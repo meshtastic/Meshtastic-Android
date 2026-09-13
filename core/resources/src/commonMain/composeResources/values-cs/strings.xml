@@ -404,6 +404,7 @@
     <string name="device_db_cache_limit_summary">Maximální počet databází zařízení uchovávaných v tomto telefonu</string>
     <string name="device_gps">GPS zařízení</string>
     <string name="device_links">Odkazy na zařízení</string>
+    <string name="device_links_affiliate_disclosure">Odkazy na produkty mohou být partnerské odkazy – z nákupů může Meshtastic získat provizi.</string>
     <string name="device_links_i_want_one">Chci jeden taky</string>
     <string name="device_links_open_in_browser">Otevřít v prohlížeči</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
@@ -1566,11 +1567,13 @@
     <!-- SHARE -->
     <string name="share">Sdílet</string>
     <string name="share_action">Sdílet odkaz</string>
+    <string name="share_by_tap_subtext">Dokud je tato obrazovka otevřená, může ji převzít i jiný telefon přiložením k vašemu telefonu.</string>
     <string name="share_channels">Sdílet kanály</string>
     <string name="share_connected_node">Sdílet připojený uzel</string>
     <string name="share_contact">Sdílet kontakt</string>
     <string name="share_location">Sdílet polohu</string>
     <string name="share_location_description">Použijte GPS telefonu k odesílání polohy do svého uzlu namísto použití hardwarového GPS přímo na uzlu.</string>
+    <string name="share_qr_subtext">Naskenujte tento kód pomocí aplikace Meshtastic na jiném zařízení a přidejte jej tam.</string>
     <string name="share_to">Sdílet do…</string>
     <string name="share_your_location_in_real_time">Sdílejte svou polohu v reálném čase a udržujte svou skupinu koordinovanou díky integrovaným funkcím GPS.</string>
     <string name="shared_contact_no_public_key">Tento kontakt nemá žádný veřejný klíč, takže jej nelze importovat. Kontakt bez něj vymaže všechny klíče, které vaše rádio již pro daný uzel drží. Požádejte odesílatele, aby jej znovu sdílel, jakmile si jeho uzel vymění klíče.</string>

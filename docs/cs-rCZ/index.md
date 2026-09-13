@@ -4,23 +4,23 @@ layout: default
 nav_order: 0
 ---
 
-# Meshtastic Android App Documentation
+# Dokumentace aplikace Meshtastic Android
 
-User and developer documentation for the Meshtastic Android and Desktop app, built with Kotlin Multiplatform.
+Uživatelská a vývojářská dokumentace aplikace Meshtastic pro Android a Desktop, vytvořené pomocí Kotlin Multiplatform.
 
-Use the sidebar navigation to browse the **User Guide** for app features and the **Developer Guide** for contributing to the project.
+Pomocí navigace v postranním panelu si můžete procházet **Uživatelskou příručku** s funkcemi aplikace a **Vývojářskou příručku** s informacemi o přispívání do projektu.
 
-## Quick Links
+## Rychlé odkazy
 
-| Guide                                                                 | Popis                                                          |
-| --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| [Getting Started](user/onboarding)                                    | Connect your first radio and send a message                    |
-| [Messages & Channels](user/messages-and-channels) | Channel broadcasts, direct messages, reactions, and encryption |
-| [Nodes](user/nodes)                                                   | Understanding the mesh network node list                       |
-| [Signal Meter](user/signal-meter)                                     | How the LoRa signal quality meter works                        |
-| [Units & Locale](user/units-and-locale)           | How temperatures, distances, and times adapt to your region    |
-| [Desktop App](user/desktop)                                           | Linux, macOS, and Windows desktop usage                        |
-| [Architecture](developer/architecture)                                | App architecture overview for contributors                     |
-| [Contributing](developer/contributing)                                | Branch naming, PR workflow, and verification commands          |
+| Příručka                                         | Popis                                                          |
+| ------------------------------------------------ | -------------------------------------------------------------- |
+| [Začínáme](user/onboarding)                      | Připojte své první rádio a pošlete zprávu                      |
+| [Zprávy a kanály](user/messages-and-channels)    | Vysílání kanálů, přímé zprávy, reakce a šifrování              |
+| [Uzel](user/nodes)                               | Porozumění seznamu uzlů mesh sítě                              |
+| [Měřič signálu](user/signal-meter)               | Jak funguje měřič kvality signálu LoRa                         |
+| [Jednotky a lokalizace](user/units-and-locale)   | Jak se teploty, vzdálenosti a časy přizpůsobují vašemu regionu |
+| [Desktopová aplikace](user/desktop)              | Používání desktopové aplikace v Linuxu, macOS a Windows        |
+| [Architektura](developer/architecture)           | Přehled architektury aplikace pro přispěvatele                 |
+| [Přispívání do projektu](developer/contributing) | Pojmenování větví, postup práce s PR a příkazy pro ověření     |
 
-> This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+> Tato dokumentace je generována ze stejného zdroje Markdownu, který používá prohlížeč **Nápovědy a dokumentace** přímo v aplikaci.

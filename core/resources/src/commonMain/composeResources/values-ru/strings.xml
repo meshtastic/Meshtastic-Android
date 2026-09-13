@@ -433,6 +433,7 @@
     <string name="device_db_cache_limit_summary">Максимальное количество баз данных для этого устройства</string>
     <string name="device_gps">GPS устройства</string>
     <string name="device_links">Ссылки на устройства</string>
+    <string name="device_links_affiliate_disclosure">Ссылки на продукты могут быть партнерскими — покупки могут приносить Meshtastic комиссию.</string>
     <string name="device_links_i_want_one">Я хочу один</string>
     <string name="device_links_open_in_browser">Открыть в браузере</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
@@ -566,6 +567,9 @@
     <string name="doc_keywords_translate">translate,crowdin,localization,language,i18n,contribute</string>
     <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
     <string name="doc_keywords_widget">widget,home screen,local stats,glance,battery,utilization</string>
+    <string name="doc_loading">Загрузка документации…</string>
+    <string name="doc_no_documentation">Документация недоступна</string>
+    <string name="doc_no_results">Ничего не найдено</string>
     <string name="doc_search_placeholder">Поиск по документации…</string>
     <string name="doc_section_developer">Руководство разработчика</string>
     <string name="doc_section_user">Руководство пользователя</string>
@@ -626,6 +630,7 @@
     <string name="encryption_error">Несоответствие публичного ключа</string>
     <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить ноду и позволить ей снова обменяться ключами, но это может указывать на серьезную проблему с безопасностью. Свяжитесь с пользователем по другому надежному каналу чтобы определить, произошла ли смена ключа в результате сброса настроек или другого преднамеренного действия.</string>
     <string name="encryption_pkc">Общий ключ шифрования</string>
+    <string name="encryption_pkc_text">Для этой ноды есть открытый ключ, поэтому взаимодействие с ним происходит с использованием шифрования с открытым ключом.</string>
     <string name="env_metrics_log">Метрики окружения</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Окружающая среда</string>
@@ -983,6 +988,7 @@
     <string name="location_permission_blocked_notice">Доступ к местоположению отключен, и Android больше не будет спрашивать. Включи его в настройках приложения, когда захочешь снова пользоваться картой и делиться местоположением.</string>
     <string name="location_permission_blocked_toast">Разрешение на определение местоположения выключено. Включи его в настройках приложения, чтобы поделиться своей позицией.</string>
     <string name="location_permission_denied_notice">Без доступа к местоположению карта не покажет где ты находишься, и Meshtastic не сможет делиться твоей позицией в сети. Всё остальное будет работать, и ты сможешь включить это позже.</string>
+    <string name="location_permission_rationale">Meshtastic использует твоё местоположение, чтобы показать тебя на карте, измерять расстояние до нод и — только если ты включишь эту функцию — делиться своим местоположением с сетью. Отказ от этого ничего другого не ломает.</string>
     <string name="location_sharing">Поделиться местоположением</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Попробуй снова через %1$d секунд.</string>
@@ -1060,6 +1066,7 @@
     <string name="map_download_status_downloading">Загрузка</string>
     <string name="map_download_status_paused">Пауза</string>
     <string name="map_engine_unavailable">Карта недоступна на этом устройстве</string>
+    <string name="map_engine_unavailable_detail">Эта сборка приложения не включает рендер карты для процессора твоего телефона. Всё остальное работает нормально.</string>
     <string name="map_filter">Фильтр карты\n</string>
     <string name="map_filter_all_roles">Всё</string>
     <string name="map_filter_display_title">Дисплей</string>
@@ -1071,6 +1078,9 @@
     <string name="map_layer_opacity">Прозрачность: %1$d%</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Последняя активность: %2$s&lt;br&gt;Последняя позиция: %3$s&lt;br&gt;Заряд: %4$s</string>
     <string name="map_offline_banner">Оффлайн — отображение кэшированных данных</string>
+    <string name="map_offline_download_failed_build">Сейчас нет данных офлайн-карты — попробуй позже</string>
+    <string name="map_offline_download_failed_io">Ошибка загрузки — проверь соединение и попробуй снова</string>
+    <string name="map_offline_download_failed_region_limit">Слишком много офлайн-районов уже загружено — сначала удали один</string>
     <string name="map_offline_download_terrain">Скачать ландшафт</string>
     <string name="map_offline_downloading_progress">Загрузка… %1$d / %2$d плиток</string>
     <string name="map_offline_manager">Оффлайн менеджер</string>
@@ -1110,15 +1120,19 @@
     <string name="mesh_beacon_broadcast_summary">Периодически рекламировать эту сеть на близлежащие ноды</string>
     <string name="mesh_beacon_channel_number">Канал %1$d</string>
     <string name="mesh_beacon_channels_title">Каналы маяка</string>
+    <string name="mesh_beacon_interval">Период трансляции</string>
+    <string name="mesh_beacon_interval_error">Выбери интервал как минимум на один час</string>
     <string name="mesh_beacon_invitations_title">Приглашения в сеть</string>
     <string name="mesh_beacon_listen">Слушать маяки</string>
     <string name="mesh_beacon_listen_summary">Захват приглашений, рекламируемых ближайшими сетями</string>
     <string name="mesh_beacon_message">Сообщение маяка</string>
     <string name="mesh_beacon_message_error">Максимум %1$d байт</string>
+    <string name="mesh_beacon_no_channels">Нет доступных каналов</string>
     <string name="mesh_beacon_notification_body">Ближайшая сеть пригласила тебя присоединиться</string>
     <string name="mesh_beacon_notification_title">Приглашение в сеть</string>
     <string name="mesh_beacon_offer_add">Добавить канал</string>
     <string name="mesh_beacon_offer_channel">Канал: %1$s</string>
+    <string name="mesh_beacon_offer_channel_name">Предложенный канал</string>
     <string name="mesh_beacon_offer_discover">Обнаруживать</string>
     <string name="mesh_beacon_offer_dismiss">Отменить</string>
     <string name="mesh_beacon_offer_from_unknown">С неизвестной ноды</string>
@@ -1255,6 +1269,7 @@
     <string name="name_cannot_be_empty">Имя не может быть пустым.</string>
     <string name="navigate_back">Вернуться</string>
     <string name="navigate_into_label">Перейти в</string>
+    <string name="nearby_devices_permission">Разрешение ближайших устройств</string>
     <string name="need_hardware">Нужно оборудование?</string>
     <string name="need_hardware_description">Meshtastic требует совместимое устройство. Наши спонсоры и партнёры предлагают готовое к использованию оборудование. Вот некоторые из самых популярных вариантов тут.</string>
     <string name="neighbor_info">Информация об окружении</string>
@@ -1280,6 +1295,7 @@
     <string name="no_network_devices_hint">Убедитесь, что вы подключены к той же сети, что и устройство.</string>
     <string name="no_network_devices_seen">Сетевые устройства не обнаружены</string>
     <string name="no_pax_metrics_logs">Метрики прохожих недоступны</string>
+    <string name="no_public_key">Нет открытого ключа</string>
     <string name="no_usb_devices_found">Устройства USB не найдены</string>
     <string name="no_usb_devices_hint">Подключи устройство с помощью USB-кабеля для передачи данных, чтобы использовать последовательное соединение.</string>
     <string name="no_usb_devices_seen">USB-устройства не обнаружены</string>
@@ -1364,6 +1380,7 @@
     <string name="ntp_server">NTP-сервер</string>
     <string name="number_of_records">Количество записей</string>
     <!-- OFFLINE -->
+    <string name="offline_maps">Офлайн-карты</string>
     <string name="ok_to_mqtt">ОК в MQTT</string>
     <string name="okay">Лады</string>
     <string name="oled_type">Тип OLED</string>
@@ -1694,10 +1711,14 @@
     <string name="security_icon_insecure_precise_only">Небезопасный канал, точное местоположение</string>
     <string name="security_icon_secure">Безопасный</string>
     <string name="security_icon_warning_precise_mqtt">Предупреждение: Небезопасно, точное местоположение; Uplink MQTT</string>
+    <string name="security_legend_any_version">Показывается на любой версии прошивки.</string>
+    <string name="security_legend_legacy_firmware">Показывается для нод с прошивкой до версии 2.8 или тех, которые не указывают версию.</string>
+    <string name="security_legend_signing_firmware">Показывается для нод с прошивкой 2.8 или новее, а также для любой ноды, чью подпись радио подтвердило.</string>
     <string name="security_signed_message_info">Проверено с помощью ключа отправителя.</string>
     <string name="security_signed_node">Подписанная нода</string>
     <string name="security_signed_node_desc">Автоматически проверено</string>
     <string name="security_signed_verified">Подписано · проверено</string>
+    <string name="security_verified_contact">Подтверждённый контакт</string>
     <string name="select">Выбрать</string>
     <string name="select_all">Выбрать все</string>
     <string name="selected">Выбрано</string>
