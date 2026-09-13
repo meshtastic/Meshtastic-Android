@@ -7,7 +7,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Unreleased (not yet in any build)
+### Internal (v2.8.2-internal.11)
+Changes since [`v2.8.2-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2-open.1):
 
 #### 🛠️ Fixes
 * fix(node): revert the time frame selector to a segmented row by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7142
