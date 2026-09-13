@@ -10,47 +10,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 ### Unreleased (not yet in any build)
 
 #### 🛠️ Fixes
-* fix(node): stop presenting MQTT-only nodes as unheard on the current LoRa by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7138
+* fix(node): revert the time frame selector to a segmented row by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7142
 
-### Internal (v2.8.2-internal.9)
-Changes since [`v2.8.2-closed.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2-closed.1):
-
-#### 🏗️ Features
-* feat(network): configure HTTP client engines and add platform User-Agent headers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7008
-* feat(ui): blend noise floor into signal quality rating (design#15) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7009
-* feat(map): offline banner and Google basemap auto-fallback on connectivity loss by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6998
-* feat(node): add an update-status shortcut to the local node menu by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7047
-* feat: mark nodes not heard since the LoRa config changed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7055
-* chore: device link disclosure by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7068
-* feat(node): overflow the time frame selector instead of crushing it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7097
-* perf: cache-window the hot lists, and modernize the nav3 and adaptive wiring by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7093
-* feat(docs): use the real M3 search bar for doc search by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7098
-* feat(nfc): share a contact or channel by tapping phones, no tag needed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7124
-* feat(ui): share the link from the share dialog, and say what the dialog does by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7126
-* feat(node): signed and verified indicators in place of the PKI lock by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7117
-* fix(node): keep a contact's public key when a different one arrives by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7118
-#### 🖥️ Desktop
-* fix(desktop): use standard SPDX license identifier for RPM packaging by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/7043
-#### 🛠️ Fixes
-* fix(network): point the API base URL at the R2-backed apiv2 host by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7004
-* fix(settings): floor the beacon broadcast-target list at one row by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7010
-* fix(settings): re-learn the node number when the first region set renumbers the radio by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7021
-* fix(connections): scope region warnings to the active connection by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/7015
-* fix(mqtt): downgrade unparseable-payload decode logs from error to warn by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7040
-* fix(node): gate direct messages on holding a public key by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7050
-* fix(takserver): skip compressed v1 TAK packets to stop duplicate contacts by @texaskst in https://github.com/meshtastic/Meshtastic-Android/pull/7020
-* fix(firmware): move firmware artifact fetching onto the R2 hosts by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7073
-* fix(settings): fetch Mesh Beacon config from remote-admin nodes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7077
-* fix(messaging): keep the composer IME session stable while the node list changes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7079
-* fix(network): never send heartbeat nonce 1, the firmware NodeInfo-ping trigger by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7078
-* fix(lora): correct preset SNR floors and signal colors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7110
-* fix(settings): allow all available spread factors by @gargomoma in https://github.com/meshtastic/Meshtastic-Android/pull/7119
-* fix(nfc): write to tags that have never been NDEF-formatted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7123
-#### 📝 Other Changes
-* refactor(map): retire the maps-utils workarounds its 5.1 fixes made stale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7046
-* refactor(prefs): keep each surface's filters in one state object by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7120
-
-### Closed Beta (v2.8.2-closed.1)
+### Open Beta (v2.8.2-open.1)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
 
 #### 🏗️ Features
@@ -74,9 +36,23 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(map): filter the map by node role and by how a node was heard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6959
 * feat(settings): align the Mesh Beacon config editor with design#140 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6963
 * feat(discovery): suppress beacon invitations for channels the radio already has by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6964
+* feat(network): configure HTTP client engines and add platform User-Agent headers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7008
+* feat(ui): blend noise floor into signal quality rating (design#15) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7009
+* feat(map): offline banner and Google basemap auto-fallback on connectivity loss by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6998
+* feat(node): add an update-status shortcut to the local node menu by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7047
+* feat: mark nodes not heard since the LoRa config changed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7055
+* chore: device link disclosure by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7068
+* feat(node): overflow the time frame selector instead of crushing it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7097
+* perf: cache-window the hot lists, and modernize the nav3 and adaptive wiring by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7093
+* feat(docs): use the real M3 search bar for doc search by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7098
+* feat(nfc): share a contact or channel by tapping phones, no tag needed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7124
+* feat(ui): share the link from the share dialog, and say what the dialog does by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7126
+* feat(node): signed and verified indicators in place of the PKI lock by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7117
+* fix(node): keep a contact's public key when a different one arrives by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7118
 #### 🖥️ Desktop
 * fix(desktop): disable macOS notifications when the process has no app bundle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6876
 * fix(desktop): test the bundle path, not the identifier, before notifying by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6885
+* fix(desktop): use standard SPDX license identifier for RPM packaging by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/7043
 #### 🛠️ Fixes
 * fix(navigation): clear deep-link replay cache once applied to the backstack by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6796
 * fix(ui): give feedback when a contact or channel import arrives while disconnected by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6798
@@ -106,8 +82,25 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(ai): bound assistant messages at what the send path will actually encode by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6970
 * fix(firmware): hide USB maintenance where the platform cannot run it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6974
 * fix(map): resolve the persisted basemap before the map first renders by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6978
+* fix(network): point the API base URL at the R2-backed apiv2 host by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7004
+* fix(settings): floor the beacon broadcast-target list at one row by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7010
+* fix(settings): re-learn the node number when the first region set renumbers the radio by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7021
+* fix(connections): scope region warnings to the active connection by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/7015
+* fix(mqtt): downgrade unparseable-payload decode logs from error to warn by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7040
+* fix(node): gate direct messages on holding a public key by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7050
+* fix(takserver): skip compressed v1 TAK packets to stop duplicate contacts by @texaskst in https://github.com/meshtastic/Meshtastic-Android/pull/7020
+* fix(firmware): move firmware artifact fetching onto the R2 hosts by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7073
+* fix(settings): fetch Mesh Beacon config from remote-admin nodes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7077
+* fix(messaging): keep the composer IME session stable while the node list changes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7079
+* fix(network): never send heartbeat nonce 1, the firmware NodeInfo-ping trigger by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7078
+* fix(lora): correct preset SNR floors and signal colors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7110
+* fix(settings): allow all available spread factors by @gargomoma in https://github.com/meshtastic/Meshtastic-Android/pull/7119
+* fix(nfc): write to tags that have never been NDEF-formatted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7123
+* fix(node): stop presenting MQTT-only nodes as unheard on the current LoRa by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7138
 #### 📝 Other Changes
 * refactor(settings): edit the status message on the user screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6951
+* refactor(map): retire the maps-utils workarounds its 5.1 fixes made stale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7046
+* refactor(prefs): keep each surface's filters in one state object by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7120
 
 ## New Contributors
 * @azchohfi made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6864
