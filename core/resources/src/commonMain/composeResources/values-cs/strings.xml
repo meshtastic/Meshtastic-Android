@@ -551,6 +551,7 @@
     <string name="encryption_error">Neshoda veřejného klíče</string>
     <string name="encryption_error_text">Veřejný klíč neodpovídá uloženému klíči. Můžete uzel odebrat a nechat jej znovu vyměnit klíče, ale může to znamenat bezpečnostní problém. Kontaktujte uživatele jiným důvěryhodným kanálem a ověřte, zda ke změně klíče došlo v důsledku továrního resetu nebo jiné úmyslné akce.</string>
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
+    <string name="encryption_pkc_text">Pro tento uzel je uložen veřejný klíč, takže komunikace s ním používá šifrování veřejným klíčem.</string>
     <string name="env_metrics_log">Metriky prostředí</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Životní prostředí</string>
@@ -1134,6 +1135,7 @@
     <string name="no_network_devices_seen">Nenalezena žádná síťová zařízení</string>
     <string name="no_pax_metrics_logs">Metriky PAX nejsou k dispozici.</string>
     <string name="no_public_key">Žádný veřejný klíč</string>
+    <string name="no_public_key_text">Tento uzel nesdílel veřejný klíč, takže šifrovaná komunikace s ním není možná. Požádejte o informace o uživateli a vyžádejte si jeho veřejný klíč.</string>
     <string name="no_usb_devices_found">Nenalezena žádná USB zařízení</string>
     <string name="no_usb_devices_hint">Připojte zařízení datovým USB kabelem, chcete-li použít sériové připojení.</string>
     <string name="no_usb_devices_seen">Nebyla nalezena žádná USB zařízení</string>
@@ -1144,10 +1146,13 @@
     <string name="node_count_total">%1$d celkem</string>
     <string name="node_filter_exclude_infrastructure">Vyloučit infrastrukturu</string>
     <string name="node_filter_exclude_mqtt">Vyloučit MQTT</string>
+    <string name="node_filter_exclude_unheard">Skrýt neslyšené uzly</string>
     <string name="node_filter_ignored">Prohlížíte ignorované uzly,\nStiskněte pro návrat do seznamu uzlů.</string>
     <string name="node_filter_include_unknown">Včetně neznámých</string>
     <string name="node_filter_only_direct">Zobrazit jen přímé uzly</string>
+    <string name="node_filter_only_encrypted">Pouze šifrované</string>
     <string name="node_filter_only_online">Skrýt offline uzly</string>
+    <string name="node_filter_only_signed">Pouze podepsané</string>
     <string name="node_filter_placeholder">Filtr</string>
     <string name="node_filter_show_ignored">Zobrazit jen ignorované uzly</string>
     <string name="node_filter_title">Filtrovat podle</string>
@@ -1180,6 +1185,7 @@
     <string name="node_list_help_node_details">Detaily uzlu</string>
     <string name="node_list_help_title">Nápověda pro seznam uzlů</string>
     <string name="node_list_long_click_label">Možnosti uzlu</string>
+    <string name="node_not_heard_on_current_lora">Neslyšen při vašem aktuálním nastavení LoRa</string>
     <string name="node_number">Číslo uzlu</string>
     <string name="node_request_send_failed">Požadavek se nepodařilo odeslat. Zkuste to znovu.</string>
     <string name="node_restarting">Restartování…</string>
@@ -1202,6 +1208,9 @@
     <string name="nodes_empty_searching_hint">Zde se budou postupně zobrazovat nalezené uzly v okolí.</string>
     <string name="nodes_empty_searching_title">Vyhledávání uzlů</string>
     <string name="nodes_queued_for_deletion">%1$d uzlů zařazeno k odstranění:</string>
+    <string name="nodes_unheard_banner">%1$d uzlů nebylo slyšeno při vašem aktuálním nastavení LoRa</string>
+    <string name="nodes_unheard_banner_one">1 uzel nebyl slyšen při vašem aktuálním nastavení LoRa</string>
+    <string name="nodes_unheard_keep">Ponechat</string>
     <string name="nodes_unheard_remove">Odstranit</string>
     <string name="noise_floor">Úroveň šumu</string>
     <string name="noise_floor_definition">Úroveň okolního rádiového šumu naměřená přijímačem. Nižší hodnoty obvykle znamenají klidnější rádiové prostředí; −85 dBm je orientační hodnota pro silné rušení, nikoli pevná hranice.</string>
@@ -1522,10 +1531,16 @@
     <string name="security_icon_insecure_precise_only">Nezabezpečený kanál, přesná poloha</string>
     <string name="security_icon_secure">Bezpečný</string>
     <string name="security_icon_warning_precise_mqtt">Varování: Nezabezpečeno, přesná poloha a MQTT uplink</string>
+    <string name="security_legend_any_version">Zobrazeno v libovolné verzi firmwaru.</string>
+    <string name="security_legend_legacy_firmware">Zobrazeno u uzlů s firmwarem starším než 2.8 nebo u uzlů, které neuvádějí verzi.</string>
+    <string name="security_legend_signing_firmware">Zobrazeno u uzlů s firmwarem 2.8 nebo novějším a u všech uzlů, jejichž podpis rádio ověřilo.</string>
     <string name="security_signed_message_info">Ověřeno klíčem odesílatele.</string>
     <string name="security_signed_node">Podepsaný uzel</string>
     <string name="security_signed_node_desc">Ověřeno automaticky</string>
+    <string name="security_signed_node_help">Rádio ověřilo podepsaná vysílání tohoto uzlu pomocí jeho identifikačního klíče, takže jeho identita zůstává v čase konzistentní, ale osobně jste ji neověřili. Každý uzel s firmwarem 2.8 nebo novějším podepisuje svá vysílání.</string>
     <string name="security_signed_verified">Podepsáno · ověřeno</string>
+    <string name="security_verified_contact">Ověřený kontakt</string>
+    <string name="security_verified_contact_help">Tento klíč uzlu jste osobně ověřili výměnou kontaktních QR kódů, takže jeho identita je potvrzena. Jde o nejvyšší úroveň důvěry, kterou seznam zobrazuje, a zobrazuje se u všech verzí firmwaru.</string>
     <string name="select">Vybrat</string>
     <string name="select_all">Vybrat vše</string>
     <string name="selected">Vybrané</string>
@@ -1550,6 +1565,8 @@
     <string name="settings">nastavení</string>
     <!-- SHARE -->
     <string name="share">Sdílet</string>
+    <string name="share_action">Sdílet odkaz</string>
+    <string name="share_channels">Sdílet kanály</string>
     <string name="share_connected_node">Sdílet připojený uzel</string>
     <string name="share_contact">Sdílet kontakt</string>
     <string name="share_location">Sdílet polohu</string>
@@ -1851,6 +1868,7 @@
     <!-- WRITE -->
     <string name="write_nfc">Zapsat na NFC tag</string>
     <string name="write_nfc_failed">Nelze zapsat do tagu. Použijte zapisovatelný, prázdný NFC tag a podržte jej stabilně.</string>
+    <string name="write_nfc_subtext">Zápisem se tento odkaz uloží na NFC štítek, ke kterému může kdokoli přiložit telefon.</string>
     <string name="write_nfc_success">Zapsáno do tagu</string>
     <string name="write_nfc_text">Přidržte zapisovatelný NFC tag proti zadní straně telefonu.</string>
     <string name="you">Vy</string>
