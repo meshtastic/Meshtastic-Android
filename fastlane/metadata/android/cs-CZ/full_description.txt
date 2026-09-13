@@ -1,21 +1,21 @@
-Meshtastic is a tool for using Android devices with open-source, off-grid mesh radios. This app is the main client for the Meshtastic project, allowing you to manage your mesh devices and communicate with other users.
+Meshtastic je nástroj, umožňující používat zařízení Android s open source mesh rádii pro komunikaci mimo běžnou infrastrukturu. Tato aplikace je hlavním klientem projektu Meshtastic a umožňuje spravovat vaše mesh zařízení a komunikovat s ostatními uživateli.
 
-For more information about the Meshtastic project, please visit our website: <a href="https://www.meshtastic.org">meshtastic.org</a>. The firmware that runs on the radio devices is a separate open-source project, which you can find here: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
+Další informace o projektu Meshtastic najdete na našich webových stránkách: <a href="https://www.meshtastic.org">meshtastic.org</a>. Firmware, který běží na rádiových zařízeních, je samostatný open source projekt, který najdete zde: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
 
-<b>Community and Support</b>
+<b>Komunita a podpora</b>
 
-This project is currently in beta. We would love to hear from you! If you have questions, feedback, or encounter any problems, please join our friendly and active community:
+Tento projekt je nyní v beta verzi. Budeme rádi, když nám dáte vědět! Máte-li dotazy, připomínky nebo narazíte na nějaký problém, připojte se k naší přátelské a aktivní komunitě:
 
-• <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
+• <b>Diskusní fórum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
 • <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
-• <b>Report an Issue:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
+• <b>Nahlásit problém:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
 
-<b>Documentation</b>
+<b>Dokumentace</b>
 
-To learn more about the features and capabilities of this app and Meshtastic, please view our official documentation:
-<a href="https://meshtastic.org/docs/">View Documentation</a>
+Další informace o funkcích a možnostech této aplikace a systému Meshtastic najdete v naší oficiální dokumentaci:
+<a href="https://meshtastic.org/docs/">Zobrazit dokumentaci</a>
 
-<b>Translations</b>
+<b>Překlady</b>
 
-You can help translate the app into your native language using Crowdin:
+Můžete pomoci přeložit aplikaci do vašeho rodného jazyka pomocí Crowdinu:
 <a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>
