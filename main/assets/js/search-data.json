@@ -440,33 +440,33 @@
     
     "relUrl": "/zh-rTW/user/app-functions.html#相關主題"
   },"63": {
-    "doc": "App Functions",
-    "title": "App Functions",
+    "doc": "Funkce aplikace",
+    "title": "Funkce aplikace",
     "content": "App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app. App Functions are available on Google-flavor Android builds only. ℹ️ Note: This is separate from the in-app Chirpy assistant. App Functions let the system AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself. ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/app-functions.html",
     
     "relUrl": "/cs-rCZ/user/app-functions.html"
   },"64": {
-    "doc": "App Functions",
+    "doc": "Funkce aplikace",
     "title": "Enabling App Functions",
     "content": "Control App Functions from Settings → System AI. The screen has: . | A master toggle labeled “Allow AI access”, with the subtitle “Let system AI assistants (e.g. Gemini) discover and use mesh functions”. When off, no functions are exposed to the system. | An individual toggle for each function, so you can expose only the capabilities you want. | . ⚠️ Important: App Functions ship switched on. On a Google-flavor build the master toggle and every individual function, Send message included, start enabled — so an assistant can read your mesh data and send messages to your mesh until you turn Allow AI access off. The functions are grouped into a Write section (functions that change something or send data to your mesh) and a Read section (functions that only return information). The screenshot has Send message and Get recent messages switched off to illustrate per-function control; a fresh install shows every switch on. Write Functions . | Function | What it does | . | Send message | Sends a text message to a contact (direct message) or to a channel. The mesh carries at most 233 bytes of text, so keep assistant-composed messages short. | . Read Functions . | Function | What it returns | . | Get mesh status | Whether you’re connected to a radio, and how many nodes are online. | . | Get node list | The list of nodes on your mesh. | . | Get channel info | Information about your channels. | . | Get device status | Status of your connected radio. | . | Get node details | Detailed information about a specific node. | . | Get mesh metrics | Telemetry and metrics from your mesh. | . | Get recent messages | Recent messages from your conversations. | . | Get unread summary | A summary of unread messages. | . ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/app-functions.html#enabling-app-functions",
     
     "relUrl": "/cs-rCZ/user/app-functions.html#enabling-app-functions"
   },"65": {
-    "doc": "App Functions",
+    "doc": "Funkce aplikace",
     "title": "Privacy",
     "content": "🔒 Privacy: The Send message function lets an assistant send messages to your mesh on your behalf, and the read functions expose node, message, and metric data to it. Because all of them start enabled, the choice you make here is what to turn off rather than what to turn on. Each function has its own toggle, and Allow AI access turns all of them off at once. ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/app-functions.html#privacy",
     
     "relUrl": "/cs-rCZ/user/app-functions.html#privacy"
   },"66": {
-    "doc": "App Functions",
-    "title": "Related Topics",
+    "doc": "Funkce aplikace",
+    "title": "Související témata",
     "content": ". | Messages &amp; Channels — sending messages directly in the app | Nodes — the node list the read functions draw from | Node Metrics — the telemetry behind Get mesh metrics | . ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/app-functions.html#related-topics",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/app-functions.html#souvisej%C3%ADc%C3%AD-t%C3%A9mata",
     
-    "relUrl": "/cs-rCZ/user/app-functions.html#related-topics"
+    "relUrl": "/cs-rCZ/user/app-functions.html#související-témata"
   },"67": {
     "doc": "App Functions",
     "title": "App Functions",
@@ -10506,61 +10506,61 @@
     
     "relUrl": "/zh-rTW/user/firmware.html#相關主題"
   },"1501": {
-    "doc": "Firmware Updates",
-    "title": "Firmware Updates",
+    "doc": "Aktualizace firmware",
+    "title": "Aktualizace firmware",
     "content": "Keep your Meshtastic radio up to date with the latest firmware for new features, bug fixes, and security improvements. ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/firmware.html",
     
     "relUrl": "/cs-rCZ/user/firmware.html"
   },"1502": {
-    "doc": "Firmware Updates",
+    "doc": "Aktualizace firmware",
     "title": "Checking for Updates",
     "content": ". | Open the connected radio’s configuration and, under Advanced, tap Firmware Update. The entry appears only for OTA-capable radios. | The app checks for available firmware versions. | Available updates show the version number and changelog summary. | . ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/firmware.html#checking-for-updates",
     
     "relUrl": "/cs-rCZ/user/firmware.html#checking-for-updates"
   },"1503": {
-    "doc": "Firmware Updates",
+    "doc": "Aktualizace firmware",
     "title": "Update Methods",
     "content": "OTA (Over-The-Air) via Bluetooth . The most common update method for Android users: . ⚠️ Warning: Interrupting a firmware update can leave the radio unable to boot. Keep the phone nearby and both devices powered until the update completes. | Ensure your radio is connected via Bluetooth. | Navigate to the Firmware Update screen. | Select the desired firmware version. | Tap Update. An Update Warning dialog lists the pre-flight checks — read it, then tap I know what I’m doing. to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file. | Wait for the update to complete — do not disconnect during the update. | . Vymazat zařízení během aktualizace . Where the app offers it, an Erase device during update checkbox appears next to the update button. It is a per-update opt-in and is never remembered. | Method | What erasing does | . | BLE / Wi-Fi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. | . | USB | Úplně vymaže paměť zařízení a poté od začátku nainstaluje vybraný firmware. | . It is not offered for a local firmware file, during a recovery update, on USB devices whose board does not support the erase step, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. Afterwards the device needs setting up — and pairing — again. OTA via Wi-Fi (network-connected ESP32) . When an ESP32 radio is connected over the network rather than Bluetooth, the app offers Wi-Fi OTA, which pushes the same update over TCP: . | Connect to the radio over the network (see Connections). | Open the Firmware Update screen and pick a version. | Tap Update. Keep the radio and phone on the same network for the whole transfer. | . Wi-Fi OTA takes the ESP32 -update.bin image rather than the .uf2 a USB update uses; the app selects the right artifact for you. In-App USB Update . When your radio is connected over USB/serial (rather than Bluetooth), the Firmware Update screen offers USB File Transfer. The app reboots the device into DFU mode, then prompts you to save the .uf2 file to the device’s DFU drive using the system file picker. This option appears only on a USB/serial connection — it is not available over Bluetooth. ℹ️ Note: A vendor nRF bootloader supplied as a .zip (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as adafruit-nrfutil — copying that .zip to the drive won’t work. A bootloader supplied as an update-....uf2 can be installed by copying it to the drive; that is how the app’s own bootloader upgrade works. The app surfaces a hint when the serial-only route applies. Factory Erase and Bootloader Upgrade . On a USB/serial connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the Erase device during update opt-in described earlier on this page. nRF52 devices additionally offer Upgrade bootloader where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it. Both are Android-only. They depend on Android’s update-drive checks, so the desktop app does not show them — use the Web Flasher there instead. Select a firmware version before either one: the app hides both until a release is chosen, because the firmware is reinstalled after the device is wiped or the new bootloader is written. Both a USB erase and a bootloader upgrade write two files in turn, so you are asked to select the device’s update drive twice: once for the erase or bootloader image, then again for the firmware. The app reads INFO_UF2.TXT from the drive you select to confirm it really is the device’s update drive and to identify the board before writing anything. On nRF52 the app must already know which Bluetooth stack your device uses before it starts, because it can’t read the bootloader until the device has rebooted. If it can’t confirm the stack, it refuses to erase and points you at the Web Flasher instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer. Once the drive is readable, how an nRF52 device is erased depends on its bootloader: . | Newer bootloaders erase themselves. A bootloader that advertises factory-erase support in INFO_UF2.TXT (newer OTAFIX bootloaders) takes a single, board-agnostic erase file. The bootloader wipes your settings, channels, keys and the stored node list itself, leaves the installed firmware in place, and comes back as an update drive a second or two later for the firmware file. There is no Bluetooth-stack choice to get wrong on this path. | Older bootloaders need a Bluetooth-stack-specific erase. On these the app writes a small erase program matched to your device’s Bluetooth stack, then starts it over the serial port. If the drive reports a different stack than expected, the app refuses rather than guessing. | . The app picks the path from what the drive reports; you don’t choose it. Other Flashing Options . For recovery or when neither OTA nor in-app USB is available: . | Use the Meshtastic Web Flasher | Or the Meshtastic CLI tool on desktop | . ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/firmware.html#update-methods",
     
     "relUrl": "/cs-rCZ/user/firmware.html#update-methods"
   },"1504": {
-    "doc": "Firmware Updates",
+    "doc": "Aktualizace firmware",
     "title": "Version Channels",
     "content": "| Kanál | Popis | . | Stabilní | Recommended for most users; tested releases | . | Alfa | Preview releases; may contain bugs | . | Lokální soubor | Flash a firmware file you select yourself, instead of a downloaded release | . ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/firmware.html#version-channels",
     
     "relUrl": "/cs-rCZ/user/firmware.html#version-channels"
   },"1505": {
-    "doc": "Firmware Updates",
+    "doc": "Aktualizace firmware",
     "title": "Pre-Update Checklist",
     "content": "Before updating: . | Battery &gt; 50% | Stable Bluetooth connection | Note your current settings (they may reset on major version changes) | Check the release notes for breaking changes | Update the Meshtastic app itself, before or alongside firmware updates, to ensure compatibility | . ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/firmware.html#pre-update-checklist",
     
     "relUrl": "/cs-rCZ/user/firmware.html#pre-update-checklist"
   },"1506": {
-    "doc": "Firmware Updates",
+    "doc": "Aktualizace firmware",
     "title": "Post-Update",
     "content": "After the firmware is written, the app verifies the update and waits for the device to come back online: . Once the update succeeds: . | The radio reboots automatically | The Bluetooth connection re-establishes | Verify your settings are intact | Confirm the new version under Currently Installed on the Firmware Update screen — it’s also shown on the node’s detail page and the Connections screen | . ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/firmware.html#post-update",
     
     "relUrl": "/cs-rCZ/user/firmware.html#post-update"
   },"1507": {
-    "doc": "Firmware Updates",
+    "doc": "Aktualizace firmware",
     "title": "Troubleshooting",
     "content": "Update Stuck . If the update appears frozen: . | Give it a minute. After writing the image the app waits up to 60 seconds for the radio to come back and report its new version, so a pause at the verify step is expected. | If it is still stuck after that, power-cycle the radio. | Attempt the update again. | . The message Verification timed out. Device did not reconnect in time. means the image was written but the radio did not come back within that window — power-cycle it and check the version under Currently Installed before re-running the update. Radio Won’t Boot After Update . If the app told you the Bluetooth update could not be finished, follow the instruction it gave: connect the radio to a computer over USB and re-flash it with the vendor’s serial DFU tool, such as adafruit-nrfutil. A stock nRF bootloader cannot reliably complete an interrupted over-the-air update. Otherwise, if your radio fails to boot: . | Try connecting via USB to a computer | Use the web flasher in recovery/DFU mode | Flash a known-good firmware version | Check the Meshtastic Discord for device-specific recovery steps | . Compatibility Warnings . On connecting, the app compares the radio’s firmware against two thresholds and reacts differently to each: . | Verze firmwaru | What you see | What happens | . | Below 2.3.15 | Firmware update required. | The app disconnects from the radio. It does not operate against firmware this old. | . | 2.3.15 up to, but not including, 2.5.14 | Firmware Update Recommended. | Advisory only — dismiss it and carry on. The dialog names the latest stable release. | . | 2.5.14 or newer | Nothing | — | . A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio. ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/firmware.html#troubleshooting",
     
     "relUrl": "/cs-rCZ/user/firmware.html#troubleshooting"
   },"1508": {
-    "doc": "Firmware Updates",
-    "title": "Related Topics",
+    "doc": "Aktualizace firmware",
+    "title": "Související témata",
     "content": ". | Connections — reconnecting after a firmware update | Flashing firmware guide — full firmware flashing walkthrough on meshtastic.org | Supported devices — check firmware compatibility by device | FAQ — common questions on meshtastic.org | . ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/firmware.html#related-topics",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/firmware.html#souvisej%C3%ADc%C3%AD-t%C3%A9mata",
     
-    "relUrl": "/cs-rCZ/user/firmware.html#related-topics"
+    "relUrl": "/cs-rCZ/user/firmware.html#související-témata"
   },"1509": {
     "doc": "Firmware Updates",
     "title": "Firmware Updates",
@@ -13769,18 +13769,18 @@
     "relUrl": "/zh-rTW/"
   },"1967": {
     "doc": "Home",
-    "title": "Meshtastic Android App Documentation",
-    "content": "User and developer documentation for the Meshtastic Android and Desktop app, built with Kotlin Multiplatform. Use the sidebar navigation to browse the User Guide for app features and the Developer Guide for contributing to the project. ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/#meshtastic-android-app-documentation",
+    "title": "Dokumentace aplikace Meshtastic Android",
+    "content": "Uživatelská a vývojářská dokumentace aplikace Meshtastic pro Android a Desktop, vytvořené pomocí Kotlin Multiplatform. Pomocí navigace v postranním panelu si můžete procházet Uživatelskou příručku s funkcemi aplikace a Vývojářskou příručku s informacemi o přispívání do projektu. ",
+    "url": "/Meshtastic-Android/main/cs-rCZ/#dokumentace-aplikace-meshtastic-android",
     
-    "relUrl": "/cs-rCZ/#meshtastic-android-app-documentation"
+    "relUrl": "/cs-rCZ/#dokumentace-aplikace-meshtastic-android"
   },"1968": {
     "doc": "Home",
-    "title": "Quick Links",
-    "content": "| Guide | Popis | . | Getting Started | Connect your first radio and send a message | . | Messages &amp; Channels | Channel broadcasts, direct messages, reactions, and encryption | . | Nodes | Understanding the mesh network node list | . | Signal Meter | How the LoRa signal quality meter works | . | Units &amp; Locale | How temperatures, distances, and times adapt to your region | . | Desktop App | Linux, macOS, and Windows desktop usage | . | Architecture | App architecture overview for contributors | . | Contributing | Branch naming, PR workflow, and verification commands | . This documentation is served from the same markdown source that powers the in-app Help &amp; Documentation browser. ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/#quick-links",
+    "title": "Rychlé odkazy",
+    "content": "| Příručka | Popis | . | Začínáme | Připojte své první rádio a pošlete zprávu | . | Zprávy a kanály | Vysílání kanálů, přímé zprávy, reakce a šifrování | . | Uzel | Porozumění seznamu uzlů mesh sítě | . | Měřič signálu | Jak funguje měřič kvality signálu LoRa | . | Jednotky a lokalizace | Jak se teploty, vzdálenosti a časy přizpůsobují vašemu regionu | . | Desktopová aplikace | Používání desktopové aplikace v Linuxu, macOS a Windows | . | Architektura | Přehled architektury aplikace pro přispěvatele | . | Přispívání do projektu | Pojmenování větví, postup práce s PR a příkazy pro ověření | . Tato dokumentace je generována ze stejného zdroje Markdownu, který používá prohlížeč Nápovědy a dokumentace přímo v aplikaci. ",
+    "url": "/Meshtastic-Android/main/cs-rCZ/#rychl%C3%A9-odkazy",
     
-    "relUrl": "/cs-rCZ/#quick-links"
+    "relUrl": "/cs-rCZ/#rychlé-odkazy"
   },"1969": {
     "doc": "Home",
     "title": "Home",
@@ -41047,61 +41047,61 @@
     
     "relUrl": "/zh-rTW/user/translate.html#相關主題"
   },"5864": {
-    "doc": "Translate the App",
-    "title": "Translate the App",
-    "content": "The app and its in-app docs are translated on Crowdin — this page shows how to contribute. The app uses Crowdin to manage community translations for both the user interface and in-app documentation. ",
+    "doc": "Překlad aplikace",
+    "title": "Překlad aplikace",
+    "content": "Aplikace a její dokumentace v aplikaci se překládají na Crowdin – tato stránka ukazuje, jak přispívat k překladům. Aplikace používá Crowdin ke správě komunitních překladů uživatelského rozhraní i dokumentace přímo v aplikaci. ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html",
     
     "relUrl": "/cs-rCZ/user/translate.html"
   },"5865": {
-    "doc": "Translate the App",
-    "title": "What Gets Translated",
-    "content": "| Resource | Source Location | Poznámka | . | UI strings | core/resources/src/commonMain/composeResources/values/strings.xml | Buttons, labels, messages, and all user-visible text | . | User Guide pages | docs/en/user/*.md | In-app documentation shown in Help &amp; Documentation | . | Fastlane metadata | fastlane/metadata/android/en-US/ | Google Play listing title, description, and changelogs | . ℹ️ Note: Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated. ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#what-gets-translated",
+    "doc": "Překlad aplikace",
+    "title": "Co se překládá",
+    "content": "| Zdroj | Umístění zdroje | Poznámka | . | UI řetězce | core/resources/src/commonMain/composeResources/values/strings.xml | Tlačítka, popisky, zprávy a veškerý text zobrazený uživateli | . | Stránky uživatelské příručky | docs/en/user/*.md | Dokumentace v aplikaci zobrazená v části Nápověda a dokumentace | . | Fastlane metadata | fastlane/metadata/android/en-US/ | Google Play listing title, description, and changelogs | . ℹ️ Poznámka: Stránky Vývojářské příručky jsou pouze v angličtině. Dokumentace zaměřená na kód pro přispěvatele se nepřekládá. ",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#co-se-p%C5%99ekl%C3%A1d%C3%A1",
     
-    "relUrl": "/cs-rCZ/user/translate.html#what-gets-translated"
+    "relUrl": "/cs-rCZ/user/translate.html#co-se-překládá"
   },"5866": {
-    "doc": "Translate the App",
+    "doc": "Překlad aplikace",
     "title": "Jak přispět",
-    "content": ". | Visit the Crowdin project. Open the Meshtastic Android Crowdin project and sign in or create a free account. | Choose your language. Select an existing language or request a new one by opening a GitHub issue. | Translate strings. Crowdin shows the English source on the left and your translation on the right. Translate each string and save. | Review context. Many strings include screenshots or context comments — check these to understand where the text appears in the app. A scheduled job pulls approved translations from Crowdin and opens a pull request; they ship once a maintainer merges it and a new build goes out. | . 💡 Tip: Keep translations short. UI strings often appear in buttons, chips, or narrow columns. If a translation is significantly longer than the English original, consider abbreviating where the meaning stays clear. ",
+    "content": ". | Navštivte projekt na Crowdinu. Otevřete Meshtastic Android Crowdin project a přihlaste se nebo si zdarma vytvořte účet. | Vyberte svůj jazyk. Vyberte některý z dostupných jazyků nebo požádejte o přidání nového jazyka založením GitHub problému. | Přeložte řetězce. Crowdin zobrazuje vlevo anglický zdrojový text a vpravo váš překlad. Přeložte každý řetězec a uložte ho. | Zkontrolujte kontext. Mnoho řetězců obsahuje snímky obrazovky nebo poznámky ke kontextu – podívejte se na ně, abyste zjistili, kde se text v aplikaci zobrazuje. Naplánovaná úloha stáhne schválené překlady z Crowdin a vytvoří pull request. Překlady se dostanou do aplikace, jakmile jej správce sloučí a vyjde nová verze. | . 💡 Tip: Překlady udržujte krátké. UI řetězce se často zobrazují na tlačítkách, štítcích nebo v úzkých sloupcích. Pokud je překlad výrazně delší než anglický originál, zvažte jeho zkrácení, pokud zůstane význam jasný. ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#jak-p%C5%99isp%C4%9Bt",
     
     "relUrl": "/cs-rCZ/user/translate.html#jak-přispět"
   },"5867": {
-    "doc": "Translate the App",
-    "title": "Adding a New Language",
-    "content": "If your language is not yet listed on Crowdin: . | Open an issue on GitHub requesting the new locale. | A maintainer will add the language to Crowdin and configure crowdin.yml. | Once added, you can begin translating immediately. | . ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#adding-a-new-language",
+    "doc": "Překlad aplikace",
+    "title": "Přidání nového jazyka",
+    "content": "Pokud váš jazyk ještě není na Crowdinu uveden: . | Otevřete problém na GitHub s žádostí o přidání nového jazyka. | Správce přidá jazyk do Crowdinu a nastaví crowdin.yml. | Jakmile bude přidán, můžete začít překládat. | . ",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#p%C5%99id%C3%A1n%C3%AD-nov%C3%A9ho-jazyka",
     
-    "relUrl": "/cs-rCZ/user/translate.html#adding-a-new-language"
+    "relUrl": "/cs-rCZ/user/translate.html#přidání-nového-jazyka"
   },"5868": {
-    "doc": "Translate the App",
-    "title": "How Translations Are Organized",
+    "doc": "Překlad aplikace",
+    "title": "Jak jsou překlady uspořádány",
     "content": "The Android app uses Compose Multiplatform resources for all user-visible strings: . core/resources/src/commonMain/composeResources/ ├── values/ ← English (default) │ └── strings.xml ├── values-de/ ← German │ └── strings.xml ├── values-fr/ ← French │ └── strings.xml └── ... In-app documentation follows a similar pattern under docs/: . docs/ ├── en/user/ ← English source (default) │ ├── onboarding.md │ └── ... ├── fr-rFR/user/ ← French (France) │ ├── onboarding.md │ └── ... ├── de-rDE/user/ ← German (Germany) │ └── ... └── ... Doc locale folders use Android locale qualifiers, either {lang} or {lang}-r{REGION} (for example fr, fr-rFR, de-rDE, ja-rJP). The values-* folders for app strings use bare language codes instead (values-fr, values-de, values-ja), because crowdin.yml writes strings with %two_letters_code% and doc pages with %android_code%. The two sets do not line up one-to-one. The app automatically selects the correct locale based on your phone’s Language &amp; Region settings. A page that came from Crowdin is labeled Community translated under its title in the app. If a page has no Crowdin translation for your language yet, the Google-flavor Android build machine-translates the English source on the fly and labels it Auto-translated instead; F-Droid and desktop builds show the English page. Your Crowdin translation replaces the machine one as soon as it lands. ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#how-translations-are-organized",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#jak-jsou-p%C5%99eklady-uspo%C5%99%C3%A1d%C3%A1ny",
     
-    "relUrl": "/cs-rCZ/user/translate.html#how-translations-are-organized"
+    "relUrl": "/cs-rCZ/user/translate.html#jak-jsou-překlady-uspořádány"
   },"5869": {
-    "doc": "Translate the App",
-    "title": "Translation Guidelines",
-    "content": ". | Do not translate technical terms like “LoRa”, “MQTT”, “BLE”, “TAK”, “SNR”, or “RSSI” — these are universal. | Keep placeholders intact. Strings like %1$s or %d are filled in at runtime. Do not remove or reorder them unless the grammar of your language requires it. | Match tone. The app uses a friendly, direct voice. Avoid overly formal language. | Test if possible. Switch your phone’s language and open the app to see how translations look in context. | . ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#translation-guidelines",
+    "doc": "Překlad aplikace",
+    "title": "Pokyny pro překlad",
+    "content": ". | Technické výrazy jako „LoRa“, „MQTT“, „BLE“, „TAK“, „SNR“ nebo „RSSI“ nepřekládejte – jsou univerzální. | **Zástupné symboly ponechte beze změny. ** Řetězce jako %1$s nebo %dse doplňují za běhu aplikace. Neodstraňujte je ani neměňte jejich pořadí, pokud to nevyžaduje gramatika vašeho jazyka. | Dodržujte tón komunikace. Aplikace používá přátelský a přímý styl. Vyhněte se příliš formálnímu jazyku. | Pokud můžete, překlad otestujte. Přepněte jazyk telefonu a otevřete aplikaci, abyste viděli, jak překlady vypadají v kontextu. | . ",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#pokyny-pro-p%C5%99eklad",
     
-    "relUrl": "/cs-rCZ/user/translate.html#translation-guidelines"
+    "relUrl": "/cs-rCZ/user/translate.html#pokyny-pro-překlad"
   },"5870": {
-    "doc": "Translate the App",
-    "title": "Questions?",
-    "content": "If you have questions about a specific string’s context or need help getting started, open a discussion on the Meshtastic GitHub Discussions page. Thank you for helping expand the reach of Meshtastic. ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#questions",
+    "doc": "Překlad aplikace",
+    "title": "Máte dotazy?",
+    "content": "Pokud máte dotazy ke kontextu konkrétního řetězce nebo potřebujete pomoct se začátky, založte diskuzi na stránce Meshtastic GitHub Discussions. Děkujeme, že pomáháte rozšiřovat Meshtastic. ",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#m%C3%A1te-dotazy",
     
-    "relUrl": "/cs-rCZ/user/translate.html#questions"
+    "relUrl": "/cs-rCZ/user/translate.html#máte-dotazy"
   },"5871": {
-    "doc": "Translate the App",
-    "title": "Related Topics",
+    "doc": "Překlad aplikace",
+    "title": "Související témata",
     "content": ". | Units &amp; Locale — how the app picks number, date, and unit formats for your region | Help &amp; Documentation — the in-app docs browser these pages are published to | Onboarding — where a new user first meets the translated strings | . ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#related-topics",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/translate.html#souvisej%C3%ADc%C3%AD-t%C3%A9mata",
     
-    "relUrl": "/cs-rCZ/user/translate.html#related-topics"
+    "relUrl": "/cs-rCZ/user/translate.html#související-témata"
   },"5872": {
     "doc": "Translate the App",
     "title": "Translate the App",
@@ -47039,33 +47039,33 @@
     
     "relUrl": "/zh-rTW/user/widget.html#相關主題"
   },"6720": {
-    "doc": "Home Screen Widget",
-    "title": "Home Screen Widget",
-    "content": "On Android, Meshtastic provides a home screen widget that shows live local statistics from your connected radio at a glance — no need to open the app. ",
+    "doc": "Widget na domovské obrazovce",
+    "title": "Widget na domovské obrazovce",
+    "content": "V systému Android nabízí Meshtastic widget na domovskou obrazovku, který na první pohled zobrazuje aktuální místní statistiky připojeného rádia – bez nutnosti otevírat aplikaci. ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/widget.html",
     
     "relUrl": "/cs-rCZ/user/widget.html"
   },"6721": {
-    "doc": "Home Screen Widget",
-    "title": "What It Shows",
-    "content": "The widget displays the connected radio’s current local stats: . | A node chip across the top, carrying the radio’s short name in its own colors | Battery — the radio’s battery level, or Powered when running on external power | ChUtil — channel utilization (how busy the LoRa channel is, as a percentage) | AirUtil — airtime utilization (how much of the duty cycle your radio is transmitting) | Traffic — packets transmitted / received, and duplicates seen | Relays — packets relayed and relay cancellations (shown when the radio is relaying) | Diagnostics — a combined line carrying Noise (the background noise level in dBm), Bad (corrupt packets received), and Dropped (packets the radio discarded). Bad and Dropped appear only once they are above zero, so a quiet radio may show the noise reading alone | Heap — free versus total memory on the radio, drawn as a bar | Nodes — how many nodes are online, out of the total known | Uptime — how long the radio has been running since its last reboot, shown beside Nodes | Updated — the time the stats last refreshed, along the foot of the widget | . Tap the widget to open the app, or use its refresh control to request fresh stats. ℹ️ Note: The values reflect the connected radio. If the radio disconnects, the widget replaces the stats with a status line — Disconnected, Connecting, or Device sleeping. It does not keep the last-known numbers on screen. ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/widget.html#what-it-shows",
+    "doc": "Widget na domovské obrazovce",
+    "title": "Co zobrazuje",
+    "content": "Widget zobrazuje aktuální místní statistiky připojeného rádia: . | Nahoře je štítek uzlu s krátkým názvem rádia v jeho vlastních barvách | Baterie – úroveň nabití baterie rádia, nebo Napájeno při napájení z externího zdroje | ChUtil — využití kanálu (jak je kanál LoRa vytížený, v procentech) | AirUtil — využití vysílacího času (jakou část povoleného vysílacího cyklu rádio využívá k vysílání) | Provoz – pakety odeslané / přijaté a zaznamenané duplikáty | Přeposláno – přeposlané pakety a zrušení přeposílání (zobrazuje se, když rádio přeposílá pakety) | Diagnostiky – společný řádek s údaji Šum (úroveň okolního šumu v dBm), Poškozené (přijaté poškozené pakety) a Zahozené (pakety, které rádio zahodilo). Poškozené a zahozené pakety se zobrazí až při hodnotě vyšší než nula, takže u rádia bez provozu se může zobrazovat pouze hodnota šumu | Halda — volná a celková paměť rádia, znázorněná pomocí pruhu | Uzly — počet uzlů online z celkového počtu známých uzlů | Doba provozu — doba provozu rádia od posledního restartu, zobrazená vedle položky Uzly | Aktualizováno – čas poslední aktualizace statistik, zobrazený v dolní části widgetu | . Klepnutím na widget otevřete aplikaci nebo pomocí tlačítka obnovení vyžádejte aktuální statistiky. ℹ️ Poznámka: Hodnoty se vztahují k připojenému rádiu. Pokud se rádio odpojí, widget nahradí statistiky stavovým řádkem – Odpojeno, Připojování nebo Zařízení spí. Nezobrazuje poslední známé hodnoty. ",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/widget.html#co-zobrazuje",
     
-    "relUrl": "/cs-rCZ/user/widget.html#what-it-shows"
+    "relUrl": "/cs-rCZ/user/widget.html#co-zobrazuje"
   },"6722": {
-    "doc": "Home Screen Widget",
-    "title": "Adding the Widget",
-    "content": ". | Touch &amp; hold an empty area of your Android home screen. | Tap Widgets. | Drag the Meshtastic widget to your home screen. The app ships one widget, so the picker entry is just the app name. | Resize it as needed — the layout adapts to the available space. | . ℹ️ Note: The widget is Android-only. It is not available on the Desktop or iOS builds. ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/widget.html#adding-the-widget",
+    "doc": "Widget na domovské obrazovce",
+    "title": "Přidání widgetu",
+    "content": ". | Dotkněte se prázdného místa na domovské obrazovce Androidu a podržte jej. | Klepněte na položku Widgety. | Přetáhněte widget Meshtastic na domovskou obrazovku. Aplikace obsahuje jeden widget, takže v nabídce widgetů se zobrazuje pouze název aplikace. | Podle potřeby změňte jeho velikost – rozložení se přizpůsobí dostupnému prostoru. | . ℹ️ Poznámka: Widget je k dispozici pouze pro Android. Není k dispozici ve verzích pro Desktop ani iOS. ",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/widget.html#p%C5%99id%C3%A1n%C3%AD-widgetu",
     
-    "relUrl": "/cs-rCZ/user/widget.html#adding-the-widget"
+    "relUrl": "/cs-rCZ/user/widget.html#přidání-widgetu"
   },"6723": {
-    "doc": "Home Screen Widget",
-    "title": "Related Topics",
-    "content": ". | Node Metrics — the full Signal Quality and Local Stats history inside the app | Connections — connect to a radio so the widget has stats to show | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
-    "url": "/Meshtastic-Android/main/cs-rCZ/user/widget.html#related-topics",
+    "doc": "Widget na domovské obrazovce",
+    "title": "Související témata",
+    "content": ". | Metriky uzlu — kompletní historie kvality signálu a místních statistik přímo v aplikaci | Připojení — připojte se k rádiu, aby widget mohl zobrazovat statistiky | Local Mesh Discovery — channel and airtime utilization across the mesh | . ",
+    "url": "/Meshtastic-Android/main/cs-rCZ/user/widget.html#souvisej%C3%ADc%C3%AD-t%C3%A9mata",
     
-    "relUrl": "/cs-rCZ/user/widget.html#related-topics"
+    "relUrl": "/cs-rCZ/user/widget.html#související-témata"
   },"6724": {
     "doc": "Home Screen Widget",
     "title": "Home Screen Widget",
