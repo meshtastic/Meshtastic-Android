@@ -38,7 +38,8 @@ fun TimeFrameSelector(
     if (availableTimeFrames.size <= 1) return
 
     // material3's ButtonGroup inverts its width constraints when reserving the overflow indicator
-    // and throws; keep the segmented row until that is fixed past material3 1.12.0-alpha03.
+    // and throws (https://issuetracker.google.com/issues/516743181, fixed in androidx material3
+    // 1.5.0-alpha22); keep the segmented row until the JetBrains fork ships that fix.
     SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
         availableTimeFrames.forEachIndexed { index, timeFrame ->
             val text = stringResource(timeFrame.strRes)
