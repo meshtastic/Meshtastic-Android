@@ -40,6 +40,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
+import org.meshtastic.core.common.state.OperationLease
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.CommonUri
@@ -133,6 +134,9 @@ class FirmwareUpdateViewModel(
     private val nodeRestartTracker: NodeRestartTracker,
 ) : ViewModel() {
 
+    /** The USB maintenance sequence's hold on the radio. Spans several passes, so it cannot use `withOperation`. */
+    private var maintenanceLease: OperationLease? = null
+
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
     val state: StateFlow<FirmwareUpdateState> = _state.asStateFlow()
 
@@ -201,7 +205,7 @@ class FirmwareUpdateViewModel(
         // passes (e.g. navigating away after the erase leg but before picking the firmware save location), and a
         // leaked lock would permanently suppress the radio transport's auto-reconnect for the rest of the app
         // session — see startUsbMaintenance/advancePastPass. A no-op if no sequence was in flight.
-        radioOperationLock.release(RadioOperation.FirmwareMaintenance)
+        releaseMaintenanceLease()
         // viewModelScope is already cancelled when onCleared() runs, so launch cleanup on the
         // application-wide scope (SupervisorJob + ioDispatcher). ATOMIC start + NonCancellable
         // context keeps cleanup running even if something tries to cancel it mid-flight.
@@ -600,7 +604,7 @@ class FirmwareUpdateViewModel(
             if (!checkBatteryLevel()) return@launch
             // Held until the sequence finishes or fails. Without it the environmental-recovery listeners restart
             // the radio transport mid-sequence and bind it to the erase firmware's bare CDC port.
-            radioOperationLock.acquire(RadioOperation.FirmwareMaintenance)
+            maintenanceLease = radioOperationLock.acquire(RadioOperation.FirmwareMaintenance)
             updateJob?.cancel()
             updateJob =
                 viewModelScope.launch {
@@ -625,7 +629,7 @@ class FirmwareUpdateViewModel(
                         _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
                     } finally {
                         // Preparation that produced no passes never reached the device; hand the transport back.
-                        if (pendingUsbPasses.isEmpty()) radioOperationLock.release(RadioOperation.FirmwareMaintenance)
+                        if (pendingUsbPasses.isEmpty()) releaseMaintenanceLease()
                     }
                 }
         }
@@ -686,7 +690,7 @@ class FirmwareUpdateViewModel(
         val next = pendingUsbPasses.firstOrNull()
         if (next == null) {
             // Sequence complete: hand the device back before verifying, so the normal reconnect can run.
-            radioOperationLock.release(RadioOperation.FirmwareMaintenance)
+            releaseMaintenanceLease()
             verifyUpdateResult(originalDeviceAddress)
         } else {
             _state.value = next.toAwaitingFileSave()
@@ -705,7 +709,7 @@ class FirmwareUpdateViewModel(
             // Still mid-sequence — hold the lock, the user is being asked to retry this pass.
             _state.value = pass.toAwaitingFileSave(retryMessage = message)
         } else {
-            radioOperationLock.release(RadioOperation.FirmwareMaintenance)
+            releaseMaintenanceLease()
             _state.value = FirmwareUpdateState.Error(message)
         }
     }
@@ -741,7 +745,7 @@ class FirmwareUpdateViewModel(
                 // All writes are done once the device detached. Release before verifying: for serial,
                 // verification relies on SharedRadioInterfaceService's USB auto-recovery to reconnect the
                 // radio — which is exactly what the lock suppresses. (The release in finally is a no-op then.)
-                radioOperationLock.release(RadioOperation.FirmwareMaintenance)
+                releaseMaintenanceLease()
                 verifyUpdateResult(originalDeviceAddress)
             } catch (e: CancellationException) {
                 throw e
@@ -754,7 +758,7 @@ class FirmwareUpdateViewModel(
                 // completed: the Prepared firmware artifact is saved through this pre-existing single-pass path
                 // rather than writeMaintenancePass/advancePastPass, so releasing here is the only place that
                 // sequence's lock gets freed. A no-op for a plain single-pass update, which never acquires the lock.
-                radioOperationLock.release(RadioOperation.FirmwareMaintenance)
+                releaseMaintenanceLease()
                 pendingUsbPasses = emptyList()
                 maintenanceHardware = null
             }
@@ -1080,6 +1084,12 @@ class FirmwareUpdateViewModel(
             bootloaderWarningDataSource.dismiss(currentState.address)
             _state.value = currentState.copy(showBootloaderWarning = false)
         }
+    }
+
+    /** Ends the USB maintenance hold. Idempotent — several failure paths call it. */
+    private fun releaseMaintenanceLease() {
+        radioOperationLock.release(maintenanceLease)
+        maintenanceLease = null
     }
 
     /**

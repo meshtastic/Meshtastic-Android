@@ -379,10 +379,10 @@ class MeshNotificationManagerImpl(
         // A long operation changes the notification without any connection-state change to piggyback on — a
         // firmware update in particular deselects the device, so the state alone would read "Disconnected".
         scope.launch {
-            radioOperationLock.active.collect {
+            radioOperationLock.holders.collect { holders ->
                 synchronized(serviceNotificationLock) {
                     val last = serviceNotificationSnapshots.replayCache.lastOrNull() ?: return@synchronized
-                    serviceNotificationSnapshots.tryEmit(last.copy(activeOperations = it))
+                    serviceNotificationSnapshots.tryEmit(last.copy(activeOperations = holders.values.toSet()))
                 }
             }
         }
@@ -467,7 +467,7 @@ class MeshNotificationManagerImpl(
             deviceMetrics = cachedDeviceMetrics,
             previousMessage = cachedMessage,
             nextUpdateAt = nextStatsUpdateMillis,
-            activeOperations = radioOperationLock.active.value,
+            activeOperations = radioOperationLock.activeOperations,
         )
     }
 

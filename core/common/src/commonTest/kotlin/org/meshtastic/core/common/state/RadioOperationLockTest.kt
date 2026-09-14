@@ -31,37 +31,45 @@ class RadioOperationLockTest {
         val lock = RadioOperationLock()
         assertFalse(lock.isActive)
         assertFalse(lock.suppressesTransport)
-        assertEquals(emptySet(), lock.active.value)
+        assertEquals(emptySet(), lock.activeOperations)
     }
 
     @Test
-    fun acquireIsIdempotent() {
+    fun releasingAnUnheldLeaseIsSafe() {
         val lock = RadioOperationLock()
-        lock.acquire(RadioOperation.DiscoveryScan)
-        lock.acquire(RadioOperation.DiscoveryScan)
-        assertEquals(setOf(RadioOperation.DiscoveryScan), lock.active.value)
-
-        lock.release(RadioOperation.DiscoveryScan)
-        assertFalse(lock.isActive, "one release must clear a re-taken operation, as the old lock did")
-    }
-
-    @Test
-    fun releasingAnUnheldOperationIsSafe() {
-        val lock = RadioOperationLock()
-        lock.release(RadioOperation.FirmwareUpdate)
+        lock.release(null)
+        val lease = lock.acquire(RadioOperation.FirmwareUpdate)
+        lock.release(lease)
+        lock.release(lease)
         assertFalse(lock.isActive)
     }
 
     @Test
-    fun operationsDoNotClobberEachOther() {
+    fun twoHoldersOfTheSameOperationAreIndependent() {
+        // The firmware view model cancels an update job and starts a replacement without joining, so the cancelled
+        // job's release can land after the replacement has acquired. The late release must not retire the live holder.
         val lock = RadioOperationLock()
-        lock.acquire(RadioOperation.FirmwareUpdate)
+        val abandoned = lock.acquire(RadioOperation.FirmwareUpdate)
+        val replacement = lock.acquire(RadioOperation.FirmwareUpdate)
+
+        lock.release(abandoned)
+
+        assertTrue(lock.isActive, "the replacement holder must still hold the operation")
+        assertEquals(setOf(RadioOperation.FirmwareUpdate), lock.activeOperations)
+
+        lock.release(replacement)
+        assertFalse(lock.isActive)
+    }
+
+    @Test
+    fun differentOperationsDoNotClobberEachOther() {
+        val lock = RadioOperationLock()
+        val update = lock.acquire(RadioOperation.FirmwareUpdate)
         lock.acquire(RadioOperation.DiscoveryScan)
 
-        lock.release(RadioOperation.FirmwareUpdate)
+        lock.release(update)
 
-        assertTrue(lock.isActive, "releasing one operation must not release the other")
-        assertEquals(setOf(RadioOperation.DiscoveryScan), lock.active.value)
+        assertEquals(setOf(RadioOperation.DiscoveryScan), lock.activeOperations)
     }
 
     @Test
@@ -74,18 +82,28 @@ class RadioOperationLockTest {
         lock.acquire(RadioOperation.FirmwareUpdate)
         assertFalse(lock.suppressesTransport, "an OTA frees the transport by deselecting, not by suppression")
 
-        lock.acquire(RadioOperation.FirmwareMaintenance)
+        val maintenance = lock.acquire(RadioOperation.FirmwareMaintenance)
         assertTrue(lock.suppressesTransport)
 
-        lock.release(RadioOperation.FirmwareMaintenance)
+        lock.release(maintenance)
         assertFalse(lock.suppressesTransport, "suppression must end with the maintenance pass")
+    }
+
+    @Test
+    fun suppressionSurvivesAnotherMaintenanceHolder() {
+        val lock = RadioOperationLock()
+        val first = lock.acquire(RadioOperation.FirmwareMaintenance)
+        lock.acquire(RadioOperation.FirmwareMaintenance)
+
+        lock.release(first)
+
+        assertTrue(lock.suppressesTransport, "the second maintenance holder still needs the transport off the port")
     }
 
     @Test
     fun withOperationReleasesOnSuccess() = runTest {
         val lock = RadioOperationLock()
-        val result = lock.withOperation(RadioOperation.FirmwareUpdate) { "done" }
-        assertEquals("done", result)
+        assertEquals("done", lock.withOperation(RadioOperation.FirmwareUpdate) { "done" })
         assertFalse(lock.isActive)
     }
 
@@ -108,14 +126,28 @@ class RadioOperationLockTest {
     }
 
     @Test
-    fun activeFlowTracksAcquireAndRelease() = runTest {
+    fun withOperationCancellationLeavesAConcurrentHolderIntact() = runTest {
         val lock = RadioOperationLock()
-        assertEquals(emptySet(), lock.active.value)
+        val other = lock.acquire(RadioOperation.FirmwareUpdate)
 
-        lock.withOperation(RadioOperation.DiscoveryScan) {
-            assertEquals(setOf(RadioOperation.DiscoveryScan), lock.active.value)
+        assertFailsWith<CancellationException> {
+            lock.withOperation(RadioOperation.FirmwareUpdate) { throw CancellationException("abandoned") }
         }
 
-        assertEquals(emptySet(), lock.active.value)
+        assertTrue(lock.isActive, "the surviving holder keeps the operation")
+        lock.release(other)
+        assertFalse(lock.isActive)
+    }
+
+    @Test
+    fun holdersFlowTracksAcquireAndRelease() = runTest {
+        val lock = RadioOperationLock()
+        assertEquals(emptyMap(), lock.holders.value)
+
+        lock.withOperation(RadioOperation.DiscoveryScan) {
+            assertEquals(listOf(RadioOperation.DiscoveryScan), lock.holders.value.values.toList())
+        }
+
+        assertEquals(emptyMap(), lock.holders.value)
     }
 }

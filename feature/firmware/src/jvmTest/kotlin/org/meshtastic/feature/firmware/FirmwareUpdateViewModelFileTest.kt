@@ -897,7 +897,7 @@ class FirmwareUpdateViewModelFileTest {
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
         verifySuspend(mode = VerifyMode.not) { firmwareRetriever.retrieveUsbFirmware(any(), any(), any()) }
         assertFalse(
-            radioOperationLock.active.value.contains(RadioOperation.FirmwareMaintenance),
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
             "a refused request must never take the maintenance lock",
         )
     }
@@ -937,7 +937,7 @@ class FirmwareUpdateViewModelFileTest {
         advanceUntilIdle()
 
         assertFalse(
-            radioOperationLock.active.value.contains(RadioOperation.FirmwareMaintenance),
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
             "refusing before the sequence starts must leave the radio transport unblocked",
         )
     }
@@ -959,7 +959,7 @@ class FirmwareUpdateViewModelFileTest {
 
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
         assertFalse(
-            radioOperationLock.active.value.contains(RadioOperation.FirmwareMaintenance),
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
             "a failed preparation must not leak the lock",
         )
     }
@@ -1006,7 +1006,7 @@ class FirmwareUpdateViewModelFileTest {
         }
 
         assertTrue(
-            radioOperationLock.active.value.contains(RadioOperation.FirmwareMaintenance),
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
             "the lock must still be held between passes",
         )
         val awaitingFirmware = assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
@@ -1015,10 +1015,10 @@ class FirmwareUpdateViewModelFileTest {
 
         // Second, terminal pass (firmware image) — writes through the pre-existing saveDfuFile.
         viewModel.saveDfuFile(CommonUri.parse("file:///output/firmware.uf2"))
-        runUntilSettled { !radioOperationLock.active.value.contains(RadioOperation.FirmwareMaintenance) }
+        runUntilSettled { !radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance) }
 
         assertFalse(
-            radioOperationLock.active.value.contains(RadioOperation.FirmwareMaintenance),
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
             "completing the sequence's terminal pass must release the lock, or auto-reconnect stays suppressed forever",
         )
 

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.common.state
 
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,8 +44,8 @@ enum class RadioOperation(val suppressesTransport: Boolean) {
      * An OTA/DFU flash.
      *
      * Does not suppress the transport: the flow already frees it by deselecting the device
-     * (`radioController.setDeviceAddress("n")`), and widening suppression to this operation would change reconnection
-     * behaviour well beyond keeping the process alive.
+     * (`radioController.setDeviceAddress("n")`), and the post-flash verification deliberately reconnects the radio, so
+     * suppression would block the very step it is meant to protect.
      */
     FirmwareUpdate(suppressesTransport = false),
 
@@ -53,61 +54,76 @@ enum class RadioOperation(val suppressesTransport: Boolean) {
 }
 
 /**
+ * One holder's claim on a [RadioOperation]. Releasing a lease affects only that holder.
+ *
+ * Identity matters: two concurrent claims on the same operation produce two distinct leases, so a late release from an
+ * abandoned holder cannot retire a live one.
+ */
+class OperationLease internal constructor(internal val id: Long, val operation: RadioOperation)
+
+/**
  * Tracks which [RadioOperation]s are in flight, so the rest of the app can keep out of their way.
  *
  * Three consumers, which is why one lock replaced the single-purpose `FirmwareMaintenanceLock` it grew out of:
- * `SharedRadioInterfaceService` reads [suppressesTransport] to stay off the device, `MeshService` reads [isActive] to
- * refuse to stop itself and to hold a wake lock, and the service notification reads [active] to say what is running.
+ * `SharedRadioInterfaceService` reads [suppressesTransport] to stay off the device, `MeshService` reads [holders] to
+ * refuse to stop itself and to hold a wake lock, and the service notification reads it to say what is running.
+ *
+ * Holders are tracked as individual leases rather than a set of operation types. The set was wrong: a caller that
+ * cancels a job and immediately starts a replacement — which `FirmwareUpdateViewModel` does, without joining — lets the
+ * cancelled job's `finally` run *after* the replacement has acquired, and a shared entry would be retired out from
+ * under the live holder. Two holders of the same operation are now independent.
  *
  * Lives in `:core:common` because the parties sit in modules that cannot see each other: the flows that take an
  * operation are in `:feature:firmware` and `:feature:discovery`, and the code that must respect it is in
  * `:core:service`.
  *
- * Process-local by design. A process death drops every operation, which is correct — nothing is in flight any more —
- * but it means this narrows the window in which an interrupted flash can strand a device rather than closing it.
+ * Process-local by design. A process death drops every lease, which is correct — nothing is in flight any more — but it
+ * means this narrows the window in which an interrupted flash can strand a device rather than closing it.
  */
 @Single
 class RadioOperationLock {
-    private val _active = MutableStateFlow<Set<RadioOperation>>(emptySet())
+    private val nextLeaseId = atomic(0L)
+    private val _holders = MutableStateFlow<Map<Long, RadioOperation>>(emptyMap())
 
-    /** The operations currently held. Emits on every acquire and release. */
-    val active: StateFlow<Set<RadioOperation>> = _active.asStateFlow()
+    /** Every live lease, keyed by lease id. Emits on every acquire and release. */
+    val holders: StateFlow<Map<Long, RadioOperation>> = _holders.asStateFlow()
+
+    /** The distinct operations currently in flight. */
+    val activeOperations: Set<RadioOperation>
+        get() = _holders.value.values.toSet()
 
     /** True while any operation is in flight. */
     val isActive: Boolean
-        get() = _active.value.isNotEmpty()
+        get() = _holders.value.isNotEmpty()
 
     /** True while an operation that needs the transport off the device is in flight. */
     val suppressesTransport: Boolean
-        get() = _active.value.any(RadioOperation::suppressesTransport)
+        get() = _holders.value.values.any(RadioOperation::suppressesTransport)
 
-    /** Takes [operation]. Idempotent — re-taking an already-held operation is a no-op. */
-    fun acquire(operation: RadioOperation) {
-        _active.update { it + operation }
-    }
-
-    /** Releases [operation]. Idempotent, and safe to call for an operation that was never taken. */
-    fun release(operation: RadioOperation) {
-        _active.update { it - operation }
+    /** Takes [operation] and returns the lease that holds it. Each call is a distinct holder. */
+    fun acquire(operation: RadioOperation): OperationLease {
+        val lease = OperationLease(nextLeaseId.incrementAndGet(), operation)
+        _holders.update { it + (lease.id to operation) }
+        return lease
     }
 
     /**
-     * Runs [block] with [operation] held, releasing it even on failure or cancellation.
+     * Releases [lease]. Idempotent, and null-safe so a caller can release a hold it may never have taken.
      *
-     * Preferred over [acquire]/[release] wherever the work fits in one block. The USB maintenance flow cannot use it —
-     * it spans several passes and suspend boundaries — so the explicit pair stays public.
-     *
-     * **Do not nest the same [operation].** Holders are a set, not a counter, so an inner block's release drops the
-     * operation while the outer one is still running. Two holds of the same operation must be sequential, which is how
-     * the firmware flow uses it: the flash releases before the post-flash verification takes it again, with no suspend
-     * point in between for anything to observe the gap. Different operations may overlap freely.
+     * Releasing a stale lease is harmless: its id is already gone, and other holders of the same operation keep theirs.
      */
+    fun release(lease: OperationLease?) {
+        val id = lease?.id ?: return
+        _holders.update { it - id }
+    }
+
+    /** Runs [block] with [operation] held, releasing that exact lease even on failure or cancellation. */
     suspend fun <T> withOperation(operation: RadioOperation, block: suspend () -> T): T {
-        acquire(operation)
+        val lease = acquire(operation)
         return try {
             block()
         } finally {
-            release(operation)
+            release(lease)
         }
     }
 }
