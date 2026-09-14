@@ -1081,12 +1081,18 @@
     <string name="map_offline_download_failed_build">Сейчас нет данных офлайн-карты — попробуй позже</string>
     <string name="map_offline_download_failed_io">Ошибка загрузки — проверь соединение и попробуй снова</string>
     <string name="map_offline_download_failed_region_limit">Слишком много офлайн-районов уже загружено — сначала удали один</string>
+    <string name="map_offline_download_failed_storage">Загруженные регионы занимают слишком много памяти — сначала удали один</string>
+    <string name="map_offline_download_failed_tile_limit">Выбранная область слишком большая — увеличь масштаб или выбери меньший участок</string>
     <string name="map_offline_download_terrain">Скачать ландшафт</string>
     <string name="map_offline_downloading_progress">Загрузка… %1$d / %2$d плиток</string>
     <string name="map_offline_manager">Оффлайн менеджер</string>
     <string name="map_offline_region_label">%1$s, %2$s  %3$s</string>
     <string name="map_offline_show_on_map">Показать на карте</string>
     <string name="map_offline_terrain_contours">Контуры</string>
+    <string name="map_offline_terrain_download_complete">Загрузка местности завершена</string>
+    <string name="map_offline_terrain_download_failed_io">Загрузка местности не удалась — проверь подключение и попробуй снова</string>
+    <string name="map_offline_terrain_download_failed_tile_limit">Выбранная область слишком большая для местности — увеличь масштаб или выбери меньший участок</string>
+    <string name="map_offline_terrain_downloading_progress">Загрузка местности… %1$d / %2$d плиток</string>
     <string name="map_overlay_hillshade">Тень на склоне</string>
     <string name="map_overlay_precipitation">Осадки</string>
     <string name="map_overlay_weather_radar">Метеорадары</string>
@@ -1717,6 +1723,7 @@
     <string name="security_signed_message_info">Проверено с помощью ключа отправителя.</string>
     <string name="security_signed_node">Подписанная нода</string>
     <string name="security_signed_node_desc">Автоматически проверено</string>
+    <string name="security_signed_node_help">Радио проверило подписанные трансляции этой ноды с помощью её ключа идентификации, так что его личность постоянна, но ты сам её не проверял. Каждая нода с прошивкой 2.8 или выше подписывает свои трансляции.</string>
     <string name="security_signed_verified">Подписано · проверено</string>
     <string name="security_verified_contact">Подтверждённый контакт</string>
     <string name="select">Выбрать</string>
@@ -1745,10 +1752,13 @@
     <string name="settings">настройки</string>
     <!-- SHARE -->
     <string name="share">Поделиться</string>
+    <string name="share_action">Поделиться ссылкой</string>
+    <string name="share_channels">Поделиться каналами</string>
     <string name="share_connected_node">Поделиться подключенной нодой</string>
     <string name="share_contact">Отправить контакт</string>
     <string name="share_location">Поделиться геопозицией</string>
     <string name="share_location_description">Используй GPS твоего телефона для отправки координат на твою ноду вместо аппаратного GPS на самой ноде.</string>
+    <string name="share_qr_subtext">Отсканируй этот код с помощью приложения Meshtastic на другом устройстве, чтобы добавить его туда.</string>
     <string name="share_to">Поделиться…</string>
     <string name="share_your_location_in_real_time">Делитесь своим местоположением в режиме реального времени и поддерживайте работу группы с функциями GPS.</string>
     <string name="shared_contact_no_public_key">У этого контакта нет публичного ключа, поэтому его нельзя импортировать. Контакт без ключа стирает любой ключ, который твоя радиостанция уже хранит для этой ноды. Попроси отправителя снова поделиться им, когда его нода обменяется ключами.</string>
@@ -2099,6 +2109,7 @@
     <!-- WRITE -->
     <string name="write_nfc">Записать в NFC-метку</string>
     <string name="write_nfc_failed">Не удалось записать в метку. Используй пустую NFC-метку, которую можно записывать, и держи её неподвижно.</string>
+    <string name="write_nfc_subtext">Запись сохраняет эту ссылку на NFC-метку, к которой может прикоснуться любой.</string>
     <string name="write_nfc_success">Написано для метки</string>
     <string name="write_nfc_text">Поднеси записываемую NFC-метку к задней части своего телефона.</string>
     <string name="you">Вы</string>
