@@ -421,6 +421,25 @@ class StoreForwardPacketHandlerImplTest {
     }
 
     @Test
+    fun `handleStoreAndForward text ignores original_id for a non-router-text rr`() = testScope.runTest {
+        val captured = mutableListOf<DataPacket>()
+        every { dataHandler.rememberDataPacket(capture(captured), any(), any(), any()) } returns Unit
+        val sf =
+            StoreAndForward(
+                text = "Text under an unexpected response type".encodeToByteArray().toByteString(),
+                rr = StoreAndForward.RequestResponse.ROUTER_ERROR,
+                original_id = 0x4321,
+            )
+        val packet = makeSfPacket(999, sf)
+        val dataPacket = makeDataPacket(999)
+
+        handler.handleStoreAndForward(packet, dataPacket, myNodeNum)
+        advanceUntilIdle()
+
+        assertEquals(dataPacket.id, captured.single().id)
+    }
+
+    @Test
     fun `handleStoreAndForward stats ignores original_id`() = testScope.runTest {
         val captured = mutableListOf<DataPacket>()
         every { dataHandler.rememberDataPacket(capture(captured), any(), any(), any()) } returns Unit

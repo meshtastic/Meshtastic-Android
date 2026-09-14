@@ -202,13 +202,16 @@ class StoreForwardPacketHandlerImpl(
                 if (s.rr == StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
                     dataPacket.to = NodeAddress.ID_BROADCAST
                 }
-                // A router replays under a fresh header id and carries the stored message's id in
-                // original_id; dedupe against the original, and fall back for routers that omit it.
+                // Only a router-text replay travels under a fresh header id with the stored
+                // message's id in original_id; dedupe against that, and fall back when it is absent.
+                val isRouterText =
+                    s.rr == StoreAndForward.RequestResponse.ROUTER_TEXT_DIRECT ||
+                        s.rr == StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST
                 val u =
                     dataPacket.copy(
                         bytes = s.text,
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
-                        id = s.original_id.takeIf { it != 0 } ?: dataPacket.id,
+                        id = s.original_id.takeIf { isRouterText && it != 0 } ?: dataPacket.id,
                     )
                 dataHandler.value.rememberDataPacket(u, myNodeNum, session = session)
             }
