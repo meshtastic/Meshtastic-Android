@@ -37,6 +37,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.state.RadioOperation
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.dao.DiscoveryDao
@@ -86,6 +88,7 @@ class DiscoveryScanEngine(
     private val applicationScope: ApplicationCoroutineScope,
     private val dispatchers: CoroutineDispatchers,
     private val meshPrefs: MeshPrefs,
+    private val radioOperationLock: RadioOperationLock,
 ) : DiscoveryPacketCollector {
 
     // region Public state
@@ -330,7 +333,13 @@ class DiscoveryScanEngine(
         currentDwellPersisted = false
         CoroutineScope(dispatchers.io + SupervisorJob()).also { scope ->
             scanScope = scope
-            scope.launch { runScanLoop(targets, dwellDurationSeconds) }
+            // Held for the whole sweep, including analysis and the home-preset restore: a scan that is killed partway
+            // leaves the radio on a scanned preset until interrupted-session recovery runs at the next app launch.
+            scope.launch {
+                radioOperationLock.withOperation(RadioOperation.DiscoveryScan) {
+                    runScanLoop(targets, dwellDurationSeconds)
+                }
+            }
         }
     }
 

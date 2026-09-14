@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
@@ -217,6 +218,7 @@ class DiscoveryScanEngineTest {
             applicationScope = appScope,
             dispatchers = dispatchers,
             meshPrefs = meshPrefs,
+            radioOperationLock = RadioOperationLock(),
         )
     }
 

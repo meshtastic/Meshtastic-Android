@@ -42,6 +42,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
+import org.meshtastic.core.common.state.RadioOperation
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
@@ -67,6 +69,8 @@ import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.discovery_scan_in_progress
+import org.meshtastic.core.resources.firmware_update_in_progress
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.local_stats_bad
@@ -123,6 +127,7 @@ class MeshNotificationManagerImpl(
     private val nodeRepository: Lazy<NodeRepository>,
     private val conversationShortcutPublisher: Lazy<ConversationShortcutPublisher>,
     private val radioConfigRepository: Lazy<RadioConfigRepository>,
+    private val radioOperationLock: RadioOperationLock,
     private val scope: ServiceScope,
 ) : MeshNotificationManager {
 
@@ -171,6 +176,7 @@ class MeshNotificationManagerImpl(
         val deviceMetrics: DeviceMetrics?,
         val previousMessage: String?,
         val nextUpdateAt: Long,
+        val activeOperations: Set<RadioOperation> = emptySet(),
     )
 
     private data class RenderedServiceNotification(val notification: Notification, val message: String)
@@ -370,6 +376,16 @@ class MeshNotificationManagerImpl(
 
     init {
         scope.launch { serviceNotificationSnapshots.collectLatest(::renderAndPostServiceNotification) }
+        // A long operation changes the notification without any connection-state change to piggyback on — a
+        // firmware update in particular deselects the device, so the state alone would read "Disconnected".
+        scope.launch {
+            radioOperationLock.active.collect {
+                synchronized(serviceNotificationLock) {
+                    val last = serviceNotificationSnapshots.replayCache.lastOrNull() ?: return@synchronized
+                    serviceNotificationSnapshots.tryEmit(last.copy(activeOperations = it))
+                }
+            }
+        }
     }
 
     /**
@@ -451,21 +467,25 @@ class MeshNotificationManagerImpl(
             deviceMetrics = cachedDeviceMetrics,
             previousMessage = cachedMessage,
             nextUpdateAt = nextStatsUpdateMillis,
+            activeOperations = radioOperationLock.active.value,
         )
     }
 
     private suspend fun renderServiceNotification(snapshot: ServiceNotificationSnapshot): RenderedServiceNotification {
+        // A held operation outranks the connection state. During a firmware update the device is deliberately
+        // deselected, so the state alone would report "Disconnected" over a flash that is running perfectly.
         val title =
-            when (snapshot.state) {
-                is ConnectionState.Connected ->
-                    getStringSuspend(Res.string.meshtastic_app_name) + ": " + getStringSuspend(Res.string.connected)
+            snapshot.activeOperations.notificationTitleResource()?.let { getStringSuspend(it) }
+                ?: when (snapshot.state) {
+                    is ConnectionState.Connected ->
+                        getStringSuspend(Res.string.meshtastic_app_name) + ": " + getStringSuspend(Res.string.connected)
 
-                is ConnectionState.Disconnected -> getStringSuspend(Res.string.disconnected)
+                    is ConnectionState.Disconnected -> getStringSuspend(Res.string.disconnected)
 
-                is ConnectionState.DeviceSleep -> getStringSuspend(Res.string.device_sleeping)
+                    is ConnectionState.DeviceSleep -> getStringSuspend(Res.string.device_sleeping)
 
-                is ConnectionState.Connecting -> getStringSuspend(Res.string.connecting)
-            }
+                    is ConnectionState.Connecting -> getStringSuspend(Res.string.connecting)
+                }
 
         val freshMessage =
             when {
@@ -1200,4 +1220,18 @@ class MeshNotificationManagerImpl(
     }
 
     // endregion
+}
+
+/**
+ * The notification title for the most significant operation in flight, or null when none is.
+ *
+ * Firmware work outranks a discovery scan: it is the one the user must not interrupt.
+ */
+internal fun Set<RadioOperation>.notificationTitleResource(): StringResource? = when {
+    isEmpty() -> null
+
+    contains(RadioOperation.FirmwareUpdate) || contains(RadioOperation.FirmwareMaintenance) ->
+        Res.string.firmware_update_in_progress
+
+    else -> Res.string.discovery_scan_in_progress
 }

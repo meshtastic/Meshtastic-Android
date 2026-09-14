@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.android.ext.android.inject
 import org.meshtastic.core.common.hasLocationPermission
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.isValidDeviceAddress
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.util.anonymize
@@ -65,6 +66,8 @@ class MeshService : Service() {
 
     private val conversationShortcutPublisher: ConversationShortcutPublisher by inject()
 
+    private val radioOperationLock: RadioOperationLock by inject()
+
     private var isServiceInitialized = false
 
     /**
@@ -87,6 +90,17 @@ class MeshService : Service() {
      */
     private var wakeLock: PowerManager.WakeLock? = null
 
+    /**
+     * Partial wake lock held for exactly as long as a radio operation is in flight, and released the moment the last
+     * one ends.
+     *
+     * Separate from [wakeLock] because it answers a different question. That one is tied to having a device selected;
+     * this one is tied to work that must not be interrupted, and a firmware update deselects the device precisely so it
+     * can flash. A foreground service keeps the process alive but does not keep the CPU awake, so without this a
+     * screen-off flash or preset sweep is left to whatever the OEM's battery optimizations allow.
+     */
+    private var operationWakeLock: PowerManager.WakeLock? = null
+
     companion object {
         fun createIntent(context: Context) = Intent(context, MeshService::class.java)
 
@@ -94,6 +108,13 @@ class MeshService : Service() {
         val absoluteMinDeviceVersion = DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)
 
         private const val WAKE_LOCK_TIMEOUT_MS = 30L * 60L * 1_000L // 30 minutes
+
+        /**
+         * Safety net on [operationWakeLock], not the mechanism that ends it: the lock is released when the operation
+         * finishes. Sized past a firmware flash and a default preset sweep so it never truncates real work, while still
+         * bounding a lock that somehow leaks.
+         */
+        private const val OPERATION_WAKE_LOCK_TIMEOUT_MS = 60L * 60L * 1_000L // 1 hour
 
         /**
          * How long [onStartCommand] will keep the service alive waiting for the selected-device address flow to emit a
@@ -119,6 +140,13 @@ class MeshService : Service() {
         // Keep conversation shortcuts published for the whole service lifetime (not only during an Android Auto
         // session) so message notifications can link to them and get Conversations-section treatment on phones.
         conversationShortcutPublisher.startObserving(serviceScope)
+
+        // Hold a wake lock for as long as — and no longer than — some radio operation is in flight.
+        serviceScope.launch {
+            radioOperationLock.active.collect { operations ->
+                if (operations.isEmpty()) releaseOperationWakeLock() else acquireOperationWakeLock()
+            }
+        }
     }
 
     @Suppress("ReturnCount")
@@ -192,12 +220,21 @@ class MeshService : Service() {
                     withTimeoutOrNull(DEVICE_ADDRESS_SETTLE_MS) {
                         radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
                     }
-                if (isValidDeviceAddress(resolved)) {
-                    Logger.i { "MeshService: selected device resolved (${resolved.anonymize}) after address-flow wait" }
-                    acquireWakeLock()
-                } else {
-                    Logger.i { "MeshService: no device selected after address flow settled; stopping" }
-                    stopServiceCleanly()
+                when (serviceStayAliveDecision(resolved, radioOperationLock.isActive)) {
+                    ServiceStayAliveDecision.STAY_FOR_DEVICE -> {
+                        Logger.i {
+                            "MeshService: selected device resolved (${resolved.anonymize}) after address-flow wait"
+                        }
+                        acquireWakeLock()
+                    }
+
+                    ServiceStayAliveDecision.STAY_FOR_OPERATION ->
+                        Logger.i { "MeshService: no device selected, but a radio operation is in flight; staying up" }
+
+                    ServiceStayAliveDecision.STOP -> {
+                        Logger.i { "MeshService: no device selected after address flow settled; stopping" }
+                        stopServiceCleanly()
+                    }
                 }
             }
     }
@@ -205,6 +242,7 @@ class MeshService : Service() {
     /** Releases everything this service holds and stops it. Safe to call before it ever reached the foreground. */
     private fun stopServiceCleanly() {
         releaseWakeLock()
+        releaseOperationWakeLock()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -224,6 +262,42 @@ class MeshService : Service() {
             Logger.w(e) { "Failed to acquire wake lock — WAKE_LOCK permission missing?" }
         } catch (e: Exception) {
             Logger.w(e) { "Failed to acquire wake lock" }
+        }
+    }
+
+    /**
+     * Acquires [operationWakeLock] using the documented pattern: create it with a tag naming this class, acquire with a
+     * timeout as a safety net, and release it explicitly when the work ends.
+     */
+    private fun acquireOperationWakeLock() {
+        if (operationWakeLock?.isHeld == true) return
+        try {
+            val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+            val lock =
+                powerManager
+                    .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Meshtastic::MeshServiceRadioOperation")
+                    .apply { setReferenceCounted(false) }
+            lock.acquire(OPERATION_WAKE_LOCK_TIMEOUT_MS)
+            operationWakeLock = lock
+            Logger.i { "Acquired partial wake lock for a radio operation" }
+        } catch (e: SecurityException) {
+            Logger.w(e) { "Failed to acquire operation wake lock — WAKE_LOCK permission missing?" }
+        } catch (e: Exception) {
+            Logger.w(e) { "Failed to acquire operation wake lock" }
+        }
+    }
+
+    private fun releaseOperationWakeLock() {
+        val lock = operationWakeLock ?: return
+        try {
+            if (lock.isHeld) {
+                lock.release()
+                Logger.i { "Released the radio operation wake lock" }
+            }
+        } catch (e: Exception) {
+            Logger.w(e) { "Failed to release operation wake lock" }
+        } finally {
+            operationWakeLock = null
         }
     }
 
@@ -256,6 +330,7 @@ class MeshService : Service() {
         addressWaitJob = null
         serviceScope.cancel()
         releaseWakeLock()
+        releaseOperationWakeLock()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         if (isServiceInitialized) {
             orchestrator.stop()

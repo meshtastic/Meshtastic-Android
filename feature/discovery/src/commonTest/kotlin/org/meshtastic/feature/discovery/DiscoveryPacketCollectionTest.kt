@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -95,6 +96,7 @@ class DiscoveryPacketCollectionTest {
             applicationScope = appScope,
             dispatchers = dispatchers,
             meshPrefs = meshPrefs,
+            radioOperationLock = RadioOperationLock(),
         )
     }
 

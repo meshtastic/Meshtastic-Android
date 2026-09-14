@@ -37,8 +37,8 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -153,7 +153,7 @@ class FirmwareUpdateViewModelTest {
         usbManager,
         fileHandler,
         firmwareRetriever,
-        FirmwareMaintenanceLock(),
+        RadioOperationLock(),
         TestApplicationCoroutineScope(testDispatcher),
         hiddenFeaturesUnlock,
         analytics,

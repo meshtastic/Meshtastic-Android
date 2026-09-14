@@ -34,6 +34,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.repository.NodeRepository
@@ -181,6 +182,7 @@ class MeshNotificationManagerImplTest {
         nodeRepository = lazy { nodeRepository },
         conversationShortcutPublisher = lazy { error("Not used in this test") },
         radioConfigRepository = lazy { error("Not used in this test") },
+        radioOperationLock = RadioOperationLock(),
         scope = scope.asServiceScope(),
     )
 
