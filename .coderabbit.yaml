@@ -17,6 +17,10 @@ reviews:
     # only way to re-review was `@coderabbitai full review`, which re-reads the whole diff
     # and surfaces new findings on unchanged lines every round.
     auto_incremental_review: true
+    # Never pause on our own. The default (5) stops automatic review after five
+    # reviewed commits and says so only inside the pinned summary comment — the
+    # check still goes green — so a long PR silently stops being reviewed.
+    auto_pause_after_reviewed_commits: 0
     ignore_usernames:
       - renovate
       - renovate[bot]
