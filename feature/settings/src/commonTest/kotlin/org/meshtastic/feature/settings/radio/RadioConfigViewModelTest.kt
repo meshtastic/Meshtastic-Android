@@ -68,7 +68,6 @@ import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRestartTracker
-import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
@@ -301,7 +300,6 @@ class RadioConfigViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
-    private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val nodeRepository = FakeNodeRepository()
     private val locationRepository: LocationRepository = mock(MockMode.autofill)
@@ -382,7 +380,6 @@ class RadioConfigViewModelTest {
     ) = RadioConfigViewModel(
         initialDestNum = destNum,
         radioConfigRepository = radioConfigRepository,
-        packetRepository = packetRepository,
         serviceRepository = serviceRepository,
         nodeRepository = nodeRepository,
         locationRepository = locationRepository,
@@ -865,7 +862,7 @@ class RadioConfigViewModelTest {
         assertEquals(listOf(1, 2), writtenIndexes)
         assertEquals(partiallyApplied, viewModel.radioConfigState.value.channelList)
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
-        verifySuspend { packetRepository.migrateChannelsByPSK(old, partiallyApplied) }
+        // replaceAllSettings re-keys the conversations itself, so the partial set must still reach it.
         verifySuspend { radioConfigRepository.replaceAllSettings(partiallyApplied) }
     }
 

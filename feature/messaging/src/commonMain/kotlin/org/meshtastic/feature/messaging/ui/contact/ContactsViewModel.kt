@@ -115,6 +115,9 @@ class ContactsViewModel(
                 // Determine if this is my message (originated on this device)
                 val fromLocal = packetData.isFromLocal(myNodeNum)
                 val toBroadcast = packetData.isBroadcast
+                // A retired conversation's channel has left the radio. Its rows keep the index they were retired
+                // from, so labelling it by slot would name whichever channel took the slot over.
+                val isRetired = ContactKey(contactKey).isRetired
 
                 // grab usernames from NodeInfo
                 val userId = if (fromLocal) packetData.to else packetData.from
@@ -123,15 +126,23 @@ class ContactsViewModel(
 
                 val shortName = user.short_name
                 val longName =
-                    if (toBroadcast) {
-                        channelSet.getChannel(packetData.channel)?.name ?: "Channel ${packetData.channel}"
-                    } else {
-                        user.long_name
+                    when {
+                        isRetired -> settings[contactKey]?.displayName.orEmpty()
+
+                        toBroadcast ->
+                            channelSet.getChannel(packetData.channel)?.name ?: "Channel ${packetData.channel}"
+
+                        else -> user.long_name
                     }
 
                 Contact(
                     contactKey = contactKey,
-                    shortName = if (toBroadcast) packetData.channel.toString() else shortName,
+                    shortName =
+                    when {
+                        isRetired -> longName.take(RETIRED_SHORT_NAME_LENGTH)
+                        toBroadcast -> packetData.channel.toString()
+                        else -> shortName
+                    },
                     longName = longName,
                     lastMessageTime = if (packetData.time != 0L) packetData.time else null,
                     lastMessageText = if (fromLocal) packetData.text else "$shortName: ${packetData.text}",
@@ -141,8 +152,11 @@ class ContactsViewModel(
                     draft = settings[contactKey]?.draft.orEmpty(),
                     isPinned = settings[contactKey]?.pinned == true,
                     // Keyless DM threads stay in the list (never hide a conversation) but are flagged: without a
-                    // public key the radio refuses to send, the same as an unmessagable node.
-                    isUnmessageable = (user.is_unmessagable ?: false) || (!toBroadcast && node.num !in keyedNodes),
+                    // public key the radio refuses to send, the same as an unmessagable node. A retired channel has
+                    // no slot at all, so nothing can be sent there either.
+                    isUnmessageable =
+                    isRetired || (user.is_unmessagable ?: false) || (!toBroadcast && node.num !in keyedNodes),
+                    isRetired = isRetired,
                     nodeColors =
                     if (!toBroadcast) {
                         node.colors
@@ -195,6 +209,9 @@ class ContactsViewModel(
 
     companion object {
         private const val KEY_COLLAPSED_SECTIONS = "collapsed_contact_sections"
+
+        /** A retired channel has no slot number to show as an avatar, so its name is abbreviated instead. */
+        private const val RETIRED_SHORT_NAME_LENGTH = 4
     }
 }
 
@@ -206,7 +223,10 @@ enum class ContactSection(val key: String) {
     DIRECT_MESSAGES("direct_messages"),
 }
 
-/** Channel/broadcast contact keys carry a leading channel-digit prefix (e.g. `"0^all"`); DM keys don't. */
+/**
+ * Channel/broadcast contact keys carry a leading channel-digit prefix (e.g. `"0^all"`); DM keys don't. A retired
+ * channel still ends `^all`, so it stays with the channels it used to be one of.
+ */
 fun Contact.section(): ContactSection =
     if (contactKey.getOrNull(1) == '^' || contactKey.endsWith("^all") || contactKey.endsWith("^broadcast")) {
         ContactSection.CHANNELS

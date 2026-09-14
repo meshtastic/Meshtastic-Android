@@ -23,12 +23,17 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.ContactKey
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.PortNum
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -128,6 +133,109 @@ class SwitchingChannelSetDataSourceTest {
             dataSource.channelSetFlow.first().settings.isEmpty(),
             "A freshly selected device must start with no channels, not device A's",
         )
+    }
+
+    /**
+     * The first reconcile has no baseline to diff against, so it captures one and moves nothing. Without this an
+     * upgrade would try to reconcile every stored conversation against a set it had never seen.
+     */
+    @Test
+    fun `the first reconcile only captures a baseline`() = runTest(testDispatcher) {
+        dataSource.updateChannelSettings(secondary(0, "primary"))
+        insertBroadcastPacket(channel = 0)
+
+        dataSource.reconcileConversations()
+
+        assertEquals(1, packetsOn(ContactKey.broadcast(0).value), "nothing to compare against, so nothing moves")
+        assertEquals(
+            "primary",
+            currentBaseline()?.settings?.single()?.name,
+            "the current set becomes the baseline for the next change",
+        )
+    }
+
+    /**
+     * The handshake streams channels one slot at a time, so reconciling on each of those writes would see a channel
+     * momentarily missing and retire a conversation that never went anywhere.
+     */
+    @Test
+    fun `per-slot writes do not reconcile`() = runTest(testDispatcher) {
+        dataSource.updateChannelSet(listOf(ChannelSettings(name = "A")), Config.LoRaConfig(use_preset = true))
+        insertBroadcastPacket(channel = 0)
+
+        dataSource.updateChannelSettings(secondary(0, "B"))
+
+        assertEquals(1, packetsOn(ContactKey.broadcast(0).value), "a mid-handshake slot write must not re-key")
+    }
+
+    /** A whole-set write is the app's own change, so it is safe — and necessary — to re-key immediately. */
+    @Test
+    fun `a whole-set write reconciles immediately`() = runTest(testDispatcher) {
+        val lora = Config.LoRaConfig(use_preset = true)
+        dataSource.updateChannelSet(listOf(ChannelSettings(name = "A")), lora)
+        insertBroadcastPacket(channel = 0)
+
+        dataSource.updateChannelSet(listOf(ChannelSettings(name = "B")), lora)
+
+        assertEquals(0, packetsOn(ContactKey.broadcast(0).value), "the slot has a new occupant")
+        assertEquals(1, dbProvider.currentDb.value.packetDao().getRetiredPacketContactKeys().size)
+    }
+
+    /**
+     * Replays the handshake's real order: the cached channel set is dropped, then the radio's LoRa config arrives as
+     * its own write, and only after that do the channels stream in slot by slot.
+     *
+     * The LoRa write must not reconcile. It lands while the settings list is still empty, so reconciling there would
+     * see every channel as deleted and archive every conversation on the device — on every single reconnect.
+     */
+    @Test
+    fun `the handshake lora write does not archive conversations`() = runTest(testDispatcher) {
+        val lora = Config.LoRaConfig(use_preset = true)
+        dataSource.updateChannelSet(listOf(ChannelSettings(name = "A")), lora)
+        insertBroadcastPacket(channel = 0)
+
+        dataSource.clearChannelSet()
+        dataSource.setLoraConfig(lora)
+
+        assertEquals(1, packetsOn(ContactKey.broadcast(0).value), "a mid-handshake lora write must not re-key")
+        assertEquals(
+            0,
+            dbProvider.currentDb.value.packetDao().getRetiredPacketContactKeys().size,
+            "nothing may be archived while the channel list is still empty",
+        )
+    }
+
+    /** The messages did not move because the handshake dropped the cached channel set, so the baseline must survive. */
+    @Test
+    fun `clearing the channel set keeps the reconciliation baseline`() = runTest(testDispatcher) {
+        dataSource.updateChannelSet(listOf(ChannelSettings(name = "A")), Config.LoRaConfig(use_preset = true))
+
+        dataSource.clearChannelSet()
+
+        assertTrue(dataSource.channelSetFlow.first().settings.isEmpty())
+        assertEquals("A", currentBaseline()?.settings?.single()?.name)
+    }
+
+    private suspend fun currentBaseline(): ChannelSet? =
+        dbProvider.currentDb.value.channelSetDao().get()?.lastReconciledChannelSet
+
+    private suspend fun packetsOn(contactKey: String): Int =
+        dbProvider.currentDb.value.packetDao().getPacketsForContact(contactKey).size
+
+    private suspend fun insertBroadcastPacket(channel: Int) {
+        dbProvider.currentDb.value
+            .packetDao()
+            .insert(
+                Packet(
+                    uuid = 0L,
+                    myNodeNum = 1,
+                    port_num = PortNum.TEXT_MESSAGE_APP.value,
+                    contact_key = ContactKey.broadcast(channel).value,
+                    received_time = 1L,
+                    read = false,
+                    data = DataPacket(to = NodeAddress.ID_BROADCAST, channel = channel, text = "hi"),
+                ),
+            )
     }
 
     /** Handshake fires overlapping updateChannelSettings as it streams channels; the mutex must not drop any. */

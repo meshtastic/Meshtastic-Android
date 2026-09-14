@@ -96,7 +96,9 @@ private fun ReactionEntity.belongsTo(packet: Packet): Boolean {
             channel == 0 &&
             status == MessageStatus.RECEIVED &&
             recipient !is NodeAddress.Broadcast
-    if (packetContact.channel != channel && !isLegacyInboundPkiChannel) return false
+    // A retired conversation has no live slot, so there is no index to compare against; it is frozen and receives no
+    // new packets, which leaves the addressing check below as sufficient scoping.
+    if (!packetContact.isRetired && packetContact.channel != channel && !isLegacyInboundPkiChannel) return false
 
     val senderIsLocal =
         status != MessageStatus.RECEIVED ||
@@ -179,6 +181,12 @@ data class ContactSettings(
     @ColumnInfo(name = "draft", defaultValue = "''") val draft: String = "",
     /** Sorts this conversation above its unpinned siblings within its own list section. */
     @ColumnInfo(name = "pinned", defaultValue = "0") val pinned: Boolean = false,
+    /**
+     * The conversation's own label, set only for a retired channel. A live channel is labelled from the radio's channel
+     * set by slot index, which stops working the moment the slot belongs to someone else — so the effective name is
+     * captured here when the conversation is retired. Empty for every live conversation.
+     */
+    @ColumnInfo(name = "display_name", defaultValue = "''") val displayName: String = "",
 ) {
     val isMuted
         get() = nowMillis <= muteUntil

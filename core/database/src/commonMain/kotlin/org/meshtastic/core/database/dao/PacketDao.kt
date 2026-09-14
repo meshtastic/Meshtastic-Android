@@ -33,10 +33,12 @@ import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.PacketEntity
 import org.meshtastic.core.database.entity.ReactionEntity
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
-import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.core.model.util.ChannelKeyChange
+import org.meshtastic.core.model.util.ConversationSlot
 import org.meshtastic.proto.MeshPacket
 
 @Suppress("TooManyFunctions", "LargeClass")
@@ -283,10 +285,16 @@ interface PacketDao {
     /**
      * Atomically claims one stable packet row for sending. A returned QUEUED packet means this call performed the
      * QUEUED -> ENROUTE transition and owns the send; any other returned status means another path already handled it.
+     *
+     * A packet whose conversation was archived while it sat in the queue is never claimed. Its stored channel index
+     * still points at the slot it was composed for, and something else occupies that slot now, so sending it would put
+     * the message on a channel the user never chose. This runs in the same transaction as the status transition, which
+     * is what makes the check hold against a reconciliation landing mid-send.
      */
     @Transaction
     suspend fun claimQueuedPacket(myNodeNum: Int, uuid: Long): Packet? {
-        val packet = getPacketByPersistedId(myNodeNum, uuid) ?: return null
+        val packet =
+            getPacketByPersistedId(myNodeNum, uuid)?.takeUnless { ContactKey(it.contact_key).isRetired } ?: return null
         if (packet.data.status == MessageStatus.QUEUED) {
             update(packet.copy(data = packet.data.copy(status = MessageStatus.ENROUTE)))
         }
@@ -296,7 +304,9 @@ interface PacketDao {
     /** Legacy claim used only by pre-upgrade WorkManager jobs whose mesh packet ID still resolves to one row. */
     @Transaction
     suspend fun claimQueuedPacketByPacketIdIfUnique(packetId: Int): Packet? {
-        val packet = findPacketsWithId(packetId).singleOrNull() ?: return null
+        val packet =
+            findPacketsWithId(packetId).singleOrNull()?.takeUnless { ContactKey(it.contact_key).isRetired }
+                ?: return null
         if (packet.data.status == MessageStatus.QUEUED) {
             update(packet.copy(data = packet.data.copy(status = MessageStatus.ENROUTE)))
         }
@@ -735,54 +745,118 @@ interface PacketDao {
     // endregion
 
     /**
-     * One-time migration: Remap all message DataPacket.channel indices to new mapping using PSK after a channel
-     * reorder. For each Packet (with port_num = 1), finds the old PSK then sets the channel index to the matching
-     * newSettings index. Skips if PSKs do not match or are missing.
+     * Re-keys conversations after the radio's channel set changed, applying a plan from `planChannelReconciliation`.
+     *
+     * Conversations are keyed by channel *index*, so a slot that changes occupant would otherwise show the previous
+     * channel's history under the new channel. Each change moves one conversation: to another slot (the channel was
+     * reordered), to a retired key (the channel is gone), or back from a retired key (the channel came back).
+     *
+     * Direct messages move with their slot but are never retired — a DM is a conversation with a node, not with a
+     * channel, and losing that history because the channel set changed would be worse than the misfiling this repairs.
+     *
+     * All the rows that will move are read before any is written, so a slot swap cannot double-move a conversation.
      */
     @Transaction
-    suspend fun migrateChannelsByPSK(oldSettings: List<ChannelSettings>, newSettings: List<ChannelSettings>) {
-        // Pre-calculate mapping from old index to new index
-        val indexMap =
-            oldSettings
-                .mapIndexed { oldIndex, oldChannel ->
-                    val pskMatches =
-                        newSettings.mapIndexedNotNull { index, channel ->
-                            if (channel.psk == oldChannel.psk) index to channel else null
-                        }
+    suspend fun applyChannelReconciliation(changes: List<ChannelKeyChange>) {
+        if (changes.isEmpty()) return
+        val liveMoves = changes.filter { it.from is ConversationSlot.Live && it.to is ConversationSlot.Live }
+        val retirements = changes.filter { it.to is ConversationSlot.Retired }
+        val reclaims = changes.filter { it.from is ConversationSlot.Retired }
 
-                    val newIndex =
-                        when {
-                            pskMatches.isEmpty() -> null
+        // Retirements first. A retirement frees its slot with a wholesale key rewrite, so any move that targets
+        // that slot has to land afterwards -- otherwise the moved conversation is sitting on the key the retirement
+        // is about to sweep, and both end up in the same archive.
+        for (change in retirements) {
+            val fromIndex = (change.from as ConversationSlot.Live).index
+            val token = (change.to as ConversationSlot.Retired).token
+            moveContact(
+                from = ContactKey.broadcast(fromIndex).value,
+                to = ContactKey.retiredBroadcast(token).value,
+                displayName = change.displayName,
+            )
+        }
 
-                            pskMatches.size == 1 -> pskMatches.first().first
+        applyLiveMoves(liveMoves)
 
-                            else -> {
-                                // Multiple matches with same PSK. Disambiguate by Name.
-                                val nameMatches = pskMatches.filter { it.second.name == oldChannel.name }
-                                if (nameMatches.size == 1) {
-                                    nameMatches.first().first
-                                } else {
-                                    // Still ambiguous. Prefer keeping same index.
-                                    pskMatches.find { it.first == oldIndex }?.first ?: pskMatches.first().first
-                                }
-                            }
-                        }
-                    oldIndex to newIndex
-                }
-                .toMap()
-
-        val allPackets = getAllUserPacketsForMigration()
-        for (packet in allPackets) {
-            val oldIndex = packet.data.channel
-            val newIndex = indexMap[oldIndex]
-            if (newIndex != null && oldIndex != newIndex) {
-                // Rebuild contact_key with the new index, keeping the rest unchanged
-                val oldKeySuffix = packet.contact_key.dropWhile { it.isDigit() }
-                val newContactKey = "$newIndex$oldKeySuffix"
-                update(packet.copy(contact_key = newContactKey, data = packet.data.copy(channel = newIndex)))
-            }
+        for (change in reclaims) {
+            val token = (change.from as ConversationSlot.Retired).token
+            val toIndex = (change.to as ConversationSlot.Live).index
+            // After the moves above, never before: a reclaimed reaction stamped with its new index would otherwise be
+            // swept up by a move out of that same index. Scoped by the retired conversation's packets, which still
+            // carry the retired key at this point.
+            retargetReactionsForContact(ContactKey.retiredBroadcast(token).value, toIndex)
+            moveContact(
+                from = ContactKey.retiredBroadcast(token).value,
+                to = ContactKey.broadcast(toIndex).value,
+                displayName = "",
+                toChannel = toIndex,
+            )
         }
     }
+
+    /**
+     * Every retired conversation currently holding messages, by its channel-identity token.
+     *
+     * Messages, not settings: deleting an archived conversation removes its packets but leaves its settings row, and
+     * counting that row as parked would resurrect the deleted conversation's mute and pin onto the fresh channel if
+     * that channel were ever re-added.
+     */
+    suspend fun getRetiredContactTokens(): Set<String> =
+        getRetiredPacketContactKeys().mapNotNullTo(mutableSetOf()) { ContactKey(it).retiredToken }
+
+    @Query("SELECT DISTINCT contact_key FROM packet WHERE contact_key LIKE '~%'")
+    suspend fun getRetiredPacketContactKeys(): List<String>
+
+    /**
+     * Moves one whole conversation to [to], carrying its settings (mute, pin, draft, read marker) with it.
+     *
+     * [displayName] labels a retired conversation, whose slot no longer names it; it is cleared on the way back.
+     * [toChannel], when given, restores the packets' channel index — a retired conversation keeps the index it was
+     * retired from so a later reclaim knows which reactions belong to it.
+     */
+    @Transaction
+    suspend fun moveContact(from: String, to: String, displayName: String, toChannel: Int? = null) {
+        val existing = getContactSettings(from)
+        if (existing != null) {
+            deleteContactSettings(from)
+            deleteContactSettings(to)
+            insertContactSettingsIgnore(listOf(existing.copy(contact_key = to, displayName = displayName)))
+        } else if (displayName.isNotEmpty()) {
+            insertContactSettingsIgnore(listOf(ContactSettings(contact_key = to, displayName = displayName)))
+        }
+        if (toChannel != null) {
+            for (packet in getPacketsForContact(from)) {
+                update(packet.copy(contact_key = to, data = packet.data.copy(channel = toChannel)))
+            }
+        } else {
+            retargetContactKey(from = from, to = to)
+        }
+    }
+
+    @Query("UPDATE packet SET contact_key = :to WHERE contact_key = :from")
+    suspend fun retargetContactKey(from: String, to: String)
+
+    @Query("SELECT * FROM packet WHERE contact_key = :contact")
+    suspend fun getPacketsForContact(contact: String): List<Packet>
+
+    @Query("DELETE FROM contact_settings WHERE contact_key = :contact")
+    suspend fun deleteContactSettings(contact: String)
+
+    @Query("UPDATE reactions SET channel = :to WHERE channel = :from")
+    suspend fun retargetReactionChannel(from: Int, to: Int)
+
+    /**
+     * Re-stamps the reactions belonging to one conversation's messages.
+     *
+     * Scoped through the conversation's own packet ids rather than by channel, because a retired conversation keeps the
+     * index it was retired from and a live channel may since have taken that index over. A mesh packet id is only
+     * unique per sender, so the node scope keeps another device's rows out of it.
+     */
+    @Suppress("MaxLineLength")
+    @Query(
+        "UPDATE reactions SET channel = :to WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node)) AND reply_id IN (SELECT packet_id FROM packet WHERE contact_key = :contact)",
+    )
+    suspend fun retargetReactionsForContact(contact: String, to: Int)
 
     @Query("SELECT * FROM packet WHERE port_num = 1")
     suspend fun getAllUserPacketsForMigration(): List<Packet>
@@ -1096,4 +1170,64 @@ fun shouldApplyOutgoingQueueStatus(current: MessageStatus?, status: MessageStatu
             current == MessageStatus.ENROUTE
 
     else -> false
+}
+
+/**
+ * Parks a reaction's channel out of range while conversations swap slots. No live slot or PKI channel can hold a
+ * negative index, so a staged row cannot be picked up by the second phase of another move.
+ */
+private const val REACTION_CHANNEL_STAGING_OFFSET = 1000
+
+/**
+ * Re-keys the conversations that only changed slot.
+ *
+ * Every affected row is read before any is written, so a 0<->1 swap cannot be applied twice, and reaction channels are
+ * staged through a value no live slot can hold for the same reason. Only text messages are re-keyed: every other port
+ * is queried by port_num rather than by contact key, so a stale key on a waypoint row is invisible and rewriting one
+ * costs a blob write for nothing.
+ *
+ * Callers must have applied retirements already - a move into a slot a retirement is about to sweep would be swept with
+ * it.
+ */
+private suspend fun PacketDao.applyLiveMoves(liveMoves: List<ChannelKeyChange>) {
+    val sourceIndices = liveMoves.map { (it.from as ConversationSlot.Live).index }.toSet()
+    val movingPackets =
+        if (sourceIndices.isEmpty()) {
+            emptyList()
+        } else {
+            getAllUserPacketsForMigration().filter { ContactKey(it.contact_key).channelOrNull in sourceIndices }
+        }
+    val moveByIndex =
+        liveMoves.associate { change ->
+            (change.from as ConversationSlot.Live).index to (change.to as ConversationSlot.Live).index
+        }
+
+    // Settings are re-keyed the same way: read every affected row, then rewrite, so a swap cannot land a
+    // conversation's mute or pin on the channel it traded places with.
+    val movingSettings =
+        getAllContactSettingsSnapshot().mapNotNull { settings ->
+            val key = ContactKey(settings.contact_key)
+            val newIndex = moveByIndex[key.channelOrNull] ?: return@mapNotNull null
+            settings to "$newIndex${key.addressString}"
+        }
+
+    for (packet in movingPackets) {
+        val newIndex = moveByIndex[ContactKey(packet.contact_key).channelOrNull] ?: continue
+        val suffix = ContactKey(packet.contact_key).addressString
+        update(packet.copy(contact_key = "$newIndex$suffix", data = packet.data.copy(channel = newIndex)))
+    }
+    for ((settings, _) in movingSettings) {
+        deleteContactSettings(settings.contact_key)
+    }
+    for ((_, newKey) in movingSettings) {
+        deleteContactSettings(newKey)
+    }
+    insertContactSettingsIgnore(movingSettings.map { (settings, newKey) -> settings.copy(contact_key = newKey) })
+    // Two-phase, via a value no live slot can hold: a direct 0->1 then 1->0 would collapse both onto one channel.
+    for ((from, _) in moveByIndex) {
+        retargetReactionChannel(from = from, to = from - REACTION_CHANNEL_STAGING_OFFSET)
+    }
+    for ((from, to) in moveByIndex) {
+        retargetReactionChannel(from = from - REACTION_CHANNEL_STAGING_OFFSET, to = to)
+    }
 }

@@ -52,7 +52,6 @@ import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRestartTracker
-import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
@@ -79,7 +78,6 @@ class ProfileRoundTripTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
-    private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val nodeRepository = FakeNodeRepository()
     private val locationRepository: LocationRepository = mock(MockMode.autofill)
@@ -124,7 +122,6 @@ class ProfileRoundTripTest {
             RadioConfigViewModel(
                 initialDestNum = null,
                 radioConfigRepository = radioConfigRepository,
-                packetRepository = packetRepository,
                 serviceRepository = serviceRepository,
                 nodeRepository = nodeRepository,
                 locationRepository = locationRepository,

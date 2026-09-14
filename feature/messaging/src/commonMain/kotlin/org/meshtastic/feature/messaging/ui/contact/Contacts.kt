@@ -571,8 +571,10 @@ private fun ContactListView(
             // rise to the top of their own section — Kotlin's sort is stable, so the order below is preserved within
             // each group. Pinning matters most for DMs, where an active conversation otherwise pushes others down;
             // channels already have a deterministic order, so pinning one just reorders that.
-            channelPart.sortedBy { ContactKey(it.contactKey).channel }.sortedByDescending { it.isPinned } to
-                dmPart.sortedByDescending { it.isPinned }
+            // A retired channel has no slot, so it sorts after every live one rather than ahead of the primary.
+            channelPart
+                .sortedBy { ContactKey(it.contactKey).channelOrNull ?: Int.MAX_VALUE }
+                .sortedByDescending { it.isPinned } to dmPart.sortedByDescending { it.isPinned }
         }
     val channelsTitle = stringResource(Res.string.channels)
     val dmTitle = stringResource(Res.string.direct_messages)
