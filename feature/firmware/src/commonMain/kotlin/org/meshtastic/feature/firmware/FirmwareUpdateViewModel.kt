@@ -230,9 +230,21 @@ class FirmwareUpdateViewModel(
 
     fun cancelUpdate() {
         updateJob?.cancel()
+        // A sequence parked at AwaitingFileSave has already finished its job, so cancelling that job releases
+        // nothing. Without this the maintenance hold survives until onCleared() and keeps transport recovery
+        // suppressed for the rest of the session.
+        endMaintenanceSequence()
         clearPendingLocalFirmwareFile()
         _state.value = FirmwareUpdateState.Idle
         checkForUpdates()
+    }
+
+    /** Drops a USB maintenance sequence and the hold it owns. Idempotent. */
+    private fun endMaintenanceSequence() {
+        pendingUsbPasses = emptyList()
+        destructiveWriteDone = false
+        maintenanceHardware = null
+        releaseMaintenanceLease()
     }
 
     @Suppress("LongMethod")
@@ -732,35 +744,45 @@ class FirmwareUpdateViewModel(
         val firmwareArtifact = currentState.uf2Artifact ?: return
 
         viewModelScope.launch {
-            try {
-                _state.value =
-                    FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_copying)))
-                fileHandler.copyToUri(firmwareArtifact, uri)
+            // The plain single-pass USB write happens here, not in FirmwareUpdateManager.startUpdate — that returned
+            // at AwaitingFileSave so the UI could open the file picker, releasing its lease. Without a hold of its own
+            // the copy, the flash and the detach wait run with no foreground service and no wake lock.
+            radioOperationLock.withOperation(RadioOperation.FirmwareUpdate) {
+                try {
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_copying)),
+                        )
+                    fileHandler.copyToUri(firmwareArtifact, uri)
 
-                _state.value =
-                    FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_flashing)))
-                withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { usbManager.deviceDetachFlow().first() }
-                    ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_flashing)),
+                        )
+                    withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { usbManager.deviceDetachFlow().first() }
+                        ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
 
-                // All writes are done once the device detached. Release before verifying: for serial,
-                // verification relies on SharedRadioInterfaceService's USB auto-recovery to reconnect the
-                // radio — which is exactly what the lock suppresses. (The release in finally is a no-op then.)
-                releaseMaintenanceLease()
-                verifyUpdateResult(originalDeviceAddress)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Logger.e(e) { "Error saving DFU file" }
-                _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
-            } finally {
-                cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
-                // This is also the terminal pass of a USB maintenance sequence when the FromVolume leg has already
-                // completed: the Prepared firmware artifact is saved through this pre-existing single-pass path
-                // rather than writeMaintenancePass/advancePastPass, so releasing here is the only place that
-                // sequence's lock gets freed. A no-op for a plain single-pass update, which never acquires the lock.
-                releaseMaintenanceLease()
-                pendingUsbPasses = emptyList()
-                maintenanceHardware = null
+                    // All writes are done once the device detached. Release before verifying: for serial,
+                    // verification relies on SharedRadioInterfaceService's USB auto-recovery to reconnect the
+                    // radio — which is exactly what the lock suppresses. (The release in finally is a no-op then.)
+                    releaseMaintenanceLease()
+                    verifyUpdateResult(originalDeviceAddress)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Logger.e(e) { "Error saving DFU file" }
+                    _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
+                } finally {
+                    cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                    // This is also the terminal pass of a USB maintenance sequence when the FromVolume leg has already
+                    // completed: the Prepared firmware artifact is saved through this pre-existing single-pass path
+                    // rather than writeMaintenancePass/advancePastPass, so releasing here is the only place that
+                    // sequence's lock gets freed. A no-op for a plain single-pass update, which never acquires the
+                    // lock.
+                    releaseMaintenanceLease()
+                    pendingUsbPasses = emptyList()
+                    maintenanceHardware = null
+                }
             }
         }
     }
