@@ -21,6 +21,7 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
+import dev.mokkery.matcher.capture.capture
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
@@ -49,6 +50,7 @@ import org.meshtastic.proto.StoreAndForward
 import org.meshtastic.proto.StoreForwardPlusPlus
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class StoreForwardPacketHandlerImplTest {
@@ -377,5 +379,62 @@ class StoreForwardPacketHandlerImplTest {
         // Should not throw — the handler catches the IOException from proto decoding
         handler.handleStoreAndForward(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
+    }
+
+    // ---------- Legacy S&F: original_id ----------
+
+    @Test
+    fun `handleStoreAndForward text adopts original_id as the packet id`() = testScope.runTest {
+        val captured = mutableListOf<DataPacket>()
+        every { dataHandler.rememberDataPacket(capture(captured), any(), any(), any()) } returns Unit
+        val sf =
+            StoreAndForward(
+                text = "Replayed by a router".encodeToByteArray().toByteString(),
+                rr = StoreAndForward.RequestResponse.ROUTER_TEXT_DIRECT,
+                original_id = 0x4321,
+            )
+        val packet = makeSfPacket(999, sf)
+        val dataPacket = makeDataPacket(999)
+
+        handler.handleStoreAndForward(packet, dataPacket, myNodeNum)
+        advanceUntilIdle()
+
+        assertEquals(0x4321, captured.single().id)
+    }
+
+    @Test
+    fun `handleStoreAndForward text keeps the header id when original_id is absent`() = testScope.runTest {
+        val captured = mutableListOf<DataPacket>()
+        every { dataHandler.rememberDataPacket(capture(captured), any(), any(), any()) } returns Unit
+        val sf =
+            StoreAndForward(
+                text = "Replayed by an older router".encodeToByteArray().toByteString(),
+                rr = StoreAndForward.RequestResponse.ROUTER_TEXT_DIRECT,
+            )
+        val packet = makeSfPacket(999, sf)
+        val dataPacket = makeDataPacket(999)
+
+        handler.handleStoreAndForward(packet, dataPacket, myNodeNum)
+        advanceUntilIdle()
+
+        assertEquals(dataPacket.id, captured.single().id)
+    }
+
+    @Test
+    fun `handleStoreAndForward stats ignores original_id`() = testScope.runTest {
+        val captured = mutableListOf<DataPacket>()
+        every { dataHandler.rememberDataPacket(capture(captured), any(), any(), any()) } returns Unit
+        val sf =
+            StoreAndForward(
+                stats = StoreAndForward.Statistics(messages_total = 100, messages_saved = 50, messages_max = 200),
+                original_id = 0x4321,
+            )
+        val packet = makeSfPacket(999, sf)
+        val dataPacket = makeDataPacket(999)
+
+        handler.handleStoreAndForward(packet, dataPacket, myNodeNum)
+        advanceUntilIdle()
+
+        assertEquals(dataPacket.id, captured.single().id)
     }
 }
