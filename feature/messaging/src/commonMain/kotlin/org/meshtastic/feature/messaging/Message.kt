@@ -67,7 +67,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
@@ -110,6 +110,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Send
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.createClipEntry
+import org.meshtastic.core.ui.util.isFromSoftKeyboard
 import org.meshtastic.feature.messaging.component.ActionModeTopBar
 import org.meshtastic.feature.messaging.component.DeleteMessageDialog
 import org.meshtastic.feature.messaging.component.FormattingToolbar
@@ -835,8 +836,13 @@ internal fun MessageInput(
             Modifier.fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 4.dp)
                 .onFocusChanged { isFocused = it.isFocused }
-                .onKeyEvent { keyEvent ->
-                    val isEnterNoShift = keyEvent.key == Key.Enter && !keyEvent.isShiftPressed
+                // Tunnel phase, not bubble: a multi-line field consumes Enter to insert its newline, so an
+                // Enter-to-send shortcut has to claim the event before the field ever sees it.
+                .onPreviewKeyEvent { keyEvent ->
+                    // Enter-to-send is a physical-keyboard shortcut, reached past with Shift. An on-screen keyboard
+                    // has no Shift, so its Enter is left alone to insert the newline it is labelled with.
+                    val isEnterNoShift =
+                        keyEvent.key == Key.Enter && !keyEvent.isShiftPressed && !keyEvent.isFromSoftKeyboard()
                     if (isEnterNoShift) {
                         if (keyEvent.type == KeyEventType.KeyUp) onSendAction()
                         true // consume both KeyDown and KeyUp to prevent newline insertion
@@ -851,9 +857,10 @@ internal fun MessageInput(
             shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
             isError = isOverLimit,
             placeholder = { Text(stringResource(Res.string.type_a_message)) },
+            // A multi-line field must keep its Enter key: Compose only sets IME_FLAG_NO_ENTER_ACTION for
+            // ImeAction.Default, and without it an IME may swap Enter for the action, leaving no way to type a newline.
             keyboardOptions =
-            KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
-            onKeyboardAction = { onSendAction() },
+            KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Default),
             supportingText = {
                 // The counter is only useful as the limit approaches. Showing 0/200 before a character is typed is
                 // chrome that every chat client has learned to hide.
