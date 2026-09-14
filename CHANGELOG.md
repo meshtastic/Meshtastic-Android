@@ -7,13 +7,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.2-internal.11)
-Changes since [`v2.8.2-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2-open.1):
+### Unreleased (not yet in any build)
 
 #### 🛠️ Fixes
-* fix(node): revert the time frame selector to a segmented row by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7142
+* fix(messaging): keep the Enter key in the message composer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7155
 
-### Open Beta (v2.8.2-open.1)
+### Open Beta (v2.8.2-open.2)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
 
 #### 🏗️ Features
@@ -98,6 +97,7 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(settings): allow all available spread factors by @gargomoma in https://github.com/meshtastic/Meshtastic-Android/pull/7119
 * fix(nfc): write to tags that have never been NDEF-formatted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7123
 * fix(node): stop presenting MQTT-only nodes as unheard on the current LoRa by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7138
+* fix(node): revert the time frame selector to a segmented row by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7142
 #### 📝 Other Changes
 * refactor(settings): edit the status message on the user screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6951
 * refactor(map): retire the maps-utils workarounds its 5.1 fixes made stale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7046
