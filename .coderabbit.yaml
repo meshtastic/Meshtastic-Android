@@ -125,6 +125,17 @@ reviews:
         One problem per comment. Cite the exact line, symbol, or condition. Give a fix direction — a
         snippet when the fix is not obvious. Never restate a finding already raised in an existing
         review thread.
+
+
+        Scope. If a finding needs work beyond what this diff set out to do — a schema migration, a new
+        column, a change to a subsystem the PR only touches incidentally — say so and recommend a
+        follow-up issue instead of a change request. Prefer the smallest correct fix over the most
+        thorough one on a PR that is already several rounds deep.
+
+
+        Settled decisions. Do not re-raise a concern that an existing thread on this PR already resolved,
+        and do not ask for a change to be reverted that was made in response to an earlier finding of
+        yours without saying that is what you are proposing and why the trade-off changed.
     - path: "**/commonMain/**"
       instructions: >
         KMP common code. Flag any import of java.* or android.* — these break non-Android targets. Expect KMP equivalents instead (Okio, kotlinx Mutex/atomicfu, NumberFormatter.format() for floats).
