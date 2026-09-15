@@ -74,7 +74,7 @@ git push --force-with-lease
 Never use plain `--force`. Always `--force-with-lease` to avoid clobbering collaborator pushes.
 
 ## Post-Branch Checklist
-- [ ] Branch name follows conventional prefix.
+- [ ] Branch name carries a conventional prefix, or is a spec-driven name (numeric or `YYYYMMDD-HHMMSS-`) per Branch Naming above.
 - [ ] `ANDROID_HOME` exported (see AGENTS.md workspace bootstrap).
 - [ ] Optional: run `./gradlew assembleDebug` once to catch environment regressions before editing.
 

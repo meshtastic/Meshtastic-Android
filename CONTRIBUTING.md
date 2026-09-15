@@ -77,6 +77,7 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
 - Ensure your branch is up to date with the latest `main` branch before submitting a PR.
 - Provide a meaningful title and description for your PR.
 - Include information on how to test and/or replicate if it is not obvious.
+- Include logs where they show the behavior, as a fenced block rather than a screenshot of text. For UI changes see Screenshots below.
 - Be responsive to feedback and make requested changes promptly.
 - Squash commits if requested by a maintainer.
 
