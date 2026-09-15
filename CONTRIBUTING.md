@@ -72,6 +72,7 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
     - `refactor/` — code structure changes
     - `test/` — test additions or fixes
     - `deps/` — dependency updates
+- Spec-driven work takes no prefix from that list: a numeric spec prefix (`005-tak-v2-protocol`) or the timestamp form `YYYYMMDD-HHMMSS-feature-name` created by `/speckit.git.feature`. Both are valid.
 - `release/*` and `automation/*` are reserved for maintainers and automated workflows.
 - Ensure your branch is up to date with the latest `main` branch before submitting a PR.
 - Provide a meaningful title and description for your PR.

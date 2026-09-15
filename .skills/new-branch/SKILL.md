@@ -36,7 +36,7 @@ git --no-pager log -1 --oneline
 Use conventional-commit style prefixes. `.specify/memory/constitution.md`
 (Branch naming) is the canonical list **of prefixes**; `AGENTS.md` remains
 authoritative for rules, architecture and workflow. `CONTRIBUTING.md` →
-Pull Requests carries the same set contributor-facing. The full set:
+Pull Requests carries the same set contributor-facing:
 
 | Prefix | Use for |
 | :--- | :--- |
@@ -49,6 +49,11 @@ Pull Requests carries the same set contributor-facing. The full set:
 | `ci/<scope>` | CI workflow changes |
 | `test/<scope>` | Test additions or fixes |
 | `deps/<scope>` | Dependency updates |
+
+Spec-driven work is the exception and takes no prefix from that table: a
+numeric spec prefix (`005-tak-v2-protocol`) or the timestamp form
+`YYYYMMDD-HHMMSS-feature-name` that `/speckit.git.feature` creates. Both are
+valid — don't reject one.
 
 `release/*` and `automation/*` are reserved for maintainers and automated
 workflows.
