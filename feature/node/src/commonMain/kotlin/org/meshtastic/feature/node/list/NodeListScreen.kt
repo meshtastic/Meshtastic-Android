@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -148,7 +147,9 @@ fun NodeListScreen(
     val deviceImageUrls by viewModel.deviceImageUrls.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
-    val listState = rememberLazyListState(cacheWindow = LazyLayoutCacheWindow(ahead = 300.dp, behind = 100.dp))
+    // No cache window here: this pane renders inside ThreePaneScaffold's LookaheadScope, where a
+    // prefetched item can reach the main placement pass before the lookahead pass has measured it.
+    val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(scrollToTopEvents) {
