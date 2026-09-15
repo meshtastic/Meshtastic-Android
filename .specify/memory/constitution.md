@@ -1,6 +1,29 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 1.3.7 → 1.4.0
+Modified principles:
+  - V. Design Standards Compliance: the canonical reference is now the standards
+    index (github.com/meshtastic/design/tree/master/standards) rather than the raw
+    URL for meshtastic_design_standards_latest.md, which returns 35 bytes with HTTP
+    200 because GitHub serves a symlink as its target's filename.
+    Adds a requirement: contributors and agents MUST NOT fetch that symlink over
+    HTTP. MINOR rather than PATCH because a new prohibition is materially expanded
+    guidance, not a clarification.
+Added sections: none
+Removed sections: none
+Templates requiring updates:
+  - .specify/templates/spec-template.md ✅ updated (same raw URL in the UI checklist)
+  - .specify/templates/plan-template.md ✅ no reference
+  - .specify/templates/tasks-template.md ✅ no reference
+  - .specify/templates/checklist-template.md ✅ no change (CHK005 names no URL)
+Downstream references (Amendment Procedure step 3):
+  - .skills/speckit/SKILL.md ✅ updated (declared constitution version)
+  - AGENTS.md ✅ no change (names no URL; principle count still 7)
+Follow-up TODOs: none
+
+SYNC IMPACT REPORT
+==================
 Version change: 1.3.5 → 1.3.6
 Modified principles:
   - VI. Documentation Freshness: the verification-tooling block gains
@@ -123,8 +146,12 @@ times:
 
 All user-facing UI MUST conform to the Meshtastic Client Design Standards:
 
-- The canonical reference lives at:
-  `https://raw.githubusercontent.com/meshtastic/design/refs/heads/master/standards/meshtastic_design_standards_latest.md`
+- The canonical reference is the standards index, which always names the current
+  version: <https://github.com/meshtastic/design/tree/master/standards>
+- Contributors and agents MUST NOT fetch
+  `meshtastic_design_standards_latest.md` over HTTP. It is a symlink, and GitHub
+  serves a symlink as its target's filename, so the blob and raw views return 35
+  bytes with HTTP 200 and no error.
 - New screens and significant UI changes (any screen with ≥3 composables or a new
   navigation destination) MUST be reviewed against the design standards before merge.
 - Deviations from the design standards require explicit justification in the PR description
@@ -263,4 +290,4 @@ summary derived from this constitution. The files `.github/copilot-instructions.
 Constitution Check confirming all seven principles were evaluated. Complexity violations
 require explicit justification in the Complexity Tracking table of the plan document.
 
-**Version**: 1.3.6 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-08-30
+**Version**: 1.4.0 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-09-15
