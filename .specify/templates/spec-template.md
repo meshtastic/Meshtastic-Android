@@ -158,7 +158,7 @@
   deviations with rationale.
 -->
 
-- [ ] New screens reviewed against [design standards](https://raw.githubusercontent.com/meshtastic/design/refs/heads/master/standards/meshtastic_design_standards_latest.md)
+- [ ] New screens reviewed against [design standards](https://github.com/meshtastic/design/tree/master/standards)
 - [ ] M3 component selection verified (e.g., `SwitchPreference` not raw `Switch`)
 - [ ] Accessibility: TalkBack semantics, touch targets, color-independent info
 - [ ] Typography: `titleMediumEmphasized` for emphasis, M3 scale for hierarchy

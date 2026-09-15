@@ -4,7 +4,7 @@
 Android-specific guidance for applying the Meshtastic design standards. All visual rules, color palettes, accessibility requirements, and cross-platform conventions live upstream.
 
 > **Source of truth:** [`meshtastic/design/standards/`](https://github.com/meshtastic/design/tree/master/standards)
-> Read `meshtastic_design_standards_latest.md` (a pointer to the current versioned spec — `meshtastic_design_standards_v1_4.md` at time of writing) for the full spec (colors, M3 mapping, accessibility, units/locale, agent checklist).
+> That index names the current version; open it from there for the full spec (colors, M3 mapping, accessibility, units/locale, agent checklist). Don't fetch `meshtastic_design_standards_latest.md` over HTTP — it is a symlink, and GitHub returns its target's filename, 35 bytes, with HTTP 200.
 > If this skill diverges from upstream, **upstream wins**.
 
 ## 1. How to Use the Standards
