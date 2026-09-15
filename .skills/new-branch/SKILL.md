@@ -33,8 +33,10 @@ git --no-pager log -1 --oneline
 ```
 
 ## Branch Naming
-Use conventional-commit style prefixes that match the PR title convention in
-`.github/copilot-pull-request-instructions.md`:
+Use conventional-commit style prefixes. The canonical list is
+`.specify/memory/constitution.md` (Branch naming), which supersedes other
+agent instructions; `CONTRIBUTING.md` → Pull Requests carries the same set
+contributor-facing:
 
 | Prefix | Use for |
 | :--- | :--- |
