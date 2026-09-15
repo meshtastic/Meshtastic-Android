@@ -176,6 +176,14 @@ class FirmwareUpdateViewModel(
     private var maintenanceHardware: DeviceHardware? = null
 
     /**
+     * The in-flight USB maintenance pass, which runs on its own job rather than [updateJob].
+     *
+     * Tracked so cancellation can stop the write before the sequence's hold on the radio is handed back — releasing
+     * while the write is still running would re-enable transport recovery mid-write.
+     */
+    private var maintenanceWriteJob: Job? = null
+
+    /**
      * True once an erase or bootloader image has been written, which is the point the device stops having a working
      * application. From then on failures re-offer the pass instead of surfacing a dead end.
      */
@@ -230,10 +238,17 @@ class FirmwareUpdateViewModel(
 
     fun cancelUpdate() {
         updateJob?.cancel()
-        // A sequence parked at AwaitingFileSave has already finished its job, so cancelling that job releases
-        // nothing. Without this the maintenance hold survives until onCleared() and keeps transport recovery
-        // suppressed for the rest of the session.
-        endMaintenanceSequence()
+        val write = maintenanceWriteJob
+        if (write?.isActive == true) {
+            // A pass is mid-write on its own job, which updateJob?.cancel() does not reach. Cancelling it is what
+            // stops the write; its own cleanup releases the hold. Releasing here would re-enable transport recovery
+            // while the USB write is still going.
+            write.cancel()
+        } else {
+            // Nothing is writing — typically parked at AwaitingFileSave, where the job has already completed, so
+            // cancelling it releases nothing and the hold would otherwise survive until onCleared().
+            endMaintenanceSequence()
+        }
         clearPendingLocalFirmwareFile()
         _state.value = FirmwareUpdateState.Idle
         checkForUpdates()
@@ -241,6 +256,7 @@ class FirmwareUpdateViewModel(
 
     /** Drops a USB maintenance sequence and the hold it owns. Idempotent. */
     private fun endMaintenanceSequence() {
+        maintenanceWriteJob = null
         pendingUsbPasses = emptyList()
         destructiveWriteDone = false
         maintenanceHardware = null
@@ -661,20 +677,25 @@ class FirmwareUpdateViewModel(
         if (pass.step != currentState.step) return
         val hardware = maintenanceHardware ?: return
 
-        viewModelScope.launch {
-            try {
-                // Capture the ports present before the write so the erase image's port can be told from pre-existing
-                // ones.
-                val portsBefore = usbManager.serialPortKeys()
-                val result = usbPassWriter(portsBefore).write(pass, treeUri, hardware) { _state.value = it }
-                handlePassResult(pass, result)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.e(e) { "Writing ${pass.step} failed" }
-                reofferOrFail(pass, UiText.Resource(Res.string.firmware_update_failed))
+        maintenanceWriteJob =
+            viewModelScope.launch {
+                try {
+                    // Capture the ports present before the write so the erase image's port can be told from
+                    // pre-existing
+                    // ones.
+                    val portsBefore = usbManager.serialPortKeys()
+                    val result = usbPassWriter(portsBefore).write(pass, treeUri, hardware) { _state.value = it }
+                    handlePassResult(pass, result)
+                } catch (e: CancellationException) {
+                    // The write has stopped, so the device can be handed back. Doing this here rather than in
+                    // cancelUpdate() is the point: the sequence keeps the radio until the write actually ends.
+                    endMaintenanceSequence()
+                    throw e
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    Logger.e(e) { "Writing ${pass.step} failed" }
+                    reofferOrFail(pass, UiText.Resource(Res.string.firmware_update_failed))
+                }
             }
-        }
     }
 
     private suspend fun handlePassResult(pass: UsbFileSavePass, result: UsbPassResult) = when (result) {
