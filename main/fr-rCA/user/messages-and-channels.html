@@ -61,6 +61,23 @@
 
 <p>Tapping an existing channel opens the same editor, where you can change the name, the PSK, MQTT uplink and downlink, and position precision. Every edit on this screen — adding, editing, deleting, or dragging a channel into a new order — waits on <strong>Send</strong> the same way.</p>
 
+<h3 id="archived-channels">Archived Channels</h3>
+
+<p>A conversation belongs to the channel it was held on, not to the slot that channel occupied. When a channel leaves your radio — you scan a different channel QR, replace a channel’s key, or switch the modem preset — its conversation is <strong>archived</strong> rather than deleted or merged into whatever takes the slot.</p>
+
+<p>An archived conversation:</p>
+
+<ul>
+  <li>stays in the <strong>Channels</strong> list under the name the channel had, below the channels currently on your radio, marked with a history icon;</li>
+  <li>keeps its full message history, searchable as usual;</li>
+  <li>is read-only — you cannot send, reply, or react, because the channel is no longer on the radio to send on, and it is not offered as a share target;</li>
+  <li>comes back automatically if you re-add that exact channel, taking its messages back to the live slot.</li>
+</ul>
+
+<p>Changing the modem preset archives the channel too: the preset is part of a default channel’s identity, so <strong>LongFast</strong> and <strong>MediumFast</strong> are different channels even though neither the name nor the key changed. Changing only the region does not archive anything.</p>
+
+<p>To remove an archived conversation for good, long-press it in the conversation list and delete it.</p>
+
 <h2 id="messages-directs">Messages directs</h2>
 
 <p>Direct messages (DMs) go to one specific node. When both radios hold each other’s public keys, your radio encrypts the message to that node’s public key, so no one else on the mesh can read it — not even nodes that share your channel.</p>
