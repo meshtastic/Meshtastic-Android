@@ -37,11 +37,16 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 /** Configure base Kotlin with Android options */
 internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     val compileSdkVersion = configProperties.getProperty("COMPILE_SDK").toInt()
+    val compileSdkMinorVersion = configProperties.getProperty("COMPILE_SDK_MINOR")?.toIntOrNull()
     val minSdkVersion = configProperties.getProperty("MIN_SDK").toInt()
     val targetSdkVersion = configProperties.getProperty("TARGET_SDK").toInt()
 
     commonExtension.apply {
+        // Property form, not the `compileSdk { release(..) }` spec: the spec sets only the version
+        // object, leaving the Int property other plugins read at configuration time unset, and
+        // com.android.compose.screenshot then rejects the module as not specifying compileSdk.
         compileSdk = compileSdkVersion
+        compileSdkMinor = compileSdkMinorVersion
 
         defaultConfig.minSdk = minSdkVersion
         defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -109,7 +114,14 @@ internal fun Project.configureKotlinMultiplatform() {
         // Configure the Android target if the plugin is applied
         pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
             extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
-                compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+                // `release(..)` returns a CompileSdkVersion rather than applying one, so it has to be
+                // assigned to `version`; calling it bare leaves compileSdk unset with no compile error.
+                compileSdk {
+                    version =
+                        release(configProperties.getProperty("COMPILE_SDK").toInt()) {
+                            minorApiLevel = configProperties.getProperty("COMPILE_SDK_MINOR")?.toIntOrNull()
+                        }
+                }
                 minSdk = configProperties.getProperty("MIN_SDK").toInt()
 
                 // Default: disable Android resources for most KMP modules.

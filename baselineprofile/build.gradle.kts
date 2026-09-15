@@ -24,6 +24,7 @@ plugins {
 android {
     namespace = "org.meshtastic.baselineprofile"
     compileSdk = 37
+    compileSdkMinor = 2
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
