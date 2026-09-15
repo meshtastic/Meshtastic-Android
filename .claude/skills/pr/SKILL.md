@@ -1,6 +1,6 @@
 ---
 name: pr
-description: Push the current branch and open a draft PR for Meshtastic-Android the repo way — baseline verified first, body drafted per CONTRIBUTING.md (WHY-first, categorized changes), screenshots embedded via commit-pinned raw URLs. Use whenever work is ready to go up as a PR.
+description: Push the current branch and open a draft PR for Meshtastic-Android the repo way — baseline verified first, body drafted per CONTRIBUTING.md (WHY-first, categorized changes, screenshots for UI work). Use whenever work is ready to go up as a PR.
 disable-model-invocation: true
 ---
 
@@ -17,7 +17,7 @@ Opens a PR the way this repo expects. The SOP lives in `CONTRIBUTING.md` → **P
 ## 2. Body
 Draft per `CONTRIBUTING.md` → Pull Requests → **Writing the description** (WHY-first summary, then changes under the 🌟 New Features / 🛠️ Refactoring & Architecture / 🐛 Bug Fixes / 🧹 Chores categories that apply, **Testing Performed** section when tests were added/changed).
 
-**Screenshots** (UI changes want them): commit the PNGs on the branch, push, then embed with commit-pinned raw URLs so they render in the PR body immediately:
+**Screenshots** (UI changes want them): `CONTRIBUTING.md` → Pull Requests → Screenshots owns the policy, and it allows either a GitHub-hosted upload or a committed image. When committing one, push it first and embed it by commit-pinned raw URL so it renders immediately:
 ```
 https://raw.githubusercontent.com/<owner>/<repo>/<full-commit-sha>/<path/to/img.png>
 ```

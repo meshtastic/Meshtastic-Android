@@ -33,10 +33,10 @@ git --no-pager log -1 --oneline
 ```
 
 ## Branch Naming
-Use conventional-commit style prefixes. The canonical list is
-`.specify/memory/constitution.md` (Branch naming), which supersedes other
-agent instructions; `CONTRIBUTING.md` → Pull Requests carries the same set
-contributor-facing:
+Use conventional-commit style prefixes. `.specify/memory/constitution.md`
+(Branch naming) is the canonical list **of prefixes**; `AGENTS.md` remains
+authoritative for rules, architecture and workflow. `CONTRIBUTING.md` →
+Pull Requests carries the same set contributor-facing. The full set:
 
 | Prefix | Use for |
 | :--- | :--- |
@@ -45,6 +45,13 @@ contributor-facing:
 | `refactor/<scope>` | Code structure changes, no behavior change |
 | `chore/<scope>` | Tooling, deps, CI, cleanup |
 | `docs/<scope>` | Documentation only |
+| `build/<scope>` | Build system changes |
+| `ci/<scope>` | CI workflow changes |
+| `test/<scope>` | Test additions or fixes |
+| `deps/<scope>` | Dependency updates |
+
+`release/*` and `automation/*` are reserved for maintainers and automated
+workflows.
 
 Keep the slug short and kebab-case, e.g. `fix/r8-animation-release`, `chore/koin-application-migration`.
 

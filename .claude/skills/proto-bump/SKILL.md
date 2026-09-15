@@ -81,7 +81,7 @@ New proto versions usually add fields/messages the app doesn't consume yet. Diff
 
 ## PR + guardrails
 
-- Write the PR per `CONTRIBUTING.md` → Pull Requests: WHY-first; 🛠️ (or 🌟 if it unlocks a user-facing feature); link the upstream release notes (real URL only); "Testing Performed" = the gradle-runner run including `allTests`.
+- Write the PR per `CONTRIBUTING.md` → Pull Requests: WHY-first; 🧹 Chores for a routine catalog bump, since that is where `CONTRIBUTING.md` puts dependencies — 🛠️ only when the bump carries call-site adaptations of its own, 🌟 if it unlocks a user-facing feature; link the upstream release notes (real URL only); "Testing Performed" = the gradle-runner run including `allTests`.
 - Never hand-edit or vendor generated proto — this repo consumes the Maven artifact only.
 - Keep the change minimal: a bump PR is a catalog edit + the force block (Mode B) + necessary call-site adaptations, not a feature.
 - Branch off `main` unless told otherwise.
