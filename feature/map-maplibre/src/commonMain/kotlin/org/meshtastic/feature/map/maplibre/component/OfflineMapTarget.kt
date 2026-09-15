@@ -29,6 +29,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -53,7 +54,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.map_cache_manager
 import org.meshtastic.core.resources.map_cache_megabytes
-import org.meshtastic.core.resources.map_cache_size
 import org.meshtastic.core.resources.map_cache_tiles
 import org.meshtastic.core.resources.map_download_status_complete
 import org.meshtastic.core.resources.map_download_status_downloading
@@ -91,23 +91,18 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
     // the one every map here uses, so its packs are the ones the user sees on the map.
     val manager = DefaultMapRuntime.instance.offlineManager
     val scope = rememberCoroutineScope()
-    val packs = manager.packs
+    val packs by manager.packs.collectAsState()
     // A pack definition now carries the pixel ratio it was downloaded at, so the tiles match this display.
     val pixelRatio = LocalDensity.current.density
 
     val range = target.zoomRange()
     val estimate = target.bounds()?.tileCount(range.first, range.last) ?: 0L
-    val storedTiles =
-        packs.sumOf { pack -> (pack.downloadProgress as? DownloadProgress.Healthy)?.completedTileCount ?: 0L }
-    // Resource bytes, not tile bytes: a pack also holds the style, its glyphs and its sprites, and all of it occupies
-    // the same disk the user is being asked about.
-    val storedBytes =
-        packs.sumOf { pack -> (pack.downloadProgress as? DownloadProgress.Healthy)?.completedResourceBytes ?: 0L }
+    val usage = rememberCacheUsage(packs)
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(text = stringResource(Res.string.map_cache_manager), style = MaterialTheme.typography.titleMedium)
 
-        CacheUsageLine(storedBytes = storedBytes, storedTiles = storedTiles)
+        CacheUsageLine(storedBytes = usage.bytes, storedTiles = usage.tiles)
         DownloadEstimateLines(estimate = estimate, range = range)
 
         Button(
@@ -141,27 +136,6 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
 }
 
 /**
- * How much disk the downloaded packs occupy.
- *
- * The OSMdroid map reported this in MB, which is the number that answers "is this filling my phone". No capacity beside
- * it: OSMdroid had one bounded SQLite cache, whereas MapLibre has explicitly downloaded packs the user deletes by hand
- * plus a separate ambient cache, and quoting a ceiling that governs neither would be a lie.
- */
-@Composable
-private fun CacheUsageLine(storedBytes: Long, storedTiles: Long) {
-    Text(
-        text =
-        stringResource(Res.string.map_cache_size) +
-            ": " +
-            stringResource(Res.string.map_cache_megabytes, storedBytes.megabytes()) +
-            " · " +
-            stringResource(Res.string.map_cache_tiles, storedTiles.toInt()),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
-
-/**
  * What the next download will cost, before committing to it.
  *
  * The OSMdroid map showed this, and it matters more than it looks: the same two extra zoom levels are a couple of
@@ -191,7 +165,7 @@ private fun OfflinePackRow(
     onToggle: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val progress = pack.downloadProgress
+    val progress = pack.downloadProgress.collectAsState().value
     val bounds = (pack.definition as? OfflinePackDefinition.TilePyramid)?.bounds
 
     Row(
