@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core-model</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.model</a><span class="delimiter">/</span><span class="current">ContactKey</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Contact</span><wbr><span><span>Key</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.jvm/-jvm-inline/index.html"><span class="token annotation builtin">JvmInline</span></a></div></div><span class="token keyword">value </span><span class="token keyword">class </span><a href="index.html">ContactKey</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/model/src/commonMain/kotlin/org/meshtastic/core/model/NodeAddress.kt#L97">source</a>)</span></span></div><p class="paragraph">Type-safe wrapper for contact key strings (channel index + node address).</p><p class="paragraph">Contact keys are persisted as strings in the format <code class="lang-kotlin">"&lt;channel&gt;&lt;nodeId&gt;"</code> (e.g. <code class="lang-kotlin">"0^all"</code>, <code class="lang-kotlin">"1!a1b2c3d4"</code>).</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.jvm/-jvm-inline/index.html"><span class="token annotation builtin">JvmInline</span></a></div></div><span class="token keyword">value </span><span class="token keyword">class </span><a href="index.html">ContactKey</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/model/src/commonMain/kotlin/org/meshtastic/core/model/NodeAddress.kt#L101">source</a>)</span></span></div><p class="paragraph">Type-safe wrapper for contact key strings (channel index + node address).</p><p class="paragraph">Contact keys are persisted as strings in the format <code class="lang-kotlin">"&lt;channel&gt;&lt;nodeId&gt;"</code> (e.g. <code class="lang-kotlin">"0^all"</code>, <code class="lang-kotlin">"1!a1b2c3d4"</code>).</p><p class="paragraph">A broadcast conversation whose channel is no longer configured is <i>retired</i> rather than deleted, and takes the form <code class="lang-kotlin">"~&lt;token&gt;^all"</code> — see <a href="-companion/retired-broadcast.html">retiredBroadcast</a>. A retired key has no <a href="channel-or-null.html">channelOrNull</a>, which is what makes every "which live slot is this?" site treat it as having none without needing to know the form exists.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -163,7 +163,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="address-string.html">addressString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The node address portion: everything after the channel digit, or the whole key when there is no channel prefix. Empty if the key is empty.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="address-string.html">addressString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The node address portion: everything after the channel digit (or the retired token), or the whole key when there is no prefix at all. Empty if the key is empty.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -193,7 +193,37 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="channel-or-null.html">channelOrNull</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The channel index if the key carries a leading channel digit, or <code class="lang-kotlin">null</code> for a legacy unprefixed direct-message key. Callers that must distinguish "channel 0" from "no channel prefix" (e.g. PKI vs legacy DM routing) need this rather than <a href="channel.html">channel</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="channel-or-null.html">channelOrNull</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The channel index if the key carries a leading channel digit, or <code class="lang-kotlin">null</code> for a legacy unprefixed direct-message key or a retired conversation. Callers that must distinguish "channel 0" from "no channel prefix" (e.g. PKI vs legacy DM routing) need this rather than <a href="channel.html">channel</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1297974408%2FProperties%2F394437785" anchor-label="isRetired" id="1297974408%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-retired.html"><span>is</span><wbr><span><span>Retired</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1297974408%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="is-retired.html">isRetired</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True when this conversation's channel is no longer configured on the radio and its history is read-only.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-291285341%2FProperties%2F394437785" anchor-label="retiredToken" id="-291285341%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="retired-token.html"><span>retired</span><wbr><span><span>Token</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-291285341%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="retired-token.html">retiredToken</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The channel-identity token a retired conversation is parked under, or null when this key is live.</p></div></div></div>
                 </div>
               </div>
             </div>

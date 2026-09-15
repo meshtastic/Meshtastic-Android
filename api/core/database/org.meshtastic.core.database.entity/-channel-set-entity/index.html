@@ -93,24 +93,24 @@
   <div class="breadcrumbs"><a href="../../index.html">core-database</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.database.entity</a><span class="delimiter">/</span><span class="current">ChannelSetEntity</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Channel</span><wbr><span>Set</span><wbr><span><span>Entity</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">ChannelSetEntity</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>SINGLETON_ID<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>channelSet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/database/src/commonMain/kotlin/org/meshtastic/core/database/entity/ChannelSetEntity.kt#L34">source</a>)</span></span></div><p class="paragraph">The connected device's channel set, stored per-device (one row per Room database).</p><p class="paragraph">The channel set was historically a single <strong>global</strong> DataStore (<code class="lang-kotlin">channel_set.pb</code>) while messages are per-device, so switching between devices rendered one device's messages against another device's channels — the same channel then appeared multiple times in the conversation list (#4623). Storing it here, in the per-device database, keeps it in lockstep with the messages it labels. The whole <span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span> proto (settings + lora_config) is persisted as one row so semantics match the old whole-proto DataStore exactly.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">ChannelSetEntity</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>SINGLETON_ID<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>channelSet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>lastReconciled<span class="token operator">: </span><span data-unresolved-link="okio/ByteString///PointingToDeclaration/">ByteString</span><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/database/src/commonMain/kotlin/org/meshtastic/core/database/entity/ChannelSetEntity.kt#L38">source</a>)</span></span></div><p class="paragraph">The connected device's channel set, stored per-device (one row per Room database).</p><p class="paragraph">The channel set was historically a single <strong>global</strong> DataStore (<code class="lang-kotlin">channel_set.pb</code>) while messages are per-device, so switching between devices rendered one device's messages against another device's channels — the same channel then appeared multiple times in the conversation list (#4623). Storing it here, in the per-device database, keeps it in lockstep with the messages it labels. The whole <span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span> proto (settings + lora_config) is persisted as one row so semantics match the old whole-proto DataStore exactly.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="-684536556%2FConstructors%2F-475033937" anchor-label="ChannelSetEntity" id="-684536556%2FConstructors%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+        <div class="table"><a data-name="-2032321903%2FConstructors%2F-475033937" anchor-label="ChannelSetEntity" id="-2032321903%2FConstructors%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-channel-set-entity.html"><span>Channel</span><wbr><span>Set</span><wbr><span><span>Entity</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-684536556%2FConstructors%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2032321903%2FConstructors%2F-475033937"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>SINGLETON_ID<span class="token punctuation">, </span></span><span class="parameter ">channelSet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>SINGLETON_ID<span class="token punctuation">, </span></span><span class="parameter ">channelSet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span><span class="token punctuation">, </span></span><span class="parameter ">lastReconciled<span class="token operator">: </span><span data-unresolved-link="okio/ByteString///PointingToDeclaration/">ByteString</span><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -164,6 +164,36 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="id.html">id</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="658944509%2FProperties%2F-475033937" anchor-label="lastReconciled" id="658944509%2FProperties%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="last-reconciled.html"><span>last</span><wbr><span><span>Reconciled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="658944509%2FProperties%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="last-reconciled.html">lastReconciled</a><span class="token operator">: </span><span data-unresolved-link="okio/ByteString///PointingToDeclaration/">ByteString</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The channel set the stored conversations are currently keyed against, encoded as a <span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1269448286%2FProperties%2F-475033937" anchor-label="lastReconciledChannelSet" id="1269448286%2FProperties%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="last-reconciled-channel-set.html"><span>last</span><wbr><span>Reconciled</span><wbr><span>Channel</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1269448286%2FProperties%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="last-reconciled-channel-set.html">lastReconciledChannelSet</a><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The baseline decoded, or null when no reconcile has run for this device yet.</p></div></div></div>
                 </div>
               </div>
             </div>
