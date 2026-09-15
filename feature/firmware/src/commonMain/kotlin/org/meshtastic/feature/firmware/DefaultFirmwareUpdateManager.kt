@@ -17,6 +17,8 @@
 package org.meshtastic.feature.firmware
 
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.state.RadioOperation
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
@@ -37,6 +39,7 @@ class DefaultFirmwareUpdateManager(
     private val secureDfuHandler: SecureDfuHandler,
     private val usbUpdateHandler: UsbUpdateHandler,
     private val esp32OtaUpdateHandler: Esp32OtaUpdateHandler,
+    private val radioOperationLock: RadioOperationLock,
 ) : FirmwareUpdateManager {
 
     override suspend fun startUpdate(
@@ -45,11 +48,11 @@ class DefaultFirmwareUpdateManager(
         address: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri?,
-    ): FirmwareArtifact? {
+    ): FirmwareArtifact? = radioOperationLock.withOperation(RadioOperation.FirmwareUpdate) {
         val handler = getHandler(hardware)
         val target = getTarget(address)
 
-        return handler.startUpdate(
+        handler.startUpdate(
             release = release,
             hardware = hardware,
             target = target,
@@ -63,7 +66,7 @@ class DefaultFirmwareUpdateManager(
         hardware: DeviceHardware,
         address: String,
         updateState: (FirmwareUpdateState) -> Unit,
-    ): FirmwareArtifact? =
+    ): FirmwareArtifact? = radioOperationLock.withOperation(RadioOperation.FirmwareUpdate) {
         // Recovery is inherently a BLE DFU operation — route straight to the DFU handler rather than the
         // connection-type dispatch in getHandler(), which would fail with no live connection. The handler derives
         // MAC+1 from address and its buttonless trigger already no-ops when the device is already in DFU mode.
@@ -74,6 +77,7 @@ class DefaultFirmwareUpdateManager(
             updateState = updateState,
             firmwareUri = null,
         )
+    }
 
     internal fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
         radioPrefs.isSerial() -> {

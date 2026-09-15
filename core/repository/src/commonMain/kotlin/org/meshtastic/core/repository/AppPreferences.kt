@@ -469,7 +469,15 @@ interface DiscoveryPrefs {
     fun setTopologyOverlayEnabled(enabled: Boolean)
 
     companion object {
-        const val DEFAULT_DWELL_MINUTES = 15
+        /**
+         * Minutes to dwell on each preset by default.
+         *
+         * Deliberately short. The dwell is per preset, so this multiplies: at the previous default of 15 a three-preset
+         * sweep ran for 45 minutes, which outlived the wake lock that keeps the CPU up for it. Longer dwells hear more,
+         * so every previous option is still offered in the picker — this only changes what an untouched first scan
+         * costs.
+         */
+        const val DEFAULT_DWELL_MINUTES = 5
     }
 }
 

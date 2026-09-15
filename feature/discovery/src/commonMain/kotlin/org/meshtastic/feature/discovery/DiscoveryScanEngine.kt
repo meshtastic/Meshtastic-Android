@@ -37,6 +37,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.state.OperationLease
+import org.meshtastic.core.common.state.RadioOperation
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.dao.DiscoveryDao
@@ -86,6 +89,7 @@ class DiscoveryScanEngine(
     private val applicationScope: ApplicationCoroutineScope,
     private val dispatchers: CoroutineDispatchers,
     private val meshPrefs: MeshPrefs,
+    private val radioOperationLock: RadioOperationLock,
 ) : DiscoveryPacketCollector {
 
     // region Public state
@@ -115,7 +119,13 @@ class DiscoveryScanEngine(
             homeRestorer = homeRestorer,
             applicationScope = applicationScope,
             onSessionUpdated = { updated -> _currentSession.value = updated },
-            onTerminalCompleted = { outcome -> _scanState.value = DiscoveryScanState.Complete(outcome) },
+            onTerminalCompleted = { outcome ->
+                _scanState.value = DiscoveryScanState.Complete(outcome)
+                // Terminal cleanup has restored the home preset by now, so the radio is back where the user left it.
+                // Releasing any earlier — when the scan scope is cancelled — would drop the protection during the
+                // restore itself. Safe to run twice: the coordinator may republish a corrected outcome.
+                releaseScanLease()
+            },
             cancelScan = { mutex.withLock { cancelScanInternal() } },
         )
     private val interruptedSessionRecovery =
@@ -135,6 +145,9 @@ class DiscoveryScanEngine(
             },
         )
     private var scanScope: CoroutineScope? = null
+
+    /** Held from scan start until terminal cleanup finishes, so it outlives [scanScope]'s cancellation. */
+    private var scanLease: OperationLease? = null
     private var dwellJob: Job? = null
     private var originalLoRaConfig: Config.LoRaConfig? = null
 
@@ -328,10 +341,20 @@ class DiscoveryScanEngine(
         currentPresetName = targets.first().label
         totalDwellSeconds = dwellDurationSeconds
         currentDwellPersisted = false
+        // Taken before the loop starts and released by the terminal callback, not by this scope. Terminal processing
+        // cancels scanScope before the home-preset restore runs, so a hold owned by the scope would end during the
+        // restore — leaving the radio on a scanned preset, which is the failure this protects against.
+        scanLease = radioOperationLock.acquire(RadioOperation.DiscoveryScan)
         CoroutineScope(dispatchers.io + SupervisorJob()).also { scope ->
             scanScope = scope
             scope.launch { runScanLoop(targets, dwellDurationSeconds) }
         }
+    }
+
+    /** Drops the scan's hold on the radio. Idempotent — the terminal outcome may be published more than once. */
+    private fun releaseScanLease() {
+        radioOperationLock.release(scanLease)
+        scanLease = null
     }
 
     private fun isScanPreparationCurrent(deviceAddress: String?, sessionGeneration: Long): Boolean =
@@ -382,6 +405,7 @@ class DiscoveryScanEngine(
             }
             _currentSession.value = null
             _scanState.value = DiscoveryScanState.Idle
+            releaseScanLease()
         } finally {
             mutex.unlock()
         }
