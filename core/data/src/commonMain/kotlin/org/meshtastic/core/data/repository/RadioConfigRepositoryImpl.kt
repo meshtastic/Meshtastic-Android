@@ -73,6 +73,10 @@ open class RadioConfigRepositoryImpl(
         channelSetDataSource.updateChannelSet(settingsList, loraConfig)
     }
 
+    override suspend fun reconcileConversations() {
+        channelSetDataSource.reconcileConversations()
+    }
+
     /**
      * Updates the [ChannelSettings] list with the provided channel and returns the index of the admin channel after the
      * update (if not found, returns 0).

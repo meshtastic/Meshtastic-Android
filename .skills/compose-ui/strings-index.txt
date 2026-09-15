@@ -107,6 +107,8 @@ aqi_unhealthy
 aqi_unhealthy_sensitive
 aqi_value_with_severity
 aqi_very_unhealthy
+archived_channel
+archived_channel_read_only
 are_you_sure
 are_you_sure_change_default
 audio

@@ -40,6 +40,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -51,18 +52,22 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.archived_channel
 import org.meshtastic.core.resources.contact_draft_prefix
 import org.meshtastic.core.resources.contact_pinned
 import org.meshtastic.core.ui.component.SecurityIcon
+import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.Keep
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.VolumeOff
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ChannelSet
 
 @Suppress("LongMethod")
@@ -146,7 +151,15 @@ private fun ContactHeader(
         // Show unlock icon for broadcast with default PSK
         val isBroadcast = with(contact.contactKey) { getOrNull(1) == '^' || endsWith("^all") || endsWith("^broadcast") }
 
-        if (isBroadcast && channels != null) {
+        if (contact.isRetired) {
+            // The channel is gone, so there is no key state left to report; say the conversation is archived instead.
+            Icon(
+                imageVector = MeshtasticIcons.History,
+                contentDescription = stringResource(Res.string.archived_channel),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp),
+            )
+        } else if (isBroadcast && channels != null) {
             ContactKey(contact.contactKey).channelOrNull?.let { index -> SecurityIcon(channels, index) }
         }
 
@@ -225,6 +238,54 @@ private fun ChatMetadata(contact: Contact, modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.labelSmall,
                 maxLines = 1,
             )
+        }
+    }
+}
+
+/**
+ * A live channel row above the same conversation once its channel has left the radio.
+ *
+ * The archived row is the point: it keeps the name the channel had (its slot now belongs to someone else), swaps the
+ * key-state lock for a history icon, and is flagged unmessageable.
+ */
+@PreviewLightDark
+@Composable
+fun ContactItemArchivedPreview() {
+    AppTheme {
+        Surface {
+            Column {
+                ContactItem(
+                    contact =
+                    Contact(
+                        contactKey = ContactKey.broadcast(0).value,
+                        shortName = "0",
+                        longName = "LongFast",
+                        lastMessageTime = null,
+                        lastMessageText = "On the air",
+                        unreadCount = 0,
+                        messageCount = 1,
+                        isMuted = false,
+                        isUnmessageable = false,
+                    ),
+                    selected = false,
+                )
+                ContactItem(
+                    contact =
+                    Contact(
+                        contactKey = ContactKey.retiredBroadcast("a1b2c3d4").value,
+                        shortName = "VCFM",
+                        longName = "VCFMW",
+                        lastMessageTime = null,
+                        lastMessageText = "See you next year",
+                        unreadCount = 0,
+                        messageCount = 42,
+                        isMuted = false,
+                        isUnmessageable = true,
+                        isRetired = true,
+                    ),
+                    selected = false,
+                )
+            }
         }
     }
 }

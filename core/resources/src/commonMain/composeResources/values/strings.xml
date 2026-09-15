@@ -125,6 +125,8 @@
     <string name="aqi_unhealthy_sensitive">Unhealthy for Sensitive Groups</string>
     <string name="aqi_value_with_severity">%1$d (%2$s)</string>
     <string name="aqi_very_unhealthy">Very Unhealthy</string>
+    <string name="archived_channel">Archived channel</string>
+    <string name="archived_channel_read_only">This channel is no longer set up on your radio. Its messages are kept here, but you can't send or react.</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="are_you_sure_change_default">Are you sure you want to change to the default channel?</string>
     <string name="audio">Audio</string>

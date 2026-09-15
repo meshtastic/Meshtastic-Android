@@ -73,6 +73,11 @@ internal class MessagingControllerImpl(
     override suspend fun sendReaction(emoji: String, replyId: Int, contactKey: String) {
         val myNum = nodeManager.myNodeNum.value ?: return
         val parsedKey = ContactKey(contactKey)
+        // A retired conversation has no live slot; its absent channel prefix would otherwise read as the primary.
+        if (parsedKey.isRetired) {
+            Logger.w { "Refusing to react in a retired conversation" }
+            return
+        }
         val channel = parsedKey.channel
         val destId = parsedKey.addressString
         val dataPacket =

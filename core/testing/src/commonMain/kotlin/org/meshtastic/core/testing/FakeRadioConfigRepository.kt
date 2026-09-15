@@ -102,6 +102,7 @@ class FakeRadioConfigRepository :
         registerResetAction {
             lastSetLocalConfig = null
             lastSetModuleConfig = null
+            reconcileConversationsCount = 0
             channelSetUpdates.clear()
         }
     }
@@ -119,6 +120,14 @@ class FakeRadioConfigRepository :
         val current = channelSetBacking.value
         channelSetBacking.value =
             current.copy(settings = settingsList ?: current.settings, lora_config = loraConfig ?: current.lora_config)
+    }
+
+    /** Number of times [reconcileConversations] was called. */
+    var reconcileConversationsCount: Int = 0
+        private set
+
+    override suspend fun reconcileConversations() {
+        reconcileConversationsCount++
     }
 
     override suspend fun updateChannelSettings(channel: Channel) {

@@ -138,6 +138,10 @@ fun MessageItem(
     showFullMessageTimestamp: Boolean = false,
     emojis: List<Reaction> = emptyList(),
     quickEmojis: List<String> = listOf("👍", "👎", "😂", "🔥", "❤️", "😮"),
+    /** False for an archived conversation: existing reactions still render, but none can be added. */
+    canReact: Boolean = true,
+    /** False for an archived conversation: its channel is gone, so there is nothing to reply into. */
+    canReply: Boolean = true,
     /**
      * Hoisted so the list can keep at most one bar open and close it on a tap anywhere else; owning it here would leave
      * every row's bar independent, and none of them able to see a tap outside their own bubble.
@@ -195,7 +199,8 @@ fun MessageItem(
             when (activeSheet) {
                 ActiveSheet.Actions -> {
                     MessageActionsContent(
-                        quickEmojis = quickEmojis,
+                        quickEmojis = if (canReact) quickEmojis else emptyList(),
+                        canReply = canReply,
                         onReply = {
                             activeSheet = null
                             onReply()
@@ -326,6 +331,8 @@ fun MessageItem(
     // on a
     // duty-cycled radio. The overflow button keeps the full actions sheet one tap away.
     AnimatedVisibility(
+        // Stays available on an archived conversation even though its emoji are gone: this bar carries the only
+        // route to the actions sheet, and copy, select, delete and status all still apply to archived messages.
         visible = quickReactionsOpen && !inSelectionMode,
         modifier = Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start),
     ) {
@@ -361,16 +368,20 @@ fun MessageItem(
     var swipeArmed by remember(message.uuid) { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxWidth()) {
-        ReplySwipeAffordance(
-            progress = (swipeOffset.value * swipeSign / swipeThresholdPx).coerceIn(0f, 1f),
-            modifier = Modifier.align(if (message.fromLocal) Alignment.CenterEnd else Alignment.CenterStart),
-        )
+        // An archived conversation cannot send, so the swipe neither renders nor arms. Left in place it would buzz
+        // at the threshold and then drop the reply silently.
+        if (canReply) {
+            ReplySwipeAffordance(
+                progress = (swipeOffset.value * swipeSign / swipeThresholdPx).coerceIn(0f, 1f),
+                modifier = Modifier.align(if (message.fromLocal) Alignment.CenterEnd else Alignment.CenterStart),
+            )
+        }
         Surface(
             modifier =
             Modifier.align(if (message.fromLocal) Alignment.CenterEnd else Alignment.CenterStart)
                 .graphicsLayer { translationX = swipeOffset.value }
-                .pointerInput(message.uuid, inSelectionMode) {
-                    if (inSelectionMode) return@pointerInput
+                .pointerInput(message.uuid, inSelectionMode, canReply) {
+                    if (inSelectionMode || !canReply) return@pointerInput
                     detectHorizontalDragGestures(
                         onDragEnd = {
                             val reached = swipeOffset.value * swipeSign >= swipeThresholdPx
@@ -548,6 +559,7 @@ fun MessageItem(
             ),
         reactions = if (message.fromLocal) emojis.reversed() else emojis,
         myId = ourNode.user.id,
+        canReact = canReact,
         onSendReaction = sendReaction,
         onShowReactions = onShowReactions,
     )

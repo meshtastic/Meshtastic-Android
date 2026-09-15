@@ -77,7 +77,6 @@ import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
-import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SecurityKeyBackupStore
@@ -155,7 +154,6 @@ data class RadioConfigState(
 open class RadioConfigViewModel(
     @InjectedParam initialDestNum: Int?,
     private val radioConfigRepository: RadioConfigRepository,
-    private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val locationRepository: LocationRepository,
@@ -516,13 +514,12 @@ open class RadioConfigViewModel(
                             onInterrupted = { result ->
                                 reconcileInterruptedManualChannelUpdate(
                                     destNum = destNum,
-                                    oldSettings = current,
                                     appliedSettings = result.appliedSettings,
                                 )
                             },
                         )
                         currentCoroutineContext().ensureActive()
-                        commitManualChannelSettings(destNum = destNum, oldSettings = current, newSettings = new)
+                        commitManualChannelSettings(destNum = destNum, newSettings = new)
                         finishManualChannelBatch()
                     } catch (e: CancellationException) {
                         abortManualChannelBatch(batchRequestIds)
@@ -543,29 +540,21 @@ open class RadioConfigViewModel(
     private fun getManualChannelUpdatePlan(new: List<ChannelSettings>, old: List<ChannelSettings>): List<Channel> =
         getChannelList(new, old).sortedBy { it.index }
 
-    private suspend fun commitManualChannelSettings(
-        destNum: Int,
-        oldSettings: List<ChannelSettings>,
-        newSettings: List<ChannelSettings>,
-    ) {
+    private suspend fun commitManualChannelSettings(destNum: Int, newSettings: List<ChannelSettings>) {
         withContext(NonCancellable) {
+            // replaceAllSettings re-keys the conversations itself; remote-admin of another node's channels must not
+            // touch this device's conversations, which is what the destNum gate protects.
             if (destNum == myNodeNum) {
-                packetRepository.migrateChannelsByPSK(oldSettings, newSettings)
                 radioConfigRepository.replaceAllSettings(newSettings)
             }
             _radioConfigState.update { it.copy(channelList = newSettings) }
         }
     }
 
-    private suspend fun reconcileInterruptedManualChannelUpdate(
-        destNum: Int,
-        oldSettings: List<ChannelSettings>,
-        appliedSettings: List<ChannelSettings>,
-    ) {
+    private suspend fun reconcileInterruptedManualChannelUpdate(destNum: Int, appliedSettings: List<ChannelSettings>) {
         withContext(NonCancellable) {
             Logger.w { "Reconciling interrupted manual channel update appliedSettings=${appliedSettings.size}" }
             if (destNum == myNodeNum) {
-                packetRepository.migrateChannelsByPSK(oldSettings, appliedSettings)
                 radioConfigRepository.replaceAllSettings(appliedSettings)
             }
             _radioConfigState.update { it.copy(channelList = appliedSettings) }

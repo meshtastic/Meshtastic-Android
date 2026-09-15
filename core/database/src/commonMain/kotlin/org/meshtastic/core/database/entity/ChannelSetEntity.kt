@@ -19,6 +19,10 @@ package org.meshtastic.core.database.entity
 import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
+import co.touchlab.kermit.Logger
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.proto.ChannelSet
 
 /**
@@ -34,9 +38,29 @@ import org.meshtastic.proto.ChannelSet
 data class ChannelSetEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: Int = SINGLETON_ID,
     @ColumnInfo(name = "channel_set") val channelSet: ChannelSet,
+    /**
+     * The channel set the stored conversations are currently keyed against, encoded as a [ChannelSet].
+     *
+     * Conversations are keyed by channel index, so they have to be re-keyed whenever a slot changes occupant. This is
+     * the baseline that change is measured from. It is persisted rather than held in memory because the radio reboots
+     * after a preset change and the app is routinely killed across that gap; an in-memory baseline would be lost
+     * exactly when it is needed, leaving the messages permanently misfiled. Null before the first reconcile — then the
+     * current set is captured and nothing moves.
+     *
+     * Survives [ChannelSetDao.clearRetainingBaseline], which the handshake uses: the messages have not moved just
+     * because the cached channel set was dropped.
+     */
+    @ColumnInfo(name = "last_reconciled") val lastReconciled: ByteString? = null,
 ) {
+    /** The baseline decoded, or null when no reconcile has run for this device yet. */
+    val lastReconciledChannelSet: ChannelSet?
+        get() = lastReconciled?.let { ChannelSet.ADAPTER.decodeOrNull(it.toByteArray(), Logger) }
+
     companion object {
         /** There is only ever one channel set per device, so every row uses this fixed primary key. */
         const val SINGLETON_ID = 0
+
+        /** Encodes [channelSet] for storage in [lastReconciled]. */
+        fun encodeBaseline(channelSet: ChannelSet): ByteString = ChannelSet.ADAPTER.encode(channelSet).toByteString()
     }
 }

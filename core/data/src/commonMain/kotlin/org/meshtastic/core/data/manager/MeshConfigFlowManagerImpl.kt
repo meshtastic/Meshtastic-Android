@@ -282,6 +282,15 @@ class MeshConfigFlowManagerImpl(
     private suspend fun installAndPublishNodeDatabase(state: HandshakeState.ReceivingNodeInfo) {
         val session = state.session
         val info = state.myNodeInfo
+
+        // Stage 1 streamed the radio's channels in one slot at a time, and its LoRa config arrived as a separate
+        // write, so no single one of those could tell a replaced channel from a half-downloaded set. Now that the
+        // whole set has landed, re-key the conversations once -- before Connected, so the list is never rendered
+        // with one channel's history under another's name.
+        safeCatching { radioConfigRepository.reconcileConversations() }
+            .onFailure { e -> Logger.e(e) { "Conversation reconciliation failed after handshake" } }
+        if (!isActiveSession(session)) return
+
         val entities = mutableListOf<Node>()
         state.nodes.forEach { nodeInfo ->
             nodeManager.installNodeInfo(nodeInfo)
