@@ -98,10 +98,9 @@ fun DocsSearchBar(
         snapshotFlow { textFieldState.text.toString() }.collect { latestOnQueryChange(it) }
     }
 
-    val barModifier =
-        modifier.fillMaxWidth().let { base ->
-            scrollBehavior?.let { behavior -> with(behavior) { base.searchBarScrollBehavior() } } ?: base
-        }
+    // material3 1.13 replaced the SearchBarScrollBehavior member extension with a plain Modifier
+    // property; this is the same shape SearchBar itself uses internally.
+    val barModifier = modifier.fillMaxWidth().then(scrollBehavior?.searchBarScrollBehaviorModifier ?: Modifier)
     SearchBar(
         state = searchBarState,
         inputField = {
