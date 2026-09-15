@@ -72,13 +72,49 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
     - `refactor/` — code structure changes
     - `test/` — test additions or fixes
     - `deps/` — dependency updates
+- Spec-driven work takes no prefix from that list: a numeric spec prefix (`005-tak-v2-protocol`) or the timestamp form `YYYYMMDD-HHMMSS-feature-name` created by `/speckit.git.feature`. Both are valid.
 - `release/*` and `automation/*` are reserved for maintainers and automated workflows.
 - Ensure your branch is up to date with the latest `main` branch before submitting a PR.
 - Provide a meaningful title and description for your PR.
 - Include information on how to test and/or replicate if it is not obvious.
-- Include screenshots or logs if your change affects the UI or user experience.
+- Include logs where they show the behavior, as a fenced block rather than a screenshot of text. For UI changes see Screenshots below.
 - Be responsive to feedback and make requested changes promptly.
 - Squash commits if requested by a maintainer.
+
+### Writing the description
+
+Delete the tips block from the template first, then:
+
+- **Lead with why.** One or two sentences on the problem the change solves,
+  before any list of what changed. If it addresses an issue, say `Fixes #123`.
+- **Group what changed** under whichever of these apply, and omit the rest:
+  🌟 New Features · 🛠️ Refactoring & Architecture · 🐛 Bug Fixes ·
+  🧹 Chores (dependencies, formatting, docs).
+- **Call out architecture moves.** Files moving `androidMain` → `commonMain`,
+  or Views → Compose, are a KMP migration milestone — say so explicitly rather
+  than leaving it to the diff.
+- **Add a "Testing Performed" section** whenever tests were added or changed,
+  listing them. If a change is hard to test, say why there instead.
+
+### Screenshots
+
+UI changes want images — anything touching Compose, layouts, theming,
+navigation, `feature/**` or `core/ui/**`. Use a Before / After table for a
+visual change or fix:
+
+| Before | After |
+|--------|-------|
+| <img src="<url>" width="300"/> | <img src="<url>" width="300"/> |
+
+Paste or drag images directly into the PR so GitHub hosts them, or reference a
+committed image by **commit-SHA** raw URL
+(`https://raw.githubusercontent.com/<owner>/<repo>/<sha>/<path>`, spaces
+encoded as `%20`) so the link survives the branch being deleted. Never use an
+external image service.
+
+**Never invent a URL or a placeholder image.** If a UI change has no real
+screenshot yet, leave the template's commented image block in place for the
+author to fill in.
 
 ## Issue Reporting
 
