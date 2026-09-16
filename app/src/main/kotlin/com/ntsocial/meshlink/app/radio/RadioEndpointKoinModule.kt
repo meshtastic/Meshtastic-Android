@@ -54,6 +54,7 @@ import com.ntsocial.meshlink.core.data.manager.NodeManagerImpl
 import com.ntsocial.meshlink.core.data.manager.PacketHandlerImpl
 import com.ntsocial.meshlink.core.data.manager.RadioIngressWorkTracker
 import com.ntsocial.meshlink.core.data.manager.SessionManagerImpl
+import com.ntsocial.meshlink.core.data.manager.SessionMessageQueue
 import com.ntsocial.meshlink.core.data.manager.StoreForwardPacketHandlerImpl
 import com.ntsocial.meshlink.core.data.manager.TelemetryPacketHandlerImpl
 import com.ntsocial.meshlink.core.data.manager.TracerouteHandlerImpl
@@ -64,6 +65,7 @@ import com.ntsocial.meshlink.core.data.repository.DeviceLinkRepositoryImpl
 import com.ntsocial.meshlink.core.data.repository.FirmwareReleaseRepositoryImpl
 import com.ntsocial.meshlink.core.data.repository.MeshLogRepositoryImpl
 import com.ntsocial.meshlink.core.data.repository.NodeRepositoryImpl
+import com.ntsocial.meshlink.core.data.repository.NtsocialGatewayRepositoryImpl
 import com.ntsocial.meshlink.core.data.repository.PacketRepositoryImpl
 import com.ntsocial.meshlink.core.data.repository.QuickChatActionRepositoryImpl
 import com.ntsocial.meshlink.core.data.repository.RadioConfigRepositoryImpl
@@ -176,7 +178,20 @@ internal val radioEndpointKoinModule = module {
         scoped<AppWidgetUpdater> { EndpointAppWidgetUpdater }
         // Gateway v1/v2 remains owned by the legacy-primary graph. A secondary endpoint must
         // never inherit the root Provider route or publish through an endpoint-less contract.
-        scoped<NtsocialGatewayRepository> { SecondaryGatewayRepository() }
+        scoped<NtsocialGatewayRepository> {
+            NtsocialGatewayRepositoryImpl(
+                commandSender = get(),
+                packetRepository = get(),
+                messageQueue = get(),
+                nodeRepository = get(),
+                radioConfigRepository = get(),
+                radioInterfaceService = get(),
+                databaseManager = get(),
+                ingressWorkTracker = get(),
+                scope = get(named("ServiceScope")),
+                ingressSessionGate = get(),
+            )
+        }
 
         scopedOf(::SwitchingNodeInfoReadDataSource).bind<NodeInfoReadDataSource>()
         scopedOf(::SwitchingNodeInfoWriteDataSource).bind<NodeInfoWriteDataSource>()
@@ -498,7 +513,17 @@ internal val radioEndpointKoinModule = module {
             .bind<ChannelReliabilityManager>()
         scopedOf(::DirectRadioControllerImpl).bind<RadioController>()
 
-        scoped { EndpointMessageQueue(get(), lazy { get<RadioController>() }, get(named("ServiceScope"))) }
+        scoped {
+            SessionMessageQueue(
+                packetRepository = get(),
+                radioController = lazy { get<RadioController>() },
+                commandSender = get(),
+                radioConfigRepository = get(),
+                radioInterfaceService = get(),
+                gatewayIngressSessionGate = get(),
+                parentScope = get(named("ServiceScope")),
+            )
+        }
             .bind<MessageQueue>()
         scopedOf(::EndpointMeshWorkerManager).bind<MeshWorkerManager>()
 

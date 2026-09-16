@@ -265,16 +265,19 @@ class IosBluetoothRepository(private val loggingConfig: BleLoggingConfig) : Blue
             "[$address] Saved iOS peripheral could not publish a verified connect transition; " +
                 "releasing restored link before retry"
         }
+        Logger.i { "ios_ble_recovery stage=retire_probe" }
         closePeripheral(stalePeripheral)
         delay(IOS_RESTORED_PERIPHERAL_SETTLE_DELAY)
-        return createFreshPeripheral()
+        return createFreshPeripheral().also { Logger.i { "ios_ble_recovery stage=fresh_wrapper" } }
     }
 
     private suspend fun preparePairingPeripheral(
         peripheral: Peripheral,
         timeout: kotlin.time.Duration,
     ): CoroutineScope = withTimeout(timeout) {
+        Logger.i { "ios_ble_recovery stage=connect_begin timeoutMs=${timeout.inWholeMilliseconds}" }
         val connectionScope = peripheral.connect()
+        Logger.i { "ios_ble_recovery stage=connect_complete" }
         val service = KableBleService(peripheral, MeshtasticBleConstants.SERVICE_UUID)
         val fromNum = service.characteristic(MeshtasticBleConstants.FROMNUM_CHARACTERISTIC)
         if (!service.hasCharacteristic(fromNum)) {
@@ -298,6 +301,7 @@ class IosBluetoothRepository(private val loggingConfig: BleLoggingConfig) : Blue
         try {
             // The encrypted CCCD write triggers and authoritatively completes native iOS pairing.
             subscriptionReady.await()
+            Logger.i { "ios_ble_recovery stage=subscription_ready" }
         } finally {
             observationJob.cancelAndJoin()
         }

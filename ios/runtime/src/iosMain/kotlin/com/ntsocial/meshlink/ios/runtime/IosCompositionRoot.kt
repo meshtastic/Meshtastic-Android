@@ -48,6 +48,10 @@ import org.koin.dsl.koinApplication
 
 /** Process composition root. Swift owns only Apple lifecycle/entitlements; this owner owns the radio graph. */
 internal class IosCompositionRoot {
+    init {
+        installGatewayDiagnostics()
+    }
+
     val application: KoinApplication = koinApplication { modules(iosCoreModule()) }
     val koin: Koin
         get() = application.koin

@@ -24,30 +24,18 @@
  */
 package com.ntsocial.meshlink.app.radio
 
+import com.ntsocial.meshlink.core.data.manager.SessionMessageQueue
 import com.ntsocial.meshlink.core.model.ConnectionState
 import com.ntsocial.meshlink.core.model.DataPacket
 import com.ntsocial.meshlink.core.model.MessageStatus
 import com.ntsocial.meshlink.core.model.Node
-import com.ntsocial.meshlink.core.model.RadioController
-import com.ntsocial.meshlink.core.model.ntsocial.NtsocialCachedEnvelope
-import com.ntsocial.meshlink.core.model.ntsocial.NtsocialDefaultChannelStatus
 import com.ntsocial.meshlink.core.repository.AppWidgetUpdater
 import com.ntsocial.meshlink.core.repository.MeshLocationManager
 import com.ntsocial.meshlink.core.repository.MeshServiceNotifications
 import com.ntsocial.meshlink.core.repository.MeshWorkerManager
-import com.ntsocial.meshlink.core.repository.MessageQueue
-import com.ntsocial.meshlink.core.repository.NtsocialGatewayRepository
-import com.ntsocial.meshlink.core.repository.PacketRepository
 import com.ntsocial.meshlink.core.repository.ServiceBroadcasts
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import okio.ByteString
 import org.meshtastic.proto.ClientNotification
-import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Telemetry
 
@@ -129,117 +117,7 @@ internal object EndpointAppWidgetUpdater : AppWidgetUpdater {
     override suspend fun updateAll() = Unit
 }
 
-/**
- * A process-local worker facade whose durable source of truth is the endpoint's own Room database. On every connected
- * transition, [MeshConnectionManager] asks this facade to re-enqueue all rows still marked QUEUED.
- */
-internal class EndpointMessageQueue(
-    private val packetRepository: PacketRepository,
-    private val radioController: Lazy<RadioController>,
-    private val scope: CoroutineScope,
-) : MessageQueue {
-    private val mutex = Mutex()
-    private val drainMutex = Mutex()
-    private val pendingPacketIds = linkedSetOf<Int>()
-
-    override suspend fun enqueue(packetId: Int) {
-        mutex.withLock { pendingPacketIds += packetId }
-        drain()
-    }
-
-    @Suppress("TooGenericExceptionCaught")
-    suspend fun drain() {
-        drainMutex.withLock {
-            if (radioController.value.connectionState.value != ConnectionState.Connected) return@withLock
-            val queuedIds = mutex.withLock { pendingPacketIds.toList() }
-            queuedIds.forEach { packetId ->
-                val packet = packetRepository.getPacketByPacketId(packetId)
-                if (packet == null) {
-                    mutex.withLock { pendingPacketIds -= packetId }
-                    return@forEach
-                }
-                try {
-                    radioController.value.sendMessage(packet)
-                    packetRepository.updateMessageStatus(packet, MessageStatus.ENROUTE)
-                    mutex.withLock { pendingPacketIds -= packetId }
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (error: Exception) {
-                    co.touchlab.kermit.Logger.w(error) { "Secondary endpoint send failed; queued row retained" }
-                    packetRepository.updateMessageStatus(packet, MessageStatus.QUEUED)
-                }
-            }
-        }
-    }
-
-    fun enqueueFromConnection(packetId: Int) {
-        scope.launch { enqueue(packetId) }
-    }
-}
-
-internal class EndpointMeshWorkerManager(private val messageQueue: EndpointMessageQueue) : MeshWorkerManager {
-    override fun enqueueSendMessage(packetId: Int) = messageQueue.enqueueFromConnection(packetId)
-}
-
-/** Gateway v1/v2 has no endpoint selector, so every non-primary session fails closed at this boundary. */
-internal class SecondaryGatewayRepository : NtsocialGatewayRepository {
-    override val cachedEnvelopes = MutableStateFlow<List<NtsocialCachedEnvelope>>(emptyList())
-    override val inboundSessionRevision = MutableStateFlow(0L)
-    override val defaultChannelStatus = MutableStateFlow(NtsocialDefaultChannelStatus())
-
-    override suspend fun activateInboundSession(expectedRadioSessionEpoch: Long): Boolean = false
-
-    override fun invalidateInboundSession() {
-        inboundSessionRevision.value += 1
-    }
-
-    override fun isInboundSessionActive(expectedRadioSessionEpoch: Long): Boolean = false
-
-    override fun cacheInbound(packet: MeshPacket, dataPacket: DataPacket): Boolean = false
-
-    override fun sendTestPayload(
-        payload: ByteString,
-        to: String?,
-        channelIndex: Int,
-        wantAck: Boolean,
-        headerMsgId: ByteString?,
-    ): NtsocialCachedEnvelope = secondaryGatewayUnavailable()
-
-    override fun sendRawEnvelope(
-        rawEnvelope: ByteString,
-        to: String?,
-        channelIndex: Int,
-        hopLimit: Int,
-        wantAck: Boolean,
-        packetId: Int?,
-    ): NtsocialCachedEnvelope = secondaryGatewayUnavailable()
-
-    override suspend fun persistAndQueueRawEnvelope(
-        rawEnvelope: ByteString,
-        sourceChannelId: String?,
-        to: String?,
-        channelIndex: Int,
-        hopLimit: Int,
-        wantAck: Boolean,
-        packetId: Int,
-    ): NtsocialCachedEnvelope = secondaryGatewayUnavailable()
-
-    override suspend fun persistAndQueueNativeBroadcastText(
-        text: String,
-        sourceChannelId: String,
-        channelIndex: Int,
-        packetId: Int,
-        originClientMessageId: String,
-    ): DataPacket = secondaryGatewayUnavailable()
-
-    override fun updateDefaultChannelStatus(status: NtsocialDefaultChannelStatus) {
-        defaultChannelStatus.value = status
-    }
-
-    override fun clearCache() {
-        cachedEnvelopes.value = emptyList()
-    }
-
-    private fun secondaryGatewayUnavailable(): Nothing =
-        error("Android Gateway v1/v2 is available only on the legacy-primary radio")
+/** Secondary replay wakes only the queue owned by this endpoint's service scope. */
+internal class EndpointMeshWorkerManager(private val messageQueue: SessionMessageQueue) : MeshWorkerManager {
+    override fun enqueueSendMessage(packetId: Int) = messageQueue.requestDrain()
 }

@@ -4,6 +4,8 @@
 > (latest product change `6db8c6a8d`; HEAD itself adds Xcode user-interface state).
 > Source and reproducible checks override historical handovers. Update this snapshot when either changes.
 > Findings, source references, and validation: [development audit](docs/development-status-audit-2026-09-05.md).
+> Gateway repair update: 2026-09-16 on `3c5cb824d` plus working-tree changes;
+> [device repair evidence](docs/meshlink-parent-gateway-repair-2026-09-16.md).
 > Prior dated status paragraphs are preserved as [historical evidence](docs/archive/agent-status-history-through-2026-09-04.md),
 > not current instructions or proof for a later artifact.
 
@@ -43,9 +45,9 @@ Use Compose Multiplatform, Navigation 3, and the repository's existing architect
 
 | Track | Implemented source | Evidence boundary / current limitation |
 | --- | --- | --- |
-| Android | Shared shell, three-language first launch, per-endpoint UI and independent sessions for up to four BLE radios, Channel Hub, protected Gateway v1/v2 and additive v3 fleet surface | Two-radio BLE and secondary-only reconnect have retained device evidence. Current v3 secondary **send capability and repository wiring disagree**; see blocker below. Four-radio source capacity is not four-radio hardware proof. |
+| Android | Shared shell, three-language first launch, per-endpoint UI and independent sessions for up to four BLE radios, Channel Hub, protected Gateway v1/v2 and additive v3 fleet surface | Secondary v3 native and overlay dispatch now use an isolated production repository and durable queue. September 16 device evidence covers secondary-to-iPhone RF and parent import. Four-radio source capacity is not four-radio hardware proof. |
 | Windows | Branded Compose Desktop host, blue butterfly/theme/splash, native packaging metadata, shared messaging/nodes/settings, BLE/TCP/Serial transport backends | Single-radio UI/runtime; fleet and MQTT bindings are no-op. Connections exposes Bluetooth only. No Windows parent IPC/service/authenticator integration. Discovery has historical hardware evidence; successful first-pair/PIN recovery is not established. |
-| iOS | Shared Compose shell/settings, three-language first launch, up-to-four isolated BLE endpoint runtime/UI, primary-only Apple Gateway, durable native outbox, Channels-only VisionKit scanner | Signed entitled Debug BLE recovery and READY catalog have retained device evidence; native text has a user-confirmed two-way device run. Concurrent multi-radio iPhone operation and complete Apple Gateway parent-to-parent remote delivery remain unproven. |
+| iOS | Shared Compose shell/settings, three-language first launch, up-to-four isolated BLE endpoint runtime/UI, primary-only Apple Gateway, durable native outbox, Channels-only VisionKit scanner | September 16 signed Debug evidence covers both directions of native and overlay RF plus parent history, after fixing the duplicated ingress gate. Concurrent multi-radio iPhone operation and arbitrary background lifetime remain unproven. |
 
 - **Android fleet:** Every secondary endpoint owns an independent Room database, radio/config DataStores,
   Koin scope, transport/packet graph, generation, and message drain. App preferences remain shared.
@@ -55,7 +57,8 @@ Use Compose Multiplatform, Navigation 3, and the repository's existing architect
 - **Android Gateway:** v1 is immutable; v2 supplies configured channel catalog, stable-only native-text
   insertion history, protected route/capability commands, and Room/WorkManager/ledger admission. v3 adds
   protected fleet status/endpoints/channels/history, endpoint-bound tokens and ledger keys, and dispatch
-  plumbing. It is not merely a roadmap item, but it is not a completed secondary-send implementation.
+  plumbing. Secondary dispatch uses its own `NtsocialGatewayRepositoryImpl` and `SessionMessageQueue`;
+  it must never borrow the primary repository, database or WorkManager drain.
 - **Shared channel reliability:** QR/manual changes use serialized exact-session admission and fresh
   readback. Explicit decoded Routing rejection or a complete same-context mismatch is terminal;
   restart, silence, timeout, or context loss remains neutral `VERIFICATION_PENDING`. Guidance permits
@@ -88,15 +91,14 @@ Use Compose Multiplatform, Navigation 3, and the repository's existing architect
 - **MeshCore:** Protocol/model/repository and UI foundations exist; production radio transport remains
   pending. Do not claim MeshCore connection, RF delivery, or multi-node operation from these screens/tests.
 
-## Open findings that change development decisions
+## Findings and invariants that change development decisions
 
-1. **Android v3 secondary send mismatch (source-confirmed):** `RadioEndpointKoinModule` binds
-   `SecondaryGatewayRepository`; both its durable send methods throw. The production conversation/source
-   coordinator injects that same scoped repository into `MeshtasticEndpointGatewaySource`, which can
-   advertise READY native/overlay sending and delegates sends to those methods. The receiver returns
-   `queue_failed`. Preserve v1/v2 isolation when correcting v3; do not simply expose the root repository
-   to secondary endpoints. Current fake facade/token tests and the production graph-resolution test do
-   not prove successful production secondary dispatch.
+1. **Gateway composition invariant (repaired September 16):** Android secondary dispatch previously
+   reached a throwing stub. It now owns an isolated production repository and session queue. Also,
+   `NtsocialGatewayRepositoryImpl.ingressSessionGate` must remain a mandatory constructor dependency:
+   a default-created gate made generated Koin code allocate a different instance from the iOS packet
+   handler/queue, leaving accepted work permanently QUEUED. Production composition and durable-scope
+   regression tests plus RF device evidence cover these fixes. Preserve the iOS primary-only Gateway.
 2. **Live history reset (source-confirmed):** `PacketRepositoryImpl.getGatewayHistoryState()` captures
    the epoch once per database subscription, while whole-history clear rotates persisted metadata.
    An existing subscriber can publish sequence zero with its old epoch until resubscription. Do not
@@ -114,11 +116,10 @@ Use Compose Multiplatform, Navigation 3, and the repository's existing architect
    module list missing `core:radio-fleet`; dependency compilation can still cover it indirectly.
    Kotlin/Native test executable link **and execution** are disabled by convention. None of these
    mechanisms should be described as complete automatic three-platform test discovery.
-6. **Static gate:** The September 5 1,946-task replay passed formatting, Debug builds/lints, tests and KMP compilation,
-   but exits 1 for eight Detekt findings, not the previously reported six:
-   BLE 3, domain 1, model 1, network 1, plus `core:ui` 2 `CompositionLocalAllowlist` findings in
-   `LocalBarcodeScannerProvider.kt`. Record failures accurately; do not suppress them or claim a green
-   root gate because the other tasks pass. Exact results are in the audit report.
+6. **Static gate:** The September 16 repair replay passes root formatting/Detekt, Debug builds/lints,
+   JVM tests and KMP/native compilation (1,947 tasks). The September 5 eight-Detekt-finding failure
+   remains historical evidence in its audit; it is not the current gate result. Native test executable
+   execution remains disabled and no Windows hardware or Store release is established by this gate.
 
 ## Retained validation and release status
 
@@ -128,15 +129,17 @@ Use Compose Multiplatform, Navigation 3, and the repository's existing architect
   cannot override a conflicting current production call chain.
 - **Android:** August 31 report proves two concurrent BLE sessions and secondary-only reconnect on one
   phone. September 3 memory records two visible endpoint routes, aggregate Gateway QueueStatus success,
-  and Android-to-iPhone PRIVATE_APP receipt. That record does not resolve the current secondary-send
-  mismatch or establish which current endpoint implementation admitted each packet. The latest IME
-  artifact has three-phone install/startup and one-radio keyboard UI evidence.
+  and Android-to-iPhone PRIVATE_APP receipt. September 16 separately proves production secondary native
+  and overlay sends to iPhone, with packet/payload correlation and parent history. The three Android
+  phones were upgraded, but only the S24 Ultra has the two paired radios used in this run.
 - **iOS:** September 3 reports supersede the August entitlement-stripped/no-radio diagnosis for the
   later signed Debug devices: restored BLE recovery and same-generation READY parent projections were
   observed. The native queue report records iOS-origin `DELIVERED` and Android-origin `RECEIVED` rows in
   iOS Room, plus user-confirmed two-way native messaging. Scanner device QA covers camera permission,
   reticle, close, and return to Channels; it does not prove optical decoding or connected-radio QR apply/readback. Parent route-expiry
-  recovery in memory is a separate parent change with local admission evidence only.
+  recovery in memory is a separate parent change with local admission evidence only. The September 16
+  repair adds scoped native/overlay RF and remote parent-import evidence; it does not replace the
+  outstanding scanner, multi-radio, long-background or Store acceptance checks.
 - **Windows:** July 23 unsigned MSI/EXE packaging and BLE discovery are historical evidence. The current
   local environment is macOS; Desktop/JVM tests here are not a new Windows installer, pairing, scaling,
   tray, or device run. No Windows parent integration has been implemented.
@@ -180,7 +183,7 @@ Use Compose Multiplatform, Navigation 3, and the repository's existing architect
 - **Application Version Governance:** LiberaNt LLC and the NTsocial team own NTsocial MeshLink release/version policy. The radio-reported upstream `min_app_version` remains an ingested protocol/database compatibility field, but must not be compared with the NTsocial MeshLink `VERSION_CODE`, used to label MeshLink outdated, force a device deselection, or direct users to upstream Meshtastic App update channels. Radio-firmware compatibility checks are a separate boundary and remain supported.
 - **Windows Packaging Identity:** Windows uses display/package name `NTsocial MeshLink`, vendor `LiberaNt LLC`, menu group `NTsocial`, application ID `com.ntsocial.meshlink.desktop`, and stable upgrade UUID `6784A2DD-CE59-518B-AA15-C26302D6FA85`. Preserve the UUID for in-place upgrades of this Windows product. Keep macOS/Linux metadata and icons unchanged unless a task explicitly expands platform scope.
 - **Windows Brand Provenance:** `C:\Users\cth\Documents\GitHub\NTsocial_Windows` is a read-only brand reference. Only explicitly authorized brand assets may be copied; never modify that repository or import its code, secrets, credentials, or unrelated/proprietary data. Record source paths, source commits, and SHA-256 hashes in `desktop/BRANDING_ASSETS.md`.
-- **Gateway Provider:** The authority is `${applicationId}.gateway`; immutable v1 read-only endpoints are `/v1/status`, `/v1/envelopes`, `/v1/nodes`, and `/v1/channels`. Additive v2 read-only endpoints are `/v2/status`, `/v2/channels`, and bounded `/v2/message-changes?after=&limit=`. v2 exposes only sanitized Meshtastic catalog/native broadcast-text facts: never raw PSKs, raw radio configuration, precise location, or canonical NTsocial history. Encrypted source-channel IDs are domain-separated SHA-256 digests of resolved PSKs; CLEAR channels retain the existing deterministic public identity rules. `/v2/message-changes` exposes only rows whose stable identity was captured at insertion and never derives an old row from the currently configured slot. Do not add unversioned endpoints, Provider mutations, or selection/sort semantics. Additive v3 read-only endpoints are `/v3/status`, `/v3/endpoints`, `/v3/channels`, and `/v3/message-changes?endpoint_id=&after=&limit=`. The endpoint ID is required exactly once for v3 history; do not merge cursor sequences across endpoints. v3 uses sanitized registered endpoint sources and has the secondary-send blocker documented above.
+- **Gateway Provider:** The authority is `${applicationId}.gateway`; immutable v1 read-only endpoints are `/v1/status`, `/v1/envelopes`, `/v1/nodes`, and `/v1/channels`. Additive v2 read-only endpoints are `/v2/status`, `/v2/channels`, and bounded `/v2/message-changes?after=&limit=`. v2 exposes only sanitized Meshtastic catalog/native broadcast-text facts: never raw PSKs, raw radio configuration, precise location, or canonical NTsocial history. Encrypted source-channel IDs are domain-separated SHA-256 digests of resolved PSKs; CLEAR channels retain the existing deterministic public identity rules. `/v2/message-changes` exposes only rows whose stable identity was captured at insertion and never derives an old row from the currently configured slot. Do not add unversioned endpoints, Provider mutations, or selection/sort semantics. Additive v3 read-only endpoints are `/v3/status`, `/v3/endpoints`, `/v3/channels`, and `/v3/message-changes?endpoint_id=&after=&limit=`. The endpoint ID is required exactly once for v3 history; do not merge cursor sequences across endpoints. v3 uses sanitized registered endpoint sources and isolated secondary durable dispatch, as documented above.
 - **Gateway Cursor Domains:** `history_epoch` is a durable random value in the active per-radio Room database. Initial creation and whole-history clear persist it transactionally; switching databases exposes the target database's stored epoch rather than rotating on every switch. `not-ready` is transient and must not be persisted or treated as a reset. The current active publisher has a known defect: `getGatewayHistoryState()` captures the epoch once per subscription, so a whole-history clear can publish sequence zero with the old epoch until the history flow is resubscribed, for example by an active-database switch or process restart. Do not claim live clear/reset correctness until this is fixed and device-tested. `radio_generation` is opaque random process state; it rotates on process restart and any `ChannelSet` inequality, potentially including LoRa/config differences not exported in the catalog, invalidates every route token, and must never be a ChannelSet/config digest.
 - **Native Text Insertion Cursor:** `/v2/message-changes` is an insertion cursor, not a general change feed. It includes only unfiltered broadcast `TEXT_MESSAGE_APP` rows inserted by live ingress, Store & Forward router-text broadcast, MeshLink's own native send, or accepted Gateway `SEND_CHANNEL_TEXT`, with both stable identity columns captured at insertion. Gateway-originated rows may additionally expose nullable `origin_client_message_id` for reliable parent own-echo correlation; it is local metadata and never enters the Meshtastic packet/protobuf. DMs, reactions, filtered rows, state/control traffic, port-256 NTsocial overlays, and upgraded nullable legacy rows are excluded; updates and deletes create neither a new sequence nor a tombstone. A nullable legacy row must never be recomputed from current slot/config state because slot reuse could assign channel A's message to channel B. `change_seq` is the monotonically increasing Room packet `uuid` within one database, not a message ID, timestamp, delivery state, or cross-database order. The v2 status high-water uses the same stable-only predicate, so it never advances to an unexportable nullable row. The default page is `after=0&limit=100`, the maximum limit is 200, and negative/repeated/unknown parameters are rejected. Consumers must pair the cursor with a real epoch, restart at zero on epoch change, advance to the maximum returned sequence, and retry without mutating durable cursor state while status is `not-ready`.
 - **Room 43 Gateway Schema:** Auto-migration 41-to-42 adds nullable `gateway_source_channel_id` and `gateway_source_message_id` packet columns, non-unique lookup indexes, and the `gateway_metadata` table. Auto-migration 42-to-43 adds only nullable `origin_client_message_id`; it does not backfill or alter serialized packet/protobuf data. Rows that remain without captured stable identity stay available only to MeshLink's internal/local compatibility views and are not Gateway v2 history. Duplicate Room rows may share a stable source-message ID, so clients dedupe by exported identity rather than assuming database-row uniqueness. Generated schemas/unit gates are not retained proof of real on-device migrations.
@@ -248,10 +251,8 @@ Use Compose Multiplatform, Navigation 3, and the repository's existing architect
 - **CMP Over Android:** Use Compose Multiplatform constraints. Pre-format floats with `NumberFormatter.format()`. Use `MeshtasticNavDisplay` and `NavigationBackHandler`.
 - **Zero Lint Tolerance:** Do not add or suppress new findings; `spotlessCheck` and every
   changed-module Detekt task must pass, and full root `detekt` remains the authoritative release gate.
-  The September 5 source baseline is not full-root green: eight findings in `core/ble` (three),
-  `core/domain` (one), `core/model` (one), `core/network` (one), and `core/ui` (two).
-  Record that blocker honestly on unrelated work, and fix it rather than suppress it when those
-  files or the release gate are in scope.
+  The September 16 repair baseline passes full-root Detekt. Preserve the older September 5 failure
+  in its historical audit; record any new failure honestly rather than suppressing it.
 - **Verify Before Push:** Treat any push as verify-then-push. Check GitHub Actions state before pushing when GitHub context is relevant.
 - **Never Touch Protos or Secrets:** `core/proto` is an upstream submodule. Secrets are git-ignored and must not be logged, committed, or exposed.
 - **Privacy First:** Never log or expose PII, precise location, private messages, cryptographic keys, tokens, or pairing credentials.

@@ -117,6 +117,7 @@ class NtsocialGatewayRepositoryImplTest {
             databaseManager,
             RadioIngressWorkTracker(),
             CoroutineScope(SupervisorJob()),
+            ingressSessionGate = com.ntsocial.meshlink.core.repository.GatewayIngressSessionGate(),
         )
 
     @Test
@@ -158,6 +159,7 @@ class NtsocialGatewayRepositoryImplTest {
                 databaseManager,
                 RadioIngressWorkTracker(),
                 backgroundScope,
+                ingressSessionGate = com.ntsocial.meshlink.core.repository.GatewayIngressSessionGate(),
             )
         activateInbound(scopedRepository)
 
@@ -304,6 +306,7 @@ class NtsocialGatewayRepositoryImplTest {
                 replacementDb,
                 RadioIngressWorkTracker(),
                 backgroundScope,
+                ingressSessionGate = com.ntsocial.meshlink.core.repository.GatewayIngressSessionGate(),
             )
 
         // Do not run the repository's asynchronous collectors before activation.
@@ -362,6 +365,7 @@ class NtsocialGatewayRepositoryImplTest {
                 exactDb,
                 RadioIngressWorkTracker(),
                 backgroundScope,
+                ingressSessionGate = com.ntsocial.meshlink.core.repository.GatewayIngressSessionGate(),
             )
         assertTrue(scopedRepository.activateInboundSession(exactRadio.radioSessionState.value.epoch))
 
@@ -435,6 +439,7 @@ class NtsocialGatewayRepositoryImplTest {
                 FakeDatabaseManager().apply { setCurrentAddressForTest(RADIO_A) },
                 RadioIngressWorkTracker(),
                 backgroundScope,
+                ingressSessionGate = com.ntsocial.meshlink.core.repository.GatewayIngressSessionGate(),
             )
         val sessionEpoch = exactRadio.radioSessionState.value.epoch
         assertTrue(scopedRepository.activateInboundSession(sessionEpoch))
@@ -496,6 +501,7 @@ class NtsocialGatewayRepositoryImplTest {
                 FakeDatabaseManager().apply { setCurrentAddressForTest(RADIO_A) },
                 RadioIngressWorkTracker(),
                 backgroundScope,
+                ingressSessionGate = com.ntsocial.meshlink.core.repository.GatewayIngressSessionGate(),
             )
         val sessionEpoch = exactRadio.radioSessionState.value.epoch
         assertTrue(scopedRepository.activateInboundSession(sessionEpoch))
@@ -544,6 +550,7 @@ class NtsocialGatewayRepositoryImplTest {
                 FakeDatabaseManager().apply { setCurrentAddressForTest(RADIO_A) },
                 RadioIngressWorkTracker(),
                 backgroundScope,
+                ingressSessionGate = com.ntsocial.meshlink.core.repository.GatewayIngressSessionGate(),
             )
         val sessionEpoch = exactRadio.radioSessionState.value.epoch
         assertTrue(scopedRepository.activateInboundSession(sessionEpoch))

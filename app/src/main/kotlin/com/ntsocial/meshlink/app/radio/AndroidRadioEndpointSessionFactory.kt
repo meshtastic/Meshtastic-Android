@@ -245,6 +245,7 @@ private class SecondaryRadioEndpointSession(
         // Resolving the connection manager activates its endpoint-local transport and canonical-state collectors.
         koinScope.get<com.ntsocial.meshlink.core.repository.MeshConnectionManager>()
         radio.resetReceivedBuffer()
+        koinScope.get<com.ntsocial.meshlink.core.data.manager.SessionMessageQueue>().start()
         wired = true
         serviceScope.handledLaunch {
             radio.receivedData.collect { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum.value) }

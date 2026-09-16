@@ -89,7 +89,7 @@ class NtsocialGatewayRepositoryImpl(
     private val databaseManager: DatabaseManager,
     private val ingressWorkTracker: RadioIngressWorkTracker,
     @Named("ServiceScope") private val scope: CoroutineScope,
-    private val ingressSessionGate: GatewayIngressSessionGate = GatewayIngressSessionGate(),
+    private val ingressSessionGate: GatewayIngressSessionGate,
 ) : NtsocialGatewayRepository {
     private val _cachedEnvelopes = MutableStateFlow<List<NtsocialCachedEnvelope>>(emptyList())
     private val _defaultChannelStatus = MutableStateFlow(NtsocialDefaultChannelStatus())
@@ -151,7 +151,12 @@ class NtsocialGatewayRepositoryImpl(
     override suspend fun activateInboundSession(expectedRadioSessionEpoch: Long): Boolean =
         inboundIdentityMutex.withLock {
             val capturedGate = rotateInboundActivation(replacementExpectedEpoch = expectedRadioSessionEpoch)
-            refreshInboundSession(expectedRadioSessionEpoch, capturedGate)
+            refreshInboundSession(expectedRadioSessionEpoch, capturedGate).also { active ->
+                Logger.i {
+                    "gateway_ingress stage=activation epoch=$expectedRadioSessionEpoch active=$active " +
+                        "gateActive=${ingressSessionGate.isActive(expectedRadioSessionEpoch)}"
+                }
+            }
         }
 
     override fun invalidateInboundSession() {
