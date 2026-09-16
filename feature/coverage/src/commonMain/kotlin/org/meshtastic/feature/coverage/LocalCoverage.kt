@@ -52,36 +52,65 @@ class LocalCoverage(
      * @param radials how many bearings to sweep; the planner's own sweep uses one per perimeter pixel
      * @param samplesPerRadial profile points along each radial, including the transmitter
      */
-    suspend fun sweep(site: Site, radials: Int = DEFAULT_RADIALS, samplesPerRadial: Int = DEFAULT_SAMPLES): Coverage {
+    /**
+     * Sweep radials out from [site] and return received signal strength at every sample point.
+     *
+     * Terrain profile resolution and receiver spacing are deliberately **decoupled**. P.1812
+     * evaluates diffraction across the whole profile between transmitter and receiver, so the
+     * profile has to be sampled near the terrain's own resolution — Mapterhorn at z11 is ~75 m/px.
+     * Sampling it at the receiver spacing instead (900 m over a 30 km radius) makes the model see a
+     * jagged, aliased profile and invent diffraction loss that is not there: visible as spurious
+     * rings and spokes in the plot, and a badly depressed reachable fraction.
+     *
+     * The expensive part is the number of [P1812.predict] calls, not the profile length, so a dense
+     * profile with sparse receivers is both more accurate and no more costly.
+     *
+     * @param site the transmitter
+     * @param radials how many bearings to sweep
+     * @param receiversPerRadial how many receiver positions to evaluate along each radial
+     * @param profileStepKm spacing of the terrain profile itself
+     */
+    suspend fun sweep(
+        site: Site,
+        radials: Int = DEFAULT_RADIALS,
+        receiversPerRadial: Int = DEFAULT_RECEIVERS,
+        profileStepKm: Double = DEFAULT_PROFILE_STEP_KM,
+    ): Coverage {
         require(radials >= MIN_RADIALS) { "radials must be >= $MIN_RADIALS, got $radials" }
-        require(samplesPerRadial >= MIN_SAMPLES) { "samplesPerRadial must be >= $MIN_SAMPLES, got $samplesPerRadial" }
+        require(receiversPerRadial >= MIN_RECEIVERS) {
+            "receiversPerRadial must be >= $MIN_RECEIVERS, got $receiversPerRadial"
+        }
+        require(profileStepKm > 0) { "profileStepKm must be > 0, got $profileStepKm" }
 
-        val points = ArrayList<CoveragePoint>(radials * samplesPerRadial)
-        val stepKm = site.radiusKm / (samplesPerRadial - 1)
+        // Profile points, at terrain resolution.
+        val profilePoints = maxOf((site.radiusKm / profileStepKm).toInt() + 1, MIN_PROFILE_POINTS)
+        val stepKm = site.radiusKm / (profilePoints - 1)
+        // Which profile indices carry a receiver. Never the first two: P.1812 needs interior points.
+        val firstReceiver = MIN_PROFILE_POINTS - 1
+        val receiverStride = maxOf((profilePoints - firstReceiver) / receiversPerRadial, 1)
+
+        val points = ArrayList<CoveragePoint>(radials * receiversPerRadial)
 
         for (i in 0 until radials) {
             val bearing = 360.0 * i / radials
-            // One profile per radial, reused for every receiver position along it: the profile to a
-            // point 5 km out is the prefix of the profile to a point 20 km out.
-            val lats = DoubleArray(samplesPerRadial)
-            val lons = DoubleArray(samplesPerRadial)
-            val heights = DoubleArray(samplesPerRadial)
-            for (s in 0 until samplesPerRadial) {
+            val lats = DoubleArray(profilePoints)
+            val lons = DoubleArray(profilePoints)
+            val heights = DoubleArray(profilePoints)
+            for (s in 0 until profilePoints) {
                 val (lat, lon) = destination(site.latitude, site.longitude, bearing, stepKm * s)
                 lats[s] = lat
                 lons[s] = lon
                 heights[s] = elevation.elevationMeters(lat, lon)
             }
 
-            // Skip the first few samples: P.1812 needs a profile with interior points, and a
-            // receiver on top of the transmitter is not a useful prediction anyway.
-            for (end in MIN_PROFILE_POINTS - 1 until samplesPerRadial) {
+            var end = firstReceiver
+            while (end < profilePoints) {
                 val n = end + 1
                 val d = DoubleArray(n) { stepKm * it }
                 val h = DoubleArray(n) { heights[it] }
                 val prediction = P1812.predict(
                     path = TerrainPath(d, h, DoubleArray(n) { site.clutterHeightM }, IntArray(n) { INLAND }),
-                    frequencyGhz = site.frequencyMhz / 1000.0,
+                    frequencyGhz = site.frequencyMhz / MHZ_PER_GHZ,
                     txHeightM = site.txHeightM,
                     rxHeightM = site.rxHeightM,
                     timePercent = site.timePercent,
@@ -96,6 +125,7 @@ class LocalCoverage(
                     rxGainDbi = site.rxGainDbi,
                 ).value
                 points.add(CoveragePoint(lats[end], lons[end], rxDbm))
+                end += receiverStride
             }
         }
         return Coverage(site, points)
@@ -103,10 +133,13 @@ class LocalCoverage(
 
     private companion object {
         const val DEFAULT_RADIALS = 180
-        const val DEFAULT_SAMPLES = 60
+        const val DEFAULT_RECEIVERS = 40
+        /** ~100 m, close to Mapterhorn z11's ~75 m/px. */
+        const val DEFAULT_PROFILE_STEP_KM = 0.1
         const val MIN_RADIALS = 4
-        const val MIN_SAMPLES = 4
+        const val MIN_RECEIVERS = 2
         const val MIN_PROFILE_POINTS = 3
+        const val MHZ_PER_GHZ = 1000.0
         const val INLAND = 4
     }
 }
@@ -153,7 +186,7 @@ data class Coverage(val site: Site, val points: List<CoveragePoint>) {
 private const val EARTH_RADIUS_KM = 6371.0
 
 /** Great-circle destination from a start point along [bearingDeg] for [distanceKm]. */
-internal fun destination(latDeg: Double, lonDeg: Double, bearingDeg: Double, distanceKm: Double): Pair<Double, Double> {
+fun destination(latDeg: Double, lonDeg: Double, bearingDeg: Double, distanceKm: Double): Pair<Double, Double> {
     val ang = distanceKm / EARTH_RADIUS_KM
     val lat1 = latDeg.toRadians()
     val lon1 = lonDeg.toRadians()
@@ -163,8 +196,8 @@ internal fun destination(latDeg: Double, lonDeg: Double, bearingDeg: Double, dis
     return lat2.toDegrees() to lon2.toDegrees()
 }
 
-/** Great-circle distance between two points, km. */
-internal fun haversineKm(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+/** Great-circle distance between two points, km. Public: a consumer plotting a [Coverage] needs it. */
+fun haversineKm(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
     val dLat = (lat2 - lat1).toRadians()
     val dLon = (lon2 - lon1).toRadians()
     val a = sin(dLat / 2) * sin(dLat / 2) +

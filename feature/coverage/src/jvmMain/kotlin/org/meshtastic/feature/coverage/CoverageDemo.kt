@@ -57,7 +57,7 @@ object CoverageDemo {
             lateinit var coverage: Coverage
             val ms = measureTimeMillis {
                 coverage = runBlocking {
-                    LocalCoverage(elevation).sweep(site, radials = RADIALS, samplesPerRadial = SAMPLES)
+                    LocalCoverage(elevation).sweep(site, radials = RADIALS, receiversPerRadial = RECEIVERS)
                 }
             }
             val reach = coverage.reachable
@@ -119,5 +119,5 @@ object CoverageDemo {
     private const val DEFAULT_LAT = 47.6062 // Seattle — real relief nearby
     private const val DEFAULT_LON = -122.3321
     private const val RADIALS = 120
-    private const val SAMPLES = 40
+    private const val RECEIVERS = 40
 }

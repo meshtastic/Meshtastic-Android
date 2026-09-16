@@ -35,7 +35,7 @@ class LocalCoverageTest {
 
     @Test
     fun signalFallsOffWithDistance() = runTest {
-        val coverage = LocalCoverage(flat).sweep(site(), radials = 4, samplesPerRadial = 20)
+        val coverage = LocalCoverage(flat).sweep(site(), radials = 4, receiversPerRadial = 20)
         // Take one radial's worth of points and check monotone decay over flat ground.
         val radial = coverage.points.take(18)
         val distances = radial.map { haversineKm(47.6, -122.2, it.latitude, it.longitude) }
@@ -55,7 +55,7 @@ class LocalCoverageTest {
             val northKm = (lat - 47.6) * 111.0
             if (northKm in 4.5..5.5) 400.0 else 0.0
         }
-        val coverage = LocalCoverage(ridged).sweep(site(), radials = 4, samplesPerRadial = 24)
+        val coverage = LocalCoverage(ridged).sweep(site(), radials = 4, receiversPerRadial = 24)
         val far = 8.0
         fun strengthTowards(bearingIndex: Int): Double {
             val perRadial = coverage.points.size / 4
@@ -70,8 +70,8 @@ class LocalCoverageTest {
 
     @Test
     fun higherTransmitPowerReachesFurther() = runTest {
-        val low = LocalCoverage(flat).sweep(site(txPowerDbm = 17.0), radials = 4, samplesPerRadial = 20)
-        val high = LocalCoverage(flat).sweep(site(txPowerDbm = 30.0), radials = 4, samplesPerRadial = 20)
+        val low = LocalCoverage(flat).sweep(site(txPowerDbm = 17.0), radials = 4, receiversPerRadial = 20)
+        val high = LocalCoverage(flat).sweep(site(txPowerDbm = 30.0), radials = 4, receiversPerRadial = 20)
         assertTrue(
             high.maxRangeKm >= low.maxRangeKm,
             "30 dBm (${high.maxRangeKm} km) should reach at least as far as 17 dBm (${low.maxRangeKm} km)",
@@ -81,7 +81,7 @@ class LocalCoverageTest {
 
     @Test
     fun reachableRespectsReceiverSensitivity() = runTest {
-        val coverage = LocalCoverage(flat).sweep(site(), radials = 4, samplesPerRadial = 12)
+        val coverage = LocalCoverage(flat).sweep(site(), radials = 4, receiversPerRadial = 12)
         assertTrue(coverage.points.isNotEmpty())
         assertTrue(coverage.reachable.all { it.rxDbm >= coverage.site.rxSensitivityDbm })
         assertTrue(coverage.points.none { it.rxDbm >= coverage.site.rxSensitivityDbm && it !in coverage.reachable })
@@ -89,9 +89,11 @@ class LocalCoverageTest {
 
     @Test
     fun sweepCoversEveryBearing() = runTest {
-        val coverage = LocalCoverage(flat).sweep(site(), radials = 8, samplesPerRadial = 6)
-        // 8 radials x (6 samples - 2 skipped leading points) = 32
-        assertEquals(8 * 4, coverage.points.size)
+        val coverage = LocalCoverage(flat).sweep(site(), radials = 8, receiversPerRadial = 6)
+        // Receivers are strided along a dense profile, so integer stride rounding can yield a few
+        // more per radial than requested. What must hold is that every bearing contributes equally.
+        assertEquals(0, coverage.points.size % 8, "each bearing should contribute the same count")
+        assertTrue(coverage.points.size >= 8 * 6, "at least the requested receivers per bearing")
     }
 
     @Test
