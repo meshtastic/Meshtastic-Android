@@ -101,3 +101,31 @@ class LocalCoverageTest {
         assertTrue(abs(back - 25.0) < 0.01, "round trip was $back km, expected 25")
     }
 }
+
+/**
+ * The one-decimal helper that replaced `String.format`, which does not exist off the JVM.
+ *
+ * Exact halves are deliberately not asserted: `roundToLong` breaks ties toward positive infinity,
+ * and whether a decimal like -76.15 even *is* a tie depends on its binary representation
+ * (-76.15 * 10 is -761.4999999999999, so it rounds to -76.1). Immaterial for displaying dBm, and
+ * a test that pinned it would be asserting floating-point trivia rather than behaviour.
+ */
+class ToFixed1Test {
+    @Test
+    fun formatsToOneDecimalPlace() {
+        assertEquals("-76.1", (-76.14).toFixed1())
+        assertEquals("-76.2", (-76.16).toFixed1())
+        assertEquals("0.0", 0.0.toFixed1())
+        assertEquals("130.0", 130.0.toFixed1())
+        assertEquals("-130.0", (-129.999).toFixed1())
+        assertEquals("7.5", 7.45001.toFixed1())
+    }
+
+    @Test
+    fun roundTripsThroughGeoJson() {
+        // The value that actually matters: what lands in the exported feature properties.
+        assertEquals("-76.1", (-76.14).toFixed1())
+        assertEquals("-145.4", (-145.44).toFixed1())
+        assertEquals("-61.7", (-61.72).toFixed1())
+    }
+}

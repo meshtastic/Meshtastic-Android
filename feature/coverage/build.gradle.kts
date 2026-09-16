@@ -20,19 +20,39 @@ plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 // Pure computation over org.meshtastic:kp1812 (ITU-R P.1812) and an ElevationSource — no Compose
 // UI, no rendering, no network. The app supplies elevation from feature/map-terrain's Mapterhorn
 // tiles; tests supply a lambda.
-// SPIKE SCOPE: jvm() only. kp1812 publishes no androidTarget (Android is meant to consume its
-// jvm artifact, the same choice kzstd makes), and proving that resolution path is a separate
-// question from proving the model works. Desktop is also where the current experience is worst:
-// it cannot run the WebView at all, so today it opens a browser and asks the user to export and
-// re-import a file by hand.
 kotlin {
     jvm()
+
+    // kp1812 publishes no androidTarget - Android resolves its jvm artifact, the same way this
+    // repo already consumes takpacket-sdk-jvm.
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.feature.coverage"
+        androidResources.enable = false
+    }
 
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kp1812)
             implementation(libs.kotlinx.coroutines.core)
+            // Elevation comes from the same Mapterhorn archives the map already uses for hillshade
+            // and contours. Over flat synthetic ground a coverage plot is a bullseye and proves
+            // nothing; against real terrain it has to show ridges shadowing valleys.
+            implementation(projects.feature.mapTerrain)
         }
+
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
+        jvmTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
+}
+
+// SPIKE: run a real prediction and write a PNG + GeoJSON, so the replacement can be *seen*.
+//   ./gradlew :feature:coverage:coverageDemo -PuseMavenLocal
+tasks.register<JavaExec>("coverageDemo") {
+    group = "verification"
+    description = "Compute real coverage from Mapterhorn terrain via kp1812 and render it."
+    val jvmMain = kotlin.targets.getByName("jvm").compilations.getByName("main")
+    classpath = jvmMain.output.allOutputs + jvmMain.runtimeDependencyFiles!!
+    mainClass.set("org.meshtastic.feature.coverage.CoverageDemo")
+    args = (providers.gradleProperty("demoArgs").orNull ?: "").split(" ").filter { it.isNotBlank() }
 }
