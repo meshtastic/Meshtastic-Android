@@ -131,17 +131,19 @@ paid, is allowed. The license and the
 conditions, and renaming, moving files, or regenerating headers does not remove them.
 
 - **Keep the license.** Your version is GPL-3.0-or-later with `LICENSE` intact. Publish the
-  exact source of every binary you distribute, for example by tagging the commit each store
-  release was built from (GPL section 6). Added restrictions, or a binary without source,
-  end your license (section 8).
+  Corresponding Source of every binary you distribute (section 6d — a store listing is a
+  designated place to offer it from), for example by tagging the commit each store release
+  was built from. Added restrictions, or a binary without source, end your license
+  (section 8).
 - **Keep the notices.** Every `Copyright (c) <year> Meshtastic LLC` header and the license
   text under it stay as they are. Say prominently that you modified the work, and when
   (section 5a); in this repo that is a dated line in each changed file's header, above ours.
   Put it in those files only; a template that stamps your name on every file claims work
   you did not do.
-- **Keep the legal notices in the app.** The About screen shows the copyright notice and
-  links to the source, and the Acknowledgements screen lists third-party licenses. Keep
-  them (section 5d), and keep Meshtastic LLC named there.
+- **Keep the legal notices in the app.** Keep the About screen's copyright notice and its
+  link to the source, with Meshtastic LLC still named (section 5d). Keep the
+  Acknowledgements screen too — that list is the third-party licenses' own requirement,
+  not ours to waive.
 - **Leave the trademarks out of your branding.** The GPL is a copyright license and grants
   no trademark rights. The Meshtastic name and logo are trademarks of Meshtastic LLC. Do
   not use them in your app name, icon, store listing title, or domain, and do not
