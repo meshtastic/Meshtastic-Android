@@ -16,15 +16,12 @@
  */
 package org.meshtastic.feature.coverage
 
-import kotlin.math.cos
-
 /**
  * Received signal strength on a regular lat/lon grid.
  *
- * A grid, not the polar sweep the first version produced, because coverage has to be drawn as
- * **filled iso-bands** — the hosted planner runs marching squares over exactly this shape. Polar
- * samples exported as GeoJSON `Point` features get clustered by the map and render as a swarm of
- * identical node markers, which is what they are.
+ * A grid, not the polar sweep the first version produced, because coverage has to be drawn as **filled iso-bands** —
+ * the hosted planner runs marching squares over exactly this shape. Polar samples exported as GeoJSON `Point` features
+ * get clustered by the map and render as a swarm of identical node markers, which is what they are.
  *
  * `NaN` marks a cell that was not computed.
  */
@@ -79,38 +76,17 @@ class CoverageGrid(
         }
 }
 
-/** Compute coverage onto a regular grid centred on [site]. */
+/**
+ * Compute coverage onto a regular grid centred on [site].
+ *
+ * Swept in polar and resampled: see [sweepPolar]. The grid resolution is therefore free of the prediction budget, so it
+ * can be fine enough for the contour tracer without costing anything.
+ */
 suspend fun LocalCoverage.sweepGrid(
     site: Site,
     resolution: Int = DEFAULT_GRID,
-    profileStepKm: Double = 0.1,
-): CoverageGrid {
-    require(resolution >= MIN_GRID) { "resolution must be >= $MIN_GRID, got $resolution" }
+    profileStepKm: Double = DEFAULT_PROFILE_STEP_KM,
+): CoverageGrid = sweepPolar(site, profileStepKm = profileStepKm).toGrid(resolution)
 
-    // A degree of longitude shrinks with latitude; keep the box square on the ground.
-    val latSpanDeg = site.radiusKm / KM_PER_DEG_LAT
-    val lonSpanDeg = latSpanDeg / cos(site.latitude * DEG_TO_RAD)
-    val north = site.latitude + latSpanDeg
-    val south = site.latitude - latSpanDeg
-    val east = site.longitude + lonSpanDeg
-    val west = site.longitude - lonSpanDeg
-
-    val out = DoubleArray(resolution * resolution) { Double.NaN }
-    for (y in 0 until resolution) {
-        val lat = north - (north - south) * y / (resolution - 1)
-        for (x in 0 until resolution) {
-            val lon = west + (east - west) * x / (resolution - 1)
-            val km = haversineKm(site.latitude, site.longitude, lat, lon)
-            // Outside the requested radius, and too close to profile at all, stay NaN.
-            if (km > site.radiusKm || km < profileStepKm * MIN_PROFILE_STEPS) continue
-            out[y * resolution + x] = predictAt(site, lat, lon, km, profileStepKm)
-        }
-    }
-    return CoverageGrid(site, resolution, resolution, north, south, east, west, out)
-}
-
-internal const val DEFAULT_GRID = 96
-private const val MIN_GRID = 8
-private const val MIN_PROFILE_STEPS = 3
-private const val KM_PER_DEG_LAT = 111.32
-private const val DEG_TO_RAD = 0.017453292519943295
+/** 256 cells across the coverage box is ~195 m per cell at a 25 km radius. */
+internal const val DEFAULT_GRID = 256

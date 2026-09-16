@@ -1,7 +1,18 @@
 /*
  * Copyright (c) 2026 Meshtastic LLC
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.coverage
 
@@ -12,11 +23,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Spike verification: the local model behaves the way a coverage prediction must, without
- * needing a network, a WebView or a terrain download.
+ * Spike verification: the local model behaves the way a coverage prediction must, without needing a network, a WebView
+ * or a terrain download.
  *
- * These are behavioural assertions, not conformance ones — `kp1812`'s own suite already checks
- * the model against the ITU reference. What matters here is that this module drives it correctly.
+ * These are behavioural assertions, not conformance ones — `kp1812`'s own suite already checks the model against the
+ * ITU reference. What matters here is that this module drives it correctly.
  */
 class LocalCoverageTest {
 
@@ -59,7 +70,9 @@ class LocalCoverageTest {
         val far = 8.0
         fun strengthTowards(bearingIndex: Int): Double {
             val perRadial = coverage.points.size / 4
-            return coverage.points.drop(bearingIndex * perRadial).take(perRadial)
+            return coverage.points
+                .drop(bearingIndex * perRadial)
+                .take(perRadial)
                 .minByOrNull { abs(haversineKm(47.6, -122.2, it.latitude, it.longitude) - far) }!!
                 .rxDbm
         }
@@ -107,10 +120,10 @@ class LocalCoverageTest {
 /**
  * The one-decimal helper that replaced `String.format`, which does not exist off the JVM.
  *
- * Exact halves are deliberately not asserted: `roundToLong` breaks ties toward positive infinity,
- * and whether a decimal like -76.15 even *is* a tie depends on its binary representation
- * (-76.15 * 10 is -761.4999999999999, so it rounds to -76.1). Immaterial for displaying dBm, and
- * a test that pinned it would be asserting floating-point trivia rather than behaviour.
+ * Exact halves are deliberately not asserted: `roundToLong` breaks ties toward positive infinity, and whether a decimal
+ * like -76.15 even *is* a tie depends on its binary representation (-76.15 * 10 is -761.4999999999999, so it rounds to
+ * -76.1). Immaterial for displaying dBm, and a test that pinned it would be asserting floating-point trivia rather than
+ * behaviour.
  */
 class ToFixed1Test {
     @Test

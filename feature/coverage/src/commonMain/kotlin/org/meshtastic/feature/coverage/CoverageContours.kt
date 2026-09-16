@@ -16,20 +16,23 @@
  */
 package org.meshtastic.feature.coverage
 
+import kotlin.math.abs
+import kotlin.math.roundToLong
+
 /**
  * Turns a [CoverageGrid] into filled iso-bands — "signal ≥ X dBm" polygons — as GeoJSON.
  *
- * This is the shape a map can actually draw coverage with, and the shape the hosted Site Planner
- * exports. Emitting the sample points instead produces a swarm of markers that the map clusters,
- * which is what the first version did.
+ * This is the shape a map can actually draw coverage with, and the shape the hosted Site Planner exports. Emitting the
+ * sample points instead produces a swarm of markers that the map clusters, which is what the first version did.
  *
- * Marching squares, tracing each band's boundary cell by cell. Deliberately simple: cells at or
- * above the threshold contribute their own square to the band, so the result is a union of cell
- * rectangles rather than a smoothed isoline. At ~100 m cells that reads as a solid coverage area,
- * and it avoids the ambiguous-saddle handling a true isoline tracer needs.
+ * Marching squares, tracing each band's boundary cell by cell. Deliberately simple: cells at or above the threshold
+ * contribute their own square to the band, so the result is a union of cell rectangles rather than a smoothed isoline.
+ * At ~100 m cells that reads as a solid coverage area, and it avoids the ambiguous-saddle handling a true isoline
+ * tracer needs.
  */
-internal fun CoverageGrid.bands(thresholdsDbm: List<Double>): List<CoverageBand> =
-    thresholdsDbm.sorted().map { threshold ->
+internal fun CoverageGrid.bands(thresholdsDbm: List<Double>): List<CoverageBand> = thresholdsDbm
+    .sorted()
+    .map { threshold ->
         val rings = mutableListOf<List<Pair<Double, Double>>>()
         // Greedily merge horizontal runs of in-band cells into rectangles: far fewer polygons than
         // one per cell, and the map renders a handful of rings rather than thousands.
@@ -42,12 +45,16 @@ internal fun CoverageGrid.bands(thresholdsDbm: List<Double>): List<CoverageBand>
                     continue
                 }
                 var runEnd = x
-                while (runEnd + 1 < width - 1 && !taken[y * width + runEnd + 1] && inBand(runEnd + 1, y, threshold)) {
+                while (
+                    runEnd + 1 < width - 1 && !taken[y * width + runEnd + 1] && inBand(runEnd + 1, y, threshold)
+                ) {
                     runEnd++
                 }
                 // Extend downwards while the whole run stays in band.
                 var runBottom = y
-                while (runBottom + 1 < height - 1 && (x..runEnd).all { inBand(it, runBottom + 1, threshold) } &&
+                while (
+                    runBottom + 1 < height - 1 &&
+                    (x..runEnd).all { inBand(it, runBottom + 1, threshold) } &&
                     (x..runEnd).none { taken[(runBottom + 1) * width + it] }
                 ) {
                     runBottom++
@@ -68,7 +75,8 @@ internal fun CoverageGrid.bands(thresholdsDbm: List<Double>): List<CoverageBand>
             }
         }
         CoverageBand(threshold, rings)
-    }.filter { it.rings.isNotEmpty() }
+    }
+    .filter { it.rings.isNotEmpty() }
 
 private fun CoverageGrid.inBand(x: Int, y: Int, threshold: Double): Boolean {
     val v = at(x, y)
@@ -81,8 +89,8 @@ internal class CoverageBand(val thresholdDbm: Double, val rings: List<List<Pair<
 /**
  * The coverage as GeoJSON polygons with simplestyle-spec fills — what the map draws as a layer.
  *
- * Bands run from the receiver's sensitivity upward, so the outermost polygon is "a node here can
- * hear this site at all" and the inner ones are progressively stronger signal.
+ * Bands run from the receiver's sensitivity upward, so the outermost polygon is "a node here can hear this site at all"
+ * and the inner ones are progressively stronger signal.
  */
 fun CoverageGrid.toGeoJson(bandCount: Int = DEFAULT_BANDS): String {
     val floor = site.rxSensitivityDbm
@@ -92,20 +100,24 @@ fun CoverageGrid.toGeoJson(bandCount: Int = DEFAULT_BANDS): String {
     val step = (ceiling - floor) / bandCount
     val thresholds = (0 until bandCount).map { floor + step * it }
 
-    val features = bands(thresholds).mapIndexed { index, band ->
-        val t = index.toDouble() / (bandCount - 1).coerceAtLeast(1)
-        val color = bandColor(t)
-        // GeoJSON MultiPolygon nests coordinates[polygon][ring][position]. Emitting the rings
-        // one level flatter makes a Polygon-with-holes wearing a MultiPolygon label, which MapLibre
-        // silently drops - the layer is added and nothing draws.
-        val polygons = band.rings.joinToString(",") { ring ->
-            "[[" + ring.joinToString(",") { (lon, lat) -> "[$lon,$lat]" } + "]]"
-        }
-        """    {"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[$polygons]},""" +
-            """"properties":{"title":"≥ ${band.thresholdDbm.toFixed1()} dBm",""" +
-            """"dbm":${band.thresholdDbm.toFixed1()},"fill":"$color","fill-opacity":${bandOpacity(t)},""" +
-            """"stroke":"$color","stroke-opacity":0.0,"stroke-width":0}}"""
-    }.joinToString(",\n")
+    val features =
+        bands(thresholds)
+            .mapIndexed { index, band ->
+                val t = index.toDouble() / (bandCount - 1).coerceAtLeast(1)
+                val color = bandColor(t)
+                // GeoJSON MultiPolygon nests coordinates[polygon][ring][position]. Emitting the rings
+                // one level flatter makes a Polygon-with-holes wearing a MultiPolygon label, which MapLibre
+                // silently drops - the layer is added and nothing draws.
+                val polygons =
+                    band.rings.joinToString(",") { ring ->
+                        "[[" + ring.joinToString(",") { (lon, lat) -> "[$lon,$lat]" } + "]]"
+                    }
+                """    {"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[$polygons]},""" +
+                    """"properties":{"title":"≥ ${band.thresholdDbm.toFixed1()} dBm",""" +
+                    """"dbm":${band.thresholdDbm.toFixed1()},"fill":"$color","fill-opacity":${bandOpacity(t)},""" +
+                    """"stroke":"$color","stroke-opacity":0.0,"stroke-width":0}}"""
+            }
+            .joinToString(",\n")
 
     return """{
   "type": "FeatureCollection",
@@ -134,3 +146,16 @@ private const val BASE_OPACITY = 0.15
 private const val OPACITY_RANGE = 0.45
 private const val EMPTY_FEATURE_COLLECTION =
     """{"type":"FeatureCollection","properties":{"generator":"meshtastic-kp1812"},"features":[]}"""
+
+/**
+ * One decimal place, without `String.format` — which is JVM-only and does not exist on Kotlin/Native or wasm. Adding
+ * the native targets is what surfaced that.
+ */
+internal fun Double.toFixed1(): String {
+    val scaled = (this * TENTHS).roundToLong()
+    val sign = if (scaled < 0) "-" else ""
+    val magnitude = abs(scaled)
+    return "$sign${magnitude / TENTHS}.${magnitude % TENTHS}"
+}
+
+private const val TENTHS = 10
