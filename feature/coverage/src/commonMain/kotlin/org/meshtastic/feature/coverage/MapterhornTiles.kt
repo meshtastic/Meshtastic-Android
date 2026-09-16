@@ -19,7 +19,9 @@ package org.meshtastic.feature.coverage
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsBytes
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
@@ -54,12 +56,27 @@ internal class MapterhornTiles(
         return readLocal(source, tile) ?: download(zoom, x, y)?.also { writeLocal(source, tile, it) }
     }
 
+    /**
+     * Only 404 means "no tile here" — ocean, or past the endpoint's deepest zoom — and only 404 is allowed to return
+     * null, because null is cached as flat ground for the rest of the process. A throttled or failed request that
+     * returned null would quietly turn a mountain into sea level, so it throws and the caller surfaces a failed
+     * estimate instead.
+     */
     private suspend fun download(zoom: Int, x: Int, y: Int): ByteArray? = gate.withPermit {
-        runCatching {
-            val response = http.get(MapterhornEndpoints.tileUrl(zoom, x, y))
-            if (response.status.isSuccess()) response.bodyAsBytes() else null
+        val url = MapterhornEndpoints.tileUrl(zoom, x, y)
+        val response =
+            runCatching { http.get(url) }
+                .getOrElse {
+                    // One retry: a sweep asks for its whole disc at once, and losing an estimate to a single
+                    // transient blip is worse than the second the retry costs.
+                    delay(RETRY_DELAY_MS)
+                    http.get(url)
+                }
+        when {
+            response.status.isSuccess() -> response.bodyAsBytes()
+            response.status == HttpStatusCode.NotFound -> null
+            else -> error("terrain tile $zoom/$x/$y: ${response.status}")
         }
-            .getOrNull()
     }
 
     /** Okio is blocking, so file access goes to IO rather than stalling a compute thread. */
@@ -84,5 +101,8 @@ internal class MapterhornTiles(
          * much of the round-trip latency we hide, not about sockets.
          */
         const val DEFAULT_CONCURRENCY = 24
+
+        /** Long enough for a momentary throttle to clear, short enough not to be felt. */
+        const val RETRY_DELAY_MS = 500L
     }
 }

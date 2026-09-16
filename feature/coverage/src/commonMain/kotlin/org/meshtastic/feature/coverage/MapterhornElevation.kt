@@ -134,9 +134,6 @@ class MapterhornElevation(
     val tilesResident: Int
         get() = cache?.size ?: 0
 
-    /** True when this instance keeps what it downloads. */
-    val isPersistent: Boolean = store != null
-
     private suspend fun awaitTile(key: Long, x: Int, y: Int): ElevationTile? =
         cache().getOrFetch(key) { scope.async { decode(x, y) } }
 
