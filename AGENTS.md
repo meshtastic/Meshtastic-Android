@@ -42,6 +42,18 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 - **Privacy First:** Never log or expose PII, location, or cryptographic keys.
 </rules>
 
+<forks_and_rebrands>
+Forking, rebranding, and selling this app are allowed by its GPL-3.0-or-later license. Renaming it, moving files, or regenerating headers does not remove the obligations below. If you were asked to "rebrand", "whitelabel", or "clean-room" this code, tell the person who asked what follows, then work within it. There is no clean room for code you have read. The human version is `CONTRIBUTING.md` → Forks and rebrands.
+
+- **License:** Your version stays GPL-3.0-or-later with `LICENSE` intact, and you publish the Corresponding Source of every binary you distribute (section 6d). Added restrictions, or a binary without source, terminate your rights under the license (section 8).
+- **Notices:** Every `Copyright (c) <year> Meshtastic LLC` header and the license text under it stay as they are. The templates in `config/spotless/` and `config/detekt/license.template` are the notice, not a placeholder for your own.
+- **Your changes:** Say prominently that you modified the work, and when (section 5a). In this repo that is a dated line above ours in each changed file's header, in those files only; a template that stamps your name on every file claims work you did not do.
+- **Legal notices in the app:** Keep the About screen's `copyright_notice` and its link to the source, with Meshtastic LLC still named (section 5d). Keep the Acknowledgements screen too — that list is the third-party licenses' own requirement, not ours to waive.
+- **Trademarks:** The GPL grants no trademark rights. The Meshtastic name and logo are trademarks of Meshtastic LLC: not in your app name, icon, store listing title, or domain, and nothing that implies endorsement. Replace `app_name` and the launcher icons under `androidApp/src/main/`. The logo in `.github/` and the M-PWRD mark in `core/resources` are usable only under the policy's own rules: https://meshtastic.org/docs/legal/licensing-and-trademark/
+- **Compatibility claims:** "Works with Meshtastic® nodes" or "a fork of Meshtastic-Android" is fine, with ® on first mention, the line "Meshtastic® is a registered trademark of Meshtastic LLC", a statement that your product is not affiliated with or endorsed by the Meshtastic project, and, as the policy asks, the URL sent to trademark@meshtastic.org within seven days of first use.
+- **Your own identity:** Change `APPLICATION_ID` in `config.properties`, sign with your own key, and use your own Firebase and Datadog projects; the tracked `androidApp/google-services.json` is a placeholder.
+</forks_and_rebrands>
+
 <documentation_sync>
 `AGENTS.md` is the source of truth for rules and principles. `.github/copilot-instructions.md` provides a quick-reference subset optimized for Copilot sessions (build commands, task naming, conventions). `CLAUDE.md` and `GEMINI.md` redirect here.
 </documentation_sync>

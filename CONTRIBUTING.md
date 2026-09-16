@@ -123,6 +123,42 @@ author to fill in.
 - Include steps to reproduce, expected behavior, and actual behavior.
 - Attach logs, screenshots, or other helpful context if applicable.
 
+## Forks and rebrands
+
+Meshtastic-Android is GPL-3.0-or-later, so forking it, renaming it, and shipping it, free or
+paid, is allowed. The license and the
+[trademark policy](https://meshtastic.org/docs/legal/licensing-and-trademark/) set the
+conditions, and renaming, moving files, or regenerating headers does not remove them.
+
+- **Keep the license.** Your version is GPL-3.0-or-later with `LICENSE` intact. Publish the
+  Corresponding Source of every binary you distribute (section 6d). Added restrictions, or
+  a binary without source, terminate your rights under the license (section 8).
+- **Keep the notices.** Every `Copyright (c) <year> Meshtastic LLC` header and the license
+  text under it stay as they are. Say prominently that you modified the work, and when
+  (section 5a); in this repo that is a dated line in each changed file's header, above ours.
+  Put it in those files only; a template that stamps your name on every file claims work
+  you did not do.
+- **Keep the legal notices in the app.** Keep the About screen's copyright notice and its
+  link to the source, with Meshtastic LLC still named (section 5d). Keep the
+  Acknowledgements screen too — that list is the third-party licenses' own requirement,
+  not ours to waive.
+- **Leave the trademarks out of your branding.** The GPL is a copyright license and grants
+  no trademark rights. The Meshtastic name and logo are trademarks of Meshtastic LLC. Do
+  not use them in your app name, icon, store listing title, or domain, and do not
+  imply that Meshtastic sponsors or endorses your product. Replace `app_name` and the
+  launcher icons under `androidApp/src/main/`. The logo in `.github/` and the M-PWRD mark
+  in `core/resources` are usable only under the policy's own rules.
+- **Describe compatibility plainly.** "Works with Meshtastic® nodes" or "a fork of
+  Meshtastic-Android" is fine. Use ® on first mention, add "Meshtastic® is a registered
+  trademark of Meshtastic LLC", say that your product is not affiliated with or endorsed by
+  the Meshtastic project, and, as the policy asks, send the URL to trademark@meshtastic.org
+  within seven days of first use.
+- **Use your own identity.** Change `APPLICATION_ID` in `config.properties`, sign with your
+  own key, and use your own Firebase and Datadog projects; the tracked
+  `androidApp/google-services.json` is a placeholder.
+
+Questions about any of this: trademark@meshtastic.org.
+
 ## Community Standards
 
 - Be respectful and considerate in all interactions.

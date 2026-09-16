@@ -183,6 +183,7 @@ MAPS_API_KEY=your_google_maps_api_key_here
 
 For detailed instructions on how to contribute, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file.
 For details on our release process, see the [RELEASE_PROCESS.md](RELEASE_PROCESS.md) file.
+Forking or rebranding the app? Read [Forks and rebrands](CONTRIBUTING.md#forks-and-rebrands) first.
 
 ## Repository Statistics
 
