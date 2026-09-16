@@ -125,6 +125,7 @@
     <string name="aqi_unhealthy_sensitive">Вредный для чувствительных групп</string>
     <string name="aqi_value_with_severity">%1$d (%2$s)</string>
     <string name="aqi_very_unhealthy">Очень вредный</string>
+    <string name="archived_channel">Архивный канал</string>
     <string name="are_you_sure">Вы уверены?</string>
     <string name="are_you_sure_change_default">Вы уверены, что хотите перейти на канал по умолчанию?</string>
     <string name="audio">Звук</string>
