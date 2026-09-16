@@ -999,7 +999,7 @@
     <string name="lockdown_disable_message">Enter your passphrase to turn off lockdown. The device will decrypt its storage and reboot.</string>
     <string name="lockdown_enable">Enable lockdown</string>
     <string name="lockdown_enable_ack">I understand</string>
-    <string name="lockdown_enable_warning">Heads up: on hardware that supports it, enabling lockdown burns off the debug port (SWD) permanently. Nothing undoes that — not your passphrase, not a factory reset, not this app. Turning lockdown off decrypts your data again, but the debug port stays locked for the life of the device.</string>
+    <string name="lockdown_enable_warning">Enabling lockdown locks the debug port (SWD) on hardware where the lockout takes effect. Turning lockdown off later decrypts your data, but the port stays locked. Reopening it takes a full chip erase with a debug probe, which destroys everything on the device.</string>
     <string name="lockdown_enter_passphrase">Enter Passphrase</string>
     <string name="lockdown_hide_passphrase">Hide</string>
     <string name="lockdown_hours_until_expiry">Hours until expiry</string>
