@@ -131,6 +131,46 @@ class LocalCoverage(
         return Coverage(site, points)
     }
 
+    /**
+     * Predict received power at one receiver position, building the terrain profile along the way.
+     *
+     * The profile is sampled at [profileStepKm] regardless of how far apart receivers are: P.1812
+     * integrates diffraction across the whole profile, so sampling it at receiver spacing makes the
+     * model see an aliased ridge line and invent loss that is not there.
+     */
+    internal suspend fun predictAt(
+        site: Site,
+        rxLat: Double,
+        rxLon: Double,
+        distanceKm: Double,
+        profileStepKm: Double,
+    ): Double {
+        val n = maxOf((distanceKm / profileStepKm).toInt() + 1, MIN_PROFILE_POINTS)
+        val step = distanceKm / (n - 1)
+        val bearing = bearingDeg(site.latitude, site.longitude, rxLat, rxLon)
+        val d = DoubleArray(n) { step * it }
+        val h = DoubleArray(n) { i ->
+            val (lat, lon) = destination(site.latitude, site.longitude, bearing, step * i)
+            elevation.elevationMeters(lat, lon)
+        }
+        val prediction = P1812.predict(
+            path = TerrainPath(d, h, DoubleArray(n) { site.clutterHeightM }, IntArray(n) { INLAND }),
+            frequencyGhz = site.frequencyMhz / MHZ_PER_GHZ,
+            txHeightM = site.txHeightM,
+            rxHeightM = site.rxHeightM,
+            timePercent = site.timePercent,
+            pathCentreLatitudeDeg = (site.latitude + rxLat) / 2.0,
+            polarization = Polarization.VERTICAL,
+            atmosphere = atmosphere,
+        )
+        return P1812.receivedPower(
+            prediction,
+            txPowerDbm = site.txPowerDbm,
+            txGainDbi = site.txGainDbi,
+            rxGainDbi = site.rxGainDbi,
+        ).value
+    }
+
     private companion object {
         const val DEFAULT_RADIALS = 180
         const val DEFAULT_RECEIVERS = 40
@@ -194,6 +234,16 @@ fun destination(latDeg: Double, lonDeg: Double, bearingDeg: Double, distanceKm: 
     val lat2 = asin(sin(lat1) * cos(ang) + cos(lat1) * sin(ang) * cos(brg))
     val lon2 = lon1 + atan2(sin(brg) * sin(ang) * cos(lat1), cos(ang) - sin(lat1) * sin(lat2))
     return lat2.toDegrees() to lon2.toDegrees()
+}
+
+/** Initial great-circle bearing from one point to another, degrees. */
+fun bearingDeg(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    val p1 = lat1.toRadians()
+    val p2 = lat2.toRadians()
+    val dl = (lon2 - lon1).toRadians()
+    val y = sin(dl) * cos(p2)
+    val x = cos(p1) * sin(p2) - sin(p1) * cos(p2) * cos(dl)
+    return (atan2(y, x).toDegrees() + 360.0) % 360.0
 }
 
 /** Great-circle distance between two points, km. Public: a consumer plotting a [Coverage] needs it. */

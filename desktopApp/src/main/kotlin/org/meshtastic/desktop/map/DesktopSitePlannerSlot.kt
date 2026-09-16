@@ -48,11 +48,11 @@ import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.spatialk.geojson.Position
-import org.meshtastic.feature.coverage.Coverage
+import org.meshtastic.feature.coverage.CoverageGrid
 import org.meshtastic.feature.coverage.LocalCoverage
 import org.meshtastic.feature.coverage.MapterhornElevation
 import org.meshtastic.feature.coverage.Site
-import org.meshtastic.feature.coverage.haversineKm
+import org.meshtastic.feature.coverage.sweepGrid
 import org.meshtastic.feature.coverage.toGeoJson
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.layers.MapLayersManager
@@ -94,7 +94,7 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
 
     var params by remember(subject) { mutableStateOf(subject.toSitePlannerParams(channelSet)) }
     var running by remember { mutableStateOf<SitePlannerParams?>(null) }
-    var result by remember { mutableStateOf<Coverage?>(null) }
+    var result by remember { mutableStateOf<CoverageGrid?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
 
     val current = running
@@ -115,7 +115,7 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
                 runCatching {
                     withContext(Dispatchers.Default) {
                         MapterhornElevation().use { elevation ->
-                            LocalCoverage(elevation).sweep(current.toSite(), radials = RADIALS, receiversPerRadial = RECEIVERS)
+                            LocalCoverage(elevation).sweepGrid(current.toSite(), resolution = GRID)
                         }
                     }
                 }
@@ -185,7 +185,7 @@ private fun ComputingDialog(name: String, onCancel: () -> Unit) {
 }
 
 @Composable
-private fun CoverageResultDialog(coverage: Coverage, onDismiss: () -> Unit) {
+private fun CoverageResultDialog(coverage: CoverageGrid, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface) {
             Column(
@@ -201,7 +201,7 @@ private fun CoverageResultDialog(coverage: Coverage, onDismiss: () -> Unit) {
                 )
                 CoveragePlot(coverage, modifier = Modifier.fillMaxWidth().aspectRatio(1f))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("${coverage.points.size} points", style = MaterialTheme.typography.bodySmall)
+                    Text("${coverage.width}×${coverage.height} grid", style = MaterialTheme.typography.bodySmall)
                     Text(
                         "${(coverage.reachableFraction * PERCENT).roundToInt()}% reachable",
                         style = MaterialTheme.typography.bodySmall,
@@ -217,30 +217,28 @@ private fun CoverageResultDialog(coverage: Coverage, onDismiss: () -> Unit) {
     }
 }
 
-/** Top-down plot of the sweep, coloured by predicted signal. */
+/** Top-down preview of the grid, coloured by predicted signal. */
 @Composable
-private fun CoveragePlot(coverage: Coverage, modifier: Modifier = Modifier) {
-    val site = coverage.site
-    val strongest = coverage.points.maxOf { it.rxDbm }
-    val sensitivity = site.rxSensitivityDbm
+private fun CoveragePlot(coverage: CoverageGrid, modifier: Modifier = Modifier) {
+    val sensitivity = coverage.site.rxSensitivityDbm
+    val strongest = coverage.dbm.filter { !it.isNaN() }.maxOrNull() ?: sensitivity
 
     Box(modifier) {
         Canvas(Modifier.fillMaxWidth().aspectRatio(1f)) {
-            val half = size.minDimension / 2f
-            val scale = half / site.radiusKm.toFloat()
-            drawCircle(Color(0xFF14151C), radius = half, center = center)
-
-            coverage.points.forEach { p ->
-                val km = haversineKm(site.latitude, site.longitude, p.latitude, p.longitude)
-                val bearing = atan2(
-                    (p.longitude - site.longitude) * cos(site.latitude * DEG_TO_RAD),
-                    p.latitude - site.latitude,
-                )
-                val x = center.x + (sin(bearing) * km).toFloat() * scale
-                val y = center.y - (cos(bearing) * km).toFloat() * scale
-                drawCircle(signalColor(p.rxDbm, sensitivity, strongest), radius = DOT_RADIUS, center = Offset(x, y))
+            drawRect(Color(0xFF14151C))
+            val cw = size.width / coverage.width
+            val ch = size.height / coverage.height
+            for (y in 0 until coverage.height) {
+                for (x in 0 until coverage.width) {
+                    val v = coverage.at(x, y)
+                    if (v.isNaN() || v < sensitivity) continue
+                    drawRect(
+                        signalColor(v, sensitivity, strongest),
+                        topLeft = Offset(x * cw, y * ch),
+                        size = androidx.compose.ui.geometry.Size(cw + 1, ch + 1),
+                    )
+                }
             }
-            drawCircle(Color(0xFF67EA94), radius = TX_RADIUS, center = center)
         }
     }
 }
@@ -253,8 +251,7 @@ private fun signalColor(dbm: Double, sensitivity: Double, strongest: Double): Co
     return Color(r, g, GREEN_FLOOR)
 }
 
-private const val RADIALS = 90
-private const val RECEIVERS = 34
+private const val GRID = 80
 private const val MILLIWATTS_PER_WATT = 1000.0
 private const val PERCENT = 100
 private const val DEG_TO_RAD = 0.017453292519943295

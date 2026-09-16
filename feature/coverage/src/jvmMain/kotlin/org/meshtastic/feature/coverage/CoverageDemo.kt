@@ -54,18 +54,18 @@ object CoverageDemo {
 
         println("site ${site.latitude}, ${site.longitude}  ${site.frequencyMhz} MHz  ${site.txPowerDbm} dBm")
         MapterhornElevation().use { elevation ->
-            lateinit var coverage: Coverage
+            lateinit var coverage: CoverageGrid
             val ms = measureTimeMillis {
                 coverage = runBlocking {
-                    LocalCoverage(elevation).sweep(site, radials = RADIALS, receiversPerRadial = RECEIVERS)
+                    LocalCoverage(elevation).sweepGrid(site, resolution = GRID)
                 }
             }
-            val reach = coverage.reachable
-            println("computed ${coverage.points.size} points in ${ms}ms from ${elevation.tilesFetched} terrain tiles")
-            println("reachable: ${reach.size} (${(coverage.reachableFraction * 100).roundToInt()}%)")
+            val computed = coverage.dbm.count { !it.isNaN() }
+            println("computed $computed grid cells in ${ms}ms from ${elevation.tilesFetched} terrain tiles")
+            println("reachable: ${(coverage.reachableFraction * 100).roundToInt()}%")
             println("max range: ${"%.1f".format(coverage.maxRangeKm)} km")
-            println("rx dBm range: ${"%.1f".format(coverage.points.minOf { it.rxDbm })} .. " +
-                "${"%.1f".format(coverage.points.maxOf { it.rxDbm })}")
+            val finite = coverage.dbm.filter { !it.isNaN() }
+            println("rx dBm range: ${"%.1f".format(finite.min())} .. ${"%.1f".format(finite.max())}")
 
             File(outDir, "coverage.geojson").writeText(coverage.toGeoJson())
             renderPng(coverage, File(outDir, "coverage.png"))
@@ -73,33 +73,27 @@ object CoverageDemo {
         }
     }
 
-    /** Plot the sweep as a top-down image, coloured by signal strength. */
+    /** Plot the grid as a top-down image, coloured by signal strength. */
     @Suppress("MagicNumber")
-    private fun renderPng(coverage: Coverage, dest: File) {
+    private fun renderPng(coverage: CoverageGrid, dest: File) {
         val size = 700
         val img = BufferedImage(size, size, BufferedImage.TYPE_INT_RGB)
         val g = img.createGraphics()
         g.color = java.awt.Color(0x14, 0x15, 0x1c)
         g.fillRect(0, 0, size, size)
 
-        val site = coverage.site
-        val scale = (size / 2.0) / site.radiusKm
-        val sensitivity = site.rxSensitivityDbm
-        val strongest = coverage.points.maxOf { it.rxDbm }
-
-        for (p in coverage.points) {
-            val km = haversineKm(site.latitude, site.longitude, p.latitude, p.longitude)
-            val bearing = kotlin.math.atan2(
-                (p.longitude - site.longitude) * kotlin.math.cos(site.latitude * Math.PI / 180),
-                p.latitude - site.latitude,
-            )
-            val px = (size / 2 + kotlin.math.sin(bearing) * km * scale).toInt()
-            val py = (size / 2 - kotlin.math.cos(bearing) * km * scale).toInt()
-            if (px !in 0 until size || py !in 0 until size) continue
-            g.color = colorFor(p.rxDbm, sensitivity, strongest)
-            g.fillOval(px - 3, py - 3, 6, 6)
+        val sensitivity = coverage.site.rxSensitivityDbm
+        val strongest = coverage.dbm.filter { !it.isNaN() }.maxOrNull() ?: sensitivity
+        val cw = size.toDouble() / coverage.width
+        val ch = size.toDouble() / coverage.height
+        for (y in 0 until coverage.height) {
+            for (x in 0 until coverage.width) {
+                val v = coverage.at(x, y)
+                if (v.isNaN() || v < sensitivity) continue
+                g.color = colorFor(v, sensitivity, strongest)
+                g.fillRect((x * cw).toInt(), (y * ch).toInt(), (cw + 1).toInt(), (ch + 1).toInt())
+            }
         }
-        // transmitter
         g.color = java.awt.Color(0x67, 0xEA, 0x94)
         g.fillOval(size / 2 - 5, size / 2 - 5, 10, 10)
         g.dispose()
@@ -118,6 +112,5 @@ object CoverageDemo {
 
     private const val DEFAULT_LAT = 47.6062 // Seattle — real relief nearby
     private const val DEFAULT_LON = -122.3321
-    private const val RADIALS = 120
-    private const val RECEIVERS = 40
+        private const val GRID = 80
 }
