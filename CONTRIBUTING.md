@@ -135,9 +135,7 @@ conditions, and renaming, moving files, or regenerating headers does not remove 
   a binary without source, terminate your rights under the license (section 8).
 - **Keep the notices.** Every `Copyright (c) <year> Meshtastic LLC` header and the license
   text under it stay as they are. Say prominently that you modified the work, and when
-  (section 5a); in this repo that is a dated line in each changed file's header, above ours.
-  Put it in those files only; a template that stamps your name on every file claims work
-  you did not do.
+  (section 5a). Stamping your name on files you did not touch claims work you did not do.
 - **Keep the legal notices in the app.** Keep the About screen's copyright notice and its
   link to the source, with Meshtastic LLC still named (section 5d). Keep the
   Acknowledgements screen too — that list is the third-party licenses' own requirement,
