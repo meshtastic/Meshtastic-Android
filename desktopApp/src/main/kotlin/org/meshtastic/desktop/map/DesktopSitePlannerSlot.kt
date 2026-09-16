@@ -31,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,30 +56,26 @@ import org.meshtastic.feature.coverage.Site
 import org.meshtastic.feature.coverage.sweepGrid
 import org.meshtastic.feature.coverage.toGeoJson
 import org.meshtastic.feature.map.SharedMapViewModel
-import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.SitePlannerSheet
 import org.meshtastic.feature.map.component.toSitePlannerParams
+import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.maplibre.SitePlannerSession
-import kotlin.math.atan2
-import kotlin.math.cos
 import kotlin.math.log10
 import kotlin.math.roundToInt
-import kotlin.math.sin
 
 /**
  * Site Planner on the desktop — computed **in this app**, not in a browser.
  *
- * Previously this opened site.meshtastic.org in the system browser and asked the user to export a
- * `.geojson` and re-import it by hand: desktop has no embedded browser, and putting JCEF back into
- * the jlink'd runtime measured at roughly three and a half times the size of the whole application.
+ * Previously this opened site.meshtastic.org in the system browser and asked the user to export a `.geojson` and
+ * re-import it by hand: desktop has no embedded browser, and putting JCEF back into the jlink'd runtime measured at
+ * roughly three and a half times the size of the whole application.
  *
- * Now `feature:coverage` runs ITU-R P.1812 (`org.meshtastic:kp1812`) against the same Mapterhorn
- * elevation the map already uses for hillshade and contours. No network call to the planner, no
- * WebView, no export/re-import round trip.
+ * Now `feature:coverage` runs ITU-R P.1812 (`org.meshtastic:kp1812`) against the same Mapterhorn elevation the map
+ * already uses for hillshade and contours. No network call to the planner, no WebView, no export/re-import round trip.
  *
- * Note this is a different propagation model from the hosted planner's SPLAT!/ITM, so predictions
- * will not match it pixel for pixel.
+ * Note this is a different propagation model from the hosted planner's SPLAT!/ITM, so predictions will not match it
+ * pixel for pixel.
  */
 @Composable
 fun DesktopSitePlannerSlot(session: SitePlannerSession) {
@@ -96,15 +93,20 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
     var running by remember { mutableStateOf<SitePlannerParams?>(null) }
     var result by remember { mutableStateOf<CoverageGrid?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
+    // Held across estimates: decoded terrain is the whole cost of a sweep, so the second estimate
+    // anywhere near the first is near-instant. Opened lazily - the constructor does network I/O.
+    var elevation by remember { mutableStateOf<MapterhornElevation?>(null) }
+    DisposableEffect(Unit) { onDispose { elevation?.close() } }
 
     val current = running
     val coverage = result
 
     when {
-        coverage != null -> CoverageResultDialog(coverage) {
-            result = null
-            session.onDismiss()
-        }
+        coverage != null ->
+            CoverageResultDialog(coverage) {
+                result = null
+                session.onDismiss()
+            }
 
         current != null -> {
             ComputingDialog(current.name) {
@@ -114,9 +116,10 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
             LaunchedEffect(current) {
                 runCatching {
                     withContext(Dispatchers.Default) {
-                        MapterhornElevation().use { elevation ->
-                            LocalCoverage(elevation).sweepGrid(current.toSite(), resolution = GRID)
-                        }
+                        val source = elevation ?: MapterhornElevation().also { elevation = it }
+                        // Terrain first, pooled: fetched on demand it dominates the sweep entirely.
+                        source.prefetch(current.toSite())
+                        LocalCoverage(source).sweepGrid(current.toSite(), resolution = GRID)
                     }
                 }
                     .onSuccess { swept ->
@@ -132,22 +135,27 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
             }
         }
 
-        else -> SitePlannerSheet(
-            initial = params,
-            onSubmit = { submitted ->
-                params = submitted
-                running = submitted
-            },
-            onDismiss = session.onDismiss,
-            note = failure?.let { "Coverage failed: $it" }
-                ?: "Computed on this device with ITU-R P.1812 — no browser, works offline once terrain is cached.",
-            onUseNodeLocation = subject?.takeIf { it.validPosition != null }?.let { node ->
-                { params = params.copy(latitude = node.latitude, longitude = node.longitude) }
-            },
-            onUseMapCenter = {
-                session.mapCenter().let { params = params.copy(latitude = it.latitude, longitude = it.longitude) }
-            },
-        )
+        else ->
+            SitePlannerSheet(
+                initial = params,
+                onSubmit = { submitted ->
+                    params = submitted
+                    running = submitted
+                },
+                onDismiss = session.onDismiss,
+                note =
+                failure?.let { "Coverage failed: $it" }
+                    ?: "Computed on this device with ITU-R P.1812 — no browser, works offline once terrain is cached.",
+                onUseNodeLocation =
+                subject
+                    ?.takeIf { it.validPosition != null }
+                    ?.let { node ->
+                        { params = params.copy(latitude = node.latitude, longitude = node.longitude) }
+                    },
+                onUseMapCenter = {
+                    session.mapCenter().let { params = params.copy(latitude = it.latitude, longitude = it.longitude) }
+                },
+            )
     }
 }
 
@@ -206,10 +214,7 @@ private fun CoverageResultDialog(coverage: CoverageGrid, onDismiss: () -> Unit) 
                         "${(coverage.reachableFraction * PERCENT).roundToInt()}% reachable",
                         style = MaterialTheme.typography.bodySmall,
                     )
-                    Text(
-                        "max ${coverage.maxRangeKm.roundToInt()} km",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+                    Text("max ${coverage.maxRangeKm.roundToInt()} km", style = MaterialTheme.typography.bodySmall)
                 }
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("Done") }
             }
@@ -251,7 +256,7 @@ private fun signalColor(dbm: Double, sensitivity: Double, strongest: Double): Co
     return Color(r, g, GREEN_FLOOR)
 }
 
-private const val GRID = 80
+private const val GRID = 256
 private const val MILLIWATTS_PER_WATT = 1000.0
 private const val PERCENT = 100
 private const val DEG_TO_RAD = 0.017453292519943295

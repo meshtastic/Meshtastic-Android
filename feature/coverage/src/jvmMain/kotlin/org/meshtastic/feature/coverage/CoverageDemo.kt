@@ -17,55 +17,80 @@
 package org.meshtastic.feature.coverage
 
 import kotlinx.coroutines.runBlocking
+import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
-import java.awt.image.BufferedImage
 import kotlin.math.roundToInt
 import kotlin.system.measureTimeMillis
 
 /**
  * Runs a real coverage prediction end to end and writes a PNG plus the GeoJSON the app imports.
  *
- * This exists so the spike can be *seen* rather than only asserted: real Mapterhorn terrain, the
- * ITU-R P.1812 model from `org.meshtastic:kp1812`, no network call to site.meshtastic.org, no
- * WebView, no browser. The same `LocalCoverage` the desktop app would call.
+ * This exists so the spike can be *seen* rather than only asserted: real Mapterhorn terrain, the ITU-R P.1812 model
+ * from `org.meshtastic:kp1812`, no network call to site.meshtastic.org, no WebView, no browser. The same
+ * `LocalCoverage` the desktop app would call.
  *
  * `./gradlew :feature:coverage:coverageDemo -PuseMavenLocal`
  */
 object CoverageDemo {
 
+    @Suppress("MagicNumber")
     @JvmStatic
     fun main(args: Array<String>) {
         val lat = args.getOrNull(0)?.toDoubleOrNull() ?: DEFAULT_LAT
         val lon = args.getOrNull(1)?.toDoubleOrNull() ?: DEFAULT_LON
         val outDir = File(args.getOrNull(2) ?: "build/coverage-demo").apply { mkdirs() }
+        val radials = args.getOrNull(3)?.toIntOrNull() ?: DEFAULT_RADIALS
+        val rings = args.getOrNull(4)?.toIntOrNull() ?: DEFAULT_RINGS
+        val profileStepKm = args.getOrNull(5)?.toDoubleOrNull() ?: DEFAULT_PROFILE_STEP_KM
+        val readers = args.getOrNull(6)?.toIntOrNull() ?: MapterhornElevation.DEFAULT_PREFETCH_READERS
 
-        val site = Site(
-            name = "Demo",
-            latitude = lat,
-            longitude = lon,
-            frequencyMhz = 906.875, // Meshtastic US LongFast
-            txPowerDbm = 30.0,
-            rxSensitivityDbm = -130.0, // LONG_FAST
-            txHeightM = 10.0,
-            rxHeightM = 1.5,
-            radiusKm = 25.0,
-        )
+        val site =
+            Site(
+                name = "Demo",
+                latitude = lat,
+                longitude = lon,
+                frequencyMhz = 906.875, // Meshtastic US LongFast
+                txPowerDbm = 30.0,
+                rxSensitivityDbm = -130.0, // LONG_FAST
+                txHeightM = 10.0,
+                rxHeightM = 1.5,
+                radiusKm = 25.0,
+            )
 
         println("site ${site.latitude}, ${site.longitude}  ${site.frequencyMhz} MHz  ${site.txPowerDbm} dBm")
-        MapterhornElevation().use { elevation ->
+        MapterhornElevation(site.coverageBounds()).use { elevation ->
+            println("terrain: ${if (elevation.isRegional) "regional" else "global"} archive at z${elevation.zoomLevel}")
+            var warmed = 0
+            val prefetchMs = measureTimeMillis { warmed = runBlocking { elevation.prefetch(concurrency = readers) } }
+            println("prefetched $warmed terrain tiles in ${prefetchMs}ms with $readers readers")
             lateinit var coverage: CoverageGrid
             val ms = measureTimeMillis {
                 coverage = runBlocking {
-                    LocalCoverage(elevation).sweepGrid(site, resolution = GRID)
+                    LocalCoverage(elevation)
+                        .sweepPolar(site, radials = radials, rings = rings, profileStepKm = profileStepKm)
+                        .toGrid(GRID)
                 }
             }
             val computed = coverage.dbm.count { !it.isNaN() }
             println("computed $computed grid cells in ${ms}ms from ${elevation.tilesFetched} terrain tiles")
+            println(
+                "predictions: ${radials * rings} ($radials radials x $rings rings, " +
+                    "profile step ${profileStepKm * 1000} m), cores ${Runtime.getRuntime().availableProcessors()}",
+            )
             println("reachable: ${(coverage.reachableFraction * 100).roundToInt()}%")
             println("max range: ${"%.1f".format(coverage.maxRangeKm)} km")
             val finite = coverage.dbm.filter { !it.isNaN() }
             println("rx dBm range: ${"%.1f".format(finite.min())} .. ${"%.1f".format(finite.max())}")
+
+            val again = measureTimeMillis {
+                runBlocking {
+                    LocalCoverage(elevation)
+                        .sweepPolar(site, radials = radials, rings = rings, profileStepKm = profileStepKm)
+                        .toGrid(GRID)
+                }
+            }
+            println("re-swept with terrain already decoded in ${again}ms")
 
             File(outDir, "coverage.geojson").writeText(coverage.toGeoJson())
             renderPng(coverage, File(outDir, "coverage.png"))
@@ -112,5 +137,5 @@ object CoverageDemo {
 
     private const val DEFAULT_LAT = 47.6062 // Seattle — real relief nearby
     private const val DEFAULT_LON = -122.3321
-        private const val GRID = 80
+    private const val GRID = 256
 }
