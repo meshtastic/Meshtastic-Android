@@ -65,7 +65,11 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
      * cache outlives any one [MapterhornElevation] and must not hold its scope.
      */
     suspend fun getOrFetch(key: Long, produce: () -> Deferred<ElevationTile?>): ElevationTile? {
-        val pending = lock.withLock { inFlight.getOrPut(key) { produce() } }
+        // A cancelled fetch must not be handed to the next caller: the scope producing it belongs to
+        // one MapterhornElevation, and cancelling that (the planner sheet being dismissed mid-run)
+        // would otherwise leave a dead Deferred that fails every later sweep touching this tile.
+        val pending =
+            lock.withLock { inFlight[key]?.takeUnless { it.isCancelled } ?: produce().also { inFlight[key] = it } }
         val tile = pending.await()
         publish(listOf(key to tile))
         return tile

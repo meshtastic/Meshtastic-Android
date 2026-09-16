@@ -31,7 +31,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,10 +92,6 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
     var running by remember { mutableStateOf<SitePlannerParams?>(null) }
     var result by remember { mutableStateOf<CoverageGrid?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
-    // Held across estimates: decoded terrain is the whole cost of a sweep, so the second estimate
-    // anywhere near the first is near-instant. Opened lazily - the constructor does network I/O.
-    var elevation by remember { mutableStateOf<MapterhornElevation?>(null) }
-    DisposableEffect(Unit) { onDispose { elevation?.close() } }
 
     val current = running
     val coverage = result
@@ -116,10 +111,12 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
             LaunchedEffect(current) {
                 runCatching {
                     withContext(Dispatchers.Default) {
-                        val source = elevation ?: MapterhornElevation().also { elevation = it }
-                        // Terrain first, pooled: fetched on demand it dominates the sweep entirely.
-                        source.prefetch(current.toSite())
-                        LocalCoverage(source).sweepGrid(current.toSite(), resolution = GRID)
+                        // A fresh source per estimate is free: decoded terrain lives in the shared
+                        // cache, and the archive reader only opens if a tile is actually missing.
+                        MapterhornElevation().use { source ->
+                            source.prefetch(current.toSite())
+                            LocalCoverage(source).sweepGrid(current.toSite(), resolution = GRID)
+                        }
                     }
                 }
                     .onSuccess { swept ->
