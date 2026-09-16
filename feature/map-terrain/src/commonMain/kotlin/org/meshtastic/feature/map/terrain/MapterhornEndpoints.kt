@@ -28,6 +28,19 @@ object MapterhornEndpoints {
 
     const val GLOBAL_PMTILES_URL = "https://download.mapterhorn.com/planet.pmtiles"
 
+    /**
+     * Plain XYZ tiles, the endpoint Mapterhorn's own migration guide documents.
+     *
+     * Probed 2026-09-16 at Seattle: z0–16 all 200 (~56–95 KB each, ~130 ms, Cloudflare-cached for a
+     * week, `access-control-allow-origin: *`), z17+ 404. So it serves the regional detail the
+     * per-z6-tile archives were meant to, and does it as independent cacheable requests rather than
+     * range reads into one seekable channel — which is what made bulk terrain sampling serial.
+     */
+    fun tileUrl(zoom: Int, x: Int, y: Int): String = "https://tiles.mapterhorn.com/$zoom/$x/$y.webp"
+
+    /** Deepest zoom [tileUrl] serves. Deeper requests 404. */
+    const val TILES_MAX_ZOOM = 16
+
     /** Global coverage tops out at this zoom; deeper detail (if any) only exists in a regional archive. */
     const val GLOBAL_MAX_ZOOM = 12
 
@@ -40,7 +53,13 @@ object MapterhornEndpoints {
     private const val REGIONAL_ARCHIVE_ZOOM = 6
 
     /**
-     * The regional archive URL for [bounds], or `null` if [bounds] doesn't fit inside one z6 tile — matching iOS's
+     * The regional archive URL for [bounds], or `null` if [bounds] doesn't fit inside one z6 tile.
+     *
+     * **Every URL this builds 404s as of 2026-09-16** — five z6 tiles probed plus the bare host, while
+     * `planet.pmtiles` still serves. Whether the naming changed or Mapterhorn stopped publishing
+     * per-region archives is unverified; [tileUrl] reaches the same detail either way.
+
+     * Original contract: `null` if [bounds] doesn't fit inside one z6 tile — matching iOS's
      * "global-only terrain is normal, never an error" rule: a region spanning more than one z6 tile just gets no
      * regional detail, rather than trying to stitch multiple regional archives together.
      */

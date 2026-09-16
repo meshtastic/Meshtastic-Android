@@ -45,6 +45,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okio.FileSystem
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.spatialk.geojson.Position
@@ -60,6 +61,8 @@ import org.meshtastic.feature.map.component.SitePlannerSheet
 import org.meshtastic.feature.map.component.toSitePlannerParams
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.maplibre.SitePlannerSession
+import org.meshtastic.feature.map.maplibre.terrain.terrainStorageDirectory
+import org.meshtastic.feature.map.terrain.TerrainTileStore
 import kotlin.math.log10
 import kotlin.math.roundToInt
 
@@ -92,6 +95,9 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
     var running by remember { mutableStateOf<SitePlannerParams?>(null) }
     var result by remember { mutableStateOf<CoverageGrid?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
+    // Its own directory beside the map's offline regions, not inside one: coverage downloads should
+    // not silently inflate the size and tile count a downloaded region reports.
+    val terrainStore = remember { TerrainTileStore(FileSystem.SYSTEM, terrainStorageDirectory().resolve("coverage")) }
 
     val current = running
     val coverage = result
@@ -111,9 +117,9 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
             LaunchedEffect(current) {
                 runCatching {
                     withContext(Dispatchers.Default) {
-                        // A fresh source per estimate is free: decoded terrain lives in the shared
-                        // cache, and the archive reader only opens if a tile is actually missing.
-                        MapterhornElevation().use { source ->
+                        // A fresh source per estimate is free: decoded terrain lives in a shared
+                        // cache, on disk under the store, and the HTTP client is shared too.
+                        MapterhornElevation(store = terrainStore).use { source ->
                             source.prefetch(current.toSite())
                             LocalCoverage(source).sweepGrid(current.toSite(), resolution = GRID)
                         }

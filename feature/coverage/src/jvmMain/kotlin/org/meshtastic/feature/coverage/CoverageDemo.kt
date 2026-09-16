@@ -17,6 +17,9 @@
 package org.meshtastic.feature.coverage
 
 import kotlinx.coroutines.runBlocking
+import okio.FileSystem
+import okio.Path.Companion.toOkioPath
+import org.meshtastic.feature.map.terrain.TerrainTileStore
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -43,7 +46,8 @@ object CoverageDemo {
         val radials = args.getOrNull(3)?.toIntOrNull() ?: DEFAULT_RADIALS
         val rings = args.getOrNull(4)?.toIntOrNull() ?: DEFAULT_RINGS
         val profileStepKm = args.getOrNull(5)?.toDoubleOrNull() ?: DEFAULT_PROFILE_STEP_KM
-        val readers = args.getOrNull(6)?.toIntOrNull() ?: MapterhornElevation.DEFAULT_PREFETCH_READERS
+        val cacheDir = File(args.getOrNull(6) ?: "build/terrain-cache").apply { mkdirs() }
+        val zoom = args.getOrNull(7)?.toIntOrNull() ?: MapterhornElevation.DEFAULT_ZOOM
 
         val site =
             Site(
@@ -59,11 +63,13 @@ object CoverageDemo {
             )
 
         println("site ${site.latitude}, ${site.longitude}  ${site.frequencyMhz} MHz  ${site.txPowerDbm} dBm")
-        MapterhornElevation(site.coverageBounds()).use { elevation ->
-            println("terrain: ${if (elevation.isRegional) "regional" else "global"} archive at z${elevation.zoomLevel}")
+        // A real on-disk cache, so a second run of this task pays nothing for terrain.
+        val store = TerrainTileStore(FileSystem.SYSTEM, cacheDir.toOkioPath())
+        MapterhornElevation(site.coverageBounds(), store, zoom).use { elevation ->
+            println("terrain: z${elevation.zoomLevel} XYZ tiles, cache ${cacheDir.absolutePath}")
             var warmed = 0
-            val prefetchMs = measureTimeMillis { warmed = runBlocking { elevation.prefetch(concurrency = readers) } }
-            println("prefetched $warmed terrain tiles in ${prefetchMs}ms with $readers readers")
+            val prefetchMs = measureTimeMillis { warmed = runBlocking { elevation.prefetch() } }
+            println("prefetched $warmed terrain tiles in ${prefetchMs}ms")
             lateinit var coverage: CoverageGrid
             val ms = measureTimeMillis {
                 coverage = runBlocking {
@@ -83,7 +89,7 @@ object CoverageDemo {
             val finite = coverage.dbm.filter { !it.isNaN() }
             println("rx dBm range: ${"%.1f".format(finite.min())} .. ${"%.1f".format(finite.max())}")
 
-            reportWarmSweeps(elevation, site, radials, rings, profileStepKm)
+            reportWarmSweeps(elevation, store, site, radials, rings, profileStepKm)
 
             File(outDir, "coverage.geojson").writeText(coverage.toGeoJson())
             renderPng(coverage, File(outDir, "coverage.png"))
@@ -100,6 +106,7 @@ object CoverageDemo {
      */
     private fun reportWarmSweeps(
         elevation: MapterhornElevation,
+        store: TerrainTileStore,
         site: Site,
         radials: Int,
         rings: Int,
@@ -116,7 +123,7 @@ object CoverageDemo {
 
         val fresh = measureTimeMillis {
             runBlocking {
-                MapterhornElevation().use { second ->
+                MapterhornElevation(store = store, zoom = elevation.zoomLevel).use { second ->
                     second.prefetch(site)
                     LocalCoverage(second)
                         .sweepPolar(site, radials = radials, rings = rings, profileStepKm = profileStepKm)
