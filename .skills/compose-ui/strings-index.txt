@@ -921,6 +921,8 @@ led_heartbeat
 led_state
 legacy_admin_channel
 library_count
+license
+license_notice
 ### LICENSED ###
 licensed_amateur_radio
 licensed_amateur_radio_text

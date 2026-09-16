@@ -21,6 +21,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.test.Test
@@ -71,9 +72,16 @@ class AboutScreenTest {
         onNodeWithText("Project information").assertIsDisplayed()
         onNodeWithText("Website").assertIsDisplayed()
         onNodeWithText("Documentation").assertIsDisplayed()
+        onNodeWithText("License").performScrollTo().assertIsDisplayed()
 
         // Copyright footer
-        onNodeWithText("Meshtastic® Copyright Meshtastic LLC").assertIsDisplayed()
+        onNodeWithText("Meshtastic® Copyright Meshtastic LLC").performScrollTo().assertIsDisplayed()
+        onNodeWithText(
+            "Free software under the GNU General Public License v3, with no warranty. " +
+                "You may redistribute it under the same license.",
+        )
+            .performScrollTo()
+            .assertIsDisplayed()
 
         onNodeWithText("Acknowledgements").performClick()
         assertTrue(navigatedToAcknowledgements)

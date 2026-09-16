@@ -951,6 +951,8 @@
     <string name="led_state">LED state</string>
     <string name="legacy_admin_channel">Legacy Admin channel</string>
     <string name="library_count">%1$d libraries</string>
+    <string name="license">License</string>
+    <string name="license_notice">Free software under the GNU General Public License v3, with no warranty. You may redistribute it under the same license.</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Licensed amateur radio (Ham)</string>
     <string name="licensed_amateur_radio_text">Enabling this option disables encryption and is not compatible with the default Meshtastic network.</string>
