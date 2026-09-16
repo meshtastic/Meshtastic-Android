@@ -60,6 +60,8 @@ import org.meshtastic.core.resources.apps
 import org.meshtastic.core.resources.copyright_notice
 import org.meshtastic.core.resources.documentation
 import org.meshtastic.core.resources.github_repository
+import org.meshtastic.core.resources.license
+import org.meshtastic.core.resources.license_notice
 import org.meshtastic.core.resources.need_hardware
 import org.meshtastic.core.resources.need_hardware_description
 import org.meshtastic.core.resources.project_information
@@ -75,6 +77,7 @@ import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.Memory
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.settings.component.ExpressiveSection
 
@@ -87,6 +90,7 @@ private const val HARDWARE_URL = "https://meshtastic.org/#hardware"
 private const val GITHUB_REPO_URL = "https://github.com/meshtastic/Meshtastic-Android"
 private const val WEBSITE_URL = "https://meshtastic.org"
 private const val DOCS_URL = "https://meshtastic.org/docs/getting-started"
+private const val LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
 
 private data class PopularDevice(val name: String, val svgFileName: String)
 
@@ -146,6 +150,7 @@ fun AboutScreen(
             ProjectInformationSection(
                 onOpenWebsite = { uriHandler.openUri(WEBSITE_URL) },
                 onOpenDocs = { uriHandler.openUri(DOCS_URL) },
+                onOpenLicense = { uriHandler.openUri(LICENSE_URL) },
             )
             CopyrightFooter()
         }
@@ -199,6 +204,7 @@ private fun AppsSection(
 private fun ProjectInformationSection(
     onOpenWebsite: () -> Unit,
     onOpenDocs: () -> Unit,
+    onOpenLicense: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ExpressiveSection(title = stringResource(Res.string.project_information), modifier = modifier) {
@@ -214,18 +220,38 @@ private fun ProjectInformationSection(
             trailingIcon = MeshtasticIcons.ChevronRight,
             onClick = onOpenDocs,
         )
+        ListItem(
+            text = stringResource(Res.string.license),
+            leadingIcon = MeshtasticIcons.Notes,
+            trailingIcon = MeshtasticIcons.ChevronRight,
+            onClick = onOpenLicense,
+        )
     }
 }
 
+// GPL section 5(d): this screen shows the copyright notice, the no-warranty statement and where the
+// license is, so a modified version has to keep showing them too. Keep all three together here.
 @Composable
 private fun CopyrightFooter(modifier: Modifier = Modifier) {
-    Text(
-        text = stringResource(Res.string.copyright_notice),
+    Column(
         modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-    )
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            text = stringResource(Res.string.copyright_notice),
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(Res.string.license_notice),
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
 }
 
 @Composable
