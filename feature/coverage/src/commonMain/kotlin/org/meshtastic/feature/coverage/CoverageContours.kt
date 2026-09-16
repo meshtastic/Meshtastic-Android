@@ -95,10 +95,13 @@ fun CoverageGrid.toGeoJson(bandCount: Int = DEFAULT_BANDS): String {
     val features = bands(thresholds).mapIndexed { index, band ->
         val t = index.toDouble() / (bandCount - 1).coerceAtLeast(1)
         val color = bandColor(t)
-        val rings = band.rings.joinToString(",") { ring ->
-            "[" + ring.joinToString(",") { (lon, lat) -> "[$lon,$lat]" } + "]"
+        // GeoJSON MultiPolygon nests coordinates[polygon][ring][position]. Emitting the rings
+        // one level flatter makes a Polygon-with-holes wearing a MultiPolygon label, which MapLibre
+        // silently drops - the layer is added and nothing draws.
+        val polygons = band.rings.joinToString(",") { ring ->
+            "[[" + ring.joinToString(",") { (lon, lat) -> "[$lon,$lat]" } + "]]"
         }
-        """    {"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[$rings]},""" +
+        """    {"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[$polygons]},""" +
             """"properties":{"title":"≥ ${band.thresholdDbm.toFixed1()} dBm",""" +
             """"dbm":${band.thresholdDbm.toFixed1()},"fill":"$color","fill-opacity":${bandOpacity(t)},""" +
             """"stroke":"$color","stroke-opacity":0.0,"stroke-width":0}}"""
