@@ -16,17 +16,13 @@
  */
 package org.meshtastic.feature.coverage
 
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.meshtastic.feature.map.terrain.ElevationTile
 import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
@@ -77,7 +73,17 @@ class MapterhornElevation(
 
     private val url = if (regional != null) archiveUrl!! else MapterhornEndpoints.GLOBAL_PMTILES_URL
 
-    private val fetcher = regional ?: TerrainTileFetcher(url)
+    /**
+     * Opened only when a tile actually has to be downloaded.
+     *
+     * Opening one reads the archive header over the network — measured at 719 ms — and an estimate whose terrain is
+     * already in [SharedTerrain] needs no reader at all. Eager, that open was more than half the cost of a repeat
+     * estimate.
+     */
+    private val lazyFetcher = lazy { regional ?: TerrainTileFetcher(url) }
+
+    private val fetcher: TerrainTileFetcher
+        get() = lazyFetcher.value
 
     /** True when this is drawing on a regional archive rather than the coarse global one. */
     val isRegional: Boolean = regional != null
@@ -90,19 +96,16 @@ class MapterhornElevation(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    // Cached as the in-flight fetch, not the result, so concurrent radials landing on the same tile
-    // await one download instead of starting one each.
-    private val cache = HashMap<Long, Deferred<ElevationTile?>>()
-    private val lock = Mutex()
+    // Decoded terrain outlives this instance - see TerrainCache. Memoised after the first suspend
+    // acquisition; two callers racing here both get the same cache, so the race is harmless.
+    @Volatile private var tiles: TerrainCache? = null
 
-    // A read-only snapshot of what has already decoded. Sampling is overwhelmingly cache hits, and
-    // taking the mutex for each would serialise a parallel sweep on the one lock.
-    @Volatile private var resolved: Map<Long, ElevationTile?> = emptyMap()
+    private suspend fun tiles(): TerrainCache = tiles ?: SharedTerrain.forArchive(url, zoom).also { tiles = it }
 
     override suspend fun elevationMeters(latitude: Double, longitude: Double): Double {
         val tile = TerrainTileMath.tileAt(zoom, latitude, longitude)
         val key = tileKey(tile.x, tile.y)
-        val snapshot = resolved
+        val snapshot = tiles().snapshot()
         // Ocean, or outside the archive, decodes to null — sea level, as the planner assumes too.
         val decoded = (if (snapshot.containsKey(key)) snapshot[key] else awaitTile(key, tile.x, tile.y)) ?: return 0.0
 
@@ -131,6 +134,8 @@ class MapterhornElevation(
 
     /** As [prefetch], for a box that is not a site's coverage disc. */
     suspend fun prefetch(area: GeoBounds? = bounds, concurrency: Int = DEFAULT_PREFETCH_READERS): Int {
+        val cache = tiles()
+        val resident = cache.snapshot()
         val wanted =
             area
                 ?.let { box ->
@@ -140,7 +145,7 @@ class MapterhornElevation(
                         for (x in nw.x..se.x) {
                             for (y in nw.y..se.y) {
                                 val key = tileKey(x, y)
-                                if (!resolved.containsKey(key)) add(TileRequest(key, x, y))
+                                if (!resident.containsKey(key)) add(TileRequest(key, x, y))
                             }
                         }
                     }
@@ -173,10 +178,7 @@ class MapterhornElevation(
                     .awaitAll()
                     .flatten()
             }
-            lock.withLock {
-                resolved = resolved + warmed
-                for ((key, tile) in warmed) cache[key] = CompletableDeferred(tile)
-            }
+            cache.publish(warmed)
             return warmed.size
         } finally {
             for (extra in extras) extra?.close()
@@ -184,30 +186,22 @@ class MapterhornElevation(
     }
 
     /** Fetch and decode one tile, sharing the work with anyone else who wants it. */
-    private suspend fun awaitTile(key: Long, x: Int, y: Int): ElevationTile? {
-        val pending =
-            lock.withLock {
-                cache.getOrPut(key) {
-                    // Dispatchers.IO is JVM/Android-only; Default keeps this source common.
-                    scope.async {
-                        val bytes = fetcher.fetchTile(zoom, x, y)
-                        bytes?.let { runCatching { decodeTerrariumTile(it) }.getOrNull() }
-                    }
-                }
-            }
-        val tile = pending.await()
-        lock.withLock { resolved = resolved + (key to tile) }
-        return tile
+    private suspend fun awaitTile(key: Long, x: Int, y: Int): ElevationTile? = tiles().getOrFetch(key) {
+        // Dispatchers.IO is JVM/Android-only; Default keeps this source common.
+        scope.async {
+            val bytes = fetcher.fetchTile(zoom, x, y)
+            bytes?.let { runCatching { decodeTerrariumTile(it) }.getOrNull() }
+        }
     }
 
-    /** How many distinct tiles the sweep actually touched — useful when reporting a run. */
-    val tilesFetched: Int
-        get() = cache.size
+    /** How many tiles are decoded and resident, useful when reporting a run. */
+    val tilesResident: Int
+        get() = tiles?.size ?: 0
 
     override fun close() {
         scope.cancel()
-        regional?.close()
-        if (regional == null) fetcher.close()
+        // Never force the lazy open just to close it; and when regional won, it *is* the fetcher.
+        if (lazyFetcher.isInitialized()) lazyFetcher.value.close() else regional?.close()
     }
 
     companion object {
