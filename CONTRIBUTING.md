@@ -131,10 +131,8 @@ paid, is allowed. The license and the
 conditions, and renaming, moving files, or regenerating headers does not remove them.
 
 - **Keep the license.** Your version is GPL-3.0-or-later with `LICENSE` intact. Publish the
-  Corresponding Source of every binary you distribute (section 6d — a store listing is a
-  designated place to offer it from), for example by tagging the commit each store release
-  was built from. Added restrictions, or a binary without source, end your license
-  (section 8).
+  Corresponding Source of every binary you distribute (section 6d). Added restrictions, or
+  a binary without source, end your license (section 8).
 - **Keep the notices.** Every `Copyright (c) <year> Meshtastic LLC` header and the license
   text under it stay as they are. Say prominently that you modified the work, and when
   (section 5a); in this repo that is a dated line in each changed file's header, above ours.
