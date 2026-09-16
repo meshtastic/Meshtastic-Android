@@ -39,7 +39,15 @@ kotlin {
             // and contours. Over flat synthetic ground a coverage plot is a bullseye and proves
             // nothing; against real terrain it has to show ridges shadowing valleys.
             implementation(projects.feature.mapTerrain)
+            implementation(projects.core.common)
+            implementation(libs.okio)
+            // Terrain comes over plain XYZ requests now; ktor suspends rather than blocking, so a
+            // sweep's fetches never occupy the compute dispatcher.
+            implementation(libs.ktor.client.core)
         }
+
+        jvmMain.dependencies { implementation(libs.ktor.client.java) }
+        androidMain.dependencies { implementation(libs.ktor.client.okhttp) }
 
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
         jvmTest.dependencies { implementation(libs.kotlinx.coroutines.test) }

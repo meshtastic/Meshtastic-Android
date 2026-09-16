@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.coverage
 
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -91,8 +92,12 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
     }
 
     private companion object {
-        /** ~70 tiles cover a 25 km disc at z12, and one is ~256 KB — so this holds a working set plus room to pan. */
-        const val DEFAULT_CAPACITY = 128
+        /**
+         * A 25 km disc is ~70 tiles at z12 and a decoded tile is ~256 KB, so this holds a working set with room to pan.
+         * Asking for a deeper zoom will evict — 256 tiles at z13 — which the disk cache makes a decode rather than a
+         * download, but it is why z12 is the default.
+         */
+        const val DEFAULT_CAPACITY = 192
     }
 }
 
@@ -109,4 +114,12 @@ internal object SharedTerrain {
 
     suspend fun forArchive(url: String, zoom: Int): TerrainCache =
         lock.withLock { caches.getOrPut("$url@$zoom") { TerrainCache() } }
+
+    /**
+     * One HTTP client for the process.
+     *
+     * Building one per estimate cost seconds — the engine brings up its own selector threads — for a client that is
+     * stateless once connected. Never closed: it is shared, and an estimate that closed it would break the next one.
+     */
+    val http: HttpClient by lazy { HttpClient() }
 }

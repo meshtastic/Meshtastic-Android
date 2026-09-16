@@ -322,6 +322,8 @@ dependencies {
 
     // The MapLibre map surfaces, shared with the F-Droid Android flavor.
     implementation(projects.feature.mapMaplibre)
+    // TerrainTileStore: the site planner keeps its downloaded terrain between launches.
+    implementation(projects.feature.mapTerrain)
 
     // Exactly one native runtime, the one matching this build host (see maplibreDesktopRuntime()).
     maplibreDesktopRuntime()
