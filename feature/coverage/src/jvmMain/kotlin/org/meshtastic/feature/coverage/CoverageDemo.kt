@@ -73,7 +73,7 @@ object CoverageDemo {
                 }
             }
             val computed = coverage.dbm.count { !it.isNaN() }
-            println("computed $computed grid cells in ${ms}ms from ${elevation.tilesFetched} terrain tiles")
+            println("computed $computed grid cells in ${ms}ms from ${elevation.tilesResident} terrain tiles")
             println(
                 "predictions: ${radials * rings} ($radials radials x $rings rings, " +
                     "profile step ${profileStepKm * 1000} m), cores ${Runtime.getRuntime().availableProcessors()}",
@@ -83,19 +83,48 @@ object CoverageDemo {
             val finite = coverage.dbm.filter { !it.isNaN() }
             println("rx dBm range: ${"%.1f".format(finite.min())} .. ${"%.1f".format(finite.max())}")
 
-            val again = measureTimeMillis {
-                runBlocking {
-                    LocalCoverage(elevation)
-                        .sweepPolar(site, radials = radials, rings = rings, profileStepKm = profileStepKm)
-                        .toGrid(GRID)
-                }
-            }
-            println("re-swept with terrain already decoded in ${again}ms")
+            reportWarmSweeps(elevation, site, radials, rings, profileStepKm)
 
             File(outDir, "coverage.geojson").writeText(coverage.toGeoJson())
             renderPng(coverage, File(outDir, "coverage.png"))
             println("wrote ${outDir.absolutePath}/coverage.{png,geojson}")
         }
+    }
+
+    /**
+     * What a repeat estimate costs once terrain is decoded — the number that decides whether the planner can update
+     * interactively.
+     *
+     * The second run builds a *fresh* source, because that is the app's real shape: the planner's composable is
+     * disposed when its sheet closes, so nothing survives in the instance itself.
+     */
+    private fun reportWarmSweeps(
+        elevation: MapterhornElevation,
+        site: Site,
+        radials: Int,
+        rings: Int,
+        profileStepKm: Double,
+    ) {
+        val again = measureTimeMillis {
+            runBlocking {
+                LocalCoverage(elevation)
+                    .sweepPolar(site, radials = radials, rings = rings, profileStepKm = profileStepKm)
+                    .toGrid(GRID)
+            }
+        }
+        println("re-swept with terrain already decoded in ${again}ms")
+
+        val fresh = measureTimeMillis {
+            runBlocking {
+                MapterhornElevation().use { second ->
+                    second.prefetch(site)
+                    LocalCoverage(second)
+                        .sweepPolar(site, radials = radials, rings = rings, profileStepKm = profileStepKm)
+                        .toGrid(GRID)
+                }
+            }
+        }
+        println("re-swept through a brand new elevation source in ${fresh}ms")
     }
 
     /** Plot the grid as a top-down image, coloured by signal strength. */
