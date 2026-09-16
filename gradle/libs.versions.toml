@@ -377,6 +377,8 @@ dd-sdk-android = [
 ]
 
 
+kp1812 = { module = "org.meshtastic:kp1812", version = "0.1.0" }
+
 [plugins]
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
