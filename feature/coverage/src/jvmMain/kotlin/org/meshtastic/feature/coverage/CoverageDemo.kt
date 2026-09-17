@@ -48,6 +48,7 @@ object CoverageDemo {
         val profileStepKm = args.getOrNull(5)?.toDoubleOrNull() ?: DEFAULT_PROFILE_STEP_KM
         val cacheDir = File(args.getOrNull(6) ?: "build/terrain-cache").apply { mkdirs() }
         val zoom = args.getOrNull(7)?.toIntOrNull() ?: MapterhornElevation.DEFAULT_ZOOM
+        val style = CoverageStyle(palette = CoveragePalette.forKey(args.getOrNull(8)))
 
         val site =
             Site(
@@ -91,7 +92,8 @@ object CoverageDemo {
 
             reportWarmSweeps(elevation, store, site, radials, rings, profileStepKm)
 
-            File(outDir, "coverage.geojson").writeText(coverage.toGeoJson())
+            println("palette: ${style.palette.key}")
+            File(outDir, "coverage.geojson").writeText(coverage.toGeoJson(style))
             renderPng(coverage, File(outDir, "coverage.png"))
             println("wrote ${outDir.absolutePath}/coverage.{png,geojson}")
         }
