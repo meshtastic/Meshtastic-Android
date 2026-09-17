@@ -843,7 +843,6 @@
     <string name="lockdown_disable_message">Entrez votre phrase de passe pour désactiver le verrouillage. L'appareil déchiffrera son stockage et redémarrera.</string>
     <string name="lockdown_enable">Activer le verrouillage</string>
     <string name="lockdown_enable_ack">Je comprends</string>
-    <string name="lockdown_enable_warning">Attention : l'activation du verrouillage bloque le port de débogage (SWD) sur le matériel pris en charge. Vous pouvez désactiver le verrouillage à tout moment avec votre phrase de passe. Une restauration d'usine effacera l'entièreté de l'appareil si besoin.</string>
     <string name="lockdown_enter_passphrase">Entrez la phrase de passe</string>
     <string name="lockdown_hide_passphrase">Masquer</string>
     <string name="lockdown_hours_until_expiry">Heures jusqu'à expiration</string>

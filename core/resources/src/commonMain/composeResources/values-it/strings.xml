@@ -891,7 +891,6 @@
     <string name="lockdown_disable_message">Inserisci la passphrase per disattivare il lockdown. Il dispositivo decifrerà la sua memoria e si riavvierà.</string>
     <string name="lockdown_enable">Attiva il lockdown</string>
     <string name="lockdown_enable_ack">Ho capito</string>
-    <string name="lockdown_enable_warning">Attenzione: attivando il lockdown viene bloccata la porta di debug (SWD) sull'hardware supportato. Puoi disattivare il lockdown in qualsiasi momento con la tua passphrase, e una cancellazione completa del dispositivo ripristina tutto se necessario.</string>
     <string name="lockdown_enter_passphrase">Inserisci Passphrase</string>
     <string name="lockdown_hide_passphrase">Nascondi</string>
     <string name="lockdown_hours_until_expiry">Ore alla scadenza</string>

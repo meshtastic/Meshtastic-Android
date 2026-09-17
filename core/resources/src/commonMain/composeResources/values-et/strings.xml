@@ -967,7 +967,6 @@
     <string name="lockdown_disable_message">Lukustuse väljalülitamiseks sisesta salasõna. Seade dekrüpteerib oma salvestusruumi ja taaskäivitub.</string>
     <string name="lockdown_enable">Luba lukustus</string>
     <string name="lockdown_enable_ack">Saan aru</string>
-    <string name="lockdown_enable_warning">Tähelepanu: lukustuse lubamine lukustab arendajapordi (SWD) toetatud riistvara. Lukustuse saab igal ajal salasõnaga välja lülitada ja seadme täielik kustutamine taastab vajadusel kõik.</string>
     <string name="lockdown_enter_passphrase">Sisesta salasõna</string>
     <string name="lockdown_hide_passphrase">Peida</string>
     <string name="lockdown_hours_until_expiry">Tunde kuni kehtivusaja lõpuni</string>

@@ -885,7 +885,6 @@
     <string name="lockdown_disable_message">パスフレーズを入力してロックダウンを解除します。デバイスはストレージを復号して再起動します。</string>
     <string name="lockdown_enable">ロックダウンを有効化</string>
     <string name="lockdown_enable_ack">理解しました</string>
-    <string name="lockdown_enable_warning">注意：ロックダウンを有効にすると、対応ハードウェアではデバッグポート（SWD）がロックされます。パスフレーズがあればいつでもロックダウンを解除でき、必要に応じてデバイスを完全に消去すればすべて元に戻せます。</string>
     <string name="lockdown_enter_passphrase">パスフレーズを入力</string>
     <string name="lockdown_hide_passphrase">非表示</string>
     <string name="lockdown_hours_until_expiry">有効期限までの時間</string>
