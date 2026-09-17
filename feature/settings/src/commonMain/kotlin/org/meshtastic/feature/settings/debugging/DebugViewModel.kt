@@ -355,7 +355,7 @@ class DebugViewModel(
 
     private fun annotatePacketLog(packet: MeshPacket, nodeList: List<Node>, myNodeNum: Int?): String {
         val decoded = packet.decoded
-        val basePacket = packet.copy(decoded = null)
+        val basePacket = packet.newBuilder().also { wb -> wb.decoded = null }.build()
         val baseText = basePacket.toString().trimEnd()
         var result =
             if (decoded != null) {

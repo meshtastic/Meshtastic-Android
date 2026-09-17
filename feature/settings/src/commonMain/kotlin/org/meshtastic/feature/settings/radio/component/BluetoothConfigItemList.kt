@@ -49,7 +49,7 @@ private const val PIN_LENGTH = 6
 @Composable
 fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val bluetoothConfig = state.radioConfig.bluetooth ?: Config.BluetoothConfig()
+    val bluetoothConfig = state.radioConfig.bluetooth ?: Config.BluetoothConfig.Builder().build()
     val formState = rememberConfigState(initialValue = bluetoothConfig)
     val focusManager = LocalFocusManager.current
 
@@ -62,7 +62,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config(bluetooth = it)
+            val config = Config.Builder().also { wb -> wb.bluetooth = it }.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -72,7 +72,9 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.bluetooth_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -86,14 +88,18 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     selectedItem =
                     formState.value.mode.takeUnless { it.name == "UNRECOGNIZED" }
                         ?: Config.BluetoothConfig.PairingMode.RANDOM_PIN,
-                    onItemSelected = { formState.value = formState.value.copy(mode = it) },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 FixedPinPreference(
                     pinValue = formState.value.fixed_pin,
                     enabled = state.connected,
                     focusManager = focusManager,
-                    onPinChange = { formState.value = formState.value.copy(fixed_pin = it) },
+                    onPinChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.fixed_pin = it }.build()
+                    },
                 )
             }
         }

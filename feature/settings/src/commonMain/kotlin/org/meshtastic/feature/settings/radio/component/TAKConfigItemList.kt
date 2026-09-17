@@ -126,7 +126,7 @@ import org.meshtastic.proto.Team
 @Composable
 fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val takConfig = state.moduleConfig.tak ?: ModuleConfig.TAKConfig()
+    val takConfig = state.moduleConfig.tak ?: ModuleConfig.TAKConfig.Builder().build()
     val formState = rememberConfigState(initialValue = takConfig)
 
     val effectiveResponseState =
@@ -144,7 +144,7 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = effectiveResponseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig(tak = it)
+            val config = ModuleConfig.Builder().also { wb -> wb.tak = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -153,8 +153,8 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 team = formState.value.team,
                 role = formState.value.role,
                 enabled = state.connected,
-                onTeamSelected = { formState.value = formState.value.copy(team = it) },
-                onRoleSelected = { formState.value = formState.value.copy(role = it) },
+                onTeamSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.team = it }.build() },
+                onRoleSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.role = it }.build() },
             )
         }
     }
@@ -212,7 +212,8 @@ fun TakServerScreen(onBack: () -> Unit) {
     val isTakServerEnabled by takPrefs.isTakServerEnabled.collectAsStateWithLifecycle()
     val isMeshToCotEnabled by takPrefs.isMeshToCotEnabled.collectAsStateWithLifecycle()
     val takServerChannel by takPrefs.takServerChannel.collectAsStateWithLifecycle()
-    val channelSet by radioConfigRepository.channelSetFlow.collectAsStateWithLifecycle(initialValue = ChannelSet())
+    val channelSet by
+        radioConfigRepository.channelSetFlow.collectAsStateWithLifecycle(initialValue = ChannelSet.Builder().build())
     // Options come from the radio's configured channels; the persisted index is appended as a bare
     // number when it isn't among them (no radio connected yet, or the channel list shrank) so the
     // dropdown never renders an empty selection.

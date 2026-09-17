@@ -25,7 +25,7 @@ import org.meshtastic.proto.LocalConfig
 
 /** Serializer for the [LocalConfig] object defined in localonly.proto. */
 object LocalConfigSerializer : OkioSerializer<LocalConfig> {
-    override val defaultValue: LocalConfig = LocalConfig()
+    override val defaultValue: LocalConfig = LocalConfig.Builder().build()
 
     override suspend fun readFrom(source: BufferedSource): LocalConfig {
         try {

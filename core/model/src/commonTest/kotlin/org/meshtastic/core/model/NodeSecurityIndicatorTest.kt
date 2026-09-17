@@ -151,7 +151,11 @@ class NodeSecurityIndicatorTest {
     fun `of reads the same decision off a Node`() {
         val key = ByteArray(32) { 1 }.toByteString()
         val signedOn28 =
-            Node(num = 1, metadata = DeviceMetadata(firmware_version = "2.8.0"), user = User(public_key = key))
+            Node(
+                num = 1,
+                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.8.0" }.build(),
+                user = User.Builder().also { wb -> wb.public_key = key }.build(),
+            )
         assertEquals(NodeSecurityIndicator.SIGNED_NODE, NodeSecurityIndicator.of(signedOn28))
         assertEquals(NodeSecurityIndicator.VERIFIED_CONTACT, NodeSecurityIndicator.of(signedOn28, isOwnNode = true))
         assertEquals(
@@ -159,12 +163,17 @@ class NodeSecurityIndicatorTest {
             NodeSecurityIndicator.of(signedOn28.copy(manuallyVerified = true)),
         )
 
-        val legacy = signedOn28.copy(metadata = DeviceMetadata(firmware_version = "2.7.26"))
+        val legacy =
+            signedOn28.copy(metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.26" }.build())
         assertEquals(NodeSecurityIndicator.PUBLIC_KEY, NodeSecurityIndicator.of(legacy))
         assertEquals(NodeSecurityIndicator.SIGNED_NODE, NodeSecurityIndicator.of(legacy.copy(signsPackets = true)))
-        assertEquals(NodeSecurityIndicator.NO_PUBLIC_KEY, NodeSecurityIndicator.of(legacy.copy(user = User())))
+        assertEquals(
+            NodeSecurityIndicator.NO_PUBLIC_KEY,
+            NodeSecurityIndicator.of(legacy.copy(user = User.Builder().build())),
+        )
 
-        val mismatched = legacy.copy(user = User(public_key = Node.ERROR_BYTE_STRING))
+        val mismatched =
+            legacy.copy(user = User.Builder().also { wb -> wb.public_key = Node.ERROR_BYTE_STRING }.build())
         assertEquals(NodeSecurityIndicator.KEY_MISMATCH, NodeSecurityIndicator.of(mismatched))
         assertEquals(
             NodeSecurityIndicator.KEY_MISMATCH,

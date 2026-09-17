@@ -155,16 +155,19 @@ open class MetricsViewModel(
                     // Each 1-Wire channel converts independently; an absent channel must stay null rather than
                     // becoming a converted zero.
                     var converted =
-                        em.copy(
-                            temperature = em.temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
-                            soil_temperature = em.soil_temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
-                        )
+                        em.newBuilder()
+                            .also { wb ->
+                                wb.temperature = em.temperature?.let { UnitConversions.celsiusToFahrenheit(it) }
+                                wb.soil_temperature =
+                                    em.soil_temperature?.let { UnitConversions.celsiusToFahrenheit(it) }
+                            }
+                            .build()
                     for (channel in 0 until TELEMETRY_CHANNEL_COUNT) {
                         val celsius = em.oneWireTemperature(channel) ?: continue
                         converted =
                             converted.withOneWireTemperature(channel, UnitConversions.celsiusToFahrenheit(celsius))
                     }
-                    telemetry.copy(environment_metrics = converted)
+                    telemetry.newBuilder().also { wb -> wb.environment_metrics = converted }.build()
                 }
             } else {
                 data

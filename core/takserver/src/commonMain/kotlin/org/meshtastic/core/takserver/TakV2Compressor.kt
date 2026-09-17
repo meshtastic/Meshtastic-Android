@@ -330,230 +330,267 @@ internal object TakV2Compressor {
             org.meshtastic.proto.GeoPointSource.fromValue(data.altSrc)
                 ?: org.meshtastic.proto.GeoPointSource.GeoPointSource_Unspecified
 
-        return TAKPacketV2(
-            cot_type_id = cotType,
-            cot_type_str = data.cotTypeStr ?: "",
-            how = how,
-            callsign = data.callsign,
-            team = team,
-            role = role,
-            latitude_i = data.latitudeI,
-            longitude_i = data.longitudeI,
-            altitude = data.altitude,
-            speed = data.speed,
-            course = data.course,
-            battery = data.battery,
-            geo_src = geoSrc,
-            alt_src = altSrc,
-            uid = data.uid,
-            device_callsign = data.deviceCallsign,
-            stale_seconds = data.staleSeconds,
-            tak_version = data.takVersion,
-            tak_device = data.takDevice,
-            tak_platform = data.takPlatform,
-            tak_os = data.takOs,
-            endpoint = data.endpoint,
-            phone = data.phone,
-            // v0.4.0: PLI is implicit — no payload_variant is set for a PLI (the
-            // bool pli oneof arm was removed). Pli/None simply set no oneof field.
-            chat =
-            (data.payload as? TakPacketV2Data.Payload.Chat)?.let { chat ->
-                WireGeoChat(
-                    message = chat.message,
-                    to = chat.to,
-                    to_callsign = chat.toCallsign,
-                    receipt_for_uid = chat.receiptForUid,
-                    receipt_type =
-                    WireGeoChat.ReceiptType.fromValue(chat.receiptType)
-                        ?: WireGeoChat.ReceiptType.ReceiptType_None,
-                    // TAKTALK sidecars.  Empty SDK string → wire null (field absent)
-                    // so non-TAKTALK chats don't carry empty sidecar bytes on every
-                    // mesh packet.  voice_profile_id stays present-but-empty when
-                    // hasVoiceProfile=true so the receiver can re-emit `<voice_profile_id/>`.
-                    lang = chat.lang.ifEmpty { null },
-                    room_id = chat.roomId.ifEmpty { null },
-                    voice_profile_id = if (chat.hasVoiceProfile) chat.voiceProfileId else null,
-                )
-            },
-            aircraft =
-            (data.payload as? TakPacketV2Data.Payload.Aircraft)?.let { ac ->
-                WireAircraftTrack(
-                    icao = ac.icao,
-                    registration = ac.registration,
-                    flight = ac.flight,
-                    aircraft_type = ac.aircraftType,
-                    squawk = ac.squawk,
-                    category = ac.category,
-                    rssi_x10 = ac.rssiX10,
-                    gps = ac.gps,
-                    cot_host_id = ac.cotHostId,
-                )
-            },
-            shape =
-            (data.payload as? TakPacketV2Data.Payload.DrawnShape)?.let { s ->
-                WireDrawnShape(
-                    kind = WireDrawnShape.Kind.fromValue(s.kind) ?: WireDrawnShape.Kind.Kind_Unspecified,
-                    style =
-                    WireDrawnShape.StyleMode.fromValue(s.style)
-                        ?: WireDrawnShape.StyleMode.StyleMode_Unspecified,
-                    major_cm = s.majorCm,
-                    minor_cm = s.minorCm,
-                    angle_deg = s.angleDeg,
-                    stroke_color = WireTeam.fromValue(s.strokeColor) ?: WireTeam.Unspecifed_Color,
-                    stroke_argb = s.strokeArgb,
-                    stroke_weight_x10 = s.strokeWeightX10,
-                    fill_color = WireTeam.fromValue(s.fillColor) ?: WireTeam.Unspecifed_Color,
-                    fill_argb = s.fillArgb,
-                    labels_on = s.labelsOn,
-                    // v0.4.0: delta-encode vertices into two packed sint32 columns
-                    // relative to the event anchor (was repeated CotGeoPoint).
-                    vertex_lat_deltas = s.vertices.map { it.latI - data.latitudeI },
-                    vertex_lon_deltas = s.vertices.map { it.lonI - data.longitudeI },
-                    truncated = s.truncated,
-                    bullseye_distance_dm = s.bullseyeDistanceDm,
-                    bullseye_bearing_ref = s.bullseyeBearingRef,
-                    bullseye_flags = s.bullseyeFlags,
-                    bullseye_uid_ref = s.bullseyeUidRef,
-                )
-            },
-            marker =
-            (data.payload as? TakPacketV2Data.Payload.Marker)?.let { m ->
-                WireMarker(
-                    kind = WireMarker.Kind.fromValue(m.kind) ?: WireMarker.Kind.Kind_Unspecified,
-                    color = WireTeam.fromValue(m.color) ?: WireTeam.Unspecifed_Color,
-                    color_argb = m.colorArgb,
-                    readiness = m.readiness,
-                    parent_uid = m.parentUid,
-                    parent_type = m.parentType,
-                    parent_callsign = m.parentCallsign,
-                    iconset = m.iconset,
-                )
-            },
-            rab =
-            (data.payload as? TakPacketV2Data.Payload.RangeAndBearing)?.let { r ->
-                WireRangeAndBearing(
-                    anchor =
-                    WireCotGeoPoint(
-                        lat_delta_i = r.anchorLatI - data.latitudeI,
-                        lon_delta_i = r.anchorLonI - data.longitudeI,
-                    ),
-                    anchor_uid = r.anchorUid,
-                    range_cm = r.rangeCm,
-                    bearing_cdeg = r.bearingCdeg,
-                    stroke_color = WireTeam.fromValue(r.strokeColor) ?: WireTeam.Unspecifed_Color,
-                    stroke_argb = r.strokeArgb,
-                    stroke_weight_x10 = r.strokeWeightX10,
-                )
-            },
-            route =
-            (data.payload as? TakPacketV2Data.Payload.Route)?.let { rt ->
-                WireRoute(
-                    method = WireRoute.Method.fromValue(rt.method) ?: WireRoute.Method.Method_Unspecified,
-                    direction =
-                    WireRoute.Direction.fromValue(rt.direction) ?: WireRoute.Direction.Direction_Unspecified,
-                    prefix = rt.prefix,
-                    stroke_weight_x10 = rt.strokeWeightX10,
-                    links =
-                    rt.links.map { link ->
-                        WireRoute.Link(
-                            point =
-                            WireCotGeoPoint(
-                                lat_delta_i = link.latI - data.latitudeI,
-                                lon_delta_i = link.lonI - data.longitudeI,
-                            ),
-                            uid = link.uid,
-                            callsign = link.callsign,
-                            link_type = link.linkType,
-                        )
-                    },
-                    truncated = rt.truncated,
-                )
-            },
-            casevac =
-            (data.payload as? TakPacketV2Data.Payload.CasevacReport)?.let { c ->
-                WireCasevacReport(
-                    precedence =
-                    WireCasevacReport.Precedence.fromValue(c.precedence)
-                        ?: WireCasevacReport.Precedence.Precedence_Unspecified,
-                    equipment_flags = c.equipmentFlags,
-                    litter_patients = c.litterPatients,
-                    ambulatory_patients = c.ambulatoryPatients,
-                    security =
-                    WireCasevacReport.Security.fromValue(c.security)
-                        ?: WireCasevacReport.Security.Security_Unspecified,
-                    hlz_marking =
-                    WireCasevacReport.HlzMarking.fromValue(c.hlzMarking)
-                        ?: WireCasevacReport.HlzMarking.HlzMarking_Unspecified,
-                    zone_marker = c.zoneMarker,
-                    us_military = c.usMilitary,
-                    us_civilian = c.usCivilian,
-                    non_us_military = c.nonUsMilitary,
-                    non_us_civilian = c.nonUsCivilian,
-                    epw = c.epw,
-                    child = c.child,
-                    terrain_flags = c.terrainFlags,
-                    frequency = c.frequency,
-                )
-            },
-            emergency =
-            (data.payload as? TakPacketV2Data.Payload.EmergencyAlert)?.let { e ->
-                WireEmergencyAlert(
-                    type = WireEmergencyAlert.Type.fromValue(e.type) ?: WireEmergencyAlert.Type.Type_Unspecified,
-                    authoring_uid = e.authoringUid,
-                    cancel_reference_uid = e.cancelReferenceUid,
-                )
-            },
-            task =
-            (data.payload as? TakPacketV2Data.Payload.TaskRequest)?.let { t ->
-                WireTaskRequest(
-                    task_type = t.taskType,
-                    target_uid = t.targetUid,
-                    assignee_uid = t.assigneeUid,
-                    priority =
-                    WireTaskRequest.Priority.fromValue(t.priority)
-                        ?: WireTaskRequest.Priority.Priority_Unspecified,
-                    status =
-                    WireTaskRequest.Status.fromValue(t.status) ?: WireTaskRequest.Status.Status_Unspecified,
-                    note = t.note,
-                )
-            },
-            raw_detail = (data.payload as? TakPacketV2Data.Payload.RawDetail)?.bytes?.toByteString(),
-            // TAKTALK voice/text message (m-t-t).  Without this, m-t-t events
-            // would compress with no payload set, the receiver's wireToSdkData
-            // would fall through to Payload.None, and TAKTALK plugin would
-            // never see the rebuilt CoT event for TTS playback.
-            taktalk =
-            (data.payload as? TakPacketV2Data.Payload.TakTalk)?.let { tt ->
-                WireTakTalkMessage(
-                    text = tt.text,
-                    chatroom_id = tt.chatroomId,
-                    lang = tt.lang,
-                    from_voice = tt.fromVoice,
-                )
-            },
-            // TAKTALK room/membership broadcast (y-).  Required for receivers
-            // to resolve TAKTALK room UUIDs to friendly names + rosters.
-            taktalk_room =
-            (data.payload as? TakPacketV2Data.Payload.TakTalkRoom)?.let { room ->
-                @Suppress("DEPRECATION")
-                WireTakTalkRoomData(
-                    // sender_callsign deprecated in SDK v0.3.2 — the SDK
-                    // builder reconstitutes <sender-callsign> from envelope
-                    // packet.callsign, so we stop emitting the duplicate
-                    // wire byte. Field stays present for one release so
-                    // v0.3.1 receivers continue decoding cleanly.
-                    sender_callsign = "",
-                    room_id = room.roomId,
-                    room_name = room.roomName,
-                    participants = room.participants.toList(),
-                )
-            },
-            // Directed-routing recipient list (<marti><dest …/>…</marti>).
-            // Empty list = broadcast (default); populated for TAKTALK m-t-t
-            // and directed b-t-f DMs. Encode an explicit Marti only when
-            // there is at least one destination — the wrapper costs wire
-            // bytes for no benefit on broadcast packets.
-            marti = data.marti.takeIf { it.isNotEmpty() }?.let { org.meshtastic.proto.Marti(dest_callsign = it) },
-        )
+        return TAKPacketV2.Builder()
+            .also { wb ->
+                wb.cot_type_id = cotType
+                wb.cot_type_str = data.cotTypeStr ?: ""
+                wb.how = how
+                wb.callsign = data.callsign
+                wb.team = team
+                wb.role = role
+                wb.latitude_i = data.latitudeI
+                wb.longitude_i = data.longitudeI
+                wb.altitude = data.altitude
+                wb.speed = data.speed
+                wb.course = data.course
+                wb.battery = data.battery
+                wb.geo_src = geoSrc
+                wb.alt_src = altSrc
+                wb.uid = data.uid
+                wb.device_callsign = data.deviceCallsign
+                wb.stale_seconds = data.staleSeconds
+                wb.tak_version = data.takVersion
+                wb.tak_device = data.takDevice
+                wb.tak_platform = data.takPlatform
+                wb.tak_os = data.takOs
+                wb.endpoint = data.endpoint
+                wb.phone = data.phone
+                // v0.4.0: PLI is implicit — no payload_variant is set for a PLI (the
+                // bool pli oneof arm was removed). Pli/None simply set no oneof field.
+                wb.chat =
+                    (data.payload as? TakPacketV2Data.Payload.Chat)?.let { chat ->
+                        WireGeoChat.Builder()
+                            .also { wb ->
+                                wb.message = chat.message
+                                wb.to = chat.to
+                                wb.to_callsign = chat.toCallsign
+                                wb.receipt_for_uid = chat.receiptForUid
+                                wb.receipt_type =
+                                    WireGeoChat.ReceiptType.fromValue(chat.receiptType)
+                                        ?: WireGeoChat.ReceiptType.ReceiptType_None
+                                // TAKTALK sidecars.  Empty SDK string → wire null (field absent)
+                                // so non-TAKTALK chats don't carry empty sidecar bytes on every
+                                // mesh packet.  voice_profile_id stays present-but-empty when
+                                // hasVoiceProfile=true so the receiver can re-emit `<voice_profile_id/>`.
+                                wb.lang = chat.lang.ifEmpty { null }
+                                wb.room_id = chat.roomId.ifEmpty { null }
+                                wb.voice_profile_id = if (chat.hasVoiceProfile) chat.voiceProfileId else null
+                            }
+                            .build()
+                    }
+                wb.aircraft =
+                    (data.payload as? TakPacketV2Data.Payload.Aircraft)?.let { ac ->
+                        WireAircraftTrack.Builder()
+                            .also { wb ->
+                                wb.icao = ac.icao
+                                wb.registration = ac.registration
+                                wb.flight = ac.flight
+                                wb.aircraft_type = ac.aircraftType
+                                wb.squawk = ac.squawk
+                                wb.category = ac.category
+                                wb.rssi_x10 = ac.rssiX10
+                                wb.gps = ac.gps
+                                wb.cot_host_id = ac.cotHostId
+                            }
+                            .build()
+                    }
+                wb.shape =
+                    (data.payload as? TakPacketV2Data.Payload.DrawnShape)?.let { s ->
+                        WireDrawnShape.Builder()
+                            .also { wb ->
+                                wb.kind = WireDrawnShape.Kind.fromValue(s.kind) ?: WireDrawnShape.Kind.Kind_Unspecified
+                                wb.style =
+                                    WireDrawnShape.StyleMode.fromValue(s.style)
+                                        ?: WireDrawnShape.StyleMode.StyleMode_Unspecified
+                                wb.major_cm = s.majorCm
+                                wb.minor_cm = s.minorCm
+                                wb.angle_deg = s.angleDeg
+                                wb.stroke_color = WireTeam.fromValue(s.strokeColor) ?: WireTeam.Unspecifed_Color
+                                wb.stroke_argb = s.strokeArgb
+                                wb.stroke_weight_x10 = s.strokeWeightX10
+                                wb.fill_color = WireTeam.fromValue(s.fillColor) ?: WireTeam.Unspecifed_Color
+                                wb.fill_argb = s.fillArgb
+                                wb.labels_on = s.labelsOn
+                                // v0.4.0: delta-encode vertices into two packed sint32 columns
+                                // relative to the event anchor (was repeated CotGeoPoint).
+                                wb.vertex_lat_deltas = s.vertices.map { it.latI - data.latitudeI }
+                                wb.vertex_lon_deltas = s.vertices.map { it.lonI - data.longitudeI }
+                                wb.truncated = s.truncated
+                                wb.bullseye_distance_dm = s.bullseyeDistanceDm
+                                wb.bullseye_bearing_ref = s.bullseyeBearingRef
+                                wb.bullseye_flags = s.bullseyeFlags
+                                wb.bullseye_uid_ref = s.bullseyeUidRef
+                            }
+                            .build()
+                    }
+                wb.marker =
+                    (data.payload as? TakPacketV2Data.Payload.Marker)?.let { m ->
+                        WireMarker.Builder()
+                            .also { wb ->
+                                wb.kind = WireMarker.Kind.fromValue(m.kind) ?: WireMarker.Kind.Kind_Unspecified
+                                wb.color = WireTeam.fromValue(m.color) ?: WireTeam.Unspecifed_Color
+                                wb.color_argb = m.colorArgb
+                                wb.readiness = m.readiness
+                                wb.parent_uid = m.parentUid
+                                wb.parent_type = m.parentType
+                                wb.parent_callsign = m.parentCallsign
+                                wb.iconset = m.iconset
+                            }
+                            .build()
+                    }
+                wb.rab =
+                    (data.payload as? TakPacketV2Data.Payload.RangeAndBearing)?.let { r ->
+                        WireRangeAndBearing.Builder()
+                            .also { wb ->
+                                wb.anchor =
+                                    WireCotGeoPoint.Builder()
+                                        .also { wb ->
+                                            wb.lat_delta_i = r.anchorLatI - data.latitudeI
+                                            wb.lon_delta_i = r.anchorLonI - data.longitudeI
+                                        }
+                                        .build()
+                                wb.anchor_uid = r.anchorUid
+                                wb.range_cm = r.rangeCm
+                                wb.bearing_cdeg = r.bearingCdeg
+                                wb.stroke_color = WireTeam.fromValue(r.strokeColor) ?: WireTeam.Unspecifed_Color
+                                wb.stroke_argb = r.strokeArgb
+                                wb.stroke_weight_x10 = r.strokeWeightX10
+                            }
+                            .build()
+                    }
+                wb.route =
+                    (data.payload as? TakPacketV2Data.Payload.Route)?.let { rt ->
+                        WireRoute.Builder()
+                            .also { wb ->
+                                wb.method = WireRoute.Method.fromValue(rt.method) ?: WireRoute.Method.Method_Unspecified
+                                wb.direction =
+                                    WireRoute.Direction.fromValue(rt.direction)
+                                        ?: WireRoute.Direction.Direction_Unspecified
+                                wb.prefix = rt.prefix
+                                wb.stroke_weight_x10 = rt.strokeWeightX10
+                                wb.links =
+                                    rt.links.map { link ->
+                                        WireRoute.Link.Builder()
+                                            .also { wb ->
+                                                wb.point =
+                                                    WireCotGeoPoint.Builder()
+                                                        .also { wb ->
+                                                            wb.lat_delta_i = link.latI - data.latitudeI
+                                                            wb.lon_delta_i = link.lonI - data.longitudeI
+                                                        }
+                                                        .build()
+                                                wb.uid = link.uid
+                                                wb.callsign = link.callsign
+                                                wb.link_type = link.linkType
+                                            }
+                                            .build()
+                                    }
+                                wb.truncated = rt.truncated
+                            }
+                            .build()
+                    }
+                wb.casevac =
+                    (data.payload as? TakPacketV2Data.Payload.CasevacReport)?.let { c ->
+                        WireCasevacReport.Builder()
+                            .also { wb ->
+                                wb.precedence =
+                                    WireCasevacReport.Precedence.fromValue(c.precedence)
+                                        ?: WireCasevacReport.Precedence.Precedence_Unspecified
+                                wb.equipment_flags = c.equipmentFlags
+                                wb.litter_patients = c.litterPatients
+                                wb.ambulatory_patients = c.ambulatoryPatients
+                                wb.security =
+                                    WireCasevacReport.Security.fromValue(c.security)
+                                        ?: WireCasevacReport.Security.Security_Unspecified
+                                wb.hlz_marking =
+                                    WireCasevacReport.HlzMarking.fromValue(c.hlzMarking)
+                                        ?: WireCasevacReport.HlzMarking.HlzMarking_Unspecified
+                                wb.zone_marker = c.zoneMarker
+                                wb.us_military = c.usMilitary
+                                wb.us_civilian = c.usCivilian
+                                wb.non_us_military = c.nonUsMilitary
+                                wb.non_us_civilian = c.nonUsCivilian
+                                wb.epw = c.epw
+                                wb.child = c.child
+                                wb.terrain_flags = c.terrainFlags
+                                wb.frequency = c.frequency
+                            }
+                            .build()
+                    }
+                wb.emergency =
+                    (data.payload as? TakPacketV2Data.Payload.EmergencyAlert)?.let { e ->
+                        WireEmergencyAlert.Builder()
+                            .also { wb ->
+                                wb.type =
+                                    WireEmergencyAlert.Type.fromValue(e.type)
+                                        ?: WireEmergencyAlert.Type.Type_Unspecified
+                                wb.authoring_uid = e.authoringUid
+                                wb.cancel_reference_uid = e.cancelReferenceUid
+                            }
+                            .build()
+                    }
+                wb.task =
+                    (data.payload as? TakPacketV2Data.Payload.TaskRequest)?.let { t ->
+                        WireTaskRequest.Builder()
+                            .also { wb ->
+                                wb.task_type = t.taskType
+                                wb.target_uid = t.targetUid
+                                wb.assignee_uid = t.assigneeUid
+                                wb.priority =
+                                    WireTaskRequest.Priority.fromValue(t.priority)
+                                        ?: WireTaskRequest.Priority.Priority_Unspecified
+                                wb.status =
+                                    WireTaskRequest.Status.fromValue(t.status)
+                                        ?: WireTaskRequest.Status.Status_Unspecified
+                                wb.note = t.note
+                            }
+                            .build()
+                    }
+                wb.raw_detail = (data.payload as? TakPacketV2Data.Payload.RawDetail)?.bytes?.toByteString()
+                // TAKTALK voice/text message (m-t-t).  Without this, m-t-t events
+                // would compress with no payload set, the receiver's wireToSdkData
+                // would fall through to Payload.None, and TAKTALK plugin would
+                // never see the rebuilt CoT event for TTS playback.
+                wb.taktalk =
+                    (data.payload as? TakPacketV2Data.Payload.TakTalk)?.let { tt ->
+                        WireTakTalkMessage.Builder()
+                            .also { wb ->
+                                wb.text = tt.text
+                                wb.chatroom_id = tt.chatroomId
+                                wb.lang = tt.lang
+                                wb.from_voice = tt.fromVoice
+                            }
+                            .build()
+                    }
+                // TAKTALK room/membership broadcast (y-).  Required for receivers
+                // to resolve TAKTALK room UUIDs to friendly names + rosters.
+                wb.taktalk_room =
+                    (data.payload as? TakPacketV2Data.Payload.TakTalkRoom)?.let { room ->
+                        @Suppress("DEPRECATION")
+                        WireTakTalkRoomData.Builder()
+                            .also { wb ->
+                                // sender_callsign deprecated in SDK v0.3.2 — the SDK
+                                // builder reconstitutes <sender-callsign> from envelope
+                                // packet.callsign, so we stop emitting the duplicate
+                                // wire byte. Field stays present for one release so
+                                // v0.3.1 receivers continue decoding cleanly.
+                                wb.sender_callsign = ""
+                                wb.room_id = room.roomId
+                                wb.room_name = room.roomName
+                                wb.participants = room.participants.toList()
+                            }
+                            .build()
+                    }
+                // Directed-routing recipient list (<marti><dest …/>…</marti>).
+                // Empty list = broadcast (default); populated for TAKTALK m-t-t
+                // and directed b-t-f DMs. Encode an explicit Marti only when
+                // there is at least one destination — the wrapper costs wire
+                // bytes for no benefit on broadcast packets.
+                wb.marti =
+                    data.marti
+                        .takeIf { it.isNotEmpty() }
+                        ?.let { org.meshtastic.proto.Marti.Builder().also { wb -> wb.dest_callsign = it }.build() }
+            }
+            .build()
     }
 }

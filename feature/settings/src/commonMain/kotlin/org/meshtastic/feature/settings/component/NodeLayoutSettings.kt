@@ -235,29 +235,47 @@ fun NodeLayoutSettings(
 internal fun previewSampleNode(hopsAway: Int = 1): Node = Node(
     num = 0x1A2B3C4D,
     user =
-    User(
-        id = "!1a2b3c4d",
-        long_name = "Solar Hilltop",
-        short_name = "SoHi",
-        hw_model = HardwareModel.TBEAM,
-        role = Config.DeviceConfig.Role.ROUTER,
-        public_key = ByteArray(32) { (it * 7).toByte() }.toByteString(),
-    ),
-    position = Position(latitude_i = 338125110, longitude_i = -1179189760, altitude = 138, sats_in_view = 8),
+    User.Builder()
+        .also { wb ->
+            wb.id = "!1a2b3c4d"
+            wb.long_name = "Solar Hilltop"
+            wb.short_name = "SoHi"
+            wb.hw_model = HardwareModel.TBEAM
+            wb.role = Config.DeviceConfig.Role.ROUTER
+            wb.public_key = ByteArray(32) { (it * 7).toByte() }.toByteString()
+        }
+        .build(),
+    position =
+    Position.Builder()
+        .also { wb ->
+            wb.latitude_i = 338125110
+            wb.longitude_i = -1179189760
+            wb.altitude = 138
+            wb.sats_in_view = 8
+        }
+        .build(),
     lastHeard = (nowSeconds - 300).toInt(),
     channel = 1,
     snr = 10.25F,
     rssi = -67,
     deviceMetrics =
-    DeviceMetrics(
-        channel_utilization = 3.2F,
-        air_util_tx = 1.8F,
-        battery_level = 92,
-        voltage = 4.1F,
-        uptime_seconds = 86400,
-    ),
+    DeviceMetrics.Builder()
+        .also { wb ->
+            wb.channel_utilization = 3.2F
+            wb.air_util_tx = 1.8F
+            wb.battery_level = 92
+            wb.voltage = 4.1F
+            wb.uptime_seconds = 86400
+        }
+        .build(),
     environmentMetrics =
-    EnvironmentMetrics(temperature = 24.5F, relative_humidity = 45.0F, barometric_pressure = 1013.25F),
+    EnvironmentMetrics.Builder()
+        .also { wb ->
+            wb.temperature = 24.5F
+            wb.relative_humidity = 45.0F
+            wb.barometric_pressure = 1013.25F
+        }
+        .build(),
     isFavorite = true,
     hopsAway = hopsAway,
 )
@@ -267,13 +285,23 @@ internal fun previewSampleNode(hopsAway: Int = 1): Node = Node(
 internal fun previewLocalNode(): Node = Node(
     num = 0xDEADBEEF.toInt(),
     user =
-    User(
-        id = "!deadbeef",
-        long_name = "My Radio",
-        short_name = "MyRd",
-        hw_model = HardwareModel.HELTEC_V3,
-        role = Config.DeviceConfig.Role.CLIENT,
-    ),
-    position = Position(latitude_i = 338000000, longitude_i = -1179000000, altitude = 50, sats_in_view = 10),
+    User.Builder()
+        .also { wb ->
+            wb.id = "!deadbeef"
+            wb.long_name = "My Radio"
+            wb.short_name = "MyRd"
+            wb.hw_model = HardwareModel.HELTEC_V3
+            wb.role = Config.DeviceConfig.Role.CLIENT
+        }
+        .build(),
+    position =
+    Position.Builder()
+        .also { wb ->
+            wb.latitude_i = 338000000
+            wb.longitude_i = -1179000000
+            wb.altitude = 50
+            wb.sats_in_view = 10
+        }
+        .build(),
     lastHeard = (nowSeconds - 30).toInt(),
 )

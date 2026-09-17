@@ -30,16 +30,18 @@ class TelemetryChannelsTest {
     @Test
     fun oneWireAccessorReadsEveryChannelInOrder() {
         val metrics =
-            EnvironmentMetrics(
-                one_wire_temperature_ch0 = 0f,
-                one_wire_temperature_ch1 = 1f,
-                one_wire_temperature_ch2 = 2f,
-                one_wire_temperature_ch3 = 3f,
-                one_wire_temperature_ch4 = 4f,
-                one_wire_temperature_ch5 = 5f,
-                one_wire_temperature_ch6 = 6f,
-                one_wire_temperature_ch7 = 7f,
-            )
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.one_wire_temperature_ch0 = 0f
+                    wb.one_wire_temperature_ch1 = 1f
+                    wb.one_wire_temperature_ch2 = 2f
+                    wb.one_wire_temperature_ch3 = 3f
+                    wb.one_wire_temperature_ch4 = 4f
+                    wb.one_wire_temperature_ch5 = 5f
+                    wb.one_wire_temperature_ch6 = 6f
+                    wb.one_wire_temperature_ch7 = 7f
+                }
+                .build()
 
         for (channel in 0 until TELEMETRY_CHANNEL_COUNT) {
             assertEquals(channel.toFloat(), metrics.oneWireTemperature(channel))
@@ -49,16 +51,18 @@ class TelemetryChannelsTest {
     @Test
     fun adcAccessorReadsEveryChannelInOrder() {
         val metrics =
-            EnvironmentMetrics(
-                adc_voltage_ch0 = 0f,
-                adc_voltage_ch1 = 1f,
-                adc_voltage_ch2 = 2f,
-                adc_voltage_ch3 = 3f,
-                adc_voltage_ch4 = 4f,
-                adc_voltage_ch5 = 5f,
-                adc_voltage_ch6 = 6f,
-                adc_voltage_ch7 = 7f,
-            )
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.adc_voltage_ch0 = 0f
+                    wb.adc_voltage_ch1 = 1f
+                    wb.adc_voltage_ch2 = 2f
+                    wb.adc_voltage_ch3 = 3f
+                    wb.adc_voltage_ch4 = 4f
+                    wb.adc_voltage_ch5 = 5f
+                    wb.adc_voltage_ch6 = 6f
+                    wb.adc_voltage_ch7 = 7f
+                }
+                .build()
 
         for (channel in 0 until TELEMETRY_CHANNEL_COUNT) {
             assertEquals(channel.toFloat(), metrics.adcVoltage(channel))
@@ -67,17 +71,29 @@ class TelemetryChannelsTest {
 
     @Test
     fun measuredZeroIsDistinctFromAbsentChannel() {
-        val reported = EnvironmentMetrics(one_wire_temperature_ch3 = 0f, adc_voltage_ch3 = 0f)
+        val reported =
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.one_wire_temperature_ch3 = 0f
+                    wb.adc_voltage_ch3 = 0f
+                }
+                .build()
 
         assertEquals(0f, reported.oneWireTemperature(3))
         assertEquals(0f, reported.adcVoltage(3))
-        assertNull(EnvironmentMetrics().oneWireTemperature(3))
-        assertNull(EnvironmentMetrics().adcVoltage(3))
+        assertNull(EnvironmentMetrics.Builder().build().oneWireTemperature(3))
+        assertNull(EnvironmentMetrics.Builder().build().adcVoltage(3))
     }
 
     @Test
     fun outOfRangeChannelIsNullRatherThanAnError() {
-        val metrics = EnvironmentMetrics(one_wire_temperature_ch0 = 1f, adc_voltage_ch0 = 1f)
+        val metrics =
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.one_wire_temperature_ch0 = 1f
+                    wb.adc_voltage_ch0 = 1f
+                }
+                .build()
 
         assertNull(metrics.oneWireTemperature(TELEMETRY_CHANNEL_COUNT))
         assertNull(metrics.adcVoltage(TELEMETRY_CHANNEL_COUNT))
@@ -87,7 +103,7 @@ class TelemetryChannelsTest {
 
     @Test
     fun withAccessorsSetOnlyTheTargetChannel() {
-        val metrics = EnvironmentMetrics().withOneWireTemperature(2, 12.5f).withAdcVoltage(5, 1.8f)
+        val metrics = EnvironmentMetrics.Builder().build().withOneWireTemperature(2, 12.5f).withAdcVoltage(5, 1.8f)
 
         assertEquals(12.5f, metrics.oneWireTemperature(2))
         assertEquals(1.8f, metrics.adcVoltage(5))
@@ -97,7 +113,7 @@ class TelemetryChannelsTest {
 
     @Test
     fun withAccessorsIgnoreOutOfRangeChannels() {
-        val metrics = EnvironmentMetrics()
+        val metrics = EnvironmentMetrics.Builder().build()
 
         assertEquals(metrics, metrics.withOneWireTemperature(TELEMETRY_CHANNEL_COUNT, 1f))
         assertEquals(metrics, metrics.withAdcVoltage(TELEMETRY_CHANNEL_COUNT, 1f))
@@ -108,7 +124,7 @@ class TelemetryChannelsTest {
     @Suppress("DEPRECATION")
     @Test
     fun legacyListIsLiftedOntoPerChannelFields() {
-        val stored = EnvironmentMetrics(one_wire_temperature = listOf(10f, 0f, 30f))
+        val stored = EnvironmentMetrics.Builder().also { wb -> wb.one_wire_temperature = listOf(10f, 0f, 30f) }.build()
 
         val lifted = stored.withLegacyOneWireTemperatures()
 
@@ -122,7 +138,13 @@ class TelemetryChannelsTest {
     @Suppress("DEPRECATION")
     @Test
     fun perChannelValuesWinOverLegacyList() {
-        val mixed = EnvironmentMetrics(one_wire_temperature = listOf(10f, 20f), one_wire_temperature_ch0 = 99f)
+        val mixed =
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.one_wire_temperature = listOf(10f, 20f)
+                    wb.one_wire_temperature_ch0 = 99f
+                }
+                .build()
 
         val lifted = mixed.withLegacyOneWireTemperatures()
 
@@ -133,7 +155,8 @@ class TelemetryChannelsTest {
     @Suppress("DEPRECATION")
     @Test
     fun legacyListLongerThanTheChannelRangeIsTruncated() {
-        val stored = EnvironmentMetrics(one_wire_temperature = List(12) { it.toFloat() })
+        val stored =
+            EnvironmentMetrics.Builder().also { wb -> wb.one_wire_temperature = List(12) { it.toFloat() } }.build()
 
         val lifted = stored.withLegacyOneWireTemperatures()
 
@@ -143,7 +166,7 @@ class TelemetryChannelsTest {
 
     @Test
     fun absentLegacyListLeavesMetricsUnchanged() {
-        val metrics = EnvironmentMetrics(temperature = 21f)
+        val metrics = EnvironmentMetrics.Builder().also { wb -> wb.temperature = 21f }.build()
 
         assertEquals(metrics, metrics.withLegacyOneWireTemperatures())
     }

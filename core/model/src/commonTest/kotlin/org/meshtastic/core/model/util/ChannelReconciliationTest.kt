@@ -28,24 +28,56 @@ import kotlin.test.assertTrue
 import org.meshtastic.core.model.Channel as ModelChannel
 
 class ChannelReconciliationTest {
-    private val longFast = LoRaConfig(use_preset = true, modem_preset = ModemPreset.LONG_FAST)
-    private val mediumFast = LoRaConfig(use_preset = true, modem_preset = ModemPreset.MEDIUM_FAST)
+    private val longFast =
+        LoRaConfig.Builder()
+            .also { wb ->
+                wb.use_preset = true
+                wb.modem_preset = ModemPreset.LONG_FAST
+            }
+            .build()
+    private val mediumFast =
+        LoRaConfig.Builder()
+            .also { wb ->
+                wb.use_preset = true
+                wb.modem_preset = ModemPreset.MEDIUM_FAST
+            }
+            .build()
     private val defaultPsk = byteArrayOf(0x01).toByteString()
     private val otherPsk = byteArrayOf(0x09, 0x08).toByteString()
 
-    private fun set(lora: LoRaConfig?, vararg settings: ChannelSettings) =
-        ChannelSet(settings = settings.toList(), lora_config = lora)
+    private fun set(lora: LoRaConfig?, vararg settings: ChannelSettings) = ChannelSet.Builder()
+        .also { wb ->
+            wb.settings = settings.toList()
+            wb.lora_config = lora
+        }
+        .build()
 
     @Test
     fun `an unchanged set produces no changes`() {
-        val settings = ChannelSettings(psk = defaultPsk, name = "A")
+        val settings =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
         assertEquals(emptyList(), planChannelReconciliation(set(longFast, settings), set(longFast, settings)))
     }
 
     @Test
     fun `a replaced slot retires the previous occupant`() {
-        val old = ChannelSettings(psk = defaultPsk, name = "A")
-        val changes = planChannelReconciliation(set(longFast, old), set(longFast, ChannelSettings(psk = otherPsk)))
+        val old =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
+        val changes =
+            planChannelReconciliation(
+                set(longFast, old),
+                set(longFast, ChannelSettings.Builder().also { wb -> wb.psk = otherPsk }.build()),
+            )
 
         val change = changes.single()
         assertEquals(ConversationSlot.Live(0), change.from)
@@ -55,8 +87,20 @@ class ChannelReconciliationTest {
 
     @Test
     fun `a reordered channel moves rather than retires`() {
-        val a = ChannelSettings(psk = defaultPsk, name = "A")
-        val b = ChannelSettings(psk = otherPsk, name = "B")
+        val a =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
+        val b =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = otherPsk
+                    wb.name = "B"
+                }
+                .build()
         val changes = planChannelReconciliation(set(longFast, a, b), set(longFast, b, a))
 
         assertEquals(
@@ -71,7 +115,7 @@ class ChannelReconciliationTest {
     /** Effective name comes from the preset, so a preset switch is a channel change with neither raw field moved. */
     @Test
     fun `a preset switch is a channel change`() {
-        val settings = ChannelSettings(psk = defaultPsk)
+        val settings = ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()
         val changes = planChannelReconciliation(set(longFast, settings), set(mediumFast, settings))
 
         assertEquals("LongFast", changes.single().displayName)
@@ -85,15 +129,33 @@ class ChannelReconciliationTest {
      */
     @Test
     fun `a duplicated channel does not drag a conversation off its own slot`() {
-        val settings = ChannelSettings(psk = defaultPsk, name = "A")
+        val settings =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
         assertEquals(emptyList(), planChannelReconciliation(set(longFast, settings), set(longFast, settings, settings)))
     }
 
     /** With the identity gone from its own slot, the lowest duplicate is a deterministic destination. */
     @Test
     fun `a duplicated channel resolves to its lowest slot`() {
-        val a = ChannelSettings(psk = defaultPsk, name = "A")
-        val b = ChannelSettings(psk = otherPsk, name = "B")
+        val a =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
+        val b =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = otherPsk
+                    wb.name = "B"
+                }
+                .build()
         val changes = planChannelReconciliation(set(longFast, b, a), set(longFast, b, b, a, a))
 
         assertEquals(ConversationSlot.Live(2), changes.single { it.from == ConversationSlot.Live(1) }.to)
@@ -102,11 +164,17 @@ class ChannelReconciliationTest {
     /** A parked channel must not be reclaimed twice when the radio reports it in two slots. */
     @Test
     fun `a duplicated channel is reclaimed only once`() {
-        val settings = ChannelSettings(psk = defaultPsk, name = "A")
+        val settings =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
         val token = settings.channelIdentity(longFast).token
         val changes =
             planChannelReconciliation(
-                old = set(longFast, ChannelSettings(psk = otherPsk)),
+                old = set(longFast, ChannelSettings.Builder().also { wb -> wb.psk = otherPsk }.build()),
                 new = set(longFast, settings, settings),
                 retiredTokens = setOf(token),
             )
@@ -121,7 +189,7 @@ class ChannelReconciliationTest {
      */
     @Test
     fun `a duplicate old slot is retired rather than merged into the slot that kept the identity`() {
-        val settings = ChannelSettings(psk = defaultPsk)
+        val settings = ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()
         val changes = planChannelReconciliation(set(longFast, settings, settings), set(longFast, settings))
 
         val change = changes.single()
@@ -132,8 +200,20 @@ class ChannelReconciliationTest {
     /** With duplicates on both sides the pairing must be one-to-one, never two conversations onto one slot. */
     @Test
     fun `duplicate slots pair off one to one`() {
-        val a = ChannelSettings(psk = defaultPsk, name = "A")
-        val b = ChannelSettings(psk = otherPsk, name = "B")
+        val a =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
+        val b =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = otherPsk
+                    wb.name = "B"
+                }
+                .build()
         // A holds slot 1 in both sets, so it stays; B and the other A trade places around it.
         val changes = planChannelReconciliation(set(longFast, b, a, a), set(longFast, a, a, b))
 
@@ -153,11 +233,17 @@ class ChannelReconciliationTest {
 
     @Test
     fun `a parked channel is reclaimed when it comes back`() {
-        val settings = ChannelSettings(psk = defaultPsk, name = "A")
+        val settings =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
         val token = settings.channelIdentity(longFast).token
         val changes =
             planChannelReconciliation(
-                old = set(longFast, ChannelSettings(psk = otherPsk)),
+                old = set(longFast, ChannelSettings.Builder().also { wb -> wb.psk = otherPsk }.build()),
                 new = set(longFast, settings),
                 retiredTokens = setOf(token),
             )
@@ -168,7 +254,7 @@ class ChannelReconciliationTest {
     /** A blank name only resolves through the preset, so an unknown LoRa config cannot decide identity. */
     @Test
     fun `a missing lora config on either side retires nothing`() {
-        val settings = ChannelSettings(psk = defaultPsk)
+        val settings = ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()
         assertEquals(emptyList(), planChannelReconciliation(set(longFast, settings), set(null, settings)))
         assertEquals(emptyList(), planChannelReconciliation(set(null, settings), set(longFast, settings)))
     }
@@ -179,29 +265,47 @@ class ChannelReconciliationTest {
      */
     @Test
     fun `an empty new channel list retires nothing`() {
-        val settings = ChannelSettings(psk = defaultPsk, name = "A")
+        val settings =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
         assertEquals(
             emptyList(),
-            planChannelReconciliation(set(longFast, settings), ChannelSet(lora_config = longFast)),
+            planChannelReconciliation(
+                set(longFast, settings),
+                ChannelSet.Builder().also { wb -> wb.lora_config = longFast }.build(),
+            ),
         )
     }
 
     /** A gap left by a removed secondary is padded with a bare ChannelSettings; that is not a channel. */
     @Test
     fun `blank padding secondaries are not treated as channels`() {
-        val primary = ChannelSettings(psk = defaultPsk, name = "A")
+        val primary =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
         val changes =
-            planChannelReconciliation(old = set(longFast, primary, ChannelSettings()), new = set(longFast, primary))
+            planChannelReconciliation(
+                old = set(longFast, primary, ChannelSettings.Builder().build()),
+                new = set(longFast, primary),
+            )
         assertEquals(emptyList(), changes)
     }
 
     @Test
     fun `region is not part of channel identity`() {
-        val settings = ChannelSettings(psk = defaultPsk)
+        val settings = ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()
         val changes =
             planChannelReconciliation(
                 set(longFast, settings),
-                set(longFast.copy(region = LoRaConfig.RegionCode.EU_868), settings),
+                set(longFast.newBuilder().also { wb -> wb.region = LoRaConfig.RegionCode.EU_868 }.build(), settings),
             )
         assertEquals(emptyList(), changes)
     }
@@ -212,15 +316,19 @@ class ChannelReconciliationTest {
      */
     @Test
     fun `the default psk is disambiguated across presets`() {
-        val stock = ChannelSettings(psk = defaultPsk)
+        val stock = ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()
         val tokens =
             listOf(
                 longFast,
                 mediumFast,
-                LoRaConfig(use_preset = true, modem_preset = ModemPreset.SHORT_FAST),
-            ).map { lora ->
-                stock.channelIdentity(lora).token
-            }
+                LoRaConfig.Builder()
+                    .also { wb ->
+                        wb.use_preset = true
+                        wb.modem_preset = ModemPreset.SHORT_FAST
+                    }
+                    .build(),
+            )
+                .map { lora -> stock.channelIdentity(lora).token }
 
         assertEquals(tokens.size, tokens.distinct().size, "each preset must be a distinct channel")
     }
@@ -233,9 +341,25 @@ class ChannelReconciliationTest {
      */
     @Test
     fun `two different custom lora configs are not yet distinguished`() {
-        val stock = ChannelSettings(psk = defaultPsk)
-        val slow = LoRaConfig(use_preset = false, bandwidth = 125, spread_factor = 11, coding_rate = 8)
-        val fast = LoRaConfig(use_preset = false, bandwidth = 250, spread_factor = 7, coding_rate = 5)
+        val stock = ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()
+        val slow =
+            LoRaConfig.Builder()
+                .also { wb ->
+                    wb.use_preset = false
+                    wb.bandwidth = 125
+                    wb.spread_factor = 11
+                    wb.coding_rate = 8
+                }
+                .build()
+        val fast =
+            LoRaConfig.Builder()
+                .also { wb ->
+                    wb.use_preset = false
+                    wb.bandwidth = 250
+                    wb.spread_factor = 7
+                    wb.coding_rate = 5
+                }
+                .build()
 
         assertEquals("Custom", ModelChannel(settings = stock, loraConfig = slow).name)
         assertEquals(stock.channelIdentity(slow).token, stock.channelIdentity(fast).token)
@@ -243,8 +367,22 @@ class ChannelReconciliationTest {
 
     @Test
     fun `a token distinguishes name from psk and never leaks either`() {
-        val a = ChannelSettings(psk = defaultPsk, name = "ab").channelIdentity(longFast)
-        val b = ChannelSettings(psk = defaultPsk, name = "ba").channelIdentity(longFast)
+        val a =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "ab"
+                }
+                .build()
+                .channelIdentity(longFast)
+        val b =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "ba"
+                }
+                .build()
+                .channelIdentity(longFast)
         assertNotEquals(a.token, b.token)
         assertEquals(CHANNEL_IDENTITY_TOKEN_LENGTH, a.token.length)
         assertTrue(a.token.all { it.isDigit() || it in 'a'..'f' })

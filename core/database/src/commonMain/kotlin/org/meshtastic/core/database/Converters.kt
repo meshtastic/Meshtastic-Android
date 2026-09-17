@@ -52,37 +52,43 @@ class Converters {
     fun dataToString(value: DataPacket): String = json.encodeToString(DataPacket.serializer(), value)
 
     @ColumnTypeConverter
-    fun bytesToFromRadio(bytes: ByteArray): FromRadio = FromRadio.ADAPTER.decodeOrNull(bytes, Logger) ?: FromRadio()
+    fun bytesToFromRadio(bytes: ByteArray): FromRadio =
+        FromRadio.ADAPTER.decodeOrNull(bytes, Logger) ?: FromRadio.Builder().build()
 
     @ColumnTypeConverter fun fromRadioToBytes(value: FromRadio): ByteArray = FromRadio.ADAPTER.encode(value)
 
-    @ColumnTypeConverter fun bytesToUser(bytes: ByteArray): User = User.ADAPTER.decodeOrNull(bytes, Logger) ?: User()
+    @ColumnTypeConverter
+    fun bytesToUser(bytes: ByteArray): User = User.ADAPTER.decodeOrNull(bytes, Logger) ?: User.Builder().build()
 
     @ColumnTypeConverter fun userToBytes(value: User): ByteArray = User.ADAPTER.encode(value)
 
     @ColumnTypeConverter
-    fun bytesToPosition(bytes: ByteArray): Position = Position.ADAPTER.decodeOrNull(bytes, Logger) ?: Position()
+    fun bytesToPosition(bytes: ByteArray): Position =
+        Position.ADAPTER.decodeOrNull(bytes, Logger) ?: Position.Builder().build()
 
     @ColumnTypeConverter fun positionToBytes(value: Position): ByteArray = Position.ADAPTER.encode(value)
 
     @ColumnTypeConverter
-    fun bytesToTelemetry(bytes: ByteArray): Telemetry = Telemetry.ADAPTER.decodeOrNull(bytes, Logger) ?: Telemetry()
+    fun bytesToTelemetry(bytes: ByteArray): Telemetry =
+        Telemetry.ADAPTER.decodeOrNull(bytes, Logger) ?: Telemetry.Builder().build()
 
     @ColumnTypeConverter fun telemetryToBytes(value: Telemetry): ByteArray = Telemetry.ADAPTER.encode(value)
 
     @ColumnTypeConverter
-    fun bytesToPaxcounter(bytes: ByteArray): Paxcount = Paxcount.ADAPTER.decodeOrNull(bytes, Logger) ?: Paxcount()
+    fun bytesToPaxcounter(bytes: ByteArray): Paxcount =
+        Paxcount.ADAPTER.decodeOrNull(bytes, Logger) ?: Paxcount.Builder().build()
 
     @ColumnTypeConverter fun paxCounterToBytes(value: Paxcount): ByteArray = Paxcount.ADAPTER.encode(value)
 
     @ColumnTypeConverter
     fun bytesToMetadata(bytes: ByteArray): DeviceMetadata =
-        DeviceMetadata.ADAPTER.decodeOrNull(bytes, Logger) ?: DeviceMetadata()
+        DeviceMetadata.ADAPTER.decodeOrNull(bytes, Logger) ?: DeviceMetadata.Builder().build()
 
     @ColumnTypeConverter fun metadataToBytes(value: DeviceMetadata): ByteArray = DeviceMetadata.ADAPTER.encode(value)
 
     @ColumnTypeConverter
-    fun bytesToChannelSet(bytes: ByteArray): ChannelSet = ChannelSet.ADAPTER.decodeOrNull(bytes, Logger) ?: ChannelSet()
+    fun bytesToChannelSet(bytes: ByteArray): ChannelSet =
+        ChannelSet.ADAPTER.decodeOrNull(bytes, Logger) ?: ChannelSet.Builder().build()
 
     @ColumnTypeConverter fun channelSetToBytes(value: ChannelSet): ByteArray = ChannelSet.ADAPTER.encode(value)
 

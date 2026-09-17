@@ -35,7 +35,7 @@ class ImportProfileUseCaseTest {
     @Test
     fun `invoke with valid data returns profile`() {
         // Arrange
-        val profile = DeviceProfile(long_name = "Test Node")
+        val profile = DeviceProfile.Builder().also { wb -> wb.long_name = "Test Node" }.build()
         val buffer = Buffer().write(profile.encode())
 
         // Act

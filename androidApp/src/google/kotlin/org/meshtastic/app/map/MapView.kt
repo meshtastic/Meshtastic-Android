@@ -657,7 +657,7 @@ fun MapView(
                         // would yield a zero-area box, so ignore it and keep waiting for a valid second corner.
                         boxAuthoringSecondCorner = latLng
                         val box = boundingBoxFromCorners(first, latLng)
-                        editingWaypoint = boxAuthoringDraft?.copy(bounding_box = box)
+                        editingWaypoint = boxAuthoringDraft?.newBuilder()?.also { wb -> wb.bounding_box = box }?.build()
                         boxAuthoringDraft = null
                         boxAuthoringFirstCorner = null
                         boxAuthoringSecondCorner = null
@@ -667,10 +667,12 @@ fun MapView(
             onMapLongClick = { latLng ->
                 if (isMainMode && isConnected && boxAuthoringDraft == null) {
                     editingWaypoint =
-                        Waypoint(
-                            latitude_i = (latLng.latitude / DEG_D).toInt(),
-                            longitude_i = (latLng.longitude / DEG_D).toInt(),
-                        )
+                        Waypoint.Builder()
+                            .also { wb ->
+                                wb.latitude_i = (latLng.latitude / DEG_D).toInt()
+                                wb.longitude_i = (latLng.longitude / DEG_D).toInt()
+                            }
+                            .build()
                 }
             },
         ) {
@@ -822,9 +824,11 @@ fun MapView(
                     onSend = { updatedWp ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
-                            finalWp = finalWp.copy(id = mapViewModel.generatePacketId())
+                            finalWp =
+                                finalWp.newBuilder().also { wb -> wb.id = mapViewModel.generatePacketId() }.build()
                         }
-                        finalWp = finalWp.copy(icon = finalWp.icon.waypointIconOrDefault())
+                        finalWp =
+                            finalWp.newBuilder().also { wb -> wb.icon = finalWp.icon.waypointIconOrDefault() }.build()
                         mapViewModel.sendWaypoint(finalWp)
                         editingWaypoint = null
                     },
@@ -832,7 +836,7 @@ fun MapView(
                         // Broadcast the removal (expire=1) only for waypoints we're allowed to modify mesh-wide
                         // (unlocked, or locked to us); otherwise just drop our local copy below.
                         if (wpToDelete.isModifiableBy(myNodeNum) && isConnected && wpToDelete.id != 0) {
-                            mapViewModel.sendWaypoint(wpToDelete.copy(expire = 1))
+                            mapViewModel.sendWaypoint(wpToDelete.newBuilder().also { wb -> wb.expire = 1 }.build())
                         }
                         mapViewModel.deleteWaypoint(wpToDelete.id)
                         editingWaypoint = null
@@ -857,7 +861,7 @@ fun MapView(
                     },
                     onDeleteForEveryone = {
                         Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
-                        mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
+                        mapViewModel.sendWaypoint(waypoint.newBuilder().also { wb -> wb.expire = 1 }.build())
                         mapViewModel.deleteWaypoint(waypoint.id)
                         deletingWaypoint = null
                     },
@@ -927,7 +931,8 @@ fun MapView(
                             val bounds = cameraPositionState.projection?.visibleRegion?.latLngBounds
                             if (bounds != null) {
                                 val box = boundingBoxFromCorners(bounds.southwest, bounds.northeast)
-                                editingWaypoint = boxAuthoringDraft?.copy(bounding_box = box)
+                                editingWaypoint =
+                                    boxAuthoringDraft?.newBuilder()?.also { wb -> wb.bounding_box = box }?.build()
                                 boxAuthoringDraft = null
                                 boxAuthoringFirstCorner = null
                                 boxAuthoringSecondCorner = null
@@ -1897,12 +1902,14 @@ private suspend fun FusedLocationProviderClient.awaitLastLocation(): Location? =
 }
 
 /** Builds a proto [BoundingBox] (degrees ×1e7) from two opposite corner taps. */
-private fun boundingBoxFromCorners(a: LatLng, b: LatLng): BoundingBox = BoundingBox(
-    longitude_west_i = (minOf(a.longitude, b.longitude) / DEG_D).toInt(),
-    latitude_south_i = (minOf(a.latitude, b.latitude) / DEG_D).toInt(),
-    longitude_east_i = (maxOf(a.longitude, b.longitude) / DEG_D).toInt(),
-    latitude_north_i = (maxOf(a.latitude, b.latitude) / DEG_D).toInt(),
-)
+private fun boundingBoxFromCorners(a: LatLng, b: LatLng): BoundingBox = BoundingBox.Builder()
+    .also { wb ->
+        wb.longitude_west_i = (minOf(a.longitude, b.longitude) / DEG_D).toInt()
+        wb.latitude_south_i = (minOf(a.latitude, b.latitude) / DEG_D).toInt()
+        wb.longitude_east_i = (maxOf(a.longitude, b.longitude) / DEG_D).toInt()
+        wb.latitude_north_i = (maxOf(a.latitude, b.latitude) / DEG_D).toInt()
+    }
+    .build()
 
 // endregion
 

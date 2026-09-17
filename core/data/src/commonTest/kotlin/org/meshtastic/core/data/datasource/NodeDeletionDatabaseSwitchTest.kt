@@ -105,8 +105,17 @@ class NodeDeletionDatabaseSwitchTest {
     }
 
     private suspend fun seedNodeAndMetadata(database: MeshtasticDatabase, label: String) {
-        database.nodeInfoDao().upsert(NodeEntity(num = NODE_NUM, user = User(id = "!node-$label")))
-        database.nodeInfoDao().upsert(MetadataEntity(num = NODE_NUM, proto = DeviceMetadata(firmware_version = label)))
+        database
+            .nodeInfoDao()
+            .upsert(NodeEntity(num = NODE_NUM, user = User.Builder().also { wb -> wb.id = "!node-$label" }.build()))
+        database
+            .nodeInfoDao()
+            .upsert(
+                MetadataEntity(
+                    num = NODE_NUM,
+                    proto = DeviceMetadata.Builder().also { wb -> wb.firmware_version = label }.build(),
+                ),
+            )
     }
 
     private suspend fun MeshtasticDatabase.hasMetadata(num: Int): Boolean =

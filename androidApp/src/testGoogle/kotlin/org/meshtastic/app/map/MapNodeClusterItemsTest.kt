@@ -98,7 +98,7 @@ class MapNodeClusterItemsTest {
 
         runOnIdle {
             val node = nodes.single()
-            nodes = listOf(node.copy(user = node.user.copy(short_name = "NEW")))
+            nodes = listOf(node.copy(user = node.user.newBuilder().also { wb -> wb.short_name = "NEW" }.build()))
         }
         waitForIdle()
         val changedNodeItems = latestItems
@@ -133,13 +133,22 @@ class MapNodeClusterItemsTest {
     private fun testNodes(count: Int): List<Node> = List(count) { index ->
         Node(
             num = index + 1,
-            user = User(id = "!${index + 1}", long_name = "Node ${index + 1}", short_name = "N$index"),
+            user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!${index + 1}"
+                    wb.long_name = "Node ${index + 1}"
+                    wb.short_name = "N$index"
+                }
+                .build(),
             position =
-            Position(
-                latitude_i = 210_000_000 + index,
-                longitude_i = -1_570_000_000 + index,
-                time = 1_700_000_000,
-            ),
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 210_000_000 + index
+                    wb.longitude_i = -1_570_000_000 + index
+                    wb.time = 1_700_000_000
+                }
+                .build(),
         )
     }
 

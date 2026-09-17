@@ -62,8 +62,20 @@ class ChannelReconciliationTest {
 
     private val myNodeNum = 42424242
 
-    private val longFast = LoRaConfig(use_preset = true, modem_preset = ModemPreset.LONG_FAST)
-    private val mediumFast = LoRaConfig(use_preset = true, modem_preset = ModemPreset.MEDIUM_FAST)
+    private val longFast =
+        LoRaConfig.Builder()
+            .also { wb ->
+                wb.use_preset = true
+                wb.modem_preset = ModemPreset.LONG_FAST
+            }
+            .build()
+    private val mediumFast =
+        LoRaConfig.Builder()
+            .also { wb ->
+                wb.use_preset = true
+                wb.modem_preset = ModemPreset.MEDIUM_FAST
+            }
+            .build()
     private val defaultPsk = byteArrayOf(0x01).toByteString()
     private val vcfmwPsk = byteArrayOf(0x11, 0x22, 0x33, 0x44).toByteString()
 
@@ -102,8 +114,17 @@ class ChannelReconciliationTest {
     @Test
     fun `a replaced primary channel takes its history with it`() = runTest {
         insertBroadcast(channel = 0, text = "hello from the old mesh")
-        val old = channelSet(longFast, ChannelSettings(psk = defaultPsk))
-        val new = channelSet(longFast, ChannelSettings(psk = vcfmwPsk, name = "VCFMW"))
+        val old = channelSet(longFast, ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build())
+        val new =
+            channelSet(
+                longFast,
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.psk = vcfmwPsk
+                        wb.name = "VCFMW"
+                    }
+                    .build(),
+            )
 
         reconcile(old, new)
 
@@ -119,7 +140,7 @@ class ChannelReconciliationTest {
     @Test
     fun `switching modem preset retires the old channel`() = runTest {
         insertBroadcast(channel = 0, text = "sent on LongFast")
-        val settings = ChannelSettings(psk = defaultPsk)
+        val settings = ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()
 
         reconcile(channelSet(longFast, settings), channelSet(mediumFast, settings))
 
@@ -132,7 +153,7 @@ class ChannelReconciliationTest {
     fun `re-adding a channel restores its history to the live slot`() = runTest {
         insertBroadcast(channel = 0, text = "sent on LongFast", packetId = 100)
         insertReaction(replyId = 100, channel = 0, emoji = "\uD83D\uDC4D")
-        val settings = ChannelSettings(psk = defaultPsk)
+        val settings = ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()
 
         reconcile(channelSet(longFast, settings), channelSet(mediumFast, settings))
         reconcile(channelSet(mediumFast, settings), channelSet(longFast, settings))
@@ -153,8 +174,20 @@ class ChannelReconciliationTest {
     fun `reclaiming lifts only its own reactions off a shared index`() = runTest {
         insertBroadcast(channel = 0, text = "on the old mesh", packetId = 100)
         insertReaction(replyId = 100, channel = 0, emoji = "\uD83D\uDC4D")
-        val old = ChannelSettings(psk = defaultPsk, name = "Old")
-        val new = ChannelSettings(psk = vcfmwPsk, name = "New")
+        val old =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "Old"
+                }
+                .build()
+        val new =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = vcfmwPsk
+                    wb.name = "New"
+                }
+                .build()
 
         reconcile(channelSet(longFast, old), channelSet(longFast, new))
 
@@ -181,8 +214,20 @@ class ChannelReconciliationTest {
     fun `reconciling again once a swap has settled finds nothing to do`() = runTest {
         insertBroadcast(channel = 0, text = "on A")
         insertBroadcast(channel = 1, text = "on B")
-        val a = ChannelSettings(psk = defaultPsk, name = "A")
-        val b = ChannelSettings(psk = vcfmwPsk, name = "B")
+        val a =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
+        val b =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = vcfmwPsk
+                    wb.name = "B"
+                }
+                .build()
         val swapped = channelSet(longFast, b, a)
 
         reconcile(channelSet(longFast, a, b), swapped)
@@ -198,8 +243,20 @@ class ChannelReconciliationTest {
         insertBroadcast(channel = 0, text = "on A")
         insertBroadcast(channel = 1, text = "on B")
         packetDao.setPinned(listOf(ContactKey.broadcast(0).value), true)
-        val a = ChannelSettings(psk = defaultPsk, name = "A")
-        val b = ChannelSettings(psk = vcfmwPsk, name = "B")
+        val a =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
+        val b =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = vcfmwPsk
+                    wb.name = "B"
+                }
+                .build()
 
         reconcile(channelSet(longFast, a, b), channelSet(longFast, b, a))
 
@@ -213,8 +270,20 @@ class ChannelReconciliationTest {
         insertBroadcast(channel = 1, text = "on B", packetId = 200)
         insertReaction(replyId = 100, channel = 0, emoji = "👍")
         insertReaction(replyId = 200, channel = 1, emoji = "🎉")
-        val a = ChannelSettings(psk = defaultPsk, name = "A")
-        val b = ChannelSettings(psk = vcfmwPsk, name = "B")
+        val a =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
+        val b =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = vcfmwPsk
+                    wb.name = "B"
+                }
+                .build()
 
         reconcile(channelSet(longFast, a, b), channelSet(longFast, b, a))
 
@@ -236,8 +305,20 @@ class ChannelReconciliationTest {
         insertBroadcast(channel = 1, text = "on B")
         packetDao.setPinned(listOf(ContactKey.broadcast(1).value), true)
         packetDao.setMuteUntil(listOf(ContactKey.broadcast(1).value), Long.MAX_VALUE)
-        val a = ChannelSettings(psk = defaultPsk, name = "A")
-        val b = ChannelSettings(psk = vcfmwPsk, name = "B")
+        val a =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
+        val b =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = vcfmwPsk
+                    wb.name = "B"
+                }
+                .build()
 
         reconcile(channelSet(longFast, a, b), channelSet(longFast, b))
 
@@ -259,9 +340,26 @@ class ChannelReconciliationTest {
     @Test
     fun `a queued message in an archived conversation is not claimable for sending`() = runTest {
         insertBroadcast(channel = 0, text = "never sent", packetId = 77, status = MessageStatus.QUEUED)
-        val old = ChannelSettings(psk = defaultPsk, name = "A")
+        val old =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.psk = defaultPsk
+                    wb.name = "A"
+                }
+                .build()
 
-        reconcile(channelSet(longFast, old), channelSet(longFast, ChannelSettings(psk = vcfmwPsk, name = "B")))
+        reconcile(
+            channelSet(longFast, old),
+            channelSet(
+                longFast,
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.psk = vcfmwPsk
+                        wb.name = "B"
+                    }
+                    .build(),
+            ),
+        )
 
         val row = packetDao.getAllPackets(PortNum.TEXT_MESSAGE_APP.value).first().single()
         assertTrue(ContactKey(row.contact_key).isRetired, "precondition: the conversation was archived")
@@ -290,8 +388,16 @@ class ChannelReconciliationTest {
         )
 
         reconcile(
-            channelSet(longFast, ChannelSettings(psk = defaultPsk)),
-            channelSet(longFast, ChannelSettings(psk = vcfmwPsk, name = "VCFMW")),
+            channelSet(longFast, ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()),
+            channelSet(
+                longFast,
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.psk = vcfmwPsk
+                        wb.name = "VCFMW"
+                    }
+                    .build(),
+            ),
         )
 
         assertEquals(1, messagesOn(dmKey).size, "a DM thread belongs to the node, not the channel")
@@ -303,9 +409,29 @@ class ChannelReconciliationTest {
         insertBroadcast(channel = 0, text = "hi")
         packetDao.setMuteUntil(listOf(ContactKey.broadcast(0).value), Long.MAX_VALUE)
         packetDao.setPinned(listOf(ContactKey.broadcast(0).value), true)
-        val old = channelSet(longFast, ChannelSettings(psk = defaultPsk, name = "VCFMW"))
+        val old =
+            channelSet(
+                longFast,
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.psk = defaultPsk
+                        wb.name = "VCFMW"
+                    }
+                    .build(),
+            )
 
-        reconcile(old, channelSet(longFast, ChannelSettings(psk = vcfmwPsk, name = "Field Day")))
+        reconcile(
+            old,
+            channelSet(
+                longFast,
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.psk = vcfmwPsk
+                        wb.name = "Field Day"
+                    }
+                    .build(),
+            ),
+        )
 
         val retiredKey = ContactKey.retiredBroadcast(old.settings[0].channelIdentity(longFast).token).value
         val settings = assertNotNull(packetDao.getContactSettings(retiredKey))
@@ -319,9 +445,12 @@ class ChannelReconciliationTest {
     @Test
     fun `an unknown lora config never retires anything`() = runTest {
         insertBroadcast(channel = 0, text = "still mine")
-        val settings = ChannelSettings(psk = defaultPsk)
+        val settings = ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()
 
-        reconcile(channelSet(longFast, settings), ChannelSet(settings = listOf(settings)))
+        reconcile(
+            channelSet(longFast, settings),
+            ChannelSet.Builder().also { wb -> wb.settings = listOf(settings) }.build(),
+        )
 
         assertEquals(1, messagesOn(ContactKey.broadcast(0).value).size)
     }
@@ -330,11 +459,11 @@ class ChannelReconciliationTest {
     @Test
     fun `changing region alone leaves conversations alone`() = runTest {
         insertBroadcast(channel = 0, text = "unaffected")
-        val settings = ChannelSettings(psk = defaultPsk)
+        val settings = ChannelSettings.Builder().also { wb -> wb.psk = defaultPsk }.build()
 
         reconcile(
             channelSet(longFast, settings),
-            channelSet(longFast.copy(region = LoRaConfig.RegionCode.EU_868), settings),
+            channelSet(longFast.newBuilder().also { wb -> wb.region = LoRaConfig.RegionCode.EU_868 }.build(), settings),
         )
 
         assertEquals(1, messagesOn(ContactKey.broadcast(0).value).size)
@@ -344,8 +473,12 @@ class ChannelReconciliationTest {
         packetDao.applyChannelReconciliation(planChannelReconciliation(old, new, packetDao.getRetiredContactTokens()))
     }
 
-    private fun channelSet(lora: LoRaConfig, vararg settings: ChannelSettings) =
-        ChannelSet(settings = settings.toList(), lora_config = lora)
+    private fun channelSet(lora: LoRaConfig, vararg settings: ChannelSettings) = ChannelSet.Builder()
+        .also { wb ->
+            wb.settings = settings.toList()
+            wb.lora_config = lora
+        }
+        .build()
 
     private suspend fun insertBroadcast(channel: Int, text: String, packetId: Int = 0, status: MessageStatus? = null) {
         packetDao.insert(

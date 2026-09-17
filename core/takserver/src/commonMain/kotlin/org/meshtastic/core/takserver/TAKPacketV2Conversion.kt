@@ -58,33 +58,35 @@ object TAKPacketV2Conversion {
             val callsign = contact?.callsign ?: "UNKNOWN"
             val deviceCallsign = uid
 
-            return TAKPacketV2(
-                cot_type_id = cotTypeEnum,
-                cot_type_str = cotTypeStr,
-                how = howEnum,
-                callsign = callsign,
-                device_callsign = deviceCallsign,
-                uid = uid,
-                team = teamEnum,
-                role = roleEnum,
-                latitude_i = (latitude * TAK_COORDINATE_SCALE).toInt(),
-                longitude_i = (longitude * TAK_COORDINATE_SCALE).toInt(),
-                altitude = if (hae >= TAK_UNKNOWN_POINT_VALUE || hae.isNaN()) 0 else hae.toInt(),
-                // V2 encodes speed as cm/s (m/s × 100) and course as deg×100.
-                // V1 (legacy TAKPacket, port 72) uses raw integers with no scaling.
-                // These two paths are ALWAYS separate (different portnums) and must
-                // never cross-feed: a V1 packet decoded in TAKMeshIntegration goes
-                // through convertV1ToCoT() → CoTMessage.pli() → toXml(), NOT through
-                // toTAKPacketV2(). If this invariant is ever broken, speed/course
-                // would be silently off by ×100.
-                speed = (track?.speed?.coerceAtLeast(0.0)?.times(100))?.toInt() ?: 0, // m/s -> cm/s
-                course = (track?.course?.coerceAtLeast(0.0)?.times(100))?.toInt() ?: 0, // deg -> deg*100
-                battery = battery,
-                geo_src = GeoPointSource.GeoPointSource_GPS,
-                alt_src = GeoPointSource.GeoPointSource_GPS,
-                // v0.4.0: PLI is implicit — no payload_variant is set (the bool pli
-                // oneof arm was removed). An a-f-* packet with no variant IS a PLI.
-            )
+            return TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = cotTypeEnum
+                    wb.cot_type_str = cotTypeStr
+                    wb.how = howEnum
+                    wb.callsign = callsign
+                    wb.device_callsign = deviceCallsign
+                    wb.uid = uid
+                    wb.team = teamEnum
+                    wb.role = roleEnum
+                    wb.latitude_i = (latitude * TAK_COORDINATE_SCALE).toInt()
+                    wb.longitude_i = (longitude * TAK_COORDINATE_SCALE).toInt()
+                    wb.altitude = if (hae >= TAK_UNKNOWN_POINT_VALUE || hae.isNaN()) 0 else hae.toInt()
+                    // V2 encodes speed as cm/s (m/s × 100) and course as deg×100.
+                    // V1 (legacy TAKPacket, port 72) uses raw integers with no scaling.
+                    // These two paths are ALWAYS separate (different portnums) and must
+                    // never cross-feed: a V1 packet decoded in TAKMeshIntegration goes
+                    // through convertV1ToCoT() → CoTMessage.pli() → toXml(), NOT through
+                    // toTAKPacketV2(). If this invariant is ever broken, speed/course
+                    // would be silently off by ×100.
+                    wb.speed = (track?.speed?.coerceAtLeast(0.0)?.times(100))?.toInt() ?: 0 // m/s -> cm/s
+                    wb.course = (track?.course?.coerceAtLeast(0.0)?.times(100))?.toInt() ?: 0 // deg -> deg*100
+                    wb.battery = battery
+                    wb.geo_src = GeoPointSource.GeoPointSource_GPS
+                    wb.alt_src = GeoPointSource.GeoPointSource_GPS
+                    // v0.4.0: PLI is implicit — no payload_variant is set (the bool pli
+                    // oneof arm was removed). An a-f-* packet with no variant IS a PLI.
+                }
+                .build()
         }
 
         // GeoChat
@@ -121,22 +123,26 @@ object TAKPacketV2Conversion {
                 }
             }
 
-            return TAKPacketV2(
-                cot_type_id = CotType.CotType_b_t_f,
-                how = CotHow.CotHow_h_g_i_g_o,
-                callsign = callsign,
-                device_callsign = smuggledCallsign,
-                uid = uid,
-                team = teamEnum,
-                role = roleEnum,
-                battery = battery,
-                chat =
-                GeoChat(
-                    message = localChat.message,
-                    to = toUid ?: if (toCallsign == null) "All Chat Rooms" else null,
-                    to_callsign = toCallsign,
-                ),
-            )
+            return TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = CotType.CotType_b_t_f
+                    wb.how = CotHow.CotHow_h_g_i_g_o
+                    wb.callsign = callsign
+                    wb.device_callsign = smuggledCallsign
+                    wb.uid = uid
+                    wb.team = teamEnum
+                    wb.role = roleEnum
+                    wb.battery = battery
+                    wb.chat =
+                        GeoChat.Builder()
+                            .also { wb ->
+                                wb.message = localChat.message
+                                wb.to = toUid ?: if (toCallsign == null) "All Chat Rooms" else null
+                                wb.to_callsign = toCallsign
+                            }
+                            .build()
+                }
+                .build()
         }
 
         // Fallback: wrap the whole detail XML in raw_detail for unmapped types
@@ -144,21 +150,23 @@ object TAKPacketV2Conversion {
         val detailBytes = parsedDetailXml?.encodeToByteArray()
         if (detailBytes != null) {
             val callsign = contact?.callsign ?: "UNKNOWN"
-            return TAKPacketV2(
-                cot_type_id = cotTypeEnum,
-                cot_type_str = cotTypeStr,
-                how = howEnum,
-                callsign = callsign,
-                device_callsign = uid,
-                uid = uid,
-                team = teamEnum,
-                role = roleEnum,
-                latitude_i = (latitude * TAK_COORDINATE_SCALE).toInt(),
-                longitude_i = (longitude * TAK_COORDINATE_SCALE).toInt(),
-                altitude = if (hae >= TAK_UNKNOWN_POINT_VALUE || hae.isNaN()) 0 else hae.toInt(),
-                battery = battery,
-                raw_detail = detailBytes.toByteString(),
-            )
+            return TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = cotTypeEnum
+                    wb.cot_type_str = cotTypeStr
+                    wb.how = howEnum
+                    wb.callsign = callsign
+                    wb.device_callsign = uid
+                    wb.uid = uid
+                    wb.team = teamEnum
+                    wb.role = roleEnum
+                    wb.latitude_i = (latitude * TAK_COORDINATE_SCALE).toInt()
+                    wb.longitude_i = (longitude * TAK_COORDINATE_SCALE).toInt()
+                    wb.altitude = if (hae >= TAK_UNKNOWN_POINT_VALUE || hae.isNaN()) 0 else hae.toInt()
+                    wb.battery = battery
+                    wb.raw_detail = detailBytes.toByteString()
+                }
+                .build()
         }
 
         Logger.w { "Cannot convert CoT to TAKPacketV2 for type $type (no parsed detail)" }

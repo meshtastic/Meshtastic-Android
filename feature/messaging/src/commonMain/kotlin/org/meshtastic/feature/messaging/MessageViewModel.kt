@@ -187,7 +187,7 @@ class MessageViewModel(
 
     val nodeList: StateFlow<List<Node>> = nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
-    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(ChannelSet())
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(ChannelSet.Builder().build())
 
     val showQuickChat = uiPrefs.showQuickChat
 

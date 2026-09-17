@@ -60,7 +60,7 @@ class ContactsViewModelTest {
 
         every { connectionStateProvider.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
         every { packetRepository.getUnreadCountTotal() } returns MutableStateFlow(0)
-        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
 
         viewModel =
             ContactsViewModel(

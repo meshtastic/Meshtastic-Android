@@ -53,7 +53,8 @@ import org.meshtastic.proto.ModuleConfig
 @Composable
 fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val detectionSensorConfig = state.moduleConfig.detection_sensor ?: ModuleConfig.DetectionSensorConfig()
+    val detectionSensorConfig =
+        state.moduleConfig.detection_sensor ?: ModuleConfig.DetectionSensorConfig.Builder().build()
     val formState = rememberConfigState(initialValue = detectionSensorConfig)
     val focusManager = LocalFocusManager.current
 
@@ -66,7 +67,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig(detection_sensor = it)
+            val config = ModuleConfig.Builder().also { wb -> wb.detection_sensor = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -76,7 +77,9 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                     title = stringResource(Res.string.detection_sensor_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -88,7 +91,10 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                     selectedItem = formState.value.minimum_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = minimumBroadcastIntervals.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.copy(minimum_broadcast_secs = it.toInt()) },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.minimum_broadcast_secs = it.toInt() }.build()
+                    },
                 )
 
                 val stateBroadcastIntervals = remember { IntervalConfiguration.DETECTION_SENSOR_STATE.allowedIntervals }
@@ -97,14 +103,19 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                     selectedItem = formState.value.state_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = stateBroadcastIntervals.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.copy(state_broadcast_secs = it.toInt()) },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.state_broadcast_secs = it.toInt() }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.send_bell_with_alert_message),
                     checked = formState.value.send_bell,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(send_bell = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.send_bell = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -117,7 +128,9 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(name = it) },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.name = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 val pins = remember { gpioPins }
@@ -126,7 +139,9 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                     items = pins,
                     selectedItem = formState.value.monitor_pin,
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.copy(monitor_pin = it) },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.monitor_pin = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 DropDownPreference(
@@ -134,14 +149,19 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                     enabled = state.connected,
                     items = ModuleConfig.DetectionSensorConfig.TriggerType.entries.map { it to it.name },
                     selectedItem = formState.value.detection_trigger_type,
-                    onItemSelected = { formState.value = formState.value.copy(detection_trigger_type = it) },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.detection_trigger_type = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.use_input_pullup_mode),
                     checked = formState.value.use_pullup,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(use_pullup = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.use_pullup = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()

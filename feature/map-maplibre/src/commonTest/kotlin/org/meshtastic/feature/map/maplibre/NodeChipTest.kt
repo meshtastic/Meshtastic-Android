@@ -38,7 +38,7 @@ import kotlin.test.assertTrue
 class NodeChipKeyTest {
 
     private fun chipNode(num: Int, shortName: String, isIgnored: Boolean = false) =
-        Node(num = num, user = User(short_name = shortName), isIgnored = isIgnored)
+        Node(num = num, user = User.Builder().also { wb -> wb.short_name = shortName }.build(), isIgnored = isIgnored)
 
     @Test
     fun `two nodes with the same name and different colours get different keys`() {
@@ -177,8 +177,12 @@ class NodesInViewTest {
     private fun at(latitude: Double, longitude: Double) =
         Node(num = (latitude * 1000).toInt(), position = protoPosition(latitude, longitude))
 
-    private fun protoPosition(latitude: Double, longitude: Double) =
-        org.meshtastic.proto.Position(latitude_i = (latitude * 1e7).toInt(), longitude_i = (longitude * 1e7).toInt())
+    private fun protoPosition(latitude: Double, longitude: Double) = org.meshtastic.proto.Position.Builder()
+        .also { wb ->
+            wb.latitude_i = (latitude * 1e7).toInt()
+            wb.longitude_i = (longitude * 1e7).toInt()
+        }
+        .build()
 
     private val box = BoundingBox(west = -108.0, south = 34.0, east = -107.0, north = 35.0)
 

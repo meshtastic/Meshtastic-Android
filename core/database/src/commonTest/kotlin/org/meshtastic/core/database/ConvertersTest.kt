@@ -63,7 +63,19 @@ class ConvertersTest {
     @Test
     fun `from radio converter round trips`() {
         assertProtoRoundTrip(
-            expected = FromRadio(queueStatus = QueueStatus(res = 1, free = 2, mesh_packet_id = 3)),
+            expected =
+            FromRadio.Builder()
+                .also { wb ->
+                    wb.queueStatus =
+                        QueueStatus.Builder()
+                            .also { wb ->
+                                wb.res = 1
+                                wb.free = 2
+                                wb.mesh_packet_id = 3
+                            }
+                            .build()
+                }
+                .build(),
             toBytes = converters::fromRadioToBytes,
             fromBytes = converters::bytesToFromRadio,
         )
@@ -73,7 +85,14 @@ class ConvertersTest {
     fun `user converter round trips`() {
         assertProtoRoundTrip(
             expected =
-            User(id = "!abcdef01", long_name = "Test User", short_name = "TU", hw_model = HardwareModel.TBEAM),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!abcdef01"
+                    wb.long_name = "Test User"
+                    wb.short_name = "TU"
+                    wb.hw_model = HardwareModel.TBEAM
+                }
+                .build(),
             toBytes = converters::userToBytes,
             fromBytes = converters::bytesToUser,
         )
@@ -83,7 +102,15 @@ class ConvertersTest {
     fun `position converter round trips`() {
         assertProtoRoundTrip(
             expected =
-            Position(latitude_i = 450000000, longitude_i = 900000000, altitude = 123, time = 456, sats_in_view = 7),
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 450000000
+                    wb.longitude_i = 900000000
+                    wb.altitude = 123
+                    wb.time = 456
+                    wb.sats_in_view = 7
+                }
+                .build(),
             toBytes = converters::positionToBytes,
             fromBytes = converters::bytesToPosition,
         )
@@ -93,17 +120,21 @@ class ConvertersTest {
     fun `telemetry converter round trips`() {
         assertProtoRoundTrip(
             expected =
-            Telemetry(
-                time = 1000,
-                device_metrics =
-                DeviceMetrics(
-                    battery_level = 85,
-                    voltage = 4.1f,
-                    channel_utilization = 0.12f,
-                    air_util_tx = 0.05f,
-                    uptime_seconds = 123456,
-                ),
-            ),
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1000
+                    wb.device_metrics =
+                        DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 85
+                                wb.voltage = 4.1f
+                                wb.channel_utilization = 0.12f
+                                wb.air_util_tx = 0.05f
+                                wb.uptime_seconds = 123456
+                            }
+                            .build()
+                }
+                .build(),
             toBytes = converters::telemetryToBytes,
             fromBytes = converters::bytesToTelemetry,
         )
@@ -112,7 +143,14 @@ class ConvertersTest {
     @Test
     fun `paxcount converter round trips`() {
         assertProtoRoundTrip(
-            expected = Paxcount(wifi = 10, ble = 5, uptime = 1000),
+            expected =
+            Paxcount.Builder()
+                .also { wb ->
+                    wb.wifi = 10
+                    wb.ble = 5
+                    wb.uptime = 1000
+                }
+                .build(),
             toBytes = converters::paxCounterToBytes,
             fromBytes = converters::bytesToPaxcounter,
         )
@@ -121,7 +159,14 @@ class ConvertersTest {
     @Test
     fun `device metadata converter round trips`() {
         assertProtoRoundTrip(
-            expected = DeviceMetadata(firmware_version = "2.5.0", hw_model = HardwareModel.HELTEC_V3, hasWifi = false),
+            expected =
+            DeviceMetadata.Builder()
+                .also { wb ->
+                    wb.firmware_version = "2.5.0"
+                    wb.hw_model = HardwareModel.HELTEC_V3
+                    wb.hasWifi = false
+                }
+                .build(),
             toBytes = converters::metadataToBytes,
             fromBytes = converters::bytesToMetadata,
         )
@@ -129,24 +174,39 @@ class ConvertersTest {
 
     @Test
     fun `empty proto messages round trip to empty defaults`() {
-        assertEquals(FromRadio(), converters.bytesToFromRadio(converters.fromRadioToBytes(FromRadio())))
-        assertEquals(User(), converters.bytesToUser(converters.userToBytes(User())))
-        assertEquals(Position(), converters.bytesToPosition(converters.positionToBytes(Position())))
-        assertEquals(Telemetry(), converters.bytesToTelemetry(converters.telemetryToBytes(Telemetry())))
-        assertEquals(Paxcount(), converters.bytesToPaxcounter(converters.paxCounterToBytes(Paxcount())))
-        assertEquals(DeviceMetadata(), converters.bytesToMetadata(converters.metadataToBytes(DeviceMetadata())))
+        assertEquals(
+            FromRadio.Builder().build(),
+            converters.bytesToFromRadio(converters.fromRadioToBytes(FromRadio.Builder().build())),
+        )
+        assertEquals(User.Builder().build(), converters.bytesToUser(converters.userToBytes(User.Builder().build())))
+        assertEquals(
+            Position.Builder().build(),
+            converters.bytesToPosition(converters.positionToBytes(Position.Builder().build())),
+        )
+        assertEquals(
+            Telemetry.Builder().build(),
+            converters.bytesToTelemetry(converters.telemetryToBytes(Telemetry.Builder().build())),
+        )
+        assertEquals(
+            Paxcount.Builder().build(),
+            converters.bytesToPaxcounter(converters.paxCounterToBytes(Paxcount.Builder().build())),
+        )
+        assertEquals(
+            DeviceMetadata.Builder().build(),
+            converters.bytesToMetadata(converters.metadataToBytes(DeviceMetadata.Builder().build())),
+        )
     }
 
     @Test
     fun `empty byte arrays decode to empty proto messages`() {
         val emptyBytes = byteArrayOf()
 
-        assertEquals(FromRadio(), converters.bytesToFromRadio(emptyBytes))
-        assertEquals(User(), converters.bytesToUser(emptyBytes))
-        assertEquals(Position(), converters.bytesToPosition(emptyBytes))
-        assertEquals(Telemetry(), converters.bytesToTelemetry(emptyBytes))
-        assertEquals(Paxcount(), converters.bytesToPaxcounter(emptyBytes))
-        assertEquals(DeviceMetadata(), converters.bytesToMetadata(emptyBytes))
+        assertEquals(FromRadio.Builder().build(), converters.bytesToFromRadio(emptyBytes))
+        assertEquals(User.Builder().build(), converters.bytesToUser(emptyBytes))
+        assertEquals(Position.Builder().build(), converters.bytesToPosition(emptyBytes))
+        assertEquals(Telemetry.Builder().build(), converters.bytesToTelemetry(emptyBytes))
+        assertEquals(Paxcount.Builder().build(), converters.bytesToPaxcounter(emptyBytes))
+        assertEquals(DeviceMetadata.Builder().build(), converters.bytesToMetadata(emptyBytes))
     }
 
     @Test

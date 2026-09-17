@@ -159,7 +159,7 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
 @Composable
 fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val deviceConfig = state.radioConfig.device ?: Config.DeviceConfig()
+    val deviceConfig = state.radioConfig.device ?: Config.DeviceConfig.Builder().build()
     val formState = rememberConfigState(initialValue = deviceConfig)
     var selectedRole by rememberSaveable(formState.value.role) { mutableStateOf(formState.value.role) }
     val infrastructureRoles =
@@ -168,10 +168,12 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
         if (selectedRole in infrastructureRoles) {
             RouterRoleConfirmationDialog(
                 onDismiss = { selectedRole = formState.value.role },
-                onConfirm = { formState.value = formState.value.copy(role = selectedRole) },
+                onConfirm = {
+                    formState.value = formState.value.newBuilder().also { wb -> wb.role = selectedRole }.build()
+                },
             )
         } else {
-            formState.value = formState.value.copy(role = selectedRole)
+            formState.value = formState.value.newBuilder().also { wb -> wb.role = selectedRole }.build()
         }
     }
     val focusManager = LocalFocusManager.current
@@ -183,7 +185,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config(device = it)
+            val config = Config.Builder().also { wb -> wb.device = it }.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -207,7 +209,9 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     title = stringResource(Res.string.rebroadcast_mode),
                     enabled = state.connected,
                     selectedItem = currentRebroadcastMode,
-                    onItemSelected = { formState.value = formState.value.copy(rebroadcast_mode = it) },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.rebroadcast_mode = it }.build()
+                    },
                     summary = stringResource(currentRebroadcastMode.description),
                 )
 
@@ -219,7 +223,10 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     selectedItem = formState.value.node_info_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.copy(node_info_broadcast_secs = it.toInt()) },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.node_info_broadcast_secs = it.toInt() }.build()
+                    },
                 )
             }
         }
@@ -231,7 +238,10 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     summary = stringResource(Res.string.config_device_doubleTapAsButtonPress_summary),
                     checked = formState.value.double_tap_as_button_press,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(double_tap_as_button_press = it) },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.double_tap_as_button_press = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
 
@@ -242,7 +252,10 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     summary = stringResource(Res.string.config_device_tripleClickAsAdHocPing_summary),
                     checked = !formState.value.disable_triple_click,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(disable_triple_click = !it) },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.disable_triple_click = !it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
 
@@ -253,7 +266,10 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     summary = stringResource(Res.string.config_device_ledHeartbeatEnabled_summary),
                     checked = !formState.value.led_heartbeat_disabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(led_heartbeat_disabled = !it) },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.led_heartbeat_disabled = !it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -272,9 +288,15 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(tzdef = it) },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.tzdef = it }.build()
+                    },
                     trailingIcon = {
-                        IconButton(onClick = { formState.value = formState.value.copy(tzdef = "") }) {
+                        IconButton(
+                            onClick = {
+                                formState.value = formState.value.newBuilder().also { wb -> wb.tzdef = "" }.build()
+                            },
+                        ) {
                             Icon(
                                 imageVector = MeshtasticIcons.Close,
                                 contentDescription = stringResource(Res.string.clear_time_zone),
@@ -289,7 +311,10 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     modifier = Modifier.fillMaxWidth(),
                     enabled = state.connected,
                     shape = RectangleShape,
-                    onClick = { formState.value = formState.value.copy(tzdef = appTzPosixString) },
+                    onClick = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.tzdef = appTzPosixString }.build()
+                    },
                 ) {
                     Icon(
                         imageVector = MeshtasticIcons.PhoneAndroid,
@@ -310,7 +335,9 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     value = formState.value.button_gpio,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(button_gpio = it) },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.button_gpio = it }.build()
+                    },
                 )
 
                 HorizontalDivider()
@@ -320,7 +347,9 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     value = formState.value.buzzer_gpio,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(buzzer_gpio = it) },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.buzzer_gpio = it }.build()
+                    },
                 )
             }
         }

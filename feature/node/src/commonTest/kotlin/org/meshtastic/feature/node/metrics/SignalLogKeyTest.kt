@@ -70,7 +70,12 @@ class SignalLogKeyTest {
         assertEquals(listOf(30, 20, 10), log.map { it.timeSeconds })
     }
 
-    private fun packet(id: Int, rxTime: Int = 0) = MeshPacket(id = id, rx_time = rxTime)
+    private fun packet(id: Int, rxTime: Int = 0) = MeshPacket.Builder()
+        .also { wb ->
+            wb.id = id
+            wb.rx_time = rxTime
+        }
+        .build()
 
-    private fun stats(time: Int) = Telemetry(time = time)
+    private fun stats(time: Int) = Telemetry.Builder().also { wb -> wb.time = time }.build()
 }

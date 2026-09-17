@@ -108,10 +108,10 @@ class MessageViewModelTest {
         contactSettingsFlow.value = emptyMap()
 
         // Core flows - MUST be separate every blocks
-        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
-        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
-        every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
+        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig.Builder().build())
+        every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile.Builder().build())
 
         every { connectionStateProvider.connectionState } returns connectionStateFlow
 
