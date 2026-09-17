@@ -812,7 +812,6 @@
     <string name="lockdown_backoff">Versuche es erneut in %1$d Sekunden.</string>
     <string name="lockdown_confirm_passphrase">Passwort bestätigen</string>
     <string name="lockdown_enable_ack">Ich verstehe</string>
-    <string name="lockdown_enable_warning">Hinweis: Die Aktivierung des Lockdown-Modus sperrt den Debug-Port (SWD) auf unterstützter Hardware. Sie können den Lockdown jederzeit mithilfe Ihrer Passphrase aufheben; zudem stellt ein vollständiges Zurücksetzen des Geräts bei Bedarf den ursprünglichen Zustand wieder her.</string>
     <string name="lockdown_enter_passphrase">Passwort eingeben</string>
     <string name="lockdown_hide_passphrase">Ausblenden</string>
     <string name="lockdown_hours_until_expiry">Stunden bis zum Ablauf</string>

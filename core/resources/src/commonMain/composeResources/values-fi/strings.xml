@@ -987,7 +987,6 @@
     <string name="lockdown_disable_message">Anna salasana poistaaksesi lukituksen käytöstä. Laite purkaa tallennustilan salauksen ja käynnistyy uudelleen.</string>
     <string name="lockdown_enable">Poista lukitus</string>
     <string name="lockdown_enable_ack">Ymmärrän</string>
-    <string name="lockdown_enable_warning">Huom: lukitustilan käyttöönotto lukitsee debug-portin (SWD) tuetuilla laitteilla. Voit poistaa lukituksen milloin tahansa salasanallasi ja laitteen täydellinen tyhjennys palauttaa kaiken tarvittaessa.</string>
     <string name="lockdown_enter_passphrase">Syötä salasana</string>
     <string name="lockdown_hide_passphrase">Piilota</string>
     <string name="lockdown_hours_until_expiry">Tuntia vanhenemiseen saakka</string>

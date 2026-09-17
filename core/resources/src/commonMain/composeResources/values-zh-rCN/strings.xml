@@ -900,7 +900,6 @@
     <string name="lockdown_disable_message">请输入您的密码短语以关闭锁定状态.设备将解密其存储空间并重启。</string>
     <string name="lockdown_enable">启用锁定功能模式</string>
     <string name="lockdown_enable_ack">我明白了</string>
-    <string name="lockdown_enable_warning">高能预警:在支持的硬件上启用锁定模式将会锁死调试端口 (SWD) 你可以随时通过输入密码短语来关闭锁定模式如果情况紧急执行一次全设备擦除也能恢复一切。</string>
     <string name="lockdown_enter_passphrase">输入密码短语</string>
     <string name="lockdown_hide_passphrase">隐藏</string>
     <string name="lockdown_hours_until_expiry">距离失效还有多少小时</string>
