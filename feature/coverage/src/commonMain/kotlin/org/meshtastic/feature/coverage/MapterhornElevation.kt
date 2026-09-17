@@ -59,7 +59,7 @@ class MapterhornElevation(
 ) : ElevationSource,
     AutoCloseable {
 
-    private val zoom = zoom.coerceAtMost(MapterhornEndpoints.TILES_MAX_ZOOM)
+    private val zoom = zoomFitting(zoom.coerceAtMost(MapterhornEndpoints.TILES_MAX_ZOOM), bounds)
 
     // Shared, and never closed here: a caller's client is theirs, and the shared one outlives us.
     private val tiles = MapterhornTiles(http ?: SharedTerrain.http, store)
@@ -146,6 +146,9 @@ class MapterhornElevation(
     private class TileRequest(val key: Long, val x: Int, val y: Int)
 
     companion object {
+        /** Below this one tile spans a continent; the guard never needs to go further. */
+        const val MIN_ZOOM = 6
+
         /**
          * ~37 m per pixel at mid latitudes, which matches the 50 m terrain profile step.
          *
@@ -185,3 +188,31 @@ private const val STRAIGHT_ANGLE_DEG = 180.0
 private const val HALF = 2.0
 private const val KM_PER_DEG_LAT = 111.32
 private const val DEG_TO_RAD = 0.017453292519943295
+
+/**
+ * The deepest zoom at or below [wanted] whose tiles for [bounds] still fit the shared cache.
+ *
+ * Tiles scale with the square of the sampled radius and with 1/cos(latitude), so a fixed zoom is only ever right for
+ * one area. At z12 a 30 km disc is ~120 tiles at mid latitudes but ~360 above 65°N, and the radius is a free-text field
+ * — 70 km asks for 500 to 1800. Past the cache's capacity the failure is not graceful: eviction is insertion order, so
+ * the sweep evicts the very tiles it is about to read and re-decodes the whole disc on every pass. Measured once at
+ * ~1800 tiles: 133 MB downloaded and seconds per estimate instead of hundreds of milliseconds.
+ *
+ * Dropping a zoom quarters the tile count, so this converges immediately and leaves the common case untouched — a 30 km
+ * disc at mid latitudes still samples at z12.
+ */
+internal fun zoomFitting(wanted: Int, bounds: GeoBounds?): Int {
+    if (bounds == null) return wanted
+    var zoom = wanted
+    while (zoom > MapterhornElevation.MIN_ZOOM && tilesSpanning(bounds, zoom) > TerrainCache.DEFAULT_CAPACITY) {
+        zoom--
+    }
+    return zoom
+}
+
+/** How many tiles [bounds] covers at [zoom]. */
+internal fun tilesSpanning(bounds: GeoBounds, zoom: Int): Int {
+    val nw = TerrainTileMath.tileAt(zoom, bounds.north, bounds.west)
+    val se = TerrainTileMath.tileAt(zoom, bounds.south, bounds.east)
+    return (se.x - nw.x + 1) * (se.y - nw.y + 1)
+}

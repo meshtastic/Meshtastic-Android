@@ -91,7 +91,7 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
         resolved = merged
     }
 
-    private companion object {
+    companion object {
         /**
          * A 25 km disc is ~70 tiles at z12 and a decoded tile is ~256 KB, so this holds a working set with room to pan.
          * Asking for a deeper zoom will evict — 256 tiles at z13 — which the disk cache makes a decode rather than a
