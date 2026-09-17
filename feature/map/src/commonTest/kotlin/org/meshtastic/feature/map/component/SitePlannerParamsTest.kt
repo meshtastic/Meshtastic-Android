@@ -89,4 +89,14 @@ class SitePlannerParamsTest {
         assertEquals("Tower%20%C3%91%C3%B6r%C3%B0", encodeQueryComponent("Tower Ñörð"))
         assertEquals("plain-name_1.0~", encodeQueryComponent("plain-name_1.0~"))
     }
+
+    @Test
+    fun `toQueryUrl clamps max_range to what the hosted planner accepts in each mode`() {
+        // Free text, so a user can ask for more than the hosted planner's SPLAT!-in-wasm handles.
+        // Only the URL is clamped - the local engine has no such ceiling.
+        val wide = SitePlannerParams(latitude = 51.05, longitude = -114.07, name = "Tower A", maxRangeKm = 400.0)
+
+        assertTrue(wide.toQueryUrl("http://localhost:5173").contains("&max_range=150.0"))
+        assertTrue(wide.copy(highResolution = true).toQueryUrl("http://localhost:5173").contains("&max_range=70.0"))
+    }
 }
