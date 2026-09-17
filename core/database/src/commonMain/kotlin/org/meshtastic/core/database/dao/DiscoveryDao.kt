@@ -165,6 +165,30 @@ interface DiscoveryDao {
     )
     suspend fun getMaxDistance(sessionId: Long): Double?
 
+    /**
+     * Writes one dwell's preset result and its discovered nodes, but only if the parent session row exists in *this*
+     * database, returning null when it does not.
+     *
+     * The parent check and the child writes share one transaction on purpose. Every [SwitchingDiscoveryDao] call
+     * re-resolves the active database, so a caller that checks the session and then inserts issues two independent
+     * resolutions and a device/DB switch landing between them orphans the foreign key. Callers must not reimplement
+     * this as check-then-insert.
+     *
+     * [nodes] are stamped with the new preset-result id, so callers pass them with any placeholder.
+     */
+    @Transaction
+    suspend fun insertDwellIfSessionExists(
+        result: DiscoveryPresetResultEntity,
+        nodes: List<DiscoveredNodeEntity>,
+    ): Long? {
+        if (getSession(result.sessionId) == null) return null
+        val presetResultId = insertPresetResult(result)
+        if (nodes.isNotEmpty()) {
+            insertDiscoveredNodes(nodes.map { it.copy(presetResultId = presetResultId) })
+        }
+        return presetResultId
+    }
+
     @Transaction
     @Query("SELECT * FROM discovery_session WHERE id = :sessionId")
     suspend fun getSessionWithResults(sessionId: Long): DiscoverySessionEntity?

@@ -147,6 +147,23 @@ private class FakeDiscoveryDao(private val delegate: SharedInMemoryDiscoveryDao 
         )
     }
 
+    /**
+     * The engine writes a dwell through this one call now. Delegation would forward it straight to the backing fake and
+     * bypass [insertPresetResult]'s barrier hooks, so route it back through them here, and honour the parent check the
+     * real transaction performs.
+     */
+    override suspend fun insertDwellIfSessionExists(
+        result: DiscoveryPresetResultEntity,
+        nodes: List<DiscoveredNodeEntity>,
+    ): Long? {
+        if (delegate.getSession(result.sessionId) == null) return null
+        val presetResultId = insertPresetResult(result)
+        if (nodes.isNotEmpty()) {
+            delegate.insertDiscoveredNodes(nodes.map { it.copy(presetResultId = presetResultId) })
+        }
+        return presetResultId
+    }
+
     override suspend fun insertPresetResult(result: DiscoveryPresetResultEntity): Long {
         val id = delegate.insertPresetResult(result)
         nextInsertPresetResultEntered?.also { entered ->
@@ -377,6 +394,39 @@ class DiscoveryScanEngineTest {
         assertNull(engine.currentSession.value)
         assertNull(collectorRegistry.collector)
         assertTrue(radioController.configWrites.isEmpty(), "A replaced transport must not be retuned")
+    }
+
+    /**
+     * Regression for Crashlytics `d79ee407` (SQLite FK 787). The engine holds `sessionId` for the whole scan while
+     * `SwitchingDiscoveryDao` re-resolves the active database per call, so a device/DB switch mid-scan leaves the id
+     * pointing at a row the active database does not have. Writing the dwell's preset result then orphans its foreign
+     * key. Deleting the session row reproduces what the switch does to this engine: the parent is gone by the time the
+     * dwell persists.
+     *
+     * The engine must skip the write, not crash. `persistCurrentDwellResults` runs on a `SupervisorJob` scope with no
+     * `CoroutineExceptionHandler`, so anything thrown there reaches the default handler as a crash rather than a logged
+     * scan abort - which is why the real fix makes the check and the writes one transaction
+     * ([DiscoveryDao.insertDwellIfSessionExists]) rather than a check followed by an insert.
+     *
+     * Real-database coverage of the transaction itself lives in `SwitchingDiscoveryDaoTest`, which can switch two Room
+     * instances deterministically; this module's tests share an in-memory fake and its Robolectric source set has no
+     * bundled-SQLite native library.
+     */
+    @Test
+    fun dwellPersistenceIsSkippedWhenTheSessionLeavesTheActiveDatabase() = runTest {
+        val engine = createEngine(this)
+        engine.startScan(testPresets, dwellDurationSeconds = 60)
+        assertScanActive(engine)
+        val sessionId = discoveryDao.sessions.keys.single()
+
+        // What a device/DB switch does to this engine: the parent row is no longer reachable.
+        discoveryDao.deleteSession(sessionId)
+
+        engine.stopScan()
+        advanceUntilIdle()
+
+        assertTrue(discoveryDao.presetResults.isEmpty(), "an unreachable session must not receive an orphan dwell row")
+        assertTrue(discoveryDao.sessions.isEmpty(), "and the session must not be resurrected")
     }
 
     @Test

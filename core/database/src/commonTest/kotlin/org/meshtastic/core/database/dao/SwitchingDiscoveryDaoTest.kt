@@ -26,12 +26,16 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.MeshtasticDatabase
+import org.meshtastic.core.database.entity.DiscoveredNodeEntity
+import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.database.entity.DiscoverySessionStatus
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -94,6 +98,48 @@ class SwitchingDiscoveryDaoTest {
             dbA.discoveryDao().getSession(sessionId)?.completionStatus,
             "an unavailable database must not be reported as a successful recoverable status write",
         )
+    }
+
+    /**
+     * Regression for the FK-787 crash (Crashlytics `d79ee407`). A caller cannot check the parent session and then
+     * insert its child: the two calls resolve the active database independently, so a switch landing between them
+     * writes a `discovery_preset_result` whose `session_id` has no row. `insertDwellIfSessionExists` must do both in
+     * one resolution and report the missing parent instead of raising a constraint failure.
+     */
+    @Test
+    fun dwellWriteAfterASwitchReportsTheMissingParentInsteadOfViolatingTheForeignKey() = runTest {
+        val sessionId = dao.insertSession(session(timestamp = 1))
+        assertEquals(1, dbA.discoveryDao().getAllSessionsSnapshot().size, "parent session lives in DB A")
+
+        provider.switchTo(dbB)
+
+        val presetResultId =
+            dao.insertDwellIfSessionExists(
+                result = DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "LongFast"),
+                nodes = emptyList(),
+            )
+
+        assertNull(presetResultId, "a dwell whose session is not in the active DB must report, not insert")
+        assertEquals(0, dbB.discoveryDao().getPresetResults(sessionId).size, "no orphan row in the new DB")
+        assertEquals(0, dbA.discoveryDao().getPresetResults(sessionId).size, "and none written back to the old DB")
+    }
+
+    /** The same call must still write normally when the parent session is present. */
+    @Test
+    fun dwellWriteSucceedsWhenTheSessionIsInTheActiveDb() = runTest {
+        val sessionId = dao.insertSession(session(timestamp = 1))
+
+        val presetResultId =
+            dao.insertDwellIfSessionExists(
+                result = DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "LongFast"),
+                nodes = listOf(DiscoveredNodeEntity(presetResultId = 0L, nodeNum = 42L)),
+            )
+
+        assertNotNull(presetResultId, "a dwell with a live parent session must be written")
+        assertEquals(1, dbA.discoveryDao().getPresetResults(sessionId).size)
+        val nodes = dbA.discoveryDao().getDiscoveredNodes(presetResultId)
+        assertEquals(1, nodes.size, "child nodes are stamped with the new preset-result id inside the transaction")
+        assertEquals(42L, nodes.first().nodeNum)
     }
 
     @Test

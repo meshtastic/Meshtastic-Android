@@ -734,28 +734,26 @@ class DiscoveryScanEngine(
         if (sessionId == 0L) return
         mutex.withLock {
             if (currentDwellPersisted) return@withLock
-            if (collectedNodes.isEmpty()) {
-                persistEmptyPresetResult()
-                currentDwellPersisted = true
-            } else {
-                val presetResultId = persistPresetResult()
-                persistDiscoveredNodes(presetResultId)
-                currentDwellPersisted = true
+            val result = if (collectedNodes.isEmpty()) emptyPresetResult() else presetResult()
+            // One transaction, so a device/DB switch cannot land between the parent-session check and these writes.
+            // A null return means the session row is not in the active database and this dwell is unwritable.
+            if (discoveryDao.insertDwellIfSessionExists(result, discoveredNodeEntities()) == null) {
+                Logger.w {
+                    "DiscoveryScanEngine: session $sessionId is not in the active database; skipping dwell persistence"
+                }
+                return@withLock
             }
+            currentDwellPersisted = true
         }
     }
 
-    private suspend fun persistEmptyPresetResult() {
-        val emptyResult =
-            DiscoveryPresetResultEntity(
-                sessionId = sessionId,
-                presetName = currentPresetName,
-                dwellDurationSeconds = totalDwellSeconds,
-            )
-        discoveryDao.insertPresetResult(emptyResult)
-    }
+    private fun emptyPresetResult() = DiscoveryPresetResultEntity(
+        sessionId = sessionId,
+        presetName = currentPresetName,
+        dwellDurationSeconds = totalDwellSeconds,
+    )
 
-    private suspend fun persistPresetResult(): Long {
+    private fun presetResult(): DiscoveryPresetResultEntity {
         val (avgChannelUtil, avgAirUtil) = computeAverageMetrics()
         val directCount = collectedNodes.values.count { it.neighborType == "direct" }
         val meshCount = collectedNodes.values.count { it.neighborType == "mesh" }
@@ -790,7 +788,7 @@ class DiscoveryScanEngine(
                 numTotalNodes = lastLocalStats?.num_total_nodes ?: 0,
                 uptimeSeconds = lastLocalStats?.uptime_seconds ?: 0,
             )
-        return discoveryDao.insertPresetResult(presetResult)
+        return presetResult
     }
 
     /**
@@ -804,13 +802,16 @@ class DiscoveryScanEngine(
         return successRate to failureRate
     }
 
-    private suspend fun persistDiscoveredNodes(presetResultId: Long) {
+    /**
+     * Builds this dwell's node rows. `presetResultId` is a placeholder - [DiscoveryDao.insertDwellIfSessionExists]
+     * stamps the real one inside its transaction.
+     */
+    private suspend fun discoveredNodeEntities(): List<DiscoveredNodeEntity> {
+        if (collectedNodes.isEmpty()) return emptyList()
         val session = discoveryDao.getSession(sessionId)
         val userLat = session?.userLatitude ?: 0.0
         val userLon = session?.userLongitude ?: 0.0
-
-        val nodeEntities = collectedNodes.values.map { data -> data.toEntity(presetResultId, userLat, userLon) }
-        discoveryDao.insertDiscoveredNodes(nodeEntities)
+        return collectedNodes.values.map { data -> data.toEntity(presetResultId = 0L, userLat, userLon) }
     }
 
     private fun CollectedNodeData.toEntity(
