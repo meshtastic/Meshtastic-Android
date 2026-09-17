@@ -17,6 +17,7 @@
 package org.meshtastic.feature.coverage
 
 import kotlin.math.abs
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 /**
@@ -110,7 +111,11 @@ fun CoverageGrid.toGeoJson(style: CoverageStyle = CoverageStyle(), bandCount: In
     val features =
         bands(ranges)
             .map { band ->
-                val t = ((band.thresholdDbm - style.minDbm) / (style.maxDbm - style.minDbm)).coerceIn(0.0, 1.0)
+                // Spread across the band INDEX, not its lower bound. Colouring a band by where its
+                // floor sits means the last one samples at 5/6 and the palette's brightest end never
+                // appears at all — plasma stopped at orange and never reached its yellow.
+                val index = ((band.thresholdDbm - style.minDbm) / step).roundToInt()
+                val t = (index.toDouble() / (bandCount - 1).coerceAtLeast(1)).coerceIn(0.0, 1.0)
                 val color = style.palette.colorAt(t)
                 // GeoJSON MultiPolygon nests coordinates[polygon][ring][position]. Emitting the rings
                 // one level flatter makes a Polygon-with-holes wearing a MultiPolygon label, which MapLibre
