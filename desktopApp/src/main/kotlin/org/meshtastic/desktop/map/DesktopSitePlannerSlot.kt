@@ -50,6 +50,7 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.feature.coverage.CoverageGrid
+import org.meshtastic.feature.coverage.CoverageStyle
 import org.meshtastic.feature.coverage.LocalCoverage
 import org.meshtastic.feature.coverage.MapterhornElevation
 import org.meshtastic.feature.coverage.Site
@@ -129,7 +130,7 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
                         // Persist and draw it on the map, the same path the F-Droid flavour uses for
                         // the WebView's GeoJSON — so the coverage survives the dialog closing and
                         // shows up in the layers list like any other import.
-                        layersManager.addGeoJsonLayer(current.name, swept.toGeoJson())
+                        layersManager.addGeoJsonLayer(current.name, swept.toGeoJson(current.toCoverageStyle()))
                         session.moveTo(Position(longitude = current.longitude, latitude = current.latitude))
                         result = swept
                     }
@@ -175,6 +176,14 @@ private fun SitePlannerParams.toSite(): Site = Site(
     rxHeightM = rxHeightMeters,
     txGainDbi = txGainDbi,
     radiusKm = maxRangeKm,
+)
+
+/** The sheet's Display section: palette, the dBm range the ramp spans, and overlay transparency. */
+private fun SitePlannerParams.toCoverageStyle(): CoverageStyle = CoverageStyle.fromTransparency(
+    palette = colorScale,
+    minDbm = minDbm,
+    maxDbm = maxDbm,
+    transparencyPercent = overlayTransparency,
 )
 
 @Composable
