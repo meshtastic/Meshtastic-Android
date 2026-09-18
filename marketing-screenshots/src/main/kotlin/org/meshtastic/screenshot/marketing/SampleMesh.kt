@@ -224,7 +224,7 @@ internal object SampleMesh {
             fireLookout,
         )
 
-    /** LongFast (index 0, default PSK), a private group channel with a full 256-bit key, and a second private one. */
+    /** LongTurbo (index 0, default PSK), a private group channel with a full 256-bit key, and a second private one. */
     val channelSet: ChannelSet =
         ChannelSet.Builder()
             .also { set ->
@@ -248,7 +248,7 @@ internal object SampleMesh {
                     Config.LoRaConfig.Builder()
                         .also {
                             it.use_preset = true
-                            it.modem_preset = Config.LoRaConfig.ModemPreset.LONG_FAST
+                            it.modem_preset = Config.LoRaConfig.ModemPreset.LONG_TURBO
                             it.region = Config.LoRaConfig.RegionCode.US
                             it.hop_limit = 3
                             it.tx_enabled = true
@@ -257,7 +257,7 @@ internal object SampleMesh {
             }
             .build()
 
-    /** The LongFast thread as seen from Base Camp: a day trip checking in from the ridge and the river. */
+    /** The LongTurbo thread as seen from Base Camp: a day trip checking in from the ridge and the river. */
     val messages: List<Message> =
         listOf(
             received(trailhead, "Heading up from the trailhead now, 4 of us", "09:02", 39, 5.5f, -92, hops = 1),

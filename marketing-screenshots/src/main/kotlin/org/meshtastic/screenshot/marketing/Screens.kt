@@ -131,7 +131,7 @@ private fun BottomNav(selected: TopLevelDestination) {
     }
 }
 
-/** The LongFast channel thread, built from the messaging feature's own bubbles, reactions and top bar. */
+/** The LongTurbo channel thread, built from the messaging feature's own bubbles, reactions and top bar. */
 @Composable
 internal fun MessagesScreen() {
     val channelName = Channel(SampleMesh.channelSet.settings.first(), SampleMesh.channelSet.lora_config!!).name
