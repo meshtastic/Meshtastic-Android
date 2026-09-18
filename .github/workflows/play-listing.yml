@@ -36,14 +36,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Both fail before any credential is written: a bad locale directory is
+      # Fails before any credential is written: a bad locale directory is
       # rejected by the Play API mid-upload, after earlier locales have already
       # been written, and an overlength string is rejected the same way.
-      - name: Check locale directories are languages Play accepts
-        run: python3 scripts/check-play-locales.py
-
-      - name: Check store metadata lengths
-        run: python3 scripts/check-metadata-length.py
+      - name: Check store metadata
+        run: python3 scripts/check-store-metadata.py
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0

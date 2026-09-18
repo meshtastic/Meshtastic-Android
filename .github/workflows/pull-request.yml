@@ -303,13 +303,12 @@ jobs:
         run: ./scripts/verify-rb-selftest.sh
       - name: Self-test verify-abi-parity
         run: ./scripts/verify-abi-parity-selftest.sh
-      - name: Validate store listing metadata lengths
-        run: python3 scripts/check-metadata-length.py
-      # supply uploads every locale directory it finds and neither it nor the Crowdin CLI
+      # Locale codes, lengths and HTML for all three stores that read the tree. supply
+      # uploads every locale directory it finds and neither it nor the Crowdin CLI
       # validates the names, so an unmapped code is only rejected by the Play API, partway
-      # through an upload. Catch it here instead.
-      - name: Validate store listing locale codes
-        run: python3 scripts/check-play-locales.py
+      # through an upload; F-Droid and IzzyOnDroid read the tree straight from git.
+      - name: Validate store listing metadata
+        run: python3 scripts/check-store-metadata.py
       # default.txt is rendered from metainfo.xml; a PR that edits one without the
       # other ships a listing that no longer says what the release did.
       - name: Check Play what's-new matches AppStream

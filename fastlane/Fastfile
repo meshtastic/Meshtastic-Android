@@ -1,17 +1,7 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
-
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
+# Lanes are invoked by the workflows in .github/workflows (release.yml,
+# promote.yml, play-listing.yml); `bundle exec fastlane lanes` lists them.
+# Play credentials come from fastlane/play-store-credentials.json, written by
+# the workflow from the GOOGLE_PLAY_JSON_KEY secret and deleted afterwards.
 
 default_platform(:android)
 
@@ -19,7 +9,7 @@ platform :android do
   desc "Deploy a new version to the internal track on Google Play"
   lane :internal do |options|
     aab_path = build_google_release
-    
+
     upload_to_play_store(
       track: 'internal',
       aab: aab_path,
