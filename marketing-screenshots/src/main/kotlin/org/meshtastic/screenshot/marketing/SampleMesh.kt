@@ -44,8 +44,17 @@ internal object SampleMesh {
     const val CENTER_LAT = 32.7767
     const val CENTER_LON = -96.797
 
-    /** Seconds since the epoch, taken once so every node's "last heard" reads as minutes or hours, not years. */
+    /**
+     * Seconds since the epoch, taken once when the mesh is built. The row composables format "last heard" against the
+     * wall clock at composition, which is up to a map capture later, so [heardAgo] places every offset mid-minute: a
+     * label can only change if that gap exceeds 30 s, and a whole run takes well under it.
+     */
     private val now: Int = (nowMillis / 1_000L).toInt()
+    private const val HALF_MINUTE_SECONDS = 30
+    private const val JUST_NOW_SECONDS = 5
+
+    /** 0 reads "Now"; anything else lands 30 s into that minute so a delayed composition cannot move the label. */
+    private fun heardAgo(minutes: Int): Int = if (minutes == 0) JUST_NOW_SECONDS else minutes * 60 + HALF_MINUTE_SECONDS
 
     /** A fixed, obviously synthetic 256-bit key so the detail page shows a keyed node rather than a key warning. */
     private val ridgeKey = ByteArray(32) { i -> (i * 13 + 29).toByte() }.toByteString()
@@ -59,7 +68,7 @@ internal object SampleMesh {
             Role.CLIENT,
             95,
             0,
-            5,
+            0,
             0.0,
             0.0,
             0f,
@@ -75,7 +84,7 @@ internal object SampleMesh {
             Role.ROUTER,
             88,
             0,
-            160,
+            2,
             0.04,
             0.03,
             11.5f,
@@ -117,7 +126,7 @@ internal object SampleMesh {
                     .build(),
             )
     val trailhead =
-        node(0x3c4d5e6f, "Trailhead", "TRLH", HardwareModel.TBEAM, Role.CLIENT, 72, 1, 180, -0.03, 0.045, 8.25f, -92)
+        node(0x3c4d5e6f, "Trailhead", "TRLH", HardwareModel.TBEAM, Role.CLIENT, 72, 1, 3, -0.03, 0.045, 8.25f, -92)
     val riverCrossing =
         node(
             0x4d5e6f70,
@@ -127,7 +136,7 @@ internal object SampleMesh {
             Role.CLIENT_MUTE,
             64,
             1,
-            420,
+            7,
             -0.045,
             -0.02,
             6.0f,
@@ -142,7 +151,7 @@ internal object SampleMesh {
             Role.ROUTER,
             91,
             2,
-            900,
+            15,
             0.05,
             -0.04,
             3.5f,
@@ -158,7 +167,7 @@ internal object SampleMesh {
             Role.TRACKER,
             58,
             2,
-            1500,
+            25,
             0.012,
             -0.042,
             2.75f,
@@ -173,7 +182,7 @@ internal object SampleMesh {
             Role.CLIENT,
             47,
             3,
-            3600,
+            60,
             -0.01,
             0.02,
             -1.5f,
@@ -188,7 +197,7 @@ internal object SampleMesh {
             Role.CLIENT,
             83,
             1,
-            240,
+            4,
             0.025,
             0.01,
             9.0f,
@@ -203,7 +212,7 @@ internal object SampleMesh {
             Role.CLIENT,
             77,
             2,
-            660,
+            11,
             -0.02,
             -0.035,
             4.5f,
@@ -350,7 +359,7 @@ internal object SampleMesh {
         role: Role,
         battery: Int,
         hops: Int,
-        heardAgoSec: Int,
+        heardMinutesAgo: Int,
         dLat: Double,
         dLon: Double,
         snr: Float,
@@ -375,10 +384,10 @@ internal object SampleMesh {
                 it.longitude_i = ((CENTER_LON + dLon) * 1e7).toInt()
                 it.altitude = 120 + (num and 0xff)
                 it.sats_in_view = 8
-                it.time = now - heardAgoSec
+                it.time = now - heardAgo(heardMinutesAgo)
             }
             .build(),
-        lastHeard = now - heardAgoSec,
+        lastHeard = now - heardAgo(heardMinutesAgo),
         channel = 0,
         snr = snr,
         rssi = rssi,

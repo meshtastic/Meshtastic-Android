@@ -37,6 +37,8 @@ fun main(args: Array<String>) {
     val metadataDir = File(args[0])
     val locales = args[1].split(',').map { it.trim() }.filter { it.isNotEmpty() }
     require(locales.isNotEmpty()) { "at least one locale is required, got '${args[1]}'" }
+    // Resolved up front so an unknown locale fails before anything is rendered or written.
+    val captionsByLocale = locales.associateWith(Captions::forLocale)
 
     val t0 = System.nanoTime()
     val mapSnapshot = MapSnapshot.capture(MAP_WIDTH_DP, MAP_HEIGHT_DP, Phone.SCREEN_DENSITY)
@@ -58,8 +60,7 @@ fun main(args: Array<String>) {
             screen
         }
 
-    for (locale in locales) {
-        val captions = Captions.forLocale(locale)
+    for ((locale, captions) in captionsByLocale) {
         val outDir = File(metadataDir, "$locale/images/phoneScreenshots").apply { mkdirs() }
         for ((shot, screen) in rendered) {
             val t = System.nanoTime()

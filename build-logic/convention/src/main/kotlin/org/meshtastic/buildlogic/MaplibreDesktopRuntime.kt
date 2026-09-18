@@ -22,13 +22,19 @@ import org.gradle.api.Project
  * Adds exactly one maplibre-compose native runtime — the one matching this build host — as `runtimeOnly`.
  *
  * Each runtime artifact carries that platform's maplibre-native blob, so adding them all would bloat every
- * distribution with four unusable copies. Upstream publishes no macos-x64 artifact, which matches our release matrix.
+ * distribution with four unusable copies. Upstream publishes no macos-x64 artifact, which matches our release matrix;
+ * on an Intel Mac no runtime is added and the map degrades to its engine-unavailable state at runtime, rather than
+ * failing every Gradle task at configuration time for a host that only builds the Android app.
  * Shared by `:desktopApp` and `:marketing-screenshots`, the two JVM modules that draw a MapLibre map.
  */
 fun Project.maplibreDesktopRuntime() {
     val osName = providers.systemProperty("os.name").get().lowercase()
     val osArch = providers.systemProperty("os.arch").get().lowercase()
     val isArm = osArch.contains("aarch64") || osArch.contains("arm64")
+    if (osName.contains("mac") && !isArm) {
+        logger.warn("maplibre-compose publishes no macOS x64 runtime; the desktop map is unavailable on this host.")
+        return
+    }
     val alias =
         when {
             osName.contains("mac") -> "maplibre-compose-runtime-metal-macos-arm64"
