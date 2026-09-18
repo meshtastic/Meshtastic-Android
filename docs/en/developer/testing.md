@@ -73,13 +73,27 @@ Rendering is host-deterministic here (layoutlib): a local `update` produces refe
 
 #### Marketing screenshots
 
-The store-listing screenshots (Play, F-Droid, IzzyOnDroid) are generated too, by a third module: **`:marketing-screenshots`** is a plain JVM program, not a test. It renders the app's own `commonMain` screens offscreen with Compose Desktop's `ImageComposeScene` over one sample mesh, captures the real MapLibre map (basemap plus the app's node chips) through maplibre-compose's `MapSnapshotter`, and frames each shot in a phone bezel under a captioned banner as a 1242×2484 PNG. It has no tests, so `./gradlew test` never touches it, and CI never runs it. The one command:
+The store-listing screenshots (Play, F-Droid, IzzyOnDroid) are generated too, by a third module: **`:marketing-screenshots`** is a plain JVM program, not a test. It renders the app's own `commonMain` screens offscreen with Compose Desktop's `ImageComposeScene` over one sample mesh and captures the real MapLibre map (basemap plus the app's node chips) through maplibre-compose's `MapSnapshotter`. Every shot is the raw screen, as [Play's listing rules](https://support.google.com/googleplay/android-developer/answer/9866151) require - no device frame, no caption banner - at one size per form factor. It has no tests, so `./gradlew test` never touches it, and CI never runs it. The one command:
 
 ```shell
 ./gradlew :marketing-screenshots:updateMarketingScreenshots
 ```
 
-That writes `1_messages.png` … `5_channels.png` straight into `fastlane/metadata/android/en-US/images/phoneScreenshots/`, deterministically (two runs are byte-identical). Only `en-US` is generated (`-PmarketingLocales`, default `en-US`) and committed: everything under `fastlane/` is read straight from git by F-Droid and IzzyOnDroid, and the other locales are ~55 MB per regeneration, so those are a follow-up - generated in CI and pushed with `fastlane supply`, never committed. Captions live in `Captions.kt` in the module.
+That writes `1_messages.png` … `5_channels.png` into five folders under `fastlane/metadata/android/en-US/images/`, deterministically (two runs are byte-identical):
+
+| Folder | Size | Window | Uploaded by |
+| --- | --- | --- | --- |
+| `phoneScreenshots/` | 1080×1920 @2.5x | 432×768 dp, compact: bottom navigation bar | `fastlane supply` |
+| `sevenInchScreenshots/` | 1080×1920 @1.8x | 600×1067 dp, medium: navigation rail, one pane | `fastlane supply` |
+| `tenInchScreenshots/` | 2560×1440 @2x | 1280×720 dp, expanded: rail, list beside detail | `fastlane supply` |
+| `chromebookScreenshots/` | 1920×1080 @1x | expanded | hand, in Play Console |
+| `xrScreenshots/` | 1920×1200 @1x (8:5) | expanded | hand, in Play Console |
+
+The screens are composed in the app's own adaptive shell (`NavigationSuiteScaffold`, `ListDetailPaneScaffold`, `AdaptiveTwoPane`) with the same window-class calculations the app uses, so the form factors are data - a size, a density and a folder in `FormFactor.kt` - and every layout difference between them is the app's own. Neither `fastlane supply` nor the Play Developer API has a Chromebook or XR slot, so those two folders are ignored by supply and F-Droid and uploaded by hand. The basemap is the app's default Liberty style with its text layers removed: MapLibre packs glyphs into an atlas in tile-arrival order, which moves label edge pixels by one level from run to run, and nothing else in the map is affected.
+
+Locales: `-PmarketingLocales=en-US,de-DE` renders each locale in turn after switching the JVM default locale, the same switch the desktop app makes, so the app's strings, numbers and dates follow. Only `en-US` goes into `fastlane/` - everything there is read straight from git by F-Droid and IzzyOnDroid - and every other locale lands in `marketing-screenshots/build/marketing-screenshots/<locale>/images/` in the same layout, ready for a later `supply` run. The sample prose (the thread, the conversation previews, the framed variant's captions) is in `marketing-screenshots/src/main/composeResources/values/strings.xml`, which `crowdin.yml`'s first rule already globs like every other `composeResources` strings file, so a translated conversation needs no configuration change; until Crowdin fills a locale's `values-xx/strings.xml`, that locale's chat text stays English while the UI around it is translated.
+
+`-PmarketingFramed=true` also writes the framed 1242×2484 phone variants - bezel, drawn status bar and a caption banner - under `marketing-screenshots/build/marketing-screenshots/framed/<locale>/`, for the website and social posts. They never go into `fastlane/`.
 
 The map needs a Vulkan loader the JVM can find. On a stock Ubuntu nothing is required; in a Nix dev shell, which replaces `LD_LIBRARY_PATH` on entry, pass `-PmarketingLibraryPath=/usr/lib/x86_64-linux-gnu` (the system loader plus the GPU's ICD). No display is needed or used.
 
