@@ -66,10 +66,10 @@ internal object SampleMesh {
             0,
             favorite = true,
         )
-    val ridgeRepeater =
+    val ridgeTop =
         node(
             0x1a2b3c4d,
-            "Ridge Repeater",
+            "Ridge Top",
             "RDGE",
             HardwareModel.RAK4631,
             Role.ROUTER,
@@ -212,17 +212,7 @@ internal object SampleMesh {
 
     /** The node list, in the order the real list would show it: us first, then favorites, then by last heard. */
     val nodes: List<Node> =
-        listOf(
-            baseCamp,
-            ridgeRepeater,
-            summitSolar,
-            trailhead,
-            sarahsTruck,
-            riverCrossing,
-            hamShack,
-            kayakDan,
-            fireLookout,
-        )
+        listOf(baseCamp, ridgeTop, summitSolar, trailhead, sarahsTruck, riverCrossing, hamShack, kayakDan, fireLookout)
 
     /** LongTurbo (index 0, default PSK), a private group channel with a full 256-bit key, and a second private one. */
     val channelSet: ChannelSet =
@@ -263,7 +253,7 @@ internal object SampleMesh {
             received(trailhead, "Heading up from the trailhead now, 4 of us", "09:02", 39, 5.5f, -92, hops = 1),
             received(sarahsTruck, "Parked at the overflow lot, radio on", "09:05", 36, 9.0f, -85, hops = 1),
             sent("Copy. Weather window closes around 2, keep moving", "09:07", 34),
-            received(trailhead, "Made the ridge, 2 bars on the repeater", "09:31", 10, 11.25f, -70, hops = 1)
+            received(trailhead, "Made the ridge, good signal back to base", "09:31", 10, 11.25f, -70, hops = 1)
                 .withReactions(reaction(baseCamp, "👍", 9), reaction(sarahsTruck, "🔥", 8)),
             received(kayakDan, "Water at the crossing is low, safe to ford", "09:34", 7, 2.75f, -113, hops = 2),
             sent("Great, we'll take the crossing route back", "09:35", 6),

@@ -305,10 +305,10 @@ internal fun MapScreen(snapshot: ImageBitmap) {
     }
 }
 
-/** Ridge Repeater's detail page from the node feature's own [NodeDetailContent], as a remote, unmanaged node. */
+/** Ridge Top's detail page from the node feature's own [NodeDetailContent], as a remote, unmanaged node. */
 @Composable
 internal fun NodeDetailScreen() {
-    val node = SampleMesh.ridgeRepeater
+    val node = SampleMesh.ridgeTop
     MarketingTheme {
         Scaffold(
             topBar = {
