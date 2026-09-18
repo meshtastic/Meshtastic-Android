@@ -349,6 +349,14 @@ dependencies {
     // JVM variant provides the host-platform native library for BundledSQLiteDriver under Robolectric
     testRuntimeOnly(libs.androidx.sqlite.bundled.jvm)
 
+    // spike-screengrab (throwaway): fastlane screengrab + UiAutomator instrumented capture.
+    androidTestImplementation("tools.fastlane:screengrab:2.1.1")
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.uiautomator)
+    androidTestImplementation(libs.junit)
+
     // Producer of the baseline profile consumed by the release build. The androidx.baselineprofile
     // plugin merges the generated rules into src/<variant>/generated/baselineProfiles at build time.
     baselineProfile(projects.baselineprofile)
