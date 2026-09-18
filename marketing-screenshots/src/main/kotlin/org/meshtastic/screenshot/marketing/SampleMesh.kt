@@ -19,7 +19,10 @@
 package org.meshtastic.screenshot.marketing
 
 import okio.ByteString.Companion.toByteString
+import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.Contact
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
@@ -32,32 +35,53 @@ import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Position
+import org.meshtastic.proto.PowerMetrics
 import org.meshtastic.proto.User
+import org.meshtastic.screenshot.marketing.resources.Res
+import org.meshtastic.screenshot.marketing.resources.marketing_msg_crossing_low
+import org.meshtastic.screenshot.marketing.resources.marketing_msg_heading_up
+import org.meshtastic.screenshot.marketing.resources.marketing_msg_lunch_lookout
+import org.meshtastic.screenshot.marketing.resources.marketing_msg_made_ridge
+import org.meshtastic.screenshot.marketing.resources.marketing_msg_parked
+import org.meshtastic.screenshot.marketing.resources.marketing_msg_take_crossing
+import org.meshtastic.screenshot.marketing.resources.marketing_msg_truck_around
+import org.meshtastic.screenshot.marketing.resources.marketing_msg_weather_window
+import org.meshtastic.screenshot.marketing.resources.marketing_preview_first_aid
+import org.meshtastic.screenshot.marketing.resources.marketing_preview_see_me_on_map
+import org.meshtastic.screenshot.marketing.resources.marketing_preview_spare_battery
+import org.meshtastic.screenshot.marketing.resources.marketing_preview_trail_crew
+import org.meshtastic.screenshot.marketing.resources.marketing_preview_weather_thanks
+import java.time.LocalDate
+import java.time.ZoneId
 
 /**
  * One plausible mesh shared by every store screenshot, so the five shots tell one story: a base camp, a ridge-top
  * router, and a handful of hikers, boats and trucks spread across a valley outside Dallas. Nine nodes, so the map never
  * clusters them. "Last heard" and message timestamps hang off the wall clock because the row composables format them
  * relative to now.
+ *
+ * Node and channel names are literals: they are what a real group typed into their radios, and the channel names feed
+ * the QR payload. The prose - the thread, the direct-message previews - is a string resource per line, resolved at
+ * composition so each locale renders its own translation once Crowdin has filled it in.
+ *
+ * Built once per render pass: "last heard" hangs off [now], the wall clock when the mesh was built, and the row
+ * composables format it against the wall clock at composition. [heardAgo] places every offset mid-minute, so a label
+ * can only change once composition falls more than 30 s behind construction; one locale's pass takes a third of that.
  */
-internal object SampleMesh {
-    const val CENTER_LAT = 32.7767
-    const val CENTER_LON = -96.797
-
-    /**
-     * Seconds since the epoch, taken once when the mesh is built. The row composables format "last heard" against the
-     * wall clock at composition, which is up to a map capture later, so [heardAgo] places every offset mid-minute: a
-     * label can only change if that gap exceeds 30 s, and a whole run takes well under it.
-     */
-    private val now: Int = (nowMillis / 1_000L).toInt()
-    private const val HALF_MINUTE_SECONDS = 30
-    private const val JUST_NOW_SECONDS = 5
+internal class SampleMesh(private val now: Int = (nowMillis / 1_000L).toInt()) {
+    companion object {
+        const val CENTER_LAT = 32.7767
+        const val CENTER_LON = -96.797
+        private const val HALF_MINUTE_SECONDS = 30
+        private const val JUST_NOW_SECONDS = 5
+    }
 
     /** 0 reads "Now"; anything else lands 30 s into that minute so a delayed composition cannot move the label. */
     private fun heardAgo(minutes: Int): Int = if (minutes == 0) JUST_NOW_SECONDS else minutes * 60 + HALF_MINUTE_SECONDS
 
     /** A fixed, obviously synthetic 256-bit key so the detail page shows a keyed node rather than a key warning. */
     private val ridgeKey = ByteArray(32) { i -> (i * 13 + 29).toByte() }.toByteString()
+    private val summitKey = ByteArray(32) { i -> (i * 17 + 41).toByte() }.toByteString()
 
     val baseCamp =
         node(
@@ -142,6 +166,8 @@ internal object SampleMesh {
             6.0f,
             -101,
         )
+
+    /** A solar router two hops out: the second node with a full detail page, so the wide layouts show two of them. */
     val summitSolar =
         node(
             0x5e6f7081,
@@ -158,6 +184,50 @@ internal object SampleMesh {
             -110,
             favorite = true,
         )
+            .let { base ->
+                base.copy(
+                    user = base.user.newBuilder().also { it.public_key = summitKey }.build(),
+                    publicKey = summitKey,
+                )
+            }
+            .copy(
+                metadata =
+                DeviceMetadata.Builder()
+                    .also {
+                        it.firmware_version = "2.8.1.f3c2a9"
+                        it.hw_model = HardwareModel.RAK4631
+                        it.role = Role.ROUTER
+                        it.hasBluetooth = true
+                        it.hasWifi = false
+                        it.canShutdown = true
+                    }
+                    .build(),
+                environmentMetrics =
+                EnvironmentMetrics.Builder()
+                    .also {
+                        it.temperature = 9.6f
+                        it.relative_humidity = 58f
+                        it.barometric_pressure = 791.3f
+                    }
+                    .build(),
+                powerMetrics =
+                PowerMetrics.Builder()
+                    .also {
+                        it.ch1_voltage = 13.8f
+                        it.ch1_current = 412f
+                    }
+                    .build(),
+                deviceMetrics =
+                DeviceMetrics.Builder()
+                    .also {
+                        it.battery_level = 91
+                        it.voltage = 4.09f
+                        it.channel_utilization = 5.1f
+                        it.air_util_tx = 1.9f
+                        it.uptime_seconds = 63 * 86_400 + 2 * 3_600
+                    }
+                    .build(),
+            )
     val kayakDan =
         node(
             0x6f708192,
@@ -256,20 +326,93 @@ internal object SampleMesh {
             }
             .build()
 
-    /** The LongTurbo thread as seen from Base Camp: a day trip checking in from the ridge and the river. */
+    private val messageTextByUuid = mutableMapOf<Long, StringResource>()
+
+    /**
+     * The LongTurbo thread as seen from Base Camp: a day trip checking in from the ridge and the river. Each
+     * [Message.text] is empty here; [messageText] carries the line as a resource, and the screen fills it in at
+     * composition.
+     */
     val messages: List<Message> =
         listOf(
-            received(trailhead, "Heading up from the trailhead now, 4 of us", "09:02", 39, 5.5f, -92, hops = 1),
-            received(sarahsTruck, "Parked at the overflow lot, radio on", "09:05", 36, 9.0f, -85, hops = 1),
-            sent("Copy. Weather window closes around 2, keep moving", "09:07", 34),
-            received(trailhead, "Made the ridge, good signal back to base", "09:31", 10, 11.25f, -70, hops = 1)
+            received(trailhead, Res.string.marketing_msg_heading_up, "09:02", 39, 5.5f, -92, hops = 1),
+            received(sarahsTruck, Res.string.marketing_msg_parked, "09:05", 36, 9.0f, -85, hops = 1),
+            sent(Res.string.marketing_msg_weather_window, "09:07", 34),
+            received(trailhead, Res.string.marketing_msg_made_ridge, "09:31", 10, 11.25f, -70, hops = 1)
                 .withReactions(reaction(baseCamp, "👍", 9), reaction(sarahsTruck, "🔥", 8)),
-            received(kayakDan, "Water at the crossing is low, safe to ford", "09:34", 7, 2.75f, -113, hops = 2),
-            sent("Great, we'll take the crossing route back", "09:35", 6),
-            received(sarahsTruck, "Bringing the truck around to the lower lot at 3", "09:38", 3, 8.5f, -88, hops = 1)
+            received(kayakDan, Res.string.marketing_msg_crossing_low, "09:34", 7, 2.75f, -113, hops = 2),
+            sent(Res.string.marketing_msg_take_crossing, "09:35", 6),
+            received(sarahsTruck, Res.string.marketing_msg_truck_around, "09:38", 3, 8.5f, -88, hops = 1)
                 .withReactions(reaction(trailhead, "❤️", 2)),
-            received(trailhead, "Lunch at the lookout, back on the air in 30", "09:41", 0, 10.0f, -74, hops = 1),
+            received(trailhead, Res.string.marketing_msg_lunch_lookout, "09:41", 0, 10.0f, -74, hops = 1),
         )
+
+    /** The prose of each message in [messages], by uuid. */
+    val messageText: Map<Long, StringResource>
+        get() = messageTextByUuid
+
+    /**
+     * The conversation list beside the thread on wide layouts: the three channels, then the hikers Base Camp has
+     * messaged directly. [Contact.lastMessageText] is empty here for the same reason as [Message.text]; the preview
+     * line is in [contactPreview].
+     */
+    val contacts: List<Contact> =
+        listOf(
+            channelContact(0, "LongTurbo", at = "09:41", unread = 0),
+            channelContact(1, "Basecamp", at = "09:23", unread = 0),
+            channelContact(2, "TrailCrew", at = "08:55", unread = 2),
+            directContact(trailhead, at = "09:29"),
+            directContact(sarahsTruck, at = "09:14", unread = 1),
+            directContact(kayakDan, at = "08:46"),
+        )
+
+    /**
+     * The preview line of each contact in [contacts], by contact key: the sender whose short name the app prefixes the
+     * line with (none when Base Camp sent it), and the line itself.
+     */
+    val contactPreview: Map<String, Pair<Node?, StringResource>> =
+        mapOf(
+            contacts[0].contactKey to (trailhead to Res.string.marketing_msg_lunch_lookout),
+            contacts[1].contactKey to (sarahsTruck to Res.string.marketing_preview_spare_battery),
+            contacts[2].contactKey to (trailhead to Res.string.marketing_preview_trail_crew),
+            contacts[3].contactKey to (trailhead to Res.string.marketing_preview_weather_thanks),
+            contacts[4].contactKey to (null to Res.string.marketing_preview_first_aid),
+            contacts[5].contactKey to (kayakDan to Res.string.marketing_preview_see_me_on_map),
+        )
+
+    /**
+     * The row shows a message from today as its clock time, so these are fixed times of day rather than offsets from
+     * now, in step with the thread's own "09:02" stamps; an offset would print the wall clock.
+     */
+    private fun todayAt(time: String): Long {
+        val (hour, minute) = time.split(':').map(String::toInt)
+        return LocalDate.now().atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    }
+
+    private fun channelContact(index: Int, name: String, at: String, unread: Int): Contact = Contact(
+        contactKey = ContactKey.broadcast(index).value,
+        shortName = index.toString(),
+        longName = name,
+        lastMessageTime = todayAt(at),
+        lastMessageText = "",
+        unreadCount = unread,
+        messageCount = messages.size,
+        isMuted = false,
+        isUnmessageable = false,
+    )
+
+    private fun directContact(from: Node, at: String, unread: Int = 0): Contact = Contact(
+        contactKey = "0${from.user.id}",
+        shortName = from.user.short_name,
+        longName = from.user.long_name,
+        lastMessageTime = todayAt(at),
+        lastMessageText = "",
+        unreadCount = unread,
+        messageCount = 4,
+        isMuted = false,
+        isUnmessageable = false,
+        nodeColors = from.colors,
+    )
 
     /** Reactions render from `MessageItem`'s own list, not [Message.emojis], so they are carried per message here. */
     val reactions: Map<Long, List<Reaction>> = messages.associate { it.uuid to it.emojis }
@@ -290,7 +433,7 @@ internal object SampleMesh {
 
     private fun received(
         from: Node,
-        text: String,
+        text: StringResource,
         time: String,
         minutesAgo: Int,
         snr: Float,
@@ -308,7 +451,7 @@ internal object SampleMesh {
         hops = hops,
     )
 
-    private fun sent(text: String, time: String, minutesAgo: Int): Message = message(
+    private fun sent(text: StringResource, time: String, minutesAgo: Int): Message = message(
         baseCamp,
         text,
         time,
@@ -322,7 +465,7 @@ internal object SampleMesh {
 
     private fun message(
         from: Node,
-        text: String,
+        text: StringResource,
         time: String,
         minutesAgo: Int,
         fromLocal: Boolean,
@@ -332,11 +475,12 @@ internal object SampleMesh {
         hops: Int,
     ): Message {
         val id = ++nextMessageId
+        messageTextByUuid[id] = text
         return Message(
             uuid = id,
             receivedTime = nowMillis - minutesAgo * 60_000L,
             node = from,
-            text = text,
+            text = "",
             fromLocal = fromLocal,
             time = time,
             read = true,

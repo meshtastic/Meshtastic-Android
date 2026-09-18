@@ -16,41 +16,43 @@
  */
 package org.meshtastic.screenshot.marketing
 
-/** The banner drawn above the phone: a headline and one line of body copy. */
-internal data class Caption(val title: String, val description: String)
+import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.screenshot.marketing.resources.Res
+import org.meshtastic.screenshot.marketing.resources.marketing_caption_channels_description
+import org.meshtastic.screenshot.marketing.resources.marketing_caption_channels_title
+import org.meshtastic.screenshot.marketing.resources.marketing_caption_map_description
+import org.meshtastic.screenshot.marketing.resources.marketing_caption_map_title
+import org.meshtastic.screenshot.marketing.resources.marketing_caption_messages_description
+import org.meshtastic.screenshot.marketing.resources.marketing_caption_messages_title
+import org.meshtastic.screenshot.marketing.resources.marketing_caption_node_detail_description
+import org.meshtastic.screenshot.marketing.resources.marketing_caption_node_detail_title
+import org.meshtastic.screenshot.marketing.resources.marketing_caption_nodes_description
+import org.meshtastic.screenshot.marketing.resources.marketing_caption_nodes_title
 
-/** The five listing shots in listing order; file names sort into that order on Play and F-Droid alike. */
-internal enum class Shot(val fileName: String) {
-    Messages("1_messages"),
-    Nodes("2_nodes"),
-    Map("3_map"),
-    NodeDetail("4_node_detail"),
-    Channels("5_channels"),
-}
-
-/** Store copy per locale. Only en-US is written today; a new locale is a new entry here plus `-PmarketingLocales`. */
-internal object Captions {
-    private val enUs =
-        mapOf(
-            Shot.Messages to
-                Caption(
-                    "Text without cell service",
-                    "Messages hop node to node over LoRa. No towers, no SIM, no subscription.",
-                ),
-            Shot.Nodes to
-                Caption("See everyone on your mesh", "Battery, signal, distance and hops for every node you can hear."),
-            Shot.Map to Caption("Every node on the map", "Positions shared over the mesh, with no internet required."),
-            Shot.NodeDetail to
-                Caption("Every node in detail", "Signal, uptime, hops and security, one tap from the list."),
-            Shot.Channels to
-                Caption(
-                    "Share a channel with a QR code",
-                    "Set up a private encrypted mesh with your group in seconds.",
-                ),
-        )
-
-    private val byLocale: Map<String, Map<Shot, Caption>> = mapOf("en-US" to enUs)
-
-    fun forLocale(locale: String): Map<Shot, Caption> =
-        requireNotNull(byLocale[locale]) { "No captions for locale '$locale'; known: ${byLocale.keys}" }
+/**
+ * The five listing shots in listing order; file names sort into that order on Play and F-Droid alike. The caption is
+ * the headline and body copy the framed variant draws above the phone, as string resources so Crowdin carries them.
+ */
+internal enum class Shot(
+    val fileName: String,
+    val captionTitle: StringResource,
+    val captionDescription: StringResource,
+) {
+    Messages(
+        "1_messages",
+        Res.string.marketing_caption_messages_title,
+        Res.string.marketing_caption_messages_description,
+    ),
+    Nodes("2_nodes", Res.string.marketing_caption_nodes_title, Res.string.marketing_caption_nodes_description),
+    Map("3_map", Res.string.marketing_caption_map_title, Res.string.marketing_caption_map_description),
+    NodeDetail(
+        "4_node_detail",
+        Res.string.marketing_caption_node_detail_title,
+        Res.string.marketing_caption_node_detail_description,
+    ),
+    Channels(
+        "5_channels",
+        Res.string.marketing_caption_channels_title,
+        Res.string.marketing_caption_channels_description,
+    ),
 }

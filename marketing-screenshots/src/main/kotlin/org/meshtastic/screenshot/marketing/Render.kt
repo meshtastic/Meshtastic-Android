@@ -48,6 +48,9 @@ internal fun renderScreen(width: Int, height: Int, density: Float, content: @Com
             image = next
             frames++
         }
+        if (scene.hasInvalidations()) {
+            System.err.println("[marketing-screenshots] warning: scene still invalidating after $frames frames")
+        }
         image.toComposeImageBitmap()
     }
 

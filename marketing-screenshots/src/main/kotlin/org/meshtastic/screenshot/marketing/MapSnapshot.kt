@@ -30,9 +30,9 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.io.files.Path
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.map.LocalMapState
+import org.maplibre.compose.map.MapRuntime
 import org.maplibre.compose.map.MapRuntimeOptions
 import org.maplibre.compose.map.MapSnapshotRequest
-import org.maplibre.compose.map.MapSnapshotter
 import org.maplibre.compose.map.createMapRuntime
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Position
@@ -40,82 +40,101 @@ import org.meshtastic.feature.map.maplibre.layers.NodeLayers
 import org.meshtastic.feature.map.maplibre.style.Basemaps
 import java.nio.file.Files
 
+/** One capture: the map area in dp at the screen density, and the zoom the form factor asks for. */
+internal data class MapArea(val widthDp: Int, val heightDp: Int, val density: Float, val zoom: Double)
+
 /**
  * Captures the real mesh map — the app's default basemap with its own [NodeLayers] chips over [SampleMesh] — through
- * maplibre-compose's snapshotter, with no window and no display. Sized to the map area between the app bar and the
- * bottom navigation at the screen density, so the screen composable can place it without rescaling.
+ * maplibre-compose's snapshotter, with no window and no display. Each [MapArea] is the map area between a form factor's
+ * app bar and its navigation at that screen's density, so the screen composable places it without rescaling.
  */
 internal object MapSnapshot {
-    private const val ZOOM = 11.5
     private const val CAPTURE_TIMEOUT_MS = 180_000L
-    private const val MAX_SETTLE_CAPTURES = 4
+    private const val MAX_SETTLE_RUNTIMES = 4
 
-    fun capture(widthDp: Int, heightDp: Int, density: Float): ImageBitmap = runBlocking {
+    fun capture(areas: List<MapArea>, mesh: SampleMesh): Map<MapArea, ImageBitmap> =
+        areas.associateWith { area -> captureUntilStable(area, mesh) }
+
+    /**
+     * Label and glyph placement depends on the order tiles arrive, which the network decides on the first load, so a
+     * capture can differ from the next run's by a few pixels; a second capture from the same runtime always matches the
+     * first, because that runtime already holds the placement. So each capture comes from a fresh runtime over one
+     * shared tile cache: the first fills the cache from the network, the ones after it read the cache in a stable
+     * order, and two consecutive runtimes agreeing means the run is reproducible. A warm runtime costs about a second.
+     */
+    private fun captureUntilStable(area: MapArea, mesh: SampleMesh): ImageBitmap = runBlocking {
         val cacheDir = Files.createTempDirectory("marketing-maplibre")
-        val runtime = createMapRuntime(MapRuntimeOptions(cacheFile = Path(cacheDir.resolve("cache.db").toString())))
+        val cacheFile = Path(cacheDir.resolve("cache.db").toString())
         try {
-            val baseStyle = BaseStyle.Uri(Basemaps.Liberty.styleUri)
-            // NodeLayers reads LocalMapState (for cluster clicks) and rasterizes chips with a TextMeasurer; the
-            // snapshotter's own composition provides neither, so both are supplied here.
-            val mapState = runtime.createMapState(baseStyle)
-            val fontResolver = createFontFamilyResolver()
-            val snapshotter =
-                runtime.createSnapshotter(baseStyle) {
-                    CompositionLocalProvider(
-                        LocalMapState provides mapState,
-                        LocalFontFamilyResolver provides fontResolver,
-                    ) {
-                        NodeLayers(
-                            nodes = SampleMesh.nodes,
-                            myNodeNum = SampleMesh.baseCamp.num,
-                            showPrecisionCircles = false,
-                            onNodeClick = {},
-                            onClusterZoom = { _, _ -> },
-                            onClusterMembers = {},
-                            visibleBounds = null,
-                            zoom = ZOOM.toInt(),
-                        )
-                    }
-                }
-            try {
-                val request =
-                    MapSnapshotRequest(
-                        width = widthDp,
-                        height = heightDp,
-                        cameraPosition =
-                        CameraPosition(
-                            target = Position(longitude = SampleMesh.CENTER_LON, latitude = SampleMesh.CENTER_LAT),
-                            zoom = ZOOM,
-                        ),
-                        density = density,
-                    )
-                withTimeout(CAPTURE_TIMEOUT_MS) { captureUntilStable(snapshotter, request) }
-            } finally {
-                withContext(NonCancellable) {
-                    snapshotter.close()
-                    snapshotter.awaitClosed()
-                }
+            var previous = captureOnce(cacheFile, area, mesh)
+            repeat(MAX_SETTLE_RUNTIMES - 1) {
+                val next = captureOnce(cacheFile, area, mesh)
+                if (next.toPixelMap().buffer.contentEquals(previous.toPixelMap().buffer)) return@runBlocking next
+                previous = next
             }
+            System.err.println(
+                "[marketing-screenshots] warning: map ${area.widthDp}x${area.heightDp}@${area.density} never settled",
+            )
+            previous
+        } finally {
+            cacheDir.toFile().deleteRecursively()
+        }
+    }
+
+    private suspend fun captureOnce(cacheFile: Path, area: MapArea, mesh: SampleMesh): ImageBitmap {
+        val runtime = createMapRuntime(MapRuntimeOptions(cacheFile = cacheFile))
+        return try {
+            withTimeout(CAPTURE_TIMEOUT_MS) { runtime.capture(area, mesh) }
         } finally {
             withContext(NonCancellable) {
                 runtime.close()
                 runtime.awaitClosed()
             }
-            cacheDir.toFile().deleteRecursively()
         }
     }
 
-    /**
-     * Label placement depends on the order tiles arrive, so a first capture can differ from the next by a few glyphs.
-     * Two consecutive matching frames mean placement has settled; a warm capture costs about 200 ms.
-     */
-    private suspend fun captureUntilStable(snapshotter: MapSnapshotter, request: MapSnapshotRequest): ImageBitmap {
-        var previous = snapshotter.capture(request)
-        repeat(MAX_SETTLE_CAPTURES - 1) {
-            val next = snapshotter.capture(request)
-            if (next.toPixelMap().buffer.contentEquals(previous.toPixelMap().buffer)) return next
-            previous = next
+    private suspend fun MapRuntime.capture(area: MapArea, mesh: SampleMesh): ImageBitmap {
+        val baseStyle = BaseStyle.Uri(Basemaps.Liberty.styleUri)
+        // NodeLayers reads LocalMapState (for cluster clicks) and rasterizes chips with a TextMeasurer; the
+        // snapshotter's own composition provides neither, so both are supplied here.
+        val mapState = createMapState(baseStyle)
+        val fontResolver = createFontFamilyResolver()
+        val snapshotter =
+            createSnapshotter(baseStyle) {
+                CompositionLocalProvider(
+                    LocalMapState provides mapState,
+                    LocalFontFamilyResolver provides fontResolver,
+                ) {
+                    NodeLayers(
+                        nodes = mesh.nodes,
+                        myNodeNum = mesh.baseCamp.num,
+                        showPrecisionCircles = false,
+                        onNodeClick = {},
+                        onClusterZoom = { _, _ -> },
+                        onClusterMembers = {},
+                        visibleBounds = null,
+                        zoom = area.zoom.toInt(),
+                    )
+                }
+            }
+        return try {
+            val request =
+                MapSnapshotRequest(
+                    width = area.widthDp,
+                    height = area.heightDp,
+                    cameraPosition =
+                    CameraPosition(
+                        target = Position(longitude = SampleMesh.CENTER_LON, latitude = SampleMesh.CENTER_LAT),
+                        zoom = area.zoom,
+                    ),
+                    density = area.density,
+                )
+            snapshotter.capture(request)
+        } finally {
+            withContext(NonCancellable) {
+                snapshotter.close()
+                snapshotter.awaitClosed()
+            }
         }
-        return previous
     }
 }

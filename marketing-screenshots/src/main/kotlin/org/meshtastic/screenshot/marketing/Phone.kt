@@ -52,32 +52,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.ui.theme.AppTheme
 
-/** The phone form factor: the screen every phone shot is rendered at, and the store canvas it is framed into. */
-internal object Phone {
-    /** 1080x2160 at 2.5x is the app's 432x864 dp, a common tall-phone window. */
-    const val SCREEN_WIDTH_PX = 1080
-    const val SCREEN_HEIGHT_PX = 2160
-    const val SCREEN_DENSITY = 2.5f
-
-    /** 1242x2484 is Play's 2:1 long-side limit; drawn at 3x so the frame layout is written in dp. */
-    const val FRAME_WIDTH_PX = 1242
-    const val FRAME_HEIGHT_PX = 2484
-    const val FRAME_DENSITY = 3f
+/** The framed phone canvas: 1242x2484 is Play's 2:1 long-side limit; drawn at 3x so the layout is written in dp. */
+internal object Frame {
+    const val WIDTH_PX = 1242
+    const val HEIGHT_PX = 2484
+    const val DENSITY = 3f
 }
 
-/** Step two of the pipeline for phones: [screen] inside a captioned bezel on the 1242x2484 store canvas. */
-internal fun framePhone(screen: ImageBitmap, caption: Caption): ImageBitmap =
-    renderScreen(Phone.FRAME_WIDTH_PX, Phone.FRAME_HEIGHT_PX, Phone.FRAME_DENSITY) { StoreFrame(caption, screen) }
+/**
+ * The opt-in framed variant, for the website and social posts rather than the store: a phone [screen] inside a
+ * captioned bezel on the 1242x2484 canvas. Play itself forbids device frames in listing screenshots.
+ */
+internal fun framePhone(screen: ImageBitmap, shot: Shot): ImageBitmap =
+    renderScreen(Frame.WIDTH_PX, Frame.HEIGHT_PX, Frame.DENSITY) { StoreFrame(shot, screen) }
 
 private val Background = Color(0xFF1F2937)
 private val BezelColor = Color(0xFF0B0F14)
 private val StatusBarColor = Color(0xFF111418)
 
-// The bezel's proportions, in reference dp: a 1:2 screen with a status bar above it and an even inset around both.
-private const val SCREEN_W = 300f
-private const val SCREEN_H = 600f
+// The bezel's proportions, in reference dp: a 9:16 screen with a status bar above it and an even inset around both.
+private const val SCREEN_W = 315f
+private const val SCREEN_H = 560f
 private const val STATUS_H = 24f
 private const val INSET = 7f
 private const val BEZEL_ASPECT = (SCREEN_W + 2 * INSET) / (STATUS_H + SCREEN_H + 2 * INSET)
@@ -91,7 +89,7 @@ private val CAPTION_BLOCK_HEIGHT = 232.dp
  * drawn status bar and [screen] scaled inside it, sized so the whole phone fits above the bottom edge.
  */
 @Composable
-private fun StoreFrame(caption: Caption, screen: ImageBitmap) {
+private fun StoreFrame(shot: Shot, screen: ImageBitmap) {
     AppTheme(darkTheme = true, dynamicColor = false) {
         Column(
             modifier = Modifier.fillMaxSize().background(Background).padding(horizontal = 28.dp),
@@ -102,7 +100,7 @@ private fun StoreFrame(caption: Caption, screen: ImageBitmap) {
             Box(modifier = Modifier.fillMaxWidth().height(CAPTION_BLOCK_HEIGHT), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = caption.title,
+                        text = stringResource(shot.captionTitle),
                         style =
                         MaterialTheme.typography.displaySmall.copy(
                             fontWeight = FontWeight.Bold,
@@ -113,7 +111,7 @@ private fun StoreFrame(caption: Caption, screen: ImageBitmap) {
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        text = caption.description,
+                        text = stringResource(shot.captionDescription),
                         style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, lineHeight = 27.sp),
                         color = Color.White.copy(alpha = 0.82f),
                         textAlign = TextAlign.Center,
