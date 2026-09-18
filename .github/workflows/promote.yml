@@ -72,7 +72,7 @@ permissions:
 
 jobs:
   prepare-build-info:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     outputs:
       APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
@@ -115,7 +115,7 @@ jobs:
         shell: bash
 
   promote-release:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 30
     needs: [ prepare-build-info ]
     env:
@@ -206,7 +206,7 @@ jobs:
         run: rm -f fastlane/play-store-credentials.json
 
   update-github-release:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     needs: [ prepare-build-info, promote-release ]
     # actions: write is scoped here — only this job's publish-workflow
@@ -408,7 +408,7 @@ jobs:
   # promoted to homebrew/cask, replace the tap PR with `brew bump-cask-pr`.
   update-homebrew-cask:
     if: ${{ inputs.channel == 'production' }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     needs: [ update-github-release ]
     steps:
