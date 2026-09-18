@@ -52,6 +52,8 @@ import androidx.compose.ui.window.isTraySupported
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import co.touchlab.kermit.Logger
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import co.touchlab.kermit.platformLogWriter
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
@@ -175,6 +177,13 @@ fun main(args: Array<String>) {
         MeshServiceLifecycle()
         ThemeAndLocaleProvider(uiViewModel)
         SnitcherTraceWindow()
+        // Spike-only: a crash on Compose's own path (composition/effects), since no synthetic click reaches the window.
+        if (System.getenv("MESHTASTIC_SPIKE_CRASH") != null) {
+            LaunchedEffect(Unit) {
+                delay(8.seconds)
+                error("Forced crash from MESHTASTIC_SPIKE_CRASH")
+            }
+        }
     }
 
     // Runs on the main thread with the UI already gone. The native sender must be closed before the container goes,
