@@ -1,0 +1,64 @@
+name: Play Store Listing
+
+# Uploads fastlane/metadata/android - every locale's title, descriptions,
+# feature graphic, icon and screenshots - to the Google Play listing. Manual
+# only: a listing commit is a Play submission, and a submission sent for review
+# cancels and restarts any release review in flight. Nothing here touches a
+# build or a track.
+#
+# The default is a dry run. Play validates the whole edit (unknown locales,
+# overlength text, bad image dimensions) and discards it; tick `publish` to
+# commit the edit instead. Even then it is held as "changes not sent for
+# review" - send it from the Play Console when no release review is running.
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Commit the listing to Play (unticked = validate only, nothing changes)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Two edits on the same listing race; the later one wins and the earlier one
+# is silently discarded.
+concurrency:
+  group: play-listing
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Both fail before any credential is written: a bad locale directory is
+      # rejected by the Play API mid-upload, after earlier locales have already
+      # been written, and an overlength string is rejected the same way.
+      - name: Check locale directories are languages Play accepts
+        run: python3 scripts/check-play-locales.py
+
+      - name: Check store metadata lengths
+        run: python3 scripts/check-metadata-length.py
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
+        with:
+          ruby-version: '4.0.7'
+          bundler-cache: true
+
+      - name: Decode Play Store credentials
+        run: echo '${{ secrets.GOOGLE_PLAY_JSON_KEY }}' > fastlane/play-store-credentials.json
+
+      - name: Upload listing
+        env:
+          VALIDATE_ONLY: ${{ inputs.publish && 'false' || 'true' }}
+        run: bundle exec fastlane play_listing validate_only:"$VALIDATE_ONLY"
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f fastlane/play-store-credentials.json
