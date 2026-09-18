@@ -40,6 +40,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -117,6 +118,9 @@ internal enum class Pane {
 @Composable
 internal fun ListDetail(compactPane: Pane, list: @Composable () -> Unit, detail: @Composable () -> Unit) {
     val directive = calculatePaneScaffoldDirective(currentWindowAdaptiveInfoV2())
+    // Movable content, as AdaptiveTwoPane does, so neither slot is emitted directly from two branches.
+    val listPane = remember { movableContentOf(list) }
+    val detailPane = remember { movableContentOf(detail) }
     if (directive.maxHorizontalPartitions > 1) {
         ListDetailPaneScaffold(
             directive = directive,
@@ -126,15 +130,15 @@ internal fun ListDetail(compactPane: Pane, list: @Composable () -> Unit, detail:
                 secondary = PaneAdaptedValue.Expanded,
                 tertiary = PaneAdaptedValue.Hidden,
             ),
-            listPane = { AnimatedPane { list() } },
-            detailPane = { AnimatedPane { detail() } },
+            listPane = { AnimatedPane { listPane() } },
+            detailPane = { AnimatedPane { detailPane() } },
             paneExpansionState = rememberPaneExpansionState(),
             paneExpansionDragHandle = { state -> PaneExpansionDragHandle(state) },
         )
     } else {
         when (compactPane) {
-            Pane.List -> list()
-            Pane.Detail -> detail()
+            Pane.List -> listPane()
+            Pane.Detail -> detailPane()
         }
     }
 }

@@ -25,6 +25,11 @@ import kotlin.math.ceil
 
 private const val NANOS_PER_MILLI = 1_000_000L
 private const val FASTLANE_LOCALE = "en-US"
+private const val ARG_METADATA_DIR = 0
+private const val ARG_BUILD_DIR = 1
+private const val ARG_LOCALES = 2
+private const val ARG_FRAMED = 3
+private const val ARG_COUNT = 4
 
 /**
  * Renders the listing screenshots: every [FormFactors.all] entry's shots, for each requested locale.
@@ -40,12 +45,14 @@ private const val FASTLANE_LOCALE = "en-US"
  * are measured from a clock a few seconds old, before any of its screens are composed.
  */
 fun main(args: Array<String>) {
-    require(args.size == 4) { "usage: <fastlane/metadata/android dir> <build dir> <comma-separated locales> <framed>" }
-    val metadataDir = File(args[0])
-    val buildDir = File(args[1])
-    val locales = args[2].split(',').map { it.trim() }.filter { it.isNotEmpty() }
-    require(locales.isNotEmpty()) { "at least one locale is required, got '${args[2]}'" }
-    val framed = args[3].toBooleanStrict()
+    require(args.size == ARG_COUNT) {
+        "usage: <fastlane/metadata/android dir> <build dir> <comma-separated locales> <framed>"
+    }
+    val metadataDir = File(args[ARG_METADATA_DIR])
+    val buildDir = File(args[ARG_BUILD_DIR])
+    val locales = args[ARG_LOCALES].split(',').map { it.trim() }.filter { it.isNotEmpty() }
+    require(locales.isNotEmpty()) { "at least one locale is required, got '${args[ARG_LOCALES]}'" }
+    val framed = args[ARG_FRAMED].toBooleanStrict()
 
     val t0 = System.nanoTime()
     val mapAreas = FormFactors.all.associateWith { it.mapArea() }
