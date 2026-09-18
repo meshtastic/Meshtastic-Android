@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   upload:
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 15
     steps:
       - name: Checkout code
