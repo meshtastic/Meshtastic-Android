@@ -53,6 +53,9 @@ import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.platformLogWriter
+import com.skydoves.snitcher.Snitcher
+import com.skydoves.snitcher.install
+import com.skydoves.snitcher.ui.SnitcherTraceWindow
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
@@ -148,6 +151,9 @@ private fun svgPainterResource(path: String, density: Density): Painter = rememb
 @OptIn(ExperimentalCoilApi::class)
 fun main(args: Array<String>) {
     installQuitHandler()
+    // Before application {}: the handler must exist before the first window can throw. The default storage
+    // directory is ~/.snitcher, shared by every Snitcher app on the machine, so keep our crash next to our data.
+    Snitcher.install(storageDirectory = System.getProperty("user.home") + "/.meshtastic", isDebuggable = true)
     // exitProcessOnExit = false is what makes the shutdown block below reachable at all: with the default (true),
     // application() calls System.exit(0) itself as soon as the Compose loop ends, and control never returns here.
     // Do not "simplify" this back to a bare application {} — that silently disables every teardown that follows.
@@ -168,6 +174,7 @@ fun main(args: Array<String>) {
         DeepLinkHandler(args, uiViewModel)
         MeshServiceLifecycle()
         ThemeAndLocaleProvider(uiViewModel)
+        SnitcherTraceWindow()
     }
 
     // Runs on the main thread with the UI already gone. The native sender must be closed before the container goes,

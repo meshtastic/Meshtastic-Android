@@ -372,6 +372,7 @@
     <string name="debug_filter_included">Filter included</string>
     <string name="debug_filter_preset_title">Preset Filters</string>
     <string name="debug_filters">Filters</string>
+    <string name="debug_force_crash">Crash the app</string>
     <string name="debug_log_api_enabled">Debug log API enabled</string>
     <string name="debug_logcat_empty">No app logs to show</string>
     <string name="debug_logcat_refresh">Refresh</string>

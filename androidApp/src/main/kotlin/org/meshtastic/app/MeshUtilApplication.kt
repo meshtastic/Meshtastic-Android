@@ -30,6 +30,8 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import com.skydoves.snitcher.Snitcher
+import com.skydoves.snitcher.install
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -92,6 +94,23 @@ open class MeshUtilApplication :
 
     /** Supplies Coil's process-wide loader without retaining an Activity in its singleton factory. */
     override fun newImageLoader(context: Context): ImageLoader = get<ImageLoader>()
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        installCrashScreen()
+    }
+
+    /**
+     * Runs before the content providers, so this handler sits inside the one Crashlytics installs from
+     * FirebaseInitProvider: Snitcher never chains to Crashlytics when Crashlytics is the handler it wrapped.
+     * Skipped under Robolectric, where the process kill that follows a crash would take the test worker with it.
+     */
+    private fun installCrashScreen() {
+        if (Build.FINGERPRINT == "robolectric") return
+        Snitcher.install<MainActivity>(application = this)
+        // Show the trace screen in every build type, not the restore-only screen release gets by default.
+        Snitcher.isDebuggable = true
+    }
 
     override fun onCreate() {
         super.onCreate()

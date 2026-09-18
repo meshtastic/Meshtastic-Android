@@ -280,6 +280,7 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.koin.android)
     implementation(libs.koin.compose.viewmodel)
+    implementation(libs.snitcher)
     implementation(libs.koin.androidx.workmanager)
     implementation(libs.kermit)
     implementation(libs.kotlinx.datetime)

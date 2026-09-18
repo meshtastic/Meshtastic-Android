@@ -71,6 +71,7 @@ import org.meshtastic.core.repository.MeshLogRetention
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_clear
 import org.meshtastic.core.resources.debug_decoded_payload
+import org.meshtastic.core.resources.debug_force_crash
 import org.meshtastic.core.resources.debug_logs_export
 import org.meshtastic.core.resources.debug_logs_export_warning
 import org.meshtastic.core.resources.debug_panel
@@ -160,6 +161,12 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {
+                    IconButton(onClick = { error("Forced crash from the Debug panel") }) {
+                        Icon(
+                            imageVector = MeshtasticIcons.BugReport,
+                            contentDescription = stringResource(Res.string.debug_force_crash),
+                        )
+                    }
                     // The settings and delete actions apply to the Packets (MeshLog) list only.
                     if (selectedTab == 0) {
                         IconToggleButton(checked = showSettings, onCheckedChange = { showSettings = it }) {

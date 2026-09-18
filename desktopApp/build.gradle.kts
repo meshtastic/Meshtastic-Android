@@ -351,6 +351,7 @@ dependencies {
     implementation(libs.compose.multiplatform.runtime)
     implementation(libs.compose.multiplatform.foundation)
     implementation(libs.compose.multiplatform.resources)
+    implementation(libs.snitcher)
 
     // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
     implementation(libs.jetbrains.compose.material3.adaptive)

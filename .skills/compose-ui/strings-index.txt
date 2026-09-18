@@ -345,6 +345,7 @@ debug_filter_clear
 debug_filter_included
 debug_filter_preset_title
 debug_filters
+debug_force_crash
 debug_log_api_enabled
 debug_logcat_empty
 debug_logcat_refresh

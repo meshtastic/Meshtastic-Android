@@ -100,6 +100,7 @@ google-services-gradle = "4.5.0"
 markdown = "0.7.14"
 markdownRenderer = "0.45.0"
 okio = "3.18.2"
+snitcher = "1.1.0"
 uri-kmp = "0.0.21"
 spotless = "8.10.2"
 vico = "3.3.1"
@@ -314,6 +315,7 @@ meshtastic-mqtt-client-transport-ws = { module = "org.meshtastic:mqtt-client-tra
 
 jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+snitcher = { module = "com.github.skydoves:snitcher", version.ref = "snitcher" }
 okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
 uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uri-kmp" }
 kermit = { module = "co.touchlab:kermit", version = "2.2.0" }
