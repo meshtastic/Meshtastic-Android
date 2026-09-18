@@ -158,6 +158,9 @@ class DiscoveryScanEngine(
     private var tunedPrimaryChannel: Boolean = false
     private var sessionId: Long = 0
 
+    /** The radio [sessionId]'s row was written against. Identifies the session across per-device databases. */
+    private var sessionDeviceAddress: String? = null
+
     /** Nodes collected for the current preset dwell. Keyed by nodeNum. */
     private val collectedNodes = mutableMapOf<Long, CollectedNodeData>()
 
@@ -329,12 +332,14 @@ class DiscoveryScanEngine(
         if (!isScanPreparationCurrent(deviceAddress, sessionGeneration)) {
             discoveryDao.deleteSession(insertedSessionId)
             sessionId = 0L
+            sessionDeviceAddress = null
             originalLoRaConfig = null
             originalPrimaryChannel = null
             _scanState.value = DiscoveryScanState.Failed("Selected radio changed while preparing the scan")
             return
         }
         sessionId = insertedSessionId
+        sessionDeviceAddress = deviceAddress
         _currentSession.value = session.copy(id = sessionId)
         collectorRegistry.collector = this
         _scanState.value = DiscoveryScanState.Shifting(targets.first().label)
@@ -758,28 +763,32 @@ class DiscoveryScanEngine(
         if (sessionId == 0L) return
         mutex.withLock {
             if (currentDwellPersisted) return@withLock
-            if (collectedNodes.isEmpty()) {
-                persistEmptyPresetResult()
-                currentDwellPersisted = true
-            } else {
-                val presetResultId = persistPresetResult()
-                persistDiscoveredNodes(presetResultId)
-                currentDwellPersisted = true
+            val deviceAddress = sessionDeviceAddress
+            if (deviceAddress == null) {
+                Logger.w { "DiscoveryScanEngine: session $sessionId has no device address; skipping dwell persistence" }
+                return@withLock
             }
+            val result = if (collectedNodes.isEmpty()) emptyPresetResult() else presetResult()
+            // One transaction, so a device/DB switch cannot land between the parent-session check and these writes.
+            // A null return means this device's session row is not in the active database and the dwell is unwritable.
+            if (discoveryDao.insertDwellIfSessionExists(result, discoveredNodeEntities(), deviceAddress) == null) {
+                Logger.w {
+                    "DiscoveryScanEngine: session $sessionId for $deviceAddress is not in the active database; " +
+                        "skipping dwell persistence"
+                }
+                return@withLock
+            }
+            currentDwellPersisted = true
         }
     }
 
-    private suspend fun persistEmptyPresetResult() {
-        val emptyResult =
-            DiscoveryPresetResultEntity(
-                sessionId = sessionId,
-                presetName = currentPresetName,
-                dwellDurationSeconds = totalDwellSeconds,
-            )
-        discoveryDao.insertPresetResult(emptyResult)
-    }
+    private fun emptyPresetResult() = DiscoveryPresetResultEntity(
+        sessionId = sessionId,
+        presetName = currentPresetName,
+        dwellDurationSeconds = totalDwellSeconds,
+    )
 
-    private suspend fun persistPresetResult(): Long {
+    private fun presetResult(): DiscoveryPresetResultEntity {
         val (avgChannelUtil, avgAirUtil) = computeAverageMetrics()
         val directCount = collectedNodes.values.count { it.neighborType == "direct" }
         val meshCount = collectedNodes.values.count { it.neighborType == "mesh" }
@@ -814,7 +823,7 @@ class DiscoveryScanEngine(
                 numTotalNodes = lastLocalStats?.num_total_nodes ?: 0,
                 uptimeSeconds = lastLocalStats?.uptime_seconds ?: 0,
             )
-        return discoveryDao.insertPresetResult(presetResult)
+        return presetResult
     }
 
     /**
@@ -828,13 +837,16 @@ class DiscoveryScanEngine(
         return successRate to failureRate
     }
 
-    private suspend fun persistDiscoveredNodes(presetResultId: Long) {
+    /**
+     * Builds this dwell's node rows. `presetResultId` is a placeholder - [DiscoveryDao.insertDwellIfSessionExists]
+     * stamps the real one inside its transaction.
+     */
+    private suspend fun discoveredNodeEntities(): List<DiscoveredNodeEntity> {
+        if (collectedNodes.isEmpty()) return emptyList()
         val session = discoveryDao.getSession(sessionId)
         val userLat = session?.userLatitude ?: 0.0
         val userLon = session?.userLongitude ?: 0.0
-
-        val nodeEntities = collectedNodes.values.map { data -> data.toEntity(presetResultId, userLat, userLon) }
-        discoveryDao.insertDiscoveredNodes(nodeEntities)
+        return collectedNodes.values.map { data -> data.toEntity(presetResultId = 0L, userLat, userLon) }
     }
 
     private fun CollectedNodeData.toEntity(

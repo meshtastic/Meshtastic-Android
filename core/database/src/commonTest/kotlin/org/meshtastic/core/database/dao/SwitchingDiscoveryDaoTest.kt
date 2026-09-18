@@ -26,12 +26,16 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.MeshtasticDatabase
+import org.meshtastic.core.database.entity.DiscoveredNodeEntity
+import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.database.entity.DiscoverySessionStatus
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -52,8 +56,12 @@ class SwitchingDiscoveryDaoTest {
         dbB.close()
     }
 
-    private fun session(timestamp: Long) =
-        DiscoverySessionEntity(timestamp = timestamp, presetsScanned = "LongFast", homePreset = "LongFast")
+    private fun session(timestamp: Long, deviceAddress: String = DEVICE_A) = DiscoverySessionEntity(
+        timestamp = timestamp,
+        presetsScanned = "LongFast",
+        homePreset = "LongFast",
+        deviceAddress = deviceAddress,
+    )
 
     @Test
     fun suspendCallsResolveTheCurrentDbPerCall() = runTest {
@@ -96,6 +104,75 @@ class SwitchingDiscoveryDaoTest {
         )
     }
 
+    /**
+     * Regression for the FK-787 crash (Crashlytics `d79ee407`). A caller cannot check the parent session and then
+     * insert its child: the two calls resolve the active database independently, so a switch landing between them
+     * writes a `discovery_preset_result` whose `session_id` has no row. `insertDwellIfSessionExists` must do both in
+     * one resolution and report the missing parent instead of raising a constraint failure.
+     */
+    @Test
+    fun dwellWriteAfterASwitchReportsTheMissingParentInsteadOfViolatingTheForeignKey() = runTest {
+        val sessionId = dao.insertSession(session(timestamp = 1))
+        assertEquals(1, dbA.discoveryDao().getAllSessionsSnapshot().size, "parent session lives in DB A")
+
+        provider.switchTo(dbB)
+
+        val presetResultId =
+            dao.insertDwellIfSessionExists(
+                result = DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "LongFast"),
+                nodes = emptyList(),
+                deviceAddress = DEVICE_A,
+            )
+
+        assertNull(presetResultId, "a dwell whose session is not in the active DB must report, not insert")
+        assertEquals(0, dbB.discoveryDao().getPresetResults(sessionId).size, "no orphan row in the new DB")
+        assertEquals(0, dbA.discoveryDao().getPresetResults(sessionId).size, "and none written back to the old DB")
+    }
+
+    /** The same call must still write normally when the parent session is present. */
+    @Test
+    fun dwellWriteSucceedsWhenTheSessionIsInTheActiveDb() = runTest {
+        val sessionId = dao.insertSession(session(timestamp = 1))
+
+        val presetResultId =
+            dao.insertDwellIfSessionExists(
+                result = DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "LongFast"),
+                nodes = listOf(DiscoveredNodeEntity(presetResultId = 0L, nodeNum = 42L)),
+                deviceAddress = DEVICE_A,
+            )
+
+        assertNotNull(presetResultId, "a dwell with a live parent session must be written")
+        assertEquals(1, dbA.discoveryDao().getPresetResults(sessionId).size)
+        val nodes = dbA.discoveryDao().getDiscoveredNodes(presetResultId)
+        assertEquals(1, nodes.size, "child nodes are stamped with the new preset-result id inside the transaction")
+        assertEquals(42L, nodes.first().nodeNum)
+    }
+
+    /**
+     * Every per-device database autogenerates session ids from 1, so an id alone is not an identity: DB A's session 1
+     * and DB B's session 1 are unrelated scans. A parent check on the id alone passes after a switch and silently
+     * attaches the dwell to the other radio's session, so the check matches the device address too.
+     */
+    @Test
+    fun dwellWriteAfterASwitchRejectsAnUnrelatedSessionSharingTheId() = runTest {
+        val sessionId = dao.insertSession(session(timestamp = 1))
+        val otherId = dbB.discoveryDao().insertSession(session(timestamp = 2, deviceAddress = DEVICE_B))
+        assertEquals(sessionId, otherId, "both databases autogenerate the same first id - that is the trap")
+
+        provider.switchTo(dbB)
+
+        val presetResultId =
+            dao.insertDwellIfSessionExists(
+                result = DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "LongFast"),
+                nodes = listOf(DiscoveredNodeEntity(presetResultId = 0L, nodeNum = 42L)),
+                deviceAddress = DEVICE_A,
+            )
+
+        assertNull(presetResultId, "a session id matching another radio's session must not be treated as the parent")
+        assertEquals(0, dbB.discoveryDao().getPresetResults(otherId).size, "the other radio's session gains no dwell")
+        assertEquals(0, dbA.discoveryDao().getPresetResults(sessionId).size, "and none is written back to the old DB")
+    }
+
     @Test
     fun flowsRelatchOntoTheCurrentDb() = runTest {
         dao.insertSession(session(timestamp = 1))
@@ -116,6 +193,11 @@ class SwitchingDiscoveryDaoTest {
 
         assertTrue(sawDbA, "collector observed DB A's session before the switch")
         assertEquals(0, relatched.size, "the same collector re-latched onto the new (empty) DB")
+    }
+
+    private companion object {
+        const val DEVICE_A = "x:AA:BB:CC:DD:EE:01"
+        const val DEVICE_B = "x:AA:BB:CC:DD:EE:02"
     }
 
     /** Minimal [DatabaseProvider] whose active DB the test can swap, mirroring a device/DB switch. */
