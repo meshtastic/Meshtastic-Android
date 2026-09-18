@@ -10,10 +10,46 @@ files:
     escape_quotes: 0
     escape_special_characters: 0
     type: android
+  # Crowdin's %locale% is not Google Play's language set: it renders regions Play rejects
+  # (ar-SA), `srp` for Serbian, and the modern Hebrew code where Play wants the legacy one.
+  # Nothing validates this - supply uploads every directory it finds and fastlane documents
+  # no behaviour for unknown ones - so a bad code is rejected by the Play API mid-upload,
+  # after earlier locales have already been written.
   - source: /fastlane/metadata/android/en-US/*.txt
     translation: /fastlane/metadata/android/%locale%/%original_file_name%
+    languages_mapping: &play_locales
+      locale:
+        # Keys are Crowdin language ids, not the locale %locale% renders. Play takes the
+        # bare language for these; %locale% would render a region it rejects.
+        ar: ar
+        be: be
+        bg: bg
+        ca: ca
+        et: et
+        hr: hr
+        lt: lt
+        ro: ro
+        sk: sk
+        sl: sl
+        sq: sq
+        uk: uk
+        # Play still uses the pre-1989 ISO code for Hebrew; %locale% renders he-IL.
+        he: iw-IL
+        # Crowdin renders Serbian as `srp`, which Play does not accept in any form.
+        sr: sr
+    # Play publishes no slot for these. Irish and Haitian Creole are absent from its
+    # supported-languages list entirely, and it lists Serbian only as `sr` with no script
+    # variant - mapping sr-Latn there too would point two languages at one directory and
+    # silently lose whichever wrote first. They keep translating the app's own strings;
+    # only the store listing is out of reach.
+    excluded_target_languages: &play_unsupported
+      - ga
+      - ht
+      - sr-Latn
   - source: /fastlane/metadata/android/en-US/changelogs/default.txt
     translation: /fastlane/metadata/android/%locale%/changelogs/%original_file_name%
+    languages_mapping: *play_locales
+    excluded_target_languages: *play_unsupported
   # In-app docs — user guide only (developer guide is English-only)
   # English sources live under docs/en/; translations land at docs/{android_code}/
   # Uses %android_code% to output Android/CMP qualifier format directly (pt-rBR, zh-rCN, fr)
