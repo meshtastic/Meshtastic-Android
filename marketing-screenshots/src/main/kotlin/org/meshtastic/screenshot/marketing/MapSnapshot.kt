@@ -20,6 +20,7 @@ package org.meshtastic.screenshot.marketing
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.font.createFontFamilyResolver
 import kotlinx.coroutines.NonCancellable
@@ -31,6 +32,7 @@ import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.map.MapRuntimeOptions
 import org.maplibre.compose.map.MapSnapshotRequest
+import org.maplibre.compose.map.MapSnapshotter
 import org.maplibre.compose.map.createMapRuntime
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Position
@@ -46,6 +48,7 @@ import java.nio.file.Files
 internal object MapSnapshot {
     private const val ZOOM = 11.5
     private const val CAPTURE_TIMEOUT_MS = 180_000L
+    private const val MAX_SETTLE_CAPTURES = 4
 
     fun capture(widthDp: Int, heightDp: Int, density: Float): ImageBitmap = runBlocking {
         val cacheDir = Files.createTempDirectory("marketing-maplibre")
@@ -86,7 +89,7 @@ internal object MapSnapshot {
                         ),
                         density = density,
                     )
-                withTimeout(CAPTURE_TIMEOUT_MS) { snapshotter.capture(request) }
+                withTimeout(CAPTURE_TIMEOUT_MS) { captureUntilStable(snapshotter, request) }
             } finally {
                 withContext(NonCancellable) {
                     snapshotter.close()
@@ -100,5 +103,19 @@ internal object MapSnapshot {
             }
             cacheDir.toFile().deleteRecursively()
         }
+    }
+
+    /**
+     * Label placement depends on the order tiles arrive, so a first capture can differ from the next by a few glyphs.
+     * Two consecutive matching frames mean placement has settled; a warm capture costs about 200 ms.
+     */
+    private suspend fun captureUntilStable(snapshotter: MapSnapshotter, request: MapSnapshotRequest): ImageBitmap {
+        var previous = snapshotter.capture(request)
+        repeat(MAX_SETTLE_CAPTURES - 1) {
+            val next = snapshotter.capture(request)
+            if (next.toPixelMap().buffer.contentEquals(previous.toPixelMap().buffer)) return next
+            previous = next
+        }
+        return previous
     }
 }

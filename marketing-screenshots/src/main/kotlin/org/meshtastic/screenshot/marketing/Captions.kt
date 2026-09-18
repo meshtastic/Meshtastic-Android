@@ -41,7 +41,7 @@ internal object Captions {
                 Caption("See everyone on your mesh", "Battery, signal, distance and hops for every node you can hear."),
             Shot.Map to Caption("Every node on the map", "Positions shared over the mesh, with no internet required."),
             Shot.NodeDetail to
-                Caption("Every node in detail", "Signal, battery, position, hardware and firmware at a glance."),
+                Caption("Every node in detail", "Signal, uptime, hops and security, one tap from the list."),
             Shot.Channels to
                 Caption(
                     "Share a channel with a QR code",

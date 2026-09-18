@@ -83,6 +83,9 @@ private const val INSET = 7f
 private const val BEZEL_ASPECT = (SCREEN_W + 2 * INSET) / (STATUS_H + SCREEN_H + 2 * INSET)
 private val BezelCorner = 34.dp
 
+// Tall enough for a two-line title plus a three-line description at the sizes above.
+private val CAPTION_BLOCK_HEIGHT = 232.dp
+
 /**
  * A captioned store frame: the headline and body copy across the top in the app's typography, then a phone bezel with a
  * drawn status bar and [screen] scaled inside it, sized so the whole phone fits above the bottom edge.
@@ -94,24 +97,30 @@ private fun StoreFrame(caption: Caption, screen: ImageBitmap) {
             modifier = Modifier.fillMaxSize().background(Background).padding(horizontal = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(36.dp))
-            Text(
-                text = caption.title,
-                style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold, lineHeight = 44.sp),
-                color = Color.White,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(14.dp))
-            Text(
-                text = caption.description,
-                style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, lineHeight = 27.sp),
-                color = Color.White.copy(alpha = 0.82f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 8.dp),
-            )
-            Spacer(Modifier.height(28.dp))
-            // The bezel takes whatever height the captions leave and derives its width from that, so a two-line
-            // title never pushes the phone off the bottom of the canvas.
+            // The caption block has a fixed height whatever the text wraps to, so the bezel below it is the same
+            // size at the same place in all five shots; a shorter caption centres within the block.
+            Box(modifier = Modifier.fillMaxWidth().height(CAPTION_BLOCK_HEIGHT), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = caption.title,
+                        style =
+                        MaterialTheme.typography.displaySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 44.sp,
+                        ),
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    Text(
+                        text = caption.description,
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, lineHeight = 27.sp),
+                        color = Color.White.copy(alpha = 0.82f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                    )
+                }
+            }
             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                 PhoneBezel(screen)
             }
