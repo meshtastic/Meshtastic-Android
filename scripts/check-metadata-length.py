@@ -30,6 +30,9 @@ METADATA_DIR = REPO_ROOT / "fastlane" / "metadata" / "android"
 LIMITS = {
     "short_description.txt": 80,
     "title.txt": 30,
+    # Play's "what's new" cap. A path key works because the glob below is
+    # rooted at the locale directory, not at a bare file name.
+    "changelogs/default.txt": 500,
 }
 
 # Running inside GitHub Actions enables ::error:: annotations on the PR.
