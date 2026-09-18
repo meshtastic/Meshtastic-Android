@@ -42,13 +42,17 @@ internal fun renderScreen(width: Int, height: Int, density: Float, content: @Com
         var image = scene.render(nanos)
         while (scene.hasInvalidations() && frames < MAX_FRAMES) {
             nanos += FRAME_NANOS
-            image = scene.render(nanos)
+            val next = scene.render(nanos)
+            // Each superseded frame is a native Skia image; the last one is owned by the returned bitmap.
+            image.close()
+            image = next
             frames++
         }
         image.toComposeImageBitmap()
     }
 
 internal fun ImageBitmap.writePng(file: File) {
-    val data = checkNotNull(Image.makeFromBitmap(asSkiaBitmap()).encodeToData(EncodedImageFormat.PNG))
-    file.writeBytes(data.bytes)
+    Image.makeFromBitmap(asSkiaBitmap()).use { image ->
+        checkNotNull(image.encodeToData(EncodedImageFormat.PNG)).use { data -> file.writeBytes(data.bytes) }
+    }
 }

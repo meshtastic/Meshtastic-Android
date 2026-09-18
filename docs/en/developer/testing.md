@@ -79,7 +79,7 @@ The store-listing screenshots (Play, F-Droid, IzzyOnDroid) are generated too, by
 ./gradlew :marketing-screenshots:updateMarketingScreenshots
 ```
 
-That writes `1_messages.png` … `5_channels.png` straight into `fastlane/metadata/android/en-US/images/phoneScreenshots/`, deterministically (two runs are byte-identical). Only `en-US` is generated (`-PmarketingLocales`, default `en-US`) and committed: everything under `fastlane/` is read straight from git by F-Droid and IzzyOnDroid, and the other locales are ~55 MB per regeneration, so those are produced in CI and pushed with `fastlane supply` instead. Captions live in `Captions.kt` in the module.
+That writes `1_messages.png` … `5_channels.png` straight into `fastlane/metadata/android/en-US/images/phoneScreenshots/`, deterministically (two runs are byte-identical). Only `en-US` is generated (`-PmarketingLocales`, default `en-US`) and committed: everything under `fastlane/` is read straight from git by F-Droid and IzzyOnDroid, and the other locales are ~55 MB per regeneration, so those are a follow-up - generated in CI and pushed with `fastlane supply`, never committed. Captions live in `Captions.kt` in the module.
 
 The map needs a Vulkan loader the JVM can find. On a stock Ubuntu nothing is required; in a Nix dev shell, which replaces `LD_LIBRARY_PATH` on entry, pass `-PmarketingLibraryPath=/usr/lib/x86_64-linux-gnu` (the system loader plus the GPU's ICD). No display is needed or used.
 

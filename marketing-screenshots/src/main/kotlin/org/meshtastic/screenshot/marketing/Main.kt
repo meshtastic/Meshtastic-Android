@@ -36,6 +36,7 @@ fun main(args: Array<String>) {
     require(args.size == 2) { "usage: <fastlane/metadata/android dir> <comma-separated locales>" }
     val metadataDir = File(args[0])
     val locales = args[1].split(',').map { it.trim() }.filter { it.isNotEmpty() }
+    require(locales.isNotEmpty()) { "at least one locale is required, got '${args[1]}'" }
 
     val t0 = System.nanoTime()
     val mapSnapshot = MapSnapshot.capture(MAP_WIDTH_DP, MAP_HEIGHT_DP, Phone.SCREEN_DENSITY)
