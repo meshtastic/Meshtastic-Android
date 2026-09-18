@@ -575,6 +575,21 @@ jobs:
             ${PREV:+-f previous_tag_name="$PREV"} \
             --jq '.body' > release-notes.md
 
+      # The generated notes are a list of PR titles - accurate, and not what a user reads.
+      # metainfo.xml already carries one hand-written paragraph per version, required by
+      # pull-request.yml on the VERSION_NAME_BASE bump, so reuse it rather than asking for
+      # the same sentence twice. When it is missing the notes gain a rendered warning
+      # instead of silence, and every release here is created as a draft, so that warning
+      # is seen before anyone publishes.
+      - name: Prepend release highlights
+        run: |
+          python3 scripts/release-highlights.py \
+            desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml \
+            config.properties \
+            release-notes.md
+          echo "--- release notes ---"
+          cat release-notes.md
+
       - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         with:
