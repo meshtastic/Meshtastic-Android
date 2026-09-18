@@ -89,7 +89,7 @@ ktor = "3.6.0"
 # Other
 aboutlibraries = "15.2.0"
 jserialcomm = "2.11.4"
-coil = "3.6.2"
+coil = "3.6.3"
 datadog-gradle = "1.31.0"
 dd-sdk-android = "3.14.0"
 detekt = "2.0.0-alpha.6"
