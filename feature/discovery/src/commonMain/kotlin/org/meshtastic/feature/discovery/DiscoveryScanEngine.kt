@@ -158,6 +158,9 @@ class DiscoveryScanEngine(
     private var tunedPrimaryChannel: Boolean = false
     private var sessionId: Long = 0
 
+    /** The radio [sessionId]'s row was written against. Identifies the session across per-device databases. */
+    private var sessionDeviceAddress: String? = null
+
     /** Nodes collected for the current preset dwell. Keyed by nodeNum. */
     private val collectedNodes = mutableMapOf<Long, CollectedNodeData>()
 
@@ -329,12 +332,14 @@ class DiscoveryScanEngine(
         if (!isScanPreparationCurrent(deviceAddress, sessionGeneration)) {
             discoveryDao.deleteSession(insertedSessionId)
             sessionId = 0L
+            sessionDeviceAddress = null
             originalLoRaConfig = null
             originalPrimaryChannel = null
             _scanState.value = DiscoveryScanState.Failed("Selected radio changed while preparing the scan")
             return
         }
         sessionId = insertedSessionId
+        sessionDeviceAddress = deviceAddress
         _currentSession.value = session.copy(id = sessionId)
         collectorRegistry.collector = this
         _scanState.value = DiscoveryScanState.Shifting(targets.first().label)
@@ -734,12 +739,18 @@ class DiscoveryScanEngine(
         if (sessionId == 0L) return
         mutex.withLock {
             if (currentDwellPersisted) return@withLock
+            val deviceAddress = sessionDeviceAddress
+            if (deviceAddress == null) {
+                Logger.w { "DiscoveryScanEngine: session $sessionId has no device address; skipping dwell persistence" }
+                return@withLock
+            }
             val result = if (collectedNodes.isEmpty()) emptyPresetResult() else presetResult()
             // One transaction, so a device/DB switch cannot land between the parent-session check and these writes.
-            // A null return means the session row is not in the active database and this dwell is unwritable.
-            if (discoveryDao.insertDwellIfSessionExists(result, discoveredNodeEntities()) == null) {
+            // A null return means this device's session row is not in the active database and the dwell is unwritable.
+            if (discoveryDao.insertDwellIfSessionExists(result, discoveredNodeEntities(), deviceAddress) == null) {
                 Logger.w {
-                    "DiscoveryScanEngine: session $sessionId is not in the active database; skipping dwell persistence"
+                    "DiscoveryScanEngine: session $sessionId for $deviceAddress is not in the active database; " +
+                        "skipping dwell persistence"
                 }
                 return@withLock
             }

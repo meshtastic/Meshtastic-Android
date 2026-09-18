@@ -150,13 +150,14 @@ private class FakeDiscoveryDao(private val delegate: SharedInMemoryDiscoveryDao 
     /**
      * The engine writes a dwell through this one call now. Delegation would forward it straight to the backing fake and
      * bypass [insertPresetResult]'s barrier hooks, so route it back through them here, and honour the parent check the
-     * real transaction performs.
+     * real transaction performs - including its device-address match, not the id alone.
      */
     override suspend fun insertDwellIfSessionExists(
         result: DiscoveryPresetResultEntity,
         nodes: List<DiscoveredNodeEntity>,
+        deviceAddress: String,
     ): Long? {
-        if (delegate.getSession(result.sessionId) == null) return null
+        if (delegate.countSessionsForDevice(result.sessionId, deviceAddress) == 0) return null
         val presetResultId = insertPresetResult(result)
         if (nodes.isNotEmpty()) {
             delegate.insertDiscoveredNodes(nodes.map { it.copy(presetResultId = presetResultId) })

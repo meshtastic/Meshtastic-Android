@@ -97,6 +97,9 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
     override suspend fun getSession(sessionId: Long): DiscoverySessionEntity? =
         stateLock.withLock { mutableSessions[sessionId] }
 
+    override suspend fun countSessionsForDevice(sessionId: Long, deviceAddress: String): Int =
+        stateLock.withLock { if (mutableSessions[sessionId]?.deviceAddress == deviceAddress) 1 else 0 }
+
     override suspend fun updateSessionCompletionStatus(sessionId: Long, status: String): Int {
         val updated =
             stateLock.withLock {
