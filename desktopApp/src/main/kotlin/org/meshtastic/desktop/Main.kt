@@ -52,8 +52,6 @@ import androidx.compose.ui.window.isTraySupported
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import co.touchlab.kermit.Logger
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import co.touchlab.kermit.platformLogWriter
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
@@ -69,6 +67,7 @@ import com.skydoves.snitcher.Snitcher
 import com.skydoves.snitcher.install
 import com.skydoves.snitcher.ui.SnitcherTraceWindow
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.decodeToSvgPainter
@@ -125,6 +124,7 @@ import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
 import java.awt.Desktop
 import java.util.Locale
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.seconds
 import coil3.util.Logger as CoilLogger
 
 /** Meshtastic Desktop — the first non-Android target for the shared KMP module graph. */
@@ -155,7 +155,7 @@ fun main(args: Array<String>) {
     installQuitHandler()
     // Before application {}: the handler must exist before the first window can throw. The default storage
     // directory is ~/.snitcher, shared by every Snitcher app on the machine, so keep our crash next to our data.
-    Snitcher.install(storageDirectory = System.getProperty("user.home") + "/.meshtastic", isDebuggable = true)
+    with(Snitcher) { install(storageDirectory = System.getProperty("user.home") + "/.meshtastic", isDebuggable = true) }
     // exitProcessOnExit = false is what makes the shutdown block below reachable at all: with the default (true),
     // application() calls System.exit(0) itself as soon as the Compose loop ends, and control never returns here.
     // Do not "simplify" this back to a bare application {} — that silently disables every teardown that follows.
