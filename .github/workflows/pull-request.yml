@@ -305,6 +305,10 @@ jobs:
         run: ./scripts/verify-abi-parity-selftest.sh
       - name: Validate store listing metadata lengths
         run: python3 scripts/check-metadata-length.py
+      # default.txt is rendered from metainfo.xml; a PR that edits one without the
+      # other ships a listing that no longer says what the release did.
+      - name: Check Play what's-new matches AppStream
+        run: python3 scripts/sync-play-changelog.py --check
       # Compose Multiplatform does not strip Android-style \" / \' escapes, so a
       # backslash written before a quote renders literally in the UI (PR #6357).
       # Guards the English source strings; locale mirrors are cleaned upstream by

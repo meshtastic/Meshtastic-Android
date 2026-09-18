@@ -3,8 +3,8 @@
 
 metainfo.xml already carries one hand-written paragraph per version, required by
 pull-request.yml on the VERSION_NAME_BASE bump. This renders that same paragraph
-into fastlane/metadata/android/en-US/changelogs/default.txt so the store listing
-says what the release did, instead of pointing at a URL.
+into fastlane/metadata/android/en-US/changelogs/default.txt, followed by a link to
+the full release notes, so the store listing says what the release did.
 
 default.txt rather than a <versionCode>.txt: it is the file crowdin.yml already
 maps, so translations continue in place instead of starting from zero on a new
