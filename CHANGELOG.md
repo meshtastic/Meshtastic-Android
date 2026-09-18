@@ -1,7 +1,8 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-The `[Unreleased]` section is automatically updated on every push to `main`.
+The `[Unreleased]` section is refreshed by running the `Update Changelog` workflow by hand;
+a production release stamps its own section here automatically.
 See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases) for the full history.
 
 <!-- UNRELEASED_START -->

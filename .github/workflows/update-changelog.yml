@@ -1,11 +1,9 @@
 name: Update Changelog
 
+# Manual only: promote.yml stamps the released section at release time on its
+# own. Dispatch this to refresh the [Unreleased] section between releases.
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'CHANGELOG.md'
+  workflow_dispatch:
 
 permissions:
   contents: write
