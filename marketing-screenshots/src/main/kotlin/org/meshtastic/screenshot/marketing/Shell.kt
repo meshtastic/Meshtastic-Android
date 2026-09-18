@@ -53,6 +53,8 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.ui.component.AnimatedConnectionsNavIcon
 import org.meshtastic.core.ui.navigation.icon
+import org.meshtastic.screenshot.marketing.resources.Res
+import org.meshtastic.screenshot.marketing.resources.marketing_section_header
 
 /**
  * The app's navigation shell, from the same [NavigationSuiteScaffold], destinations and icons as
@@ -169,7 +171,7 @@ internal fun SectionHeader(title: String, count: Int) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "$title ($count)",
+            text = stringResource(Res.string.marketing_section_header, title, count),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.weight(1f),

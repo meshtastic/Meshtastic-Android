@@ -69,6 +69,8 @@ import org.meshtastic.core.ui.util.rememberQrCodePainter
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapZoomControls
 import org.meshtastic.proto.Config
+import org.meshtastic.screenshot.marketing.resources.marketing_map_attribution
+import org.meshtastic.screenshot.marketing.resources.Res as MarketingRes
 
 /** Every store screenshot is the dark theme, matching the live listing; dynamic color would follow the host. */
 @Composable
@@ -127,7 +129,7 @@ internal fun MapScreen(mesh: SampleMesh, snapshot: ImageBitmap?, onMapArea: (Int
                         shape = MaterialTheme.shapes.small,
                     ) {
                         Text(
-                            text = "OpenFreeMap © OpenMapTiles Data from OpenStreetMap",
+                            text = stringResource(MarketingRes.string.marketing_map_attribution),
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Black,

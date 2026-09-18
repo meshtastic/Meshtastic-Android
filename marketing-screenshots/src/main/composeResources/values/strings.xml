@@ -15,6 +15,7 @@
     <string name="marketing_caption_node_detail_title">Every node in detail</string>
     <string name="marketing_caption_nodes_description">Battery, signal, distance and hops for every node you can hear.</string>
     <string name="marketing_caption_nodes_title">See everyone on your mesh</string>
+    <string name="marketing_map_attribution">OpenFreeMap © OpenMapTiles Data from OpenStreetMap</string>
     <string name="marketing_msg_crossing_low">Water at the crossing is low, safe to ford</string>
     <string name="marketing_msg_heading_up">Heading up from the trailhead now, 4 of us</string>
     <string name="marketing_msg_lunch_lookout">Lunch at the lookout, back on the air in 30</string>
@@ -28,4 +29,5 @@
     <string name="marketing_preview_spare_battery">Got the spare battery in the truck if anyone needs it</string>
     <string name="marketing_preview_trail_crew">Trail crew meets at the north gate at 8</string>
     <string name="marketing_preview_weather_thanks">Thanks for the weather heads-up</string>
+    <string name="marketing_section_header">%1$s (%2$d)</string>
 </resources>
