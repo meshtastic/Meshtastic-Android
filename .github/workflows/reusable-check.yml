@@ -71,7 +71,7 @@ jobs:
 
   # ── Lint & Static Analysis ──────────────────────────────────────────
   lint-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -110,7 +110,7 @@ jobs:
 
   # ── Screenshot Test Validation ──────────────────────────────────────
   screenshot-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -159,7 +159,7 @@ jobs:
   # Only runs in the merge queue (not PRs, to keep PR feedback fast; not main pushes,
   # which are the same merge commit the queue just verified).
   rb-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -205,7 +205,7 @@ jobs:
   #                  core:barcode, feature:widget)
   #                  + :core:database + :core:network
   test-shards:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -457,7 +457,7 @@ jobs:
   # ── Android Build ────────────────────────────────────────────────────
   # Also generates the dependency graph — assembling both flavors resolves the widest set.
   android-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     # No permissions block on purpose: inherits the caller's. main grants contents: write
     # (graph submit); PRs grant read (upload only).
     timeout-minutes: 60

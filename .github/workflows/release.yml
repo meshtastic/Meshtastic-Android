@@ -85,7 +85,7 @@ permissions:
 
 jobs:
   prepare-build-info:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     outputs:
       APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
@@ -127,7 +127,7 @@ jobs:
         shell: bash
 
   release-google:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     needs: [prepare-build-info]
     steps:
@@ -211,7 +211,7 @@ jobs:
           subject-path: androidApp/build/outputs/apk/google/release/*.apk
 
   release-fdroid:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     needs: [prepare-build-info]
     steps:
@@ -485,7 +485,7 @@ jobs:
 
   release-flatpak-src:
     if: ${{ inputs.build_flatpak_src }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     needs: [create-flatpak-src]
     steps:
@@ -523,7 +523,7 @@ jobs:
 
   github-release:
     if: ${{ !cancelled() && !failure() }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     needs:
       - prepare-build-info

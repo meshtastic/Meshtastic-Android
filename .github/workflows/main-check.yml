@@ -52,7 +52,7 @@ jobs:
     # Android APKs may still have built fine — attempt the snapshot regardless. If the
     # APK build itself failed, the artifact download below fails and this job goes red.
     if: github.repository == 'meshtastic/Meshtastic-Android' && !cancelled()
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     # ~1.5 GB of assets, uploaded one at a time with up to 3 attempts each (see "Upload
     # snapshot assets"). Sized for the worst case that still succeeds -- every asset failing
     # twice before landing -- which is 45 uploads plus 7m30s of backoff. The 2026-08-26

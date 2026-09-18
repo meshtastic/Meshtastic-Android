@@ -35,7 +35,7 @@ jobs:
     # Lightweight, but it fetches a Node toolchain, so it takes the ARM tier rather than
     # ubuntu-slim. No workflow currently runs Node; ubuntu-slim's suitability for setup-node
     # is untested and this is not the place to find out.
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
 
     steps:
