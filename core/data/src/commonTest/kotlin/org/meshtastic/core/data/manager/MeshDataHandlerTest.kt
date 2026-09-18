@@ -199,7 +199,7 @@ class MeshDataHandlerTest {
         // Stub commonly accessed properties to avoid NPE from autofill
         every { nodeManager.getNodeById(any()) } returns null
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
         // GeofenceMonitor collects this on init; stub it so the launched collector doesn't NPE on the test scope.
         every { packetRepository.getWaypoints() } returns emptyFlow()
         everySuspend { packetRepository.findPacketsWithId(any()) } returns emptyList()
@@ -213,7 +213,7 @@ class MeshDataHandlerTest {
 
     @Test
     fun `handleReceivedData returns early when dataMapper returns null`() {
-        val packet = MeshPacket()
+        val packet = MeshPacket.Builder().build()
         every { dataMapper.toDataPacket(packet) } returns null
 
         handler.handleReceivedData(packet, 123)
@@ -224,12 +224,26 @@ class MeshDataHandlerTest {
     @Test
     fun `handleReceivedData does not broadcast for position from local node`() {
         val myNodeNum = 123
-        val position = Position(latitude_i = 450000000, longitude_i = 900000000)
+        val position =
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 450000000
+                    wb.longitude_i = 900000000
+                }
+                .build()
         val packet =
-            MeshPacket(
-                from = myNodeNum,
-                decoded = Data(portnum = PortNum.POSITION_APP, payload = position.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = myNodeNum
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.POSITION_APP
+                                wb.payload = position.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = NodeAddress.numToDefaultId(myNodeNum),
@@ -249,7 +263,13 @@ class MeshDataHandlerTest {
     fun `handleReceivedData broadcasts for remote packets`() {
         val myNodeNum = 123
         val remoteNum = 456
-        val packet = MeshPacket(from = remoteNum, decoded = Data(portnum = PortNum.PRIVATE_APP))
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = remoteNum
+                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.PRIVATE_APP }.build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = NodeAddress.numToDefaultId(remoteNum),
@@ -264,7 +284,13 @@ class MeshDataHandlerTest {
 
     @Test
     fun `handleReceivedData tracks analytics`() {
-        val packet = MeshPacket(from = 456, decoded = Data(portnum = PortNum.PRIVATE_APP))
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.PRIVATE_APP }.build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!other",
@@ -285,12 +311,26 @@ class MeshDataHandlerTest {
     fun `position packet delegates to nodeManager`() {
         val myNodeNum = 123
         val remoteNum = 456
-        val position = Position(latitude_i = 450000000, longitude_i = 900000000)
+        val position =
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 450000000
+                    wb.longitude_i = 900000000
+                }
+                .build()
         val packet =
-            MeshPacket(
-                from = remoteNum,
-                decoded = Data(portnum = PortNum.POSITION_APP, payload = position.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = remoteNum
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.POSITION_APP
+                                wb.payload = position.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!remote",
@@ -312,12 +352,27 @@ class MeshDataHandlerTest {
     fun `nodeinfo packet from remote delegates to handleReceivedUser`() {
         val myNodeNum = 123
         val remoteNum = 456
-        val user = User(id = "!remote", long_name = "Remote", short_name = "R")
+        val user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!remote"
+                    wb.long_name = "Remote"
+                    wb.short_name = "R"
+                }
+                .build()
         val packet =
-            MeshPacket(
-                from = remoteNum,
-                decoded = Data(portnum = PortNum.NODEINFO_APP, payload = user.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = remoteNum
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.NODEINFO_APP
+                                wb.payload = user.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!remote",
@@ -335,12 +390,27 @@ class MeshDataHandlerTest {
     @Test
     fun `nodeinfo packet from local node is ignored`() {
         val myNodeNum = 123
-        val user = User(id = "!local", long_name = "Local", short_name = "L")
+        val user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!local"
+                    wb.long_name = "Local"
+                    wb.short_name = "L"
+                }
+                .build()
         val packet =
-            MeshPacket(
-                from = myNodeNum,
-                decoded = Data(portnum = PortNum.NODEINFO_APP, payload = user.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = myNodeNum
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.NODEINFO_APP
+                                wb.payload = user.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!local",
@@ -362,12 +432,27 @@ class MeshDataHandlerTest {
     @Test
     fun `paxcounter packet delegates to nodeManager`() {
         val remoteNum = 456
-        val pax = Paxcount(wifi = 10, ble = 5, uptime = 1000)
+        val pax =
+            Paxcount.Builder()
+                .also { wb ->
+                    wb.wifi = 10
+                    wb.ble = 5
+                    wb.uptime = 1000
+                }
+                .build()
         val packet =
-            MeshPacket(
-                from = remoteNum,
-                decoded = Data(portnum = PortNum.PAXCOUNTER_APP, payload = pax.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = remoteNum
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.PAXCOUNTER_APP
+                                wb.payload = pax.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!remote",
@@ -387,10 +472,18 @@ class MeshDataHandlerTest {
     @Test
     fun `traceroute packet delegates to tracerouteHandler and suppresses broadcast`() {
         val packet =
-            MeshPacket(
-                from = 456,
-                decoded = Data(portnum = PortNum.TRACEROUTE_APP, payload = byteArrayOf().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TRACEROUTE_APP
+                                wb.payload = byteArrayOf().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!remote",
@@ -409,12 +502,20 @@ class MeshDataHandlerTest {
 
     @Test
     fun `neighborinfo packet delegates to neighborInfoHandler and broadcasts`() {
-        val ni = NeighborInfo(node_id = 456)
+        val ni = NeighborInfo.Builder().also { wb -> wb.node_id = 456 }.build()
         val packet =
-            MeshPacket(
-                from = 456,
-                decoded = Data(portnum = PortNum.NEIGHBORINFO_APP, payload = ni.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.NEIGHBORINFO_APP
+                                wb.payload = ni.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!remote",
@@ -433,12 +534,26 @@ class MeshDataHandlerTest {
 
     @Test
     fun `mesh beacon with a join offer is recorded as an invitation`() {
-        val beacon = MeshBeacon(message = "Join us", offer_channel = ChannelSettings(name = "PartyNet"))
+        val beacon =
+            MeshBeacon.Builder()
+                .also { wb ->
+                    wb.message = "Join us"
+                    wb.offer_channel = ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build()
+                }
+                .build()
         val packet =
-            MeshPacket(
-                from = 456,
-                decoded = Data(portnum = PortNum.MESH_BEACON_APP, payload = beacon.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.MESH_BEACON_APP
+                                wb.payload = beacon.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         every { dataMapper.toDataPacket(packet) } returns
             DataPacket(
                 from = "!remote",
@@ -456,12 +571,23 @@ class MeshDataHandlerTest {
 
     @Test
     fun `mesh beacon without a join offer is ignored`() {
-        val beacon = MeshBeacon(message = "Just saying hi") // no offer_channel → not actionable
+        val beacon =
+            MeshBeacon.Builder()
+                .also { wb -> wb.message = "Just saying hi" }
+                .build() // no offer_channel → not actionable
         val packet =
-            MeshPacket(
-                from = 456,
-                decoded = Data(portnum = PortNum.MESH_BEACON_APP, payload = beacon.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.MESH_BEACON_APP
+                                wb.payload = beacon.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         every { dataMapper.toDataPacket(packet) } returns
             DataPacket(
                 from = "!remote",
@@ -477,12 +603,27 @@ class MeshDataHandlerTest {
     @Test
     fun `our own mesh beacon is ignored`() {
         // Spec FR-001: ignore beacons from the scanning node itself (else a listen+broadcast node self-notifies).
-        val beacon = MeshBeacon(message = "Join us", offer_channel = ChannelSettings(name = "PartyNet"))
+        val beacon =
+            MeshBeacon.Builder()
+                .also { wb ->
+                    wb.message = "Join us"
+                    wb.offer_channel = ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build()
+                }
+                .build()
         val packet =
-            MeshPacket(
-                from = 123, // == myNodeNum below
-                decoded = Data(portnum = PortNum.MESH_BEACON_APP, payload = beacon.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 123
+                    // == myNodeNum below
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.MESH_BEACON_APP
+                                wb.payload = beacon.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         every { dataMapper.toDataPacket(packet) } returns
             DataPacket(from = "!self", bytes = beacon.encode().toByteString(), dataType = PortNum.MESH_BEACON_APP.value)
 
@@ -496,22 +637,40 @@ class MeshDataHandlerTest {
         // design#140 behavior 10: the radio already has "PartyNet" configured, so this offer is redundant.
         every { radioConfigRepository.channelSetFlow } returns
             MutableStateFlow(
-                ChannelSet(
-                    settings = listOf(ChannelSettings(name = "PartyNet")),
-                    lora_config = Config.LoRaConfig(use_preset = true, modem_preset = ModemPreset.LONG_FAST),
-                ),
+                ChannelSet.Builder()
+                    .also { wb ->
+                        wb.settings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build())
+                        wb.lora_config =
+                            Config.LoRaConfig.Builder()
+                                .also { wb ->
+                                    wb.use_preset = true
+                                    wb.modem_preset = ModemPreset.LONG_FAST
+                                }
+                                .build()
+                    }
+                    .build(),
             )
         val beacon =
-            MeshBeacon(
-                message = "Join us",
-                offer_channel = ChannelSettings(name = "PartyNet"),
-                offer_preset = ModemPreset.LONG_FAST,
-            )
+            MeshBeacon.Builder()
+                .also { wb ->
+                    wb.message = "Join us"
+                    wb.offer_channel = ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build()
+                    wb.offer_preset = ModemPreset.LONG_FAST
+                }
+                .build()
         val packet =
-            MeshPacket(
-                from = 456,
-                decoded = Data(portnum = PortNum.MESH_BEACON_APP, payload = beacon.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.MESH_BEACON_APP
+                                wb.payload = beacon.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         every { dataMapper.toDataPacket(packet) } returns
             DataPacket(
                 from = "!remote",
@@ -532,10 +691,18 @@ class MeshDataHandlerTest {
     @Test
     fun `store forward packet delegates to storeForwardHandler`() {
         val packet =
-            MeshPacket(
-                from = 456,
-                decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = byteArrayOf().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.STORE_FORWARD_APP
+                                wb.payload = byteArrayOf().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!remote",
@@ -553,13 +720,21 @@ class MeshDataHandlerTest {
     // --- Routing/ACK-NAK handling ---
 
     private fun routingPacket(error: Routing.Error): MeshPacket {
-        val routing = Routing(error_reason = error)
+        val routing = Routing.Builder().also { wb -> wb.error_reason = error }.build()
         val packet =
-            MeshPacket(
-                from = 456,
-                decoded =
-                Data(portnum = PortNum.ROUTING_APP, payload = routing.encode().toByteString(), request_id = 99),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.ROUTING_APP
+                                wb.payload = routing.encode().toByteString()
+                                wb.request_id = 99
+                            }
+                            .build()
+                }
+                .build()
         every { dataMapper.toDataPacket(packet) } returns
             DataPacket(
                 from = "!remote",
@@ -590,13 +765,21 @@ class MeshDataHandlerTest {
 
     @Test
     fun `routing ack from a retired generation cannot update the replacement database`() = testScope.runTest {
-        val routing = Routing(error_reason = Routing.Error.NONE)
+        val routing = Routing.Builder().also { wb -> wb.error_reason = Routing.Error.NONE }.build()
         val packet =
-            MeshPacket(
-                from = 456,
-                decoded =
-                Data(portnum = PortNum.ROUTING_APP, payload = routing.encode().toByteString(), request_id = 99),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.ROUTING_APP
+                                wb.payload = routing.encode().toByteString()
+                                wb.request_id = 99
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!remote",
@@ -619,13 +802,21 @@ class MeshDataHandlerTest {
 
     @Test
     fun `routing packet always broadcasts`() {
-        val routing = Routing(error_reason = Routing.Error.NONE)
+        val routing = Routing.Builder().also { wb -> wb.error_reason = Routing.Error.NONE }.build()
         val packet =
-            MeshPacket(
-                from = 456,
-                decoded =
-                Data(portnum = PortNum.ROUTING_APP, payload = routing.encode().toByteString(), request_id = 99),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.ROUTING_APP
+                                wb.payload = routing.encode().toByteString()
+                                wb.request_id = 99
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!remote",
@@ -644,15 +835,31 @@ class MeshDataHandlerTest {
     @Test
     fun `telemetry packet delegates to telemetryHandler`() {
         val telemetry =
-            Telemetry(
-                time = 2000,
-                device_metrics = org.meshtastic.proto.DeviceMetrics(battery_level = 80, voltage = 4.0f),
-            )
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 2000
+                    wb.device_metrics =
+                        org.meshtastic.proto.DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 80
+                                wb.voltage = 4.0f
+                            }
+                            .build()
+                }
+                .build()
         val packet =
-            MeshPacket(
-                from = 456,
-                decoded = Data(portnum = PortNum.TELEMETRY_APP, payload = telemetry.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TELEMETRY_APP
+                                wb.payload = telemetry.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!remote",
@@ -672,15 +879,31 @@ class MeshDataHandlerTest {
     fun `telemetry from local node delegates to telemetryHandler`() {
         val myNodeNum = 123
         val telemetry =
-            Telemetry(
-                time = 2000,
-                device_metrics = org.meshtastic.proto.DeviceMetrics(battery_level = 80, voltage = 4.0f),
-            )
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 2000
+                    wb.device_metrics =
+                        org.meshtastic.proto.DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 80
+                                wb.voltage = 4.0f
+                            }
+                            .build()
+                }
+                .build()
         val packet =
-            MeshPacket(
-                from = myNodeNum,
-                decoded = Data(portnum = PortNum.TELEMETRY_APP, payload = telemetry.encode().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = myNodeNum
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TELEMETRY_APP
+                                wb.payload = telemetry.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!local",
@@ -701,12 +924,19 @@ class MeshDataHandlerTest {
     @Test
     fun `text message is persisted via rememberDataPacket`() = testScope.runTest {
         val packet =
-            MeshPacket(
-                id = 42,
-                from = 456,
-                decoded =
-                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 42
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = "hello".encodeToByteArray().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 id = 42,
@@ -721,7 +951,17 @@ class MeshDataHandlerTest {
         every { messageFilter.shouldFilter(any(), any()) } returns false
         // Provide sender node so getSenderName() doesn't fall back to getString (requires Skiko)
         every { nodeManager.getNodeById("!remote") } returns
-            Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU"))
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!remote"
+                        wb.long_name = "Remote User"
+                        wb.short_name = "RU"
+                    }
+                    .build(),
+            )
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -732,12 +972,19 @@ class MeshDataHandlerTest {
     @Test
     fun `text persistence from a retired session is rejected before database access`() = testScope.runTest {
         val packet =
-            MeshPacket(
-                id = 45,
-                from = 456,
-                decoded =
-                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "late".encodeToByteArray().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 45
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = "late".encodeToByteArray().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 id = 45,
@@ -759,12 +1006,19 @@ class MeshDataHandlerTest {
     @Test
     fun `duplicate text message is not inserted again`() = testScope.runTest {
         val packet =
-            MeshPacket(
-                id = 42,
-                from = 456,
-                decoded =
-                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 42
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = "hello".encodeToByteArray().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 id = 42,
@@ -788,12 +1042,19 @@ class MeshDataHandlerTest {
     @Test
     fun `same packet id from a different sender is persisted`() = testScope.runTest {
         val packet =
-            MeshPacket(
-                id = 42,
-                from = 789,
-                decoded =
-                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "second".encodeToByteArray().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 42
+                    wb.from = 789
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = "second".encodeToByteArray().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val existing =
             DataPacket(
                 id = 42,
@@ -830,18 +1091,22 @@ class MeshDataHandlerTest {
     fun `text with reply_id and emoji is treated as reaction`() = testScope.runTest {
         val emojiBytes = "👍".encodeToByteArray()
         val packet =
-            MeshPacket(
-                id = 99,
-                from = 456,
-                to = 123,
-                decoded =
-                Data(
-                    portnum = PortNum.TEXT_MESSAGE_APP,
-                    payload = emojiBytes.toByteString(),
-                    reply_id = 42,
-                    emoji = 1,
-                ),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 99
+                    wb.from = 456
+                    wb.to = 123
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emojiBytes.toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 id = 99,
@@ -853,8 +1118,8 @@ class MeshDataHandlerTest {
         every { dataMapper.toDataPacket(packet) } returns dataPacket
         every { nodeManager.nodeDBbyNodeNum } returns
             mapOf(
-                456 to Node(num = 456, user = User(id = "!remote")),
-                123 to Node(num = 123, user = User(id = "!local")),
+                456 to Node(num = 456, user = User.Builder().also { wb -> wb.id = "!remote" }.build()),
+                123 to Node(num = 123, user = User.Builder().also { wb -> wb.id = "!local" }.build()),
             )
         every { nodeManager.toNodeID(456) } returns "!remote"
         every { nodeManager.toNodeID(123) } returns "!local"
@@ -872,20 +1137,24 @@ class MeshDataHandlerTest {
     fun `PKI reaction persists normalized channel and finds its notification parent`() = testScope.runTest {
         val emoji = "+1"
         val packet =
-            MeshPacket(
-                id = 99,
-                from = 456,
-                to = 123,
-                channel = 0,
-                pki_encrypted = true,
-                decoded =
-                Data(
-                    portnum = PortNum.TEXT_MESSAGE_APP,
-                    payload = emoji.encodeToByteArray().toByteString(),
-                    reply_id = 42,
-                    emoji = 1,
-                ),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 99
+                    wb.from = 456
+                    wb.to = 123
+                    wb.channel = 0
+                    wb.pki_encrypted = true
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emoji.encodeToByteArray().toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 id = 99,
@@ -910,14 +1179,33 @@ class MeshDataHandlerTest {
         every { dataMapper.toDataPacket(packet) } returns dataPacket
         every { nodeManager.nodeDBbyNodeNum } returns
             mapOf(
-                456 to Node(num = 456, user = User(id = "!remote", long_name = "Remote User")),
-                123 to Node(num = 123, user = User(id = NodeAddress.ID_LOCAL)),
+                456 to
+                    Node(
+                        num = 456,
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!remote"
+                                wb.long_name = "Remote User"
+                            }
+                            .build(),
+                    ),
+                123 to Node(num = 123, user = User.Builder().also { wb -> wb.id = NodeAddress.ID_LOCAL }.build()),
             )
         every { nodeManager.toNodeID(456) } returns "!remote"
         every { nodeManager.toNodeID(123) } returns NodeAddress.ID_LOCAL
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
         every { nodeManager.getNodeById("!remote") } returns
-            Node(num = 456, user = User(id = "!remote", long_name = "Remote User"))
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!remote"
+                        wb.long_name = "Remote User"
+                    }
+                    .build(),
+            )
         everySuspend { packetRepository.findReactionsWithId(99) } returns emptyList()
         everySuspend { packetRepository.findPacketsWithId(42) } returns listOf(otherConversationParent, parent)
         everySuspend { packetRepository.getContactSettings("8!remote") } returns
@@ -947,18 +1235,22 @@ class MeshDataHandlerTest {
     fun `same reaction packet id from a different sender is persisted`() = testScope.runTest {
         val emojiBytes = "ðŸ‘".encodeToByteArray()
         val packet =
-            MeshPacket(
-                id = 99,
-                from = 456,
-                to = 123,
-                decoded =
-                Data(
-                    portnum = PortNum.TEXT_MESSAGE_APP,
-                    payload = emojiBytes.toByteString(),
-                    reply_id = 42,
-                    emoji = 1,
-                ),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 99
+                    wb.from = 456
+                    wb.to = 123
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emojiBytes.toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 id = 99,
@@ -970,7 +1262,7 @@ class MeshDataHandlerTest {
         val existing =
             Reaction(
                 replyId = 42,
-                user = User(id = "!other"),
+                user = User.Builder().also { wb -> wb.id = "!other" }.build(),
                 emoji = "ðŸ‘",
                 timestamp = 1L,
                 snr = null,
@@ -981,8 +1273,8 @@ class MeshDataHandlerTest {
         every { dataMapper.toDataPacket(packet) } returns dataPacket
         every { nodeManager.nodeDBbyNodeNum } returns
             mapOf(
-                456 to Node(num = 456, user = User(id = "!remote")),
-                123 to Node(num = 123, user = User(id = "!local")),
+                456 to Node(num = 456, user = User.Builder().also { wb -> wb.id = "!remote" }.build()),
+                123 to Node(num = 123, user = User.Builder().also { wb -> wb.id = "!local" }.build()),
             )
         every { nodeManager.toNodeID(456) } returns "!remote"
         every { nodeManager.toNodeID(123) } returns "!local"
@@ -1002,12 +1294,19 @@ class MeshDataHandlerTest {
     @Test
     fun `range test packet is remembered as text message type`() = testScope.runTest {
         val packet =
-            MeshPacket(
-                id = 55,
-                from = 456,
-                decoded =
-                Data(portnum = PortNum.RANGE_TEST_APP, payload = "test".encodeToByteArray().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 55
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.RANGE_TEST_APP
+                                wb.payload = "test".encodeToByteArray().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 id = 55,
@@ -1021,7 +1320,17 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
         every { messageFilter.shouldFilter(any(), any()) } returns false
         every { nodeManager.getNodeById("!remote") } returns
-            Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU"))
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!remote"
+                        wb.long_name = "Remote User"
+                        wb.short_name = "RU"
+                    }
+                    .build(),
+            )
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -1034,9 +1343,23 @@ class MeshDataHandlerTest {
 
     @Test
     fun `admin message delegates to adminPacketHandler`() {
-        val admin = org.meshtastic.proto.AdminMessage(session_passkey = okio.ByteString.of(1, 2, 3))
+        val admin =
+            org.meshtastic.proto.AdminMessage.Builder()
+                .also { wb -> wb.session_passkey = okio.ByteString.of(1, 2, 3) }
+                .build()
         val packet =
-            MeshPacket(from = 123, decoded = Data(portnum = PortNum.ADMIN_APP, payload = admin.encode().toByteString()))
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 123
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.ADMIN_APP
+                                wb.payload = admin.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 from = "!local",
@@ -1056,15 +1379,19 @@ class MeshDataHandlerTest {
     @Test
     fun `filtered message is inserted with filtered flag`() = testScope.runTest {
         val packet =
-            MeshPacket(
-                id = 77,
-                from = 456,
-                decoded =
-                Data(
-                    portnum = PortNum.TEXT_MESSAGE_APP,
-                    payload = "spam content".encodeToByteArray().toByteString(),
-                ),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 77
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = "spam content".encodeToByteArray().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 id = 77,
@@ -1089,12 +1416,19 @@ class MeshDataHandlerTest {
     @Test
     fun `message from ignored node is filtered`() = testScope.runTest {
         val packet =
-            MeshPacket(
-                id = 88,
-                from = 456,
-                decoded =
-                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 88
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = "hello".encodeToByteArray().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 id = 88,
@@ -1106,7 +1440,7 @@ class MeshDataHandlerTest {
         every { dataMapper.toDataPacket(packet) } returns dataPacket
         everySuspend { packetRepository.findPacketsWithId(88) } returns emptyList()
         every { nodeManager.getNodeById("!remote") } returns
-            Node(num = 456, user = User(id = "!remote"), isIgnored = true)
+            Node(num = 456, user = User.Builder().also { wb -> wb.id = "!remote" }.build(), isIgnored = true)
         everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
 
         handler.handleReceivedData(packet, 123)
@@ -1119,12 +1453,19 @@ class MeshDataHandlerTest {
 
     private val myId = "!abcd1234"
 
-    private fun mentionPacket() = MeshPacket(
-        id = 101,
-        from = 456,
-        decoded =
-        Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hey @$myId".encodeToByteArray().toByteString()),
-    )
+    private fun mentionPacket() = MeshPacket.Builder()
+        .also { wb ->
+            wb.id = 101
+            wb.from = 456
+            wb.decoded =
+                Data.Builder()
+                    .also { wb ->
+                        wb.portnum = PortNum.TEXT_MESSAGE_APP
+                        wb.payload = "hey @$myId".encodeToByteArray().toByteString()
+                    }
+                    .build()
+        }
+        .build()
 
     private fun mentionDataPacket() = DataPacket(
         id = 101,
@@ -1144,7 +1485,17 @@ class MeshDataHandlerTest {
         every { nodeManager.getMyId() } returns myId
         // Node mute is authoritative: a mention must NOT break through it.
         every { nodeManager.getNodeById("!remote") } returns
-            Node(num = 456, user = User(id = "!remote", long_name = "Remote User"), isMuted = true)
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!remote"
+                        wb.long_name = "Remote User"
+                    }
+                    .build(),
+                isMuted = true,
+            )
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -1165,7 +1516,16 @@ class MeshDataHandlerTest {
         every { messageFilter.shouldFilter(any(), any()) } returns false
         every { nodeManager.getMyId() } returns myId
         every { nodeManager.getNodeById("!remote") } returns
-            Node(num = 456, user = User(id = "!remote", long_name = "Remote User"))
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!remote"
+                        wb.long_name = "Remote User"
+                    }
+                    .build(),
+            )
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -1187,7 +1547,16 @@ class MeshDataHandlerTest {
         every { messageFilter.shouldFilter(any(), any()) } returns false
         every { nodeManager.getMyId() } returns myId
         every { nodeManager.getNodeById("!remote") } returns
-            Node(num = 456, user = User(id = "!remote", long_name = "Remote User"))
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!remote"
+                        wb.long_name = "Remote User"
+                    }
+                    .build(),
+            )
     }
 
     @Test
@@ -1243,7 +1612,19 @@ class MeshDataHandlerTest {
     private fun waypointPacket(txId: Int, from: Int, waypoint: Waypoint): MeshPacket {
         val payload = waypoint.encode().toByteString()
         val packet =
-            MeshPacket(id = txId, from = from, decoded = Data(portnum = PortNum.WAYPOINT_APP, payload = payload))
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = txId
+                    wb.from = from
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.WAYPOINT_APP
+                                wb.payload = payload
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket =
             DataPacket(
                 id = txId,
@@ -1259,7 +1640,17 @@ class MeshDataHandlerTest {
     /** Persist a single stored waypoint (via the getWaypoints firehose) so handleWaypoint can read its owner. */
     private fun storeWaypoint(id: Int, lockedTo: Int) {
         val stored =
-            DataPacket(to = NodeAddress.ID_BROADCAST, channel = 0, waypoint = Waypoint(id = id, locked_to = lockedTo))
+            DataPacket(
+                to = NodeAddress.ID_BROADCAST,
+                channel = 0,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = id
+                        wb.locked_to = lockedTo
+                    }
+                    .build(),
+            )
         every { packetRepository.getWaypoints() } returns flowOf(listOf(stored))
     }
 
@@ -1274,7 +1665,18 @@ class MeshDataHandlerTest {
         storeWaypoint(id = 42, lockedTo = 111)
         // Mallory (999) replays waypoint 42 with locked_to = 0 (unlock). The inbound check passes, so only the
         // stored-owner check can drop it.
-        val packet = waypointPacket(txId = 500, from = 999, waypoint = Waypoint(id = 42, locked_to = 0))
+        val packet =
+            waypointPacket(
+                txId = 500,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.locked_to = 0
+                    }
+                    .build(),
+            )
         stubWaypointPersistDependencies(500)
 
         handler.handleReceivedData(packet, 123)
@@ -1288,7 +1690,18 @@ class MeshDataHandlerTest {
         storeWaypoint(id = 42, lockedTo = 111)
         // Mallory (999) locks waypoint 42 to herself. The inbound check passes (locked_to == from), so only the
         // stored-owner check can catch this.
-        val packet = waypointPacket(txId = 501, from = 999, waypoint = Waypoint(id = 42, locked_to = 999))
+        val packet =
+            waypointPacket(
+                txId = 501,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.locked_to = 999
+                    }
+                    .build(),
+            )
         stubWaypointPersistDependencies(501)
 
         handler.handleReceivedData(packet, 123)
@@ -1300,7 +1713,18 @@ class MeshDataHandlerTest {
     @Test
     fun `owner unlock of their own locked waypoint is accepted`() = testScope.runTest {
         storeWaypoint(id = 42, lockedTo = 111)
-        val packet = waypointPacket(txId = 502, from = 111, waypoint = Waypoint(id = 42, locked_to = 0))
+        val packet =
+            waypointPacket(
+                txId = 502,
+                from = 111,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.locked_to = 0
+                    }
+                    .build(),
+            )
         stubWaypointPersistDependencies(502)
 
         handler.handleReceivedData(packet, 123)
@@ -1312,7 +1736,18 @@ class MeshDataHandlerTest {
     @Test
     fun `owner edit of their own locked waypoint is accepted`() = testScope.runTest {
         storeWaypoint(id = 42, lockedTo = 111)
-        val packet = waypointPacket(txId = 503, from = 111, waypoint = Waypoint(id = 42, locked_to = 111))
+        val packet =
+            waypointPacket(
+                txId = 503,
+                from = 111,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.locked_to = 111
+                    }
+                    .build(),
+            )
         stubWaypointPersistDependencies(503)
 
         handler.handleReceivedData(packet, 123)
@@ -1325,7 +1760,18 @@ class MeshDataHandlerTest {
     fun `new waypoint from a non-owner is accepted when none is stored`() = testScope.runTest {
         // Nothing persisted yet: getWaypoints() emits an empty list (as Room does). A creation, not a hijack.
         every { packetRepository.getWaypoints() } returns flowOf(emptyList())
-        val packet = waypointPacket(txId = 504, from = 999, waypoint = Waypoint(id = 42, locked_to = 0))
+        val packet =
+            waypointPacket(
+                txId = 504,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.locked_to = 0
+                    }
+                    .build(),
+            )
         stubWaypointPersistDependencies(504)
 
         handler.handleReceivedData(packet, 123)
@@ -1337,7 +1783,18 @@ class MeshDataHandlerTest {
     @Test
     fun `non-owner update to an unlocked waypoint is accepted`() = testScope.runTest {
         storeWaypoint(id = 42, lockedTo = 0)
-        val packet = waypointPacket(txId = 505, from = 999, waypoint = Waypoint(id = 42, locked_to = 0))
+        val packet =
+            waypointPacket(
+                txId = 505,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.locked_to = 0
+                    }
+                    .build(),
+            )
         stubWaypointPersistDependencies(505)
 
         handler.handleReceivedData(packet, 123)
@@ -1350,7 +1807,18 @@ class MeshDataHandlerTest {
     fun `waypoint locked to someone other than the sender is dropped`() = testScope.runTest {
         // Pre-existing inbound-payload rule: a node can only lock a waypoint to itself. Nothing stored here — the
         // payload itself is invalid, so it is rejected before any repository read.
-        val packet = waypointPacket(txId = 506, from = 999, waypoint = Waypoint(id = 42, locked_to = 111))
+        val packet =
+            waypointPacket(
+                txId = 506,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.locked_to = 111
+                    }
+                    .build(),
+            )
         stubWaypointPersistDependencies(506)
 
         handler.handleReceivedData(packet, 123)

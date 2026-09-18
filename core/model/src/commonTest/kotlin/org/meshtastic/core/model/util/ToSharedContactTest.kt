@@ -25,8 +25,17 @@ import kotlin.test.assertTrue
 
 class ToSharedContactTest {
 
-    private fun node(manuallyVerified: Boolean = false) =
-        Node(num = 7, user = User(id = "!7", long_name = "Seven"), manuallyVerified = manuallyVerified)
+    private fun node(manuallyVerified: Boolean = false) = Node(
+        num = 7,
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.id = "!7"
+                wb.long_name = "Seven"
+            }
+            .build(),
+        manuallyVerified = manuallyVerified,
+    )
 
     @Test
     fun `sharing your own contact marks it manually verified`() {

@@ -28,7 +28,10 @@ import kotlin.test.assertFalse
 class ChannelScreenTest {
     @Test
     fun `channel share state defaults to a replace URL`() {
-        val channelSet = ChannelSet(lora_config = LoRaConfig(region = RegionCode.US))
+        val channelSet =
+            ChannelSet.Builder()
+                .also { wb -> wb.lora_config = LoRaConfig.Builder().also { wb -> wb.region = RegionCode.US }.build() }
+                .build()
 
         val url = ChannelShareState().uriString(channelSet)
 

@@ -120,15 +120,21 @@ fun ScannedQrCodeDialog(
                 // When replacing, apply the incoming LoRa configuration but preserve certain
                 // locally safe fields such as MQTT flags and TX power. This prevents QR codes
                 // from unintentionally overriding device-specific power limits (e.g. E22 caps).
-                incoming.copy(
-                    lora_config =
-                    incoming.lora_config?.copy(
-                        config_ok_to_mqtt = channels.lora_config?.config_ok_to_mqtt ?: false,
-                        tx_power = channels.lora_config?.tx_power ?: 0,
-                    ),
-                )
+                incoming
+                    .newBuilder()
+                    .also { wb ->
+                        wb.lora_config =
+                            incoming.lora_config
+                                ?.newBuilder()
+                                ?.also { wb ->
+                                    wb.config_ok_to_mqtt = channels.lora_config?.config_ok_to_mqtt ?: false
+                                    wb.tx_power = channels.lora_config?.tx_power ?: 0
+                                }
+                                ?.build()
+                    }
+                    .build()
             } else {
-                channels.copy(settings = addPreview.settings)
+                channels.newBuilder().also { wb -> wb.settings = addPreview.settings }.build()
             }
         }
 
@@ -148,19 +154,26 @@ fun ScannedQrCodeDialog(
 
     val selectedChannelSet =
         if (shouldReplace) {
-            channelSet.copy(
-                settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true },
-            )
+            channelSet
+                .newBuilder()
+                .also { wb ->
+                    wb.settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+                }
+                .build()
         } else {
-            channelSet.copy(
-                settings =
-                channelSet.settings.filterIndexed { i, _ ->
-                    // Primary (index 0) is always kept; existing secondaries can be dropped to free a slot for the
-                    // incoming channel when the radio is full (Apple FR-017 "replace a secondary, never the
-                    // primary").
-                    i == 0 || channelSelections.getOrNull(i) == true
-                },
-            )
+            channelSet
+                .newBuilder()
+                .also { wb ->
+                    wb.settings =
+                        channelSet.settings.filterIndexed { i, _ ->
+                            // Primary (index 0) is always kept; existing secondaries can be dropped to free a slot for
+                            // the
+                            // incoming channel when the radio is full (Apple FR-017 "replace a secondary, never the
+                            // primary").
+                            i == 0 || channelSelections.getOrNull(i) == true
+                        }
+                }
+                .build()
         }
 
     // Compute LoRa configuration changes when in replace mode
@@ -352,9 +365,19 @@ private fun ScannedQrCodeDialogPreview() {
     AppTheme {
         ScannedQrCodeDialog(
             channels =
-            ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = listOf(Channel.default.settings)
+                    wb.lora_config = Channel.default.loraConfig
+                }
+                .build(),
             incoming =
-            ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = listOf(Channel.default.settings)
+                    wb.lora_config = Channel.default.loraConfig
+                }
+                .build(),
             onDismiss = {},
             onConfirm = {},
         )

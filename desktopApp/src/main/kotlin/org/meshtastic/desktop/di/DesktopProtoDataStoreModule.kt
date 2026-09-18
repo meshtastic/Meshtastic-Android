@@ -50,20 +50,23 @@ class DesktopProtoDataStoreModule {
 
     @Single
     fun localConfigDataStore(scope: DataStoreScope): CoreLocalConfigDataStore =
-        protoStore(LocalConfigSerializer, "local_config.pb", { LocalConfig() }, scope).asCoreLocalConfigDataStore()
+        protoStore(LocalConfigSerializer, "local_config.pb", { LocalConfig.Builder().build() }, scope)
+            .asCoreLocalConfigDataStore()
 
     @Single
     fun moduleConfigDataStore(scope: DataStoreScope): CoreModuleConfigDataStore =
-        protoStore(ModuleConfigSerializer, "module_config.pb", { LocalModuleConfig() }, scope)
+        protoStore(ModuleConfigSerializer, "module_config.pb", { LocalModuleConfig.Builder().build() }, scope)
             .asCoreModuleConfigDataStore()
 
     @Single
     fun channelSetDataStore(scope: DataStoreScope): CoreChannelSetDataStore =
-        protoStore(ChannelSetSerializer, "channel_set.pb", { ChannelSet() }, scope).asCoreChannelSetDataStore()
+        protoStore(ChannelSetSerializer, "channel_set.pb", { ChannelSet.Builder().build() }, scope)
+            .asCoreChannelSetDataStore()
 
     @Single
     fun localStatsDataStore(scope: DataStoreScope): CoreLocalStatsDataStore =
-        protoStore(LocalStatsSerializer, "local_stats.pb", { LocalStats() }, scope).asCoreLocalStatsDataStore()
+        protoStore(LocalStatsSerializer, "local_stats.pb", { LocalStats.Builder().build() }, scope)
+            .asCoreLocalStatsDataStore()
 }
 
 /** [fileName] is an on-disk identity — changing it orphans existing user data. */

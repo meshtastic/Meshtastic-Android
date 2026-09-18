@@ -66,7 +66,17 @@ class CurrentlyConnectedInfoRssiLifecycleTest {
             CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
                 MaterialTheme {
                     CurrentlyConnectedInfo(
-                        node = Node(num = 1, user = User(long_name = "Test Node", short_name = "TST")),
+                        node =
+                        Node(
+                            num = 1,
+                            user =
+                            User.Builder()
+                                .also { wb ->
+                                    wb.long_name = "Test Node"
+                                    wb.short_name = "TST"
+                                }
+                                .build(),
+                        ),
                         text =
                         CurrentlyConnectedText(
                             unknownLabel = "Unknown",

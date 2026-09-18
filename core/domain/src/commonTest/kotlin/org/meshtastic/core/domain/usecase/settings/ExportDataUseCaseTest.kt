@@ -63,14 +63,24 @@ class ExportDataUseCaseTest {
                 received_date = 1000000000L,
                 raw_message = "",
                 fromRadio =
-                FromRadio(
-                    packet =
-                    MeshPacket(
-                        from = 1234,
-                        rx_snr = 5.0f,
-                        decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "Hello".encodeUtf8()),
-                    ),
-                ),
+                FromRadio.Builder()
+                    .also { wb ->
+                        wb.packet =
+                            MeshPacket.Builder()
+                                .also { wb ->
+                                    wb.from = 1234
+                                    wb.rx_snr = 5.0f
+                                    wb.decoded =
+                                        Data.Builder()
+                                            .also { wb ->
+                                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                                wb.payload = "Hello".encodeUtf8()
+                                            }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build(),
             )
         meshLogRepository.setLogs(listOf(log))
 
@@ -91,17 +101,28 @@ class ExportDataUseCaseTest {
                 received_date = 1000000000L,
                 raw_message = "",
                 fromRadio =
-                FromRadio(
-                    packet =
-                    MeshPacket(
-                        from = 1234,
-                        rx_snr = 5.0f,
-                        hop_limit = 2,
-                        hop_start = 3,
-                        relay_node = 77, // 0x4d -> matches the tail of a node id such as !........4d
-                        decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "Hello".encodeUtf8()),
-                    ),
-                ),
+                FromRadio.Builder()
+                    .also { wb ->
+                        wb.packet =
+                            MeshPacket.Builder()
+                                .also { wb ->
+                                    wb.from = 1234
+                                    wb.rx_snr = 5.0f
+                                    wb.hop_limit = 2
+                                    wb.hop_start = 3
+                                    wb.relay_node = 77
+                                    // 0x4d -> matches the tail of a node id such as !........4d
+                                    wb.decoded =
+                                        Data.Builder()
+                                            .also { wb ->
+                                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                                wb.payload = "Hello".encodeUtf8()
+                                            }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build(),
             )
         meshLogRepository.setLogs(listOf(log))
 
@@ -122,14 +143,24 @@ class ExportDataUseCaseTest {
                 received_date = 1000000000L,
                 raw_message = "",
                 fromRadio =
-                FromRadio(
-                    packet =
-                    MeshPacket(
-                        from = 1234,
-                        rx_snr = 5.0f,
-                        decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "Hello".encodeUtf8()),
-                    ),
-                ),
+                FromRadio.Builder()
+                    .also { wb ->
+                        wb.packet =
+                            MeshPacket.Builder()
+                                .also { wb ->
+                                    wb.from = 1234
+                                    wb.rx_snr = 5.0f
+                                    wb.decoded =
+                                        Data.Builder()
+                                            .also { wb ->
+                                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                                wb.payload = "Hello".encodeUtf8()
+                                            }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build(),
             )
         meshLogRepository.setLogs(listOf(log))
 

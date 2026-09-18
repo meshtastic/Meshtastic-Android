@@ -22,16 +22,22 @@ import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.Waypoint
 
-private fun sampleGeofence(lockedTo: Int) = Waypoint(
-    id = 42,
-    name = "Trailhead",
-    description = "North gate of the reserve",
-    latitude_i = 377_749_000,
-    longitude_i = -1_224_194_000,
-    geofence_radius = 500,
-    notify_on_enter = true,
-    locked_to = lockedTo,
-)
+// Sample coordinates for the previews below. Exempt as named arguments until the
+// buildersOnly rewrite turned them into assignments; the previews themselves are
+// covered by MagicNumber's ignoreAnnotated.
+@Suppress("MagicNumber")
+private fun sampleGeofence(lockedTo: Int) = Waypoint.Builder()
+    .also { wb ->
+        wb.id = 42
+        wb.name = "Trailhead"
+        wb.description = "North gate of the reserve"
+        wb.latitude_i = 377_749_000
+        wb.longitude_i = -1_224_194_000
+        wb.geofence_radius = 500
+        wb.notify_on_enter = true
+        wb.locked_to = lockedTo
+    }
+    .build()
 
 /** Locked foreign geofence: opt-in off, no Edit affordance — but the local delete is still offered. */
 @PreviewLightDark

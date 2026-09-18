@@ -59,7 +59,7 @@ class SwitchingChannelSetDataSource(
         dbManager
             .observeCurrentDb { db -> db.channelSetDao().observe() }
             .retryOnDbPoolFailure("channelSet")
-            .map { entity -> entity?.channelSet ?: ChannelSet() }
+            .map { entity -> entity?.channelSet ?: ChannelSet.Builder().build() }
             .distinctUntilChanged()
 
     suspend fun clearChannelSet() {
@@ -70,7 +70,7 @@ class SwitchingChannelSetDataSource(
                 dbManager.withDb { db ->
                     val dao = db.channelSetDao()
                     val existing = dao.get()
-                    val empty = ChannelSet.ADAPTER.encode(ChannelSet())
+                    val empty = ChannelSet.ADAPTER.encode(ChannelSet.Builder().build())
                     when {
                         existing == null -> Unit
 
@@ -110,7 +110,13 @@ class SwitchingChannelSetDataSource(
      */
     suspend fun updateChannelSet(settingsList: List<ChannelSettings>?, loraConfig: Config.LoRaConfig?) {
         mutate(reconcile = settingsList != null) { current ->
-            current.copy(settings = settingsList ?: current.settings, lora_config = loraConfig ?: current.lora_config)
+            current
+                .newBuilder()
+                .also { wb ->
+                    wb.settings = settingsList ?: current.settings
+                    wb.lora_config = loraConfig ?: current.lora_config
+                }
+                .build()
         }
     }
 
@@ -134,10 +140,10 @@ class SwitchingChannelSetDataSource(
         mutate { current ->
             val settings = current.settings.toMutableList()
             while (settings.size <= channel.index) {
-                settings.add(ChannelSettings())
+                settings.add(ChannelSettings.Builder().build())
             }
-            settings[channel.index] = channel.settings ?: ChannelSettings()
-            current.copy(settings = settings)
+            settings[channel.index] = channel.settings ?: ChannelSettings.Builder().build()
+            current.newBuilder().also { wb -> wb.settings = settings }.build()
         }
     }
 
@@ -151,7 +157,7 @@ class SwitchingChannelSetDataSource(
                 dbManager.withDb { db ->
                     val dao = db.channelSetDao()
                     val existing = dao.get()
-                    val current = existing?.channelSet ?: ChannelSet()
+                    val current = existing?.channelSet ?: ChannelSet.Builder().build()
                     dao.upsert(
                         ChannelSetEntity(channelSet = transform(current), lastReconciled = existing?.lastReconciled),
                     )

@@ -126,7 +126,9 @@ fun ChannelScreen(
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }
     val modemPresetName by
-        remember(channels) { mutableStateOf(Channel(loraConfig = channels.lora_config ?: Config.LoRaConfig()).name) }
+        remember(channels) {
+            mutableStateOf(Channel(loraConfig = channels.lora_config ?: Config.LoRaConfig.Builder().build()).name)
+        }
 
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -167,7 +169,12 @@ fun ChannelScreen(
         }
 
     val selectedChannelSet =
-        channelSet.copy(settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true })
+        channelSet
+            .newBuilder()
+            .also { wb ->
+                wb.settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+            }
+            .build()
 
     val scope = rememberCoroutineScope()
     val showToast = rememberShowToastResource()
@@ -190,7 +197,13 @@ fun ChannelScreen(
     }
 
     fun installSettings(newChannel: ChannelSettings, newLoRaConfig: Config.LoRaConfig) {
-        val newSet = ChannelSet(settings = listOf(newChannel), lora_config = newLoRaConfig)
+        val newSet =
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = listOf(newChannel)
+                    wb.lora_config = newLoRaConfig
+                }
+                .build()
         installSettings(newSet)
     }
 
@@ -208,11 +221,14 @@ fun ChannelScreen(
                 // hash, and frequency match what a freshly-set-up node in that region would use.
                 val preset = defaultPresetFor(viewModel.region) ?: Channel.default.loraConfig.modem_preset
                 val lora =
-                    Channel.default.loraConfig.copy(
-                        region = viewModel.region,
-                        modem_preset = preset,
-                        tx_enabled = viewModel.txEnabled,
-                    )
+                    Channel.default.loraConfig
+                        .newBuilder()
+                        .also { wb ->
+                            wb.region = viewModel.region
+                            wb.modem_preset = preset
+                            wb.tx_enabled = viewModel.txEnabled
+                        }
+                        .build()
                 installSettings(Channel.default.settings, lora)
                 showResetDialog = false
             },
@@ -346,12 +362,17 @@ private fun ChannelListView(
     onClickShare: () -> Unit = {},
 ) {
     val selectedChannelSet =
-        channelSet.copy(settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true })
+        channelSet
+            .newBuilder()
+            .also { wb ->
+                wb.settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+            }
+            .build()
 
     AdaptiveTwoPane(
         first = {
             channelSet.settings.forEachIndexed { index, channel ->
-                val channelObj = Channel(channel, channelSet.lora_config ?: Config.LoRaConfig())
+                val channelObj = Channel(channel, channelSet.lora_config ?: Config.LoRaConfig.Builder().build())
                 val displayTitle = if (channel.name.isEmpty()) modemPresetName else channel.name
 
                 ChannelSelection(

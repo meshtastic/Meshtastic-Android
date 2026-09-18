@@ -82,7 +82,16 @@ class RadioConfigRepositoryImplTest {
         // under test (that it caps at all, deterministically, is).
         val cap = 4096
 
-        repeat(cap + 500) { i -> repository.addFileInfo(FileInfo(file_name = "file$i.bin", size_bytes = i)) }
+        repeat(cap + 500) { i ->
+            repository.addFileInfo(
+                FileInfo.Builder()
+                    .also { wb ->
+                        wb.file_name = "file$i.bin"
+                        wb.size_bytes = i
+                    }
+                    .build(),
+            )
+        }
 
         val manifest = repository.fileManifestFlow.first()
         assertEquals(cap, manifest.size)
@@ -102,7 +111,18 @@ class RadioConfigRepositoryImplTest {
         withContext(Dispatchers.Default) {
             coroutineScope {
                 (0 until n)
-                    .map { i -> async { repository.addFileInfo(FileInfo(file_name = "f$i.bin", size_bytes = i)) } }
+                    .map { i ->
+                        async {
+                            repository.addFileInfo(
+                                FileInfo.Builder()
+                                    .also { wb ->
+                                        wb.file_name = "f$i.bin"
+                                        wb.size_bytes = i
+                                    }
+                                    .build(),
+                            )
+                        }
+                    }
                     .awaitAll()
             }
         }
@@ -113,14 +133,35 @@ class RadioConfigRepositoryImplTest {
     @Test
     fun `clearFileManifest empties the manifest so a new handshake can accumulate again`() = runTest {
         val repository = createRepository()
-        repository.addFileInfo(FileInfo(file_name = "a.bin", size_bytes = 1))
-        repository.addFileInfo(FileInfo(file_name = "b.bin", size_bytes = 2))
+        repository.addFileInfo(
+            FileInfo.Builder()
+                .also { wb ->
+                    wb.file_name = "a.bin"
+                    wb.size_bytes = 1
+                }
+                .build(),
+        )
+        repository.addFileInfo(
+            FileInfo.Builder()
+                .also { wb ->
+                    wb.file_name = "b.bin"
+                    wb.size_bytes = 2
+                }
+                .build(),
+        )
         assertEquals(2, repository.fileManifestFlow.first().size)
 
         repository.clearFileManifest()
         assertEquals(0, repository.fileManifestFlow.first().size)
 
-        repository.addFileInfo(FileInfo(file_name = "c.bin", size_bytes = 3))
+        repository.addFileInfo(
+            FileInfo.Builder()
+                .also { wb ->
+                    wb.file_name = "c.bin"
+                    wb.size_bytes = 3
+                }
+                .build(),
+        )
         assertEquals(1, repository.fileManifestFlow.first().size)
     }
 }

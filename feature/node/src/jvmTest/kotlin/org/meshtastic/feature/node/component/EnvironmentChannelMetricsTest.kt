@@ -37,21 +37,28 @@ class EnvironmentChannelMetricsTest {
 
     @Test
     fun zeroOneWireTemperatureIsShown() = runComposeUiTest {
-        setEnvironmentMetrics(EnvironmentMetricsProto(one_wire_temperature_ch0 = 0f))
+        setEnvironmentMetrics(EnvironmentMetricsProto.Builder().also { wb -> wb.one_wire_temperature_ch0 = 0f }.build())
         onNodeWithText("1-Wire Temp 1").assertIsDisplayed()
         onNodeWithText("0°C").assertIsDisplayed()
     }
 
     @Test
     fun absentOneWireChannelIsHidden() = runComposeUiTest {
-        setEnvironmentMetrics(EnvironmentMetricsProto())
+        setEnvironmentMetrics(EnvironmentMetricsProto.Builder().build())
         onNodeWithText("1-Wire Temp 1").assertDoesNotExist()
     }
 
     @Test
     fun oneWireChannelsKeepTheirChannelNumber() = runComposeUiTest {
         // A gap in the middle must not renumber the channels above it.
-        setEnvironmentMetrics(EnvironmentMetricsProto(one_wire_temperature_ch0 = 10f, one_wire_temperature_ch2 = 30f))
+        setEnvironmentMetrics(
+            EnvironmentMetricsProto.Builder()
+                .also { wb ->
+                    wb.one_wire_temperature_ch0 = 10f
+                    wb.one_wire_temperature_ch2 = 30f
+                }
+                .build(),
+        )
         onNodeWithText("1-Wire Temp 1").assertIsDisplayed()
         onNodeWithText("1-Wire Temp 3").assertIsDisplayed()
         onNodeWithText("1-Wire Temp 2").assertDoesNotExist()
@@ -59,20 +66,27 @@ class EnvironmentChannelMetricsTest {
 
     @Test
     fun zeroAdcVoltageIsShown() = runComposeUiTest {
-        setEnvironmentMetrics(EnvironmentMetricsProto(adc_voltage_ch0 = 0f))
+        setEnvironmentMetrics(EnvironmentMetricsProto.Builder().also { wb -> wb.adc_voltage_ch0 = 0f }.build())
         onNodeWithText("ADC Voltage 1").assertIsDisplayed()
         onNodeWithText("0.00 V").assertIsDisplayed()
     }
 
     @Test
     fun absentAdcChannelIsHidden() = runComposeUiTest {
-        setEnvironmentMetrics(EnvironmentMetricsProto())
+        setEnvironmentMetrics(EnvironmentMetricsProto.Builder().build())
         onNodeWithText("ADC Voltage 1").assertDoesNotExist()
     }
 
     @Test
     fun adcChannelsKeepTheirChannelNumber() = runComposeUiTest {
-        setEnvironmentMetrics(EnvironmentMetricsProto(adc_voltage_ch1 = 3.3f, adc_voltage_ch7 = 1.8f))
+        setEnvironmentMetrics(
+            EnvironmentMetricsProto.Builder()
+                .also { wb ->
+                    wb.adc_voltage_ch1 = 3.3f
+                    wb.adc_voltage_ch7 = 1.8f
+                }
+                .build(),
+        )
         onNodeWithText("ADC Voltage 2").assertIsDisplayed()
         onNodeWithText("3.30 V").assertIsDisplayed()
         onNodeWithText("ADC Voltage 8").assertIsDisplayed()

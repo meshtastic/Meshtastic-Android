@@ -126,12 +126,14 @@ class NodeManagerImplTest {
             val num = 200_000 + i
             nodeManager.handleReceivedUser(
                 num,
-                User(
-                    id = NodeAddress.numToDefaultId(num),
-                    long_name = "Flood $i",
-                    short_name = "F$i",
-                    hw_model = HardwareModel.TLORA_V2,
-                ),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = NodeAddress.numToDefaultId(num)
+                        wb.long_name = "Flood $i"
+                        wb.short_name = "F$i"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                    }
+                    .build(),
             )
         }
 
@@ -172,7 +174,16 @@ class NodeManagerImplTest {
     fun `eviction prefers placeholders over nodes with a real identity`() {
         val identified = 7777
         nodeManager.updateNode(identified) {
-            it.copy(user = it.user.copy(long_name = "Real Node", hw_model = HardwareModel.TLORA_V2))
+            it.copy(
+                user =
+                it.user
+                    .newBuilder()
+                    .also { wb ->
+                        wb.long_name = "Real Node"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                    }
+                    .build(),
+            )
         }
 
         floodPastCapAndAssertEvicted()
@@ -293,13 +304,27 @@ class NodeManagerImplTest {
     fun `handleReceivedUser preserves existing user if incoming is default`() {
         val nodeNum = 1234
         val existingUser =
-            User(id = "!12345678", long_name = "My Custom Name", short_name = "MCN", hw_model = HardwareModel.TLORA_V2)
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!12345678"
+                    wb.long_name = "My Custom Name"
+                    wb.short_name = "MCN"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                }
+                .build()
 
         // Setup existing node
         nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
 
         val incomingDefaultUser =
-            User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!12345678"
+                    wb.long_name = "Meshtastic 5678"
+                    wb.short_name = "5678"
+                    wb.hw_model = HardwareModel.UNSET
+                }
+                .build()
 
         nodeManager.handleReceivedUser(nodeNum, incomingDefaultUser)
 
@@ -313,12 +338,26 @@ class NodeManagerImplTest {
         val nodeNum = 1234
         // Use a non-UNSET hw_model so isUnknownUser=false (avoids new-node notification + getString)
         val existingUser =
-            User(id = "!12345678", long_name = "Old Name", short_name = "ON", hw_model = HardwareModel.TLORA_V2)
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!12345678"
+                    wb.long_name = "Old Name"
+                    wb.short_name = "ON"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                }
+                .build()
 
         nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
 
         val incomingDetailedUser =
-            User(id = "!12345678", long_name = "Real User", short_name = "RU", hw_model = HardwareModel.TLORA_V1)
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!12345678"
+                    wb.long_name = "Real User"
+                    wb.short_name = "RU"
+                    wb.hw_model = HardwareModel.TLORA_V1
+                }
+                .build()
 
         nodeManager.handleReceivedUser(nodeNum, incomingDetailedUser)
 
@@ -330,7 +369,13 @@ class NodeManagerImplTest {
     @Test
     fun `handleReceivedPosition updates node position`() {
         val nodeNum = 1234
-        val position = ProtoPosition(latitude_i = 450000000, longitude_i = 900000000)
+        val position =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 450000000
+                    wb.longitude_i = 900000000
+                }
+                .build()
 
         nodeManager.handleReceivedPosition(nodeNum, 9999, position, 0)
 
@@ -344,11 +389,26 @@ class NodeManagerImplTest {
     @Test
     fun `handleReceivedPosition with zero coordinates preserves last known location but updates satellites`() {
         val nodeNum = 1234
-        val initialPosition = ProtoPosition(latitude_i = 450000000, longitude_i = 900000000, sats_in_view = 10)
+        val initialPosition =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 450000000
+                    wb.longitude_i = 900000000
+                    wb.sats_in_view = 10
+                }
+                .build()
         nodeManager.handleReceivedPosition(nodeNum, 9999, initialPosition, 1000000L)
 
         // Receive "zero" position with new satellite count
-        val zeroPosition = ProtoPosition(latitude_i = 0, longitude_i = 0, sats_in_view = 5, time = 1001)
+        val zeroPosition =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 0
+                    wb.longitude_i = 0
+                    wb.sats_in_view = 5
+                    wb.time = 1001
+                }
+                .build()
         nodeManager.handleReceivedPosition(nodeNum, 9999, zeroPosition, 1001000L)
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]
@@ -369,7 +429,14 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedPosition(
             nodeNum,
             9999,
-            ProtoPosition(latitude_i = exactLatI, longitude_i = exactLonI, altitude = 135, time = 1000),
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = exactLatI
+                    wb.longitude_i = exactLonI
+                    wb.altitude = 135
+                    wb.time = 1000
+                }
+                .build(),
             1000000L,
         )
 
@@ -379,14 +446,16 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedPosition(
             nodeNum,
             9999,
-            ProtoPosition(
-                latitude_i = coarseLatI,
-                longitude_i = coarseLonI,
-                altitude = 210,
-                sats_in_view = 7,
-                time = 2000,
-                precision_bits = 13,
-            ),
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = coarseLatI
+                    wb.longitude_i = coarseLonI
+                    wb.altitude = 210
+                    wb.sats_in_view = 7
+                    wb.time = 2000
+                    wb.precision_bits = 13
+                }
+                .build(),
             2000000L,
         )
 
@@ -410,7 +479,13 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedPosition(
             nodeNum,
             9999,
-            ProtoPosition(latitude_i = 524595000, longitude_i = 310255000, time = 1000),
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 524595000
+                    wb.longitude_i = 310255000
+                    wb.time = 1000
+                }
+                .build(),
             1000000L,
         )
 
@@ -420,7 +495,14 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedPosition(
             nodeNum,
             9999,
-            ProtoPosition(latitude_i = movedLatI, longitude_i = movedLonI, time = 2000, precision_bits = 13),
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = movedLatI
+                    wb.longitude_i = movedLonI
+                    wb.time = 2000
+                    wb.precision_bits = 13
+                }
+                .build(),
             2000000L,
         )
 
@@ -439,7 +521,14 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedPosition(
             nodeNum,
             9999,
-            ProtoPosition(latitude_i = coarseLatI, longitude_i = coarseLonI, time = 1000, precision_bits = 11),
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = coarseLatI
+                    wb.longitude_i = coarseLonI
+                    wb.time = 1000
+                    wb.precision_bits = 11
+                }
+                .build(),
             1000000L,
         )
 
@@ -448,7 +537,14 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedPosition(
             nodeNum,
             9999,
-            ProtoPosition(latitude_i = finerLatI, longitude_i = finerLonI, time = 2000, precision_bits = 13),
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = finerLatI
+                    wb.longitude_i = finerLonI
+                    wb.time = 2000
+                    wb.precision_bits = 13
+                }
+                .build(),
             2000000L,
         )
 
@@ -462,7 +558,15 @@ class NodeManagerImplTest {
     @Test
     fun `handleReceivedPosition for local node ignores purely empty packets`() {
         val myNum = 1111
-        val emptyPos = ProtoPosition(latitude_i = 0, longitude_i = 0, sats_in_view = 0, time = 0)
+        val emptyPos =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 0
+                    wb.longitude_i = 0
+                    wb.sats_in_view = 0
+                    wb.time = 0
+                }
+                .build()
 
         nodeManager.handleReceivedPosition(myNum, myNum, emptyPos, 0)
 
@@ -476,7 +580,13 @@ class NodeManagerImplTest {
         val nodeNum = 1234
         nodeManager.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
 
-        val telemetry = Telemetry(time = 2000, device_metrics = DeviceMetrics(battery_level = 50))
+        val telemetry =
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 2000
+                    wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 50 }.build()
+                }
+                .build()
 
         nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
 
@@ -487,7 +597,18 @@ class NodeManagerImplTest {
     @Test
     fun `handleReceivedTelemetry updates device metrics`() {
         val nodeNum = 1234
-        val telemetry = Telemetry(device_metrics = DeviceMetrics(battery_level = 75, voltage = 3.8f))
+        val telemetry =
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.device_metrics =
+                        DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 75
+                                wb.voltage = 3.8f
+                            }
+                            .build()
+                }
+                .build()
 
         nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
 
@@ -501,7 +622,17 @@ class NodeManagerImplTest {
     fun `handleReceivedTelemetry updates environment metrics`() {
         val nodeNum = 1234
         val telemetry =
-            Telemetry(environment_metrics = EnvironmentMetrics(temperature = 22.5f, relative_humidity = 45.0f))
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.environment_metrics =
+                        EnvironmentMetrics.Builder()
+                            .also { wb ->
+                                wb.temperature = 22.5f
+                                wb.relative_humidity = 45.0f
+                            }
+                            .build()
+                }
+                .build()
 
         nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
 
@@ -513,7 +644,9 @@ class NodeManagerImplTest {
 
     @Test
     fun `clear resets internal state`() {
-        nodeManager.updateNode(1234) { it.copy(user = it.user.copy(long_name = "Test")) }
+        nodeManager.updateNode(1234) {
+            it.copy(user = it.user.newBuilder().also { wb -> wb.long_name = "Test" }.build())
+        }
         nodeManager.clear()
 
         assertTrue(nodeManager.nodeDBbyNodeNum.isEmpty())
@@ -537,7 +670,7 @@ class NodeManagerImplTest {
     fun `toNodeID returns user ID for known node`() {
         val nodeNum = 5678
         val userId = "!customid"
-        nodeManager.updateNode(nodeNum) { it.copy(user = it.user.copy(id = userId)) }
+        nodeManager.updateNode(nodeNum) { it.copy(user = it.user.newBuilder().also { wb -> wb.id = userId }.build()) }
         val result = nodeManager.toNodeID(nodeNum)
         assertEquals(userId, result)
     }
@@ -546,7 +679,17 @@ class NodeManagerImplTest {
     fun `removeByNodenum removes node from map`() {
         val nodeNum = 1234
         nodeManager.updateNode(nodeNum) {
-            Node(num = nodeNum, user = User(id = "!testnode", long_name = "Test", short_name = "T"))
+            Node(
+                num = nodeNum,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!testnode"
+                        wb.long_name = "Test"
+                        wb.short_name = "T"
+                    }
+                    .build(),
+            )
         }
         assertTrue(nodeManager.nodeDBbyNodeNum.containsKey(nodeNum))
         assertNotNull(nodeManager.getNodeById("!testnode"))
@@ -562,17 +705,26 @@ class NodeManagerImplTest {
         val nodeNum = 1234
         val pk = ByteArray(32) { (it + 1).toByte() }.toByteString()
         val existingUser =
-            User(id = "!12345678", long_name = "Existing", short_name = "EX", hw_model = HardwareModel.TLORA_V2)
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!12345678"
+                    wb.long_name = "Existing"
+                    wb.short_name = "EX"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                }
+                .build()
         nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
 
         val incomingUser =
-            User(
-                id = "!12345678",
-                long_name = "Updated",
-                short_name = "UP",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = pk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!12345678"
+                    wb.long_name = "Updated"
+                    wb.short_name = "UP"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = pk
+                }
+                .build()
         nodeManager.handleReceivedUser(nodeNum, incomingUser)
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
@@ -586,24 +738,28 @@ class NodeManagerImplTest {
         val nodeNum = 1234
         val existingPk = ByteArray(32) { (it + 1).toByte() }.toByteString()
         val existingUser =
-            User(
-                id = "!12345678",
-                long_name = "Existing",
-                short_name = "EX",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = existingPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!12345678"
+                    wb.long_name = "Existing"
+                    wb.short_name = "EX"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = existingPk
+                }
+                .build()
         nodeManager.updateNode(nodeNum) { it.copy(user = existingUser, publicKey = existingPk) }
 
         val differentPk = ByteArray(32) { (it + 10).toByte() }.toByteString()
         val incomingUser =
-            User(
-                id = "!12345678",
-                long_name = "Updated",
-                short_name = "UP",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = differentPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!12345678"
+                    wb.long_name = "Updated"
+                    wb.short_name = "UP"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = differentPk
+                }
+                .build()
         nodeManager.handleReceivedUser(nodeNum, incomingUser)
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
@@ -622,14 +778,24 @@ class NodeManagerImplTest {
         val nodeNum = 5678
         val pk = ByteArray(32) { (it + 1).toByte() }.toByteString()
         val user =
-            User(
-                id = "!abcd1234",
-                long_name = "Remote Node",
-                short_name = "RN",
-                hw_model = HardwareModel.HELTEC_V3,
-                public_key = pk,
-            )
-        val info = ProtoNodeInfo(num = nodeNum, user = user, last_heard = 1000, channel = 0)
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!abcd1234"
+                    wb.long_name = "Remote Node"
+                    wb.short_name = "RN"
+                    wb.hw_model = HardwareModel.HELTEC_V3
+                    wb.public_key = pk
+                }
+                .build()
+        val info =
+            ProtoNodeInfo.Builder()
+                .also { wb ->
+                    wb.num = nodeNum
+                    wb.user = user
+                    wb.last_heard = 1000
+                    wb.channel = 0
+                }
+                .build()
 
         nodeManager.installNodeInfo(info)
 
@@ -647,18 +813,35 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedPosition(
             nodeNum,
             9999,
-            ProtoPosition(latitude_i = exactLatI, longitude_i = exactLonI, time = 1000),
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = exactLatI
+                    wb.longitude_i = exactLonI
+                    wb.time = 1000
+                }
+                .build(),
             1000000L,
         )
 
         val coarse =
-            ProtoPosition(
-                latitude_i = (exactLatI and (-1 shl 19)) + (1 shl 18),
-                longitude_i = (exactLonI and (-1 shl 19)) + (1 shl 18),
-                time = 2000,
-                precision_bits = 13,
-            )
-        nodeManager.installNodeInfo(ProtoNodeInfo(num = nodeNum, position = coarse, last_heard = 2000, channel = 0))
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = (exactLatI and (-1 shl 19)) + (1 shl 18)
+                    wb.longitude_i = (exactLonI and (-1 shl 19)) + (1 shl 18)
+                    wb.time = 2000
+                    wb.precision_bits = 13
+                }
+                .build()
+        nodeManager.installNodeInfo(
+            ProtoNodeInfo.Builder()
+                .also { wb ->
+                    wb.num = nodeNum
+                    wb.position = coarse
+                    wb.last_heard = 2000
+                    wb.channel = 0
+                }
+                .build(),
+        )
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
         assertEquals(exactLatI, result.position.latitude_i)
@@ -675,15 +858,25 @@ class NodeManagerImplTest {
         val nodeNum = 5678
         val pk = ByteArray(32) { (it + 1).toByte() }.toByteString()
         val user =
-            User(
-                id = "!abcd1234",
-                long_name = "Licensed Op",
-                short_name = "LO",
-                hw_model = HardwareModel.HELTEC_V3,
-                public_key = pk,
-                is_licensed = true,
-            )
-        val info = ProtoNodeInfo(num = nodeNum, user = user, last_heard = 1000, channel = 0)
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!abcd1234"
+                    wb.long_name = "Licensed Op"
+                    wb.short_name = "LO"
+                    wb.hw_model = HardwareModel.HELTEC_V3
+                    wb.public_key = pk
+                    wb.is_licensed = true
+                }
+                .build()
+        val info =
+            ProtoNodeInfo.Builder()
+                .also { wb ->
+                    wb.num = nodeNum
+                    wb.user = user
+                    wb.last_heard = 1000
+                    wb.channel = 0
+                }
+                .build()
 
         nodeManager.installNodeInfo(info)
 
@@ -724,8 +917,24 @@ class NodeManagerImplTest {
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(repoInfo)
 
         // Add node with position (non-zero lat → hasGPS = true)
-        nodeManager.handleReceivedPosition(myNum, myNum, ProtoPosition(latitude_i = 100), 0)
-        nodeManager.updateNode(myNum) { it.copy(user = it.user.copy(id = "!mydevice", hw_model = HardwareModel.TBEAM)) }
+        nodeManager.handleReceivedPosition(
+            myNum,
+            myNum,
+            ProtoPosition.Builder().also { wb -> wb.latitude_i = 100 }.build(),
+            0,
+        )
+        nodeManager.updateNode(myNum) {
+            it.copy(
+                user =
+                it.user
+                    .newBuilder()
+                    .also { wb ->
+                        wb.id = "!mydevice"
+                        wb.hw_model = HardwareModel.TBEAM
+                    }
+                    .build(),
+            )
+        }
 
         val result = nodeManager.getMyNodeInfo()
 
@@ -758,7 +967,9 @@ class NodeManagerImplTest {
             )
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(repoInfo)
 
-        nodeManager.updateNode(myNum) { it.copy(user = it.user.copy(hw_model = HardwareModel.HELTEC_V3)) }
+        nodeManager.updateNode(myNum) {
+            it.copy(user = it.user.newBuilder().also { wb -> wb.hw_model = HardwareModel.HELTEC_V3 }.build())
+        }
 
         val result = nodeManager.getMyNodeInfo()
 
@@ -772,7 +983,7 @@ class NodeManagerImplTest {
         nodeManager.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
 
         // Telemetry with no metrics at all
-        val telemetry = Telemetry(time = 3000)
+        val telemetry = Telemetry.Builder().also { wb -> wb.time = 3000 }.build()
 
         nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
 
@@ -793,7 +1004,9 @@ class NodeManagerImplTest {
     fun `getMyId returns user ID when connected`() {
         val myNum = 1234
         nodeManager.setMyNodeNum(myNum)
-        nodeManager.updateNode(myNum) { it.copy(user = it.user.copy(id = "!mynode42")) }
+        nodeManager.updateNode(myNum) {
+            it.copy(user = it.user.newBuilder().also { wb -> wb.id = "!mynode42" }.build())
+        }
 
         val result = nodeManager.getMyId()
         assertEquals("!mynode42", result)
@@ -814,13 +1027,15 @@ class NodeManagerImplTest {
     private fun makeKnownNode(num: Int, pk: ByteString, name: String = "Known"): Node = Node(
         num = num,
         user =
-        User(
-            id = "!${num.toString(16)}",
-            long_name = name,
-            short_name = name.take(3),
-            hw_model = HardwareModel.TLORA_V2,
-            public_key = pk,
-        ),
+        User.Builder()
+            .also { wb ->
+                wb.id = "!${num.toString(16)}"
+                wb.long_name = name
+                wb.short_name = name.take(3)
+                wb.hw_model = HardwareModel.TLORA_V2
+                wb.public_key = pk
+            }
+            .build(),
         publicKey = pk,
     )
 
@@ -843,29 +1058,59 @@ class NodeManagerImplTest {
         nodeManager.applyTrustedIdentityMigrations(listOf(retiredNum))
         enableDbWrites()
 
-        nodeManager.handleReceivedTelemetry(retiredNum, Telemetry(device_metrics = DeviceMetrics(battery_level = 50)))
+        nodeManager.handleReceivedTelemetry(
+            retiredNum,
+            Telemetry.Builder()
+                .also { wb -> wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 50 }.build() }
+                .build(),
+        )
         nodeManager.handleReceivedPosition(
             retiredNum,
             myNodeNum = 9999,
-            p = ProtoPosition(latitude_i = 123, longitude_i = 456),
+            p =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 123
+                    wb.longitude_i = 456
+                }
+                .build(),
             defaultTime = 1000L,
         )
-        nodeManager.handleReceivedPaxcounter(retiredNum, Paxcount(wifi = 10, ble = 5, uptime = 1000))
-        nodeManager.handleReceivedNodeStatus(retiredNum, StatusMessage(status = "stale"))
-        nodeManager.installNodeInfo(
-            ProtoNodeInfo(
-                num = retiredNum,
-                user =
-                User(
-                    id = "!retired",
-                    long_name = "Retired",
-                    short_name = "RET",
-                    hw_model = HardwareModel.TLORA_V2,
-                    public_key = validPk,
-                ),
-            ),
+        nodeManager.handleReceivedPaxcounter(
+            retiredNum,
+            Paxcount.Builder()
+                .also { wb ->
+                    wb.wifi = 10
+                    wb.ble = 5
+                    wb.uptime = 1000
+                }
+                .build(),
         )
-        nodeManager.insertMetadata(retiredNum, DeviceMetadata(firmware_version = "2.7.0"))
+        nodeManager.handleReceivedNodeStatus(
+            retiredNum,
+            StatusMessage.Builder().also { wb -> wb.status = "stale" }.build(),
+        )
+        nodeManager.installNodeInfo(
+            ProtoNodeInfo.Builder()
+                .also { wb ->
+                    wb.num = retiredNum
+                    wb.user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!retired"
+                                wb.long_name = "Retired"
+                                wb.short_name = "RET"
+                                wb.hw_model = HardwareModel.TLORA_V2
+                                wb.public_key = validPk
+                            }
+                            .build()
+                }
+                .build(),
+        )
+        nodeManager.insertMetadata(
+            retiredNum,
+            DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.0" }.build(),
+        )
         testScope.advanceUntilIdle()
 
         assertNull(nodeManager.nodeDBbyNodeNum[retiredNum])
@@ -885,27 +1130,38 @@ class NodeManagerImplTest {
 
         nodeManager.handleReceivedUser(
             retiredNum,
-            User(id = "!keyless", long_name = "Keyless replay", short_name = "KEY", hw_model = HardwareModel.TLORA_V2),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!keyless"
+                    wb.long_name = "Keyless replay"
+                    wb.short_name = "KEY"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                }
+                .build(),
         )
         nodeManager.handleReceivedUser(
             retiredNum,
-            User(
-                id = "!invalid",
-                long_name = "Invalid-key replay",
-                short_name = "INV",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = byteArrayOf(1, 2, 3).toByteString(),
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!invalid"
+                    wb.long_name = "Invalid-key replay"
+                    wb.short_name = "INV"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = byteArrayOf(1, 2, 3).toByteString()
+                }
+                .build(),
         )
         nodeManager.handleReceivedUser(
             retiredNum,
-            User(
-                id = "!represented",
-                long_name = "Represented replay",
-                short_name = "REP",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!represented"
+                    wb.long_name = "Represented replay"
+                    wb.short_name = "REP"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -929,13 +1185,15 @@ class NodeManagerImplTest {
 
         nodeManager.handleReceivedUser(
             retiredNum,
-            User(
-                id = "!replacement",
-                long_name = "Replacement",
-                short_name = "NEW",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = replacementKey,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!replacement"
+                    wb.long_name = "Replacement"
+                    wb.short_name = "NEW"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = replacementKey
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -969,7 +1227,14 @@ class NodeManagerImplTest {
         // A stale keyless replay at the retired number is still suppressed after the reload.
         nodeManager.handleReceivedUser(
             retiredNum,
-            User(id = "!stale", long_name = "Stale replay", short_name = "STL", hw_model = HardwareModel.TLORA_V2),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!stale"
+                    wb.long_name = "Stale replay"
+                    wb.short_name = "STL"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -982,11 +1247,21 @@ class NodeManagerImplTest {
     fun `clear starts a new session without retired-number suppression`() {
         val retiredNum = validPk.noncanonicalNum(4400)
         nodeManager.applyTrustedIdentityMigrations(listOf(retiredNum))
-        nodeManager.handleReceivedTelemetry(retiredNum, Telemetry(device_metrics = DeviceMetrics(battery_level = 10)))
+        nodeManager.handleReceivedTelemetry(
+            retiredNum,
+            Telemetry.Builder()
+                .also { wb -> wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 10 }.build() }
+                .build(),
+        )
         assertNull(nodeManager.nodeDBbyNodeNum[retiredNum])
 
         nodeManager.clear()
-        nodeManager.handleReceivedTelemetry(retiredNum, Telemetry(device_metrics = DeviceMetrics(battery_level = 90)))
+        nodeManager.handleReceivedTelemetry(
+            retiredNum,
+            Telemetry.Builder()
+                .also { wb -> wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 90 }.build() }
+                .build(),
+        )
 
         assertEquals(90, nodeManager.nodeDBbyNodeNum[retiredNum]?.deviceMetrics?.battery_level)
     }
@@ -1002,13 +1277,15 @@ class NodeManagerImplTest {
         enableDbWrites()
 
         val staleUser =
-            User(
-                id = "!old",
-                long_name = "Stale",
-                short_name = "STL",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!old"
+                    wb.long_name = "Stale"
+                    wb.short_name = "STL"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build()
         nodeManager.handleReceivedUser(oldNum, staleUser)
         testScope.advanceUntilIdle()
 
@@ -1035,28 +1312,38 @@ class NodeManagerImplTest {
             Node(
                 num = oldNum,
                 user =
-                User(
-                    id = defaultId,
-                    long_name = "Meshtastic ${defaultId.takeLast(4)}",
-                    short_name = defaultId.takeLast(4),
-                    hw_model = HardwareModel.UNSET,
-                    public_key = placeholderKey,
-                ),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = defaultId
+                        wb.long_name = "Meshtastic ${defaultId.takeLast(4)}"
+                        wb.short_name = defaultId.takeLast(4)
+                        wb.hw_model = HardwareModel.UNSET
+                        wb.public_key = placeholderKey
+                    }
+                    .build(),
                 publicKey = placeholderKey,
-                position = ProtoPosition(latitude_i = 123, longitude_i = 456),
+                position =
+                ProtoPosition.Builder()
+                    .also { wb ->
+                        wb.latitude_i = 123
+                        wb.longitude_i = 456
+                    }
+                    .build(),
                 channel = 7,
             )
         }
         enableDbWrites()
 
         val staleUser =
-            User(
-                id = "!old",
-                long_name = "Stale",
-                short_name = "STL",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!old"
+                    wb.long_name = "Stale"
+                    wb.short_name = "STL"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build()
         nodeManager.handleReceivedUser(oldNum, staleUser)
         testScope.advanceUntilIdle()
 
@@ -1086,13 +1373,15 @@ class NodeManagerImplTest {
         enableDbWrites()
 
         val incomingUser =
-            User(
-                id = "!stale",
-                long_name = "Stale",
-                short_name = "STL",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!stale"
+                    wb.long_name = "Stale"
+                    wb.short_name = "STL"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build()
         nodeManager.handleReceivedUser(fromNum, incomingUser)
         testScope.advanceUntilIdle()
 
@@ -1121,13 +1410,15 @@ class NodeManagerImplTest {
         enableDbWrites()
 
         val incomingUser =
-            User(
-                id = "!incoming",
-                long_name = "Incoming",
-                short_name = "INC",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!incoming"
+                    wb.long_name = "Incoming"
+                    wb.short_name = "INC"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build()
         nodeManager.handleReceivedUser(fromNum, incomingUser)
         testScope.advanceUntilIdle()
 
@@ -1149,13 +1440,15 @@ class NodeManagerImplTest {
 
         nodeManager.handleReceivedUser(
             fromNum,
-            User(
-                id = "!incoming",
-                long_name = "Incoming",
-                short_name = "INC",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!incoming"
+                    wb.long_name = "Incoming"
+                    wb.short_name = "INC"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -1176,30 +1469,40 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedPosition(
             fromNum = fromNum,
             myNodeNum = 9999,
-            p = ProtoPosition(latitude_i = 123, longitude_i = 456),
+            p =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 123
+                    wb.longitude_i = 456
+                }
+                .build(),
             defaultTime = 1000L,
         )
         enableDbWrites()
 
         nodeManager.handleReceivedUser(
             fromNum,
-            User(
-                id = "!incoming",
-                long_name = "First Identity",
-                short_name = "ONE",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!incoming"
+                    wb.long_name = "First Identity"
+                    wb.short_name = "ONE"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build(),
         )
         nodeManager.handleReceivedUser(
             fromNum,
-            User(
-                id = "!incoming",
-                long_name = "Updated Identity",
-                short_name = "TWO",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!incoming"
+                    wb.long_name = "Updated Identity"
+                    wb.short_name = "TWO"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -1225,13 +1528,15 @@ class NodeManagerImplTest {
         enableDbWrites()
 
         val localUser =
-            User(
-                id = "!local",
-                long_name = "Local Node",
-                short_name = "LCL",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!local"
+                    wb.long_name = "Local Node"
+                    wb.short_name = "LCL"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build()
         nodeManager.handleReceivedUser(localNum, localUser)
         testScope.advanceUntilIdle()
 
@@ -1252,13 +1557,15 @@ class NodeManagerImplTest {
         val replayedNodeNum = 2999
         val replayedKey = ByteArray(32) { (it + 90).toByte() }.toByteString()
         val replayedUser =
-            User(
-                id = "!replayed",
-                long_name = "Replayed Node",
-                short_name = "RPL",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = replayedKey,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!replayed"
+                    wb.long_name = "Replayed Node"
+                    wb.short_name = "RPL"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = replayedKey
+                }
+                .build()
 
         nodeManager.setAllowNodeDbWrites(true)
         nodeManager.handleReceivedUser(replayedNodeNum, replayedUser)
@@ -1275,13 +1582,15 @@ class NodeManagerImplTest {
     fun `pre-ready user packet stays notification-suppressed across a CAS retry`() {
         val replayedNodeNum = 2998
         val replayedUser =
-            User(
-                id = "!retry",
-                long_name = "Retried Baseline Node",
-                short_name = "RTY",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = ByteArray(32) { (it + 91).toByte() }.toByteString(),
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!retry"
+                    wb.long_name = "Retried Baseline Node"
+                    wb.short_name = "RTY"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = ByteArray(32) { (it + 91).toByte() }.toByteString()
+                }
+                .build()
         var reductionCount = 0
         nodeManager.receivedUserReductionHook = {
             reductionCount += 1
@@ -1305,13 +1614,15 @@ class NodeManagerImplTest {
         val newNodeNum = 3000
         val newPk = ByteArray(32) { (it + 100).toByte() }.toByteString()
         val newUser =
-            User(
-                id = "!newnode",
-                long_name = "New Node",
-                short_name = "NEW",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = newPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!newnode"
+                    wb.long_name = "New Node"
+                    wb.short_name = "NEW"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = newPk
+                }
+                .build()
         enableDbWrites()
 
         val captured = mutableListOf<Notification>()
@@ -1351,33 +1662,44 @@ class NodeManagerImplTest {
         // (a) null key
         nodeManager.handleReceivedUser(
             targetNum,
-            User(id = "!a", long_name = "A", short_name = "A", hw_model = HardwareModel.TLORA_V2),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!a"
+                    wb.long_name = "A"
+                    wb.short_name = "A"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
         // (b) empty key
         nodeManager.handleReceivedUser(
             targetNum,
-            User(
-                id = "!b",
-                long_name = "B",
-                short_name = "B",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = ByteString.EMPTY,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!b"
+                    wb.long_name = "B"
+                    wb.short_name = "B"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = ByteString.EMPTY
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
         // (c) ERROR key
         nodeManager.handleReceivedUser(
             targetNum,
-            User(
-                id = "!c",
-                long_name = "C",
-                short_name = "C",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = Node.ERROR_BYTE_STRING,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!c"
+                    wb.long_name = "C"
+                    wb.short_name = "C"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = Node.ERROR_BYTE_STRING
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -1394,13 +1716,15 @@ class NodeManagerImplTest {
         enableDbWrites()
 
         val updatedUser =
-            User(
-                id = "!${nodeNum.toString(16)}",
-                long_name = "Updated",
-                short_name = "UPD",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!${nodeNum.toString(16)}"
+                    wb.long_name = "Updated"
+                    wb.short_name = "UPD"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build()
         nodeManager.handleReceivedUser(nodeNum, updatedUser)
         testScope.advanceUntilIdle()
 
@@ -1423,13 +1747,15 @@ class NodeManagerImplTest {
         enableDbWrites()
 
         val staleUser =
-            User(
-                id = "!old",
-                long_name = "Stale Packet",
-                short_name = "STL",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!old"
+                    wb.long_name = "Stale Packet"
+                    wb.short_name = "STL"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build()
         nodeManager.handleReceivedUser(oldNum, staleUser)
         testScope.advanceUntilIdle()
 
@@ -1449,7 +1775,15 @@ class NodeManagerImplTest {
         nodeManager.updateNode(staleOld) { makeKnownNode(staleOld, validPk, "Old") }
         nodeManager.handleReceivedUser(
             staleOld,
-            User(id = "!s", long_name = "S", short_name = "S", hw_model = HardwareModel.TLORA_V2, public_key = validPk),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!s"
+                    wb.long_name = "S"
+                    wb.short_name = "S"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build(),
         )
 
         // Conflict: different established identity at fromNum.
@@ -1460,7 +1794,15 @@ class NodeManagerImplTest {
         nodeManager.updateNode(conflictFrom) { makeKnownNode(conflictFrom, conflictPk, "Established") }
         nodeManager.handleReceivedUser(
             conflictFrom,
-            User(id = "!c", long_name = "C", short_name = "C", hw_model = HardwareModel.TLORA_V2, public_key = validPk),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!c"
+                    wb.long_name = "C"
+                    wb.short_name = "C"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build(),
         )
 
         // Local: fromNum == myNodeNum, local-link authoritative update.
@@ -1470,7 +1812,15 @@ class NodeManagerImplTest {
         nodeManager.updateNode(localGhost) { makeKnownNode(localGhost, validPk, "Ghost") }
         nodeManager.handleReceivedUser(
             localNum,
-            User(id = "!l", long_name = "L", short_name = "L", hw_model = HardwareModel.TLORA_V2, public_key = validPk),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!l"
+                    wb.long_name = "L"
+                    wb.short_name = "L"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build(),
         )
 
         testScope.advanceUntilIdle()
@@ -1491,13 +1841,15 @@ class NodeManagerImplTest {
             Node(
                 num = newNum,
                 user =
-                User(
-                    id = sharedUserId,
-                    long_name = "Canonical",
-                    short_name = "CAN",
-                    hw_model = HardwareModel.TLORA_V2,
-                    public_key = validPk,
-                ),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = sharedUserId
+                        wb.long_name = "Canonical"
+                        wb.short_name = "CAN"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                        wb.public_key = validPk
+                    }
+                    .build(),
                 publicKey = validPk,
             )
         }
@@ -1505,26 +1857,30 @@ class NodeManagerImplTest {
             Node(
                 num = oldNum,
                 user =
-                User(
-                    id = sharedUserId,
-                    long_name = "Stale",
-                    short_name = "STL",
-                    hw_model = HardwareModel.TLORA_V2,
-                    public_key = validPk,
-                ),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = sharedUserId
+                        wb.long_name = "Stale"
+                        wb.short_name = "STL"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                        wb.public_key = validPk
+                    }
+                    .build(),
                 publicKey = validPk,
             )
         }
         enableDbWrites()
 
         val staleUser =
-            User(
-                id = sharedUserId,
-                long_name = "Stale",
-                short_name = "STL",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validPk,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = sharedUserId
+                    wb.long_name = "Stale"
+                    wb.short_name = "STL"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validPk
+                }
+                .build()
         nodeManager.handleReceivedUser(oldNum, staleUser)
         testScope.advanceUntilIdle()
 
@@ -1548,39 +1904,45 @@ class NodeManagerImplTest {
         // All malformed keys should be treated as no-key (normal update path).
         nodeManager.handleReceivedUser(
             nodeNum,
-            User(
-                id = "!short",
-                long_name = "S",
-                short_name = "S",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = shortKey,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!short"
+                    wb.long_name = "S"
+                    wb.short_name = "S"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = shortKey
+                }
+                .build(),
         )
         var result = nodeManager.nodeDBbyNodeNum[nodeNum]
         assertEquals(ByteString.EMPTY, result!!.publicKey)
 
         nodeManager.handleReceivedUser(
             nodeNum,
-            User(
-                id = "!almost",
-                long_name = "A",
-                short_name = "A",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = almostKey,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!almost"
+                    wb.long_name = "A"
+                    wb.short_name = "A"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = almostKey
+                }
+                .build(),
         )
         result = nodeManager.nodeDBbyNodeNum[nodeNum]
         assertEquals(ByteString.EMPTY, result!!.publicKey)
 
         nodeManager.handleReceivedUser(
             nodeNum,
-            User(
-                id = "!long",
-                long_name = "L",
-                short_name = "L",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = longKey,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!long"
+                    wb.long_name = "L"
+                    wb.short_name = "L"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = longKey
+                }
+                .build(),
         )
         result = nodeManager.nodeDBbyNodeNum[nodeNum]
         assertEquals(ByteString.EMPTY, result!!.publicKey)
@@ -1596,13 +1958,15 @@ class NodeManagerImplTest {
 
         nodeManager.handleReceivedUser(
             nodeNum,
-            User(
-                id = "!test",
-                long_name = "Test",
-                short_name = "T",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = validUserKey,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!test"
+                    wb.long_name = "Test"
+                    wb.short_name = "T"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = validUserKey
+                }
+                .build(),
         )
         // Manually set an invalid Node.publicKey
         nodeManager.updateNode(nodeNum) { it.copy(publicKey = invalidNodeKey) }
@@ -1630,13 +1994,15 @@ class NodeManagerImplTest {
             Node(
                 num = conflictNum,
                 user =
-                User(
-                    id = "!conflict",
-                    long_name = "Conflict",
-                    short_name = "CON",
-                    hw_model = HardwareModel.UNSET,
-                    public_key = conflictKey,
-                ),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!conflict"
+                        wb.long_name = "Conflict"
+                        wb.short_name = "CON"
+                        wb.hw_model = HardwareModel.UNSET
+                        wb.public_key = conflictKey
+                    }
+                    .build(),
                 publicKey = conflictKey,
             )
         }
@@ -1644,13 +2010,15 @@ class NodeManagerImplTest {
         // Packet at conflictNum with canonicalKey should be treated as conflict (preserve both)
         nodeManager.handleReceivedUser(
             conflictNum,
-            User(
-                id = "!c",
-                long_name = "C",
-                short_name = "C",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = canonicalKey,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!c"
+                    wb.long_name = "C"
+                    wb.short_name = "C"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = canonicalKey
+                }
+                .build(),
         )
 
         // Both nodes should still exist
@@ -1666,22 +2034,26 @@ class NodeManagerImplTest {
     fun `custom incomplete identity is preserved over default incoming`() {
         val nodeNum = 1234
         val customUser =
-            User(
-                id = "!custom",
-                long_name = "My Custom Name",
-                short_name = "MCN",
-                hw_model = HardwareModel.UNSET, // Incomplete hardware
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!custom"
+                    wb.long_name = "My Custom Name"
+                    wb.short_name = "MCN"
+                    wb.hw_model = HardwareModel.UNSET // Incomplete hardware
+                }
+                .build()
         nodeManager.updateNode(nodeNum) { it.copy(user = customUser) }
 
         // Incoming default user should not overwrite custom identity
         val defaultUser =
-            User(
-                id = NodeAddress.numToDefaultId(nodeNum),
-                long_name = "Meshtastic ${nodeNum.toHex().takeLast(4)}",
-                short_name = nodeNum.toHex().takeLast(4),
-                hw_model = HardwareModel.UNSET,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = NodeAddress.numToDefaultId(nodeNum)
+                    wb.long_name = "Meshtastic ${nodeNum.toHex().takeLast(4)}"
+                    wb.short_name = nodeNum.toHex().takeLast(4)
+                    wb.hw_model = HardwareModel.UNSET
+                }
+                .build()
         nodeManager.handleReceivedUser(nodeNum, defaultUser)
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]
@@ -1702,19 +2074,43 @@ class NodeManagerImplTest {
         nodeManager.updateNode(node1) {
             Node(
                 num = node1,
-                user = User(id = userId, long_name = "N1", short_name = "N1", hw_model = HardwareModel.UNSET),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = userId
+                        wb.long_name = "N1"
+                        wb.short_name = "N1"
+                        wb.hw_model = HardwareModel.UNSET
+                    }
+                    .build(),
             )
         }
         nodeManager.updateNode(node2) {
             Node(
                 num = node2,
-                user = User(id = userId, long_name = "N2", short_name = "N2", hw_model = HardwareModel.TLORA_V2),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = userId
+                        wb.long_name = "N2"
+                        wb.short_name = "N2"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                    }
+                    .build(),
             )
         }
         nodeManager.updateNode(node3) {
             Node(
                 num = node3,
-                user = User(id = userId, long_name = "N3", short_name = "N3", hw_model = HardwareModel.UNSET),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = userId
+                        wb.long_name = "N3"
+                        wb.short_name = "N3"
+                        wb.hw_model = HardwareModel.UNSET
+                    }
+                    .build(),
             )
         }
 
@@ -1737,20 +2133,45 @@ class NodeManagerImplTest {
         nodeManager.updateNode(nodeNum) {
             Node(
                 num = nodeNum,
-                user = User(id = oldUserId, long_name = "Old", short_name = "OLD", hw_model = HardwareModel.TLORA_V2),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = oldUserId
+                        wb.long_name = "Old"
+                        wb.short_name = "OLD"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                    }
+                    .build(),
             )
         }
         nodeManager.updateNode(survivorNum) {
             Node(
                 num = survivorNum,
                 user =
-                User(id = oldUserId, long_name = "Survivor", short_name = "SUR", hw_model = HardwareModel.TLORA_V2),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = oldUserId
+                        wb.long_name = "Survivor"
+                        wb.short_name = "SUR"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                    }
+                    .build(),
             )
         }
 
         // Change nodeNum's user ID
         nodeManager.updateNode(nodeNum) {
-            it.copy(user = it.user.copy(id = newUserId, long_name = "New", short_name = "NEW"))
+            it.copy(
+                user =
+                it.user
+                    .newBuilder()
+                    .also { wb ->
+                        wb.id = newUserId
+                        wb.long_name = "New"
+                        wb.short_name = "NEW"
+                    }
+                    .build(),
+            )
         }
 
         // byId for oldUserId should now point to survivorNum
@@ -1777,17 +2198,28 @@ class NodeManagerImplTest {
                 node1 to
                     Node(
                         num = node1,
-                        user = User(id = userId, long_name = "N1", short_name = "N1", hw_model = HardwareModel.UNSET),
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = userId
+                                wb.long_name = "N1"
+                                wb.short_name = "N1"
+                                wb.hw_model = HardwareModel.UNSET
+                            }
+                            .build(),
                     ),
                 node2 to
                     Node(
                         num = node2,
-                        user = User(
-                            id = userId,
-                            long_name = "N2",
-                            short_name = "N2",
-                            hw_model = HardwareModel.TLORA_V2,
-                        ),
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = userId
+                                wb.long_name = "N2"
+                                wb.short_name = "N2"
+                                wb.hw_model = HardwareModel.TLORA_V2
+                            }
+                            .build(),
                     ),
             )
         val nodes21 =
@@ -1795,17 +2227,28 @@ class NodeManagerImplTest {
                 node2 to
                     Node(
                         num = node2,
-                        user = User(
-                            id = userId,
-                            long_name = "N2",
-                            short_name = "N2",
-                            hw_model = HardwareModel.TLORA_V2,
-                        ),
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = userId
+                                wb.long_name = "N2"
+                                wb.short_name = "N2"
+                                wb.hw_model = HardwareModel.TLORA_V2
+                            }
+                            .build(),
                     ),
                 node1 to
                     Node(
                         num = node1,
-                        user = User(id = userId, long_name = "N1", short_name = "N1", hw_model = HardwareModel.UNSET),
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = userId
+                                wb.long_name = "N1"
+                                wb.short_name = "N1"
+                                wb.hw_model = HardwareModel.UNSET
+                            }
+                            .build(),
                     ),
             )
 
@@ -1832,13 +2275,15 @@ class NodeManagerImplTest {
             Node(
                 num = competingNum,
                 user =
-                User(
-                    id = userId,
-                    long_name = "Fallback Winner",
-                    short_name = "FBK",
-                    hw_model = HardwareModel.TLORA_V2,
-                    public_key = competingKey,
-                ),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = userId
+                        wb.long_name = "Fallback Winner"
+                        wb.short_name = "FBK"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                        wb.public_key = competingKey
+                    }
+                    .build(),
                 publicKey = competingKey,
             )
         }
@@ -1846,13 +2291,15 @@ class NodeManagerImplTest {
             Node(
                 num = preferredNum,
                 user =
-                User(
-                    id = userId,
-                    long_name = "Preferred",
-                    short_name = "PRE",
-                    hw_model = HardwareModel.TLORA_V2,
-                    public_key = canonicalKey,
-                ),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = userId
+                        wb.long_name = "Preferred"
+                        wb.short_name = "PRE"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                        wb.public_key = canonicalKey
+                    }
+                    .build(),
                 publicKey = canonicalKey,
             )
         }
@@ -1860,26 +2307,30 @@ class NodeManagerImplTest {
             Node(
                 num = staleNum,
                 user =
-                User(
-                    id = userId,
-                    long_name = "Stale",
-                    short_name = "STL",
-                    hw_model = HardwareModel.TLORA_V2,
-                    public_key = canonicalKey,
-                ),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = userId
+                        wb.long_name = "Stale"
+                        wb.short_name = "STL"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                        wb.public_key = canonicalKey
+                    }
+                    .build(),
                 publicKey = canonicalKey,
             )
         }
 
         nodeManager.handleReceivedUser(
             staleNum,
-            User(
-                id = userId,
-                long_name = "Stale Replay",
-                short_name = "STL",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = canonicalKey,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = userId
+                    wb.long_name = "Stale Replay"
+                    wb.short_name = "STL"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = canonicalKey
+                }
+                .build(),
         )
 
         assertNull(nodeManager.nodeDBbyNodeNum[staleNum])
@@ -1902,20 +2353,43 @@ class NodeManagerImplTest {
         nodeManager.updateNode(localNum) {
             Node(
                 num = localNum,
-                user = User(id = userId, long_name = "Local", short_name = "LOC", hw_model = HardwareModel.TLORA_V2),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = userId
+                        wb.long_name = "Local"
+                        wb.short_name = "LOC"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                    }
+                    .build(),
             )
         }
         nodeManager.updateNode(remoteNum) {
             Node(
                 num = remoteNum,
-                user = User(id = userId, long_name = "Remote", short_name = "REM", hw_model = HardwareModel.TLORA_V2),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = userId
+                        wb.long_name = "Remote"
+                        wb.short_name = "REM"
+                        wb.hw_model = HardwareModel.TLORA_V2
+                    }
+                    .build(),
             )
         }
 
         assertEquals(remoteNum, nodeManager.getNodeById(userId)!!.num)
         nodeManager.handleReceivedUser(
             localNum,
-            User(id = userId, long_name = "Local Updated", short_name = "LOC", hw_model = HardwareModel.TLORA_V2),
+            User.Builder()
+                .also { wb ->
+                    wb.id = userId
+                    wb.long_name = "Local Updated"
+                    wb.short_name = "LOC"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                }
+                .build(),
         )
 
         assertNotNull(nodeManager.nodeDBbyNodeNum[remoteNum])
@@ -1930,7 +2404,15 @@ class NodeManagerImplTest {
     fun `notification has exact title message ID category and deep link`() {
         enableDbWrites()
         val nodeNum = 1234
-        val user = User(id = "!test", long_name = "Test User", short_name = "TST", hw_model = HardwareModel.TLORA_V2)
+        val user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!test"
+                    wb.long_name = "Test User"
+                    wb.short_name = "TST"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                }
+                .build()
 
         nodeManager.handleReceivedUser(nodeNum, user)
         testScope.advanceUntilIdle()
@@ -1963,14 +2445,22 @@ class NodeManagerImplTest {
             Node(
                 num = canonicalNum,
                 user =
-                User(
-                    id = placeholderId,
-                    long_name = "Meshtastic ${placeholderId.takeLast(4)}",
-                    short_name = placeholderId.takeLast(4),
-                    hw_model = HardwareModel.UNSET,
-                ),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = placeholderId
+                        wb.long_name = "Meshtastic ${placeholderId.takeLast(4)}"
+                        wb.short_name = placeholderId.takeLast(4)
+                        wb.hw_model = HardwareModel.UNSET
+                    }
+                    .build(),
                 publicKey = ByteString.EMPTY,
-                position = ProtoPosition(latitude_i = 111, longitude_i = 222),
+                position =
+                ProtoPosition.Builder()
+                    .also { wb ->
+                        wb.latitude_i = 111
+                        wb.longitude_i = 222
+                    }
+                    .build(),
                 channel = 4,
             )
         }
@@ -1978,13 +2468,15 @@ class NodeManagerImplTest {
 
         nodeManager.handleReceivedUser(
             canonicalNum,
-            User(
-                id = "!canonical",
-                long_name = "Canonical",
-                short_name = "CAN",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = canonicalKey,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!canonical"
+                    wb.long_name = "Canonical"
+                    wb.short_name = "CAN"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = canonicalKey
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -2013,13 +2505,15 @@ class NodeManagerImplTest {
 
         nodeManager.handleReceivedUser(
             canonicalNum,
-            User(
-                id = "!fresh",
-                long_name = "Fresh Canonical",
-                short_name = "FRS",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = canonicalKey,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!fresh"
+                    wb.long_name = "Fresh Canonical"
+                    wb.short_name = "FRS"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = canonicalKey
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -2049,13 +2543,15 @@ class NodeManagerImplTest {
 
         nodeManager.handleReceivedUser(
             a,
-            User(
-                id = "!a",
-                long_name = "Alpha Packet",
-                short_name = "ALA",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = key,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!a"
+                    wb.long_name = "Alpha Packet"
+                    wb.short_name = "ALA"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = key
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -2086,13 +2582,15 @@ class NodeManagerImplTest {
 
         nodeManager.handleReceivedUser(
             canonicalNum,
-            User(
-                id = "!c",
-                long_name = "Claimant",
-                short_name = "CLM",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = canonicalKey,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!c"
+                    wb.long_name = "Claimant"
+                    wb.short_name = "CLM"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = canonicalKey
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -2125,13 +2623,15 @@ class NodeManagerImplTest {
 
         nodeManager.handleReceivedUser(
             newLocalNum,
-            User(
-                id = "!local9999",
-                long_name = "Current Local",
-                short_name = "LOC",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = key,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!local9999"
+                    wb.long_name = "Current Local"
+                    wb.short_name = "LOC"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = key
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -2155,13 +2655,15 @@ class NodeManagerImplTest {
 
         nodeManager.handleReceivedUser(
             num,
-            User(
-                id = "!session-reset",
-                long_name = "Previous Session",
-                short_name = "OLD",
-                hw_model = HardwareModel.TLORA_V2,
-                public_key = key,
-            ),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!session-reset"
+                    wb.long_name = "Previous Session"
+                    wb.short_name = "OLD"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.public_key = key
+                }
+                .build(),
         )
         testScope.advanceUntilIdle()
 
@@ -2178,14 +2680,26 @@ class NodeManagerImplTest {
         val sharedId = "!shared"
         val replacementId = "!replacement"
         var index = NodeManagerImpl.NodeIndex()
-        index = index.put(1, makeKnownNode(1, keyA).copy(user = makeKnownNode(1, keyA).user.copy(id = sharedId)))
-        index = index.put(2, makeKnownNode(2, keyA).copy(user = makeKnownNode(2, keyA).user.copy(id = sharedId)))
+        index =
+            index.put(
+                1,
+                makeKnownNode(1, keyA)
+                    .copy(user = makeKnownNode(1, keyA).user.newBuilder().also { wb -> wb.id = sharedId }.build()),
+            )
+        index =
+            index.put(
+                2,
+                makeKnownNode(2, keyA)
+                    .copy(user = makeKnownNode(2, keyA).user.newBuilder().also { wb -> wb.id = sharedId }.build()),
+            )
 
         assertEquals<Set<Int>?>(setOf(1, 2), index.candidateNumsById[sharedId])
         assertEquals<Set<Int>?>(setOf(1, 2), index.candidateNumsByPublicKey[keyA])
         assertEquals(1, index.byId[sharedId]?.num)
 
-        val replacement = makeKnownNode(1, keyB).copy(user = makeKnownNode(1, keyB).user.copy(id = replacementId))
+        val replacement =
+            makeKnownNode(1, keyB)
+                .copy(user = makeKnownNode(1, keyB).user.newBuilder().also { wb -> wb.id = replacementId }.build())
         index = index.put(1, replacement)
         assertEquals<Set<Int>?>(setOf(2), index.candidateNumsById[sharedId])
         assertEquals<Set<Int>?>(setOf(1), index.candidateNumsById[replacementId])
@@ -2203,13 +2717,15 @@ class NodeManagerImplTest {
 
     private fun Int.toHex(): String = this.toString(16).padStart(8, '0')
 
-    private fun userWithKey(key: ByteString, longName: String, shortName: String): User = User(
-        id = key.hex(),
-        long_name = longName,
-        short_name = shortName,
-        hw_model = HardwareModel.TLORA_V2,
-        public_key = key,
-    )
+    private fun userWithKey(key: ByteString, longName: String, shortName: String): User = User.Builder()
+        .also { wb ->
+            wb.id = key.hex()
+            wb.long_name = longName
+            wb.short_name = shortName
+            wb.hw_model = HardwareModel.TLORA_V2
+            wb.public_key = key
+        }
+        .build()
 
     // ---------- Retired-node notification behavior ----------
 

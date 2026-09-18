@@ -118,7 +118,7 @@ private fun buildRegionItems(capabilities: Capabilities, selectedRegion: RegionC
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val loraConfig = state.radioConfig.lora ?: Config.LoRaConfig()
+    val loraConfig = state.radioConfig.lora ?: Config.LoRaConfig.Builder().build()
     val primarySettings = state.channelList.getOrNull(0)
 
     if (primarySettings == null) {
@@ -156,7 +156,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config(lora = it)
+            val config = Config.Builder().also { wb -> wb.lora = it }.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -196,7 +196,14 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                                 newRegion = region,
                                 current = formState.value.modem_preset,
                             )
-                        formState.value = formState.value.copy(region = region, modem_preset = preset)
+                        formState.value =
+                            formState.value
+                                .newBuilder()
+                                .also { wb ->
+                                    wb.region = region
+                                    wb.modem_preset = preset
+                                }
+                                .build()
                     },
                 )
                 HorizontalDivider()
@@ -204,7 +211,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.use_modem_preset),
                     checked = formState.value.use_preset,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(use_preset = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.use_preset = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -228,7 +237,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         enabled = state.connected,
                         items = presetItems,
                         selectedItem = formState.value.modem_preset,
-                        onItemSelected = { formState.value = formState.value.copy(modem_preset = it) },
+                        onItemSelected = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.modem_preset = it }.build()
+                        },
                     )
                 } else {
                     ManualModemSettings(
@@ -248,7 +259,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.ignore_mqtt),
                     checked = formState.value.ignore_mqtt,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(ignore_mqtt = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.ignore_mqtt = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -256,7 +269,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.ok_to_mqtt),
                     checked = formState.value.config_ok_to_mqtt,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(config_ok_to_mqtt = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.config_ok_to_mqtt = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -264,7 +279,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.tx_enabled),
                     checked = formState.value.tx_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(tx_enabled = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.tx_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -272,7 +289,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.override_duty_cycle),
                     checked = formState.value.override_duty_cycle,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(override_duty_cycle = it) },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.override_duty_cycle = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -282,7 +302,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     summary = stringResource(Res.string.config_lora_hop_limit_summary),
                     items = hopLimitItems,
                     selectedItem = formState.value.hop_limit,
-                    onItemSelected = { formState.value = formState.value.copy(hop_limit = it) },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.hop_limit = it }.build()
+                    },
                     enabled = state.connected,
                 )
                 HorizontalDivider()
@@ -301,7 +323,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     onFocusChanged = { isFocusedSlot = it.isFocused },
                     onValueChanged = {
                         if (it <= formState.value.numChannels) { // total num of LoRa channels
-                            formState.value = formState.value.copy(channel_num = it)
+                            formState.value = formState.value.newBuilder().also { wb -> wb.channel_num = it }.build()
                         }
                     },
                 )
@@ -310,7 +332,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.sx126x_rx_boosted_gain),
                     checked = formState.value.sx126x_rx_boosted_gain,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(sx126x_rx_boosted_gain = it) },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.sx126x_rx_boosted_gain = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -326,7 +351,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onFocusChanged = { isFocusedOverride = it.isFocused },
-                    onValueChanged = { formState.value = formState.value.copy(override_frequency = it) },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.override_frequency = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 SignedIntegerEditTextPreference(
@@ -334,7 +361,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.tx_power,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(tx_power = it) },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.tx_power = it }.build()
+                    },
                 )
                 if (viewModel.hasPaFan) {
                     HorizontalDivider()
@@ -342,7 +371,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         title = stringResource(Res.string.pa_fan_disabled),
                         checked = formState.value.pa_fan_disabled,
                         enabled = state.connected,
-                        onCheckedChange = { formState.value = formState.value.copy(pa_fan_disabled = it) },
+                        onCheckedChange = {
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.pa_fan_disabled = it }.build()
+                        },
                         containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
@@ -376,7 +408,7 @@ private fun ManualModemSettings(
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             onValueChanged = {
                 if (it in SPREAD_FACTOR_RANGE) {
-                    onConfigChange(config.copy(spread_factor = it))
+                    onConfigChange(config.newBuilder().also { wb -> wb.spread_factor = it }.build())
                 }
             },
         )
@@ -389,7 +421,7 @@ private fun ManualModemSettings(
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             onValueChanged = {
                 if (it in CODING_RATE_RANGE) {
-                    onConfigChange(config.copy(coding_rate = it))
+                    onConfigChange(config.newBuilder().also { wb -> wb.coding_rate = it }.build())
                 }
             },
         )
@@ -411,7 +443,7 @@ internal fun LoRaBandwidthPreference(
             value = config.bandwidth,
             enabled = enabled,
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            onValueChanged = { onConfigChange(config.copy(bandwidth = it)) },
+            onValueChanged = { onConfigChange(config.newBuilder().also { wb -> wb.bandwidth = it }.build()) },
         )
         return
     }
@@ -447,6 +479,6 @@ internal fun LoRaBandwidthPreference(
         enabled = enabled,
         items = items,
         selectedItem = config.bandwidth,
-        onItemSelected = { onConfigChange(config.copy(bandwidth = it)) },
+        onItemSelected = { onConfigChange(config.newBuilder().also { wb -> wb.bandwidth = it }.build()) },
     )
 }

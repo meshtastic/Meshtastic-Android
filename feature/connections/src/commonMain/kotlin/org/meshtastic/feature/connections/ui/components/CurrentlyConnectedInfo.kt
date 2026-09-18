@@ -157,10 +157,28 @@ private fun CurrentlyConnectedInfoPreview() {
             node =
             Node(
                 num = 13444,
-                user = User(short_name = "\uD83E\uDEE0", long_name = "John Doe"),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.short_name = "\uD83E\uDEE0"
+                        wb.long_name = "John Doe"
+                    }
+                    .build(),
                 isIgnored = false,
-                paxcounter = Paxcount(ble = 10, wifi = 5),
-                environmentMetrics = EnvironmentMetrics(temperature = 25f, relative_humidity = 60f),
+                paxcounter =
+                Paxcount.Builder()
+                    .also { wb ->
+                        wb.ble = 10
+                        wb.wifi = 5
+                    }
+                    .build(),
+                environmentMetrics =
+                EnvironmentMetrics.Builder()
+                    .also { wb ->
+                        wb.temperature = 25f
+                        wb.relative_humidity = 60f
+                    }
+                    .build(),
             ),
             text =
             CurrentlyConnectedText(

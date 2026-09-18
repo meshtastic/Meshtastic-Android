@@ -48,20 +48,23 @@ class PacketAuthenticitySettingTest {
     fun `protobuf default is compatible`() {
         assertEquals(
             PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_COMPATIBLE,
-            Config.SecurityConfig().packet_signature_policy,
+            Config.SecurityConfig.Builder().build().packet_signature_policy,
         )
     }
 
     @Test
     fun `balanced selection updates the device config field`() = runComposeUiTest {
-        var updatedConfig = Config.SecurityConfig()
+        var updatedConfig = Config.SecurityConfig.Builder().build()
         setContent {
             AppTheme {
                 PacketAuthenticitySetting(
                     selectedPolicy = updatedConfig.packet_signature_policy,
                     connected = true,
                     supported = true,
-                    onPolicyChange = { policy -> updatedConfig = updatedConfig.copy(packet_signature_policy = policy) },
+                    onPolicyChange = { policy ->
+                        updatedConfig =
+                            updatedConfig.newBuilder().also { wb -> wb.packet_signature_policy = policy }.build()
+                    },
                 )
             }
         }

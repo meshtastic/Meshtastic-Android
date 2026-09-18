@@ -98,7 +98,7 @@ internal fun WaypointDialogs(
                 canDeleteForEveryone = waypoint.removableForEveryone(viewModel.myNodeNum, isConnected),
                 onDeleteForMe = { viewModel.deleteWaypoint(waypoint.id) },
                 onDeleteForEveryone = {
-                    viewModel.sendWaypoint(waypoint.copy(expire = 1))
+                    viewModel.sendWaypoint(waypoint.newBuilder().also { wb -> wb.expire = 1 }.build())
                     viewModel.deleteWaypoint(waypoint.id)
                 },
                 onDone = { deletingId = null },
@@ -203,10 +203,12 @@ internal fun rememberWaypointEditing(): WaypointEditing {
         onLongPress = { position ->
             if (isConnected && box.draft == null) {
                 pending =
-                    Waypoint(
-                        latitude_i = (position.latitude / DEG_SCALE).toInt(),
-                        longitude_i = (position.longitude / DEG_SCALE).toInt(),
-                    )
+                    Waypoint.Builder()
+                        .also { wb ->
+                            wb.latitude_i = (position.latitude / DEG_SCALE).toInt()
+                            wb.longitude_i = (position.longitude / DEG_SCALE).toInt()
+                        }
+                        .build()
             }
         },
         pending = pending,
@@ -220,7 +222,7 @@ internal fun rememberWaypointEditing(): WaypointEditing {
             // left the waypoint on everyone else's map — while deleting the same waypoint from its info dialog, two
             // taps away, removed it properly. The Google flavor broadcasts from both.
             if (toDelete.removableForEveryone(viewModel.myNodeNum, isConnected)) {
-                viewModel.sendWaypoint(toDelete.copy(expire = 1))
+                viewModel.sendWaypoint(toDelete.newBuilder().also { wb -> wb.expire = 1 }.build())
             }
             viewModel.deleteWaypoint(toDelete.id)
             pending = null
@@ -262,7 +264,7 @@ private fun rememberBoxAuthoring(onApplyBox: (Waypoint) -> Unit, onReopenEditor:
     var firstCorner by remember { mutableStateOf<Position?>(null) }
 
     fun apply(corners: ProtoBoundingBox) {
-        draft?.let { onApplyBox(it.copy(bounding_box = corners)) }
+        draft?.let { onApplyBox(it.newBuilder().also { wb -> wb.bounding_box = corners }.build()) }
         draft = null
         firstCorner = null
     }
@@ -311,18 +313,24 @@ private fun Position.isDistinctFrom(other: Position): Boolean =
     abs(latitude - other.latitude) >= MIN_CORNER_DELTA_DEG && abs(longitude - other.longitude) >= MIN_CORNER_DELTA_DEG
 
 /** A proto bounding box (degrees x 1e7) from two opposite corners, in either order. */
-internal fun boundingBoxFromCorners(a: Position, b: Position): ProtoBoundingBox = ProtoBoundingBox(
-    longitude_west_i = (minOf(a.longitude, b.longitude) / DEG_SCALE).toInt(),
-    latitude_south_i = (minOf(a.latitude, b.latitude) / DEG_SCALE).toInt(),
-    longitude_east_i = (maxOf(a.longitude, b.longitude) / DEG_SCALE).toInt(),
-    latitude_north_i = (maxOf(a.latitude, b.latitude) / DEG_SCALE).toInt(),
-)
+internal fun boundingBoxFromCorners(a: Position, b: Position): ProtoBoundingBox = ProtoBoundingBox.Builder()
+    .also { wb ->
+        wb.longitude_west_i = (minOf(a.longitude, b.longitude) / DEG_SCALE).toInt()
+        wb.latitude_south_i = (minOf(a.latitude, b.latitude) / DEG_SCALE).toInt()
+        wb.longitude_east_i = (maxOf(a.longitude, b.longitude) / DEG_SCALE).toInt()
+        wb.latitude_north_i = (maxOf(a.latitude, b.latitude) / DEG_SCALE).toInt()
+    }
+    .build()
 
 private const val MIN_CORNER_DELTA_DEG = 1e-4
 
 /** A new waypoint arrives with id 0 and no icon; it needs both before it goes on air. */
-private fun Waypoint.readyToSend(nextPacketId: () -> Int): Waypoint =
-    copy(id = if (id == 0) nextPacketId() else id, icon = icon.waypointIconOrDefault())
+private fun Waypoint.readyToSend(nextPacketId: () -> Int): Waypoint = this.newBuilder()
+    .also { wb ->
+        wb.id = if (id == 0) nextPacketId() else id
+        wb.icon = icon.waypointIconOrDefault()
+    }
+    .build()
 
 /** Waypoint coordinates travel as degrees scaled by 1e7. */
 private const val DEG_SCALE = 1e-7

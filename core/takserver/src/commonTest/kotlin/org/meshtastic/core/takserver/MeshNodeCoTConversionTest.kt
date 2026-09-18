@@ -153,15 +153,22 @@ class MeshNodeCoTConversionTest {
             shortName: String = "WOLF",
             longName: String = "Wolf Ridge Relay",
             hwModel: org.meshtastic.proto.HardwareModel = org.meshtastic.proto.HardwareModel.TBEAM,
-        ) = org.meshtastic.proto.User(
-            id = "!a1b2c3d4",
-            short_name = shortName,
-            long_name = longName,
-            hw_model = hwModel,
-        )
+        ) = org.meshtastic.proto.User.Builder()
+            .also { wb ->
+                wb.id = "!a1b2c3d4"
+                wb.short_name = shortName
+                wb.long_name = longName
+                wb.hw_model = hwModel
+            }
+            .build()
 
         fun position(latitudeI: Int = 377_749_000, longitudeI: Int = -1_224_194_000) =
-            org.meshtastic.proto.Position(latitude_i = latitudeI, longitude_i = longitudeI)
+            org.meshtastic.proto.Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = latitudeI
+                    wb.longitude_i = longitudeI
+                }
+                .build()
 
         @Suppress("LongParameterList")
         fun meshNode(
@@ -188,12 +195,14 @@ class MeshNodeCoTConversionTest {
                 snr = snr,
                 rssi = rssi,
                 deviceMetrics =
-                org.meshtastic.proto.DeviceMetrics(
-                    battery_level = batteryLevel,
-                    voltage = voltage,
-                    channel_utilization = channelUtilization,
-                    air_util_tx = airUtilTx,
-                ),
+                org.meshtastic.proto.DeviceMetrics.Builder()
+                    .also { wb ->
+                        wb.battery_level = batteryLevel
+                        wb.voltage = voltage
+                        wb.channel_utilization = channelUtilization
+                        wb.air_util_tx = airUtilTx
+                    }
+                    .build(),
             )
     }
 }

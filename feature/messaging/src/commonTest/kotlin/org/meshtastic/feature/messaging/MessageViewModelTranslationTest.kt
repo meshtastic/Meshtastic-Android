@@ -165,7 +165,7 @@ class MessageViewModelTranslationTest {
             }
         }
 
-        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
         every { connectionStateProvider.connectionState } returns
             MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
         every { customEmojiPrefs.customEmojiFrequency } returns MutableStateFlow<String?>(null)

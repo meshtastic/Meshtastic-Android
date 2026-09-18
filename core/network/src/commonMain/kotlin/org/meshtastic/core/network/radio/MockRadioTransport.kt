@@ -57,15 +57,23 @@ import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
 
 private val defaultLoRaConfig =
-    Config.LoRaConfig(
-        use_preset = true,
-        modem_preset = Config.LoRaConfig.ModemPreset.LONG_FAST,
-        region = Config.LoRaConfig.RegionCode.US,
-        hop_limit = 3,
-        tx_enabled = true,
-    )
+    Config.LoRaConfig.Builder()
+        .also { wb ->
+            wb.use_preset = true
+            wb.modem_preset = Config.LoRaConfig.ModemPreset.LONG_FAST
+            wb.region = Config.LoRaConfig.RegionCode.US
+            wb.hop_limit = 3
+            wb.tx_enabled = true
+        }
+        .build()
 
-private val defaultChannel = ProtoChannel(settings = Channel.default.settings, role = ProtoChannel.Role.PRIMARY)
+private val defaultChannel =
+    ProtoChannel.Builder()
+        .also { wb ->
+            wb.settings = Channel.default.settings
+            wb.role = ProtoChannel.Role.PRIMARY
+        }
+        .build()
 
 /**
  * A simulated radio, selected as "Demo Mode" in the Connections screen.
@@ -174,32 +182,49 @@ class MockRadioTransport(
         when {
             d.get_config_request == AdminMessage.ConfigType.LORA_CONFIG ->
                 sendAdmin(packet.to, packet.from, packet.id) {
-                    copy(get_config_response = Config(lora = defaultLoRaConfig))
+                    this.newBuilder()
+                        .also { wb ->
+                            wb.get_config_response = Config.Builder().also { wb -> wb.lora = defaultLoRaConfig }.build()
+                        }
+                        .build()
                 }
 
             (d.get_channel_request ?: 0) != 0 ->
                 sendAdmin(packet.to, packet.from, packet.id) {
-                    copy(
-                        get_channel_response =
-                        ProtoChannel(
-                            index = (d.get_channel_request ?: 0) - 1, // 0 based on the response
-                            settings = if (d.get_channel_request == 1) Channel.default.settings else null,
-                            role =
-                            if (d.get_channel_request == 1) {
-                                ProtoChannel.Role.PRIMARY
-                            } else {
-                                ProtoChannel.Role.DISABLED
-                            },
-                        ),
-                    )
+                    this.newBuilder()
+                        .also { wb ->
+                            wb.get_channel_response =
+                                ProtoChannel.Builder()
+                                    .also { wb ->
+                                        wb.index = (d.get_channel_request ?: 0) - 1 // 0 based on the response
+                                        wb.settings = if (d.get_channel_request == 1) Channel.default.settings else null
+                                        wb.role =
+                                            if (d.get_channel_request == 1) {
+                                                ProtoChannel.Role.PRIMARY
+                                            } else {
+                                                ProtoChannel.Role.DISABLED
+                                            }
+                                    }
+                                    .build()
+                        }
+                        .build()
                 }
 
             d.get_module_config_request == AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG ->
                 sendAdmin(packet.to, packet.from, packet.id) {
-                    copy(
-                        get_module_config_response =
-                        ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = MY_NODE_STATUS)),
-                    )
+                    this.newBuilder()
+                        .also { wb ->
+                            wb.get_module_config_response =
+                                ModuleConfig.Builder()
+                                    .also { wb ->
+                                        wb.statusmessage =
+                                            ModuleConfig.StatusMessageConfig.Builder()
+                                                .also { wb -> wb.node_status = MY_NODE_STATUS }
+                                                .build()
+                                    }
+                                    .build()
+                        }
+                        .build()
                 }
 
             else -> Logger.i { "Ignoring admin sent to mock transport $d" }
@@ -220,26 +245,62 @@ class MockRadioTransport(
     /** Stage 1: our own identity, device metadata, config and channels. Deliberately carries no `node_info`. */
     private fun sendConfigStage() {
         Logger.d { "Mock transport answering config stage" }
-        val metadata = DeviceMetadata(firmware_version = FIRMWARE_VERSION, hw_model = HardwareModel.ANDROID_SIM)
+        val metadata =
+            DeviceMetadata.Builder()
+                .also { wb ->
+                    wb.firmware_version = FIRMWARE_VERSION
+                    wb.hw_model = HardwareModel.ANDROID_SIM
+                }
+                .build()
         val frames =
             listOf(
-                FromRadio(my_info = ProtoMyNodeInfo(my_node_num = MY_NODE, reboot_count = 3)),
-                FromRadio(metadata = metadata),
-                FromRadio(config = Config(lora = defaultLoRaConfig)),
-                FromRadio(config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT))),
-                FromRadio(
-                    config =
-                    Config(
-                        position =
-                        Config.PositionConfig(
-                            position_broadcast_secs = 900,
-                            position_broadcast_smart_enabled = true,
-                            gps_enabled = true,
-                        ),
-                    ),
-                ),
-                FromRadio(channel = defaultChannel),
-                FromRadio(config_complete_id = HandshakeConstants.CONFIG_NONCE),
+                FromRadio.Builder()
+                    .also { wb ->
+                        wb.my_info =
+                            ProtoMyNodeInfo.Builder()
+                                .also { wb ->
+                                    wb.my_node_num = MY_NODE
+                                    wb.reboot_count = 3
+                                }
+                                .build()
+                    }
+                    .build(),
+                FromRadio.Builder().also { wb -> wb.metadata = metadata }.build(),
+                FromRadio.Builder()
+                    .also { wb -> wb.config = Config.Builder().also { wb -> wb.lora = defaultLoRaConfig }.build() }
+                    .build(),
+                FromRadio.Builder()
+                    .also { wb ->
+                        wb.config =
+                            Config.Builder()
+                                .also { wb ->
+                                    wb.device =
+                                        Config.DeviceConfig.Builder()
+                                            .also { wb -> wb.role = Config.DeviceConfig.Role.CLIENT }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build(),
+                FromRadio.Builder()
+                    .also { wb ->
+                        wb.config =
+                            Config.Builder()
+                                .also { wb ->
+                                    wb.position =
+                                        Config.PositionConfig.Builder()
+                                            .also { wb ->
+                                                wb.position_broadcast_secs = 900
+                                                wb.position_broadcast_smart_enabled = true
+                                                wb.gps_enabled = true
+                                            }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build(),
+                FromRadio.Builder().also { wb -> wb.channel = defaultChannel }.build(),
+                FromRadio.Builder().also { wb -> wb.config_complete_id = HandshakeConstants.CONFIG_NONCE }.build(),
             )
         frames.forEach { callback.handleFromRadio(it.encode()) }
     }
@@ -247,58 +308,84 @@ class MockRadioTransport(
     /** Stage 2: the node database. This is the only window in which the app accepts `node_info`. */
     private fun sendNodeInfoStage() {
         Logger.d { "Mock transport answering node-info stage with ${SIM_PEERS.size + 1} nodes" }
-        callback.handleFromRadio(FromRadio(node_info = localNodeInfo()).encode())
-        SIM_PEERS.forEach { peer -> callback.handleFromRadio(FromRadio(node_info = peer.toNodeInfo()).encode()) }
-        callback.handleFromRadio(FromRadio(config_complete_id = HandshakeConstants.NODE_INFO_NONCE).encode())
+        callback.handleFromRadio(FromRadio.Builder().also { wb -> wb.node_info = localNodeInfo() }.build().encode())
+        SIM_PEERS.forEach { peer ->
+            callback.handleFromRadio(
+                FromRadio.Builder().also { wb -> wb.node_info = peer.toNodeInfo() }.build().encode(),
+            )
+        }
+        callback.handleFromRadio(
+            FromRadio.Builder()
+                .also { wb -> wb.config_complete_id = HandshakeConstants.NODE_INFO_NONCE }
+                .build()
+                .encode(),
+        )
 
         if (trafficStarted.compareAndSet(expect = false, update = true)) {
             transportScope.handledLaunch { seedTraffic() }
         }
     }
 
-    private fun localNodeInfo() = NodeInfo(
-        num = MY_NODE,
-        last_heard = nowSeconds.toInt(),
-        user =
-        User(
-            id = NodeAddress.numToDefaultId(MY_NODE),
-            long_name = "Demo Handset",
-            short_name = "DEMO",
-            hw_model = HardwareModel.ANDROID_SIM,
-            role = Config.DeviceConfig.Role.CLIENT,
-        ),
-        position = MY_POSITION.toProto(),
-        device_metrics =
-        DeviceMetrics(
-            battery_level = 78,
-            voltage = 3.98f,
-            channel_utilization = 8.4f,
-            air_util_tx = 1.9f,
-            uptime_seconds = 7_240,
-        ),
-        hops_away = 0,
-    )
+    private fun localNodeInfo() = NodeInfo.Builder()
+        .also { wb ->
+            wb.num = MY_NODE
+            wb.last_heard = nowSeconds.toInt()
+            wb.user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = NodeAddress.numToDefaultId(MY_NODE)
+                        wb.long_name = "Demo Handset"
+                        wb.short_name = "DEMO"
+                        wb.hw_model = HardwareModel.ANDROID_SIM
+                        wb.role = Config.DeviceConfig.Role.CLIENT
+                    }
+                    .build()
+            wb.position = MY_POSITION.toProto()
+            wb.device_metrics =
+                DeviceMetrics.Builder()
+                    .also { wb ->
+                        wb.battery_level = 78
+                        wb.voltage = 3.98f
+                        wb.channel_utilization = 8.4f
+                        wb.air_util_tx = 1.9f
+                        wb.uptime_seconds = 7_240
+                    }
+                    .build()
+            wb.hops_away = 0
+        }
+        .build()
 
-    private fun SimPeer.toNodeInfo() = NodeInfo(
-        num = num,
-        // Without last_heard every simulated node reads as offline and disappears the moment the user turns on the
-        // node list's "online only" filter.
-        last_heard = nowSeconds.toInt() - secondsSinceHeard,
-        user =
-        User(
-            id = NodeAddress.numToDefaultId(num),
-            long_name = longName,
-            short_name = shortName,
-            hw_model = hwModel,
-            role = role,
-        ),
-        position = SimPosition(latitude, longitude, altitude).toProto(),
-        device_metrics =
-        DeviceMetrics(battery_level = batteryLevel, voltage = voltage, uptime_seconds = uptimeSeconds),
-        snr = snr,
-        hops_away = hops,
-        channel = 0,
-    )
+    private fun SimPeer.toNodeInfo() = NodeInfo.Builder()
+        .also { wb ->
+            wb.num = num
+            // Without last_heard every simulated node reads as offline and disappears the moment the user turns on
+            // the
+            // node list's "online only" filter.
+            wb.last_heard = nowSeconds.toInt() - secondsSinceHeard
+            wb.user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = NodeAddress.numToDefaultId(num)
+                        wb.long_name = longName
+                        wb.short_name = shortName
+                        wb.hw_model = hwModel
+                        wb.role = role
+                    }
+                    .build()
+            wb.position = SimPosition(latitude, longitude, altitude).toProto()
+            wb.device_metrics =
+                DeviceMetrics.Builder()
+                    .also { wb ->
+                        wb.battery_level = batteryLevel
+                        wb.voltage = voltage
+                        wb.uptime_seconds = uptimeSeconds
+                    }
+                    .build()
+            wb.snr = snr
+            wb.hops_away = hops
+            wb.channel = 0
+        }
+        .build()
 
     // ── Simulated traffic ─────────────────────────────────────────────────────────────────────
 
@@ -430,43 +517,58 @@ class MockRadioTransport(
      * `transport_mechanism` and the matching `hop_start`/`hop_limit` are load-bearing, not decoration: the app only
      * harvests SNR, RSSI and hop count from packets that pass its direct-LoRa test.
      */
-    private fun SimPeer.packet(id: Int, to: Int, ageSeconds: Int, data: Data) = MeshPacket(
-        id = id,
-        from = num,
-        to = to,
-        channel = 0,
-        rx_time = (nowSeconds - ageSeconds).toInt(),
-        rx_snr = snr,
-        rx_rssi = rssi,
-        hop_start = DEFAULT_HOP_START,
-        hop_limit = DEFAULT_HOP_START - hops,
-        transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA,
-        decoded = data,
-    )
+    private fun SimPeer.packet(id: Int, to: Int, ageSeconds: Int, data: Data) = MeshPacket.Builder()
+        .also { wb ->
+            wb.id = id
+            wb.from = num
+            wb.to = to
+            wb.channel = 0
+            wb.rx_time = (nowSeconds - ageSeconds).toInt()
+            wb.rx_snr = snr
+            wb.rx_rssi = rssi
+            wb.hop_start = DEFAULT_HOP_START
+            wb.hop_limit = DEFAULT_HOP_START - hops
+            wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA
+            wb.decoded = data
+        }
+        .build()
 
-    private fun SimPeer.textPacket(id: Int, to: Int, text: String, ageSeconds: Int) = FromRadio(
-        packet =
-        packet(
-            id = id,
-            to = to,
-            ageSeconds = ageSeconds,
-            data = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = text.encodeUtf8()),
-        ),
-    )
+    private fun SimPeer.textPacket(id: Int, to: Int, text: String, ageSeconds: Int) = FromRadio.Builder()
+        .also { wb ->
+            wb.packet =
+                packet(
+                    id = id,
+                    to = to,
+                    ageSeconds = ageSeconds,
+                    data =
+                    Data.Builder()
+                        .also { wb ->
+                            wb.portnum = PortNum.TEXT_MESSAGE_APP
+                            wb.payload = text.encodeUtf8()
+                        }
+                        .build(),
+                )
+        }
+        .build()
 
-    private fun SimPeer.positionPacket(id: Int) = FromRadio(
-        packet =
-        packet(
-            id = id,
-            to = BROADCAST_ADDR,
-            ageSeconds = 0,
-            data =
-            Data(
-                portnum = PortNum.POSITION_APP,
-                payload = SimPosition(latitude, longitude, altitude).toProto().encode().toByteString(),
-            ),
-        ),
-    )
+    private fun SimPeer.positionPacket(id: Int) = FromRadio.Builder()
+        .also { wb ->
+            wb.packet =
+                packet(
+                    id = id,
+                    to = BROADCAST_ADDR,
+                    ageSeconds = 0,
+                    data =
+                    Data.Builder()
+                        .also { wb ->
+                            wb.portnum = PortNum.POSITION_APP
+                            wb.payload =
+                                SimPosition(latitude, longitude, altitude).toProto().encode().toByteString()
+                        }
+                        .build(),
+                )
+        }
+        .build()
 
     /**
      * Device telemetry for [tick], drifted so the charts show a trend rather than a flat line.
@@ -478,134 +580,203 @@ class MockRadioTransport(
     private fun SimPeer.deviceTelemetryPacket(id: Int, tick: Int): FromRadio {
         val driftedBattery = (batteryLevel - tick).coerceIn(MIN_BATTERY_PERCENT, MAX_BATTERY_PERCENT)
         val driftedVoltage = (voltage - tick * VOLTAGE_DRIFT_PER_TICK).coerceAtLeast(MIN_CELL_VOLTAGE)
-        return FromRadio(
-            packet =
-            packet(
-                id = id,
-                to = BROADCAST_ADDR,
-                ageSeconds = 0,
-                data =
-                Data(
-                    portnum = PortNum.TELEMETRY_APP,
-                    payload =
-                    Telemetry(
-                        device_metrics =
-                        DeviceMetrics(
-                            battery_level = driftedBattery,
-                            voltage = driftedVoltage,
-                            channel_utilization = 6f + (tick % 5) * 1.5f,
-                            air_util_tx = 1.2f + (tick % 4) * 0.4f,
-                            uptime_seconds = uptimeSeconds + tick * (LIVE_TICK_MS / 1000).toInt(),
-                        ),
+        return FromRadio.Builder()
+            .also { wb ->
+                wb.packet =
+                    packet(
+                        id = id,
+                        to = BROADCAST_ADDR,
+                        ageSeconds = 0,
+                        data =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TELEMETRY_APP
+                                wb.payload =
+                                    Telemetry.Builder()
+                                        .also { wb ->
+                                            wb.device_metrics =
+                                                DeviceMetrics.Builder()
+                                                    .also { wb ->
+                                                        wb.battery_level = driftedBattery
+                                                        wb.voltage = driftedVoltage
+                                                        wb.channel_utilization = 6f + (tick % 5) * 1.5f
+                                                        wb.air_util_tx = 1.2f + (tick % 4) * 0.4f
+                                                        wb.uptime_seconds =
+                                                            uptimeSeconds + tick * (LIVE_TICK_MS / 1000).toInt()
+                                                    }
+                                                    .build()
+                                        }
+                                        .build()
+                                        .encode()
+                                        .toByteString()
+                            }
+                            .build(),
                     )
-                        .encode()
-                        .toByteString(),
-                ),
-            ),
-        )
+            }
+            .build()
     }
 
-    private fun SimPeer.environmentTelemetryPacket(id: Int, tick: Int) = FromRadio(
-        packet =
-        packet(
-            id = id,
-            to = BROADCAST_ADDR,
-            ageSeconds = 0,
-            data =
-            Data(
-                portnum = PortNum.TELEMETRY_APP,
-                payload =
-                Telemetry(
-                    environment_metrics =
-                    EnvironmentMetrics(
-                        // Temperature AND humidity must both be present or the Environment tab
-                        // stays empty.
-                        temperature = 18.5f + (tick % 7) * 0.4f,
-                        relative_humidity = 47f + (tick % 5) * 1.5f,
-                        barometric_pressure = 1013.2f + (tick % 3) * 0.3f,
-                    ),
+    private fun SimPeer.environmentTelemetryPacket(id: Int, tick: Int) = FromRadio.Builder()
+        .also { wb ->
+            wb.packet =
+                packet(
+                    id = id,
+                    to = BROADCAST_ADDR,
+                    ageSeconds = 0,
+                    data =
+                    Data.Builder()
+                        .also { wb ->
+                            wb.portnum = PortNum.TELEMETRY_APP
+                            wb.payload =
+                                Telemetry.Builder()
+                                    .also { wb ->
+                                        wb.environment_metrics =
+                                            EnvironmentMetrics.Builder()
+                                                .also { wb ->
+                                                    // Temperature AND humidity must both be present or the
+                                                    // Environment tab
+                                                    // stays empty.
+                                                    wb.temperature = 18.5f + (tick % 7) * 0.4f
+                                                    wb.relative_humidity = 47f + (tick % 5) * 1.5f
+                                                    wb.barometric_pressure = 1013.2f + (tick % 3) * 0.3f
+                                                }
+                                                .build()
+                                    }
+                                    .build()
+                                    .encode()
+                                    .toByteString()
+                        }
+                        .build(),
                 )
-                    .encode()
-                    .toByteString(),
-            ),
-        ),
-    )
+        }
+        .build()
 
-    private fun SimPeer.neighborInfoPacket(id: Int) = FromRadio(
-        packet =
-        packet(
-            id = id,
-            to = BROADCAST_ADDR,
-            ageSeconds = 0,
-            data =
-            Data(
-                portnum = PortNum.NEIGHBORINFO_APP,
-                payload =
-                NeighborInfo(
-                    node_id = num,
-                    last_sent_by_id = num,
-                    node_broadcast_interval_secs = 900,
-                    neighbors =
-                    SIM_PEERS.drop(1).take(3).map { neighbor ->
-                        Neighbor(
-                            node_id = neighbor.num,
-                            snr = neighbor.snr,
-                            last_rx_time = nowSeconds.toInt(),
-                            node_broadcast_interval_secs = 900,
-                        )
-                    },
+    private fun SimPeer.neighborInfoPacket(id: Int) = FromRadio.Builder()
+        .also { wb ->
+            wb.packet =
+                packet(
+                    id = id,
+                    to = BROADCAST_ADDR,
+                    ageSeconds = 0,
+                    data =
+                    Data.Builder()
+                        .also { wb ->
+                            wb.portnum = PortNum.NEIGHBORINFO_APP
+                            wb.payload =
+                                NeighborInfo.Builder()
+                                    .also { wb ->
+                                        wb.node_id = num
+                                        wb.last_sent_by_id = num
+                                        wb.node_broadcast_interval_secs = 900
+                                        wb.neighbors =
+                                            SIM_PEERS.drop(1).take(3).map { neighbor ->
+                                                Neighbor.Builder()
+                                                    .also { wb ->
+                                                        wb.node_id = neighbor.num
+                                                        wb.snr = neighbor.snr
+                                                        wb.last_rx_time = nowSeconds.toInt()
+                                                        wb.node_broadcast_interval_secs = 900
+                                                    }
+                                                    .build()
+                                            }
+                                    }
+                                    .build()
+                                    .encode()
+                                    .toByteString()
+                        }
+                        .build(),
                 )
-                    .encode()
-                    .toByteString(),
-            ),
-        ),
-    )
+        }
+        .build()
 
-    private fun SimPeer.nodeStatusPacket(id: Int) = FromRadio(
-        packet =
-        packet(
-            id = id,
-            to = BROADCAST_ADDR,
-            ageSeconds = 0,
-            data =
-            Data(
-                portnum = PortNum.NODE_STATUS_APP,
-                payload = StatusMessage(status = PEER_NODE_STATUS).encode().toByteString(),
-            ),
-        ),
-    )
+    private fun SimPeer.nodeStatusPacket(id: Int) = FromRadio.Builder()
+        .also { wb ->
+            wb.packet =
+                packet(
+                    id = id,
+                    to = BROADCAST_ADDR,
+                    ageSeconds = 0,
+                    data =
+                    Data.Builder()
+                        .also { wb ->
+                            wb.portnum = PortNum.NODE_STATUS_APP
+                            wb.payload =
+                                StatusMessage.Builder()
+                                    .also { wb -> wb.status = PEER_NODE_STATUS }
+                                    .build()
+                                    .encode()
+                                    .toByteString()
+                        }
+                        .build(),
+                )
+        }
+        .build()
 
-    private fun makeDataPacket(fromIn: Int, toIn: Int, data: Data) = FromRadio(
-        packet =
-        MeshPacket(
-            id = nextPacketId(),
-            from = fromIn,
-            to = toIn,
-            rx_time = nowSeconds.toInt(),
-            rx_snr = 1.5f,
-            decoded = data,
-        ),
-    )
+    private fun makeDataPacket(fromIn: Int, toIn: Int, data: Data) = FromRadio.Builder()
+        .also { wb ->
+            wb.packet =
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = nextPacketId()
+                        wb.from = fromIn
+                        wb.to = toIn
+                        wb.rx_time = nowSeconds.toInt()
+                        wb.rx_snr = 1.5f
+                        wb.decoded = data
+                    }
+                    .build()
+        }
+        .build()
 
     private fun makeAck(fromIn: Int, toIn: Int, msgId: Int) = makeDataPacket(
         fromIn,
         toIn,
-        Data(portnum = PortNum.ROUTING_APP, payload = Routing().encode().toByteString(), request_id = msgId),
+        Data.Builder()
+            .also { wb ->
+                wb.portnum = PortNum.ROUTING_APP
+                wb.payload = Routing.Builder().build().encode().toByteString()
+                wb.request_id = msgId
+            }
+            .build(),
     )
 
     private fun sendQueueStatus(msgId: Int) = callback.handleFromRadio(
-        FromRadio(queueStatus = QueueStatus(res = 0, free = 16, mesh_packet_id = msgId)).encode(),
+        FromRadio.Builder()
+            .also { wb ->
+                wb.queueStatus =
+                    QueueStatus.Builder()
+                        .also { wb ->
+                            wb.res = 0
+                            wb.free = 16
+                            wb.mesh_packet_id = msgId
+                        }
+                        .build()
+            }
+            .build()
+            .encode(),
     )
 
     private fun sendAdmin(fromIn: Int, toIn: Int, reqId: Int, initFn: AdminMessage.() -> AdminMessage) {
         // Embed a deterministic 8-byte fake passkey so SessionManager can record a session refresh — mirrors what real
         // firmware always attaches to admin responses (see firmware/src/modules/AdminModule.cpp:1460-1481).
-        val adminMsg = AdminMessage().initFn().copy(session_passkey = FAKE_SESSION_PASSKEY)
+        val adminMsg =
+            AdminMessage.Builder()
+                .build()
+                .initFn()
+                .newBuilder()
+                .also { wb -> wb.session_passkey = FAKE_SESSION_PASSKEY }
+                .build()
         val p =
             makeDataPacket(
                 fromIn,
                 toIn,
-                Data(portnum = PortNum.ADMIN_APP, payload = adminMsg.encode().toByteString(), request_id = reqId),
+                Data.Builder()
+                    .also { wb ->
+                        wb.portnum = PortNum.ADMIN_APP
+                        wb.payload = adminMsg.encode().toByteString()
+                        wb.request_id = reqId
+                    }
+                    .build(),
             )
         callback.handleFromRadio(p.encode())
     }
@@ -642,17 +813,20 @@ class MockRadioTransport(
 
     /** Latitude/longitude/altitude triple, converted to the proto's scaled-integer representation on demand. */
     private data class SimPosition(val latitude: Double, val longitude: Double, val altitude: Int) {
-        fun toProto() = ProtoPosition(
-            latitude_i = org.meshtastic.core.model.Position.degI(latitude),
-            longitude_i = org.meshtastic.core.model.Position.degI(longitude),
-            altitude = altitude,
-            time = nowSeconds.toInt(),
-            // 32 bits is "full precision"; the coarse end of the scale draws a large uncertainty circle instead of
-            // placing the node where it actually is.
-            precision_bits = 32,
-            sats_in_view = 9,
-            location_source = ProtoPosition.LocSource.LOC_INTERNAL,
-        )
+        fun toProto() = ProtoPosition.Builder()
+            .also { wb ->
+                wb.latitude_i = org.meshtastic.core.model.Position.degI(latitude)
+                wb.longitude_i = org.meshtastic.core.model.Position.degI(longitude)
+                wb.altitude = altitude
+                wb.time = nowSeconds.toInt()
+                // 32 bits is "full precision"; the coarse end of the scale draws a large uncertainty circle instead
+                // of
+                // placing the node where it actually is.
+                wb.precision_bits = 32
+                wb.sats_in_view = 9
+                wb.location_source = ProtoPosition.LocSource.LOC_INTERNAL
+            }
+            .build()
     }
 
     private companion object {

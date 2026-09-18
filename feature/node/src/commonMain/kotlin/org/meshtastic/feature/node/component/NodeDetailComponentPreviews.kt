@@ -170,14 +170,16 @@ fun PowerMetricsPreview() {
     val node =
         previewData.mickeyMouse.copy(
             powerMetrics =
-            org.meshtastic.proto.PowerMetrics(
-                ch1_voltage = 4.19f,
-                ch1_current = 128.4f,
-                ch2_voltage = 3.72f,
-                ch2_current = 12.5f,
-                ch3_voltage = 5.02f,
-                ch3_current = 431.7f,
-            ),
+            org.meshtastic.proto.PowerMetrics.Builder()
+                .also { wb ->
+                    wb.ch1_voltage = 4.19f
+                    wb.ch1_current = 128.4f
+                    wb.ch2_voltage = 3.72f
+                    wb.ch2_current = 12.5f
+                    wb.ch3_voltage = 5.02f
+                    wb.ch3_current = 431.7f
+                }
+                .build(),
         )
     AppTheme { Surface { PowerMetrics(node = node) } }
 }
@@ -189,7 +191,13 @@ fun PowerMetricsPartialPreview() {
     // Only channel 1 reports a voltage — a single column, matching the partial layout in issue #4507.
     val node =
         previewData.mickeyMouse.copy(
-            powerMetrics = org.meshtastic.proto.PowerMetrics(ch1_voltage = 4.19f, ch1_current = 128.4f),
+            powerMetrics =
+            org.meshtastic.proto.PowerMetrics.Builder()
+                .also { wb ->
+                    wb.ch1_voltage = 4.19f
+                    wb.ch1_current = 128.4f
+                }
+                .build(),
         )
     AppTheme { Surface { PowerMetrics(node = node) } }
 }
@@ -201,7 +209,13 @@ fun PowerMetricsNoCurrentPreview() {
     // Channels report voltage but no current at all — voltage-only columns, no fabricated 0.0mA cards.
     val node =
         previewData.mickeyMouse.copy(
-            powerMetrics = org.meshtastic.proto.PowerMetrics(ch1_voltage = 4.19f, ch2_voltage = 3.72f),
+            powerMetrics =
+            org.meshtastic.proto.PowerMetrics.Builder()
+                .also { wb ->
+                    wb.ch1_voltage = 4.19f
+                    wb.ch2_voltage = 3.72f
+                }
+                .build(),
         )
     AppTheme { Surface { PowerMetrics(node = node) } }
 }
@@ -217,20 +231,22 @@ fun EnvironmentMetricsPreview() {
     val node =
         previewData.mickeyMouse.copy(
             environmentMetrics =
-            org.meshtastic.proto.EnvironmentMetrics(
-                temperature = 21.5f,
-                relative_humidity = 47f,
-                barometric_pressure = 1013f,
-                gas_resistance = 1200f,
-                voltage = 4.19f,
-                current = 128.4f,
-                iaq = 62,
-                lux = 480f,
-                uv_lux = 12f,
-                soil_temperature = 18.2f,
-                soil_moisture = 33,
-                radiation = 0.15f,
-            ),
+            org.meshtastic.proto.EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.temperature = 21.5f
+                    wb.relative_humidity = 47f
+                    wb.barometric_pressure = 1013f
+                    wb.gas_resistance = 1200f
+                    wb.voltage = 4.19f
+                    wb.current = 128.4f
+                    wb.iaq = 62
+                    wb.lux = 480f
+                    wb.uv_lux = 12f
+                    wb.soil_temperature = 18.2f
+                    wb.soil_moisture = 33
+                    wb.radiation = 0.15f
+                }
+                .build(),
         )
     AppTheme { Surface { EnvironmentMetrics(node = node, displayUnits = MeasurementSystem.METRIC) } }
 }
@@ -242,14 +258,16 @@ fun AirQualityInfoCardsPreview() {
     val node =
         previewData.mickeyMouse.copy(
             airQualityMetrics =
-            org.meshtastic.proto.AirQualityMetrics(
-                pm10_standard = 8,
-                pm25_standard = 12,
-                pm100_standard = 18,
-                co2 = 640,
-                co2_temperature = 22.1f,
-                co2_humidity = 44f,
-            ),
+            org.meshtastic.proto.AirQualityMetrics.Builder()
+                .also { wb ->
+                    wb.pm10_standard = 8
+                    wb.pm25_standard = 12
+                    wb.pm100_standard = 18
+                    wb.co2 = 640
+                    wb.co2_temperature = 22.1f
+                    wb.co2_humidity = 44f
+                }
+                .build(),
         )
     AppTheme { Surface { AirQualityInfoCards(node = node) } }
 }

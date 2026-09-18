@@ -60,7 +60,7 @@ class RadioConfigUseCaseTest {
 
     @Test
     fun `setOwner calls radioController`() = runTest {
-        val user = User(long_name = "New Name")
+        val user = User.Builder().also { wb -> wb.long_name = "New Name" }.build()
         useCase.setOwner(1234, user)
         // Verify call implicitly or by adding tracking to FakeRadioController if needed.
         // FakeRadioController already has getPacketId returning 1.
@@ -68,7 +68,16 @@ class RadioConfigUseCaseTest {
 
     @Test
     fun `setHamMode calls radioController and returns packetId`() = runTest {
-        val packetId = useCase.setHamMode(1234, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"))
+        val packetId =
+            useCase.setHamMode(
+                1234,
+                HamParameters.Builder()
+                    .also { wb ->
+                        wb.call_sign = "KK7ABC"
+                        wb.short_name = "KK7A"
+                    }
+                    .build(),
+            )
         assertEquals(1, packetId)
     }
 
@@ -80,13 +89,19 @@ class RadioConfigUseCaseTest {
 
     @Test
     fun `setConfig calls radioController`() = runTest {
-        val config = Config(lora = Config.LoRaConfig(use_preset = true))
+        val config =
+            Config.Builder()
+                .also { wb -> wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build() }
+                .build()
         useCase.setConfig(1234, config)
     }
 
     @Test
     fun `setModuleConfig calls radioController`() = runTest {
-        val config = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
+        val config =
+            ModuleConfig.Builder()
+                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build()
         useCase.setModuleConfig(1234, config)
     }
 
@@ -111,7 +126,7 @@ class RadioConfigUseCaseTest {
 
     @Test
     fun `setRemoteChannel calls radioController`() = runTest {
-        useCase.setRemoteChannel(1234, org.meshtastic.proto.Channel())
+        useCase.setRemoteChannel(1234, org.meshtastic.proto.Channel.Builder().build())
     }
 
     @Test fun `getRingtone calls radioController`() = runTest { useCase.getRingtone(1234) }

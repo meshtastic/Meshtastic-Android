@@ -25,7 +25,7 @@ import org.meshtastic.proto.ChannelSet
 
 /** Serializer for the [ChannelSet] object defined in apponly.proto. */
 object ChannelSetSerializer : OkioSerializer<ChannelSet> {
-    override val defaultValue: ChannelSet = ChannelSet()
+    override val defaultValue: ChannelSet = ChannelSet.Builder().build()
 
     override suspend fun readFrom(source: BufferedSource): ChannelSet {
         try {

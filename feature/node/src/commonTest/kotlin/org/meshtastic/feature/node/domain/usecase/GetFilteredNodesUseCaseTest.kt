@@ -60,7 +60,15 @@ class GetFilteredNodesUseCaseTest {
         publicKey: ByteString? = null,
         heardOnCurrentLora: Boolean = true,
     ): Node {
-        val user = User(id = "!$num", long_name = name, short_name = "N$num", role = role)
+        val user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!$num"
+                    wb.long_name = name
+                    wb.short_name = "N$num"
+                    wb.role = role
+                }
+                .build()
         return Node(
             num = num,
             user = user,

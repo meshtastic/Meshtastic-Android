@@ -45,7 +45,14 @@ class NodeItemUnheardMarkerTest {
 
     private fun node(viaMqtt: Boolean) = Node(
         num = 1928,
-        user = User(long_name = "Minnie Mouse", short_name = "MiMo", id = "!minnie"),
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.long_name = "Minnie Mouse"
+                wb.short_name = "MiMo"
+                wb.id = "!minnie"
+            }
+            .build(),
         lastHeard = (nowSeconds - 300).toInt(),
         heardOnCurrentLora = false,
         viaMqtt = viaMqtt,

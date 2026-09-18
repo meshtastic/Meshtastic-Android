@@ -48,8 +48,13 @@ class SwitchingChannelSetDataSourceTest {
 
     @AfterTest fun tearDown() = dbProvider.close()
 
-    private fun secondary(index: Int, name: String) =
-        Channel(index = index, settings = ChannelSettings(name = name), role = Channel.Role.SECONDARY)
+    private fun secondary(index: Int, name: String) = Channel.Builder()
+        .also { wb ->
+            wb.index = index
+            wb.settings = ChannelSettings.Builder().also { wb -> wb.name = name }.build()
+            wb.role = Channel.Role.SECONDARY
+        }
+        .build()
 
     @Test
     fun `updateChannelSettings places channel at its index`() = runTest(testDispatcher) {
@@ -74,16 +79,28 @@ class SwitchingChannelSetDataSourceTest {
 
     @Test
     fun `disabled channels are ignored`() = runTest(testDispatcher) {
-        dataSource.updateChannelSettings(Channel(index = 0, role = Channel.Role.DISABLED))
+        dataSource.updateChannelSettings(
+            Channel.Builder()
+                .also { wb ->
+                    wb.index = 0
+                    wb.role = Channel.Role.DISABLED
+                }
+                .build(),
+        )
         assertTrue(dataSource.channelSetFlow.first().settings.isEmpty())
     }
 
     @Test
     fun `replaceAllSettings replaces the whole list`() = runTest(testDispatcher) {
         dataSource.updateChannelSettings(secondary(0, "old"))
-        val originalLora = Config.LoRaConfig(channel_num = 4)
+        val originalLora = Config.LoRaConfig.Builder().also { wb -> wb.channel_num = 4 }.build()
         dataSource.setLoraConfig(originalLora)
-        dataSource.replaceAllSettings(listOf(ChannelSettings(name = "a"), ChannelSettings(name = "b")))
+        dataSource.replaceAllSettings(
+            listOf(
+                ChannelSettings.Builder().also { wb -> wb.name = "a" }.build(),
+                ChannelSettings.Builder().also { wb -> wb.name = "b" }.build(),
+            ),
+        )
 
         val set = dataSource.channelSetFlow.first()
         assertEquals(listOf("a", "b"), set.settings.map { it.name })
@@ -92,18 +109,26 @@ class SwitchingChannelSetDataSourceTest {
 
     @Test
     fun `updateChannelSet atomically replaces settings and lora`() = runTest(testDispatcher) {
-        val settings = listOf(ChannelSettings(name = "new"))
-        val lora = Config.LoRaConfig(channel_num = 7)
+        val settings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "new" }.build())
+        val lora = Config.LoRaConfig.Builder().also { wb -> wb.channel_num = 7 }.build()
 
         dataSource.updateChannelSet(settingsList = settings, loraConfig = lora)
 
-        assertEquals(ChannelSet(settings = settings, lora_config = lora), dataSource.channelSetFlow.first())
+        assertEquals(
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = settings
+                    wb.lora_config = lora
+                }
+                .build(),
+            dataSource.channelSetFlow.first(),
+        )
     }
 
     @Test
     fun `setLoraConfig preserves existing channel settings`() = runTest(testDispatcher) {
         dataSource.updateChannelSettings(secondary(0, "keep"))
-        dataSource.setLoraConfig(Config.LoRaConfig(channel_num = 7))
+        dataSource.setLoraConfig(Config.LoRaConfig.Builder().also { wb -> wb.channel_num = 7 }.build())
 
         val set = dataSource.channelSetFlow.first()
         assertEquals("keep", set.settings.single().name)
@@ -160,7 +185,10 @@ class SwitchingChannelSetDataSourceTest {
      */
     @Test
     fun `per-slot writes do not reconcile`() = runTest(testDispatcher) {
-        dataSource.updateChannelSet(listOf(ChannelSettings(name = "A")), Config.LoRaConfig(use_preset = true))
+        dataSource.updateChannelSet(
+            listOf(ChannelSettings.Builder().also { wb -> wb.name = "A" }.build()),
+            Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build(),
+        )
         insertBroadcastPacket(channel = 0)
 
         dataSource.updateChannelSettings(secondary(0, "B"))
@@ -171,11 +199,11 @@ class SwitchingChannelSetDataSourceTest {
     /** A whole-set write is the app's own change, so it is safe — and necessary — to re-key immediately. */
     @Test
     fun `a whole-set write reconciles immediately`() = runTest(testDispatcher) {
-        val lora = Config.LoRaConfig(use_preset = true)
-        dataSource.updateChannelSet(listOf(ChannelSettings(name = "A")), lora)
+        val lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build()
+        dataSource.updateChannelSet(listOf(ChannelSettings.Builder().also { wb -> wb.name = "A" }.build()), lora)
         insertBroadcastPacket(channel = 0)
 
-        dataSource.updateChannelSet(listOf(ChannelSettings(name = "B")), lora)
+        dataSource.updateChannelSet(listOf(ChannelSettings.Builder().also { wb -> wb.name = "B" }.build()), lora)
 
         assertEquals(0, packetsOn(ContactKey.broadcast(0).value), "the slot has a new occupant")
         assertEquals(1, dbProvider.currentDb.value.packetDao().getRetiredPacketContactKeys().size)
@@ -190,8 +218,8 @@ class SwitchingChannelSetDataSourceTest {
      */
     @Test
     fun `the handshake lora write does not archive conversations`() = runTest(testDispatcher) {
-        val lora = Config.LoRaConfig(use_preset = true)
-        dataSource.updateChannelSet(listOf(ChannelSettings(name = "A")), lora)
+        val lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build()
+        dataSource.updateChannelSet(listOf(ChannelSettings.Builder().also { wb -> wb.name = "A" }.build()), lora)
         insertBroadcastPacket(channel = 0)
 
         dataSource.clearChannelSet()
@@ -208,7 +236,10 @@ class SwitchingChannelSetDataSourceTest {
     /** The messages did not move because the handshake dropped the cached channel set, so the baseline must survive. */
     @Test
     fun `clearing the channel set keeps the reconciliation baseline`() = runTest(testDispatcher) {
-        dataSource.updateChannelSet(listOf(ChannelSettings(name = "A")), Config.LoRaConfig(use_preset = true))
+        dataSource.updateChannelSet(
+            listOf(ChannelSettings.Builder().also { wb -> wb.name = "A" }.build()),
+            Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build(),
+        )
 
         dataSource.clearChannelSet()
 
