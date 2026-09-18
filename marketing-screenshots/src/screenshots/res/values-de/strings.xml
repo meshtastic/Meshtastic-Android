@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="screenshot_nodes_title">Jeden Knoten in deinem Mesh sehen</string>
+    <string name="screenshot_nodes_desc">Akku, Entfernung und Hops auf einen Blick - ganz ohne Mobilfunk.</string>
+</resources>

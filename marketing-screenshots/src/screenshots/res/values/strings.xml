@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="screenshot_nodes_title">See every node on your mesh</string>
+    <string name="screenshot_nodes_desc">Battery, distance and hops at a glance - no cell service required.</string>
+</resources>

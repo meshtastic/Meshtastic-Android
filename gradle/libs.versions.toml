@@ -41,6 +41,8 @@ turbine = "1.2.1"
 
 # Compose Screenshot Testing
 compose-screenshot = "0.0.1-alpha16"
+# Store screenshots (framed Play Store PNGs under Robolectric) - spike only
+store-screenshots = "1.5.8"
 
 # Baseline Profiles / Macrobenchmark
 # `benchmark` drives both the androidx.benchmark macro lib AND the androidx.baselineprofile
@@ -384,6 +386,7 @@ android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.
 android-test = { id = "com.android.test" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "compose-screenshot" }
+store-screenshots = { id = "io.github.lucianosantosdev.storescreenshots", version.ref = "store-screenshots" }
 
 # Jetbrains
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
