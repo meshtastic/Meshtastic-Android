@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.jetbrains.compose.material3.adaptive.layout)
     implementation(libs.jetbrains.compose.material3.adaptive.navigation.suite)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.maplibre.compose)
     maplibreDesktopRuntime()
 
