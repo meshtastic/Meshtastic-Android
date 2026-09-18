@@ -53,9 +53,6 @@ import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.platformLogWriter
-import com.skydoves.snitcher.Snitcher
-import com.skydoves.snitcher.install
-import com.skydoves.snitcher.ui.SnitcherTraceWindow
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
@@ -66,6 +63,9 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
+import com.skydoves.snitcher.Snitcher
+import com.skydoves.snitcher.install
+import com.skydoves.snitcher.ui.SnitcherTraceWindow
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.first
 import okio.Path.Companion.toPath

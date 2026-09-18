@@ -89,6 +89,7 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Settings

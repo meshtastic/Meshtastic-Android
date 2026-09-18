@@ -30,10 +30,10 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import com.skydoves.snitcher.Snitcher
-import com.skydoves.snitcher.install
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
+import com.skydoves.snitcher.Snitcher
+import com.skydoves.snitcher.install
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -102,8 +102,8 @@ open class MeshUtilApplication :
 
     /**
      * Runs before the content providers, so this handler sits inside the one Crashlytics installs from
-     * FirebaseInitProvider: Snitcher never chains to Crashlytics when Crashlytics is the handler it wrapped.
-     * Skipped under Robolectric, where the process kill that follows a crash would take the test worker with it.
+     * FirebaseInitProvider: Snitcher never chains to Crashlytics when Crashlytics is the handler it wrapped. Skipped
+     * under Robolectric, where the process kill that follows a crash would take the test worker with it.
      */
     private fun installCrashScreen() {
         if (Build.FINGERPRINT == "robolectric") return
