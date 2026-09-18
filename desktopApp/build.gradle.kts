@@ -389,8 +389,25 @@ dependencies {
     implementation(libs.jna)
 
     testRuntimeOnly(libs.junit.vintage.engine)
+    // SPIKE (throwaway): the snapshotter spike composes maplibre-compose directly from a test.
+    testImplementation(libs.maplibre.compose)
     testImplementation(projects.core.testing)
     testImplementation(libs.koin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(kotlin("test"))
+}
+
+// SPIKE (throwaway): the map-snapshotter feasibility test. The forked test JVM needs the same FFM flag the app
+// passes, and must provably have no display - it inherits the daemon's environment, not this shell's.
+tasks.withType<Test>().configureEach {
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    environment.remove("DISPLAY")
+    environment.remove("WAYLAND_DISPLAY")
+    // Spike knobs, forwarded so a run can be repeated with a different Vulkan ICD or library path.
+    listOf("SPIKE_VK_DRIVER_FILES", "SPIKE_VK_ICD_FILENAMES", "SPIKE_LD_LIBRARY_PATH").forEach { key ->
+        providers.environmentVariable(key).orNull?.let { value ->
+            environment(key.removePrefix("SPIKE_"), value)
+        }
+    }
+    environment("SPIKE_RUN_TAG", providers.environmentVariable("SPIKE_RUN_TAG").getOrElse("run"))
 }
