@@ -88,6 +88,7 @@ jobs:
               - 'feature/**'
               - 'screenshot-tests/**'
               - 'docs-screenshots/**'
+              - 'marketing-screenshots/**'
               # Shared build infrastructure
               - 'build-logic/**'
               - 'config/**'
@@ -170,6 +171,7 @@ jobs:
               ':baselineprofile',
               ':core:konsist',
               ':docs-screenshots',
+              ':marketing-screenshots',
               ':screenshot-tests',
           }
 
@@ -225,6 +227,7 @@ jobs:
           covered_elsewhere = {
               ':screenshot-tests',   # dedicated screenshot-check job
               ':docs-screenshots',   # doc-screenshot generation (screenshot tooling)
+              ':marketing-screenshots',  # store-listing screenshot generator, a JVM program with no tests
               ':baselineprofile',    # benchmark module, instrumented-only
           }
           # Modules with no unit-test sources yet. One of these gaining test

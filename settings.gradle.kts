@@ -125,5 +125,6 @@ include(
     ":feature:widget",
     ":screenshot-tests",
     ":docs-screenshots",
+    ":marketing-screenshots",
     ":baselineprofile",
 )
