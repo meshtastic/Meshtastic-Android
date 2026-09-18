@@ -28,11 +28,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.io.files.Path
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.map.MapRuntime
@@ -43,7 +38,6 @@ import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.feature.map.maplibre.layers.NodeLayers
 import org.meshtastic.feature.map.maplibre.style.Basemaps
-import java.net.URI
 import java.nio.file.Files
 
 /** One capture: the map area in dp at the screen density, and the zoom the form factor asks for. */
@@ -100,23 +94,12 @@ internal object MapSnapshot {
     }
 
     /**
-     * The app's default basemap with its text layers removed. MapLibre packs glyphs into an atlas in the order the
-     * tiles that need them arrive, and the sub-texel position a glyph lands at moves its antialiased edge pixels by one
-     * level: the five maps came out in four different states over five runs, every one differing from the next by a
-     * dozen pixels at label edges, and no amount of settling can pick one. Without text layers there is no glyph atlas,
-     * and three runs are byte-identical on every form factor. Roads, water, parks and the node chips are unaffected. To
-     * put the labels back for a one-off (a website hero, say), use `BaseStyle.Uri(Basemaps.Liberty. styleUri)` here and
-     * accept that the file will not reproduce.
+     * The app's default basemap, labels included: a street map with no names is not the in-app experience Play asks
+     * for. MapLibre packs glyphs into an atlas in the order tiles arrive, so on the wide layouts a label's antialiased
+     * edge can land one level off between generations - a dozen pixels, invisible - which is why [captureUntilStable]
+     * warns rather than fails when two runtimes disagree, and why a regenerated wide map may not `cmp` the last one.
      */
-    private val baseStyle: BaseStyle by lazy {
-        val root = Json.parseToJsonElement(URI(Basemaps.Liberty.styleUri).toURL().readText()).jsonObject
-        val layers =
-            root.getValue("layers").jsonArray.filter { layer ->
-                val layout = layer.jsonObject["layout"]?.jsonObject
-                layout == null || "text-field" !in layout
-            }
-        BaseStyle.Json(Json.encodeToString(JsonObject.serializer(), JsonObject(root + ("layers" to JsonArray(layers)))))
-    }
+    private val baseStyle: BaseStyle = BaseStyle.Uri(Basemaps.Liberty.styleUri)
 
     private suspend fun MapRuntime.capture(area: MapArea, mesh: SampleMesh): ImageBitmap {
         // NodeLayers reads LocalMapState (for cluster clicks) and rasterizes chips with a TextMeasurer; the

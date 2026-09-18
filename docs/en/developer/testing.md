@@ -79,7 +79,7 @@ The store-listing screenshots (Play, F-Droid, IzzyOnDroid) are generated too, by
 ./gradlew :marketing-screenshots:updateMarketingScreenshots
 ```
 
-That writes `1_messages.png` … `5_channels.png` into five folders under `fastlane/metadata/android/en-US/images/`, deterministically (two runs are byte-identical):
+That writes `1_messages.png` … `5_channels.png` into five folders under `fastlane/metadata/android/en-US/images/`, reproducibly - the screens are byte-identical between runs; a wide map can differ by a few antialiased label-edge pixels, see below:
 
 | Folder | Size | Window | Uploaded by |
 | --- | --- | --- | --- |
@@ -89,7 +89,7 @@ That writes `1_messages.png` … `5_channels.png` into five folders under `fastl
 | `chromebookScreenshots/` | 1920×1080 @1x | expanded | hand, in Play Console |
 | `xrScreenshots/` | 1920×1200 @1x (8:5) | expanded | hand, in Play Console |
 
-The screens are composed in the app's own adaptive shell (`NavigationSuiteScaffold`, `ListDetailPaneScaffold`, `AdaptiveTwoPane`) with the same window-class calculations the app uses, so the form factors are data - a size, a density and a folder in `FormFactor.kt` - and every layout difference between them is the app's own. Neither `fastlane supply` nor the Play Developer API has a Chromebook or XR slot, so those two folders are ignored by supply and F-Droid and uploaded by hand. The basemap is the app's default Liberty style with its text layers removed: MapLibre packs glyphs into an atlas in tile-arrival order, which moves label edge pixels by one level from run to run, and nothing else in the map is affected.
+The screens are composed in the app's own adaptive shell (`NavigationSuiteScaffold`, `ListDetailPaneScaffold`, `AdaptiveTwoPane`) with the same window-class calculations the app uses, so the form factors are data - a size, a density and a folder in `FormFactor.kt` - and every layout difference between them is the app's own. Neither `fastlane supply` nor the Play Developer API has a Chromebook or XR slot, so those two folders are ignored by supply and F-Droid and uploaded by hand. The basemap is the app's default Liberty style, labels included. MapLibre packs glyphs into an atlas in tile-arrival order, so on the wide layouts a label's antialiased edge can land one level off between generations - a dozen pixels, invisible; the generator captures from fresh runtimes until two agree and warns if they never do, and a regenerated wide map may not `cmp` the previous one. Commit whichever run produced it.
 
 Locales: `-PmarketingLocales=en-US,de-DE` renders each locale in turn after switching the JVM default locale, the same switch the desktop app makes, so the app's strings, numbers and dates follow. Only `en-US` goes into `fastlane/` - everything there is read straight from git by F-Droid and IzzyOnDroid - and every other locale lands in `marketing-screenshots/build/marketing-screenshots/<locale>/images/` in the same layout, ready for a later `supply` run. The sample prose (the thread, the conversation previews, the framed variant's captions) is in `marketing-screenshots/src/main/composeResources/values/strings.xml`, which `crowdin.yml`'s first rule already globs like every other `composeResources` strings file, so a translated conversation needs no configuration change; until Crowdin fills a locale's `values-xx/strings.xml`, that locale's chat text stays English while the UI around it is translated.
 
