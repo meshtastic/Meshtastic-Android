@@ -255,12 +255,24 @@ class LoRaRegionPresetsTest {
     }
 
     @Test
-    fun `fresh setup placeholder adopts the built-in default when unconstrained`() {
+    fun `fresh setup keeps LongFast when firmware advertises no map`() {
+        // Pre-2.8 firmware installs its own region-table default on its screen; the app must not diverge from it.
         val nullMap: LoRaRegionPresetMap? = null
         assertEquals(
-            ModemPreset.LONG_TURBO,
+            ModemPreset.LONG_FAST,
             nullMap.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.LONG_FAST),
         )
+    }
+
+    @Test
+    fun `no first-setup default is offered without a map`() {
+        val nullMap: LoRaRegionPresetMap? = null
+        assertNull(nullMap.firstSetupDefaultFor(RegionCode.US))
+    }
+
+    @Test
+    fun `no first-setup default when the map omits it from the region`() {
+        assertNull(map.firstSetupDefaultFor(RegionCode.US))
     }
 
     @Test
@@ -359,6 +371,11 @@ class LoRaRegionPresetsTest {
                     )
             }
             .build()
+
+    @Test
+    fun `first-setup default is offered when the map lists it as legal`() {
+        assertEquals(ModemPreset.LONG_TURBO, firmware28Map.firstSetupDefaultFor(RegionCode.US))
+    }
 
     @Test
     fun `fresh US setup adopts LongTurbo over the advertised LongFast default`() {
