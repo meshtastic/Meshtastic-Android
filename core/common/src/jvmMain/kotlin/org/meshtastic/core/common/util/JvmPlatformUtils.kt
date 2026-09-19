@@ -37,6 +37,11 @@ actual object DateFormatter {
     private val shortDateTimeFormatter: DateTimeFormatter =
         DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM)
 
+    // A localized formatter binds the default locale of the moment it was built, and the desktop app changes the
+    // default locale after this object exists (the language preference resolves in composition), so each call
+    // rebinds to the current one; withLocale is a cheap copy.
+    private fun DateTimeFormatter.localized(): DateTimeFormatter = withLocale(Locale.getDefault())
+
     actual fun formatRelativeTime(timestampMillis: Long): String {
         val deltaMillis = nowMillis - timestampMillis
         val absDeltaMillis = abs(deltaMillis)
@@ -51,29 +56,29 @@ actual object DateFormatter {
     }
 
     actual fun formatDateTime(timestampMillis: Long): String =
-        shortDateTimeFormatter.format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
+        shortDateTimeFormatter.localized().format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
 
     actual fun formatShortDate(timestampMillis: Long): String {
         val isWithin24Hours = (nowMillis - timestampMillis) <= DAY_MILLIS
         val zonedDateTime = java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId)
         return if (isWithin24Hours) {
-            shortTimeFormatter.format(zonedDateTime)
+            shortTimeFormatter.localized().format(zonedDateTime)
         } else {
-            shortDateFormatter.format(zonedDateTime)
+            shortDateFormatter.localized().format(zonedDateTime)
         }
     }
 
     actual fun formatTime(timestampMillis: Long): String =
-        shortTimeFormatter.format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
+        shortTimeFormatter.localized().format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
 
     actual fun formatTimeWithSeconds(timestampMillis: Long): String =
-        mediumTimeFormatter.format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
+        mediumTimeFormatter.localized().format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
 
     actual fun formatDate(timestampMillis: Long): String =
-        shortDateFormatter.format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
+        shortDateFormatter.localized().format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
 
     actual fun formatDateTimeShort(timestampMillis: Long): String =
-        shortDateTimeFormatter.format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
+        shortDateTimeFormatter.localized().format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
 }
 
 // No ICU measurement data on the JVM, so the region table in core:common is the source. Desktop

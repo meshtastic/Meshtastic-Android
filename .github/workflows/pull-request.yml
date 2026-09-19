@@ -88,6 +88,7 @@ jobs:
               - 'feature/**'
               - 'screenshot-tests/**'
               - 'docs-screenshots/**'
+              - 'marketing-screenshots/**'
               # Shared build infrastructure
               - 'build-logic/**'
               - 'config/**'
@@ -170,6 +171,7 @@ jobs:
               ':baselineprofile',
               ':core:konsist',
               ':docs-screenshots',
+              ':marketing-screenshots',
               ':screenshot-tests',
           }
 
@@ -232,6 +234,7 @@ jobs:
           # and remove it from this list.
           no_tests_yet = {
               ':core:di',
+              ':marketing-screenshots',  # store-listing screenshot generator, a JVM program
               ':core:nfc',
               ':core:resources',
           }

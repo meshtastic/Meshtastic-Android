@@ -88,7 +88,7 @@ private const val CLUSTER_MIN_POINTS = 10
  */
 @Composable
 @Suppress("LongMethod")
-internal fun NodeLayers(
+fun NodeLayers(
     nodes: List<Node>,
     myNodeNum: Int?,
     showPrecisionCircles: Boolean,
