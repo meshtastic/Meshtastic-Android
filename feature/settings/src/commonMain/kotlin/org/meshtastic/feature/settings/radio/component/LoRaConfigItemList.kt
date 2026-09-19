@@ -71,10 +71,11 @@ import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.util.hopLimits
+import org.meshtastic.feature.settings.util.intRange
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
+import org.meshtastic.proto.hop_limit
 
 private val SPREAD_FACTOR_RANGE = 5..12
 private val CODING_RATE_RANGE = 5..8
@@ -296,7 +297,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                val hopLimitItems = remember { hopLimits }
+                // The schema declares this bound; a pin that drops it must fail here rather than unbound the picker.
+                val hopLimitItems = remember {
+                    requireNotNull(Config.LoRaConfig.hop_limit.intRange).map { it to it.toString() }
+                }
                 DropDownPreference(
                     title = stringResource(Res.string.hop_limit),
                     summary = stringResource(Res.string.config_lora_hop_limit_summary),

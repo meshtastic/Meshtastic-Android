@@ -16,4 +16,17 @@
  */
 package org.meshtastic.feature.settings.util
 
-val gpioPins = (0..48).map { it to "Pin $it" }
+import org.meshtastic.proto.FieldMetadata
+import kotlin.math.ceil
+import kotlin.math.floor
+
+/**
+ * The inclusive range a proto field declares for presentation, or null when the schema leaves either bound open.
+ * Fractional bounds round inward, so the integer range never admits a value the schema excludes.
+ */
+val FieldMetadata.intRange: IntRange?
+    get() {
+        val min = min_value ?: return null
+        val max = max_value ?: return null
+        return ceil(min).toInt()..floor(max).toInt()
+    }
