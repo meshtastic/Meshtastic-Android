@@ -1,1 +1,3 @@
-Täpsemad väljalaskemärkmed: https://github.com/meshtastic/Meshtastic-Android/releases/
+Stability and reliability fixes.
+
+Full release notes: https://github.com/meshtastic/Meshtastic-Android/releases
