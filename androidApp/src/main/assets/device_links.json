@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-04T17:23:12.532Z",
+  "generatedAt": "2026-09-19T12:33:23.000Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -316,6 +316,20 @@
       "shortCode": "t-watch-s3",
       "url": "https://msh.to/t-watch-s3",
       "description": "T-Watch S3",
+      "type": "vendor",
+      "targets": [
+        "t-watch-s3"
+      ],
+      "hwModels": [
+        51
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "t-watch-s3-plus",
+      "url": "https://msh.to/t-watch-s3-plus",
+      "description": "T-Watch S3 Plus",
       "type": "vendor",
       "targets": [
         "t-watch-s3"
@@ -3881,6 +3895,66 @@
       "hwModels": [
         83
       ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "t5s3-epaper-v1",
+      "url": "https://msh.to/t5s3-epaper-v1",
+      "description": "LilyGo T5 E-paper S3 Pro",
+      "type": "vendor",
+      "targets": [
+        "t5s3-epaper-v1"
+      ],
+      "hwModels": [
+        123
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "t5s3-epaper-v2",
+      "url": "https://msh.to/t5s3-epaper-v2",
+      "description": "LilyGo T5 E-paper S3 Pro V2",
+      "type": "vendor",
+      "targets": [
+        "t5s3-epaper-v2"
+      ],
+      "hwModels": [
+        123
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "fdroid",
+      "url": "https://msh.to/fdroid",
+      "description": "Meshtastic FDroid App Listing",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "nightly",
+      "url": "https://msh.to/nightly",
+      "description": "Meshtastic Nightly Index",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_mesh_tracker_x1",
+      "url": "https://msh.to/seeed_mesh_tracker_x1",
+      "description": "Seeed Mesh Tracker X1",
+      "type": "vendor",
+      "targets": [
+        "seeed_mesh_tracker_x1"
+      ],
+      "hwModels": [],
       "marketplace": null,
       "regions": null
     }
