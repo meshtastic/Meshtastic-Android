@@ -324,13 +324,13 @@ Opens the **Packets** and **App logs** tabs for viewing, filtering, and exportin
 
 ### App Settings
 
-The **App Settings** block on the **Settings** screen configures the app rather than the radio, and
+The **App Settings** block on the **Settings** screen configures the app rather than the node, and
 appears only when your own node is selected. It is grouped rather than flat:
 
 **Privacy**
 
 - **Allow analytics and crash reporting** — opt in or out of diagnostics.
-- **Provide phone location to mesh** — share this phone's position when the radio has no GPS fix.
+- **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
 - **Homoglyph encoding** — how look-alike characters in names are handled.
 
 **Appearance**
