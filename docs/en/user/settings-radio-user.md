@@ -66,7 +66,7 @@ On **Settings → Device configuration → Device**.
 | Rebroadcast Mode | How the node retransmits messages. As with the role, the picker lists the firmware names and describes only the selected one | `ALL` |
 | Node Info Broadcast Interval | How often the node re-announces itself. A dropdown of fixed intervals — Unset, then 3 to 72 hours — not a value you type in seconds | 3 hours |
 | Double Tap as Button | Treat a double tap as a button press | Disabled |
-| Triple Click Ad Hoc Ping | Send an ad-hoc position ping on a triple click | Disabled |
+| Triple Click Ad Hoc Ping | Send an ad-hoc position ping on a triple click | Enabled |
 | LED Heartbeat | Blink the status LED periodically | Enabled |
 | Time Zone | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it | — |
 | Button / Buzzer GPIO | Advanced: which pins the button and buzzer are wired to | — |
@@ -93,6 +93,12 @@ On **Settings → LoRa**.
 | Ok to MQTT | Allow your packets to be forwarded to MQTT by gateways | Off |
 | RX Boosted Gain | Extra receive gain on SX126x radios; costs a little current | Off |
 | PA fan disabled | Turn off the power-amplifier fan on hardware that has one | Off |
+
+The preset list is also filtered to what your region legally permits, so a preset allowed in one
+region simply does not appear in another. Changing region can therefore leave your current preset
+illegal — the app repairs it for you, switching to the region's own default rather than leaving an
+unusable setting in place. The region list itself is filtered by what your firmware supports, so
+the newer regions appear only on 2.8 or later, alongside whichever region the node already has set.
 
 Some regions are amateur-radio allocations whose presets only licensed operators may use. On firmware 2.8 or newer the app knows which regions those are and grays the whole **Presets** list out until **Licensed amateur radio (Ham)** is turned on for the node you are configuring; the text under the field says so while it is grayed out.
 
@@ -158,9 +164,9 @@ On **Settings → Device configuration → Display**. These control the **radio'
 | Use 12h clock format | Show the radio's clock as 12-hour rather than 24-hour |
 | Bold Heading | Draw the screen's heading text in bold |
 | Flip screen | Rotate the display 180° for an inverted mounting |
-| OLED type | Auto, SSD1306, SH1106, SH1107 |
+| OLED type | Six values, shown as the raw constants: `OLED_AUTO`, `OLED_SSD1306`, `OLED_SH1106`, `OLED_SH1107`, `OLED_SH1107_128_128`, `OLED_SH1107_ROTATED` |
 | Wake on tap or motion | Light the screen when the radio is tapped or moved |
-| Compass orientation | Rotation offset for the compass rose (0°, 90°, 180°, 270°) |
+| Compass orientation | Rotation offset for the compass rose. Eight values, shown as the raw constants `DEGREES_0` through `DEGREES_270` plus an `_INVERTED` variant of each |
 | Always point north | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Position Config
@@ -243,7 +249,7 @@ On **Settings → Security**. The screen is grouped into cards: **Packet authent
 | ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set |
 | Serial console | Serial console over the Stream API |
 | Debug log API enabled | Output live debug logging over serial, and view and export position-redacted radio logs over Bluetooth |
-| Managed Mode | Restrict non-admin channel changes. Only selectable once an Admin Key is set |
+| Managed Mode | Locks the whole Configuration list, not just channels — every radio setting becomes read-only and only an admin can change anything. Only selectable once an Admin Key is set |
 | Backup Keys | Save an encrypted backup of the node's keys on this phone (Android only, and only for your own node) |
 | Restore Keys | Write the backed-up keys back to the node (available once a backup exists) |
 | Delete Key Backup | Remove the stored key backup from this phone |
