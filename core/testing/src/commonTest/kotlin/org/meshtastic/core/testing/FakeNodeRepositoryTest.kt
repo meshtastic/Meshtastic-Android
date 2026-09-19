@@ -93,6 +93,20 @@ class FakeNodeRepositoryTest {
     }
 
     @Test
+    fun `getNodes filtering by onlyDirect drops an mqtt node at zero hops`() = runTest {
+        // An MQTT-bridged node reports the hop count its uplink gateway heard, not ours, so it is not direct.
+        val node1 = Node(num = 1, hopsAway = 0)
+        val node2 = Node(num = 2, hopsAway = 0, viaMqtt = true)
+        repository.setNodes(listOf(node1, node2))
+
+        repository.getNodes(onlyDirect = true).test {
+            val result = awaitItem()
+            assertEquals(1, result.size)
+            assertEquals(1, result[0].num)
+        }
+    }
+
+    @Test
     fun `insertMetadata updates node metadata`() = runTest {
         val nodeNum = 1234
         repository.upsert(Node(num = nodeNum))

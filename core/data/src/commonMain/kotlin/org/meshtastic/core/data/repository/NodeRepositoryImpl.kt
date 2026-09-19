@@ -203,7 +203,7 @@ class NodeRepositoryImpl(
         .getNodesFlow(
             sort = sort.sqlValue,
             includeUnknown = includeUnknown,
-            hopsAwayMax = if (onlyDirect) 0 else -1,
+            onlyDirect = onlyDirect,
             lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
         )
         .mapLatest { list -> list.map { it.toModel() }.filter { node -> node.matchesSearch(filter) } }
