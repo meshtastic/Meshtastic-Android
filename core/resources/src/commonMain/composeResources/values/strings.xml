@@ -90,6 +90,7 @@
     <string name="always_point_north">Always point north</string>
     <string name="ambient_lighting">Ambient Lighting</string>
     <string name="ambient_lighting_config">Ambient Lighting Config</string>
+    <string name="ammonium">Ammonium</string>
     <string name="analytics_notice">Analytics are collected to help us improve the Android app (thank you), we will receive anonymized information about user behavior. This includes crash reports, screens used in the app, etc.</string>
     <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="analytics_platforms">Analytics platforms:</string>
@@ -146,6 +147,7 @@
     <string name="baro_pressure">Baro</string>
     <string name="battery">Battery</string>
     <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
+    <string name="biochemical_oxygen_demand">BOD</string>
     <string name="ble_devices">Bluetooth Devices</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI threshold (defaults to -80)</string>
     <string name="ble_scan_needs_location_services">Bluetooth scanning also needs location services switched on for this version of Android. Your position is not used.</string>
@@ -222,6 +224,7 @@
     <string name="channel_url">Channel URL</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Channels</string>
+    <string name="chemical_oxygen_demand">COD</string>
     <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="chirpy_assistant_title">Chirpy Assistant</string>
@@ -535,6 +538,7 @@
     <string name="display_mode">Display mode</string>
     <string name="display_time_in_12h_format">When enabled, the device will display the time in 12-hour format on screen.</string>
     <string name="display_units">Display units</string>
+    <string name="dissolved_oxygen">Dissolved O₂</string>
     <!-- DISTANCE -->
     <string name="distance">Distance</string>
     <string name="distance_filters">Distance Filters</string>
@@ -609,6 +613,7 @@
     <string name="edit">Edit</string>
     <string name="edit_custom_tile_source">Edit Network Tile Source</string>
     <string name="eight_hours">8 Hours</string>
+    <string name="electrical_conductivity">Conductivity</string>
     <string name="elevation_suffix" translatable="false">MSL</string>
     <!-- EMOJI -->
     <string name="emoji_category_activities">Activities</string>
@@ -960,6 +965,8 @@
     <string name="licensed_mode_enable_title">Enable licensed (Ham) mode?</string>
     <string name="licensed_mode_enable_warning">Licensed mode removes channel encryption keys and disables the admin channel, so all traffic is sent as plaintext that anyone can read — and this firmware cannot sign it, so other nodes cannot verify it came from you. This is not compatible with the default Meshtastic network, and you remain responsible for meeting your amateur radio license requirements and local regulations.</string>
     <string name="licensed_mode_enable_warning_signed">Licensed mode removes channel encryption keys and disables the admin channel, so all traffic is sent as plaintext that anyone can read — but it is digitally signed, letting other nodes verify it came from you. Your node number may change once to match your identity key, so favorites, message history, remote admin, and other nodes may initially treat it as new; you remain responsible for meeting your amateur radio license requirements and local regulations.</string>
+    <string name="lightning_distance">Storm Distance</string>
+    <string name="lightning_strikes_1h">Lightning (1h)</string>
     <!-- LOAD -->
     <string name="load">Load</string>
     <string name="load_15_min">Load 15m</string>
@@ -1296,6 +1303,8 @@
     <string name="new_nodes">New Nodes</string>
     <string name="next">Next</string>
     <string name="nfc_disabled">NFC is disabled. Please enable it in system settings.</string>
+    <string name="nitrate">Nitrate</string>
+    <string name="nitrogen">Nitrogen</string>
     <!-- NO -->
     <string name="no_bluetooth_devices_hint">Ensure you're within range of the device.</string>
     <string name="no_bluetooth_devices_seen">No Bluetooth devices seen</string>
@@ -1437,6 +1446,7 @@
     <string name="open_wifi_settings">Open Wi-Fi settings</string>
     <string name="options">Options</string>
     <string name="orient_north">Orient north</string>
+    <string name="orp">ORP</string>
     <!-- OUTPUT -->
     <string name="output_buzzer_gpio">Output buzzer (GPIO)</string>
     <string name="output_duration_milliseconds">Output duration (milliseconds)</string>
@@ -1502,6 +1512,7 @@
     <string name="permissions_show">Show permissions</string>
     <string name="phone_location">Phone Location</string>
     <string name="phone_location_description">Meshtastic uses your phone's location to enable a number of features. You can update your location permissions at any time from settings.</string>
+    <string name="phosphorus">Phosphorus</string>
     <string name="pin_selected">Pin</string>
     <string name="play">Play</string>
     <plurals name="plurals_hours">
@@ -1516,6 +1527,16 @@
         <item quantity="one">%1$d second</item>
         <item quantity="other">%1$d seconds</item>
     </plurals>
+    <!-- PM -->
+    <string name="pm_sensor_status">Sensor Status</string>
+    <string name="pm_status_co2_error">CO₂ error</string>
+    <string name="pm_status_fan_error">Fan error</string>
+    <string name="pm_status_fan_speed_warning">Fan speed warning</string>
+    <string name="pm_status_gas_error">Gas sensor error</string>
+    <string name="pm_status_hcho_error">HCHO error</string>
+    <string name="pm_status_pm_error">PM error</string>
+    <string name="pm_status_rht_error">RH&amp;T error</string>
+    <string name="pm_status_unknown_flags">Unknown flags 0x%1$s</string>
     <string name="pm1_0">PM1.0</string>
     <string name="pm10">PM10</string>
     <string name="pm2_5">PM2.5</string>
@@ -1526,6 +1547,7 @@
     <string name="position_flags">Position Flags</string>
     <string name="position_log">Position</string>
     <string name="position_packet">Position Packet</string>
+    <string name="potassium">Potassium</string>
     <!-- POWER -->
     <string name="power">Power</string>
     <string name="power_config">Power Config</string>
@@ -1700,6 +1722,7 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
     <string name="rsyslog_server">rsyslog server</string>
+    <string name="salinity">Salinity</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I'm kinda scared.</string>
     <string name="sats">Sats</string>
     <!-- SAVE -->
@@ -1849,7 +1872,10 @@
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, a measure used in communications to quantify the level of a desired signal to the level of background noise. In Meshtastic and other wireless systems, a higher SNR indicates a clearer signal that can enhance the reliability and quality of data transmission.</string>
     <string name="soil_moisture">Soil Moist</string>
+    <string name="soil_ph">Soil pH</string>
     <string name="soil_temperature">Soil Temp</string>
+    <string name="soil_water_metrics">Soil &amp; Water</string>
+    <string name="solar_irradiance">Solar Irradiance</string>
     <string name="speed">Speed</string>
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="speed_mph">%1$d mph</string>
@@ -2010,6 +2036,7 @@
     <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
+    <string name="turbidity">Turbidity</string>
     <string name="twenty_four_hours">24H</string>
     <string name="two_days">48 Hours</string>
     <string name="two_weeks">2W</string>
@@ -2081,6 +2108,7 @@
     <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration</string>
     <string name="wake_on_tap_or_motion">Wake on tap or motion</string>
     <string name="warning">Warning</string>
+    <string name="water_ph">Water pH</string>
     <string name="waypoint_delete">Delete waypoint?</string>
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_new">New waypoint</string>

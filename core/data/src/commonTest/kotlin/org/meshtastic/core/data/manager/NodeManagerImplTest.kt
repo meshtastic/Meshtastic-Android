@@ -53,6 +53,7 @@ import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.SoilWaterMetrics
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
@@ -640,6 +641,31 @@ class NodeManagerImplTest {
         assertNotNull(result!!.environmentMetrics)
         assertEquals(22.5f, result.environmentMetrics.temperature)
         assertEquals(45.0f, result.environmentMetrics.relative_humidity)
+    }
+
+    @Test
+    fun `handleReceivedTelemetry updates soil water metrics`() {
+        val nodeNum = 1234
+        val telemetry =
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.soil_water_metrics =
+                        SoilWaterMetrics.Builder()
+                            .also { wb ->
+                                wb.soil_ph = 6.5f
+                                wb.nitrogen = 0f
+                            }
+                            .build()
+                }
+                .build()
+
+        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        assertEquals(6.5f, result!!.soilWaterMetrics.soil_ph)
+        // A reported 0 mg/kg is a reading, not absence.
+        assertEquals(0f, result.soilWaterMetrics.nitrogen)
+        assertNull(result.soilWaterMetrics.potassium)
     }
 
     @Test

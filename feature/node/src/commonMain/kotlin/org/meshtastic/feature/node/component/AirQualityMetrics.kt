@@ -16,11 +16,11 @@
  */
 package org.meshtastic.feature.node.component
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowSeconds
@@ -37,6 +37,8 @@ import org.meshtastic.core.resources.micrograms_per_cubic_meter
 import org.meshtastic.core.resources.pm10
 import org.meshtastic.core.resources.pm1_0
 import org.meshtastic.core.resources.pm2_5
+import org.meshtastic.core.resources.pm_sensor_status
+import org.meshtastic.core.resources.pm_status_unknown_flags
 import org.meshtastic.core.resources.ppm
 import org.meshtastic.core.ui.component.Co2Severity
 import org.meshtastic.core.ui.component.PmAqiSeverity
@@ -44,6 +46,8 @@ import org.meshtastic.core.ui.icon.AirQuality
 import org.meshtastic.core.ui.icon.Humidity
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Temperature
+import org.meshtastic.feature.node.metrics.PmStatusFault
+import org.meshtastic.feature.node.model.MetricInfo
 import org.meshtastic.feature.node.model.VectorMetricInfo
 import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.Telemetry
@@ -62,6 +66,7 @@ private fun nowCastAqi(pm25History: List<Telemetry>): Pair<Int, PmAqiSeverity>? 
 private fun buildAirQualityCards(
     metrics: AirQualityMetrics,
     aqiText: String?,
+    statusValues: List<String>,
     ugm3: String,
     ppmUnit: String,
     icon: ImageVector,
@@ -97,15 +102,38 @@ private fun buildAirQualityCards(
             },
         ),
     )
+    // One card per fault: the info card has no wrapping, so a joined list would make one very wide card.
+    statusValues.forEach { add(VectorMetricInfo(Res.string.pm_sensor_status, it, icon).asGroup()) }
+}
+
+/**
+ * The PM sensor's status register decoded to one display string per set bit, each mapped to whether it is a fault
+ * (true) or a warning. Empty when the register is absent or 0 (a healthy sensor); the export carries it raw either way.
+ */
+@Composable
+private fun pmStatusValues(flags: Int?): Map<String, Boolean> {
+    val nonZero = flags?.takeIf { it != 0 } ?: return emptyMap()
+    val faults = PmStatusFault.decode(nonZero).associate { stringResource(it.labelRes) to !it.isWarning }
+    val unknown =
+        PmStatusFault.unknownBitsHex(nonZero)?.let { stringResource(Res.string.pm_status_unknown_flags, it) to false }
+    return if (unknown == null) faults else faults + unknown
 }
 
 /**
  * Severity color for a metric's value text, or null to keep the default card color. The AQI tone is resolved by the
- * caller because [PmAqiSeverity.color] is `@Composable`.
+ * caller because [PmAqiSeverity.color] is `@Composable`. Status cards share one label, so faults are told from warnings
+ * by value.
  */
-private fun metricValueColor(label: StringResource, co2Color: Color?, aqiColor: Color?): Color? = when (label) {
+private fun metricValueColor(
+    metric: MetricInfo,
+    co2Color: Color?,
+    aqiColor: Color?,
+    faultColor: Color,
+    faultValues: Set<String>,
+): Color? = when (metric.label) {
     Res.string.co2 -> co2Color
     Res.string.aqi -> aqiColor
+    Res.string.pm_sensor_status -> faultColor.takeIf { metric.value in faultValues }
     else -> null
 }
 
@@ -134,18 +162,35 @@ internal fun AirQualityInfoCards(
         aqi?.let { (value, severity) ->
             stringResource(Res.string.aqi_value_with_severity, value, stringResource(severity.labelRes))
         }
+    val status = pmStatusValues(metrics.pm_status_flags)
+    val statusValues = status.keys.toList()
     val icon = MeshtasticIcons.AirQuality
     val tempIcon = MeshtasticIcons.Temperature
     val humidityIcon = MeshtasticIcons.Humidity
     val cards =
-        remember(metrics, aqiText, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit) {
-            buildAirQualityCards(metrics, aqiText, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit)
+        remember(metrics, aqiText, statusValues, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit) {
+            buildAirQualityCards(
+                metrics,
+                aqiText,
+                statusValues,
+                ugm3,
+                ppmUnit,
+                icon,
+                tempIcon,
+                humidityIcon,
+                isFahrenheit,
+            )
         }
 
     if (cards.none { it.isNotEmpty() }) return
 
     val co2Color = Co2Severity.fromPpm(metrics.co2 ?: 0)?.color
     val aqiColor = aqi?.second?.color()
+    val faultColor = MaterialTheme.colorScheme.error
+    val faultValues = status.filterValues { it }.keys
 
-    MetricCardFlow(groups = cards, valueColor = { metric -> metricValueColor(metric.label, co2Color, aqiColor) })
+    MetricCardFlow(
+        groups = cards,
+        valueColor = { metric -> metricValueColor(metric, co2Color, aqiColor, faultColor, faultValues) },
+    )
 }

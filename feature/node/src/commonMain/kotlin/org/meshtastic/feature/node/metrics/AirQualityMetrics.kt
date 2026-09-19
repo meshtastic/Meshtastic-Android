@@ -70,6 +70,8 @@ import org.meshtastic.core.resources.micrograms_per_cubic_meter
 import org.meshtastic.core.resources.pm10
 import org.meshtastic.core.resources.pm1_0
 import org.meshtastic.core.resources.pm2_5
+import org.meshtastic.core.resources.pm_sensor_status
+import org.meshtastic.core.resources.pm_status_unknown_flags
 import org.meshtastic.core.resources.ppm
 import org.meshtastic.core.ui.component.Co2Severity
 import org.meshtastic.core.ui.component.PmAqiSeverity
@@ -358,6 +360,27 @@ private fun AqiText(aqi: Int) {
     )
 }
 
+/**
+ * The PM sensor's decoded status register. A register at 0 is a healthy sensor and is not listed here (the CSV and the
+ * node DB export still carry it); a non-zero one names each fault it sets, plus any bits this build does not know.
+ */
+@Composable
+private fun PmStatusText(flags: Int) {
+    val faults = remember(flags) { PmStatusFault.decode(flags) }
+    val unknownHex = remember(flags) { PmStatusFault.unknownBitsHex(flags) }
+    val parts =
+        faults.map { stringResource(it.labelRes) } +
+            listOfNotNull(unknownHex?.let { stringResource(Res.string.pm_status_unknown_flags, it) })
+    // A warning-only register (fan speed) is not an error tone; unknown bits alone are not either.
+    val isFault = faults.any { !it.isWarning }
+    Text(
+        text = "${stringResource(Res.string.pm_sensor_status)}: ${parts.joinToString()}",
+        style = MaterialTheme.typography.bodySmall,
+        fontWeight = FontWeight.Medium,
+        color = if (isFault) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
 @Composable
 private fun AirQualityMetricsCard(
     sample: AirQualitySample,
@@ -421,6 +444,7 @@ private fun AirQualityMetricsCard(
                     }
                 }
             }
+            aq.pm_status_flags?.takeIf { it != 0 }?.let { PmStatusText(it) }
         }
     }
 }

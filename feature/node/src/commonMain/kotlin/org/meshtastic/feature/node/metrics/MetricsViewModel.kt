@@ -461,7 +461,8 @@ open class MetricsViewModel(
             header =
             "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\"," +
                 "\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\"," +
-                "\"soilMoisture\",$oneWireHeaders,$adcHeaders\n",
+                "\"soilMoisture\",$oneWireHeaders,$adcHeaders," +
+                "\"lightningStrikeCount1h\",\"lightningDistanceKm\"\n",
             rows = data,
             epochSeconds = { it.time.toLong() },
         ) { t ->
@@ -479,7 +480,8 @@ open class MetricsViewModel(
                 "\"${em?.barometric_pressure ?: ""}\",\"${em?.gas_resistance ?: ""}\"," +
                 "\"${em?.iaq ?: ""}\",\"${em?.wind_speed ?: ""}\"," +
                 "\"${em?.wind_direction ?: ""}\",\"${em?.soil_temperature ?: ""}\"," +
-                "\"${em?.soil_moisture ?: ""}\",$oneWireValues,$adcValues"
+                "\"${em?.soil_moisture ?: ""}\",$oneWireValues,$adcValues," +
+                "\"${em?.lightning_strike_count_1h ?: ""}\",\"${em?.lightning_distance_km ?: ""}\""
         }
     }
 
@@ -529,7 +531,7 @@ open class MetricsViewModel(
                 "\"form_formaldehyde\",\"form_humidity\",\"form_temperature\"," +
                 "\"pm40_standard\",\"particles_40um\"," +
                 "\"pm_temperature\",\"pm_humidity\",\"pm_voc_idx\",\"pm_nox_idx\"," +
-                "\"particles_tps\"\n",
+                "\"particles_tps\",\"pm_status_flags\"\n",
             rows = data,
             epochSeconds = { it.telemetry.time.toLong() },
         ) { sample ->
@@ -561,7 +563,8 @@ open class MetricsViewModel(
                 "\"${aq?.pm_humidity ?: ""}\"," +
                 "\"${aq?.pm_voc_idx ?: ""}\"," +
                 "\"${aq?.pm_nox_idx ?: ""}\"," +
-                "\"${aq?.particles_tps ?: ""}\""
+                "\"${aq?.particles_tps ?: ""}\"," +
+                "\"${aq?.pm_status_flags ?: ""}\""
         }
     }
 

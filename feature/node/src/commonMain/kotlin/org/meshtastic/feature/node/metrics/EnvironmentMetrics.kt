@@ -51,6 +51,7 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.adcVoltage
 import org.meshtastic.core.model.util.oneWireTemperature
+import org.meshtastic.core.model.util.toStormDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.adc_voltage
 import org.meshtastic.core.resources.current
@@ -60,6 +61,8 @@ import org.meshtastic.core.resources.gas_resistance
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.iaq_definition
+import org.meshtastic.core.resources.lightning_distance
+import org.meshtastic.core.resources.lightning_strikes_1h
 import org.meshtastic.core.resources.lux
 import org.meshtastic.core.resources.metric_channel_label
 import org.meshtastic.core.resources.one_wire_temperature
@@ -507,6 +510,40 @@ private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics,
 }
 
 /**
+ * Strikes in the last hour and distance to the storm front, from the AS3935. Absent readings are null; 0 strikes is a
+ * real reading.
+ */
+@Composable
+private fun LightningDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics, isImperial: Boolean) {
+    val strikes = envMetrics.lightning_strike_count_1h
+    val distanceKm = envMetrics.lightning_distance_km?.takeIf { !it.isNaN() }
+    if (strikes == null && distanceKm == null) return
+    val system = if (isImperial) MeasurementSystem.IMPERIAL else MeasurementSystem.METRIC
+
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        strikes?.let {
+            Text(
+                text = formatString(LABELLED_VALUE, stringResource(Res.string.lightning_strikes_1h), it.toString()),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+        distanceKm?.let {
+            Text(
+                text =
+                formatString(
+                    LABELLED_VALUE,
+                    stringResource(Res.string.lightning_distance),
+                    it.toStormDistanceString(system),
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
+}
+
+/**
  * One row per reporting 1-Wire probe. Values arrive already converted to the display unit by the view model, so they
  * are only formatted here — a second conversion would double-count. An absent channel is `null`; 0°C is a real reading.
  */
@@ -606,6 +643,7 @@ private fun EnvironmentMetricsContent(
         RadiationDisplay(envMetrics)
         WindDisplay(envMetrics, isImperial)
         RainfallDisplay(envMetrics, isImperial)
+        LightningDisplay(envMetrics, isImperial)
         OneWireTemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
         AdcVoltageDisplay(envMetrics)
     }
