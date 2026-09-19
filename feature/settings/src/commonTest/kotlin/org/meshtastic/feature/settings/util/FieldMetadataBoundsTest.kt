@@ -44,7 +44,12 @@ class FieldMetadataBoundsTest {
 
     @Test
     fun aFieldWithoutBounds_isUnbounded() {
-        assertNull(Config.LoRaConfig.spread_factor.intRange)
+        assertNull(FieldMetadata.Builder().build().intRange)
+    }
+
+    @Test
+    fun spreadFactor_readsItsBoundsFromTheRegistry() {
+        assertEquals(5..12, Config.LoRaConfig.spread_factor.intRange)
     }
 
     @Test
