@@ -1,1 +1,3 @@
-Für detaillierte Versionshinweise besuchen Sie bitte: https://github.com/meshtastic/Meshtastic-Android/releases/
+Stability and reliability fixes.
+
+Full release notes: https://github.com/meshtastic/Meshtastic-Android/releases
