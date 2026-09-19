@@ -32,9 +32,12 @@ import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Position
+import org.meshtastic.proto.SoilWaterMetrics
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -84,7 +87,67 @@ class ExportNodeDatabaseUseCaseTest {
         assertFalse("position" in node)
         assertFalse("deviceMetrics" in node)
         assertFalse("environmentMetrics" in node)
+        assertFalse("airQualityMetrics" in node)
+        assertFalse("soilWaterMetrics" in node)
         assertFalse("publicKey" in node)
+    }
+
+    @Test
+    fun `lightning readings export from environment metrics`() = runTest {
+        val env =
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.lightning_strike_count_1h = 0
+                    wb.lightning_distance_km = 12f
+                }
+                .build()
+        nodeRepository.setNodes(listOf(Node(num = 7, environmentMetrics = env)))
+
+        val metrics = exportJson()["nodes"]!!.jsonArray.single().jsonObject["environmentMetrics"]!!.jsonObject
+
+        // A quiet hour is 0 strikes, a reading in its own right - it must not be dropped as absent.
+        assertEquals(0, metrics["lightningStrikeCount1h"]?.jsonPrimitive?.int)
+        assertEquals(12f, metrics["lightningDistanceKm"]?.jsonPrimitive?.float)
+        assertFalse("temperature" in metrics)
+    }
+
+    @Test
+    fun `pm status flags export raw and survive at zero`() = runTest {
+        val aq =
+            AirQualityMetrics.Builder()
+                .also { wb ->
+                    wb.pm25_standard = 9
+                    wb.pm_status_flags = 0
+                }
+                .build()
+        nodeRepository.setNodes(listOf(Node(num = 7, airQualityMetrics = aq)))
+
+        val metrics = exportJson()["nodes"]!!.jsonArray.single().jsonObject["airQualityMetrics"]!!.jsonObject
+
+        // A status register at 0 means "no faults", which is a reading, not absence.
+        assertEquals(0, metrics["pmStatusFlags"]?.jsonPrimitive?.int)
+        assertEquals(9, metrics["pm25Standard"]?.jsonPrimitive?.int)
+    }
+
+    @Test
+    fun `soil water metrics export with absent fields omitted`() = runTest {
+        val soil =
+            SoilWaterMetrics.Builder()
+                .also { wb ->
+                    wb.soil_ph = 6.5f
+                    wb.electrical_conductivity = 1.2f
+                    wb.nitrogen = 0f
+                }
+                .build()
+        nodeRepository.setNodes(listOf(Node(num = 7, soilWaterMetrics = soil)))
+
+        val metrics = exportJson()["nodes"]!!.jsonArray.single().jsonObject["soilWaterMetrics"]!!.jsonObject
+
+        assertEquals(6.5f, metrics["soilPh"]?.jsonPrimitive?.float)
+        assertEquals(1.2f, metrics["electricalConductivity"]?.jsonPrimitive?.float)
+        assertEquals(0f, metrics["nitrogen"]?.jsonPrimitive?.float)
+        assertFalse("phosphorus" in metrics)
+        assertFalse("ph" in metrics)
     }
 
     @Test

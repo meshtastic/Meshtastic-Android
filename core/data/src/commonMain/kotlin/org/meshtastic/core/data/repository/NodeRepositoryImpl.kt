@@ -314,6 +314,10 @@ class NodeRepositoryImpl(
         org.meshtastic.proto.Telemetry.Builder()
             .also { wb -> wb.air_quality_metrics = airQualityMetrics }
             .build(),
+        soilWaterTelemetry =
+        org.meshtastic.proto.Telemetry.Builder()
+            .also { wb -> wb.soil_water_metrics = soilWaterMetrics }
+            .build(),
         paxcounter = paxcounter,
         publicKey = publicKey,
         notes = notes,

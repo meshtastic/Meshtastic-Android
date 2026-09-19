@@ -51,6 +51,7 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.adcVoltage
 import org.meshtastic.core.model.util.oneWireTemperature
+import org.meshtastic.core.model.util.toStormDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.adc_voltage
 import org.meshtastic.core.resources.current
@@ -60,6 +61,8 @@ import org.meshtastic.core.resources.gas_resistance
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.iaq_definition
+import org.meshtastic.core.resources.lightning_distance
+import org.meshtastic.core.resources.lightning_strikes_1h
 import org.meshtastic.core.resources.lux
 import org.meshtastic.core.resources.metric_channel_label
 import org.meshtastic.core.resources.one_wire_temperature
@@ -507,6 +510,40 @@ private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics,
 }
 
 /**
+ * Strikes in the last hour and distance to the storm front, from the AS3935. Absent readings are null; 0 strikes is a
+ * real reading.
+ */
+@Composable
+private fun LightningDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics, isImperial: Boolean) {
+    val strikes = envMetrics.lightning_strike_count_1h
+    val distanceKm = envMetrics.lightning_distance_km?.takeIf { !it.isNaN() }
+    if (strikes == null && distanceKm == null) return
+    val system = if (isImperial) MeasurementSystem.IMPERIAL else MeasurementSystem.METRIC
+
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        strikes?.let {
+            Text(
+                text = formatString(LABELLED_VALUE, stringResource(Res.string.lightning_strikes_1h), it.toString()),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+        distanceKm?.let {
+            Text(
+                text =
+                formatString(
+                    LABELLED_VALUE,
+                    stringResource(Res.string.lightning_distance),
+                    it.toStormDistanceString(system),
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
+}
+
+/**
  * One row per reporting 1-Wire probe. Values arrive already converted to the display unit by the view model, so they
  * are only formatted here — a second conversion would double-count. An absent channel is `null`; 0°C is a real reading.
  */
@@ -606,6 +643,7 @@ private fun EnvironmentMetricsContent(
         RadiationDisplay(envMetrics)
         WindDisplay(envMetrics, isImperial)
         RainfallDisplay(envMetrics, isImperial)
+        LightningDisplay(envMetrics, isImperial)
         OneWireTemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
         AdcVoltageDisplay(envMetrics)
     }
@@ -636,6 +674,40 @@ fun PreviewEnvironmentMetricsContent() {
                 wb.wind_lull = 2.3f
                 wb.rainfall_1h = 1.5f
                 wb.rainfall_24h = 12.3f
+            }
+            .build()
+    val fakeTelemetry =
+        Telemetry.Builder()
+            .also { wb ->
+                wb.time = 1700000000
+                wb.environment_metrics = fakeEnvMetrics
+            }
+            .build()
+    AppTheme {
+        Surface {
+            EnvironmentMetricsContent(
+                telemetry = fakeTelemetry,
+                environmentDisplayFahrenheit = false,
+                isImperial = false,
+                timeTextOverride = "2023-11-14 22:13",
+            )
+        }
+    }
+}
+
+/** A log entry from an AS3935-equipped node: strikes in the last hour and the distance to the storm front. */
+@PreviewLightDark
+@Suppress("MagicNumber", "PreviewPublic") // fake data; public so :screenshot-tests can reference it
+@Composable
+fun PreviewEnvironmentMetricsContentLightning() {
+    val fakeEnvMetrics =
+        org.meshtastic.proto.EnvironmentMetrics.Builder()
+            .also { wb ->
+                wb.temperature = 19.4f
+                wb.relative_humidity = 71.0f
+                wb.barometric_pressure = 998.0f
+                wb.lightning_strike_count_1h = 3
+                wb.lightning_distance_km = 12.0f
             }
             .build()
     val fakeTelemetry =
