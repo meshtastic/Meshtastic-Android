@@ -173,15 +173,15 @@ Inline status indicators show key metrics at a glance:
 
 ### Hardware support status
 
-When a node's hardware is recognized, the detail view names the device and marks which rung of support it sits on, taken from the Meshtastic device registry rather than the app:
+When a node's hardware is recognized, the detail view names the device and marks its support status, taken from the Meshtastic device registry rather than the app:
 
 | Mark | Meaning |
 | --- | --- |
-| Rosette (green) | **Supported** — Backer or Partner hardware |
-| Wrench (sky blue) | **Independent maker hardware** — built and tested by an independent maker, ranked between Backer/Partner and community hardware |
-| Unverified (red) | **Supported by Meshtastic Community** — community and DIY hardware, and any legacy board |
+| Rosette (green) | **Supported** — hardware the Meshtastic project actively supports |
+| Wrench (sky blue) | **Independent maker hardware** — built and tested by an independent maker, shown as its own rung whether or not the project has promoted it yet |
+| Unverified (red) | **Supported by Meshtastic Community** — hardware the project does not actively support, including legacy boards |
 
-The label always accompanies the mark, so the rung is never conveyed by colour alone.
+The label always accompanies the mark, so the status is never conveyed by colour alone.
 
 ### Device Links ("I want one")
 

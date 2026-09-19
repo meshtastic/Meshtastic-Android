@@ -25,29 +25,26 @@ class HardwareSupportTierTest {
         DeviceHardware(activelySupported = activelySupported, isMaker = isMaker, supportLevel = supportLevel)
 
     @Test
-    fun `actively supported is the top rung whatever the other flags say`() {
+    fun `a maker board reads maker even once the registry marks it actively supported`() {
+        assertEquals(HardwareSupportTier.MAKER, hardware(false, true, 1).supportTier)
+        assertEquals(HardwareSupportTier.MAKER, hardware(true, true, 1).supportTier)
+        assertEquals(HardwareSupportTier.MAKER, hardware(true, true, 2).supportTier)
+    }
+
+    @Test
+    fun `actively supported decides the rung for everything that is not maker`() {
         assertEquals(HardwareSupportTier.SUPPORTED, hardware(true, false, 1).supportTier)
-        assertEquals(HardwareSupportTier.SUPPORTED, hardware(true, true, 1).supportTier)
         assertEquals(HardwareSupportTier.SUPPORTED, hardware(true, false, 3).supportTier)
         assertEquals(HardwareSupportTier.SUPPORTED, hardware(true, false, null).supportTier)
-    }
-
-    @Test
-    fun `a flagship or niche maker board is maker`() {
-        assertEquals(HardwareSupportTier.MAKER, hardware(false, true, 1).supportTier)
-        assertEquals(HardwareSupportTier.MAKER, hardware(false, true, 2).supportTier)
-    }
-
-    @Test
-    fun `a legacy or untiered maker board is community`() {
-        assertEquals(HardwareSupportTier.COMMUNITY, hardware(false, true, 3).supportTier)
-        assertEquals(HardwareSupportTier.COMMUNITY, hardware(false, true, null).supportTier)
-    }
-
-    @Test
-    fun `neither flag is community`() {
         assertEquals(HardwareSupportTier.COMMUNITY, hardware(false, false, 1).supportTier)
         assertEquals(HardwareSupportTier.COMMUNITY, hardware(false, false, null).supportTier)
+    }
+
+    @Test
+    fun `a legacy or untiered maker board falls through to the lifecycle flag`() {
+        assertEquals(HardwareSupportTier.SUPPORTED, hardware(true, true, 3).supportTier)
+        assertEquals(HardwareSupportTier.COMMUNITY, hardware(false, true, 3).supportTier)
+        assertEquals(HardwareSupportTier.COMMUNITY, hardware(false, true, null).supportTier)
     }
 
     @Test

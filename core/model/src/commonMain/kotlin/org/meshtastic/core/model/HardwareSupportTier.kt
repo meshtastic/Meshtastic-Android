@@ -17,8 +17,8 @@
 package org.meshtastic.core.model
 
 /**
- * The rung a board reads at wherever the app names its support status. Ordered top to bottom: Backer/Partner hardware,
- * independent maker hardware, then community hardware.
+ * The rung a board reads at wherever the app names its support status. Top to bottom: hardware the project actively
+ * supports, independent maker hardware, then community hardware (including anything not actively supported).
  */
 enum class HardwareSupportTier {
     SUPPORTED,
@@ -30,14 +30,15 @@ enum class HardwareSupportTier {
 private const val SUPPORT_LEVEL_LEGACY = 3
 
 /**
- * Resolves the rung in one place so every surface agrees. [DeviceHardware.activelySupported] is the top rung and wins
- * over [DeviceHardware.isMaker]; a maker board reads as maker only while its `supportLevel` is flagship or niche, so a
- * legacy or untiered maker board is community.
+ * Resolves the rung in one place so every surface agrees. [DeviceHardware.isMaker] is a relationship and wins first, so
+ * a maker board never reads as plain supported once the registry promotes it; [DeviceHardware.activelySupported] is the
+ * project's lifecycle flag and decides the other two rungs. A legacy or untiered maker board falls through to that
+ * lifecycle check.
  */
 val DeviceHardware.supportTier: HardwareSupportTier
     get() =
         when {
-            activelySupported -> HardwareSupportTier.SUPPORTED
             isMaker && supportLevel != null && supportLevel < SUPPORT_LEVEL_LEGACY -> HardwareSupportTier.MAKER
+            activelySupported -> HardwareSupportTier.SUPPORTED
             else -> HardwareSupportTier.COMMUNITY
         }
