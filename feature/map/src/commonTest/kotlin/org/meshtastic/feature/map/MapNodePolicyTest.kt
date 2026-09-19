@@ -175,7 +175,7 @@ class MapNodePolicyTest {
 
     @Test
     fun `the direct filter drops both relayed nodes and nodes of unknown distance`() {
-        // The node list's query is `hops_away = 0`, so -1 — never measured — is not direct.
+        // A non-local direct node needs `hops_away = 0` and `via_mqtt = 0`, so -1 — never measured — is not direct.
         val nodes =
             listOf(node(1, 45.0, -122.0, hopsAway = 2), node(2, 45.1, -122.1), node(3, 45.2, -122.2, hopsAway = -1))
         assertEquals(listOf(2), visible(nodes, filters(onlyDirect = true)))
