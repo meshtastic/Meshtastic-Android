@@ -2,7 +2,7 @@
 title: Local Mesh Discovery
 parent: User Guide
 nav_order: 12
-last_updated: 2026-09-11
+last_updated: 2026-09-19
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - discovery
@@ -27,7 +27,7 @@ The app offers two complementary approaches:
 
 Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, dwells on each one — listens for a set time — to collect packets, then analyzes and ranks the results.
 
-Connect your radio, then open **Settings → Advanced → Local Mesh Discovery**. On Android the **Advanced** section stays grayed out until a radio is connected and the app has finished reading its configuration, and every entry in it is disabled on a managed device. On desktop, Local Mesh Discovery has its own entry on the Settings screen, with no such gate.
+Connect your node, then open **Settings → Advanced → Local Mesh Discovery**. On Android the **Advanced** section appears only for a locally connected node, never over remote admin, and stays grayed out until the app has finished reading the node's configuration. On a managed device its entries are disabled, except **Debug Panel**, which reads app-local logs and stays available. On desktop, Local Mesh Discovery has its own entry on the Settings screen, with no such gate.
 
 > ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes.
 
@@ -39,7 +39,7 @@ Before starting, configure these controls:
 |---------|-------------|
 | **LoRa preset picker** | Select one or more presets to scan. Discovery dwells on each selected preset in turn. |
 | **Dwell time** | Time to listen on each preset. Choose from 1, 5, 15, 30, 45, 60, 90, 120, or 180 minutes. Longer dwell times collect more packets and give a clearer picture, but take longer. |
-| **Keep screen awake** | Keeps the phone out of Android Doze mode, which would otherwise drop radio packets during a long scan. Recommended — a scan run with it off can under-count what the radio heard. |
+| **Keep screen awake** | Keeps the display on for the scan. The scan itself holds a CPU wake lock for its whole run and posts a **Scanning LoRa presets…** notification, so it keeps collecting with the screen off or the app in the background. |
 
 The **Start Scan** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
@@ -98,7 +98,7 @@ Configure it under **Settings → Module configuration → Mesh Beacon**. The en
 
 - **Listen for beacons** — receive invitations broadcast by other nodes.
 - **Broadcast a beacon** — periodically advertise this mesh to nearby nodes, with an optional **Beacon message** of up to 100 bytes, a **Broadcast interval** picked from fixed intervals between 1 hour and 72 hours, and an **Offered channel** chosen from your radio's own channels. The offered channel is required, and defaults to your primary channel. Over remote admin the picker offers the primary channel only.
-- **Broadcast targets** — optional extra destinations beyond the offered channel. **Add target** appends a row; each row picks a **Channel** and a **Transmit preset**, and **Remove target** deletes it. With no targets, the beacon goes out on the offered channel alone.
+- **Broadcast targets** — where the beacon actually transmits. The list always holds at least one row: the first is the beacon's own transmission, not an extra. Each row picks a **Channel** and a **Transmit preset**. **Add target** appends a row, and **Remove target** deletes one — removing the last row replaces it with a fresh default rather than emptying the list.
 
 Two conditions block beacon setup:
 
@@ -142,12 +142,12 @@ Route traced toward destination:
 ■ Target Node (TGT1)
 ```
 
-Each `⇊` line between two nodes is one relay hop, and the SNR on that line is the quality of that segment alone. The app colors it green at or above −7 dB, yellow at or above −15 dB, and orange below that. A request that also gets a reply adds a second block under **Route traced back to us:**.
+Each `⇊` line between two nodes is one relay hop, and the SNR on that line is the quality of that segment alone. The app colors it against the demodulation floor of the preset in use, not a fixed number: green above the floor, yellow within 5.5 dB below it, orange within 7.5 dB, and red beyond that. The floor is −7.5 dB on Short Fast and improves 2.5 dB per spreading-factor step, so it is −17.5 dB on Long Fast — the same SNR reads differently on different presets. See [Signal Meter](signal-meter). A request that also gets a reply adds a second block under **Route traced back to us:**.
 
 | What to look for | What it means |
 |------------------|---------------|
-| All hops show Good SNR (≥ −7 dB, green) | Healthy path — messages flow reliably |
-| One hop shows a poor SNR (below −15 dB, orange) | Weak link — this relay segment is fragile |
+| All hops show Good SNR (green) | Healthy path — messages flow reliably |
+| One hop shows a poor SNR (orange or red) | Weak link — this relay segment is fragile |
 | Many hops (4+) | Long path — consider repositioning a node to shorten it |
 | Different path on retry | Mesh is adapting — multiple routes exist (this is good!) |
 
@@ -168,8 +168,8 @@ The Neighbor Info module lets each node broadcast a list of the nodes it can **d
 
 1. Navigate to **Settings → Module configuration → Neighbor Info**.
 2. Enable the module.
-3. Set **Update interval (seconds)**. The default is 21600 seconds (6 hours), and the firmware minimum is 14400 seconds (4 hours) — a smaller value is rejected and reset to the default.
-4. Turn on **Transmit over LoRa**. Without it, your neighbor list goes only to MQTT and to this app, never over the air. It is unavailable on a channel that still uses the default name and key, so set up your own channel first — see [Messages & Channels](messages-and-channels).
+3. Set **Update interval (seconds)**. The app accepts whatever you type; the firmware enforces its own minimum and resets a value below it.
+4. Turn on **Transmit over LoRa**. Without it, your neighbor list goes only to MQTT and to this app, never over the air.
 
 Once enabled and transmitting over LoRa, your node periodically broadcasts its neighbor list. Other nodes with Neighbor Info enabled do the same.
 
