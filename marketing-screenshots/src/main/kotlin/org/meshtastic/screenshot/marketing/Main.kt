@@ -31,6 +31,9 @@ private const val ARG_LOCALES = 2
 private const val ARG_FRAMED = 3
 private const val ARG_COUNT = 4
 
+/** A BCP 47 tag as Crowdin and Play spell it: a language, then optional script, region or variant subtags. */
+private val LANGUAGE_TAG = Regex("^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$")
+
 /**
  * Renders the listing screenshots: every [FormFactors.all] entry's shots, for each requested locale.
  *
@@ -50,6 +53,9 @@ fun main(args: Array<String>) {
     val buildDir = File(args[ARG_BUILD_DIR])
     val locales = args[ARG_LOCALES].split(',').map { it.trim() }.filter { it.isNotEmpty() }
     require(locales.isNotEmpty()) { "at least one locale is required, got '${args[ARG_LOCALES]}'" }
+    // Locales name output directories under the build dir, so only a language tag is accepted - nothing that could
+    // carry a path separator or a parent reference.
+    locales.forEach { require(LANGUAGE_TAG.matches(it)) { "'$it' is not a language tag such as en-US or pt-BR" } }
     val framed = args[ARG_FRAMED].toBooleanStrict()
 
     val t0 = System.nanoTime()
