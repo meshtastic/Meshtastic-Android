@@ -95,7 +95,8 @@ import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.json_enabled
 
-// json_enabled still drives MQTT JSON on firmware below its deprecated_since; the schema gate hides it beyond that.
+// json_enabled still drives MQTT JSON on firmware below its deprecated_since; beyond that the schema gate hides it
+// unless the node still holds it set, so a stale value stays visible.
 @Suppress("DEPRECATION")
 @Composable
 fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
