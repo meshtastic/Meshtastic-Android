@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @file:Suppress("TooManyFunctions")
 
 package org.meshtastic.feature.firmware
@@ -45,7 +44,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -1018,7 +1016,6 @@ private fun ProgressContent(
                 tint = MaterialTheme.colorScheme.primary,
             )
         } else {
-            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
             CircularWavyProgressIndicator(
                 progress = { if (isUpdating) progressState.progress else 1f },
                 modifier = Modifier.size(64.dp),
@@ -1058,7 +1055,6 @@ private fun ProgressContent(
         Spacer(Modifier.height(12.dp))
 
         if (isDownloading || isUpdating) {
-            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
             LinearWavyProgressIndicator(
                 progress = { progressState.progress },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
@@ -1252,9 +1248,7 @@ internal fun SuccessState(wasLowSpeedTransfer: Boolean = false, deviceWasWiped: 
             TextButton(onClick = { openUrl(OTAFIX_BOOTLOADER_URL) }) { Text(stringResource(Res.string.learn_more)) }
         }
         Spacer(Modifier.height(32.dp))
-        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         val largeHeight = ButtonDefaults.LargeContainerHeight
-        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         Button(
             onClick = onDone,
             shapes = ButtonDefaults.shapesFor(largeHeight),
