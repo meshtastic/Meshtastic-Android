@@ -1,11 +1,9 @@
 name: Update Changelog
 
+# Manual only: promote.yml stamps the released section at release time on its
+# own. Dispatch this to refresh the [Unreleased] section between releases.
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'CHANGELOG.md'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,6 +16,9 @@ concurrency:
 
 jobs:
   update-changelog:
+    # The content comes from main whatever ref was dispatched; refuse the rest so a
+    # stale-branch dispatch cannot open a PR built against a different tip.
+    if: github.ref == 'refs/heads/main'
     # ubuntu-slim: git + gh + coreutils + stdlib python3 is the whole toolchain here. Note this job checks out
     # full history below and slim is single-CPU, so the clone is slower than on a VM — and
     # slim's 15-minute platform cap is hard, matching the timeout already set here. A run that
@@ -37,6 +38,8 @@ jobs:
           # Find the latest production tag (vX.Y.Z)
           PROD=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
           echo "prod=${PROD:-}" >> "$GITHUB_OUTPUT"
+          # The tip of the checked-out main; github.sha is the dispatched ref's tip.
+          echo "head=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
           if [ -z "$PROD" ]; then
             echo "No production tag found. Skipping."
@@ -83,7 +86,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          HEAD_SHA: ${{ github.sha }}
+          HEAD_SHA: ${{ steps.tags.outputs.head }}
           PROD_TAG: ${{ steps.tags.outputs.prod }}
           INTERNAL_TAG: ${{ steps.tags.outputs.internal }}
           CLOSED_TAG: ${{ steps.tags.outputs.closed }}
@@ -284,7 +287,7 @@ jobs:
           else
             gh pr create \
               --title "docs: update CHANGELOG.md" \
-              --body "Automated changelog update from push to main." \
+              --body "Automated changelog refresh, dispatched from main." \
               --head "$BRANCH" \
               --base main \
               --label "automation" \

@@ -18,7 +18,7 @@ jobs:
   # compute, are the scarce resource during queue bursts).
   check-changes:
     if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     outputs:
       android: ${{ steps.filter.outputs.android }}
@@ -88,6 +88,7 @@ jobs:
               - 'feature/**'
               - 'screenshot-tests/**'
               - 'docs-screenshots/**'
+              - 'marketing-screenshots/**'
               # Shared build infrastructure
               - 'build-logic/**'
               - 'config/**'
@@ -170,6 +171,7 @@ jobs:
               ':baselineprofile',
               ':core:konsist',
               ':docs-screenshots',
+              ':marketing-screenshots',
               ':screenshot-tests',
           }
 
@@ -232,6 +234,7 @@ jobs:
           # and remove it from this list.
           no_tests_yet = {
               ':core:di',
+              ':marketing-screenshots',  # store-listing screenshot generator, a JVM program
               ':core:nfc',
               ':core:resources',
           }
@@ -277,7 +280,7 @@ jobs:
   check-metadata:
     name: Check Store Metadata
     if: github.repository == 'meshtastic/Meshtastic-Android'
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     permissions:
       contents: read
@@ -303,8 +306,16 @@ jobs:
         run: ./scripts/verify-rb-selftest.sh
       - name: Self-test verify-abi-parity
         run: ./scripts/verify-abi-parity-selftest.sh
-      - name: Validate store listing metadata lengths
-        run: python3 scripts/check-metadata-length.py
+      # Locale codes, lengths and HTML for all three stores that read the tree. supply
+      # uploads every locale directory it finds and neither it nor the Crowdin CLI
+      # validates the names, so an unmapped code is only rejected by the Play API, partway
+      # through an upload; F-Droid and IzzyOnDroid read the tree straight from git.
+      - name: Validate store listing metadata
+        run: python3 scripts/check-store-metadata.py
+      # default.txt is rendered from metainfo.xml; a PR that edits one without the
+      # other ships a listing that no longer says what the release did.
+      - name: Check Play what's-new matches AppStream
+        run: python3 scripts/sync-play-changelog.py --check
       # Compose Multiplatform does not strip Android-style \" / \' escapes, so a
       # backslash written before a quote renders literally in the UI (PR #6357).
       # Guards the English source strings; locale mirrors are cleaned upstream by
@@ -341,6 +352,18 @@ jobs:
             exit 1
           fi
 
+      # Flathub runs this exact command (flatpak-builder-lint checks/metainfo.py) and turns any
+      # non-zero exit into appstream-failed-validation at publish time. Nothing here ran it, so a
+      # malformed <description> reached Flathub before CI ever saw it. Catches a whitespace-only or
+      # empty-<p> description; a truly empty <description></description> and a release with no
+      # description at all both still validate, so this is hygiene, not a prose gate.
+      - name: Validate AppStream metainfo
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq appstream
+          appstreamcli validate --no-net \
+            desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml
+
   # 2. VALIDATION & BUILD: Delegate to reusable-check.yml
   # Coverage stays off for PRs to keep feedback fast (< 10 mins); mainline coverage comes
   # from main-check. Desktop *compilation* is covered on every PR by :desktopApp:test in the
@@ -369,11 +392,12 @@ jobs:
     secrets: inherit
 
   # 3. WORKFLOW STATUS: Ensures required checks are satisfied
-  # Pure gate job: no checkout, no toolchain, just reads `needs` results. ubuntu-slim is a
-  # container-backed single-CPU runner that starts faster than a VM (15-min job cap, x64 only).
+  # Pure gate job: no checkout, no toolchain, just reads `needs` results. It is the required
+  # check, so it runs on the label the rest of the workflow already gets slots on, not on
+  # ubuntu-slim's separate pool: an aggregator queued behind slim blocks a finished build.
   check-workflow-status:
     name: Check Workflow Status
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     permissions: {}
     needs: [check-changes, check-metadata, validate-and-build]

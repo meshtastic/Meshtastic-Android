@@ -79,9 +79,10 @@ fun LoRaRegionPresetMap?.repairPresetFor(region: RegionCode, current: ModemPrese
  * [current] selected.
  *
  * Keeps [current] (legality-repaired via [repairPresetFor]) except at fresh setup: when [previousRegion] is UNSET and
- * [current] is the [ModemPreset.LONG_FAST] placeholder a factory-flashed node reports (proto default), the region's
- * advertised default is adopted instead (the firmware map's when present, else the app's built-in default). Any other
- * preset at UNSET was set deliberately (e.g. a vendor build pinning USERPREFS_LORACONFIG_MODEM_PRESET) and is kept.
+ * [current] is the [ModemPreset.LONG_FAST] placeholder a factory-flashed node reports (proto default), a region default
+ * is adopted instead: the app's [firstSetupDefaultFor] where the firmware map confirms it, else the map's own default.
+ * Any other preset at UNSET was set deliberately (e.g. a vendor build pinning USERPREFS_LORACONFIG_MODEM_PRESET) and is
+ * kept.
  *
  * A build that pins a preset can also advertise it as an UNSET map entry (firmware #11507), stating outright that the
  * preset is deliberate; that keeps even a pinned LONG_FAST, which the placeholder heuristic alone cannot distinguish.
@@ -95,8 +96,8 @@ fun LoRaRegionPresetMap?.presetForRegionChange(
     val pinned = constraintFor(RegionCode.UNSET) != null
     val freshSetup = previousRegion == RegionCode.UNSET && !pinned && current == ModemPreset.LONG_FAST
     return if (freshSetup) {
-        // Re-repair the adopted default: a malformed map's advertised default may not be in its own legal set.
-        val preferred = constraintFor(newRegion)?.defaultPreset ?: defaultPresetFor(newRegion) ?: repaired
+        // Re-repaired: a malformed map's advertised default may not be in its own legal set.
+        val preferred = firstSetupDefaultFor(newRegion) ?: constraintFor(newRegion)?.defaultPreset ?: repaired
         repairPresetFor(newRegion, preferred)
     } else {
         repaired
@@ -104,9 +105,9 @@ fun LoRaRegionPresetMap?.presetForRegionChange(
 }
 
 /**
- * The app's built-in default modem presets for regions whose default differs from the global [ChannelOption.DEFAULT].
- * Mirrors the per-region defaults newer firmware advertises in [LoRaRegionPresetMap], so the default channel and a
- * fresh setup over old firmware (which sends no map) land on the same preset a new node would.
+ * The app's first-setup default modem presets, for regions whose default differs from the global
+ * [ChannelOption.DEFAULT]. Firmware's [LoRaRegionPresetMap] advertises only its region-table default, which for US is
+ * not what its own on-device chooser installs on a first-ever setup, so these override the advertised default.
  */
 private val REGION_DEFAULT_PRESETS = mapOf(RegionCode.US to ModemPreset.LONG_TURBO)
 
@@ -115,3 +116,15 @@ private val REGION_DEFAULT_PRESETS = mapOf(RegionCode.US to ModemPreset.LONG_TUR
  * should fall back to [ChannelOption.DEFAULT] / the current preset.
  */
 fun defaultPresetFor(region: RegionCode): ModemPreset? = REGION_DEFAULT_PRESETS[region]
+
+/**
+ * The preset a first-ever setup in [region] should install, or `null` to leave the choice alone.
+ *
+ * Gated on the firmware map: an unconstrained node is running firmware whose own region chooser installs the
+ * region-table default, and overriding it there would make the same node set up from the phone and from its screen
+ * disagree. Only a preset the map lists as legal is adopted.
+ */
+fun LoRaRegionPresetMap?.firstSetupDefaultFor(region: RegionCode): ModemPreset? {
+    val constraint = constraintFor(region) ?: return null
+    return defaultPresetFor(region)?.takeIf { it in constraint.presets }
+}

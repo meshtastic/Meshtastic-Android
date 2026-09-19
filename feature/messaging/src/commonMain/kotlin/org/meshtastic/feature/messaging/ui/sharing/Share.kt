@@ -26,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,13 +49,21 @@ import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
 @Composable
 fun ShareScreen(viewModel: ContactsViewModel, onConfirm: (String) -> Unit, onNavigateUp: () -> Unit) {
     val contactList by viewModel.contactList.collectAsStateWithLifecycle()
+    // A retired channel has left the radio, so it can receive nothing; offering it here would fail silently.
+    val shareable = remember(contactList) { contactList.filterNot { it.isRetired } }
 
-    ShareScreen(contacts = contactList, onConfirm = onConfirm, onNavigateUp = onNavigateUp)
+    ShareScreen(contacts = shareable, onConfirm = onConfirm, onNavigateUp = onNavigateUp)
 }
 
 @Composable
 fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigateUp: () -> Unit) {
     var selectedContact by remember { mutableStateOf("") }
+    // A conversation can leave the list while the sheet is open, most obviously when its channel is archived mid
+    // share. Drop the selection with it rather than leaving the button armed on a key that can no longer receive.
+    val selectionIsSendable = contacts.any { it.contactKey == selectedContact }
+    LaunchedEffect(contacts) {
+        if (selectedContact.isNotEmpty() && contacts.none { it.contactKey == selectedContact }) selectedContact = ""
+    }
 
     Scaffold(
         topBar = {
@@ -86,9 +95,9 @@ fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigate
             }
 
             Button(
-                onClick = { onConfirm(selectedContact) },
+                onClick = { if (selectionIsSendable) onConfirm(selectedContact) },
                 modifier = Modifier.fillMaxWidth().padding(24.dp),
-                enabled = selectedContact.isNotEmpty(),
+                enabled = selectionIsSendable,
             ) {
                 Icon(imageVector = MeshtasticIcons.Send, contentDescription = stringResource(Res.string.share))
             }

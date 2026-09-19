@@ -67,6 +67,7 @@ data class NodeExport(
     val powerMetrics: PowerMetricsExport? = null,
     val powerChannelLabels: List<String>? = null,
     val airQualityMetrics: AirQualityMetricsExport? = null,
+    val soilWaterMetrics: SoilWaterMetricsExport? = null,
     val paxcounter: PaxcountExport? = null,
     val metadata: DeviceMetadataExport? = null,
 )
@@ -139,6 +140,10 @@ data class EnvironmentMetricsExport(
     val adcVoltageCh5: Float? = null,
     val adcVoltageCh6: Float? = null,
     val adcVoltageCh7: Float? = null,
+    /** AS3935 lightning detector: strikes counted in the last hour. */
+    val lightningStrikeCount1h: Int? = null,
+    /** AS3935 lightning detector: estimated distance to the storm's leading edge, in km. */
+    val lightningDistanceKm: Float? = null,
 )
 
 @Serializable
@@ -188,6 +193,28 @@ data class AirQualityMetricsExport(
     val pmVocIdx: Float? = null,
     val pmNoxIdx: Float? = null,
     val particlesTps: Float? = null,
+    /** Raw PM sensor status register bitmask as the sensor's datasheet defines it (SEN6X family); 0 means no faults. */
+    val pmStatusFlags: Int? = null,
+)
+
+/** Soil probe and water-quality sonde chemistry; units follow the proto (mg/kg, mg/l, ppm, mV, NTU, mS/cm, W/m²). */
+@Serializable
+data class SoilWaterMetricsExport(
+    val soilPh: Float? = null,
+    val ph: Float? = null,
+    val electricalConductivity: Float? = null,
+    val salinity: Float? = null,
+    val nitrogen: Float? = null,
+    val phosphorus: Float? = null,
+    val potassium: Float? = null,
+    val dissolvedOxygen: Float? = null,
+    val orp: Float? = null,
+    val chemicalOxygenDemand: Float? = null,
+    val turbidity: Float? = null,
+    val nitrate: Float? = null,
+    val ammonium: Float? = null,
+    val biochemicalOxygenDemand: Float? = null,
+    val solarIrradiance: Float? = null,
 )
 
 @Serializable data class PaxcountExport(val wifi: Int = 0, val ble: Int = 0, val uptime: Int = 0)

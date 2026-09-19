@@ -1,0 +1,10 @@
+# actionlint validates `runs-on` against a built-in list of GitHub-hosted labels, and
+# the pin in pull-request.yml (1.7.12) predates ubuntu-26.04. Both labels below are
+# real GitHub-hosted runners, not self-hosted; this key is simply actionlint's only
+# mechanism for teaching it a label it does not yet know.
+#
+# Remove once the pinned actionlint recognises them on its own.
+self-hosted-runner:
+  labels:
+    - ubuntu-26.04
+    - ubuntu-26.04-arm

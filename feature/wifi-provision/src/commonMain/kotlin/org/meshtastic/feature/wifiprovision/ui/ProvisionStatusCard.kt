@@ -44,7 +44,6 @@ import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
 
 /** Inline status card matching the web flasher's colored status feedback. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ProvisionStatusCard(provisionStatus: ProvisionStatus, isProvisioning: Boolean) {
     val colors = statusCardColors(provisionStatus, isProvisioning)

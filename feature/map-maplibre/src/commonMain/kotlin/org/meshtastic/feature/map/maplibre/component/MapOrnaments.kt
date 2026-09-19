@@ -16,14 +16,19 @@
  */
 package org.meshtastic.feature.map.maplibre.component
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.overlay.DisappearingScaleBar
-import org.maplibre.compose.overlay.ExpandingAttributionButton
-import org.maplibre.compose.overlay.MaplibreLogo
+import org.maplibre.compose.overlay.LocalCameraPadding
+import org.maplibre.compose.overlay.include
 import org.maplibre.compose.overlay.MapOverlay as MaplibreOverlay
 
 /**
@@ -40,21 +45,26 @@ import org.maplibre.compose.overlay.MapOverlay as MaplibreOverlay
  * app takes through `localeUnitsProvider`.
  */
 internal val MeshMapOrnaments: MaplibreOverlay = MaplibreOverlay {
-    DisappearingScaleBar(
-        metersPerDp = cameraState.viewport?.metersPerDpAtTarget ?: 0.0,
-        zoom = cameraState.position.zoom,
-        modifier = Modifier.align(Alignment.TopStart),
-    )
+    val mapState = checkNotNull(LocalMapState.current)
+    val cameraPadding = LocalCameraPadding.current
 
-    // Read before entering the Row, whose scope shadows this one.
-    val camera = cameraState
-    val style = styleState
-    Row(
-        modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+    // A custom overlay fills the map and the library keeps its own inset helper internal, so the scale bar has to
+    // carry the camera padding, safe-area insets and edge margin that the built-in controls apply for themselves.
+    Box(
+        modifier =
+        Modifier.fillMaxSize()
+            .padding(cameraPadding)
+            .consumeWindowInsets(cameraPadding)
+            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .padding(MaplibreOverlay.Spacing),
     ) {
-        MaplibreLogo()
-        ExpandingAttributionButton(cameraState = camera, styleState = style)
+        DisappearingScaleBar(
+            metersPerDp = mapState.viewport?.metersPerDpAtTarget ?: 0.0,
+            zoom = mapState.cameraPosition.zoom,
+            modifier = Modifier.align(Alignment.TopStart),
+        )
     }
+
+    // The logo and the attribution button, in the places `MapOverlay.Default` puts them.
+    include(MaplibreOverlay.AttributionOnly)
 }

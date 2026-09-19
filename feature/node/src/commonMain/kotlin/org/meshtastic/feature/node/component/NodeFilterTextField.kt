@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.background
@@ -28,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -35,7 +34,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -68,40 +66,30 @@ import org.meshtastic.core.resources.node_filter_exclude_unheard
 import org.meshtastic.core.resources.node_filter_ignored
 import org.meshtastic.core.resources.node_filter_include_unknown
 import org.meshtastic.core.resources.node_filter_only_direct
+import org.meshtastic.core.resources.node_filter_only_encrypted
 import org.meshtastic.core.resources.node_filter_only_online
+import org.meshtastic.core.resources.node_filter_only_signed
 import org.meshtastic.core.resources.node_filter_placeholder
 import org.meshtastic.core.resources.node_filter_show_ignored
 import org.meshtastic.core.resources.node_filter_title
 import org.meshtastic.core.resources.node_sort_button
 import org.meshtastic.core.resources.node_sort_title
+import org.meshtastic.core.ui.component.SignedNodeIcon
 import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.icon.Sort
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 
-@Suppress("LongParameterList")
 @Composable
 fun NodeFilterTextField(
-    modifier: Modifier = Modifier,
     filterText: String,
     onTextChange: (String) -> Unit,
     currentSortOption: NodeSortOption,
     onSortSelect: (NodeSortOption) -> Unit,
-    includeUnknown: Boolean,
-    onToggleIncludeUnknown: () -> Unit,
-    excludeInfrastructure: Boolean,
-    onToggleExcludeInfrastructure: () -> Unit,
-    onlyOnline: Boolean,
-    onToggleOnlyOnline: () -> Unit,
-    onlyDirect: Boolean,
-    onToggleOnlyDirect: () -> Unit,
-    showIgnored: Boolean,
-    onToggleShowIgnored: () -> Unit,
-    ignoredNodeCount: Int,
-    excludeUnheard: Boolean,
-    onToggleExcludeUnheard: () -> Unit,
-    excludeMqtt: Boolean,
-    onToggleExcludeMqtt: () -> Unit,
+    toggles: NodeFilterToggles,
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
         Row {
@@ -111,32 +99,15 @@ fun NodeFilterTextField(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 currentSortOption = currentSortOption,
                 onSortSelect = onSortSelect,
-                toggles =
-                NodeFilterToggles(
-                    includeUnknown = includeUnknown,
-                    onToggleIncludeUnknown = onToggleIncludeUnknown,
-                    excludeInfrastructure = excludeInfrastructure,
-                    onToggleExcludeInfrastructure = onToggleExcludeInfrastructure,
-                    onlyOnline = onlyOnline,
-                    onToggleOnlyOnline = onToggleOnlyOnline,
-                    onlyDirect = onlyDirect,
-                    onToggleOnlyDirect = onToggleOnlyDirect,
-                    showIgnored = showIgnored,
-                    onToggleShowIgnored = onToggleShowIgnored,
-                    ignoredNodeCount = ignoredNodeCount,
-                    excludeMqtt = excludeMqtt,
-                    onToggleExcludeMqtt = onToggleExcludeMqtt,
-                    excludeUnheard = excludeUnheard,
-                    onToggleExcludeUnheard = onToggleExcludeUnheard,
-                ),
+                toggles = toggles,
             )
         }
-        if (showIgnored) {
+        if (toggles.showIgnored) {
             Box(
                 modifier =
                 Modifier.fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceDim)
-                    .clickable { onToggleShowIgnored() }
+                    .clickable { toggles.onToggleShowIgnored() }
                     .padding(vertical = 16.dp, horizontal = 24.dp),
             ) {
                 Text(
@@ -167,6 +138,10 @@ data class NodeFilterToggles(
     val onToggleExcludeUnheard: () -> Unit,
     val excludeMqtt: Boolean,
     val onToggleExcludeMqtt: () -> Unit,
+    val onlySigned: Boolean,
+    val onToggleOnlySigned: () -> Unit,
+    val onlyEncrypted: Boolean,
+    val onToggleOnlyEncrypted: () -> Unit,
 )
 
 @Composable
@@ -291,6 +266,27 @@ private fun NodeSortButton(
                     }
                 } else {
                     null
+                },
+            )
+
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_only_signed),
+                checked = toggles.onlySigned,
+                onClick = toggles.onToggleOnlySigned,
+                trailing = { SignedNodeIcon(Modifier.size(20.dp)) },
+            )
+
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_only_encrypted),
+                checked = toggles.onlyEncrypted,
+                onClick = toggles.onToggleOnlyEncrypted,
+                trailing = {
+                    Icon(
+                        imageVector = MeshtasticIcons.Lock,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.StatusGreen,
+                        modifier = Modifier.size(20.dp),
+                    )
                 },
             )
 

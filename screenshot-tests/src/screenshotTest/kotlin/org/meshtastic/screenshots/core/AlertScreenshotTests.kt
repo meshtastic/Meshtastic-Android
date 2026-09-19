@@ -26,6 +26,8 @@ import org.meshtastic.core.ui.util.PreviewIconAlert
 import org.meshtastic.core.ui.util.PreviewMultipleChoiceAlert
 import org.meshtastic.core.ui.util.PreviewNfcWriteFailedAlert
 import org.meshtastic.core.ui.util.PreviewNfcWriteSuccessAlert
+import org.meshtastic.core.ui.util.PreviewShareDialog
+import org.meshtastic.core.ui.util.PreviewShareDialogWithNfc
 import org.meshtastic.core.ui.util.PreviewTextAlert
 
 @PreviewTest
@@ -82,4 +84,18 @@ fun ScreenshotNfcWriteFailedAlert() {
 @Composable
 fun ScreenshotSharedContactImportAlert() {
     PreviewSharedContactImportAlert()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotShareDialog() {
+    PreviewShareDialog()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotShareDialogWithNfc() {
+    PreviewShareDialogWithNfc()
 }

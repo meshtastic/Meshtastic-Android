@@ -36,7 +36,8 @@ class ScannedQrCodeViewModel(
     nodeRepository: NodeRepository,
 ) : ViewModel() {
 
-    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
+    val channels =
+        radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet.Builder().build())
 
     val maxChannels =
         nodeRepository.myNodeInfo

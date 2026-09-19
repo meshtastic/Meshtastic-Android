@@ -1,6 +1,6 @@
 ---
-title: Firmware Updates
-parent: User Guide
+title: Aktualizace firmware
+parent: Uživatelská příručka
 nav_order: 13
 last_updated: 2026-09-06
 description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.
@@ -11,7 +11,7 @@ aliases:
   - flash
 ---
 
-# Firmware Updates
+# Aktualizace firmware
 
 Keep your Meshtastic radio up to date with the latest firmware for new features, bug fixes, and security improvements.
 
@@ -162,7 +162,7 @@ On connecting, the app compares the radio's firmware against two thresholds and 
 
 A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.
 
-## Related Topics
+## Související témata
 
 - [Connections](connections) — reconnecting after a firmware update
 - [Flashing firmware guide](https://meshtastic.org/docs/getting-started/flashing-firmware) — full firmware flashing walkthrough on meshtastic.org

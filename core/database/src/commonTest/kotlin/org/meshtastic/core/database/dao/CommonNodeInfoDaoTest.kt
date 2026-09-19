@@ -18,6 +18,7 @@ package org.meshtastic.core.database.dao
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.MyNodeEntity
@@ -28,6 +29,7 @@ import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -75,7 +77,14 @@ abstract class CommonNodeInfoDaoTest {
         val node =
             NodeEntity(
                 num = 1234,
-                user = User(long_name = "Test Node", id = "!test", hw_model = org.meshtastic.proto.HardwareModel.TBEAM),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.long_name = "Test Node"
+                        wb.id = "!test"
+                        wb.hw_model = org.meshtastic.proto.HardwareModel.TBEAM
+                    }
+                    .build(),
                 lastHeard = (nowMillis / 1000).toInt(),
             )
         dao.upsert(node)
@@ -87,8 +96,8 @@ abstract class CommonNodeInfoDaoTest {
     @Test
     fun testNodeDBbyNum() = runTest {
         createDb()
-        val node1 = NodeEntity(num = 1, user = User(id = "!1"))
-        val node2 = NodeEntity(num = 2, user = User(id = "!2"))
+        val node1 = NodeEntity(num = 1, user = User.Builder().also { wb -> wb.id = "!1" }.build())
+        val node2 = NodeEntity(num = 2, user = User.Builder().also { wb -> wb.id = "!2" }.build())
         dao.putAll(listOf(node1, node2))
 
         val nodes = dao.nodeDBbyNum().first()
@@ -100,7 +109,7 @@ abstract class CommonNodeInfoDaoTest {
     @Test
     fun testDeleteNode() = runTest {
         createDb()
-        val node = NodeEntity(num = 1, user = User(id = "!1"))
+        val node = NodeEntity(num = 1, user = User.Builder().also { wb -> wb.id = "!1" }.build())
         dao.upsert(node)
         dao.deleteNode(1)
         val result = dao.getNodeByNum(1)
@@ -108,10 +117,344 @@ abstract class CommonNodeInfoDaoTest {
     }
 
     @Test
+    fun `a remote node changing its key keeps the stored key and records the refusal`() = runTest {
+        createDb()
+        val trusted = ByteArray(32) { 1 }.toByteString()
+        val substitute = ByteArray(32) { 2 }.toByteString()
+        dao.upsert(
+            NodeEntity(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!1"
+                        wb.public_key = trusted
+                    }
+                    .build(),
+            ),
+        )
+        dao.upsert(
+            NodeEntity(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!1"
+                        wb.public_key = substitute
+                    }
+                    .build(),
+            ),
+        )
+
+        // First-wins: anyone can broadcast a NodeInfo under another node's number, so the substitute is refused
+        // rather than applied. Overwriting would break PKC direct messages to that contact.
+        val stored = dao.getNodeByNum(1)?.node
+        assertEquals(trusted, stored?.publicKey)
+        assertEquals(trusted, stored?.user?.public_key)
+        assertFalse(stored?.keyMatch ?: true)
+        assertEquals(substitute, stored?.newPublicKey)
+    }
+
+    @Test
+    fun `the refused key is kept so the mismatch can name it`() = runTest {
+        createDb()
+        val trusted = ByteArray(32) { 1 }.toByteString()
+        val substitute = ByteArray(32) { 2 }.toByteString()
+        dao.upsert(
+            NodeEntity(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!1"
+                        wb.public_key = trusted
+                    }
+                    .build(),
+            ),
+        )
+
+        // Nothing is refused yet, so there is no key to report.
+        assertEquals(null, dao.getNodeByNum(1)?.node?.newPublicKey)
+
+        dao.upsert(
+            NodeEntity(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!1"
+                        wb.public_key = substitute
+                    }
+                    .build(),
+            ),
+        )
+        assertEquals(substitute, dao.getNodeByNum(1)?.node?.newPublicKey)
+
+        // The key already on file arriving again settles nothing: the refusal stands until the connected radio
+        // speaks for itself, or the next legitimate beacon would hide the substitute.
+        dao.upsert(
+            NodeEntity(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!1"
+                        wb.public_key = trusted
+                    }
+                    .build(),
+            ),
+        )
+        val stillFlagged = dao.getNodeByNum(1)?.node
+        assertEquals(trusted, stillFlagged?.publicKey)
+        assertFalse(stillFlagged?.keyMatch ?: true)
+        assertEquals(substitute, stillFlagged?.newPublicKey)
+    }
+
+    @Test
+    fun `the connected radio re-keying clears the refused key along with the mismatch`() = runTest {
+        createDb()
+        val own = myNodeInfo.myNodeNum
+        val before = ByteArray(32) { 1 }.toByteString()
+        dao.upsert(
+            NodeEntity(
+                num = own,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!own"
+                        wb.public_key = before
+                    }
+                    .build(),
+            ),
+        )
+        dao.upsert(
+            NodeEntity(
+                num = own,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!own"
+                        wb.public_key = ByteArray(32) { 9 }.toByteString()
+                    }
+                    .build(),
+            ),
+        )
+        assertFalse(dao.getNodeByNum(own)?.node?.keyMatch ?: true)
+
+        // The local link is authoritative, so accepting the radio's own key also drops what was refused.
+        val after = ByteArray(32) { 2 }.toByteString()
+        dao.installConfig(
+            myNodeInfo,
+            listOf(
+                NodeEntity(
+                    num = own,
+                    user =
+                    User.Builder()
+                        .also { wb ->
+                            wb.id = "!own"
+                            wb.public_key = after
+                        }
+                        .build(),
+                ),
+            ),
+        )
+
+        val stored = dao.getNodeByNum(own)?.node
+        assertEquals(after, stored?.publicKey)
+        assertTrue(stored?.keyMatch ?: false)
+        assertEquals(null, stored?.newPublicKey)
+    }
+
+    @Test
+    fun `the legacy mismatch sentinel arriving as a key is neither refused nor stored`() = runTest {
+        createDb()
+        val trusted = ByteArray(32) { 1 }.toByteString()
+        dao.upsert(
+            NodeEntity(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!1"
+                        wb.public_key = trusted
+                    }
+                    .build(),
+            ),
+        )
+
+        // A row that recorded a mismatch the old way carries the sentinel as its key. Re-upserting it through the
+        // repository must not read as a fresh substitution, and the sentinel is not a key anyone refused.
+        dao.upsert(
+            NodeEntity(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!1"
+                        wb.public_key = NodeEntity.ERROR_BYTE_STRING
+                    }
+                    .build(),
+            ),
+        )
+        val remote = dao.getNodeByNum(1)?.node
+        assertEquals(trusted, remote?.publicKey)
+        assertTrue(remote?.keyMatch ?: false)
+        assertEquals(null, remote?.newPublicKey)
+
+        // Nor may the local link write it over the connected radio's real key. A key of its own, or the new-node
+        // guard would read this upsert as node 1 claiming a second number and never insert it.
+        val own = myNodeInfo.myNodeNum
+        val ownKey = ByteArray(32) { 3 }.toByteString()
+        dao.upsert(
+            NodeEntity(
+                num = own,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!own"
+                        wb.public_key = ownKey
+                    }
+                    .build(),
+            ),
+        )
+        dao.installConfig(
+            myNodeInfo,
+            listOf(
+                NodeEntity(
+                    num = own,
+                    user =
+                    User.Builder()
+                        .also { wb ->
+                            wb.id = "!own"
+                            wb.public_key = NodeEntity.ERROR_BYTE_STRING
+                        }
+                        .build(),
+                ),
+            ),
+        )
+        assertEquals(ownKey, dao.getNodeByNum(own)?.node?.publicKey)
+    }
+
+    @Test
+    fun `the stored key surviving a substitution still reads as a mismatch to the UI`() = runTest {
+        createDb()
+        val trusted = ByteArray(32) { 1 }.toByteString()
+        dao.upsert(
+            NodeEntity(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!1"
+                        wb.public_key = trusted
+                    }
+                    .build(),
+            ),
+        )
+        dao.upsert(
+            NodeEntity(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!1"
+                        wb.public_key = ByteArray(32) { 2 }.toByteString()
+                    }
+                    .build(),
+            ),
+        )
+
+        assertTrue(dao.getNodeByNum(1)!!.toModel().mismatchKey)
+    }
+
+    @Test
+    fun `the connected radio re-keying replaces its stored key rather than flagging a mismatch`() = runTest {
+        createDb()
+        val own = myNodeInfo.myNodeNum
+        val before = ByteArray(32) { 1 }.toByteString()
+        // What a 2.8 upgrade or a factory reset does: the same radio comes back under a new key.
+        val after = ByteArray(32) { 2 }.toByteString()
+        dao.upsert(
+            NodeEntity(
+                num = own,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!own"
+                        wb.public_key = before
+                    }
+                    .build(),
+            ),
+        )
+
+        // Through installConfig, which is the local link. selfNum comes from the device's own MyNodeInfo there.
+        dao.installConfig(
+            myNodeInfo,
+            listOf(
+                NodeEntity(
+                    num = own,
+                    user =
+                    User.Builder()
+                        .also { wb ->
+                            wb.id = "!own"
+                            wb.public_key = after
+                        }
+                        .build(),
+                ),
+            ),
+        )
+
+        val stored = dao.getNodeByNum(own)?.node
+        assertEquals(after, stored?.publicKey)
+        assertEquals(after, stored?.user?.public_key)
+        assertTrue(stored?.keyMatch ?: false)
+    }
+
+    @Test
+    fun `a mesh packet claiming the local node number cannot replace the stored key`() = runTest {
+        createDb()
+        val own = myNodeInfo.myNodeNum
+        val real = ByteArray(32) { 1 }.toByteString()
+        dao.upsert(
+            NodeEntity(
+                num = own,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!own"
+                        wb.public_key = real
+                    }
+                    .build(),
+            ),
+        )
+
+        // The single-upsert path carries mesh-received NodeInfo, and `from` is attacker controlled, so matching the
+        // local node number proves only that the sender claimed it.
+        dao.upsert(
+            NodeEntity(
+                num = own,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!own"
+                        wb.public_key = ByteArray(32) { 9 }.toByteString()
+                    }
+                    .build(),
+            ),
+        )
+
+        // First-wins keeps the stored key; the refusal is recorded and still reads as a mismatch to the UI.
+        val stored = dao.getNodeByNum(own)
+        assertEquals(real, stored?.node?.publicKey)
+        assertFalse(stored?.node?.keyMatch ?: true)
+        assertTrue(stored!!.toModel().mismatchKey)
+    }
+
+    @Test
     fun testClearNodeInfo() = runTest {
         createDb()
-        val node1 = NodeEntity(num = 1, user = User(id = "!1"), isFavorite = true)
-        val node2 = NodeEntity(num = 2, user = User(id = "!2"), isFavorite = false)
+        val node1 = NodeEntity(num = 1, user = User.Builder().also { wb -> wb.id = "!1" }.build(), isFavorite = true)
+        val node2 = NodeEntity(num = 2, user = User.Builder().also { wb -> wb.id = "!2" }.build(), isFavorite = false)
         dao.putAll(listOf(node1, node2))
 
         dao.clearNodeInfo(preserveFavorites = true)

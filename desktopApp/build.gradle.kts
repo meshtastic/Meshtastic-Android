@@ -19,6 +19,7 @@ import dev.detekt.gradle.Detekt
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.meshtastic.buildlogic.configureGraphTasks
+import org.meshtastic.buildlogic.maplibreDesktopRuntime
 import org.meshtastic.buildlogic.resolveVersionInfo
 
 plugins {
@@ -321,31 +322,8 @@ dependencies {
     // The MapLibre map surfaces, shared with the F-Droid Android flavor.
     implementation(projects.feature.mapMaplibre)
 
-    // Exactly one native runtime — the one matching this build host. Each carries that platform's
-    // maplibre-native blob, so adding them all would bloat every distribution with four unusable
-    // copies. Upstream publishes no macos-x64 artifact, which matches our release matrix.
-    run {
-        val osName = providers.systemProperty("os.name").get().lowercase()
-        val osArch = providers.systemProperty("os.arch").get().lowercase()
-        val isArm = osArch.contains("aarch64") || osArch.contains("arm64")
-        when {
-            osName.contains("mac") -> runtimeOnly(libs.maplibre.compose.runtime.metal.macos.arm64)
-
-            osName.contains("win") ->
-                if (isArm) {
-                    runtimeOnly(libs.maplibre.compose.runtime.vulkan.windows.arm64)
-                } else {
-                    runtimeOnly(libs.maplibre.compose.runtime.vulkan.windows.x64)
-                }
-
-            else ->
-                if (isArm) {
-                    runtimeOnly(libs.maplibre.compose.runtime.vulkan.linux.arm64)
-                } else {
-                    runtimeOnly(libs.maplibre.compose.runtime.vulkan.linux.x64)
-                }
-        }
-    }
+    // Exactly one native runtime, the one matching this build host (see maplibreDesktopRuntime()).
+    maplibreDesktopRuntime()
     implementation(libs.compose.multiplatform.animation)
     implementation(libs.compose.multiplatform.material3)
     implementation(libs.compose.multiplatform.runtime)

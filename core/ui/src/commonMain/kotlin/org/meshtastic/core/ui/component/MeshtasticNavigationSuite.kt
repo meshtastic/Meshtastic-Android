@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -73,7 +72,7 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
  * This implementation uses the [MultiBackstack] state holder to manage independent histories for each tab, aligning
  * with Navigation 3 best practices for state preservation during tab switching.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeshtasticNavigationSuite(
     multiBackstack: MultiBackstack,

@@ -25,10 +25,18 @@ import kotlin.test.assertTrue
 
 class TracerouteNodeSelectionTest {
 
-    private fun nodeWithPosition(num: Int, latI: Int = num * 100000, lonI: Int = num * 200000): Node =
-        Node(num = num, position = Position(latitude_i = latI, longitude_i = lonI))
+    private fun nodeWithPosition(num: Int, latI: Int = num * 100000, lonI: Int = num * 200000): Node = Node(
+        num = num,
+        position =
+        Position.Builder()
+            .also { wb ->
+                wb.latitude_i = latI
+                wb.longitude_i = lonI
+            }
+            .build(),
+    )
 
-    private fun nodeWithoutPosition(num: Int): Node = Node(num = num, position = Position())
+    private fun nodeWithoutPosition(num: Int): Node = Node(num = num, position = Position.Builder().build())
 
     private val defaultGetNodeOrFallback: (Int) -> Node = { num -> Node(num = num) }
 
@@ -72,8 +80,20 @@ class TracerouteNodeSelectionTest {
         val overlay = TracerouteOverlay(requestId = 1, forwardRoute = listOf(10, 20), returnRoute = listOf(20, 10))
         val snapshotPositions =
             mapOf(
-                10 to Position(latitude_i = 400000000, longitude_i = -700000000),
-                20 to Position(latitude_i = 410000000, longitude_i = -710000000),
+                10 to
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 400000000
+                            wb.longitude_i = -700000000
+                        }
+                        .build(),
+                20 to
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 410000000
+                            wb.longitude_i = -710000000
+                        }
+                        .build(),
             )
         val liveNodes =
             listOf(
@@ -101,8 +121,20 @@ class TracerouteNodeSelectionTest {
         val overlay = TracerouteOverlay(requestId = 1, forwardRoute = listOf(10, 20))
         val snapshotPositions =
             mapOf(
-                10 to Position(latitude_i = 400000000, longitude_i = -700000000),
-                20 to Position(latitude_i = 410000000, longitude_i = -710000000),
+                10 to
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 400000000
+                            wb.longitude_i = -700000000
+                        }
+                        .build(),
+                20 to
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 410000000
+                            wb.longitude_i = -710000000
+                        }
+                        .build(),
             )
         val result =
             tracerouteNodeSelection(
@@ -122,9 +154,27 @@ class TracerouteNodeSelectionTest {
         val overlay = TracerouteOverlay(requestId = 1, forwardRoute = listOf(10, 20))
         val snapshotPositions =
             mapOf(
-                10 to Position(latitude_i = 400000000, longitude_i = -700000000),
-                20 to Position(latitude_i = 410000000, longitude_i = -710000000),
-                30 to Position(latitude_i = 420000000, longitude_i = -720000000),
+                10 to
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 400000000
+                            wb.longitude_i = -700000000
+                        }
+                        .build(),
+                20 to
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 410000000
+                            wb.longitude_i = -710000000
+                        }
+                        .build(),
+                30 to
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 420000000
+                            wb.longitude_i = -720000000
+                        }
+                        .build(),
             )
         val result =
             tracerouteNodeSelection(
@@ -195,7 +245,16 @@ class TracerouteNodeSelectionTest {
     @Test
     fun getNodeOrFallback_usedForSnapshotNodeLookup() {
         val overlay = TracerouteOverlay(requestId = 1, forwardRoute = listOf(10))
-        val snapshotPositions = mapOf(10 to Position(latitude_i = 400000000, longitude_i = -700000000))
+        val snapshotPositions =
+            mapOf(
+                10 to
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 400000000
+                            wb.longitude_i = -700000000
+                        }
+                        .build(),
+            )
         var lookupCalledWith: Int? = null
         val result =
             tracerouteNodeSelection(

@@ -66,7 +66,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
@@ -99,16 +99,19 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.archived_channel_read_only
 import org.meshtastic.core.resources.send
 import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown_channel
 import org.meshtastic.core.ui.component.InlineStyle
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
+import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Send
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.createClipEntry
+import org.meshtastic.core.ui.util.isFromSoftKeyboard
 import org.meshtastic.feature.messaging.component.ActionModeTopBar
 import org.meshtastic.feature.messaging.component.DeleteMessageDialog
 import org.meshtastic.feature.messaging.component.FormattingToolbar
@@ -142,6 +145,7 @@ private const val COUNTER_VISIBLE_WITHIN_BYTES = 20
  * @param onNavigateBack Callback to navigate back from this screen.
  */
 @Suppress("LongMethod", "CyclomaticComplexMethod")
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MessageScreen(
     contactKey: String,
@@ -219,6 +223,7 @@ fun MessageScreen(
     }
 
     // Derived state, memoized for performance
+    val isRetiredChannel = remember(contactKey) { ContactKey(contactKey).isRetired }
     val channelInfo =
         remember(contactKey, channels) {
             val parsedKey = ContactKey(contactKey)
@@ -229,7 +234,9 @@ fun MessageScreen(
         }
     val (channelIndex, nodeId, rawChannelName) = channelInfo
     val unknownChannelText = stringResource(Res.string.unknown_channel)
-    val channelName = rawChannelName ?: unknownChannelText
+    // A retired channel has no slot to look a name up in — its own stored label is all that is left of it.
+    val retiredName = contactSettings[contactKey]?.displayName.orEmpty()
+    val channelName = rawChannelName ?: retiredName.ifEmpty { unknownChannelText }
 
     val title =
         remember(nodeId, channelName, viewModel) {
@@ -246,6 +253,8 @@ fun MessageScreen(
 
     val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }
 
+    // No cache window here: this pane renders inside ThreePaneScaffold's LookaheadScope, where a
+    // prefetched item can reach the main placement pass before the lookahead pass has measured it.
     val listState = rememberLazyListState()
 
     // Track unread messages using lightweight metadata queries
@@ -466,37 +475,43 @@ fun MessageScreen(
             }
         },
         bottomBar = {
-            Column {
-                AnimatedVisibility(visible = showQuickChat) {
-                    QuickChatRow(
-                        enabled = connectionState is ConnectionState.Connected,
-                        actions = quickChatActions,
-                        onClick = { action ->
-                            handleQuickChatAction(
-                                action = action,
-                                messageInputState = messageInputState,
-                                onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
-                            )
+            // A retired channel is read-only: there is no slot left to send on, so the composer and the quick-chat
+            // row are replaced outright rather than merely disabled.
+            if (isRetiredChannel) {
+                RetiredChannelNotice()
+            } else {
+                Column {
+                    AnimatedVisibility(visible = showQuickChat) {
+                        QuickChatRow(
+                            enabled = connectionState is ConnectionState.Connected,
+                            actions = quickChatActions,
+                            onClick = { action ->
+                                handleQuickChatAction(
+                                    action = action,
+                                    messageInputState = messageInputState,
+                                    onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
+                                )
+                            },
+                        )
+                    }
+                    ReplySnippet(
+                        originalMessage = originalMessage,
+                        onClearReply = { replyingToPacketId = null },
+                        ourNode = ourNode,
+                    )
+                    MessageInput(
+                        isEnabled = connectionState is ConnectionState.Connected,
+                        isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
+                        textFieldState = messageInputState,
+                        mentionCandidates = mentionCandidates,
+                        onSendMessage = {
+                            val messageText = messageInputState.text.toString().trim { it.isWhitespace() }
+                            if (messageText.isNotEmpty()) {
+                                onEvent(MessageScreenEvent.SendMessage(messageText, replyingToPacketId))
+                            }
                         },
                     )
                 }
-                ReplySnippet(
-                    originalMessage = originalMessage,
-                    onClearReply = { replyingToPacketId = null },
-                    ourNode = ourNode,
-                )
-                MessageInput(
-                    isEnabled = connectionState is ConnectionState.Connected,
-                    isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
-                    textFieldState = messageInputState,
-                    mentionCandidates = mentionCandidates,
-                    onSendMessage = {
-                        val messageText = messageInputState.text.toString().trim { it.isWhitespace() }
-                        if (messageText.isNotEmpty()) {
-                            onEvent(MessageScreenEvent.SendMessage(messageText, replyingToPacketId))
-                        }
-                    },
-                )
             }
         },
     ) { paddingValues ->
@@ -519,17 +534,26 @@ fun MessageScreen(
                     searchQuery = if (isSearchActive) searchQuery else "",
                     translationAvailable = translationAvailable,
                     showFullMessageTimestamps = showFullMessageTimestamps,
+                    canReact = !isRetiredChannel,
+                    canSend = !isRetiredChannel,
                 ),
                 handlers =
                 MessageListHandlers(
                     onUnreadChanged = { messageUuid, timestamp ->
                         onEvent(MessageScreenEvent.ClearUnreadCount(messageUuid, timestamp))
                     },
-                    onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
+                    // A retired conversation is read-only; the send path refuses these anyway, so do not offer
+                    // them.
+                    onSendReaction =
+                    if (isRetiredChannel) {
+                        { _, _ -> }
+                    } else {
+                        { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) }
+                    },
                     onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
                     onDeleteMessages = { viewModel.deleteMessages(it) },
-                    onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
-                    onReply = { message -> replyingToPacketId = message?.packetId },
+                    onSendMessage = { text, key -> if (!isRetiredChannel) viewModel.sendMessage(text, key) },
+                    onReply = { message -> if (!isRetiredChannel) replyingToPacketId = message?.packetId },
                     onTranslate = { onEvent(MessageScreenEvent.TranslateMessage(it)) },
                     onToggleTranslation = { onEvent(MessageScreenEvent.ToggleShowTranslated(it)) },
                 ),
@@ -749,6 +773,34 @@ private fun mentionOutputTransformation(candidatesById: () -> Map<String, Mentio
 }
 
 /**
+ * Replaces the composer for a conversation whose channel has left the radio's channel set.
+ *
+ * The history is kept and still searchable, but there is no slot left to send on, so the affordance is removed rather
+ * than disabled — a greyed-out composer reads as "not connected yet", which this is not.
+ */
+@Composable
+internal fun RetiredChannelNotice(modifier: Modifier = Modifier) {
+    Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Icon(
+                imageVector = MeshtasticIcons.History,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(Res.string.archived_channel_read_only),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/**
  * The text input field for composing messages.
  *
  * @param isEnabled Whether the input field should be enabled.
@@ -832,8 +884,13 @@ internal fun MessageInput(
             Modifier.fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 4.dp)
                 .onFocusChanged { isFocused = it.isFocused }
-                .onKeyEvent { keyEvent ->
-                    val isEnterNoShift = keyEvent.key == Key.Enter && !keyEvent.isShiftPressed
+                // Tunnel phase, not bubble: a multi-line field consumes Enter to insert its newline, so an
+                // Enter-to-send shortcut has to claim the event before the field ever sees it.
+                .onPreviewKeyEvent { keyEvent ->
+                    // Enter-to-send is a physical-keyboard shortcut, reached past with Shift. An on-screen keyboard
+                    // has no Shift, so its Enter is left alone to insert the newline it is labelled with.
+                    val isEnterNoShift =
+                        keyEvent.key == Key.Enter && !keyEvent.isShiftPressed && !keyEvent.isFromSoftKeyboard()
                     if (isEnterNoShift) {
                         if (keyEvent.type == KeyEventType.KeyUp) onSendAction()
                         true // consume both KeyDown and KeyUp to prevent newline insertion
@@ -848,9 +905,10 @@ internal fun MessageInput(
             shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
             isError = isOverLimit,
             placeholder = { Text(stringResource(Res.string.type_a_message)) },
+            // A multi-line field must keep its Enter key: Compose only sets IME_FLAG_NO_ENTER_ACTION for
+            // ImeAction.Default, and without it an IME may swap Enter for the action, leaving no way to type a newline.
             keyboardOptions =
-            KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
-            onKeyboardAction = { onSendAction() },
+            KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Default),
             supportingText = {
                 // The counter is only useful as the limit approaches. Showing 0/200 before a character is typed is
                 // chrome that every chat client has learned to hide.
@@ -927,6 +985,30 @@ private fun MentionSuggestions(suggestions: List<MentionCandidate>, onPick: (Men
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * The composer a live channel gets, above the notice that replaces it once that channel leaves the radio. Shown
+ * together because the point is the swap: the affordance is removed, not greyed out.
+ */
+@PreviewLightDark
+@Composable
+fun RetiredChannelNoticePreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.padding(8.dp)) {
+                MessageInput(
+                    isEnabled = true,
+                    isHomoglyphEncodingEnabled = false,
+                    mentionCandidates = persistentMapOf(),
+                    textFieldState = rememberTextFieldState("Still on the air"),
+                    onSendMessage = {},
+                )
+                Spacer(Modifier.size(16.dp))
+                RetiredChannelNotice()
             }
         }
     }

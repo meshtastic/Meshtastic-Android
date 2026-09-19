@@ -40,8 +40,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
+import org.meshtastic.core.common.state.RadioOperation
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -95,7 +96,7 @@ class FirmwareUpdateViewModelFileTest {
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
     private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
-    private val firmwareMaintenanceLock = FirmwareMaintenanceLock()
+    private val radioOperationLock = RadioOperationLock()
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
 
     private lateinit var viewModel: FirmwareUpdateViewModel
@@ -174,7 +175,7 @@ class FirmwareUpdateViewModelFileTest {
         usbManager,
         fileHandler,
         firmwareRetriever,
-        firmwareMaintenanceLock,
+        radioOperationLock,
         TestApplicationCoroutineScope(testDispatcher),
         HiddenFeaturesUnlock(),
         analytics,
@@ -895,7 +896,10 @@ class FirmwareUpdateViewModelFileTest {
 
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
         verifySuspend(mode = VerifyMode.not) { firmwareRetriever.retrieveUsbFirmware(any(), any(), any()) }
-        assertFalse(firmwareMaintenanceLock.isActive, "a refused request must never take the maintenance lock")
+        assertFalse(
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
+            "a refused request must never take the maintenance lock",
+        )
     }
 
     @Test
@@ -933,7 +937,7 @@ class FirmwareUpdateViewModelFileTest {
         advanceUntilIdle()
 
         assertFalse(
-            firmwareMaintenanceLock.isActive,
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
             "refusing before the sequence starts must leave the radio transport unblocked",
         )
     }
@@ -954,7 +958,10 @@ class FirmwareUpdateViewModelFileTest {
         runUntilSettled { viewModel.state.value is FirmwareUpdateState.Error }
 
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
-        assertFalse(firmwareMaintenanceLock.isActive, "a failed preparation must not leak the lock")
+        assertFalse(
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
+            "a failed preparation must not leak the lock",
+        )
     }
 
     @Test
@@ -998,17 +1005,20 @@ class FirmwareUpdateViewModelFileTest {
             (viewModel.state.value as? FirmwareUpdateState.AwaitingFileSave)?.step == UsbFileSaveStep.Firmware
         }
 
-        assertTrue(firmwareMaintenanceLock.isActive, "the lock must still be held between passes")
+        assertTrue(
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
+            "the lock must still be held between passes",
+        )
         val awaitingFirmware = assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
         assertEquals(UsbFileSaveStep.Firmware, awaitingFirmware.step)
         assertNotNull(awaitingFirmware.uf2Artifact, "the terminal pass must carry its artifact")
 
         // Second, terminal pass (firmware image) — writes through the pre-existing saveDfuFile.
         viewModel.saveDfuFile(CommonUri.parse("file:///output/firmware.uf2"))
-        runUntilSettled { !firmwareMaintenanceLock.isActive }
+        runUntilSettled { !radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance) }
 
         assertFalse(
-            firmwareMaintenanceLock.isActive,
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
             "completing the sequence's terminal pass must release the lock, or auto-reconnect stays suppressed forever",
         )
 

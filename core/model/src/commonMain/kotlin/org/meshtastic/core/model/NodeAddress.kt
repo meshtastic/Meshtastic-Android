@@ -92,35 +92,68 @@ sealed class NodeAddress {
  * Type-safe wrapper for contact key strings (channel index + node address).
  *
  * Contact keys are persisted as strings in the format `"<channel><nodeId>"` (e.g. `"0^all"`, `"1!a1b2c3d4"`).
+ *
+ * A broadcast conversation whose channel is no longer configured is *retired* rather than deleted, and takes the form
+ * `"~<token>^all"` — see [retiredBroadcast]. A retired key has no [channelOrNull], which is what makes every "which
+ * live slot is this?" site treat it as having none without needing to know the form exists.
  */
 @JvmInline
 value class ContactKey(val value: String) {
     /**
      * The channel index if the key carries a leading channel digit, or `null` for a legacy unprefixed direct-message
-     * key. Callers that must distinguish "channel 0" from "no channel prefix" (e.g. PKI vs legacy DM routing) need this
-     * rather than [channel].
+     * key or a retired conversation. Callers that must distinguish "channel 0" from "no channel prefix" (e.g. PKI vs
+     * legacy DM routing) need this rather than [channel].
      */
     val channelOrNull: Int?
-        get() = value.firstOrNull()?.takeIf { it.isDigit() }?.digitToInt()
+        get() = if (isRetired) null else value.firstOrNull()?.takeIf { it.isDigit() }?.digitToInt()
 
     /** The channel index (first character). Returns 0 if the key is empty or has no channel digit. */
     val channel: Int
         get() = channelOrNull ?: 0
 
+    /** True when this conversation's channel is no longer configured on the radio and its history is read-only. */
+    val isRetired: Boolean
+        get() = value.startsWith(RETIRED_PREFIX)
+
+    /** The channel-identity token a retired conversation is parked under, or null when this key is live. */
+    val retiredToken: String?
+        get() = if (isRetired) value.drop(1).takeWhile { it != ADDRESS_SEPARATOR } else null
+
     /**
-     * The node address portion: everything after the channel digit, or the whole key when there is no channel prefix.
-     * Empty if the key is empty.
+     * The node address portion: everything after the channel digit (or the retired token), or the whole key when there
+     * is no prefix at all. Empty if the key is empty.
      */
     val addressString: String
-        get() = if (channelOrNull != null) value.substring(1) else value
+        get() =
+            when {
+                isRetired -> value.dropWhile { it != ADDRESS_SEPARATOR }
+                channelOrNull != null -> value.substring(1)
+                else -> value
+            }
 
     /** Parsed [NodeAddress] for the contact. */
     val address: NodeAddress
         get() = NodeAddress.fromString(addressString)
 
     companion object {
+        /**
+         * Marks a retired conversation. `~` is RFC 3986 *unreserved*, so a retired key survives the deep links,
+         * launcher shortcut ids and notification extras that carry contact keys verbatim.
+         */
+        const val RETIRED_PREFIX = "~"
+
+        private const val ADDRESS_SEPARATOR = '^'
+
         /** Create a broadcast contact key for the given channel. */
         fun broadcast(channel: Int = 0): ContactKey = NodeAddress.Broadcast.toContactKey(channel)
+
+        /**
+         * Create the key a broadcast conversation is parked under once its channel leaves the radio's channel set.
+         *
+         * [token] is a `ChannelIdentity.token`, so re-adding the same channel later resolves back to this exact key and
+         * the history returns to the live slot.
+         */
+        fun retiredBroadcast(token: String): ContactKey = ContactKey("$RETIRED_PREFIX$token${NodeAddress.ID_BROADCAST}")
     }
 }
 

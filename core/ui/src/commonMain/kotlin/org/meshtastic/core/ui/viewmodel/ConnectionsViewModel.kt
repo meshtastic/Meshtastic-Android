@@ -111,7 +111,7 @@ class ConnectionsViewModel(
     private val scheduledFirmwareUpdateNotificationKeys = mutableSetOf<String>()
 
     val localConfig: StateFlow<LocalConfig> =
-        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
+        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.Builder().build())
 
     val connectionState = serviceRepository.connectionState
     val lockdownState = serviceRepository.lockdownState

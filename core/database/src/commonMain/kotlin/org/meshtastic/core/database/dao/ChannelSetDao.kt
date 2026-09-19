@@ -21,6 +21,7 @@ import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import kotlinx.coroutines.flow.Flow
+import okio.ByteString
 import org.meshtastic.core.database.entity.ChannelSetEntity
 
 /** Per-device persistence of the connected device's [ChannelSetEntity]. */
@@ -45,4 +46,18 @@ interface ChannelSetDao {
 
     @Query("DELETE FROM channel_set")
     suspend fun clear()
+
+    /**
+     * Drops the cached channel set but keeps [ChannelSetEntity.lastReconciled].
+     *
+     * The handshake clears the cache before re-downloading the radio's channels. The stored conversations have not
+     * moved just because the cache was dropped, so the reconciliation baseline has to outlive it — otherwise every
+     * reconnect would look like "no baseline yet" and a channel replaced while the app was away would never be noticed.
+     */
+    @Query("UPDATE channel_set SET channel_set = :emptyChannelSet WHERE id = 0")
+    suspend fun clearRetainingBaseline(emptyChannelSet: ByteArray)
+
+    /** Records the channel set the stored conversations are now keyed against. */
+    @Query("UPDATE channel_set SET last_reconciled = :baseline WHERE id = 0")
+    suspend fun setLastReconciled(baseline: ByteString)
 }

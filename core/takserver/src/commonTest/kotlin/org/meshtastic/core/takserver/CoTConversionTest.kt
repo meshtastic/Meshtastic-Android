@@ -28,14 +28,16 @@ class CoTConversionTest {
     @Test
     fun testPositionToCoTMessage() {
         val position =
-            Position(
-                latitude_i = 377749000,
-                longitude_i = -1224194000,
-                altitude = 15,
-                ground_speed = 5,
-                ground_track = 180,
-                time = 1620000000,
-            )
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 377749000
+                    wb.longitude_i = -1224194000
+                    wb.altitude = 15
+                    wb.ground_speed = 5
+                    wb.ground_track = 180
+                    wb.time = 1620000000
+                }
+                .build()
 
         val cot =
             position.toCoTMessage(uid = "!12345678", callsign = "TestUser", team = "Red", role = "HQ", battery = 85)
@@ -61,12 +63,14 @@ class CoTConversionTest {
     @Test
     fun testUserToCoTMessage() {
         val user =
-            User(
-                id = "!87654321",
-                long_name = "LongName",
-                short_name = "SN",
-                macaddr = "00:11:22:33:44:55".encodeUtf8(),
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!87654321"
+                    wb.long_name = "LongName"
+                    wb.short_name = "SN"
+                    wb.macaddr = "00:11:22:33:44:55".encodeUtf8()
+                }
+                .build()
 
         val cot = user.toCoTMessage(position = null, team = "Blue", role = "Sniper", battery = 92)
 

@@ -2,7 +2,7 @@
 title: Käännä sovellus
 parent: Käyttöopas
 nav_order: 17
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Miten sovellus ja sen dokumentaatio käännetään Crowdinin avulla sekä ohjeet käännöksiin osallistumiseen.
 aliases:
   - käännä
@@ -45,7 +45,7 @@ Jos kieltäsi ei ole vielä listattu Crowdinissa:
 
 Android-sovellus käyttää **Compose Multiplatform -resursseja** kaikille käyttäjälle näkyville teksteille:
 
-```
+```text
 core/resources/src/commonMain/composeResources/
 ├── values/              ← English (default)
 │   └── strings.xml
@@ -58,7 +58,7 @@ core/resources/src/commonMain/composeResources/
 
 Sovelluksen sisäinen dokumentaatio noudattaa samaa rakennetta `docs/` -hakemistossa:
 
-```
+```text
 docs/
 ├── en/user/             ← English source (default)
 │   ├── onboarding.md

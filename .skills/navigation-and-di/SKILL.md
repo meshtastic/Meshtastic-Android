@@ -12,7 +12,7 @@ This skill covers dependency injection (Koin Annotations 4.2.x) and JetBrains Na
 4. **Resolution:** Resolve app-layer wrappers via `koinViewModel()` or injected bindings within Compose navigation graphs.
 
 ### Anti-Patterns
-- **A1 Module Compile Safety:** Do **not** enable `compileSafety`. It is a single boolean that enables A1 per-module checks — there is no separate A3 full-graph mode. Runtime graph verification is handled by `KoinVerificationTest` and `DesktopKoinTest` instead.
+- **Compile Safety Outside An Entry Point:** Do **not** enable `compileSafety` on a library module. Validation is whole-graph and runs at the `@KoinApplication` entry point, so a library validates against a graph it cannot see and reports `KOIN-D003` for definitions its consumers supply. `KoinConventionPlugin` enables it only for the modules in `KOIN_ENTRY_POINTS`.
 - **Default Parameters:** Do **not** expect Koin to inject default parameters automatically. The K2 plugin's `skipDefaultValues = true` behavior skips parameters with default Kotlin values.
 
 ### Koin Startup Pattern (K2 Compiler Plugin)
@@ -31,7 +31,9 @@ startKoin<AndroidKoinApp> {
 - `@KoinApplication` goes on a **dedicated bootstrap object**, not on a `@Module` class.
 - `startKoin<T>()` (from `org.koin.plugin.module.dsl`) is a compiler plugin stub — if the plugin isn't applied, it throws `NotImplementedError`.
 - `stopKoin()` uses the standard runtime API (`org.koin.core.context.stopKoin`).
-- `compileSafety` must stay **disabled** — it enables A1 per-module checks that break our inverted-dependency architecture. There is no separate A3 full-graph flag.
+- `compileSafety` is **on at the entry points only** (`:androidApp`, `:desktopApp`). Plugin 1.1.0 replaced per-module validation with whole-graph validation, so the flag is only meaningful where the graph is assembled. A new app target must be added to `KOIN_ENTRY_POINTS` or it is never validated.
+- A definition two `@Module(includes = ...)` levels below the entry point is invisible to the index. The flavor modules carry `@Configuration` as well as their `includes` for this reason; dropping the `includes` removes them from the **runtime** graph, which `KoinVerificationTest` catches.
+- Hand-written DSL `module { }` definitions are not reachable by the assembled graph, which is why `:desktopApp` uses `@Module` classes.
 
 ## Navigation 3
 

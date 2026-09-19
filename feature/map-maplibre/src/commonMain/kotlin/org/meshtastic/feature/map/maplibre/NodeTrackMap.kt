@@ -32,7 +32,6 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.koin.compose.viewmodel.koinViewModel
-import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.asNumber
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.feature
@@ -40,10 +39,10 @@ import org.maplibre.compose.expressions.dsl.interpolate
 import org.maplibre.compose.expressions.dsl.linear
 import org.maplibre.compose.expressions.value.LineCap
 import org.maplibre.compose.expressions.value.LineJoin
+import org.maplibre.compose.interaction.ClickResult
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.sources.GeoJsonOptions
-import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.LineString
@@ -99,7 +98,6 @@ fun MapLibreNodeTrackMap(
     // runs from the start of the line, the fade runs from index 0, and the chip goes on the last point. The view model
     // hands these over newest-first for its list, so an unsorted track drew the whole thing backwards.
     val allPoints = remember(positions) { positions.mapNotNull { it.toTrackPoint() }.sortedBy { it.second } }
-    val cameraState = rememberCameraState()
 
     // The basemap is a shared preference, so a track opens on whatever the main map is set to. The OSMdroid track map
     // resolved the same preference; hardcoding the default meant picking Dark on the main map and getting Liberty here.
@@ -115,22 +113,14 @@ fun MapLibreNodeTrackMap(
     val trackFilter = filterState.lastHeardTrackFilter
     val points = remember(allPoints, trackFilter) { allPoints.olderThanCutoffRemoved(trackFilter) }
 
-    // Frame the whole track, not just its midpoint: a fixed zoom on the centre cropped long tracks at both ends. Keyed
-    // on the *unfiltered* track, so tightening the age filter does not yank the camera around under the user.
-    FitBoundsOnceVisible(cameraState = cameraState, key = allPoints) {
-        positionsBoundingBox(allPoints.map { it.first })
-    }
-
     if (allPoints.isEmpty()) return
 
     // The colour the rest of the app draws this node in. The track used to be a flat blue, which said nothing about
     // whose track it was — the Google flavor fades the node's own colour along it, and so does this now.
     val trackColor = node?.let { Color(it.colors.second) } ?: MapColors.Slate
 
-    // The map and its toolbar stay up even when the filter empties the track — otherwise the control that emptied it
-    // disappears along with the points, leaving no way back.
-    Box(modifier = modifier) {
-        SecondaryMapSurface(basemaps = basemaps, cameraState = cameraState) {
+    val mapState =
+        rememberSecondaryMapState(basemaps) {
             // A LineString needs two coordinates; a filter tight enough to leave one point would otherwise throw.
             if (points.size > 1) TrackLineLayer(points = points, color = trackColor)
             if (points.isNotEmpty()) {
@@ -143,8 +133,17 @@ fun MapLibreNodeTrackMap(
                 if (node != null) NewestPositionChip(node = node, newest = points.last())
             }
         }
+
+    // Frame the whole track, not just its midpoint: a fixed zoom on the centre cropped long tracks at both ends. Keyed
+    // on the *unfiltered* track, so tightening the age filter does not yank the camera around under the user.
+    FitBoundsOnceVisible(mapState = mapState, key = allPoints) { positionsBoundingBox(allPoints.map { it.first }) }
+
+    // The map and its toolbar stay up even when the filter empties the track — otherwise the control that emptied it
+    // disappears along with the points, leaving no way back.
+    Box(modifier = modifier) {
+        SecondaryMapSurface(mapState = mapState, basemaps = basemaps)
         SecondaryMapChrome(
-            cameraState = cameraState,
+            mapState = mapState,
             basemaps = basemaps,
             filterMenu = { expanded, onDismissRequest ->
                 NodeTrackFilterMenu(

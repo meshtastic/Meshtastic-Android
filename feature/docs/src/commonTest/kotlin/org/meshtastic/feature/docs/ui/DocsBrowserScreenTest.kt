@@ -53,7 +53,7 @@ class DocsBrowserScreenTest {
                 onBack = {},
             )
         }
-        onNodeWithText("Loading documentation...").assertIsDisplayed()
+        onNodeWithText("Loading documentation…").assertIsDisplayed()
     }
 
     @Test

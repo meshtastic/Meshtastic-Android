@@ -38,7 +38,7 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
     override fun getNodesFlow(
         sort: String,
         includeUnknown: Boolean,
-        hopsAwayMax: Int,
+        onlyDirect: Boolean,
         lastHeardMin: Int,
     ): Flow<List<NodeWithRelations>> = dbManager
         .observeCurrentDb { db ->
@@ -46,7 +46,7 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
                 .getNodes(
                     sort = sort,
                     includeUnknown = includeUnknown,
-                    hopsAwayMax = hopsAwayMax,
+                    onlyDirect = onlyDirect,
                     lastHeardMin = lastHeardMin,
                 )
         }

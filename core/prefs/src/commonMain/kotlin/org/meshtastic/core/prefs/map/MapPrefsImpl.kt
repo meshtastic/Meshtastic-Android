@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.prefs.map
 
+import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -34,6 +36,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.MapDataStore
 import org.meshtastic.core.repository.MapCameraPosition
+import org.meshtastic.core.repository.MapFilterPrefs
 import org.meshtastic.core.repository.MapPrefs
 
 @Single
@@ -50,83 +53,48 @@ class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDi
 
     override suspend fun awaitMapStyle(): Int = dataStore.data.map { it[KEY_MAP_STYLE_PREF] ?: 0 }.first()
 
-    override val showOnlyFavorites: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_SHOW_ONLY_FAVORITES_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
+    override val mapFilters: StateFlow<MapFilterPrefs> =
+        dataStore.data.map { it.toMapFilterPrefs() }.stateIn(scope, SharingStarted.Eagerly, MapFilterPrefs())
 
-    override fun setShowOnlyFavorites(show: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_SHOW_ONLY_FAVORITES_PREF] = show } }
+    override fun updateMapFilters(transform: (MapFilterPrefs) -> MapFilterPrefs) {
+        // Read-modify-write inside edit{}, which is transactional — the same lost-update guard updateHiddenLayerUrls
+        // uses. Writing every key rather than the changed one keeps this a single pure transform.
+        scope.launch { dataStore.edit { it.writeMapFilterPrefs(transform(it.toMapFilterPrefs())) } }
     }
 
-    override val showWaypointsOnMap: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_SHOW_WAYPOINTS_PREF] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
-
-    override fun setShowWaypointsOnMap(show: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_SHOW_WAYPOINTS_PREF] = show } }
+    private fun Preferences.toMapFilterPrefs(): MapFilterPrefs {
+        val defaults = MapFilterPrefs()
+        return MapFilterPrefs(
+            onlyFavorites = this[KEY_SHOW_ONLY_FAVORITES_PREF] ?: defaults.onlyFavorites,
+            showWaypoints = this[KEY_SHOW_WAYPOINTS_PREF] ?: defaults.showWaypoints,
+            showPrecisionCircle = this[KEY_SHOW_PRECISION_CIRCLE_PREF] ?: defaults.showPrecisionCircle,
+            onlyOnline = this[KEY_ONLY_ONLINE_PREF] ?: defaults.onlyOnline,
+            onlyDirect = this[KEY_ONLY_DIRECT_PREF] ?: defaults.onlyDirect,
+            onlySigned = this[KEY_ONLY_SIGNED_PREF] ?: defaults.onlySigned,
+            onlyEncrypted = this[KEY_ONLY_ENCRYPTED_PREF] ?: defaults.onlyEncrypted,
+            excludeMqtt = this[KEY_EXCLUDE_MQTT_PREF] ?: defaults.excludeMqtt,
+            showIgnored = this[KEY_SHOW_IGNORED_PREF] ?: defaults.showIgnored,
+            includeUnknown = this[KEY_INCLUDE_UNKNOWN_PREF] ?: defaults.includeUnknown,
+            lastHeardSeconds = this[KEY_LAST_HEARD_FILTER_PREF] ?: defaults.lastHeardSeconds,
+            lastHeardTrackSeconds = this[KEY_LAST_HEARD_TRACK_FILTER_PREF] ?: defaults.lastHeardTrackSeconds,
+            excludedRoles = this[KEY_EXCLUDED_ROLES_PREF] ?: defaults.excludedRoles,
+        )
     }
 
-    override val showPrecisionCircleOnMap: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_SHOW_PRECISION_CIRCLE_PREF] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
-
-    override fun setShowPrecisionCircleOnMap(show: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_SHOW_PRECISION_CIRCLE_PREF] = show } }
-    }
-
-    override val lastHeardFilter: StateFlow<Long> =
-        dataStore.data.map { it[KEY_LAST_HEARD_FILTER_PREF] ?: 0L }.stateIn(scope, SharingStarted.Eagerly, 0L)
-
-    override fun setLastHeardFilter(seconds: Long) {
-        scope.launch { dataStore.edit { it[KEY_LAST_HEARD_FILTER_PREF] = seconds } }
-    }
-
-    override val lastHeardTrackFilter: StateFlow<Long> =
-        dataStore.data.map { it[KEY_LAST_HEARD_TRACK_FILTER_PREF] ?: 0L }.stateIn(scope, SharingStarted.Eagerly, 0L)
-
-    override fun setLastHeardTrackFilter(seconds: Long) {
-        scope.launch { dataStore.edit { it[KEY_LAST_HEARD_TRACK_FILTER_PREF] = seconds } }
-    }
-
-    override val onlyOnlineOnMap: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_ONLY_ONLINE_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
-
-    override fun setOnlyOnlineOnMap(only: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_ONLY_ONLINE_PREF] = only } }
-    }
-
-    override val onlyDirectOnMap: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_ONLY_DIRECT_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
-
-    override fun setOnlyDirectOnMap(only: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_ONLY_DIRECT_PREF] = only } }
-    }
-
-    override val excludeMqttOnMap: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_EXCLUDE_MQTT_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
-
-    override fun setExcludeMqttOnMap(exclude: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_EXCLUDE_MQTT_PREF] = exclude } }
-    }
-
-    override val showIgnoredOnMap: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_SHOW_IGNORED_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
-
-    override fun setShowIgnoredOnMap(show: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_SHOW_IGNORED_PREF] = show } }
-    }
-
-    override val includeUnknownOnMap: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_INCLUDE_UNKNOWN_PREF] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
-
-    override fun setIncludeUnknownOnMap(include: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_INCLUDE_UNKNOWN_PREF] = include } }
-    }
-
-    override val excludedMapRoles: StateFlow<Set<String>> =
-        dataStore.data
-            .map { it[KEY_EXCLUDED_ROLES_PREF] ?: emptySet() }
-            .stateIn(scope, SharingStarted.Eagerly, emptySet())
-
-    override fun setExcludedMapRoles(roles: Set<String>) {
-        scope.launch { dataStore.edit { it[KEY_EXCLUDED_ROLES_PREF] = roles } }
+    private fun MutablePreferences.writeMapFilterPrefs(prefs: MapFilterPrefs) {
+        this[KEY_SHOW_ONLY_FAVORITES_PREF] = prefs.onlyFavorites
+        this[KEY_SHOW_WAYPOINTS_PREF] = prefs.showWaypoints
+        this[KEY_SHOW_PRECISION_CIRCLE_PREF] = prefs.showPrecisionCircle
+        this[KEY_ONLY_ONLINE_PREF] = prefs.onlyOnline
+        this[KEY_ONLY_DIRECT_PREF] = prefs.onlyDirect
+        this[KEY_ONLY_SIGNED_PREF] = prefs.onlySigned
+        this[KEY_ONLY_ENCRYPTED_PREF] = prefs.onlyEncrypted
+        this[KEY_EXCLUDE_MQTT_PREF] = prefs.excludeMqtt
+        this[KEY_SHOW_IGNORED_PREF] = prefs.showIgnored
+        this[KEY_INCLUDE_UNKNOWN_PREF] = prefs.includeUnknown
+        this[KEY_LAST_HEARD_FILTER_PREF] = prefs.lastHeardSeconds
+        this[KEY_LAST_HEARD_TRACK_FILTER_PREF] = prefs.lastHeardTrackSeconds
+        this[KEY_EXCLUDED_ROLES_PREF] = prefs.excludedRoles
     }
 
     override val hiddenLayerUrls: StateFlow<Set<String>> =
@@ -203,6 +171,8 @@ class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDi
         val KEY_LAYER_OPACITY_PREF = stringSetPreferencesKey("layer_opacity")
         val KEY_ONLY_ONLINE_PREF = booleanPreferencesKey("map_only_online")
         val KEY_ONLY_DIRECT_PREF = booleanPreferencesKey("map_only_direct")
+        val KEY_ONLY_SIGNED_PREF = booleanPreferencesKey("map_only_signed")
+        val KEY_ONLY_ENCRYPTED_PREF = booleanPreferencesKey("map_only_encrypted")
         val KEY_EXCLUDE_MQTT_PREF = booleanPreferencesKey("map_exclude_mqtt")
         val KEY_SHOW_IGNORED_PREF = booleanPreferencesKey("map_show_ignored")
         val KEY_INCLUDE_UNKNOWN_PREF = booleanPreferencesKey("map_include_unknown")

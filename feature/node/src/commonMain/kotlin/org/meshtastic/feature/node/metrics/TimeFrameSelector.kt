@@ -37,6 +37,9 @@ fun TimeFrameSelector(
 ) {
     if (availableTimeFrames.size <= 1) return
 
+    // material3's ButtonGroup measures its overflow indicator with constraints.copy(maxWidth = remaining)
+    // without lowering minWidth, so under fillMaxWidth it throws once any chip overflows (#7141).
+    // Unfixed upstream: re-check that branch of ButtonGroup.kt before adopting it again.
     SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
         availableTimeFrames.forEachIndexed { index, timeFrame ->
             val text = stringResource(timeFrame.strRes)

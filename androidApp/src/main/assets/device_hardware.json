@@ -554,7 +554,7 @@
     "platformioTarget": "t-watch-s3",
     "architecture": "esp32-s3",
     "activelySupported": true,
-    "supportLevel": 3,
+    "supportLevel": 1,
     "displayName": "LILYGO T-Watch S3",
     "tags": [
       "LilyGo"
@@ -1401,9 +1401,9 @@
   {
     "hwModel": 123,
     "hwModelSlug": "T5_S3_EPAPER_PRO",
-    "platformioTarget": "t5-epaper-s3",
+    "platformioTarget": "t5s3-epaper-v1",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "LilyGo T5 E-paper S3 Pro",
     "tags": [
@@ -1416,11 +1416,28 @@
     ]
   },
   {
+    "hwModel": 123,
+    "hwModelSlug": "T5_S3_EPAPER_PRO",
+    "platformioTarget": "t5s3-epaper-v2",
+    "architecture": "esp32-s3",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "LilyGo T5 E-paper S3 Pro V2",
+    "tags": [
+      "LilyGo"
+    ],
+    "hasMui": false,
+    "partitionScheme": "8MB",
+    "images": [
+      "t5s3_epaper_v2.svg"
+    ]
+  },
+  {
     "hwModel": 125,
     "hwModelSlug": "MINI_EPAPER_S3",
     "platformioTarget": "mini-epaper-s3",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "LilyGo Mini E-paper S3",
     "tags": [
@@ -1484,7 +1501,7 @@
     "hwModelSlug": "TLORA_C6",
     "platformioTarget": "tlora-c6",
     "architecture": "esp32-c6",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "LilyGo T-Lora C6",
     "tags": [
@@ -1782,5 +1799,21 @@
     ],
     "requiresDfu": true,
     "partitionScheme": "16MB"
+  },
+  {
+    "hwModel": 148,
+    "hwModelSlug": "AXIOMETA_GENESIS_MINI",
+    "platformioTarget": "axiometa-genesis-mini",
+    "architecture": "esp32-s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Axiometa Genesis Mini",
+    "tags": [
+      "Axiometa"
+    ],
+    "images": [
+      "axiometa-genesis-mini.svg"
+    ],
+    "isMaker": true
   }
 ]

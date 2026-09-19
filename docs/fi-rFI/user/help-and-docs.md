@@ -2,7 +2,7 @@
 title: Ohjeet jasovelluksen sisäinen dokumentaatio
 parent: Käyttöopas
 nav_order: 21
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Selaa tätä dokumentaatiota sovelluksessa, hae siitä tietoa ja kysy Meshtasticiin liittyviä kysymyksiä Chirpyltä — laitteella toimivalta tekoälyavustajalta.
 aliases:
   - apua
@@ -23,7 +23,7 @@ Dokumentaation selain näyttää kaikki käyttöohjeen sivut. Avaa sivu napautta
 
 ### Haku
 
-The search box sits at the top of the docs browser. Type in it to filter pages by title and keywords — results update as you type, and the **Clear search** button (✕) empties the box.
+Tap the search field at the top of the docs browser to open a full-screen search view. Type to filter pages by title and keywords — results update as you type, under the same field. The back arrow, or the keyboard's search action, closes the view. The field hides while you scroll down the page list and comes back when you scroll up.
 
 ![Haku sovelluksen sisäisessä dokumentaatiossa](../../assets/screenshots/docs-browser_search.png)
 

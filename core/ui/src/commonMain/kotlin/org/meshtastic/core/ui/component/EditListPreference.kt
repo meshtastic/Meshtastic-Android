@@ -130,7 +130,7 @@ inline fun <reified T> EditListPreference(
                         keyboardActions = keyboardActions,
                         onValueChanged = { newValue ->
                             if (newValue in 0..255) {
-                                listState[index] = value.copy(gpio_pin = newValue) as T
+                                listState[index] = value.newBuilder().also { wb -> wb.gpio_pin = newValue }.build() as T
                                 onValuesChanged(listState)
                             }
                         },
@@ -145,7 +145,7 @@ inline fun <reified T> EditListPreference(
                         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                         keyboardActions = keyboardActions,
                         onValueChanged = { newValue ->
-                            listState[index] = value.copy(name = newValue) as T
+                            listState[index] = value.newBuilder().also { wb -> wb.name = newValue }.build() as T
                             onValuesChanged(listState)
                         },
                         trailingIcon = trailingIcon,
@@ -159,7 +159,7 @@ inline fun <reified T> EditListPreference(
                             .map { it to it.name },
                         selectedItem = value.type,
                         onItemSelected = {
-                            listState[index] = value.copy(type = it) as T
+                            listState[index] = value.newBuilder().also { wb -> wb.type = it }.build() as T
                             onValuesChanged(listState)
                         },
                     )
@@ -174,7 +174,7 @@ inline fun <reified T> EditListPreference(
                     when (T::class) {
                         Int::class -> 0 as T
                         okio.ByteString::class -> okio.ByteString.EMPTY as T
-                        RemoteHardwarePin::class -> RemoteHardwarePin() as T
+                        RemoteHardwarePin::class -> RemoteHardwarePin.Builder().build() as T
                         else -> throw IllegalArgumentException("Unsupported type: ${T::class}")
                     }
                 listState.add(listState.size, newElement)
@@ -204,7 +204,13 @@ fun EditListPreferencePreview() {
                 title = "Available pins",
                 list =
                 listOf(
-                    RemoteHardwarePin(gpio_pin = 12, name = "Front door", type = RemoteHardwarePinType.DIGITAL_READ),
+                    RemoteHardwarePin.Builder()
+                        .also { wb ->
+                            wb.gpio_pin = 12
+                            wb.name = "Front door"
+                            wb.type = RemoteHardwarePinType.DIGITAL_READ
+                        }
+                        .build(),
                 ),
                 maxCount = 4,
                 enabled = true,

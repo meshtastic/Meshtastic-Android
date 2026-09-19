@@ -124,7 +124,11 @@ class RepositoryFakesTest {
     @Test
     fun `FakeTracerouteSnapshotRepository roundtrips positions keyed by log uuid`() = runTest {
         val repo = FakeTracerouteSnapshotRepository()
-        val positions = mapOf(1 to Position(latitude_i = 10), 2 to Position(latitude_i = 20))
+        val positions =
+            mapOf(
+                1 to Position.Builder().also { wb -> wb.latitude_i = 10 }.build(),
+                2 to Position.Builder().also { wb -> wb.latitude_i = 20 }.build(),
+            )
         repo.upsertSnapshotPositions(logUuid = "log-1", requestId = 99, positions = positions)
 
         repo.getSnapshotPositions("log-1").test { assertEquals(positions, awaitItem()) }
@@ -189,9 +193,15 @@ class RepositoryFakesTest {
     @Test
     fun `FakeRadioController preserves configuration and fixed-position evidence until reset`() = runTest {
         val controller = FakeRadioController()
-        val local = Config(device = Config.DeviceConfig())
-        val admin = Config(lora = Config.LoRaConfig(hop_limit = 5))
-        val module = ModuleConfig(serial = ModuleConfig.SerialConfig(enabled = true))
+        val local = Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build()
+        val admin =
+            Config.Builder()
+                .also { wb -> wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.hop_limit = 5 }.build() }
+                .build()
+        val module =
+            ModuleConfig.Builder()
+                .also { wb -> wb.serial = ModuleConfig.SerialConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build()
         val position = ModelPosition(latitude = 1.0, longitude = 2.0, altitude = 3)
 
         controller.setLocalConfig(local)
@@ -242,8 +252,11 @@ class RepositoryFakesTest {
     @Test
     fun `FakeRadioController uses null destination consistently for local config writes`() = runTest {
         val controller = FakeRadioController()
-        val config = Config(device = Config.DeviceConfig())
-        val moduleConfig = ModuleConfig(serial = ModuleConfig.SerialConfig(enabled = true))
+        val config = Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build()
+        val moduleConfig =
+            ModuleConfig.Builder()
+                .also { wb -> wb.serial = ModuleConfig.SerialConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build()
 
         controller.setConfig(destNum = 0, config = config, packetId = 1)
         controller.setModuleConfig(destNum = 0, config = moduleConfig, packetId = 2)
@@ -319,7 +332,7 @@ class RepositoryFakesTest {
     @Test
     fun `FakeCommandSender records retryable admin and telemetry requests and clears them on reset`() = runTest {
         val sender = FakeCommandSender()
-        val adminMessage = AdminMessage(get_device_metadata_request = true)
+        val adminMessage = AdminMessage.Builder().also { wb -> wb.get_device_metadata_request = true }.build()
 
         sender.sendAdmin(destNum = 123, requestId = 7, wantResponse = true) { adminMessage }
         sender.requestTelemetry(requestId = 8, destNum = 456, typeValue = 2)
@@ -359,7 +372,7 @@ class RepositoryFakesTest {
     fun `FakeCommandSender applies command failure before immediate command mutation`() {
         val failure = PacketQueueRejectedException("queue closed")
         val sender = FakeCommandSender().apply { commandFailure = failure }
-        val message = AdminMessage(set_time_only = 123)
+        val message = AdminMessage.Builder().also { wb -> wb.set_time_only = 123 }.build()
 
         assertSame(failure, assertFailsWith<PacketQueueRejectedException> { sender.sendAdminImmediate(7) { message } })
         assertSame(
@@ -379,7 +392,9 @@ class RepositoryFakesTest {
     fun `FakeCommandSender records connection ownership on post-handshake requests`() = runTest {
         val sender = FakeCommandSender()
 
-        sender.sendAdminForConnection(destNum = 123, expectedConnectionVersion = 41, requestId = 7) { AdminMessage() }
+        sender.sendAdminForConnection(destNum = 123, expectedConnectionVersion = 41, requestId = 7) {
+            AdminMessage.Builder().build()
+        }
         sender.requestTelemetryForConnection(
             requestId = 8,
             destNum = 123,
@@ -423,16 +438,29 @@ class RepositoryFakesTest {
             controller.editSettings(destNum = 7) {
                 transactionStarted.complete(Unit)
                 finishTransaction.await()
-                setConfig(Config(device = Config.DeviceConfig()))
-                setModuleConfig(ModuleConfig(serial = ModuleConfig.SerialConfig(enabled = true)))
+                setConfig(Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build())
+                setModuleConfig(
+                    ModuleConfig.Builder()
+                        .also { wb ->
+                            wb.serial = ModuleConfig.SerialConfig.Builder().also { wb -> wb.enabled = true }.build()
+                        }
+                        .build(),
+                )
             }
         }
         transactionStarted.await()
 
-        controller.setConfig(destNum = 8, config = Config(power = Config.PowerConfig()), packetId = 1)
+        controller.setConfig(
+            destNum = 8,
+            config = Config.Builder().also { wb -> wb.power = Config.PowerConfig.Builder().build() }.build(),
+            packetId = 1,
+        )
         controller.setModuleConfig(
             destNum = 8,
-            config = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true)),
+            config =
+            ModuleConfig.Builder()
+                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build(),
             packetId = 2,
         )
         finishTransaction.complete(Unit)
@@ -441,8 +469,14 @@ class RepositoryFakesTest {
         assertEquals(listOf("config", "module"), standaloneHooks)
         assertEquals(
             listOf(
-                FakeRadioController.ConfigWrite(destination = 8, config = Config(power = Config.PowerConfig())),
-                FakeRadioController.ConfigWrite(destination = 7, config = Config(device = Config.DeviceConfig())),
+                FakeRadioController.ConfigWrite(
+                    destination = 8,
+                    config = Config.Builder().also { wb -> wb.power = Config.PowerConfig.Builder().build() }.build(),
+                ),
+                FakeRadioController.ConfigWrite(
+                    destination = 7,
+                    config = Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build(),
+                ),
             ),
             controller.configWrites,
         )
@@ -450,11 +484,21 @@ class RepositoryFakesTest {
             listOf(
                 FakeRadioController.ModuleConfigWrite(
                     destination = 8,
-                    config = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true)),
+                    config =
+                    ModuleConfig.Builder()
+                        .also { wb ->
+                            wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build()
+                        }
+                        .build(),
                 ),
                 FakeRadioController.ModuleConfigWrite(
                     destination = 7,
-                    config = ModuleConfig(serial = ModuleConfig.SerialConfig(enabled = true)),
+                    config =
+                    ModuleConfig.Builder()
+                        .also { wb ->
+                            wb.serial = ModuleConfig.SerialConfig.Builder().also { wb -> wb.enabled = true }.build()
+                        }
+                        .build(),
                 ),
             ),
             controller.moduleConfigWrites,
@@ -468,8 +512,20 @@ class RepositoryFakesTest {
     @Test
     fun `FakeRadioController records owner destinations consistently`() = runTest {
         val controller = FakeRadioController()
-        val localOwner = User(id = "!00000001", long_name = "Local")
-        val remoteOwner = User(id = "!00000002", long_name = "Remote")
+        val localOwner =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!00000001"
+                    wb.long_name = "Local"
+                }
+                .build()
+        val remoteOwner =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!00000002"
+                    wb.long_name = "Remote"
+                }
+                .build()
 
         controller.setOwner(destNum = 0, user = localOwner, packetId = 1)
         controller.setOwner(destNum = 7, user = remoteOwner, packetId = 2)
@@ -552,13 +608,20 @@ class RepositoryFakesTest {
     @Test
     fun `FakeRadioConfigRepository tracks channel set and module config`() = runTest {
         val repo = FakeRadioConfigRepository()
-        val a = ChannelSettings(name = "A")
-        val b = ChannelSettings(name = "B")
+        val a = ChannelSettings.Builder().also { wb -> wb.name = "A" }.build()
+        val b = ChannelSettings.Builder().also { wb -> wb.name = "B" }.build()
 
         repo.replaceAllSettings(listOf(a, b))
         assertEquals(listOf(a, b), repo.currentChannelSet.settings)
 
-        repo.updateChannelSettings(Channel(index = 1, settings = ChannelSettings(name = "B2")))
+        repo.updateChannelSettings(
+            Channel.Builder()
+                .also { wb ->
+                    wb.index = 1
+                    wb.settings = ChannelSettings.Builder().also { wb -> wb.name = "B2" }.build()
+                }
+                .build(),
+        )
         assertEquals("B2", repo.currentChannelSet.settings[1].name)
 
         repo.clearChannelSet()

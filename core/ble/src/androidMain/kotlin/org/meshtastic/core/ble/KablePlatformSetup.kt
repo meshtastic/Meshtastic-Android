@@ -25,10 +25,10 @@ import com.juul.kable.ScannerBuilder
 import com.juul.kable.toIdentifier
 import org.meshtastic.core.model.util.anonymize
 
-// Kable's default trySendBlocking can park the scan-callback (sometimes main) thread in dense BLE
-// environments, causing ANRs; preConflate drops excess advertisements instead (kable#654).
+// The scan callback never blocks; a capacity of 1 conflates, so a dense BLE environment cannot back
+// advertisements up behind a slow collector.
 internal actual fun ScannerBuilder.platformScanConfig() {
-    preConflate = true
+    bufferCapacity = 1
 }
 
 /** Android's scanner filters on address in hardware, so Kable's `Filter.Address` works natively here. */

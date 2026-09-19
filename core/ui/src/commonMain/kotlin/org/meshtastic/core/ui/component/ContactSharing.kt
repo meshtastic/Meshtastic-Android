@@ -22,22 +22,34 @@ import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.getSharedContactUrl
+import org.meshtastic.core.model.util.toSharedContact
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.share_contact
+import org.meshtastic.core.resources.share_contact_subject
 import org.meshtastic.proto.SharedContact
 
 /**
  * Displays a dialog with the contact's information as a QR code and URI.
  *
+ * Sharing your own contact marks it manually verified (design#149 point 2): you hold your own radio's key, and a QR
+ * shown in person is the in-person exchange. Relaying someone else's contact asserts nothing on their behalf.
+ *
  * @param contact The node representing the contact to share. Null if no contact is selected.
+ * @param isOwnContact True when [contact] is the connected radio.
  * @param onDismiss Callback invoked when the dialog is dismissed.
  */
 @Composable
-fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit) {
+fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit, isOwnContact: Boolean = false) {
     if (contact == null) return
-    val contactToShare = SharedContact(user = contact.user, node_num = contact.num)
+    val contactToShare = contact.toSharedContact(isOwnContact)
     val uriString = contactToShare.getSharedContactUrl().toString()
-    QrDialog(title = stringResource(Res.string.share_contact), uriString = uriString, onDismiss = onDismiss)
+    QrDialog(
+        title = stringResource(Res.string.share_contact),
+        uriString = uriString,
+        onDismiss = onDismiss,
+        subtitle = contact.user?.long_name,
+        shareSubject = stringResource(Res.string.share_contact_subject),
+    )
 }
 
 /**

@@ -2,7 +2,7 @@
 title: Asetukset — Moduulit ja ylläpito
 parent: Käyttöopas
 nav_order: 8
-last_updated: 2026-08-30
+last_updated: 2026-09-16
 description: Määritä valinnaiset ominaisuusmoduulit (MQTT, telemetria, valmiit viestit, TAK ja muut) sekä suorita laitteen ylläpitotoimia.
 aliases:
   - moduulit
@@ -330,13 +330,17 @@ appear only when your own node is selected:
 
 ### Tietoja
 
-**Asetukset → Tietoja** sisältää sovelluksen tiedot, ei radion tietoja:
+**Settings → About** carries the app's own identity rather than the node's:
 
 Kolme osiota:
 
 - **Mikä on Meshtastic?** – lyhyt kuvaus projektista.
 - **Sovellukset** — avaa **Tarvitsetko laitteiston?** -näkymän, jossa on suosittujen laitteiden karuselli ja linkit niiden ostopaikkoihin. Siellä näytetään myös GitHub-tietovarasto, käytössä oleva sovellusversio ja **Tekijätiedot** (katso seuraava osio).
-- **Projektitiedot** – linkit verkkosivustolle ja tähän dokumentaatioon.
+- **Project information** — links to the website, to this documentation, and to the GNU GPL v3
+  license the app is released under.
+
+The footer states the copyright and that the app is free software with no warranty, which you
+may redistribute under the same license.
 
 ### Kiitokset
 

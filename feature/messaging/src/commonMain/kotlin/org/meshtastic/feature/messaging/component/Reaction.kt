@@ -135,6 +135,8 @@ internal fun ReactionRow(
     modifier: Modifier = Modifier,
     reactions: List<Reaction> = emptyList(),
     myId: String? = null,
+    /** False for an archived conversation: existing reactions still show, but nothing new can be added. */
+    canReact: Boolean = true,
     onSendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
 ) {
@@ -150,11 +152,13 @@ internal fun ReactionRow(
                     emoji = emoji,
                     emojiCount = reactions.size,
                     status = localReaction?.status ?: MessageStatus.RECEIVED,
-                    onClick = { onSendReaction(emoji) },
+                    onClick = { if (canReact) onSendReaction(emoji) },
                     onLongClick = onShowReactions,
                 )
             }
-            item { AddReactionButton(onSendReaction = onSendReaction) }
+            if (canReact) {
+                item { AddReactionButton(onSendReaction = onSendReaction) }
+            }
         }
     }
 }
@@ -194,6 +198,8 @@ internal fun ReactionDialog(
     reactions: List<Reaction>,
     onDismiss: () -> Unit = {},
     myId: String? = null,
+    /** False for an archived conversation: a failed reaction cannot be retried there. */
+    canReact: Boolean = true,
     onResend: (Reaction) -> Unit = {},
 ) = ModalBottomSheet(
     onDismissRequest = onDismiss,
@@ -216,7 +222,8 @@ internal fun ReactionDialog(
             title = title,
             text = text,
             detail = getMessageStatusDetailRes(reaction.status, reaction.routingError),
-            resendOption = isMessageStatusRetryable(reaction.status, reaction.routingError, isDirectMessage),
+            resendOption =
+            canReact && isMessageStatusRetryable(reaction.status, reaction.routingError, isDirectMessage),
             onConfirm = {
                 onResend(reaction)
                 showStatusDialog = null

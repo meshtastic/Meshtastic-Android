@@ -404,6 +404,7 @@
     <string name="device_db_cache_limit_summary">Maximální počet databází zařízení uchovávaných v tomto telefonu</string>
     <string name="device_gps">GPS zařízení</string>
     <string name="device_links">Odkazy na zařízení</string>
+    <string name="device_links_affiliate_disclosure">Odkazy na produkty mohou být partnerské odkazy – z nákupů může Meshtastic získat provizi.</string>
     <string name="device_links_i_want_one">Chci jeden taky</string>
     <string name="device_links_open_in_browser">Otevřít v prohlížeči</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
@@ -551,7 +552,7 @@
     <string name="encryption_error">Neshoda veřejného klíče</string>
     <string name="encryption_error_text">Veřejný klíč neodpovídá uloženému klíči. Můžete uzel odebrat a nechat jej znovu vyměnit klíče, ale může to znamenat bezpečnostní problém. Kontaktujte uživatele jiným důvěryhodným kanálem a ověřte, zda ke změně klíče došlo v důsledku továrního resetu nebo jiné úmyslné akce.</string>
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
-    <string name="encryption_pkc_text">Přímé zprávy používají novou infrastrukturu veřejných klíčů pro šifrování.</string>
+    <string name="encryption_pkc_text">Pro tento uzel je uložen veřejný klíč, takže komunikace s ním používá šifrování veřejným klíčem.</string>
     <string name="env_metrics_log">Metriky prostředí</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Životní prostředí</string>
@@ -832,6 +833,8 @@
     <string name="led_state">Stav LED</string>
     <string name="legacy_admin_channel">Starý kanál správce</string>
     <string name="library_count">%1$d knihoven</string>
+    <string name="license">Licence</string>
+    <string name="license_notice">Svobodný software licencovaný pod GNU General Public License v3, bez záruky. Můžete jej dále šířit za stejných licenčních podmínek.</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Licencované amatérské rádio (Ham)</string>
     <string name="licensed_amateur_radio_text">Povolení této možnosti zruší šifrování a není kompatibilní se základním nastavením Meshtastic sítě.</string>
@@ -874,7 +877,6 @@
     <string name="lockdown_disable_message">Zadejte přístupovou frázi pro vypnutí režimu uzamčení. Zařízení dešifruje své úložiště a restartuje se.</string>
     <string name="lockdown_enable">Povolit uzamčení</string>
     <string name="lockdown_enable_ack">Rozumím</string>
-    <string name="lockdown_enable_warning">Pozor: povolením režimu uzamčení se na podporovaném hardwaru uzamkne ladicí port (SWD). Režim uzamčení můžete kdykoli vypnout pomocí přístupové fráze a v případě potřeby vše obnovit úplným vymazáním zařízení.</string>
     <string name="lockdown_enter_passphrase">Zadejte přístupovou frázi</string>
     <string name="lockdown_hide_passphrase">Skrýt</string>
     <string name="lockdown_hours_until_expiry">Hodiny do vypršení platnosti</string>
@@ -1135,7 +1137,7 @@
     <string name="no_network_devices_seen">Nenalezena žádná síťová zařízení</string>
     <string name="no_pax_metrics_logs">Metriky PAX nejsou k dispozici.</string>
     <string name="no_public_key">Žádný veřejný klíč</string>
-    <string name="no_public_key_text">Tento uzel nesdílel veřejný klíč, takže mu nelze posílat přímé zprávy. Požádejte o informace o uživateli.</string>
+    <string name="no_public_key_text">Tento uzel nesdílel veřejný klíč, takže šifrovaná komunikace s ním není možná. Požádejte o informace o uživateli a vyžádejte si jeho veřejný klíč.</string>
     <string name="no_usb_devices_found">Nenalezena žádná USB zařízení</string>
     <string name="no_usb_devices_hint">Připojte zařízení datovým USB kabelem, chcete-li použít sériové připojení.</string>
     <string name="no_usb_devices_seen">Nebyla nalezena žádná USB zařízení</string>
@@ -1146,10 +1148,13 @@
     <string name="node_count_total">%1$d celkem</string>
     <string name="node_filter_exclude_infrastructure">Vyloučit infrastrukturu</string>
     <string name="node_filter_exclude_mqtt">Vyloučit MQTT</string>
+    <string name="node_filter_exclude_unheard">Skrýt neslyšené uzly</string>
     <string name="node_filter_ignored">Prohlížíte ignorované uzly,\nStiskněte pro návrat do seznamu uzlů.</string>
     <string name="node_filter_include_unknown">Včetně neznámých</string>
     <string name="node_filter_only_direct">Zobrazit jen přímé uzly</string>
+    <string name="node_filter_only_encrypted">Pouze šifrované</string>
     <string name="node_filter_only_online">Skrýt offline uzly</string>
+    <string name="node_filter_only_signed">Pouze podepsané</string>
     <string name="node_filter_placeholder">Filtr</string>
     <string name="node_filter_show_ignored">Zobrazit jen ignorované uzly</string>
     <string name="node_filter_title">Filtrovat podle</string>
@@ -1182,6 +1187,7 @@
     <string name="node_list_help_node_details">Detaily uzlu</string>
     <string name="node_list_help_title">Nápověda pro seznam uzlů</string>
     <string name="node_list_long_click_label">Možnosti uzlu</string>
+    <string name="node_not_heard_on_current_lora">Neslyšen při vašem aktuálním nastavení LoRa</string>
     <string name="node_number">Číslo uzlu</string>
     <string name="node_request_send_failed">Požadavek se nepodařilo odeslat. Zkuste to znovu.</string>
     <string name="node_restarting">Restartování…</string>
@@ -1204,6 +1210,9 @@
     <string name="nodes_empty_searching_hint">Zde se budou postupně zobrazovat nalezené uzly v okolí.</string>
     <string name="nodes_empty_searching_title">Vyhledávání uzlů</string>
     <string name="nodes_queued_for_deletion">%1$d uzlů zařazeno k odstranění:</string>
+    <string name="nodes_unheard_banner">%1$d uzlů nebylo slyšeno při vašem aktuálním nastavení LoRa</string>
+    <string name="nodes_unheard_banner_one">1 uzel nebyl slyšen při vašem aktuálním nastavení LoRa</string>
+    <string name="nodes_unheard_keep">Ponechat</string>
     <string name="nodes_unheard_remove">Odstranit</string>
     <string name="noise_floor">Úroveň šumu</string>
     <string name="noise_floor_definition">Úroveň okolního rádiového šumu naměřená přijímačem. Nižší hodnoty obvykle znamenají klidnější rádiové prostředí; −85 dBm je orientační hodnota pro silné rušení, nikoli pevná hranice.</string>
@@ -1361,6 +1370,7 @@
     <string name="primary">Primární</string>
     <string name="primary_channel_feature">Pravidelné vysílání pozice a telemetrie</string>
     <string name="private_key">Soukromý klíč</string>
+    <string name="project_information">Informace o projektu</string>
     <string name="provide_location_to_mesh">Poskytnout polohu síti</string>
     <string name="proxy_to_client_enabled">Proxy na klienta povoleno</string>
     <string name="psk">PSK</string>
@@ -1524,11 +1534,16 @@
     <string name="security_icon_insecure_precise_only">Nezabezpečený kanál, přesná poloha</string>
     <string name="security_icon_secure">Bezpečný</string>
     <string name="security_icon_warning_precise_mqtt">Varování: Nezabezpečeno, přesná poloha a MQTT uplink</string>
+    <string name="security_legend_any_version">Zobrazeno v libovolné verzi firmwaru.</string>
+    <string name="security_legend_legacy_firmware">Zobrazeno u uzlů s firmwarem starším než 2.8 nebo u uzlů, které neuvádějí verzi.</string>
+    <string name="security_legend_signing_firmware">Zobrazeno u uzlů s firmwarem 2.8 nebo novějším a u všech uzlů, jejichž podpis rádio ověřilo.</string>
     <string name="security_signed_message_info">Ověřeno klíčem odesílatele.</string>
     <string name="security_signed_node">Podepsaný uzel</string>
     <string name="security_signed_node_desc">Ověřeno automaticky</string>
-    <string name="security_signed_node_help">Tento uzel podepisuje své vysílání pomocí XEdDSA. Vysílání, která od něj přijímáte, rádio ověřuje pomocí jeho identitního klíče.</string>
+    <string name="security_signed_node_help">Rádio ověřilo podepsaná vysílání tohoto uzlu pomocí jeho identifikačního klíče, takže jeho identita zůstává v čase konzistentní, ale osobně jste ji neověřili. Každý uzel s firmwarem 2.8 nebo novějším podepisuje svá vysílání.</string>
     <string name="security_signed_verified">Podepsáno · ověřeno</string>
+    <string name="security_verified_contact">Ověřený kontakt</string>
+    <string name="security_verified_contact_help">Tento klíč uzlu jste osobně ověřili výměnou kontaktních QR kódů, takže jeho identita je potvrzena. Jde o nejvyšší úroveň důvěry, kterou seznam zobrazuje, a zobrazuje se u všech verzí firmwaru.</string>
     <string name="select">Vybrat</string>
     <string name="select_all">Vybrat vše</string>
     <string name="selected">Vybrané</string>
@@ -1553,11 +1568,14 @@
     <string name="settings">nastavení</string>
     <!-- SHARE -->
     <string name="share">Sdílet</string>
-    <string name="share_channels_qr">Sdílet QR kód kanálů</string>
+    <string name="share_action">Sdílet odkaz</string>
+    <string name="share_by_tap_subtext">Dokud je tato obrazovka otevřená, může ji převzít i jiný telefon přiložením k vašemu telefonu.</string>
+    <string name="share_channels">Sdílet kanály</string>
     <string name="share_connected_node">Sdílet připojený uzel</string>
     <string name="share_contact">Sdílet kontakt</string>
     <string name="share_location">Sdílet polohu</string>
     <string name="share_location_description">Použijte GPS telefonu k odesílání polohy do svého uzlu namísto použití hardwarového GPS přímo na uzlu.</string>
+    <string name="share_qr_subtext">Naskenujte tento kód pomocí aplikace Meshtastic na jiném zařízení a přidejte jej tam.</string>
     <string name="share_to">Sdílet do…</string>
     <string name="share_your_location_in_real_time">Sdílejte svou polohu v reálném čase a udržujte svou skupinu koordinovanou díky integrovaným funkcím GPS.</string>
     <string name="shared_contact_no_public_key">Tento kontakt nemá žádný veřejný klíč, takže jej nelze importovat. Kontakt bez něj vymaže všechny klíče, které vaše rádio již pro daný uzel drží. Požádejte odesílatele, aby jej znovu sdílel, jakmile si jeho uzel vymění klíče.</string>
@@ -1855,7 +1873,7 @@
     <!-- WRITE -->
     <string name="write_nfc">Zapsat na NFC tag</string>
     <string name="write_nfc_failed">Nelze zapsat do tagu. Použijte zapisovatelný, prázdný NFC tag a podržte jej stabilně.</string>
-    <string name="write_nfc_subtext">Zápisem se tento odkaz pro sdílení uloží na NFC štítek. Kdokoli může přiložit telefon ke štítku a otevřít odkaz.</string>
+    <string name="write_nfc_subtext">Zápisem se tento odkaz uloží na NFC štítek, ke kterému může kdokoli přiložit telefon.</string>
     <string name="write_nfc_success">Zapsáno do tagu</string>
     <string name="write_nfc_text">Přidržte zapisovatelný NFC tag proti zadní straně telefonu.</string>
     <string name="you">Vy</string>

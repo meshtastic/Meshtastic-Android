@@ -50,7 +50,9 @@ import org.meshtastic.core.ui.icon.PersonOff
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.core.ui.util.annotateNeighborInfo
 import org.meshtastic.feature.node.component.CooldownIconButton
 
@@ -65,6 +67,8 @@ fun NeighborInfoLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewM
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
     val statusOrange = MaterialTheme.colorScheme.StatusOrange
+    val statusRed = MaterialTheme.colorScheme.StatusRed
+    val modemPreset = LocalModemPreset.current
 
     Scaffold(
         topBar = {
@@ -131,6 +135,8 @@ fun NeighborInfoLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewM
                                             statusGreen = statusGreen,
                                             statusYellow = statusYellow,
                                             statusOrange = statusOrange,
+                                            statusRed = statusRed,
+                                            modemPreset = modemPreset,
                                         )
                                     viewModel.showLogDetail(Res.string.neighbor_info, message)
                                 }

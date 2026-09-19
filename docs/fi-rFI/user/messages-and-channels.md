@@ -2,7 +2,7 @@
 title: Viestit ja kanavat
 parent: Käyttöopas
 nav_order: 3
-last_updated: 2026-08-30
+last_updated: 2026-09-14
 description: Lähetä ja vastaanota viestejä, hallitse kanavia, määritä salaus, hae keskusteluja sekä käytä pikachatia, reaktioita ja viestitoimintoja.
 aliases:
   - kanavat
@@ -49,6 +49,21 @@ Key length alone does not change the icon: a 128-bit key and a 256-bit key both 
 7. Optional: share the channel URL or QR code with the people who need access.
 
 Tapping an existing channel opens the same editor, where you can change the name, the PSK, MQTT uplink and downlink, and position precision. Every edit on this screen — adding, editing, deleting, or dragging a channel into a new order — waits on **Send** the same way.
+
+### Archived Channels
+
+A conversation belongs to the channel it was held on, not to the slot that channel occupied. When a channel leaves your radio — you scan a different channel QR, replace a channel's key, or switch the modem preset — its conversation is **archived** rather than deleted or merged into whatever takes the slot.
+
+An archived conversation:
+
+- stays in the **Channels** list under the name the channel had, below the channels currently on your radio, marked with a history icon;
+- keeps its full message history, searchable as usual;
+- is read-only — you cannot send, reply, or react, because the channel is no longer on the radio to send on, and it is not offered as a share target;
+- comes back automatically if you re-add that exact channel, taking its messages back to the live slot.
+
+Changing the modem preset archives the channel too: the preset is part of a default channel's identity, so **LongFast** and **MediumFast** are different channels even though neither the name nor the key changed. Changing only the region does not archive anything.
+
+To remove an archived conversation for good, long-press it in the conversation list and delete it.
 
 ## Yksityisviestit
 

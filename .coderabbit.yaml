@@ -13,10 +13,14 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-    # Review once when the PR goes ready, then on demand via `@coderabbitai review`.
-    # Re-reviewing every push turned 6-commit PRs into 8 review rounds, because each
-    # fix commit reopened a full pass. Batch the fixes, push, then ask for one re-review.
-    auto_incremental_review: false
+    # Review each push incrementally. With this off, a push got no review at all and the
+    # only way to re-review was `@coderabbitai full review`, which re-reads the whole diff
+    # and surfaces new findings on unchanged lines every round.
+    auto_incremental_review: true
+    # Never pause on our own. The default (5) stops automatic review after five
+    # reviewed commits and says so only inside the pinned summary comment — the
+    # check still goes green — so a long PR silently stops being reviewed.
+    auto_pause_after_reviewed_commits: 0
     ignore_usernames:
       - renovate
       - renovate[bot]
@@ -121,6 +125,17 @@ reviews:
         One problem per comment. Cite the exact line, symbol, or condition. Give a fix direction — a
         snippet when the fix is not obvious. Never restate a finding already raised in an existing
         review thread.
+
+
+        Scope. If a finding needs work beyond what this diff set out to do — a schema migration, a new
+        column, a change to a subsystem the PR only touches incidentally — say so and recommend a
+        follow-up issue instead of a change request. Prefer the smallest correct fix over the most
+        thorough one on a PR that is already several rounds deep.
+
+
+        Settled decisions. Do not re-raise a concern that an existing thread on this PR already resolved,
+        and do not ask for a change to be reverted that was made in response to an earlier finding of
+        yours without saying that is what you are proposing and why the trade-off changed.
     - path: "**/commonMain/**"
       instructions: >
         KMP common code. Flag any import of java.* or android.* — these break non-Android targets. Expect KMP equivalents instead (Okio, kotlinx Mutex/atomicfu, NumberFormatter.format() for floats).

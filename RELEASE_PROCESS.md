@@ -18,7 +18,7 @@ The entire release process is managed by a single GitHub Action: **`Create or Pr
         already in flight. Internal releases and dry runs are exempt (Play internal testing
         skips full review).
 -   **Automation:** The workflow handles everything automatically:
-    -   **Generates Changelog:** Categorizes merged PRs by their labels (per `.github/release.yml`) into GitHub's auto-generated release notes; a separate automation workflow opens a PR to fold the same notes into `CHANGELOG.md`.
+    -   **Generates Changelog:** Categorizes merged PRs by their labels (per `.github/release.yml`) into GitHub's auto-generated release notes; a production release also opens a PR folding the same notes into `CHANGELOG.md`. Between releases that file is only refreshed by dispatching the `Update Changelog` workflow by hand.
     -   **Tags & Builds** *(internal releases)*: Pushes the incremental tag first — there is no lint/test gate in this workflow, that's the separate PR/CI pipeline — then builds the Android bundle/APK and Desktop installers from that tag; if the build fails, an automatic cleanup job deletes the tag so a retry starts clean. Promotions skip this entirely and retag the already-built artifact (see below).
     -   **Deploys Android:** Uploads the build to the correct Google Play track and attaches artifacts (`.aab`/`.apk`) to a GitHub Release.
     -   **Deploys Desktop** *(internal releases)*: Builds native installers (DMG, MSI, EXE, DEB, RPM, AppImage) and Flatpak sources on a matrix of runners and attaches them to the GitHub Release.
@@ -119,7 +119,7 @@ Desktop uses the same version resolution chain as Android — both read `VERSION
 
 ### Flatpak
 
-Flatpak packaging is maintained externally at [flathub/org.meshtastic.MeshtasticDesktop](https://github.com/flathub/org.meshtastic.MeshtasticDesktop). It builds `:desktopApp:packageUberJarForCurrentOS` (not the native distribution pipeline) and includes its own AppStream metainfo, `.desktop` entry, and JBR bundling. The offline-build sources it consumes are captured in-repo by `scripts/verify-flatpak/` (see its README).
+Flatpak packaging is maintained externally at [flathub/org.meshtastic.MeshtasticDesktop](https://github.com/flathub/org.meshtastic.MeshtasticDesktop). It builds `:desktopApp:packageUberJarForCurrentOS` (not the native distribution pipeline) and handles JBR bundling; the AppStream metainfo and `.desktop` entry it installs come from this repo, out of the tag it builds. So the desktop screenshots and the `<release>` notes ship with the tag - nothing to do on the Flathub side beyond the version bump. The offline-build sources it consumes are captured in-repo by `scripts/verify-flatpak/` (see its README).
 
 ## Build Attestations & Provenance
 

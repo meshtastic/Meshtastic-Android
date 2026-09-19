@@ -50,7 +50,7 @@ What those two channels point at right now:
 | Channel | Currently | Released |
 |---|---|---|
 | **Latest release** | `v2.8.1` | 2026-08-20 |
-| **Open beta** | *none published right now* | — |
+| **Open beta** | `v2.8.2-open.2` | 2026-09-13 |
 
 <!-- END GENERATED STATUS -->
 
@@ -183,6 +183,7 @@ MAPS_API_KEY=your_google_maps_api_key_here
 
 For detailed instructions on how to contribute, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file.
 For details on our release process, see the [RELEASE_PROCESS.md](RELEASE_PROCESS.md) file.
+Forking or rebranding the app? Read [Forks and rebrands](CONTRIBUTING.md#forks-and-rebrands) first.
 
 ## Repository Statistics
 

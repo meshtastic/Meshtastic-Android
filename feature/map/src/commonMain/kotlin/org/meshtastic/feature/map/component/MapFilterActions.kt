@@ -38,6 +38,8 @@ class MapFilterActions(
     val onClearExcludedRoles: () -> Unit,
     val onToggleOnlyOnline: () -> Unit,
     val onToggleOnlyDirect: () -> Unit,
+    val onToggleOnlySigned: () -> Unit,
+    val onToggleOnlyEncrypted: () -> Unit,
     val onToggleExcludeMqtt: () -> Unit,
     val onToggleShowIgnored: () -> Unit,
     val onToggleIncludeUnknown: () -> Unit,
@@ -46,9 +48,9 @@ class MapFilterActions(
 /**
  * The standard wiring from a view model to [MapFilterSheet].
  *
- * Both flavours build the identical bag of method references, and eleven of them written out twice is eleven chances
- * for the two maps to drift apart again — which is exactly what [org.meshtastic.feature.map.MapNodePolicy] exists to
- * prevent on the rules side.
+ * Both flavours build the identical bag of method references, and writing them out twice is that many chances for the
+ * two maps to drift apart again — which is exactly what [org.meshtastic.feature.map.MapNodePolicy] exists to prevent on
+ * the rules side.
  */
 fun BaseMapViewModel.mapFilterActions(): MapFilterActions = MapFilterActions(
     onToggleOnlyFavorites = ::toggleOnlyFavorites,
@@ -59,6 +61,8 @@ fun BaseMapViewModel.mapFilterActions(): MapFilterActions = MapFilterActions(
     onClearExcludedRoles = ::clearExcludedRoles,
     onToggleOnlyOnline = ::toggleOnlyOnline,
     onToggleOnlyDirect = ::toggleOnlyDirect,
+    onToggleOnlySigned = ::toggleOnlySigned,
+    onToggleOnlyEncrypted = ::toggleOnlyEncrypted,
     onToggleExcludeMqtt = ::toggleExcludeMqtt,
     onToggleShowIgnored = ::toggleShowIgnored,
     onToggleIncludeUnknown = ::toggleIncludeUnknown,

@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   update_assets:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     if: github.repository == 'meshtastic/Meshtastic-Android'
     permissions:
@@ -265,7 +265,7 @@ jobs:
           fi
 
       - name: Sync with Crowdin
-        uses: crowdin/github-action@0d5670f539973aea2f01abce61a8989934df0025 # v3
+        uses: crowdin/github-action@9af557de76d70c480f88065d336f445a362f402b # v3
         with:
           base_url: 'https://meshtastic.crowdin.com/api/v2'
           config: 'crowdin.yml'
@@ -286,13 +286,14 @@ jobs:
       - name: Fix file permissions
         run: sudo chown -R "$USER:$USER" .
 
-      # Early warning for overlength store-listing translations just pulled from
-      # Crowdin. Non-blocking on purpose: a hard failure here would abort the job
-      # and stop the PR from being created. The hard gate is the check-metadata
-      # job in pull-request.yml, which runs against the PR this workflow opens.
-      - name: Check store metadata lengths
+      # Early warning for store-listing translations just pulled from Crowdin
+      # (overlength text, unmapped locale codes, forbidden HTML). Non-blocking on
+      # purpose: a hard failure here would abort the job and stop the PR from
+      # being created. The hard gate is the same script in pull-request.yml,
+      # which runs against the PR this workflow opens.
+      - name: Check store metadata
         continue-on-error: true
-        run: python3 scripts/check-metadata-length.py
+        run: python3 scripts/check-store-metadata.py
 
       - name: Build PR body
         id: pr_body

@@ -601,9 +601,9 @@ class DefaultDocBundleLoader : DocBundleLoader {
             "developer",
             "en/developer/documentation-style.html",
             11,
-            listOf("style", "writing", "docs", "prose", "voice", "admonition", "wording"),
+            listOf("style", "writing", "docs", "prose", "voice", "admonition", "wording", "standards"),
             listOf("style", "style-guide", "docs-style", "writing"),
-            15400,
+            9660,
             "documentation-style",
         ),
     )

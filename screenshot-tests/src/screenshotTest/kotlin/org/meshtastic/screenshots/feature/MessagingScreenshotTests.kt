@@ -30,6 +30,7 @@ import org.meshtastic.feature.messaging.DeliveryInfo
 import org.meshtastic.feature.messaging.EditQuickChatDialogPreview
 import org.meshtastic.feature.messaging.MessageInputPreview
 import org.meshtastic.feature.messaging.QuickChatItemPreview
+import org.meshtastic.feature.messaging.RetiredChannelNoticePreview
 import org.meshtastic.feature.messaging.component.MessageActionsContentPreview
 import org.meshtastic.feature.messaging.component.MessageItemGroupedRunPreview
 import org.meshtastic.feature.messaging.component.MessageItemMarkdownPreview
@@ -37,6 +38,7 @@ import org.meshtastic.feature.messaging.component.MessageItemSignedPreview
 import org.meshtastic.feature.messaging.component.MessageItemStatusStatesPreview
 import org.meshtastic.feature.messaging.component.MessageSearchBarPreview
 import org.meshtastic.feature.messaging.component.ReactionItemPreview
+import org.meshtastic.feature.messaging.ui.contact.ContactItemArchivedPreview
 
 @PreviewTest
 @PreviewLightDark
@@ -57,6 +59,20 @@ fun ScreenshotEditQuickChatDialog() {
 @Composable
 fun ScreenshotMessageInput() {
     MessageInputPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotRetiredChannelNotice() {
+    RetiredChannelNoticePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotContactItemArchived() {
+    ContactItemArchivedPreview()
 }
 
 @PreviewTest

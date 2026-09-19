@@ -207,7 +207,9 @@ class ReactionKeyTest {
         channel = channel,
     )
 
-    private val getNode: suspend (String?) -> Node = { userId -> Node(num = 1, user = User(id = userId.orEmpty())) }
+    private val getNode: suspend (String?) -> Node = { userId ->
+        Node(num = 1, user = User.Builder().also { wb -> wb.id = userId.orEmpty() }.build())
+    }
 
     private companion object {
         const val MY_NODE_NUM = 42

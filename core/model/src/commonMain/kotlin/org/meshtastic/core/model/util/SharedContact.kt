@@ -22,8 +22,24 @@ import okio.ByteString
 import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.model.Node
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
+
+/**
+ * The [SharedContact] to encode for [node].
+ *
+ * [isOwnContact] marks it manually verified (design#149 point 2): you hold your own radio's key, and a QR shown in
+ * person is the in-person exchange. Relaying someone else's contact only passes on what was already recorded, it never
+ * asserts verification on their behalf.
+ */
+fun Node.toSharedContact(isOwnContact: Boolean = false): SharedContact = SharedContact.Builder()
+    .also { wb ->
+        wb.node_num = num
+        wb.user = user
+        wb.manually_verified = isOwnContact || manuallyVerified
+    }
+    .build()
 
 /**
  * Return a [SharedContact] that represents the contact encoded by the URL.

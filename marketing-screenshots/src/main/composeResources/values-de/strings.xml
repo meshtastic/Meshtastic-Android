@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sample prose shown in the store-listing screenshots: the chat thread, the direct-message previews and the framed
+  variant's captions. Crowdin picks this file up through its composeResources rule, so a translated listing shows a
+  translated conversation. Node and channel names are not here: they are what a real group typed into their radios.
+-->
+<resources></resources>

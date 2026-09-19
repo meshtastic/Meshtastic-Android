@@ -2,7 +2,7 @@
 title: Codebase
 parent: Developer Guide
 nav_order: 2
-last_updated: 2026-08-29
+last_updated: 2026-09-11
 description: Repository layout, package namespacing, and the Gradle build system — convention plugins, build variants, and key tasks.
 aliases:
   - repository-layout
@@ -16,7 +16,7 @@ Repository layout, namespacing conventions, and build system overview.
 
 ## Repository Structure
 
-```
+```text
 Meshtastic-Android/
 ├── androidApp/                 # Android application module
 │   ├── src/main/           # Shared Android code
@@ -75,7 +75,7 @@ Meshtastic-Android/
 ## Namespacing Convention
 
 All Kotlin packages follow the pattern:
-```
+```text
 org.meshtastic.{layer}.{module}.{subpackage}
 ```
 
@@ -123,7 +123,7 @@ block rather than assuming a plugin does or does not exist.
 
 ### Key Gradle Tasks
 
-```bash
+```shell
 # Compile check across all KMP targets
 ./gradlew kmpSmokeCompile
 

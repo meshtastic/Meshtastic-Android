@@ -113,9 +113,9 @@ class FakeCommandSender :
 
     override fun getCurrentPacketId(): Long = nextPacketId.toLong()
 
-    override fun getCachedLocalConfig(): LocalConfig = LocalConfig()
+    override fun getCachedLocalConfig(): LocalConfig = LocalConfig.Builder().build()
 
-    override fun getCachedChannelSet(): ChannelSet = ChannelSet()
+    override fun getCachedChannelSet(): ChannelSet = ChannelSet.Builder().build()
 
     override fun generatePacketId(): Int = nextPacketId++
 

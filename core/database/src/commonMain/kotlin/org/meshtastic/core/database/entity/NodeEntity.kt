@@ -50,16 +50,17 @@ data class NodeWithRelations(
         snr = node.snr,
         rssi = node.rssi,
         lastHeard = node.lastHeard,
-        deviceMetrics = node.deviceMetrics ?: org.meshtastic.proto.DeviceMetrics(),
+        deviceMetrics = node.deviceMetrics ?: org.meshtastic.proto.DeviceMetrics.Builder().build(),
         channel = node.channel,
         viaMqtt = node.viaMqtt,
         hopsAway = node.hopsAway,
         isFavorite = node.isFavorite,
         isIgnored = node.isIgnored,
         isMuted = node.isMuted,
-        environmentMetrics = node.environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
-        powerMetrics = node.powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
-        airQualityMetrics = node.airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics(),
+        environmentMetrics = node.environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics.Builder().build(),
+        powerMetrics = node.powerMetrics ?: org.meshtastic.proto.PowerMetrics.Builder().build(),
+        airQualityMetrics = node.airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics.Builder().build(),
+        soilWaterMetrics = node.soilWaterMetrics ?: org.meshtastic.proto.SoilWaterMetrics.Builder().build(),
         paxcounter = node.paxcounter,
         publicKey = node.publicKey ?: node.user.public_key,
         notes = node.notes,
@@ -70,6 +71,8 @@ data class NodeWithRelations(
         manuallyVerified = node.manuallyVerified,
         signsPackets = node.signsPackets,
         heardOnCurrentLora = node.heardOnCurrentLora,
+        keyMatch = node.keyMatch,
+        newPublicKey = node.newPublicKey,
     )
 
     fun toEntity() = with(node) {
@@ -90,6 +93,7 @@ data class NodeWithRelations(
             environmentTelemetry = environmentTelemetry,
             powerTelemetry = powerTelemetry,
             airQualityTelemetry = airQualityTelemetry,
+            soilWaterTelemetry = soilWaterTelemetry,
             paxcounter = paxcounter,
             publicKey = publicKey ?: user.public_key,
             notes = notes,
@@ -99,6 +103,8 @@ data class NodeWithRelations(
             lastTransport = lastTransport,
             signsPackets = signsPackets,
             heardOnCurrentLora = heardOnCurrentLora,
+            keyMatch = keyMatch,
+            newPublicKey = newPublicKey,
         )
     }
 }
@@ -126,16 +132,17 @@ data class MetadataEntity(
 )
 data class NodeEntity(
     @PrimaryKey(autoGenerate = false) val num: Int, // This is immutable, and used as a key
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var user: User = User(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var user: User = User.Builder().build(),
     @ColumnInfo(name = "long_name") var longName: String? = null,
     @ColumnInfo(name = "short_name") var shortName: String? = null, // used in includeUnknown filter
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var position: WirePosition = WirePosition(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var position: WirePosition = WirePosition.Builder().build(),
     var latitude: Double = 0.0,
     var longitude: Double = 0.0,
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
     @ColumnInfo(name = "last_heard") var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    @ColumnInfo(name = "device_metrics", typeAffinity = ColumnInfo.BLOB) var deviceTelemetry: Telemetry = Telemetry(),
+    @ColumnInfo(name = "device_metrics", typeAffinity = ColumnInfo.BLOB)
+    var deviceTelemetry: Telemetry = Telemetry.Builder().build(),
     var channel: Int = 0,
     @ColumnInfo(name = "via_mqtt") var viaMqtt: Boolean = false,
     @ColumnInfo(name = "hops_away") var hopsAway: Int = -1,
@@ -143,11 +150,14 @@ data class NodeEntity(
     @ColumnInfo(name = "is_ignored", defaultValue = "0") var isIgnored: Boolean = false,
     @ColumnInfo(name = "is_muted", defaultValue = "0") var isMuted: Boolean = false,
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
-    var environmentTelemetry: Telemetry = Telemetry(),
-    @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB) var powerTelemetry: Telemetry = Telemetry(),
+    var environmentTelemetry: Telemetry = Telemetry.Builder().build(),
+    @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB)
+    var powerTelemetry: Telemetry = Telemetry.Builder().build(),
     @ColumnInfo(name = "air_quality_metrics", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
-    var airQualityTelemetry: Telemetry = Telemetry(),
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount(),
+    var airQualityTelemetry: Telemetry = Telemetry.Builder().build(),
+    @ColumnInfo(name = "soil_water_metrics", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
+    var soilWaterTelemetry: Telemetry = Telemetry.Builder().build(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount.Builder().build(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
     @ColumnInfo(name = "power_channel_labels", defaultValue = "[]") var powerChannelLabels: List<String> = emptyList(),
@@ -159,11 +169,31 @@ data class NodeEntity(
     /** True when this node signs its broadcasts via XEdDSA (NodeInfo.has_xeddsa_signed). */
     @ColumnInfo(name = "has_xeddsa_signed", defaultValue = "0") var signsPackets: Boolean = false,
     /**
-     * True when the radio has heard this node over RF since its current LoRa config took effect
-     * (NodeInfo.heard_on_current_lora). Defaults true so nodes stored before this column existed, and nodes from
-     * firmware that does not report it, are never shown as unheard.
+     * True when the radio has heard this node over RF on the LoRa configuration it is using now
+     * (NodeInfo.heard_on_current_lora). The radio derives this from the slot each node was heard on rather than
+     * clearing it on a config change, so returning to a configuration restores the previous answers. Defaults true so
+     * nodes stored before this column existed, and nodes from firmware that does not report it, are never shown as
+     * unheard.
      */
     @ColumnInfo(name = "heard_on_current_lora", defaultValue = "1") var heardOnCurrentLora: Boolean = true,
+    /**
+     * False once a *different* public key has arrived for a node one is already stored for.
+     *
+     * The stored key stands (first-wins) and this records the refusal, matching firmware — which drops the whole
+     * NodeInfo on a key mismatch rather than overwriting — and Meshtastic-Apple. Overwriting the trusted key instead
+     * would let any mesh or MQTT peer destroy it by broadcasting a NodeInfo under that node's number.
+     *
+     * Defaults true so rows written before this column existed are not read as mismatched; those rows record a mismatch
+     * the old way, as [ERROR_BYTE_STRING] in [publicKey].
+     */
+    @ColumnInfo(name = "key_match", defaultValue = "1") var keyMatch: Boolean = true,
+    /**
+     * The key that was refused, kept so the mismatch can be shown as more than a warning.
+     *
+     * Null whenever [keyMatch] is true. Rows that recorded a mismatch the old way, as [ERROR_BYTE_STRING] in
+     * [publicKey], have no rejected key to report and stay null.
+     */
+    @ColumnInfo(name = "new_public_key") var newPublicKey: ByteString? = null,
 ) {
     val deviceMetrics: org.meshtastic.proto.DeviceMetrics?
         get() = deviceTelemetry.device_metrics
@@ -177,6 +207,9 @@ data class NodeEntity(
     val airQualityMetrics: org.meshtastic.proto.AirQualityMetrics?
         get() = airQualityTelemetry.air_quality_metrics
 
+    val soilWaterMetrics: org.meshtastic.proto.SoilWaterMetrics?
+        get() = soilWaterTelemetry.soil_water_metrics
+
     val isUnknownUser
         get() = user.hw_model == HardwareModel.UNSET
 
@@ -184,7 +217,7 @@ data class NodeEntity(
         get() = (publicKey ?: user.public_key).size > 0
 
     fun setPosition(p: WirePosition, defaultTime: Int = currentTime()) {
-        position = p.copy(time = if (p.time != 0) p.time else defaultTime)
+        position = p.newBuilder().also { wb -> wb.time = if (p.time != 0) p.time else defaultTime }.build()
         latitude = degD(p.latitude_i ?: 0)
         longitude = degD(p.longitude_i ?: 0)
     }
@@ -213,16 +246,17 @@ data class NodeEntity(
         snr = snr,
         rssi = rssi,
         lastHeard = lastHeard,
-        deviceMetrics = deviceMetrics ?: org.meshtastic.proto.DeviceMetrics(),
+        deviceMetrics = deviceMetrics ?: org.meshtastic.proto.DeviceMetrics.Builder().build(),
         channel = channel,
         viaMqtt = viaMqtt,
         hopsAway = hopsAway,
         isFavorite = isFavorite,
         isIgnored = isIgnored,
         isMuted = isMuted,
-        environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
-        powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
-        airQualityMetrics = airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics(),
+        environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics.Builder().build(),
+        powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics.Builder().build(),
+        airQualityMetrics = airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics.Builder().build(),
+        soilWaterMetrics = soilWaterMetrics ?: org.meshtastic.proto.SoilWaterMetrics.Builder().build(),
         paxcounter = paxcounter,
         publicKey = publicKey ?: user.public_key,
         notes = notes,
@@ -231,5 +265,7 @@ data class NodeEntity(
         lastTransport = lastTransport,
         signsPackets = signsPackets,
         heardOnCurrentLora = heardOnCurrentLora,
+        keyMatch = keyMatch,
+        newPublicKey = newPublicKey,
     )
 }

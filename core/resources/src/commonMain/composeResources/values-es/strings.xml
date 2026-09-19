@@ -285,7 +285,6 @@
     <string name="encryption_enabled">Permitir Encripción</string>
     <string name="encryption_error">Clave pública no coincide</string>
     <string name="encryption_pkc">Cifrado de Clave Pública</string>
-    <string name="encryption_pkc_text">Los mensajes directos están utilizando la nueva infraestructura de clave pública para el cifrado.</string>
     <string name="env_metrics_log">Métricas de Entorno</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Ambiente</string>

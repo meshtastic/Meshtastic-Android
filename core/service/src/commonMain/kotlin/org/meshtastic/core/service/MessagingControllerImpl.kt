@@ -73,6 +73,11 @@ internal class MessagingControllerImpl(
     override suspend fun sendReaction(emoji: String, replyId: Int, contactKey: String) {
         val myNum = nodeManager.myNodeNum.value ?: return
         val parsedKey = ContactKey(contactKey)
+        // A retired conversation has no live slot; its absent channel prefix would otherwise read as the primary.
+        if (parsedKey.isRetired) {
+            Logger.w { "Refusing to react in a retired conversation" }
+            return
+        }
         val channel = parsedKey.channel
         val destId = parsedKey.addressString
         val dataPacket =
@@ -88,7 +93,9 @@ internal class MessagingControllerImpl(
                 .apply { from = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: NodeAddress.ID_LOCAL }
         commandSender.sendData(dataPacket)
         analytics.trackAction("reaction_send")
-        val user = nodeManager.nodeDBbyNodeNum[myNum]?.user ?: User(id = nodeManager.getMyId())
+        val user =
+            nodeManager.nodeDBbyNodeNum[myNum]?.user
+                ?: User.Builder().also { wb -> wb.id = nodeManager.getMyId() }.build()
         packetRepository.value.insertReaction(
             Reaction(
                 replyId = replyId,
@@ -117,8 +124,18 @@ internal class MessagingControllerImpl(
             false
         } else {
             val contact =
-                SharedContact(node_num = nodeDef.num, user = nodeDef.user, manually_verified = nodeDef.manuallyVerified)
-            safeCatching { commandSender.sendAdminAwait(myNum) { AdminMessage(add_contact = contact) } }
+                SharedContact.Builder()
+                    .also { wb ->
+                        wb.node_num = nodeDef.num
+                        wb.user = nodeDef.user
+                        wb.manually_verified = nodeDef.manuallyVerified
+                    }
+                    .build()
+            safeCatching {
+                commandSender.sendAdminAwait(myNum) {
+                    AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build()
+                }
+            }
                 .getOrDefault(false)
         }
     }
@@ -133,7 +150,7 @@ internal class MessagingControllerImpl(
         }
         // Cross-platform policy: honor the verification state encoded by the sharer as-is
         // (see meshtastic/design standards/audits/nfc-alignment-audit.md).
-        commandSender.sendAdmin(myNum) { AdminMessage(add_contact = contact) }
+        commandSender.sendAdmin(myNum) { AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build() }
         nodeManager.handleReceivedUser(contact.node_num, user, manuallyVerified = contact.manually_verified)
     }
 

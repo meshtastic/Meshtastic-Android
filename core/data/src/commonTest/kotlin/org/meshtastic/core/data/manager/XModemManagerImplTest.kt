@@ -62,26 +62,30 @@ class XModemManagerImplTest {
         xmodemManager.fileTransferFlow.test {
             // Send Block 1
             xmodemManager.handleIncomingXModem(
-                XModem(
-                    control = XModem.Control.SOH,
-                    seq = 1,
-                    crc16 = calculateExpectedCrc(payload1),
-                    buffer = payload1.toByteString(),
-                ),
+                XModem.Builder()
+                    .also { wb ->
+                        wb.control = XModem.Control.SOH
+                        wb.seq = 1
+                        wb.crc16 = calculateExpectedCrc(payload1)
+                        wb.buffer = payload1.toByteString()
+                    }
+                    .build(),
             )
 
             // Send Block 2
             xmodemManager.handleIncomingXModem(
-                XModem(
-                    control = XModem.Control.SOH,
-                    seq = 2,
-                    crc16 = calculateExpectedCrc(payload2),
-                    buffer = payload2.toByteString(),
-                ),
+                XModem.Builder()
+                    .also { wb ->
+                        wb.control = XModem.Control.SOH
+                        wb.seq = 2
+                        wb.crc16 = calculateExpectedCrc(payload2)
+                        wb.buffer = payload2.toByteString()
+                    }
+                    .build(),
             )
 
             // EOT
-            xmodemManager.handleIncomingXModem(XModem(control = XModem.Control.EOT))
+            xmodemManager.handleIncomingXModem(XModem.Builder().also { wb -> wb.control = XModem.Control.EOT }.build())
 
             val file = awaitItem()
             assertEquals("test.txt", file.name)
@@ -96,12 +100,15 @@ class XModemManagerImplTest {
         val payload1 = "Bad CRC payload".encodeToByteArray()
 
         xmodemManager.handleIncomingXModem(
-            XModem(
-                control = XModem.Control.SOH,
-                seq = 1,
-                crc16 = 0xBAD, // intentionally bad
-                buffer = payload1.toByteString(),
-            ),
+            XModem.Builder()
+                .also { wb ->
+                    wb.control = XModem.Control.SOH
+                    wb.seq = 1
+                    wb.crc16 = 0xBAD
+                    // intentionally bad
+                    wb.buffer = payload1.toByteString()
+                }
+                .build(),
         )
 
         verify(exactly(1)) { packetHandler.sendToRadio(any<ToRadio>()) }
@@ -111,7 +118,7 @@ class XModemManagerImplTest {
     fun `handles CAN and resets state`() = runTest {
         xmodemManager.setTransferName("bad.txt")
 
-        xmodemManager.handleIncomingXModem(XModem(control = XModem.Control.CAN))
+        xmodemManager.handleIncomingXModem(XModem.Builder().also { wb -> wb.control = XModem.Control.CAN }.build())
 
         // No control sent back for CAN by the device, just resets.
         // If we cancel locally, we send CAN. Wait, the test is for receiving CAN.
@@ -127,14 +134,16 @@ class XModemManagerImplTest {
 
         xmodemManager.fileTransferFlow.test {
             xmodemManager.handleIncomingXModem(
-                XModem(
-                    control = XModem.Control.SOH,
-                    seq = 1,
-                    crc16 = calculateExpectedCrc(payload),
-                    buffer = payload.toByteString(),
-                ),
+                XModem.Builder()
+                    .also { wb ->
+                        wb.control = XModem.Control.SOH
+                        wb.seq = 1
+                        wb.crc16 = calculateExpectedCrc(payload)
+                        wb.buffer = payload.toByteString()
+                    }
+                    .build(),
             )
-            xmodemManager.handleIncomingXModem(XModem(control = XModem.Control.EOT))
+            xmodemManager.handleIncomingXModem(XModem.Builder().also { wb -> wb.control = XModem.Control.EOT }.build())
 
             val file = awaitItem()
             val expected = byteArrayOf(0x48, 0x69) // "Hi"

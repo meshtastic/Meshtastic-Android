@@ -116,7 +116,7 @@ constructor(
             combine(
                 nodeRepository.ourNodeInfo,
                 nodeRepository.myNodeInfo,
-                radioConfigRepository.deviceProfileFlow.onStart { emit(DeviceProfile()) },
+                radioConfigRepository.deviceProfileFlow.onStart { emit(DeviceProfile.Builder().build()) },
             ) { ourNode, myInfo, profile ->
                 IdentityGroup(ourNode, myInfo, profile)
             }

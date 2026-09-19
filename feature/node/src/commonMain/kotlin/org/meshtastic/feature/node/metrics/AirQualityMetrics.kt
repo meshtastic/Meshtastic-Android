@@ -70,6 +70,8 @@ import org.meshtastic.core.resources.micrograms_per_cubic_meter
 import org.meshtastic.core.resources.pm10
 import org.meshtastic.core.resources.pm1_0
 import org.meshtastic.core.resources.pm2_5
+import org.meshtastic.core.resources.pm_sensor_status
+import org.meshtastic.core.resources.pm_status_unknown_flags
 import org.meshtastic.core.resources.ppm
 import org.meshtastic.core.ui.component.Co2Severity
 import org.meshtastic.core.ui.component.PmAqiSeverity
@@ -358,6 +360,27 @@ private fun AqiText(aqi: Int) {
     )
 }
 
+/**
+ * The PM sensor's decoded status register. A register at 0 is a healthy sensor and is not listed here (the CSV and the
+ * node DB export still carry it); a non-zero one names each fault it sets, plus any bits this build does not know.
+ */
+@Composable
+private fun PmStatusText(flags: Int) {
+    val faults = remember(flags) { PmStatusFault.decode(flags) }
+    val unknownHex = remember(flags) { PmStatusFault.unknownBitsHex(flags) }
+    val parts =
+        faults.map { stringResource(it.labelRes) } +
+            listOfNotNull(unknownHex?.let { stringResource(Res.string.pm_status_unknown_flags, it) })
+    // A warning-only register (fan speed) is not an error tone; unknown bits alone are not either.
+    val isFault = faults.any { !it.isWarning }
+    Text(
+        text = "${stringResource(Res.string.pm_sensor_status)}: ${parts.joinToString()}",
+        style = MaterialTheme.typography.bodySmall,
+        fontWeight = FontWeight.Medium,
+        color = if (isFault) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
 @Composable
 private fun AirQualityMetricsCard(
     sample: AirQualitySample,
@@ -421,6 +444,7 @@ private fun AirQualityMetricsCard(
                     }
                 }
             }
+            aq.pm_status_flags?.takeIf { it != 0 }?.let { PmStatusText(it) }
         }
     }
 }
@@ -431,28 +455,50 @@ private fun AirQualityMetricsCard(
 fun PreviewAirQualityCards() {
     val readings =
         listOf(
-            Telemetry(
-                time = 1700000000,
-                air_quality_metrics =
-                AirQualityMetricsProto(
-                    pm10_standard = 4,
-                    pm25_standard = 9,
-                    pm100_standard = 12,
-                    co2 = 620,
-                    co2_temperature = 21.5f,
-                    co2_humidity = 58f,
-                ),
-            ) to "2023-11-14 20:13",
-            Telemetry(
-                time = 1700003600,
-                air_quality_metrics =
-                AirQualityMetricsProto(pm10_standard = 6, pm25_standard = 14, pm100_standard = 19, co2 = 1450),
-            ) to "2023-11-14 21:13",
-            Telemetry(
-                time = 1700007200,
-                air_quality_metrics =
-                AirQualityMetricsProto(pm10_standard = 11, pm25_standard = 25, pm100_standard = 33, co2 = 2300),
-            ) to "2023-11-14 22:13",
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.air_quality_metrics =
+                        AirQualityMetricsProto.Builder()
+                            .also { wb ->
+                                wb.pm10_standard = 4
+                                wb.pm25_standard = 9
+                                wb.pm100_standard = 12
+                                wb.co2 = 620
+                                wb.co2_temperature = 21.5f
+                                wb.co2_humidity = 58f
+                            }
+                            .build()
+                }
+                .build() to "2023-11-14 20:13",
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700003600
+                    wb.air_quality_metrics =
+                        AirQualityMetricsProto.Builder()
+                            .also { wb ->
+                                wb.pm10_standard = 6
+                                wb.pm25_standard = 14
+                                wb.pm100_standard = 19
+                                wb.co2 = 1450
+                            }
+                            .build()
+                }
+                .build() to "2023-11-14 21:13",
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700007200
+                    wb.air_quality_metrics =
+                        AirQualityMetricsProto.Builder()
+                            .also { wb ->
+                                wb.pm10_standard = 11
+                                wb.pm25_standard = 25
+                                wb.pm100_standard = 33
+                                wb.co2 = 2300
+                            }
+                            .build()
+                }
+                .build() to "2023-11-14 22:13",
         )
     // Newest first, matching the list view; AQI is derived rather than read from the proto, so the first row has too
     // little history to show one.
@@ -470,6 +516,42 @@ fun PreviewAirQualityCards() {
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * A log entry whose PM sensor reports a fault (fan, bit 4), a warning (fan speed, bit 21) and a bit this build does not
+ * name (bit 30), so the status line renders all three parts in its error tone.
+ */
+@PreviewLightDark
+@Suppress("MagicNumber", "PreviewPublic") // fake data; public so :screenshot-tests can reference it
+@Composable
+fun PreviewAirQualityCardsStatus() {
+    val telemetry =
+        Telemetry.Builder()
+            .also { wb ->
+                wb.time = 1700000000
+                wb.air_quality_metrics =
+                    AirQualityMetricsProto.Builder()
+                        .also { aq ->
+                            aq.pm10_standard = 6
+                            aq.pm25_standard = 14
+                            aq.pm100_standard = 19
+                            aq.co2 = 820
+                            aq.pm_status_flags = (1 shl 4) or (1 shl 21) or (1 shl 30)
+                        }
+                        .build()
+            }
+            .build()
+    AppTheme {
+        Surface {
+            AirQualityMetricsCard(
+                sample = withNowCastAqi(listOf(telemetry)).single(),
+                isSelected = false,
+                onClick = {},
+                timeTextOverride = "2023-11-14 22:13",
+            )
         }
     }
 }

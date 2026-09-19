@@ -32,7 +32,7 @@ import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.gt
 import org.maplibre.compose.expressions.dsl.not
 import org.maplibre.compose.layers.CircleLayer
-import org.maplibre.compose.sources.Source
+import org.maplibre.compose.sources.VectorSource
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.RECENTLY_HEARD_SECONDS
@@ -56,7 +56,7 @@ import org.meshtastic.feature.map.maplibre.style.MapColors
  * between packets is invisible.
  */
 @Composable
-internal fun NodePulseLayer(nodes: List<Node>, source: Source) {
+internal fun NodePulseLayer(nodes: List<Node>, source: VectorSource) {
     val heardJustNow = remember(nodes) { nodes.heardJustNow(nowSeconds) }
     // Frozen with the membership so the filter cannot drift out from under a pulse already running.
     val cutoff = remember(heardJustNow) { (nowSeconds - RECENTLY_HEARD_SECONDS).toInt() }

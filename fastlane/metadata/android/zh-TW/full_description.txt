@@ -1,10 +1,10 @@
-Meshtastic 是一款 Android 應用程式，可搭配開源的離網網狀網路無線電裝置使用。 此應用程式是 Meshtastic 專案的主要客戶端，讓您可以管理網狀網路裝置並與其他使用者通訊。
+Meshtastic 是一款 Android 應用程式，可搭配開源的離網網狀網路無線電裝置使用。此應用程式是 Meshtastic 專案的主要客戶端，讓您可以管理網狀網路裝置並與其他使用者通訊。
 
-如需更多 Meshtastic 專案相關資訊，請造訪我們的網站：<a href="https://www.meshtastic.org">meshtastic.org</a>。 執行於無線電裝置上的韌體是一個獨立的開源專案，您可以在此找到：<a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>。
+如需更多 Meshtastic 專案相關資訊，請造訪我們的網站：<a href="https://www.meshtastic.org">meshtastic.org</a>。執行於無線電裝置上的韌體是一個獨立的開源專案，您可以在此找到：<a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>。
 
 <b>社群與支援</b>
 
-本專案目前為 Beta 測試階段。 我們非常期待您的回饋！ 無論您有任何疑問、回饋或遭遇問題，都歡迎加入我們友善的社群：
+本專案目前為 Beta 測試階段。我們非常期待您的回饋！無論您有任何疑問、回饋或遭遇問題，都歡迎加入我們友善的社群：
 
 <b>討論論壇：</b><a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
 <b>Discord：</b><a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>

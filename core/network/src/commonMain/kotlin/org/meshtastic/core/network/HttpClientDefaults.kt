@@ -41,11 +41,11 @@ object HttpClientDefaults {
     /**
      * Base URL for the Meshtastic public API, installed via the `DefaultRequest` plugin.
      *
-     * The Cloudflare R2-backed v2 host, not `api.meshtastic.org`. v2 is CDN-cached with `stale-if-error`, and it
-     * answers cross-origin requests: v1 replies HTTP 500 to any `Origin` outside a hardcoded allowlist, so it cannot be
-     * reached from a browser at all (meshtastic/api#134).
+     * The production Worker: R2-backed, CDN-cached with `stale-if-error`, and cross-origin readable. Never
+     * `apiv2.meshtastic.org` — that hostname is the Worker's staging route and redeploys only on a push to the dormant
+     * `v2` branch, so it serves a frozen copy of the JSON documents compiled into the bundle.
      */
-    const val API_BASE_URL = "https://apiv2.meshtastic.org/"
+    const val API_BASE_URL = "https://api.meshtastic.org/"
 
     /**
      * Base URL for the nightly firmware channel. Absolute, and not routed through [API_BASE_URL] — the nightly build is

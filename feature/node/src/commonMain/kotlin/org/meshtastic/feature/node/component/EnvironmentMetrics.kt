@@ -27,6 +27,7 @@ import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.model.util.adcVoltage
 import org.meshtastic.core.model.util.oneWireTemperature
 import org.meshtastic.core.model.util.toSmallDistanceString
+import org.meshtastic.core.model.util.toStormDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.adc_voltage
 import org.meshtastic.core.resources.current
@@ -35,9 +36,12 @@ import org.meshtastic.core.resources.distance
 import org.meshtastic.core.resources.gas_resistance
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
+import org.meshtastic.core.resources.ic_bolt
 import org.meshtastic.core.resources.ic_dew_point
 import org.meshtastic.core.resources.ic_electric_bolt
 import org.meshtastic.core.resources.ic_radioactive
+import org.meshtastic.core.resources.lightning_distance
+import org.meshtastic.core.resources.lightning_strikes_1h
 import org.meshtastic.core.resources.lux
 import org.meshtastic.core.resources.one_wire_temperature
 import org.meshtastic.core.resources.pressure
@@ -239,6 +243,27 @@ internal fun EnvironmentMetrics(node: Node, displayUnits: MeasurementSystem, isF
                         .asGroup(),
                 )
             }
+            // Strike count and storm distance come from the same AS3935 detector, so they share a column.
+            add(
+                listOfNotNull(
+                    lightning_strike_count_1h?.let {
+                        DrawableMetricInfo(
+                            label = Res.string.lightning_strikes_1h,
+                            value = it.toString(),
+                            icon = Res.drawable.ic_bolt,
+                        )
+                    },
+                    lightning_distance_km
+                        ?.takeUnless { it.isNaN() }
+                        ?.let {
+                            DrawableMetricInfo(
+                                label = Res.string.lightning_distance,
+                                value = it.toStormDistanceString(displayUnits),
+                                icon = Res.drawable.ic_bolt,
+                            )
+                        },
+                ),
+            )
             // 1-Wire probes and ADC inputs are independent channels, so one card each. Absent channels are null; a
             // reported 0°C or 0 V is a real reading and stays visible.
             for (channel in 0 until TELEMETRY_CHANNEL_COUNT) {

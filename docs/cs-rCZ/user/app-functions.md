@@ -1,5 +1,5 @@
 ---
-title: App Functions
+title: Funkce aplikace
 parent: Uživatelská příručka
 nav_order: 19
 last_updated: 2026-08-30
@@ -11,7 +11,7 @@ aliases:
   - assistant
 ---
 
-# App Functions
+# Funkce aplikace
 
 App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app. App Functions are available on **Google-flavor Android builds only**.
 
@@ -55,7 +55,7 @@ The screenshot has **Send message** and **Get recent messages** switched off to 
 
 > 🔒 **Privacy:** The **Send message** function lets an assistant send messages to your mesh on your behalf, and the read functions expose node, message, and metric data to it. Because all of them start enabled, the choice you make here is what to turn off rather than what to turn on. Each function has its own toggle, and **Allow AI access** turns all of them off at once.
 
-## Related Topics
+## Související témata
 
 - [Messages & Channels](messages-and-channels) — sending messages directly in the app
 - [Nodes](nodes) — the node list the read functions draw from

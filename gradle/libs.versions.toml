@@ -2,36 +2,40 @@
 xmlutil = "1.0.2.1"
 
 # Android
-agp = "9.4.0"
+agp = "9.4.1"
 appcompat = "1.8.0"
 appfunctions = "1.0.0-alpha11"
 
 # androidx
-androidx-sqlite-bundled = "2.7.0"
+androidx-sqlite-bundled = "2.7.1"
 androidx-work = "2.11.2"
 datastore = "1.2.1"
 glance = "1.2.0"
 lifecycle = "2.11.0"
 jetbrains-lifecycle = "2.11.0"
-navigation3 = "1.1.1"
+navigation3 = "1.2.0-beta01"
+# navigation3-runtime is AndroidX's own KMP artifact, separate from the JetBrains
+# navigation3-ui mirror above; the two refs move independently and the mirror does not
+# publish every AndroidX version, so they are not always equal.
+navigation3-runtime = "1.2.0-rc01"
 navigationevent = "1.1.0"
 paging = "3.5.1"
-room = "3.0.2"
+room = "3.0.3"
 koin = "4.2.2"
-koin-plugin = "1.1.0"
+koin-plugin = "1.2.1"
 
 # Kotlin
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 kotlinx-coroutines-android = "1.11.0"
 kotlinx-datetime = "0.8.0-0.6.x-compat"
 kotlinx-serialization = "1.11.0"
 ktlint = "1.7.1"
 ktfmt = "0.61"
 kover = "0.9.9"
-mokkery = "3.4.2"
+mokkery = "3.5.0"
 junit5 = "6.1.3"
 junit-platform = "6.1.3" # aligned with junit5 — JUnit Platform uses 1.x scheme
-kotest = "6.2.4"
+kotest = "6.2.5"
 konsist = "0.17.3"
 turbine = "1.2.1"
 
@@ -42,7 +46,7 @@ compose-screenshot = "0.0.1-alpha16"
 # `benchmark` drives both the androidx.benchmark macro lib AND the androidx.baselineprofile
 # Gradle plugin (same coordinates/version). Kept on the alpha track to stay compatible with
 # AGP 9.x (the stable 1.4.x line predates AGP 9 support).
-benchmark = "1.5.0-rc02"
+benchmark = "1.5.0"
 profileinstaller = "1.4.1"
 androidx-uiautomator = "2.4.0"
 
@@ -57,8 +61,8 @@ compose-multiplatform-material3 = "1.12.0-alpha03"
 # current `compose-multiplatform` release maps to (see CMP release notes).
 # AndroidCompose.kt's resolutionStrategy force-aligns these groups to *this* version
 # at resolution time, so it is the source of truth for the Android target.
-androidx-compose-bom-aligned = "1.12.0"
-jetbrains-adaptive = "1.3.0-beta02"
+androidx-compose-bom-aligned = "1.12.1"
+jetbrains-adaptive = "1.3.0-rc01"
 
 # Google
 # The 5.1.1 floor was load-bearing while the app parsed KML through maps-utils: 5.0.0's data.parser
@@ -67,7 +71,7 @@ jetbrains-adaptive = "1.3.0-beta02"
 # 2.8.0–2.8.1). KML is now read by the app's own xmlutil-based converter and that parser is unused, so
 # the pairing — and the canary test that guarded it — is gone. The floor stays as a plain minimum.
 android-maps-utils = "5.2.0"
-maplibre-compose = "0.15.0"
+maplibre-compose = "0.17.0"
 maps-compose = "8.6.0"
 
 # ML Kit
@@ -80,32 +84,32 @@ mlkit-translate = "17.0.3"
 camerax = "1.6.2"
 
 # Networking
-ktor = "3.5.2"
+ktor = "3.6.0"
 
 # Other
 aboutlibraries = "15.2.0"
 jserialcomm = "2.11.4"
-coil = "3.6.2"
+coil = "3.6.3"
 datadog-gradle = "1.31.0"
-dd-sdk-android = "3.13.1"
+dd-sdk-android = "3.14.0"
 detekt = "2.0.0-alpha.6"
 dokka = "2.2.0"
-devtools-ksp = "2.3.11"
+devtools-ksp = "2.3.12"
 firebase-crashlytics-gradle = "3.0.8"
 google-services-gradle = "4.5.0"
-markdown = "0.7.12"
+markdown = "0.7.14"
 markdownRenderer = "0.45.0"
 okio = "3.18.2"
 uri-kmp = "0.0.21"
 spotless = "8.10.2"
 vico = "3.3.1"
-kable = "0.44.3"
-mqttastic = "0.8.1"
+kable = "0.45.0"
+mqttastic = "0.8.2"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
-takpacket-sdk = "0.9.1"
+takpacket-sdk = "0.9.2-SNAPSHOT"
 # PoC: DisplayFrame screen mirroring, locally published from protobufs@screen-mirror-poc.
-# Revert to main's pin once protobufs#1054 is tagged. main tracks 2.8.0.23-gca2cb1a-SNAPSHOT.
+# Revert to main's pin once protobufs#1054 is tagged. main tracks 2.8.0.96-g16fbc6c-SNAPSHOT.
 # (requires -PuseMavenLocal or the gradle.properties flag on this branch)
 meshtastic-protobufs = "2.99.0-screen-mirror-poc-SNAPSHOT"
 
@@ -153,6 +157,7 @@ jetbrains-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecyc
 jetbrains-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-lifecycle" }
 jetbrains-lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "jetbrains-lifecycle" }
 jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3-runtime" }
 jetbrains-navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationevent" }
 androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
@@ -203,7 +208,7 @@ jetbrains-compose-material3-adaptive-navigation-suite = { module = "org.jetbrain
 firebase-ai = { module = "com.google.firebase:firebase-ai" }
 firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", version = "16.0.0-beta05" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.18.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.19.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 location-services = { module = "com.google.android.gms:play-services-location", version = "21.4.0" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
@@ -279,7 +284,7 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }
-robolectric = { module = "org.robolectric:robolectric", version = "4.16.1" }
+robolectric = { module = "org.robolectric:robolectric", version = "4.17" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 # Other
@@ -329,7 +334,7 @@ screenshot-validation-api = { group = "com.android.tools.screenshot", name = "sc
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "32.4.0" }
+android-tools-common = { module = "com.android.tools:common", version = "32.4.1" }
 androidx-room-gradlePlugin = { module = "androidx.room3:room3-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }

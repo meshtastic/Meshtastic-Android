@@ -2,7 +2,7 @@
 title: Map & Waypoints
 parent: User Guide
 nav_order: 6
-last_updated: 2026-09-01
+last_updated: 2026-09-11
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -44,7 +44,7 @@ The floating toolbar provides quick access to the compass, the map type and laye
 
 ### Filtering the Map
 
-Tap the filter button in the floating toolbar to open **Filter map**. **Display** controls what is drawn: **Only Favorites**, **Show Waypoints**, **Show Precision Circles**, and a slider that hides nodes not heard from recently. **Node roles** is a chip per device role, plus **All** to show every role; a selected chip means that role is shown. **Nodes** narrows the set further with **Hide offline nodes**, **Only show direct nodes**, **Exclude MQTT**, **Show ignored nodes**, and **Include unknown**.
+Tap the filter button in the floating toolbar to open **Filter map**. **Display** controls what is drawn: **Only Favorites**, **Show Waypoints**, **Show Precision Circles**, and a slider that hides nodes not heard from recently. **Node roles** is a chip per device role, plus **All** to show every role; a selected chip means that role is shown. **Nodes** narrows the set further with **Hide offline nodes**, **Only show direct nodes**, **Signed only**, **Encrypted only**, **Exclude MQTT**, **Show ignored nodes**, and **Include unknown** — the same rules as the node list's [filter toggles](nodes).
 
 A dot on the filter button means at least one filter is hiding something — check it before concluding the mesh is quiet. Turning **Show Waypoints** off hides every waypoint, including your own. **Show ignored nodes** adds them to the map rather than showing only them — unlike the node list's **Only show ignored Nodes**.
 
@@ -147,8 +147,9 @@ picker, all three offer the same raster base maps:
 Overlays can be toggled on top of any base map, from the layers sheet:
 
 - **Weather radar** — NOAA NEXRAD reflectivity (US coverage)
-- **Hillshade** — terrain relief, on **F-Droid** and **Desktop** only. Useful for understanding why a
-  link fails, since LoRa range is limited by terrain
+- **Hillshade** — terrain relief from an online tile source, on **F-Droid** and **Desktop** only; Google
+  Play draws hillshade from downloaded offline terrain instead. Useful for understanding why a link
+  fails, since LoRa range is limited by terrain
 
 ### Adding your own tile source
 
@@ -156,7 +157,7 @@ Any XYZ tile endpoint can be added as a base map, on every flavor and on desktop
 Tile Sources** at the foot of the base map picker and paste a URL template using `{z}`, `{x}` and `{y}`
 — plus `{s}` if the provider uses rotating subdomains. A national mapping service, for example:
 
-```
+```text
 https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
 ```
 
@@ -173,7 +174,18 @@ On **Google Play**, the layers sheet's **Offline Manager** section downloads its
 — water, roads and administrative boundaries extracted from the public Protomaps basemap dataset, drawn
 directly as map shapes rather than raster tiles. Frame the area you want, tap **Start Download**, and once
 it finishes flip **Show on map** to draw it (it's off by default so it never surprises you by covering up the
-live map). You can still import a pre-made `.mbtiles` archive here too, as before. **Desktop** has neither.
+live map). You can still import a pre-made `.mbtiles` archive here too, as before. **Desktop** has neither, though
+the offline terrain described next does work there.
+
+### Offline terrain
+
+Hillshade and elevation contours can be downloaded for offline use as well, so a downloaded area still
+shows why a link fails when there is no network. The terrain data comes from Mapterhorn and is credited on
+the map. On **Google Play**, each downloaded region in the **Offline Manager** list has a **Download Terrain**
+button and **Hillshade** and **Contours** switches; terrain attaches to that region and shares its storage limit, and an area
+too large for terrain asks you to zoom in or pick a smaller region. On **F-Droid** and **Desktop**, the
+layers sheet has an **Offline Terrain** section of its own: frame the area, tap **Start Download**, and the
+hillshade and contours draw from the downloaded tiles from then on.
 
 ### Going offline
 
@@ -181,8 +193,8 @@ An **Offline** pill appears over the map whenever the device has no network conn
 builds, if you've imported a local `.mbtiles` archive, the map switches to it automatically the moment the
 network drops — no toggle to remember — and switches back once you're reconnected, as long as you haven't
 picked a different base map yourself in between. On **F-Droid**, a downloaded offline area keeps rendering on
-its own; the pill is purely informational there. **Desktop** has no offline downloads at all yet, so the pill
-is informational there too.
+its own; the pill is purely informational there. **Desktop** downloads offline terrain but no base-map
+packs, so the pill is informational there too.
 
 ## Related Topics
 

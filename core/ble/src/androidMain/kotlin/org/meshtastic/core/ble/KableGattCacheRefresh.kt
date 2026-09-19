@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 @Suppress("ReturnCount")
 internal actual fun Peripheral.refreshGattCache(): Boolean {
-    // Direct 2-hop reflection on Kable 0.43.1 internals.
+    // Direct 2-hop reflection on Kable 0.45.0 internals.
     // Path: BluetoothDeviceAndroidPeripheral.connection (MutableStateFlow<Connection?>) → .value → Connection.gatt
     // Re-verify field names on Kable version bumps.
     val gatt =

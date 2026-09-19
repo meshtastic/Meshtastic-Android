@@ -102,15 +102,15 @@ fun EditChannelDialog(
                     enabled = true,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChange = {
-                        val fullPsk = Channel(ChannelSettings(psk = it)).psk
+                        val fullPsk = Channel(ChannelSettings.Builder().also { wb -> wb.psk = it }.build()).psk
                         if (fullPsk.size in setOf(0, 16, 32)) {
                             pskEditState = pskEditState.copy(generatedPskForName = false, pskExplicitlyEdited = true)
-                            channelInput = channelInput.copy(psk = it)
+                            channelInput = channelInput.newBuilder().also { wb -> wb.psk = it }.build()
                         }
                     },
                     onGenerateKey = {
                         pskEditState = pskEditState.copy(generatedPskForName = false, pskExplicitlyEdited = true)
-                        channelInput = channelInput.copy(psk = Channel.getRandomKey())
+                        channelInput = channelInput.newBuilder().also { wb -> wb.psk = Channel.getRandomKey() }.build()
                     },
                 )
 
@@ -118,7 +118,9 @@ fun EditChannelDialog(
                     title = stringResource(Res.string.uplink_enabled),
                     checked = channelInput.uplink_enabled,
                     enabled = true,
-                    onCheckedChange = { channelInput = channelInput.copy(uplink_enabled = it) },
+                    onCheckedChange = {
+                        channelInput = channelInput.newBuilder().also { wb -> wb.uplink_enabled = it }.build()
+                    },
                     padding = PaddingValues(0.dp),
                 )
 
@@ -126,17 +128,21 @@ fun EditChannelDialog(
                     title = stringResource(Res.string.downlink_enabled),
                     checked = channelInput.downlink_enabled,
                     enabled = true,
-                    onCheckedChange = { channelInput = channelInput.copy(downlink_enabled = it) },
+                    onCheckedChange = {
+                        channelInput = channelInput.newBuilder().also { wb -> wb.downlink_enabled = it }.build()
+                    },
                     padding = PaddingValues(0.dp),
                 )
 
-                val moduleSettings = channelInput.module_settings ?: ModuleSettings()
+                val moduleSettings = channelInput.module_settings ?: ModuleSettings.Builder().build()
                 PositionPrecisionPreference(
                     enabled = true,
                     value = moduleSettings.position_precision,
                     onValueChanged = {
-                        val updatedModule = moduleSettings.copy(position_precision = it)
-                        channelInput = channelInput.copy(module_settings = updatedModule)
+                        val updatedModule =
+                            moduleSettings.newBuilder().also { wb -> wb.position_precision = it }.build()
+                        channelInput =
+                            channelInput.newBuilder().also { wb -> wb.module_settings = updatedModule }.build()
                     },
                 )
             }
@@ -177,7 +183,13 @@ internal fun ChannelSettings.applyChannelNameEdit(
             else -> pskEditState.generatedPskForName
         }
     return ChannelNameUpdate(
-        settings = copy(name = name, psk = nextPsk),
+        settings =
+        this.newBuilder()
+            .also { wb ->
+                wb.name = name
+                wb.psk = nextPsk
+            }
+            .build(),
         pskEditState = pskEditState.copy(generatedPskForName = nextGeneratedPskForName),
     )
 }

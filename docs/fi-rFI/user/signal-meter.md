@@ -2,7 +2,7 @@
 title: Kuinka Meshtastic-signaalimittari toimii
 parent: Käyttöopas
 nav_order: 15
-last_updated: 2026-08-30
+last_updated: 2026-09-09
 description: Miten signaalimittari arvioi signaalin laadun SNR-arvon perusteella suhteessa LoRa-modeemiesiasetukseen — hajaspektri, esiasetukset ja mitä palkit todellisuudessa tarkoittavat.
 aliases:
   - signaali
@@ -32,7 +32,7 @@ Jokaisella modeemiesiasetuksella on SNR-raja: pienin SNR-arvo, jolla kyseinen es
 
 ## Signaalin laadun arviointi
 
-Sovellus arvioi signaalin laadun (Ei mitään, Huono, Tyydyttävä tai Hyvä) pelkästään SNR:n perusteella vertaamalla sitä käytössä olevan esiasetuksen SNR-rajaan. RSSI:tä ei oteta huomioon: ilman tietoa paikallisesta kohinatasosta pelkkä RSSI ei kerro, voidaanko signaali purkaa. RSSI on silti käytettävissä — radion tiedoissa ja mittarikaavioissa.
+The app rates signal quality (None, Bad, Fair, or Good) from SNR relative to the active preset's SNR limit. When RSSI and a noise-floor reading are both available, it also rates the difference between them against that limit and uses the worse rating. Otherwise, it uses SNR alone.
 
 Koska arviointi suhteutetaan esiasetukseen, sama SNR saa eri arvioinnin eri esiasetuksilla. SNR −16 dB arvioidaan Hyväksi Long Fast -esiasetuksella (SNR-raja −17.5 dB), mutta Ei mitään -tasolle Short Fast -esiasetuksella (SNR-raja −7.5 dB). Jos `raja` tarkoittaa käytössä olevan esiasetuksen SNR-rajaa:
 
@@ -45,7 +45,7 @@ Koska arviointi suhteutetaan esiasetukseen, sama SNR saa eri arvioinnin eri esia
 
 The icon never goes blank, so count the bars carefully: a single bar means None, not a weak but usable link, and Good is a solid wedge rather than a set of bars. A gray three-bar icon labeled Unknown is a different state again — the packet carried no SNR measurement at all, which is not the same as measuring one and finding it too weak.
 
-> ℹ️ **Huomautus:** Reitiselvityksen hyppyjen värit käyttävät kiinteitä raja-arvoja (−7 dB / −15 dB); radion signaalimittari käyttää sen sijaan esiasetukseen suhteutettua arviointia.
+> ℹ️ **Note:** Traceroute and neighbor-info SNR colors use the active preset's limits too. RSSI text has separate strength colors: green above −115 dBm, yellow above −120 dBm, orange above −126 dBm, and red at or below −126 dBm.
 
 ## Paikallisten häiriöiden tunnistaminen
 

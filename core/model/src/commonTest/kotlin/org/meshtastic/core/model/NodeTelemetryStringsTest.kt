@@ -33,40 +33,65 @@ class NodeTelemetryStringsTest {
 
     @Test
     fun absent_environment_metrics_render_nothing() {
-        assertEquals(emptyList(), telemetry(EnvironmentMetrics()))
+        assertEquals(emptyList(), telemetry(EnvironmentMetrics.Builder().build()))
     }
 
     @Test
     fun zero_temperature_is_reported() {
-        assertEquals(listOf("0.0°C"), telemetry(EnvironmentMetrics(temperature = 0f)))
+        assertEquals(
+            listOf("0.0°C"),
+            telemetry(EnvironmentMetrics.Builder().also { wb -> wb.temperature = 0f }.build()),
+        )
     }
 
     @Test
     fun zero_voltage_and_current_are_reported() {
-        val strings = telemetry(EnvironmentMetrics(voltage = 0f, current = 0f))
+        val strings =
+            telemetry(
+                EnvironmentMetrics.Builder()
+                    .also { wb ->
+                        wb.voltage = 0f
+                        wb.current = 0f
+                    }
+                    .build(),
+            )
         assertEquals(listOf("0.00 V", "0.0 mA"), strings)
     }
 
     @Test
     fun zero_soil_readings_are_reported() {
-        val strings = telemetry(EnvironmentMetrics(soil_temperature = 0f, soil_moisture = 0))
+        val strings =
+            telemetry(
+                EnvironmentMetrics.Builder()
+                    .also { wb ->
+                        wb.soil_temperature = 0f
+                        wb.soil_moisture = 0
+                    }
+                    .build(),
+            )
         assertEquals(listOf("0.0°C", "0%"), strings)
     }
 
     @Test
     fun soil_moisture_no_longer_requires_a_soil_temperature() {
-        assertEquals(listOf("42%"), telemetry(EnvironmentMetrics(soil_moisture = 42)))
+        assertEquals(
+            listOf("42%"),
+            telemetry(EnvironmentMetrics.Builder().also { wb -> wb.soil_moisture = 42 }.build()),
+        )
     }
 
     @Test
     fun out_of_range_soil_moisture_is_still_rejected() {
-        assertEquals(emptyList(), telemetry(EnvironmentMetrics(soil_moisture = 101)))
+        assertEquals(emptyList(), telemetry(EnvironmentMetrics.Builder().also { wb -> wb.soil_moisture = 101 }.build()))
     }
 
     @Test
     fun zero_humidity_stays_filtered() {
         // 0 %RH is not physically reachable, so unlike the other metrics its zero-guard is intentional.
-        assertTrue(telemetry(EnvironmentMetrics(relative_humidity = 0f)).isEmpty())
-        assertEquals(listOf("41%"), telemetry(EnvironmentMetrics(relative_humidity = 41f)))
+        assertTrue(telemetry(EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 0f }.build()).isEmpty())
+        assertEquals(
+            listOf("41%"),
+            telemetry(EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 41f }.build()),
+        )
     }
 }

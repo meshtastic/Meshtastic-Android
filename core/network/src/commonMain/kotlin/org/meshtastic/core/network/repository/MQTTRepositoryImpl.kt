@@ -302,7 +302,15 @@ class MQTTRepositoryImpl(
             try {
                 val jsonStr = payload.decodeToString()
                 json.decodeFromString<MqttJsonPayload>(jsonStr)
-                trySend(MqttClientProxyMessage(topic = topic, text = jsonStr, retained = msg.retain))
+                trySend(
+                    MqttClientProxyMessage.Builder()
+                        .also { wb ->
+                            wb.topic = topic
+                            wb.text = jsonStr
+                            wb.retained = msg.retain
+                        }
+                        .build(),
+                )
             } catch (e: JsonDecodingException) {
                 // Warn, not error: a non-conforming payload recurs for as long as a busy public broker
                 // stays subscribed, not an app defect worth a non-fatal per message.
@@ -327,7 +335,15 @@ class MQTTRepositoryImpl(
                 }
                 return
             }
-            trySend(MqttClientProxyMessage(topic = topic, data_ = payload.toByteString(), retained = msg.retain))
+            trySend(
+                MqttClientProxyMessage.Builder()
+                    .also { wb ->
+                        wb.topic = topic
+                        wb.data_ = payload.toByteString()
+                        wb.retained = msg.retain
+                    }
+                    .build(),
+            )
         }
     }
 

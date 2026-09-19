@@ -51,7 +51,9 @@ import org.meshtastic.core.resources.map_filter_title
 import org.meshtastic.core.resources.node_filter_exclude_mqtt
 import org.meshtastic.core.resources.node_filter_include_unknown
 import org.meshtastic.core.resources.node_filter_only_direct
+import org.meshtastic.core.resources.node_filter_only_encrypted
 import org.meshtastic.core.resources.node_filter_only_online
+import org.meshtastic.core.resources.node_filter_only_signed
 import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
@@ -135,8 +137,8 @@ internal fun MapFilterSheetContent(filterState: BaseMapViewModel.MapFilterState,
 }
 
 /**
- * The node-level filters, in the node list's own words — four of these five labels are its string resources, so a user
- * who has met them there does not have to learn them twice.
+ * The node-level filters, in the node list's own words — all but one of these labels are its string resources, so a
+ * user who has met them there does not have to learn them twice.
  */
 @Composable
 private fun NodeFilterToggles(filterState: BaseMapViewModel.MapFilterState, actions: MapFilterActions) = Column {
@@ -151,12 +153,22 @@ private fun NodeFilterToggles(filterState: BaseMapViewModel.MapFilterState, acti
         onToggle = actions.onToggleOnlyDirect,
     )
     FilterToggle(
+        label = stringResource(Res.string.node_filter_only_signed),
+        checked = filterState.onlySigned,
+        onToggle = actions.onToggleOnlySigned,
+    )
+    FilterToggle(
+        label = stringResource(Res.string.node_filter_only_encrypted),
+        checked = filterState.onlyEncrypted,
+        onToggle = actions.onToggleOnlyEncrypted,
+    )
+    FilterToggle(
         label = stringResource(Res.string.node_filter_exclude_mqtt),
         checked = filterState.excludeMqtt,
         onToggle = actions.onToggleExcludeMqtt,
     )
-    // The fifth is ours: the list's `node_filter_show_ignored` reads "Only show ignored Nodes", which is what the
-    // list does and the opposite of what this does.
+    // The one exception is ours: the list's `node_filter_show_ignored` reads "Only show ignored Nodes", which is what
+    // the list does and the opposite of what this does.
     FilterToggle(
         label = stringResource(Res.string.map_filter_show_ignored),
         checked = filterState.showIgnored,

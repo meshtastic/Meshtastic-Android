@@ -22,8 +22,9 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
-import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
+import org.meshtastic.core.ui.component.Quality
+import org.meshtastic.core.ui.component.determineSignalQuality
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 
 /**
  * Converts a raw traceroute string into an [AnnotatedString] with SNR values highlighted according to their quality.
@@ -33,6 +34,8 @@ fun annotateTraceroute(
     statusGreen: Color,
     statusYellow: Color,
     statusOrange: Color,
+    statusRed: Color,
+    modemPreset: ModemPreset?,
 ): AnnotatedString {
     if (inString == null) return buildAnnotatedString { append("") }
 
@@ -47,11 +50,7 @@ fun annotateTraceroute(
 
                 if (snrValue != null) {
                     val snrColor =
-                        when {
-                            snrValue >= SNR_GOOD_THRESHOLD -> statusGreen
-                            snrValue >= SNR_FAIR_THRESHOLD -> statusYellow
-                            else -> statusOrange
-                        }
+                        snrTierColor(snrValue, modemPreset, statusGreen, statusYellow, statusOrange, statusRed)
                     withStyle(style = SpanStyle(color = snrColor, fontWeight = FontWeight.Bold)) { append(line) }
                 } else {
                     append(line)
@@ -71,6 +70,8 @@ fun annotateNeighborInfo(
     statusGreen: Color,
     statusYellow: Color,
     statusOrange: Color,
+    statusRed: Color,
+    modemPreset: ModemPreset?,
 ): AnnotatedString {
     if (inString == null) return buildAnnotatedString { append("") }
 
@@ -85,11 +86,7 @@ fun annotateNeighborInfo(
 
                 if (snrValue != null) {
                     val snrColor =
-                        when {
-                            snrValue >= SNR_GOOD_THRESHOLD -> statusGreen
-                            snrValue >= SNR_FAIR_THRESHOLD -> statusYellow
-                            else -> statusOrange
-                        }
+                        snrTierColor(snrValue, modemPreset, statusGreen, statusYellow, statusOrange, statusRed)
                     val snrPrefix = "(SNR: "
                     append(line.substring(0, line.indexOf(snrPrefix) + snrPrefix.length))
                     withStyle(style = SpanStyle(color = snrColor, fontWeight = FontWeight.Bold)) { append("$snrValue") }
@@ -102,4 +99,18 @@ fun annotateNeighborInfo(
             }
         }
     }
+}
+
+private fun snrTierColor(
+    snr: Float,
+    modemPreset: ModemPreset?,
+    statusGreen: Color,
+    statusYellow: Color,
+    statusOrange: Color,
+    statusRed: Color,
+): Color = when (determineSignalQuality(snr, modemPreset)) {
+    Quality.GOOD -> statusGreen
+    Quality.FAIR -> statusYellow
+    Quality.BAD -> statusOrange
+    Quality.NONE -> statusRed
 }

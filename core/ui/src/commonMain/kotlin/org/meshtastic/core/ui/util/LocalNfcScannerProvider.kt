@@ -28,3 +28,11 @@ val LocalNfcWriterProvider =
     compositionLocalOf<@Composable (url: String, onResult: (Boolean) -> Unit, onNfcDisabled: () -> Unit) -> Unit> {
         { _, _, _ -> }
     }
+
+/** Offers a share URL to NFC readers for as long as the composable stays composed. */
+@Suppress("CompositionLocalAllowlist")
+val LocalNfcEmulatorProvider = compositionLocalOf<@Composable (url: String) -> Unit> { {} }
+
+/** True where the platform can emulate an NFC tag (Android host card emulation). */
+@Suppress("CompositionLocalAllowlist")
+val LocalNfcEmulationSupported = compositionLocalOf { false }

@@ -72,13 +72,49 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
     - `refactor/` — code structure changes
     - `test/` — test additions or fixes
     - `deps/` — dependency updates
+- Spec-driven work takes no prefix from that list: a numeric spec prefix (`005-tak-v2-protocol`) or the timestamp form `YYYYMMDD-HHMMSS-feature-name` created by `/speckit.git.feature`. Both are valid.
 - `release/*` and `automation/*` are reserved for maintainers and automated workflows.
 - Ensure your branch is up to date with the latest `main` branch before submitting a PR.
 - Provide a meaningful title and description for your PR.
 - Include information on how to test and/or replicate if it is not obvious.
-- Include screenshots or logs if your change affects the UI or user experience.
+- Include logs where they show the behavior, as a fenced block rather than a screenshot of text. For UI changes see Screenshots below.
 - Be responsive to feedback and make requested changes promptly.
 - Squash commits if requested by a maintainer.
+
+### Writing the description
+
+Delete the tips block from the template first, then:
+
+- **Lead with why.** One or two sentences on the problem the change solves,
+  before any list of what changed. If it addresses an issue, say `Fixes #123`.
+- **Group what changed** under whichever of these apply, and omit the rest:
+  🌟 New Features · 🛠️ Refactoring & Architecture · 🐛 Bug Fixes ·
+  🧹 Chores (dependencies, formatting, docs).
+- **Call out architecture moves.** Files moving `androidMain` → `commonMain`,
+  or Views → Compose, are a KMP migration milestone — say so explicitly rather
+  than leaving it to the diff.
+- **Add a "Testing Performed" section** whenever tests were added or changed,
+  listing them. If a change is hard to test, say why there instead.
+
+### Screenshots
+
+UI changes want images — anything touching Compose, layouts, theming,
+navigation, `feature/**` or `core/ui/**`. Use a Before / After table for a
+visual change or fix:
+
+| Before | After |
+|--------|-------|
+| <img src="<url>" width="300"/> | <img src="<url>" width="300"/> |
+
+Paste or drag images directly into the PR so GitHub hosts them, or reference a
+committed image by **commit-SHA** raw URL
+(`https://raw.githubusercontent.com/<owner>/<repo>/<sha>/<path>`, spaces
+encoded as `%20`) so the link survives the branch being deleted. Never use an
+external image service.
+
+**Never invent a URL or a placeholder image.** If a UI change has no real
+screenshot yet, leave the template's commented image block in place for the
+author to fill in.
 
 ## Issue Reporting
 
@@ -86,6 +122,40 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
 - Provide a clear and descriptive title.
 - Include steps to reproduce, expected behavior, and actual behavior.
 - Attach logs, screenshots, or other helpful context if applicable.
+
+## Forks and rebrands
+
+Meshtastic-Android is GPL-3.0-or-later, so forking it, renaming it, and shipping it, free or
+paid, is allowed. The license and the
+[trademark policy](https://meshtastic.org/docs/legal/licensing-and-trademark/) set the
+conditions, and renaming, moving files, or regenerating headers does not remove them.
+
+- **Keep the license.** Your version is GPL-3.0-or-later with `LICENSE` intact. Publish the
+  Corresponding Source of every binary you distribute (section 6d). Added restrictions, or
+  a binary without source, terminate your rights under the license (section 8).
+- **Keep the notices.** Every `Copyright (c) <year> Meshtastic LLC` header and the license
+  text under it stay as they are. Say prominently that you modified the work, and when
+  (section 5a). Stamping your name on files you did not touch claims work you did not do.
+- **Keep the legal notices in the app.** Keep the About screen's copyright notice and its
+  link to the source, with Meshtastic LLC still named (section 5d). Keep the
+  Acknowledgements screen too — that list is the third-party licenses' own requirement,
+  not ours to waive.
+- **Leave the trademarks out of your branding.** The GPL is a copyright license and grants
+  no trademark rights. The Meshtastic name and logo are trademarks of Meshtastic LLC. Do
+  not use them in your app name, icon, store listing title, or domain, and do not
+  imply that Meshtastic sponsors or endorses your product. Replace `app_name` and the
+  launcher icons under `androidApp/src/main/`. The logo in `.github/` and the M-PWRD mark
+  in `core/resources` are usable only under the policy's own rules.
+- **Describe compatibility plainly.** "Works with Meshtastic® nodes" or "a fork of
+  Meshtastic-Android" is fine. Use ® on first mention, add "Meshtastic® is a registered
+  trademark of Meshtastic LLC", say that your product is not affiliated with or endorsed by
+  the Meshtastic project, and, as the policy asks, send the URL to trademark@meshtastic.org
+  within seven days of first use.
+- **Use your own identity.** Change `APPLICATION_ID` in `config.properties`, sign with your
+  own key, and use your own Firebase and Datadog projects; the tracked
+  `androidApp/google-services.json` is a placeholder.
+
+Questions about any of this: trademark@meshtastic.org.
 
 ## Community Standards
 

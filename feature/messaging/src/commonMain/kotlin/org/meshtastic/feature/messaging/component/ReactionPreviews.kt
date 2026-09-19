@@ -48,7 +48,7 @@ private fun ReactionRowPreview() {
             listOf(
                 Reaction(
                     replyId = 1,
-                    user = User(),
+                    user = User.Builder().build(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L,
                     snr = -1.0f,
@@ -57,7 +57,7 @@ private fun ReactionRowPreview() {
                 ),
                 Reaction(
                     replyId = 1,
-                    user = User(),
+                    user = User.Builder().build(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L,
                     snr = -1.0f,

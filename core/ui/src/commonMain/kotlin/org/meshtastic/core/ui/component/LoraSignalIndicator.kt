@@ -60,13 +60,10 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 
-// Fixed-threshold SNR colors retained for contexts without an active preset (e.g. traceroute hop coloring in
-// AnnotatedStrings). Per-node signal quality uses preset-relative thresholds instead — see [determineSignalQuality].
-const val SNR_GOOD_THRESHOLD = -7f
-const val SNR_FAIR_THRESHOLD = -15f
-
+// RSSI display bands match Apple's getRssiColor; quality needs SNR and a preset instead.
 const val RSSI_GOOD_THRESHOLD = -115
-const val RSSI_FAIR_THRESHOLD = -126
+const val RSSI_FAIR_THRESHOLD = -120
+const val RSSI_BAD_THRESHOLD = -126
 
 // SNR offsets (dB) below a preset's demodulation floor that delimit the quality bands, matching Meshtastic-Apple's
 // getSnrColor(): within 5.5 dB below the limit is FAIR, within 7.5 dB is BAD, further down is NONE.
@@ -139,12 +136,11 @@ fun Snr(snr: Float?, modifier: Modifier = Modifier, modemPreset: ModemPreset? = 
 fun Rssi(rssi: Int?, modifier: Modifier = Modifier, label: String = stringResource(Res.string.rssi)) {
     if (rssi == null) return
     val color: Color =
-        if (rssi > RSSI_GOOD_THRESHOLD) {
-            Quality.GOOD.color.invoke()
-        } else if (rssi > RSSI_FAIR_THRESHOLD) {
-            Quality.FAIR.color.invoke()
-        } else {
-            Quality.BAD.color.invoke()
+        when {
+            rssi > RSSI_GOOD_THRESHOLD -> Quality.GOOD.color.invoke()
+            rssi > RSSI_FAIR_THRESHOLD -> Quality.FAIR.color.invoke()
+            rssi > RSSI_BAD_THRESHOLD -> Quality.BAD.color.invoke()
+            else -> Quality.NONE.color.invoke()
         }
     Text(
         modifier = modifier,
@@ -165,6 +161,8 @@ fun Rssi(rssi: Int?, modifier: Modifier = Modifier, label: String = stringResour
  * a noisy channel is still a bad link. With either missing, the rating is SNR-only, unchanged from #5446.
  *
  * A null/unknown [modemPreset] falls back to the LongFast default limit.
+ *
+ * Without a noise floor, fixed RSSI thresholds cannot account for the preset's bandwidth, so rating stays SNR-only.
  */
 fun determineSignalQuality(snr: Float, modemPreset: ModemPreset?, rssi: Int? = null, noiseFloor: Int? = null): Quality {
     val limit = modemPreset.snrLimit

@@ -57,7 +57,7 @@ import org.meshtastic.proto.Position as ProtoPosition
  * real `commonMain` implementations wired through the generated Koin K2 modules.
  *
  * As real desktop implementations become available (e.g., serial transport, TCP transport), they replace individual
- * stubs in [desktopModule].
+ * stubs in [org.meshtastic.desktop.di.DesktopStubsModule].
  */
 private const val TAG = "NoopStub"
 

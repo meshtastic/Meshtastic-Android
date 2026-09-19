@@ -2,7 +2,7 @@
 title: MQTT
 parent: User Guide
 nav_order: 11
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: メッシュをインターネットに橋渡しします。MQTT サーバーの設定、暗号化の各レイヤー、マップ報告について説明します。
 aliases:
   - mqtt
@@ -25,7 +25,7 @@ MQTT モジュールは、ノードを MQTT サーバーに接続し、次のこ
 
 ## 仕組み
 
-```
+```text
 [Your Node] → Radio → [Gateway Node with Wi-Fi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
 ```
 

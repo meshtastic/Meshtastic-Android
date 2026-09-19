@@ -35,7 +35,7 @@ import org.meshtastic.core.repository.RadioTransportFactory
  * Desktop implementation of [RadioTransportFactory] delegating multiplatform transports (BLE, TCP) and providing
  * platform-specific transports (USB/Serial) via jSerialComm.
  *
- * Registered manually in [desktopPlatformStubsModule] — do NOT add @Single to avoid double-registration with
+ * Registered manually in [DesktopRuntimeModule] — do NOT add @Single to avoid double-registration with
  * the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
  */
 class DesktopRadioTransportFactory(

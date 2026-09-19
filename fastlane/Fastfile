@@ -1,17 +1,7 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
-
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
+# Lanes are invoked by the workflows in .github/workflows (release.yml,
+# promote.yml, play-listing.yml); `bundle exec fastlane lanes` lists them.
+# Play credentials come from fastlane/play-store-credentials.json, written by
+# the workflow from the GOOGLE_PLAY_JSON_KEY secret and deleted afterwards.
 
 default_platform(:android)
 
@@ -19,7 +9,7 @@ platform :android do
   desc "Deploy a new version to the internal track on Google Play"
   lane :internal do |options|
     aab_path = build_google_release
-    
+
     upload_to_play_store(
       track: 'internal',
       aab: aab_path,
@@ -29,6 +19,33 @@ platform :android do
       skip_upload_changelogs: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
+    )
+  end
+
+  desc "Upload the store listing - title, descriptions, feature graphic, icon and screenshots - for every locale under fastlane/metadata/android. Touches no build or track. Dry-runs unless validate_only:false"
+  lane :play_listing do |options|
+    # Anything but an explicit `validate_only:false` stays a dry run, so a typo
+    # in the dispatch input can only ever under-publish.
+    validate_only = options[:validate_only].to_s != 'false'
+
+    upload_to_play_store(
+      # Only changelogs are per-track, and those are skipped below; the track
+      # is named so supply has a release to resolve, nothing on it changes.
+      track: 'production',
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: false,
+      skip_upload_changelogs: true,
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
+      # sha256-compare images and screenshots so an unchanged asset is not
+      # re-uploaded, and a run with nothing to change produces no edit.
+      sync_image_upload: true,
+      # A committed listing that is sent for review cancels and restarts any
+      # release review in flight (see promote.yml). Hold it; a human sends it
+      # for review from the Play Console.
+      changes_not_sent_for_review: true,
+      validate_only: validate_only,
     )
   end
 

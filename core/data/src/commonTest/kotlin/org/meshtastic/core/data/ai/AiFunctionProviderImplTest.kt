@@ -99,7 +99,14 @@ class AiFunctionProviderImplTest {
         val testNode =
             Node(
                 num = 0xabc,
-                user = User(id = "!00000abc", long_name = "Alice", short_name = "AL"),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!00000abc"
+                        wb.long_name = "Alice"
+                        wb.short_name = "AL"
+                    }
+                    .build(),
                 lastHeard = 1_700_000_000,
                 snr = 5.5f,
                 rssi = -70,
@@ -122,7 +129,18 @@ class AiFunctionProviderImplTest {
     @Test
     fun getNodeDetails_returns_null_position_when_no_fix() = runTest {
         // Node with (0.0, 0.0) position and time=0 → no valid position
-        val testNode = Node(num = 1, user = User(id = "!00000001", long_name = "NoGPS", short_name = "NG"))
+        val testNode =
+            Node(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!00000001"
+                        wb.long_name = "NoGPS"
+                        wb.short_name = "NG"
+                    }
+                    .build(),
+            )
         val nodeMap = MutableStateFlow(mapOf(1 to testNode))
         every { nodeRepository.nodeDBbyNum } returns nodeMap
 
@@ -151,7 +169,18 @@ class AiFunctionProviderImplTest {
     fun getNodeDetails_round_trips_high_bit_node_num() = runTest {
         // A node num with the high bit set (-1 == 0xFFFFFFFF) must format and parse as the canonical
         // "!ffffffff", not the signed "!-1" — regression guard for the node-ID hex fix.
-        val testNode = Node(num = -1, user = User(id = "!ffffffff", long_name = "HighBit", short_name = "HB"))
+        val testNode =
+            Node(
+                num = -1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!ffffffff"
+                        wb.long_name = "HighBit"
+                        wb.short_name = "HB"
+                    }
+                    .build(),
+            )
         val nodeMap = MutableStateFlow(mapOf(-1 to testNode))
         every { nodeRepository.nodeDBbyNum } returns nodeMap
 
@@ -271,7 +300,7 @@ class AiFunctionProviderImplTest {
 
     @Test
     fun sendMessage_accepts_text_exactly_at_the_byte_limit() = runTest {
-        every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet())
+        every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet.Builder().build())
         everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns 42
 
         val text = "a".repeat(AiFunctionProviderImpl.MAX_MESSAGE_LENGTH)
@@ -300,7 +329,7 @@ class AiFunctionProviderImplTest {
 
     @Test
     fun sendMessage_counts_multi_byte_text_in_bytes_not_characters() = runTest {
-        every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet())
+        every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet.Builder().build())
         everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns 7
 
         // "\u00fc" is two UTF-8 bytes, so half as many characters fit.
@@ -320,12 +349,14 @@ class AiFunctionProviderImplTest {
         // Data proto's framing fails here instead of in the send queue.
         fun encodesWithinLimit(byteCount: Int): Boolean {
             val data =
-                Data(
-                    portnum = PortNum.TEXT_MESSAGE_APP,
-                    payload = ByteArray(byteCount) { 'a'.code.toByte() }.toByteString(),
-                    reply_id = 0,
-                    emoji = 0,
-                )
+                Data.Builder()
+                    .also { wb ->
+                        wb.portnum = PortNum.TEXT_MESSAGE_APP
+                        wb.payload = ByteArray(byteCount) { 'a'.code.toByte() }.toByteString()
+                        wb.reply_id = 0
+                        wb.emoji = 0
+                    }
+                    .build()
             return Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)
         }
 
@@ -339,7 +370,7 @@ class AiFunctionProviderImplTest {
     fun getRecentMessages_contact_not_found() = runTest {
         val nodeMap = MutableStateFlow(emptyMap<Int, Node>())
         every { nodeRepository.nodeDBbyNum } returns nodeMap
-        every { radioConfigRepository.channelSetFlow } returns flowOf(org.meshtastic.proto.ChannelSet())
+        every { radioConfigRepository.channelSetFlow } returns flowOf(org.meshtastic.proto.ChannelSet.Builder().build())
 
         val provider = createProvider()
         val result = provider.getRecentMessages("NonExistent", 10)
@@ -352,7 +383,7 @@ class AiFunctionProviderImplTest {
     fun getUnreadSummary_returns_empty_when_no_unread() = runTest {
         every { packetRepository.getContacts() } returns flowOf(emptyMap())
         every { packetRepository.getContactSettings() } returns flowOf(emptyMap())
-        every { radioConfigRepository.channelSetFlow } returns flowOf(org.meshtastic.proto.ChannelSet())
+        every { radioConfigRepository.channelSetFlow } returns flowOf(org.meshtastic.proto.ChannelSet.Builder().build())
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
 
         val provider = createProvider()

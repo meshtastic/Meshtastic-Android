@@ -24,7 +24,7 @@ import org.meshtastic.proto.LocalStats
 class FakeLocalStatsDataSource :
     BaseFake(),
     LocalStatsDataSource {
-    private val _localStatsFlow = mutableStateFlow(LocalStats())
+    private val _localStatsFlow = mutableStateFlow(LocalStats.Builder().build())
     override val localStatsFlow: StateFlow<LocalStats> = _localStatsFlow
 
     override suspend fun setLocalStats(stats: LocalStats) {
@@ -32,6 +32,6 @@ class FakeLocalStatsDataSource :
     }
 
     override suspend fun clearLocalStats() {
-        _localStatsFlow.value = LocalStats()
+        _localStatsFlow.value = LocalStats.Builder().build()
     }
 }

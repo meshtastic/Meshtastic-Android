@@ -90,6 +90,7 @@
     <string name="always_point_north">Always point north</string>
     <string name="ambient_lighting">Ambient Lighting</string>
     <string name="ambient_lighting_config">Ambient Lighting Config</string>
+    <string name="ammonium">Ammonium</string>
     <string name="analytics_notice">Analytics are collected to help us improve the Android app (thank you), we will receive anonymized information about user behavior. This includes crash reports, screens used in the app, etc.</string>
     <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="analytics_platforms">Analytics platforms:</string>
@@ -125,6 +126,8 @@
     <string name="aqi_unhealthy_sensitive">Unhealthy for Sensitive Groups</string>
     <string name="aqi_value_with_severity">%1$d (%2$s)</string>
     <string name="aqi_very_unhealthy">Very Unhealthy</string>
+    <string name="archived_channel">Archived channel</string>
+    <string name="archived_channel_read_only">This channel is no longer set up on your radio. Its messages are kept here, but you can't send or react.</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="are_you_sure_change_default">Are you sure you want to change to the default channel?</string>
     <string name="audio">Audio</string>
@@ -144,6 +147,7 @@
     <string name="baro_pressure">Baro</string>
     <string name="battery">Battery</string>
     <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
+    <string name="biochemical_oxygen_demand">BOD</string>
     <string name="ble_devices">Bluetooth Devices</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI threshold (defaults to -80)</string>
     <string name="ble_scan_needs_location_services">Bluetooth scanning also needs location services switched on for this version of Android. Your position is not used.</string>
@@ -220,6 +224,7 @@
     <string name="channel_url">Channel URL</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Channels</string>
+    <string name="chemical_oxygen_demand">COD</string>
     <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="chirpy_assistant_title">Chirpy Assistant</string>
@@ -482,6 +487,7 @@
     <string name="discovery_scan_complete">Session complete</string>
     <string name="discovery_scan_failed">Scan failed: %1$s</string>
     <string name="discovery_scan_history">Scan History</string>
+    <string name="discovery_scan_in_progress">Scanning LoRa presets…</string>
     <string name="discovery_scan_incomplete">Session incomplete</string>
     <string name="discovery_scan_progress">Scan Progress</string>
     <string name="discovery_scan_summary">Scan Summary</string>
@@ -533,6 +539,7 @@
     <string name="display_mode">Display mode</string>
     <string name="display_time_in_12h_format">When enabled, the device will display the time in 12-hour format on screen.</string>
     <string name="display_units">Display units</string>
+    <string name="dissolved_oxygen">Dissolved O₂</string>
     <!-- DISTANCE -->
     <string name="distance">Distance</string>
     <string name="distance_filters">Distance Filters</string>
@@ -564,6 +571,9 @@
     <string name="doc_keywords_translate">translate,crowdin,localization,language,i18n,contribute</string>
     <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
     <string name="doc_keywords_widget">widget,home screen,local stats,glance,battery,utilization</string>
+    <string name="doc_loading">Loading documentation…</string>
+    <string name="doc_no_documentation">No documentation available</string>
+    <string name="doc_no_results">No results found</string>
     <string name="doc_search_placeholder">Search documentation…</string>
     <string name="doc_section_developer">Developer Guide</string>
     <string name="doc_section_user">User Guide</string>
@@ -604,6 +614,7 @@
     <string name="edit">Edit</string>
     <string name="edit_custom_tile_source">Edit Network Tile Source</string>
     <string name="eight_hours">8 Hours</string>
+    <string name="electrical_conductivity">Conductivity</string>
     <string name="elevation_suffix" translatable="false">MSL</string>
     <!-- EMOJI -->
     <string name="emoji_category_activities">Activities</string>
@@ -625,7 +636,7 @@
     <string name="encryption_error">Public key mismatch</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
     <string name="encryption_pkc">Public Key Encryption</string>
-    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
+    <string name="encryption_pkc_text">A public key is on file for this node, so interactions with it use public key encryption.</string>
     <string name="env_metrics_log">Environment Metrics</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Environment</string>
@@ -737,6 +748,7 @@
     <string name="firmware_update_flashing">Flashing device, please wait...</string>
     <string name="firmware_update_hang_tight">Hang tight, we are working on it...</string>
     <string name="firmware_update_hash_rejected">Firmware hash rejected. Device may require hash provisioning or bootloader update.</string>
+    <string name="firmware_update_in_progress">Updating firmware…</string>
     <string name="firmware_update_invalid_local_file_detail">The selected file "%1$s" does not match %2$s (%3$s). Choose the firmware file for this target.</string>
     <string name="firmware_update_keep_device_close">Keep your device close to your phone.</string>
     <string name="firmware_update_latest">Update To: %1$s</string>
@@ -945,6 +957,8 @@
     <string name="led_state">LED state</string>
     <string name="legacy_admin_channel">Legacy Admin channel</string>
     <string name="library_count">%1$d libraries</string>
+    <string name="license">License</string>
+    <string name="license_notice">Free software under the GNU General Public License v3, with no warranty. You may redistribute it under the same license.</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Licensed amateur radio (Ham)</string>
     <string name="licensed_amateur_radio_text">Enabling this option disables encryption and is not compatible with the default Meshtastic network.</string>
@@ -952,6 +966,8 @@
     <string name="licensed_mode_enable_title">Enable licensed (Ham) mode?</string>
     <string name="licensed_mode_enable_warning">Licensed mode removes channel encryption keys and disables the admin channel, so all traffic is sent as plaintext that anyone can read — and this firmware cannot sign it, so other nodes cannot verify it came from you. This is not compatible with the default Meshtastic network, and you remain responsible for meeting your amateur radio license requirements and local regulations.</string>
     <string name="licensed_mode_enable_warning_signed">Licensed mode removes channel encryption keys and disables the admin channel, so all traffic is sent as plaintext that anyone can read — but it is digitally signed, letting other nodes verify it came from you. Your node number may change once to match your identity key, so favorites, message history, remote admin, and other nodes may initially treat it as new; you remain responsible for meeting your amateur radio license requirements and local regulations.</string>
+    <string name="lightning_distance">Storm Distance</string>
+    <string name="lightning_strikes_1h">Lightning (1h)</string>
     <!-- LOAD -->
     <string name="load">Load</string>
     <string name="load_15_min">Load 15m</string>
@@ -997,7 +1013,7 @@
     <string name="lockdown_disable_message">Enter your passphrase to turn off lockdown. The device will decrypt its storage and reboot.</string>
     <string name="lockdown_enable">Enable lockdown</string>
     <string name="lockdown_enable_ack">I understand</string>
-    <string name="lockdown_enable_warning">Heads up: enabling lockdown locks the debug port (SWD) on supported hardware. You can turn lockdown off any time with your passphrase, and a full device erase restores everything if needed.</string>
+    <string name="lockdown_enable_warning">Enabling lockdown locks the debug port (SWD) on hardware where the lockout takes effect. Turning lockdown off later decrypts your data, but the port stays locked. Reopening it takes a full chip erase with a debug probe, which destroys everything on the device.</string>
     <string name="lockdown_enter_passphrase">Enter Passphrase</string>
     <string name="lockdown_hide_passphrase">Hide</string>
     <string name="lockdown_hours_until_expiry">Hours until expiry</string>
@@ -1306,6 +1322,8 @@
     <string name="new_nodes">New Nodes</string>
     <string name="next">Next</string>
     <string name="nfc_disabled">NFC is disabled. Please enable it in system settings.</string>
+    <string name="nitrate">Nitrate</string>
+    <string name="nitrogen">Nitrogen</string>
     <!-- NO -->
     <string name="no_bluetooth_devices_hint">Ensure you're within range of the device.</string>
     <string name="no_bluetooth_devices_seen">No Bluetooth devices seen</string>
@@ -1320,7 +1338,7 @@
     <string name="no_network_devices_seen">No network devices seen</string>
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="no_public_key">No public key</string>
-    <string name="no_public_key_text">This node has not shared a public key, so direct messages to it cannot be sent. Request User Info to ask for one.</string>
+    <string name="no_public_key_text">This node has not shared a public key, so encrypted interactions with it are not possible. Request User Info to ask for one.</string>
     <string name="no_usb_devices_found">No USB devices found</string>
     <string name="no_usb_devices_hint">Connect a device with a USB data cable to use serial.</string>
     <string name="no_usb_devices_seen">No USB devices detected</string>
@@ -1335,7 +1353,9 @@
     <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
     <string name="node_filter_include_unknown">Include unknown</string>
     <string name="node_filter_only_direct">Only show direct nodes</string>
+    <string name="node_filter_only_encrypted">Encrypted only</string>
     <string name="node_filter_only_online">Hide offline nodes</string>
+    <string name="node_filter_only_signed">Signed only</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="node_filter_show_ignored">Only show ignored Nodes</string>
     <string name="node_filter_title">Filter by</string>
@@ -1368,7 +1388,7 @@
     <string name="node_list_help_node_details">Node Details</string>
     <string name="node_list_help_title">Node List Help</string>
     <string name="node_list_long_click_label">Node options</string>
-    <string name="node_not_heard_on_current_lora">Not heard since you changed settings</string>
+    <string name="node_not_heard_on_current_lora">Not heard on your current LoRa settings</string>
     <string name="node_number">Node Number</string>
     <string name="node_request_send_failed">Couldn't send request. Try again.</string>
     <string name="node_restarting">Restarting…</string>
@@ -1391,8 +1411,8 @@
     <string name="nodes_empty_searching_hint">Nearby nodes will appear here as they're discovered.</string>
     <string name="nodes_empty_searching_title">Searching for nodes</string>
     <string name="nodes_queued_for_deletion">%1$d nodes queued for deletion:</string>
-    <string name="nodes_unheard_banner">%1$d nodes not heard since you changed settings</string>
-    <string name="nodes_unheard_banner_one">1 node not heard since you changed settings</string>
+    <string name="nodes_unheard_banner">%1$d nodes not heard on your current LoRa settings</string>
+    <string name="nodes_unheard_banner_one">1 node not heard on your current LoRa settings</string>
     <string name="nodes_unheard_keep">Keep</string>
     <string name="nodes_unheard_remove">Remove</string>
     <string name="noise_floor">Noise Floor</string>
@@ -1445,6 +1465,7 @@
     <string name="open_wifi_settings">Open Wi-Fi settings</string>
     <string name="options">Options</string>
     <string name="orient_north">Orient north</string>
+    <string name="orp">ORP</string>
     <!-- OUTPUT -->
     <string name="output_buzzer_gpio">Output buzzer (GPIO)</string>
     <string name="output_duration_milliseconds">Output duration (milliseconds)</string>
@@ -1510,6 +1531,7 @@
     <string name="permissions_show">Show permissions</string>
     <string name="phone_location">Phone Location</string>
     <string name="phone_location_description">Meshtastic uses your phone's location to enable a number of features. You can update your location permissions at any time from settings.</string>
+    <string name="phosphorus">Phosphorus</string>
     <string name="pin_selected">Pin</string>
     <string name="play">Play</string>
     <plurals name="plurals_hours">
@@ -1524,6 +1546,16 @@
         <item quantity="one">%1$d second</item>
         <item quantity="other">%1$d seconds</item>
     </plurals>
+    <!-- PM -->
+    <string name="pm_sensor_status">Sensor Status</string>
+    <string name="pm_status_co2_error">CO₂ error</string>
+    <string name="pm_status_fan_error">Fan error</string>
+    <string name="pm_status_fan_speed_warning">Fan speed warning</string>
+    <string name="pm_status_gas_error">Gas sensor error</string>
+    <string name="pm_status_hcho_error">HCHO error</string>
+    <string name="pm_status_pm_error">PM error</string>
+    <string name="pm_status_rht_error">RH&amp;T error</string>
+    <string name="pm_status_unknown_flags">Unknown flags 0x%1$s</string>
     <string name="pm1_0">PM1.0</string>
     <string name="pm10">PM10</string>
     <string name="pm2_5">PM2.5</string>
@@ -1534,6 +1566,7 @@
     <string name="position_flags">Position Flags</string>
     <string name="position_log">Position</string>
     <string name="position_packet">Position Packet</string>
+    <string name="potassium">Potassium</string>
     <!-- POWER -->
     <string name="power">Power</string>
     <string name="power_config">Power Config</string>
@@ -1708,6 +1741,7 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
     <string name="rsyslog_server">rsyslog server</string>
+    <string name="salinity">Salinity</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I'm kinda scared.</string>
     <string name="sats">Sats</string>
     <!-- SAVE -->
@@ -1752,11 +1786,16 @@
     <string name="security_icon_insecure_precise_only">Insecure Channel, Precise Location</string>
     <string name="security_icon_secure">Secure</string>
     <string name="security_icon_warning_precise_mqtt">Warning: Insecure, Precise Location &amp; MQTT Uplink</string>
+    <string name="security_legend_any_version">Shown at any firmware version.</string>
+    <string name="security_legend_legacy_firmware">Shown for nodes on firmware before 2.8, or that report no version.</string>
+    <string name="security_legend_signing_firmware">Shown for nodes on firmware 2.8 or later, and for any node whose signature the radio has verified.</string>
     <string name="security_signed_message_info">Verified with the sender's key.</string>
     <string name="security_signed_node">Signed node</string>
     <string name="security_signed_node_desc">Verified automatically</string>
-    <string name="security_signed_node_help">This node signs its broadcasts with XEdDSA. Broadcasts you see from it are verified by the radio using its identity key.</string>
+    <string name="security_signed_node_help">The radio verified this node's signed broadcasts using its identity key, so its identity is consistent over time, but you have not verified it in person. Every node on firmware 2.8 or later signs its broadcasts.</string>
     <string name="security_signed_verified">Signed · verified</string>
+    <string name="security_verified_contact">Verified contact</string>
+    <string name="security_verified_contact_help">You verified this node's key in person, by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows, and shown at any firmware version.</string>
     <string name="select">Select</string>
     <string name="select_all">Select all</string>
     <string name="selected">Selected</string>
@@ -1783,11 +1822,18 @@
     <string name="settings">settings</string>
     <!-- SHARE -->
     <string name="share">Share</string>
-    <string name="share_channels_qr">Share Channels QR Code</string>
+    <string name="share_action">Share link</string>
+    <string name="share_by_tap_subtext">While this is open, another phone can also take it by tapping yours.</string>
+    <string name="share_channels">Share Channels</string>
+    <string name="share_channels_add_hint">Adding keeps the channels they already have and appends yours.</string>
+    <string name="share_channels_replace_hint">Replacing overwrites every channel on their radio with yours.</string>
+    <string name="share_channels_subject">Meshtastic channels</string>
     <string name="share_connected_node">Share Connected Node</string>
     <string name="share_contact">Share Contact</string>
+    <string name="share_contact_subject">Meshtastic contact</string>
     <string name="share_location">Share Location</string>
     <string name="share_location_description">Use your phone GPS to send locations to your node instead of using a hardware GPS on your node.</string>
+    <string name="share_qr_subtext">Scan this code with another device's Meshtastic app to add it there.</string>
     <string name="share_to">Share to…</string>
     <string name="share_your_location_in_real_time">Share your location in real-time and keep your group coordinated with integrated GPS features.</string>
     <string name="shared_contact_no_public_key">This contact has no public key, so it cannot be imported. A contact without one clears any key your radio already holds for that node. Ask the sender to share it again once their node has exchanged keys.</string>
@@ -1845,7 +1891,10 @@
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, a measure used in communications to quantify the level of a desired signal to the level of background noise. In Meshtastic and other wireless systems, a higher SNR indicates a clearer signal that can enhance the reliability and quality of data transmission.</string>
     <string name="soil_moisture">Soil Moist</string>
+    <string name="soil_ph">Soil pH</string>
     <string name="soil_temperature">Soil Temp</string>
+    <string name="soil_water_metrics">Soil &amp; Water</string>
+    <string name="solar_irradiance">Solar Irradiance</string>
     <string name="speed">Speed</string>
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="speed_mph">%1$d mph</string>
@@ -2006,6 +2055,7 @@
     <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
+    <string name="turbidity">Turbidity</string>
     <string name="twenty_four_hours">24H</string>
     <string name="two_days">48 Hours</string>
     <string name="two_weeks">2W</string>
@@ -2077,6 +2127,7 @@
     <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration</string>
     <string name="wake_on_tap_or_motion">Wake on tap or motion</string>
     <string name="warning">Warning</string>
+    <string name="water_ph">Water pH</string>
     <string name="waypoint_delete">Delete waypoint?</string>
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_new">New waypoint</string>
@@ -2137,7 +2188,7 @@
     <!-- WRITE -->
     <string name="write_nfc">Write to NFC tag</string>
     <string name="write_nfc_failed">Couldn't write to tag. Use a writable, empty NFC tag and hold it steady.</string>
-    <string name="write_nfc_subtext">Writing saves this share link to a physical NFC tag. Anyone can tap the tag with their phone to open it.</string>
+    <string name="write_nfc_subtext">Writing saves this link to an NFC tag anyone can tap.</string>
     <string name="write_nfc_success">Written to tag</string>
     <string name="write_nfc_text">Hold a writable NFC tag against the back of your phone.</string>
     <string name="you">You</string>

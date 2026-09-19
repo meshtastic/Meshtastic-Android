@@ -2,7 +2,7 @@
 title: Translate the App
 parent: User Guide
 nav_order: 17
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: How the app and its documentation are translated via Crowdin, and guidelines for contributing translations.
 aliases:
   - translate
@@ -45,7 +45,7 @@ If your language is not yet listed on Crowdin:
 
 The Android app uses **Compose Multiplatform resources** for all user-visible strings:
 
-```
+```text
 core/resources/src/commonMain/composeResources/
 ├── values/              ← Englisch (Standard)
 │   └── strings.xml
@@ -58,7 +58,7 @@ core/resources/src/commonMain/composeResources/
 
 In-app documentation follows a similar pattern under `docs/`:
 
-```
+```text
 docs/
 ├── en/user/             ← Englisch  (Standard)
 │   ├── onboarding.md

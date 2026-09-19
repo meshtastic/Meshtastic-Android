@@ -71,7 +71,7 @@ jobs:
 
   # ── Lint & Static Analysis ──────────────────────────────────────────
   lint-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -106,11 +106,11 @@ jobs:
           install_jetbrains_jdk: 'true'
 
       - name: Lint, Analysis & KMP Smoke Compile
-        run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug kmpSmokeCompile -Pci=true --continue
+        run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true --continue
 
   # ── Screenshot Test Validation ──────────────────────────────────────
   screenshot-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -159,7 +159,7 @@ jobs:
   # Only runs in the merge queue (not PRs, to keep PR feedback fast; not main pushes,
   # which are the same merge commit the queue just verified).
   rb-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -197,13 +197,15 @@ jobs:
   # These lists are hand-maintained; pull-request.yml's check-changes job
   # guards them against drift (every module in settings.gradle.kts with test
   # sources must appear here or be explicitly exempted).
-  #   shard-core:    remaining core:* KMP module tests (allTests)
+  #   shard-core:    remaining core:* KMP module tests (allTests), plus kmpSmokeCompile,
+  #                  which is the only iOS compile :core:di, :core:nfc and :core:resources
+  #                  get. It lived in lint-check until a cold build there blew the 30m budget.
   #   shard-feature: feature:* KMP module tests + :core:service
   #   shard-app:     Pure-Android/JVM tests (androidApp, desktopApp,
   #                  core:barcode, feature:widget)
   #                  + :core:database + :core:network
   test-shards:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -230,6 +232,7 @@ jobs:
               :core:takserver:allTests
               :core:testing:allTests
               :core:ui:allTests
+              kmpSmokeCompile
             kover: >-
               :core:ble:koverXmlReport
               :core:common:koverXmlReport
@@ -349,7 +352,7 @@ jobs:
       # which Codecov flag its coverage lands under.
       - name: Upload test results to Codecov (core)
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
@@ -361,7 +364,7 @@ jobs:
 
       - name: Upload test results to Codecov (feature)
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
@@ -373,7 +376,7 @@ jobs:
 
       - name: Upload test results to Codecov (app)
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
@@ -385,7 +388,7 @@ jobs:
 
       - name: Upload test results to Codecov (desktop)
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
@@ -397,7 +400,7 @@ jobs:
 
       - name: Upload coverage to Codecov (core)
         if: ${{ !cancelled() && inputs.run_coverage }}
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
@@ -408,7 +411,7 @@ jobs:
 
       - name: Upload coverage to Codecov (feature)
         if: ${{ !cancelled() && inputs.run_coverage }}
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
@@ -419,7 +422,7 @@ jobs:
 
       - name: Upload coverage to Codecov (app)
         if: ${{ !cancelled() && inputs.run_coverage }}
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
@@ -430,7 +433,7 @@ jobs:
 
       - name: Upload coverage to Codecov (desktop)
         if: ${{ !cancelled() && inputs.run_coverage }}
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
@@ -454,7 +457,7 @@ jobs:
   # ── Android Build ────────────────────────────────────────────────────
   # Also generates the dependency graph — assembling both flavors resolves the widest set.
   android-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     # No permissions block on purpose: inherits the caller's. main grants contents: write
     # (graph submit); PRs grant read (upload only).
     timeout-minutes: 60

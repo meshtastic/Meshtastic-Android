@@ -208,7 +208,13 @@ class DiscoveryViewModel(
                         ScanTarget(
                             preset = preset,
                             label = "${preset.name} · ${bc.name}",
-                            channel = ChannelSettings(name = bc.name, psk = bc.psk),
+                            channel =
+                            ChannelSettings.Builder()
+                                .also { wb ->
+                                    wb.name = bc.name
+                                    wb.psk = bc.psk
+                                }
+                                .build(),
                             region = bc.region.takeIf { it != RegionCode.UNSET },
                         )
                     }

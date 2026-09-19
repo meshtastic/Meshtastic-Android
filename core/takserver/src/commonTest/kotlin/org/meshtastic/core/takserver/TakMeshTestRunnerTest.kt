@@ -49,8 +49,8 @@ import kotlin.test.assertTrue
 class TakMeshTestRunnerTest {
 
     private class FakeMeshConfigHandler : MeshConfigHandler {
-        override val localConfig = MutableStateFlow(LocalConfig())
-        override val moduleConfig = MutableStateFlow(LocalModuleConfig())
+        override val localConfig = MutableStateFlow(LocalConfig.Builder().build())
+        override val moduleConfig = MutableStateFlow(LocalModuleConfig.Builder().build())
 
         override fun handleDeviceConfig(config: Config, session: RadioSessionContext) = true
 

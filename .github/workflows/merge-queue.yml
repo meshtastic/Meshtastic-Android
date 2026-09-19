@@ -19,12 +19,12 @@ jobs:
   # new merge group but does NOT cancel the workflow runs of the destroyed one. Those stale
   # runs sit queued/running and starve the runner pool. Cancel any older merge-queue run
   # for the same PR — only the newest merge group per PR is ever valid.
-  # No checkout, no toolchain — just gh api + jq. ubuntu-slim starts sooner than a VM, which
-  # matters most here: every second before this runs is a second the superseded run keeps a slot.
+  # No checkout, no toolchain — just gh api + jq. Runs on the same label as check-changes:
+  # ubuntu-slim is a separate, smaller pool, and a gate job waiting on it holds the whole queue.
   cancel-superseded:
     name: Cancel Superseded Queue Runs
     if: github.repository == 'meshtastic/Meshtastic-Android'
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     permissions:
       actions: write
@@ -44,7 +44,10 @@ jobs:
               --jq ".workflow_runs[] | select(.head_branch | startswith(\"$PR_PREFIX\")) | select(.id < ${{ github.run_id }}) | .id"
           done | sort -u | while read -r run_id; do
             echo "Cancelling superseded run $run_id"
+            # A graceful cancel is delivered to the runner, so a run still waiting for one
+            # never receives it. force-cancel ends the run at the API regardless.
             gh run cancel "$run_id" --repo "${{ github.repository }}" || true
+            gh api -X POST "repos/${{ github.repository }}/actions/runs/${run_id}/force-cancel" || true
           done
 
   # Docs-only queue entries (changelog updates, markdown fixes) cannot affect the build;
@@ -53,7 +56,7 @@ jobs:
   check-changes:
     name: Check Changes
     if: github.repository == 'meshtastic/Meshtastic-Android'
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     outputs:
       android: ${{ steps.filter.outputs.android }}
@@ -96,11 +99,12 @@ jobs:
       upload_artifacts: false
     secrets: inherit
 
-  # Pure gate job: no checkout, no toolchain, just reads `needs` results. ubuntu-slim is a
-  # container-backed single-CPU runner that starts faster than a VM (15-min job cap, x64 only).
+  # Pure gate job: no checkout, no toolchain, just reads `needs` results. It is the required
+  # check, so it runs on the label the rest of the workflow already gets slots on, not on
+  # ubuntu-slim's separate pool: an aggregator queued behind slim blocks a finished build.
   check-workflow-status:
     name: Check Workflow Status
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     permissions: {}
     needs:

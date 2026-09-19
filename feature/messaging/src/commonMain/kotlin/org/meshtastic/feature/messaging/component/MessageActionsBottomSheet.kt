@@ -89,6 +89,8 @@ fun MessageActionsContent(
     onSelect: () -> Unit,
     onDelete: () -> Unit,
     onStatus: () -> Unit,
+    /** False for an archived conversation: there is no channel left to reply into. */
+    canReply: Boolean = true,
     statusString: Pair<StringResource, StringResource>? = null,
     status: MessageStatus? = null,
     timestamp: String? = null,
@@ -98,9 +100,13 @@ fun MessageActionsContent(
     onToggleTranslation: () -> Unit = {},
 ) {
     Column {
-        QuickEmojiRow(quickEmojis = quickEmojis, onReact = onReact, onMoreReactions = onMoreReactions)
+        // An archived conversation shows no reaction affordances: the send path refuses them, so offering the row
+        // would be a control that silently does nothing.
+        if (quickEmojis.isNotEmpty()) {
+            QuickEmojiRow(quickEmojis = quickEmojis, onReact = onReact, onMoreReactions = onMoreReactions)
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        }
 
         if (xeddsaSigned) {
             ListItem(
@@ -151,16 +157,7 @@ fun MessageActionsContent(
             )
         }
 
-        ListItem(
-            headlineContent = { Text(stringResource(Res.string.reply)) },
-            leadingContent = { Icon(MeshtasticIcons.Reply, contentDescription = stringResource(Res.string.reply)) },
-            modifier =
-            Modifier.clickable(
-                onClickLabel = stringResource(Res.string.action_send_reply),
-                role = Role.Button,
-                onClick = onReply,
-            ),
-        )
+        ReplyAction(canReply = canReply, onReply = onReply)
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.copy)) },
@@ -294,4 +291,20 @@ internal fun QuickEmojiRow(
             }
         }
     }
+}
+
+/** The sheet's Reply row, absent on an archived conversation because there is nothing to reply into. */
+@Composable
+private fun ReplyAction(canReply: Boolean, onReply: () -> Unit) {
+    if (!canReply) return
+    ListItem(
+        headlineContent = { Text(stringResource(Res.string.reply)) },
+        leadingContent = { Icon(MeshtasticIcons.Reply, contentDescription = stringResource(Res.string.reply)) },
+        modifier =
+        Modifier.clickable(
+            onClickLabel = stringResource(Res.string.action_send_reply),
+            role = Role.Button,
+            onClick = onReply,
+        ),
+    )
 }

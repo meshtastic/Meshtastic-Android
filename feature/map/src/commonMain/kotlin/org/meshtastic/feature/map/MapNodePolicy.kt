@@ -79,16 +79,39 @@ object MapNodePolicy {
      */
     private fun Node.passesFilters(filterState: BaseMapViewModel.MapFilterState, nowSeconds: Long): Boolean {
         val secondsSinceHeard = nowSeconds - lastHeard
-        val cutoff = filterState.lastHeardFilter.seconds
-        return (!filterState.onlyFavorites || isFavorite) &&
+        return passesIdentityFilters(filterState) &&
+            passesSecurityFilters(filterState) &&
+            passesReachabilityFilters(filterState, secondsSinceHeard)
+    }
+
+    /** Who the node is: favourited, ignored, its role, and whether its name has arrived yet. */
+    private fun Node.passesIdentityFilters(filterState: BaseMapViewModel.MapFilterState): Boolean =
+        (!filterState.onlyFavorites || isFavorite) &&
             (!isIgnored || filterState.showIgnored) &&
             user.role !in filterState.excludedRoles &&
-            (!filterState.onlyOnline || secondsSinceHeard <= ONLINE_WINDOW_SECONDS) &&
-            (!filterState.onlyDirect || hopsAway == 0) &&
+            (filterState.includeUnknown || user.short_name.isNotEmpty())
+
+    /** How the node is reachable: online, hop count, bearer, and how recently it was heard. */
+    private fun Node.passesReachabilityFilters(
+        filterState: BaseMapViewModel.MapFilterState,
+        secondsSinceHeard: Long,
+    ): Boolean {
+        val cutoff = filterState.lastHeardFilter.seconds
+        return (!filterState.onlyOnline || secondsSinceHeard <= ONLINE_WINDOW_SECONDS) &&
+            (!filterState.onlyDirect || (hopsAway == 0 && !viaMqtt)) &&
             (!filterState.excludeMqtt || !viaMqtt) &&
-            (filterState.includeUnknown || user.short_name.isNotEmpty()) &&
             (cutoff == LastHeardFilter.Any.seconds || secondsSinceHeard <= cutoff)
     }
+
+    /**
+     * The two security filters (design#149).
+     *
+     * Signing reads the raw flag rather than the version-gated indicator: the filter answers "has the radio verified
+     * this node's signature", which is what the badge beside it claims. Encrypted excludes a stored key that stopped
+     * matching — a mismatch is not a key you can safely encrypt to.
+     */
+    private fun Node.passesSecurityFilters(filterState: BaseMapViewModel.MapFilterState): Boolean =
+        (!filterState.onlySigned || signsPackets) && (!filterState.onlyEncrypted || (hasPKC && !mismatchKey))
 }
 
 /**

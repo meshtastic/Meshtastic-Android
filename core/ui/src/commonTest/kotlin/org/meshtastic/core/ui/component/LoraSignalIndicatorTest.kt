@@ -28,21 +28,64 @@ import kotlin.test.assertEquals
  */
 class LoraSignalIndicatorTest {
 
+    // Firmware spreading factors (MeshRadio.h) paired with literal Semtech demodulation floors.
+    // Keep expected values independent of the production formula.
+    private val expectedFloors =
+        mapOf(
+            ModemPreset.SHORT_TURBO to (7 to -7.5f),
+            ModemPreset.SHORT_FAST to (7 to -7.5f),
+            ModemPreset.SHORT_SLOW to (8 to -10f),
+            ModemPreset.MEDIUM_FAST to (9 to -12.5f),
+            ModemPreset.MEDIUM_SLOW to (10 to -15f),
+            ModemPreset.MEDIUM_TURBO to (9 to -12.5f),
+            ModemPreset.LONG_TURBO to (11 to -17.5f),
+            ModemPreset.LONG_FAST to (11 to -17.5f),
+            ModemPreset.LONG_MODERATE to (11 to -17.5f),
+            ModemPreset.LONG_SLOW to (12 to -20f),
+            ModemPreset.VERY_LONG_SLOW to (12 to -20f),
+            ModemPreset.LITE_FAST to (9 to -12.5f),
+            ModemPreset.LITE_SLOW to (10 to -15f),
+            ModemPreset.NARROW_FAST to (7 to -7.5f),
+            ModemPreset.NARROW_SLOW to (8 to -10f),
+            ModemPreset.TINY_FAST to (7 to -7.5f),
+            ModemPreset.TINY_SLOW to (8 to -10f),
+        )
+
     @Test
-    fun `snrLimit follows spreading-factor demod floor per preset`() {
-        assertEquals(-7.5f, ModemPreset.SHORT_FAST.snrLimit) // SF7
-        assertEquals(-7.5f, ModemPreset.SHORT_TURBO.snrLimit) // SF7
-        assertEquals(-10f, ModemPreset.SHORT_SLOW.snrLimit) // SF8
-        assertEquals(-12.5f, ModemPreset.MEDIUM_FAST.snrLimit) // SF9
-        assertEquals(-15f, ModemPreset.MEDIUM_SLOW.snrLimit) // SF10
-        assertEquals(-17.5f, ModemPreset.LONG_FAST.snrLimit) // SF11
-        assertEquals(-17.5f, ModemPreset.LONG_MODERATE.snrLimit) // SF11
+    fun `every preset's snrLimit is its spreading factor's demod floor`() {
+        expectedFloors.forEach { (preset, expected) ->
+            val (sf, floor) = expected
+            assertEquals(floor, preset.snrLimit, "$preset (SF$sf)")
+        }
+    }
+
+    @Test
+    fun `presets sharing a spreading factor share a floor regardless of bandwidth`() {
+        // Bandwidth changes sensitivity in dBm, not the demodulation SNR floor.
+        assertEquals(ModemPreset.LONG_FAST.snrLimit, ModemPreset.LONG_TURBO.snrLimit)
+        assertEquals(ModemPreset.MEDIUM_FAST.snrLimit, ModemPreset.MEDIUM_TURBO.snrLimit)
+        assertEquals(ModemPreset.SHORT_FAST.snrLimit, ModemPreset.SHORT_TURBO.snrLimit)
+        assertEquals(ModemPreset.SHORT_FAST.snrLimit, ModemPreset.TINY_FAST.snrLimit)
+    }
+
+    @Test
+    fun `every ModemPreset is covered by the firmware spreading-factor table`() {
+        // A preset added to the proto without a row above would otherwise be rated against LongFast's floor silently.
+        val uncovered =
+            ModemPreset.entries
+                .filter { it.name != "UNSET" && it.name != "UNRECOGNIZED" }
+                .filter { it !in expectedFloors }
+        assertEquals(emptyList(), uncovered, "presets missing from expectedFloors")
+    }
+
+    @Test
+    fun `LongTurbo is rated at its SF11 floor rather than SF9`() {
+        assertEquals(-17.5f, ModemPreset.LONG_TURBO.snrLimit)
+        assertEquals(Quality.GOOD, determineSignalQuality(snr = -15f, modemPreset = ModemPreset.LONG_TURBO))
     }
 
     @Test
     fun `LONG_SLOW uses physically-correct SF12 floor`() {
-        // Meshtastic-Apple's snrLimit() returns -7.5 here (the SF7 value, an apparent bug). The correct SF12
-        // demodulation floor is -20 dB — see #5446.
         assertEquals(-20f, ModemPreset.LONG_SLOW.snrLimit)
         assertEquals(-20f, ModemPreset.VERY_LONG_SLOW.snrLimit)
     }

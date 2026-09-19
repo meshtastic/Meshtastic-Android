@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
@@ -146,6 +147,24 @@ private class FakeDiscoveryDao(private val delegate: SharedInMemoryDiscoveryDao 
         )
     }
 
+    /**
+     * The engine writes a dwell through this one call now. Delegation would forward it straight to the backing fake and
+     * bypass [insertPresetResult]'s barrier hooks, so route it back through them here, and honour the parent check the
+     * real transaction performs - including its device-address match, not the id alone.
+     */
+    override suspend fun insertDwellIfSessionExists(
+        result: DiscoveryPresetResultEntity,
+        nodes: List<DiscoveredNodeEntity>,
+        deviceAddress: String,
+    ): Long? {
+        if (delegate.countSessionsForDevice(result.sessionId, deviceAddress) == 0) return null
+        val presetResultId = insertPresetResult(result)
+        if (nodes.isNotEmpty()) {
+            delegate.insertDiscoveredNodes(nodes.map { it.copy(presetResultId = presetResultId) })
+        }
+        return presetResultId
+    }
+
     override suspend fun insertPresetResult(result: DiscoveryPresetResultEntity): Long {
         val id = delegate.insertPresetResult(result)
         nextInsertPresetResultEntered?.also { entered ->
@@ -188,9 +207,17 @@ class DiscoveryScanEngineTest {
     private val radioConfigRepository =
         FakeRadioConfigRepository().apply {
             setLocalConfigDirect(
-                LocalConfig(
-                    lora = Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
-                ),
+                LocalConfig.Builder()
+                    .also { wb ->
+                        wb.lora =
+                            Config.LoRaConfig.Builder()
+                                .also { wb ->
+                                    wb.use_preset = true
+                                    wb.modem_preset = ChannelOption.LONG_FAST.modemPreset
+                                }
+                                .build()
+                    }
+                    .build(),
             )
         }
     private val collectorRegistry = FakeCollectorRegistry()
@@ -217,6 +244,7 @@ class DiscoveryScanEngineTest {
             applicationScope = appScope,
             dispatchers = dispatchers,
             meshPrefs = meshPrefs,
+            radioOperationLock = RadioOperationLock(),
         )
     }
 
@@ -266,8 +294,21 @@ class DiscoveryScanEngineTest {
 
     private fun createNodeWithPosition(num: Int, latI: Int = 0, lonI: Int = 0) = Node(
         num = num,
-        user = User(id = "!${num.toString(16)}", short_name = "T$num", long_name = "Test Node $num"),
-        position = Position(latitude_i = latI, longitude_i = lonI),
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.id = "!${num.toString(16)}"
+                wb.short_name = "T$num"
+                wb.long_name = "Test Node $num"
+            }
+            .build(),
+        position =
+        Position.Builder()
+            .also { wb ->
+                wb.latitude_i = latI
+                wb.longitude_i = lonI
+            }
+            .build(),
     )
 
     private fun createPositionMeshPacket(
@@ -277,15 +318,50 @@ class DiscoveryScanEngineTest {
         snr: Float = 5.5f,
         rssi: Int = -70,
     ): MeshPacket {
-        val posPayload = Position.ADAPTER.encode(Position(latitude_i = latI, longitude_i = lonI)).toByteString()
-        val data = Data(portnum = PortNum.POSITION_APP, payload = posPayload)
-        return MeshPacket(from = from, decoded = data, rx_snr = snr, rx_rssi = rssi)
+        val posPayload =
+            Position.ADAPTER.encode(
+                Position.Builder()
+                    .also { wb ->
+                        wb.latitude_i = latI
+                        wb.longitude_i = lonI
+                    }
+                    .build(),
+            )
+                .toByteString()
+        val data =
+            Data.Builder()
+                .also { wb ->
+                    wb.portnum = PortNum.POSITION_APP
+                    wb.payload = posPayload
+                }
+                .build()
+        return MeshPacket.Builder()
+            .also { wb ->
+                wb.from = from
+                wb.decoded = data
+                wb.rx_snr = snr
+                wb.rx_rssi = rssi
+            }
+            .build()
     }
 
     private fun createTelemetryWithLocalStats(from: Int, localStats: LocalStats): MeshPacket {
-        val telPayload = Telemetry.ADAPTER.encode(Telemetry(local_stats = localStats)).toByteString()
-        val data = Data(portnum = PortNum.TELEMETRY_APP, payload = telPayload)
-        return MeshPacket(from = from, decoded = data)
+        val telPayload =
+            Telemetry.ADAPTER.encode(Telemetry.Builder().also { wb -> wb.local_stats = localStats }.build())
+                .toByteString()
+        val data =
+            Data.Builder()
+                .also { wb ->
+                    wb.portnum = PortNum.TELEMETRY_APP
+                    wb.payload = telPayload
+                }
+                .build()
+        return MeshPacket.Builder()
+            .also { wb ->
+                wb.from = from
+                wb.decoded = data
+            }
+            .build()
     }
 
     private fun createDataPacket(from: Int): DataPacket = DataPacket(
@@ -375,6 +451,39 @@ class DiscoveryScanEngineTest {
         assertNull(engine.currentSession.value)
         assertNull(collectorRegistry.collector)
         assertTrue(radioController.configWrites.isEmpty(), "A replaced transport must not be retuned")
+    }
+
+    /**
+     * Regression for Crashlytics `d79ee407` (SQLite FK 787). The engine holds `sessionId` for the whole scan while
+     * `SwitchingDiscoveryDao` re-resolves the active database per call, so a device/DB switch mid-scan leaves the id
+     * pointing at a row the active database does not have. Writing the dwell's preset result then orphans its foreign
+     * key. Deleting the session row reproduces what the switch does to this engine: the parent is gone by the time the
+     * dwell persists.
+     *
+     * The engine must skip the write, not crash. `persistCurrentDwellResults` runs on a `SupervisorJob` scope with no
+     * `CoroutineExceptionHandler`, so anything thrown there reaches the default handler as a crash rather than a logged
+     * scan abort - which is why the real fix makes the check and the writes one transaction
+     * ([DiscoveryDao.insertDwellIfSessionExists]) rather than a check followed by an insert.
+     *
+     * Real-database coverage of the transaction itself lives in `SwitchingDiscoveryDaoTest`, which can switch two Room
+     * instances deterministically; this module's tests share an in-memory fake and its Robolectric source set has no
+     * bundled-SQLite native library.
+     */
+    @Test
+    fun dwellPersistenceIsSkippedWhenTheSessionLeavesTheActiveDatabase() = runTest {
+        val engine = createEngine(this)
+        engine.startScan(testPresets, dwellDurationSeconds = 60)
+        assertScanActive(engine)
+        val sessionId = discoveryDao.sessions.keys.single()
+
+        // What a device/DB switch does to this engine: the parent row is no longer reachable.
+        discoveryDao.deleteSession(sessionId)
+
+        engine.stopScan()
+        advanceUntilIdle()
+
+        assertTrue(discoveryDao.presetResults.isEmpty(), "an unreachable session must not receive an orphan dwell row")
+        assertTrue(discoveryDao.sessions.isEmpty(), "and the session must not be resurrected")
     }
 
     @Test
@@ -517,14 +626,23 @@ class DiscoveryScanEngineTest {
             delay(100)
         }
 
-        val posPayload = Position.ADAPTER.encode(Position(latitude_i = 377749300)).toByteString()
+        val posPayload =
+            Position.ADAPTER.encode(Position.Builder().also { wb -> wb.latitude_i = 377749300 }.build()).toByteString()
         val meshPacket =
-            MeshPacket(
-                from = 12345,
-                decoded = Data(portnum = PortNum.POSITION_APP, payload = posPayload),
-                rx_snr = 5.5f,
-                rx_rssi = null,
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 12345
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.POSITION_APP
+                                wb.payload = posPayload
+                            }
+                            .build()
+                    wb.rx_snr = 5.5f
+                    wb.rx_rssi = null
+                }
+                .build()
         engine.onPacketReceived(meshPacket, createDataPacket(from = 12345))
         engine.stopScan()
 
@@ -546,17 +664,19 @@ class DiscoveryScanEngineTest {
 
         // Send a telemetry packet with local_stats
         val localStats =
-            LocalStats(
-                num_packets_tx = 100,
-                num_packets_rx = 200,
-                num_packets_rx_bad = 5,
-                num_rx_dupe = 10,
-                num_tx_relay = 15,
-                num_tx_relay_canceled = 2,
-                num_online_nodes = 3,
-                num_total_nodes = 10,
-                uptime_seconds = 3600,
-            )
+            LocalStats.Builder()
+                .also { wb ->
+                    wb.num_packets_tx = 100
+                    wb.num_packets_rx = 200
+                    wb.num_packets_rx_bad = 5
+                    wb.num_rx_dupe = 10
+                    wb.num_tx_relay = 15
+                    wb.num_tx_relay_canceled = 2
+                    wb.num_online_nodes = 3
+                    wb.num_total_nodes = 10
+                    wb.uptime_seconds = 3600
+                }
+                .build()
         val meshPacket = createTelemetryWithLocalStats(from = 12345, localStats = localStats)
         val dataPacket = createDataPacket(from = 12345)
 
@@ -941,7 +1061,7 @@ class DiscoveryScanEngineTest {
 
     @Test
     fun scanIsRefusedWhenHomeLoraConfigCannotBeCaptured() = runTest {
-        radioConfigRepository.setLocalConfigDirect(LocalConfig())
+        radioConfigRepository.setLocalConfigDirect(LocalConfig.Builder().build())
         val engine = createEngine(this)
 
         engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
@@ -996,7 +1116,17 @@ class DiscoveryScanEngineTest {
         selectDevice(secondDevice)
         val secondDeviceHome = ChannelOption.LONG_SLOW
         radioConfigRepository.setLocalConfigDirect(
-            LocalConfig(lora = Config.LoRaConfig(use_preset = true, modem_preset = secondDeviceHome.modemPreset)),
+            LocalConfig.Builder()
+                .also { wb ->
+                    wb.lora =
+                        Config.LoRaConfig.Builder()
+                            .also { wb ->
+                                wb.use_preset = true
+                                wb.modem_preset = secondDeviceHome.modemPreset
+                            }
+                            .build()
+                }
+                .build(),
         )
         serviceRepository.setConnectionState(ConnectionState.Connected)
         engine.startScan(listOf(ChannelOption.MEDIUM_FAST), dwellDurationSeconds = 60)
@@ -1048,7 +1178,12 @@ class DiscoveryScanEngineTest {
         homePreset: String = "LONG_FAST",
         completionStatus: String = DiscoverySessionStatus.IN_PROGRESS,
         homeLoraConfig: Config.LoRaConfig? =
-            Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.use_preset = true
+                    wb.modem_preset = ChannelOption.LONG_FAST.modemPreset
+                }
+                .build(),
     ) {
         discoveryDao.seedSession(
             DiscoverySessionEntity(

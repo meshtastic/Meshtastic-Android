@@ -18,6 +18,7 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.AppFunctionsPrefs
@@ -27,9 +28,11 @@ import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.MapCameraPosition
 import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.MapFilterPrefs
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MapTileProviderPrefs
 import org.meshtastic.core.repository.MeshPrefs
+import org.meshtastic.core.repository.NodeFilterPrefs
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.UiPrefs
 
@@ -110,46 +113,12 @@ class FakeUiPrefs : UiPrefs {
         nodeSort.value = value
     }
 
-    override val includeUnknown = MutableStateFlow(true)
+    override val nodeFilters = MutableStateFlow(NodeFilterPrefs())
 
-    override fun setIncludeUnknown(value: Boolean) {
-        includeUnknown.value = value
-    }
-
-    override val excludeInfrastructure = MutableStateFlow(false)
-
-    override fun setExcludeInfrastructure(value: Boolean) {
-        excludeInfrastructure.value = value
-    }
-
-    override val onlyOnline = MutableStateFlow(false)
-
-    override fun setOnlyOnline(value: Boolean) {
-        onlyOnline.value = value
-    }
-
-    override val onlyDirect = MutableStateFlow(false)
-
-    override fun setOnlyDirect(value: Boolean) {
-        onlyDirect.value = value
-    }
-
-    override val showIgnored = MutableStateFlow(false)
-
-    override fun setShowIgnored(value: Boolean) {
-        showIgnored.value = value
-    }
-
-    override val excludeMqtt = MutableStateFlow(false)
-
-    override fun setExcludeMqtt(value: Boolean) {
-        excludeMqtt.value = value
-    }
-
-    override val excludeUnheard = MutableStateFlow(false)
-
-    override fun setExcludeUnheard(value: Boolean) {
-        excludeUnheard.value = value
+    override fun updateNodeFilters(transform: (NodeFilterPrefs) -> NodeFilterPrefs) {
+        // update, not read-then-assign: the real one is transactional, and a fake that loses a concurrent write
+        // would pass tests the production path fails.
+        nodeFilters.update(transform)
     }
 
     override val hasShownNotPairedWarning = MutableStateFlow(false)
@@ -282,70 +251,10 @@ class FakeMapPrefs : MapPrefs {
 
     override suspend fun awaitMapStyle(): Int = mapStyle.value
 
-    override val showOnlyFavorites = MutableStateFlow(false)
+    override val mapFilters = MutableStateFlow(MapFilterPrefs())
 
-    override fun setShowOnlyFavorites(show: Boolean) {
-        showOnlyFavorites.value = show
-    }
-
-    override val showWaypointsOnMap = MutableStateFlow(true)
-
-    override fun setShowWaypointsOnMap(show: Boolean) {
-        showWaypointsOnMap.value = show
-    }
-
-    override val showPrecisionCircleOnMap = MutableStateFlow(true)
-
-    override fun setShowPrecisionCircleOnMap(show: Boolean) {
-        showPrecisionCircleOnMap.value = show
-    }
-
-    override val lastHeardFilter = MutableStateFlow(0L)
-
-    override fun setLastHeardFilter(seconds: Long) {
-        lastHeardFilter.value = seconds
-    }
-
-    override val lastHeardTrackFilter = MutableStateFlow(0L)
-
-    override fun setLastHeardTrackFilter(seconds: Long) {
-        lastHeardTrackFilter.value = seconds
-    }
-
-    override val onlyOnlineOnMap = MutableStateFlow(false)
-
-    override fun setOnlyOnlineOnMap(only: Boolean) {
-        onlyOnlineOnMap.value = only
-    }
-
-    override val onlyDirectOnMap = MutableStateFlow(false)
-
-    override fun setOnlyDirectOnMap(only: Boolean) {
-        onlyDirectOnMap.value = only
-    }
-
-    override val excludeMqttOnMap = MutableStateFlow(false)
-
-    override fun setExcludeMqttOnMap(exclude: Boolean) {
-        excludeMqttOnMap.value = exclude
-    }
-
-    override val showIgnoredOnMap = MutableStateFlow(false)
-
-    override fun setShowIgnoredOnMap(show: Boolean) {
-        showIgnoredOnMap.value = show
-    }
-
-    override val includeUnknownOnMap = MutableStateFlow(true)
-
-    override fun setIncludeUnknownOnMap(include: Boolean) {
-        includeUnknownOnMap.value = include
-    }
-
-    override val excludedMapRoles = MutableStateFlow<Set<String>>(emptySet())
-
-    override fun setExcludedMapRoles(roles: Set<String>) {
-        excludedMapRoles.value = roles
+    override fun updateMapFilters(transform: (MapFilterPrefs) -> MapFilterPrefs) {
+        mapFilters.update(transform)
     }
 
     override val hiddenLayerUrls = MutableStateFlow<Set<String>>(emptySet())

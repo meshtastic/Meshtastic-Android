@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLinkStyles
@@ -37,6 +38,8 @@ actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): A
 @Composable actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit = { _, _, _ -> }
 
 @Composable actual fun rememberOpenUrl(): (url: String) -> Unit = { _ -> }
+
+@Composable actual fun rememberShareText(): (text: String, subject: String) -> Unit = { _, _ -> }
 
 @Composable
 actual fun rememberSaveFileLauncher(
@@ -85,3 +88,5 @@ actual fun SetScreenBrightness(brightness: Float) {
 @Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedPermissionUiState()
 
 @Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+actual fun KeyEvent.isFromSoftKeyboard(): Boolean = false

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.model.util
 
+import okio.Buffer
 import okio.ByteString
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -85,16 +86,18 @@ fun getChannelReplacementList(
     if (endIndex < 0) return@buildList
     for (index in 0..endIndex) {
         add(
-            Channel(
-                role =
-                when (index) {
-                    0 -> if (new.isEmpty()) Channel.Role.DISABLED else Channel.Role.PRIMARY
-                    in 1..new.lastIndex -> Channel.Role.SECONDARY
-                    else -> Channel.Role.DISABLED
-                },
-                index = index,
-                settings = new.getOrNull(index) ?: ChannelSettings(),
-            ),
+            Channel.Builder()
+                .also { wb ->
+                    wb.role =
+                        when (index) {
+                            0 -> if (new.isEmpty()) Channel.Role.DISABLED else Channel.Role.PRIMARY
+                            in 1..new.lastIndex -> Channel.Role.SECONDARY
+                            else -> Channel.Role.DISABLED
+                        }
+                    wb.index = index
+                    wb.settings = new.getOrNull(index) ?: ChannelSettings.Builder().build()
+                }
+                .build(),
         )
     }
 }
@@ -110,7 +113,7 @@ fun normalizeReplacementSettings(
     loraConfig: Config.LoRaConfig?,
 ): List<ChannelSettings> {
     if (settings.size <= 1) return settings
-    val effectiveLora = loraConfig ?: Config.LoRaConfig()
+    val effectiveLora = loraConfig ?: Config.LoRaConfig.Builder().build()
     val primary = settings.first()
     val seen = mutableSetOf<ChannelIdentity>()
     if (!primary.isChannelPlaceholder()) {
@@ -132,7 +135,34 @@ fun ChannelSettings.isChannelPlaceholder(): Boolean = name.isNullOrBlank() && ps
 data class ChannelIdentity(val name: String, val psk: ByteString) {
     // Never expose an effective PSK through diagnostics or an auto-generated data-class toString.
     override fun toString(): String = "ChannelIdentity(name=$name, psk=<redacted>)"
+
+    /**
+     * Stable opaque token for this identity, used to key a retired conversation (see `ContactKey`).
+     *
+     * Deliberately one-way and truncated: a contact key reaches logs and deep links, so it must never carry a PSK or be
+     * reversible into one. The name length is prefixed so `("ab", "c")` and `("a", "bc")` cannot collide.
+     */
+    val token: String
+        get() {
+            val nameBytes = name.encodeToByteArray()
+            return Buffer()
+                .writeInt(nameBytes.size)
+                .write(nameBytes)
+                .write(psk)
+                .readByteString()
+                .sha256()
+                .hex()
+                .substring(0, CHANNEL_IDENTITY_TOKEN_LENGTH)
+        }
 }
+
+/**
+ * Hex characters of the identity digest kept in a retired contact key.
+ *
+ * 64 bits rather than the 32 that eight slots would need: a collision would silently merge two archived conversations,
+ * and the key format is not released yet, so widening it now costs nothing and never has to be migrated later.
+ */
+const val CHANNEL_IDENTITY_TOKEN_LENGTH = 16
 
 /** Resolves this setting's semantic identity under [loraConfig]. */
 fun ChannelSettings.channelIdentity(loraConfig: Config.LoRaConfig): ChannelIdentity {

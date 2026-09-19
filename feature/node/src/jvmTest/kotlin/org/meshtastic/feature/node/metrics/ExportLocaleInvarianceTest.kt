@@ -41,7 +41,18 @@ class ExportLocaleInvarianceTest {
     fun `gpx coordinates keep a dot separator on a comma locale`() {
         Locale.setDefault(Locale.GERMANY)
 
-        val gpx = buildGpx(listOf(Position(latitude_i = 525_200_000, longitude_i = 134_050_000)), "Berlin")
+        val gpx =
+            buildGpx(
+                listOf(
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 525_200_000
+                            wb.longitude_i = 134_050_000
+                        }
+                        .build(),
+                ),
+                "Berlin",
+            )
 
         assertTrue(gpx.contains("lat=\"52.52"), "latitude was localized:\n$gpx")
         assertTrue(gpx.contains("lon=\"13.40"), "longitude was localized:\n$gpx")

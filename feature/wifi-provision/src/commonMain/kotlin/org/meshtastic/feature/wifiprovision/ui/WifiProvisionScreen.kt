@@ -159,7 +159,7 @@ import org.meshtastic.feature.wifiprovision.model.WifiNetwork
 
 private const val NETWORK_LIST_MAX_HEIGHT_DP = 240
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
 @Composable
 fun WifiProvisionScreen(
@@ -278,7 +278,6 @@ private val Phase.isLoading: Boolean
 // ---------------------------------------------------------------------------
 
 /** BLE scanning spinner — shown while searching for a device. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ScanningBleContent(error: WifiProvisionError.ConnectFailed? = null, onRetry: () -> Unit = {}) {
     CenteredStatusContent {
@@ -310,7 +309,6 @@ internal fun ScanningBleContent(error: WifiProvisionError.ConnectFailed? = null,
  * Confirmation step shown after BLE device discovery — the Android analog of the web flasher's native BLE pairing
  * prompt. Gives the user a clear "device found" moment before proceeding.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCancel: () -> Unit) {
     CenteredStatusContent {
@@ -351,7 +349,6 @@ internal fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCa
 }
 
 /** Network scanning spinner — shown during the initial scan when no networks are loaded yet. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ScanningNetworksContent() {
     CenteredStatusContent {
@@ -365,7 +362,6 @@ internal fun ScanningNetworksContent() {
  * Main configuration screen shown after BLE connection — mirrors the web flasher's connected state. All controls (scan
  * button, network list, SSID/password fields, Apply, status) are on one screen.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "LongParameterList")
 @Composable
 internal fun ConnectedContent(

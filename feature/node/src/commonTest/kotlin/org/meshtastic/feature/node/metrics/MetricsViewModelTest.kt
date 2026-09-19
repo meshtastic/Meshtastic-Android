@@ -47,6 +47,7 @@ import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
+import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.LocalStats
@@ -151,9 +152,15 @@ class MetricsViewModelTest {
             nodeDetailFlow.value =
                 NodeDetailUiState(
                     node =
-                    org.meshtastic.core.model.Node(num = 1234, user = org.meshtastic.proto.User(id = "!1234")),
+                    org.meshtastic.core.model.Node(
+                        num = 1234,
+                        user = org.meshtastic.proto.User.Builder().also { wb -> wb.id = "!1234" }.build(),
+                    ),
                     environmentState =
-                    EnvironmentMetricsState(environmentMetrics = listOf(Telemetry(time = twoHoursAgo.toInt()))),
+                    EnvironmentMetricsState(
+                        environmentMetrics =
+                        listOf(Telemetry.Builder().also { wb -> wb.time = twoHoursAgo.toInt() }.build()),
+                    ),
                 )
 
             // We might get multiple emissions as flows propagate
@@ -170,10 +177,14 @@ class MetricsViewModelTest {
             nodeDetailFlow.value =
                 NodeDetailUiState(
                     node =
-                    org.meshtastic.core.model.Node(num = 1234, user = org.meshtastic.proto.User(id = "!1234")),
+                    org.meshtastic.core.model.Node(
+                        num = 1234,
+                        user = org.meshtastic.proto.User.Builder().also { wb -> wb.id = "!1234" }.build(),
+                    ),
                     environmentState =
                     EnvironmentMetricsState(
-                        environmentMetrics = listOf(Telemetry(time = eightDaysAgo.toInt())),
+                        environmentMetrics =
+                        listOf(Telemetry.Builder().also { wb -> wb.time = eightDaysAgo.toInt() }.build()),
                     ),
                 )
 
@@ -187,15 +198,17 @@ class MetricsViewModelTest {
     @Test
     fun `savePositionCSV writes correct data`() = runTest(testDispatcher) {
         val testPosition =
-            Position(
-                latitude_i = 123456789,
-                longitude_i = -987654321,
-                altitude = 100,
-                sats_in_view = 5,
-                ground_speed = 10,
-                ground_track = 123456,
-                time = 1700000000,
-            )
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 123456789
+                    wb.longitude_i = -987654321
+                    wb.altitude = 100
+                    wb.sats_in_view = 5
+                    wb.ground_speed = 10
+                    wb.ground_track = 123456
+                    wb.time = 1700000000
+                }
+                .build()
 
         val nodeDetailFlow =
             MutableStateFlow(NodeDetailUiState(metricsState = MetricsState(positionLogs = listOf(testPosition))))
@@ -234,17 +247,21 @@ class MetricsViewModelTest {
     @Test
     fun `saveDeviceMetricsCSV writes correct data`() = runTest(testDispatcher) {
         val testTelemetry =
-            Telemetry(
-                time = 1700000000,
-                device_metrics =
-                DeviceMetrics(
-                    battery_level = 80,
-                    voltage = 4.1f,
-                    channel_utilization = 12.5f,
-                    air_util_tx = 3.25f,
-                    uptime_seconds = 3600,
-                ),
-            )
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.device_metrics =
+                        DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 80
+                                wb.voltage = 4.1f
+                                wb.channel_utilization = 12.5f
+                                wb.air_util_tx = 3.25f
+                                wb.uptime_seconds = 3600
+                            }
+                            .build()
+                }
+                .build()
 
         val nodeDetailFlow =
             MutableStateFlow(NodeDetailUiState(metricsState = MetricsState(deviceMetrics = listOf(testTelemetry))))
@@ -284,27 +301,33 @@ class MetricsViewModelTest {
     @Test
     fun `saveEnvironmentMetricsCSV writes correct data`() = runTest(testDispatcher) {
         val testTelemetry =
-            Telemetry(
-                time = 1700000000,
-                environment_metrics =
-                EnvironmentMetrics(
-                    temperature = 21.5f,
-                    relative_humidity = 55.5f,
-                    barometric_pressure = 1013.25f,
-                    gas_resistance = 12.3f,
-                    iaq = 42,
-                    wind_speed = 5.5f,
-                    wind_direction = 180,
-                    soil_temperature = 18.75f,
-                    soil_moisture = 65,
-                    one_wire_temperature_ch0 = 1f,
-                    one_wire_temperature_ch1 = 2f,
-                    one_wire_temperature_ch2 = 3f,
-                    // 0 V is a real reading on an unloaded ADC input, so it exports as 0.0, not empty.
-                    adc_voltage_ch0 = 3.3f,
-                    adc_voltage_ch1 = 0f,
-                ),
-            )
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.environment_metrics =
+                        EnvironmentMetrics.Builder()
+                            .also { wb ->
+                                wb.temperature = 21.5f
+                                wb.relative_humidity = 55.5f
+                                wb.barometric_pressure = 1013.25f
+                                wb.gas_resistance = 12.3f
+                                wb.iaq = 42
+                                wb.wind_speed = 5.5f
+                                wb.wind_direction = 180
+                                wb.soil_temperature = 18.75f
+                                wb.soil_moisture = 65
+                                wb.one_wire_temperature_ch0 = 1f
+                                wb.one_wire_temperature_ch1 = 2f
+                                wb.one_wire_temperature_ch2 = 3f
+                                // 0 V is a real reading on an unloaded ADC input, so it exports as 0.0, not empty.
+                                wb.adc_voltage_ch0 = 3.3f
+                                wb.adc_voltage_ch1 = 0f
+                                wb.lightning_strike_count_1h = 3
+                                wb.lightning_distance_km = 12f
+                            }
+                            .build()
+                }
+                .build()
 
         val nodeDetailFlow =
             MutableStateFlow(
@@ -336,12 +359,12 @@ class MetricsViewModelTest {
             val csvOutput = buffer.readUtf8()
             assertTrue(
                 csvOutput.startsWith(
-                    "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\",\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\",\"soilMoisture\",\"oneWireTemp1\",\"oneWireTemp2\",\"oneWireTemp3\",\"oneWireTemp4\",\"oneWireTemp5\",\"oneWireTemp6\",\"oneWireTemp7\",\"oneWireTemp8\",\"adcVoltage1\",\"adcVoltage2\",\"adcVoltage3\",\"adcVoltage4\",\"adcVoltage5\",\"adcVoltage6\",\"adcVoltage7\",\"adcVoltage8\"",
+                    "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\",\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\",\"soilMoisture\",\"oneWireTemp1\",\"oneWireTemp2\",\"oneWireTemp3\",\"oneWireTemp4\",\"oneWireTemp5\",\"oneWireTemp6\",\"oneWireTemp7\",\"oneWireTemp8\",\"adcVoltage1\",\"adcVoltage2\",\"adcVoltage3\",\"adcVoltage4\",\"adcVoltage5\",\"adcVoltage6\",\"adcVoltage7\",\"adcVoltage8\",\"lightningStrikeCount1h\",\"lightningDistanceKm\"\n",
                 ),
             )
             assertTrue(
                 csvOutput.contains(
-                    "\"21.5\",\"55.5\",\"1013.25\",\"12.3\",\"42\",\"5.5\",\"180\",\"18.75\",\"65\",\"1.0\",\"2.0\",\"3.0\",\"\",\"\",\"\",\"\",\"\",\"3.3\",\"0.0\",\"\",\"\",\"\",\"\",\"\",\"\"",
+                    "\"21.5\",\"55.5\",\"1013.25\",\"12.3\",\"42\",\"5.5\",\"180\",\"18.75\",\"65\",\"1.0\",\"2.0\",\"3.0\",\"\",\"\",\"\",\"\",\"\",\"3.3\",\"0.0\",\"\",\"\",\"\",\"\",\"\",\"\",\"3\",\"12.0\"\n",
                 ),
             )
 
@@ -349,9 +372,68 @@ class MetricsViewModelTest {
         }
     }
 
+    /** A status register of 0 is a healthy sensor, and 0 is a reading: it exports as "0", never as an empty cell. */
+    @Test
+    fun `saveAirQualityMetricsCSV exports the raw pm status register`() = runTest(testDispatcher) {
+        val testTelemetry =
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.air_quality_metrics =
+                        AirQualityMetrics.Builder()
+                            .also { wb ->
+                                wb.pm10_standard = 5
+                                wb.pm_status_flags = 0
+                            }
+                            .build()
+                }
+                .build()
+
+        val nodeDetailFlow =
+            MutableStateFlow(
+                NodeDetailUiState(metricsState = MetricsState(airQualityMetrics = listOf(testTelemetry))),
+            )
+        every { getNodeDetailsUseCase(1234) } returns nodeDetailFlow.asStateFlow()
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val vm = createViewModel()
+        vm.state.test {
+            awaitItem()
+            awaitItem()
+
+            val uri = CommonUri.parse("content://test")
+            vm.saveAirQualityMetricsCSV(uri, listOf(AirQualitySample(testTelemetry, aqi = null)))
+            runCurrent()
+
+            verifySuspend { fileService.write(uri, any()) }
+
+            val lines = buffer.readUtf8().lines()
+            assertTrue(lines[0].startsWith("\"date\",\"time\",\"aqi\",\"pm10_standard\","))
+            assertTrue(lines[0].endsWith("\"particles_tps\",\"pm_status_flags\""))
+            assertTrue(lines[1].contains("\"\",\"5\",\"\","), "no AQI, then the PM1.0 reading")
+            assertTrue(lines[1].endsWith("\"\",\"0\""), "absent particles_tps, then the zero register")
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `saveSignalMetricsCSV writes correct data`() = runTest(testDispatcher) {
-        val testPacket = MeshPacket(rx_time = 1700000000, rx_rssi = -105, rx_snr = 7.5f)
+        val testPacket =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.rx_time = 1700000000
+                    wb.rx_rssi = -105
+                    wb.rx_snr = 7.5f
+                }
+                .build()
 
         val nodeDetailFlow =
             MutableStateFlow(NodeDetailUiState(metricsState = MetricsState(signalMetrics = listOf(testPacket))))
@@ -387,26 +469,41 @@ class MetricsViewModelTest {
     @Test
     fun `saveLocalStatsCSV writes only provided visible data`() = runTest(testDispatcher) {
         val visibleTelemetry =
-            Telemetry(
-                time = 1700000000,
-                local_stats =
-                LocalStats(
-                    noise_floor = -112,
-                    uptime_seconds = 3600,
-                    channel_utilization = 12.5f,
-                    air_util_tx = 3.25f,
-                    num_packets_tx = 2,
-                    num_packets_rx = 3,
-                    num_packets_rx_bad = 1,
-                    num_rx_dupe = 4,
-                    num_tx_relay = 5,
-                    num_tx_relay_canceled = 6,
-                    num_online_nodes = 7,
-                    num_total_nodes = 8,
-                ),
-            )
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.local_stats =
+                        LocalStats.Builder()
+                            .also { wb ->
+                                wb.noise_floor = -112
+                                wb.uptime_seconds = 3600
+                                wb.channel_utilization = 12.5f
+                                wb.air_util_tx = 3.25f
+                                wb.num_packets_tx = 2
+                                wb.num_packets_rx = 3
+                                wb.num_packets_rx_bad = 1
+                                wb.num_rx_dupe = 4
+                                wb.num_tx_relay = 5
+                                wb.num_tx_relay_canceled = 6
+                                wb.num_online_nodes = 7
+                                wb.num_total_nodes = 8
+                            }
+                            .build()
+                }
+                .build()
         val hiddenTelemetry =
-            Telemetry(time = 1600000000, local_stats = LocalStats(noise_floor = -99, uptime_seconds = 10))
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1600000000
+                    wb.local_stats =
+                        LocalStats.Builder()
+                            .also { wb ->
+                                wb.noise_floor = -99
+                                wb.uptime_seconds = 10
+                            }
+                            .build()
+                }
+                .build()
 
         val nodeDetailFlow =
             MutableStateFlow(
@@ -459,18 +556,22 @@ class MetricsViewModelTest {
     @Test
     fun `savePowerMetricsCSV writes correct data`() = runTest(testDispatcher) {
         val testTelemetry =
-            Telemetry(
-                time = 1700000000,
-                power_metrics =
-                PowerMetrics(
-                    ch1_voltage = 3.3f,
-                    ch1_current = 0.1f,
-                    ch2_voltage = 5.0f,
-                    ch2_current = 0.2f,
-                    ch3_voltage = 12.0f,
-                    ch3_current = 0.3f,
-                ),
-            )
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.power_metrics =
+                        PowerMetrics.Builder()
+                            .also { wb ->
+                                wb.ch1_voltage = 3.3f
+                                wb.ch1_current = 0.1f
+                                wb.ch2_voltage = 5.0f
+                                wb.ch2_current = 0.2f
+                                wb.ch3_voltage = 12.0f
+                                wb.ch3_current = 0.3f
+                            }
+                            .build()
+                }
+                .build()
 
         val nodeDetailFlow =
             MutableStateFlow(NodeDetailUiState(metricsState = MetricsState(powerMetrics = listOf(testTelemetry))))

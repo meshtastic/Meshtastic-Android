@@ -2,7 +2,7 @@
 title: MQTT
 parent: Käyttöopas
 nav_order: 11
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Siltaa mesh-verkko internetiin — MQTT-välityspalvelimen käyttöönotto, salauskerrokset ja karttadatan välitys.
 aliases:
   - mqtt
@@ -25,7 +25,7 @@ MQTT-moduuli yhdistää radion MQTT-välityspalvelimeen, mahdollistaen:
 
 ## Kuinka se toimii
 
-```
+```text
 [Oma radio] → Radio → [Yhdyskäytäväradio, jossa WiFi] → MQTT-välityspalvelin → [Etäyhdyskäytävä] → Radio → [Etäradio]
 ```
 

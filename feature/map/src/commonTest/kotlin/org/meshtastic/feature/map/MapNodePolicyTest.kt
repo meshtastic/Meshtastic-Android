@@ -16,7 +16,10 @@
  */
 package org.meshtastic.feature.map
 
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.Node.Companion.PUBLIC_KEY_SIZE
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
@@ -39,15 +42,31 @@ class MapNodePolicyTest {
         viaMqtt: Boolean = false,
         isIgnored: Boolean = false,
         shortName: String = "ABCD",
+        signsPackets: Boolean = false,
+        publicKey: ByteString? = null,
     ) = Node(
         num = num,
-        position = Position(latitude_i = (latitude * 1e7).toInt(), longitude_i = (longitude * 1e7).toInt()),
+        position =
+        Position.Builder()
+            .also { wb ->
+                wb.latitude_i = (latitude * 1e7).toInt()
+                wb.longitude_i = (longitude * 1e7).toInt()
+            }
+            .build(),
         lastHeard = lastHeard,
         isFavorite = isFavorite,
-        user = User(short_name = shortName, role = role),
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.short_name = shortName
+                wb.role = role
+            }
+            .build(),
         hopsAway = hopsAway,
         viaMqtt = viaMqtt,
         isIgnored = isIgnored,
+        signsPackets = signsPackets,
+        publicKey = publicKey,
     )
 
     @Suppress("LongParameterList")
@@ -57,6 +76,8 @@ class MapNodePolicyTest {
         excludedRoles: Set<Config.DeviceConfig.Role> = emptySet(),
         onlyOnline: Boolean = false,
         onlyDirect: Boolean = false,
+        onlySigned: Boolean = false,
+        onlyEncrypted: Boolean = false,
         excludeMqtt: Boolean = false,
         showIgnored: Boolean = false,
         includeUnknown: Boolean = true,
@@ -69,6 +90,8 @@ class MapNodePolicyTest {
         excludedRoles = excludedRoles,
         onlyOnline = onlyOnline,
         onlyDirect = onlyDirect,
+        onlySigned = onlySigned,
+        onlyEncrypted = onlyEncrypted,
         excludeMqtt = excludeMqtt,
         showIgnored = showIgnored,
         includeUnknown = includeUnknown,
@@ -152,9 +175,17 @@ class MapNodePolicyTest {
 
     @Test
     fun `the direct filter drops both relayed nodes and nodes of unknown distance`() {
-        // The node list's query is `hops_away <= 0 AND hops_away >= 0`, so -1 — never measured — is not direct.
+        // A non-local direct node needs `hops_away = 0` and `via_mqtt = 0`, so -1 — never measured — is not direct.
         val nodes =
             listOf(node(1, 45.0, -122.0, hopsAway = 2), node(2, 45.1, -122.1), node(3, 45.2, -122.2, hopsAway = -1))
+        assertEquals(listOf(2), visible(nodes, filters(onlyDirect = true)))
+    }
+
+    @Test
+    fun `the direct filter drops an mqtt node reporting zero hops`() {
+        // An MQTT-bridged node carries the hop count its uplink gateway heard, not ours, so zero hops there is no
+        // claim about our radio. Direct is the same `hopsAway == 0 && !viaMqtt` the row renderers read.
+        val nodes = listOf(node(1, 45.0, -122.0, viaMqtt = true), node(2, 45.1, -122.1))
         assertEquals(listOf(2), visible(nodes, filters(onlyDirect = true)))
     }
 
@@ -208,5 +239,28 @@ class MapNodePolicyTest {
                 includeUnknown = false,
             )
         assertEquals(listOf(1), visible(listOf(mine), state, now = 100_000, mine = 1))
+    }
+
+    @Test
+    fun `the signed filter keeps only nodes whose signature the radio verified`() {
+        val nodes = listOf(node(1, 1.0, 1.0), node(2, 1.0, 1.0, signsPackets = true))
+
+        assertEquals(listOf(1, 2), visible(nodes, filters()))
+        assertEquals(listOf(2), visible(nodes, filters(onlySigned = true)))
+    }
+
+    @Test
+    fun `the encrypted filter keeps a key on file and drops one that stopped matching`() {
+        val key = ByteArray(PUBLIC_KEY_SIZE) { 1 }.toByteString()
+        val nodes =
+            listOf(
+                node(1, 1.0, 1.0),
+                node(2, 1.0, 1.0, publicKey = key),
+                // A mismatch is not a key you can safely encrypt to, so it is excluded rather than counted.
+                node(3, 1.0, 1.0, publicKey = Node.ERROR_BYTE_STRING),
+            )
+
+        assertEquals(listOf(1, 2, 3), visible(nodes, filters()))
+        assertEquals(listOf(2), visible(nodes, filters(onlyEncrypted = true)))
     }
 }

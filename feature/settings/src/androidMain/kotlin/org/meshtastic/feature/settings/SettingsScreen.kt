@@ -89,6 +89,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
 import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
+import org.meshtastic.feature.settings.util.deviceProfileExportFileName
 import org.meshtastic.proto.DeviceProfile
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
@@ -146,7 +147,6 @@ fun SettingsScreen(
                     viewModel.installProfile(it)
                 } else {
                     deviceProfile = it
-                    val nodeName = (it.short_name ?: "").ifBlank { "node" }
                     val dateStr =
                         fromEpochMilliseconds(nowMillis)
                             .toLocalDateTime(TimeZone.currentSystemDefault())
@@ -157,7 +157,7 @@ fun SettingsScreen(
                                     day()
                                 },
                             )
-                    val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
+                    val fileName = deviceProfileExportFileName(it.long_name, it.short_name, dateStr)
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)

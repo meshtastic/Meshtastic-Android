@@ -1,1 +1,3 @@
-詳細的版本說明請參閱：https://github.com/meshtastic/Meshtastic-Android/releases/
+Stability and reliability fixes.
+
+Full release notes: https://github.com/meshtastic/Meshtastic-Android/releases

@@ -36,7 +36,7 @@ data class MeshLog(
     val raw_message: String,
     val fromNum: Int = 0,
     val portNum: Int = 0,
-    val fromRadio: FromRadio = FromRadio(),
+    val fromRadio: FromRadio = FromRadio.Builder().build(),
 ) {
     val meshPacket = fromRadio.packet
 

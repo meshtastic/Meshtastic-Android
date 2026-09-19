@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package org.meshtastic.feature.connections.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +21,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -157,10 +154,28 @@ private fun CurrentlyConnectedInfoPreview() {
             node =
             Node(
                 num = 13444,
-                user = User(short_name = "\uD83E\uDEE0", long_name = "John Doe"),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.short_name = "\uD83E\uDEE0"
+                        wb.long_name = "John Doe"
+                    }
+                    .build(),
                 isIgnored = false,
-                paxcounter = Paxcount(ble = 10, wifi = 5),
-                environmentMetrics = EnvironmentMetrics(temperature = 25f, relative_humidity = 60f),
+                paxcounter =
+                Paxcount.Builder()
+                    .also { wb ->
+                        wb.ble = 10
+                        wb.wifi = 5
+                    }
+                    .build(),
+                environmentMetrics =
+                EnvironmentMetrics.Builder()
+                    .also { wb ->
+                        wb.temperature = 25f
+                        wb.relative_humidity = 60f
+                    }
+                    .build(),
             ),
             text =
             CurrentlyConnectedText(

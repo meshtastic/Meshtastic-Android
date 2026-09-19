@@ -39,8 +39,10 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
-import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
+import org.meshtastic.core.common.state.OperationLease
+import org.meshtastic.core.common.state.RadioOperation
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -125,12 +127,15 @@ class FirmwareUpdateViewModel(
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
     private val firmwareRetriever: FirmwareRetriever,
-    private val firmwareMaintenanceLock: FirmwareMaintenanceLock,
+    private val radioOperationLock: RadioOperationLock,
     private val applicationScope: ApplicationCoroutineScope,
     private val hiddenFeaturesUnlock: HiddenFeaturesUnlock,
     private val analytics: PlatformAnalytics,
     private val nodeRestartTracker: NodeRestartTracker,
 ) : ViewModel() {
+
+    /** The USB maintenance sequence's hold on the radio. Spans several passes, so it cannot use `withOperation`. */
+    private var maintenanceLease: OperationLease? = null
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
     val state: StateFlow<FirmwareUpdateState> = _state.asStateFlow()
@@ -171,6 +176,14 @@ class FirmwareUpdateViewModel(
     private var maintenanceHardware: DeviceHardware? = null
 
     /**
+     * The in-flight USB maintenance pass, which runs on its own job rather than [updateJob].
+     *
+     * Tracked so cancellation can stop the write before the sequence's hold on the radio is handed back — releasing
+     * while the write is still running would re-enable transport recovery mid-write.
+     */
+    private var maintenanceWriteJob: Job? = null
+
+    /**
      * True once an erase or bootloader image has been written, which is the point the device stops having a working
      * application. From then on failures re-offer the pass instead of surfacing a dead end.
      */
@@ -200,7 +213,7 @@ class FirmwareUpdateViewModel(
         // passes (e.g. navigating away after the erase leg but before picking the firmware save location), and a
         // leaked lock would permanently suppress the radio transport's auto-reconnect for the rest of the app
         // session — see startUsbMaintenance/advancePastPass. A no-op if no sequence was in flight.
-        firmwareMaintenanceLock.release()
+        releaseMaintenanceLease()
         // viewModelScope is already cancelled when onCleared() runs, so launch cleanup on the
         // application-wide scope (SupervisorJob + ioDispatcher). ATOMIC start + NonCancellable
         // context keeps cleanup running even if something tries to cancel it mid-flight.
@@ -225,9 +238,29 @@ class FirmwareUpdateViewModel(
 
     fun cancelUpdate() {
         updateJob?.cancel()
+        val write = maintenanceWriteJob
+        if (write?.isActive == true) {
+            // A pass is mid-write on its own job, which updateJob?.cancel() does not reach. Cancelling it is what
+            // stops the write; its own cleanup releases the hold. Releasing here would re-enable transport recovery
+            // while the USB write is still going.
+            write.cancel()
+        } else {
+            // Nothing is writing — typically parked at AwaitingFileSave, where the job has already completed, so
+            // cancelling it releases nothing and the hold would otherwise survive until onCleared().
+            endMaintenanceSequence()
+        }
         clearPendingLocalFirmwareFile()
         _state.value = FirmwareUpdateState.Idle
         checkForUpdates()
+    }
+
+    /** Drops a USB maintenance sequence and the hold it owns. Idempotent. */
+    private fun endMaintenanceSequence() {
+        maintenanceWriteJob = null
+        pendingUsbPasses = emptyList()
+        destructiveWriteDone = false
+        maintenanceHardware = null
+        releaseMaintenanceLease()
     }
 
     @Suppress("LongMethod")
@@ -599,7 +632,7 @@ class FirmwareUpdateViewModel(
             if (!checkBatteryLevel()) return@launch
             // Held until the sequence finishes or fails. Without it the environmental-recovery listeners restart
             // the radio transport mid-sequence and bind it to the erase firmware's bare CDC port.
-            firmwareMaintenanceLock.acquire()
+            maintenanceLease = radioOperationLock.acquire(RadioOperation.FirmwareMaintenance)
             updateJob?.cancel()
             updateJob =
                 viewModelScope.launch {
@@ -624,7 +657,7 @@ class FirmwareUpdateViewModel(
                         _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
                     } finally {
                         // Preparation that produced no passes never reached the device; hand the transport back.
-                        if (pendingUsbPasses.isEmpty()) firmwareMaintenanceLock.release()
+                        if (pendingUsbPasses.isEmpty()) releaseMaintenanceLease()
                     }
                 }
         }
@@ -644,20 +677,25 @@ class FirmwareUpdateViewModel(
         if (pass.step != currentState.step) return
         val hardware = maintenanceHardware ?: return
 
-        viewModelScope.launch {
-            try {
-                // Capture the ports present before the write so the erase image's port can be told from pre-existing
-                // ones.
-                val portsBefore = usbManager.serialPortKeys()
-                val result = usbPassWriter(portsBefore).write(pass, treeUri, hardware) { _state.value = it }
-                handlePassResult(pass, result)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.e(e) { "Writing ${pass.step} failed" }
-                reofferOrFail(pass, UiText.Resource(Res.string.firmware_update_failed))
+        maintenanceWriteJob =
+            viewModelScope.launch {
+                try {
+                    // Capture the ports present before the write so the erase image's port can be told from
+                    // pre-existing
+                    // ones.
+                    val portsBefore = usbManager.serialPortKeys()
+                    val result = usbPassWriter(portsBefore).write(pass, treeUri, hardware) { _state.value = it }
+                    handlePassResult(pass, result)
+                } catch (e: CancellationException) {
+                    // The write has stopped, so the device can be handed back. Doing this here rather than in
+                    // cancelUpdate() is the point: the sequence keeps the radio until the write actually ends.
+                    endMaintenanceSequence()
+                    throw e
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    Logger.e(e) { "Writing ${pass.step} failed" }
+                    reofferOrFail(pass, UiText.Resource(Res.string.firmware_update_failed))
+                }
             }
-        }
     }
 
     private suspend fun handlePassResult(pass: UsbFileSavePass, result: UsbPassResult) = when (result) {
@@ -685,7 +723,7 @@ class FirmwareUpdateViewModel(
         val next = pendingUsbPasses.firstOrNull()
         if (next == null) {
             // Sequence complete: hand the device back before verifying, so the normal reconnect can run.
-            firmwareMaintenanceLock.release()
+            releaseMaintenanceLease()
             verifyUpdateResult(originalDeviceAddress)
         } else {
             _state.value = next.toAwaitingFileSave()
@@ -704,7 +742,7 @@ class FirmwareUpdateViewModel(
             // Still mid-sequence — hold the lock, the user is being asked to retry this pass.
             _state.value = pass.toAwaitingFileSave(retryMessage = message)
         } else {
-            firmwareMaintenanceLock.release()
+            releaseMaintenanceLease()
             _state.value = FirmwareUpdateState.Error(message)
         }
     }
@@ -727,35 +765,45 @@ class FirmwareUpdateViewModel(
         val firmwareArtifact = currentState.uf2Artifact ?: return
 
         viewModelScope.launch {
-            try {
-                _state.value =
-                    FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_copying)))
-                fileHandler.copyToUri(firmwareArtifact, uri)
+            // The plain single-pass USB write happens here, not in FirmwareUpdateManager.startUpdate — that returned
+            // at AwaitingFileSave so the UI could open the file picker, releasing its lease. Without a hold of its own
+            // the copy, the flash and the detach wait run with no foreground service and no wake lock.
+            radioOperationLock.withOperation(RadioOperation.FirmwareUpdate) {
+                try {
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_copying)),
+                        )
+                    fileHandler.copyToUri(firmwareArtifact, uri)
 
-                _state.value =
-                    FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_flashing)))
-                withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { usbManager.deviceDetachFlow().first() }
-                    ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_flashing)),
+                        )
+                    withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { usbManager.deviceDetachFlow().first() }
+                        ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
 
-                // All writes are done once the device detached. Release before verifying: for serial,
-                // verification relies on SharedRadioInterfaceService's USB auto-recovery to reconnect the
-                // radio — which is exactly what the lock suppresses. (The release in finally is a no-op then.)
-                firmwareMaintenanceLock.release()
-                verifyUpdateResult(originalDeviceAddress)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Logger.e(e) { "Error saving DFU file" }
-                _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
-            } finally {
-                cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
-                // This is also the terminal pass of a USB maintenance sequence when the FromVolume leg has already
-                // completed: the Prepared firmware artifact is saved through this pre-existing single-pass path
-                // rather than writeMaintenancePass/advancePastPass, so releasing here is the only place that
-                // sequence's lock gets freed. A no-op for a plain single-pass update, which never acquires the lock.
-                firmwareMaintenanceLock.release()
-                pendingUsbPasses = emptyList()
-                maintenanceHardware = null
+                    // All writes are done once the device detached. Release before verifying: for serial,
+                    // verification relies on SharedRadioInterfaceService's USB auto-recovery to reconnect the
+                    // radio — which is exactly what the lock suppresses. (The release in finally is a no-op then.)
+                    releaseMaintenanceLease()
+                    verifyUpdateResult(originalDeviceAddress)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Logger.e(e) { "Error saving DFU file" }
+                    _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
+                } finally {
+                    cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                    // This is also the terminal pass of a USB maintenance sequence when the FromVolume leg has already
+                    // completed: the Prepared firmware artifact is saved through this pre-existing single-pass path
+                    // rather than writeMaintenancePass/advancePastPass, so releasing here is the only place that
+                    // sequence's lock gets freed. A no-op for a plain single-pass update, which never acquires the
+                    // lock.
+                    releaseMaintenanceLease()
+                    pendingUsbPasses = emptyList()
+                    maintenanceHardware = null
+                }
             }
         }
     }
@@ -1081,7 +1129,25 @@ class FirmwareUpdateViewModel(
         }
     }
 
-    private suspend fun verifyUpdateResult(address: String?, wasLowSpeedTransfer: Boolean = false) {
+    /** Ends the USB maintenance hold. Idempotent — several failure paths call it. */
+    private fun releaseMaintenanceLease() {
+        radioOperationLock.release(maintenanceLease)
+        maintenanceLease = null
+    }
+
+    /**
+     * Verifies the update, holding the radio operation for the whole wait.
+     *
+     * The device reboots into the new firmware here and the app waits for it to come back — over USB that is a ~20s
+     * re-enumeration. It is the most fragile stretch of an update and it runs after the flash returns, so without its
+     * own hold the process would lose the foreground service and wake lock exactly when the device is mid-reboot.
+     */
+    private suspend fun verifyUpdateResult(address: String?, wasLowSpeedTransfer: Boolean = false) =
+        radioOperationLock.withOperation(RadioOperation.FirmwareUpdate) {
+            performUpdateVerification(address, wasLowSpeedTransfer)
+        }
+
+    private suspend fun performUpdateVerification(address: String?, wasLowSpeedTransfer: Boolean = false) {
         // Consume the wipe opt-in up front: whatever this verification concludes, it must never leak into a
         // later update flow that did not opt in (e.g. a retry via a local file).
         val factoryResetAfterVerify = pendingFactoryResetAfterUpdate

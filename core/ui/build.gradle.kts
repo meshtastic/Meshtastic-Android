@@ -59,6 +59,10 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive.navigation)
             implementation(libs.jetbrains.compose.material3.adaptive.navigation.suite)
             api(libs.jetbrains.navigation3.ui)
+            // Pinned past navigation3-ui's transitive 1.1.1 — the JetBrains mirror never
+            // published 1.1.6's SaveableStateHolder fix. Consumers import
+            // androidx.navigation3.runtime.* (NavKey, NavBackStack) directly from commonMain.
+            api(libs.androidx.navigation3.runtime)
             // navigation3-ui's own POM marks this runtime-scope, so it never reaches any
             // compile classpath transitively — declare it directly. Consumers (e.g.
             // feature:docs) import androidx.navigationevent.compose.* directly.

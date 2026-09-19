@@ -37,6 +37,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.state.OperationLease
+import org.meshtastic.core.common.state.RadioOperation
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.dao.DiscoveryDao
@@ -86,6 +89,7 @@ class DiscoveryScanEngine(
     private val applicationScope: ApplicationCoroutineScope,
     private val dispatchers: CoroutineDispatchers,
     private val meshPrefs: MeshPrefs,
+    private val radioOperationLock: RadioOperationLock,
 ) : DiscoveryPacketCollector {
 
     // region Public state
@@ -115,7 +119,13 @@ class DiscoveryScanEngine(
             homeRestorer = homeRestorer,
             applicationScope = applicationScope,
             onSessionUpdated = { updated -> _currentSession.value = updated },
-            onTerminalCompleted = { outcome -> _scanState.value = DiscoveryScanState.Complete(outcome) },
+            onTerminalCompleted = { outcome ->
+                _scanState.value = DiscoveryScanState.Complete(outcome)
+                // Terminal cleanup has restored the home preset by now, so the radio is back where the user left it.
+                // Releasing any earlier — when the scan scope is cancelled — would drop the protection during the
+                // restore itself. Safe to run twice: the coordinator may republish a corrected outcome.
+                releaseScanLease()
+            },
             cancelScan = { mutex.withLock { cancelScanInternal() } },
         )
     private val interruptedSessionRecovery =
@@ -135,6 +145,9 @@ class DiscoveryScanEngine(
             },
         )
     private var scanScope: CoroutineScope? = null
+
+    /** Held from scan start until terminal cleanup finishes, so it outlives [scanScope]'s cancellation. */
+    private var scanLease: OperationLease? = null
     private var dwellJob: Job? = null
     private var originalLoRaConfig: Config.LoRaConfig? = null
 
@@ -144,6 +157,9 @@ class DiscoveryScanEngine(
     /** True once a custom-channel target has retuned the primary channel, so restore only writes when needed. */
     private var tunedPrimaryChannel: Boolean = false
     private var sessionId: Long = 0
+
+    /** The radio [sessionId]'s row was written against. Identifies the session across per-device databases. */
+    private var sessionDeviceAddress: String? = null
 
     /** Nodes collected for the current preset dwell. Keyed by nodeNum. */
     private val collectedNodes = mutableMapOf<Long, CollectedNodeData>()
@@ -316,22 +332,34 @@ class DiscoveryScanEngine(
         if (!isScanPreparationCurrent(deviceAddress, sessionGeneration)) {
             discoveryDao.deleteSession(insertedSessionId)
             sessionId = 0L
+            sessionDeviceAddress = null
             originalLoRaConfig = null
             originalPrimaryChannel = null
             _scanState.value = DiscoveryScanState.Failed("Selected radio changed while preparing the scan")
             return
         }
         sessionId = insertedSessionId
+        sessionDeviceAddress = deviceAddress
         _currentSession.value = session.copy(id = sessionId)
         collectorRegistry.collector = this
         _scanState.value = DiscoveryScanState.Shifting(targets.first().label)
         currentPresetName = targets.first().label
         totalDwellSeconds = dwellDurationSeconds
         currentDwellPersisted = false
+        // Taken before the loop starts and released by the terminal callback, not by this scope. Terminal processing
+        // cancels scanScope before the home-preset restore runs, so a hold owned by the scope would end during the
+        // restore — leaving the radio on a scanned preset, which is the failure this protects against.
+        scanLease = radioOperationLock.acquire(RadioOperation.DiscoveryScan)
         CoroutineScope(dispatchers.io + SupervisorJob()).also { scope ->
             scanScope = scope
             scope.launch { runScanLoop(targets, dwellDurationSeconds) }
         }
+    }
+
+    /** Drops the scan's hold on the radio. Idempotent — the terminal outcome may be published more than once. */
+    private fun releaseScanLease() {
+        radioOperationLock.release(scanLease)
+        scanLease = null
     }
 
     private fun isScanPreparationCurrent(deviceAddress: String?, sessionGeneration: Long): Boolean =
@@ -382,6 +410,7 @@ class DiscoveryScanEngine(
             }
             _currentSession.value = null
             _scanState.value = DiscoveryScanState.Idle
+            releaseScanLease()
         } finally {
             mutex.unlock()
         }
@@ -536,11 +565,22 @@ class DiscoveryScanEngine(
         // Start from the captured original config so unrelated fields (hop_limit, tx_power, tx_enabled, …) are carried
         // over instead of zeroed by a fresh LoRaConfig — a from-scratch config can e.g. break the dwell-boundary
         // NeighborInfo request. Only the preset (and, for custom channels, region + channel_num) is overridden.
-        val base = originalLoRaConfig ?: Config.LoRaConfig()
+        val base = originalLoRaConfig ?: Config.LoRaConfig.Builder().build()
         if (target.channel == null) {
             // Public-preset target — dwell on the preset using the radio's existing primary channel (unchanged).
             radioController.setLocalConfig(
-                Config(lora = base.copy(use_preset = true, modem_preset = target.preset.modemPreset)),
+                Config.Builder()
+                    .also { wb ->
+                        wb.lora =
+                            base
+                                .newBuilder()
+                                .also { wb ->
+                                    wb.use_preset = true
+                                    wb.modem_preset = target.preset.modemPreset
+                                }
+                                .build()
+                    }
+                    .build(),
             )
             Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (use_preset=true)" }
         } else {
@@ -548,19 +588,32 @@ class DiscoveryScanEngine(
             // frequency from the new name, then tune the primary channel to the offered name+PSK so nodes on that mesh
             // are heard. The original primary channel is restored after the scan.
             radioController.setLocalConfig(
-                Config(
-                    lora =
-                    base.copy(
-                        use_preset = true,
-                        modem_preset = target.preset.modemPreset,
-                        region = target.region ?: base.region,
-                        channel_num = 0,
-                    ),
-                ),
+                Config.Builder()
+                    .also { wb ->
+                        wb.lora =
+                            base
+                                .newBuilder()
+                                .also { wb ->
+                                    wb.use_preset = true
+                                    wb.modem_preset = target.preset.modemPreset
+                                    wb.region = target.region ?: base.region
+                                    wb.channel_num = 0
+                                }
+                                .build()
+                    }
+                    .build(),
             )
             currentCoroutineContext().ensureActive()
             mutex.withLock { tunedPrimaryChannel = true }
-            radioController.setLocalChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = target.channel))
+            radioController.setLocalChannel(
+                Channel.Builder()
+                    .also { wb ->
+                        wb.index = 0
+                        wb.role = Channel.Role.PRIMARY
+                        wb.settings = target.channel
+                    }
+                    .build(),
+            )
             Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (custom channel)" }
         }
         // The firmware often restarts the radio or reboots after a LoRa config change.
@@ -710,28 +763,32 @@ class DiscoveryScanEngine(
         if (sessionId == 0L) return
         mutex.withLock {
             if (currentDwellPersisted) return@withLock
-            if (collectedNodes.isEmpty()) {
-                persistEmptyPresetResult()
-                currentDwellPersisted = true
-            } else {
-                val presetResultId = persistPresetResult()
-                persistDiscoveredNodes(presetResultId)
-                currentDwellPersisted = true
+            val deviceAddress = sessionDeviceAddress
+            if (deviceAddress == null) {
+                Logger.w { "DiscoveryScanEngine: session $sessionId has no device address; skipping dwell persistence" }
+                return@withLock
             }
+            val result = if (collectedNodes.isEmpty()) emptyPresetResult() else presetResult()
+            // One transaction, so a device/DB switch cannot land between the parent-session check and these writes.
+            // A null return means this device's session row is not in the active database and the dwell is unwritable.
+            if (discoveryDao.insertDwellIfSessionExists(result, discoveredNodeEntities(), deviceAddress) == null) {
+                Logger.w {
+                    "DiscoveryScanEngine: session $sessionId for $deviceAddress is not in the active database; " +
+                        "skipping dwell persistence"
+                }
+                return@withLock
+            }
+            currentDwellPersisted = true
         }
     }
 
-    private suspend fun persistEmptyPresetResult() {
-        val emptyResult =
-            DiscoveryPresetResultEntity(
-                sessionId = sessionId,
-                presetName = currentPresetName,
-                dwellDurationSeconds = totalDwellSeconds,
-            )
-        discoveryDao.insertPresetResult(emptyResult)
-    }
+    private fun emptyPresetResult() = DiscoveryPresetResultEntity(
+        sessionId = sessionId,
+        presetName = currentPresetName,
+        dwellDurationSeconds = totalDwellSeconds,
+    )
 
-    private suspend fun persistPresetResult(): Long {
+    private fun presetResult(): DiscoveryPresetResultEntity {
         val (avgChannelUtil, avgAirUtil) = computeAverageMetrics()
         val directCount = collectedNodes.values.count { it.neighborType == "direct" }
         val meshCount = collectedNodes.values.count { it.neighborType == "mesh" }
@@ -766,7 +823,7 @@ class DiscoveryScanEngine(
                 numTotalNodes = lastLocalStats?.num_total_nodes ?: 0,
                 uptimeSeconds = lastLocalStats?.uptime_seconds ?: 0,
             )
-        return discoveryDao.insertPresetResult(presetResult)
+        return presetResult
     }
 
     /**
@@ -780,13 +837,16 @@ class DiscoveryScanEngine(
         return successRate to failureRate
     }
 
-    private suspend fun persistDiscoveredNodes(presetResultId: Long) {
+    /**
+     * Builds this dwell's node rows. `presetResultId` is a placeholder - [DiscoveryDao.insertDwellIfSessionExists]
+     * stamps the real one inside its transaction.
+     */
+    private suspend fun discoveredNodeEntities(): List<DiscoveredNodeEntity> {
+        if (collectedNodes.isEmpty()) return emptyList()
         val session = discoveryDao.getSession(sessionId)
         val userLat = session?.userLatitude ?: 0.0
         val userLon = session?.userLongitude ?: 0.0
-
-        val nodeEntities = collectedNodes.values.map { data -> data.toEntity(presetResultId, userLat, userLon) }
-        discoveryDao.insertDiscoveredNodes(nodeEntities)
+        return collectedNodes.values.map { data -> data.toEntity(presetResultId = 0L, userLat, userLon) }
     }
 
     private fun CollectedNodeData.toEntity(

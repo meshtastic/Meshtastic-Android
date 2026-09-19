@@ -27,6 +27,13 @@ docs/
 
 ## Editing Guidelines
 
+- **How to write**: Section 11 of the
+  [Meshtastic Client Design Standards](https://github.com/meshtastic/design/tree/master/standards)
+  is the style guide for everything under `docs/en/` — voice, terminology, page
+  structure, code examples, media and accessibility. Read it first.
+  [Documentation Style](en/developer/documentation-style.md) carries what is
+  specific to this repository, including the admonition form, and defers to
+  Section 11 everywhere else. The rules below are mechanics, not style.
 - **English source**: Edit files under `docs/en/`. These are the authoritative source.
 - **Translations**: Do **not** edit files in locale folders directly. They are auto-generated
   by [Crowdin](https://crowdin.com/project/meshtastic-android) and will be overwritten on sync.

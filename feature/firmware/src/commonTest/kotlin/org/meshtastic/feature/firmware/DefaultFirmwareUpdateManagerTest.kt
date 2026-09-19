@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
@@ -107,6 +108,7 @@ class DefaultFirmwareUpdateManagerTest {
             secureDfuHandler = secureDfuHandler,
             usbUpdateHandler = usbUpdateHandler,
             esp32OtaUpdateHandler = esp32OtaHandler,
+            radioOperationLock = RadioOperationLock(),
         )
     }
 

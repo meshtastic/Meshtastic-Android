@@ -51,6 +51,8 @@ class MapFilterSheetTest {
         onClearExcludedRoles = {},
         onToggleOnlyOnline = {},
         onToggleOnlyDirect = {},
+        onToggleOnlySigned = {},
+        onToggleOnlyEncrypted = {},
         onToggleExcludeMqtt = {},
         onToggleShowIgnored = {},
         onToggleIncludeUnknown = {},

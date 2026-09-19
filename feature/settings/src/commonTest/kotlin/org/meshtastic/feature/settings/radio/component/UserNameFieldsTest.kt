@@ -68,7 +68,15 @@ class UserNameFieldsTest {
 
     @Test
     fun `the ham long name field only exists while licensed`() = runComposeUiTest {
-        showNameFields(User(long_name = "Attic Heltec", short_name = "ATTC"), hamMode = false)
+        showNameFields(
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Attic Heltec"
+                    wb.short_name = "ATTC"
+                }
+                .build(),
+            hamMode = false,
+        )
 
         onNodeWithTag(HAM_LONG_NAME_TEST_TAG).assertDoesNotExist()
         assertEquals("Attic Heltec", fieldText(USER_LONG_NAME_TEST_TAG))
@@ -76,7 +84,15 @@ class UserNameFieldsTest {
 
     @Test
     fun `the call sign field shows only the call sign half of a composed name`() = runComposeUiTest {
-        showNameFields(User(long_name = "KD2ABC//Attic Heltec", short_name = "ABC"), hamMode = true)
+        showNameFields(
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "KD2ABC//Attic Heltec"
+                    wb.short_name = "ABC"
+                }
+                .build(),
+            hamMode = true,
+        )
 
         assertEquals("KD2ABC", fieldText(USER_LONG_NAME_TEST_TAG))
         assertEquals("Attic Heltec", fieldText(HAM_LONG_NAME_TEST_TAG))
@@ -84,7 +100,16 @@ class UserNameFieldsTest {
 
     @Test
     fun `editing the call sign keeps the long name half`() = runComposeUiTest {
-        val user = showNameFields(User(long_name = "KD2ABC//Attic Heltec", short_name = "ABC"), hamMode = true)
+        val user =
+            showNameFields(
+                User.Builder()
+                    .also { wb ->
+                        wb.long_name = "KD2ABC//Attic Heltec"
+                        wb.short_name = "ABC"
+                    }
+                    .build(),
+                hamMode = true,
+            )
 
         field(USER_LONG_NAME_TEST_TAG).performTextClearance()
         field(USER_LONG_NAME_TEST_TAG).performTextInput("N0CALL")
@@ -94,7 +119,16 @@ class UserNameFieldsTest {
 
     @Test
     fun `editing the long name keeps the call sign`() = runComposeUiTest {
-        val user = showNameFields(User(long_name = "KD2ABC", short_name = "ABC"), hamMode = true)
+        val user =
+            showNameFields(
+                User.Builder()
+                    .also { wb ->
+                        wb.long_name = "KD2ABC"
+                        wb.short_name = "ABC"
+                    }
+                    .build(),
+                hamMode = true,
+            )
 
         field(HAM_LONG_NAME_TEST_TAG).performTextInput("Garage")
 
@@ -103,7 +137,16 @@ class UserNameFieldsTest {
 
     @Test
     fun `clearing the long name leaves the node named after the call sign alone`() = runComposeUiTest {
-        val user = showNameFields(User(long_name = "KD2ABC//Attic Heltec", short_name = "ABC"), hamMode = true)
+        val user =
+            showNameFields(
+                User.Builder()
+                    .also { wb ->
+                        wb.long_name = "KD2ABC//Attic Heltec"
+                        wb.short_name = "ABC"
+                    }
+                    .build(),
+                hamMode = true,
+            )
 
         field(HAM_LONG_NAME_TEST_TAG).performTextClearance()
 
@@ -112,7 +155,16 @@ class UserNameFieldsTest {
 
     @Test
     fun `the widest pair the proto can carry composes whole`() = runComposeUiTest {
-        val user = showNameFields(User(long_name = "KD2ABCD", short_name = "ABC"), hamMode = true)
+        val user =
+            showNameFields(
+                User.Builder()
+                    .also { wb ->
+                        wb.long_name = "KD2ABCD"
+                        wb.short_name = "ABC"
+                    }
+                    .build(),
+                hamMode = true,
+            )
 
         field(HAM_LONG_NAME_TEST_TAG).performTextInput("Attic Heltec 3")
 

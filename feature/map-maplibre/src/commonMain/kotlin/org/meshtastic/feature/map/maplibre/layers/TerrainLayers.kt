@@ -37,7 +37,7 @@ import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.RasterDemEncoding
 import org.maplibre.compose.sources.TileSetOptions
 import org.maplibre.compose.sources.rememberGeoJsonSource
-import org.maplibre.compose.sources.rememberRasterDemSource
+import org.maplibre.compose.sources.rememberRasterDemTileSource
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.LineString
@@ -104,9 +104,9 @@ private const val MAPTERHORN_ATTRIBUTION_HTML =
 
 /**
  * The two hillshade tiers, as two [HillshadeLayer]s over two `file://` raster-dem sources (see
- * [org.maplibre.compose.sources.rememberRasterDemSource]) — see this feature's PR description for why MapLibre's own
- * internal Horn's-method shading means no decoded elevation grid or [org.meshtastic.feature.map.terrain.Hillshade] call
- * is needed here at all, unlike the contours below.
+ * [org.maplibre.compose.sources.rememberRasterDemTileSource]) — see this feature's PR description for why MapLibre's
+ * own internal Horn's-method shading means no decoded elevation grid or [org.meshtastic.feature.map.terrain.Hillshade]
+ * call is needed here at all, unlike the contours below.
  *
  * A style layer's own `minZoom`/`maxZoom` (exclusive on the max, per the style spec) is how the two tiers hand off: the
  * global layer stops at [MapterhornEndpoints.REGIONAL_MIN_ZOOM] once regional detail exists, and the regional layer
@@ -118,7 +118,7 @@ private const val MAPTERHORN_ATTRIBUTION_HTML =
 private fun HillshadeTiers(repository: OfflineTerrainRepository, region: OfflineTerrainRegion) {
     val globalMaxZoom = minOf(region.maxZoom, MapterhornEndpoints.GLOBAL_MAX_ZOOM)
     val globalSource =
-        rememberRasterDemSource(
+        rememberRasterDemTileSource(
             tiles = listOf(repository.tileUrlTemplate(TerrainSource.GLOBAL)),
             options =
             TileSetOptions(minZoom = 0, maxZoom = globalMaxZoom, attributionHtml = MAPTERHORN_ATTRIBUTION_HTML),
@@ -137,7 +137,7 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
 
         val regionalMaxZoom = minOf(region.maxZoom, MapterhornEndpoints.REGIONAL_MAX_ZOOM)
         val regionalSource =
-            rememberRasterDemSource(
+            rememberRasterDemTileSource(
                 tiles = listOf(repository.tileUrlTemplate(TerrainSource.REGIONAL)),
                 options =
                 TileSetOptions(

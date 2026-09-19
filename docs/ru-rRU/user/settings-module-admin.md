@@ -2,7 +2,7 @@
 title: Настройки — Модули и администрирование
 parent: Руководство пользователя
 nav_order: 8
-last_updated: 2026-08-30
+last_updated: 2026-09-16
 description: Настрой дополнительные функциональные модули (MQTT, телеметрия, готовые сообщения, TAK и другие) и выполняй администрирование устройств.
 aliases:
   - modules
@@ -333,7 +333,7 @@ appear only when your own node is selected:
 
 ### О приложении
 
-**Settings → About** carries the app's own identity rather than the radio's:
+**Settings → About** carries the app's own identity rather than the node's:
 
 Three sections:
 
@@ -341,7 +341,11 @@ Three sections:
 - **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
   to where to buy one. It also lists the GitHub repository, the running app version, and
   **Acknowledgements** (see the next section).
-- **Project information** — links to the website and to this documentation.
+- **Project information** — links to the website, to this documentation, and to the GNU GPL v3
+  license the app is released under.
+
+The footer states the copyright and that the app is free software with no warranty, which you
+may redistribute under the same license.
 
 ### Благодарности
 

@@ -1,1 +1,3 @@
-欲了解详细发布说明，请访问：https://github.com/meshtastic/Meshtastic-Android/releases/
+Stability and reliability fixes.
+
+Full release notes: https://github.com/meshtastic/Meshtastic-Android/releases

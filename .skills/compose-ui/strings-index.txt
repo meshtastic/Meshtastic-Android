@@ -72,6 +72,7 @@ altitude
 always_point_north
 ambient_lighting
 ambient_lighting_config
+ammonium
 analytics_notice
 analytics_okay
 analytics_platforms
@@ -107,6 +108,8 @@ aqi_unhealthy
 aqi_unhealthy_sensitive
 aqi_value_with_severity
 aqi_very_unhealthy
+archived_channel
+archived_channel_read_only
 are_you_sure
 are_you_sure_change_default
 audio
@@ -126,6 +129,7 @@ bandwidth_unsupported_summary
 baro_pressure
 battery
 battery_ina_2xx_i2c_address
+biochemical_oxygen_demand
 ble_devices
 ble_rssi_threshold_defaults_to_80
 ble_scan_needs_location_services
@@ -196,6 +200,7 @@ channel_name
 channel_url
 channel_utilization
 channels
+chemical_oxygen_demand
 ### CHIRPY ###
 chirpy
 chirpy_assistant_title
@@ -452,6 +457,7 @@ discovery_restoring_preset
 discovery_scan_complete
 discovery_scan_failed
 discovery_scan_history
+discovery_scan_in_progress
 discovery_scan_incomplete
 discovery_scan_progress
 discovery_scan_summary
@@ -503,6 +509,7 @@ display_config
 display_mode
 display_time_in_12h_format
 display_units
+dissolved_oxygen
 ### DISTANCE ###
 distance
 distance_filters
@@ -534,6 +541,9 @@ doc_keywords_telemetry
 doc_keywords_translate
 doc_keywords_units
 doc_keywords_widget
+doc_loading
+doc_no_documentation
+doc_no_results
 doc_search_placeholder
 doc_section_developer
 doc_section_user
@@ -574,6 +584,7 @@ echo_enabled
 edit
 edit_custom_tile_source
 eight_hours
+electrical_conductivity
 elevation_suffix
 ### EMOJI ###
 emoji_category_activities
@@ -707,6 +718,7 @@ firmware_update_filename_unavailable
 firmware_update_flashing
 firmware_update_hang_tight
 firmware_update_hash_rejected
+firmware_update_in_progress
 firmware_update_invalid_local_file_detail
 firmware_update_keep_device_close
 firmware_update_latest
@@ -915,6 +927,8 @@ led_heartbeat
 led_state
 legacy_admin_channel
 library_count
+license
+license_notice
 ### LICENSED ###
 licensed_amateur_radio
 licensed_amateur_radio_text
@@ -922,6 +936,8 @@ licensed_mode_enable_confirm
 licensed_mode_enable_title
 licensed_mode_enable_warning
 licensed_mode_enable_warning_signed
+lightning_distance
+lightning_strikes_1h
 ### LOAD ###
 load
 load_15_min
@@ -1270,6 +1286,8 @@ new_node_seen
 new_nodes
 next
 nfc_disabled
+nitrate
+nitrogen
 ### NO ###
 no_bluetooth_devices_hint
 no_bluetooth_devices_seen
@@ -1299,7 +1317,9 @@ node_filter_exclude_unheard
 node_filter_ignored
 node_filter_include_unknown
 node_filter_only_direct
+node_filter_only_encrypted
 node_filter_only_online
+node_filter_only_signed
 node_filter_placeholder
 node_filter_show_ignored
 node_filter_title
@@ -1409,6 +1429,7 @@ open_source_libraries
 open_wifi_settings
 options
 orient_north
+orp
 ### OUTPUT ###
 output_buzzer_gpio
 output_duration_milliseconds
@@ -1471,11 +1492,22 @@ permissions_nothing_needed
 permissions_show
 phone_location
 phone_location_description
+phosphorus
 pin_selected
 play
 plurals_hours
 plurals_minutes
 plurals_seconds
+### PM ###
+pm_sensor_status
+pm_status_co2_error
+pm_status_fan_error
+pm_status_fan_speed_warning
+pm_status_gas_error
+pm_status_hcho_error
+pm_status_pm_error
+pm_status_rht_error
+pm_status_unknown_flags
 pm1_0
 pm10
 pm2_5
@@ -1486,6 +1518,7 @@ position_enabled
 position_flags
 position_log
 position_packet
+potassium
 ### POWER ###
 power
 power_config
@@ -1657,6 +1690,7 @@ routing_error_too_large
 rssi
 rssi_definition
 rsyslog_server
+salinity
 sample_message
 sats
 ### SAVE ###
@@ -1701,11 +1735,16 @@ security_icon_insecure_no_precise
 security_icon_insecure_precise_only
 security_icon_secure
 security_icon_warning_precise_mqtt
+security_legend_any_version
+security_legend_legacy_firmware
+security_legend_signing_firmware
 security_signed_message_info
 security_signed_node
 security_signed_node_desc
 security_signed_node_help
 security_signed_verified
+security_verified_contact
+security_verified_contact_help
 select
 select_all
 selected
@@ -1732,11 +1771,18 @@ set_your_region
 settings
 ### SHARE ###
 share
-share_channels_qr
+share_action
+share_by_tap_subtext
+share_channels
+share_channels_add_hint
+share_channels_replace_hint
+share_channels_subject
 share_connected_node
 share_contact
+share_contact_subject
 share_location
 share_location_description
+share_qr_subtext
 share_to
 share_your_location_in_real_time
 shared_contact_no_public_key
@@ -1794,7 +1840,10 @@ smart_position
 snr
 snr_definition
 soil_moisture
+soil_ph
 soil_temperature
+soil_water_metrics
+solar_irradiance
 speed
 speed_kmh
 speed_mph
@@ -1949,6 +1998,7 @@ transport_tcp
 transport_udp
 transport_usb
 triple_click_adhoc_ping
+turbidity
 twenty_four_hours
 two_days
 two_weeks
@@ -2020,6 +2070,7 @@ voltage
 wait_for_bluetooth_duration_seconds
 wake_on_tap_or_motion
 warning
+water_ph
 waypoint_delete
 waypoint_edit
 waypoint_new

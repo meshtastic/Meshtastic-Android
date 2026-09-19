@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
@@ -45,9 +44,7 @@ fun NodeActionButton(
     iconTint: Color? = null,
     onClick: () -> Unit,
 ) {
-    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     val mediumHeight = ButtonDefaults.MediumContainerHeight
-    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     Button(
         onClick = { onClick() },
         shapes = ButtonDefaults.shapesFor(mediumHeight),

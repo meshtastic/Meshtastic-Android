@@ -2,7 +2,7 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-08-29
+last_updated: 2026-09-11
 description: How the Android and Desktop apps split into androidApp/desktopApp, feature modules, and core modules, and how radio control and navigation are layered across them.
 aliases:
   - layers
@@ -17,7 +17,7 @@ The Meshtastic Android and Desktop apps follow a modular Kotlin Multiplatform (K
 
 ## Layer Overview
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │          androidApp / desktopApp            │  Platform entry points
 ├─────────────────────────────────────────────┤
@@ -105,7 +105,7 @@ Protobuf models come from the external `org.meshtastic:protobufs` Maven artifact
 
 Each module uses the standard KMP source set hierarchy:
 
-```
+```text
 src/
 ├── commonMain/     ← Shared code (all platforms)
 ├── commonTest/     ← Shared tests

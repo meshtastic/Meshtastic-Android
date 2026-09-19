@@ -155,7 +155,8 @@ fun EditWaypointDialog(
             selectedDateString = DateFormatter.formatDate(instant.toEpochMilliseconds())
             selectedTimeString = DateFormatter.formatTime(instant.toEpochMilliseconds())
             if (!expireValue.isExpirySet()) {
-                waypointInput = waypointInput.copy(expire = instant.epochSeconds.toInt())
+                waypointInput =
+                    waypointInput.newBuilder().also { wb -> wb.expire = instant.epochSeconds.toInt() }.build()
             }
         } else {
             selectedDateString = ""
@@ -178,7 +179,9 @@ fun EditWaypointDialog(
                 Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
                     OutlinedTextField(
                         value = waypointInput.name,
-                        onValueChange = { waypointInput = waypointInput.copy(name = it.take(29)) },
+                        onValueChange = {
+                            waypointInput = waypointInput.newBuilder().also { wb -> wb.name = it.take(29) }.build()
+                        },
                         label = { Text(stringResource(Res.string.name)) },
                         singleLine = true,
                         keyboardOptions =
@@ -199,7 +202,10 @@ fun EditWaypointDialog(
                     Spacer(modifier = Modifier.size(8.dp))
                     OutlinedTextField(
                         value = waypointInput.description,
-                        onValueChange = { waypointInput = waypointInput.copy(description = it.take(99)) },
+                        onValueChange = {
+                            waypointInput =
+                                waypointInput.newBuilder().also { wb -> wb.description = it.take(99) }.build()
+                        },
                         label = { Text(stringResource(Res.string.description)) },
                         keyboardOptions =
                         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
@@ -231,7 +237,11 @@ fun EditWaypointDialog(
                             // stay unlocked).
                             enabled = myNodeNum != null,
                             onCheckedChange = { locked ->
-                                waypointInput = waypointInput.copy(locked_to = if (locked) myNodeNum ?: 0 else 0)
+                                waypointInput =
+                                    waypointInput
+                                        .newBuilder()
+                                        .also { wb -> wb.locked_to = if (locked) myNodeNum ?: 0 else 0 }
+                                        .build()
                             },
                         )
                     }
@@ -256,10 +266,15 @@ fun EditWaypointDialog(
                                 if (checked) {
                                     if (!waypointInput.expire.isExpirySet()) {
                                         val default = waypointInput.expire.expiryInstantOrDefault()
-                                        waypointInput = waypointInput.copy(expire = default.epochSeconds.toInt())
+                                        waypointInput =
+                                            waypointInput
+                                                .newBuilder()
+                                                .also { wb -> wb.expire = default.epochSeconds.toInt() }
+                                                .build()
                                     }
                                 } else {
-                                    waypointInput = waypointInput.copy(expire = Int.MAX_VALUE)
+                                    waypointInput =
+                                        waypointInput.newBuilder().also { wb -> wb.expire = Int.MAX_VALUE }.build()
                                 }
                             },
                         )
@@ -284,7 +299,10 @@ fun EditWaypointDialog(
                                             nanosecond = ldt.nanosecond,
                                         )
                                     waypointInput =
-                                        waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
+                                        waypointInput
+                                            .newBuilder()
+                                            .also { wb -> wb.expire = newLdt.toInstant(tz).epochSeconds.toInt() }
+                                            .build()
                                     showDatePicker = false
                                 },
                             )
@@ -304,7 +322,10 @@ fun EditWaypointDialog(
                                                 nanosecond = ldt.nanosecond,
                                             )
                                     waypointInput =
-                                        waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
+                                        waypointInput
+                                            .newBuilder()
+                                            .also { wb -> wb.expire = newLdt.toInstant(tz).epochSeconds.toInt() }
+                                            .build()
                                     showTimePicker = false
                                 },
                             )
@@ -371,7 +392,9 @@ fun EditWaypointDialog(
     } else {
         EmojiPickerDialog(onDismiss = { showEmojiPickerView = false }) { selectedEmoji ->
             showEmojiPickerView = false
-            selectedEmoji.firstCodePointOrNull()?.let { waypointInput = waypointInput.copy(icon = it) }
+            selectedEmoji.firstCodePointOrNull()?.let {
+                waypointInput = waypointInput.newBuilder().also { wb -> wb.icon = it }.build()
+            }
         }
     }
 }
@@ -413,7 +436,13 @@ private fun GeofenceSection(
                 FilterChip(
                     selected = meters == selectedRadius,
                     onClick = {
-                        onWaypointChange(waypoint.copy(geofence_radius = meters).normalizeGeofenceNotifications())
+                        onWaypointChange(
+                            waypoint
+                                .newBuilder()
+                                .also { wb -> wb.geofence_radius = meters }
+                                .build()
+                                .normalizeGeofenceNotifications(),
+                        )
                     },
                     label = { Text(label) },
                 )
@@ -431,7 +460,15 @@ private fun GeofenceSection(
             }
             if (hasBox) {
                 TextButton(
-                    onClick = { onWaypointChange(waypoint.copy(bounding_box = null).normalizeGeofenceNotifications()) },
+                    onClick = {
+                        onWaypointChange(
+                            waypoint
+                                .newBuilder()
+                                .also { wb -> wb.bounding_box = null }
+                                .build()
+                                .normalizeGeofenceNotifications(),
+                        )
+                    },
                 ) {
                     Text(stringResource(Res.string.geofence_remove_area))
                 }
@@ -453,19 +490,30 @@ private fun GeofenceNotificationControls(waypoint: Waypoint, onWaypointChange: (
             label = stringResource(Res.string.geofence_notify_on_enter),
             checked = waypoint.notify_on_enter,
             onCheckedChange = {
-                onWaypointChange(waypoint.copy(notify_on_enter = it).normalizeGeofenceNotifications())
+                onWaypointChange(
+                    waypoint
+                        .newBuilder()
+                        .also { wb -> wb.notify_on_enter = it }
+                        .build()
+                        .normalizeGeofenceNotifications(),
+                )
             },
         )
         GeofenceToggleRow(
             label = stringResource(Res.string.geofence_notify_on_exit),
             checked = waypoint.notify_on_exit,
-            onCheckedChange = { onWaypointChange(waypoint.copy(notify_on_exit = it).normalizeGeofenceNotifications()) },
+            onCheckedChange = {
+                val updated = waypoint.newBuilder().also { wb -> wb.notify_on_exit = it }.build()
+                onWaypointChange(updated.normalizeGeofenceNotifications())
+            },
         )
         if (waypoint.notify_on_enter || waypoint.notify_on_exit) {
             GeofenceToggleRow(
                 label = stringResource(Res.string.geofence_favorites_only),
                 checked = waypoint.notify_favorites_only,
-                onCheckedChange = { onWaypointChange(waypoint.copy(notify_favorites_only = it)) },
+                onCheckedChange = {
+                    onWaypointChange(waypoint.newBuilder().also { wb -> wb.notify_favorites_only = it }.build())
+                },
             )
         }
     }
@@ -492,9 +540,15 @@ private fun GeofenceToggleRow(label: String, checked: Boolean, onCheckedChange: 
  */
 private fun Waypoint.normalizeGeofenceNotifications(): Waypoint = when {
     geofence_radius <= 0 && bounding_box == null ->
-        copy(notify_on_enter = false, notify_on_exit = false, notify_favorites_only = false)
+        this.newBuilder()
+            .also { wb ->
+                wb.notify_on_enter = false
+                wb.notify_on_exit = false
+                wb.notify_favorites_only = false
+            }
+            .build()
 
-    !notify_on_enter && !notify_on_exit -> copy(notify_favorites_only = false)
+    !notify_on_enter && !notify_on_exit -> this.newBuilder().also { wb -> wb.notify_favorites_only = false }.build()
 
     else -> this
 }

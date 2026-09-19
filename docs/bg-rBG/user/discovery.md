@@ -2,7 +2,7 @@
 title: Local Mesh Discovery
 parent: Ръководство за потребители
 nav_order: 12
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - discovery
@@ -97,7 +97,7 @@ Mesh Beacon lets nodes invite others to join their mesh. A beaconing node period
 Configure it under **Settings → Module configuration → Mesh Beacon**. The entry appears only on radios running firmware 2.8.0 or newer. A read-only **Region** row at the top of the screen shows the region the beacon advertises: that region, and the preset, are always the ones the radio itself uses, so a beacon cannot invite anyone onto settings your radio is not running.
 
 - **Listen for beacons** — receive invitations broadcast by other nodes.
-- **Broadcast a beacon** — periodically advertise this mesh to nearby nodes, with an optional **Beacon message** of up to 100 bytes, a **Broadcast interval** picked from fixed intervals between 1 hour and 72 hours, and an **Offered channel** chosen from your radio's own channels. The offered channel is required, and defaults to your primary channel.
+- **Broadcast a beacon** — periodically advertise this mesh to nearby nodes, with an optional **Beacon message** of up to 100 bytes, a **Broadcast interval** picked from fixed intervals between 1 hour and 72 hours, and an **Offered channel** chosen from your radio's own channels. The offered channel is required, and defaults to your primary channel. Over remote admin the picker offers the primary channel only.
 - **Broadcast targets** — optional extra destinations beyond the offered channel. **Add target** appends a row; each row picks a **Channel** and a **Transmit preset**, and **Remove target** deletes it. With no targets, the beacon goes out on the offered channel alone.
 
 Two conditions block beacon setup:

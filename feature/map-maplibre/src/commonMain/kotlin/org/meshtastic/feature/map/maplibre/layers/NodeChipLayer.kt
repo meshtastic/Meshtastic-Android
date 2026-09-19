@@ -52,14 +52,13 @@ import org.maplibre.compose.expressions.dsl.condition
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.image
-import org.maplibre.compose.expressions.dsl.nil
 import org.maplibre.compose.expressions.dsl.switch
 import org.maplibre.compose.expressions.value.BooleanValue
 import org.maplibre.compose.expressions.value.FloatValue
+import org.maplibre.compose.interaction.ClickResult
+import org.maplibre.compose.layers.FeaturesClickHandler
 import org.maplibre.compose.layers.SymbolLayer
-import org.maplibre.compose.sources.Source
-import org.maplibre.compose.util.ClickResult
-import org.maplibre.compose.util.FeaturesClickHandler
+import org.maplibre.compose.sources.VectorSource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
@@ -95,10 +94,10 @@ import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
 @Composable
 internal fun NodeChipLayer(
     id: String,
-    source: Source,
+    source: VectorSource,
     nodes: List<Node>,
     onNodeClick: ((Int) -> Unit)? = null,
-    chipFilter: Expression<BooleanValue> = nil(),
+    chipFilter: Expression<BooleanValue>? = null,
 ) = MapChipLayer(
     id = id,
     source = source,
@@ -156,9 +155,9 @@ private fun chipSortKey(): Expression<FloatValue> = switch(
 @Composable
 internal fun MapChipLayer(
     id: String,
-    source: Source,
+    source: VectorSource,
     chips: List<MapChipKey>,
-    filter: Expression<BooleanValue> = nil(),
+    filter: Expression<BooleanValue>? = null,
     onClick: FeaturesClickHandler? = null,
 ) {
     val distinct = remember(chips) { chips.distinct().take(MAX_CHIP_IMAGES) }

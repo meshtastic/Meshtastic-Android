@@ -116,7 +116,12 @@ class RadioControllerRestoreTest {
         val restored =
             controller.restoreLocalConfiguration(
                 expectedDeviceAddress = "x:STALE",
-                config = Config(lora = Config.LoRaConfig(use_preset = true)),
+                config =
+                Config.Builder()
+                    .also { wb ->
+                        wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build()
+                    }
+                    .build(),
             )
 
         assertFalse(restored)
@@ -131,7 +136,12 @@ class RadioControllerRestoreTest {
         val restored =
             controller.restoreLocalConfiguration(
                 expectedDeviceAddress = null,
-                config = Config(lora = Config.LoRaConfig(use_preset = true)),
+                config =
+                Config.Builder()
+                    .also { wb ->
+                        wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build()
+                    }
+                    .build(),
             )
 
         assertFalse(restored)
@@ -140,8 +150,18 @@ class RadioControllerRestoreTest {
 
     @Test
     fun restoreLocalConfigurationUsesOneEditTransactionInChannelThenConfigOrder() = runTest {
-        val primaryChannel = Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings())
-        val config = Config(lora = Config.LoRaConfig(use_preset = true))
+        val primaryChannel =
+            Channel.Builder()
+                .also { wb ->
+                    wb.index = 0
+                    wb.role = Channel.Role.PRIMARY
+                    wb.settings = ChannelSettings.Builder().build()
+                }
+                .build()
+        val config =
+            Config.Builder()
+                .also { wb -> wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build() }
+                .build()
         val operations = mutableListOf<String>()
         val editScope = mock<AdminEditScope>(MockMode.autofill)
         everySuspend { editScope.setChannel(any()) } calls { operations += "channel" }
@@ -191,7 +211,12 @@ class RadioControllerRestoreTest {
         val restore = async {
             controller.restoreLocalConfiguration(
                 expectedDeviceAddress = "x:OLD",
-                config = Config(lora = Config.LoRaConfig(use_preset = true)),
+                config =
+                Config.Builder()
+                    .also { wb ->
+                        wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build()
+                    }
+                    .build(),
             )
         }
         runCurrent()

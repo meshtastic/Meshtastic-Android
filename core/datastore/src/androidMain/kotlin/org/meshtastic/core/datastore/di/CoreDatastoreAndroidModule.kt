@@ -65,7 +65,7 @@ class LocalConfigDataStoreModule {
     fun provideLocalConfigDataStore(context: Context, scope: DataStoreScope): CoreLocalConfigDataStore = protoStore(
         serializer = LocalConfigSerializer,
         producePath = { context.dataStoreFile("local_config.pb").toOkioPath() },
-        produceNewData = { LocalConfig() },
+        produceNewData = { LocalConfig.Builder().build() },
         scope = scope,
     )
         .asCoreLocalConfigDataStore()
@@ -77,7 +77,7 @@ class ModuleConfigDataStoreModule {
     fun provideModuleConfigDataStore(context: Context, scope: DataStoreScope): CoreModuleConfigDataStore = protoStore(
         serializer = ModuleConfigSerializer,
         producePath = { context.dataStoreFile("module_config.pb").toOkioPath() },
-        produceNewData = { LocalModuleConfig() },
+        produceNewData = { LocalModuleConfig.Builder().build() },
         scope = scope,
     )
         .asCoreModuleConfigDataStore()
@@ -89,7 +89,7 @@ class ChannelSetDataStoreModule {
     fun provideChannelSetDataStore(context: Context, scope: DataStoreScope): CoreChannelSetDataStore = protoStore(
         serializer = ChannelSetSerializer,
         producePath = { context.dataStoreFile("channel_set.pb").toOkioPath() },
-        produceNewData = { ChannelSet() },
+        produceNewData = { ChannelSet.Builder().build() },
         scope = scope,
     )
         .asCoreChannelSetDataStore()
@@ -101,7 +101,7 @@ class LocalStatsDataStoreModule {
     fun provideLocalStatsDataStore(context: Context, scope: DataStoreScope): CoreLocalStatsDataStore = protoStore(
         serializer = LocalStatsSerializer,
         producePath = { context.dataStoreFile("local_stats.pb").toOkioPath() },
-        produceNewData = { LocalStats() },
+        produceNewData = { LocalStats.Builder().build() },
         scope = scope,
     )
         .asCoreLocalStatsDataStore()

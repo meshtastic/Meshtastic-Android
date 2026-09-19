@@ -2,7 +2,7 @@
 title: TAK 連携
 parent: User Guide
 nav_order: 10
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: ATAK および WinTAK と相互運用します。CoT による位置共有、TAK の役割、プラグインの設定を説明します。
 aliases:
   - tak
@@ -36,7 +36,7 @@ TAK モジュールを使うと、Meshtastic のノードは次のことがで�
 > ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
 > work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
 > service is now in-process only. Do not install it. Interop today runs over the app's own local
-> TAK server plus the Mesh to CoT Converter, both described below, with stock ATAK/iTAK/WinTAK.
+> TAK server plus the Mesh to CoT Converter, both described in the following sections, with stock ATAK/iTAK/WinTAK.
 
 ### 設定
 

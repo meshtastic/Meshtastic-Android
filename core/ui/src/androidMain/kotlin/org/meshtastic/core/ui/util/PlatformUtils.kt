@@ -61,6 +61,28 @@ import org.meshtastic.core.common.util.ioDispatcher
 import java.net.URLEncoder
 
 @Composable
+actual fun rememberShareText(): (text: String, subject: String) -> Unit {
+    val context = LocalContext.current
+    return remember(context) {
+        { text, subject ->
+            try {
+                val send =
+                    Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, text)
+                        putExtra(Intent.EXTRA_SUBJECT, subject)
+                    }
+                context.startActivity(
+                    Intent.createChooser(send, subject).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) },
+                )
+            } catch (ex: ActivityNotFoundException) {
+                Logger.d { "No app available to share to: $ex" }
+            }
+        }
+    }
+}
+
+@Composable
 actual fun rememberOpenNfcSettings(): () -> Unit {
     val context = LocalContext.current
     return remember(context) {

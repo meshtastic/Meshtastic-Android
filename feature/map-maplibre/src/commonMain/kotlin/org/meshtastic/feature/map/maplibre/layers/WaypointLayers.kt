@@ -37,10 +37,11 @@ import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.eq
 import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.image
+import org.maplibre.compose.expressions.dsl.textOffset
+import org.maplibre.compose.interaction.ClickResult
 import org.maplibre.compose.layers.FillLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.layers.SymbolLayer
-import org.maplibre.compose.util.ClickResult
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.feature.map.maplibre.geojson.WaypointFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.geofencesToFeatureCollection
@@ -100,7 +101,7 @@ internal fun WaypointLayers(waypoints: Collection<DataPacket>, onWaypointClick: 
         textColor = const(Color.White),
         textHaloColor = const(Color.Black),
         textHaloWidth = const(1.dp),
-        textOffset = org.maplibre.compose.expressions.dsl.offset(0f.em, WAYPOINT_LABEL_OFFSET_EM.em),
+        textOffset = textOffset(0f.em, WAYPOINT_LABEL_OFFSET_EM.em),
     )
 }
 

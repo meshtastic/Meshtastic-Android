@@ -85,7 +85,7 @@ permissions:
 
 jobs:
   prepare-build-info:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     outputs:
       APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
@@ -127,7 +127,7 @@ jobs:
         shell: bash
 
   release-google:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     needs: [prepare-build-info]
     steps:
@@ -168,9 +168,9 @@ jobs:
           echo "$GOOGLE_PLAY_JSON_KEY" > ./fastlane/play-store-credentials.json
 
       - name: Setup Fastlane
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
         with:
-          ruby-version: '4.0.6'
+          ruby-version: '4.0.7'
           bundler-cache: true
 
       - name: Build and Deploy Google Play to Internal Track with Fastlane
@@ -211,7 +211,7 @@ jobs:
           subject-path: androidApp/build/outputs/apk/google/release/*.apk
 
   release-fdroid:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     needs: [prepare-build-info]
     steps:
@@ -239,9 +239,9 @@ jobs:
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
       - name: Setup Fastlane
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
         with:
-          ruby-version: '4.0.6'
+          ruby-version: '4.0.7'
           bundler-cache: true
 
       - name: Build F-Droid with Fastlane
@@ -485,7 +485,7 @@ jobs:
 
   release-flatpak-src:
     if: ${{ inputs.build_flatpak_src }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     needs: [create-flatpak-src]
     steps:
@@ -523,7 +523,7 @@ jobs:
 
   github-release:
     if: ${{ !cancelled() && !failure() }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     needs:
       - prepare-build-info
@@ -574,6 +574,21 @@ jobs:
             -f target_commitish="$TARGET" \
             ${PREV:+-f previous_tag_name="$PREV"} \
             --jq '.body' > release-notes.md
+
+      # The generated notes are a list of PR titles - accurate, and not what a user reads.
+      # metainfo.xml already carries one hand-written paragraph per version, required by
+      # pull-request.yml on the VERSION_NAME_BASE bump, so reuse it rather than asking for
+      # the same sentence twice. When it is missing the notes gain a rendered warning
+      # instead of silence, and every release here is created as a draft, so that warning
+      # is seen before anyone publishes.
+      - name: Prepend release highlights
+        run: |
+          python3 scripts/release-highlights.py \
+            desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml \
+            config.properties \
+            release-notes.md
+          echo "--- release notes ---"
+          cat release-notes.md
 
       - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3

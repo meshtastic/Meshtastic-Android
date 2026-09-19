@@ -76,16 +76,18 @@ fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSettings>): List
     for (i in 0..maxOf(old.lastIndex, new.lastIndex)) {
         if (old.getOrNull(i) != new.getOrNull(i)) {
             add(
-                Channel(
-                    role =
-                    when (i) {
-                        0 -> Channel.Role.PRIMARY
-                        in 1..new.lastIndex -> Channel.Role.SECONDARY
-                        else -> Channel.Role.DISABLED
-                    },
-                    index = i,
-                    settings = new.getOrNull(i) ?: ChannelSettings(),
-                ),
+                Channel.Builder()
+                    .also { wb ->
+                        wb.role =
+                            when (i) {
+                                0 -> Channel.Role.PRIMARY
+                                in 1..new.lastIndex -> Channel.Role.SECONDARY
+                                else -> Channel.Role.DISABLED
+                            }
+                        wb.index = i
+                        wb.settings = new.getOrNull(i) ?: ChannelSettings.Builder().build()
+                    }
+                    .build(),
             )
         }
     }
@@ -148,7 +150,7 @@ suspend fun importChannelSet(
             }
             setChannel(channel)
         }
-        importedLoraConfig?.let { setConfig(Config(lora = it)) }
+        importedLoraConfig?.let { setConfig(Config.Builder().also { wb -> wb.lora = it }.build()) }
     }
     withContext(NonCancellable) {
         radioConfigRepository.updateChannelSet(

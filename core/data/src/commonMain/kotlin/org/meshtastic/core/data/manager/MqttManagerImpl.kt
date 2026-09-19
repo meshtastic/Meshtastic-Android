@@ -86,7 +86,11 @@ class MqttManagerImpl(
             _proxyActive.value = true
             mqttMessageFlow =
                 mqttRepository.proxyMessageFlow
-                    .onEach { message -> packetHandler.sendToRadio(ToRadio(mqttClientProxyMessage = message)) }
+                    .onEach { message ->
+                        packetHandler.sendToRadio(
+                            ToRadio.Builder().also { wb -> wb.mqttClientProxyMessage = message }.build(),
+                        )
+                    }
                     .catch { throwable ->
                         _proxyActive.value = false
                         // safeCatchingAll swallows the Skiko ExceptionInInitializerError that

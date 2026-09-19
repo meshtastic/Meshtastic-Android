@@ -34,10 +34,27 @@ import kotlin.test.assertTrue
 
 class ReplayRadioTransportTest {
 
-    private val configFrames = listOf(FromRadio(my_info = MyNodeInfo(my_node_num = 1)))
+    private val configFrames =
+        listOf(
+            FromRadio.Builder()
+                .also { wb -> wb.my_info = MyNodeInfo.Builder().also { wb -> wb.my_node_num = 1 }.build() }
+                .build(),
+        )
     private val nodeFrames =
-        listOf(FromRadio(node_info = NodeInfo(num = 42)), FromRadio(node_info = NodeInfo(num = 43)))
-    private val packetFrames = (1..3).map { FromRadio(packet = MeshPacket(id = it)) }
+        listOf(
+            FromRadio.Builder()
+                .also { wb -> wb.node_info = NodeInfo.Builder().also { wb -> wb.num = 42 }.build() }
+                .build(),
+            FromRadio.Builder()
+                .also { wb -> wb.node_info = NodeInfo.Builder().also { wb -> wb.num = 43 }.build() }
+                .build(),
+        )
+    private val packetFrames =
+        (1..3).map {
+            FromRadio.Builder()
+                .also { wb -> wb.packet = MeshPacket.Builder().also { wb -> wb.id = it }.build() }
+                .build()
+        }
 
     private class RecordingCallback : RadioTransportCallback {
         var connects = 0
@@ -83,7 +100,7 @@ class ReplayRadioTransportTest {
             ReplayRadioTransport(callback, backgroundScope, address = "", frames = asset(), packetDelayMs = 0)
 
         assertEquals(0, callback.connects, "construction must not publish lifecycle callbacks")
-        assertFalse(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode()))
+        assertFalse(transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE)))
         transport.start()
 
         assertEquals(1, callback.connects)
@@ -97,11 +114,11 @@ class ReplayRadioTransportTest {
             ReplayRadioTransport(callback, backgroundScope, address = "", frames = asset(), packetDelayMs = 0)
 
         transport.start()
-        val accepted = transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
+        val accepted = transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
         testScheduler.runCurrent()
 
         assertTrue(accepted)
-        assertEquals(configFrames + FromRadio(config_complete_id = HandshakeConstants.CONFIG_NONCE), callback.received)
+        assertEquals(configFrames + configComplete(HandshakeConstants.CONFIG_NONCE), callback.received)
     }
 
     @Test
@@ -111,10 +128,10 @@ class ReplayRadioTransportTest {
             ReplayRadioTransport(callback, backgroundScope, address = "", frames = asset(), packetDelayMs = 0)
 
         transport.start()
-        assertTrue(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode()))
+        assertTrue(transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE)))
         testScheduler.runCurrent()
 
-        val expected = nodeFrames + FromRadio(config_complete_id = HandshakeConstants.NODE_INFO_NONCE) + packetFrames
+        val expected = nodeFrames + configComplete(HandshakeConstants.NODE_INFO_NONCE) + packetFrames
         assertEquals(expected, callback.received)
     }
 
@@ -125,15 +142,15 @@ class ReplayRadioTransportTest {
             ReplayRadioTransport(callback, backgroundScope, address = "", frames = asset(), packetDelayMs = 0)
 
         transport.start()
-        assertTrue(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode()))
-        assertTrue(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode()))
+        assertTrue(transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE)))
+        assertTrue(transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE)))
         testScheduler.runCurrent()
 
         val expected =
             configFrames +
-                FromRadio(config_complete_id = HandshakeConstants.CONFIG_NONCE) +
+                configComplete(HandshakeConstants.CONFIG_NONCE) +
                 nodeFrames +
-                FromRadio(config_complete_id = HandshakeConstants.NODE_INFO_NONCE) +
+                configComplete(HandshakeConstants.NODE_INFO_NONCE) +
                 packetFrames
         assertEquals(expected, callback.received)
     }
@@ -145,9 +162,9 @@ class ReplayRadioTransportTest {
             ReplayRadioTransport(callback, backgroundScope, address = "", frames = asset(), packetDelayMs = 0)
 
         transport.start()
-        assertTrue(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode()))
+        assertTrue(transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE)))
         testScheduler.runCurrent()
-        assertTrue(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode()))
+        assertTrue(transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE)))
         testScheduler.runCurrent()
 
         val packetsSent = callback.received.count { it.packet != null }
@@ -161,9 +178,9 @@ class ReplayRadioTransportTest {
             ReplayRadioTransport(callback, backgroundScope, address = "", frames = asset(), packetDelayMs = 1_000)
 
         transport.start()
-        assertTrue(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode()))
+        assertTrue(transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE)))
         testScheduler.runCurrent()
-        assertTrue(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode()))
+        assertTrue(transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE)))
         testScheduler.runCurrent()
 
         assertTrue(
@@ -180,7 +197,13 @@ class ReplayRadioTransportTest {
             ReplayRadioTransport(callback, backgroundScope, address = "", frames = asset(), packetDelayMs = 0)
 
         transport.start()
-        val accepted = transport.handleSendToRadio(ToRadio(packet = MeshPacket(id = 99)).encode())
+        val accepted =
+            transport.handleSendToRadio(
+                ToRadio.Builder()
+                    .also { wb -> wb.packet = MeshPacket.Builder().also { wb -> wb.id = 99 }.build() }
+                    .build()
+                    .encode(),
+            )
         testScheduler.runCurrent()
 
         assertTrue(accepted, "a live replay transport accepts ordinary traffic before intentionally discarding it")
@@ -194,7 +217,7 @@ class ReplayRadioTransportTest {
             ReplayRadioTransport(callback, backgroundScope, address = "", frames = asset(), packetDelayMs = 1_000)
 
         transport.start()
-        assertTrue(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode()))
+        assertTrue(transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE)))
         testScheduler.runCurrent()
         val receivedBeforeClose = callback.received.toList()
         assertTrue(
@@ -207,7 +230,7 @@ class ReplayRadioTransportTest {
         testScheduler.runCurrent()
 
         assertEquals(receivedBeforeClose, callback.received, "close must cancel the in-flight packet stream")
-        assertFalse(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode()))
+        assertFalse(transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE)))
         transport.start()
         assertEquals(1, callback.connects, "a closed replay transport must not reconnect")
     }
@@ -261,10 +284,14 @@ class ReplayRadioTransportTest {
             ReplayRadioTransport(callback, backgroundScope, address = "", frames = frames, packetDelayMs = 0)
 
         transport.start()
-        assertTrue(transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode()))
+        assertTrue(transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE)))
         testScheduler.runCurrent()
 
         // Only the injected config_complete — no nodes, no packets — proves zero-length sections parse cleanly.
-        assertEquals(listOf(FromRadio(config_complete_id = HandshakeConstants.NODE_INFO_NONCE)), callback.received)
+        assertEquals(listOf(configComplete(HandshakeConstants.NODE_INFO_NONCE)), callback.received)
     }
 }
+
+private fun wantConfig(id: Int) = ToRadio.Builder().also { wb -> wb.want_config_id = id }.build().encode()
+
+private fun configComplete(id: Int) = FromRadio.Builder().also { wb -> wb.config_complete_id = id }.build()

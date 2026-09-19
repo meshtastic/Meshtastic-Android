@@ -56,6 +56,9 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
     override suspend fun getSession(sessionId: Long): DiscoverySessionEntity? =
         dbManager.withDb { it.discoveryDao().getSession(sessionId) }
 
+    override suspend fun countSessionsForDevice(sessionId: Long, deviceAddress: String): Int =
+        dbManager.withDb { it.discoveryDao().countSessionsForDevice(sessionId, deviceAddress) } ?: 0
+
     override suspend fun updateSessionCompletionStatus(sessionId: Long, status: String): Int =
         dbManager.withDb { it.discoveryDao().updateSessionCompletionStatus(sessionId, status) } ?: 0
 
@@ -105,6 +108,16 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
 
     override suspend fun insertPresetResult(result: DiscoveryPresetResultEntity): Long =
         checkNotNull(dbManager.withDb { it.discoveryDao().insertPresetResult(result) })
+
+    /**
+     * One resolution, one transaction. Inheriting [DiscoveryDao]'s default body here would issue a separate [withDb]
+     * per statement and reintroduce the switch window the transaction exists to close.
+     */
+    override suspend fun insertDwellIfSessionExists(
+        result: DiscoveryPresetResultEntity,
+        nodes: List<DiscoveredNodeEntity>,
+        deviceAddress: String,
+    ): Long? = dbManager.withDb { it.discoveryDao().insertDwellIfSessionExists(result, nodes, deviceAddress) }
 
     override suspend fun updatePresetResult(result: DiscoveryPresetResultEntity) {
         dbManager.withDb { it.discoveryDao().updatePresetResult(result) }

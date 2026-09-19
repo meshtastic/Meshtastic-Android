@@ -41,15 +41,18 @@ val MeshPacket.fullRouteDiscovery: RouteDiscovery?
             val hopStartVal = hop_start
             val hasBitfield = (d.bitfield ?: 0) != 0
 
-            return originalRd.copy(
-                route = fullRoute,
-                route_back =
-                if ((hopStartVal > 0 || hasBitfield) && originalRd.snr_back.isNotEmpty()) {
-                    fullRouteBack
-                } else {
-                    originalRd.route_back
-                },
-            )
+            return originalRd
+                .newBuilder()
+                .also { wb ->
+                    wb.route = fullRoute
+                    wb.route_back =
+                        if ((hopStartVal > 0 || hasBitfield) && originalRd.snr_back.isNotEmpty()) {
+                            fullRouteBack
+                        } else {
+                            originalRd.route_back
+                        }
+                }
+                .build()
         }
         return null
     }

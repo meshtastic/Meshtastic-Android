@@ -16,8 +16,11 @@
  */
 package org.meshtastic.app.ui
 
+import org.junit.runner.RunWith
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.navigation.DeepLinkRouter
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import org.w3c.dom.Element
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
@@ -34,7 +37,12 @@ import kotlin.test.fail
  * filter — otherwise `https://meshtastic.org/{path}` links open in the browser instead of the app, even though the
  * `meshtastic://` scheme works. The segments come straight from [DeepLinkRouter.topLevelPathSegments], the set
  * [DeepLinkRouter.route] gates its dispatch on, so a new router segment fails here until the manifest declares it.
+ *
+ * Robolectric because on Android the router's `DeepLinkUri` is `android.net.Uri`, a stub on the plain unit-test
+ * classpath.
  */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class DeepLinkManifestConsistencyTest {
 
     @Test
