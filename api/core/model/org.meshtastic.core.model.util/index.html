@@ -902,7 +902,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.meshtastic.proto/Telemetry///PointingToDeclaration/">Telemetry</span><span class="token punctuation">.</span><a href="has-valid-environment-metrics.html"><span class="token function">hasValidEnvironmentMetrics</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Returns true if this telemetry packet contains valid, plot-able environment metrics.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.meshtastic.proto/Telemetry///PointingToDeclaration/">Telemetry</span><span class="token punctuation">.</span><a href="has-valid-environment-metrics.html"><span class="token function">hasValidEnvironmentMetrics</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Returns true if this telemetry packet carries environment metrics worth listing: a temperature and humidity pair, or a lightning reading. An AS3935 on its own reports only lightning, so it is admitted without the climate pair.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -1453,6 +1453,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">.</span><a href="to-speed-string.html"><span class="token function">toSpeedString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">system<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.util/-measurement-system/index.html">MeasurementSystem</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="659674273%2FFunctions%2F394437785" anchor-label="toStormDistanceString" id="659674273%2FFunctions%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-storm-distance-string.html"><span>to</span><wbr><span>Storm</span><wbr><span>Distance</span><wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="659674273%2FFunctions%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">.</span><a href="to-storm-distance-string.html"><span class="token function">toStormDistanceString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">system<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.util/-measurement-system/index.html">MeasurementSystem</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Formats a distance already in kilometres (a storm front, not a node) in <a href="to-storm-distance-string.html">system</a>'s large unit only: whole km, or miles to one decimal. The AS3935 reports whole kilometres, so a 1 km reading must not fall through to feet.</p></div></div></div>
                 </div>
               </div>
             </div>
