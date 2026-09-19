@@ -24,17 +24,19 @@ import org.meshtastic.buildlogic.maplibreDesktopRuntime
 // rendered offscreen with Compose Desktop's ImageComposeScene over one sample mesh, and the real MapLibre map captured
 // through maplibre-compose's MapSnapshotter. Every shot is the raw screen, as Play requires ("do not position the
 // screenshots within device frames"), at one size per form factor: phone 1080x1920, 7-inch 1080x1920, 10-inch
-// 2560x1440, Chromebook 1920x1080 and Android XR 1920x1200. The same screens adapt themselves - the app's navigation
-// suite, list-detail and two-pane layouts do the work - so a form factor is data, not a copy of the loop. It has no
-// tests, so `./gradlew test` / `allTests` never touch it; the one command is
+// 2560x1440, Chromebook 1920x1080, Android XR 1920x1200, and the desktop app's Flathub listing at 1280x800. The same
+// screens adapt themselves - the app's navigation suite, list-detail and two-pane layouts do the work - so a form
+// factor is data, not a copy of the loop. It has no tests, so `./gradlew test` / `allTests` never touch it; the one
+// command is
 //
 //     ./gradlew :marketing-screenshots:updateMarketingScreenshots
 //
 // which writes en-US straight into fastlane/metadata/android/en-US/images/<type>Screenshots/ (phone, sevenInch,
-// tenInch, chromebook, xr). Any other locale in -PmarketingLocales (comma list, default "en-US") renders into
-// build/marketing-screenshots/<locale>/images/ in the same layout, for a later `fastlane supply` run: only en-US is
-// committed because everything under fastlane/ is read straight from git by F-Droid and IzzyOnDroid. The sample
-// prose lives in src/main/composeResources/values/strings.xml, which Crowdin's first rule already picks up.
+// tenInch, chromebook, xr) and desktopApp/packaging/linux/screenshots/. Any other locale in -PmarketingLocales (comma
+// list, default "en-US") renders into build/marketing-screenshots/<locale>/ in the same layout, for a later `fastlane
+// supply` run: only en-US is committed because everything under fastlane/ is read straight from git by F-Droid and
+// IzzyOnDroid. The sample prose lives in src/main/composeResources/values/strings.xml, which Crowdin's first rule
+// already picks up.
 // -PmarketingFramed=true also writes the framed 1242x2484 phone variants (bezel, caption banner) under
 // build/marketing-screenshots/framed/<locale>/ for website and social use. The map needs a Vulkan loader the JVM can
 // find: on a stock Ubuntu nothing, on a Nix host, whose shell replaces LD_LIBRARY_PATH with its own, pass
@@ -70,16 +72,19 @@ dependencies {
     implementation(libs.maplibre.compose)
     maplibreDesktopRuntime()
 
+    implementation(projects.core.ble)
     implementation(projects.core.common)
     implementation(projects.core.database)
     implementation(projects.core.model)
     implementation(projects.core.navigation)
     implementation(projects.core.resources)
     implementation(projects.core.ui)
+    implementation(projects.feature.connections)
     implementation(projects.feature.map)
     implementation(projects.feature.mapMaplibre)
     implementation(projects.feature.messaging)
     implementation(projects.feature.node)
+    implementation(projects.feature.settings)
     implementation(libs.meshtastic.protobufs)
 }
 
@@ -90,7 +95,7 @@ compose.resources {
 
 // Script-level vals are re-bound to locals inside the task block: a lambda that reads them directly captures the
 // script object, which the configuration cache refuses to serialize.
-val fastlaneMetadata = isolated.rootProject.projectDirectory.dir("fastlane/metadata/android")
+val repositoryRoot = isolated.rootProject.projectDirectory
 val marketingOutput = layout.buildDirectory.dir("marketing-screenshots")
 val marketingLocales = providers.gradleProperty("marketingLocales").orElse("en-US")
 val marketingFramed = providers.gradleProperty("marketingFramed").orElse("false")
@@ -100,10 +105,10 @@ val hostLibraryPath =
 
 tasks.register<JavaExec>("updateMarketingScreenshots") {
     description =
-        "Renders the store-listing screenshots into fastlane/metadata/android/en-US/images/ (other locales into " +
-        "build/marketing-screenshots/)."
+        "Renders the store-listing screenshots into fastlane/metadata/android/en-US/images/ and " +
+        "desktopApp/packaging/linux/screenshots/ (other locales into build/marketing-screenshots/)."
     group = "store-screenshots"
-    val output = fastlaneMetadata
+    val output = repositoryRoot
     val buildOutput = marketingOutput
     val locales = marketingLocales
     val framed = marketingFramed

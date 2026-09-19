@@ -30,29 +30,33 @@ import org.meshtastic.screenshot.marketing.resources.marketing_caption_nodes_des
 import org.meshtastic.screenshot.marketing.resources.marketing_caption_nodes_title
 
 /**
- * The five listing shots in listing order; file names sort into that order on Play and F-Droid alike. The caption is
- * the headline and body copy the framed variant draws above the phone, as string resources so Crowdin carries them.
+ * Every screen the generator can draw. Which of them a surface lists, in what order and under what file name is the
+ * form factor's ([FormFactor.shots], [FileNaming]); [slug] is the name's stable part. The caption is the headline and
+ * body copy the framed variant draws above the phone, as string resources so Crowdin carries them; the two shots only
+ * the desktop lists have none, because no framed variant ever shows them.
  */
 internal enum class Shot(
-    val fileName: String,
-    val captionTitle: StringResource,
-    val captionDescription: StringResource,
+    val slug: String,
+    val captionTitle: StringResource? = null,
+    val captionDescription: StringResource? = null,
 ) {
     Messages(
-        "1_messages",
+        "messages",
         Res.string.marketing_caption_messages_title,
         Res.string.marketing_caption_messages_description,
     ),
-    Nodes("2_nodes", Res.string.marketing_caption_nodes_title, Res.string.marketing_caption_nodes_description),
-    Map("3_map", Res.string.marketing_caption_map_title, Res.string.marketing_caption_map_description),
+    Nodes("nodes", Res.string.marketing_caption_nodes_title, Res.string.marketing_caption_nodes_description),
+    Map("map", Res.string.marketing_caption_map_title, Res.string.marketing_caption_map_description),
     NodeDetail(
-        "4_node_detail",
+        "node_detail",
         Res.string.marketing_caption_node_detail_title,
         Res.string.marketing_caption_node_detail_description,
     ),
     Channels(
-        "5_channels",
+        "channels",
         Res.string.marketing_caption_channels_title,
         Res.string.marketing_caption_channels_description,
     ),
+    Connections("connections"),
+    Settings("settings"),
 }

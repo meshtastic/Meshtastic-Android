@@ -72,6 +72,9 @@ internal class SampleMesh(private val now: Int = (nowMillis / 1_000L).toInt()) {
     companion object {
         const val CENTER_LAT = 32.7767
         const val CENTER_LON = -96.797
+
+        /** The firmware every radio in the group runs; the routers report it, and the connections card shows it. */
+        const val FIRMWARE_VERSION = "2.8.1.f3c2a9"
         private const val HALF_MINUTE_SECONDS = 30
         private const val JUST_NOW_SECONDS = 5
     }
@@ -122,7 +125,7 @@ internal class SampleMesh(private val now: Int = (nowMillis / 1_000L).toInt()) {
                 metadata =
                 DeviceMetadata.Builder()
                     .also {
-                        it.firmware_version = "2.8.1.f3c2a9"
+                        it.firmware_version = FIRMWARE_VERSION
                         it.hw_model = HardwareModel.RAK4631
                         it.role = Role.ROUTER
                         it.hasBluetooth = true
@@ -194,7 +197,7 @@ internal class SampleMesh(private val now: Int = (nowMillis / 1_000L).toInt()) {
                 metadata =
                 DeviceMetadata.Builder()
                     .also {
-                        it.firmware_version = "2.8.1.f3c2a9"
+                        it.firmware_version = FIRMWARE_VERSION
                         it.hw_model = HardwareModel.RAK4631
                         it.role = Role.ROUTER
                         it.hasBluetooth = true

@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.ui.theme.AppTheme
 
@@ -64,10 +65,14 @@ internal object Frame {
 
 /**
  * The opt-in framed variant, for the website and social posts rather than the store: a phone [screen] inside a
- * captioned bezel on the 1242x2484 canvas. Play itself forbids device frames in listing screenshots.
+ * captioned bezel on the 1242x2484 canvas. Play itself forbids device frames in listing screenshots. Only the phone's
+ * shots come through here, and every one of them carries a caption.
  */
-internal fun framePhone(screen: ImageBitmap, shot: Shot): ImageBitmap =
-    renderScreen(Frame.WIDTH_PX, Frame.HEIGHT_PX, Frame.DENSITY) { StoreFrame(shot, screen) }
+internal fun framePhone(screen: ImageBitmap, shot: Shot): ImageBitmap {
+    val title = requireNotNull(shot.captionTitle) { "$shot has no caption to frame" }
+    val description = requireNotNull(shot.captionDescription) { "$shot has no caption to frame" }
+    return renderScreen(Frame.WIDTH_PX, Frame.HEIGHT_PX, Frame.DENSITY) { StoreFrame(title, description, screen) }
+}
 
 private val Background = Color(0xFF1F2937)
 private val BezelColor = Color(0xFF0B0F14)
@@ -89,7 +94,7 @@ private val CAPTION_BLOCK_HEIGHT = 232.dp
  * drawn status bar and [screen] scaled inside it, sized so the whole phone fits above the bottom edge.
  */
 @Composable
-private fun StoreFrame(shot: Shot, screen: ImageBitmap) {
+private fun StoreFrame(title: StringResource, description: StringResource, screen: ImageBitmap) {
     AppTheme(darkTheme = true, dynamicColor = false) {
         Column(
             modifier = Modifier.fillMaxSize().background(Background).padding(horizontal = 28.dp),
@@ -100,7 +105,7 @@ private fun StoreFrame(shot: Shot, screen: ImageBitmap) {
             Box(modifier = Modifier.fillMaxWidth().height(CAPTION_BLOCK_HEIGHT), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = stringResource(shot.captionTitle),
+                        text = stringResource(title),
                         style =
                         MaterialTheme.typography.displaySmall.copy(
                             fontWeight = FontWeight.Bold,
@@ -111,7 +116,7 @@ private fun StoreFrame(shot: Shot, screen: ImageBitmap) {
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        text = stringResource(shot.captionDescription),
+                        text = stringResource(description),
                         style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, lineHeight = 27.sp),
                         color = Color.White.copy(alpha = 0.82f),
                         textAlign = TextAlign.Center,
