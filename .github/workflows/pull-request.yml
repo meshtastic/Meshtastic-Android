@@ -305,6 +305,11 @@ jobs:
         run: ./scripts/verify-abi-parity-selftest.sh
       - name: Validate store listing metadata lengths
         run: python3 scripts/check-metadata-length.py
+      # supply uploads every locale directory it finds and neither it nor the Crowdin CLI
+      # validates the names, so an unmapped code is only rejected by the Play API, partway
+      # through an upload. Catch it here instead.
+      - name: Validate store listing locale codes
+        run: python3 scripts/check-play-locales.py
       # Compose Multiplatform does not strip Android-style \" / \' escapes, so a
       # backslash written before a quote renders literally in the UI (PR #6357).
       # Guards the English source strings; locale mirrors are cleaned upstream by
