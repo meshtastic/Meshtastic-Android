@@ -242,7 +242,7 @@ private fun CoveragePlot(coverage: CoverageGrid, modifier: Modifier = Modifier) 
 
     Box(modifier) {
         Canvas(Modifier.fillMaxWidth().aspectRatio(1f)) {
-            drawRect(Color(0xFF14151C))
+            drawRect(PLOT_BACKGROUND)
             val cw = size.width / coverage.width
             val ch = size.height / coverage.height
             for (y in 0 until coverage.height) {
@@ -261,7 +261,7 @@ private fun CoveragePlot(coverage: CoverageGrid, modifier: Modifier = Modifier) 
 }
 
 private fun signalColor(dbm: Double, sensitivity: Double, strongest: Double): Color {
-    if (dbm < sensitivity) return Color(0xFF22232C)
+    if (dbm < sensitivity) return BELOW_SENSITIVITY
     val t = ((dbm - sensitivity) / (strongest - sensitivity)).coerceIn(0.0, 1.0).toFloat()
     val r = if (t < HALF) 1f else (1f - (t - HALF) * 2f).coerceIn(0f, 1f)
     val g = if (t < HALF) (t * 2f).coerceIn(0f, 1f) else 1f
@@ -276,3 +276,7 @@ private const val DOT_RADIUS = 2.5f
 private const val TX_RADIUS = 5f
 private const val HALF = 0.5f
 private const val GREEN_FLOOR = 0.24f
+
+// The preview's own dark canvas, and the shade of a cell the receiver cannot hear.
+private val PLOT_BACKGROUND = Color(0xFF14151C)
+private val BELOW_SENSITIVITY = Color(0xFF22232C)
