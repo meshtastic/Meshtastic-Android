@@ -40,6 +40,7 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.jetbrains.compose.resources.stringResource
+import org.maplibre.compose.camera.CameraAnimation
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.expressions.dsl.asBoolean
 import org.maplibre.compose.expressions.dsl.const
@@ -116,7 +117,10 @@ fun MapLibreInlineMap(
     // first composition does not animate to where the camera already is.
     LaunchedEffect(target) {
         if (mapState.cameraPosition.target != target) {
-            mapState.animateCameraPosition(mapState.cameraPosition.copy(target = target))
+            mapState.animateCameraPosition(
+                mapState.cameraPosition.copy(target = target),
+                animation = CameraAnimation.Ease(),
+            )
         }
     }
 
