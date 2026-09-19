@@ -33,15 +33,15 @@ import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.green
 import org.meshtastic.core.resources.led_state
 import org.meshtastic.core.resources.red
-import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.ModuleConfig
-
-private const val MAX_LED_CURRENT = 31
-private const val MAX_RGB_VALUE = 255
+import org.meshtastic.proto.blue
+import org.meshtastic.proto.current
+import org.meshtastic.proto.green
+import org.meshtastic.proto.red
 
 @Composable
 fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -95,53 +95,37 @@ private fun LedColorFields(
     onConfigChange: (ModuleConfig.AmbientLightingConfig) -> Unit,
 ) {
     androidx.compose.foundation.layout.Column {
-        EditTextPreference(
+        BoundedIntEditTextPreference(
             title = stringResource(Res.string.current),
             value = config.current,
+            metadata = ModuleConfig.AmbientLightingConfig.current,
             enabled = enabled,
-            isError = config.current !in 0..MAX_LED_CURRENT,
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            onValueChanged = {
-                if (it in 0..MAX_LED_CURRENT) {
-                    onConfigChange(config.newBuilder().also { wb -> wb.current = it }.build())
-                }
-            },
+            onValueChange = { onConfigChange(config.newBuilder().also { wb -> wb.current = it }.build()) },
         )
-        EditTextPreference(
+        BoundedIntEditTextPreference(
             title = stringResource(Res.string.red),
             value = config.red,
+            metadata = ModuleConfig.AmbientLightingConfig.red,
             enabled = enabled,
-            isError = config.red !in 0..MAX_RGB_VALUE,
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            onValueChanged = {
-                if (it in 0..MAX_RGB_VALUE) {
-                    onConfigChange(config.newBuilder().also { wb -> wb.red = it }.build())
-                }
-            },
+            onValueChange = { onConfigChange(config.newBuilder().also { wb -> wb.red = it }.build()) },
         )
-        EditTextPreference(
+        BoundedIntEditTextPreference(
             title = stringResource(Res.string.green),
             value = config.green,
+            metadata = ModuleConfig.AmbientLightingConfig.green,
             enabled = enabled,
-            isError = config.green !in 0..MAX_RGB_VALUE,
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            onValueChanged = {
-                if (it in 0..MAX_RGB_VALUE) {
-                    onConfigChange(config.newBuilder().also { wb -> wb.green = it }.build())
-                }
-            },
+            onValueChange = { onConfigChange(config.newBuilder().also { wb -> wb.green = it }.build()) },
         )
-        EditTextPreference(
+        BoundedIntEditTextPreference(
             title = stringResource(Res.string.blue),
             value = config.blue,
+            metadata = ModuleConfig.AmbientLightingConfig.blue,
             enabled = enabled,
-            isError = config.blue !in 0..MAX_RGB_VALUE,
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            onValueChanged = {
-                if (it in 0..MAX_RGB_VALUE) {
-                    onConfigChange(config.newBuilder().also { wb -> wb.blue = it }.build())
-                }
-            },
+            onValueChange = { onConfigChange(config.newBuilder().also { wb -> wb.blue = it }.build()) },
         )
     }
 }
