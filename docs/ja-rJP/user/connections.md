@@ -102,7 +102,7 @@ Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based c
 1. 無線機がスマートフォン／デスクトップと同じローカルネットワーク上にあることを確認します。
 2. On the **Connect** tab, select **Network** in the transport selector.
 3. 無線機は次の 2 通りの方法で選べます：
-   - **ネットワークデバイスをスキャン**：これをオンにすると、ローカルネットワーク上で自身を告知している無線機（mDNS ／ `_meshtastic._tcp`）を自動的に探索します。 見つかったデバイスがリストに表示されるので、タップして接続します。
+   - **ネットワークデバイスをスキャン**：これをオンにすると、ローカルネットワーク上で自身を告知している無線機（mDNS ／ `_meshtastic._tcp`）を自動的に探索します。見つかったデバイスがリストに表示されるので、タップして接続します。
    - **デバイスを手動で追加…**：無線機の IP アドレス（またはホスト名）とポート（既定：`4403`）を入力します。
 4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (touch & hold to remove one).
 

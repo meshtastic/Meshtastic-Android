@@ -29,7 +29,7 @@ aliases:
 
 ### ノードのマーカー
 
-位置を報告している各ノードは、そのノードの短縮名を表示する**ノードチップ**マーカーとして表示されます。 チップは、そのノード固有のアイデンティティカラー（ノード番号から導かれる一定の色）で色付けされます。ノードリストで使われるのと同じチップなので、どこでも同じ見た目になります。 マーカーの色は、オンライン／オフラインの状態を**表しません**。 ノードの位置がライブで更新されると、そのマーカーが短く脈打つように点滅します。 縮小すると、近くのマーカーはまとめて表示（クラスタリング）されます。
+位置を報告している各ノードは、そのノードの短縮名を表示する**ノードチップ**マーカーとして表示されます。チップは、そのノード固有のアイデンティティカラー（ノード番号から導かれる一定の色）で色付けされます。ノードリストで使われるのと同じチップなので、どこでも同じ見た目になります。マーカーの色は、オンライン／オフラインの状態を**表しません**。ノードの位置がライブで更新されると、そのマーカーが短く脈打つように点滅します。縮小すると、近くのマーカーはまとめて表示（クラスタリング）されます。
 
 ### マップの操作
 
@@ -79,9 +79,9 @@ Waypoints always broadcast to the whole mesh on the primary channel. Unlike a me
 ウェイポイントは、自動的に期限切れになるよう設定できます：
 
 - **なし**（デフォルト）：手動で削除するまでウェイポイントは残ります
-- **期限付き**：特定の日時を指定します。その時刻を過ぎると、ウェイポイントは自動的に削除されます。 集合地点、危険箇所、待ち合わせ場所などの一時的なマーカーに便利です。
+- **期限付き**：特定の日時を指定します。その時刻を過ぎると、ウェイポイントは自動的に削除されます。集合地点、危険箇所、待ち合わせ場所などの一時的なマーカーに便利です。
 
-期限切れのウェイポイントは、表示が煩雑にならないよう、自動的にマップから隠されます。 有効期限のカウントダウンは、指定した絶対時刻を基準とし、ウェイポイントが作成または受信されてからの経過時間ではありません。
+期限切れのウェイポイントは、表示が煩雑にならないよう、自動的にマップから隠されます。有効期限のカウントダウンは、指定した絶対時刻を基準とし、ウェイポイントが作成または受信されてからの経過時間ではありません。
 
 ### ウェイポイントのジオフェンス
 
@@ -108,7 +108,7 @@ Tap the layers icon on the map to open **Manage Map Layers**. It imports your ow
 
 ### サイトプランナー
 
-**サイトプランナー**は、送信機の RF カバレッジを推定し、色分けされたオーバーレイとしてマップに描画します。 マップの操作から開くか、ノードの詳細ページから「**カバレッジを推定**」で開きます（位置が判明しているノードでのみ表示されます）。 送信機（位置、周波数、送信出力、アンテナ利得と高さ）、受信機（感度、高さ）、シミュレーションのオプション（最大範囲、高解像度の地形、カラーパレット）を設定してから、推定を実行します。 Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On **Desktop** the same form is shown but the planner opens in your browser; to bring the estimate onto the map, click the transmitter pin in the browser, choose the planner's GeoJSON export, then add the downloaded file under **Manage Map Layers** with **Add Layer**. Use the GeoJSON export, not the KML one — the KML is a ground-overlay image this map cannot draw.
+**サイトプランナー**は、送信機の RF カバレッジを推定し、色分けされたオーバーレイとしてマップに描画します。マップの操作から開くか、ノードの詳細ページから「**カバレッジを推定**」で開きます（位置が判明しているノードでのみ表示されます）。送信機（位置、周波数、送信出力、アンテナ利得と高さ）、受信機（感度、高さ）、シミュレーションのオプション（最大範囲、高解像度の地形、カラーパレット）を設定してから、推定を実行します。 Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On **Desktop** the same form is shown but the planner opens in your browser; to bring the estimate onto the map, click the transmitter pin in the browser, choose the planner's GeoJSON export, then add the downloaded file under **Manage Map Layers** with **Add Layer**. Use the GeoJSON export, not the KML one — the KML is a ground-overlay image this map cannot draw.
 
 ## 位置の共有
 
@@ -125,7 +125,7 @@ Configure position behavior in **Settings → Device configuration → Position*
 
 ### プライバシーに関する注意
 
-> 🔒 **プライバシー：** 位置データは、チャンネル上のすべてのノードにブロードキャストされます。 位置を共有したくない場合は、設定で GPS 位置を無効にするか、固定／ダミーの位置を使用してください。 To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point.
+> 🔒 **プライバシー：** 位置データは、チャンネル上のすべてのノードにブロードキャストされます。位置を共有したくない場合は、設定で GPS 位置を無効にするか、固定／ダミーの位置を使用してください。 To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point.
 
 ## マップソース
 

@@ -2,7 +2,7 @@
 title: Laitteet
 parent: Käyttöopas
 nav_order: 4
-last_updated: 2026-09-11
+last_updated: 2026-09-19
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
@@ -15,32 +15,36 @@ aliases:
 
 Radionäkymässä luetellaan kaikki mesh-verkossasi näkyvät radiot.
 
-## Radiolista
+## Node list
 
-Radioluettelo näyttää kaikki radiot, joista radiosi on vastaanottanut tietoja, mukaan lukien:
+The node list shows every node your node has heard, including:
 
 - **Radion nimi** — käyttäjän määrittämä pitkä nimi
 - **Lyhyt nimi** — 4-merkkinen tunniste
-- **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your radio heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
+- **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your node heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
 - **Viimeksi kuultu** — aika viimeisimmästä yhteydestä
 - **Etäisyys** — arvioitu etäisyys (jos sijaintitiedot jaetaan)
 - **Akku** — etäradion akun varaustaso (jos telemetria on käytössä)
 
-### Choosing What the List Shows
+### Choosing what the list shows
 
 The list has two densities, set at **Settings → Node Layout**. **Complete** shows every field a node has reported and hides the ones it hasn't. **Compact** fits more nodes on screen and lets you pick the fields yourself — **Power**, **Last Heard Time**, **Relative Last Heard Time**, **Distance and Bearing**, **Hops Away**, **Signal (Direct Only)**, **Channel**, and **Device & Role**. The **Environment Metrics** toggle applies to both densities. A preview above the toggles shows the effect before you leave the screen.
 
-### Radion tilailmaisimet
+### Node Status indicators
 
-| Ilmaisin              | Tarkoitus                                               |
-| --------------------- | ------------------------------------------------------- |
-| Green last-heard time | Radio kuultu viimeisen 2 tunnin aikana                  |
-| Plain last-heard time | Radiosta ei ole kuultu yli 2 tuntiin                    |
-| ⭐ Suosikki            | Radio, jonka olet merkinnyt suosikiksi. |
+| Ilmaisin                                              | Tarkoitus                                                                           |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Green last-heard time                                 | Radio kuultu viimeisen 2 tunnin aikana                                              |
+| Plain last-heard time                                 | Radiosta ei ole kuultu yli 2 tuntiin                                                |
+| Orange last-heard time with a crossed-out signal icon | Not heard since your node's LoRa settings changed, so it can't be reached from here |
+| Struck-through name                                   | Node you have ignored                                                               |
+| ⭐ Suosikki                                            | Radio, jonka olet merkinnyt suosikiksi.                             |
 
-Erillistä "poissa"-tilaa ei ole.
+There is no separate "away" tier, but the orange unreachable state takes precedence over the
+green one: a node can be online and still be unreachable on your current settings. Nodes known
+only over MQTT are never shown as unreachable.
 
-### Radion roolit
+### Radioiden roolit
 
 Radioille voidaan määrittää erilaisia rooleja, jotka vaikuttavat niiden toimintaan verkossa:
 
@@ -58,18 +62,18 @@ Radioille voidaan määrittää erilaisia rooleja, jotka vaikuttavat niiden toim
 | Sensor            | Optimoitu telemetrian raportointiin                                                                                                                                            |
 | TAK               | Yhteensopiva TAK-järjestelmien kanssa (lähettää ja vastaanottaa CoT-viestejä)                                                                               |
 | TAK Tracker       | Vain TAK-sijainnin raportointi                                                                                                                                                 |
-| Lost and Found    | Sends its position to the default channel as a text message at regular intervals, to help recover a lost radio                                                                 |
+| Lost and Found    | Sends its position to the default channel as a text message at regular intervals, to help recover a lost node                                                                  |
 
-### Roolin valitseminen
+### Choosing a role
 
 Useimpien käyttäjien kannattaa käyttää oletusarvoista **Client**-roolia. Harkitse muuta roolia seuraavissa tilanteissa:
 
-- **Router** — Sinulla on radio kiinteässä, korkealla sijaitsevassa paikassa, jossa on luotettava virransyöttö (katto, mäki). Routerit pysyvät jatkuvasti hereillä välittääkseen muiden viestejä ja ovat tärkeitä verkon peittoalueen laajentamisessa. Älä käytä Reititin-roolia akkukäyttöisissä käsiradioissa.
+- **Router** — Sinulla on radio kiinteässä, korkealla sijaitsevassa paikassa, jossa on luotettava virransyöttö (katto, mäki). Routerit pysyvät jatkuvasti hereillä välittääkseen muiden viestejä ja ovat tärkeitä verkon peittoalueen laajentamisessa. Don't use Router on battery-powered handheld nodes.
 - **Router Late** — Infrastruktuuriradio, joka lähettää paketit uudelleen kerran, mutta vasta kaikkien muiden reititystilojen jälkeen. Tarjoaa lisäpeittoa paikallisille ryhmille kilpailematta ensisijaisten Routerien kanssa.
 - **Client Base** — Käsittelee suosikkiradioihisi menevän tai niistä tulevan liikenteen Router Late -prioriteetilla (varmistaen näille viesteille ylimääräisen välityspeiton), samalla kun kaikki muu käsitellään tavallisen Client-roolin tavoin.
-- **Client Mute** — Voit vastaanottaa verkkoliikennettä, mutta et osallistu viestien välittämiseen. Hyödyllinen vain kuunteluun tarkoitetuissa radioissa tai ruuhkan vähentämiseen tiheillä alueilla.
-- **Tracker** "seurantalaite" — miehittämätön radio, jonka ainoa tehtävä on lähettää GPS-sijaintiaan (esimerkiksi ajoneuvo, henkilö tai muu kohde). Nukkuu lähetysten välillä akun säästämiseksi.
-- **Anturi** — miehittämätön radio, joka lähettää ympäristötelemetriaa (lämpötila, ilmankosteus, ilmanlaatu). Samanlainen virrankulutusprofiili kuin Tracker-roolissa.
+- **Client Mute** — Voit vastaanottaa verkkoliikennettä, mutta et osallistu viestien välittämiseen. Useful for monitoring-only nodes or to reduce congestion in dense areas.
+- **Tracker** — An unattended node whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Nukkuu lähetysten välillä akun säästämiseksi.
+- **Sensor** — An unattended node reporting environmental telemetry (temperature, humidity, air quality). Samanlainen virrankulutusprofiili kuin Tracker-roolissa.
 - **TAK / TAK Tracker** — Tarvitaan vain yhteensopivuuteen ATAK-/WinTAK-järjestelmien kanssa. Katso [TAK-integraatio](tak) lisätietoja varten.
 
 > 💡 **Vinkki:** Verkko toimii parhaiten, kun suurin osa radioista käyttää **Client**- tai **Router**-roolia. Liian suuri määrä Client Mute (mykistetty) -radioita heikentää mesh-verkon vikasietoisuutta. Liian useat Router -roolin radiot tiheällä alueella voivat aiheuttaa ruuhkaa. Hyvä nyrkkisääntö on yksi Router jokaista 5–10 Client-roolia kohden alueellasi.
@@ -78,19 +82,19 @@ Useimpien käyttäjien kannattaa käyttää oletusarvoista **Client**-roolia. Ha
 
 Each node carries one security icon beside its name in the node list. Tap it to read what it means, and choose **Show All Meanings** in that dialog for the full legend. The detail screen shows the same state in words, as a **Security** row that opens the same dialog.
 
-| Kuvake                                                    | Merkitys                                                                                                                                                                                                                                                                                     | Shown for                                                                                         |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Person with a shield check (green)     | **Verified contact** — you verified this node's key in person by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows. Your own connected node carries it too                                                       | Any firmware version                                                                              |
-| Nodes icon with a shield check (green) | **Signed node** — this node signs its broadcasts with its identity key, so its identity is consistent over time, but you have not verified it in person. On firmware 2.8 the icon appears from the version alone, before any signed broadcast has been heard | Firmware 2.8 or newer, and any node whose signed broadcast your node has verified |
-| 🔒 Closed lock                                            | A public key is on file and matches, so direct messages to this node are encrypted                                                                                                                                                                                                           | Firmware before 2.8, or no reported version                                       |
-| 🔓 Open lock                                              | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one                                                                                                                                            | Firmware before 2.8, or no reported version                                       |
-| ⚠️ Ei täsmää                                              | **Public key mismatch** — a different key arrived for this node after one was stored. Investigate before trusting                                                                                                                                                            | Any firmware version                                                                              |
+| Kuvake                                                    | Merkitys                                                                                                                                                                                                                                                                                    | Shown for                                                                                         |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Person with a shield check (green)     | **Verified contact** — you verified this node's key in person by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows. Your own connected node carries it too                                                      | Any firmware version                                                                              |
+| Nodes icon with a shield check (green) | **Signed node** — this node signs its broadcasts with its identity key, so its identity is consistent over time, but you haven't verified it in person. On firmware 2.8 the icon appears from the version alone, before any signed broadcast has been heard | Firmware 2.8 or newer, and any node whose signed broadcast your node has verified |
+| 🔒 Closed lock                                            | A public key is on file and matches, so direct messages to this node are encrypted                                                                                                                                                                                                          | Firmware before 2.8, or no reported version                                       |
+| 🔓 Open lock                                              | No public key has been received for this node, so it can't be direct messaged — use **Request User Info** on the node detail page to ask for one                                                                                                                                            | Firmware before 2.8, or no reported version                                       |
+| ⚠️ Ei täsmää                                              | **Public key mismatch** — a different key arrived for this node after one was stored. Investigate before trusting                                                                                                                                                           | Any firmware version                                                                              |
 
-Every node on firmware 2.8 or newer signs its broadcasts, so on that firmware the signed state is the baseline and the locks are not shown.
+Every node on firmware 2.8 or newer signs its broadcasts, so on that firmware the signed state is the baseline and the locks aren't shown.
 
 Direct messages always use public-key encryption, so your node needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly.
 
-A mismatch never replaces the key you already hold. The app keeps the first key it recorded and refuses the new one, as the firmware does, so a stray or hostile node info cannot silently break encrypted messaging to a contact. To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two nodes exchange keys again the next time yours hears it.
+A mismatch never replaces the key you already hold. The app keeps the first key it recorded and refuses the new one, as the firmware does, so a stray or hostile node info can't silently break encrypted messaging to a contact. To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two nodes exchange keys again the next time yours hears it.
 
 ## Pikatoiminnot
 
@@ -107,10 +111,10 @@ Radioluettelosta voit:
 
 Touch & hold **your own node** instead and you get one action, **Update status**, which opens the
 User settings screen with the cursor already in the Status Message field. It only appears while the
-radio is connected and running firmware 2.8 or newer — see
+node is connected and running firmware 2.8 or newer — see
 [Settings — Radio & User](settings-radio-user.md) for the field itself.
 
-## Sharing a Contact
+## Sharing a contact
 
 On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Share link** opens the Android share sheet (on desktop it copies the link instead), **Write to NFC tag** saves it to a writable NFC tag, and **Copy** puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved.
 
@@ -118,26 +122,44 @@ Sharing your own contact this way marks it as verified in person, so whoever imp
 
 To add someone else's contact, use the import button on the node list and choose **Scan Shared Contact QR Code**, **Scan Shared Contact NFC**, or **Input Shared Contact URL**. The app asks you to confirm with **Import Shared Contact?**, and warns you when the contact is one you already have.
 
-## Suodatus ja lajittelu
+## Filtering & sorting
 
-### Tekstihaku
+### Text search
 
 Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteella. Suodatus päivittyy reaaliajassa kirjoittaessasi.
 
-### Suodatusvalinnat
+### Filter toggles
 
-| Suodatus                          | Kuvaus                                                                                                                                                                                                                                                                                                                        |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hide offline nodes**            | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                                                                                                                                                                                                                                                                |
-| **Only show direct nodes**        | Show only nodes your radio heard directly, with no relay in between                                                                                                                                                                                                                                                           |
-| **Näytä tuntemattomat**           | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and cannot be direct messaged until their user info brings a public key                                               |
-| **Ohita infrastruktuurilaitteet** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                                                                                                                                                       |
-| **Rajaa MQTT pois**               | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                                                                                                                                                                                                                                                            |
-| **Signed only**                   | Show only nodes whose signed broadcasts your node has actually heard and verified. Stricter than the icon: a node on 2.8 shows as signed by its firmware version before any signed broadcast arrives, and a contact verified in person on older firmware is not signed at all |
-| **Encrypted only**                | Show nodes with a matching public key on file, the key an encrypted direct message needs. A node with a key mismatch is excluded                                                                                                                                                                              |
-| **Only show ignored Nodes**       | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                                                                                                                                                   |
+| Suodatus                          | Kuvaus                                                                                                                                                                                                                                                                                                                       |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hide offline nodes**            | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                                                                                                                                                                                                                                                               |
+| **Only show direct nodes**        | Show only nodes your node heard directly, with no relay in between                                                                                                                                                                                                                                                           |
+| **Näytä tuntemattomat**           | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and can't be direct messaged until their user info brings a public key                                               |
+| **Ohita infrastruktuurilaitteet** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that can't be messaged, whatever its role                                                                                                                                                       |
+| **Rajaa MQTT pois**               | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                                                                                                                                                                                                                                                           |
+| **Hide unheard nodes**            | Hide nodes your own node hasn't heard since its LoRa settings changed. Off by default, and it does nothing on firmware that doesn't report whether a node was heard on the current settings                                                                                                                  |
+| **Signed only**                   | Show only nodes whose signed broadcasts your node has actually heard and verified. Stricter than the icon: a node on 2.8 shows as signed by its firmware version before any signed broadcast arrives, and a contact verified in person on older firmware isn't signed at all |
+| **Encrypted only**                | Show nodes with a matching public key on file, the key an encrypted direct message needs. A node with a key mismatch is excluded                                                                                                                                                                             |
+| **Only show ignored Nodes**       | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                                                                                                                                                  |
 
-### Lajitteluvaihtoehdot
+### Nodes not heard on your current Settings
+
+When your node's LoRa settings change — a different preset, region or frequency slot — nodes heard
+under the old settings are still in the list but can no longer be reached. The app marks them with
+an orange last-heard time and a crossed-out signal icon, and shows a banner at the top of the list:
+**N nodes not heard on your current LoRa settings**.
+
+The banner offers two actions:
+
+- **Keep** dismisses the banner and leaves every node in place.
+- **Remove** deletes those nodes from the list. Your favorites and your own node are never removed.
+
+**Remove** is a bulk delete and there is no undo, so use **Keep** if you expect to switch back to
+the old settings. Removed nodes reappear if your node hears them again.
+
+The **Hide unheard nodes** filter does the same hiding without deleting anything.
+
+### Sort options
 
 | Lajittelu                                     | Kuvaus                                                                            |
 | --------------------------------------------- | --------------------------------------------------------------------------------- |
@@ -146,14 +168,14 @@ Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteel
 | **Etäisyys**                                  | Lähimpänä olevat radiot ensin (edellyttää sijainnin jakamista) |
 | **Hyppyjä**                                   | Vähiten välityshyppyjä vaativat radiot ensin                                      |
 | **Kanava**                                    | Ryhmitelty kanavaindeksin mukaan                                                  |
-| **via MQTT**                                  | Ryhmitelty MQTT:n kautta kuultuihin ja radiolla kuultuihin        |
+| **via MQTT**                                  | Grouped by MQTT vs. node-heard                                    |
 | **via Favorite** (default) | Favorited nodes first, then the rest                                              |
 
-## Radiot hyppymäärän mukaan
+## Nodes per hop
 
-Avaa pylväskaavio, joka näyttää radioiden määrän kullakin hyppyetäisyydellä, napauttamalla radioluettelon sovelluspalkissa olevaa hyppyhistogrammikuvaketta (0 = suora yhteys, 1 = yksi välityshyppy ja niin edelleen). Suodata kaavio **Viimeksi kuultu** -ajanjakson mukaan — Kaikki ajat, 1 tunti, 8 tuntia tai 24 tuntia — nähdäksesi, miltä mesh-verkko näyttää juuri nyt verrattuna pidempään ajanjaksoon. Tämä on nopea tapa arvioida, kuinka laaja ja kuormittunut paikallinen mesh-verkkosi on.
+Avaa pylväskaavio, joka näyttää radioiden määrän kullakin hyppyetäisyydellä, napauttamalla radioluettelon sovelluspalkissa olevaa hyppyhistogrammikuvaketta (0 = suora yhteys, 1 = yksi välityshyppy ja niin edelleen). Filter the chart to a **last heard** window — **All**, **1 Hour**, **8 Hours** or **24H** — to see how the mesh looks right now versus over a longer period. Tämä on nopea tapa arvioida, kuinka laaja ja kuormittunut paikallinen mesh-verkkosi on.
 
-## Radion tiedot
+## Node detail
 
 Radion napauttaminen avaa tietonäkymän, jossa on kattavat tiedot. Katso [Radion mittarit](node-metrics) saadaksesi täydelliset tiedot mittareista ja telemetriasta.
 
@@ -173,7 +195,7 @@ Rivinsisäiset tilailmaisimet näyttävät tärkeimmät tiedot yhdellä silmäyk
 | Viimeksi kuultu | ![Viimeksi kuultu](../../assets/screenshots/nodes_last_heard.png) |
 | Etäisyys        | ![Etäisyys](../../assets/screenshots/nodes_distance_info.png)     |
 
-### Laite-linkit ("Haluan sellaisen")
+### Device links ("I want one")
 
 Kun radion laitteisto tunnistetaan, tietonäkymä näyttää avattavan **"Haluan sellaisen"** -osion, jossa on linkkejä laitteen ostamiseen tai lisätietojen hankkimiseen: valmistajan tuotesivu, tuoteversiot sekä alueelliset kauppapaikkalistaukset (esim. AliExpress, Amazon ja tuetut jälleenmyyjät), suodatettuna maasi mukaan. Jokainen linkki avautuu mesh.to -uudelleenohjauspalvelun kautta. Laitteet, joille ei löydy vastaavia linkkejä, eivät näytä tätä osiota.
 
@@ -181,12 +203,12 @@ A full, browsable directory of every link is also available at **Settings → De
 
 Some of these are affiliate links. Both places say so above the links: product links may be affiliate links, and purchases may earn Meshtastic a commission.
 
-## When No Nodes Appear
+## When no nodes appear
 
-The list stays empty until your radio hears another node.
+The list stays empty until your node hears another node.
 
-- **No device connected** — the app is not connected to a radio. See [Connections](connections).
-- **Searching for nodes** — the radio is connected and listening, but nothing has arrived yet. Check that its region and modem preset match the mesh around you, and leave **Include unknown** on so a node that has not yet sent its name still appears. See [Settings — Radio & User](settings-radio-user).
+- **No device connected** — the app isn't connected to a node. See [Connections](connections).
+- **Searching for nodes** — the node is connected and listening, but nothing has arrived yet. Check that its region and modem preset match the mesh around you, and leave **Include unknown** on so a node that hasn't yet sent its name still appears. See [Settings — Radio & User](settings-radio-user).
 - A node you expect is missing — check the filter toggles. **Only show direct nodes**, **Exclude MQTT**, and **Exclude infrastructure** each hide a whole category of node.
 
 ## Aiheeseen liittyvät aiheet

@@ -2,7 +2,7 @@
 title: MQTT
 parent: User Guide
 nav_order: 11
-last_updated: 2026-09-11
+last_updated: 2026-09-19
 description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
 aliases:
   - mqtt
@@ -75,7 +75,7 @@ The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen s
 
 The community maintains a public broker at `mqtt.meshtastic.org`. This is intended for general use and testing.
 
-When this phone relays MQTT for the radio, connections to that broker always use TLS on port 8883 even if **TLS enabled** is off — the app forces the switch on and grays it out. A radio that reaches the broker over its own Wi-Fi or Ethernet forces nothing: turn **TLS enabled** on yourself, or it connects in the clear on port 1883. For any other broker the toggle decides in both cases (port 8883 with TLS, 1883 without).
+When this phone relays MQTT for the radio, connections to that broker always use TLS on port 8883 even if **TLS enabled** is off — that upgrade is the app's own, and the switch says so. A radio that reaches the broker over its own Wi-Fi or Ethernet forces nothing: it uses **TLS enabled** as stored, so turn it on yourself or the radio connects in the clear on port 1883. For any other broker the toggle decides in both cases (port 8883 with TLS, 1883 without).
 
 > 🔒 **Privacy:** Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.
 

@@ -221,6 +221,7 @@
     <!-- PERMISSIONS -->
     <string name="phone_location">Месцазнаходжанне тэлефона</string>
     <string name="play">Граць</string>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Месцазнаходжанне</string>
     <string name="position_log">Месцазнаходжанне</string>

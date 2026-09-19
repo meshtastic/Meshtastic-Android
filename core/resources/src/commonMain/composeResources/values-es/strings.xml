@@ -641,6 +641,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
         <item quantity="one">%1$d hora</item>
         <item quantity="other">%1$d horas</item>
     </plurals>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Posición</string>
     <string name="position_config_set_fixed_from_phone">Definir desde la ubicación actual del teléfono</string>

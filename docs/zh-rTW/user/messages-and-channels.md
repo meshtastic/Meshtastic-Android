@@ -17,7 +17,7 @@ Meshtastic 支援兩種通訊模式：頻道廣播與私訊。
 
 ## 頻道
 
-頻道是共享的通訊群組。 所有設定相同頻道金鑰的節點均可在該頻道上讀取與傳送訊息。
+頻道是共享的通訊群組。所有設定相同頻道金鑰的節點均可在該頻道上讀取與傳送訊息。
 
 ### 預設頻道
 
@@ -124,7 +124,7 @@ A status label appears under **your own** outgoing messages only (incoming messa
 
 | 錯誤                               | 含義                                                                                                                                                                            | 處理方式                                                                                                                                  |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| 無路徑                              | 無法找到通往目標節點的路徑                                                                                                                                                                 | 收件者可能已離線或超出 mesh 網路範圍。 請稍後再試，或靠近對方後重新傳送。                                                                                              |
+| 無路徑                              | 無法找到通往目標節點的路徑                                                                                                                                                                 | 收件者可能已離線或超出 mesh 網路範圍。請稍後再試，或靠近對方後重新傳送。                                                                                               |
 | No radio interface               | 無可用的無線電介面進行傳送                                                                                                                                                                 | Check that your radio is connected and available.                                                                     |
 | Failed to deliver to mesh        | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause. |
 | Rate limited                     | The mesh is throttling you for sending too fast                                                                                                                               | Wait before sending again.                                                                                            |
@@ -140,7 +140,7 @@ A status label appears under **your own** outgoing messages only (incoming messa
 | Duty cycle limit                 | 已達地區無線電佔用時間上限                                                                                                                                                                 | Wait for the duty cycle window to reset.                                                                              |
 | Invalid request                  | Malformed or invalid request                                                                                                                                                  | Retry after updating or restarting the app if this persists.                                                          |
 
-> 💡 提示：大多數傳遞錯誤會自動解決。 若節點間歇性可到達，mesh 網路將自動重試。 For persistent **No route** errors, check that intermediate Router nodes are online.
+> 💡 提示：大多數傳遞錯誤會自動解決。若節點間歇性可到達，mesh 網路將自動重試。 For persistent **No route** errors, check that intermediate Router nodes are online.
 
 ## 訊息功能
 
@@ -173,7 +173,7 @@ You can search the full history of any conversation directly from the chat scree
 
 ### 訊息泡泡
 
-訊息以對話泡泡的形式顯示 — 已傳送的訊息在右側，收到的訊息在左側。 每個泡泡顯示傳送者、時間戳記及傳遞狀態。 含有回覆的訊息，會在回覆內容上方顯示原始訊息的引用預覽。
+訊息以對話泡泡的形式顯示 — 已傳送的訊息在右側，收到的訊息在左側。每個泡泡顯示傳送者、時間戳記及傳遞狀態。含有回覆的訊息，會在回覆內容上方顯示原始訊息的引用預覽。
 
 ### Text Formatting
 

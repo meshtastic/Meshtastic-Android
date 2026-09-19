@@ -433,6 +433,7 @@
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <string name="pin_selected">Pin</string>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Konum</string>
     <string name="position_enabled">Pozisyon etkinleştirildi</string>

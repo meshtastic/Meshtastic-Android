@@ -419,6 +419,7 @@
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <string name="pin_selected">핀</string>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">위치</string>
     <string name="position_enabled">위치 활성화</string>

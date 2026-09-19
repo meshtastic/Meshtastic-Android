@@ -1,17 +1,19 @@
----
-title: Telemeetria & Sensorid
-parent: Kasutusjuhend
+\| Lightning, strikes in the last hour and storm distance | count, km or mi | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometres |---
+title: Telemetry & Sensors
+parent: User Guide
 nav_order: 9
-last_updated: 2026-08-30
-description: Kärgvõrgu andurite andmed — toetatud keskkonna-, õhukvaliteedi- ja võimsusandurid ning konfiguratsiooni- ja vaatamisjuhendid.
+last_updated: 2026-09-18
+description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.
 aliases:
-  - sensorid
-  - environment
-  - ilm
-  - power-metrics
+
+- sensorid
+- environment
+- ilm
+- power-metrics
+
 ---
 
-# Telemetria & sensorid
+# Telemeetria & Sensorid
 
 Meshtastic sõlmed saavad koguda ja jagada andurite andmeid kärgvõrgu kaudu. Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information, visible on the node detail screen and logged over time.
 
@@ -43,11 +45,12 @@ Supported environmental sensors:
 
 ### Air Quality
 
-| Andur    | Meetriline           | Sõnumid                                                                                                                               |
-| -------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| BME680   | Gas Resistance / IAQ | Volatile organic compounds                                                                                                            |
-| PMSA003I | PM1,0, PM2,5, PM10   | See [Air Quality Metrics](#air-quality-metrics)                                                                                       |
-| SEN55    | PM, Temp, Humidity   | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not shown as cards or charts |
+| Andur    | Meetriline              | Sõnumid                                                                                                                                                                                                                    |
+| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BME680   | Gas Resistance / IAQ    | Volatile organic compounds                                                                                                                                                                                                 |
+| PMSA003I | PM1,0, PM2,5, PM10      | See [Air Quality Metrics](#air-quality-metrics)                                                                                                                                                                            |
+| SEN55    | PM, Temp, Humidity      | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not shown as cards or charts                                                                                      |
+| SEN6x    | PM, CO₂, Temp, Humidity | Its status register is always exported; when it reports a fault (fan, RH&T, gas, CO₂, HCHO or PM), the fault names appear as a Sensor Status card and on each Air Quality log entry |
 
 ### Soil
 
@@ -57,6 +60,8 @@ Supported environmental sensors:
 | Pinnase niiskus     | %       | Volumetric water content                        |
 
 Both appear as info cards on the node detail screen, next to the other environment readings.
+
+Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, dissolved oxygen, ORP, turbidity, nitrate, ammonium, oxygen demand, solar irradiance) appears as a **Soil & Water** row of info cards on the node detail screen once a node reports any of it, and is included in the node database export. There is no chart or log screen for it yet.
 
 ### Valgus & UV
 
@@ -68,17 +73,18 @@ Both appear as info cards on the node detail screen, next to the other environme
 
 ### Weather and Other Readings
 
-| Meetriline                            | Ühik                 | Where it appears                                                                                                                                            |
-| ------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Wind speed                            | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card |
-| Wind direction, gust, and lull        | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
-| Rainfall, last hour and last 24 hours | mm or in             | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
-| Radiatsioon                           | µR/h                 | Card and chart                                                                                                                                              |
-| Kaal                                  | kg or lb             | Card only — load cells, such as a beehive scale                                                                                                             |
-| Kaugus                                | mm or in             | Card only — water level, from a distance sensor                                                                                                             |
-| Dew point                             | °C or °F             | Card only — computed from temperature and humidity                                                                                                          |
-| 1-Wire temperature                    | °C or °F             | Card and chart, up to eight DS18B20-style probes                                                                                                            |
-| ADC voltage                           | V                    | Card and chart, up to eight raw analog channels                                                                                                             |
+| Meetriline                                             | Ühik                 | Where it appears                                                                                                                                            |
+| ------------------------------------------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Wind speed                                             | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card |
+| Wind direction, gust, and lull                         | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
+| Rainfall, last hour and last 24 hours                  | mm or in             | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
+| Lightning, strikes in the last hour and storm distance | count, km or mi      | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector                                   |
+| Radiatsioon                                            | µR/h                 | Card and chart                                                                                                                                              |
+| Kaal                                                   | kg or lb             | Card only — load cells, such as a beehive scale                                                                                                             |
+| Kaugus                                                 | mm or in             | Card only — water level, from a distance sensor                                                                                                             |
+| Dew point                                              | °C or °F             | Card only — computed from temperature and humidity                                                                                                          |
+| 1-Wire temperature                                     | °C or °F             | Card and chart, up to eight DS18B20-style probes                                                                                                            |
+| ADC voltage                                            | V                    | Card and chart, up to eight raw analog channels                                                                                                             |
 
 ## Võimsusnäitajad
 

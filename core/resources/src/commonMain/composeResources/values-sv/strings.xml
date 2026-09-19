@@ -945,6 +945,7 @@
         <item quantity="one">%1$d sekund</item>
         <item quantity="other">%1$d sekunder</item>
     </plurals>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Plats</string>
     <string name="position_config_set_fixed_from_phone">Ställ in från aktuell telefonplats</string>

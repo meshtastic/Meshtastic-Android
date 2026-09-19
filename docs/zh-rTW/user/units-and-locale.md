@@ -20,7 +20,7 @@ The Meshtastic app automatically displays temperatures, distances, speeds, and t
 
 Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
 
-在 Android 上，量測單位偏好由系統的語言與地區設定決定。 在桌面版（JVM）上，應用程式使用 JVM 的預設 Locale。
+在 Android 上，量測單位偏好由系統的語言與地區設定決定。在桌面版（JVM）上，應用程式使用 JVM 的預設 Locale。
 
 Units follow your device's **region**, not the display language. Plain languages — like **English** in the app's own Language setting or Android's per-app language — keep the region your device is set to. A choice that names a region of its own, like **English (Canada)**, overrides it and brings that region's units with it. On Android 16+, the system-wide **Measurement system** preference overrides the region for distance, speed, and the other measurements — but not for temperature, which keeps following the region.
 
