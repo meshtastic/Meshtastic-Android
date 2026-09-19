@@ -1817,6 +1817,7 @@ success
 super_deep_sleep_duration_seconds
 supported
 supported_by_community
+supported_by_maker
 swipe_action_delete
 swipe_action_mute
 swipe_action_unmute

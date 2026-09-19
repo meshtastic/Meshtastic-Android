@@ -1868,6 +1868,7 @@
     <string name="super_deep_sleep_duration_seconds">Super deep sleep duration</string>
     <string name="supported">Supported</string>
     <string name="supported_by_community">Supported by Meshtastic Community</string>
+    <string name="supported_by_maker">Independent maker hardware</string>
     <string name="swipe_action_delete">Delete</string>
     <string name="swipe_action_mute">Mute</string>
     <string name="swipe_action_unmute">Unmute</string>

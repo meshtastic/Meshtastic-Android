@@ -28,6 +28,11 @@ data class DeviceHardware(
     val hwModel: Int = 0,
     val hwModelSlug: String = "",
     val images: List<String>? = null,
+    /**
+     * The registry's maker relationship: independent hardware that is neither Backer/Partner nor community. Absent and
+     * `false` mean the same thing; how it ranks against [activelySupported] and [supportLevel] is [supportTier].
+     */
+    val isMaker: Boolean = false,
     val partitionScheme: String? = null,
     val platformioTarget: String = "",
     val requiresDfu: Boolean? = null,

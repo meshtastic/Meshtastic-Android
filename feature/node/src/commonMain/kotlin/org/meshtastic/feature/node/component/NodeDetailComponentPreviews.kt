@@ -336,6 +336,29 @@ private fun NodeDetailsSectionWithDeviceHeroPreview() {
     }
 }
 
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun NodeDetailsSectionWithMakerDeviceHeroPreview() {
+    val node = previewData.mickeyMouse
+    // Flagship supportLevel with activelySupported false: the registry's shape for the first maker board.
+    val deviceHardware =
+        org.meshtastic.core.model.DeviceHardware(
+            displayName = "Axiometa Genesis Mini",
+            activelySupported = false,
+            isMaker = true,
+            supportLevel = 1,
+            images = listOf("axiometa-genesis-mini.svg"),
+            hwModel = 148,
+            hwModelSlug = "AXIOMETA_GENESIS_MINI",
+        )
+    AppTheme {
+        Surface {
+            NodeDetailsSection(node = node, deviceHardware = deviceHardware, reportedTarget = "axiometa-genesis-mini")
+        }
+    }
+}
+
 @PreviewLightDark
 @Composable
 private fun DeviceLinksSectionPreview() {

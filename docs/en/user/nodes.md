@@ -2,7 +2,7 @@
 title: Nodes
 parent: User Guide
 nav_order: 4
-last_updated: 2026-09-11
+last_updated: 2026-09-19
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -170,6 +170,18 @@ Inline status indicators show key metrics at a glance:
 | Hop count | ![Hops](../../assets/screenshots/nodes_hops_info.png) |
 | Last heard | ![Last heard](../../assets/screenshots/nodes_last_heard.png) |
 | Distance | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
+
+### Hardware support status
+
+When a node's hardware is recognized, the detail view names the device and marks which rung of support it sits on, taken from the Meshtastic device registry rather than the app:
+
+| Mark | Meaning |
+| --- | --- |
+| Rosette (green) | **Supported** — Backer or Partner hardware |
+| Wrench (sky blue) | **Independent maker hardware** — built and tested by an independent maker, ranked between Backer/Partner and community hardware |
+| Unverified (red) | **Supported by Meshtastic Community** — community and DIY hardware, and any legacy board |
+
+The label always accompanies the mark, so the rung is never conveyed by colour alone.
 
 ### Device Links ("I want one")
 

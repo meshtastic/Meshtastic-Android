@@ -23,6 +23,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_bluetooth
 import org.meshtastic.core.resources.ic_bluetooth_connected
 import org.meshtastic.core.resources.ic_bluetooth_searching
+import org.meshtastic.core.resources.ic_build
 import org.meshtastic.core.resources.ic_cached
 import org.meshtastic.core.resources.ic_display_settings
 import org.meshtastic.core.resources.ic_memory
@@ -35,6 +36,9 @@ import org.meshtastic.core.resources.ic_usb
 import org.meshtastic.core.resources.ic_usb_off
 import org.meshtastic.core.resources.ic_wifi
 
+/** The maker hardware mark from meshtastic/design#160: a wrench, Material Symbols "build". */
+val MeshtasticIcons.Wrench: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_build)
 val MeshtasticIcons.BluetoothConnected: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_bluetooth_connected)
 val MeshtasticIcons.BluetoothSearching: ImageVector

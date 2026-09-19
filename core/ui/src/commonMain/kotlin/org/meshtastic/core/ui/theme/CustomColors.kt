@@ -210,6 +210,16 @@ object StatusColors {
             } else {
                 Color(0xFF5C6BC0) // Info
             }
+
+    /** The maker hardware rung's hue from meshtastic/design#160, shared with the flasher; declared, never derived. */
+    val ColorScheme.StatusSky: Color
+        @Composable
+        get() =
+            if (isSystemInDarkTheme()) {
+                Color(0xFF7DD3FC)
+            } else {
+                Color(0xFF075985)
+            }
 }
 
 @Suppress("MagicNumber")
