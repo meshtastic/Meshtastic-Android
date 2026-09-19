@@ -301,10 +301,10 @@ private fun FrameOnce(enabled: Boolean, nodes: List<Node>, mapState: MapState) {
     var hasFramed by remember { mutableStateOf(false) }
     val hasViewport = mapState.viewport != null
     // The node list is read through a snapshot rather than keyed on, so an arriving packet cannot cancel this.
-    // Keying on it meant the effect restarted mid-fit: `fitCameraToBounds` suspends, and whether the latch was
-    // set before the call (fit lost, latch kept, mesh never framed) or after it (latch lost to a user pan, so a
-    // later packet re-frames over them) one of the two failure modes was always reachable. Nothing here restarts
-    // on node changes now, so the latch and the fit cannot come apart.
+    // Keying on it meant the effect restarted mid-fit: `frameBounds` suspends, and whether the latch was set
+    // before the call (fit lost, latch kept, mesh never framed) or after it (latch lost to a user pan, so a later
+    // packet re-frames over them) one of the two failure modes was always reachable. Nothing here restarts on
+    // node changes now, so the latch and the fit cannot come apart.
     val currentNodes by rememberUpdatedState(nodes)
     // An effect, not composition-body work: a launch from composition fires even if the composition is
     // abandoned, while its state write is rolled back — a camera jump with no framing recorded. Fitting before
@@ -314,7 +314,7 @@ private fun FrameOnce(enabled: Boolean, nodes: List<Node>, mapState: MapState) {
         // Waits for the first node set that has anything to frame; a mesh still filling in reports none.
         val box = snapshotFlow { nodesBoundingBox(currentNodes) }.filterNotNull().first()
         hasFramed = true
-        mapState.fitCameraToBounds(box)
+        mapState.frameBounds(box)
     }
 }
 
