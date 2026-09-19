@@ -20,6 +20,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 
 // ─── Brand Colors (Design Standards v1.3) ───
 val MeshtasticGreen = Color(0xFF67EA94) // Green 500 — Brand Accent
@@ -211,15 +212,15 @@ object StatusColors {
                 Color(0xFF5C6BC0) // Info
             }
 
-    /** The maker hardware rung's hue from meshtastic/design#160, shared with the flasher; declared, never derived. */
+    /**
+     * The maker hardware rung's hue from meshtastic/design#160, shared with the flasher; declared, never derived. The
+     * one status colour whose light and dark values differ, so it follows the active scheme's surface, not the system.
+     */
     val ColorScheme.StatusSky: Color
-        @Composable
-        get() =
-            if (isSystemInDarkTheme()) {
-                Color(0xFF7DD3FC)
-            } else {
-                Color(0xFF075985)
-            }
+        @Composable get() = if (surface.luminance() < DARK_SURFACE_LUMINANCE) Color(0xFF7DD3FC) else Color(0xFF075985)
+
+    /** Midpoint luminance separating a light surface from a dark one; both static schemes sit near the extremes. */
+    private const val DARK_SURFACE_LUMINANCE = 0.5f
 }
 
 @Suppress("MagicNumber")
