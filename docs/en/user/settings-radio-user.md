@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-09-11
+last_updated: 2026-09-19
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - settings
@@ -255,8 +255,9 @@ Lockdown encrypts the device's storage and requires a passphrase for each connec
 supporting firmware; the row does not appear otherwise.
 
 Enabling it asks you to set and confirm a passphrase, and to acknowledge that **it locks the debug
-(SWD) port on hardware that supports locking**. You can turn lockdown off again at any time with
-the passphrase, and a full device erase restores the hardware regardless.
+(SWD) port on hardware where the lockout takes effect**. That part is not reversible from the app.
+Turning lockdown off later decrypts your storage and reboots the device, but the port stays locked.
+Reopening it takes a full chip erase with a debug probe, which destroys everything on the device.
 
 Alongside the passphrase you set the limits that end a session automatically:
 
