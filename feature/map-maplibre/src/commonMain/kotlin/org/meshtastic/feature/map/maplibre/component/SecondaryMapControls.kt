@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
+import org.maplibre.compose.camera.CameraAnimation
 import org.maplibre.compose.map.MapState
 import org.meshtastic.feature.map.component.MapControlsOverlay
 
@@ -53,7 +54,12 @@ internal fun SecondaryMapControls(
         filterDropdownContent = { filterMenu?.invoke(filterMenuExpanded) { filterMenuExpanded = false } },
         bearing = mapState.cameraPosition.bearing.toFloat(),
         onCompassClick = {
-            scope.launch { mapState.animateCameraPosition(mapState.cameraPosition.copy(bearing = 0.0)) }
+            scope.launch {
+                mapState.animateCameraPosition(
+                    mapState.cameraPosition.copy(bearing = 0.0),
+                    animation = CameraAnimation.Ease(),
+                )
+            }
         },
         mapTypeContent = { BasemapButton(selection = basemaps) },
         onToggleLocationTracking = null,

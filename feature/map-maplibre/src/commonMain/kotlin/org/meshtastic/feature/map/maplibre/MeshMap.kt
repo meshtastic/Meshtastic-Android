@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
+import org.maplibre.compose.camera.CameraAnimation
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.interaction.ClickResult
@@ -278,7 +279,10 @@ private fun MeshMapNodeLayers(
                 val current = mapState.cameraPosition
                 // A cluster that cannot report an expansion zoom answers with a sentinel (0 on
                 // Android and desktop, -1 on iOS), so clamp — never zoom out on a tap.
-                mapState.animateCameraPosition(current.copy(target = centre, zoom = maxOf(expansionZoom, current.zoom)))
+                mapState.animateCameraPosition(
+                    current.copy(target = centre, zoom = maxOf(expansionZoom, current.zoom)),
+                    animation = CameraAnimation.Ease(),
+                )
             }
         },
     )
