@@ -44,7 +44,10 @@ jobs:
               --jq ".workflow_runs[] | select(.head_branch | startswith(\"$PR_PREFIX\")) | select(.id < ${{ github.run_id }}) | .id"
           done | sort -u | while read -r run_id; do
             echo "Cancelling superseded run $run_id"
+            # A graceful cancel is delivered to the runner, so a run still waiting for one
+            # never receives it. force-cancel ends the run at the API regardless.
             gh run cancel "$run_id" --repo "${{ github.repository }}" || true
+            gh api -X POST "repos/${{ github.repository }}/actions/runs/${run_id}/force-cancel" || true
           done
 
   # Docs-only queue entries (changelog updates, markdown fixes) cannot affect the build;
