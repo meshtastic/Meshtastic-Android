@@ -95,6 +95,17 @@ fun Int.toDistanceString(system: MeasurementSystem): String {
 fun Int.toElevationString(system: MeasurementSystem): String =
     formatElevationLocalized(this.toDouble(), system) ?: this.metersIn(system).toString(system)
 
+/**
+ * Formats a distance already in kilometres (a storm front, not a node) in [system]'s large unit only: whole km, or
+ * miles to one decimal. The AS3935 reports whole kilometres, so a 1 km reading must not fall through to feet.
+ */
+@Suppress("MagicNumber")
+fun Float.toStormDistanceString(system: MeasurementSystem): String = if (system == MeasurementSystem.METRIC) {
+    formatMeasure(this.toDouble(), MeasureUnitKind.KILOMETER, 0)
+} else {
+    formatMeasure(this * 0.621371, MeasureUnitKind.MILE, 1)
+}
+
 @Suppress("MagicNumber")
 fun Float.toSpeedString(system: MeasurementSystem): String = formatSpeedLocalized(this.toDouble(), system)
     ?: if (system == MeasurementSystem.METRIC) {

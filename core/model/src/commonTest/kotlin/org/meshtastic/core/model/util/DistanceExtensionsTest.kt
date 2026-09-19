@@ -47,6 +47,15 @@ class DistanceExtensionsTest {
         assertEquals("1.0 mi", 1609.toDistanceString(MeasurementSystem.IMPERIAL))
     }
 
+    /** Storm distance never drops to feet: 1 km is the detector's "overhead" reading and must read as km or mi. */
+    @Test
+    fun `storm distance stays in the large unit`() {
+        assertEquals("1 km", 1f.toStormDistanceString(MeasurementSystem.METRIC))
+        assertEquals("0.6 mi", 1f.toStormDistanceString(MeasurementSystem.IMPERIAL))
+        assertEquals("40 km", 40f.toStormDistanceString(MeasurementSystem.METRIC))
+        assertEquals("24.9 mi", 40f.toStormDistanceString(MeasurementSystem.IMPERIAL))
+    }
+
     @Test
     fun `kmhIn handles zero`() {
         assertEquals(0, 0.kmhIn(MeasurementSystem.METRIC))

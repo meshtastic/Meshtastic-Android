@@ -46,9 +46,12 @@ import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.PowerMetrics
+import org.meshtastic.proto.SoilWaterMetrics
 import org.meshtastic.proto.Telemetry
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TelemetryPacketHandlerImplTest {
@@ -197,6 +200,32 @@ class TelemetryPacketHandlerImplTest {
         advanceUntilIdle()
 
         verify { nodeManager.updateNodeForSession(remoteNodeNum, radioSession, any(), any()) }
+    }
+
+    @Test
+    fun `soil water metrics updates node with probe data`() = testScope.runTest {
+        val telemetry =
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.soil_water_metrics = SoilWaterMetrics.Builder().also { wb -> wb.soil_ph = 6.8f }.build()
+                }
+                .build()
+        val packet = makeTelemetryPacket(remoteNodeNum, telemetry)
+        val dataPacket = makeDataPacket(remoteNodeNum)
+        // Run the handler's transform ourselves: the mock would otherwise accept any lambda, including one that
+        // never copies the probe data across.
+        var updated: Node? = null
+        every { nodeManager.updateNodeForSession(remoteNodeNum, radioSession, any(), any()) } calls
+            { args ->
+                updated = args.arg<(Node) -> Node>(3)(Node(num = remoteNodeNum))
+            }
+
+        handler.handleTelemetry(packet, dataPacket, myNodeNum, radioSession)
+        advanceUntilIdle()
+
+        assertEquals(6.8f, updated?.soilWaterMetrics?.soil_ph)
+        assertNull(updated?.soilWaterMetrics?.nitrogen)
     }
 
     // ---------- Power metrics ----------

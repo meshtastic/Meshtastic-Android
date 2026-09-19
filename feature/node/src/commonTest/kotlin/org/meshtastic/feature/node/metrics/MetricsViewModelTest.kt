@@ -47,6 +47,7 @@ import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
+import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.LocalStats
@@ -321,6 +322,8 @@ class MetricsViewModelTest {
                                 // 0 V is a real reading on an unloaded ADC input, so it exports as 0.0, not empty.
                                 wb.adc_voltage_ch0 = 3.3f
                                 wb.adc_voltage_ch1 = 0f
+                                wb.lightning_strike_count_1h = 3
+                                wb.lightning_distance_km = 12f
                             }
                             .build()
                 }
@@ -356,14 +359,66 @@ class MetricsViewModelTest {
             val csvOutput = buffer.readUtf8()
             assertTrue(
                 csvOutput.startsWith(
-                    "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\",\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\",\"soilMoisture\",\"oneWireTemp1\",\"oneWireTemp2\",\"oneWireTemp3\",\"oneWireTemp4\",\"oneWireTemp5\",\"oneWireTemp6\",\"oneWireTemp7\",\"oneWireTemp8\",\"adcVoltage1\",\"adcVoltage2\",\"adcVoltage3\",\"adcVoltage4\",\"adcVoltage5\",\"adcVoltage6\",\"adcVoltage7\",\"adcVoltage8\"",
+                    "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\",\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\",\"soilMoisture\",\"oneWireTemp1\",\"oneWireTemp2\",\"oneWireTemp3\",\"oneWireTemp4\",\"oneWireTemp5\",\"oneWireTemp6\",\"oneWireTemp7\",\"oneWireTemp8\",\"adcVoltage1\",\"adcVoltage2\",\"adcVoltage3\",\"adcVoltage4\",\"adcVoltage5\",\"adcVoltage6\",\"adcVoltage7\",\"adcVoltage8\",\"lightningStrikeCount1h\",\"lightningDistanceKm\"\n",
                 ),
             )
             assertTrue(
                 csvOutput.contains(
-                    "\"21.5\",\"55.5\",\"1013.25\",\"12.3\",\"42\",\"5.5\",\"180\",\"18.75\",\"65\",\"1.0\",\"2.0\",\"3.0\",\"\",\"\",\"\",\"\",\"\",\"3.3\",\"0.0\",\"\",\"\",\"\",\"\",\"\",\"\"",
+                    "\"21.5\",\"55.5\",\"1013.25\",\"12.3\",\"42\",\"5.5\",\"180\",\"18.75\",\"65\",\"1.0\",\"2.0\",\"3.0\",\"\",\"\",\"\",\"\",\"\",\"3.3\",\"0.0\",\"\",\"\",\"\",\"\",\"\",\"\",\"3\",\"12.0\"\n",
                 ),
             )
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /** A status register of 0 is a healthy sensor, and 0 is a reading: it exports as "0", never as an empty cell. */
+    @Test
+    fun `saveAirQualityMetricsCSV exports the raw pm status register`() = runTest(testDispatcher) {
+        val testTelemetry =
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.air_quality_metrics =
+                        AirQualityMetrics.Builder()
+                            .also { wb ->
+                                wb.pm10_standard = 5
+                                wb.pm_status_flags = 0
+                            }
+                            .build()
+                }
+                .build()
+
+        val nodeDetailFlow =
+            MutableStateFlow(
+                NodeDetailUiState(metricsState = MetricsState(airQualityMetrics = listOf(testTelemetry))),
+            )
+        every { getNodeDetailsUseCase(1234) } returns nodeDetailFlow.asStateFlow()
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val vm = createViewModel()
+        vm.state.test {
+            awaitItem()
+            awaitItem()
+
+            val uri = CommonUri.parse("content://test")
+            vm.saveAirQualityMetricsCSV(uri, listOf(AirQualitySample(testTelemetry, aqi = null)))
+            runCurrent()
+
+            verifySuspend { fileService.write(uri, any()) }
+
+            val lines = buffer.readUtf8().lines()
+            assertTrue(lines[0].startsWith("\"date\",\"time\",\"aqi\",\"pm10_standard\","))
+            assertTrue(lines[0].endsWith("\"particles_tps\",\"pm_status_flags\""))
+            assertTrue(lines[1].contains("\"\",\"5\",\"\","), "no AQI, then the PM1.0 reading")
+            assertTrue(lines[1].endsWith("\"\",\"0\""), "absent particles_tps, then the zero register")
 
             cancelAndIgnoreRemainingEvents()
         }

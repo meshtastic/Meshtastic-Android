@@ -273,6 +273,87 @@ fun AirQualityInfoCardsPreview() {
 }
 
 // ---------------------------------------------------------------------------
+// SoilWaterMetrics / lightning / PM status previews
+// ---------------------------------------------------------------------------
+
+/**
+ * Every soil and water field populated, so each probe group renders. Built in a function rather than a top-level `val`
+ * so the proto construction stays out of this file's class initializer.
+ */
+private fun sampleSoilWaterMetrics(): org.meshtastic.proto.SoilWaterMetrics =
+    org.meshtastic.proto.SoilWaterMetrics.Builder()
+        .also { wb ->
+            wb.soil_ph = 6.8f
+            wb.nitrogen = 42f
+            wb.phosphorus = 18f
+            wb.potassium = 96f
+            wb.ph = 7.4f
+            wb.electrical_conductivity = 1.24f
+            wb.salinity = 620f
+            wb.dissolved_oxygen = 8.3f
+            wb.orp = 215f
+            wb.chemical_oxygen_demand = 48f
+            wb.biochemical_oxygen_demand = 12f
+            wb.turbidity = 3.6f
+            wb.nitrate = 5.2f
+            wb.ammonium = 0.4f
+            wb.solar_irradiance = 780f
+        }
+        .build()
+
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun SoilWaterMetricsPreview() {
+    val node = previewData.mickeyMouse.copy(soilWaterMetrics = sampleSoilWaterMetrics())
+    AppTheme { Surface { SoilWaterMetrics(node = node) } }
+}
+
+/** Temperature and humidity for context, plus the AS3935 pair that shares a column. */
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun EnvironmentMetricsLightningPreview() {
+    val node =
+        previewData.mickeyMouse.copy(
+            environmentMetrics =
+            org.meshtastic.proto.EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.temperature = 19.4f
+                    wb.relative_humidity = 71f
+                    wb.lightning_strike_count_1h = 3
+                    wb.lightning_distance_km = 12f
+                }
+                .build(),
+        )
+    AppTheme { Surface { EnvironmentMetrics(node = node, displayUnits = MeasurementSystem.METRIC) } }
+}
+
+/**
+ * A status register setting a fault (fan, bit 4), a warning (fan speed, bit 21) and a bit this build does not name (bit
+ * 30) — the three value tones the status cards can take.
+ */
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun AirQualityInfoCardsStatusPreview() {
+    val node =
+        previewData.mickeyMouse.copy(
+            airQualityMetrics =
+            org.meshtastic.proto.AirQualityMetrics.Builder()
+                .also { wb ->
+                    wb.pm10_standard = 8
+                    wb.pm25_standard = 12
+                    wb.pm100_standard = 18
+                    wb.co2 = 640
+                    wb.pm_status_flags = (1 shl 4) or (1 shl 21) or (1 shl 30)
+                }
+                .build(),
+        )
+    AppTheme { Surface { AirQualityInfoCards(node = node) } }
+}
+
+// ---------------------------------------------------------------------------
 // PositionInlineContent preview
 // ---------------------------------------------------------------------------
 
