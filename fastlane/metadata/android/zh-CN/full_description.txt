@@ -1,10 +1,10 @@
-Meshtastic 是一款将安卓设备与开源、无互联网、基于多跳网状形无线电配合使用的客户端程序。 此应用是Meshtastic的安卓客户端，允许您管理您的Meshtastic设备并与其他Meshtastic用户沟通。
+Meshtastic 是一款将安卓设备与开源、无互联网、基于多跳网状形无线电配合使用的客户端程序。此应用是Meshtastic的安卓客户端，允许您管理您的Meshtastic设备并与其他Meshtastic用户沟通。
 
 有关Meshtastic项目的更多信息，请访问我们的网站： <a href="https://www.meshtastic.org">meshtastic.org</a>. 在无线电设备上运行的固件也是一个独立的开源项目，您可以在这里找到：<a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
 
 <b>社区和支持</b>
 
-此项目目前处于测试阶段。 我们非常乐意听取您的建议和意见！ 如果您有任何疑问，反馈或遇到任何问题，请加入我们友好和活跃的社区：
+此项目目前处于测试阶段。我们非常乐意听取您的建议和意见！如果您有任何疑问，反馈或遇到任何问题，请加入我们友好和活跃的社区：
 
 • <b>论坛:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
 • <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>

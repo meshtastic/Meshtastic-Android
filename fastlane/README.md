@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Deploy a new version to the internal track on Google Play
 
+### android play_listing
+
+```sh
+[bundle exec] fastlane android play_listing
+```
+
+Upload the store listing - title, descriptions, feature graphic, icon and screenshots - for every locale under fastlane/metadata/android. Touches no build or track. Dry-runs unless validate_only:false
+
 ### android fdroid_build
 
 ```sh

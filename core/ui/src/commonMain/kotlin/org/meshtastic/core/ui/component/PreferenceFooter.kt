@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,10 +44,8 @@ fun PreferenceFooter(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         val mediumHeight = ButtonDefaults.MediumContainerHeight
         if (negativeText != null) {
-            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
             ElevatedButton(
                 shapes = ButtonDefaults.shapesFor(mediumHeight),
                 modifier = Modifier.height(mediumHeight).weight(1f),
@@ -60,7 +57,6 @@ fun PreferenceFooter(
             }
         }
         if (positiveText != null) {
-            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
             ElevatedButton(
                 shapes = ButtonDefaults.shapesFor(mediumHeight),
                 modifier = Modifier.height(mediumHeight).weight(1f),

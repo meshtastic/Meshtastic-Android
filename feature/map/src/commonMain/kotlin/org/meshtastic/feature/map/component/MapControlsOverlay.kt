@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Box
@@ -24,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.MaterialTheme
@@ -68,7 +65,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
  * @param isRefreshing Whether a refresh is currently in progress.
  * @param onRefresh Callback when the refresh button is clicked.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongParameterList")
 @Composable
 fun MapControlsOverlay(

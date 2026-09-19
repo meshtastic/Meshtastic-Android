@@ -51,6 +51,9 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
         private val cleartextPSK = ByteString.EMPTY
         private val defaultPSK = byteArrayOfInts(1) // a shortstring code to indicate we need our default PSK
 
+        // Folded into the hash of an AEAD channel so it routes apart from a non-AEAD channel with the same name + PSK.
+        private const val AEAD_HASH_MARKER = 0xAE
+
         // The default channel that devices ship with
         val default =
             Channel(
@@ -125,9 +128,15 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
                 }
             }
 
-    /** Given a channel name and psk, return the (0 to 255) hash for that channel */
+    /**
+     * The (0 to 255) on-air hash, byte-identical to firmware Channels::generateHash: xor of name and PSK, then 0xAE
+     * folded in when use_aead is set. Identity (equals) stays name + PSK; the AEAD bit only moves the hash.
+     */
     val hash: Int
-        get() = xorHash(name.encodeToByteArray()) xor xorHash(psk.toByteArray())
+        get() {
+            val base = xorHash(name.encodeToByteArray()) xor xorHash(psk.toByteArray())
+            return if (settings.use_aead) base xor AEAD_HASH_MARKER else base
+        }
 
     val channelNum: Int
         get() = loraConfig.channelNum(name)

@@ -36,7 +36,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -112,7 +111,7 @@ internal fun canEditStatusMessage(node: Node, ourNode: Node?, connectionState: C
     node.num == ourNode?.num && connectionState == ConnectionState.Connected && node.capabilities.supportsStatusMessage
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NodeListScreen(
     navigateToNodeDetails: (Int) -> Unit,
