@@ -554,7 +554,7 @@
     "platformioTarget": "t-watch-s3",
     "architecture": "esp32-s3",
     "activelySupported": true,
-    "supportLevel": 3,
+    "supportLevel": 1,
     "displayName": "LILYGO T-Watch S3",
     "tags": [
       "LilyGo"
@@ -1799,5 +1799,21 @@
     ],
     "requiresDfu": true,
     "partitionScheme": "16MB"
+  },
+  {
+    "hwModel": 148,
+    "hwModelSlug": "AXIOMETA_GENESIS_MINI",
+    "platformioTarget": "axiometa-genesis-mini",
+    "architecture": "esp32-s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Axiometa Genesis Mini",
+    "tags": [
+      "Axiometa"
+    ],
+    "images": [
+      "axiometa-genesis-mini.svg"
+    ],
+    "isMaker": true
   }
 ]

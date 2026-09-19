@@ -29,10 +29,14 @@ import org.maplibre.spatialk.geojson.BoundingBox
  * Shared by the main map's toolbar and the node-track map's. MapLibre publishes no zoom ornament, so every map that
  * wants buttons has to do this itself, and the clamp matters: pushing past a source's maximum zoom leaves the renderer
  * with no tiles to draw.
+ *
+ * Every camera step here eases; a button press is a nudge, not a flight.
  */
 internal suspend fun MapState.zoomBy(delta: Double, range: ClosedFloatingPointRange<Float>) {
     val target = (cameraPosition.zoom + delta).coerceIn(range.start.toDouble(), range.endInclusive.toDouble())
-    if (target != cameraPosition.zoom) animateCameraPosition(cameraPosition.copy(zoom = target))
+    if (target != cameraPosition.zoom) {
+        animateCameraPosition(cameraPosition.copy(zoom = target), animation = CameraAnimation.Ease())
+    }
 }
 
 /** One zoom level per button press, which is what both predecessors' zoom controls did. */
