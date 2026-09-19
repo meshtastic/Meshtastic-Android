@@ -38,6 +38,7 @@ class CoilImageLoaderLifecycleTest {
     @OptIn(DelicateCoilApi::class)
     fun tearDown() {
         SingletonImageLoader.reset()
+        WorkManagerTestInitHelper.closeWorkDatabase()
     }
 
     @Test
