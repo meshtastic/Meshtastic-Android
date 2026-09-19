@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -81,6 +82,7 @@ import org.meshtastic.core.resources.password
 import org.meshtastic.core.resources.proxy_to_client_enabled
 import org.meshtastic.core.resources.root_topic
 import org.meshtastic.core.resources.tls_enabled
+import org.meshtastic.core.resources.tls_enabled_public_broker_summary
 import org.meshtastic.core.resources.username
 import org.meshtastic.core.ui.component.EditPasswordPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -225,16 +227,13 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                val resolvedAddress = formState.value.address.ifEmpty { "mqtt.meshtastic.org" }
-                val enforceTls = effectiveTlsEnabled(resolvedAddress, tlsEnabled = false)
-                SwitchPreference(
-                    title = stringResource(Res.string.tls_enabled),
-                    checked = formState.value.tls_enabled || enforceTls,
-                    enabled = state.connected && !enforceTls,
+                MqttTlsPreference(
+                    enabled = state.connected,
+                    address = formState.value.address,
+                    tlsEnabled = formState.value.tls_enabled,
                     onCheckedChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.tls_enabled = it }.build()
                     },
-                    containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -303,6 +302,36 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 }
 
 private const val MIN_INTERVAL_SECS = 3600
+
+// An empty address means the public broker, both here and in the firmware's PubSubConfig.
+private const val DEFAULT_MQTT_ADDRESS = "mqtt.meshtastic.org"
+
+internal const val MQTT_TLS_SWITCH_TEST_TAG = "mqtt_tls_switch"
+
+/**
+ * The radio uses the stored `tls_enabled` verbatim when it reaches the broker over its own Wi-Fi or Ethernet, so what
+ * this switch shows must be what gets stored and sent: it renders and writes that flag alone, never a forced value. The
+ * phone-relay's own TLS upgrade for the public broker is stated in the summary instead.
+ */
+@Composable
+internal fun MqttTlsPreference(
+    enabled: Boolean,
+    address: String,
+    tlsEnabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    val resolvedAddress = address.ifEmpty { DEFAULT_MQTT_ADDRESS }
+    val relayForcesTls = effectiveTlsEnabled(resolvedAddress, tlsEnabled = false)
+    SwitchPreference(
+        title = stringResource(Res.string.tls_enabled),
+        summary = if (relayForcesTls) stringResource(Res.string.tls_enabled_public_broker_summary) else "",
+        checked = tlsEnabled,
+        enabled = enabled,
+        modifier = Modifier.testTag(MQTT_TLS_SWITCH_TEST_TAG),
+        onCheckedChange = onCheckedChange,
+        containerColor = CardDefaults.cardColors().containerColor,
+    )
+}
 
 private val AmberColor = Color(0xFFFFA000)
 private val GreenColor = Color(0xFF4CAF50)
@@ -378,7 +407,7 @@ private fun MqttAddressAndProbe(
         status = probeStatus,
         onTestClick = {
             focusManager.clearFocus()
-            val resolvedAddress = formState.value.address.ifEmpty { "mqtt.meshtastic.org" }
+            val resolvedAddress = formState.value.address.ifEmpty { DEFAULT_MQTT_ADDRESS }
             val effectiveTls = effectiveTlsEnabled(resolvedAddress, formState.value.tls_enabled)
             onProbe(formState.value.address, effectiveTls, formState.value.username, formState.value.password)
         },
