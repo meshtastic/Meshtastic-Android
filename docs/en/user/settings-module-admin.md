@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-09-16
+last_updated: 2026-09-19
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -324,12 +324,38 @@ Opens the **Packets** and **App logs** tabs for viewing, filtering, and exportin
 
 ### App Settings
 
-Two easy-to-miss entries on the **Settings** screen configure the app rather than the radio, and
-appear only when your own node is selected:
+The **App Settings** block on the **Settings** screen configures the app rather than the node, and
+appears only when your own node is selected. It is grouped rather than flat:
+
+**Privacy**
+
+- **Allow analytics and crash reporting** — opt in or out of diagnostics.
+- **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
+- **Homoglyph encoding** — how look-alike characters in names are handled.
+
+**Appearance**
+
+- **Units** — metric, imperial, or follow the system. This is the entry
+  [Units & Locale](units-and-locale) sends you to.
+- **Theme** and **Language**.
+- **Show full message timestamps**.
+
+**Persistence**
+
+- A cache limit for how much history is kept.
+- **Export rangetest packets**, **Export all packets** and **Export node database**.
+
+**On their own**
 
 - **Node Layout** — how much detail each row of the node list shows.
+- **Wi-Fi Provisioning for mPWRD-OS** — see [Connections](connections).
 - **Message Filter** — hides incoming messages that contain words you list. With no words
   configured it does nothing.
+- **System AI** — appears only where app functions are available; see
+  [App Functions](app-functions).
+
+A **Permissions** block sits above App Settings, so a user who skipped a permission during
+onboarding can get back to it, and **App Info** sits below.
 
 ### About
 
