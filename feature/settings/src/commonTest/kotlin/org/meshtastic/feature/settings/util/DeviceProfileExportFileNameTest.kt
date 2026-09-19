@@ -69,6 +69,24 @@ class DeviceProfileExportFileNameTest {
     }
 
     @Test
+    fun `keeps a supplementary-plane letter`() {
+        // U+10400 DESERET CAPITAL LETTER LONG I is one code point across two UTF-16 units.
+        assertEquals(
+            "Meshtastic_\uD801\uDC00_20260919_nodeConfig.cfg",
+            deviceProfileExportFileName(longName = "\uD801\uDC00", shortName = "DS", dateStamp = date),
+        )
+    }
+
+    @Test
+    fun `drops a supplementary-plane emoji`() {
+        // U+1F4CD ROUND PUSHPIN is also two units, but it is a symbol rather than a letter.
+        assertEquals(
+            "Meshtastic_PIN_20260919_nodeConfig.cfg",
+            deviceProfileExportFileName(longName = "\uD83D\uDCCD", shortName = "PIN", dateStamp = date),
+        )
+    }
+
+    @Test
     fun `collapses a run of unsafe characters into one separator`() {
         assertEquals(
             "Meshtastic_Roof_Node_20260919_nodeConfig.cfg",
