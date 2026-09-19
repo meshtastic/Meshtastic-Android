@@ -50,7 +50,7 @@ class StatusMessageActionGateTest {
 
     @Test
     fun `older firmware does not offer the action`() {
-        val old = node(num = 1, firmware = "2.7.21")
+        val old = node(num = 1, firmware = "2.7.19")
 
         assertFalse(canEditStatusMessage(old, old, ConnectionState.Connected))
     }
