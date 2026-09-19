@@ -2,7 +2,7 @@
 title: Navigation & Deep Links
 parent: Developer Guide
 nav_order: 4
-last_updated: 2026-09-11
+last_updated: 2026-09-19
 description: How typed Navigation 3 routes and DeepLinkRouter work together, the supported deep link URIs, and how to add a new one.
 aliases:
   - deeplinks
@@ -44,7 +44,12 @@ sealed interface SettingsRoute : Route {
 
 ## Deep Link Router
 
-`DeepLinkRouter` in `core/navigation` maps URI deep links to typed backstack lists.
+`DeepLinkRouter` in `core/navigation` maps URI deep links to typed backstack lists. Each supported link is a
+Navigation 3 `UriDeepLinkMatcher` pattern whose placeholders decode into the target route's fields, wrapped in
+`withBackStack` to synthesize the parents.
+
+Patterns are anchored, so a path the patterns do not model returns null rather than falling back to the family
+root: `/firmware/anything-else` no longer opens the firmware screen.
 
 ### URI Format
 
@@ -62,7 +67,7 @@ For the `https` form to open in-app, each top-level path segment must also be de
 `android:pathPrefix` in the `android:autoVerify` intent-filter in `androidApp/src/main/AndroidManifest.xml` —
 otherwise the link opens in the browser. Adding a new top-level route therefore takes three steps: add the
 segment to `DeepLinkRouter.topLevelPathSegments` (the router refuses to dispatch segments outside that set),
-add its `when` branch in `DeepLinkRouter.route()`, and add the matching `pathPrefix` to the manifest.
+add its matcher to `DeepLinkRouter.matchers`, and add the matching `pathPrefix` to the manifest.
 `DeepLinkManifestConsistencyTest` (androidApp unit tests) checks the manifest against the set, so a missing
 manifest entry fails CI.
 
@@ -70,7 +75,7 @@ manifest entry fails CI.
 
 - The always-current list of top-level segments is `topLevelPathSegments` in
   [`DeepLinkRouter`](https://github.com/meshtastic/Meshtastic-Android/blob/main/core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/DeepLinkRouter.kt).
-- Sub-paths live in the `route()` `when` block plus its helper maps (`settingsSubRoutes`, `nodeDetailSubRoutes`).
+- Sub-paths live in the `matchers` list plus its helper maps (`settingsSubRoutes`, `nodeDetailSubRoutes`).
 - The class-level KDoc on the `DeepLinkRouter` object lists example mappings, but it's illustrative, not
   exhaustive.
 - The executable spec is
@@ -123,7 +128,8 @@ This ensures the user can navigate "up" correctly.
 ## Adding a Deep Link
 
 1. Define the typed route in `Routes.kt`.
-2. Add the mapping in `DeepLinkRouter.settingsSubRoutes` (or equivalent for other graphs).
+2. Add the mapping in `DeepLinkRouter.settingsSubRoutes` (or equivalent for other graphs), and a matcher in
+   `DeepLinkRouter.matchers` if the path shape is new.
 3. Add a test in `DeepLinkRouterTest.kt`.
 4. Register the navigation entry in the appropriate feature module.
 5. Update the illustrative KDoc list on the `DeepLinkRouter` object (the class-level doc comment, not `route()`'s own KDoc) and the preceding table — both are quick-reference snapshots, not the source of truth. See the Source of Truth list earlier in this page for the authoritative places.
