@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -80,7 +79,6 @@ private const val SITE_PLANNER_TIMEOUT_MS = 45_000L
  * ([onRequestCurrentLocation], when permission is granted), this node ([onUseNodeLocation]), or the map center
  * ([onUseMapCenter]). Google-flavor affordance; targets the official hosted planner.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "LambdaParameterInRestartableEffect")
 @Composable
 fun SitePlannerHost(
