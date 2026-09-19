@@ -17,6 +17,9 @@
 package org.meshtastic.app
 
 import androidx.test.core.app.ApplicationProvider
+import androidx.work.Configuration
+import androidx.work.testing.SynchronousExecutor
+import androidx.work.testing.WorkManagerTestInitHelper
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.annotation.DelicateCoilApi
@@ -35,6 +38,7 @@ class CoilImageLoaderLifecycleTest {
     @OptIn(DelicateCoilApi::class)
     fun tearDown() {
         SingletonImageLoader.reset()
+        WorkManagerTestInitHelper.closeWorkDatabase()
     }
 
     @Test
@@ -47,12 +51,21 @@ class CoilImageLoaderLifecycleTest {
 }
 
 /**
- * Boots the production Application with its background init suppressed: what this asserts is the Koin/Coil wiring, and
- * the real [MeshUtilApplication.startBackgroundInit] opens a database whose connection can outlive the test.
+ * Boots the production Application with no database open left in flight at teardown: [startBackgroundInit] is
+ * suppressed, and WorkManager is initialized synchronously first so Koin's eager `workManagerFactory()` skips its own
+ * `initialize`, whose `ForceStopRunnable` would otherwise open WorkDatabase on framework SQLite from a background
+ * thread.
  *
  * Must not be private: Robolectric instantiates the `@Config` application through `AppComponentFactory`, whose
  * `Class.newInstance()` call cannot reach a package-private class.
  */
 internal class ImageLoaderOnlyApplication : MeshUtilApplication() {
+    override fun onCreate() {
+        val configuration =
+            Configuration.Builder().setExecutor(SynchronousExecutor()).setTaskExecutor(SynchronousExecutor()).build()
+        WorkManagerTestInitHelper.initializeTestWorkManager(this, configuration)
+        super.onCreate()
+    }
+
     override fun startBackgroundInit() = Unit
 }
