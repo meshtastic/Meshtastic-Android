@@ -53,6 +53,18 @@ class FieldMetadataBoundsTest {
     }
 
     @Test
+    fun boundsBeyondTheIntDomain_areUnbounded() {
+        val metadata = FieldMetadata.Builder().min_value(1e18).max_value(2e18).build()
+        assertNull(metadata.intRange)
+    }
+
+    @Test
+    fun aMaxAboveIntMax_clampsInsteadOfSaturatingToAPoint() {
+        val metadata = FieldMetadata.Builder().min_value(0.0).max_value(4294967295.0).build()
+        assertEquals(0..Int.MAX_VALUE, metadata.intRange)
+    }
+
+    @Test
     fun fractionalBounds_roundInward() {
         val metadata = FieldMetadata.Builder().min_value(1.5).max_value(2.5).build()
         assertEquals(2..2, metadata.intRange)

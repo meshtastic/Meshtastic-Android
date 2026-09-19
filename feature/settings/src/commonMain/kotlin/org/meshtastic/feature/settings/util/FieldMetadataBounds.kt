@@ -28,5 +28,9 @@ val FieldMetadata.intRange: IntRange?
     get() {
         val min = min_value ?: return null
         val max = max_value ?: return null
-        return ceil(min).toInt()..floor(max).toInt()
+        val low = ceil(min)
+        val high = floor(max)
+        // Double.toInt() saturates, so a range that misses the Int domain would read as a single bogus value.
+        if (high < Int.MIN_VALUE.toDouble() || low > Int.MAX_VALUE.toDouble()) return null
+        return low.coerceAtLeast(Int.MIN_VALUE.toDouble()).toInt()..high.coerceAtMost(Int.MAX_VALUE.toDouble()).toInt()
     }
