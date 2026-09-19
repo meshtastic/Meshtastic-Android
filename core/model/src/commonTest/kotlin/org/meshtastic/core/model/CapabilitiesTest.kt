@@ -138,7 +138,8 @@ class CapabilitiesTest {
                 ChannelOption.NARROW_FAST,
                 ChannelOption.NARROW_SLOW,
             )
-        assertEquals(gated, ChannelOption.entries.filter { it.minFirmware != null }.toSet())
+        // LongTurbo's radio support lands earlier, in v2.7.17 (firmware#8985), so it gates on its own version.
+        assertEquals(gated + ChannelOption.LONG_TURBO, ChannelOption.entries.filter { it.minFirmware != null }.toSet())
 
         val old = caps("2.7.26")
         val new = caps("2.8.0")
@@ -146,6 +147,8 @@ class CapabilitiesTest {
             assertFalse(old.supportsPreset(preset), "${preset.name} should be hidden on 2.7 firmware")
             assertTrue(new.supportsPreset(preset), "${preset.name} should be shown on 2.8 firmware")
         }
+        assertFalse(caps("2.7.16").supportsPreset(ChannelOption.LONG_TURBO), "LongTurbo predates 2.7.17")
+        assertTrue(old.supportsPreset(ChannelOption.LONG_TURBO), "LongTurbo ships from 2.7.17")
         // Established presets are never gated, even with unknown firmware.
         assertTrue(caps(null).supportsPreset(ChannelOption.LONG_FAST))
         // Unknown firmware hides gated presets; debug forceEnableAll shows them.
