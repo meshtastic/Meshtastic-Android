@@ -119,7 +119,7 @@ Desktop uses the same version resolution chain as Android — both read `VERSION
 
 ### Flatpak
 
-Flatpak packaging is maintained externally at [flathub/org.meshtastic.MeshtasticDesktop](https://github.com/flathub/org.meshtastic.MeshtasticDesktop). It builds `:desktopApp:packageUberJarForCurrentOS` (not the native distribution pipeline) and includes its own AppStream metainfo, `.desktop` entry, and JBR bundling. The offline-build sources it consumes are captured in-repo by `scripts/verify-flatpak/` (see its README).
+Flatpak packaging is maintained externally at [flathub/org.meshtastic.MeshtasticDesktop](https://github.com/flathub/org.meshtastic.MeshtasticDesktop). It builds `:desktopApp:packageUberJarForCurrentOS` (not the native distribution pipeline) and handles JBR bundling; the AppStream metainfo and `.desktop` entry it installs come from this repo, out of the tag it builds. So the desktop screenshots and the `<release>` notes ship with the tag - nothing to do on the Flathub side beyond the version bump. The offline-build sources it consumes are captured in-repo by `scripts/verify-flatpak/` (see its README).
 
 ## Build Attestations & Provenance
 
