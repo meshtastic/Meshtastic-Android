@@ -350,6 +350,18 @@ jobs:
             exit 1
           fi
 
+      # Flathub runs this exact command (flatpak-builder-lint checks/metainfo.py) and turns any
+      # non-zero exit into appstream-failed-validation at publish time. Nothing here ran it, so a
+      # malformed <description> reached Flathub before CI ever saw it. Catches a whitespace-only or
+      # empty-<p> description; a truly empty <description></description> and a release with no
+      # description at all both still validate, so this is hygiene, not a prose gate.
+      - name: Validate AppStream metainfo
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq appstream
+          appstreamcli validate --no-net \
+            desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml
+
   # 2. VALIDATION & BUILD: Delegate to reusable-check.yml
   # Coverage stays off for PRs to keep feedback fast (< 10 mins); mainline coverage comes
   # from main-check. Desktop *compilation* is covered on every PR by :desktopApp:test in the
