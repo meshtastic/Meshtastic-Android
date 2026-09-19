@@ -65,6 +65,7 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.RemoteShellHandler
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
@@ -114,6 +115,7 @@ class MeshDataHandlerImpl(
     private val storeForwardHandler: StoreForwardPacketHandler,
     private val telemetryHandler: TelemetryPacketHandler,
     private val adminPacketHandler: AdminPacketHandler,
+    private val remoteShellHandler: RemoteShellHandler,
     private val collectorRegistry: DiscoveryPacketCollectorRegistry,
     private val geofenceMonitor: GeofenceMonitor,
     private val meshBeaconRepository: MeshBeaconRepository,
@@ -201,6 +203,10 @@ class MeshDataHandlerImpl(
 
             PortNum.ADMIN_APP -> {
                 adminPacketHandler.handleAdminMessage(packet, myNodeNum, session)
+            }
+
+            PortNum.REMOTE_SHELL_APP -> {
+                remoteShellHandler.handleRemoteShell(packet)
             }
 
             PortNum.NEIGHBORINFO_APP -> {
