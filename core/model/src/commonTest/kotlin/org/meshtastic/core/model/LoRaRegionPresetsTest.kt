@@ -255,12 +255,24 @@ class LoRaRegionPresetsTest {
     }
 
     @Test
-    fun `fresh setup placeholder adopts the built-in default when unconstrained`() {
+    fun `fresh setup keeps LongFast when firmware advertises no map`() {
+        // Pre-2.8 firmware installs its own region-table default on its screen; the app must not diverge from it.
         val nullMap: LoRaRegionPresetMap? = null
         assertEquals(
-            ModemPreset.LONG_TURBO,
+            ModemPreset.LONG_FAST,
             nullMap.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.LONG_FAST),
         )
+    }
+
+    @Test
+    fun `no first-setup default is offered without a map`() {
+        val nullMap: LoRaRegionPresetMap? = null
+        assertNull(nullMap.firstSetupDefaultFor(RegionCode.US))
+    }
+
+    @Test
+    fun `no first-setup default when the map omits it from the region`() {
+        assertNull(map.firstSetupDefaultFor(RegionCode.US))
     }
 
     @Test
@@ -318,6 +330,76 @@ class LoRaRegionPresetsTest {
         assertEquals(
             ModemPreset.TINY_FAST,
             pinnedMap.presetForRegionChange(RegionCode.UNSET, RegionCode.UA_433, ModemPreset.LONG_FAST),
+        )
+    }
+
+    // Mirrors what firmware 2.8 advertises for US: its whole legal preset list, defaulting to the region-table
+    // LongFast rather than the LongTurbo its own first-setup chooser installs.
+    private val firmware28Map =
+        LoRaRegionPresetMap.Builder()
+            .also { wb ->
+                wb.groups =
+                    listOf(
+                        LoRaPresetGroup.Builder()
+                            .also { g ->
+                                g.presets =
+                                    listOf(
+                                        ModemPreset.LONG_FAST,
+                                        ModemPreset.LONG_SLOW,
+                                        ModemPreset.MEDIUM_SLOW,
+                                        ModemPreset.MEDIUM_FAST,
+                                        ModemPreset.SHORT_SLOW,
+                                        ModemPreset.SHORT_FAST,
+                                        ModemPreset.LONG_MODERATE,
+                                        ModemPreset.SHORT_TURBO,
+                                        ModemPreset.LONG_TURBO,
+                                        ModemPreset.MEDIUM_TURBO,
+                                    )
+                                g.default_preset = ModemPreset.LONG_FAST
+                                g.licensed_only = false
+                            }
+                            .build(),
+                    )
+                wb.region_groups =
+                    listOf(
+                        LoRaRegionPresets.Builder()
+                            .also { r ->
+                                r.region = RegionCode.US
+                                r.group_index = 0
+                            }
+                            .build(),
+                    )
+            }
+            .build()
+
+    @Test
+    fun `first-setup default is offered when the map lists it as legal`() {
+        assertEquals(ModemPreset.LONG_TURBO, firmware28Map.firstSetupDefaultFor(RegionCode.US))
+    }
+
+    @Test
+    fun `fresh US setup adopts LongTurbo over the advertised LongFast default`() {
+        assertEquals(
+            ModemPreset.LONG_TURBO,
+            firmware28Map.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.LONG_FAST),
+        )
+    }
+
+    @Test
+    fun `a later US change on the advertised map keeps the running preset`() {
+        // Default adoption stays a fresh-setup rule: an already-configured node is never moved off its preset.
+        assertEquals(
+            ModemPreset.LONG_FAST,
+            firmware28Map.presetForRegionChange(RegionCode.EU_868, RegionCode.US, ModemPreset.LONG_FAST),
+        )
+    }
+
+    @Test
+    fun `fresh setup falls back to the advertised default when the built-in is illegal there`() {
+        // The US group here omits LONG_TURBO, so the built-in cannot be adopted.
+        assertEquals(
+            ModemPreset.LONG_FAST,
+            map.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.LONG_FAST),
         )
     }
 }
