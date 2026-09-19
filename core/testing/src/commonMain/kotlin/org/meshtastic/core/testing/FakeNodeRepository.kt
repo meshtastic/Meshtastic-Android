@@ -122,7 +122,7 @@ class FakeNodeRepository :
                 node.user.id.contains(filter, ignoreCase = true)
         val matchesUnknown = includeUnknown || !node.isUnknownUser
         val matchesOnline = !onlyOnline || node.isOnline
-        val matchesDirect = !onlyDirect || node.hopsAway == 0
+        val matchesDirect = !onlyDirect || (node.hopsAway == 0 && !node.viaMqtt)
 
         return matchesFilter && matchesUnknown && matchesOnline && matchesDirect
     }
