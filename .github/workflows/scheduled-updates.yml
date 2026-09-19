@@ -294,6 +294,10 @@ jobs:
         continue-on-error: true
         run: python3 scripts/check-metadata-length.py
 
+      - name: Check store locale codes
+        continue-on-error: true
+        run: python3 scripts/check-play-locales.py
+
       - name: Build PR body
         id: pr_body
         env:
