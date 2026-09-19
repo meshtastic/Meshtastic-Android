@@ -14,8 +14,6 @@ aliases:
 
 How the Meshtastic Android/KMP app formats numbers, units, and locale-sensitive values.
 
----
-
 ## Overview
 
 All measurement data transmitted by Meshtastic radios uses **metric units** (meters, °C, hPa, m/s, etc.). The app converts and formats these values for display using two core utilities:
@@ -27,8 +25,6 @@ All measurement data transmitted by Meshtastic radios uses **metric units** (met
 | `MeasureFormatting` | `core/common/.../util/MeasureFormatting.kt` | Pairs a fixed English unit symbol with a locale-formatted number, for the units that convert |
 
 Both live in `org.meshtastic.core.common.util` and are available to all KMP targets (Android, Desktop, iOS).
-
----
 
 ## MetricFormatter API
 
@@ -78,8 +74,6 @@ MetricFormatter.voltage(3.95f)      // "3.95 V"
 MetricFormatter.current(125.0f)     // "125.0 mA"
 ```
 
----
-
 ## NumberFormatter
 
 `NumberFormatter` has two halves, and picking the wrong one is the mistake to avoid:
@@ -101,11 +95,9 @@ value written out and read back. Localizing those turns `1.5` into `1,5` and bre
 It rounds half away from zero to match the locale path, which matters because firmware reports SNR
 in quarter-dB steps and ties are routine.
 
----
-
 ## Unit Conversion
 
-Four measurements convert away from metric for display, each gated by a boolean flag sourced from the user's device locale or preferences:
+Four measurements convert away from metric for display, each gated by a boolean flag sourced from the device locale or preferences:
 
 | Measurement | Flag | Source | Conversion |
 |---|---|---|---|
@@ -116,7 +108,7 @@ Four measurements convert away from metric for display, each gated by a boolean 
 
 The two source functions (in `core/common/.../util/MeasurementSystem.kt`) are deliberately separate: some locales mix systems (the UK uses miles for distance but Celsius for temperature), so temperature must never be derived from the distance unit. On Android, `getSystemTemperatureUnit()` delegates to `androidx.core.text.util.LocalePreferences`, which resolves CLDR locale data and honors the Android 14+ Regional preferences temperature override.
 
-The user's in-app **Units** choice (`UnitsOverride`, stored in `UiPrefs`) is folded in by `LocaleUnitsProvider`, which is the only place display code takes units from. A Konsist rule (`MeasurementSystemSourceTest`) keeps direct reads of the OS resolution out of the rest of the codebase, because a direct read follows the locale but ignores the setting. A forced system carries its temperature with it (metric → °C, imperial → °F), overriding even an explicit OS regional temperature preference.
+The in-app **Units** choice (`UnitsOverride`, stored in `UiPrefs`) is folded in by `LocaleUnitsProvider`, which is the only place display code takes units from. A Konsist rule (`MeasurementSystemSourceTest`) keeps direct reads of the OS resolution out of the rest of the codebase, because a direct read follows the locale but ignores the setting. A forced system carries its temperature with it (metric → °C, imperial → °F), overriding even an explicit OS regional temperature preference.
 
 `getSystemMeasurementSystem()` resolves the locale in this order (temperature is separate: as described above, `getSystemTemperatureUnit()` reads the regional temperature preference via `LocalePreferences`, shares only the region backfill, and falls back to Celsius):
 
@@ -127,8 +119,6 @@ The user's in-app **Units** choice (`UnitsOverride`, stored in `UiPrefs`) is fol
 The Android and Desktop implementations share the region table and the override reader in `commonMain`, so the two clients cannot disagree about the same locale.
 
 Everything else (voltage, current, pressure, SNR, RSSI, humidity, percent) displays in its native metric units. The user-facing [Units & Locale](../user/units-and-locale) page explains what end users see.
-
----
 
 ## Adding a New Measurement Type
 
@@ -162,8 +152,6 @@ To add a new measurement formatter:
    ./gradlew :core:common:allTests
    ```
 
----
-
 ## DateFormatter
 
 Date and time formatting uses the `DateFormatter` `expect object` with platform-specific `actual` implementations:
@@ -180,8 +168,6 @@ Date and time formatting uses the `DateFormatter` `expect object` with platform-
 
 Unlike `MetricFormatter`, `DateFormatter` is declared with `expect`/`actual` (an `expect object` in `commonMain`, an `actual object` per platform) because date formatting inherently depends on platform locale APIs.
 
----
-
 ## Design Decisions
 
 | Decision | Rationale |
@@ -190,8 +176,6 @@ Unlike `MetricFormatter`, `DateFormatter` is declared with `expect`/`actual` (an
 | `formatInvariant` keeps a fixed `.` for machine-read values | Interop payloads and re-parsed values break if localized |
 | Only temperature, wind speed, rainfall and weight convert | The remaining metric units are universally understood in their native form |
 | `object` singleton pattern | Stateless utility — no instance management needed |
-
----
 
 ## Related
 
