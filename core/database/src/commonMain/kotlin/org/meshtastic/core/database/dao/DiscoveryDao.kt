@@ -165,6 +165,37 @@ interface DiscoveryDao {
     )
     suspend fun getMaxDistance(sessionId: Long): Double?
 
+    @Query("SELECT COUNT(*) FROM discovery_session WHERE id = :sessionId AND device_address = :deviceAddress")
+    suspend fun countSessionsForDevice(sessionId: Long, deviceAddress: String): Int
+
+    /**
+     * Writes one dwell's preset result and its discovered nodes, but only if the parent session row exists in *this*
+     * database and belongs to [deviceAddress], returning null when it does not.
+     *
+     * The parent check and the child writes share one transaction on purpose. Every [SwitchingDiscoveryDao] call
+     * re-resolves the active database, so a caller that checks the session and then inserts issues two independent
+     * resolutions and a device/DB switch landing between them orphans the foreign key. Callers must not reimplement
+     * this as check-then-insert.
+     *
+     * The id alone is not an identity: every per-device database autogenerates from 1, so a dwell can match an
+     * unrelated session of the same id in another database. [deviceAddress] is what makes the match unambiguous.
+     *
+     * [nodes] are stamped with the new preset-result id, so callers pass them with any placeholder.
+     */
+    @Transaction
+    suspend fun insertDwellIfSessionExists(
+        result: DiscoveryPresetResultEntity,
+        nodes: List<DiscoveredNodeEntity>,
+        deviceAddress: String,
+    ): Long? {
+        if (countSessionsForDevice(result.sessionId, deviceAddress) == 0) return null
+        val presetResultId = insertPresetResult(result)
+        if (nodes.isNotEmpty()) {
+            insertDiscoveredNodes(nodes.map { it.copy(presetResultId = presetResultId) })
+        }
+        return presetResultId
+    }
+
     @Transaction
     @Query("SELECT * FROM discovery_session WHERE id = :sessionId")
     suspend fun getSessionWithResults(sessionId: Long): DiscoverySessionEntity?

@@ -369,11 +369,12 @@ jobs:
     secrets: inherit
 
   # 3. WORKFLOW STATUS: Ensures required checks are satisfied
-  # Pure gate job: no checkout, no toolchain, just reads `needs` results. ubuntu-slim is a
-  # container-backed single-CPU runner that starts faster than a VM (15-min job cap, x64 only).
+  # Pure gate job: no checkout, no toolchain, just reads `needs` results. It is the required
+  # check, so it runs on the label the rest of the workflow already gets slots on, not on
+  # ubuntu-slim's separate pool: an aggregator queued behind slim blocks a finished build.
   check-workflow-status:
     name: Check Workflow Status
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     permissions: {}
     needs: [check-changes, check-metadata, validate-and-build]
