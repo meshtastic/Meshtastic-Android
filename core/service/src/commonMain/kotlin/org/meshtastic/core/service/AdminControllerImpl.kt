@@ -140,24 +140,29 @@ internal class AdminControllerImpl(
     }
 
     override fun setDisplayMirror(enabled: Boolean) {
-        commandSender.sendAdminImmediate(myNodeNum) { AdminMessage(set_display_mirror = enabled) }
+        commandSender.sendAdminImmediate(myNodeNum) {
+            AdminMessage.Builder().also { wb -> wb.set_display_mirror = enabled }.build()
+        }
     }
 
     override fun requestDisplayFrame() {
-        commandSender.sendAdminImmediate(myNodeNum) { AdminMessage(get_display_frame_request = true) }
+        commandSender.sendAdminImmediate(myNodeNum) {
+            AdminMessage.Builder().also { wb -> wb.get_display_frame_request = true }.build()
+        }
     }
 
     override fun sendInputEvent(eventCode: Int, kbChar: Int, touchX: Int, touchY: Int) {
+        val inputEvent =
+            AdminMessage.InputEvent.Builder()
+                .also { wb ->
+                    wb.event_code = eventCode
+                    wb.kb_char = kbChar
+                    wb.touch_x = touchX
+                    wb.touch_y = touchY
+                }
+                .build()
         commandSender.sendAdminImmediate(myNodeNum) {
-            AdminMessage(
-                send_input_event =
-                AdminMessage.InputEvent(
-                    event_code = eventCode,
-                    kb_char = kbChar,
-                    touch_x = touchX,
-                    touch_y = touchY,
-                ),
-            )
+            AdminMessage.Builder().also { wb -> wb.send_input_event = inputEvent }.build()
         }
     }
 
