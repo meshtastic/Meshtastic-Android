@@ -3,7 +3,7 @@
 <p>Configure optional feature modules and perform device administration. Modules extend Meshtastic with specialized capabilities — each can be independently enabled or disabled.</p>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration. A module you expect can be missing for three reasons: your node’s role does not enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.</p>
+  <p>💡 <strong>Tip:</strong> You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration. A module you expect can be missing for three reasons: your node’s role doesn’t enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.</p>
 </blockquote>
 
 <p>Module settings use a card-based layout with toggle switches, dropdowns, text fields, and sliders:</p>
@@ -16,17 +16,17 @@
 
 <p><img src="../../assets/screenshots/settings_titled_card.png" alt="A module settings card with its title and grouped controls" /></p>
 
-<h2 id="configuration-du-module">Configuration du module</h2>
+<h2 id="réglages-du-module">Réglages du module</h2>
 
 <p>Every module lives under <strong>Settings → Module configuration</strong>.</p>
 
 <blockquote>
-  <p>⚠️ <strong>Important:</strong> Saving a module screen restarts the radio — the button reads <strong>Save &amp; restart</strong>, and the radio is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads <strong>Save</strong>, and the radio may still restart for some changes.</p>
+  <p>⚠️ <strong>Important:</strong> Saving a module screen restarts the node — the button reads <strong>Save &amp; restart</strong>, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads <strong>Save</strong>, and the node may still restart for some changes.</p>
 </blockquote>
 
-<h3 id="mqtt-module">MQTT Module</h3>
+<h3 id="mqtt-module">MQTT module</h3>
 
-<p>Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond radio range or integrate with home automation systems.</p>
+<p>Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond LoRa range or integrate with home automation systems.</p>
 
 <table>
   <thead>
@@ -84,7 +84,7 @@
 </table>
 
 <p>Turning <strong>Map reporting</strong> on reveals a consent card headed <em>Consent to Share Unencrypted Node Data
-via MQTT</em>, with an <strong>I agree.</strong> switch under it. The rest of the card does not exist on screen
+via MQTT</em>, with an <strong>I agree.</strong> switch under it. The rest of the card doesn’t exist on screen
 until you agree:</p>
 
 <table>
@@ -97,7 +97,7 @@ until you agree:</p>
   <tbody>
     <tr>
       <td>J’accepte.</td>
-      <td>Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting does not start without it</td>
+      <td>Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn’t start without it</td>
     </tr>
     <tr>
       <td>Precision slider</td>
@@ -112,7 +112,7 @@ until you agree:</p>
 
 <p>See <a href="mqtt">MQTT</a> for a detailed usage guide including encryption, privacy, and broker setup.</p>
 
-<h3 id="serial-module">Serial Module</h3>
+<h3 id="serial-module">Serial module</h3>
 
 <p>Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node’s serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.</p>
 
@@ -155,9 +155,9 @@ until you agree:</p>
   </tbody>
 </table>
 
-<h3 id="external-notification-module">External Notification Module</h3>
+<h3 id="external-notification-module">External Notification module</h3>
 
-<p>Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.</p>
+<p>Controls buzzer, LED, or vibration alerts on your node hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.</p>
 
 <p>There are two independent triggers — an incoming <strong>message</strong>, and a received <strong>bell</strong> character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.</p>
@@ -221,7 +221,7 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
   </tbody>
 </table>
 
-<h3 id="store--forward-module">Store &amp; Forward Module</h3>
+<h3 id="store--forward-module">Store &amp; Forward module</h3>
 
 <p>Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren’t lost during brief disconnections.</p>
 
@@ -264,7 +264,7 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
   <p>💡 <strong>Tip:</strong> Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they’re typically always-on.</p>
 </blockquote>
 
-<h3 id="range-test-module">Range Test Module</h3>
+<h3 id="range-test-module">Range Test module</h3>
 
 <blockquote>
   <p>⚠️ <strong>Warning:</strong> Range Test only works on a secured primary channel. As long as your primary channel
@@ -293,12 +293,12 @@ reverted to public.</p>
     </tr>
     <tr>
       <td>Enregistrer .CSV dans le stockage (ESP32 seulement)</td>
-      <td>Log received test data to the radio’s own filesystem. ESP32 hardware only</td>
+      <td>Log received test data to the node’s own filesystem. ESP32 hardware only</td>
     </tr>
   </tbody>
 </table>
 
-<h3 id="telemetry-module">Telemetry Module</h3>
+<h3 id="telemetry-module">Telemetry module</h3>
 
 <p>Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).</p>
 
@@ -335,7 +335,7 @@ battery health often and sensors rarely.</p>
     </tr>
     <tr>
       <td>Les mesures environnementales utilisent Fahrenheit</td>
-      <td>Use °F on the device’s display. This is the radio’s screen only — the app follows your phone’s locale, see <a href="units-and-locale">Units &amp; Locale</a></td>
+      <td>Use °F on the device’s display. This is the node’s screen only — the app follows your phone’s locale, see <a href="units-and-locale">Units &amp; Locale</a></td>
     </tr>
     <tr>
       <td>Module de mesure de la qualité de l’air activé</td>
@@ -362,9 +362,9 @@ battery health often and sensors rarely.</p>
 
 <p>See <a href="telemetry-and-sensors">Telemetry &amp; Sensors</a> for supported sensors and configuration recommendations.</p>
 
-<h3 id="canned-message-module">Canned Message Module</h3>
+<h3 id="canned-message-module">Canned Message module</h3>
 
-<p>Pre-configured messages accessible from the radio’s physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.</p>
+<p>Pre-configured messages accessible from the node’s physical buttons (for nodes with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.</p>
 
 <table>
   <thead>
@@ -409,7 +409,7 @@ battery health often and sensors rarely.</p>
   </tbody>
 </table>
 
-<h3 id="audio-module">Audio Module</h3>
+<h3 id="audio-module">Audio module</h3>
 
 <p>Codec2 audio support for low-bandwidth voice communication over the mesh. This is an <strong>experimental</strong> feature that encodes voice into very small data packets using the Codec2 codec.</p>
 
@@ -456,12 +456,12 @@ battery health often and sensors rarely.</p>
   <p>ℹ️ <strong>Note:</strong> Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think “understandable radio voice,” not phone-call quality.</p>
 </blockquote>
 
-<h3 id="remote-hardware-module">Remote Hardware Module</h3>
+<h3 id="remote-hardware-module">Remote Hardware module</h3>
 
 <p>GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.</p>
 
 <blockquote>
-  <p>⚠️ <strong>Warning:</strong> Turning on <strong>Allow undefined pin access</strong> gives remote nodes access to all GPIO pins, which could interfere with the radio’s own hardware. Turn it on only on dedicated GPIO nodes.</p>
+  <p>⚠️ <strong>Warning:</strong> Turning on <strong>Allow undefined pin access</strong> gives remote nodes access to all GPIO pins, which could interfere with the node’s own hardware. Turn it on only on dedicated GPIO nodes.</p>
 </blockquote>
 
 <table>
@@ -487,7 +487,7 @@ battery health often and sensors rarely.</p>
   </tbody>
 </table>
 
-<h3 id="neighbor-info-module">Neighbor Info Module</h3>
+<h3 id="neighbor-info-module">Neighbor Info module</h3>
 
 <p>Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.</p>
 
@@ -516,7 +516,7 @@ battery health often and sensors rarely.</p>
 
 <p>See <a href="discovery">Local Mesh Discovery</a> for how to use neighbor data for mesh topology exploration.</p>
 
-<h3 id="ambient-lighting-module">Ambient Lighting Module</h3>
+<h3 id="ambient-lighting-module">Ambient Lighting module</h3>
 
 <p>Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. Can be used for visual status indicators, notification lights, or decorative effects.</p>
 
@@ -543,7 +543,7 @@ battery health often and sensors rarely.</p>
   </tbody>
 </table>
 
-<h3 id="detection-sensor-module">Detection Sensor Module</h3>
+<h3 id="detection-sensor-module">Detection Sensor module</h3>
 
 <p>Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.</p>
 
@@ -590,7 +590,7 @@ battery health often and sensors rarely.</p>
   </tbody>
 </table>
 
-<h3 id="paxcounter-module">Paxcounter Module</h3>
+<h3 id="paxcounter-module">Paxcounter module</h3>
 
 <p>People counter using Wi-Fi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.</p>
 
@@ -612,7 +612,7 @@ battery health often and sensors rarely.</p>
     </tr>
     <tr>
       <td>Wi-Fi RSSI threshold</td>
-      <td>Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm)</td>
+      <td>Ignore Wi-Fi probes weaker than this, so distant devices aren’t counted (defaults to −80 dBm)</td>
     </tr>
     <tr>
       <td>BLE RSSI threshold</td>
@@ -625,21 +625,21 @@ battery health often and sensors rarely.</p>
   <p>💡 <strong>Tip:</strong> Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.</p>
 </blockquote>
 
-<h3 id="status-message-module">Status Message Module</h3>
+<h3 id="status-message-module">Status Message module</h3>
 
 <p>The status message has no module screen. It is edited with the rest of the node’s identity, on
 <a href="settings-radio-user#user-profile">Settings — Radio &amp; User</a>.</p>
 
-<h3 id="mesh-beacon-module">Mesh Beacon Module</h3>
+<h3 id="mesh-beacon-module">Mesh Beacon module</h3>
 
 <p>Broadcasts an invitation to your mesh, and receives invitations from others. The entry appears only
-on radios running firmware 2.8.0 or newer. See <a href="discovery">Local Mesh Discovery</a> for the full
+on nodes running firmware 2.8.0 or newer. See <a href="discovery">Local Mesh Discovery</a> for the full
 walkthrough.</p>
 
-<h3 id="tak-module">TAK Module</h3>
+<h3 id="tak-module">TAK module</h3>
 
 <p>Team Awareness Kit integration for interoperability with ATAK and WinTAK. Two things have to be
-true before the entry appears in the module list: the radio runs firmware 2.8.0 or newer, and its
+true before the entry appears in the module list: the node runs firmware 2.8.0 or newer, and its
 <strong>Device Role</strong> on <strong>Settings → Device configuration → Device</strong> is set to <code class="language-plaintext highlighter-rouge">TAK</code> or <code class="language-plaintext highlighter-rouge">TAK_TRACKER</code>.
 See <a href="tak">TAK Integration</a> for detailed setup and usage.</p>
 
@@ -674,15 +674,15 @@ See <a href="tak">TAK Integration</a> for detailed setup and usage.</p>
   <tbody>
     <tr>
       <td>Set time</td>
-      <td>Sends your phone’s clock to the radio</td>
+      <td>Sends your phone’s clock to the node</td>
     </tr>
     <tr>
       <td>Redémarrer</td>
-      <td>Restarts the radio</td>
+      <td>Restarts the node</td>
     </tr>
     <tr>
       <td>Éteindre</td>
-      <td>Powers the radio down</td>
+      <td>Powers the node down</td>
     </tr>
     <tr>
       <td>Réinitialisation d’usine</td>
@@ -690,31 +690,31 @@ See <a href="tak">TAK Integration</a> for detailed setup and usage.</p>
     </tr>
     <tr>
       <td>Reconfiguration de NodeDB</td>
-      <td>Clears the radio’s node database. This dialog carries a <strong>Preserve Favorites?</strong> switch</td>
+      <td>Clears the node database. This dialog carries a <strong>Preserve Favorites?</strong> switch</td>
     </tr>
   </tbody>
 </table>
 
 <blockquote>
-  <p>⚠️ <strong>Warning:</strong> Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use <strong>Export configuration</strong> to save the radio’s settings and <strong>Backup Keys</strong> on the Security screen to save its keys, so you can put both back afterwards.</p>
+  <p>⚠️ <strong>Warning:</strong> Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use <strong>Export configuration</strong> to save the node’s settings and <strong>Backup Keys</strong> on the Security screen to save its keys, so you can put both back afterwards.</p>
 </blockquote>
 
 <h3 id="sauvegarder--restaurer">Sauvegarder &amp; Restaurer</h3>
 
-<p><strong>Settings → Backup &amp; Restore</strong> writes the connected radio’s whole configuration to a file with
+<p><strong>Settings → Backup &amp; Restore</strong> writes the connected node’s whole configuration to a file with
 <strong>Export configuration</strong>, and reads a saved file back in with <strong>Import configuration</strong>. Export
-before a factory reset, or to copy one radio’s setup onto another. The section is shown for your
-own radio only, not over remote admin.</p>
+before a factory reset, or to copy one node’s setup onto another. The section is shown for your
+own node only, not over remote admin.</p>
 
 <h3 id="avancé">Avancé</h3>
 
 <p><strong>Settings → Advanced</strong> collects the tools that read or rewrite local state, and is likewise shown
-for your own radio only: <strong>Firmware Update</strong> on OTA-capable hardware, <strong>Clean Node Database</strong>,
+for your own node only: <strong>Firmware Update</strong> on OTA-capable hardware, <strong>Clean Node Database</strong>,
 <strong>TAK Server</strong>, <strong>Local Mesh Discovery</strong>, and the <strong>Debug Panel</strong>.</p>
 
 <h4 id="nettoyer-la-base-de-données-des-nœuds">Nettoyer la base de données des nœuds</h4>
 
-<p>Prunes nodes from your node database — from the app’s copy <em>and</em> from the radio’s own, so this is
+<p>Prunes nodes from your node database — from the app’s copy <em>and</em> from the node’s own, so this is
 not a display-only cleanup. The two filters combine rather than acting separately; the screen puts
 it as <em>Selections are additive</em>.</p>
 
@@ -726,7 +726,7 @@ info. The age limit still applies on top of it.</li>
 </ul>
 
 <p>The screen lists the nodes queued for deletion as you move the filters. <strong>Clean Now</strong> carries the
-purge out, after one more confirmation, and it cannot be undone. Favorited nodes, ignored nodes,
+purge out, after one more confirmation, and it can’t be undone. Favorited nodes, ignored nodes,
 and nodes with a public key heard in the last seven days are never removed, whatever the filters
 say — that is why the queued list can be shorter than you expect.</p>
 
@@ -736,14 +736,46 @@ say — that is why the queued list can be shorter than you expect.</p>
 
 <h3 id="app-settings">App Settings</h3>
 
-<p>Two easy-to-miss entries on the <strong>Settings</strong> screen configure the app rather than the radio, and
-appear only when your own node is selected:</p>
+<p>The <strong>App Settings</strong> block on the <strong>Settings</strong> screen configures the app rather than the node, and
+appears only when your own node is selected. It is grouped rather than flat:</p>
+
+<p><strong>Privacy</strong></p>
+
+<ul>
+  <li><strong>Allow analytics and crash reporting</strong> — opt in or out of diagnostics.</li>
+  <li><strong>Provide phone location to mesh</strong> — share this phone’s position when the node has no GPS fix.</li>
+  <li><strong>Homoglyph encoding</strong> — how look-alike characters in names are handled.</li>
+</ul>
+
+<p><strong>Appearance</strong></p>
+
+<ul>
+  <li><strong>Units</strong> — metric, imperial, or follow the system. This is the entry
+<a href="units-and-locale">Units &amp; Locale</a> sends you to.</li>
+  <li><strong>Theme</strong> and <strong>Language</strong>.</li>
+  <li><strong>Show full message timestamps</strong>.</li>
+</ul>
+
+<p><strong>Persistence</strong></p>
+
+<ul>
+  <li>A cache limit for how much history is kept.</li>
+  <li><strong>Export rangetest packets</strong>, <strong>Export all packets</strong> and <strong>Export node database</strong>.</li>
+</ul>
+
+<p><strong>On their own</strong></p>
 
 <ul>
   <li><strong>Node Layout</strong> — how much detail each row of the node list shows.</li>
+  <li><strong>Wi-Fi Provisioning for mPWRD-OS</strong> — see <a href="connections">Connections</a>.</li>
   <li><strong>Message Filter</strong> — hides incoming messages that contain words you list. With no words
 configured it does nothing.</li>
+  <li><strong>System AI</strong> — appears only where app functions are available; see
+<a href="app-functions">App Functions</a>.</li>
 </ul>
+
+<p>A <strong>Permissions</strong> block sits above App Settings, so a user who skipped a permission during
+onboarding can get back to it, and <strong>App Info</strong> sits below.</p>
 
 <h3 id="a-propros">A propros</h3>
 
@@ -768,7 +800,7 @@ may redistribute under the same license.</p>
 <p>Reached from <strong>About</strong>, this lists every open-source library the app ships, with its license,
 generated at build time by AboutLibraries. It was previously called the license screen.</p>
 
-<h3 id="troubleshooting-remote-admin">Troubleshooting Remote Admin</h3>
+<h3 id="troubleshooting-remote-admin">Troubleshooting remote admin</h3>
 
 <ul>
   <li><strong>“No response from target node”</strong> — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.</li>
@@ -779,7 +811,7 @@ generated at build time by AboutLibraries. It was previously called the license 
 <h2 id="related-topics">Related Topics</h2>
 
 <ul>
-  <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — core radio and user profile settings</li>
+  <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — core node and user profile settings</li>
   <li><a href="https://meshtastic.org/docs/configuration/module">Module configuration reference</a> — detailed module docs on meshtastic.org</li>
   <li><a href="https://meshtastic.org/docs/faq/">FAQ</a> — common questions on meshtastic.org</li>
 </ul>

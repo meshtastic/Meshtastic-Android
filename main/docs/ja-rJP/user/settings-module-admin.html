@@ -9,9 +9,9 @@
 <body data-page="settings-module-admin" data-locale="ja-rJP">
 <pre class="markdown-content"># 設定：モジュールと管理
 
-オプションの機能モジュールを設定し、デバイスの管理を行います。 モジュールは、専用の機能で Meshtastic を拡張します。それぞれ個別に有効・無効を切り替えられます。
+オプションの機能モジュールを設定し、デバイスの管理を行います。モジュールは、専用の機能で Meshtastic を拡張します。それぞれ個別に有効・無効を切り替えられます。
 
-&gt; 💡 **ヒント：** 実際に使うモジュールだけを有効にすれば十分です。 使わないモジュールを無効にすると、電波利用時間が減り、バッテリーを節約でき、設定もシンプルになります。 A module you expect can be missing for three reasons: your node's role does not enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
+&gt; 💡 **ヒント：** 実際に使うモジュールだけを有効にすれば十分です。使わないモジュールを無効にすると、電波利用時間が減り、バッテリーを節約でき、設定もシンプルになります。 A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
 
 モジュールの設定は、トグルスイッチ、ドロップダウン、テキストフィールド、スライダーを備えたカード形式のレイアウトを使用します：
 
@@ -23,15 +23,15 @@
 
 ![A module settings card with its title and grouped controls](../../assets/screenshots/settings_titled_card.png)
 
-## モジュールの設定
+## 追加機能の設定
 
 Every module lives under **Settings → Module configuration**.
 
-&gt; ⚠️ **Important:** Saving a module screen restarts the radio — the button reads **Save &amp; restart**, and the radio is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**, and the radio may still restart for some changes.
+&gt; ⚠️ **Important:** Saving a module screen restarts the node — the button reads **Save &amp; restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**, and the node may still restart for some changes.
 
-### MQTT モジュール
+### MQTT module
 
-インターネット接続のために、メッシュのメッセージを MQTT サーバーとの間で橋渡しします。 これにより、無線の到達範囲を超えてメッシュを拡張したり、ホームオートメーションシステムと連携したりできます。
+インターネット接続のために、メッシュのメッセージを MQTT サーバーとの間で橋渡しします。 This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
  設定項目                 | 説明                                                                                                                                                                                      |
  -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -48,20 +48,20 @@ Every module lives under **Settings → Module configuration**.
  マップレポート              | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
 
 Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
-via MQTT_, with an **I agree.** switch under it. The rest of the card does not exist on screen
+via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
 until you agree:
 
  設定項目                              | 説明                                                                                                                                                                                       |
  --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- 同意します。                            | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting does not start without it                                     |
+ 同意します。                            | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
  Precision slider                  | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
  マップレポートの間隔 (秒) | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
 
 暗号化、プライバシー、サーバーの設定を含む詳しい使い方は、[MQTT](mqtt) を参照してください。
 
-### シリアルモジュール
+### Serial module
 
-外部デバイスとの連携（GPS モジュール、センサー、カスタムハードウェア）のために、シリアルポート通信を有効にします。 有効にすると、ノードのシリアルポートで protobuf またはテキストデータを送受信でき、外部のマイコンやコンピューターがメッシュとやり取りできるようになります。
+外部デバイスとの連携（GPS モジュール、センサー、カスタムハードウェア）のために、シリアルポート通信を有効にします。有効にすると、ノードのシリアルポートで protobuf またはテキストデータを送受信でき、外部のマイコンやコンピューターがメッシュとやり取りできるようになります。
 
  設定項目              | 説明                                                                                                                                                                                                  |
  ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -73,9 +73,9 @@ until you agree:
  タイムアウト            | How long to wait before considering an incoming message complete                                                                                                                                    |
  コンソールのシリアルポートを上書き | Take over the port the debug console normally uses                                                                                                                                                  |
 
-### 外部通知モジュール
+### External Notification module
 
-無線機ハードウェアのブザー、LED、振動によるアラートを制御します。 メッセージ到着時に物理的に知らせる必要があるデバイスに便利です。特に無人設置や屋外設置で役立ちます。
+Controls buzzer, LED, or vibration alerts on your node hardware. メッセージ到着時に物理的に知らせる必要があるデバイスに便利です。特に無人設置や屋外設置で役立ちます。
 
 There are two independent triggers — an incoming **message**, and a received **bell** character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
@@ -95,9 +95,9 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
  繰り返し通知間隔（秒）                          | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
  着信音                                  | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
-### Store &amp; Forward モジュール
+### Store &amp; Forward module
 
-一時的にオフラインだったノードのためにメッセージをバッファリングし、それらのノードが再接続したときに再送します。 ノードが頻繁に圏内・圏外を行き来するメッシュに不可欠です。短時間の切断中にメッセージが失われないようにします。
+一時的にオフラインだったノードのためにメッセージをバッファリングし、それらのノードが再接続したときに再送します。ノードが頻繁に圏内・圏外を行き来するメッシュに不可欠です。短時間の切断中にメッセージが失われないようにします。
 
  設定項目                                                   | 説明                                                     |
  ------------------------------------------------------ | ------------------------------------------------------ |
@@ -108,49 +108,49 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
  リクエスト可能な履歴の期間  (分)                  | 再送する時間の範囲                                              |
  サーバー                                                   | メッシュのストア＆フォワードサーバーとして動作する（十分なメモリが必要、例：PSRAM 搭載の ESP32） |
 
-&gt; 💡 **ヒント：** ストア＆フォワードは、十分なメモリを持つノード（PSRAM 搭載の ESP32）で最も良く機能します。 ルーターノードは通常は常時起動しているため、理想的な候補です。
+&gt; 💡 **ヒント：** ストア＆フォワードは、十分なメモリを持つノード（PSRAM 搭載の ESP32）で最も良く機能します。ルーターノードは通常は常時起動しているため、理想的な候補です。
 
-### レンジテストモジュール
+### Range Test module
 
 &gt; ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
 &gt; still uses the default channel key, the interval and CSV controls stay disabled — you can still
 &gt; switch an already-enabled module off — and saving force-disables the module if the channel has
 &gt; reverted to public.
 
-ノード間のリンク品質を評価するための、自動レンジテストツールです。 有効にすると、ノードはカウンターを増やしながらテストメッセージを定期的に送信します。 受信側のノードがこれらのメッセージを記録するため、歩いたり車で移動したりして、後からどの距離でメッセージが届かなくなったかを分析できます。
+ノード間のリンク品質を評価するための、自動レンジテストツールです。有効にすると、ノードはカウンターを増やしながらテストメッセージを定期的に送信します。受信側のノードがこれらのメッセージを記録するため、歩いたり車で移動したりして、後からどの距離でメッセージが届かなくなったかを分析できます。
 
- 設定項目                                         | 説明                                                                                        |
- -------------------------------------------- | ----------------------------------------------------------------------------------------- |
- レンジテストを有効化                                   | レンジテストを有効化                                                                                |
- 送信者のメッセージ間隔 (秒)           | Time between test transmissions, chosen from a dropdown of fixed intervals                |
- ストレージにCSVファイルを保存(ESP32のみ) | Log received test data to the radio's own filesystem. ESP32 hardware only |
+ 設定項目                                         | 説明                                                                                       |
+ -------------------------------------------- | ---------------------------------------------------------------------------------------- |
+ レンジテストを有効化                                   | レンジテストを有効化                                                                               |
+ 送信者のメッセージ間隔 (秒)           | Time between test transmissions, chosen from a dropdown of fixed intervals               |
+ ストレージにCSVファイルを保存(ESP32のみ) | Log received test data to the node's own filesystem. ESP32 hardware only |
 
-### テレメトリモジュール
+### Telemetry module
 
-ノードがメッシュと共有するテレメトリデータを制御します。 テレメトリには、デバイスの状態（バッテリー、連続稼働時間）と環境センサーのデータ（温度、湿度、気圧）が含まれます。
+ノードがメッシュと共有するテレメトリデータを制御します。テレメトリには、デバイスの状態（バッテリー、連続稼働時間）と環境センサーのデータ（温度、湿度、気圧）が含まれます。
 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely.
 
- 設定項目             | 説明                                                                                                                                                                                |
- ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- デバイステレメトリを送信     | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
- デバイスメトリクスの更新間隔   | How often to report battery, uptime and channel utilization                                                                                                                       |
- 環境メトリクスモジュールを有効化 | Report the attached environment sensors                                                                                                                                           |
- 環境メトリクスの更新間隔     | How often to report them                                                                                                                                                          |
- 環境メトリクスを画面上で有効化  | Also show these readings on the device's own display                                                                                                                              |
- 環境メトリクスは華氏を使用    | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units &amp; Locale](units-and-locale) |
- 空気品質測定モジュールを有効化  | Report particulate and CO₂ sensor data                                                                                                                                            |
- 空気品質メトリクスの更新間隔   | How often to report them                                                                                                                                                          |
- 電源メトリクスモジュール有効   | Report the per-channel voltage and current readings                                                                                                                               |
- 電源メトリクスの更新間隔     | How often to report them                                                                                                                                                          |
- 電源メトリクスを画面上で有効化  | Also show power readings on the device's display                                                                                                                                  |
+ 設定項目             | 説明                                                                                                                                                                               |
+ ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ デバイステレメトリを送信     | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                        |
+ デバイスメトリクスの更新間隔   | How often to report battery, uptime and channel utilization                                                                                                                      |
+ 環境メトリクスモジュールを有効化 | Report the attached environment sensors                                                                                                                                          |
+ 環境メトリクスの更新間隔     | How often to report them                                                                                                                                                         |
+ 環境メトリクスを画面上で有効化  | Also show these readings on the device's own display                                                                                                                             |
+ 環境メトリクスは華氏を使用    | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units &amp; Locale](units-and-locale) |
+ 空気品質測定モジュールを有効化  | Report particulate and CO₂ sensor data                                                                                                                                           |
+ 空気品質メトリクスの更新間隔   | How often to report them                                                                                                                                                         |
+ 電源メトリクスモジュール有効   | Report the per-channel voltage and current readings                                                                                                                              |
+ 電源メトリクスの更新間隔     | How often to report them                                                                                                                                                         |
+ 電源メトリクスを画面上で有効化  | Also show power readings on the device's display                                                                                                                                 |
 
 対応センサーと設定の推奨事項については、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
 
-### 定型メッセージモジュール
+### Canned Message module
 
-Pre-configured messages accessible from the radio's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). スマートフォンを接続していなくても送信できる、クイック送信メッセージのリストを定義します。フィールドでの使用に最適です。
+Pre-configured messages accessible from the node's physical buttons (for nodes with rotary encoders, keypads, or similar input hardware). スマートフォンを接続していなくても送信できる、クイック送信メッセージのリストを定義します。フィールドでの使用に最適です。
 
  設定項目                                           | 説明                                                                                                        |
  ---------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -163,9 +163,9 @@ Pre-configured messages accessible from the radio's physical buttons (for radios
  上下/選択入力を有効化                                    | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
  ~~Allow input source~~                         | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
-### オーディオモジュール
+### Audio module
 
-メッシュ上での低帯域幅の音声通信のための、Codec2 音声サポートです。 これは、Codec2 コーデックを使って音声を非常に小さなデータパケットにエンコードする、**実験的**な機能です。
+メッシュ上での低帯域幅の音声通信のための、Codec2 音声サポートです。これは、Codec2 コーデックを使って音声を非常に小さなデータパケットにエンコードする、**実験的**な機能です。
 
  設定項目           | 説明                                   |
  -------------- | ------------------------------------ |
@@ -179,11 +179,11 @@ Pre-configured messages accessible from the radio's physical buttons (for radios
 
 &gt; ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). 音質は非常に低帯域です。「聞き取れる無線の声」程度で、電話並みの品質ではないと考えてください。
 
-### リモートハードウェアモジュール
+### Remote Hardware module
 
-メッシュネットワーク経由での GPIO 制御です。 リモートのノードが、別のノードの GPIO ピンを読み書きできるようにします。リレーの作動、スイッチの読み取り、離れた場所からの外部ハードウェア制御に便利です。
+メッシュネットワーク経由での GPIO 制御です。リモートのノードが、別のノードの GPIO ピンを読み書きできるようにします。リレーの作動、スイッチの読み取り、離れた場所からの外部ハードウェア制御に便利です。
 
-&gt; ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Turn it on only on dedicated GPIO nodes.
+&gt; ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the node's own hardware. Turn it on only on dedicated GPIO nodes.
 
  設定項目            | 説明                                    |
  --------------- | ------------------------------------- |
@@ -191,21 +191,21 @@ Pre-configured messages accessible from the radio's physical buttons (for radios
  未定義のピンへのアクセスを許可 | 任意の GPIO ピンへのアクセスを許可（セキュリティリスク）       |
  使用可能な端子         | このノードがリモートの読み書き用に公開する GPIO ピン（最大 4 個） |
 
-### 隣接ノード情報モジュール
+### Neighbor Info module
 
-直接受信した隣接ノードの情報をブロードキャストし、メッシュのトポロジーマッピングを可能にします。 有効にした各ノードは、受信できる他のノードとその信号品質のリストを定期的に共有します。
+直接受信した隣接ノードの情報をブロードキャストし、メッシュのトポロジーマッピングを可能にします。有効にした各ノードは、受信できる他のノードとその信号品質のリストを定期的に共有します。
 
- 設定項目                        | 説明                                                                              |
- --------------------------- | ------------------------------------------------------------------------------- |
- 近隣ノード情報を有効化                 | 隣接ノードのブロードキャストを有効化                                                              |
- 更新間隔 (秒) | 隣接ノードのリストをブロードキャストする頻度                                                          |
- LoRaで送信                     | MQTT／スマートフォンだけでなく、LoRa 経由でも隣接ノード情報をブロードキャストします。 デフォルトの鍵と名前を使用しているチャンネルでは利用できません |
+ 設定項目                        | 説明                                                                             |
+ --------------------------- | ------------------------------------------------------------------------------ |
+ 近隣ノード情報を有効化                 | 隣接ノードのブロードキャストを有効化                                                             |
+ 更新間隔 (秒) | 隣接ノードのリストをブロードキャストする頻度                                                         |
+ LoRaで送信                     | MQTT／スマートフォンだけでなく、LoRa 経由でも隣接ノード情報をブロードキャストします。デフォルトの鍵と名前を使用しているチャンネルでは利用できません |
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
-### アンビエントライティングモジュール
+### Ambient Lighting module
 
-対応ハードウェア上の、オンボードの NeoPixel やその他のアドレサブル RGB LED を制御します。 視覚的なステータス表示、通知ライト、装飾的な演出に使用できます。
+対応ハードウェア上の、オンボードの NeoPixel やその他のアドレサブル RGB LED を制御します。視覚的なステータス表示、通知ライト、装飾的な演出に使用できます。
 
  設定項目   | 説明               |
  ------ | ---------------- |
@@ -213,7 +213,7 @@ See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topo
  電流     | LED の電流制限（0〜31）  |
  赤／緑／青  | 各色チャンネルの値（0〜255） |
 
-### 検知センサーモジュール
+### Detection Sensor module
 
 ノードを、動きやドアを検知するセンサーアラートシステムに変えます。 GPIO ピンが状態の変化（動きの検知、ドアの開放）を検出すると、ノードはメッシュ経由でアラートメッセージをブロードキャストします。
 
@@ -228,34 +228,34 @@ See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topo
  アラートメッセージ付きのベルを送信                        | アラートにベル文字を含める                               |
  名前                                       | このセンサーのカスタム名                                |
 
-### Paxcounter モジュール
+### Paxcounter module
 
 People counter using Wi-Fi and BLE probe requests. スマートフォンやノートパソコンがネットワークを探すときに発するプローブ要求を受動的に受信して、近くのデバイスを数えます。 ESP32 デバイスでのみ利用できます。
 
- 設定                          | 説明                                                                                                                |
- --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
- Paxcounter を有効化             | 人数カウントを有効化                                                                                                        |
- 更新間隔 (秒) | カウントを報告する頻度                                                                                                       |
- Wi-Fi RSSI threshold        | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
- BLE RSSI threshold          | The same cut-off for BLE advertisements (defaults to −80 dBm)                                  |
+ 設定                          | 説明                                                                                                               |
+ --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+ Paxcounter を有効化             | 人数カウントを有効化                                                                                                       |
+ 更新間隔 (秒) | カウントを報告する頻度                                                                                                      |
+ Wi-Fi RSSI threshold        | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
+ BLE RSSI threshold          | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
 
-&gt; 💡 **ヒント：** Paxcounter は、登山口やイベント会場などの人出を推定するのに便利です。 カウントはおおよその値です。1 人が複数のデバイスを持っていることがあります。
+&gt; 💡 **ヒント：** Paxcounter は、登山口やイベント会場などの人出を推定するのに便利です。カウントはおおよその値です。1 人が複数のデバイスを持っていることがあります。
 
-### Status Message Module
+### Status Message module
 
 The status message has no module screen. It is edited with the rest of the node's identity, on
 [Settings — Radio &amp; User](settings-radio-user#user-profile).
 
-### Mesh Beacon Module
+### Mesh Beacon module
 
 Broadcasts an invitation to your mesh, and receives invitations from others. The entry appears only
-on radios running firmware 2.8.0 or newer. See [Local Mesh Discovery](discovery) for the full
+on nodes running firmware 2.8.0 or newer. See [Local Mesh Discovery](discovery) for the full
 walkthrough.
 
-### TAK モジュール
+### TAK module
 
 ATAK および WinTAK と相互運用するための、Team Awareness Kit 連携です。 Two things have to be
-true before the entry appears in the module list: the radio runs firmware 2.8.0 or newer, and its
+true before the entry appears in the module list: the node runs firmware 2.8.0 or newer, and its
 **Device Role** on **Settings → Device configuration → Device** is set to `TAK` or `TAK_TRACKER`.
 詳しい設定と使い方は、[TAK 連携](tak) を参照してください。
 
@@ -276,32 +276,32 @@ true before the entry appears in the module list: the radio runs firmware 2.8.0 
 
 **Settings → Administration** holds five one-shot actions, each behind a confirmation dialog:
 
- 操作          | 内容                                                                                                     |
- ----------- | ------------------------------------------------------------------------------------------------------ |
- 時刻を設定       | Sends your phone's clock to the radio                                                                  |
- 再起動         | Restarts the radio                                                                                     |
- シャットダウン     | Powers the radio down                                                                                  |
- 出荷時にリセット    | Returns every setting to its factory default                                                           |
- NodeDBをリセット | Clears the radio's node database. This dialog carries a **Preserve Favorites?** switch |
+ 操作          | 内容                                                                                             |
+ ----------- | ---------------------------------------------------------------------------------------------- |
+ 時刻を設定       | Sends your phone's clock to the node                                                           |
+ 再起動         | Restarts the node                                                                              |
+ シャットダウン     | Powers the node down                                                                           |
+ 出荷時にリセット    | Returns every setting to its factory default                                                   |
+ NodeDBをリセット | Clears the node database. This dialog carries a **Preserve Favorites?** switch |
 
-&gt; ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the radio's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
+&gt; ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the node's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
 
 ### バックアップと復元
 
-**Settings → Backup &amp; Restore** writes the connected radio's whole configuration to a file with
+**Settings → Backup &amp; Restore** writes the connected node's whole configuration to a file with
 **Export configuration**, and reads a saved file back in with **Import configuration**. Export
-before a factory reset, or to copy one radio's setup onto another. The section is shown for your
-own radio only, not over remote admin.
+before a factory reset, or to copy one node's setup onto another. The section is shown for your
+own node only, not over remote admin.
 
 ### 詳細設定
 
 **Settings → Advanced** collects the tools that read or rewrite local state, and is likewise shown
-for your own radio only: **Firmware Update** on OTA-capable hardware, **Clean Node Database**,
+for your own node only: **Firmware Update** on OTA-capable hardware, **Clean Node Database**,
 **TAK Server**, **Local Mesh Discovery**, and the **Debug Panel**.
 
 #### ノードデータベースの整理
 
-Prunes nodes from your node database — from the app's copy _and_ from the radio's own, so this is
+Prunes nodes from your node database — from the app's copy _and_ from the node's own, so this is
 not a display-only cleanup. The two filters combine rather than acting separately; the screen puts
 it as _Selections are additive_.
 
@@ -311,22 +311,48 @@ it as _Selections are additive_.
   info. The age limit still applies on top of it.
 
 The screen lists the nodes queued for deletion as you move the filters. **Clean Now** carries the
-purge out, after one more confirmation, and it cannot be undone. Favorited nodes, ignored nodes,
+purge out, after one more confirmation, and it can't be undone. Favorited nodes, ignored nodes,
 and nodes with a public key heard in the last seven days are never removed, whatever the filters
 say — that is why the queued list can be shorter than you expect.
 
 #### デバッグ
 
-診断出力の表示・絞り込み・エクスポートを行う「**パケット**」タブと「**アプリログ**」タブを開きます。 詳しい手順は、[デバッグログ](debug-logs) を参照してください。
+診断出力の表示・絞り込み・エクスポートを行う「**パケット**」タブと「**アプリログ**」タブを開きます。詳しい手順は、[デバッグログ](debug-logs) を参照してください。
 
 ### App Settings
 
-Two easy-to-miss entries on the **Settings** screen configure the app rather than the radio, and
-appear only when your own node is selected:
+The **App Settings** block on the **Settings** screen configures the app rather than the node, and
+appears only when your own node is selected. It is grouped rather than flat:
+
+**Privacy**
+
+- **Allow analytics and crash reporting** — opt in or out of diagnostics.
+- **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
+- **Homoglyph encoding** — how look-alike characters in names are handled.
+
+**Appearance**
+
+- **Units** — metric, imperial, or follow the system. This is the entry
+  [Units &amp; Locale](units-and-locale) sends you to.
+- **Theme** and **Language**.
+- **Show full message timestamps**.
+
+**Persistence**
+
+- A cache limit for how much history is kept.
+- **Export rangetest packets**, **Export all packets** and **Export node database**.
+
+**On their own**
 
 - **Node Layout** — how much detail each row of the node list shows.
+- **Wi-Fi Provisioning for mPWRD-OS** — see [Connections](connections).
 - **Message Filter** — hides incoming messages that contain words you list. With no words
   configured it does nothing.
+- **System AI** — appears only where app functions are available; see
+  [App Functions](app-functions).
+
+A **Permissions** block sits above App Settings, so a user who skipped a permission during
+onboarding can get back to it, and **App Info** sits below.
 
 ### 概要
 
@@ -349,15 +375,15 @@ may redistribute under the same license.
 Reached from **About**, this lists every open-source library the app ships, with its license,
 generated at build time by AboutLibraries. It was previously called the license screen.
 
-### リモート管理のトラブルシューティング
+### Troubleshooting remote admin
 
-- **「対象ノードから応答がありません」**：対象が圏外、オフライン、または管理者鍵が一致していない可能性があります。 両方のノードで管理者鍵が一致しているか確認してください。
-- **変更が適用されない**：一部の設定は、反映に再起動が必要です。 保存後に「再起動」を実行してみてください。
-- **リモートの設定が表示されない**：自分のノードに、対象ノードの管理者鍵があることを確認してください。 管理チャンネルは、管理者鍵を設定すると自動的に構成されます。
+- **「対象ノードから応答がありません」**：対象が圏外、オフライン、または管理者鍵が一致していない可能性があります。両方のノードで管理者鍵が一致しているか確認してください。
+- **変更が適用されない**：一部の設定は、反映に再起動が必要です。保存後に「再起動」を実行してみてください。
+- **リモートの設定が表示されない**：自分のノードに、対象ノードの管理者鍵があることを確認してください。管理チャンネルは、管理者鍵を設定すると自動的に構成されます。
 
 ## 関連トピック
 
-- [設定：無線機とユーザー](settings-radio-user)：基本の無線機とユーザープロファイルの設定
+- [Settings — Radio &amp; User](settings-radio-user) — core node and user profile settings
 - [モジュール設定リファレンス](https://meshtastic.org/docs/configuration/module)：meshtastic.org にある詳細なモジュールのドキュメント
 - [FAQ](https://meshtastic.org/docs/faq/)：meshtastic.org のよくある質問
 </pre>

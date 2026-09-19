@@ -2,24 +2,24 @@
 
 <p>The Nodes screen lists every node visible on your mesh.</p>
 
-<h2 id="node-list">Node List</h2>
+<h2 id="node-list">Node list</h2>
 
-<p>The node list shows every node your radio has heard, including:</p>
+<p>The node list shows every node your node has heard, including:</p>
 
 <ul>
   <li><strong>Node name</strong> — user-configured long name</li>
   <li><strong>Short name</strong> — 4-character identifier</li>
-  <li><strong>Signal quality</strong> — SNR, RSSI, and a quality word, shown only for nodes your radio heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither</li>
+  <li><strong>Signal quality</strong> — SNR, RSSI, and a quality word, shown only for nodes your node heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither</li>
   <li><strong>Last heard</strong> — time since last communication</li>
   <li><strong>Distance</strong> — estimated distance (if positions are shared)</li>
   <li><strong>Battery</strong> — remote node battery level (if telemetry is enabled)</li>
 </ul>
 
-<h3 id="choosing-what-the-list-shows">Choosing What the List Shows</h3>
+<h3 id="choosing-what-the-list-shows">Choosing what the list shows</h3>
 
 <p>The list has two densities, set at <strong>Settings → Node Layout</strong>. <strong>Complete</strong> shows every field a node has reported and hides the ones it hasn’t. <strong>Compact</strong> fits more nodes on screen and lets you pick the fields yourself — <strong>Power</strong>, <strong>Last Heard Time</strong>, <strong>Relative Last Heard Time</strong>, <strong>Distance and Bearing</strong>, <strong>Hops Away</strong>, <strong>Signal (Direct Only)</strong>, <strong>Channel</strong>, and <strong>Device &amp; Role</strong>. The <strong>Environment Metrics</strong> toggle applies to both densities. A preview above the toggles shows the effect before you leave the screen.</p>
 
-<h3 id="node-status-indicators">Node Status Indicators</h3>
+<h3 id="node-status-indicators">Node Status indicators</h3>
 
 <table>
   <thead>
@@ -38,15 +38,25 @@
       <td>Node not heard for over 2 hours</td>
     </tr>
     <tr>
+      <td>Orange last-heard time with a crossed-out signal icon</td>
+      <td>Not heard since your node’s LoRa settings changed, so it can’t be reached from here</td>
+    </tr>
+    <tr>
+      <td>Struck-through name</td>
+      <td>Node you have ignored</td>
+    </tr>
+    <tr>
       <td>⭐ Favorite</td>
       <td>Node you marked as a favorite.</td>
     </tr>
   </tbody>
 </table>
 
-<p>There is no separate “away” tier.</p>
+<p>There is no separate “away” tier, but the orange unreachable state takes precedence over the
+green one: a node can be online and still be unreachable on your current settings. Nodes known
+only over MQTT are never shown as unreachable.</p>
 
-<h3 id="node-roles">Node Roles</h3>
+<h3 id="node-roles">Node roles</h3>
 
 <p>Nodes can be configured with different roles that affect their mesh behavior:</p>
 
@@ -108,22 +118,22 @@
     </tr>
     <tr>
       <td>Objets trouvés</td>
-      <td>Sends its position to the default channel as a text message at regular intervals, to help recover a lost radio</td>
+      <td>Sends its position to the default channel as a text message at regular intervals, to help recover a lost node</td>
     </tr>
   </tbody>
 </table>
 
-<h3 id="choosing-a-role">Choosing a Role</h3>
+<h3 id="choosing-a-role">Choosing a role</h3>
 
 <p>Most users should keep the default <strong>Client</strong> role. Consider a different role when:</p>
 
 <ul>
-  <li><strong>Router</strong> — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don’t use Router on battery-powered handheld radios.</li>
+  <li><strong>Router</strong> — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don’t use Router on battery-powered handheld nodes.</li>
   <li><strong>Router Late</strong> — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers.</li>
   <li><strong>Client Base</strong> — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.</li>
-  <li><strong>Client Mute</strong> — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only radios or to reduce congestion in dense areas.</li>
-  <li><strong>Tracker</strong> — An unattended radio whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.</li>
-  <li><strong>Sensor</strong> — An unattended radio reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.</li>
+  <li><strong>Client Mute</strong> — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only nodes or to reduce congestion in dense areas.</li>
+  <li><strong>Tracker</strong> — An unattended node whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.</li>
+  <li><strong>Sensor</strong> — An unattended node reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.</li>
   <li><strong>TAK / TAK Tracker</strong> — Only needed if interoperating with ATAK/WinTAK systems. See <a href="tak">TAK Integration</a> for details.</li>
 </ul>
 
@@ -151,7 +161,7 @@
     </tr>
     <tr>
       <td>Nodes icon with a shield check (green)</td>
-      <td><strong>Signed node</strong> — this node signs its broadcasts with its identity key, so its identity is consistent over time, but you have not verified it in person. On firmware 2.8 the icon appears from the version alone, before any signed broadcast has been heard</td>
+      <td><strong>Signed node</strong> — this node signs its broadcasts with its identity key, so its identity is consistent over time, but you haven’t verified it in person. On firmware 2.8 the icon appears from the version alone, before any signed broadcast has been heard</td>
       <td>Firmware 2.8 or newer, and any node whose signed broadcast your node has verified</td>
     </tr>
     <tr>
@@ -161,7 +171,7 @@
     </tr>
     <tr>
       <td>🔓 Open lock</td>
-      <td>No public key has been received for this node, so it cannot be direct messaged — use <strong>Request User Info</strong> on the node detail page to ask for one</td>
+      <td>No public key has been received for this node, so it can’t be direct messaged — use <strong>Request User Info</strong> on the node detail page to ask for one</td>
       <td>Firmware before 2.8, or no reported version</td>
     </tr>
     <tr>
@@ -172,11 +182,11 @@
   </tbody>
 </table>
 
-<p>Every node on firmware 2.8 or newer signs its broadcasts, so on that firmware the signed state is the baseline and the locks are not shown.</p>
+<p>Every node on firmware 2.8 or newer signs its broadcasts, so on that firmware the signed state is the baseline and the locks aren’t shown.</p>
 
 <p>Direct messages always use public-key encryption, so your node needs the other node’s public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly.</p>
 
-<p>A mismatch never replaces the key you already hold. The app keeps the first key it recorded and refuses the new one, as the firmware does, so a stray or hostile node info cannot silently break encrypted messaging to a contact. To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch &amp; hold the node, choose <strong>Remove</strong>, and let the two nodes exchange keys again the next time yours hears it.</p>
+<p>A mismatch never replaces the key you already hold. The app keeps the first key it recorded and refuses the new one, as the firmware does, so a stray or hostile node info can’t silently break encrypted messaging to a contact. To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch &amp; hold the node, choose <strong>Remove</strong>, and let the two nodes exchange keys again the next time yours hears it.</p>
 
 <h2 id="quick-actions">Quick Actions</h2>
 
@@ -198,10 +208,10 @@
 
 <p>Touch &amp; hold <strong>your own node</strong> instead and you get one action, <strong>Update status</strong>, which opens the
 User settings screen with the cursor already in the Status Message field. It only appears while the
-radio is connected and running firmware 2.8 or newer — see
+node is connected and running firmware 2.8 or newer — see
 <a href="settings-radio-user.md">Settings — Radio &amp; User</a> for the field itself.</p>
 
-<h2 id="sharing-a-contact">Sharing a Contact</h2>
+<h2 id="sharing-a-contact">Sharing a contact</h2>
 
 <p>On a node’s detail screen, tap <strong>Share Contact</strong> to produce a link and a QR code for that node. From the same dialog, <strong>Share link</strong> opens the Android share sheet (on desktop it copies the link instead), <strong>Write to NFC tag</strong> saves it to a writable NFC tag, and <strong>Copy</strong> puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved.</p>
 
@@ -209,13 +219,13 @@ radio is connected and running firmware 2.8 or newer — see
 
 <p>To add someone else’s contact, use the import button on the node list and choose <strong>Scan Shared Contact QR Code</strong>, <strong>Scan Shared Contact NFC</strong>, or <strong>Input Shared Contact URL</strong>. The app asks you to confirm with <strong>Import Shared Contact?</strong>, and warns you when the contact is one you already have.</p>
 
-<h2 id="filtering--sorting">Filtering &amp; Sorting</h2>
+<h2 id="filtering--sorting">Filtering &amp; sorting</h2>
 
-<h3 id="text-search">Text Search</h3>
+<h3 id="text-search">Text search</h3>
 
 <p>Type in the search field to filter nodes by name or short name. The filter updates in real time as you type.</p>
 
-<h3 id="filter-toggles">Filter Toggles</h3>
+<h3 id="filter-toggles">Filter toggles</h3>
 
 <table>
   <thead>
@@ -231,23 +241,27 @@ radio is connected and running firmware 2.8 or newer — see
     </tr>
     <tr>
       <td><strong>Only show direct nodes</strong></td>
-      <td>Show only nodes your radio heard directly, with no relay in between</td>
+      <td>Show only nodes your node heard directly, with no relay in between</td>
     </tr>
     <tr>
       <td><strong>Include unknown</strong></td>
-      <td>Show nodes that haven’t sent user info yet. <strong>On by default</strong>, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and cannot be direct messaged until their user info brings a public key</td>
+      <td>Show nodes that haven’t sent user info yet. <strong>On by default</strong>, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and can’t be direct messaged until their user info brings a public key</td>
     </tr>
     <tr>
       <td><strong>Exclude infrastructure</strong></td>
-      <td>Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role</td>
+      <td>Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that can’t be messaged, whatever its role</td>
     </tr>
     <tr>
       <td><strong>Exclude MQTT</strong></td>
       <td>Hide nodes heard only via MQTT internet bridge</td>
     </tr>
     <tr>
+      <td><strong>Hide unheard nodes</strong></td>
+      <td>Hide nodes your own node hasn’t heard since its LoRa settings changed. Off by default, and it does nothing on firmware that doesn’t report whether a node was heard on the current settings</td>
+    </tr>
+    <tr>
       <td><strong>Signed only</strong></td>
-      <td>Show only nodes whose signed broadcasts your node has actually heard and verified. Stricter than the icon: a node on 2.8 shows as signed by its firmware version before any signed broadcast arrives, and a contact verified in person on older firmware is not signed at all</td>
+      <td>Show only nodes whose signed broadcasts your node has actually heard and verified. Stricter than the icon: a node on 2.8 shows as signed by its firmware version before any signed broadcast arrives, and a contact verified in person on older firmware isn’t signed at all</td>
     </tr>
     <tr>
       <td><strong>Encrypted only</strong></td>
@@ -260,7 +274,26 @@ radio is connected and running firmware 2.8 or newer — see
   </tbody>
 </table>
 
-<h3 id="sort-options">Sort Options</h3>
+<h3 id="nodes-not-heard-on-your-current-settings">Nodes not heard on your current Settings</h3>
+
+<p>When your node’s LoRa settings change — a different preset, region or frequency slot — nodes heard
+under the old settings are still in the list but can no longer be reached. The app marks them with
+an orange last-heard time and a crossed-out signal icon, and shows a banner at the top of the list:
+<strong>N nodes not heard on your current LoRa settings</strong>.</p>
+
+<p>The banner offers two actions:</p>
+
+<ul>
+  <li><strong>Keep</strong> dismisses the banner and leaves every node in place.</li>
+  <li><strong>Remove</strong> deletes those nodes from the list. Your favorites and your own node are never removed.</li>
+</ul>
+
+<p><strong>Remove</strong> is a bulk delete and there is no undo, so use <strong>Keep</strong> if you expect to switch back to
+the old settings. Removed nodes reappear if your node hears them again.</p>
+
+<p>The <strong>Hide unheard nodes</strong> filter does the same hiding without deleting anything.</p>
+
+<h3 id="sort-options">Sort options</h3>
 
 <table>
   <thead>
@@ -292,7 +325,7 @@ radio is connected and running firmware 2.8 or newer — see
     </tr>
     <tr>
       <td><strong>via MQTT</strong></td>
-      <td>Grouped by MQTT vs. radio-heard</td>
+      <td>Grouped by MQTT vs. node-heard</td>
     </tr>
     <tr>
       <td><strong>via Favorite</strong> (default)</td>
@@ -301,11 +334,11 @@ radio is connected and running firmware 2.8 or newer — see
   </tbody>
 </table>
 
-<h2 id="nodes-per-hop">Nodes per Hop</h2>
+<h2 id="nodes-per-hop">Nodes per hop</h2>
 
-<p>Tap the hop-histogram icon in the node list’s app bar to open a bar chart of how many nodes sit at each hop distance (0 = direct, 1 = one relay away, and so on). Filter the chart to a <strong>last heard</strong> window — All time, 1 hour, 8 hours, or 24 hours — to see how the mesh looks right now versus over a longer period. It’s a quick way to gauge how busy and spread out your local mesh is.</p>
+<p>Tap the hop-histogram icon in the node list’s app bar to open a bar chart of how many nodes sit at each hop distance (0 = direct, 1 = one relay away, and so on). Filter the chart to a <strong>last heard</strong> window — <strong>All</strong>, <strong>1 Hour</strong>, <strong>8 Hours</strong> or <strong>24H</strong> — to see how the mesh looks right now versus over a longer period. It’s a quick way to gauge how busy and spread out your local mesh is.</p>
 
-<h2 id="node-detail">Node Detail</h2>
+<h2 id="node-detail">Node detail</h2>
 
 <p>Tapping a node opens the detail view with comprehensive information. See <a href="node-metrics">Node Metrics</a> for full details on metrics and telemetry.</p>
 
@@ -348,7 +381,7 @@ radio is connected and running firmware 2.8 or newer — see
   </tbody>
 </table>
 
-<h3 id="device-links-i-want-one">Device Links (“I want one”)</h3>
+<h3 id="device-links-i-want-one">Device links (“I want one”)</h3>
 
 <p>When a node’s hardware is recognized, the detail view shows a collapsible <strong>“I want one”</strong> section linking to places to buy or learn more about that device: the vendor’s product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the <code class="language-plaintext highlighter-rouge">msh.to</code> redirect service. Devices with no matching links don’t show the section.</p>
 
@@ -356,13 +389,13 @@ radio is connected and running firmware 2.8 or newer — see
 
 <p>Some of these are affiliate links. Both places say so above the links: product links may be affiliate links, and purchases may earn Meshtastic a commission.</p>
 
-<h2 id="when-no-nodes-appear">When No Nodes Appear</h2>
+<h2 id="when-no-nodes-appear">When no nodes appear</h2>
 
-<p>The list stays empty until your radio hears another node.</p>
+<p>The list stays empty until your node hears another node.</p>
 
 <ul>
-  <li><strong>No device connected</strong> — the app is not connected to a radio. See <a href="connections">Connections</a>.</li>
-  <li><strong>Searching for nodes</strong> — the radio is connected and listening, but nothing has arrived yet. Check that its region and modem preset match the mesh around you, and leave <strong>Include unknown</strong> on so a node that has not yet sent its name still appears. See <a href="settings-radio-user">Settings — Radio &amp; User</a>.</li>
+  <li><strong>No device connected</strong> — the app isn’t connected to a node. See <a href="connections">Connections</a>.</li>
+  <li><strong>Searching for nodes</strong> — the node is connected and listening, but nothing has arrived yet. Check that its region and modem preset match the mesh around you, and leave <strong>Include unknown</strong> on so a node that hasn’t yet sent its name still appears. See <a href="settings-radio-user">Settings — Radio &amp; User</a>.</li>
   <li>A node you expect is missing — check the filter toggles. <strong>Only show direct nodes</strong>, <strong>Exclude MQTT</strong>, and <strong>Exclude infrastructure</strong> each hide a whole category of node.</li>
 </ul>
 

@@ -1,13 +1,13 @@
 <h1 id="settings--radio--user">Settings — Radio &amp; User</h1>
 
-<p>Configure your radio’s user identity, region and LoRa parameters, position and power behavior, network and Bluetooth connectivity, and security settings.</p>
+<p>Configure your node’s user identity, region and LoRa parameters, position and power behavior, network and Bluetooth connectivity, and security settings.</p>
 
-<h2 id="how-these-screens-work">How These Screens Work</h2>
+<h2 id="how-these-screens-work">How these screens work</h2>
 
 <p>Everything here is on the <strong>Settings</strong> screen. <strong>User</strong>, <strong>LoRa</strong>, <strong>Channels</strong> and <strong>Security</strong> are
 listed there directly. <strong>Device</strong>, <strong>Position</strong>, <strong>Power</strong>, <strong>Network</strong>, <strong>Display</strong> and
 <strong>Bluetooth</strong> are one level down, under <strong>Settings → Device configuration</strong>. <strong>Network</strong> appears
-only on radios with Wi-Fi or Ethernet, and <strong>Bluetooth</strong> only on radios with Bluetooth.</p>
+only on nodes with Wi-Fi or Ethernet, and <strong>Bluetooth</strong> only on nodes with Bluetooth.</p>
 
 <p>Settings use standard preference controls — dropdowns, toggles, and sliders:</p>
 
@@ -58,25 +58,25 @@ only on radios with Wi-Fi or Ethernet, and <strong>Bluetooth</strong> only on ra
     </tr>
     <tr>
       <td>Statut du message</td>
-      <td>A short, public free-text status other nodes display alongside your node — up to 80 bytes, cleared with the <strong>✕</strong> in the field. The radio broadcasts it to the mesh when you change it and again every 12 hours. Needs firmware 2.8 or newer, and is absent otherwise</td>
+      <td>A short, public free-text status other nodes display alongside your node — up to 80 bytes, cleared with the <strong>✕</strong> in the field. The node broadcasts it to the mesh when you change it and again every 12 hours. Needs firmware 2.8 or newer, and is absent otherwise</td>
     </tr>
     <tr>
       <td>Non joignable par message</td>
       <td>Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware</td>
     </tr>
     <tr>
-      <td>Radioamateur licencié (RA)</td>
-      <td>Enable if you hold an amateur radio license (permits higher power). Turning it on is staged behind a confirmation dialog. On your own radio it then relabels <strong>Long Name</strong> as <strong>Call sign</strong> and adds a separate Long Name field; over remote admin the field stays <strong>Long Name</strong></td>
+      <td>Licensed amateur node (Ham)</td>
+      <td>Enable if you hold an amateur node license (permits higher power). Turning it on is staged behind a confirmation dialog. On your own node it then relabels <strong>Long Name</strong> as <strong>Call sign</strong> and adds a separate Long Name field; over remote admin the field stays <strong>Long Name</strong></td>
     </tr>
   </tbody>
 </table>
 
-<h3 id="applying-changes">Applying Changes</h3>
+<h3 id="applying-changes">Applying changes</h3>
 
-<p>The footer appears as soon as you change something. <strong>Discard</strong> throws the change away, and the other button writes it to the radio: it reads <strong>Save &amp; restart</strong> on the screens the firmware applies with a reboot — Position, Network, Bluetooth, Security, and most module screens — and <strong>Save</strong> everywhere else.</p>
+<p>The footer appears as soon as you change something. <strong>Discard</strong> throws the change away, and the other button writes it to the node: it reads <strong>Save &amp; restart</strong> on the screens the firmware applies with a reboot — Position, Network, Bluetooth, Security, and most module screens — and <strong>Save</strong> everywhere else.</p>
 
 <p>The status message is saved with the same <strong>Save</strong>, but it never reboots the node — and, like the
-rest of this screen, it can be edited on a remote node you administer. For your own radio there is a
+rest of this screen, it can be edited on a remote node you administer. For your own node there is a
 shortcut while it is connected: touch &amp; hold your node in the <a href="nodes.md">node list</a> and choose
 <strong>Update status</strong>. Older firmware and a disconnected node have no shortcut — the field itself is
 still the way in.</p>
@@ -119,7 +119,7 @@ still the way in.</p>
     <tr>
       <td>Triple clic pour faire un ping Ad Hoc</td>
       <td>Send an ad-hoc position ping on a triple click</td>
-      <td>Désactivé</td>
+      <td>Activé</td>
     </tr>
     <tr>
       <td>LED de vérification de fonctionnement (heartbeat)</td>
@@ -174,7 +174,7 @@ still the way in.</p>
     </tr>
     <tr>
       <td>Remplacer la fréquence</td>
-      <td>Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency</td>
+      <td>Overrides the computed operating frequency outright (MHz). It doesn’t offset the calculated value — leave at 0 unless you know you need a specific frequency</td>
       <td>0 (use calculated)</td>
     </tr>
     <tr>
@@ -184,7 +184,7 @@ still the way in.</p>
     </tr>
     <tr>
       <td>Facteur de propagation</td>
-      <td>Manual mode only: 5–12. Higher spreads further but slower. On SX127x (RF95) radios the firmware does not accept 5 or 6 and uses 11 instead</td>
+      <td>Manual mode only: 5–12. Higher spreads further but slower. On SX127x (RF95) radios the firmware doesn’t accept 5 or 6 and uses 11 instead</td>
       <td>From preset</td>
     </tr>
     <tr>
@@ -194,7 +194,7 @@ still the way in.</p>
     </tr>
     <tr>
       <td>Bande Passante</td>
-      <td>Manual mode only: the channel bandwidth in kHz, typed in directly. On the 2.4 GHz region the app offers a list of the bandwidths your radio supports instead, and a stored value that is not on that list shows as <em>Unsupported</em> and blocks saving until you pick a supported one</td>
+      <td>Manual mode only: the channel bandwidth in kHz, typed in directly. On the 2.4 GHz region the app offers a list of the bandwidths your node supports instead, and a stored value that isn’t on that list shows as <em>Unsupported</em> and blocks saving until you pick a supported one</td>
       <td>From preset</td>
     </tr>
     <tr>
@@ -235,15 +235,21 @@ still the way in.</p>
   </tbody>
 </table>
 
-<p>Some regions are amateur-radio allocations whose presets only licensed operators may use. On firmware 2.8 or newer the app knows which regions those are and grays the whole <strong>Presets</strong> list out until <strong>Licensed amateur radio (Ham)</strong> is turned on for the node you are configuring; the text under the field says so while it is grayed out.</p>
+<p>The preset list is also filtered to what your region legally permits, so a preset allowed in one
+region doesn’t appear in another. Changing region can therefore leave your current preset
+illegal — the app repairs it for you, switching to the region’s own default rather than leaving an
+unusable setting in place. The region list itself is filtered by what your firmware supports, so
+the newer regions appear only on 2.8 or later, alongside whichever region the node already has set.</p>
+
+<p>Some regions are amateur-node allocations whose presets only licensed operators may use. On firmware 2.8 or newer the app knows which regions those are and grays the whole <strong>Presets</strong> list out until <strong>Licensed amateur node (Ham)</strong> is turned on for the node you are configuring; the text under the field says so while it is grayed out.</p>
 
 <blockquote>
   <p>⚠️ <strong>Important:</strong> Operating without the correct region may violate local radio regulations. See the <a href="https://meshtastic.org/docs/getting-started/initial-config">region configuration guide</a> on meshtastic.org for details.</p>
 </blockquote>
 
-<h3 id="modem-presets">Modem Presets</h3>
+<h3 id="modem-presets">Modem presets</h3>
 
-<p>The Lite, Narrow, Medium Turbo, and Tiny presets need firmware 2.8 or newer — the app hides them on older radios.</p>
+<p>The Lite, Narrow, Medium Turbo, and Tiny presets need firmware 2.8 or newer — the app hides them on older nodes.</p>
 
 <blockquote>
   <p>💡 <strong>Tip:</strong> The <strong>SNR Limit</strong> values are negative on purpose. LoRa can decode signals <em>below</em> the noise floor, so a more-negative limit means the preset tolerates a weaker, noisier signal (more range). See <a href="signal-meter">How the Signal Meter Works</a> for the full explanation.</p>
@@ -363,7 +369,7 @@ still the way in.</p>
       <td>~20 km</td>
       <td>0.33 kbps</td>
       <td>−10 dB</td>
-      <td>Same band restrictions as Tiny Fast, longer range. Same firmware, radio, and TCXO requirements</td>
+      <td>Same band restrictions as Tiny Fast, longer range. Same firmware, node, and TCXO requirements</td>
     </tr>
     <tr>
       <td><del>Long Slow</del></td>
@@ -386,7 +392,7 @@ still the way in.</p>
   <p>ℹ️ <strong>Note:</strong> This table uses the common short names. The app’s <strong>Presets</strong> dropdown lists the raw firmware names instead — <code class="language-plaintext highlighter-rouge">SHORT_FAST</code>, <code class="language-plaintext highlighter-rouge">LONG_FAST</code>, <code class="language-plaintext highlighter-rouge">LITE_FAST</code>, <code class="language-plaintext highlighter-rouge">NARROW_FAST</code>, and so on. Local Mesh Discovery shows the same presets as <em>Long Fast</em> and <em>Short Turbo</em>.</p>
 </blockquote>
 
-<h4 id="choosing-a-modem-preset">Choosing a Modem Preset</h4>
+<h4 id="choosing-a-modem-preset">Choosing a modem preset</h4>
 
 <p>The modem preset controls the fundamental tradeoff between <strong>range</strong> and <strong>data rate</strong>:</p>
 
@@ -405,13 +411,13 @@ still the way in.</p>
   <li><strong>Mixed environments:</strong> Stick with <strong>Long Fast</strong> — it’s the community default and ensures compatibility with others in your area.</li>
 </ul>
 
-<p>All nodes on the same channel must use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.</p>
+<p>All nodes on the same channel must use the same modem preset. Nodes with mismatched presets can’t communicate even if they share the same frequency and encryption key.</p>
 
 <p>The range estimates in the <a href="#modem-presets">Modem Presets</a> table assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.</p>
 
 <h3 id="configuration-de-lécran">Configuration de l’écran</h3>
 
-<p>On <strong>Settings → Device configuration → Display</strong>. These control the <strong>radio’s own screen</strong>, not the app’s.</p>
+<p>On <strong>Settings → Device configuration → Display</strong>. These control the <strong>node’s own screen</strong>, not the app’s.</p>
 
 <table>
   <thead>
@@ -427,7 +433,7 @@ still the way in.</p>
     </tr>
     <tr>
       <td>Intervalle du carrousel</td>
-      <td>How often the radio cycles between screens on its own</td>
+      <td>How often the node cycles between screens on its own</td>
     </tr>
     <tr>
       <td>Mode d’affichage</td>
@@ -435,11 +441,11 @@ still the way in.</p>
     </tr>
     <tr>
       <td>Unités d’affichage</td>
-      <td>Metric or Imperial on the radio’s screen</td>
+      <td>Metric or Imperial on the node’s screen</td>
     </tr>
     <tr>
       <td>Utiliser le format horaire 12h</td>
-      <td>Show the radio’s clock as 12-hour rather than 24-hour</td>
+      <td>Show the node’s clock as 12-hour rather than 24-hour</td>
     </tr>
     <tr>
       <td>Titre en gras</td>
@@ -451,15 +457,15 @@ still the way in.</p>
     </tr>
     <tr>
       <td>Type d’OLED</td>
-      <td>Auto, SSD1306, SH1106, SH1107</td>
+      <td>Six values, shown as the raw constants: <code class="language-plaintext highlighter-rouge">OLED_AUTO</code>, <code class="language-plaintext highlighter-rouge">OLED_SSD1306</code>, <code class="language-plaintext highlighter-rouge">OLED_SH1106</code>, <code class="language-plaintext highlighter-rouge">OLED_SH1107</code>, <code class="language-plaintext highlighter-rouge">OLED_SH1107_128_128</code>, <code class="language-plaintext highlighter-rouge">OLED_SH1107_ROTATED</code></td>
     </tr>
     <tr>
       <td>Réveil par appui ou mouvement</td>
-      <td>Light the screen when the radio is tapped or moved</td>
+      <td>Light the screen when the node is tapped or moved</td>
     </tr>
     <tr>
       <td>Orientation de la boussole</td>
-      <td>Rotation offset for the compass rose (0°, 90°, 180°, 270°)</td>
+      <td>Rotation offset for the compass rose. Eight values, shown as the raw constants <code class="language-plaintext highlighter-rouge">DEGREES_0</code> through <code class="language-plaintext highlighter-rouge">DEGREES_270</code> plus an <code class="language-plaintext highlighter-rouge">_INVERTED</code> variant of each</td>
     </tr>
     <tr>
       <td>Toujours pointer vers le nord</td>
@@ -471,10 +477,6 @@ still the way in.</p>
 <h3 id="configuration-de-la-position">Configuration de la position</h3>
 
 <p>On <strong>Settings → Device configuration → Position</strong>.</p>
-
-<blockquote>
-  <p>⚠️ <strong>Important:</strong> Saving this screen always reboots the radio.</p>
-</blockquote>
 
 <table>
   <thead>
@@ -490,7 +492,7 @@ still the way in.</p>
     </tr>
     <tr>
       <td>Fréquence de récupération GPS</td>
-      <td>How often the radio asks its GPS for a fix</td>
+      <td>How often the node asks its GPS for a fix</td>
     </tr>
     <tr>
       <td>Intervalle de diffusion</td>
@@ -537,7 +539,7 @@ still the way in.</p>
   <tbody>
     <tr>
       <td>Activer le mode économie d’énergie</td>
-      <td>Let the radio sleep aggressively between activity</td>
+      <td>Let the node sleep aggressively between activity</td>
     </tr>
     <tr>
       <td>Arrêt en cas de perte d’alimentation</td>
@@ -549,7 +551,7 @@ still the way in.</p>
     </tr>
     <tr>
       <td>Durée minimale de réveil</td>
-      <td>The shortest time the radio stays awake once woken</td>
+      <td>The shortest time the node stays awake once woken</td>
     </tr>
     <tr>
       <td>Durée d’attente max du Bluetooth</td>
@@ -572,10 +574,10 @@ still the way in.</p>
 
 <h3 id="configuration-du-réseau">Configuration du réseau</h3>
 
-<p>On <strong>Settings → Device configuration → Network</strong>, on radios with Wi-Fi or Ethernet.</p>
+<p>On <strong>Settings → Device configuration → Network</strong>, on nodes with Wi-Fi or Ethernet.</p>
 
 <blockquote>
-  <p>⚠️ <strong>Warning:</strong> Turning on <strong>Wi-Fi enabled</strong> or <strong>Ethernet enabled</strong> ends the Bluetooth connection between your phone and the radio. Reconnect over the network afterwards from the <a href="connections">Connections</a> screen, or turn Wi-Fi off again from the radio’s own screen or over USB. Saving this screen also always reboots the radio.</p>
+  <p>⚠️ <strong>Warning:</strong> Turning on <strong>Wi-Fi enabled</strong> or <strong>Ethernet enabled</strong> ends the Bluetooth connection between your phone and the node. Reconnect over the network afterwards from the <a href="connections">Connections</a> screen, or turn Wi-Fi off again from the node’s own screen or over USB. Saving this screen also always reboots the node.</p>
 </blockquote>
 
 <table>
@@ -588,7 +590,7 @@ still the way in.</p>
   <tbody>
     <tr>
       <td>Wi-Fi enabled</td>
-      <td>Enable the Wi-Fi radio (ESP32 radios)</td>
+      <td>Enable the Wi-Fi node (ESP32 nodes)</td>
     </tr>
     <tr>
       <td>SSID</td>
@@ -629,11 +631,7 @@ still the way in.</p>
 
 <h3 id="configuration-bluetooth">Configuration Bluetooth</h3>
 
-<p>On <strong>Settings → Device configuration → Bluetooth</strong>, on radios with Bluetooth.</p>
-
-<blockquote>
-  <p>⚠️ <strong>Important:</strong> Saving this screen always reboots the radio.</p>
-</blockquote>
+<p>On <strong>Settings → Device configuration → Bluetooth</strong>, on nodes with Bluetooth.</p>
 
 <table>
   <thead>
@@ -662,10 +660,6 @@ still the way in.</p>
 
 <p>On <strong>Settings → Security</strong>. The screen is grouped into cards: <strong>Packet authenticity</strong>, <strong>Direct Message Key</strong> (your node’s key pair), <strong>Admin Keys</strong>, <strong>Logs</strong>, and <strong>Administration</strong>.</p>
 
-<blockquote>
-  <p>⚠️ <strong>Important:</strong> Saving this screen always reboots the radio.</p>
-</blockquote>
-
 <table>
   <thead>
     <tr>
@@ -684,7 +678,7 @@ still the way in.</p>
     </tr>
     <tr>
       <td>Clé privée</td>
-      <td>Your node’s private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it</td>
+      <td>Your node’s private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware doesn’t send it</td>
     </tr>
     <tr>
       <td>Régénérer la clé privée</td>
@@ -700,11 +694,11 @@ still the way in.</p>
     </tr>
     <tr>
       <td>API de journalisation de débogage activée</td>
-      <td>Output live debug logging over serial, and view and export position-redacted radio logs over Bluetooth</td>
+      <td>Output live debug logging over serial, and view and export position-redacted node logs over Bluetooth</td>
     </tr>
     <tr>
       <td>Mode géré</td>
-      <td>Restrict non-admin channel changes. Only selectable once an Admin Key is set</td>
+      <td>Locks the whole Configuration list, not just channels — every setting on the node becomes read-only and only an admin can change anything. Only selectable once an Admin Key is set</td>
     </tr>
     <tr>
       <td>Sauvegarder les clés</td>
@@ -728,11 +722,12 @@ still the way in.</p>
 <h4 id="lockdown-mode">Lockdown Mode</h4>
 
 <p>Lockdown encrypts the device’s storage and requires a passphrase for each connection. It needs
-supporting firmware; the row does not appear otherwise.</p>
+supporting firmware; the row doesn’t appear otherwise.</p>
 
 <p>Enabling it asks you to set and confirm a passphrase, and to acknowledge that <strong>it locks the debug
-(SWD) port on hardware that supports locking</strong>. You can turn lockdown off again at any time with
-the passphrase, and a full device erase restores the hardware regardless.</p>
+(SWD) port on hardware where the lockout takes effect</strong>. That part isn’t reversible from the app.
+Turning lockdown off later decrypts your storage and reboots the device, but the port stays locked.
+Reopening it takes a full chip erase with a debug probe, which destroys everything on the device.</p>
 
 <p>Alongside the passphrase you set the limits that end a session automatically:</p>
 
