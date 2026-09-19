@@ -38,17 +38,29 @@ class DisplayMirrorManagerImplTest {
         width: Int = WIDTH,
         height: Int = HEIGHT,
         format: DisplayFrame.Format = DisplayFrame.Format.MONO_VLSB,
-    ) = DisplayFrame(
-        width = width,
-        height = height,
-        format = format,
-        frame_id = frameId,
-        offset = offset,
-        total_size = total,
-        data_ = data.toByteString(),
-    )
+    ) = DisplayFrame.Builder()
+        .also { wb ->
+            wb.width = width
+            wb.height = height
+            wb.format = format
+            wb.frame_id = frameId
+            wb.offset = offset
+            wb.total_size = total
+            wb.data_ = data.toByteString()
+        }
+        .build()
 
     private fun bytes(size: Int, fill: Int) = ByteArray(size) { fill.toByte() }
+
+    private fun palette(signature: Int, regionOffset: Int, regionTotal: Int, regions: List<DisplayPalette.ColorRegion>) =
+        DisplayPalette.Builder()
+            .also { wb ->
+                wb.signature = signature
+                wb.region_offset = regionOffset
+                wb.region_total = regionTotal
+                wb.regions = regions
+            }
+            .build()
 
     @Test
     fun `reassembles a three-chunk frame in order`() {
@@ -131,21 +143,32 @@ class DisplayMirrorManagerImplTest {
     @Test
     fun `reassembles a two-chunk palette and tags frames with its signature`() {
         val region =
-            DisplayPalette.ColorRegion(x = 0, y = 0, width = 128, height = 16, on_color = 0xF800, off_color = 0)
+            DisplayPalette.ColorRegion.Builder()
+                .also { wb ->
+                    wb.x = 0
+                    wb.y = 0
+                    wb.width = 128
+                    wb.height = 16
+                    wb.on_color = 0xF800
+                    wb.off_color = 0
+                }
+                .build()
         manager.handleIncomingPalette(
-            DisplayPalette(
-                signature = 42,
-                default_on_color = 0xFFFF,
-                default_off_color = 0,
-                region_offset = 0,
-                region_total = 3,
-                regions = listOf(region, region),
-            ),
+            DisplayPalette.Builder()
+                .also { wb ->
+                    wb.signature = 42
+                    wb.default_on_color = 0xFFFF
+                    wb.default_off_color = 0
+                    wb.region_offset = 0
+                    wb.region_total = 3
+                    wb.regions = listOf(region, region)
+                }
+                .build(),
         )
         assertNull(manager.palette.value)
 
         manager.handleIncomingPalette(
-            DisplayPalette(signature = 42, region_offset = 2, region_total = 3, regions = listOf(region)),
+            palette(signature = 42, regionOffset = 2, regionTotal = 3, regions = listOf(region)),
         )
 
         val palette = manager.palette.value!!
@@ -156,18 +179,26 @@ class DisplayMirrorManagerImplTest {
 
     @Test
     fun `out-of-sequence palette chunk is dropped until a restart`() {
-        val region = DisplayPalette.ColorRegion(x = 0, y = 0, width = 8, height = 8)
+        val region =
+            DisplayPalette.ColorRegion.Builder()
+                .also { wb ->
+                    wb.x = 0
+                    wb.y = 0
+                    wb.width = 8
+                    wb.height = 8
+                }
+                .build()
         manager.handleIncomingPalette(
-            DisplayPalette(signature = 7, region_offset = 0, region_total = 2, regions = listOf(region)),
+            palette(signature = 7, regionOffset = 0, regionTotal = 2, regions = listOf(region)),
         )
         manager.handleIncomingPalette(
-            DisplayPalette(signature = 7, region_offset = 5, region_total = 2, regions = listOf(region)),
+            palette(signature = 7, regionOffset = 5, regionTotal = 2, regions = listOf(region)),
         )
         assertNull(manager.palette.value)
 
         // A fresh offset-0 chunk recovers
         manager.handleIncomingPalette(
-            DisplayPalette(signature = 8, region_offset = 0, region_total = 1, regions = listOf(region)),
+            palette(signature = 8, regionOffset = 0, regionTotal = 1, regions = listOf(region)),
         )
         assertEquals(8, manager.palette.value?.signature)
     }
@@ -176,7 +207,7 @@ class DisplayMirrorManagerImplTest {
     fun `reset clears frames palettes and partial state`() {
         manager.handleIncomingFrame(chunk(width = 64, height = 32, total = 256, data = bytes(256, 7)))
         manager.handleIncomingPalette(
-            DisplayPalette(signature = 9, region_offset = 0, region_total = 0, regions = emptyList()),
+            palette(signature = 9, regionOffset = 0, regionTotal = 0, regions = emptyList()),
         )
 
         manager.reset()
@@ -187,9 +218,17 @@ class DisplayMirrorManagerImplTest {
 
     @Test
     fun `rejects palettes past the region cap`() {
-        val region = DisplayPalette.ColorRegion(x = 0, y = 0, width = 8, height = 8)
+        val region =
+            DisplayPalette.ColorRegion.Builder()
+                .also { wb ->
+                    wb.x = 0
+                    wb.y = 0
+                    wb.width = 8
+                    wb.height = 8
+                }
+                .build()
         manager.handleIncomingPalette(
-            DisplayPalette(signature = 3, region_offset = 0, region_total = 100_000, regions = listOf(region)),
+            palette(signature = 3, regionOffset = 0, regionTotal = 100_000, regions = listOf(region)),
         )
 
         assertNull(manager.palette.value)
@@ -218,19 +257,21 @@ class DisplayMirrorManagerImplTest {
         rectY: Int = 0,
         rectW: Int = 10,
         rectH: Int = 10,
-    ) = DisplayFrame(
-        width = width,
-        height = height,
-        format = DisplayFrame.Format.RGB565,
-        frame_id = frameId,
-        offset = offset,
-        total_size = total,
-        rect_x = rectX,
-        rect_y = rectY,
-        rect_width = rectW,
-        rect_height = rectH,
-        data_ = data.toByteString(),
-    )
+    ) = DisplayFrame.Builder()
+        .also { wb ->
+            wb.width = width
+            wb.height = height
+            wb.format = DisplayFrame.Format.RGB565
+            wb.frame_id = frameId
+            wb.offset = offset
+            wb.total_size = total
+            wb.rect_x = rectX
+            wb.rect_y = rectY
+            wb.rect_width = rectW
+            wb.rect_height = rectH
+            wb.data_ = data.toByteString()
+        }
+        .build()
 
     @Test
     fun `composites a completed rect into an RGB565 frame`() {
