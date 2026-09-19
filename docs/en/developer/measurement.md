@@ -2,7 +2,7 @@
 title: Measurement & Formatting
 parent: Developer Guide
 nav_order: 9
-last_updated: 2026-08-29
+last_updated: 2026-09-19
 description: How MetricFormatter and NumberFormatter format measurements, and how the app resolves metric or imperial units from locale and user preference.
 aliases:
   - measurement
@@ -14,8 +14,6 @@ aliases:
 
 How the Meshtastic Android/KMP app formats numbers, units, and locale-sensitive values.
 
----
-
 ## Overview
 
 All measurement data transmitted by Meshtastic radios uses **metric units** (meters, °C, hPa, m/s, etc.). The app converts and formats these values for display using two core utilities:
@@ -23,11 +21,10 @@ All measurement data transmitted by Meshtastic radios uses **metric units** (met
 | Utility | Location | Purpose |
 |---|---|---|
 | `MetricFormatter` | `core/common/.../util/MetricFormatter.kt` | Converts and formats physical measurements (temperature, pressure, speed, etc.) |
-| `NumberFormatter` | `core/common/.../util/NumberFormatter.kt` | Low-level fixed-point number formatting with locale-independent dot separator |
+| `NumberFormatter` | `core/common/.../util/NumberFormatter.kt` | Decimal formatting: `format` follows the OS locale, `formatInvariant` keeps a fixed dot separator |
+| `MeasureFormatting` | `core/common/.../util/MeasureFormatting.kt` | Pairs a fixed English unit symbol with a locale-formatted number, for the units that convert |
 
 Both live in `org.meshtastic.core.common.util` and are available to all KMP targets (Android, Desktop, iOS).
-
----
 
 ## MetricFormatter API
 
@@ -41,11 +38,16 @@ object MetricFormatter {
     fun percent(value: Float, decimalPlaces: Int = 1): String
     fun humidity(value: Float): String
     fun pressure(hPa: Float, decimalPlaces: Int = 1): String
-    fun snr(value: Float, decimalPlaces: Int = 1): String
-    fun rssi(value: Int): String
+    fun snr(value: Float?, decimalPlaces: Int = 1): String
+    fun rssi(value: Int?): String
+    fun degreeSymbol(isFahrenheit: Boolean): String
+    fun percent(value: Int): String
     fun windSpeed(metersPerSecond: Float, isImperial: Boolean, decimalPlaces: Int = 1): String
     fun rainfall(millimeters: Float, isImperial: Boolean, decimalPlaces: Int = 1): String
+    fun weight(kilograms: Float, isImperial: Boolean, decimalPlaces: Int = 2): String
 }
+
+`snr` and `rssi` take a nullable reading and render the `—` placeholder when it is absent.
 ```
 
 ### Usage
@@ -72,36 +74,41 @@ MetricFormatter.voltage(3.95f)      // "3.95 V"
 MetricFormatter.current(125.0f)     // "125.0 mA"
 ```
 
----
-
 ## NumberFormatter
 
-`NumberFormatter` provides locale-independent decimal formatting using pure arithmetic (no `String.format` or `DecimalFormat`):
+`NumberFormatter` has two halves, and picking the wrong one is the mistake to avoid:
 
 ```kotlin
 object NumberFormatter {
-    fun format(value: Double, decimalPlaces: Int): String
-    fun format(value: Float, decimalPlaces: Int): String
+    fun format(value: Double, decimalPlaces: Int): String        // follows the OS locale
+    fun format(value: Float, decimalPlaces: Int): String         // follows the OS locale
+    fun formatInvariant(value: Double, decimalPlaces: Int): String  // fixed dot separator
 }
 ```
 
-> **Why locale-independent?** Meshtastic is a mesh networking app where consistency matters — sensor readings shared between nodes should look the same everywhere. `NumberFormatter` always uses `.` as the decimal separator.
+**Use `format` for anything a person reads.** It delegates to the platform's own number formatter
+through an `expect`/`actual` (`java.text.NumberFormat` on JVM and Android), so a number reads the
+way that user writes numbers. `NaN` and infinity render as `—`.
 
----
+**Use `formatInvariant` for anything a machine parses** — a CoT payload another client reads, or a
+value written out and read back. Localizing those turns `1.5` into `1,5` and breaks the reader.
+It rounds half away from zero to match the locale path, which matters because firmware reports SNR
+in quarter-dB steps and ties are routine.
 
 ## Unit Conversion
 
-Three measurements convert away from metric for display, each gated by a boolean flag sourced from the user's device locale or preferences:
+Four measurements convert away from metric for display, each gated by a boolean flag sourced from the device locale or preferences:
 
 | Measurement | Flag | Source | Conversion |
 |---|---|---|---|
 | `temperature` | `isFahrenheit` | `getSystemTemperatureUnit()` | `°F = °C × 1.8 + 32` |
 | `windSpeed` | `isImperial` | `getSystemMeasurementSystem()` | m/s × 3.6 → km/h, or × 2.23694 → mph |
 | `rainfall` | `isImperial` | `getSystemMeasurementSystem()` | mm ÷ 25.4 → in |
+| `weight` | `isImperial` | `getSystemMeasurementSystem()` | kg × 2.20462 → lb |
 
 The two source functions (in `core/common/.../util/MeasurementSystem.kt`) are deliberately separate: some locales mix systems (the UK uses miles for distance but Celsius for temperature), so temperature must never be derived from the distance unit. On Android, `getSystemTemperatureUnit()` delegates to `androidx.core.text.util.LocalePreferences`, which resolves CLDR locale data and honors the Android 14+ Regional preferences temperature override.
 
-The user's in-app **Units** choice (`UnitsOverride`, stored in `UiPrefs`) is folded in by `LocaleUnitsProvider`, which is the only place display code takes units from. A Konsist rule (`MeasurementSystemSourceTest`) keeps direct reads of the OS resolution out of the rest of the codebase, because a direct read follows the locale but ignores the setting. A forced system carries its temperature with it (metric → °C, imperial → °F), overriding even an explicit OS regional temperature preference.
+The in-app **Units** choice (`UnitsOverride`, stored in `UiPrefs`) is folded in by `LocaleUnitsProvider`, which is the only place display code takes units from. A Konsist rule (`MeasurementSystemSourceTest`) keeps direct reads of the OS resolution out of the rest of the codebase, because a direct read follows the locale but ignores the setting. A forced system carries its temperature with it (metric → °C, imperial → °F), overriding even an explicit OS regional temperature preference.
 
 `getSystemMeasurementSystem()` resolves the locale in this order (temperature is separate: as described above, `getSystemTemperatureUnit()` reads the regional temperature preference via `LocalePreferences`, shares only the region backfill, and falls back to Celsius):
 
@@ -112,8 +119,6 @@ The user's in-app **Units** choice (`UnitsOverride`, stored in `UiPrefs`) is fol
 The Android and Desktop implementations share the region table and the override reader in `commonMain`, so the two clients cannot disagree about the same locale.
 
 Everything else (voltage, current, pressure, SNR, RSSI, humidity, percent) displays in its native metric units. The user-facing [Units & Locale](../user/units-and-locale) page explains what end users see.
-
----
 
 ## Adding a New Measurement Type
 
@@ -147,8 +152,6 @@ To add a new measurement formatter:
    ./gradlew :core:common:allTests
    ```
 
----
-
 ## DateFormatter
 
 Date and time formatting uses the `DateFormatter` `expect object` with platform-specific `actual` implementations:
@@ -165,18 +168,14 @@ Date and time formatting uses the `DateFormatter` `expect object` with platform-
 
 Unlike `MetricFormatter`, `DateFormatter` is declared with `expect`/`actual` (an `expect object` in `commonMain`, an `actual object` per platform) because date formatting inherently depends on platform locale APIs.
 
----
-
 ## Design Decisions
 
 | Decision | Rationale |
 |---|---|
-| Locale-independent decimal separator (`.`) | Mesh data shared between nodes must be consistent |
-| Pure arithmetic formatting (no `DecimalFormat`) | Works identically on JVM, Native, and JS targets |
-| Only temperature, wind speed, and rainfall convert | The remaining metric units are universally understood in their native form |
+| Display formatting follows the OS locale | A number shown to a user should read the way that user writes numbers |
+| `formatInvariant` keeps a fixed `.` for machine-read values | Interop payloads and re-parsed values break if localized |
+| Only temperature, wind speed, rainfall and weight convert | The remaining metric units are universally understood in their native form |
 | `object` singleton pattern | Stateless utility — no instance management needed |
-
----
 
 ## Related
 

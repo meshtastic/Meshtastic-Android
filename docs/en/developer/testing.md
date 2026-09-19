@@ -2,7 +2,7 @@
 title: Testing
 parent: Developer Guide
 nav_order: 7
-last_updated: 2026-09-18
+last_updated: 2026-09-19
 description: Testing strategy for the Meshtastic KMP project — test categories, screenshot pipeline, baseline profiles, and CI integration.
 aliases:
   - tests
@@ -167,4 +167,4 @@ Tests run automatically on:
 - Push to `main`
 - Pre-release validation
 
-Every job in `reusable-check.yml` runs on `ubuntu-24.04` with JDK 25 and Gradle caching; only the desktop and Flatpak-source jobs use a matrix. The ARM (`ubuntu-24.04-arm`) and container-backed `ubuntu-slim` runners carry the lightweight utility workflows instead — see `.skills/testing-ci/SKILL.md` for the four-tier rule.
+Single-runner jobs in `reusable-check.yml` run on `ubuntu-26.04` with JDK 25 and Gradle caching. Two jobs use a matrix: `test-shards` splits into `shard-core`, `shard-feature` and `shard-app`, and `build-desktop` runs across macOS, Windows and Linux, still pinned to `ubuntu-24.04`/`-arm`. Flatpak verification is its own workflow, not a job here. The ARM (`ubuntu-26.04-arm`) and container-backed `ubuntu-slim` runners carry the lightweight utility workflows — see `.skills/testing-ci/SKILL.md` for the four-tier rule, which still quotes the older labels.

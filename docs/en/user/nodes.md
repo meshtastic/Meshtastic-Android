@@ -2,7 +2,7 @@
 title: Nodes
 parent: User Guide
 nav_order: 4
-last_updated: 2026-09-11
+last_updated: 2026-09-19
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -35,9 +35,13 @@ The list has two densities, set at **Settings → Node Layout**. **Complete** sh
 |-------|---------|
 | Green last-heard time | Node heard within the last 2 hours |
 | Plain last-heard time | Node not heard for over 2 hours |
+| Orange last-heard time with a crossed-out signal icon | Not heard since your node's LoRa settings changed, so it can't be reached from here |
+| Struck-through name | Node you have ignored |
 | ⭐ Favorite | Node you marked as a favorite. |
 
-There is no separate "away" tier.
+There is no separate "away" tier, but the orange unreachable state takes precedence over the
+green one: a node can be online and still be unreachable on your current settings. Nodes known
+only over MQTT are never shown as unreachable.
 
 ### Node Roles
 
@@ -131,9 +135,27 @@ Type in the search field to filter nodes by name or short name. The filter updat
 | **Include unknown** | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and cannot be direct messaged until their user info brings a public key |
 | **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role |
 | **Exclude MQTT** | Hide nodes heard only via MQTT internet bridge |
+| **Hide unheard nodes** | Hide nodes your own node hasn't heard since its LoRa settings changed. Off by default, and it does nothing on firmware that doesn't report whether a node was heard on the current settings |
 | **Signed only** | Show only nodes whose signed broadcasts your node has actually heard and verified. Stricter than the icon: a node on 2.8 shows as signed by its firmware version before any signed broadcast arrives, and a contact verified in person on older firmware is not signed at all |
 | **Encrypted only** | Show nodes with a matching public key on file, the key an encrypted direct message needs. A node with a key mismatch is excluded |
 | **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back |
+
+### Nodes Not Heard on Your Current Settings
+
+When your node's LoRa settings change — a different preset, region or frequency slot — nodes heard
+under the old settings are still in the list but can no longer be reached. The app marks them with
+an orange last-heard time and a crossed-out signal icon, and shows a banner at the top of the list:
+**N nodes not heard on your current LoRa settings**.
+
+The banner offers two actions:
+
+- **Keep** dismisses the banner and leaves every node in place.
+- **Remove** deletes those nodes from the list. Your favorites and your own node are never removed.
+
+**Remove** is a bulk delete and there is no undo, so use **Keep** if you expect to switch back to
+the old settings. Removed nodes reappear if your node hears them again.
+
+The **Hide unheard nodes** filter does the same hiding without deleting anything.
 
 ### Sort Options
 
@@ -149,7 +171,7 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 ## Nodes per Hop
 
-Tap the hop-histogram icon in the node list's app bar to open a bar chart of how many nodes sit at each hop distance (0 = direct, 1 = one relay away, and so on). Filter the chart to a **last heard** window — All time, 1 hour, 8 hours, or 24 hours — to see how the mesh looks right now versus over a longer period. It's a quick way to gauge how busy and spread out your local mesh is.
+Tap the hop-histogram icon in the node list's app bar to open a bar chart of how many nodes sit at each hop distance (0 = direct, 1 = one relay away, and so on). Filter the chart to a **last heard** window — **All**, **1 Hour**, **8 Hours** or **24H** — to see how the mesh looks right now versus over a longer period. It's a quick way to gauge how busy and spread out your local mesh is.
 
 ## Node Detail
 
