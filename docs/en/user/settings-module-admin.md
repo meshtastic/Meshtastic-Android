@@ -14,7 +14,7 @@ aliases:
 
 Configure optional feature modules and perform device administration. Modules extend Meshtastic with specialized capabilities — each can be independently enabled or disabled.
 
-> 💡 **Tip:** You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration. A module you expect can be missing for three reasons: your node's role does not enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
+> 💡 **Tip:** You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration. A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
 
 Module settings use a card-based layout with toggle switches, dropdowns, text fields, and sliders:
 
@@ -26,15 +26,15 @@ Module settings use a card-based layout with toggle switches, dropdowns, text fi
 
 ![A module settings card with its title and grouped controls](../../assets/screenshots/settings_titled_card.png)
 
-## Module Configuration
+## Module configuration
 
 Every module lives under **Settings → Module configuration**.
 
-> ⚠️ **Important:** Saving a module screen restarts the radio — the button reads **Save & restart**, and the radio is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**, and the radio may still restart for some changes.
+> ⚠️ **Important:** Saving a module screen restarts the node — the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**, and the node may still restart for some changes.
 
-### MQTT Module
+### MQTT module
 
-Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond radio range or integrate with home automation systems.
+Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
 | Setting | Description |
 |---------|-------------|
@@ -51,18 +51,18 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | Map reporting | Publish position to the public map — see the Map reporting group that follows |
 
 Turning **Map reporting** on reveals a consent card headed *Consent to Share Unencrypted Node Data
-via MQTT*, with an **I agree.** switch under it. The rest of the card does not exist on screen
+via MQTT*, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
 until you agree:
 
 | Setting | Description |
 |---------|-------------|
-| I agree. | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting does not start without it |
+| I agree. | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it |
 | Precision slider | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads *±* the resulting distance, in your own units |
 | Map reporting interval (seconds) | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered |
 
 See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and broker setup.
 
-### Serial Module
+### Serial module
 
 Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node's serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.
 
@@ -76,9 +76,9 @@ Enables serial port communication for external device integrations (GPS modules,
 | Timeout | How long to wait before considering an incoming message complete |
 | Override console serial port | Take over the port the debug console normally uses |
 
-### External Notification Module
+### External Notification module
 
-Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
+Controls buzzer, LED, or vibration alerts on your node hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
 
 There are two independent triggers — an incoming **message**, and a received **bell** character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
@@ -98,7 +98,7 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 | Nag timeout (seconds) | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
 | Ringtone | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file |
 
-### Store & Forward Module
+### Store & Forward module
 
 Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
 
@@ -113,7 +113,7 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 > 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
 
-### Range Test Module
+### Range Test module
 
 > ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
 > still uses the default channel key, the interval and CSV controls stay disabled — you can still
@@ -126,9 +126,9 @@ Automated range testing tool for evaluating link quality between nodes. When ena
 |---------|-------------|
 | Range test enabled | Activate range testing |
 | Sender message interval (seconds) | Time between test transmissions, chosen from a dropdown of fixed intervals |
-| Save .CSV in storage (ESP32 only) | Log received test data to the radio's own filesystem. ESP32 hardware only |
+| Save .CSV in storage (ESP32 only) | Log received test data to the node's own filesystem. ESP32 hardware only |
 
-### Telemetry Module
+### Telemetry module
 
 Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
 
@@ -142,7 +142,7 @@ battery health often and sensors rarely.
 | Environment metrics module enabled | Report the attached environment sensors |
 | Environment metrics update interval | How often to report them |
 | Environment metrics on-screen enabled | Also show these readings on the device's own display |
-| Environment metrics use Fahrenheit | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
+| Environment metrics use Fahrenheit | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
 | Air quality metrics module enabled | Report particulate and CO₂ sensor data |
 | Air quality metrics update interval | How often to report them |
 | Power metrics module enabled | Report the per-channel voltage and current readings |
@@ -151,9 +151,9 @@ battery health often and sensors rarely.
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
-### Canned Message Module
+### Canned Message module
 
-Pre-configured messages accessible from the radio's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
+Pre-configured messages accessible from the node's physical buttons (for nodes with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
 | Setting | Description |
 |---------|-------------|
@@ -166,7 +166,7 @@ Pre-configured messages accessible from the radio's physical buttons (for radios
 | Up/Down/Select input enabled | A separate, simpler input scheme using up/down/select buttons rather than an encoder |
 | ~~Allow input source~~ | ⚠️ **Deprecated** in the protobuf schema |
 
-### Audio Module
+### Audio module
 
 Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
 
@@ -182,11 +182,11 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 
 > ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
-### Remote Hardware Module
+### Remote Hardware module
 
 GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
 
-> ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Turn it on only on dedicated GPIO nodes.
+> ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the node's own hardware. Turn it on only on dedicated GPIO nodes.
 
 | Setting | Description |
 |---------|-------------|
@@ -194,7 +194,7 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 | Allow undefined pin access | Allow access to any GPIO pin (security risk) |
 | Available pins | Up to 4 GPIO pins this node exposes for remote read/write |
 
-### Neighbor Info Module
+### Neighbor Info module
 
 Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
 
@@ -206,7 +206,7 @@ Broadcasts information about directly heard neighbors, enabling mesh topology ma
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
-### Ambient Lighting Module
+### Ambient Lighting module
 
 Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. Can be used for visual status indicators, notification lights, or decorative effects.
 
@@ -216,7 +216,7 @@ Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. C
 | Current | LED current limit (0–31) |
 | Red / Green / Blue | Individual color channel values (0–255) |
 
-### Detection Sensor Module
+### Detection Sensor module
 
 Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
 
@@ -231,7 +231,7 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 | Send bell with alert message | Include bell character in alerts |
 | Friendly name | Custom name for this sensor |
 
-### Paxcounter Module
+### Paxcounter module
 
 People counter using Wi-Fi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
@@ -239,26 +239,26 @@ People counter using Wi-Fi and BLE probe requests. Counts nearby devices by pass
 |---------|-------------|
 | Paxcounter enabled | Activate people counting |
 | Update interval (seconds) | How often to report counts |
-| Wi-Fi RSSI threshold | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+| Wi-Fi RSSI threshold | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
 | BLE RSSI threshold | The same cut-off for BLE advertisements (defaults to −80 dBm) |
 
 > 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
 
-### Status Message Module
+### Status Message module
 
 The status message has no module screen. It is edited with the rest of the node's identity, on
 [Settings — Radio & User](settings-radio-user#user-profile).
 
-### Mesh Beacon Module
+### Mesh Beacon module
 
 Broadcasts an invitation to your mesh, and receives invitations from others. The entry appears only
-on radios running firmware 2.8.0 or newer. See [Local Mesh Discovery](discovery) for the full
+on nodes running firmware 2.8.0 or newer. See [Local Mesh Discovery](discovery) for the full
 walkthrough.
 
-### TAK Module
+### TAK module
 
 Team Awareness Kit integration for interoperability with ATAK and WinTAK. Two things have to be
-true before the entry appears in the module list: the radio runs firmware 2.8.0 or newer, and its
+true before the entry appears in the module list: the node runs firmware 2.8.0 or newer, and its
 **Device Role** on **Settings → Device configuration → Device** is set to `TAK` or `TAK_TRACKER`.
 See [TAK Integration](tak) for detailed setup and usage.
 
@@ -281,30 +281,30 @@ Remotely configure nodes that share your admin key:
 
 | Action | What it does |
 |---|---|
-| Set time | Sends your phone's clock to the radio |
-| Reboot | Restarts the radio |
-| Shutdown | Powers the radio down |
+| Set time | Sends your phone's clock to the node |
+| Reboot | Restarts the node |
+| Shutdown | Powers the node down |
 | Factory reset | Returns every setting to its factory default |
-| NodeDB reset | Clears the radio's node database. This dialog carries a **Preserve Favorites?** switch |
+| NodeDB reset | Clears the node database. This dialog carries a **Preserve Favorites?** switch |
 
-> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the radio's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
+> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the node's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
 
 ### Backup & Restore
 
-**Settings → Backup & Restore** writes the connected radio's whole configuration to a file with
+**Settings → Backup & Restore** writes the connected node's whole configuration to a file with
 **Export configuration**, and reads a saved file back in with **Import configuration**. Export
-before a factory reset, or to copy one radio's setup onto another. The section is shown for your
-own radio only, not over remote admin.
+before a factory reset, or to copy one node's setup onto another. The section is shown for your
+own node only, not over remote admin.
 
 ### Advanced
 
 **Settings → Advanced** collects the tools that read or rewrite local state, and is likewise shown
-for your own radio only: **Firmware Update** on OTA-capable hardware, **Clean Node Database**,
+for your own node only: **Firmware Update** on OTA-capable hardware, **Clean Node Database**,
 **TAK Server**, **Local Mesh Discovery**, and the **Debug Panel**.
 
 #### Clean Node Database
 
-Prunes nodes from your node database — from the app's copy *and* from the radio's own, so this is
+Prunes nodes from your node database — from the app's copy *and* from the node's own, so this is
 not a display-only cleanup. The two filters combine rather than acting separately; the screen puts
 it as *Selections are additive*.
 
@@ -314,7 +314,7 @@ it as *Selections are additive*.
   info. The age limit still applies on top of it.
 
 The screen lists the nodes queued for deletion as you move the filters. **Clean Now** carries the
-purge out, after one more confirmation, and it cannot be undone. Favorited nodes, ignored nodes,
+purge out, after one more confirmation, and it can't be undone. Favorited nodes, ignored nodes,
 and nodes with a public key heard in the last seven days are never removed, whatever the filters
 say — that is why the queued list can be shorter than you expect.
 
@@ -378,7 +378,7 @@ may redistribute under the same license.
 Reached from **About**, this lists every open-source library the app ships, with its license,
 generated at build time by AboutLibraries. It was previously called the license screen.
 
-### Troubleshooting Remote Admin
+### Troubleshooting remote admin
 
 - **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
 - **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
@@ -386,6 +386,6 @@ generated at build time by AboutLibraries. It was previously called the license 
 
 ## Related Topics
 
-- [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
+- [Settings — Radio & User](settings-radio-user) — core node and user profile settings
 - [Module configuration reference](https://meshtastic.org/docs/configuration/module) — detailed module docs on meshtastic.org
 - [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org

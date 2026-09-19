@@ -14,11 +14,11 @@ aliases:
 
 The app uses **Navigation 3** with typed, serializable routes and centralized deep link resolution.
 
-## Route Architecture
+## Route architecture
 
 All routes are defined in `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`.
 
-### Route Hierarchy
+### Route hierarchy
 
 ```kotlin
 interface Route : NavKey           // All routes implement NavKey
@@ -42,16 +42,16 @@ sealed interface SettingsRoute : Route {
 - Group related routes under a `sealed interface`
 - Graph entry points implement both the route interface and `Graph`
 
-## Deep Link Router
+## Deep link router
 
 `DeepLinkRouter` in `core/navigation` maps URI deep links to typed backstack lists. Each supported link is a
 Navigation 3 `UriDeepLinkMatcher` pattern whose placeholders decode into the target route's fields, wrapped in
 `withBackStack` to synthesize the parents.
 
-Patterns are anchored, so a path the patterns do not model returns null rather than falling back to the family
+Patterns are anchored, so a path the patterns don't model returns null rather than falling back to the family
 root: `/firmware/anything-else` no longer opens the firmware screen.
 
-### URI Format
+### URI format
 
 Both forms resolve through the same `DeepLinkRouter`, so any deep link path works with either scheme:
 
@@ -82,15 +82,15 @@ manifest entry fails CI.
   [`DeepLinkRouterTest.kt`](https://github.com/meshtastic/Meshtastic-Android/blob/main/core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt).
 - The following table is a snapshot for quick reference — check those two files if it looks out of date.
 
-### Supported Deep Links
+### Supported deep links
 
 | URI Path | Route | Notes |
 |----------|-------|-------|
 | `/connections` | `ConnectionsRoute.Connections(null)` | Connections screen |
-| `/connections?address={prefixedAddress}` | `ConnectionsRoute.Connections(address)` | Auto-connects to a radio without manual selection — the address uses the app's internal transport-prefixed format: `t192.168.1.1:4403` (TCP), `xAA:BB:CC:DD:EE:FF` (BLE), `s/dev/ttyUSB0` (serial). Intended for scripts/AI tooling driving the app. |
-| `/connections?address=n` | `ConnectionsRoute.Connections("n")` | Disconnects the current radio instead of connecting (`n` = the internal "no device selected" sentinel). |
+| `/connections?address={prefixedAddress}` | `ConnectionsRoute.Connections(address)` | Auto-connects to a node without manual selection — the address uses the app's internal transport-prefixed format: `t192.168.1.1:4403` (TCP), `xAA:BB:CC:DD:EE:FF` (BLE), `s/dev/ttyUSB0` (serial). Intended for scripts/AI tooling driving the app. |
+| `/connections?address=n` | `ConnectionsRoute.Connections("n")` | Disconnects the current node instead of connecting (`n` = the internal "no device selected" sentinel). |
 | `/wifi-provision` | `WifiProvisionRoute.WifiProvision(null)` | Wi-Fi provisioning screen |
-| `/wifi-provision?address={mac}` | `WifiProvisionRoute.WifiProvision(mac)` | Provisioning targeting a specific radio MAC |
+| `/wifi-provision?address={mac}` | `WifiProvisionRoute.WifiProvision(mac)` | Provisioning targeting a specific node MAC |
 | `/settings` | `SettingsRoute.Settings(null)` | Settings root |
 | `/settings/helpDocs` | `SettingsRoute.HelpDocs` | Docs browser |
 | `/settings/helpDocs/{pageId}` | `SettingsRoute.HelpDocPage(pageId)` | Specific doc page |
@@ -110,7 +110,7 @@ manifest entry fails CI.
 | `/firmware` | `FirmwareRoute.FirmwareGraph` | Firmware screen |
 | `/firmware/update` | `FirmwareRoute.FirmwareUpdate` | Firmware update flow |
 
-### Backstack Synthesis
+### Backstack synthesis
 
 Deep links synthesize a full backstack, not just the target screen:
 
@@ -125,7 +125,7 @@ listOf(
 
 This ensures the user can navigate "up" correctly.
 
-## Adding a Deep Link
+## Adding a deep link
 
 1. Define the typed route in `Routes.kt`.
 2. Add the mapping in `DeepLinkRouter.settingsSubRoutes` (or equivalent for other graphs), and a matcher in
@@ -134,7 +134,7 @@ This ensures the user can navigate "up" correctly.
 4. Register the navigation entry in the appropriate feature module.
 5. Update the illustrative KDoc list on the `DeepLinkRouter` object (the class-level doc comment, not `route()`'s own KDoc) and the preceding table — both are quick-reference snapshots, not the source of truth. See the Source of Truth list earlier in this page for the authoritative places.
 
-## Navigation Entry Registration
+## Navigation entry registration
 
 Each feature module provides entries via an extension function:
 

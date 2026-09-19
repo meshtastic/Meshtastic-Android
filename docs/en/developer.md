@@ -30,6 +30,10 @@ Things that trip up first-time contributors — check these before requesting re
 Keep the last 5–8 entries and trim older ones from the bottom.
 -->
 
+**September 2026** — [Navigation & Deep Links](developer/navigation-and-deep-links) — Deep links route through Navigation 3's `UriDeepLinkMatcher` instead of a hand-rolled `when` block, and patterns are anchored, so an unmodelled trailing path no longer opens the family root.
+
+**September 2026** — [Measurement & Formatting](developer/measurement) — `NumberFormatter.format` follows the OS locale; `formatInvariant` is the fixed-dot one for payloads another system parses.
+
 **September 2026** — [Documentation Style](developer/documentation-style) — Section 11 of the Meshtastic design standards is now the style guide for `docs/en/`; this page keeps only the repository mechanics, the in-app renderer's admonition form, and the prose rules the standards leave open.
 
 **August 2026** — [Documentation Style](developer/documentation-style) — New page: the house style guide for `docs/en/` prose, with rule IDs, a project word list, and the reasoning behind each convention.
@@ -41,12 +45,6 @@ Keep the last 5–8 entries and trim older ones from the bottom.
 **August 2026** — Offline map-pack downloads are gated on `offlineMapsSupported`, since the MapLibre offline API compiles on Desktop but silently downloads nothing there.
 
 **August 2026** — New module `feature/map-maplibre`: the F-Droid flavor and Desktop now render every map surface (main map, node track, traceroute, discovery, inline mini-map) through `maplibre-compose` from one multiplatform module, and `osmdroid` is gone. The shared rules both renderers must agree on live in `feature/map` policy classes.
-
-**August 2026** — Android Auto removed from all build variants (#6779). `feature/car` is gone — the module, its Car App Library dependencies, the `automotive_app_desc.xml` manifest entry and the `google` flavor's `FlavorModule` registration.
-
-**August 2026** — [Testing](developer/testing) — CI gained a fourth runner tier: `ubuntu-slim` (#6674, #6677) now carries the lightweight jobs. It is single-CPU, unprivileged, x64-only and capped at 15 minutes, so anything needing `sudo`, Docker or a full-history clone stays on `ubuntu-24.04-arm`. Picking rules are in `.github/instructions/ci-workflows.instructions.md`.
-
-**August 2026** — Flatpak sources are generated inside each architecture's own offline build (#6919) rather than committed, and the flatpak-sources plugin resolves platform dependencies transitively (0.2.x), so the hand-tracked entries are gone.
 
 <!-- DEV_WHATS_NEW_END -->
 
