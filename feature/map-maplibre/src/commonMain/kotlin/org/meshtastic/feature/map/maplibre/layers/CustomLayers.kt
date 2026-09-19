@@ -182,11 +182,8 @@ private fun rememberLayerIcons(urls: Set<String>): Map<String, Painter> {
     val loaded = mutableMapOf<String, Painter>()
     ordered.forEach { url ->
         key(url) {
-            // See `decodeForSoftwareCanvas` — without it the app dies the moment an icon finishes loading.
             val painter =
-                rememberAsyncImagePainter(
-                    ImageRequest.Builder(LocalPlatformContext.current).data(url).decodeForSoftwareCanvas().build(),
-                )
+                rememberAsyncImagePainter(ImageRequest.Builder(LocalPlatformContext.current).data(url).build())
             val state by painter.state.collectAsState()
             // The loaded painter, not the async wrapper around it: MapLibre rasterizes a painter outside the
             // composition driving it, where an AsyncImagePainter draws nothing.
