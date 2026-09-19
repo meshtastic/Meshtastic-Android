@@ -28,6 +28,9 @@ kotlin {
             implementation(projects.core.resources)
             implementation(libs.kotlinx.serialization.core)
             implementation(libs.jetbrains.navigation3.ui)
+            // navigation3-ui drags in navigation3-runtime 1.2.0-beta01; the app resolves the
+            // catalog's rc01, so declare it directly to compile against what it runs against.
+            implementation(libs.androidx.navigation3.runtime)
             implementation(libs.kermit)
         }
 
