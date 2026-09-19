@@ -35,7 +35,7 @@ The list has two densities, set at **Settings → Node Layout**. **Complete** sh
 |-------|---------|
 | Green last-heard time | Node heard within the last 2 hours |
 | Plain last-heard time | Node not heard for over 2 hours |
-| Orange last-heard time with a crossed-out signal icon | Not heard since your radio's LoRa settings changed, so it cannot be reached from here |
+| Orange last-heard time with a crossed-out signal icon | Not heard since your node's LoRa settings changed, so it can't be reached from here |
 | Struck-through name | Node you have ignored |
 | ⭐ Favorite | Node you marked as a favorite. |
 
@@ -135,14 +135,14 @@ Type in the search field to filter nodes by name or short name. The filter updat
 | **Include unknown** | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and cannot be direct messaged until their user info brings a public key |
 | **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role |
 | **Exclude MQTT** | Hide nodes heard only via MQTT internet bridge |
-| **Hide unheard nodes** | Hide nodes your radio has not heard since its LoRa settings changed. Off by default, and it does nothing on firmware that does not report whether a node was heard on the current settings |
+| **Hide unheard nodes** | Hide nodes your own node hasn't heard since its LoRa settings changed. Off by default, and it does nothing on firmware that doesn't report whether a node was heard on the current settings |
 | **Signed only** | Show only nodes whose signed broadcasts your node has actually heard and verified. Stricter than the icon: a node on 2.8 shows as signed by its firmware version before any signed broadcast arrives, and a contact verified in person on older firmware is not signed at all |
 | **Encrypted only** | Show nodes with a matching public key on file, the key an encrypted direct message needs. A node with a key mismatch is excluded |
 | **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back |
 
 ### Nodes Not Heard on Your Current Settings
 
-When your radio's LoRa settings change — a different preset, region or frequency slot — nodes heard
+When your node's LoRa settings change — a different preset, region or frequency slot — nodes heard
 under the old settings are still in the list but can no longer be reached. The app marks them with
 an orange last-heard time and a crossed-out signal icon, and shows a banner at the top of the list:
 **N nodes not heard on your current LoRa settings**.
@@ -153,7 +153,7 @@ The banner offers two actions:
 - **Remove** deletes those nodes from the list. Your favorites and your own node are never removed.
 
 **Remove** is a bulk delete and there is no undo, so use **Keep** if you expect to switch back to
-the old settings. Removed nodes reappear if your radio hears them again.
+the old settings. Removed nodes reappear if your node hears them again.
 
 The **Hide unheard nodes** filter does the same hiding without deleting anything.
 
