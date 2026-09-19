@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 61,
-    "identityHash": "805d0ee45153230626f9d51192422ac7",
+    "identityHash": "c0060fc2597e2f9c13762e40de774ea5",
     "entities": [
       {
         "tableName": "my_node",
@@ -86,7 +86,7 @@
       },
       {
         "tableName": "nodes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `user` BLOB NOT NULL, `long_name` TEXT, `short_name` TEXT, `position` BLOB NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `last_heard` INTEGER NOT NULL, `device_metrics` BLOB NOT NULL, `channel` INTEGER NOT NULL, `via_mqtt` INTEGER NOT NULL, `hops_away` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `is_ignored` INTEGER NOT NULL DEFAULT 0, `is_muted` INTEGER NOT NULL DEFAULT 0, `environment_metrics` BLOB NOT NULL, `power_metrics` BLOB NOT NULL, `air_quality_metrics` BLOB NOT NULL DEFAULT x'', `paxcounter` BLOB NOT NULL, `public_key` BLOB, `notes` TEXT NOT NULL DEFAULT '', `power_channel_labels` TEXT NOT NULL DEFAULT '[]', `manually_verified` INTEGER NOT NULL DEFAULT 0, `node_status` TEXT, `last_transport` INTEGER NOT NULL DEFAULT 0, `has_xeddsa_signed` INTEGER NOT NULL DEFAULT 0, `heard_on_current_lora` INTEGER NOT NULL DEFAULT 1, `key_match` INTEGER NOT NULL DEFAULT 1, `new_public_key` BLOB, PRIMARY KEY(`num`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `user` BLOB NOT NULL, `long_name` TEXT, `short_name` TEXT, `position` BLOB NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `last_heard` INTEGER NOT NULL, `device_metrics` BLOB NOT NULL, `channel` INTEGER NOT NULL, `via_mqtt` INTEGER NOT NULL, `hops_away` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `is_ignored` INTEGER NOT NULL DEFAULT 0, `is_muted` INTEGER NOT NULL DEFAULT 0, `environment_metrics` BLOB NOT NULL, `power_metrics` BLOB NOT NULL, `air_quality_metrics` BLOB NOT NULL DEFAULT x'', `soil_water_metrics` BLOB NOT NULL DEFAULT x'', `paxcounter` BLOB NOT NULL, `public_key` BLOB, `notes` TEXT NOT NULL DEFAULT '', `power_channel_labels` TEXT NOT NULL DEFAULT '[]', `manually_verified` INTEGER NOT NULL DEFAULT 0, `node_status` TEXT, `last_transport` INTEGER NOT NULL DEFAULT 0, `has_xeddsa_signed` INTEGER NOT NULL DEFAULT 0, `heard_on_current_lora` INTEGER NOT NULL DEFAULT 1, `key_match` INTEGER NOT NULL DEFAULT 1, `new_public_key` BLOB, PRIMARY KEY(`num`))",
         "fields": [
           {
             "fieldPath": "num",
@@ -205,6 +205,13 @@
           {
             "fieldPath": "airQualityTelemetry",
             "columnName": "air_quality_metrics",
+            "affinity": "BLOB",
+            "notNull": true,
+            "defaultValue": "x''"
+          },
+          {
+            "fieldPath": "soilWaterTelemetry",
+            "columnName": "soil_water_metrics",
             "affinity": "BLOB",
             "notNull": true,
             "defaultValue": "x''"
@@ -940,7 +947,7 @@
       },
       {
         "tableName": "device_hardware",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actively_supported` INTEGER NOT NULL, `architecture` TEXT NOT NULL, `display_name` TEXT NOT NULL, `has_ink_hud` INTEGER, `has_mui` INTEGER, `hwModel` INTEGER NOT NULL, `hw_model_slug` TEXT NOT NULL, `images` TEXT, `is_maker` INTEGER NOT NULL DEFAULT 0, `last_updated` INTEGER NOT NULL, `partition_scheme` TEXT, `platformio_target` TEXT NOT NULL, `requires_dfu` INTEGER, `support_level` INTEGER, `tags` TEXT, PRIMARY KEY(`platformio_target`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actively_supported` INTEGER NOT NULL, `architecture` TEXT NOT NULL, `display_name` TEXT NOT NULL, `has_ink_hud` INTEGER, `has_mui` INTEGER, `hwModel` INTEGER NOT NULL, `hw_model_slug` TEXT NOT NULL, `images` TEXT, `last_updated` INTEGER NOT NULL, `partition_scheme` TEXT, `platformio_target` TEXT NOT NULL, `requires_dfu` INTEGER, `support_level` INTEGER, `tags` TEXT, PRIMARY KEY(`platformio_target`))",
         "fields": [
           {
             "fieldPath": "activelySupported",
@@ -986,13 +993,6 @@
             "fieldPath": "images",
             "columnName": "images",
             "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "isMaker",
-            "columnName": "is_maker",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "0"
           },
           {
             "fieldPath": "lastUpdated",
@@ -1846,7 +1846,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '805d0ee45153230626f9d51192422ac7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c0060fc2597e2f9c13762e40de774ea5')"
     ]
   }
 }

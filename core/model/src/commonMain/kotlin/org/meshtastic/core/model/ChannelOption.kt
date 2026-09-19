@@ -115,6 +115,9 @@ internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
  */
 private val FIRMWARE_2_8 = DeviceVersion("2.8.0")
 
+/** The firmware release that introduced the LONG_TURBO preset (firmware#8985). */
+private val FIRMWARE_2_7_17 = DeviceVersion("2.7.17")
+
 /**
  * Regulatory regions for radio usage
  *
@@ -470,7 +473,7 @@ enum class ChannelOption(
 
     // Historical parameters for firmware predating the removal of VERY_LONG_SLOW.
     VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, 0.0625f, spreadingFactor = 12),
-    LONG_TURBO(ModemPreset.LONG_TURBO, 0.500f, spreadingFactor = 11),
+    LONG_TURBO(ModemPreset.LONG_TURBO, 0.500f, spreadingFactor = 11, minFirmware = FIRMWARE_2_7_17),
     LONG_FAST(ModemPreset.LONG_FAST, 0.250f, spreadingFactor = 11),
     LONG_MODERATE(ModemPreset.LONG_MODERATE, 0.125f, spreadingFactor = 11),
     LONG_SLOW(ModemPreset.LONG_SLOW, 0.125f, spreadingFactor = 12),

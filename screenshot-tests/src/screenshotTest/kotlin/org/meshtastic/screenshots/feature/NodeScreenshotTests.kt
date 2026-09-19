@@ -20,8 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.node.component.AirQualityInfoCardsPreview
+import org.meshtastic.feature.node.component.AirQualityInfoCardsStatusPreview
 import org.meshtastic.feature.node.component.DeviceActionsLocalPreview
 import org.meshtastic.feature.node.component.DeviceActionsRemotePreview
+import org.meshtastic.feature.node.component.EnvironmentMetricsLightningPreview
 import org.meshtastic.feature.node.component.EnvironmentMetricsPreview
 import org.meshtastic.feature.node.component.HopHistogramContentPreview
 import org.meshtastic.feature.node.component.HopHistogramEmptyPreview
@@ -44,6 +46,7 @@ import org.meshtastic.feature.node.component.PositionInlineContentPreview
 import org.meshtastic.feature.node.component.PowerMetricsNoCurrentPreview
 import org.meshtastic.feature.node.component.PowerMetricsPartialPreview
 import org.meshtastic.feature.node.component.PowerMetricsPreview
+import org.meshtastic.feature.node.component.SoilWaterMetricsPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionEmptyPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionLocalPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionPreview
@@ -54,7 +57,9 @@ import org.meshtastic.feature.node.detail.NodeDetailContentRemotePreview
 import org.meshtastic.feature.node.metrics.DeviceMetricsCardPreview
 import org.meshtastic.feature.node.metrics.LegendPreview
 import org.meshtastic.feature.node.metrics.PreviewAirQualityCards
+import org.meshtastic.feature.node.metrics.PreviewAirQualityCardsStatus
 import org.meshtastic.feature.node.metrics.PreviewEnvironmentMetricsContent
+import org.meshtastic.feature.node.metrics.PreviewEnvironmentMetricsContentLightning
 
 @PreviewTest
 @PreviewLightDark
@@ -314,4 +319,43 @@ fun ScreenshotNodeItemUnheard() {
 @Composable
 fun ScreenshotNodeItemCompactUnheard() {
     NodeItemCompactUnheardPreview()
+}
+
+// ---------------------------------------------------------------------------
+// Soil & water chemistry, lightning and PM sensor status (PR #7237)
+// ---------------------------------------------------------------------------
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSoilWaterMetrics() {
+    SoilWaterMetricsPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotEnvironmentMetricsLightning() {
+    EnvironmentMetricsLightningPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotAirQualityInfoCardsStatus() {
+    AirQualityInfoCardsStatusPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotEnvironmentMetricsContentLightning() {
+    PreviewEnvironmentMetricsContentLightning()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotAirQualityCardsStatus() {
+    PreviewAirQualityCardsStatus()
 }

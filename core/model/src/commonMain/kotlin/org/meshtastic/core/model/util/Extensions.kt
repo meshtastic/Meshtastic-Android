@@ -113,10 +113,15 @@ fun MeshPacket.snrOrNull(): Float? = rx_snr
 fun MeshPacket.isDirectSignal(): Boolean =
     rxTimeOrNull() != null && hop_start == hop_limit && via_mqtt != true && isLora()
 
-/** Returns true if this telemetry packet contains valid, plot-able environment metrics. */
+/**
+ * Returns true if this telemetry packet carries environment metrics worth listing: a temperature and humidity pair, or
+ * a lightning reading. An AS3935 on its own reports only lightning, so it is admitted without the climate pair.
+ */
 fun Telemetry.hasValidEnvironmentMetrics(): Boolean {
     val metrics = this.environment_metrics ?: return false
-    return metrics.relative_humidity != null && metrics.temperature != null && !metrics.temperature!!.isNaN()
+    val hasClimate = metrics.relative_humidity != null && metrics.temperature != null && !metrics.temperature!!.isNaN()
+    val hasLightning = metrics.lightning_strike_count_1h != null || metrics.lightning_distance_km?.isNaN() == false
+    return hasClimate || hasLightning
 }
 
 /**

@@ -60,6 +60,7 @@ data class NodeWithRelations(
         environmentMetrics = node.environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics.Builder().build(),
         powerMetrics = node.powerMetrics ?: org.meshtastic.proto.PowerMetrics.Builder().build(),
         airQualityMetrics = node.airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics.Builder().build(),
+        soilWaterMetrics = node.soilWaterMetrics ?: org.meshtastic.proto.SoilWaterMetrics.Builder().build(),
         paxcounter = node.paxcounter,
         publicKey = node.publicKey ?: node.user.public_key,
         notes = node.notes,
@@ -92,6 +93,7 @@ data class NodeWithRelations(
             environmentTelemetry = environmentTelemetry,
             powerTelemetry = powerTelemetry,
             airQualityTelemetry = airQualityTelemetry,
+            soilWaterTelemetry = soilWaterTelemetry,
             paxcounter = paxcounter,
             publicKey = publicKey ?: user.public_key,
             notes = notes,
@@ -153,6 +155,8 @@ data class NodeEntity(
     var powerTelemetry: Telemetry = Telemetry.Builder().build(),
     @ColumnInfo(name = "air_quality_metrics", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
     var airQualityTelemetry: Telemetry = Telemetry.Builder().build(),
+    @ColumnInfo(name = "soil_water_metrics", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
+    var soilWaterTelemetry: Telemetry = Telemetry.Builder().build(),
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount.Builder().build(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
@@ -203,6 +207,9 @@ data class NodeEntity(
     val airQualityMetrics: org.meshtastic.proto.AirQualityMetrics?
         get() = airQualityTelemetry.air_quality_metrics
 
+    val soilWaterMetrics: org.meshtastic.proto.SoilWaterMetrics?
+        get() = soilWaterTelemetry.soil_water_metrics
+
     val isUnknownUser
         get() = user.hw_model == HardwareModel.UNSET
 
@@ -249,6 +256,7 @@ data class NodeEntity(
         environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics.Builder().build(),
         powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics.Builder().build(),
         airQualityMetrics = airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics.Builder().build(),
+        soilWaterMetrics = soilWaterMetrics ?: org.meshtastic.proto.SoilWaterMetrics.Builder().build(),
         paxcounter = paxcounter,
         publicKey = publicKey ?: user.public_key,
         notes = notes,

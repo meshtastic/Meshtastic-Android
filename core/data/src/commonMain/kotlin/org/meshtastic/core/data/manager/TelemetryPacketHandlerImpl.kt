@@ -86,6 +86,7 @@ class TelemetryPacketHandlerImpl(
             telemetry.environment_metrics?.let { nextNode = nextNode.copy(environmentMetrics = it) }
             telemetry.power_metrics?.let { nextNode = nextNode.copy(powerMetrics = it) }
             telemetry.air_quality_metrics?.let { nextNode = nextNode.copy(airQualityMetrics = it) }
+            telemetry.soil_water_metrics?.let { nextNode = nextNode.copy(soilWaterMetrics = it) }
             val telemetryTime = if (telemetry.time != 0) telemetry.time else nextNode.lastHeard
             val newLastHeard = clampTimestampToNow(maxOf(nextNode.lastHeard, telemetryTime))
             nextNode.copy(lastHeard = newLastHeard)

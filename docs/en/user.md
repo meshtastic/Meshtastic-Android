@@ -17,6 +17,12 @@ Documentation for using the Meshtastic Android and Desktop app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
+**September 2026** — [Nodes](user/nodes) — Nodes your node has not heard since its LoRa settings changed now carry an orange marker, a **Hide unheard nodes** filter, and a banner whose **Remove** action deletes them in bulk.
+
+**September 2026** — [Settings — Radio & User](user/settings-radio-user) — Lockdown's debug-port lock is not reversible from the app, Managed Mode locks the whole configuration list, and the preset list is filtered to what your region permits.
+
+**September 2026** — [Local Mesh Discovery](user/discovery) — Signal colours are relative to the preset's demodulation floor rather than fixed thresholds, and a beacon's broadcast targets always hold at least one row.
+
 **September 2026** — [Nodes](user/nodes) — Nodes on firmware 2.8 show signed and verified identity icons in place of the PKI lock, and **Signed only** and **Encrypted only** filters join the node list and the map.
 
 **September 2026** — [Map & Waypoints](user/map-and-waypoints) — Offline terrain (hillshade and contours) can be downloaded on Google Play, F-Droid, and Desktop.
@@ -26,12 +32,6 @@ Keep the last 5–8 entries and archive older ones by removing them.
 **August 2026** — [Map & Waypoints](user/map-and-waypoints) — Filter the map by node role and by how a node was heard, from a new filter sheet.
 
 **August 2026** — [Map & Waypoints](user/map-and-waypoints) — Every map layer and overlay now has its own opacity slider.
-
-**August 2026** — [Map & Waypoints](user/map-and-waypoints) — F-Droid builds draw the map with MapLibre, and the Desktop app has an interactive map for the first time.
-
-**August 2026** — [Settings — Radio & User](user/settings-radio-user) — The status message moved into the User Profile, beside Long Name and Short Name; its separate module screen is gone.
-
-**August 2026** — [Messages & Channels](user/messages-and-channels) — Swipe a message right to reply, double-tap it to react, and day separators group the thread.
 
 <!-- WHATS_NEW_END -->
 

@@ -35,6 +35,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.PowerMetrics
+import org.meshtastic.proto.SoilWaterMetrics
 import org.meshtastic.proto.User
 
 /**
@@ -61,6 +62,7 @@ data class Node(
     val environmentMetrics: EnvironmentMetrics = EnvironmentMetrics.Builder().build(),
     val powerMetrics: PowerMetrics = PowerMetrics.Builder().build(),
     val airQualityMetrics: AirQualityMetrics = AirQualityMetrics.Builder().build(),
+    val soilWaterMetrics: SoilWaterMetrics = SoilWaterMetrics.Builder().build(),
     val paxcounter: Paxcount = Paxcount.Builder().build(),
     val publicKey: ByteString? = null,
     val notes: String = "",
@@ -154,6 +156,9 @@ data class Node(
 
     val hasAirQualityMetrics: Boolean
         get() = airQualityMetrics != AirQualityMetrics.Builder().build()
+
+    val hasSoilWaterMetrics: Boolean
+        get() = soilWaterMetrics != SoilWaterMetrics.Builder().build()
 
     val batteryLevel
         get() = deviceMetrics.battery_level

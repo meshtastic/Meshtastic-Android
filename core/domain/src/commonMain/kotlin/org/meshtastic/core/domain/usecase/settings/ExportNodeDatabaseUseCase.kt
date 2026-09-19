@@ -33,6 +33,7 @@ import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.PowerMetrics
+import org.meshtastic.proto.SoilWaterMetrics
 import kotlin.time.Instant
 import org.meshtastic.proto.Position as WirePosition
 
@@ -104,6 +105,7 @@ private fun Node.toExport(): NodeExport = NodeExport(
     powerMetrics = powerMetrics.toExport(),
     powerChannelLabels = powerChannelLabels.takeIf { it.isNotEmpty() },
     airQualityMetrics = airQualityMetrics.toExport(),
+    soilWaterMetrics = soilWaterMetrics.toExport(),
     paxcounter = paxcounter.toExport(),
     metadata = metadata?.toExport(),
 )
@@ -172,6 +174,8 @@ private fun EnvironmentMetrics.toExport(): EnvironmentMetricsExport? = Environme
     adcVoltageCh5 = adc_voltage_ch5,
     adcVoltageCh6 = adc_voltage_ch6,
     adcVoltageCh7 = adc_voltage_ch7,
+    lightningStrikeCount1h = lightning_strike_count_1h,
+    lightningDistanceKm = lightning_distance_km,
 )
     .takeUnless { it == EnvironmentMetricsExport() }
 
@@ -225,8 +229,28 @@ private fun AirQualityMetrics.toExport(): AirQualityMetricsExport? = AirQualityM
     pmVocIdx = pm_voc_idx,
     pmNoxIdx = pm_nox_idx,
     particlesTps = particles_tps,
+    pmStatusFlags = pm_status_flags,
 )
     .takeUnless { it == AirQualityMetricsExport() }
+
+private fun SoilWaterMetrics.toExport(): SoilWaterMetricsExport? = SoilWaterMetricsExport(
+    soilPh = soil_ph,
+    ph = ph,
+    electricalConductivity = electrical_conductivity,
+    salinity = salinity,
+    nitrogen = nitrogen,
+    phosphorus = phosphorus,
+    potassium = potassium,
+    dissolvedOxygen = dissolved_oxygen,
+    orp = orp,
+    chemicalOxygenDemand = chemical_oxygen_demand,
+    turbidity = turbidity,
+    nitrate = nitrate,
+    ammonium = ammonium,
+    biochemicalOxygenDemand = biochemical_oxygen_demand,
+    solarIrradiance = solar_irradiance,
+)
+    .takeUnless { it == SoilWaterMetricsExport() }
 
 private fun Paxcount.toExport(): PaxcountExport? =
     PaxcountExport(wifi = wifi, ble = ble, uptime = uptime).takeUnless { it == PaxcountExport() }
