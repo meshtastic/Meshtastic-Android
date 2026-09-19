@@ -98,7 +98,7 @@ object MapNodePolicy {
     ): Boolean {
         val cutoff = filterState.lastHeardFilter.seconds
         return (!filterState.onlyOnline || secondsSinceHeard <= ONLINE_WINDOW_SECONDS) &&
-            (!filterState.onlyDirect || hopsAway == 0) &&
+            (!filterState.onlyDirect || (hopsAway == 0 && !viaMqtt)) &&
             (!filterState.excludeMqtt || !viaMqtt) &&
             (cutoff == LastHeardFilter.Any.seconds || secondsSinceHeard <= cutoff)
     }
