@@ -818,6 +818,7 @@
         <item quantity="few">%1$d ore</item>
         <item quantity="other">%1$d de ore</item>
     </plurals>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Poziție</string>
     <string name="position_config_set_fixed_from_phone">Setează din locația curentă a telefonului</string>

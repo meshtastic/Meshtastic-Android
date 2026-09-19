@@ -539,6 +539,7 @@
     <!-- PERMISSIONS -->
     <string name="phone_location">Localização do Telefone</string>
     <string name="phone_location_description">Meshtastic usa a localização do seu telefone para habilitar vários recursos. Você pode atualizar as permissões de localização a qualquer momento a partir das configurações.</string>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Posição</string>
     <string name="position_config_set_fixed_from_phone">Definir a partir da localização atual do telefone</string>

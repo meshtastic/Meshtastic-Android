@@ -1,14 +1,16 @@
----
-title: Telemetria ja anturit
-parent: Käyttöopas
+\| Lightning, strikes in the last hour and storm distance | count, km or mi | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometres |---
+title: Telemetry & Sensors
+parent: User Guide
 nav_order: 9
-last_updated: 2026-08-30
-description: Anturitiedot verkossa — tuetut ympäristö-, ilmanlaatu- ja virta-anturit sekä määritys- ja katseluohjeet.
+last_updated: 2026-09-18
+description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.
 aliases:
-  - sensorit
-  - ympäristö
-  - sää
-  - virtamittarit
+
+- sensorit
+- ympäristö
+- sää
+- virtamittarit
+
 ---
 
 # Telemetria ja anturit
@@ -43,11 +45,12 @@ Tuetut ympäristöanturit:
 
 ### Ilmanlaatu
 
-| Sensor   | Metrijärjestelmä                                   | Viestit                                                                                                                                           |
-| -------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BME680   | Kaasuvastus ja IAQ                                 | Haihtuvat orgaaniset yhdisteet                                                                                                                    |
-| PMSA003I | PM1.0, PM2.5, PM10 | Katso [Ilmanlaatumittaukset](#air-quality-metrics)                                                                                                |
-| SEN55    | PM, lämpötila, kosteus                             | Monianturi. NOx- ja VOC-indeksit tallennetaan ja sisällytetään CSV-vientiin, mutta niitä ei vielä näytetä kortteina tai kaavioina |
+| Sensor   | Metrijärjestelmä                                   | Viestit                                                                                                                                                                                                                    |
+| -------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BME680   | Kaasuvastus ja IAQ                                 | Haihtuvat orgaaniset yhdisteet                                                                                                                                                                                             |
+| PMSA003I | PM1.0, PM2.5, PM10 | Katso [Ilmanlaatumittaukset](#air-quality-metrics)                                                                                                                                                                         |
+| SEN55    | PM, lämpötila, kosteus                             | Monianturi. NOx- ja VOC-indeksit tallennetaan ja sisällytetään CSV-vientiin, mutta niitä ei vielä näytetä kortteina tai kaavioina                                                                          |
+| SEN6x    | PM, CO₂, Temp, Humidity                            | Its status register is always exported; when it reports a fault (fan, RH&T, gas, CO₂, HCHO or PM), the fault names appear as a Sensor Status card and on each Air Quality log entry |
 
 ### Maaperä
 
@@ -57,6 +60,8 @@ Tuetut ympäristöanturit:
 | Maaperän kosteus   | %       | Tilavuusvesipitoisuus                                                       |
 
 Molemmat näkyvät tietokorteissa radion tietonäytössä muiden ympäristömittausten rinnalla.
+
+Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, dissolved oxygen, ORP, turbidity, nitrate, ammonium, oxygen demand, solar irradiance) appears as a **Soil & Water** row of info cards on the node detail screen once a node reports any of it, and is included in the node database export. There is no chart or log screen for it yet.
 
 ### Valo ja UV
 
@@ -68,17 +73,18 @@ Molemmat näkyvät tietokorteissa radion tietonäytössä muiden ympäristömitt
 
 ### Weather and Other Readings
 
-| Metrijärjestelmä                      | Yksikkö              | Where it appears                                                                                                                                            |
-| ------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Wind speed                            | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card |
-| Wind direction, gust, and lull        | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
-| Rainfall, last hour and last 24 hours | mm or in             | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
-| Säteily                               | µR/h                 | Card and chart                                                                                                                                              |
-| Paino                                 | kg or lb             | Card only — load cells, such as a beehive scale                                                                                                             |
-| Etäisyys                              | mm or in             | Card only — water level, from a distance sensor                                                                                                             |
-| Dew point                             | °C or °F             | Card only — computed from temperature and humidity                                                                                                          |
-| 1-Wire temperature                    | °C or °F             | Card and chart, up to eight DS18B20-style probes                                                                                                            |
-| ADC voltage                           | V                    | Card and chart, up to eight raw analog channels                                                                                                             |
+| Metrijärjestelmä                                       | Yksikkö              | Where it appears                                                                                                                                            |
+| ------------------------------------------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Wind speed                                             | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card |
+| Wind direction, gust, and lull                         | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
+| Rainfall, last hour and last 24 hours                  | mm or in             | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
+| Lightning, strikes in the last hour and storm distance | count, km or mi      | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector                                   |
+| Säteily                                                | µR/h                 | Card and chart                                                                                                                                              |
+| Paino                                                  | kg or lb             | Card only — load cells, such as a beehive scale                                                                                                             |
+| Etäisyys                                               | mm or in             | Card only — water level, from a distance sensor                                                                                                             |
+| Dew point                                              | °C or °F             | Card only — computed from temperature and humidity                                                                                                          |
+| 1-Wire temperature                                     | °C or °F             | Card and chart, up to eight DS18B20-style probes                                                                                                            |
+| ADC voltage                                            | V                    | Card and chart, up to eight raw analog channels                                                                                                             |
 
 ## Virranhallinnan arvot
 

@@ -594,6 +594,7 @@
         <item quantity="many">%1$d godzin</item>
         <item quantity="other">%1$d godzin</item>
     </plurals>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Pozycjonowanie</string>
     <string name="position_enabled">Lokalizacja włączona</string>

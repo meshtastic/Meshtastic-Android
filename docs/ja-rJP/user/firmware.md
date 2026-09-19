@@ -60,7 +60,7 @@ Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB updat
 
 ### アプリ内での USB 更新
 
-無線機が（Bluetooth ではなく）**USB／シリアル**で接続されている場合、ファームウェア更新画面に「**USB ファイル転送**」が表示されます。 アプリはデバイスを DFU モードで再起動し、システムのファイル選択画面を使って `.uf2` ファイルをデバイスの DFU ドライブに保存するよう促します。 このオプションは USB／シリアル接続でのみ表示され、Bluetooth では利用できません。
+無線機が（Bluetooth ではなく）**USB／シリアル**で接続されている場合、ファームウェア更新画面に「**USB ファイル転送**」が表示されます。アプリはデバイスを DFU モードで再起動し、システムのファイル選択画面を使って `.uf2` ファイルをデバイスの DFU ドライブに保存するよう促します。このオプションは USB／シリアル接続でのみ表示され、Bluetooth では利用できません。
 
 > ℹ️ **Note:** A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
 

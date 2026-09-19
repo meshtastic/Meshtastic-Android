@@ -2,7 +2,7 @@
 title: Настройки — Модули и администрирование
 parent: Руководство пользователя
 nav_order: 8
-last_updated: 2026-09-16
+last_updated: 2026-09-19
 description: Настрой дополнительные функциональные модули (MQTT, телеметрия, готовые сообщения, TAK и другие) и выполняй администрирование устройств.
 aliases:
   - modules
@@ -14,7 +14,7 @@ aliases:
 
 Настрой дополнительные функциональные модули и выполняй управление устройством. Модули расширяют Meshtastic с помощью специализированных возможностей — каждый из них можно включать или отключать отдельно.
 
-> 💡 **Совет:** Тебе нужно включать только те модули, которые действительно используешь. Отключение неиспользуемых модулей снижает время передачи, экономит батарею и упрощает конфигурацию. A module you expect can be missing for three reasons: your node's role does not enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
+> 💡 **Совет:** Тебе нужно включать только те модули, которые действительно используешь. Отключение неиспользуемых модулей снижает время передачи, экономит батарею и упрощает конфигурацию. A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
 
 Настройки модулей используют макет на основе карточек с переключателями, выпадающими списками, текстовыми полями и ползунками:
 
@@ -26,15 +26,15 @@ aliases:
 
 ![A module settings card with its title and grouped controls](../../assets/screenshots/settings_titled_card.png)
 
-## Конфигурация модуля
+## Настройки модуля
 
 Every module lives under **Settings → Module configuration**.
 
-> ⚠️ **Important:** Saving a module screen restarts the radio — the button reads **Save & restart**, and the radio is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**, and the radio may still restart for some changes.
+> ⚠️ **Important:** Saving a module screen restarts the node — the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**, and the node may still restart for some changes.
 
-### Модуль MQTT
+### MQTT module
 
-Мосты передают сообщения туда и обратно от брокера MQTT для подключения к интернету. Ты так расширишь сеть за пределы радиуса действия или интегрируешь её с системами домашней автоматизации.
+Мосты передают сообщения туда и обратно от брокера MQTT для подключения к интернету. This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
 | Настройка                    | Описание                                                                                                                                                                                |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -51,18 +51,18 @@ Every module lives under **Settings → Module configuration**.
 | Отчёты по карте              | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
 
 Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
-via MQTT_, with an **I agree.** switch under it. The rest of the card does not exist on screen
+via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
 until you agree:
 
 | Настройка                                             | Описание                                                                                                                                                                                 |
 | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Я согласен.                           | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting does not start without it                                     |
+| Я согласен.                           | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
 | Precision slider                                      | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
 | Интервал отчета карты (в секундах) | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
 
 См. [MQTT](mqtt) для подробного руководства по использованию, включая шифрование, конфиденциальность и настройку брокера.
 
-### Последовательный модуль
+### Serial module
 
 Позволяет общаться через последовательный порт с внешними устройствами (GPS-модулями, датчиками или собственной техникой). Когда включено, последовательный порт ноды может отправлять и получать данные в формате protobuf или текст, что позволяет внешним микроконтроллерам или компьютерам взаимодействовать с сетью.
 
@@ -76,9 +76,9 @@ until you agree:
 | Время ожидания истекло          | How long to wait before considering an incoming message complete                                                                                                                                    |
 | Переопределить COM-порт консоли | Take over the port the debug console normally uses                                                                                                                                                  |
 
-### Модуль внешних уведомлений
+### External Notification module
 
-Управляет зуммером, светодиодом или вибрацией на вашем радиооборудовании. Полезно для устройств, которым нужно физически сигнализировать о приходе сообщения — особенно удобно для неоснащенных персоналом или уличных установок.
+Controls buzzer, LED, or vibration alerts on your node hardware. Полезно для устройств, которым нужно физически сигнализировать о приходе сообщения — особенно удобно для неоснащенных персоналом или уличных установок.
 
 There are two independent triggers — an incoming **message**, and a received **bell** character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
@@ -98,7 +98,7 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 | Таймаут Nag (в секундах)                | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
 | Рингтон                                                    | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
-### Модуль Store & Forward
+### Store & Forward module
 
 Буферизирует сообщения для узлов, которые временно были недоступны, а затем ретранслирует их, когда эти узлы переподключаются. Важное значение для сеток, где узлы входят и выходят вне диапазона регулярно - обеспечивает отсутствие потери сообщений при коротких разъединениях.
 
@@ -113,7 +113,7 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 
 > 💡 **Совет:** Хранение и пересылка лучше всего работает на узлах с достаточной памятью (ESP32 с PSRAM). Узлы маршрутизатора являются идеальными кандидатами, так как они обычно всегда включены.
 
-### Модуль проверки дальности
+### Range Test module
 
 > ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
 > still uses the default channel key, the interval and CSV controls stay disabled — you can still
@@ -122,38 +122,38 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 
 Автоматизированный инструмент для проверки дальности и оценки качества связи между нодами. Когда включено, нода периодически отправляет сообщения с увеличивающимся счетчиком. Приёмная нода записывает эти сообщения, что позволяет тебе уйти пешком или уехать на машине, а потом проанализировать, на каком расстоянии сообщения перестали приходить.
 
-| Настройка                                                                    | Описание                                                                                  |
-| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Проверка дальности включена                                                  | Активировать проверку дальности                                                           |
-| Интервал сообщений отправителя (в секундах)               | Time between test transmissions, chosen from a dropdown of fixed intervals                |
-| Сохранить .CSV в хранилище (только ESP32) | Log received test data to the radio's own filesystem. ESP32 hardware only |
+| Настройка                                                                    | Описание                                                                                 |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Проверка дальности включена                                                  | Активировать проверку дальности                                                          |
+| Интервал сообщений отправителя (в секундах)               | Time between test transmissions, chosen from a dropdown of fixed intervals               |
+| Сохранить .CSV в хранилище (только ESP32) | Log received test data to the node's own filesystem. ESP32 hardware only |
 
-### Модуль телеметрии
+### Telemetry module
 
 Контролирует какими телеметрическими данными ваш узел делится с сеткой. Телеметрия включает данные о состоянии устройства (заряд батареи, время работы) и данные с датчиков окружающей среды (температура, влажность, давление).
 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely.
 
-| Настройка                                   | Описание                                                                                                                                                                          |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Отправлять телеметрию устройства            | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
-| Интервал обновления метрик устройства       | How often to report battery, uptime and channel utilization                                                                                                                       |
-| Модуль метрик окружения включен             | Report the attached environment sensors                                                                                                                                           |
-| Интервал обновления метрик среды            | How often to report them                                                                                                                                                          |
-| Показатели окружения на экране включены     | Also show these readings on the device's own display                                                                                                                              |
-| Использовать метрику окружения в Fahrenheit | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
-| Модуль измерения качества воздуха включен   | Report particulate and CO₂ sensor data                                                                                                                                            |
-| Интервал обновления данных качества воздуха | How often to report them                                                                                                                                                          |
-| Модуль метрик питания включен               | Report the per-channel voltage and current readings                                                                                                                               |
-| Интервал обновления метрик электропитания   | How often to report them                                                                                                                                                          |
-| Включить метрики питания на экране          | Also show power readings on the device's display                                                                                                                                  |
+| Настройка                                   | Описание                                                                                                                                                                         |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Отправлять телеметрию устройства            | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                        |
+| Интервал обновления метрик устройства       | How often to report battery, uptime and channel utilization                                                                                                                      |
+| Модуль метрик окружения включен             | Report the attached environment sensors                                                                                                                                          |
+| Интервал обновления метрик среды            | How often to report them                                                                                                                                                         |
+| Показатели окружения на экране включены     | Also show these readings on the device's own display                                                                                                                             |
+| Использовать метрику окружения в Fahrenheit | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
+| Модуль измерения качества воздуха включен   | Report particulate and CO₂ sensor data                                                                                                                                           |
+| Интервал обновления данных качества воздуха | How often to report them                                                                                                                                                         |
+| Модуль метрик питания включен               | Report the per-channel voltage and current readings                                                                                                                              |
+| Интервал обновления метрик электропитания   | How often to report them                                                                                                                                                         |
+| Включить метрики питания на экране          | Also show power readings on the device's display                                                                                                                                 |
 
 Посмотрите [Телеметрия и датчики](telemetry-and-sensors) — для получения информации о поддерживаемых датчиках и рекомендациях по настройке.
 
-### Модуль шаблонных сообщений
+### Canned Message module
 
-Pre-configured messages accessible from the radio's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Определите список быстрых сообщений, которые могут быть переданы без подключённого телефона — идеально подходит для использования в поле.
+Pre-configured messages accessible from the node's physical buttons (for nodes with rotary encoders, keypads, or similar input hardware). Определите список быстрых сообщений, которые могут быть переданы без подключённого телефона — идеально подходит для использования в поле.
 
 | Настройка                                      | Описание                                                                                                  |
 | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -166,7 +166,7 @@ Pre-configured messages accessible from the radio's physical buttons (for radios
 | Вверх/Вниз/Выбирать включён                    | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
 | ~~Allow input source~~                         | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
-### Звуковой модуль
+### Audio module
 
 Поддержка аудио Codec2 для низкополосной голосовой связи через сетку. Это **экспериментальная функция**, которая кодирует голос в очень маленькие пакеты данных с помощью кодека Codec2.
 
@@ -182,11 +182,11 @@ Pre-configured messages accessible from the radio's physical buttons (for radios
 
 > ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Качество голоса очень низкополосное — представьте себе «разборчивую радиосвязь», а не качество телефонного звонка.
 
-### Удаленный аппаратный модуль
+### Remote Hardware module
 
 Управление GPIO через mesh-сеть. Позволяет удалённому узлу читать и записывать состояния выводов GPIO на другом узле — полезно для активации реле, опроса переключателей или удалённого управления внешним оборудованием.
 
-> ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Turn it on only on dedicated GPIO nodes.
+> ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the node's own hardware. Turn it on only on dedicated GPIO nodes.
 
 | Настройка                        | Описание                                                                        |
 | -------------------------------- | ------------------------------------------------------------------------------- |
@@ -194,7 +194,7 @@ Pre-configured messages accessible from the radio's physical buttons (for radios
 | Разрешить неопределённый контакт | Разрешить доступ к любому GPIO-пину (риск для безопасности)  |
 | Доступные контакты               | До 4 пинов GPIO, которые этот узел предоставляет для удалённого чтения и записи |
 
-### Модуль информации о соседях
+### Neighbor Info module
 
 Транслирует информацию о доступных услышанных соседей, включив ячейку сеточной топологии. Каждый включенный узел периодически делится списком других узлов которые он может слышать и их качество сигнала.
 
@@ -206,7 +206,7 @@ Pre-configured messages accessible from the radio's physical buttons (for radios
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
-### Модуль окружающего освещения
+### Ambient Lighting module
 
 Управляет встроенными светодиодами NeoPixel или другими адресуемыми RGB-светодиодами на поддерживаемом оборудовании. Может использоваться для визуальных статусовых индикаторов, световых уведомлений, или декоративных эффектов.
 
@@ -216,7 +216,7 @@ See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topo
 | Ток                       | Текущий лимит светодиодов (0–31)              |
 | Красный / Зеленый / Синий | Индивидуальные значения цветов канала (0–255) |
 
-### Модуль определения датчика
+### Detection Sensor module
 
 Превращает ваш узел в систему сигнализации на основе датчика движения или открытия двери. При обнаружении изменения состояния на выводе GPIO (например, сработал датчик движения или открылась дверь) узел отправляет по меш-сети оповещение.
 
@@ -231,34 +231,34 @@ See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topo
 | Отправить колокол с уведомлением                       | Включать символ колокола в оповещения                                                                                                              |
 | Понятное имя                                           | Пользовательское имя для этого датчика                                                                                                             |
 
-### Paxcounter Модуль
+### Paxcounter module
 
 People counter using Wi-Fi and BLE probe requests. Засчитывает ближайшие устройства, пассивно прослушивая зондирующие запросы, чтобы телефоны и ноутбуки излучали при сканировании сетей. Доступно только на устройствах ESP32.
 
-| Настройка                                           | Описание                                                                                                          |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Paxcounter включен                                  | Активировать подсчет людей                                                                                        |
-| Интервал обновления (в секундах) | Как часто сообщать подсчитывания                                                                                  |
-| Wi-Fi RSSI threshold                                | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
-| BLE RSSI threshold                                  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                  |
+| Настройка                                           | Описание                                                                                                         |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Paxcounter включен                                  | Активировать подсчет людей                                                                                       |
+| Интервал обновления (в секундах) | Как часто сообщать подсчитывания                                                                                 |
+| Wi-Fi RSSI threshold                                | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
+| BLE RSSI threshold                                  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
 
 > 💡 **Совет:** Paxcounter полезен для приблизительной оценки пешеходного потока в местах начала маршрутов, на мероприятийных площадках или в других локациях. Счетчики приблизительны — один человек может иметь несколько устройств.
 
-### Status Message Module
+### Status Message module
 
 The status message has no module screen. It is edited with the rest of the node's identity, on
 [Settings — Radio & User](settings-radio-user#user-profile).
 
-### Mesh Beacon Module
+### Mesh Beacon module
 
 Broadcasts an invitation to your mesh, and receives invitations from others. The entry appears only
-on radios running firmware 2.8.0 or newer. See [Local Mesh Discovery](discovery) for the full
+on nodes running firmware 2.8.0 or newer. See [Local Mesh Discovery](discovery) for the full
 walkthrough.
 
-### Модуль TAK
+### TAK module
 
 Интеграция Team Awareness Kit для совместимости с ATAK и WinTAK. Two things have to be
-true before the entry appears in the module list: the radio runs firmware 2.8.0 or newer, and its
+true before the entry appears in the module list: the node runs firmware 2.8.0 or newer, and its
 **Device Role** on **Settings → Device configuration → Device** is set to `TAK` or `TAK_TRACKER`.
 См. [TAK Integration](tak) для детальной настройки и использования.
 
@@ -279,32 +279,32 @@ true before the entry appears in the module list: the radio runs firmware 2.8.0 
 
 **Settings → Administration** holds five one-shot actions, each behind a confirmation dialog:
 
-| Действие                    | Что она делает                                                                                         |
-| --------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Установить время            | Sends your phone's clock to the radio                                                                  |
-| Перезагрузка                | Restarts the radio                                                                                     |
-| Выключение                  | Powers the radio down                                                                                  |
-| Сброс до заводских настроек | Returns every setting to its factory default                                                           |
-| Очистка списка нод сети     | Clears the radio's node database. This dialog carries a **Preserve Favorites?** switch |
+| Действие                    | Что она делает                                                                                 |
+| --------------------------- | ---------------------------------------------------------------------------------------------- |
+| Установить время            | Sends your phone's clock to the node                                                           |
+| Перезагрузка                | Restarts the node                                                                              |
+| Выключение                  | Powers the node down                                                                           |
+| Сброс до заводских настроек | Returns every setting to its factory default                                                   |
+| Очистка списка нод сети     | Clears the node database. This dialog carries a **Preserve Favorites?** switch |
 
-> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the radio's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
+> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the node's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
 
 ### Бэкап & Восстановление
 
-**Settings → Backup & Restore** writes the connected radio's whole configuration to a file with
+**Settings → Backup & Restore** writes the connected node's whole configuration to a file with
 **Export configuration**, and reads a saved file back in with **Import configuration**. Export
-before a factory reset, or to copy one radio's setup onto another. The section is shown for your
-own radio only, not over remote admin.
+before a factory reset, or to copy one node's setup onto another. The section is shown for your
+own node only, not over remote admin.
 
 ### Расширенные
 
 **Settings → Advanced** collects the tools that read or rewrite local state, and is likewise shown
-for your own radio only: **Firmware Update** on OTA-capable hardware, **Clean Node Database**,
+for your own node only: **Firmware Update** on OTA-capable hardware, **Clean Node Database**,
 **TAK Server**, **Local Mesh Discovery**, and the **Debug Panel**.
 
 #### Очистить базу данных нод
 
-Prunes nodes from your node database — from the app's copy _and_ from the radio's own, so this is
+Prunes nodes from your node database — from the app's copy _and_ from the node's own, so this is
 not a display-only cleanup. The two filters combine rather than acting separately; the screen puts
 it as _Selections are additive_.
 
@@ -314,7 +314,7 @@ it as _Selections are additive_.
   info. The age limit still applies on top of it.
 
 The screen lists the nodes queued for deletion as you move the filters. **Clean Now** carries the
-purge out, after one more confirmation, and it cannot be undone. Favorited nodes, ignored nodes,
+purge out, after one more confirmation, and it can't be undone. Favorited nodes, ignored nodes,
 and nodes with a public key heard in the last seven days are never removed, whatever the filters
 say — that is why the queued list can be shorter than you expect.
 
@@ -324,12 +324,38 @@ say — that is why the queued list can be shorter than you expect.
 
 ### App Settings
 
-Two easy-to-miss entries on the **Settings** screen configure the app rather than the radio, and
-appear only when your own node is selected:
+The **App Settings** block on the **Settings** screen configures the app rather than the node, and
+appears only when your own node is selected. It is grouped rather than flat:
+
+**Privacy**
+
+- **Allow analytics and crash reporting** — opt in or out of diagnostics.
+- **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
+- **Homoglyph encoding** — how look-alike characters in names are handled.
+
+**Appearance**
+
+- **Units** — metric, imperial, or follow the system. This is the entry
+  [Units & Locale](units-and-locale) sends you to.
+- **Theme** and **Language**.
+- **Show full message timestamps**.
+
+**Persistence**
+
+- A cache limit for how much history is kept.
+- **Export rangetest packets**, **Export all packets** and **Export node database**.
+
+**On their own**
 
 - **Node Layout** — how much detail each row of the node list shows.
+- **Wi-Fi Provisioning for mPWRD-OS** — see [Connections](connections).
 - **Message Filter** — hides incoming messages that contain words you list. With no words
   configured it does nothing.
+- **System AI** — appears only where app functions are available; see
+  [App Functions](app-functions).
+
+A **Permissions** block sits above App Settings, so a user who skipped a permission during
+onboarding can get back to it, and **App Info** sits below.
 
 ### О приложении
 
@@ -352,7 +378,7 @@ may redistribute under the same license.
 Reached from **About**, this lists every open-source library the app ships, with its license,
 generated at build time by AboutLibraries. It was previously called the license screen.
 
-### Устранение неполадок удалённого администрирования
+### Troubleshooting remote admin
 
 - **"Нет ответа от целевого узла"** — цель может находиться вне диапазона, в автономном режиме или иметь несоответствующий ключ администратора. Проверьте соответствие ключа администратора на обоих узлах.
 - **Изменения не применены** — чтобы некоторые настройки вступили в силу, нужно перезагрузить устройство. Попробуй перезагрузить после сохранения.
@@ -360,6 +386,6 @@ generated at build time by AboutLibraries. It was previously called the license 
 
 ## Связанные темы
 
-- [Настройки — Радио и Пользователь](settings-radio-user) — основные настройки радио и профиля пользователя
+- [Settings — Radio & User](settings-radio-user) — core node and user profile settings
 - [Ссылка на конфигурацию модуля](https://meshtastic.org/docs/configuration/module) — подробная документация по модулям на meshtastic.org
 - [FAQ](https://meshtastic.org/docs/faq/) — общие вопросы на meshtastic.org

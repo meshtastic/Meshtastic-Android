@@ -1148,6 +1148,7 @@
         <item quantity="one">%1$d seconde</item>
         <item quantity="other">%1$d secondes</item>
     </plurals>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Position</string>
     <string name="position_config_set_fixed_from_phone">Définir à partir de l'emplacement actuel du téléphone</string>

@@ -927,6 +927,7 @@
         <item quantity="many">%1$d секунд</item>
         <item quantity="other">%1$d секунд</item>
     </plurals>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Місцезнаходження</string>
     <string name="position_config_set_fixed_from_phone">Встановити з поточного місцеположення телефону</string>

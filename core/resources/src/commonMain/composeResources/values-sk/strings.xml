@@ -346,6 +346,7 @@
         <item quantity="many">%1$d hodín</item>
         <item quantity="other">%1$d hodín</item>
     </plurals>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Pozícia</string>
     <string name="position_enabled">Zapnutá poloha</string>

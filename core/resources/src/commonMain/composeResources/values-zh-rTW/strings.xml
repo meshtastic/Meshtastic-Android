@@ -971,6 +971,7 @@
     <plurals name="plurals_seconds">
         <item quantity="other">%1$d 秒</item>
     </plurals>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">位置</string>
     <string name="position_config_set_fixed_from_phone">使用手機目前定位</string>

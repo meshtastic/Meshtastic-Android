@@ -2,7 +2,7 @@
 title: Sätted - moodulid & admin
 parent: Kasutusjuhend
 nav_order: 8
-last_updated: 2026-09-16
+last_updated: 2026-09-19
 description: Muuda valikulisi funktsioonimooduleid (MQTT, telemeetria, salvestatud sõnumid, TAK ja palju muud) ja teosta seadme haldamist.
 aliases:
   - moodul
@@ -14,7 +14,7 @@ aliases:
 
 Konfi valikulisi funktsioonimooduleid ja teosta seadme haldamist. Moodulid laiendavad Meshtasticut spetsiaalsete võimalustega – igaüht saab eraldi lubada või keelata.
 
-> 💡 **Vihje:** Pead lubama ainult need moodulid, mida sa tegelikult kasutad. Kasutamata moodulite keelamine vähendab eetriaega, säästab akut ja lihtsustab seadistamist. A module you expect can be missing for three reasons: your node's role does not enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
+> 💡 **Vihje:** Pead lubama ainult need moodulid, mida sa tegelikult kasutad. Kasutamata moodulite keelamine vähendab eetriaega, säästab akut ja lihtsustab seadistamist. A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
 
 Mooduli seaded kasutavad kaardipõhist paigutust koos lülitite, rippmenüüde, tekstiväljade ja liuguritega:
 
@@ -26,15 +26,15 @@ Mooduli seaded kasutavad kaardipõhist paigutust koos lülitite, rippmenüüde, 
 
 ![A module settings card with its title and grouped controls](../../assets/screenshots/settings_titled_card.png)
 
-## Mooduli konf
+## Mooduli sätted
 
 Every module lives under **Settings → Module configuration**.
 
-> ⚠️ **Important:** Saving a module screen restarts the radio — the button reads **Save & restart**, and the radio is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**, and the radio may still restart for some changes.
+> ⚠️ **Important:** Saving a module screen restarts the node — the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**, and the node may still restart for some changes.
 
-### MQTT moodul
+### MQTT module
 
-Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. This is how you extend your mesh beyond radio range or integrate with home automation systems.
+Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
 | Sätted                           | Kirjeldus                                                                                                                                                                               |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -51,18 +51,18 @@ Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. 
 | Kaardi raport                    | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
 
 Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
-via MQTT_, with an **I agree.** switch under it. The rest of the card does not exist on screen
+via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
 until you agree:
 
 | Sätted                                             | Kirjeldus                                                                                                                                                                                |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nõustun.                           | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting does not start without it                                     |
+| Nõustun.                           | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
 | Precision slider                                   | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
 | Kaardi raporti sagedus (sekund) | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
 
 Vaata [MQTT](mqtt) üksikasjalikumat kasutusjuhendit, mis sisaldab teavet krüpteerimise, privaatsuse ja vahendaja seadistamise kohta,.
 
-### Jadapordi moodul
+### Serial module
 
 Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, andurid või kohandatud riistvara). Kui lubatud, saab sõlme jadaühendus saata ja vastu võtta protobuf- või tekstiandmeid, võimaldades välistel mikrokontrolleritel või arvutitel võrguga suhelda.
 
@@ -76,9 +76,9 @@ Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, and
 | Aegunud                       | How long to wait before considering an incoming message complete                                                                                                                                    |
 | Konsooli jadapordi alistamine | Take over the port the debug console normally uses                                                                                                                                                  |
 
-### Välise teavitusmoodul
+### External Notification module
 
-Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Kasulik seadmetele, mis peavad sõnumi saabumisest füüsiliselt märku andma – eriti kasulik järelevalveta või välistingimustes paigaldamise korral.
+Controls buzzer, LED, or vibration alerts on your node hardware. Kasulik seadmetele, mis peavad sõnumi saabumisest füüsiliselt märku andma – eriti kasulik järelevalveta või välistingimustes paigaldamise korral.
 
 There are two independent triggers — an incoming **message**, and a received **bell** character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
@@ -98,7 +98,7 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 | Häire ajalõpp (sekundit)         | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
 | Helin                                               | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
-### Salvesta & edasta moodul
+### Store & Forward module
 
 Puhverdab ajutiselt võrguühenduseta olnud sõlmede sõnumeid ja esitab need uuesti, kui need sõlmed taasühenduvad. Hädavajalik kärgvõrgu jaoks, kus sõlmed regulaarselt levialasse lähevad ja levialast välja lähevad — tagab, et lühikeste katkestuste ajal sõnumid kaotsi ei lähe.
 
@@ -113,7 +113,7 @@ Puhverdab ajutiselt võrguühenduseta olnud sõlmede sõnumeid ja esitab need uu
 
 > 💡 **Vihje:** Salvesta ja edasta töötab kõige paremini rohke mäluga sõlmedes (ESP32 koos PSRAM-iga). Router nodes are ideal candidates since they're typically always-on.
 
-### Kaugustesti moodul
+### Range Test module
 
 > ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
 > still uses the default channel key, the interval and CSV controls stay disabled — you can still
@@ -122,38 +122,38 @@ Puhverdab ajutiselt võrguühenduseta olnud sõlmede sõnumeid ja esitab need uu
 
 Automatiseeritud vahemiku testimise tööriist sõlmede vahelise ühenduse kvaliteedi hindamiseks. Kui lubatud, edastab sõlm perioodiliselt testsõnumeid kasvavate loenduritega. Vastuvõtusõlm logib need sõnumid, võimaldades kõndida või minema sõita ning hiljem analüüsida, millisel kaugusel sõnumite saabumine lakkas.
 
-| Sätted                                                                | Kirjeldus                                                                                 |
-| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Ulatustest lubatud                                                    | Aktiveeri levi test                                                                       |
-| Saatja sõnumi sagedus (sekundit)                   | Time between test transmissions, chosen from a dropdown of fixed intervals                |
-| Salvesta .CSV faili (ainult ESP32) | Log received test data to the radio's own filesystem. ESP32 hardware only |
+| Sätted                                                                | Kirjeldus                                                                                |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Ulatustest lubatud                                                    | Aktiveeri levi test                                                                      |
+| Saatja sõnumi sagedus (sekundit)                   | Time between test transmissions, chosen from a dropdown of fixed intervals               |
+| Salvesta .CSV faili (ainult ESP32) | Log received test data to the node's own filesystem. ESP32 hardware only |
 
-### Telemeetria moodul
+### Telemetry module
 
 Juhib, milliseid telemeetriaandmeid sõlm võrguga jagab. Telemeetria sisaldab seadme tervist (aku, tööaeg) ja keskkonnaandurite andmeid (temperatuur, niiskus, rõhk).
 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely.
 
-| Sätted                                          | Kirjeldus                                                                                                                                                                         |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Saada seadme telemeetria                        | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
-| Seadme mõõdikute värskendamise intervall        | How often to report battery, uptime and channel utilization                                                                                                                       |
-| Keskkonnamõõdikute lubamine                     | Report the attached environment sensors                                                                                                                                           |
-| Keskkonnamõõdikute värskendamise intervall      | How often to report them                                                                                                                                                          |
-| Keskkonnamõõdikute ekraanil kuvamine lubatud    | Also show these readings on the device's own display                                                                                                                              |
-| Keskkonnamõõdikud kasutavad Fahrenheiti         | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
-| Õhukvaliteedi moodul on lubatud                 | Report particulate and CO₂ sensor data                                                                                                                                            |
-| Õhukvaliteedi näidikute värskendamise intervall | How often to report them                                                                                                                                                          |
-| Toitemõõdiku moodul on lubatud                  | Report the per-channel voltage and current readings                                                                                                                               |
-| Toitemõõdikute värskendamise intervall          | How often to report them                                                                                                                                                          |
-| Toitemõõdiku ekraanil kuvamine lubatud          | Also show power readings on the device's display                                                                                                                                  |
+| Sätted                                          | Kirjeldus                                                                                                                                                                        |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Saada seadme telemeetria                        | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                        |
+| Seadme mõõdikute värskendamise intervall        | How often to report battery, uptime and channel utilization                                                                                                                      |
+| Keskkonnamõõdikute lubamine                     | Report the attached environment sensors                                                                                                                                          |
+| Keskkonnamõõdikute värskendamise intervall      | How often to report them                                                                                                                                                         |
+| Keskkonnamõõdikute ekraanil kuvamine lubatud    | Also show these readings on the device's own display                                                                                                                             |
+| Keskkonnamõõdikud kasutavad Fahrenheiti         | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
+| Õhukvaliteedi moodul on lubatud                 | Report particulate and CO₂ sensor data                                                                                                                                           |
+| Õhukvaliteedi näidikute värskendamise intervall | How often to report them                                                                                                                                                         |
+| Toitemõõdiku moodul on lubatud                  | Report the per-channel voltage and current readings                                                                                                                              |
+| Toitemõõdikute värskendamise intervall          | How often to report them                                                                                                                                                         |
+| Toitemõõdiku ekraanil kuvamine lubatud          | Also show power readings on the device's display                                                                                                                                 |
 
 Vaata [Telemeetria & Sensorid](telemetry-and-sensors) toetatud andurite ja sätete soovituste kohta.
 
-### Eelsalvestatud sõnumi moodul
+### Canned Message module
 
-Pre-configured messages accessible from the radio's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Määra nimekiri kiirsõnumitest, mida saab edastada ilma telefoni ühendamata – ideaalne välitöödeks.
+Pre-configured messages accessible from the node's physical buttons (for nodes with rotary encoders, keypads, or similar input hardware). Määra nimekiri kiirsõnumitest, mida saab edastada ilma telefoni ühendamata – ideaalne välitöödeks.
 
 | Sätted                                         | Kirjeldus                                                                                                 |
 | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -166,7 +166,7 @@ Pre-configured messages accessible from the radio's physical buttons (for radios
 | Üles/Alla/Vali sisend lubatud                  | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
 | ~~Allow input source~~                         | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
-### Audio moodul
+### Audio module
 
 Codec2 audio support for low-bandwidth voice communication over the mesh. See on **eksperimentaalne** funktsioon, mis kodeerib hääle Codec2 koodeki abil väga väikesteks andmepakettideks.
 
@@ -182,11 +182,11 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. See on
 
 > ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
-### Kaugriistvara moodul
+### Remote Hardware module
 
 GPIO juhtimine kärgvõrgu kaudu. Võimaldab kaugsõlmel lugeda või kirjutada GPIO sisendkontakte teisel sõlmel – kasulik releede aktiveerimiseks, lülitite lugemiseks või välise riistvara kaugjuhtimiseks.
 
-> ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Turn it on only on dedicated GPIO nodes.
+> ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the node's own hardware. Turn it on only on dedicated GPIO nodes.
 
 | Sätted                              | Kirjeldus                                                               |
 | ----------------------------------- | ----------------------------------------------------------------------- |
@@ -194,7 +194,7 @@ GPIO juhtimine kärgvõrgu kaudu. Võimaldab kaugsõlmel lugeda või kirjutada G
 | Luba määratlemata klemmi juurdepääs | Luba juurdepääs mis tahes GPIO sisendile (turvarisk) |
 | Saadaval klemmid                    | Kuni 4 GPIO sisendit, mida see sõlm kauglugemiseks/-kirjutamiseks avab  |
 
-### Naabriinfo moodul
+### Neighbor Info module
 
 Levitab teavet otse kuuldud naabrite kohta, võimaldades kärgvõrgu topoloogia kaardistamist. Iga lubatud sõlm jagab perioodiliselt nimekirja teistest sõlmedest, mida ta kuuleb ja nende signaali kvaliteedist.
 
@@ -206,7 +206,7 @@ Levitab teavet otse kuuldud naabrite kohta, võimaldades kärgvõrgu topoloogia 
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
-### Ambientvalguse moodul
+### Ambient Lighting module
 
 Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Saab kasutada visuaalsete olekuindikaatorite, märgutulede või dekoratiivsete efektide jaoks.
 
@@ -216,7 +216,7 @@ Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Saab ka
 | Pinge                      | LED current limit (0–31)                        |
 | Punane / Roheline / Sinine | Individuaalsete värvikanalite väärtused (0–255) |
 
-### Tuvastusanduri moodul
+### Detection Sensor module
 
 Muudab sõlme liikumis- või ukseanduri hoiatussüsteemiks. Kui GPIO sisend tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
 
@@ -231,34 +231,34 @@ Muudab sõlme liikumis- või ukseanduri hoiatussüsteemiks. Kui GPIO sisend tuva
 | Saada kõll koos hoiatussõnumiga                   | Lisa märguannetesse hoiatuskella sümbol                                                                           |
 | Kasutajasõbralik nimi                             | Selle anduri kohandatud nimi                                                                                      |
 
-### Paxloenduri moodul
+### Paxcounter module
 
 People counter using Wi-Fi and BLE probe requests. Loendab lähedalasuvaid seadmeid, kuulates passiivselt sondimistaotlusi, mida telefonid ja sülearvutid võrkude skannimisel edastavad. Available only on ESP32 devices.
 
-| Sätted                                          | Kirjeldus                                                                                                         |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Paxcounter lubatud                              | Aktiveeri inimeste loendamine                                                                                     |
-| Uuenduste sagedus (sekundit) | Kui tihti loendeid esitada                                                                                        |
-| Wi-Fi RSSI threshold                            | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
-| BLE RSSI threshold                              | The same cut-off for BLE advertisements (defaults to −80 dBm)                                  |
+| Sätted                                          | Kirjeldus                                                                                                        |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Paxcounter lubatud                              | Aktiveeri inimeste loendamine                                                                                    |
+| Uuenduste sagedus (sekundit) | Kui tihti loendeid esitada                                                                                       |
+| Wi-Fi RSSI threshold                            | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
+| BLE RSSI threshold                              | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
 
 > 💡 **Vihje:** Paxloendur on kasulik jalakäijate liikluse hindamiseks matkaradade alguses, ürituste toimumiskohtades või muudes kohtades. Arvud on ligikaudsed – üks inimene võib kaasas kanda mitut seadet.
 
-### Status Message Module
+### Status Message module
 
 The status message has no module screen. It is edited with the rest of the node's identity, on
 [Settings — Radio & User](settings-radio-user#user-profile).
 
-### Mesh Beacon Module
+### Mesh Beacon module
 
 Broadcasts an invitation to your mesh, and receives invitations from others. The entry appears only
-on radios running firmware 2.8.0 or newer. See [Local Mesh Discovery](discovery) for the full
+on nodes running firmware 2.8.0 or newer. See [Local Mesh Discovery](discovery) for the full
 walkthrough.
 
-### TAK moodul
+### TAK module
 
 Meeskonna teadlikkuse komplekti integratsioon ATAKi ja WinTAKi koostalitlusvõime tagamiseks. Two things have to be
-true before the entry appears in the module list: the radio runs firmware 2.8.0 or newer, and its
+true before the entry appears in the module list: the node runs firmware 2.8.0 or newer, and its
 **Device Role** on **Settings → Device configuration → Device** is set to `TAK` or `TAK_TRACKER`.
 Vaata [TAK Integration](tak) täpsema seadistamise ja kasutamise kohta.
 
@@ -279,32 +279,32 @@ Administraatori võtit jagavate sõlmede kaugkonfigureerimine:
 
 **Settings → Administration** holds five one-shot actions, each behind a confirmation dialog:
 
-| Action              | What it does                                                                                           |
-| ------------------- | ------------------------------------------------------------------------------------------------------ |
-| Määra aeg           | Sends your phone's clock to the radio                                                                  |
-| Taaskäivita         | Restarts the radio                                                                                     |
-| Lülita välja        | Powers the radio down                                                                                  |
-| Tehasesätted        | Returns every setting to its factory default                                                           |
-| NodeDB lähtestamine | Clears the radio's node database. This dialog carries a **Preserve Favorites?** switch |
+| Action              | What it does                                                                                   |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| Määra aeg           | Sends your phone's clock to the node                                                           |
+| Taaskäivita         | Restarts the node                                                                              |
+| Lülita välja        | Powers the node down                                                                           |
+| Tehasesätted        | Returns every setting to its factory default                                                   |
+| NodeDB lähtestamine | Clears the node database. This dialog carries a **Preserve Favorites?** switch |
 
-> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the radio's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
+> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the node's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
 
 ### Varunda ja taasta
 
-**Settings → Backup & Restore** writes the connected radio's whole configuration to a file with
+**Settings → Backup & Restore** writes the connected node's whole configuration to a file with
 **Export configuration**, and reads a saved file back in with **Import configuration**. Export
-before a factory reset, or to copy one radio's setup onto another. The section is shown for your
-own radio only, not over remote admin.
+before a factory reset, or to copy one node's setup onto another. The section is shown for your
+own node only, not over remote admin.
 
 ### Täpsem
 
 **Settings → Advanced** collects the tools that read or rewrite local state, and is likewise shown
-for your own radio only: **Firmware Update** on OTA-capable hardware, **Clean Node Database**,
+for your own node only: **Firmware Update** on OTA-capable hardware, **Clean Node Database**,
 **TAK Server**, **Local Mesh Discovery**, and the **Debug Panel**.
 
 #### Tühjenda sõlmede andmebaas
 
-Prunes nodes from your node database — from the app's copy _and_ from the radio's own, so this is
+Prunes nodes from your node database — from the app's copy _and_ from the node's own, so this is
 not a display-only cleanup. The two filters combine rather than acting separately; the screen puts
 it as _Selections are additive_.
 
@@ -314,7 +314,7 @@ it as _Selections are additive_.
   info. The age limit still applies on top of it.
 
 The screen lists the nodes queued for deletion as you move the filters. **Clean Now** carries the
-purge out, after one more confirmation, and it cannot be undone. Favorited nodes, ignored nodes,
+purge out, after one more confirmation, and it can't be undone. Favorited nodes, ignored nodes,
 and nodes with a public key heard in the last seven days are never removed, whatever the filters
 say — that is why the queued list can be shorter than you expect.
 
@@ -324,12 +324,38 @@ Avab vahekaardid **Paketid** ja **Rakenduse logid** diagnostilise väljundi vaat
 
 ### App Settings
 
-Two easy-to-miss entries on the **Settings** screen configure the app rather than the radio, and
-appear only when your own node is selected:
+The **App Settings** block on the **Settings** screen configures the app rather than the node, and
+appears only when your own node is selected. It is grouped rather than flat:
+
+**Privacy**
+
+- **Allow analytics and crash reporting** — opt in or out of diagnostics.
+- **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
+- **Homoglyph encoding** — how look-alike characters in names are handled.
+
+**Appearance**
+
+- **Units** — metric, imperial, or follow the system. This is the entry
+  [Units & Locale](units-and-locale) sends you to.
+- **Theme** and **Language**.
+- **Show full message timestamps**.
+
+**Persistence**
+
+- A cache limit for how much history is kept.
+- **Export rangetest packets**, **Export all packets** and **Export node database**.
+
+**On their own**
 
 - **Node Layout** — how much detail each row of the node list shows.
+- **Wi-Fi Provisioning for mPWRD-OS** — see [Connections](connections).
 - **Message Filter** — hides incoming messages that contain words you list. With no words
   configured it does nothing.
+- **System AI** — appears only where app functions are available; see
+  [App Functions](app-functions).
+
+A **Permissions** block sits above App Settings, so a user who skipped a permission during
+onboarding can get back to it, and **App Info** sits below.
 
 ### Teave
 
@@ -352,7 +378,7 @@ may redistribute under the same license.
 Reached from **About**, this lists every open-source library the app ships, with its license,
 generated at build time by AboutLibraries. It was previously called the license screen.
 
-### Kaug-admin tõrkeotsing
+### Troubleshooting remote admin
 
 - **"Sihtsõlmelt ei ole vastust"** — sihtsõlm võib olla leviulatusest väljas, võrguühenduseta või sellel võib olla sobimatu administraatori võti. Veendu, et administraatori võti sobiks mõlemas sõlmele.
 - **Muudatused ei rakendu** — mõnede sätete jõustumiseks on vaja taaskäivitada. Pärast salvestamist proovi taaskäivitust.
@@ -360,6 +386,6 @@ generated at build time by AboutLibraries. It was previously called the license 
 
 ## Seotud teemad
 
-- [Seaded — Raadio ja kasutaja](settings-radio-user) — raadio ja kasutajaprofiili põhiseaded
+- [Settings — Radio & User](settings-radio-user) — core node and user profile settings
 - [Mooduli konfiguratsiooni viide](https://meshtastic.org/docs/configuration/module) — üksikasjalik mooduli dokumentatsioon aadressil meshtastic.org
 - [KKK](https://meshtastic.org/docs/faq/) — meshtastic.org sageli esitatavad küsimused

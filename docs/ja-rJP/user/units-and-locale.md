@@ -18,9 +18,9 @@ The Meshtastic app automatically displays temperatures, distances, speeds, and t
 
 ## 仕組み
 
-Meshtastic の無線機は、常に**メートル法の単位**（メートル、°C、m/s、hPa など）でデータを送信します。 アプリはこのデータを受信すると、デバイスのロケールで指定された単位系に変換して値を表示します。
+Meshtastic の無線機は、常に**メートル法の単位**（メートル、°C、m/s、hPa など）でデータを送信します。アプリはこのデータを受信すると、デバイスのロケールで指定された単位系に変換して値を表示します。
 
-Android では、計測の設定はシステムの**言語と地域**の設定によって決まります。 デスクトップ（JVM）では、アプリは JVM のデフォルトの `Locale` を使用します。
+Android では、計測の設定はシステムの**言語と地域**の設定によって決まります。デスクトップ（JVM）では、アプリは JVM のデフォルトの `Locale` を使用します。
 
 Units follow your device's **region**, not the display language. Plain languages — like **English** in the app's own Language setting or Android's per-app language — keep the region your device is set to. A choice that names a region of its own, like **English (Canada)**, overrides it and brings that region's units with it. On Android 16+, the system-wide **Measurement system** preference overrides the region for distance, speed, and the other measurements — but not for temperature, which keeps following the region.
 

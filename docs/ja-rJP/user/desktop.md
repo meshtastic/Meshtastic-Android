@@ -53,7 +53,7 @@ Connect your radio via USB. The app detects the serial port automatically; if it
 
 Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/JuulLabs/kable) library:
 
-1. システムに Bluetooth アダプターがあることを確認します。 アプリが近くの Meshtastic 無線機を自動的にスキャンします。
+1. システムに Bluetooth アダプターがあることを確認します。アプリが近くの Meshtastic 無線機を自動的にスキャンします。
 2. Select your radio from the Connect screen.
 
 ## 機能の対応状況
@@ -75,7 +75,7 @@ Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/
 
 \*Chirpy AI には、対応ハードウェアを備えた Google 版ビルドで Android 14 以降が必要です。
 
-†アプリ機能は、Google 版ビルドで、アプリの操作を Android のシステム AI に公開します。 [アプリ機能](app-functions) を参照してください。
+†アプリ機能は、Google 版ビルドで、アプリの操作を Android のシステム AI に公開します。[アプリ機能](app-functions) を参照してください。
 
 ## UI の違い
 

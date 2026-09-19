@@ -633,6 +633,7 @@
         <item quantity="one">%1$d óra</item>
         <item quantity="other">%1$d óra</item>
     </plurals>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Pozíció</string>
     <string name="position_config_set_fixed_from_phone">Beállítás a telefon jelenlegi helyzete alapján</string>
