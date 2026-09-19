@@ -1974,6 +1974,7 @@
     <string name="timeout">Timeout</string>
     <string name="timestamp">Timestamp</string>
     <string name="tls_enabled">TLS enabled</string>
+    <string name="tls_enabled_public_broker_summary">When this phone relays MQTT it always connects to mqtt.meshtastic.org over TLS. This setting applies when the radio reaches the broker over its own Wi-Fi or Ethernet.</string>
     <string name="toggle_my_position">Toggle my position</string>
     <string name="trace_route">Trace Route</string>
     <!-- TRACEROUTE -->

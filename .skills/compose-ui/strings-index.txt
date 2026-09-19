@@ -1920,6 +1920,7 @@ time_zone
 timeout
 timestamp
 tls_enabled
+tls_enabled_public_broker_summary
 toggle_my_position
 trace_route
 ### TRACEROUTE ###
