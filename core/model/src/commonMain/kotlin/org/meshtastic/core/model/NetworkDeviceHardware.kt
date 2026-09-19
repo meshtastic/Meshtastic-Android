@@ -33,6 +33,7 @@ data class NetworkDeviceHardware(
     @SerialName("hwModel") val hwModel: Int = 0,
     @SerialName("hwModelSlug") val hwModelSlug: String = "",
     @SerialName("images") val images: List<String>? = null,
+    @SerialName("isMaker") val isMaker: Boolean = false,
     @SerialName("key") val key: String? = null,
     @SerialName("partitionScheme") val partitionScheme: String? = null,
     @SerialName("platformioTarget") val platformioTarget: String = "",

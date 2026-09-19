@@ -427,6 +427,64 @@ class MeshtasticDatabaseMigrationTest {
         }
     }
 
+    /**
+     * 61→62 adds `device_hardware.is_maker`. [migrateAll] only proves the resulting schema validates from an empty
+     * database; this proves a cached registry row survives the addition with the fields the support badge and the
+     * firmware flow read, and that the new column arrives as 0 - an absent flag means "not maker", never NULL.
+     */
+    @Test
+    fun isMakerColumnAddedWithoutDisturbingDeviceHardware() = runTest {
+        helper.createDatabase(IS_MAKER_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO device_hardware (actively_supported, architecture, display_name, hwModel, " +
+                    "hw_model_slug, last_updated, platformio_target, support_level, tags) " +
+                    "VALUES (1, 'esp32-s3', 'Heltec V3', 43, 'HELTEC_V3', 1000, 'heltec-v3', 1, " +
+                    "'[\"Heltec\"]')",
+            )
+            connection.execSQL(
+                "INSERT INTO device_hardware (actively_supported, architecture, display_name, hwModel, " +
+                    "hw_model_slug, last_updated, platformio_target, requires_dfu) " +
+                    "VALUES (0, 'nrf52840', 'RAK4631', 9, 'RAK4631', 2000, 'rak4631', 1)",
+            )
+        }
+
+        helper.runMigrationsAndValidate(
+            IS_MAKER_TO_VERSION,
+            listOf(MeshtasticDatabase.MIGRATION_52_53),
+        ).use { connection ->
+            assertEquals(
+                listOf("heltec-v3", "rak4631"),
+                queryColumn(connection, "SELECT platformio_target FROM device_hardware ORDER BY platformio_target"),
+            )
+            assertEquals(
+                listOf("1", "0"),
+                queryColumn(connection, "SELECT actively_supported FROM device_hardware ORDER BY platformio_target"),
+            )
+            assertEquals(
+                listOf("1", null),
+                queryColumn(connection, "SELECT support_level FROM device_hardware ORDER BY platformio_target"),
+            )
+            assertEquals(
+                listOf("[\"Heltec\"]", null),
+                queryColumn(connection, "SELECT tags FROM device_hardware ORDER BY platformio_target"),
+            )
+            assertEquals(
+                listOf(null, "1"),
+                queryColumn(connection, "SELECT requires_dfu FROM device_hardware ORDER BY platformio_target"),
+            )
+            // 0, never NULL - the resolver reads an absent flag as not maker.
+            assertEquals(
+                listOf("0", "0"),
+                queryColumn(connection, "SELECT is_maker FROM device_hardware ORDER BY platformio_target"),
+            )
+            connection.execSQL("UPDATE device_hardware SET is_maker = 1 WHERE platformio_target = 'rak4631'")
+            assertEquals(
+                listOf("1"),
+                queryColumn(connection, "SELECT is_maker FROM device_hardware WHERE platformio_target = 'rak4631'"),
+            )
+        }
+    }
+
     private fun queryColumn(connection: SQLiteConnection, sql: String): List<String?> =
         connection.prepare(sql).use { statement ->
             buildList {
@@ -457,6 +515,8 @@ class MeshtasticDatabaseMigrationTest {
         const val HEARD_ON_LORA_TO_VERSION = 58
         const val KEY_MATCH_FROM_VERSION = 58
         const val KEY_MATCH_TO_VERSION = 59
+        const val IS_MAKER_FROM_VERSION = 61
+        const val IS_MAKER_TO_VERSION = 62
         const val PUBLIC_KEY_BYTES = 32
 
         /** Room's runtime FTS content-sync triggers, verbatim from the generated MeshtasticDatabase_Impl. */

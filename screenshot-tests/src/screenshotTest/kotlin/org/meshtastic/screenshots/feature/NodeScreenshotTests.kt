@@ -29,6 +29,7 @@ import org.meshtastic.feature.node.component.HopHistogramContentPreview
 import org.meshtastic.feature.node.component.HopHistogramEmptyPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionSignedPreview
+import org.meshtastic.feature.node.component.NodeDetailsSectionWithMakerDeviceHeroPreview
 import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompactAllFieldsPreview
 import org.meshtastic.feature.node.component.NodeItemCompactMinimalPreview
@@ -149,6 +150,13 @@ fun ScreenshotNodeDetailsSection() {
 @Composable
 fun ScreenshotNodeDetailsSectionSigned() {
     NodeDetailsSectionSignedPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeDetailsSectionMakerHero() {
+    NodeDetailsSectionWithMakerDeviceHeroPreview()
 }
 
 @PreviewTest

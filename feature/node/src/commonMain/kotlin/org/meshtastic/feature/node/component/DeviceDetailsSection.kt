@@ -46,15 +46,20 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.HardwareSupportTier
+import org.meshtastic.core.model.supportTier
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_unverified
 import org.meshtastic.core.resources.img_hw_unknown
 import org.meshtastic.core.resources.supported
 import org.meshtastic.core.resources.supported_by_community
+import org.meshtastic.core.resources.supported_by_maker
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Verified
+import org.meshtastic.core.ui.icon.Wrench
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.StatusColors.StatusSky
 
 /**
  * Device "hero" section showing the hardware image, device name, and support status. Used as the top section of the
@@ -84,7 +89,7 @@ internal fun DeviceHeroSection(
                 color = colorScheme.onSurface,
             )
             Spacer(Modifier.height(4.dp))
-            SupportStatusBadge(deviceHardware.activelySupported)
+            SupportStatusBadge(deviceHardware.supportTier)
         }
     }
 }
@@ -102,27 +107,39 @@ private fun DeviceAvatar(bgColor: Long, deviceHardware: DeviceHardware, size: In
     }
 }
 
+/**
+ * Names the rung beside its mark. The icon carries no description of its own: the label is the accessible name, so the
+ * rung is never conveyed by colour alone.
+ */
 @Composable
-private fun SupportStatusBadge(isSupported: Boolean) {
+private fun SupportStatusBadge(tier: HardwareSupportTier) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
         Icon(
             imageVector =
-            if (isSupported) {
-                MeshtasticIcons.Verified
-            } else {
-                org.jetbrains.compose.resources.vectorResource(Res.drawable.ic_unverified)
+            when (tier) {
+                HardwareSupportTier.SUPPORTED -> MeshtasticIcons.Verified
+
+                HardwareSupportTier.MAKER -> MeshtasticIcons.Wrench
+
+                HardwareSupportTier.COMMUNITY ->
+                    org.jetbrains.compose.resources.vectorResource(Res.drawable.ic_unverified)
             },
             contentDescription = null,
             modifier = Modifier.size(14.dp),
-            tint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
+            tint =
+            when (tier) {
+                HardwareSupportTier.SUPPORTED -> colorScheme.StatusGreen
+                HardwareSupportTier.MAKER -> colorScheme.StatusSky
+                HardwareSupportTier.COMMUNITY -> colorScheme.StatusRed
+            },
         )
         Spacer(Modifier.width(4.dp))
         Text(
             text =
-            if (isSupported) {
-                stringResource(Res.string.supported)
-            } else {
-                stringResource(Res.string.supported_by_community)
+            when (tier) {
+                HardwareSupportTier.SUPPORTED -> stringResource(Res.string.supported)
+                HardwareSupportTier.MAKER -> stringResource(Res.string.supported_by_maker)
+                HardwareSupportTier.COMMUNITY -> stringResource(Res.string.supported_by_community)
             },
             style = MaterialTheme.typography.labelSmall,
             color = colorScheme.onSurfaceVariant,
