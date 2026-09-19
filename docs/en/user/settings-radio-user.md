@@ -173,8 +173,6 @@ On **Settings → Device configuration → Display**. These control the **radio'
 
 On **Settings → Device configuration → Position**.
 
-> ⚠️ **Important:** Saving this screen always reboots the radio.
-
 | Setting | Description |
 |---------|-------------|
 | GPS Mode (Physical Hardware) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off |
@@ -226,8 +224,6 @@ On **Settings → Device configuration → Network**, on radios with Wi-Fi or Et
 
 On **Settings → Device configuration → Bluetooth**, on radios with Bluetooth.
 
-> ⚠️ **Important:** Saving this screen always reboots the radio.
-
 | Setting | Description |
 |---------|-------------|
 | Bluetooth enabled | Enable/disable BLE radio |
@@ -237,8 +233,6 @@ On **Settings → Device configuration → Bluetooth**, on radios with Bluetooth
 ### Security Config
 
 On **Settings → Security**. The screen is grouped into cards: **Packet authenticity**, **Direct Message Key** (your node's key pair), **Admin Keys**, **Logs**, and **Administration**.
-
-> ⚠️ **Important:** Saving this screen always reboots the radio.
 
 | Setting | Description |
 |---------|-------------|
