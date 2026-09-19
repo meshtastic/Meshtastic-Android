@@ -17,6 +17,7 @@
 package org.meshtastic.core.model
 
 import org.meshtastic.core.model.util.isDebug
+import org.meshtastic.proto.FieldMetadata
 
 /**
  * Defines the capabilities and feature support based on the device firmware version.
@@ -31,6 +32,22 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
 
     private fun atLeast(min: DeviceVersion): Boolean = forceEnableAll || (version != null && version >= min)
 
+    /**
+     * Whether a config field is worth offering on this firmware, from the version gates its schema declares. Below
+     * `since_firmware` the node ignores the field. At or above `deprecated_since` it is shown only while [isSet], so a
+     * value the node still holds stays visible instead of being silently kept.
+     */
+    fun offers(field: FieldMetadata, isSet: Boolean = false): Boolean {
+        val arrived = field.since_firmware?.let(::gate)?.let(::atLeast) ?: true
+        val retired =
+            field.deprecated_since?.let(::gate)?.let { !forceEnableAll && version != null && version >= it } ?: false
+        return arrived && (!retired || isSet)
+    }
+
+    // The schema declares these; an unparseable one must fail here rather than silently pass every gate.
+    private fun gate(declared: String): DeviceVersion =
+        DeviceVersion(declared).also { require(it.isValid) { "Unparseable firmware version in schema: $declared" } }
+
     /** Ability to mute notifications from specific nodes via admin messages. */
     val canMuteNode = atLeast(V2_7_18)
 
@@ -40,17 +57,14 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Ability to send verified shared contacts. Supported since firmware v2.7.12. */
     val canSendVerifiedContacts = atLeast(V2_7_12)
 
-    /** Ability to toggle device telemetry globally via module config. Supported since firmware v2.7.12. */
-    val canToggleTelemetryEnabled = atLeast(V2_7_12)
-
     /** Ability to toggle the 'is_unmessageable' flag in user config. Supported since firmware v2.6.9. */
     val canToggleUnmessageable = atLeast(V2_6_9)
 
     /** Support for sharing contact information via QR codes. Supported since firmware v2.6.8. */
     val supportsQrCodeSharing = atLeast(V2_6_8)
 
-    /** Support for Status Message module. Supported since firmware v2.8.0. */
-    val supportsStatusMessage = atLeast(V2_8_0)
+    /** Support for Status Message module. Supported since firmware v2.7.20. */
+    val supportsStatusMessage = atLeast(V2_7_20)
 
     /**
      * Support for TAK (ATAK) module configuration. Gated to firmware v2.8.0.
@@ -125,6 +139,7 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_6_10 = DeviceVersion("2.6.10")
         private val V2_7_12 = DeviceVersion("2.7.12")
         private val V2_7_18 = DeviceVersion("2.7.18")
+        private val V2_7_20 = DeviceVersion("2.7.20")
         private val V2_8_0 = DeviceVersion("2.8.0")
         private val UNRELEASED = DeviceVersion("9.9.9")
     }
