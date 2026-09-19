@@ -519,3 +519,39 @@ fun PreviewAirQualityCards() {
         }
     }
 }
+
+/**
+ * A log entry whose PM sensor reports a fault (fan, bit 4), a warning (fan speed, bit 21) and a bit this build does not
+ * name (bit 30), so the status line renders all three parts in its error tone.
+ */
+@PreviewLightDark
+@Suppress("MagicNumber", "PreviewPublic") // fake data; public so :screenshot-tests can reference it
+@Composable
+fun PreviewAirQualityCardsStatus() {
+    val telemetry =
+        Telemetry.Builder()
+            .also { wb ->
+                wb.time = 1700000000
+                wb.air_quality_metrics =
+                    AirQualityMetricsProto.Builder()
+                        .also { aq ->
+                            aq.pm10_standard = 6
+                            aq.pm25_standard = 14
+                            aq.pm100_standard = 19
+                            aq.co2 = 820
+                            aq.pm_status_flags = (1 shl 4) or (1 shl 21) or (1 shl 30)
+                        }
+                        .build()
+            }
+            .build()
+    AppTheme {
+        Surface {
+            AirQualityMetricsCard(
+                sample = withNowCastAqi(listOf(telemetry)).single(),
+                isSelected = false,
+                onClick = {},
+                timeTextOverride = "2023-11-14 22:13",
+            )
+        }
+    }
+}

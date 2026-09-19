@@ -694,3 +694,37 @@ fun PreviewEnvironmentMetricsContent() {
         }
     }
 }
+
+/** A log entry from an AS3935-equipped node: strikes in the last hour and the distance to the storm front. */
+@PreviewLightDark
+@Suppress("MagicNumber", "PreviewPublic") // fake data; public so :screenshot-tests can reference it
+@Composable
+fun PreviewEnvironmentMetricsContentLightning() {
+    val fakeEnvMetrics =
+        org.meshtastic.proto.EnvironmentMetrics.Builder()
+            .also { wb ->
+                wb.temperature = 19.4f
+                wb.relative_humidity = 71.0f
+                wb.barometric_pressure = 998.0f
+                wb.lightning_strike_count_1h = 3
+                wb.lightning_distance_km = 12.0f
+            }
+            .build()
+    val fakeTelemetry =
+        Telemetry.Builder()
+            .also { wb ->
+                wb.time = 1700000000
+                wb.environment_metrics = fakeEnvMetrics
+            }
+            .build()
+    AppTheme {
+        Surface {
+            EnvironmentMetricsContent(
+                telemetry = fakeTelemetry,
+                environmentDisplayFahrenheit = false,
+                isImperial = false,
+                timeTextOverride = "2023-11-14 22:13",
+            )
+        }
+    }
+}
