@@ -95,7 +95,7 @@ On **Settings → LoRa**.
 | PA fan disabled | Turn off the power-amplifier fan on hardware that has one | Off |
 
 The preset list is also filtered to what your region legally permits, so a preset allowed in one
-region simply does not appear in another. Changing region can therefore leave your current preset
+region doesn't appear in another. Changing region can therefore leave your current preset
 illegal — the app repairs it for you, switching to the region's own default rather than leaving an
 unusable setting in place. The region list itself is filtered by what your firmware supports, so
 the newer regions appear only on 2.8 or later, alongside whichever region the node already has set.
@@ -249,7 +249,7 @@ On **Settings → Security**. The screen is grouped into cards: **Packet authent
 | ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set |
 | Serial console | Serial console over the Stream API |
 | Debug log API enabled | Output live debug logging over serial, and view and export position-redacted radio logs over Bluetooth |
-| Managed Mode | Locks the whole Configuration list, not just channels — every radio setting becomes read-only and only an admin can change anything. Only selectable once an Admin Key is set |
+| Managed Mode | Locks the whole Configuration list, not just channels — every setting on the node becomes read-only and only an admin can change anything. Only selectable once an Admin Key is set |
 | Backup Keys | Save an encrypted backup of the node's keys on this phone (Android only, and only for your own node) |
 | Restore Keys | Write the backed-up keys back to the node (available once a backup exists) |
 | Delete Key Backup | Remove the stored key backup from this phone |
