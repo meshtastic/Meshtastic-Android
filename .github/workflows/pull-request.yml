@@ -173,6 +173,7 @@ jobs:
               ':core:konsist',
               ':docs-screenshots',
               ':marketing-screenshots',
+              ':schema-strings',
               ':screenshot-tests',
           }
 
