@@ -10,11 +10,32 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 🏗️ Features
+* feat(settings): show the license notice on the About screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7191
+* feat(map): clamp zoom when framing bounds, and let style images use hardware bitmaps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7245
+* refactor(navigation): route deep links through navigation3 UriDeepLinkMatcher by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7246
+* refactor(settings): read numeric field bounds from the protobufs field registry by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7242
+* feat(telemetry): surface lightning, PM status and soil-water metrics by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7237
+* feat(node): rank maker hardware between supported and community in the device badge by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7263
+* feat(settings): gate config fields on the schema's firmware versions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7262
+#### 🖥️ Desktop
+* fix(desktop): pin the Flathub screenshots to a commit that survives the squash by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7243
 #### 🛠️ Fixes
 * fix(messaging): keep the Enter key in the message composer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7155
 * fix(storeforward): dedupe a router replay by original_id by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7158
 * fix(service): keep the process alive and awake through firmware updates and scans by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7159
 * fix(messaging): key conversations to channel identity, not slot index by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7162
+* fix(ui): drop the lazy list cache windows that crash inside a lookahead scope by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7185
+* fix(settings): state lockdown's irreversibility in the enable dialog by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7171
+* fix(network): point the API base URL at the production host by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7197
+* fix(discovery): write a dwell and its parent check in one transaction by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7204
+* fix(map): keep the 300 ms ease on MapLibre camera nudges by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7240
+* fix(ble): replace deprecated preConflate with bufferCapacity by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7236
+* fix(model): fold 0xAE into the hash of an AEAD channel by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7239
+* fix(model): align the US first-setup preset with the device screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7244
+* fix(settings): name config exports after the long name, not the short name by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7248
+* fix(nodes): the direct filter no longer returns MQTT nodes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7256
+* fix(mqtt): TLS switch shows and sets the stored flag for the public broker by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7255
 
 ### Open Beta (v2.8.2-open.2)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
