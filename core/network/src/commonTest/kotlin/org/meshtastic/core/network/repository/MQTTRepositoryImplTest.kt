@@ -47,6 +47,7 @@ import org.meshtastic.mqtt.MqttEndpoint
 import org.meshtastic.mqtt.MqttException
 import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.MqttMessage
+import org.meshtastic.mqtt.MqttProtocolVersion
 import org.meshtastic.mqtt.QoS
 import org.meshtastic.mqtt.ReasonCode
 import org.meshtastic.mqtt.packet.Subscription
@@ -824,6 +825,39 @@ class MQTTRepositoryImplTest {
         assertContentEquals(real, proxyMessage.data_?.toByteArray())
     }
 
+    @Test
+    fun `a 3 1 1 broker is subscribed without the MQTT 5 noLocal option`() = runTest {
+        val client = FakeMqttClientSession().apply { negotiatedProtocolVersion = MqttProtocolVersion.V3_1_1 }
+        val harness = createHarness(client = client)
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+
+        val subscriptions = harness.client.subscribeCalls.single()
+        assertTrue(subscriptions.isNotEmpty(), "a 3.1.1 broker must still be subscribed")
+        assertTrue(
+            subscriptions.none { it.noLocal },
+            "noLocal is an MQTT 5 option and makes the client reject the whole SUBSCRIBE on 3.1.1",
+        )
+
+        collector.cancel()
+    }
+
+    @Test
+    fun `a 5 0 broker keeps noLocal so the broker does not echo our own uplink`() = runTest {
+        val client = FakeMqttClientSession().apply { negotiatedProtocolVersion = MqttProtocolVersion.V5_0 }
+        val harness = createHarness(client = client)
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+
+        val subscriptions = harness.client.subscribeCalls.single()
+        assertTrue(subscriptions.isNotEmpty())
+        assertTrue(subscriptions.all { it.noLocal })
+
+        collector.cancel()
+    }
+
     // endregion
 
     private fun TestScope.createHarness(
@@ -879,6 +913,7 @@ class MQTTRepositoryImplTest {
         private val mutableMessages = MutableSharedFlow<MqttMessage>(extraBufferCapacity = 8)
         override val messages: Flow<MqttMessage> = mutableMessages
         override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
+        override var negotiatedProtocolVersion: MqttProtocolVersion = MqttProtocolVersion.V5_0
         val connectCalls = mutableListOf<MqttEndpoint>()
         val subscribeCalls = mutableListOf<List<Subscription>>()
         val publishStarted = mutableListOf<MqttMessage>()

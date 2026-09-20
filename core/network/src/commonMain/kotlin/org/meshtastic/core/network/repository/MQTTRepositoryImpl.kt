@@ -58,6 +58,7 @@ import org.meshtastic.mqtt.MqttEndpoint
 import org.meshtastic.mqtt.MqttException
 import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.MqttMessage
+import org.meshtastic.mqtt.MqttProtocolVersion
 import org.meshtastic.mqtt.QoS
 import org.meshtastic.mqtt.ReasonCode
 import org.meshtastic.mqtt.packet.Subscription
@@ -154,34 +155,6 @@ class MQTTRepositoryImpl(
         val session = ActiveMqttSession(newClient)
         closeSession(replaceActiveSession(session))
 
-        val subscriptions: List<Subscription> = buildList {
-            channelSet.subscribeList.forEach { globalId ->
-                add(
-                    Subscription(
-                        "$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+",
-                        maxQos = QoS.AT_LEAST_ONCE,
-                        noLocal = true,
-                    ),
-                )
-                if (mqttConfig?.json_enabled == true) {
-                    add(
-                        Subscription(
-                            "$rootTopic$JSON_TOPIC_LEVEL$globalId/+",
-                            maxQos = QoS.AT_LEAST_ONCE,
-                            noLocal = true,
-                        ),
-                    )
-                }
-            }
-            add(
-                Subscription(
-                    "$rootTopic$DEFAULT_TOPIC_LEVEL$PKI_CHANNEL_ID/+",
-                    maxQos = QoS.AT_LEAST_ONCE,
-                    noLocal = true,
-                ),
-            )
-        }
-
         // Collect from the SharedFlow before connecting to avoid missing retained messages
         // that arrive immediately after SUBSCRIBE.
         launch { newClient.messages.collect { msg -> processMessage(msg) } }
@@ -199,6 +172,14 @@ class MQTTRepositoryImpl(
                         }
                         newClient.connect(endpoint)
                         if (!isActiveSession(session)) return@launch
+                        // Built here, not before connect: the option set depends on the version the broker accepted.
+                        val subscriptions =
+                            buildSubscriptions(
+                                globalIds = channelSet.subscribeList,
+                                rootTopic = rootTopic,
+                                jsonEnabled = mqttConfig?.json_enabled == true,
+                                version = newClient.negotiatedProtocolVersion,
+                            )
                         if (subscriptions.isNotEmpty()) {
                             Logger.d { "MQTT subscribing to ${subscriptions.size} topics" }
                             newClient.subscribe(subscriptions)
@@ -294,6 +275,53 @@ class MQTTRepositoryImpl(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
+    /**
+     * Builds the SUBSCRIBE list for the protocol version the broker actually accepted.
+     *
+     * `noLocal` stops the broker echoing our own uplink back to us, but it is an MQTT 5 subscription option. The
+     * client offers 5.0 and silently falls back to 3.1.1 when the broker refuses, and mqtt-client then rejects the
+     * whole SUBSCRIBE with `IllegalArgumentException`. Because the failure is deterministic, the connect loop retried
+     * it forever: 121,003 reported errors across 72 users in fourteen days, with MQTT never once working for them.
+     *
+     * On 3.1.1 we take the echo instead. The radio already discards a packet it has seen, and receiving our own
+     * uplink is what every 3.1.1 client lives with; no subscription at all is strictly worse.
+     */
+    private fun buildSubscriptions(
+        globalIds: List<String>,
+        rootTopic: String,
+        jsonEnabled: Boolean,
+        version: MqttProtocolVersion,
+    ): List<Subscription> {
+        val noLocal = version == MqttProtocolVersion.V5_0
+        return buildList {
+            globalIds.forEach { globalId ->
+                add(
+                    Subscription(
+                        "$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+",
+                        maxQos = QoS.AT_LEAST_ONCE,
+                        noLocal = noLocal,
+                    ),
+                )
+                if (jsonEnabled) {
+                    add(
+                        Subscription(
+                            "$rootTopic$JSON_TOPIC_LEVEL$globalId/+",
+                            maxQos = QoS.AT_LEAST_ONCE,
+                            noLocal = noLocal,
+                        ),
+                    )
+                }
+            }
+            add(
+                Subscription(
+                    "$rootTopic$DEFAULT_TOPIC_LEVEL$PKI_CHANNEL_ID/+",
+                    maxQos = QoS.AT_LEAST_ONCE,
+                    noLocal = noLocal,
+                ),
+            )
+        }
+    }
+
     private fun ProducerScope<MqttClientProxyMessage>.processMessage(msg: MqttMessage) {
         val topic = msg.topic
         val payload = msg.payload.toByteArray()
@@ -433,6 +461,9 @@ internal interface MqttClientSession {
     val messages: Flow<MqttMessage>
     val connectionState: StateFlow<ConnectionState>
 
+    /** The version the broker accepted, valid only after [connect] returns. */
+    val negotiatedProtocolVersion: MqttProtocolVersion
+
     suspend fun connect(endpoint: MqttEndpoint)
 
     suspend fun subscribe(subscriptions: List<Subscription>)
@@ -445,6 +476,10 @@ internal interface MqttClientSession {
 private class DefaultMqttClientSession(private val delegate: MqttClient) : MqttClientSession {
     override val messages: Flow<MqttMessage> = delegate.messages
     override val connectionState: StateFlow<ConnectionState> = delegate.connectionState
+
+    // Read through on every access: the client resets it on connect and preserves it across auto-reconnects.
+    override val negotiatedProtocolVersion: MqttProtocolVersion
+        get() = delegate.negotiatedProtocolVersion
 
     override suspend fun connect(endpoint: MqttEndpoint) {
         delegate.connect(endpoint)
