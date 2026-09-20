@@ -64,6 +64,15 @@ class SchemaStringsTest {
     }
 
     @Test
+    fun `the notice carries the pin and reads back`() {
+        val pin = "2.8.0.111-g45f6b7e-SNAPSHOT"
+        val xml = StringsXml.render("", emptyMap(), notice = SchemaStringsSync.notice(pin))
+
+        assertEquals(pin, SchemaStringsSync.recordedPin(xml))
+        assertEquals(null, SchemaStringsSync.recordedPin("<resources>\n</resources>\n"))
+    }
+
+    @Test
     fun `rendering escapes markup and leaves quotes bare`() {
         val xml = StringsXml.render("<?xml?>\n", mapOf("a" to StringsXml.escape("Tom's <b> & \"c\"")), notice = null)
 

@@ -19,15 +19,31 @@ package org.meshtastic.schemastrings
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-/** The committed tree must match what `sync` would write, so the schema stays the only place this copy is written. */
+/**
+ * The committed generated file is checked against the registry only while it records the pin the build resolves. A
+ * merged protobufs bump leaves the two apart until the hourly scheduled-updates run re-syncs; that window is not an
+ * error, a hand edit at a matching pin is.
+ */
 class RepositorySyncTest {
 
     private val sync = SchemaStringsSync(File(System.getProperty("schemaStrings.rootDir")))
 
     @Test
-    fun `schema_strings xml is what the registry implies`() {
+    fun `the generated file records the pin it was built from`() {
+        assertNotNull(sync.recordedPin, "values/schema_strings.xml carries no pin: run ./gradlew :schema-strings:sync")
+    }
+
+    @Test
+    fun `at a matching pin the generated file is what the registry implies`() {
+        if (sync.recordedPin != sync.catalogPin) {
+            println(
+                "protobufs moved from ${sync.recordedPin} to ${sync.catalogPin}; scheduled-updates re-syncs the file",
+            )
+            return
+        }
         assertEquals(
             sync.expectedEnglish(),
             sync.englishSchemaStrings.readText(),
