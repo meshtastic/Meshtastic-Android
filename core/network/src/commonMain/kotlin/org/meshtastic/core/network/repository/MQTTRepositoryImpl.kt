@@ -48,6 +48,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.core.repository.NodeRepository
@@ -282,8 +283,8 @@ class MQTTRepositoryImpl(
      * SUBSCRIBE with `IllegalArgumentException`. Because the failure is deterministic, the connect loop retried it
      * forever: 121,003 reported errors across 72 users in fourteen days, with MQTT never once working for them.
      *
-     * On 3.1.1 we take the echo instead. The radio already discards a packet it has seen, and receiving our own uplink
-     * is what every 3.1.1 client lives with; no subscription at all is strictly worse.
+     * On 3.1.1 the broker hands our own traffic back instead, which [classifyMqttSelfTraffic] sorts out. No
+     * subscription at all is strictly worse.
      */
     private fun buildSubscriptions(
         globalIds: List<String>,
@@ -330,8 +331,9 @@ class MQTTRepositoryImpl(
             try {
                 val jsonStr = payload.decodeToString()
                 val decoded = json.decodeFromString<MqttJsonPayload>(jsonStr)
-                if (isOwnMqttJsonEcho(decoded.sender, nodeRepository.myId.value)) {
-                    Logger.d { "MQTT echo dropped (json)" }
+                val selfTraffic = classifyMqttJsonSelfTraffic(decoded.from, decoded.sender, nodeRepository.myId.value)
+                if (selfTraffic != MqttSelfTraffic.FORWARD) {
+                    Logger.d { "MQTT json dropped ($selfTraffic)" }
                 } else {
                     trySend(
                         MqttClientProxyMessage.Builder()
@@ -354,12 +356,15 @@ class MQTTRepositoryImpl(
             }
         } else {
             val myId = nodeRepository.myId.value
+            val selfTraffic = classifyMqttSelfTraffic(payload, myId)
             when {
-                // A broker that negotiated MQTT 3.1.1 cannot honour `noLocal`, so it hands our own uplink straight
-                // back. Relaying it would spend phone-API and BLE bandwidth pushing the radio packets it just gave
-                // us. Dropping it here makes 3.1.1 behave the way 5.0 already does, where `noLocal` means these
-                // never arrive at all - so nobody loses an implicit ACK they were previously getting.
-                isOwnMqttEcho(payload, myId) -> Logger.d { "MQTT echo dropped" }
+                // A broker that negotiated MQTT 3.1.1 cannot honour `noLocal`, so our own traffic comes straight
+                // back. Only two of the three self-traffic cases are worth dropping - our own uplink returning is
+                // what firmware reads as a local ack, so it is relayed. See [classifyMqttSelfTraffic].
+                selfTraffic == MqttSelfTraffic.FORGED_SENDER ->
+                    Logger.w { "MQTT packet claiming our node id via another gateway dropped" }
+
+                selfTraffic == MqttSelfTraffic.OWN_UPLINK_ECHO -> Logger.d { "MQTT own-uplink echo dropped" }
 
                 // Drop provably-undeliverable downlink packets before spending BLE bandwidth on
                 // them. In client-proxy mode the public broker floods payload-less packet-header
@@ -605,19 +610,60 @@ internal fun extractHost(address: String): String {
 
 private const val PKI_CHANNEL_ID = "PKI"
 
-/**
- * `true` when this binary payload is our own uplink handed back to us by the broker.
- *
- * `gateway_id` names the gateway that uploaded the envelope, so it equals our node id only for a message this device
- * published. A packet another node rebroadcast carries *that* node's gateway id and is never matched here.
- *
- * Fails open: unparseable bytes, or an unknown local node id, forward as before.
- */
-internal fun isOwnMqttEcho(payload: ByteArray, myId: String?): Boolean =
-    myId != null && ServiceEnvelope.ADAPTER.decodeOrNull(payload)?.gateway_id == myId
+/** What to do with a downlink envelope once its `from` and `gateway_id` are compared against this device. */
+internal enum class MqttSelfTraffic {
+    /** Not self-traffic, or our own uplink returning, which firmware reads as delivery. Relay it. */
+    FORWARD,
 
-/** `true` when a decoded JSON payload's `sender` marks it as our own uplink. See [isOwnMqttEcho]. */
-internal fun isOwnMqttJsonEcho(sender: String?, myId: String?): Boolean = myId != null && sender == myId
+    /** Our `from` via someone else's gateway: only a peer could have published it. Drop. */
+    FORGED_SENDER,
+
+    /** Our gateway id on someone else's packet: our own uplink of their traffic. We already have it. Drop. */
+    OWN_UPLINK_ECHO,
+}
+
+/**
+ * Classifies a downlink envelope by comparing both `from` and `gateway_id` against this device.
+ *
+ * `gateway_id` alone is not enough, and the three cases pull in different directions:
+ * - **ours via us** - our uplink returning. Firmware turns it into a local ack, so it must be relayed; the broker
+ *   echoes back only what it accepted, which is what makes it meaningful.
+ * - **ours via another gateway** - nothing legitimate produces this. `ReliableRouter` checks only `p->from` before
+ *   generating an implicit ack, so a peer that publishes a packet carrying our `from` manufactures a delivery receipt
+ *   for a message that was never delivered.
+ * - **theirs via us** - our own uplink of traffic we bridged, coming back. Relaying it would spend phone-API and BLE
+ *   bandwidth handing the node a packet it just gave us.
+ *
+ * This mirrors `MqttFraming.toCanonical` in meshtastic-node-kmp, which is the closest reading of the firmware rules we
+ * have. Fails open: unparseable bytes, a packet-less envelope, or an unknown local node id all forward as before.
+ */
+internal fun classifyMqttSelfTraffic(payload: ByteArray, myId: String?): MqttSelfTraffic {
+    val envelope = myId?.let { ServiceEnvelope.ADAPTER.decodeOrNull(payload) }
+    val from = envelope?.packet?.from
+
+    return if (myId == null || from == null) {
+        MqttSelfTraffic.FORWARD
+    } else {
+        selfTrafficOf(fromUs = NodeAddress.numToDefaultId(from) == myId, viaUs = envelope.gateway_id == myId)
+    }
+}
+
+/** The shared decision behind both classifiers, so the two topics cannot drift apart. */
+private fun selfTrafficOf(fromUs: Boolean, viaUs: Boolean): MqttSelfTraffic = when {
+    fromUs && !viaUs -> MqttSelfTraffic.FORGED_SENDER
+    !fromUs && viaUs -> MqttSelfTraffic.OWN_UPLINK_ECHO
+    else -> MqttSelfTraffic.FORWARD
+}
+
+/**
+ * The JSON-topic counterpart of [classifyMqttSelfTraffic]. `sender` is the gateway id and `from` the originating node.
+ */
+internal fun classifyMqttJsonSelfTraffic(from: Long, sender: String?, myId: String?): MqttSelfTraffic =
+    if (myId == null || sender == null) {
+        MqttSelfTraffic.FORWARD
+    } else {
+        selfTrafficOf(fromUs = NodeAddress.numToDefaultId(from.toInt()) == myId, viaUs = sender == myId)
+    }
 
 /**
  * Returns true when a downlink [ServiceEnvelope] is provably un-usable by the node and should be dropped before
@@ -625,9 +671,10 @@ internal fun isOwnMqttJsonEcho(sender: String?, myId: String?): Boolean = myId !
  *
  * Fails open — returns false (forward) for anything it cannot positively prove undeliverable: unparseable bytes,
  * traffic on the `PKI` channel (public-key-encrypted direct messages the node accepts without first decrypting), a
- * packet-less envelope, or any packet that actually carries a payload. Our own echoed-back packets no longer reach this
- * function - [isOwnMqttEcho] drops them first. The only drop case is Tier 1: a [MeshPacket] with neither `decoded` nor
- * `encrypted` set — no legitimate Meshtastic packet is payload-less.
+ * packet-less envelope, or any packet that actually carries a payload. Our own uplink returning still reaches this
+ * function and is guarded here, because firmware reads it as a local ack; [classifyMqttSelfTraffic] has already dropped
+ * the other two self-traffic cases. The only drop case is Tier 1: a [MeshPacket] with neither `decoded` nor `encrypted`
+ * set — no legitimate Meshtastic packet is payload-less.
  *
  * Extracted as an internal top-level function so [MQTTRepositoryImplTest] can exercise every branch without spinning up
  * the full repository.
