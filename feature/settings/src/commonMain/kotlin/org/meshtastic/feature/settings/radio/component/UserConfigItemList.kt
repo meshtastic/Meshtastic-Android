@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.HamName
+import org.meshtastic.core.model.excludes
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.utf8Size
 import org.meshtastic.core.resources.Res
@@ -66,6 +67,7 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.proto.ExcludedModules
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 
@@ -92,6 +94,8 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, focusS
     val formState = rememberConfigState(initialValue = userConfig)
     val firmwareVersion = state.metadata?.firmware_version
     val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
+    val offersStatusMessage =
+        capabilities.supportsStatusMessage && !state.metadata.excludes(ExcludedModules.STATUSMESSAGE_CONFIG)
 
     // The status message is a ModuleConfig field, but it is part of the node's identity rather than a module of its
     // own, so it is edited beside the names instead of in a screen of its own. Editing it here also keeps it reachable
@@ -105,7 +109,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, focusS
     val statusFocus =
         rememberStatusMessageFocus(
             requested = focusStatusMessage,
-            supported = capabilities.supportsStatusMessage,
+            supported = offersStatusMessage,
             connected = state.connected,
         )
     // The field is absent without the capability, so the input can only differ from the saved value when shown.
@@ -145,7 +149,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, focusS
                     isLongNameError = !validLongName,
                     isShortNameError = !validShortName,
                 )
-                if (capabilities.supportsStatusMessage) {
+                if (offersStatusMessage) {
                     HorizontalDivider()
                     StatusMessageField(
                         value = statusMessageInput,

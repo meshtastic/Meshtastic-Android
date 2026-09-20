@@ -66,6 +66,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeListDensity
+import org.meshtastic.core.model.excludes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.resources.hop_histogram_title
@@ -102,13 +103,17 @@ import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeFilterToggles
 import org.meshtastic.feature.node.component.NodeHopHistogramSheet
 import org.meshtastic.feature.node.component.NodeListHelp
+import org.meshtastic.proto.ExcludedModules
 
 /**
  * design#115: status message editing is offered on the connected local node only, and only where the firmware has the
  * module — absent, never disabled, everywhere else.
  */
 internal fun canEditStatusMessage(node: Node, ourNode: Node?, connectionState: ConnectionState): Boolean =
-    node.num == ourNode?.num && connectionState == ConnectionState.Connected && node.capabilities.supportsStatusMessage
+    node.num == ourNode?.num &&
+        connectionState == ConnectionState.Connected &&
+        node.capabilities.supportsStatusMessage &&
+        !node.metadata.excludes(ExcludedModules.STATUSMESSAGE_CONFIG)
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalFoundationApi::class)

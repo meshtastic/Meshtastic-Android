@@ -55,6 +55,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.allow_input_source
+import org.meshtastic.proto.enabled
 
 @Suppress("DEPRECATION", "LongMethod")
 @Composable
@@ -90,16 +91,18 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
     ) {
         item {
             TitledCard(title = stringResource(Res.string.canned_message_config)) {
-                SwitchPreference(
-                    title = stringResource(Res.string.canned_message_enabled),
-                    checked = formState.value.enabled,
-                    enabled = state.connected,
-                    onCheckedChange = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
-                    },
-                    containerColor = CardDefaults.cardColors().containerColor,
-                )
-                HorizontalDivider()
+                if (capabilities.offers(ModuleConfig.CannedMessageConfig.enabled, isSet = formState.value.enabled)) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.canned_message_enabled),
+                        checked = formState.value.enabled,
+                        enabled = state.connected,
+                        onCheckedChange = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                        },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                    HorizontalDivider()
+                }
                 SwitchPreference(
                     title = stringResource(Res.string.rotary_encoder_1_enabled),
                     checked = formState.value.rotary1_enabled,

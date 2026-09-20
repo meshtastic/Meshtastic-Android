@@ -64,6 +64,7 @@ import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.excludes
 import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.FileService
@@ -105,6 +106,7 @@ import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.ExcludedModules
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.HardwareModel
@@ -849,10 +851,12 @@ open class RadioConfigViewModel(
                 safeLaunch(tag = "getOwner") {
                     radioConfigUseCase.getOwner(destNum, onRequestId = ::registerReadRequestId)
                 }
-                // The status message is edited on the user screen, so it is read with the owner. Gated on the
-                // capability: firmware without the module never answers the get, leaving the overlay waiting.
+                // The status message is edited on the user screen, so it is read with the owner. Gated like the
+                // editor: firmware without the module never answers the get, leaving the overlay waiting.
+                val metadata = radioConfigState.value.metadata
                 val readsStatusMessage =
-                    Capabilities(radioConfigState.value.metadata?.firmware_version).supportsStatusMessage
+                    Capabilities(metadata?.firmware_version).supportsStatusMessage &&
+                        !metadata.excludes(ExcludedModules.STATUSMESSAGE_CONFIG)
                 loadFanOut = ConfigRoute.USER.name to readsStatusMessage
                 if (readsStatusMessage) {
                     safeLaunch(tag = "getStatusMessageConfig") {
