@@ -16,7 +16,10 @@
  */
 package org.meshtastic.core.data.manager
 
+import co.touchlab.kermit.LogWriter
+import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import co.touchlab.kermit.platformLogWriter
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
@@ -190,7 +193,23 @@ class MeshConnectionManagerImplTest {
         return { restartCalls }
     }
 
-    @AfterTest fun tearDown() = Unit
+    @AfterTest
+    fun tearDown() {
+        Logger.setLogWriters(platformLogWriter())
+    }
+
+    private class CapturingLogWriter : LogWriter() {
+        val entries = mutableListOf<Pair<Severity, String>>()
+
+        override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+            entries += severity to message
+        }
+    }
+
+    private fun captureLogs(): CapturingLogWriter = CapturingLogWriter().also { Logger.setLogWriters(it) }
+
+    private fun CapturingLogWriter.messages(severity: Severity): List<String> =
+        entries.filter { it.first == severity }.map { it.second }
 
     @Test
     fun `Connected state triggers broadcast and config start`() = runTest(testDispatcher) {
@@ -969,6 +988,94 @@ class MeshConnectionManagerImplTest {
             ConnectionState.Disconnected,
             serviceRepository.connectionState.value,
             "Watchdog must fire once progress stops for longer than the fast timeout",
+        )
+    }
+
+    @Test
+    fun `TCP Stage 1 stall report names TCP`() = runTest(testDispatcher) {
+        every { radioInterfaceService.getDeviceAddress() } returns "t192.168.1.42"
+        val logs = captureLogs()
+        manager = createManager(backgroundScope)
+        radioConnectionState.value = ConnectionState.Connected
+        advanceTimeBy(200)
+        advanceUntilIdle()
+
+        advanceTimeBy(13_000L)
+        advanceUntilIdle()
+
+        val stall = logs.messages(Severity.Error).single { it.startsWith("Handshake stall detected") }
+        assertTrue(
+            stall.startsWith(
+                "Handshake stall detected at Stage 1 on TCP after 12s without progress (progressSignals=0",
+            ),
+            "TCP stall report must name TCP, not a shared fast-transport label: $stall",
+        )
+    }
+
+    @Test
+    fun `USB Stage 1 stall report names USB`() = runTest(testDispatcher) {
+        every { radioInterfaceService.getDeviceAddress() } returns "s/dev/bus/usb/001/002"
+        val logs = captureLogs()
+        manager = createManager(backgroundScope)
+        radioConnectionState.value = ConnectionState.Connected
+        advanceTimeBy(200)
+        advanceUntilIdle()
+
+        advanceTimeBy(13_000L)
+        advanceUntilIdle()
+
+        val stall = logs.messages(Severity.Error).single { it.startsWith("Handshake stall detected") }
+        assertTrue(
+            stall.startsWith(
+                "Handshake stall detected at Stage 1 on USB after 12s without progress (progressSignals=0",
+            ),
+            "USB stall report must name USB, not a shared fast-transport label: $stall",
+        )
+        verifySuspend(exactly(1)) { radioInterfaceService.restartTransport() }
+    }
+
+    @Test
+    fun `BLE Stage 1 stall report names BLE`() = runTest(testDispatcher) {
+        every { radioInterfaceService.getDeviceAddress() } returns "xAA:BB:CC:DD:EE:FF"
+        val logs = captureLogs()
+        manager = createManager(backgroundScope)
+        radioConnectionState.value = ConnectionState.Connected
+        advanceTimeBy(200)
+        advanceUntilIdle()
+
+        advanceTimeBy(31_000L)
+        advanceUntilIdle()
+
+        val stall = logs.messages(Severity.Error).single { it.startsWith("Handshake stall detected") }
+        assertTrue(
+            stall.startsWith("Handshake stall detected at Stage 1 on BLE after 30s without progress"),
+            "BLE stall report keeps its BLE label and budget: $stall",
+        )
+    }
+
+    @Test
+    fun `TCP fast watchdog report names TCP`() = runTest(testDispatcher) {
+        every { radioInterfaceService.getDeviceAddress() } returns "t192.168.1.42"
+        val logs = captureLogs()
+        manager = createManager(backgroundScope)
+        radioConnectionState.value = ConnectionState.Connected
+        advanceTimeBy(200)
+        advanceUntilIdle()
+
+        advanceTimeBy(8_000L)
+        manager.onHandshakeProgress()
+        advanceUntilIdle()
+        advanceTimeBy(13_000L)
+        advanceUntilIdle()
+
+        val watchdog = logs.messages(Severity.Warn).single { it.startsWith("Fast-handshake watchdog expired") }
+        assertTrue(
+            watchdog.startsWith("Fast-handshake watchdog expired on TCP after progress stalled"),
+            "Fast watchdog report must name the transport: $watchdog",
+        )
+        assertTrue(
+            logs.messages(Severity.Error).none { it.startsWith("Handshake stall detected") },
+            "A watchdog trip after progress must not also be reported as a silent stall",
         )
     }
 

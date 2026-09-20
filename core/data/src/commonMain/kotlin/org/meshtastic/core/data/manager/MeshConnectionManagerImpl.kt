@@ -353,7 +353,7 @@ class MeshConnectionManagerImpl(
         // progress. The aggressive 12s fast timeout recovers a stuck session quickly; BLE keeps
         // the original generous budget because its GATT latency is high and variable.
         val effectiveTimeout = if (fastTransport) FAST_HANDSHAKE_TIMEOUT else spec.timeout
-        val transportLabel = if (fastTransport) "fast transport" else "BLE"
+        val transportLabel = transportLabel()
         // Collapse cancel+reassign into one atomic swap so a concurrent re-arm cannot orphan a
         // job in the gap between cancel and reassign.
         handshakeTimeout
@@ -804,8 +804,16 @@ class MeshConnectionManagerImpl(
      * excluded because its GATT latency budget is high and variable enough that the long-and-retry stall-guard budgets
      * remain the right trade-off.
      */
-    private fun isFastRecoveryTransport(): Boolean =
-        radioInterfaceService.getDeviceAddress()?.let { DeviceType.fromAddress(it) } in FAST_RECOVERY_TYPES
+    private fun isFastRecoveryTransport(): Boolean = currentDeviceType() in FAST_RECOVERY_TYPES
+
+    private fun currentDeviceType(): DeviceType? =
+        radioInterfaceService.getDeviceAddress()?.let { DeviceType.fromAddress(it) }
+
+    /**
+     * Names the concrete transport (BLE, TCP, USB) in stall reports. TCP and USB share the fast-recovery budget but
+     * fail for different reasons, and the field reports can only be split by transport if the report says which one.
+     */
+    private fun transportLabel(): String = currentDeviceType()?.name ?: UNKNOWN_TRANSPORT_LABEL
 
     override fun onHandshakeProgress() {
         // Progress only matters while a handshake is live, before the completion latch has fired.
@@ -836,7 +844,8 @@ class MeshConnectionManagerImpl(
                     // non-fatal in Crashlytics and a RUM error, which made this one of the loudest issues in triage.
                     // Track it as a rate over this log line instead.
                     Logger.w {
-                        "Fast-handshake watchdog expired after progress stalled — requesting forced transport restart"
+                        "Fast-handshake watchdog expired on ${transportLabel()} after progress stalled — " +
+                            "requesting forced transport restart"
                     }
                     runSiblingHandshakeRecovery()
                 },
@@ -861,6 +870,8 @@ class MeshConnectionManagerImpl(
         // Hoisted constant — used on every meaningful handshake packet via
         // isFastRecoveryTransport(); avoids allocating a fresh Set per packet.
         private val FAST_RECOVERY_TYPES = setOf(DeviceType.TCP, DeviceType.USB)
+
+        private const val UNKNOWN_TRANSPORT_LABEL = "unknown transport"
 
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
 
