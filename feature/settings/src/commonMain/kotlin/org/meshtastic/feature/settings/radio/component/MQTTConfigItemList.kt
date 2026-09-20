@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.effectiveTlsEnabled
@@ -91,13 +93,16 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.json_enabled
 
-// json_enabled is deprecated in the protobuf schema but remains the only toggle for MQTT JSON
-// publish/consume, so the settings UI must keep exposing it until the proto provides a replacement.
+// json_enabled still drives MQTT JSON on firmware below its deprecated_since; beyond that the schema gate hides it
+// unless the node still holds it set, so a stale value stays visible.
 @Suppress("DEPRECATION")
 @Composable
 fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val firmwareVersion = state.metadata?.firmware_version
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val mqttProxyState by viewModel.mqttConnectionState.collectAsStateWithLifecycle()
     val mqttProxyActive by viewModel.mqttProxyActive.collectAsStateWithLifecycle()
@@ -217,16 +222,18 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                SwitchPreference(
-                    title = stringResource(Res.string.json_output_enabled),
-                    checked = formState.value.json_enabled,
-                    enabled = state.connected,
-                    onCheckedChange = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.json_enabled = it }.build()
-                    },
-                    containerColor = CardDefaults.cardColors().containerColor,
-                )
-                HorizontalDivider()
+                if (capabilities.offers(ModuleConfig.MQTTConfig.json_enabled, isSet = formState.value.json_enabled)) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.json_output_enabled),
+                        checked = formState.value.json_enabled,
+                        enabled = state.connected,
+                        onCheckedChange = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.json_enabled = it }.build()
+                        },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                    HorizontalDivider()
+                }
                 MqttTlsPreference(
                     enabled = state.connected,
                     address = formState.value.address,

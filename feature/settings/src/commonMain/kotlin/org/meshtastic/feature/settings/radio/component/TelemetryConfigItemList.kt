@@ -47,6 +47,7 @@ import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.device_telemetry_enabled
 
 @Composable
 fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -72,7 +73,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     ) {
         item {
             TitledCard(title = stringResource(Res.string.telemetry_config)) {
-                if (capabilities.canToggleTelemetryEnabled) {
+                if (capabilities.offers(ModuleConfig.TelemetryConfig.device_telemetry_enabled)) {
                     SwitchPreference(
                         title = stringResource(Res.string.device_telemetry_enabled),
                         summary = stringResource(Res.string.device_telemetry_enabled_summary),

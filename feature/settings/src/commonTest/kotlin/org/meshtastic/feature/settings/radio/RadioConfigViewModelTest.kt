@@ -149,7 +149,7 @@ class RadioConfigViewModelTest {
             Node(
                 num = 123,
                 user = User.Builder().also { wb -> wb.id = "!123" }.build(),
-                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.21" }.build(),
+                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.19" }.build(),
             )
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel(destNum = 123)
@@ -196,7 +196,7 @@ class RadioConfigViewModelTest {
                 Node(
                     num = 456,
                     user = User.Builder().also { wb -> wb.id = "!456" }.build(),
-                    metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.21" }.build(),
+                    metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.19" }.build(),
                 )
             nodeRepository.setNodes(listOf(localNode, remoteNode))
             nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
@@ -2035,7 +2035,7 @@ class RadioConfigViewModelTest {
             Node(
                 num = 456,
                 user = User.Builder().also { wb -> wb.id = "!456" }.build(),
-                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.21" }.build(),
+                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.19" }.build(),
             )
         val packetFlow = MutableSharedFlow<MeshPacket>()
         val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")

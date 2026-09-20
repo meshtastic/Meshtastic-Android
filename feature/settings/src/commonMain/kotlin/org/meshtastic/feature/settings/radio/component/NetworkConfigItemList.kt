@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -39,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.extractWifiCredentials
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.util.handleMeshtasticUri
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
@@ -83,6 +85,7 @@ import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.enabled_protocols
 
 @Composable
 private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
@@ -98,6 +101,8 @@ private fun formatIpAddress(ipAddress: Int): String = "${(ipAddress) and 0xFF}."
 @Composable
 fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onOpenNfcSettings: () -> Unit = {}) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val firmwareVersion = state.metadata?.firmware_version
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val networkConfig = state.radioConfig.network ?: Config.NetworkConfig.Builder().build()
     val formState = rememberConfigState(initialValue = networkConfig)
 
@@ -296,27 +301,29 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     },
                 )
                 HorizontalDivider()
-                SwitchPreference(
-                    title = stringResource(Res.string.udp_enabled),
-                    summary = stringResource(Res.string.config_network_udp_enabled_summary),
-                    checked =
-                    formState.value.enabled_protocols and Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value !=
-                        0,
-                    onCheckedChange = { enabled ->
-                        val flags =
-                            if (enabled) {
-                                formState.value.enabled_protocols or
-                                    Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value
-                            } else {
-                                formState.value.enabled_protocols and
-                                    Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value.inv()
-                            }
-                        formState.value =
-                            formState.value.newBuilder().also { wb -> wb.enabled_protocols = flags }.build()
-                    },
-                    enabled = state.connected,
-                )
-                HorizontalDivider()
+                if (capabilities.offers(Config.NetworkConfig.enabled_protocols)) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.udp_enabled),
+                        summary = stringResource(Res.string.config_network_udp_enabled_summary),
+                        checked =
+                        formState.value.enabled_protocols and
+                            Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value != 0,
+                        onCheckedChange = { enabled ->
+                            val flags =
+                                if (enabled) {
+                                    formState.value.enabled_protocols or
+                                        Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value
+                                } else {
+                                    formState.value.enabled_protocols and
+                                        Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value.inv()
+                                }
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.enabled_protocols = flags }.build()
+                        },
+                        enabled = state.connected,
+                    )
+                    HorizontalDivider()
+                }
                 DropDownPreference(
                     title = stringResource(Res.string.ipv4_mode),
                     enabled = state.connected,

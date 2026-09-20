@@ -16,8 +16,10 @@
  */
 package org.meshtastic.core.model
 
+import org.meshtastic.proto.FieldMetadata
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -51,12 +53,6 @@ class CapabilitiesTest {
     }
 
     @Test
-    fun canToggleTelemetryEnabled_requires_V2_7_12() {
-        assertFalse(caps("2.7.11").canToggleTelemetryEnabled)
-        assertTrue(caps("2.7.12").canToggleTelemetryEnabled)
-    }
-
-    @Test
     fun canToggleUnmessageable_requires_V2_6_9() {
         assertFalse(caps("2.6.8").canToggleUnmessageable)
         assertTrue(caps("2.6.9").canToggleUnmessageable)
@@ -75,9 +71,47 @@ class CapabilitiesTest {
     }
 
     @Test
-    fun supportsStatusMessage_requires_V2_8_0() {
-        assertFalse(caps("2.7.21").supportsStatusMessage)
-        assertTrue(caps("2.8.0").supportsStatusMessage)
+    fun supportsStatusMessage_requires_V2_7_20() {
+        assertFalse(caps("2.7.19").supportsStatusMessage)
+        assertTrue(caps("2.7.20").supportsStatusMessage)
+    }
+
+    @Test
+    fun offers_hides_a_field_below_since_firmware() {
+        val field = FieldMetadata.Builder().since_firmware("2.7.13").build()
+        assertFalse(caps("2.7.12").offers(field))
+        assertTrue(caps("2.7.13").offers(field))
+        assertFalse(caps(null).offers(field))
+    }
+
+    @Test
+    fun offers_hides_a_deprecated_field_at_deprecated_since_unless_set() {
+        val field = FieldMetadata.Builder().deprecated_since("2.8.0").build()
+        assertTrue(caps("2.7.26").offers(field))
+        assertFalse(caps("2.8.0").offers(field))
+        assertTrue(caps("2.8.0").offers(field, isSet = true))
+        // Unknown firmware cannot be shown to have retired the field.
+        assertTrue(caps(null).offers(field))
+    }
+
+    @Test
+    fun offers_an_unannotated_field_everywhere() {
+        val field = FieldMetadata.Builder().build()
+        assertTrue(caps(null).offers(field))
+        assertTrue(caps("2.3.15").offers(field))
+    }
+
+    @Test
+    fun offers_everything_when_forceEnableAll() {
+        val c = Capabilities(firmwareVersion = null, forceEnableAll = true)
+        assertTrue(c.offers(FieldMetadata.Builder().since_firmware("9.9.9").build()))
+        assertTrue(c.offers(FieldMetadata.Builder().deprecated_since("1.0.0").build()))
+    }
+
+    @Test
+    fun offers_rejects_an_unparseable_schema_version() {
+        val field = FieldMetadata.Builder().since_firmware("soon").build()
+        assertFailsWith<IllegalArgumentException> { caps("2.8.0").offers(field) }
     }
 
     @Test
@@ -164,7 +198,6 @@ class CapabilitiesTest {
         assertFalse(c.canMuteNode)
         assertFalse(c.canRequestNeighborInfo)
         assertFalse(c.canSendVerifiedContacts)
-        assertFalse(c.canToggleTelemetryEnabled)
         assertFalse(c.canToggleUnmessageable)
         assertFalse(c.supportsQrCodeSharing)
         assertFalse(c.supportsSecondaryChannelLocation)

@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.always_point_north
@@ -55,11 +56,15 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.compass_north_top
+import org.meshtastic.proto.use_12h_clock
 
 @Suppress("DEPRECATION", "LongMethod")
 @Composable
 fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val firmwareVersion = state.metadata?.firmware_version
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val displayConfig = state.radioConfig.display ?: Config.DisplayConfig.Builder().build()
     val formState = rememberConfigState(initialValue = displayConfig)
 
@@ -77,28 +82,38 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     ) {
         item {
             TitledCard(title = stringResource(Res.string.display_config)) {
-                SwitchPreference(
-                    title = stringResource(Res.string.always_point_north),
-                    summary = stringResource(Res.string.config_display_compass_north_top_summary),
-                    checked = formState.value.compass_north_top,
-                    enabled = state.connected,
-                    onCheckedChange = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.compass_north_top = it }.build()
-                    },
-                    containerColor = CardDefaults.cardColors().containerColor,
-                )
-                HorizontalDivider()
-                SwitchPreference(
-                    title = stringResource(Res.string.use_12h_format),
-                    summary = stringResource(Res.string.display_time_in_12h_format),
-                    enabled = state.connected,
-                    checked = formState.value.use_12h_clock,
-                    onCheckedChange = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.use_12h_clock = it }.build()
-                    },
-                    containerColor = CardDefaults.cardColors().containerColor,
-                )
-                HorizontalDivider()
+                if (
+                    capabilities.offers(
+                        Config.DisplayConfig.compass_north_top,
+                        isSet = formState.value.compass_north_top,
+                    )
+                ) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.always_point_north),
+                        summary = stringResource(Res.string.config_display_compass_north_top_summary),
+                        checked = formState.value.compass_north_top,
+                        enabled = state.connected,
+                        onCheckedChange = {
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.compass_north_top = it }.build()
+                        },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                    HorizontalDivider()
+                }
+                if (capabilities.offers(Config.DisplayConfig.use_12h_clock)) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.use_12h_format),
+                        summary = stringResource(Res.string.display_time_in_12h_format),
+                        enabled = state.connected,
+                        checked = formState.value.use_12h_clock,
+                        onCheckedChange = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.use_12h_clock = it }.build()
+                        },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                    HorizontalDivider()
+                }
                 SwitchPreference(
                     title = stringResource(Res.string.bold_heading),
                     summary = stringResource(Res.string.config_display_heading_bold_summary),

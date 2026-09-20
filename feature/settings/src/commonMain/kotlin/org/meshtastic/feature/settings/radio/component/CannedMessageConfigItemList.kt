@@ -23,6 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.allow_input_source
 import org.meshtastic.core.resources.canned_message
@@ -52,11 +54,14 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.allow_input_source
 
 @Suppress("DEPRECATION", "LongMethod")
 @Composable
 fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val firmwareVersion = state.metadata?.firmware_version
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val cannedMessageConfig = state.moduleConfig.canned_message ?: ModuleConfig.CannedMessageConfig.Builder().build()
     val messages = state.cannedMessageMessages
     val formState = rememberConfigState(initialValue = cannedMessageConfig)
@@ -176,19 +181,27 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                EditTextPreference(
-                    title = stringResource(Res.string.allow_input_source),
-                    value = formState.value.allow_input_source,
-                    maxSize = 63, // allow_input_source max_size:16
-                    enabled = state.connected,
-                    isError = false,
-                    keyboardOptions =
-                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.allow_input_source = it }.build()
-                    },
-                )
+                if (
+                    capabilities.offers(
+                        ModuleConfig.CannedMessageConfig.allow_input_source,
+                        isSet = formState.value.allow_input_source.isNotEmpty(),
+                    )
+                ) {
+                    EditTextPreference(
+                        title = stringResource(Res.string.allow_input_source),
+                        value = formState.value.allow_input_source,
+                        maxSize = 63, // allow_input_source max_size:16
+                        enabled = state.connected,
+                        isError = false,
+                        keyboardOptions =
+                        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = {
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.allow_input_source = it }.build()
+                        },
+                    )
+                }
                 SwitchPreference(
                     title = stringResource(Res.string.send_bell),
                     checked = formState.value.send_bell,
