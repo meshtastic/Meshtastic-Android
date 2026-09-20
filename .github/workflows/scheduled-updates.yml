@@ -2,8 +2,9 @@ name: Scheduled Updates (Firmware, Hardware, Translations)
 
 on:
   schedule:
-    # Hourly. This job is cheap (curl + Crowdin + PR, no build) — the slow
-    # emulator/graph work lives in scheduled-baseline.yml on a daily cron.
+    # Hourly. This job is cheap (curl + Crowdin + PR; Gradle only in the hour after
+    # a protobufs bump merges) — the slow emulator/graph work lives in
+    # scheduled-baseline.yml on a daily cron.
     - cron: '0 * * * *'
   workflow_dispatch:       # Allow manual triggering
 
@@ -264,6 +265,60 @@ jobs:
             git checkout -- README.md docs/en/developer/test-builds.md obtainium
           fi
 
+      # values/schema_strings.xml is generated from the org.meshtastic:protobufs pin and records which one. Gradle
+      # runs here only when main's pin has moved past the recorded one, so the hourly job stays cheap between bumps;
+      # the regenerated English goes up to Crowdin in the step below and rides this PR with the translations.
+      - name: Check whether the schema strings lag the protobufs pin
+        id: schema_pin
+        run: |
+          xml=core/resources/src/commonMain/composeResources/values/schema_strings.xml
+          catalog=$(sed -n 's/^meshtastic-protobufs = "\(.*\)"$/\1/p' gradle/libs.versions.toml)
+          recorded=$(sed -n 's/.*from org\.meshtastic:protobufs \([^ ]*\)\..*/\1/p' "$xml" | head -n1)
+          echo "catalog=$catalog" >> "$GITHUB_OUTPUT"
+          echo "recorded=$recorded" >> "$GITHUB_OUTPUT"
+          if [ "$catalog" = "$recorded" ]; then
+            echo "schema strings already reflect protobufs $catalog"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "schema strings reflect protobufs $recorded, catalog has $catalog"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Gradle Setup
+        if: steps.schema_pin.outputs.changed == 'true'
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          job_summary_pr_comment: 'never'
+          cache_read_only: 'true'
+          cache_configuration_cache: 'false'
+          install_jetbrains_jdk: 'true'
+
+      - name: Regenerate the schema strings
+        id: schema_strings
+        if: steps.schema_pin.outputs.changed == 'true'
+        env:
+          RECORDED: ${{ steps.schema_pin.outputs.recorded }}
+          CATALOG: ${{ steps.schema_pin.outputs.catalog }}
+        run: |
+          xml=core/resources/src/commonMain/composeResources/values/schema_strings.xml
+          cp "$xml" /tmp/schema_strings.before.xml
+          if ./gradlew :schema-strings:sync -Pci=true && python3 scripts/sort-strings.py; then
+            git clone --filter=blob:none --quiet https://github.com/meshtastic/protobufs.git /tmp/protobufs
+            python3 scripts/protobufs-bump-summary.py "$RECORDED" "$CATALOG" --protobufs /tmp/protobufs \
+              --before /tmp/schema_strings.before.xml --after "$xml" > /tmp/schema-summary.md || true
+            cat /tmp/schema-summary.md >> "$GITHUB_STEP_SUMMARY"
+            detail=$(sed -n 's/^\*\*\([0-9]* [a-z]* strings\)\*\*.*/\1/p' /tmp/schema-summary.md | paste -sd, - | sed 's/,/, /g')
+            echo "status=updated" >> "$GITHUB_OUTPUT"
+            echo "detail=${detail:-no string changes}" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Schema strings sync failed — see the error above."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=./gradlew :schema-strings:sync failed for protobufs $CATALOG" >> "$GITHUB_OUTPUT"
+            git checkout -- "$xml" .skills/compose-ui/strings-index.txt
+          fi
+
       - name: Sync with Crowdin
         uses: crowdin/github-action@9af557de76d70c480f88065d336f445a362f402b # v3
         with:
@@ -314,6 +369,10 @@ jobs:
           MAINTENANCE_UF2_DETAIL: ${{ steps.maintenance_uf2.outputs.detail }}
           OBTAINIUM_STATUS: ${{ steps.obtainium.outputs.status }}
           OBTAINIUM_DETAIL: ${{ steps.obtainium.outputs.detail }}
+          SCHEMA_PIN_CHANGED: ${{ steps.schema_pin.outputs.changed }}
+          SCHEMA_PIN_CATALOG: ${{ steps.schema_pin.outputs.catalog }}
+          SCHEMA_STRINGS_STATUS: ${{ steps.schema_strings.outputs.status }}
+          SCHEMA_STRINGS_DETAIL: ${{ steps.schema_strings.outputs.detail }}
         run: |
           firmware_status="$FIRMWARE_STATUS"
           firmware_detail="$FIRMWARE_DETAIL"
@@ -389,6 +448,17 @@ jobs:
             *)         body+=$'\n'"- ❓ Obtainium configs — unknown status." ;;
           esac
 
+          # Schema strings (generated from the protobufs pin; Gradle ran only if the pin moved)
+          if [[ "$SCHEMA_PIN_CHANGED" == "true" ]]; then
+            case "$SCHEMA_STRINGS_STATUS" in
+              updated) body+=$'\n'"- ✅ \`schema_strings.xml\` regenerated for protobufs \`${SCHEMA_PIN_CATALOG}\` (${SCHEMA_STRINGS_DETAIL})." ;;
+              error)   body+=$'\n'"- ⚠️ \`schema_strings.xml\` skipped — ${SCHEMA_STRINGS_DETAIL}." ;;
+              *)       body+=$'\n'"- ❓ \`schema_strings.xml\` — unknown status." ;;
+            esac
+          else
+            body+=$'\n'"- ✔️ \`schema_strings.xml\` already reflects protobufs \`${SCHEMA_PIN_CATALOG}\`."
+          fi
+
           # Crowdin (always attempted)
           body+=$'\n'"- Source strings were uploaded to Crowdin."
           body+=$'\n'"- Latest translations were downloaded from Crowdin (if available)."
@@ -417,6 +487,7 @@ jobs:
             - Crowdin source string uploads
             - Crowdin translation downloads
             - Obtainium deep links and import files
+            - Schema strings regenerated from the protobufs pin
           title: 'chore: Scheduled updates (Firmware, Hardware, Translations)'
           body: ${{ steps.pr_body.outputs.content }}
           branch: 'scheduled-updates'
@@ -431,6 +502,8 @@ jobs:
             androidApp/src/main/assets/maintenance_uf2.json
             fastlane/metadata/android/**
             **/strings.xml
+            **/schema_strings.xml
+            .skills/compose-ui/strings-index.txt
             docs/**/*.md
             README.md
             obtainium/**

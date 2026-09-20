@@ -38,27 +38,27 @@ import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.model.util.platformRandomBytes
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.admin_key
 import org.meshtastic.core.resources.admin_keys
 import org.meshtastic.core.resources.administration
-import org.meshtastic.core.resources.config_security_admin_key
-import org.meshtastic.core.resources.config_security_debug_log_api_enabled
-import org.meshtastic.core.resources.config_security_is_managed
 import org.meshtastic.core.resources.config_security_private_key
 import org.meshtastic.core.resources.config_security_private_key_remote
-import org.meshtastic.core.resources.config_security_public_key
-import org.meshtastic.core.resources.config_security_serial_enabled
-import org.meshtastic.core.resources.debug_log_api_enabled
 import org.meshtastic.core.resources.direct_message_key
 import org.meshtastic.core.resources.logs
-import org.meshtastic.core.resources.managed_mode
-import org.meshtastic.core.resources.private_key
-import org.meshtastic.core.resources.public_key
 import org.meshtastic.core.resources.redacted
 import org.meshtastic.core.resources.regenerate_keys_confirmation
 import org.meshtastic.core.resources.regenerate_private_key
+import org.meshtastic.core.resources.schema_security_admin_key
+import org.meshtastic.core.resources.schema_security_admin_key_description
+import org.meshtastic.core.resources.schema_security_debug_log_api_enabled
+import org.meshtastic.core.resources.schema_security_debug_log_api_enabled_description
+import org.meshtastic.core.resources.schema_security_is_managed
+import org.meshtastic.core.resources.schema_security_is_managed_description
+import org.meshtastic.core.resources.schema_security_private_key
+import org.meshtastic.core.resources.schema_security_public_key
+import org.meshtastic.core.resources.schema_security_public_key_description
+import org.meshtastic.core.resources.schema_security_serial_enabled
+import org.meshtastic.core.resources.schema_security_serial_enabled_description
 import org.meshtastic.core.resources.security
-import org.meshtastic.core.resources.serial_console
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditListPreference
@@ -161,8 +161,8 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         item {
             TitledCard(title = stringResource(Res.string.admin_keys)) {
                 EditListPreference(
-                    title = stringResource(Res.string.admin_key),
-                    summary = stringResource(Res.string.config_security_admin_key),
+                    title = stringResource(Res.string.schema_security_admin_key),
+                    summary = stringResource(Res.string.schema_security_admin_key_description),
                     list = formState.value.admin_key,
                     maxCount = 3,
                     enabled = state.connected,
@@ -176,8 +176,8 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         item {
             TitledCard(title = stringResource(Res.string.logs)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.serial_console),
-                    summary = stringResource(Res.string.config_security_serial_enabled),
+                    title = stringResource(Res.string.schema_security_serial_enabled),
+                    summary = stringResource(Res.string.schema_security_serial_enabled_description),
                     checked = formState.value.serial_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -187,8 +187,8 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.debug_log_api_enabled),
-                    summary = stringResource(Res.string.config_security_debug_log_api_enabled),
+                    title = stringResource(Res.string.schema_security_debug_log_api_enabled),
+                    summary = stringResource(Res.string.schema_security_debug_log_api_enabled_description),
                     checked = formState.value.debug_log_api_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -202,8 +202,8 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         item {
             TitledCard(title = stringResource(Res.string.administration)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.managed_mode),
-                    summary = stringResource(Res.string.config_security_is_managed),
+                    title = stringResource(Res.string.schema_security_is_managed),
+                    summary = stringResource(Res.string.schema_security_is_managed_description),
                     checked = formState.value.is_managed,
                     enabled = state.connected && formState.value.admin_key.isNotEmpty(),
                     onCheckedChange = {
@@ -263,8 +263,8 @@ internal fun SecurityPublicKeyPreference(
     val publicKey = resolvedPublicKey(securityConfig, formState.value.private_key)
 
     EditBase64Preference(
-        title = stringResource(Res.string.public_key),
-        summary = stringResource(Res.string.config_security_public_key),
+        title = stringResource(Res.string.schema_security_public_key),
+        summary = stringResource(Res.string.schema_security_public_key_description),
         value = publicKey,
         enabled = enabled,
         readOnly = true,
@@ -297,7 +297,7 @@ internal fun SecurityPrivateKeyPreference(
     val redacted = isPrivateKeyRedacted(securityConfig, isLocal) && privateKey.size != PRIVATE_KEY_SIZE
 
     EditBase64Preference(
-        title = stringResource(Res.string.private_key),
+        title = stringResource(Res.string.schema_security_private_key),
         summary =
         if (redacted) {
             stringResource(Res.string.config_security_private_key_remote)

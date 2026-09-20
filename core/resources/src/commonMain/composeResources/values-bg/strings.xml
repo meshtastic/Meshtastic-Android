@@ -53,7 +53,6 @@
     <string name="add_network_device_manually">Ръчно добавяне на устройство…</string>
     <string name="add_network_layer">Добавяне на мрежов слой</string>
     <string name="address">Адрес</string>
-    <string name="admin_key">Администраторски ключ</string>
     <string name="admin_keys">Администраторски ключове</string>
     <string name="administration">Администриране</string>
     <string name="advanced">Разширени</string>
@@ -61,8 +60,6 @@
     <!-- AIR -->
     <string name="air_quality">Качество на въздуха</string>
     <string name="air_quality_icon">Икона за качество на въздуха</string>
-    <string name="air_quality_metrics_module_enabled">Модулът за показатели за качеството на въздуха е активиран</string>
-    <string name="air_quality_metrics_update_interval_seconds">Интервал на актуализиране на показателите за качеството на въздуха</string>
     <string name="air_util_definition">Процент от ефирното време за предаване, използвано през последния час.</string>
     <string name="air_utilization">Изпол. на ефира</string>
     <!-- ALERT -->
@@ -101,7 +98,6 @@
     <string name="backup_restore">Архивиране &amp; възстановяване</string>
     <string name="bad">Лош</string>
     <!-- BANDWIDTH -->
-    <string name="bandwidth">Широчина на честотната лента</string>
     <string name="bandwidth_default">По подразбиране (%1$s kHz)</string>
     <string name="bandwidth_option_khz">%1$s kHz</string>
     <string name="bandwidth_unsupported">Не се поддържа (%1$s)</string>
@@ -110,14 +106,11 @@
     <string name="battery">Батерия</string>
     <string name="battery_ina_2xx_i2c_address">I2C адрес на батерията INA_2XX</string>
     <string name="ble_devices">Bluetooth устройства</string>
-    <string name="ble_rssi_threshold_defaults_to_80">Праг на BLE RSSI (по подразбиране -80)</string>
-    <string name="blue">Син</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_available_devices">Налични Bluetooth устройства</string>
     <string name="bluetooth_config">Конфигуриране на Bluetooth</string>
     <string name="bluetooth_disabled">Bluetooth е изключен. Включете го, за да сканирате за устройства наблизо.</string>
-    <string name="bluetooth_enabled">Bluetooth е активиран</string>
     <string name="bluetooth_feature_config">Конфигурация</string>
     <string name="bluetooth_feature_config_description">Управлявайте безжично настройките и каналите на вашето устройство.</string>
     <string name="bluetooth_feature_discovery">Откриване</string>
@@ -130,13 +123,9 @@
         <item quantity="one">Достигнат е лимитът за Bluetooth сканиране. Опитайте отново след %1$d секунда.</item>
         <item quantity="other">Достигнат е лимитът за Bluetooth сканиране. Опитайте отново след %1$d секунди.</item>
     </plurals>
-    <string name="bold_heading">Удебелен заглавен шрифт</string>
     <string name="bonding_failed_permissions">Сдвояването не е успешно. Предоставете разрешения на устройството наблизо и опитайте отново.</string>
     <string name="bonding_failed_retry">Сдвояването не завърши. Опитайте да сдвоите отново.</string>
     <string name="bottom_nav_settings">Настройки</string>
-    <string name="broadcast_interval">Интервал на излъчване</string>
-    <string name="button_gpio">GPIO за бутон</string>
-    <string name="buzzer_gpio">GPIO за зумер</string>
     <string name="calculating">Изчисляване…</string>
     <string name="call_sign">Опознавателен знак</string>
     <string name="call_sign_summary">Вашият радиолюбителски опознавателен знак, до 7 знака</string>
@@ -184,7 +173,6 @@
     <string name="close">Затвори</string>
     <string name="close_selection">Затваряне на избраните</string>
     <string name="co2">CO₂</string>
-    <string name="codec_2_enabled">CODEC 2 е активиран</string>
     <string name="collapse_chart">Свиване на диаграмата</string>
     <string name="communicate_off_the_grid">Комуникирайте извън мрежата с вашите приятели и общността без клетъчна услуга.</string>
     <!-- COMPASS -->
@@ -196,7 +184,6 @@
     <string name="compass_no_location_permission">Необходимо е разрешение за местоположение, за да се покажат разстоянието и пеленгът.</string>
     <string name="compass_no_magnetometer">Това устройство няма сензор за компас. Посоката не е налична.</string>
     <string name="compass_north_top">Север на компаса отгоре</string>
-    <string name="compass_orientation">Ориентация на компаса</string>
     <string name="compass_title">Компас</string>
     <string name="compass_uncertainty">Приблизителна площ: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Приблизителна площ: неизвестна точност</string>
@@ -205,28 +192,12 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Изпраща позиция в основния канал, когато потребителският бутон бъде щракнат три пъти.</string>
     <string name="config_device_tzdef_summary">Часова зона за дати на екрана на устройството и в дневника.</string>
     <string name="config_device_use_phone_tz">Използване на часовата зона на телефона</string>
-    <string name="config_display_auto_screen_carousel_secs_summary">Автоматично превключва към следващата страница на екрана като въртележка, въз основа на зададения интервал.</string>
-    <string name="config_display_compass_north_top_summary">Компасът на екрана извън кръга винаги ще сочи на север.</string>
-    <string name="config_display_displaymode_summary">Замяна на оформлението на екрана по подразбиране.</string>
-    <string name="config_display_flip_screen_summary">Обръщане на екрана вертикално.</string>
-    <string name="config_display_heading_bold_summary">Удебеляване на текста на заглавието на екрана.</string>
-    <string name="config_display_oled_summary">Замяна на автоматичното разпознаване на OLED екрана.</string>
-    <string name="config_display_screen_on_secs_summary">Колко дълго екранът остава включен след натискане на потребителския бутон или получаване на съобщения.</string>
-    <string name="config_display_units_summary">Мерни единици, показвани на екрана на устройството.</string>
-    <string name="config_display_wake_on_tap_or_motion_summary">Изисква се да има акселерометър на вашето устройство.</string>
-    <string name="config_lora_hop_limit_summary">Задава максималния брой отскоци, по подразбиране е 3. Увеличаването на броя отскоци също увеличава претоварването и трябва да се използва внимателно. Съобщенията с 0 отскока няма да получат ACK.</string>
     <string name="config_lora_modem_preset_summary">Налични предварително зададени настройки на модема, по подразбиране е Дълъг Бърз.</string>
     <string name="config_lora_region_summary">Регионът, където ще използвате радиостанциите си.</string>
-    <string name="config_network_eth_enabled_summary">Активирането на Ethernet ще деактивира Bluetooth връзката с приложението. TCP връзки с възли не са налични на устройства на Apple.</string>
-    <string name="config_network_wifi_enabled_summary">Активирането на Wi-Fi ще деактивира Bluetooth връзката с приложението.</string>
-    <string name="config_position_broadcast_secs_summary">Максималният интервал, който може да изтече, без възела да излъчи позиция.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Най-бързо ще бъдат изпратени актуализации на позицията, ако е спазено минималното разстояние.</string>
     <string name="config_saved_restarting">Възелът се рестартира и ще бъде за кратко недостъпен.</string>
-    <string name="config_security_admin_key">Публичният ключ, оторизиран за изпращане на администраторски съобщения до този възел.</string>
-    <string name="config_security_is_managed">Устройството се управлява от mesh администратор, потребителят няма достъп до никоя от настройките на устройството.</string>
     <string name="config_security_private_key">Използва се за създаване на споделен ключ с отдалечено устройство.</string>
     <string name="config_security_public_key">Генерира се от вашия частен ключ и се изпраща до други възли в mesh за да им позволи да изчислят споделен секретен ключ.</string>
-    <string name="config_security_serial_enabled">Серийна конзола през Stream API.</string>
     <string name="configuration">Конфигурация</string>
     <string name="configure_bluetooth_permissions">Конфигуриране на разрешения за Bluetooth</string>
     <string name="configure_critical_alerts">Конфигуриране на критични предупреждения</string>
@@ -313,11 +284,8 @@
     <string name="device_metrics_log">Метрики на устройството</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
-    <string name="device_metrics_update_interval_seconds">Интервал на актуализиране на показателите на устройството</string>
     <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_sleeping">Устройството спи</string>
-    <string name="device_telemetry_enabled">Изпращане на телеметрия на устройството</string>
-    <string name="device_telemetry_enabled_summary">Активиране/деактивиране на модула за телеметрия на устройството за изпращане на показатели към мрежата. Това са номинални стойности. Претоварените мрежи автоматично ще се мащабират до по-дълги интервали въз основа на броя на онлайн възлите.</string>
     <string name="device_theme_language">Тема: %1$s, Език: %2$s</string>
     <string name="dew_point">Точка на оросяване</string>
     <string name="direct_message">Директно съобщение</string>
@@ -361,9 +329,6 @@
     <string name="disk_free_indexed">Свободен диск %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Дисплей</string>
-    <string name="display_mode">Режим на дисплея</string>
-    <string name="display_time_in_12h_format">Когато е активирано, устройството ще показва времето на екрана в 12-часов формат.</string>
-    <string name="display_units">Показвани единици</string>
     <!-- DISTANCE -->
     <string name="distance">Разстояние</string>
     <string name="distance_measurements">Измервания на разстояния</string>
@@ -402,7 +367,6 @@
     <string name="duplicated_public_key_title">Открит е дублиран публичен ключ</string>
     <string name="dynamic">Динамична</string>
     <string name="easily_set_up_private_mesh_networks">Настройте лесно частни mesh мрежи за сигурна и надеждна комуникация в отдалечени райони.</string>
-    <string name="echo_enabled">Echo е активирано</string>
     <string name="edit">Редактирай</string>
     <string name="eight_hours">8 часа</string>
     <!-- EMOJI -->
@@ -415,26 +379,19 @@
     <string name="emoji_category_symbols">Символи</string>
     <string name="emoji_category_travel_places">Пътуване &amp; места</string>
     <string name="emoji_recently_used">Наскоро използвани</string>
-    <string name="enable_power_saving_mode">Активиране на енергоспестяващ режим</string>
     <string name="enabled">Активиран</string>
     <!-- ENCRYPTION -->
-    <string name="encryption_enabled">Криптирането е активирано</string>
     <string name="encryption_error">Несъответствие на публичния ключ</string>
     <string name="encryption_error_text">Публичният ключ не съвпада със записания ключ. Можете да премахнете възела и да го оставите да обмени ключове отново, но това може да показва по-сериозен проблем със сигурността. Свържете се с потребителя чрез друг надежден канал, за да определите дали промяната на ключа се дължи на фабрично нулиране или друго умишлено действие.</string>
     <string name="encryption_pkc">Криптиране с публичния ключ</string>
     <string name="env_metrics_log">Показатели на околната среда</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Околна среда</string>
-    <string name="environment_metrics_module_enabled">Модулът за измерване на околната среда е активиран</string>
-    <string name="environment_metrics_on_screen_enabled">Показателите на околната среда на екрана са активирани</string>
-    <string name="environment_metrics_update_interval_seconds">Интервал на актуализиране на показателите за средата</string>
-    <string name="environment_metrics_use_fahrenheit">Показателите на околната среда използват Фаренхайт</string>
     <string name="error">Грешка</string>
     <string name="error_duty_cycle">Достигнат лимит на Duty Cycle. Не може да се изпрати съобщение сега, опитайте по-късно.</string>
     <string name="establish_session">Свързване &amp; администриране</string>
     <string name="establishing_session">Установяване на отдалечена сесия…</string>
     <string name="ethernet_config">Опции за Ethernet</string>
-    <string name="ethernet_enabled">Ethernet е активиран</string>
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Размяна на позиция</string>
     <string name="expand_chart">Разгъване на диаграмата</string>
@@ -446,7 +403,6 @@
     <string name="export_gpx">Експортиране на GPX</string>
     <string name="external_notification">Външно известие</string>
     <string name="external_notification_config">Конфигуриране на външни известия</string>
-    <string name="external_notification_enabled">Външните известия са активирани</string>
     <string name="factory_reset">Фабрично нулиране</string>
     <string name="fair">Задоволителен</string>
     <string name="fallback_node_name">Meshtastic %1$s </string>
@@ -539,7 +495,6 @@
     <string name="firmware_version">Версия на фърмуера: %1$s</string>
     <string name="fixed_pin">Фиксиран ПИН</string>
     <string name="fixed_position">Фиксирана позиция</string>
-    <string name="flip_screen">Обръщане на екрана</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
     <!-- FORMAT -->
     <string name="format_bold">Удебелен</string>
@@ -549,8 +504,6 @@
     <string name="free_memory">Свободна памет</string>
     <string name="free_memory_description">Налична системна памет в байтове</string>
     <string name="freq">Чест.</string>
-    <string name="frequency_slot">Честотен слот</string>
-    <string name="friendly_name">Приятелско име</string>
     <string name="gateway">Шлюз</string>
     <string name="generate_qr_code">Генериране на QR код</string>
     <!-- GEOFENCE -->
@@ -565,19 +518,11 @@
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO пин</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">GPIO пин за ротационен енкодер A порт</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">GPIO пин за ротационен енкодер Б порт</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">GPIO пин за ротационен енкодер Press порт</string>
-    <string name="gps_mode">Режим на GPS (физически хардуер)</string>
-    <string name="gps_receive_gpio">GPIO за приемане от GPS</string>
-    <string name="gps_transmit_gpio">GPIO за предаване от GPS</string>
-    <string name="green">Зелен</string>
     <string name="hardware">Хардуер</string>
     <string name="hardware_model">Модел на хардуера</string>
     <string name="help_and_documentation">Помощ &amp; Документация</string>
     <string name="hide_layer">Скриване на слоя</string>
     <string name="hide_password">Скриване на паролата</string>
-    <string name="hop_limit">Брой отскоци</string>
     <string name="hops_away">Брой отскоци</string>
     <string name="host">Хост</string>
     <string name="humidity">Влаж</string>
@@ -589,7 +534,6 @@
     <!-- IGNORE -->
     <string name="ignore">Игнорирай</string>
     <string name="ignore_add">Добави '%1$s' към списъка с игнорирани?</string>
-    <string name="ignore_mqtt">Игнориране на MQTT</string>
     <string name="ignore_remove">Изтрий '%1$s' от списъка с игнорирани?</string>
     <!-- IMPORT -->
     <string name="import_configuration">Импортиране на конфигурацията</string>
@@ -613,7 +557,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP адрес:</string>
     <string name="ip_port">Порт:</string>
-    <string name="ipv4_mode">Режим на IPv4</string>
     <string name="jump_to_latest_from">%1$s</string>
     <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
     <!-- KEY -->
@@ -629,7 +572,6 @@
     <string name="layer_subtitle">%1$s • %2$s</string>
     <string name="layer_type_network">Мрежов слой</string>
     <string name="learn_more">Научете повече</string>
-    <string name="led_state">LED за състояние</string>
     <string name="library_count">%1$d библиотеки</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Лицензиран радиолюбител (Ham)</string>
@@ -687,7 +629,6 @@
     <string name="low_battery_title">Батерията е изтощена: %1$s</string>
     <string name="low_entropy_key_title">Открит е слаб ключ за криптиране</string>
     <string name="manage_map_layers">Управление на слоевете на картата</string>
-    <string name="managed_mode">Управляем режим</string>
     <string name="manual_position_request">Изисква се ръчно заявяване на позиция</string>
     <!-- MAP -->
     <string name="map">Карта на Mesh</string>
@@ -789,7 +730,6 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">Конфигуриране на MQTT</string>
-    <string name="mqtt_enabled">MQTT е активиран</string>
     <string name="mqtt_probe_dns_failure">Хостът не е намерен</string>
     <string name="mqtt_probe_other_failure">Връзката е неуспешна</string>
     <string name="mqtt_probe_success">Достъпен. Брокерът е приел идентификационните данни.</string>
@@ -903,11 +843,8 @@
     <string name="notifications_on_alert_bell_receipt">Известия при получаване на сигнал/позвъняване</string>
     <string name="notifications_on_message_receipt">Известия за получаване на съобщение</string>
     <string name="now">Сега</string>
-    <string name="ntp_server">NTP сървър</string>
-    <string name="number_of_records">Брой записи</string>
     <!-- OFFLINE -->
     <string name="okay">Добре</string>
-    <string name="oled_type">Тип на OLED</string>
     <!-- ONE -->
     <string name="one_day">24 часа</string>
     <string name="one_hour">1 час</string>
@@ -925,7 +862,6 @@
     <string name="options">Опции</string>
     <!-- OUTPUT -->
     <!-- PACKET -->
-    <string name="pairing_mode">Режим на сдвояване</string>
     <string name="password">Парола</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
@@ -937,7 +873,6 @@
     <string name="pax_wifi_format">W:%1$d</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Конфигуриране на Paxcounter</string>
-    <string name="paxcounter_enabled">Paxcounter е активиран</string>
     <string name="periodic_position_broadcast">Периодично излъчване на позиция</string>
     <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic се нуждае от активирани разрешения за "Устройства наблизо", за да намира и да се свързва с устройства чрез Bluetooth. Можете да ги дезактивирате, когато не се използват.</string>
@@ -983,12 +918,9 @@
     <string name="preview_text">Текст</string>
     <string name="primary">Първичен</string>
     <string name="primary_channel_feature">Периодично излъчване на местоположение и телеметрия</string>
-    <string name="private_key">Частен ключ</string>
     <string name="provide_location_to_mesh">Изпращане на местоположение в мрежата</string>
     <string name="provider_name_exists">Името на доставчика съществува.</string>
-    <string name="proxy_to_client_enabled">Прокси към клиент е активиран</string>
     <string name="psk">PSK</string>
-    <string name="ptt_pin">Пин за РТТ</string>
     <string name="public_key">Публичен ключ</string>
     <string name="public_key_changed">Публичният ключ е променен</string>
     <string name="qr_code">QR код</string>
@@ -1006,14 +938,11 @@
     <string name="rainfall_24h">Дъжд (24 ч)</string>
     <string name="range_test">Тест на обхвата</string>
     <string name="range_test_config">Конфигуриране на Тест на обхвата</string>
-    <string name="range_test_enabled">Тест на обхвата е активиран</string>
     <string name="reboot">Рестартиране</string>
     <!-- REBROADCAST -->
-    <string name="rebroadcast_mode">Режим на препредаване</string>
     <string name="rebroadcast_mode_all_desc">Препредава всяко наблюдавано съобщение, ако е било на нашия частен канал или от друга мрежа със същите параметри на lora.</string>
     <string name="recent_network_devices">Скорошни мрежови устройства</string>
     <string name="reconnecting">Повторно свързване…</string>
-    <string name="red">Червен</string>
     <string name="refresh">Опресняване</string>
     <string name="refresh_metadata">Обновяване на метаданните</string>
     <string name="regenerate_keys_confirmation">Сигурни ли сте, че искате да генерирате отново своя частен ключ?\n\nВъзлите, които може да са обменяли преди това ключове с възела, ще трябва да го премахнат и да обменят отново ключове, за да възобновят защитената комуникация.</string>
@@ -1077,7 +1006,6 @@
     <string name="role_tak_desc">Оптимизирано за комуникация със системата ATAK, намалява рутинните излъчвания.</string>
     <string name="role_tracker">Тракер</string>
     <string name="role_tracker_desc">Излъчва приоритетно пакети за GPS позиция</string>
-    <string name="rotary_encoder_1_enabled">Ротационен енкодер #1 е активиран</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
     <string name="routing_error_max_retransmit">Неуспешно доставяне към mesh</string>
@@ -1090,13 +1018,11 @@
     <string name="routing_error_too_large">Съобщението е твърде голямо за изпращане</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор за силата на получения сигнал - измерване, използвано за определяне на нивото на получения сигнал, приемано от антената. По-високата стойност на RSSI обикновено показва по-силна и по-стабилна връзка.</string>
-    <string name="rsyslog_server">rsyslog сървър</string>
     <string name="sats">Сат</string>
     <!-- SAVE -->
     <string name="save">Запазване</string>
     <string name="save_and_restart">Запазване &amp; рестартиране</string>
     <string name="save_changes">Запис</string>
-    <string name="save_csv_in_storage_esp32_only">Запазване на .CSV в хранилище (само за ESP32)</string>
     <!-- SCAN -->
     <string name="scan">Сканиране</string>
     <string name="scan_bluetooth_devices">Сканиране за Bluetooth устройства</string>
@@ -1104,7 +1030,6 @@
     <string name="scan_nfc">Сканиране на NFC</string>
     <string name="scanning_bluetooth">Сканиране…</string>
     <string name="scanning_network">Сканиране…</string>
-    <string name="screen_on_for">Екранът е включен за</string>
     <string name="scroll_to_bottom">Превъртане до края</string>
     <string name="search_emoji">Търсене на емоджи...</string>
     <string name="secondary">Вторичен</string>
@@ -1137,14 +1062,7 @@
     <string name="send">Изпрати</string>
     <!-- SERIAL -->
     <string name="serial">Серийна</string>
-    <string name="serial_baud_rate">Серийна скорост на предаване</string>
     <string name="serial_config">Конфигуриране на серийната връзка</string>
-    <string name="serial_console">Серийна конзола</string>
-    <string name="serial_enabled">Серийната връзка е активирана</string>
-    <string name="serial_mode">Сериен режим</string>
-    <string name="serial_rx_pin">RX</string>
-    <string name="serial_tx_pin">TX</string>
-    <string name="server">Сървър</string>
     <string name="set_up_connection">Настройване на връзка</string>
     <string name="set_your_region">Задайте вашия регион</string>
     <string name="settings">настройки</string>
@@ -1163,7 +1081,6 @@
     <string name="show_waypoints">Показване на пътни точки</string>
     <string name="shutdown">Изключване</string>
     <string name="shutdown_node_name">Възел: %1$s</string>
-    <string name="shutdown_on_power_loss">Изключване при загуба на захранване</string>
     <string name="shutdown_warning">⚠️ Това ще ИЗКЛЮЧИ възела. Ще е необходимо физическо взаимодействие, за да се включи отново.</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество на сигнала</string>
@@ -1184,13 +1101,11 @@
     <string name="site_planner_use_node_location">Използване на текущото местоположение на възела</string>
     <string name="skip">Пропускане</string>
     <string name="slot">Слот</string>
-    <string name="smart_position">Интелигентна позиция</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Съотношение сигнал/шум, мярка, използвана в комуникациите за количествено определяне на нивото на желания сигнал спрямо нивото на фоновия шум. В Meshtastic и други безжични системи, по-високото съотношение сигнал/шум показва по-ясен сигнал, който може да подобри надеждността и качеството на предаване на данни.</string>
     <string name="speed">Скорост</string>
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="speed_mph">%1$d mph</string>
-    <string name="ssid">SSID</string>
     <string name="stay_connected_anywhere">Останете свързани навсякъде</string>
     <string name="subnet">Подмрежа</string>
     <string name="success">Успех</string>
@@ -1271,7 +1186,6 @@
     <!-- TRANSLATION -->
     <string name="translation_failed">Не може да се преведе съобщението</string>
     <string name="translation_model_download_failed">Изтеглянето на модела за превод не е успешно</string>
-    <string name="transmit_over_lora">Предаване през LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Транспорт</string>
     <string name="transport_api">API</string>
@@ -1284,8 +1198,6 @@
     <string name="twenty_four_hours">24Ч</string>
     <string name="two_days">48 часа</string>
     <string name="two_weeks">2С</string>
-    <string name="tx_enabled">Предаването е активирано</string>
-    <string name="tx_power_dbm">Мощност на предаване</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Въведете съобщение</string>
     <!-- UNITS -->
@@ -1314,11 +1226,7 @@
     <string name="url_template">Шаблон за URL</string>
     <string name="usb">USB</string>
     <!-- USE -->
-    <string name="use_12h_format">Използване на 12ч формат</string>
     <string name="use_homoglyph_characters_encoding">Компактно кодиране за Кирилица</string>
-    <string name="use_input_pullup_mode">Използване на режим INPUT_PULLUP</string>
-    <string name="use_modem_preset">Използване на предварително зададени настройки</string>
-    <string name="use_pwm_buzzer">Използване на PWM зумер</string>
     <!-- USER -->
     <string name="user">Потребител</string>
     <string name="user_config">Конфигуриране на потребителя</string>
@@ -1326,14 +1234,12 @@
     <string name="user_info">Информация за потребителя</string>
     <string name="user_string">Потребителски низ</string>
     <string name="userinfo">Информация за потребителя</string>
-    <string name="username">Потребителско име</string>
     <string name="via_api">чрез API</string>
     <string name="via_mqtt">с MQTT</string>
     <string name="via_udp">чрез UDP</string>
     <string name="view_on_map">Вижте на картата</string>
     <string name="view_release">Преглед на изданието</string>
     <string name="voltage">Напрежение</string>
-    <string name="wake_on_tap_or_motion">Събуждане при докосване или движение</string>
     <string name="warning">Предупреждение</string>
     <string name="waypoint_delete">Изтриване на пътна точка?</string>
     <string name="waypoint_edit">Редактиране на пътна точка</string>

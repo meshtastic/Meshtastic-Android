@@ -44,7 +44,6 @@
     <string name="action_translate_message">翻译消息</string>
     <string name="actions">操作</string>
     <string name="adc_multiplier_override">ADC 倍数覆盖</string>
-    <string name="adc_multiplier_override_ratio">ADC乘数修正比率</string>
     <!-- ADD -->
     <string name="add">新增</string>
     <string name="add_a_note">添加便笺…</string>
@@ -57,7 +56,6 @@
     <string name="add_network_device_manually">手动添加设备…</string>
     <string name="add_network_layer">添加网络图层</string>
     <string name="address">地址</string>
-    <string name="admin_key">管理员密钥</string>
     <string name="admin_keys">管理密钥</string>
     <string name="administration">管理</string>
     <string name="advanced">高级</string>
@@ -67,24 +65,15 @@
     <string name="air_quality">空气质量</string>
     <string name="air_quality_icon">空气质量图标</string>
     <string name="air_quality_metrics_log">空气质量指标日志</string>
-    <string name="air_quality_metrics_module_enabled">启用空气质量计量模块</string>
-    <string name="air_quality_metrics_update_interval_seconds">空气质量计量更新间隔</string>
     <string name="air_util_definition">过去一小时内用于传输的空中占用时间百分比。</string>
     <string name="air_utilization">AirUtil</string>
     <!-- ALERT -->
-    <string name="alert_bell_buzzer">警铃蜂鸣</string>
-    <string name="alert_bell_led">警铃 LED</string>
     <string name="alert_bell_text">警铃字符！</string>
-    <string name="alert_bell_vibra">警铃震动</string>
-    <string name="alert_message_buzzer">警告消息蜂鸣</string>
-    <string name="alert_message_led">警告消息指示灯</string>
-    <string name="alert_message_vibra">警告消息振动</string>
     <string name="all_time">全部</string>
     <string name="allow_input_source">允许输入源</string>
     <string name="allow_undefined_pin_access">允许未定义的引脚访问</string>
     <string name="alt">海拔</string>
     <string name="altitude">海拔</string>
-    <string name="always_point_north">总是朝北</string>
     <string name="ambient_lighting">环境照明</string>
     <string name="ambient_lighting_config">环境亮度配置</string>
     <string name="analytics_notice">我们收集分析数据是为了帮助改进这款安卓应用（感谢您的支持），我们会收到关于用户行为的匿名信息。这包括崩溃报告、应用中使用过的屏幕等内容。</string>
@@ -132,19 +121,15 @@
     <string name="backup_restore">备份 &amp; 还原</string>
     <string name="bad">差</string>
     <!-- BANDWIDTH -->
-    <string name="bandwidth">带宽</string>
     <string name="baro_pressure">气压计</string>
     <string name="battery">电池</string>
     <string name="battery_ina_2xx_i2c_address">电池INA_2XX I2C 地址</string>
     <string name="ble_devices">蓝牙设备</string>
-    <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI 阈值(默认为-80)</string>
-    <string name="blue">蓝</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">蓝牙</string>
     <string name="bluetooth_available_devices">可用的蓝牙设备</string>
     <string name="bluetooth_config">蓝牙配置</string>
     <string name="bluetooth_disabled">蓝牙已关闭请打开蓝牙以扫描附近的设备。</string>
-    <string name="bluetooth_enabled">启用蓝牙</string>
     <string name="bluetooth_feature_config">配置</string>
     <string name="bluetooth_feature_config_description">无线管理您的设备设置和信道。</string>
     <string name="bluetooth_feature_discovery">发现</string>
@@ -156,14 +141,10 @@
     <plurals name="bluetooth_scan_too_frequent">
         <item quantity="other">已达到蓝牙扫描次数限制。请在 %1$d秒后重试。</item>
     </plurals>
-    <string name="bold_heading">加粗标题</string>
     <string name="bonding_failed_permissions">配对失败请授权附近设备权限后重试。</string>
     <string name="bonding_failed_retry">配对未完成请尝试重新配对。</string>
     <string name="bottom_nav_settings">设置</string>
-    <string name="broadcast_interval">广播间隔</string>
     <string name="busy_noise_floor">当前信道繁忙</string>
-    <string name="button_gpio">按钮 GPIO</string>
-    <string name="buzzer_gpio">蜂鸣器 GPIO</string>
     <string name="calculating">正在计算……</string>
     <string name="call_sign">短号</string>
     <string name="camera_permission">相机权限</string>
@@ -176,7 +157,6 @@
     <string name="canned_message_enabled">启用预设消息</string>
     <string name="cant_change_no_radio">无法更改频道，因为装置尚未连接。请再试一次。</string>
     <string name="cant_shutdown">此设备不支持关机</string>
-    <string name="carousel_interval">轮播间隔</string>
     <string name="ch_util_definition">当前信道的利用情况，包括格式正确的发送(TX）、接收（RX）以及无法解码的接收(即噪声）。</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -231,9 +211,6 @@
     <string name="co2">二氧化碳</string>
     <string name="co2_humidity">二氧化碳 湿度</string>
     <string name="co2_temperature">二氧化碳 温度</string>
-    <string name="codec_2_enabled">启用CODEC2</string>
-    <string name="codec2_sample_rate">CODEC2 采样率</string>
-    <string name="coding_rate">编码率</string>
     <string name="collapse_chart">折叠图表</string>
     <string name="collapsed">已折叠</string>
     <string name="communicate_off_the_grid">在没有手机服务的情况下与您的朋友和社区进行网外通信。</string>
@@ -246,47 +223,23 @@
     <string name="compass_no_location_permission">此设备没有指南针传感器。方向信息不可用</string>
     <string name="compass_no_magnetometer">此设备没有指南针传感器。方向信息不可用</string>
     <string name="compass_north_top">罗盘总是朝北</string>
-    <string name="compass_orientation">罗盘方向</string>
     <string name="compass_title">指南针</string>
     <string name="compass_uncertainty">估计区域: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">估计区域：精度未知</string>
     <string name="compromised_keys">检测到密钥泄漏，请点击 确定 进行重新生成。</string>
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">将支持的加速度计上的双击操作视为 User 按键的按压动作。</string>
     <string name="config_device_ledHeartbeatEnabled_summary">控制设备上的指示灯闪烁。对于大多数设备，这将控制最多 4 个指示灯，充电器和 GPS 指示灯无法控制。</string>
-    <string name="config_device_transmitOverLora_summary">是否除了发送到 MQTT 和 PhoneAPI 外，还应通过 LoRa 传输我们的邻居信息（NeighborInfo）。在具有默认密钥和名称的通道上不可用。</string>
     <string name="config_device_tripleClickAsAdHocPing_summary">当用户按钮被点击三次时，在主通道上发送定位。</string>
     <string name="config_device_tzdef_summary">设备屏幕和日志上的日期时区。</string>
     <string name="config_device_use_phone_tz">使用手机的地方时区</string>
-    <string name="config_display_auto_screen_carousel_secs_summary">根据指定的时间间隔，像旋转木马一样自动切换到屏幕上的下一页。</string>
-    <string name="config_display_compass_north_top_summary">屏幕上的指南针总是指向北。</string>
-    <string name="config_display_displaymode_summary">覆盖默认屏幕布局。</string>
-    <string name="config_display_flip_screen_summary">垂直翻转屏幕。</string>
-    <string name="config_display_heading_bold_summary">屏幕上的标题文字加粗。</string>
-    <string name="config_display_oled_summary">覆盖自动OLED屏幕检测。</string>
-    <string name="config_display_screen_on_secs_summary">按下用户按钮或收到消息后屏幕保持亮屏的时间。</string>
-    <string name="config_display_units_summary">设备屏幕显示的单位。</string>
-    <string name="config_display_wake_on_tap_or_motion_summary">需要在设备上有一个加速计。</string>
-    <string name="config_lora_frequency_slot_summary">您的节点运行频率是根据地区、调制解调器预设和此字段计算的。 当0时，插槽会自动根据主频道名称计算，并会从默认的公共插槽中改变。 如果配置了私有的主频道和公立中等频道，则更改到公共默认频道。</string>
-    <string name="config_lora_hop_limit_summary">设置节点的最大次数，默认值为 3。 增加频率也会增加拥塞，应该谨慎使用。0个节点广播消息不会得到ACK。</string>
     <string name="config_lora_modem_preset_licensed_summary">该地区的预设参数仅供持证 (业余无线电) 仅限操作员使用.请启用持证业余无线电模式 (Ham) 在用户配置中进行选择。</string>
     <string name="config_lora_modem_preset_summary">可用的调制解调器预置，默认为 “Long Fast”。</string>
     <string name="config_lora_region_summary">使用电台的地区。</string>
-    <string name="config_network_eth_enabled_summary">启用以太网将禁用蓝牙连接。TCP节点连接在 Apple 设备上不可用。</string>
     <string name="config_network_udp_enabled_summary">在本地网络上启用通过 UDP广播数据包。</string>
-    <string name="config_position_broadcast_secs_summary">无节点广播位置的最大间隔。</string>
-    <string name="config_position_broadcast_smart_minimum_distance_summary">智能位置广播考虑的最小距离变化以米为单位。</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">如果达到最小距离，位置更新将会发送最快的。</string>
-    <string name="config_position_flags_summary">包含位置消息时可选择包含的附加字段。包含的字段越多，消息体积就越大——这会导致占用更长的空中传输时间并增加丢包的风险。</string>
-    <string name="config_position_gps_update_interval_summary">应该以多长的时间尝试获取 GPS 位置(&lt;10秒将GPS保持开启)。</string>
-    <string name="config_power_is_power_saving_summary">尽可能让所有设备处于睡眠状态，对于跟踪器和传感器来说，这也包括 LoRa 无线电。如果您想将电台与手机 App 一起使用，或使用没有用户按钮的电台，请不要使用此设置。</string>
     <string name="config_saved_restarting">该节点正在重启，将在短时间内无法连接。</string>
-    <string name="config_security_admin_key">授权向该节点发送管理员密钥。</string>
-    <string name="config_security_debug_log_api_enabled">通过串行或蓝牙导出设备调试日志。</string>
-    <string name="config_security_is_managed">设备由 Mesh 管理员管理，用户无法访问任何设备设置。</string>
     <string name="config_security_private_key">用来创建远程设备共享密钥</string>
     <string name="config_security_public_key">从您的私钥生成并发送到网络上的其他节点，让它们能够计算共享的密钥。</string>
-    <string name="config_security_serial_enabled">串口控制 API</string>
     <string name="configuration">Configuration</string>
     <string name="configure_bluetooth_permissions">设置蓝牙权限</string>
     <string name="configure_critical_alerts">配置关键警报</string>
@@ -333,7 +286,6 @@
     <string name="debug_filter_included">筛选已包含</string>
     <string name="debug_filter_preset_title">重置筛选</string>
     <string name="debug_filters">筛选器</string>
-    <string name="debug_log_api_enabled">启用调试日志 API </string>
     <string name="debug_logcat_empty">没有应用日志可以显示</string>
     <string name="debug_logcat_refresh">刷新</string>
     <string name="debug_logs_export">导出程序日志</string>
@@ -383,8 +335,6 @@
     <string name="details">详细信息</string>
     <string name="detection_sensor">检测传感器</string>
     <string name="detection_sensor_config">检测传感器配置</string>
-    <string name="detection_sensor_enabled">启用检测传感器</string>
-    <string name="detection_trigger_type">检测触发器类型</string>
     <!-- DEVICE -->
     <string name="device">设备</string>
     <string name="device_configuration">设备配置</string>
@@ -398,12 +348,9 @@
     <string name="device_metrics_log">设备指标</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
-    <string name="device_metrics_update_interval_seconds">设备计量更新间隔 </string>
     <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_sleeping">设备休眠中</string>
     <string name="device_storage_ui_title">设备存储&amp; UI (Read-Only)</string>
-    <string name="device_telemetry_enabled">发送设备远程数据</string>
-    <string name="device_telemetry_enabled_summary">启用/禁用设备遥测模块，以将指标发送至网络。这些是标称值。拥堵的网络会根据在线节点的数量自动调整为更长的间隔。节点少于个的网络会调整为更快的间隔。</string>
     <string name="device_theme_language">主题: %1$s, 语言: %2$s</string>
     <string name="dew_point">结露点</string>
     <string name="direct_message">私信</string>
@@ -491,9 +438,6 @@
     <!-- DISPLAY -->
     <string name="display">显示</string>
     <string name="display_config">设备显示</string>
-    <string name="display_mode">显示模式</string>
-    <string name="display_time_in_12h_format">如果启用，设备将在屏幕上以12小时制格式显示时间。</string>
-    <string name="display_units">显示单位</string>
     <!-- DISTANCE -->
     <string name="distance">距离</string>
     <string name="distance_filters">距离筛选器</string>
@@ -553,38 +497,29 @@
     <string name="documentation">文档</string>
     <string name="done">完成</string>
     <string name="dont_show_again_for_device">此设备不再显示</string>
-    <string name="double_tap_as_button_press">双击作为按钮</string>
     <string name="downlink_feature_description">来自公共互联网网关的消息会被转发到本地 mesh 网络。由于采用零跳策略，来自默认 MQTT 服务器的流量不会传播到该设备之外。</string>
     <string name="download">下载</string>
     <string name="duplicated_public_key_title">检测到重复公钥</string>
     <string name="dynamic">动态</string>
     <string name="easily_set_up_private_mesh_networks">轻松建立私人网格网络，以便在偏远地区进行安全和可靠的通信。</string>
-    <string name="echo_enabled">启用Echo</string>
     <string name="edit">编辑</string>
     <string name="edit_custom_tile_source">编辑网络图层源</string>
     <string name="eight_hours">8 小时</string>
     <!-- EMOJI -->
-    <string name="enable_power_saving_mode">启用节能模式</string>
     <string name="enabled">启用</string>
     <!-- ENCRYPTION -->
-    <string name="encryption_enabled">启用加密</string>
     <string name="encryption_error">公钥不匹配</string>
     <string name="encryption_error_text">公钥与输入的密钥不匹配。 您可以移除该节点并让它再次交换密钥，但这可能会出现密钥泄露问题。 请通过另一个受信任的频道来联系用户，以确定密钥更改是否由于出厂重置或其他故意操作。</string>
     <string name="encryption_pkc">公钥加密</string>
     <string name="env_metrics_log">传感器指标</string>
     <!-- ENVIRONMENT -->
     <string name="environment">环境</string>
-    <string name="environment_metrics_module_enabled">启用环境计量模块</string>
-    <string name="environment_metrics_on_screen_enabled">屏幕显示环境指标</string>
-    <string name="environment_metrics_update_interval_seconds">环境计量更新间隔</string>
-    <string name="environment_metrics_use_fahrenheit">环境测量值使用华氏度</string>
     <string name="error">错误</string>
     <string name="error_duty_cycle">触及占空比上限。暂时无法发送消息，请稍后再试。</string>
     <string name="error_recovery_exhausted">多次尝试后仍无法建立稳定的连接.请重新选择节点进行重试。</string>
     <string name="establish_session">连接 &amp; 管理</string>
     <string name="establishing_session">建立远程会话…</string>
     <string name="ethernet_config">以太网选项</string>
-    <string name="ethernet_enabled">启用以太网</string>
     <string name="ethernet_ip">以太网 IP 地址：</string>
     <string name="event_use_event_theme">使用活动主题</string>
     <string name="exchange_position">交换位置</string>
@@ -598,7 +533,6 @@
     <string name="export_tak_data_package">导出 TAK 数据包</string>
     <string name="external_notification">外部通知</string>
     <string name="external_notification_config">外部通知设置</string>
-    <string name="external_notification_enabled">启用外部通知</string>
     <string name="factory_reset">恢复出厂设置</string>
     <string name="fair">一般</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
@@ -726,7 +660,6 @@
     <string name="firmware_version">固件版本</string>
     <string name="fixed_pin">固定PIN码</string>
     <string name="fixed_position">固定位置</string>
-    <string name="flip_screen">翻转屏幕</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多信息，请参阅我们的隐私政策。</string>
     <!-- FORMAT -->
     <string name="format_bold">粗体</string>
@@ -737,13 +670,8 @@
     <string name="free_memory">可用内存</string>
     <string name="free_memory_description">可用系统内存</string>
     <string name="freq">频率</string>
-    <string name="frequency_slot">频率</string>
-    <string name="friendly_name">易记名称</string>
     <string name="gas_resistance">气体电阻性</string>
     <string name="gateway">网关</string>
-    <string name="generate_input_event_on_ccw">CCW时生成输入事件</string>
-    <string name="generate_input_event_on_cw">CW 时生成输入事件</string>
-    <string name="generate_input_event_on_press">按下时生成输入事件</string>
     <string name="generate_qr_code">生成二维码</string>
     <!-- GEOFENCE -->
     <string name="geofence">地图围栏</string>
@@ -770,28 +698,15 @@
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO 引脚</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">用于旋转编码器A端口的 GPIO 引脚</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">用于旋转编码器B端口的 GPIO 引脚</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">用于旋转编码器按键端口的 GPIO 引脚</string>
-    <string name="gpio_pin_to_monitor">显示器的 GPIO 引脚</string>
-    <string name="gps_en_gpio">GPS 使能 GPIO</string>
-    <string name="gps_mode">GPS 模式 (物理硬件)</string>
-    <string name="gps_receive_gpio">GPS 接收GPIO</string>
-    <string name="gps_transmit_gpio">GPS 输出 GPIO</string>
     <string name="grant_permission">授予权限</string>
-    <string name="green">绿</string>
     <string name="hardware">硬件</string>
     <string name="hardware_model">硬件型号</string>
     <string name="heading">航向</string>
-    <string name="heartbeat">心跳</string>
     <string name="help_and_documentation">帮助 &amp; 文档</string>
     <string name="hide_layer">隐藏图层</string>
     <string name="hide_password">隐藏密码</string>
-    <string name="history_return_max">历史记录最大返回值</string>
-    <string name="history_return_window">历史记录返回窗口</string>
     <string name="hop_histogram_empty">此窗口没有收到节点</string>
     <string name="hop_histogram_title">每跳节点数</string>
-    <string name="hop_limit">节点数</string>
     <string name="hops_away">跃点数</string>
     <string name="host">主机</string>
     <string name="host_metrics_log">主机测量</string>
@@ -799,10 +714,6 @@
     <string name="i_agree">我同意。</string>
     <string name="i_agree_to_share_my_location">我已阅读并理解以上内容。我自愿同意通过MQTT未加密地传输我的节点数据。</string>
     <string name="i_know_what_i_m_doing">我知道自己在做什么</string>
-    <string name="i2s_clock">I2S 时钟</string>
-    <string name="i2s_data_in">I2S 数据 IN</string>
-    <string name="i2s_data_out">I2S 数据 OUT</string>
-    <string name="i2s_word_select">I2S 字选择</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">室内空气质量（Indoor Air Quality, IAQ）：由 Bosch BME680 传感器测量的相对标尺 IAQ 值，取值范围为 0–500。</string>
     <string name="icon_meanings">图标含义</string>
@@ -810,7 +721,6 @@
     <string name="ignore">忽略</string>
     <string name="ignore_add">添加 '%1$s' 到忽略列表？</string>
     <string name="ignore_incoming">忽略接收</string>
-    <string name="ignore_mqtt">忽略 MQTT</string>
     <string name="ignore_remove">从忽略列表中删除 '%1$s' ？</string>
     <!-- IMPORT -->
     <string name="import_configuration">导入配置</string>
@@ -836,7 +746,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP地址：</string>
     <string name="ip_port">端口：</string>
-    <string name="ipv4_mode">IPv4模式</string>
     <string name="json_output_enabled">启用JSON输出</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
@@ -858,7 +767,6 @@
     <string name="layer_type_network">网络层</string>
     <string name="learn_more">更多信息</string>
     <string name="led_heartbeat">LED 心跳</string>
-    <string name="led_state">LED 状态</string>
     <string name="legacy_admin_channel">旧版管理频道</string>
     <string name="library_count">%1$d 库</string>
     <!-- LICENSED -->
@@ -944,7 +852,6 @@
     <string name="lux">照度</string>
     <string name="manage_custom_tile_sources">管理自定义瓦片源</string>
     <string name="manage_map_layers">管理地图图层</string>
-    <string name="managed_mode">管理模式</string>
     <string name="manual_position_request">需要手动定位请求</string>
     <!-- MAP -->
     <string name="map">Mesh 地图</string>
@@ -1054,8 +961,6 @@
     <string name="micrograms_per_cubic_meter">微克每立方米</string>
     <string name="min">最小值</string>
     <string name="minimum_broadcast_seconds">最小广播时间(秒)</string>
-    <string name="minimum_distance">自动距离大小</string>
-    <string name="minimum_interval">自动时间间隔</string>
     <string name="minimum_wake_time_seconds">最小唤醒时间</string>
     <string name="modem_preset">预设</string>
     <string name="module_settings">模块设定</string>
@@ -1065,7 +970,6 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT设置</string>
-    <string name="mqtt_enabled">启用MQTT</string>
     <string name="mqtt_error_connection_lost">MQTT：连接已丢失</string>
     <string name="mqtt_error_credentials_rejected">MQTT：连接被拒绝（请检查凭据）</string>
     <string name="mqtt_error_proxy_failed">MQTT 代理失败: %1$s</string>
@@ -1110,7 +1014,6 @@
     <string name="navigate_into_label">导航到</string>
     <string name="neighbor_info">邻居信息</string>
     <string name="neighbor_info_config">邻居信息设置</string>
-    <string name="neighbor_info_enabled">启用邻居信息</string>
     <string name="network">网络</string>
     <string name="new_channel_rcvd">收到新的频道 URL</string>
     <string name="new_messages_below">新消息</string>
@@ -1182,7 +1085,6 @@
     <string name="node_sort_via_favorite">通过收藏夹</string>
     <string name="node_sort_via_mqtt">通过 MQTT</string>
     <string name="nodedb_reset">重置节点数据库</string>
-    <string name="nodeinfo_broadcast_interval">节点信息广播间隔</string>
     <!-- NODES -->
     <string name="nodes">节点</string>
     <string name="nodes_at_this_location">在此位置的节点</string>
@@ -1208,12 +1110,8 @@
     <string name="notifications_on_alert_bell_receipt">警报/铃声接收通知</string>
     <string name="notifications_on_message_receipt">消息已读回执通知</string>
     <string name="now">当前</string>
-    <string name="ntp_server">NTP 服务器</string>
-    <string name="number_of_records">记录数</string>
     <!-- OFFLINE -->
-    <string name="ok_to_mqtt">使用MQTT</string>
     <string name="okay">确定</string>
-    <string name="oled_type">OLED 类型</string>
     <!-- ONE -->
     <string name="one_day">24 小时</string>
     <string name="one_hour">1 小时</string>
@@ -1232,16 +1130,9 @@
     <string name="options">选项</string>
     <string name="orient_north">朝北</string>
     <!-- OUTPUT -->
-    <string name="output_buzzer_gpio">输出震动(GPIO)</string>
     <string name="output_duration_milliseconds">输出持续时间 (毫秒)</string>
-    <string name="output_led_active_high">输出 LED 活动高</string>
-    <string name="output_led_gpio">输出 LED (GPIO)</string>
-    <string name="output_vibra_gpio">输出振动 (GPIO)</string>
     <string name="overflow_menu">溢出菜单</string>
     <string name="override_console_serial_port">覆盖控制台串口端口</string>
-    <string name="override_duty_cycle">覆盖占空比</string>
-    <string name="override_frequency_mhz">频率覆盖</string>
-    <string name="pa_fan_disabled">PA风扇已禁用</string>
     <!-- PACKET -->
     <string name="packet_authenticity">数据包身份验证</string>
     <string name="packet_authenticity_balanced">平衡模式 —优先验证身份</string>
@@ -1255,7 +1146,6 @@
     <string name="packet_authenticity_strict_summary">仅显示和处理经过加密身份验证的网状网络数据包。旧版节点和超大尺寸的数据包可能会因此消失。</string>
     <string name="packet_authenticity_strict_title">是否启用严格身份验证？</string>
     <string name="packet_authenticity_unsupported">当前连接的设备不支持数据包签名验证功能。</string>
-    <string name="pairing_mode">配对模式</string>
     <string name="password">密码</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
@@ -1267,7 +1157,6 @@
     <string name="pax_wifi_format">W:%1$d</string>
     <string name="paxcounter">客流计数</string>
     <string name="paxcounter_config">Paxcount 配置</string>
-    <string name="paxcounter_enabled">启用 Paxcount</string>
     <string name="periodic_position_broadcast">定期广播</string>
     <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic需要启用“附近的设备”权限，以便通过蓝牙查找并连接设备。不使用时，您可以将其禁用。</string>
@@ -1293,16 +1182,12 @@
     <string name="position">定位</string>
     <string name="position_config_set_fixed_from_phone">根据当前手机位置设置</string>
     <string name="position_enabled">启用位置</string>
-    <string name="position_flags">位置标记</string>
     <string name="position_log">定位</string>
     <string name="position_packet">位置数据包</string>
     <!-- POWER -->
     <string name="power">电源</string>
     <string name="power_config">电源配置</string>
     <string name="power_metrics_log">电源计量日志</string>
-    <string name="power_metrics_module_enabled">启用电源计量模块</string>
-    <string name="power_metrics_on_screen_enabled">在屏幕上启用电源指标</string>
-    <string name="power_metrics_update_interval_seconds">电量计更新间隔</string>
     <string name="powered">已插电</string>
     <string name="ppm">总质量</string>
     <string name="precise_location">精准位置</string>
@@ -1324,13 +1209,10 @@
     <string name="preview_text">文本</string>
     <string name="primary">主要</string>
     <string name="primary_channel_feature">定期广播位置和遥测</string>
-    <string name="private_key">私钥</string>
     <string name="project_information">项目信息</string>
     <string name="provide_location_to_mesh">向网格提供手机位置</string>
     <string name="provider_name_exists">服务提供商名已存在。</string>
-    <string name="proxy_to_client_enabled">启用客户端代理</string>
     <string name="psk">共享密钥/PSK</string>
-    <string name="ptt_pin">PTT 引脚</string>
     <string name="public_key">公钥</string>
     <string name="public_key_changed">公钥已更改</string>
     <string name="qr_code">QR 码</string>
@@ -1348,11 +1230,9 @@
     <string name="rainfall_24h">雨量 (24小时)</string>
     <string name="range_test">距离测试</string>
     <string name="range_test_config">范围测试设置</string>
-    <string name="range_test_enabled">启用范围测试</string>
     <string name="react">互动</string>
     <string name="reboot">重启</string>
     <!-- REBROADCAST -->
-    <string name="rebroadcast_mode">转播模式</string>
     <string name="rebroadcast_mode_all_desc">重新广播任何观察到的消息，无论是来自我们的私有频道还是具有相同 LoRa 参数的其他网状网络。</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">与 ALL 模式的行为相同，但跳过数据包解码，仅简单地重新广播它们。仅适用于中继器角色。在其他角色中设置此选项将表现为 ALL 模式。</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">忽略来自非标准端口号（如 TAK、RangeTest、PaxCounter 等）的数据包，仅重新广播标准端口号的数据包：NodeInfo、Text、Position、Telemetry 和 Routing。</string>
@@ -1361,7 +1241,6 @@
     <string name="rebroadcast_mode_none_desc">仅限 SENSOR、TRACKER 和 TAK_TRACKER 角色，此模式将禁止所有重新广播，与 CLIENT_MUTE 角色类似。</string>
     <string name="recent_network_devices">最近使用的网络设备</string>
     <string name="reconnecting">正在重新连接…</string>
-    <string name="red">红</string>
     <string name="refresh">刷新</string>
     <string name="refresh_metadata">刷新元数据</string>
     <string name="regenerate_keys_confirmation">您确定要重新生成您的私钥吗？\n\n曾与此节点交换过密钥的节点将需要删除该节点并重新交换密钥以恢复安全通信。</string>
@@ -1439,8 +1318,6 @@
     <string name="role_tak_tracker_desc">启用自动 TAK PLI（Position Location Information）广播，并减少常规广播。</string>
     <string name="role_tracker">追踪器</string>
     <string name="role_tracker_desc">定位模式 - 用于作为 GPS 跟踪器。从该设备发送的定位数据包优先级较高，每两分钟广播一次。智能位置广播默认为关闭。</string>
-    <string name="root_topic">根主题</string>
-    <string name="rotary_encoder_1_enabled">启用旋转编码器 #1 </string>
     <string name="router_role_confirmation_text">我已经阅读了 &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;设备角色文档&lt;/a&gt; 这篇博客文章&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;选择合适的设备角色&lt;/a&gt;。</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">接收到否定确认</string>
@@ -1454,13 +1331,11 @@
     <string name="routing_error_too_large">消息太大，无法发送</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">接收信号强度指示（Received Signal Strength Indicator, RSSI）是一种用于测量天线接收到的信号功率的指标。较高的 RSSI 值通常表示更强、更稳定的连接。</string>
-    <string name="rsyslog_server">rsyslog 服务器</string>
     <string name="sats">卫星</string>
     <!-- SAVE -->
     <string name="save">保存</string>
     <string name="save_and_restart">保存 &amp; 重启</string>
     <string name="save_changes">保存</string>
-    <string name="save_csv_in_storage_esp32_only">保存 CSV 到存储 (仅ESP32)</string>
     <string name="save_rangetest">导出范围测试数据包</string>
     <!-- SCAN -->
     <string name="scan">扫描</string>
@@ -1474,7 +1349,6 @@
     <string name="scan_shared_contact_qr">扫描共享联系人二维码</string>
     <string name="scanning_bluetooth">正在扫描…</string>
     <string name="scanning_network">正在扫描…</string>
-    <string name="screen_on_for">开启屏幕</string>
     <string name="scroll_to_bottom">滚动到底部</string>
     <string name="search_emoji">搜索Emoji……</string>
     <string name="search_messages">搜索消息…</string>
@@ -1507,19 +1381,10 @@
     <string name="selected">选择</string>
     <string name="selected_map_type">所选地图类型</string>
     <string name="send">传送</string>
-    <string name="send_bell">发送响铃</string>
-    <string name="send_bell_with_alert_message">发送带有警报消息的响铃声</string>
     <string name="sender_message_interval_seconds">发件人消息间隔(秒)</string>
     <!-- SERIAL -->
     <string name="serial">串口</string>
-    <string name="serial_baud_rate">串口波特率</string>
     <string name="serial_config">串口配置</string>
-    <string name="serial_console">串口控制</string>
-    <string name="serial_enabled">启用串口</string>
-    <string name="serial_mode">串口模式</string>
-    <string name="serial_rx_pin">接收</string>
-    <string name="serial_tx_pin">发送</string>
-    <string name="server">服务器</string>
     <string name="session_active">会话处于活跃状态</string>
     <string name="session_refresh_required">请刷新以获取最新状态</string>
     <string name="set_time">设置时间</string>
@@ -1548,7 +1413,6 @@
     <string name="show_waypoints">显示航点</string>
     <string name="shutdown">关机</string>
     <string name="shutdown_node_name">节点 (%1$s</string>
-    <string name="shutdown_on_power_loss">断电时关机</string>
     <string name="shutdown_warning">⚠️ 警告！此操作将会关闭该节点。你需要使用电源开关按键才能重启设备~</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号质量</string>
@@ -1580,7 +1444,6 @@
     <string name="site_planner_use_node_location">使用当前节点的位置</string>
     <string name="skip">跳过</string>
     <string name="slot">槽位</string>
-    <string name="smart_position">智能位置</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">信噪比（Signal-to-Noise Ratio, SNR）是一种用于通信领域的测量指标，用于量化目标信号与背景噪声的比例。在 Meshtastic 及其他无线系统中，较高的信噪比表示信号更加清晰，从而能够提升数据传输的可靠性和质量。</string>
     <string name="soil_moisture">土壤湿度</string>
@@ -1588,15 +1451,12 @@
     <string name="speed">速度</string>
     <string name="speed_kmh">%1$d 公里/小时</string>
     <string name="speed_mph">%1$d 英里每小时</string>
-    <string name="spread_factor">扩散因子</string>
-    <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">状态广播(秒)</string>
     <string name="status_message">状态消息</string>
     <string name="stay_connected_anywhere">随时随地保持联系</string>
     <string name="stop_connecting">停止连接</string>
     <string name="store_forward">存储 &amp; 转发</string>
     <string name="store_forward_config">存储 &amp; 转发配置</string>
-    <string name="store_forward_enabled">存储 &amp; 已启用转发</string>
     <string name="subnet">子网</string>
     <string name="success">成功</string>
     <string name="super_deep_sleep_duration_seconds">深度睡眠时间</string>
@@ -1605,7 +1465,6 @@
     <string name="swipe_action_delete">删除</string>
     <string name="swipe_action_mute">静音</string>
     <string name="swipe_action_unmute">取消静音</string>
-    <string name="sx126x_rx_boosted_gain">RX 增益</string>
     <string name="system_settings">系统设置</string>
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
@@ -1709,7 +1568,6 @@
     <string name="translation_failed">无法翻译消息</string>
     <string name="translation_model_download_failed">翻译模型下载失败</string>
     <string name="translation_not_required">该消息已经是您所使用的语言</string>
-    <string name="transmit_over_lora">通过 LoRa 传输</string>
     <!-- TRANSPORT -->
     <string name="transport">传输方式</string>
     <string name="transport_api">应用程序编程接口</string>
@@ -1723,8 +1581,6 @@
     <string name="twenty_four_hours">24 小时</string>
     <string name="two_days">48 小时</string>
     <string name="two_weeks">2 周</string>
-    <string name="tx_enabled">启用传输</string>
-    <string name="tx_power_dbm">发送强度</string>
     <string name="type">类型</string>
     <string name="type_a_message">输入一条消息</string>
     <string name="udp_enabled">UDP 广播</string>
@@ -1745,8 +1601,6 @@
     <string name="unmute_selected">取消休眠所选节点</string>
     <string name="unrecognized">无法识别的</string>
     <string name="unset">未设定 - 0</string>
-    <string name="up_down_select_input_enabled">启用Up/Down/select 输入</string>
-    <string name="update_interval">GPS 轮询间隔</string>
     <string name="update_interval_seconds">更新间隔（秒）</string>
     <string name="updated">更新</string>
     <string name="uplink_feature_description">网格中的消息将通过节点配置的网关发送到公共互联网。</string>
@@ -1759,12 +1613,7 @@
     <string name="usb">USB</string>
     <string name="usb_permission_denied">USB 权限被拒绝.请重新连接设备以重试。</string>
     <!-- USE -->
-    <string name="use_12h_format">使用 12 小时制格式</string>
     <string name="use_homoglyph_characters_encoding">紧凑的Cyrillic编码</string>
-    <string name="use_i2s_as_buzzer">使用 I2S 作为蜂鸣器</string>
-    <string name="use_input_pullup_mode">使用 输入上拉 模式</string>
-    <string name="use_modem_preset">使用预设</string>
-    <string name="use_pwm_buzzer">使用 PWM 蜂鸣器</string>
     <!-- USER -->
     <string name="user">用户</string>
     <string name="user_config">用户配置</string>
@@ -1772,7 +1621,6 @@
     <string name="user_info">用户信息</string>
     <string name="user_string">用户字符串</string>
     <string name="userinfo">用户信息</string>
-    <string name="username">用户名</string>
     <string name="uv_lux">紫外线强度</string>
     <string name="via_api">通过 API</string>
     <string name="via_mqtt">通过 MQTT</string>
@@ -1780,8 +1628,6 @@
     <string name="view_on_map">查看地图</string>
     <string name="view_release">查看发行版</string>
     <string name="voltage">电压</string>
-    <string name="wait_for_bluetooth_duration_seconds">等待蓝牙持续时间 </string>
-    <string name="wake_on_tap_or_motion">点击或移动时唤醒屏幕</string>
     <string name="warning">警告</string>
     <string name="waypoint_delete">删除航点?</string>
     <string name="waypoint_edit">编辑航点</string>

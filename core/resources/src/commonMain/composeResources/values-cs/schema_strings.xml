@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">Modrá</string>
+    <string name="schema_ambientlighting_green">Zelená</string>
+    <string name="schema_ambientlighting_led_state">Stav LED</string>
+    <string name="schema_ambientlighting_red">Červená</string>
+    <string name="schema_audio_i2s_din">I2S výstupní data</string>
+    <string name="schema_audio_i2s_sd">I2S vstupní data</string>
+    <string name="schema_audio_i2s_ws">I2S výběr slov</string>
+    <string name="schema_bluetooth_enabled">Bluetooth povoleno</string>
+    <string name="schema_bluetooth_mode">Režim párování</string>
+    <string name="schema_cannedmessage_inputbroker_event_ccw">Vytvořit vstupní akci při otáčení proti směru hodinových ručiček</string>
+    <string name="schema_cannedmessage_inputbroker_event_cw">Vytvořit vstupní akci při otáčení ve směru hodinových ručiček</string>
+    <string name="schema_cannedmessage_inputbroker_event_press">Vytvořit vstupní akci při stisku Press</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">GPIO pin pro rotační enkodér A port</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">GPIO pin pro port B rotačního enkodéru</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">GPIO pin pro port Press rotačního enkodéru</string>
+    <string name="schema_cannedmessage_rotary1_enabled">Rotační enkodér #1 povolen</string>
+    <string name="schema_cannedmessage_send_bell">Odeslat zvonek</string>
+    <string name="schema_cannedmessage_updown1_enabled">Vstup Nahoru/Dolů/Výběr povolen</string>
+    <string name="schema_detectionsensor_detection_trigger_type">Typ spouštění detekce</string>
+    <string name="schema_detectionsensor_enabled">Detekční senzor povolen</string>
+    <string name="schema_detectionsensor_monitor_pin">GPIO pin ke sledování</string>
+    <string name="schema_detectionsensor_name">Přezdívka</string>
+    <string name="schema_detectionsensor_send_bell">Poslat zvonek s výstražnou zprávou</string>
+    <string name="schema_detectionsensor_use_pullup">Použít INPUT_PULLUP režim</string>
+    <string name="schema_device_button_gpio">Tlačítko GPIO</string>
+    <string name="schema_device_buzzer_gpio">Bzučák GPIO</string>
+    <string name="schema_device_double_tap_as_button_press">Dvojité klepnutí jako stisk tlačítka</string>
+    <string name="schema_device_double_tap_as_button_press_description">Zachází s dvojitým poklepáním na podporovaných akcelerometrech jako se stisknutím uživatelského tlačítka.</string>
+    <string name="schema_device_node_info_broadcast_secs">Interval vysílání Node Info</string>
+    <string name="schema_device_rebroadcast_mode">Režim opětovného vysílání</string>
+    <string name="schema_display_auto_screen_carousel_secs">Interval přepínání obrazovek</string>
+    <string name="schema_display_auto_screen_carousel_secs_description">Automaticky přepíná stránky na displeji v daném intervalu.</string>
+    <string name="schema_display_compass_north_top">Vždy ukazovat na sever</string>
+    <string name="schema_display_compass_north_top_description">Ukazatel kompasu mimo kruh na displeji bude vždy směřovat na sever.</string>
+    <string name="schema_display_compass_orientation">Orientace kompasu</string>
+    <string name="schema_display_displaymode">Režim obrazovky</string>
+    <string name="schema_display_displaymode_description">Přepíše výchozí rozložení obrazovky.</string>
+    <string name="schema_display_flip_screen">Překlopit obrazovku</string>
+    <string name="schema_display_flip_screen_description">Otočit displej vzhůru nohama.</string>
+    <string name="schema_display_heading_bold">Tučný nadpis</string>
+    <string name="schema_display_heading_bold_description">Zobrazit nadpis na obrazovce tučně.</string>
+    <string name="schema_display_oled">Typ OLED displeje</string>
+    <string name="schema_display_oled_description">Přepsat automatickou detekci OLED displeje.</string>
+    <string name="schema_display_screen_on_secs">Obrazovka zapnutá po dobu</string>
+    <string name="schema_display_screen_on_secs_description">Doba, po kterou zůstane displej aktivní po stisku tlačítka nebo po přijetí zprávy.</string>
+    <string name="schema_display_units">Zobrazení jednotek</string>
+    <string name="schema_display_units_description">Jednotky, které se zobrazují na displeji zařízení.</string>
+    <string name="schema_display_use_12h_clock">Použít 12h formát hodin</string>
+    <string name="schema_display_use_12h_clock_description">Pokud je povoleno, zařízení bude na obrazovce zobrazovat čas ve 12 hodinovém formátu.</string>
+    <string name="schema_display_wake_on_tap_or_motion">Probuzení klepnutím nebo pohybem</string>
+    <string name="schema_display_wake_on_tap_or_motion_description">Tato funkce vyžaduje, aby vaše zařízení mělo akcelerometr.</string>
+    <string name="schema_externalnotification_active">Výstupní LED aktivní při HIGH</string>
+    <string name="schema_externalnotification_alert_bell">LED při výstražném zvonku</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">Bzučák při výstražném zvonku</string>
+    <string name="schema_externalnotification_alert_bell_vibra">Vibrace při výstražném zvonku</string>
+    <string name="schema_externalnotification_alert_message">LED výstražné zprávy</string>
+    <string name="schema_externalnotification_alert_message_buzzer">Bzučák výstražné zprávy</string>
+    <string name="schema_externalnotification_alert_message_vibra">Vibrace výstražné zprávy</string>
+    <string name="schema_externalnotification_enabled">Externí oznámení povoleno</string>
+    <string name="schema_externalnotification_output">Výstupní LED (GPIO)</string>
+    <string name="schema_externalnotification_output_buzzer">Výstupní pin bzučáku (GPIO)</string>
+    <string name="schema_externalnotification_output_vibra">Výstupní pin vybračního motorku (GPIO)</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">Použít I2S jako bzučák</string>
+    <string name="schema_externalnotification_use_pwm">Použít PWM bzučák</string>
+    <string name="schema_lora_bandwidth">Šířka pásma</string>
+    <string name="schema_lora_channel_num">Frekvenční slot</string>
+    <string name="schema_lora_channel_num_description">Provozní frekvence vašeho uzlu se vypočítává na základě regionu, předvolby modemu a této hodnoty. Pokud je nastavena na 0, slot se automaticky určí podle názvu primárního kanálu a změní se z výchozího veřejného slotu. Vraťte tuto hodnotu zpět na výchozí veřejný slot, pokud jsou nakonfigurovány soukromé primární a veřejné sekundární kanály.</string>
+    <string name="schema_lora_config_ok_to_mqtt">OK do MQTT</string>
+    <string name="schema_lora_hop_limit">Počet skoků</string>
+    <string name="schema_lora_hop_limit_description">Nastaví maximální počet skoků, výchozí hodnota je 3. Zvýšení počtu skoků zároveň zvyšuje zahlcení sítě, proto je třeba tuto možnost používat opatrně. Zprávy s 0 skoky (broadcast) neobdrží potvrzení (ACK).</string>
+    <string name="schema_lora_ignore_mqtt">Ignorovat MQTT</string>
+    <string name="schema_lora_override_duty_cycle">Přepsat pracovní cyklus</string>
+    <string name="schema_lora_override_frequency">Ruční nastavení frekvence</string>
+    <string name="schema_lora_sx126x_rx_boosted_gain">Zvýšené zesílení přijímače (RX)</string>
+    <string name="schema_lora_tx_enabled">Vysílání povoleno</string>
+    <string name="schema_lora_tx_power">Vysílací výkon</string>
+    <string name="schema_lora_use_preset">Použít předvolbu</string>
+    <string name="schema_mqtt_enabled">MQTT povoleno</string>
+    <string name="schema_mqtt_encryption_enabled">Šifrování povoleno</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">Proxy na klienta povoleno</string>
+    <string name="schema_mqtt_root">Kořenové téma</string>
+    <string name="schema_mqtt_username">Uživatelské jméno</string>
+    <string name="schema_neighborinfo_enabled">Informace o sousedech povoleny</string>
+    <string name="schema_neighborinfo_transmit_over_lora">Přenos přes LoRa</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">Umožní odesílat informace o sousedních uzlech (NeighborInfo) nejen do MQTT a PhoneAPI, ale také přes LoRa. Nedostupné na kanálech s výchozím klíčem a názvem.</string>
+    <string name="schema_network_address_mode">Režim IPv4</string>
+    <string name="schema_network_eth_enabled">Ethernet povolen</string>
+    <string name="schema_network_eth_enabled_description">Zapnutí Ethernetu deaktivuje Bluetooth připojení k aplikaci. TCP připojení k uzlu není na zařízeních Apple k dispozici.</string>
+    <string name="schema_network_ntp_server">NTP server</string>
+    <string name="schema_network_rsyslog_server">rsyslog server</string>
+    <string name="schema_network_wifi_enabled">Wi-Fi povoleno</string>
+    <string name="schema_network_wifi_enabled_description">Povolením Wi-Fi se deaktivuje připojení aplikace přes Bluetooth.</string>
+    <string name="schema_network_wifi_ssid">SSID</string>
+    <string name="schema_paxcounter_ble_threshold">Práh BLE RSSI (výchozí hodnota -80)</string>
+    <string name="schema_paxcounter_enabled">Paxcounter povolen</string>
+    <string name="schema_position_broadcast_smart_minimum_distance">Chytrá vzdálenost</string>
+    <string name="schema_position_broadcast_smart_minimum_distance_description">Minimální změna vzdálenosti v metrech, která se bere v úvahu pro chytré vysílání polohy.</string>
+    <string name="schema_position_broadcast_smart_minimum_interval_secs">Chytrý Interval</string>
+    <string name="schema_position_gps_mode">Režim GPS (fyzický modul)</string>
+    <string name="schema_position_gps_update_interval">Interval aktualizace GPS</string>
+    <string name="schema_position_gps_update_interval_description">Jak často má zařízení zjišťovat polohu pomocí GPS (při intervalu kratším než 10 s zůstává GPS trvale zapnutá).</string>
+    <string name="schema_position_position_broadcast_secs">Interval vysílání</string>
+    <string name="schema_position_position_broadcast_secs_description">Maximální interval, který může uplynout, aniž by uzel odeslal polohový paket.</string>
+    <string name="schema_position_position_broadcast_smart_enabled">Chytrá poloha</string>
+    <string name="schema_position_position_flags">Příznaky polohy</string>
+    <string name="schema_position_position_flags_description">Volitelná pole, která se mají zahrnout při sestavování polohových zpráv. Čím více polí je zahrnuto, tím větší bude zpráva – to vede k delší době vysílání a vyššímu riziku ztráty paketů.</string>
+    <string name="schema_power_adc_multiplier_override">Vlastní hodnota násobiče pro ADC</string>
+    <string name="schema_power_is_power_saving">Povolit úsporný režim</string>
+    <string name="schema_power_is_power_saving_description">Uvede zařízení do co nejhlubšího spánku. U rolí tracker a sensor to zahrnuje i vypnutí LoRa rádia. Nepoužívejte toto nastavení, pokud chcete zařízení používat s mobilní aplikací nebo pokud vaše zařízení nemá uživatelské tlačítko.</string>
+    <string name="schema_power_on_battery_shutdown_after_secs">Vypnutí při ztrátě napájení</string>
+    <string name="schema_power_wait_bluetooth_secs">Doba čekání na Bluetooth</string>
+    <string name="schema_rangetest_enabled">Test pokrytí povolen</string>
+    <string name="schema_rangetest_save">Uložit .CSV do úložiště (pouze ESP32)</string>
+    <string name="schema_security_admin_key">Administrátorský klíč</string>
+    <string name="schema_security_admin_key_description">Veřejný klíč oprávněný k odesílání administrátorských zpráv tomuto uzlu.</string>
+    <string name="schema_security_debug_log_api_enabled">Ladící protokol API povolen</string>
+    <string name="schema_security_debug_log_api_enabled_description">Živý debug přes sériový port, prohlížení a export logů s anonymizovanou polohou přes Bluetooth.</string>
+    <string name="schema_security_is_managed">Řízený režim</string>
+    <string name="schema_security_is_managed_description">Toto zařízení spravuje správce mesh sítě, uživatel nemůže měnit žádná jeho nastavení.</string>
+    <string name="schema_security_private_key">Soukromý klíč</string>
+    <string name="schema_security_serial_enabled">Sériová komunikace</string>
+    <string name="schema_security_serial_enabled_description">Sériová konzole pomocí Stream API.</string>
+    <string name="schema_serial_baud">Rychlost sériového přenosu</string>
+    <string name="schema_serial_echo">Povolit echo</string>
+    <string name="schema_serial_enabled">Sériová komunikace povolena</string>
+    <string name="schema_serial_mode">Sériový režim</string>
+    <string name="schema_serial_rxd">RX</string>
+    <string name="schema_serial_txd">TX</string>
+    <string name="schema_storeforward_enabled">Ukládání a předávání povoleno</string>
+    <string name="schema_storeforward_heartbeat">Pulzující LED</string>
+    <string name="schema_storeforward_history_return_max">Max. počet záznamů historie</string>
+    <string name="schema_storeforward_history_return_window">Časové okno historie</string>
+    <string name="schema_storeforward_is_server">Server</string>
+    <string name="schema_storeforward_records">Počet záznamů</string>
+    <string name="schema_telemetry_air_quality_enabled">Modul měření kvality ovzduší povolen</string>
+    <string name="schema_telemetry_air_quality_interval">Interval aktualizace měření kvality ovzduší</string>
+    <string name="schema_telemetry_device_telemetry_enabled">Odesílat telemetrii zařízení</string>
+    <string name="schema_telemetry_device_telemetry_enabled_description">Povolí/zakáže modul telemetrie zařízení pro odesílání metrik do mesh sítě. Jde o nominální hodnoty. Přetížené mesh sítě se automaticky přizpůsobí na delší intervaly podle počtu online uzlů.</string>
+    <string name="schema_telemetry_device_update_interval">Interval aktualizace metrik zařízení</string>
+    <string name="schema_telemetry_environment_display_fahrenheit">Měření životního prostředí používá Fahrenheit</string>
+    <string name="schema_telemetry_environment_measurement_enabled">Modul měření životního prostředí povolen</string>
+    <string name="schema_telemetry_environment_screen_enabled">Zobrazení měření životního prostředí povoleno</string>
+    <string name="schema_telemetry_environment_update_interval">Interval aktualizace měření životního prostředí</string>
+    <string name="schema_telemetry_power_measurement_enabled">Modul měření spotřeby povolen</string>
+    <string name="schema_telemetry_power_screen_enabled">Měření spotřeby na obrazovce povoleno</string>
+    <string name="schema_telemetry_power_update_interval">Interval aktualizace měření napájení</string>
+</resources>

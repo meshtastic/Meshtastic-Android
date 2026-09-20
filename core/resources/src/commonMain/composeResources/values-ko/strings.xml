@@ -25,21 +25,13 @@
     <string name="add">추가</string>
     <string name="add_network_device">추가</string>
     <string name="address">서버 주소</string>
-    <string name="admin_key">Admin 키</string>
     <string name="administration">관리</string>
     <string name="advanced">고급</string>
     <string name="advanced_title">고급</string>
     <!-- AIR -->
-    <string name="air_quality_metrics_module_enabled">대기질 메트릭 모듈 사용</string>
     <string name="air_util_definition">지난 1시간 동안 전송에 사용된 통신 시간의 백분율.</string>
     <!-- ALERT -->
-    <string name="alert_bell_buzzer">알림 벨 부저</string>
-    <string name="alert_bell_led">알림 벨 LED</string>
     <string name="alert_bell_text">알람 종 문자!</string>
-    <string name="alert_bell_vibra">알림 벨 진동</string>
-    <string name="alert_message_buzzer">알림 메시지 소리</string>
-    <string name="alert_message_led">알림 메시지 LED</string>
-    <string name="alert_message_vibra">알림 메시지 진동</string>
     <string name="all_time">All</string>
     <string name="allow_input_source">입력 소스 허용</string>
     <string name="alt">고도</string>
@@ -56,19 +48,13 @@
     <string name="audio_config">오디오 설정</string>
     <string name="bad">나쁨</string>
     <!-- BANDWIDTH -->
-    <string name="bandwidth">대역폭</string>
     <string name="battery">배터리</string>
-    <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI 임계값 (기본값 -80)</string>
-    <string name="blue">파랑</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">블루투스</string>
     <string name="bluetooth_config">블루투스 설정</string>
-    <string name="bluetooth_enabled">블루투스 활성화</string>
     <string name="bluetooth_feature_config">설정</string>
     <string name="bluetooth_permission">블루투스</string>
-    <string name="bold_heading">상태표시줄 볼드체</string>
     <string name="bottom_nav_settings">설정</string>
-    <string name="broadcast_interval">전송 간격</string>
     <string name="calculating">계산 중...</string>
     <string name="camera_permission">카메라 권한 부여</string>
     <string name="cancel">취소</string>
@@ -98,18 +84,11 @@
     <string name="clear">삭제</string>
     <string name="client_notification">클라이언트 알림</string>
     <string name="close">닫기</string>
-    <string name="codec_2_enabled">CODEC2 활성화</string>
-    <string name="codec2_sample_rate">CODEC2 샘플 레이트</string>
-    <string name="coding_rate">Coding rate</string>
     <!-- COMPASS -->
     <string name="compass_north_top">나침반 상단을 북쪽으로 고정</string>
-    <string name="compass_orientation">나침반 방향</string>
     <string name="compromised_keys">손상된 키가 감지되었습니다. 다시 생성하려면 OK를 선택하세요.</string>
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">가속도계가 있는 장치를 두 번 탭하여 사용자 버튼과 동일한 동작.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">장치에서 깜빡이는 LED를 제어합니다. 대부분 장치의 경우 최대 4개의 LED 중 하나를 제어할 수 있지만 충전 상태 LED와 GPS 상태 LED는 제어할 수 없습니다.</string>
-    <string name="config_device_transmitOverLora_summary">MQTT 및 PhoneAPI로 전송하는 것 외에도, 우리 NeighborInfo는 LoRa를 통해 전송되어야 합니다. 기본 키와 이름을 사용하는 채널에서는 사용할 수 없습니다.</string>
-    <string name="config_display_wake_on_tap_or_motion_summary">이 설정은 기기에 가속도계가 내장되어 있어야 사용할 수 있습니다.</string>
     <string name="configuration">설정</string>
     <string name="connect">연결</string>
     <string name="connected">연결됨</string>
@@ -144,8 +123,6 @@
     <string name="details">세부 정보</string>
     <string name="detection_sensor">감지 센서</string>
     <string name="detection_sensor_config">감지 센서 설정</string>
-    <string name="detection_sensor_enabled">감지 센서 활성화</string>
-    <string name="detection_trigger_type">디텍션 트리거 타입</string>
     <!-- DEVICE -->
     <string name="device">장치</string>
     <string name="device_sleeping">절전모드</string>
@@ -159,9 +136,6 @@
     <string name="discovery_stat_messages">메시지기기</string>
     <!-- DISPLAY -->
     <string name="display">화면</string>
-    <string name="display_mode">디스플레이 모드</string>
-    <string name="display_time_in_12h_format">활성화 하면 장치의 디스플레이에서 시간이 12시간제로 표시됩니다.</string>
-    <string name="display_units">단위 표시</string>
     <!-- DISTANCE -->
     <string name="distance">거리</string>
     <string name="dns">DNS</string>
@@ -169,31 +143,23 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">노드</string>
     <string name="download">다운로드</string>
-    <string name="echo_enabled">에코 활성화</string>
     <string name="edit">편집</string>
     <string name="eight_hours">8 시간</string>
     <!-- EMOJI -->
-    <string name="enable_power_saving_mode">저전력 모드 설정</string>
     <string name="enabled">활성화</string>
     <!-- ENCRYPTION -->
-    <string name="encryption_enabled">암호화 사용</string>
     <string name="encryption_error">공개 키가 일치하지 않습니다</string>
     <string name="encryption_pkc">공개 키 암호화</string>
     <!-- ENVIRONMENT -->
     <string name="environment">환경</string>
-    <string name="environment_metrics_module_enabled">환경 메트릭 모듈 사용</string>
-    <string name="environment_metrics_on_screen_enabled">환경 메트릭 화면 사용</string>
-    <string name="environment_metrics_use_fahrenheit">환경 메트릭에서 화씨 사용</string>
     <string name="error">오류</string>
     <string name="error_duty_cycle">듀티 사이클 제한에 도달했습니다. 지금은 메시지를 보낼 수 없습니다. 나중에 다시 시도하세요.</string>
-    <string name="ethernet_enabled">이더넷 활성화</string>
     <string name="exchange_position">위치 교환</string>
     <string name="expires">만료</string>
     <!-- EXPORT -->
     <string name="export_configuration">설정 내보내기</string>
     <string name="external_notification">외부 알림</string>
     <string name="external_notification_config">외부 알림 설정</string>
-    <string name="external_notification_enabled">외부 알림 활성화</string>
     <string name="factory_reset">공장초기화</string>
     <string name="fair">보통</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
@@ -208,25 +174,14 @@
     <string name="firmware_too_old">펌웨어 업데이트가 필요합니다.</string>
     <string name="firmware_update_failed">업데이트 실패</string>
     <string name="fixed_pin">고정 PIN</string>
-    <string name="flip_screen">화면 뒤집기</string>
     <!-- FORMAT -->
     <string name="freq">주파수</string>
-    <string name="frequency_slot">주파수 슬롯</string>
-    <string name="friendly_name">식별 이름</string>
     <string name="gas_resistance">가스 저항</string>
     <string name="gateway">게이트웨이</string>
-    <string name="generate_input_event_on_ccw">반시계방향 동작</string>
-    <string name="generate_input_event_on_cw">시계방향 동작</string>
-    <string name="generate_input_event_on_press">누름 동작</string>
     <!-- GEOFENCE -->
     <string name="good">좋음</string>
     <!-- GPIO -->
     <string name="gpio_pin">GPIO 핀</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">로터리 엔코더 A포트 용 GPIO 핀</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">로터리 엔코더 B포트 용 GPIO 핀</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">로터리 엔코더 누름 포트 용 GPIO 핀</string>
-    <string name="gpio_pin_to_monitor">상태 모니터링 GPIO 핀</string>
-    <string name="green">초록</string>
     <string name="hardware">하드웨어</string>
     <string name="hardware_model">하드웨어 모델</string>
     <string name="heading">제목</string>
@@ -235,17 +190,12 @@
     <string name="i_agree">동의합니다.</string>
     <string name="i_agree_to_share_my_location">위 내용을 읽고 이해했습니다. 저는 MQTT를 통해 제 노드 데이터를 암호화되지 않은 상태로 전송하는 것에 자발적으로 동의합니다.</string>
     <string name="i_know_what_i_m_doing">뭘하는지 알고 있습니다</string>
-    <string name="i2s_clock">I2S 시간</string>
-    <string name="i2s_data_in">I2S 데이터 in</string>
-    <string name="i2s_data_out">I2S 데이터 out</string>
-    <string name="i2s_word_select">I2S 단어 선택</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(실내공기질) Bosch BME680으로 측정한 상대적 척도 IAQ 값. 범위 0–500.</string>
     <!-- IGNORE -->
     <string name="ignore">무시하기</string>
     <string name="ignore_add">%1$s를 무시 목록에 추가하시겠습니까?</string>
     <string name="ignore_incoming">수신 무시</string>
-    <string name="ignore_mqtt">MQTT로 부터 수신 무시</string>
     <string name="ignore_remove">%1$s를 무시 목록에서 삭제하시겠습니까?</string>
     <!-- IMPORT -->
     <string name="import_configuration">설정 불러오기</string>
@@ -259,13 +209,11 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP 주소:</string>
     <string name="ip_port">포트:</string>
-    <string name="ipv4_mode">IPv4 모드</string>
     <string name="json_output_enabled">JSON 사용</string>
     <!-- KEY -->
     <string name="last_position_update">최근 위치 업데이트</string>
     <string name="latitude">위도</string>
     <!-- LAYER -->
-    <string name="led_state">LED 상태</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">이 옵션을 활성화하면 암호화가 비활성화되며 기본 Meshtastic 네트워크와 호환되지 않습니다.</string>
     <!-- LOAD -->
@@ -285,7 +233,6 @@
     <string name="low_battery_message">%1$s 노드의 배터리가 낮습니다. (%2$d%)</string>
     <string name="low_battery_title">배터리  부족: %1$s</string>
     <string name="lux">조도</string>
-    <string name="managed_mode">관리 모드</string>
     <string name="manual_position_request">수동 위치 요청 필요함</string>
     <!-- MAP -->
     <string name="map_cache_info">캐시 용량: %1$dMB\n캐시 사용량: %2$dMB</string>
@@ -343,7 +290,6 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT 설정</string>
-    <string name="mqtt_enabled">MQTT 활성화</string>
     <string name="mqtt_status_connected">연결됨</string>
     <string name="mqtt_status_disconnected">연결 끊김</string>
     <string name="must_set_region">지역을 설정해 주세요!</string>
@@ -358,7 +304,6 @@
     <string name="navigate_back">뒤로 가기</string>
     <string name="neighbor_info">이웃 정보</string>
     <string name="neighbor_info_config">이웃 정보 설정</string>
-    <string name="neighbor_info_enabled">이웃 정보 활성화</string>
     <string name="network">네트워크</string>
     <string name="new_channel_rcvd">새로운 채널 URL 수신</string>
     <!-- NO -->
@@ -382,7 +327,6 @@
     <string name="node_sort_via_favorite">즐겨찾기 우선</string>
     <string name="node_sort_via_mqtt">MQTT 경유</string>
     <string name="nodedb_reset">노드 목록 리셋</string>
-    <string name="nodeinfo_broadcast_interval">노드 정보 발송 주기</string>
     <!-- NODES -->
     <string name="nodes">노드</string>
     <string name="nodes_unheard_remove">지우기</string>
@@ -393,7 +337,6 @@
     <string name="notifications_on_alert_bell_receipt">경고/벨 수신 알림</string>
     <string name="notifications_on_message_receipt">메시지 수신 알림</string>
     <string name="now">지금</string>
-    <string name="ntp_server">NTP 서버</string>
     <!-- OFFLINE -->
     <string name="okay">확인</string>
     <!-- ONE -->
@@ -402,20 +345,12 @@
     <string name="only_favorites">즐겨찾기만 보기</string>
     <!-- OPEN -->
     <!-- OUTPUT -->
-    <string name="output_buzzer_gpio">부저 출력 (GPIO)</string>
     <string name="output_duration_milliseconds">출력 지속시간 (밀리초)</string>
-    <string name="output_led_active_high">LED 출력 active high</string>
-    <string name="output_led_gpio">LED 출력 (GPIO)</string>
-    <string name="output_vibra_gpio">진동 출력 (GPIO)</string>
-    <string name="override_duty_cycle">Duty Cycle 무시</string>
-    <string name="pa_fan_disabled">PA fan 비활성화됨</string>
     <!-- PACKET -->
-    <string name="pairing_mode">페어링 모드</string>
     <string name="password">비밀번호</string>
     <!-- PAX -->
     <string name="paxcounter">팍스카운터</string>
     <string name="paxcounter_config">팍스카운터 설정</string>
-    <string name="paxcounter_enabled">팍스카운터 활성화</string>
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <string name="pin_selected">핀</string>
@@ -427,8 +362,6 @@
     <!-- POWER -->
     <string name="power">전원</string>
     <string name="power_config">전원 설정</string>
-    <string name="power_metrics_module_enabled">전력 메트릭 모듈 사용</string>
-    <string name="power_metrics_on_screen_enabled">전력 메트릭 화면 사용</string>
     <string name="preferences_language">언어</string>
     <string name="preferences_system_default">시스템 기본값</string>
     <string name="press_and_drag">누르고 드래그해서 순서 변경</string>
@@ -436,11 +369,8 @@
     <!-- PREVIEW -->
     <string name="primary">주 채널</string>
     <string name="primary_channel_feature">위치 및 텔레메트리 주기적 전송</string>
-    <string name="private_key">개인 키</string>
     <string name="provide_location_to_mesh">메쉬에 현재 위치 공유</string>
-    <string name="proxy_to_client_enabled">Proxy to client 사용</string>
     <string name="psk">PSK</string>
-    <string name="ptt_pin">PTT 핀</string>
     <string name="public_key">공개 키</string>
     <string name="public_key_changed">공개 키 변경됨</string>
     <string name="qr_code">QR코드</string>
@@ -454,18 +384,15 @@
     <string name="radio_configuration">무선 설정</string>
     <string name="range_test">거리 테스트</string>
     <string name="range_test_config">거리 테스트 설정</string>
-    <string name="range_test_enabled">거리 테스트 활성화</string>
     <string name="react">반응</string>
     <string name="reboot">재부팅</string>
     <!-- REBROADCAST -->
-    <string name="rebroadcast_mode">중계 모드</string>
     <string name="rebroadcast_mode_all_desc">관찰된 메시지가 우리 비공개 채널에 있거나, 동일한 LoRa 파라미터를 사용하는 다른 메쉬에서 온 경우 해당 메시지를 재전송합니다.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">ALL 역할과 동일하게 동작하지만, 패킷 디코딩을 건너뛰고 단순히 재전송만 수행합니다. Repeater 일때 설정가능. 다른 Role에서는 ALL로 동작.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">TAK, RangeTest, PaxCounter 등과 같은 비표준 포트 번호의 패킷을 무시합니다. NodeInfo, Text, Position, Telemetry 및 Routing과 같은 표준 포트 번호가 있는 패킷만 재브로드캐스트.</string>
     <string name="rebroadcast_mode_known_only_desc">LOCAL_ONLY와 유사하게 외부 메쉬에서 관찰된 메시지를 무시하지만, 추가적으로 알려진 목록에 없는 노드의 메시지도 무시합니다.</string>
     <string name="rebroadcast_mode_local_only_desc">오픈되어 있거나 해독할 수 없는 외부 메시에서 관찰된 메시지를 무시합니다. 로컬 주/보조 채널에서만 메시지를 재브로드캐스트.</string>
     <string name="rebroadcast_mode_none_desc">SENSOR, TRACKER 및 TAK_TRACKER role에서만 허용되며 CLIENT_MUTE role과 마찬가지로 모든 재브로드캐스트를 금지합니다.</string>
-    <string name="red">빨강</string>
     <string name="regenerate_keys_confirmation">개인 키를 다시 생성하시겠습니까?\n\n이 노드와 이전에 키를 교환한 노드들은 해당 노드를 제거하고 키를 다시 교환해야 안전한 통신을 재개할 수 있습니다.</string>
     <string name="regenerate_private_key">개인 키 다시 생성하기</string>
     <string name="region_frequency_plan">지역</string>
@@ -498,8 +425,6 @@
     <string name="role_tak_desc">ATAK 시스템 통신에 최적화됨, 정기적 전송을 최소화.</string>
     <string name="role_tak_tracker_desc">TAK PLI 전송을 자동화하고 정기적 전송을 최소화.</string>
     <string name="role_tracker_desc">GPS 위치 정보를 우선적으로 전송.</string>
-    <string name="root_topic">Root topic</string>
-    <string name="rotary_encoder_1_enabled">로터리 엔코더 #1 활성화</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">수락 거부됨</string>
     <string name="routing_error_no_route">루트 없음</string>
@@ -507,12 +432,10 @@
     <string name="routing_error_timeout">시간 초과됨</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">수신 신호 강도 지표 Received Signal Strength Indicator, RSSI는 안테나가 수신하는 신호의 전력 수준을 측정하는 데 사용되는 지표입니다. RSSI 값이 높을수록 일반적으로 더 강력하고 안정적인 연결을 나타냅니다.</string>
-    <string name="rsyslog_server">rsyslog 서버</string>
     <string name="sats">인공위성</string>
     <!-- SAVE -->
     <string name="save">저장</string>
     <string name="save_changes">저장</string>
-    <string name="save_csv_in_storage_esp32_only">.CSV 파일 저장 (EPS32만 동작)</string>
     <!-- SCAN -->
     <string name="scan">스캔</string>
     <string name="secondary">보조 채널</string>
@@ -522,17 +445,10 @@
     <string name="security_icon_help_dismiss">취소</string>
     <string name="select_all">전부 선택</string>
     <string name="send">보내기</string>
-    <string name="send_bell">벨 전송</string>
-    <string name="send_bell_with_alert_message">알람 메시지와 벨 전송</string>
     <string name="sender_message_interval_seconds">송신 장치 메시지 간격 (초)</string>
     <!-- SERIAL -->
     <string name="serial">시리얼</string>
-    <string name="serial_baud_rate">시리얼 baud rate</string>
     <string name="serial_config">시리얼 설정</string>
-    <string name="serial_console">시리얼 콘솔</string>
-    <string name="serial_enabled">시리얼 활성화</string>
-    <string name="serial_mode">시리얼 모드</string>
-    <string name="server">서버</string>
     <string name="set_your_region">지역을 설정하세요</string>
     <string name="settings">설정</string>
     <!-- SHARE -->
@@ -554,7 +470,6 @@
     <string name="slot">슬롯</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">통신에서 원하는 신호의 수준을 배경 잡음의 수준과 비교하여 정량화하는 데 사용되는 신호 대 잡음비 Signal-to-Noise Ratio, SNR는 Meshtastic와 같은 무선 시스템에서 SNR이 높을수록 더 선명한 신호를 나타내어 데이터 전송의 안정성과 품질을 향상시킬 수 있습니다.</string>
-    <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">상태 전송 간격 (초)</string>
     <string name="subnet">서브넷</string>
     <string name="supported">지원됨</string>
@@ -589,7 +504,6 @@
     <!-- TRAFFIC -->
     <string name="traffic_management_enabled">모듈 활성화</string>
     <!-- TRANSLATION -->
-    <string name="transmit_over_lora">LoRa로 전송</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
@@ -597,8 +511,6 @@
     <string name="twenty_four_hours">24시간</string>
     <string name="two_days">48 시간</string>
     <string name="two_weeks">2주</string>
-    <string name="tx_enabled">전송 활성화</string>
-    <string name="tx_power_dbm">전송 출력</string>
     <string name="type">타입</string>
     <!-- UNITS -->
     <string name="units_follow_system">시스템 기본값</string>
@@ -610,22 +522,15 @@
     <string name="unmonitored_or_infrastructure">감시되지 않거나 인프라 노드</string>
     <string name="unmute">음소거 해제</string>
     <string name="unrecognized">확인되지 않음</string>
-    <string name="up_down_select_input_enabled">업/다운/선택 입력 활성화</string>
     <string name="update_interval_seconds">업데이트 간격 (초)</string>
     <string name="uptime">업타임</string>
     <!-- URL -->
     <string name="url">URL</string>
     <!-- USE -->
-    <string name="use_12h_format">12시간제 보기</string>
-    <string name="use_i2s_as_buzzer">I2S 부저 사용</string>
-    <string name="use_input_pullup_mode">INPUT_PULLUP 모드 사용</string>
-    <string name="use_modem_preset">프리셋 사용</string>
-    <string name="use_pwm_buzzer">PWM 부저 사용</string>
     <!-- USER -->
     <string name="user">사용자</string>
     <string name="user_config">사용자 설정</string>
     <string name="user_id">유저 ID</string>
-    <string name="username">사용자명</string>
     <string name="via_mqtt">MQTT 경유</string>
     <string name="voltage">전압</string>
     <string name="waypoint_delete">웨이포인트 삭제?</string>

@@ -35,7 +35,6 @@
     <string name="audio">Ήχος</string>
     <!-- BANDWIDTH -->
     <string name="battery">Μπαταρία</string>
-    <string name="blue">Μπλε</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_config">Ρυθμίσεις Bluetooth</string>
@@ -114,7 +113,6 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <!-- GPIO -->
-    <string name="green">Πράσινο</string>
     <string name="i_know_what_i_m_doing">Ξέρω τι κάνω.</string>
     <!-- IGNORE -->
     <string name="ignore">Παράβλεψη</string>
@@ -208,7 +206,6 @@
     <string name="preferences_language">Γλώσσα</string>
     <string name="preferences_system_default">Προκαθορισμένο του συστήματος</string>
     <!-- PREVIEW -->
-    <string name="private_key">Ιδιωτικό Κλειδί</string>
     <string name="provide_location_to_mesh">Παρέχετε τοποθεσία στο πλέγμα</string>
     <string name="psk">PSK</string>
     <string name="public_key">Δημόσιο Κλειδί</string>
@@ -221,7 +218,6 @@
     <string name="radio_configuration">Ρυθμίσεις συσκευής</string>
     <string name="reboot">Επανεκκίνηση</string>
     <!-- REBROADCAST -->
-    <string name="red">Κόκκινο</string>
     <string name="region_frequency_plan">Περιφέρεια</string>
     <!-- REMOTE -->
     <string name="remote_admin">Απομακρυσμένη Διαχείριση</string>
@@ -256,7 +252,6 @@
     <string name="shutdown">Τερματισμός λειτουργίας</string>
     <!-- SITE -->
     <string name="site_planner_section_display">Οθόνη</string>
-    <string name="ssid">SSID</string>
     <string name="swipe_action_delete">Διαγραφή</string>
     <string name="swipe_action_mute">Σίγαση</string>
     <!-- TAK -->
@@ -287,7 +282,6 @@
     <!-- USE -->
     <!-- USER -->
     <string name="user">Χρήστης</string>
-    <string name="username">Όνομα χρήστη</string>
     <string name="via_mqtt">μέσω MQTT</string>
     <string name="voltage">Τάση</string>
     <string name="waypoint_delete">Διαγραφή σημείου πορείας;</string>

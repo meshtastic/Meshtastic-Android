@@ -26,7 +26,6 @@
     <string name="action_delete_message">Ștergeți mesajul</string>
     <string name="actions">Acţiuni</string>
     <string name="adc_multiplier_override">Suprascriere multiplicator ADC</string>
-    <string name="adc_multiplier_override_ratio">Raportul suprascrierii multiplicatorului ADC</string>
     <!-- ADD -->
     <string name="add">Adaugă</string>
     <string name="add_a_note">Adaugă o notiță privată</string>
@@ -37,7 +36,6 @@
     <string name="add_network_device">Adaugă</string>
     <string name="add_network_layer">Adaugă nivel rețea</string>
     <string name="address">Adresă</string>
-    <string name="admin_key">Cheie Administrator</string>
     <string name="admin_keys">Chei Admin</string>
     <string name="administration">Administrare</string>
     <string name="advanced">Avansate</string>
@@ -45,23 +43,15 @@
     <string name="advanced_title">Avansate</string>
     <!-- AIR -->
     <string name="air_quality_icon">Pictograma calităţii aerului</string>
-    <string name="air_quality_metrics_update_interval_seconds">Interval actualizare măsurători de calitate a aerului</string>
     <string name="air_util_definition">Procentul de timp de emisie utilizat în ultima oră.</string>
     <string name="air_utilization">AirUtil</string>
     <!-- ALERT -->
-    <string name="alert_bell_buzzer">Buzzer alertă clopoțel</string>
-    <string name="alert_bell_led">LED alertă clopoțel</string>
     <string name="alert_bell_text">Caracter clopoțel de alertă!</string>
-    <string name="alert_bell_vibra">Vibrație alertă clopoțel</string>
-    <string name="alert_message_buzzer">Buzzer alertă mesaj</string>
-    <string name="alert_message_led">LED alertă mesaj</string>
-    <string name="alert_message_vibra">Vibrație alertă mesaj</string>
     <string name="all_time">Toate</string>
     <string name="allow_input_source">Permite sursa de intrare</string>
     <string name="allow_undefined_pin_access">Permite acces Pin nedefinit</string>
     <string name="alt">Alt</string>
     <string name="altitude">Altitudine</string>
-    <string name="always_point_north">Indică mereu spre nord</string>
     <string name="ambient_lighting">Lumină ambientală</string>
     <string name="ambient_lighting_config">Configurare iluminare ambientală</string>
     <string name="analytics_notice">Analytics sunt colectate pentru a ne ajuta să îmbunătățim aplicația Android (mulțumesc), vom primi informații anonime despre comportamentul utilizatorului. Aceasta include rapoarte de accidente, ecrane folosite în aplicație, etc.</string>
@@ -84,25 +74,18 @@
     <string name="back">Înapoi</string>
     <string name="bad">Slab</string>
     <!-- BANDWIDTH -->
-    <string name="bandwidth">Lățime bandă</string>
     <string name="baro_pressure">Baro</string>
     <string name="battery">Baterie</string>
     <string name="battery_ina_2xx_i2c_address">Adresa baterie INA_2XX I2C</string>
     <string name="ble_devices">Dispozitive Bluetooth</string>
-    <string name="blue">Albastru</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_available_devices">Dispozitive bluetooth disponibile</string>
     <string name="bluetooth_config">Configurare Bluetooth</string>
-    <string name="bluetooth_enabled">Bluetooth activat</string>
     <string name="bluetooth_feature_config_description">Gestionați fără fir setările și canalele dispozitivului dvs.</string>
     <string name="bluetooth_feature_discovery">Descoperiți</string>
     <string name="bluetooth_permission">Bluetooth</string>
-    <string name="bold_heading">Direcție îngroșat</string>
     <string name="bottom_nav_settings">Setări</string>
-    <string name="broadcast_interval">Interval de difuzare</string>
-    <string name="button_gpio">GPIO buton</string>
-    <string name="buzzer_gpio">GPIO buzzer</string>
     <string name="calculating">Calculare…</string>
     <string name="camera_permission">Permisiune cameră</string>
     <string name="cancel">Renunta</string>
@@ -112,7 +95,6 @@
     <string name="canned_message_enabled">Mesaj prestabilit activat</string>
     <string name="cant_change_no_radio">Nu s-a putut schimba canalul, deoarece radioul nu este conectat încă. Vă rugăm să încercați din nou.</string>
     <string name="cant_shutdown">Oprirea nu este acceptată pe acest dispozitiv</string>
-    <string name="carousel_interval">Intervalul caruselului</string>
     <string name="ch_util_definition">Utilizarea pentru canalul curent, inclusiv TX bine format, RX și RX malformat (zgomot).</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -147,9 +129,6 @@
     <string name="client_notification">Notificare client</string>
     <string name="close">Închide</string>
     <string name="close_selection">Închideți selecția</string>
-    <string name="codec_2_enabled">CODEC 2 activat</string>
-    <string name="codec2_sample_rate">Rată de eșantionare CODEC2</string>
-    <string name="coding_rate">Rata de codificare</string>
     <string name="collapse_chart">Restrânge graficul</string>
     <string name="communicate_off_the_grid">Comunicați în afara grilei cu prietenii și comunitatea dvs. fără serviciu celular.</string>
     <!-- COMPASS -->
@@ -160,45 +139,21 @@
     <string name="compass_no_location_permission">Este necesară permisiunea de localizare pentru a afișa distanța și rularea.</string>
     <string name="compass_no_magnetometer">Acest dispozitiv nu are un senzor de busolă. Heading este indisponibil.</string>
     <string name="compass_north_top">Vârf nord busolă</string>
-    <string name="compass_orientation">Orientarea busolei</string>
     <string name="compass_title">Busolă</string>
     <string name="compass_uncertainty">Suprafață estimată: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Zonă estimată: precizie necunoscută</string>
     <string name="compromised_keys">Chei promise detectate, selectaţi OK pentru regenerare.</string>
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">Tratează o apăsare dublă pe accelerometrele compatibile ca apăsare a butonului utilizatorului.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Controlează LED-ul intermitent de pe dispozitiv. Pentru majoritatea dispozitivelor, acesta va controla unul dintre cele 4 LED-uri, LED-urile GPS și ale încrăcătorului nu pot fi controlate.</string>
-    <string name="config_device_transmitOverLora_summary">NeighborInfo al dvs. să fie transmis prin LoRa, pe lângă MQTT și PhoneAPI. Nu este disponibil pe un canal cu cheie și nume implicite.</string>
     <string name="config_device_tripleClickAsAdHocPing_summary">Trimite o poziție pe canalul principal când butonul utilizatorului este apăsat de trei ori.</string>
     <string name="config_device_tzdef_summary">Fus orar pentru datele de pe ecranul dispozitivului și jurnal.</string>
     <string name="config_device_use_phone_tz">Utilizați fusul orar al telefonului</string>
-    <string name="config_display_auto_screen_carousel_secs_summary">Comută automat la pagina următoare de pe ecran ca un carusel, bazat pe intervalul specificat.</string>
-    <string name="config_display_compass_north_top_summary">Busola de pe ecran, în afara cercului, va indica întotdeauna nordul.</string>
-    <string name="config_display_displaymode_summary">Suprascrie aspectul implicit al ecranului.</string>
-    <string name="config_display_flip_screen_summary">Rotire ecran vertical.</string>
-    <string name="config_display_heading_bold_summary">Îngroşează textul din antet de pe ecran.</string>
-    <string name="config_display_oled_summary">Suprascrie ecranul OLED automat.</string>
-    <string name="config_display_screen_on_secs_summary">Cât timp rămâne ecranul pornit după ce butonul utilizatorului este apăsat sau mesajele sunt primite.</string>
-    <string name="config_display_units_summary">Unitățile afișate pe ecranul dispozitivului.</string>
-    <string name="config_display_wake_on_tap_or_motion_summary">Necesită ca dispozitivul dvs. să aibă un accelerometru.</string>
-    <string name="config_lora_frequency_slot_summary">Frecvența de funcționare a nodului dvs. este calculată pe baza regiunii, presetării modemului și a acestui câmp. Când valoarea este 0, slotul este calculat automat pe baza numelui canalului principal și se va modifica față de slotul public implicit. Reveniți la slotul public implicit dacă sunt configurate canale private principale și canale publice secundare.</string>
-    <string name="config_lora_hop_limit_summary">Setează numărul maxim de salturi, valoarea implicită fiind 3. Creșterea numărului de salturi crește și congestia și trebuie utilizată cu precauție. Mesajele de difuzare cu 0 salturi nu vor primi confirmări (ACK).</string>
     <string name="config_lora_modem_preset_summary">Presetările modemului disponibile, implicit este Long Fast (Rază lungă - rapid).</string>
     <string name="config_lora_region_summary">Regiunea în care veți folosi radioul.</string>
-    <string name="config_network_eth_enabled_summary">Activarea Ethernet va dezactiva conexiunea Bluetooth la aplicație. Conexiunile TCP ale nodului nu sunt disponibile pe dispozitivele Apple.</string>
     <string name="config_network_udp_enabled_summary">Activați transmisiunea pachetelor prin UDP în rețeaua locală.</string>
-    <string name="config_position_broadcast_secs_summary">Intervalul maxim care poate trece fără ca un nod să transmită o poziție.</string>
-    <string name="config_position_broadcast_smart_minimum_distance_summary">Modificarea minimă a distanței în metri care trebuie luată în considerare pentru o transmisie inteligentă a poziției.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Cea mai rapidă actualizare a poziției care va fi trimisă dacă distanța minimă a fost respectată.</string>
-    <string name="config_position_flags_summary">Câmpuri opționale care trebuie incluse la asamblarea mesajelor de poziție. Cu cât sunt incluse mai multe câmpuri, cu atât mesajul va fi mai mare, ceea ce va duce la un timp de transmisie mai lung și la un risc mai mare de pierdere a pachetelor.</string>
-    <string name="config_position_gps_update_interval_summary">Cât de des ar trebui să încercăm să obținem o poziție GPS (&lt;10sec păstrează GPS activat).</string>
-    <string name="config_power_is_power_saving_summary">Va păstra totul în repaus cât mai mult posibil, pentru rolul de tracker și senzor, aceasta va include și radioul LoRa. Nu utilizați această setare dacă doriți să utilizați dispozitivul cu aplicațiile telefonului sau dacă utilizați un dispozitiv fără buton de utilizator.</string>
-    <string name="config_security_admin_key">Cheia publică autorizată să trimită mesaje de administrare către acest nod.</string>
-    <string name="config_security_debug_log_api_enabled">Generarea de jurnale de depanare în timp real prin serial, vizualizarea și exportarea jurnalelor dispozitivelor cu poziția redactată prin Bluetooth.</string>
-    <string name="config_security_is_managed">Dispozitivul este gestionat de un administrator de rețea, utilizatorul neputând accesa niciuna dintre setările dispozitivului.</string>
     <string name="config_security_private_key">Utilizat pentru a crea o cheie partajată cu un dispozitiv la distanță.</string>
     <string name="config_security_public_key">Generată din cheia publică și trimisă către alte noduri din rețea pentru a le permite să calculeze o cheie secretă comună.</string>
-    <string name="config_security_serial_enabled">Consolă serială prin API-ul Stream.</string>
     <string name="configure_bluetooth_permissions">Configuraţi permisiunile Bluetooth</string>
     <string name="configure_critical_alerts">Configurează alertele critice</string>
     <string name="configure_location_permissions">Configurare permisiuni locație</string>
@@ -238,7 +193,6 @@
     <string name="debug_filter_included">Filtru inclus</string>
     <string name="debug_filter_preset_title">Presetări filtre</string>
     <string name="debug_filters">Filtre</string>
-    <string name="debug_log_api_enabled">Debug log API activat</string>
     <string name="debug_logcat_refresh">Reimprospatare</string>
     <string name="debug_logs_export">Export jurnale</string>
     <string name="debug_panel">Panou de depanare</string>
@@ -270,8 +224,6 @@
     <string name="details">Detalii</string>
     <string name="detection_sensor">Senzor de detecție</string>
     <string name="detection_sensor_config">Configurare senzor detectare</string>
-    <string name="detection_sensor_enabled">Senzor detectare activat</string>
-    <string name="detection_trigger_type">Tip declanșator detectare</string>
     <!-- DEVICE -->
     <string name="device">Dispozitiv</string>
     <string name="device_configuration">Configurare dispozitiv</string>
@@ -282,12 +234,9 @@
     <string name="device_metrics_log">Valori dispozitiv</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s:%2$s%%</string>
-    <string name="device_metrics_update_interval_seconds">Intervalul de actualizare a parametrilor dispozitivului</string>
     <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_sleeping">Adormirea dispozitivului</string>
     <string name="device_storage_ui_title">Dispozitiv de stocare &amp; UI (doar cu permisiune)</string>
-    <string name="device_telemetry_enabled">Trimite telemetrie dispozitiv</string>
-    <string name="device_telemetry_enabled_summary">Activează/dezactivează modulul de telemetrie al dispozitivului pentru a trimite metrici către rețeaua mesh. Acestea sunt valori nominale. Rețelele mesh congestionate se vor scala automat la intervale mai lungi, în funcție de numărul de noduri online.</string>
     <string name="device_theme_language">Tema %1$s, Limba %2$s</string>
     <string name="dew_point">Punct de rouă</string>
     <string name="direct_message">Mesaj direct</string>
@@ -305,9 +254,6 @@
     <!-- DISPLAY -->
     <string name="display">Ecran</string>
     <string name="display_config">Ecran dispozitiv</string>
-    <string name="display_mode">Mod ecran</string>
-    <string name="display_time_in_12h_format">Când este activat, dispozitivul va afișa pe ecran ora în format 12 ore.</string>
-    <string name="display_units">Unități de măsură afișate</string>
     <!-- DISTANCE -->
     <string name="distance">Distanță</string>
     <string name="distance_filters">Filtre distanță</string>
@@ -320,35 +266,26 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Noduri</string>
     <string name="done">Gata</string>
-    <string name="double_tap_as_button_press">Apăsare dublă ca buton</string>
     <string name="downlink_feature_description">Mesajele provenite de la o un gateway public de internet sunt redirecționate către rețeaua locală. Datorită politicii de zero salturi, traficul provenit de la serverul MQTT implicit nu se va propaga mai departe de acest dispozitiv.</string>
     <string name="download">Descărcare</string>
     <string name="duplicated_public_key_title">Duplicat Cheie Publică detectată</string>
     <string name="dynamic">Dinamic</string>
     <string name="easily_set_up_private_mesh_networks">Înființarea cu ușurință a rețelelor private de plasare pentru comunicații sigure și fiabile în zonele îndepărtate;</string>
-    <string name="echo_enabled">Echo activat</string>
     <string name="edit">Editare</string>
     <string name="edit_custom_tile_source">Modifică sursa rețelei</string>
     <string name="eight_hours">8 Ore</string>
     <!-- EMOJI -->
-    <string name="enable_power_saving_mode">Activează modul de economisire a energiei</string>
     <string name="enabled">Activat</string>
     <!-- ENCRYPTION -->
-    <string name="encryption_enabled">Criptare activată</string>
     <string name="encryption_error">Nepotrivire cheie publică</string>
     <string name="encryption_error_text">Cheia publică nu corespunde cu cheia înregistrată. Puteți elimina nodul și permiteți schimbul de chei din nou, dar acest lucru poate indica o problemă de securitate mai gravă. Contactați utilizatorul printr-un alt canal de încredere, pentru a determina dacă schimbarea cheii s-a datorat unei resetări la setările din fabrică sau unei alte acțiuni intenționate.</string>
     <string name="encryption_pkc">Criptare cu cheie publică</string>
     <string name="env_metrics_log">Indicatori de mediu</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Mediu</string>
-    <string name="environment_metrics_module_enabled">Modul de măsurare mediu activat</string>
-    <string name="environment_metrics_on_screen_enabled">Valorile de mediu pe ecran sunt activate</string>
-    <string name="environment_metrics_update_interval_seconds">Interval actualizare valori mediu</string>
-    <string name="environment_metrics_use_fahrenheit">Valorile de mediu utilizează Fahrenheit</string>
     <string name="error">Eroare</string>
     <string name="error_duty_cycle">Limita Duty Cycle a fost atinsă. Nu se pot trimite mesaje acum, vă rugăm să încercați din nou mai târziu.</string>
     <string name="ethernet_config">Opţiuni Ethernet</string>
-    <string name="ethernet_enabled">Ethernet activat</string>
     <string name="ethernet_ip">IP Ethernet:</string>
     <string name="exchange_position">Schimb de poziție</string>
     <string name="expand_chart">Extindeți graficul</string>
@@ -358,7 +295,6 @@
     <string name="export_data_csv">Exportă toate pachetele</string>
     <string name="external_notification">Notificare externă</string>
     <string name="external_notification_config">Configurare notificare externă</string>
-    <string name="external_notification_enabled">Notificare externă activată</string>
     <string name="factory_reset">Resetare la setările din fabrică</string>
     <string name="fair">Acceptabil</string>
     <string name="favorite">Favorit</string>
@@ -447,18 +383,12 @@
     <string name="firmware_version">Versiune firmware: %1$s</string>
     <string name="fixed_pin">PIN fix</string>
     <string name="fixed_position">Poziție fixă</string>
-    <string name="flip_screen">Rotire ecran</string>
     <string name="for_more_information_see_our_privacy_policy">Pentru mai multe informații, consultați politica noastră de confidențialitate.</string>
     <!-- FORMAT -->
     <string name="free_memory">Memorie Liberă</string>
     <string name="freq">Frecvență</string>
-    <string name="frequency_slot">Slot pentru frecvenţă</string>
-    <string name="friendly_name">Nume comun</string>
     <string name="gas_resistance">Rezistența la gaz</string>
     <string name="gateway">Poartă de acces</string>
-    <string name="generate_input_event_on_ccw">Generează eveniment de intrare pe CCW</string>
-    <string name="generate_input_event_on_cw">Generează eveniment de intrare pe CW</string>
-    <string name="generate_input_event_on_press">Generează eveniment de intrare la apăsare</string>
     <string name="generate_qr_code">Generați codul QR</string>
     <!-- GEOFENCE -->
     <string name="get_started">Să începem</string>
@@ -466,24 +396,11 @@
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">Pin GPIO</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">Pin GPIO pentru portul encoder rotativ A</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">Pin GPIO pentru portul encoder rotativ B</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">Pin GPIO pentru portul encoder rotativ Press</string>
-    <string name="gpio_pin_to_monitor">Pin GPIO de monitorizat</string>
-    <string name="gps_en_gpio">GPIO EN GPS</string>
-    <string name="gps_mode">Mod GPS (hardware fizic)</string>
-    <string name="gps_receive_gpio">GPIO recepție GPS</string>
-    <string name="gps_transmit_gpio">GPIO transmitere GPS</string>
-    <string name="green">Verde</string>
     <string name="hardware">Dispozitive</string>
     <string name="hardware_model">Model hardware</string>
     <string name="heading">Direcție</string>
-    <string name="heartbeat">Puls</string>
     <string name="hide_layer">Ascunde Layer</string>
     <string name="hide_password">Ascundeți parola</string>
-    <string name="history_return_max">istoric număr maxim de retur</string>
-    <string name="history_return_window">Fereastra de returnare a istoricului</string>
-    <string name="hop_limit">Numărul de Hops</string>
     <string name="hops_away">Salturi distanță</string>
     <string name="host">Gazdă</string>
     <string name="host_metrics_log">Valori Gazdă</string>
@@ -491,10 +408,6 @@
     <string name="i_agree">Sunt de acord</string>
     <string name="i_agree_to_share_my_location">Am citit şi înţeleg cele de mai sus. Sunt de acord voluntar cu transmiterea necriptată a datelor nodului prin MQTT</string>
     <string name="i_know_what_i_m_doing">Știu ce fac.</string>
-    <string name="i2s_clock">Ceas I2S</string>
-    <string name="i2s_data_in">Intrare date I2S</string>
-    <string name="i2s_data_out">Ieșire date I2S</string>
-    <string name="i2s_word_select">Selectare cuvânt I2S</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Calitatea aerului interior) valoarea IAQ pe o scară relativă, măsurată cu Bosch BME680. Intervalul valorilor: 0–500.</string>
     <string name="icon_meanings">Semne pictograme</string>
@@ -502,7 +415,6 @@
     <string name="ignore">Ignoră</string>
     <string name="ignore_add">Adaugă '%1$s' in lista de ignor? Radioul tău va reporni după ce această modificare.</string>
     <string name="ignore_incoming">Ignoră primirea</string>
-    <string name="ignore_mqtt">Ignoră MQTT</string>
     <string name="ignore_remove">Elimină '%1$s' din lista de ignor? Radioul tău va reporni după această modificare.</string>
     <!-- IMPORT -->
     <string name="import_configuration">Importă configurația</string>
@@ -521,7 +433,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">Adresa IP:</string>
     <string name="ip_port">Port:</string>
-    <string name="ipv4_mode">Mod IPv4</string>
     <string name="json_output_enabled">Ieșire JSON activată</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
@@ -535,7 +446,6 @@
     <string name="latitude">Latitudine</string>
     <!-- LAYER -->
     <string name="led_heartbeat">Puls LED</string>
-    <string name="led_state">Stare LED</string>
     <string name="legacy_admin_channel">Canal implicit de administrator</string>
     <string name="library_count">Librării %1$d</string>
     <!-- LICENSED -->
@@ -596,7 +506,6 @@
     <string name="lux">Lux</string>
     <string name="manage_custom_tile_sources">Gestionează surse personalizate de stil</string>
     <string name="manage_map_layers">Gestionează Layers Hartă</string>
-    <string name="managed_mode">Mod Gestionat</string>
     <string name="manual_position_request">Solicitarea de poziție manuală este necesară</string>
     <!-- MAP -->
     <string name="map">Harta retea</string>
@@ -665,8 +574,6 @@
     <string name="message_status_unknown">Necunoscut</string>
     <string name="messages">Mesaje</string>
     <string name="minimum_broadcast_seconds">Difuzare minimă (secunde)</string>
-    <string name="minimum_distance">Distanță inteligentă</string>
-    <string name="minimum_interval">Interval inteligent</string>
     <string name="minimum_wake_time_seconds">Durata minimă a trezirii</string>
     <string name="modem_preset">Presetări</string>
     <string name="module_settings">Configurare modul</string>
@@ -676,7 +583,6 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">Configurare MQTT</string>
-    <string name="mqtt_enabled">MQTT activat</string>
     <string name="mqtt_status_connected">Conectat</string>
     <string name="mqtt_status_disconnected">Deconectat</string>
     <string name="must_set_region">Trebuie să alegeți o regiune!</string>
@@ -699,7 +605,6 @@
     <string name="navigate_into_label">Navigați în</string>
     <string name="neighbor_info">Informații vecin</string>
     <string name="neighbor_info_config">Configurare informații vecin</string>
-    <string name="neighbor_info_enabled">Info vecin activat</string>
     <string name="network">Rețea</string>
     <string name="new_channel_rcvd">Am primit un nou URL de canal</string>
     <string name="new_messages_below">Mesaje noi mai jos</string>
@@ -743,7 +648,6 @@
     <string name="node_sort_via_favorite">după favorite</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="nodedb_reset">Resetare NodeDB</string>
-    <string name="nodeinfo_broadcast_interval">Intervalul de difuzare a informațiilor nodului</string>
     <!-- NODES -->
     <string name="nodes">Noduri</string>
     <string name="nodes_at_this_location">Noduri în această locație</string>
@@ -763,12 +667,8 @@
     <string name="notifications_on_alert_bell_receipt">Notificări la primirea alertei/clopoțelului</string>
     <string name="notifications_on_message_receipt">Notificări la primirea mesajului</string>
     <string name="now">Acum</string>
-    <string name="ntp_server">Server NTP</string>
-    <string name="number_of_records">Numarul de inregistrari</string>
     <!-- OFFLINE -->
-    <string name="ok_to_mqtt">Acceptă MQTT</string>
     <string name="okay">Ok</string>
-    <string name="oled_type">Tip OLED</string>
     <!-- ONE -->
     <string name="one_day">24 Ore</string>
     <string name="one_hour">1 Oră</string>
@@ -782,18 +682,10 @@
     <string name="options">Opțiuni</string>
     <string name="orient_north">Orientare spre nord</string>
     <!-- OUTPUT -->
-    <string name="output_buzzer_gpio">Buzzer ieșire (GPIO)</string>
     <string name="output_duration_milliseconds">Durată ieșire (milisecunde)</string>
-    <string name="output_led_active_high">LED de ieșire activ ridicat</string>
-    <string name="output_led_gpio">LED ieșire (GPIO)</string>
-    <string name="output_vibra_gpio">Ieșire vibrație (GPIO)</string>
     <string name="overflow_menu">Meniu de Overflow</string>
     <string name="override_console_serial_port">Suprascrie portul serial al consolei</string>
-    <string name="override_duty_cycle">Suprascrie ciclul de obligații</string>
-    <string name="override_frequency_mhz">Suprascriere frecvență</string>
-    <string name="pa_fan_disabled">Ventilator PA dezactivat</string>
     <!-- PACKET -->
-    <string name="pairing_mode">Mod împerechere</string>
     <string name="password">Parolă</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
@@ -805,7 +697,6 @@
     <string name="pax_wifi_format">W:%1$d</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Configurație Paxcounter</string>
-    <string name="paxcounter_enabled">Paxcounter activat</string>
     <string name="periodic_position_broadcast">Pozitie periodica</string>
     <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic necesită permisiunea „Dispozitive din apropiere” pentru a găsi și conecta dispozitive prin Bluetooth. Puteți dezactiva această funcție când nu o utilizați.</string>
@@ -823,16 +714,12 @@
     <string name="position">Poziție</string>
     <string name="position_config_set_fixed_from_phone">Setează din locația curentă a telefonului</string>
     <string name="position_enabled">Poziție activată</string>
-    <string name="position_flags">Steaguri poziție</string>
     <string name="position_log">Poziție</string>
     <string name="position_packet">Pachet de poziție</string>
     <!-- POWER -->
     <string name="power">Alimentare</string>
     <string name="power_config">Configurare Putere</string>
     <string name="power_metrics_log">Valori putere</string>
-    <string name="power_metrics_module_enabled">Modul de măsurare putere activat</string>
-    <string name="power_metrics_on_screen_enabled">Valori pe ecran activate</string>
-    <string name="power_metrics_update_interval_seconds">Interval actualizare măsurători de putere</string>
     <string name="powered">Alimentare</string>
     <string name="precise_location">Locație precisă</string>
     <string name="preferences_language">Limba</string>
@@ -853,12 +740,9 @@
     <string name="preview_text">Text</string>
     <string name="primary">Primară</string>
     <string name="primary_channel_feature">Poziție periodică și transmisiune telemetrică</string>
-    <string name="private_key">Cheia privată</string>
     <string name="provide_location_to_mesh">Furnizați locația telefonului la mesh</string>
     <string name="provider_name_exists">Nume furnizor exista.</string>
-    <string name="proxy_to_client_enabled">Proxy-ul pentru client activat</string>
     <string name="psk">PSK</string>
-    <string name="ptt_pin">Pin PTT</string>
     <string name="public_key">Chei publice</string>
     <string name="public_key_changed">Cheie publică schimbată</string>
     <string name="qr_code">Cod QR</string>
@@ -876,11 +760,9 @@
     <string name="rainfall_24h">Ploaie (24h)</string>
     <string name="range_test">Test de rază</string>
     <string name="range_test_config">Configurare test interval</string>
-    <string name="range_test_enabled">Testul de gamă activat</string>
     <string name="react">Reacţionează</string>
     <string name="reboot">Restartează</string>
     <!-- REBROADCAST -->
-    <string name="rebroadcast_mode">Mod de redifuzare</string>
     <string name="rebroadcast_mode_all_desc">Retransmite orice mesaj observat, dacă acesta se afla pe canalul nostru privat sau provine de la o altă rețea cu aceiași parametri LoRa.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Același comportament ca „Toate”, dar omite decodarea pachetelor și le retransmite direct. Disponibil numai în rolul Releu. Setarea acestei opțiuni pentru orice alt rol va avea ca rezultat comportamentul „Toate”</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignoră pachetele provenite de la numere de port non-standard, cum ar fi: TAK, RangeTest, PaxCounter etc. Retransmite numai pachetele cu numere de port standard: NodeInfo, Text, Position, Telemetry și Routing.</string>
@@ -888,7 +770,6 @@
     <string name="rebroadcast_mode_local_only_desc">Ignoră mesajele observate provenite de la rețele străine deschise sau pe care nu le poate decripta. Retransmite mesajele numai pe canalele locale primare/secundare ale nodurilor.</string>
     <string name="rebroadcast_mode_none_desc">Permis numai pentru rolurile SENSOR, TRACKER și TAK_TRACKER, aceasta va inhiba toate retransmisiile, similar rolului CLIENT_MUTE.</string>
     <string name="recent_network_devices">Dispozitive recente de rețea</string>
-    <string name="red">Roșu</string>
     <string name="refresh">Reimprospatare</string>
     <string name="regenerate_keys_confirmation">Sunteţi sigur că doriţi să vă regeneraţi cheia privată?\n\nNodurile care ar fi putut schimba anterior chei cu acest modul vor trebui să elimine acel nod și să schimbe din nou tastele pentru a relua comunicarea securizată.</string>
     <string name="regenerate_private_key">Regenerează Cheia privată</string>
@@ -954,8 +835,6 @@
     <string name="role_tak_tracker_desc">Activează transmisiile TAK PLI automate și reduce transmisiile de rutină.</string>
     <string name="role_tracker">Tracker</string>
     <string name="role_tracker_desc">Transmite de poziție GPS ca prioritate.</string>
-    <string name="root_topic">Temă rădăcină</string>
-    <string name="rotary_encoder_1_enabled">Encoder rotativ #1 activat</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">S-a primit o confirmare negativă</string>
     <string name="routing_error_no_route">Nici o rută</string>
@@ -963,12 +842,10 @@
     <string name="routing_error_timeout">Expirat</string>
     <string name="rssi"> RSSI</string>
     <string name="rssi_definition">Indicatorul intensității semnalului recepționat (Received Signal Strength Indicator), o măsurătoare utilizată pentru a determina nivelul de putere recepționat de antenă. O valoare RSSI mai mare indică, în general, o conexiune mai puternică și mai stabilă.</string>
-    <string name="rsyslog_server">server rsyslog</string>
     <string name="sats">Sateliți</string>
     <!-- SAVE -->
     <string name="save">Salvează</string>
     <string name="save_changes">Salvează</string>
-    <string name="save_csv_in_storage_esp32_only">Salvați .CSV doar în memorie (ESP32)</string>
     <string name="save_rangetest">Exportă pachetele rangetest</string>
     <!-- SCAN -->
     <string name="scan">Scanare</string>
@@ -978,7 +855,6 @@
     <string name="scan_shared_contact_qr">Scanare cod QR contacte partajat</string>
     <string name="scanning_bluetooth">Scanare…</string>
     <string name="scanning_network">Scanare…</string>
-    <string name="screen_on_for">Ecran pornit pentru</string>
     <string name="scroll_to_bottom">Derulare până jos</string>
     <string name="search_emoji">Căutare emoji-uri...</string>
     <string name="secondary">Secundar</string>
@@ -1006,19 +882,10 @@
     <string name="selected">Selectat</string>
     <string name="selected_map_type">Tipul hărții selectate</string>
     <string name="send">Trimite</string>
-    <string name="send_bell">Trimite clopoțel</string>
-    <string name="send_bell_with_alert_message">Trimite clopoțelul cu mesaj de alertă</string>
     <string name="sender_message_interval_seconds">Interval mesaj expeditor (secunde)</string>
     <!-- SERIAL -->
     <string name="serial">Serial</string>
-    <string name="serial_baud_rate">Rata baud-ului serial</string>
     <string name="serial_config">Configurație serial</string>
-    <string name="serial_console">Consolă serială</string>
-    <string name="serial_enabled">Serial activat</string>
-    <string name="serial_mode">Mod serial</string>
-    <string name="serial_rx_pin">RX</string>
-    <string name="serial_tx_pin">TX</string>
-    <string name="server">Server</string>
     <string name="set_your_region">Setează-ți regiunea</string>
     <string name="settings">setari</string>
     <!-- SHARE -->
@@ -1038,7 +905,6 @@
     <string name="show_waypoints">Arată repere</string>
     <string name="shutdown">Oprire</string>
     <string name="shutdown_node_name">Nod: %1$s</string>
-    <string name="shutdown_on_power_loss">Închidere la pierderea de energie</string>
     <string name="shutdown_warning">⚠️ Aceasta va OPRI nodul. Pentru a-l repune în funcțiune, va fi necesară o intervenție fizică.</string>
     <string name="signal">Semnal</string>
     <string name="signal_quality">Calitatea semnalului</string>
@@ -1046,15 +912,12 @@
     <string name="site_planner_section_display">Ecran</string>
     <string name="skip">Treci peste</string>
     <string name="slot">Slot</string>
-    <string name="smart_position">Poziție inteligentă</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Raportul semnal-zgomot (Signal-to-Noise Ratio), o măsură utilizată în comunicații pentru a cuantifica nivelul unui semnal dorit în raport cu nivelul zgomotului de fond. În Meshtastic și în alte sisteme wireless, un SNR mai mare indică un semnal mai clar, care poate îmbunătăți fiabilitatea și calitatea transmiterii datelor.</string>
     <string name="soil_moisture">Umid sol</string>
     <string name="soil_temperature">Temp sol</string>
     <string name="speed">Viteza</string>
     <string name="speed_kmh">%1$d Km/h</string>
-    <string name="spread_factor">Factor de răspândire</string>
-    <string name="ssid">Numele rețelei</string>
     <string name="state_broadcast_seconds">Difuzare stare (secunde)</string>
     <string name="status_message">Mesaj de stare:</string>
     <string name="stay_connected_anywhere">Rămâneţi conectat oriunde</string>
@@ -1063,7 +926,6 @@
     <string name="supported_by_community">Sprijinită de comunitatea Meshtastic</string>
     <string name="swipe_action_delete">Șterge</string>
     <string name="swipe_action_unmute">Activare sunet</string>
-    <string name="sx126x_rx_boosted_gain">Amplificare RX amplificată</string>
     <string name="system_settings">Setări ale sistemului</string>
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
@@ -1149,7 +1011,6 @@
     <string name="traffic_management_router_preserve_hops">Păstrează Hops Router</string>
     <string name="traffic_management_unknown_packet_threshold">Prag de pachet necunoscut</string>
     <!-- TRANSLATION -->
-    <string name="transmit_over_lora">Transmite peste LoRA</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
@@ -1158,8 +1019,6 @@
     <string name="twenty_four_hours">24H</string>
     <string name="two_days">48 Ore</string>
     <string name="two_weeks">2W</string>
-    <string name="tx_enabled">Transmisie activată</string>
-    <string name="tx_power_dbm">Putere transmisie</string>
     <string name="type">Tip</string>
     <string name="type_a_message">Scrie un mesaj</string>
     <!-- UNITS -->
@@ -1176,8 +1035,6 @@
     <string name="unmute">Activare sunet</string>
     <string name="unrecognized">Nerecunoscut</string>
     <string name="unset">Nesetat - 0</string>
-    <string name="up_down_select_input_enabled">Intrare sus/jos/selectare activată</string>
-    <string name="update_interval">Interval de actualizare GPS</string>
     <string name="update_interval_seconds">Interval de actualizare (secunde)</string>
     <string name="updated">Actualizat</string>
     <string name="uplink_feature_description">Mesajele de la mesageria va fi trimise pe internet public prin intermediul oricărui portal configurat de nod.</string>
@@ -1189,12 +1046,7 @@
     <string name="url_template">Şablon URL</string>
     <string name="usb">USB</string>
     <!-- USE -->
-    <string name="use_12h_format">Utilizaţi formatul ceasului 12h</string>
     <string name="use_homoglyph_characters_encoding">Codare compactă pentru chirilică</string>
-    <string name="use_i2s_as_buzzer">Utilizează I2S ca buzzer</string>
-    <string name="use_input_pullup_mode">Folosește modul INPUT_PULLUP</string>
-    <string name="use_modem_preset">Utilizare presetare</string>
-    <string name="use_pwm_buzzer">Utilizează buzzer PWM</string>
     <!-- USER -->
     <string name="user">Utilizator</string>
     <string name="user_config">Configurare utilizator</string>
@@ -1202,13 +1054,10 @@
     <string name="user_info">Informații utilizator</string>
     <string name="user_string">Șir Utilizator</string>
     <string name="userinfo">Info utilizator</string>
-    <string name="username">Nume de utilizator</string>
     <string name="uv_lux">LUX UV</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="view_on_map">Vizualizați pe hartă</string>
     <string name="voltage">Tensiune</string>
-    <string name="wait_for_bluetooth_duration_seconds">Așteptați pentru durata Bluetooth</string>
-    <string name="wake_on_tap_or_motion">Trezire la apăsare sau mișcare</string>
     <string name="warning">Avertizare</string>
     <string name="waypoint_delete">Şterge waypointul?</string>
     <string name="waypoint_edit">Editează waypoint</string>

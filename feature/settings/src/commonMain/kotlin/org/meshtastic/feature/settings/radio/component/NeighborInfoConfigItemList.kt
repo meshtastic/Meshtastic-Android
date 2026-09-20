@@ -25,11 +25,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.config_device_transmitOverLora_summary
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.neighbor_info_config
-import org.meshtastic.core.resources.neighbor_info_enabled
-import org.meshtastic.core.resources.transmit_over_lora
+import org.meshtastic.core.resources.schema_neighborinfo_enabled
+import org.meshtastic.core.resources.schema_neighborinfo_transmit_over_lora
+import org.meshtastic.core.resources.schema_neighborinfo_transmit_over_lora_description
 import org.meshtastic.core.resources.update_interval_seconds
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -61,7 +61,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
         item {
             TitledCard(title = stringResource(Res.string.neighbor_info_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.neighbor_info_enabled),
+                    title = stringResource(Res.string.schema_neighborinfo_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -81,8 +81,8 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.transmit_over_lora),
-                    summary = stringResource(Res.string.config_device_transmitOverLora_summary),
+                    title = stringResource(Res.string.schema_neighborinfo_transmit_over_lora),
+                    summary = stringResource(Res.string.schema_neighborinfo_transmit_over_lora_description),
                     checked = formState.value.transmit_over_lora,
                     enabled = state.connected,
                     onCheckedChange = {

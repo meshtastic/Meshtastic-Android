@@ -46,16 +46,12 @@
     <string name="audio_config">Konfigurácia zvuku</string>
     <string name="bad">Zlý</string>
     <!-- BANDWIDTH -->
-    <string name="bandwidth">Šírka pásma</string>
     <string name="battery">Batéria</string>
-    <string name="blue">Modrá</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_config">Konfigurácia Bluetooth</string>
-    <string name="bluetooth_enabled">Bluetooth zapnuté</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bottom_nav_settings">Nastavenia</string>
-    <string name="broadcast_interval">Broadcastový Interval</string>
     <string name="calculating">Prepočítavanie…</string>
     <string name="camera_permission">Práva pre prístup k fotoaparátu</string>
     <string name="cancel">Odmietnuť</string>
@@ -82,16 +78,10 @@
     <!-- CLEAR -->
     <string name="clear">Zmazať</string>
     <string name="close">Zavrieť</string>
-    <string name="codec_2_enabled">CODEC 2 zapnutý</string>
-    <string name="codec2_sample_rate">CODEC2 vzorkovacia frekvencia</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">Vykoná dvojklepnutie na podporovaných akcelerometroch ako stlačenie užívateľského tlačidla.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Ovláda blikajúcu LED na zariadení. Pre väčšinu zariadení toto ovláda jednu zo štyroch LED, neovláda LED pre GPS a nabíjanie.</string>
-    <string name="config_device_transmitOverLora_summary">Okrem odoslania do MQTT a PhoneAPI je prenášanie informácii o susedoch prostredníctvom LoRa. Nedostupné na kanáli s predvoleným kľúčom a názvom.</string>
     <string name="config_device_use_phone_tz">Použiť časovú zónu telefónu</string>
-    <string name="config_display_flip_screen_summary">Otočiť obrazovku vertikálne.</string>
-    <string name="config_display_screen_on_secs_summary">Doba počas ktorej ostane obrazovka zapnutá potom ako je stlačené používateľské tlačidlo alebo bola prijatá správa.</string>
     <string name="connected">Pripojený</string>
     <string name="connected_sleeping">Pripojené k uspanému vysielaču</string>
     <string name="connecting">Prebieha pripájanie</string>
@@ -156,7 +146,6 @@
     <string name="environment">Prostredie</string>
     <string name="error">Chyba</string>
     <string name="error_duty_cycle">Dosiahnutý limit pracovného cyklu. Nedá sa teraz posielať správy, skúste neskôr.</string>
-    <string name="ethernet_enabled">Ethernet zapnutý</string>
     <string name="ethernet_ip">Eternet IP:</string>
     <string name="exchange_position">Vymeniť si pozície</string>
     <!-- EXPORT -->
@@ -175,25 +164,17 @@
     <string name="firmware_update_failed">Aktualizácia zlyhala</string>
     <string name="fixed_pin">Pevný PIN</string>
     <string name="fixed_position">Fixná Pozícia</string>
-    <string name="flip_screen">Otoč Obrazovku</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Dobrý</string>
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO konektor</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">GPIO konektor pre Enkóder A port</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">GPIO konektor pre Enkóder B port</string>
-    <string name="green">Zelená</string>
     <string name="hardware">Hardvér</string>
     <string name="hardware_model">Model hardvéru</string>
     <string name="hide_password">Skryť heslo</string>
     <string name="hops_away">Počet skokov</string>
     <string name="i_know_what_i_m_doing">Viem čo robím.</string>
-    <string name="i2s_clock">I2S čas</string>
-    <string name="i2s_data_in">I2S vstup dát</string>
-    <string name="i2s_data_out">I2S výstup dát</string>
-    <string name="i2s_word_select">I2C výber slova</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Kvalita vzduchu v interiéri) relatívna hodnota IAQ meraná prístrojom Bosch BME680. Rozsah hodnôt 0–500.</string>
     <!-- IGNORE -->
@@ -207,10 +188,8 @@
     <string name="intro_show">Zobraziť úvod</string>
     <string name="ip_address">IP adresa:</string>
     <string name="ip_port">Port:</string>
-    <string name="ipv4_mode">IPv4 režim</string>
     <!-- KEY -->
     <!-- LAYER -->
-    <string name="led_state">Stav LED</string>
     <!-- LICENSED -->
     <!-- LOAD -->
     <string name="load_indexed">Zaťaženie %1$d</string>
@@ -326,7 +305,6 @@
     <string name="none_quality">Žiadny</string>
     <string name="not_connected">Nepripojené</string>
     <!-- NOTIFICATIONS -->
-    <string name="ntp_server">NTP server</string>
     <!-- OFFLINE -->
     <!-- ONE -->
     <string name="one_day">24 Hodín</string>
@@ -334,7 +312,6 @@
     <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PACKET -->
-    <string name="pairing_mode">Režim párovania</string>
     <string name="password">Heslo</string>
     <!-- PAX -->
     <string name="paxcounter">Počítadlo ľudí</string>
@@ -359,10 +336,8 @@
     <string name="pressure">Tlak</string>
     <!-- PREVIEW -->
     <string name="primary">Primárna</string>
-    <string name="private_key">Súkromný kľúč</string>
     <string name="provide_location_to_mesh">Poskytnúť polohu telefónu do siete</string>
     <string name="psk">PSK</string>
-    <string name="ptt_pin">PTT pin</string>
     <string name="public_key">Verejný kľúč</string>
     <string name="qr_code">QR kód</string>
     <!-- QUICK -->
@@ -382,7 +357,6 @@
     <string name="rebroadcast_mode_known_only_desc">Ignoruje pozorované správy z cudzích sietí, ako napríklad LOCAL ONLY, ale ide o krok ďalej tým, že ignoruje aj správy z uzlov, ktoré ešte nie sú v známom zozname uzla.</string>
     <string name="rebroadcast_mode_local_only_desc">Ignoruje pozorované správy z cudzích sietí, ktoré sú otvorené alebo tie, ktoré nedokáže dešifrovať. Opätovne vysiela správu iba na lokálnych primárnych / sekundárnych kanáloch uzlov.</string>
     <string name="rebroadcast_mode_none_desc">Povolené len pre role SENSOR, TRACKER a TAK_TRACKER, zamedzí to všetkým opätovným vysielaniam, na rozdiel od roly CLIENT_MUTE.</string>
-    <string name="red">Červená</string>
     <string name="region_frequency_plan">Región</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administrácia na diaľku</string>
@@ -421,7 +395,6 @@
     <string name="role_tak_tracker_desc">Umožňuje automatické vysielanie TAK PLI a znižuje rutinné vysielanie.</string>
     <string name="role_tracker">Sledovač</string>
     <string name="role_tracker_desc">Prioritne vysiela pakety polohy GPS.</string>
-    <string name="rotary_encoder_1_enabled">Enkóder #1 aktivovaný</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Prijaté negatívne potvrdenie</string>
     <string name="routing_error_no_route">Žiadna trasa</string>
@@ -453,11 +426,9 @@
     <string name="signal_quality">Kvalita signálu</string>
     <!-- SITE -->
     <string name="site_planner_section_display">Obrazovka</string>
-    <string name="smart_position">Inteligentná poloha</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Pomer signálu od šumu (SNR), miera používaná v komunikácii na kvantifikáciu úrovne požadovaného signálu k úrovni hluku pozadia. V Meshtastic a iných bezdrôtových systémoch znamená vyšší SNR jasnejší signál, ktorý môže zvýšiť spoľahlivosť a kvalitu prenosu údajov.</string>
     <string name="speed">Rýchlosť</string>
-    <string name="ssid">SSID</string>
     <string name="supported">Podporované</string>
     <string name="swipe_action_delete">Vymazať</string>
     <string name="swipe_action_mute">Stlmiť</string>
@@ -486,7 +457,6 @@
     <string name="traceroute_log">Trasovanie</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
-    <string name="transmit_over_lora">Vysielať cez sieť LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
@@ -507,7 +477,6 @@
     <!-- USER -->
     <string name="user">Užívateľ</string>
     <string name="user_id">ID používateľa</string>
-    <string name="username">Používateľské meno</string>
     <string name="via_mqtt">cez MQTT</string>
     <string name="voltage">Napätie</string>
     <string name="waypoint_delete">Vymazať cieľový bod?</string>

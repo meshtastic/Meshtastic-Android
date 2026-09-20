@@ -57,9 +57,7 @@
     <string name="close">Lukk</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">Behandle dobbeltrykk på støttede akselerometre som brukerknappetrykk.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Kontrollerer blinking av LED på enheten. For de fleste enheter vil dette kontrollere en av de opp til 4 lysdiodene. Laderen og GPS-lysene er ikke kontrollerbare.</string>
-    <string name="config_device_transmitOverLora_summary">Hvorvidt det i tillegg for å sende det til MQTT og til telefonen, skal vår Naboinfo overføres over LoRa. Ikke tilgjengelig på en kanal med standardnøkkel og standardnavn.</string>
     <string name="connected_sleeping">Tilkoblet radio, men den sover</string>
     <string name="copy">Kopier</string>
     <!-- DEBUG -->
@@ -210,7 +208,6 @@
     <string name="preferences_language">Språk</string>
     <string name="preferences_system_default">System standard</string>
     <!-- PREVIEW -->
-    <string name="private_key">Privat nøkkel</string>
     <string name="provide_location_to_mesh">Oppgi plassering til nett</string>
     <string name="public_key">Offentlig nøkkel</string>
     <string name="qr_code">QR kode</string>

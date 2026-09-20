@@ -25,14 +25,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.heartbeat
-import org.meshtastic.core.resources.history_return_max
-import org.meshtastic.core.resources.history_return_window
-import org.meshtastic.core.resources.number_of_records
-import org.meshtastic.core.resources.server
+import org.meshtastic.core.resources.schema_storeforward_enabled
+import org.meshtastic.core.resources.schema_storeforward_heartbeat
+import org.meshtastic.core.resources.schema_storeforward_history_return_max
+import org.meshtastic.core.resources.schema_storeforward_history_return_window
+import org.meshtastic.core.resources.schema_storeforward_is_server
+import org.meshtastic.core.resources.schema_storeforward_records
 import org.meshtastic.core.resources.store_forward
 import org.meshtastic.core.resources.store_forward_config
-import org.meshtastic.core.resources.store_forward_enabled
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -63,7 +63,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
         item {
             TitledCard(title = stringResource(Res.string.store_forward_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.store_forward_enabled),
+                    title = stringResource(Res.string.schema_storeforward_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -73,7 +73,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.heartbeat),
+                    title = stringResource(Res.string.schema_storeforward_heartbeat),
                     checked = formState.value.heartbeat,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -83,7 +83,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.number_of_records),
+                    title = stringResource(Res.string.schema_storeforward_records),
                     value = formState.value.records,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -93,7 +93,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.history_return_max),
+                    title = stringResource(Res.string.schema_storeforward_history_return_max),
                     value = formState.value.history_return_max,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -103,7 +103,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.history_return_window),
+                    title = stringResource(Res.string.schema_storeforward_history_return_window),
                     value = formState.value.history_return_window,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -114,7 +114,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.server),
+                    title = stringResource(Res.string.schema_storeforward_is_server),
                     checked = formState.value.is_server,
                     enabled = state.connected,
                     onCheckedChange = {

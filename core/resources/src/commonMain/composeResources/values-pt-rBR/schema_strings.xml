@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">Azul</string>
+    <string name="schema_ambientlighting_green">Verde</string>
+    <string name="schema_ambientlighting_led_state">Estado do LED</string>
+    <string name="schema_ambientlighting_red">Vermelho</string>
+    <string name="schema_audio_bitrate">Taxa de amostragem CODEC2</string>
+    <string name="schema_audio_codec2_enabled">CODEC 2 ativado</string>
+    <string name="schema_audio_i2s_din">MISO I2S</string>
+    <string name="schema_audio_i2s_sck">CLK I2S</string>
+    <string name="schema_audio_i2s_sd">MOSI I2S</string>
+    <string name="schema_audio_i2s_ws">CS I2S</string>
+    <string name="schema_audio_ptt_pin">Pino de PTT</string>
+    <string name="schema_bluetooth_enabled">Bluetooth habilitado</string>
+    <string name="schema_bluetooth_mode">Modo de pareamento</string>
+    <string name="schema_cannedmessage_inputbroker_event_ccw">Gerar evento de entrada rodando no sentido anti-horário</string>
+    <string name="schema_cannedmessage_inputbroker_event_cw">Gerar evento de entrada rodando no sentido horário</string>
+    <string name="schema_cannedmessage_inputbroker_event_press">Gerar evento de entrada ao pressionar</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">Pino GPIO para porta A do codificador rotativo</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">Pino GPIO para porta B do codificador rotativo</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">Pino GPIO para codificador rotativo porta Press</string>
+    <string name="schema_cannedmessage_rotary1_enabled">Codificador rotativo #1 ativado</string>
+    <string name="schema_cannedmessage_send_bell">Enviar sino</string>
+    <string name="schema_cannedmessage_updown1_enabled">Entrada Cima/Baixo/Selecionar ativada</string>
+    <string name="schema_detectionsensor_detection_trigger_type">Tipo de gatilho de deteção</string>
+    <string name="schema_detectionsensor_enabled">Sensor de Detecção ativado</string>
+    <string name="schema_detectionsensor_monitor_pin">Pino GPIO para monitorar</string>
+    <string name="schema_detectionsensor_name">Nome amigável</string>
+    <string name="schema_detectionsensor_send_bell">Enviar sino com mensagem de alerta</string>
+    <string name="schema_detectionsensor_use_pullup">Usar o modo INPUT_PULLUP</string>
+    <string name="schema_device_double_tap_as_button_press_description">Tratar toque duplo nos acelerômetros suportados enquanto um botão pressionado pelo usuário.</string>
+    <string name="schema_display_compass_orientation">Orientação da bússola</string>
+    <string name="schema_display_displaymode">Modo da tela</string>
+    <string name="schema_display_flip_screen">Inverter tela</string>
+    <string name="schema_display_units">Unidades de exibição</string>
+    <string name="schema_display_use_12h_clock">Usar formato de relógio 12h</string>
+    <string name="schema_display_use_12h_clock_description">Quando ativado, o dispositivo exibirá o tempo em formato de 12 horas na tela.</string>
+    <string name="schema_externalnotification_active">LED de saída habilitado alto</string>
+    <string name="schema_externalnotification_alert_bell">LED de alerta de sino</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">Campainha de alerta</string>
+    <string name="schema_externalnotification_alert_bell_vibra">Vibração da campainha de alerta</string>
+    <string name="schema_externalnotification_alert_message">LED de mensagem de alerta</string>
+    <string name="schema_externalnotification_alert_message_buzzer">Campainha de mensagem de alerta</string>
+    <string name="schema_externalnotification_alert_message_vibra">Vibração de mensagem de alerta</string>
+    <string name="schema_externalnotification_enabled">Notificação Externa habilitada</string>
+    <string name="schema_externalnotification_output">LED de Saída (GPIO)</string>
+    <string name="schema_externalnotification_output_buzzer">Saída Campainha (GPIO)</string>
+    <string name="schema_externalnotification_output_vibra">Vibra de saída (GPIO)</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">Usar I2S como campainha</string>
+    <string name="schema_externalnotification_use_pwm">Usar uma campainha PWM</string>
+    <string name="schema_lora_bandwidth">Largura da banda</string>
+    <string name="schema_lora_ignore_mqtt">Ignorar MQTT</string>
+    <string name="schema_lora_override_duty_cycle">Ignorar ciclo de trabalho</string>
+    <string name="schema_lora_pa_fan_disabled">Ventilador do PA desativado</string>
+    <string name="schema_mqtt_enabled">MQTT habilitado</string>
+    <string name="schema_mqtt_encryption_enabled">Criptografia ativada</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">Proxy para cliente ativado</string>
+    <string name="schema_mqtt_root">Tópico principal</string>
+    <string name="schema_mqtt_username">Nome de usuário</string>
+    <string name="schema_neighborinfo_enabled">Informações do Vizinho ativado</string>
+    <string name="schema_neighborinfo_transmit_over_lora">Transmitir por LoRa</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">Se além de enviá-lo para MQTT e PhoneAPI, nosso NeighborInfo deve ser transmitido por LoRa. Não disponível em um canal com chave e nome padrão.</string>
+    <string name="schema_network_address_mode">Modo IPv4</string>
+    <string name="schema_network_eth_enabled">Ethernet ativado</string>
+    <string name="schema_network_ntp_server">Servidor NTP</string>
+    <string name="schema_network_rsyslog_server">Servidor rsyslog</string>
+    <string name="schema_network_wifi_ssid">SSID</string>
+    <string name="schema_paxcounter_ble_threshold">Limite de RSSI BLE (o padrão é -80)</string>
+    <string name="schema_paxcounter_enabled">Contador de Pessoas ativado</string>
+    <string name="schema_power_adc_multiplier_override">Alterar proporção do multiplicador ADC</string>
+    <string name="schema_power_is_power_saving">Ativar modo de economia de energia</string>
+    <string name="schema_rangetest_enabled">Teste de distância ativado</string>
+    <string name="schema_rangetest_save">Salvar .CSV no armazenamento (apenas ESP32)</string>
+    <string name="schema_security_admin_key">Chave do Administrador</string>
+    <string name="schema_security_debug_log_api_enabled">API de logs de depuração ativada</string>
+    <string name="schema_security_is_managed">Modo Administrado</string>
+    <string name="schema_security_private_key">Chave Privada</string>
+    <string name="schema_security_serial_enabled">Console serial</string>
+    <string name="schema_serial_baud">Taxa de transmissão série</string>
+    <string name="schema_serial_echo">Eco habilitado</string>
+    <string name="schema_serial_enabled">Serial ativado</string>
+    <string name="schema_serial_mode">Modo de série</string>
+    <string name="schema_storeforward_heartbeat">Batimento</string>
+    <string name="schema_storeforward_history_return_max">Histórico de retorno máximo</string>
+    <string name="schema_storeforward_history_return_window">Janela de retorno do histórico</string>
+    <string name="schema_storeforward_is_server">Servidor</string>
+    <string name="schema_storeforward_records">Número de registros</string>
+    <string name="schema_telemetry_air_quality_enabled">Módulo de métricas de qualidade do ar habilitado</string>
+    <string name="schema_telemetry_environment_display_fahrenheit">Métricas de Ambiente usam Fahrenheit</string>
+    <string name="schema_telemetry_environment_measurement_enabled">Módulo de métricas do ambiente ativado</string>
+    <string name="schema_telemetry_environment_screen_enabled">Métricas de ambiente na tela habilitado</string>
+    <string name="schema_telemetry_power_measurement_enabled">Módulo de métricas de energia habilitado</string>
+    <string name="schema_telemetry_power_screen_enabled">Métricas de ambiente na tela habilitado</string>
+</resources>

@@ -26,12 +26,12 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.ble_rssi_threshold_defaults_to_80
 import org.meshtastic.core.resources.paxcounter
 import org.meshtastic.core.resources.paxcounter_config
-import org.meshtastic.core.resources.paxcounter_enabled
+import org.meshtastic.core.resources.schema_paxcounter_ble_threshold
+import org.meshtastic.core.resources.schema_paxcounter_enabled
+import org.meshtastic.core.resources.schema_paxcounter_wifi_threshold
 import org.meshtastic.core.resources.update_interval_seconds
-import org.meshtastic.core.resources.wifi_rssi_threshold_defaults_to_80
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -65,7 +65,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) 
         item {
             TitledCard(title = stringResource(Res.string.paxcounter_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.paxcounter_enabled),
+                    title = stringResource(Res.string.schema_paxcounter_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -90,7 +90,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) 
                 )
                 HorizontalDivider()
                 SignedIntegerEditTextPreference(
-                    title = stringResource(Res.string.wifi_rssi_threshold_defaults_to_80),
+                    title = stringResource(Res.string.schema_paxcounter_wifi_threshold),
                     value = formState.value.wifi_threshold,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -100,7 +100,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) 
                 )
                 HorizontalDivider()
                 SignedIntegerEditTextPreference(
-                    title = stringResource(Res.string.ble_rssi_threshold_defaults_to_80),
+                    title = stringResource(Res.string.schema_paxcounter_ble_threshold),
                     value = formState.value.ble_threshold,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

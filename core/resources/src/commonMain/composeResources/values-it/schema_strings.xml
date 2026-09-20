@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">Blu</string>
+    <string name="schema_ambientlighting_green">Verde</string>
+    <string name="schema_ambientlighting_led_state">LED di stato</string>
+    <string name="schema_ambientlighting_red">Rosso</string>
+    <string name="schema_audio_bitrate">Frequenza di campionamento CODEC2</string>
+    <string name="schema_audio_codec2_enabled">CODEC 2 attivato</string>
+    <string name="schema_audio_i2s_din">I2S data out</string>
+    <string name="schema_audio_i2s_sck">I2S clock</string>
+    <string name="schema_audio_i2s_sd">I2S data in</string>
+    <string name="schema_audio_i2s_ws">I2S word select</string>
+    <string name="schema_audio_ptt_pin">Pin PTT</string>
+    <string name="schema_bluetooth_enabled">Bluetooth attivo</string>
+    <string name="schema_bluetooth_mode">Modalità abbinamento</string>
+    <string name="schema_cannedmessage_inputbroker_event_ccw">Evento generato dalla rotazione in senso antiorario</string>
+    <string name="schema_cannedmessage_inputbroker_event_cw">Evento generato dalla rotazione in senso orario</string>
+    <string name="schema_cannedmessage_inputbroker_event_press">Evento generato dalla Pressione del pulsante</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">Pin GPIO della porta A dell'encoder rotativo</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">Pin GPIO della porta B dell'encoder rotativo</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">Pin GPIO della porta Pulsante dell'encoder rotativo</string>
+    <string name="schema_cannedmessage_rotary1_enabled">Encoder rotativo #1 abilitato</string>
+    <string name="schema_cannedmessage_send_bell">Invia campanella</string>
+    <string name="schema_cannedmessage_updown1_enabled">Input Su/Giu/Selezione abilitato</string>
+    <string name="schema_detectionsensor_detection_trigger_type">Tipo di trigger di rilevamento</string>
+    <string name="schema_detectionsensor_enabled">Sensore Rilevamento attivo</string>
+    <string name="schema_detectionsensor_monitor_pin">Pin GPIO da monitorare</string>
+    <string name="schema_detectionsensor_name">Nome semplificato</string>
+    <string name="schema_detectionsensor_send_bell">Invia campanella con messaggio di avviso</string>
+    <string name="schema_detectionsensor_use_pullup">Usa modalità INPUT_PULLUP</string>
+    <string name="schema_device_button_gpio">GPIO del Pulsante</string>
+    <string name="schema_device_buzzer_gpio">GPIO del Buzzer</string>
+    <string name="schema_device_double_tap_as_button_press">Doppio tocco come pressione pulsante</string>
+    <string name="schema_device_double_tap_as_button_press_description">Considera il doppio tocco sugli accelerometri supportati come la pressione di un pulsante utente.</string>
+    <string name="schema_device_node_info_broadcast_secs">Intervallo Di Trasmissione Info Nodo</string>
+    <string name="schema_device_rebroadcast_mode">Modalità Ritrasmissione</string>
+    <string name="schema_display_auto_screen_carousel_secs">Durata di ogni schermata</string>
+    <string name="schema_display_auto_screen_carousel_secs_description">Passa automaticamente alla pagina successiva sullo schermo come un carosello, in base all'intervallo specificato.</string>
+    <string name="schema_display_compass_north_top">Punta sempre a nord</string>
+    <string name="schema_display_compass_north_top_description">La direzione della bussola sullo schermo all'esterno del cerchio punta sempre a nord.</string>
+    <string name="schema_display_compass_orientation">Orientamento bussola</string>
+    <string name="schema_display_displaymode">Modalità schermo</string>
+    <string name="schema_display_displaymode_description">Sovrascrivi il layout predefinito dello schermo.</string>
+    <string name="schema_display_flip_screen">Capovolgi schermo</string>
+    <string name="schema_display_flip_screen_description">Capovolgi lo schermo verticalmente.</string>
+    <string name="schema_display_heading_bold">Intestazione in grassetto</string>
+    <string name="schema_display_heading_bold_description">Usa il grassetto nelle intestazioni sullo schermo.</string>
+    <string name="schema_display_oled">Tipo OLED</string>
+    <string name="schema_display_oled_description">Ignora il rilevamento automatico dello schermo OLED.</string>
+    <string name="schema_display_screen_on_secs">Tieni lo schermo acceso per</string>
+    <string name="schema_display_screen_on_secs_description">Per quanto tempo lo schermo rimane acceso dopo che il pulsante utente viene premuto o i messaggi vengono ricevuti.</string>
+    <string name="schema_display_units">Unità di misura visualizzata</string>
+    <string name="schema_display_units_description">Unità di misura visualizzate sullo schermo del dispositivo.</string>
+    <string name="schema_display_use_12h_clock">Usa formato orologio 12h</string>
+    <string name="schema_display_use_12h_clock_description">Se abilitato, il dispositivo visualizzerà il tempo in formato 12 ore sullo schermo.</string>
+    <string name="schema_display_wake_on_tap_or_motion">Accendi lo schermo al tocco o al movimento</string>
+    <string name="schema_display_wake_on_tap_or_motion_description">Richiede la presenza di un accelerometro nel dispositivo.</string>
+    <string name="schema_externalnotification_active">Output per LED active high</string>
+    <string name="schema_externalnotification_alert_bell">LED campanella di allarme</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">Buzzer campanella di allarme</string>
+    <string name="schema_externalnotification_alert_bell_vibra">Vibrazione campanella di allarme</string>
+    <string name="schema_externalnotification_alert_message">Avviso messaggi tramite LED</string>
+    <string name="schema_externalnotification_alert_message_buzzer">Avviso messaggi tramite suono</string>
+    <string name="schema_externalnotification_alert_message_vibra">Avviso messaggi tramite vibrazione</string>
+    <string name="schema_externalnotification_enabled">Notifica esterna attivata</string>
+    <string name="schema_externalnotification_output">LED Output (GPIO)</string>
+    <string name="schema_externalnotification_output_buzzer">Output buzzer (GPIO)</string>
+    <string name="schema_externalnotification_output_vibra">Output vibrazione (GPIO)</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">Usa I2S come buzzer</string>
+    <string name="schema_externalnotification_use_pwm">Usa buzzer PWM</string>
+    <string name="schema_lora_bandwidth">Larghezza di banda</string>
+    <string name="schema_lora_channel_num">Slot di Frequenza</string>
+    <string name="schema_lora_channel_num_description">La frequenza di funzionamento del nodo viene calcolata in base alla regione, alla preimpostazione del modem e a questo campo. Quando è a 0, lo slot viene calcolato automaticamente in base al nome del canale primario e cambierà rispetto allo slot pubblico predefinito. Torna allo slot pubblico predefinito se sono configurati canali primari privati e secondari pubblici.</string>
+    <string name="schema_lora_coding_rate">Coding Rate</string>
+    <string name="schema_lora_config_ok_to_mqtt">OK per MQTT</string>
+    <string name="schema_lora_hop_limit">Numero di Hop</string>
+    <string name="schema_lora_hop_limit_description">Imposta il numero massimo di hop, il predefinito è 3. Aumentare gli hop comporta anche aumentare la congestione e dovrebbe essere utilizzato con attenzione. Con 0 hop, i messaggi non otterranno conferma di ricezione.</string>
+    <string name="schema_lora_ignore_mqtt">Ignora MQTT</string>
+    <string name="schema_lora_override_duty_cycle">Ignora limite di Duty Cycle</string>
+    <string name="schema_lora_override_frequency">Sovrascrivi Frequenza</string>
+    <string name="schema_lora_pa_fan_disabled">Ventola PA disabilitata</string>
+    <string name="schema_lora_spread_factor">Spread Factor</string>
+    <string name="schema_lora_sx126x_rx_boosted_gain">Migliora guadagno in Ricezione</string>
+    <string name="schema_lora_tx_enabled">Trasmissione Abilitata</string>
+    <string name="schema_lora_tx_power">Potenza di Trasmissione</string>
+    <string name="schema_lora_use_preset">Usa Preset</string>
+    <string name="schema_mqtt_enabled">MQTT abilitato</string>
+    <string name="schema_mqtt_encryption_enabled">Crittografia abilitata</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">Proxy to client attivato</string>
+    <string name="schema_mqtt_root">Root topic</string>
+    <string name="schema_mqtt_username">Username</string>
+    <string name="schema_neighborinfo_enabled">Info Nodi Vicini abilitato</string>
+    <string name="schema_neighborinfo_transmit_over_lora">Trasmettere su LoRa</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">Se oltre a inviarli tramite MQTT e PhoneAPI, i dati NeighborInfo devono essere trasmessi tramite LoRa. Non disponibile su un canale con chiave e nome predefiniti.</string>
+    <string name="schema_network_address_mode">Modalità IPv4</string>
+    <string name="schema_network_eth_enabled">Ethernet abilitato</string>
+    <string name="schema_network_eth_enabled_description">L'attivazione della connessione Ethernet disabiliterà la connessione bluetooth all'app. La connessione al nodo via TCP non è disponibile per i dispositivi Apple.</string>
+    <string name="schema_network_ntp_server">Server NTP</string>
+    <string name="schema_network_rsyslog_server">server rsyslog</string>
+    <string name="schema_network_wifi_ssid">SSID</string>
+    <string name="schema_paxcounter_ble_threshold">Soglia RSSI BLE (valore predefinito -80)</string>
+    <string name="schema_paxcounter_enabled">Paxcounter abilitato</string>
+    <string name="schema_position_broadcast_smart_minimum_distance">Distanza Intelligente</string>
+    <string name="schema_position_broadcast_smart_minimum_distance_description">La distanza minima percorsa in metri per essere considerata per la trasmissione in modalità smart position.</string>
+    <string name="schema_position_broadcast_smart_minimum_interval_secs">Intervallo Intelligente</string>
+    <string name="schema_position_gps_en_gpio">GPIO EN del GPS</string>
+    <string name="schema_position_gps_mode">Modalità GPS (Hardware Fisico)</string>
+    <string name="schema_position_gps_update_interval">Intervallo Interrogazione GPS</string>
+    <string name="schema_position_gps_update_interval_description">Quanto spesso si tenterà di recuperare una posizione dal GPS (se &lt;10sec il GPS rimarrà sempre attivo).</string>
+    <string name="schema_position_position_broadcast_secs">Intervallo Di Trasmissione</string>
+    <string name="schema_position_position_broadcast_secs_description">Il tempo massimo che può trascorrere senza che il nodo trasmetta la posizione.</string>
+    <string name="schema_position_position_broadcast_smart_enabled">Posizione Smart</string>
+    <string name="schema_position_position_flags">Flag Di Posizione</string>
+    <string name="schema_position_position_flags_description">Dati facoltativi da includere nei messaggi di posizione. Più campi sono selezionati, più grande sarà il messaggio, che richiederà maggior tempo di trasmissione e aumenterà il rischio di perdita di pacchetti.</string>
+    <string name="schema_position_rx_gpio">GPIO di Ricezione del GPS</string>
+    <string name="schema_position_tx_gpio">GPIO di Trasmissione del GPS</string>
+    <string name="schema_power_adc_multiplier_override">Sovrascrivi rapporto moltiplicatore ADC</string>
+    <string name="schema_power_is_power_saving">Abilita modalità risparmio energetico</string>
+    <string name="schema_power_is_power_saving_description">Verranno sospese tutte le funzioni per la maggior parte del tempo. Per i ruoli di tracker e sensor, è inclusa nella sospensione anche la radio lora. Questa configurazione è sconsigliata se il dispositivo viene utilizzato con le app del telefono o se il dispositivo è privo di pulsanti utente.</string>
+    <string name="schema_power_on_battery_shutdown_after_secs">Spegnimento in mancanza di alimentazione</string>
+    <string name="schema_power_wait_bluetooth_secs">Durata attesa Bluetooth</string>
+    <string name="schema_rangetest_enabled">Test distanza massima abilitato</string>
+    <string name="schema_rangetest_save">Salva .CSV nella memoria (solo ESP32)</string>
+    <string name="schema_security_admin_key">Chiave Amministratore</string>
+    <string name="schema_security_admin_key_description">La chiave pubblica che autorizza un nodo a inviare messaggi di amministrazione a questo nodo.</string>
+    <string name="schema_security_debug_log_api_enabled">Debug log API abilitato</string>
+    <string name="schema_security_debug_log_api_enabled_description">Produce log di debug in tempo reale su seriale, visualizza ed esporta i log del dispositivo via Bluetooth dopo aver rimosso le informazioni sulla posizione.</string>
+    <string name="schema_security_is_managed">Modalità Gestita</string>
+    <string name="schema_security_is_managed_description">Il dispositivo è gestito da un amministratore nella mesh, l'utente non è in grado di accedere a nessuna delle impostazioni del dispositivo.</string>
+    <string name="schema_security_private_key">Chiave Privata</string>
+    <string name="schema_security_serial_enabled">Console seriale</string>
+    <string name="schema_security_serial_enabled_description">Console seriale attraverso la Stream API.</string>
+    <string name="schema_serial_baud">Velocità della seriale</string>
+    <string name="schema_serial_echo">Echo abilitato</string>
+    <string name="schema_serial_enabled">Seriale abilitata</string>
+    <string name="schema_serial_mode">Modalità seriale</string>
+    <string name="schema_serial_rxd">RX</string>
+    <string name="schema_serial_txd">TX</string>
+    <string name="schema_storeforward_enabled">Store &amp; Forward abilitato</string>
+    <string name="schema_storeforward_heartbeat">Heartbeat</string>
+    <string name="schema_storeforward_history_return_max">Cronologia ritorno max</string>
+    <string name="schema_storeforward_history_return_window">Finestra di ritorno cronologia</string>
+    <string name="schema_storeforward_is_server">Server</string>
+    <string name="schema_storeforward_records">Numero di record</string>
+    <string name="schema_telemetry_air_quality_enabled">Modulo metriche della qualità dell'aria abilitato</string>
+    <string name="schema_telemetry_air_quality_interval">Intervallo aggiornamento metriche qualità aria</string>
+    <string name="schema_telemetry_device_telemetry_enabled">Invia Telemetria Dispositivo</string>
+    <string name="schema_telemetry_device_telemetry_enabled_description">Abilita/disabilita il modulo di telemetria del dispositivo per inviare metriche alla mesh. Questi sono valori nominali: le mesh congestionate passeranno automaticamente a intervalli più lunghi in base al numero di nodi online.</string>
+    <string name="schema_telemetry_device_update_interval">Intervallo aggiornamento metriche dispositivo</string>
+    <string name="schema_telemetry_environment_display_fahrenheit">Usa i gradi Fahrenheit nelle metriche ambientali</string>
+    <string name="schema_telemetry_environment_measurement_enabled">Modulo metriche ambientali abilitato</string>
+    <string name="schema_telemetry_environment_screen_enabled">Metriche ambientali visualizzate su schermo</string>
+    <string name="schema_telemetry_environment_update_interval">Intervallo aggiornamento metriche ambientali</string>
+    <string name="schema_telemetry_power_measurement_enabled">Modulo metriche di alimentazione abilitato</string>
+    <string name="schema_telemetry_power_screen_enabled">Metriche di alimentazione visualizzate su schermo</string>
+    <string name="schema_telemetry_power_update_interval">Intervallo aggiornamento metriche alimentazione</string>
+</resources>

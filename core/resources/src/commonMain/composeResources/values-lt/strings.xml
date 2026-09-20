@@ -208,7 +208,6 @@
     <string name="preferences_language">Kalba</string>
     <string name="preferences_system_default">Numatytoji sistema</string>
     <!-- PREVIEW -->
-    <string name="private_key">Privatus raktas</string>
     <string name="provide_location_to_mesh">Pateikti telefono vietą tinklui</string>
     <string name="public_key">Viešasis raktas</string>
     <string name="qr_code">QR kodas</string>
@@ -224,7 +223,6 @@
     <string name="rebroadcast_mode_all_desc">Persiųsti visas žinutes, nesvarbu jos iš Jūsų privataus tinklo ar iš kito tinklo su analogiškais LoRa parametrais.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Taip pat kaip ir VISI bet nebando dekoduoti paketų ir juos tiesiog persiunčia. Galima naudoti tik Repeater rolės įtaise. Įjungus bet kokiame kitame įtaise - veiks tiesiog kaip VISI.</string>
     <string name="rebroadcast_mode_none_desc">Leidžiama tik SENSOR, TRACKER ar TAK_TRACKER rolių įtaisams. Tai užblokuos visas retransliacijas, ne taip kaip CLIENT_MUTE atveju.</string>
-    <string name="red">Raudona</string>
     <string name="region_frequency_plan">Regionas</string>
     <!-- REMOTE -->
     <string name="remote_admin">Nuotolinis administravimas</string>

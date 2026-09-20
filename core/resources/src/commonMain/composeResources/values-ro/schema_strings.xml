@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">Albastru</string>
+    <string name="schema_ambientlighting_green">Verde</string>
+    <string name="schema_ambientlighting_led_state">Stare LED</string>
+    <string name="schema_ambientlighting_red">Roșu</string>
+    <string name="schema_audio_bitrate">Rată de eșantionare CODEC2</string>
+    <string name="schema_audio_codec2_enabled">CODEC 2 activat</string>
+    <string name="schema_audio_i2s_din">Ieșire date I2S</string>
+    <string name="schema_audio_i2s_sck">Ceas I2S</string>
+    <string name="schema_audio_i2s_sd">Intrare date I2S</string>
+    <string name="schema_audio_i2s_ws">Selectare cuvânt I2S</string>
+    <string name="schema_audio_ptt_pin">Pin PTT</string>
+    <string name="schema_bluetooth_enabled">Bluetooth activat</string>
+    <string name="schema_bluetooth_mode">Mod împerechere</string>
+    <string name="schema_cannedmessage_inputbroker_event_ccw">Generează eveniment de intrare pe CCW</string>
+    <string name="schema_cannedmessage_inputbroker_event_cw">Generează eveniment de intrare pe CW</string>
+    <string name="schema_cannedmessage_inputbroker_event_press">Generează eveniment de intrare la apăsare</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">Pin GPIO pentru portul encoder rotativ A</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">Pin GPIO pentru portul encoder rotativ B</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">Pin GPIO pentru portul encoder rotativ Press</string>
+    <string name="schema_cannedmessage_rotary1_enabled">Encoder rotativ #1 activat</string>
+    <string name="schema_cannedmessage_send_bell">Trimite clopoțel</string>
+    <string name="schema_cannedmessage_updown1_enabled">Intrare sus/jos/selectare activată</string>
+    <string name="schema_detectionsensor_detection_trigger_type">Tip declanșator detectare</string>
+    <string name="schema_detectionsensor_enabled">Senzor detectare activat</string>
+    <string name="schema_detectionsensor_monitor_pin">Pin GPIO de monitorizat</string>
+    <string name="schema_detectionsensor_name">Nume comun</string>
+    <string name="schema_detectionsensor_send_bell">Trimite clopoțelul cu mesaj de alertă</string>
+    <string name="schema_detectionsensor_use_pullup">Folosește modul INPUT_PULLUP</string>
+    <string name="schema_device_button_gpio">GPIO buton</string>
+    <string name="schema_device_buzzer_gpio">GPIO buzzer</string>
+    <string name="schema_device_double_tap_as_button_press">Apăsare dublă ca buton</string>
+    <string name="schema_device_double_tap_as_button_press_description">Tratează o apăsare dublă pe accelerometrele compatibile ca apăsare a butonului utilizatorului.</string>
+    <string name="schema_device_node_info_broadcast_secs">Intervalul de difuzare a informațiilor nodului</string>
+    <string name="schema_device_rebroadcast_mode">Mod de redifuzare</string>
+    <string name="schema_display_auto_screen_carousel_secs">Intervalul caruselului</string>
+    <string name="schema_display_auto_screen_carousel_secs_description">Comută automat la pagina următoare de pe ecran ca un carusel, bazat pe intervalul specificat.</string>
+    <string name="schema_display_compass_north_top">Indică mereu spre nord</string>
+    <string name="schema_display_compass_north_top_description">Busola de pe ecran, în afara cercului, va indica întotdeauna nordul.</string>
+    <string name="schema_display_compass_orientation">Orientarea busolei</string>
+    <string name="schema_display_displaymode">Mod ecran</string>
+    <string name="schema_display_displaymode_description">Suprascrie aspectul implicit al ecranului.</string>
+    <string name="schema_display_flip_screen">Rotire ecran</string>
+    <string name="schema_display_flip_screen_description">Rotire ecran vertical.</string>
+    <string name="schema_display_heading_bold">Direcție îngroșat</string>
+    <string name="schema_display_heading_bold_description">Îngroşează textul din antet de pe ecran.</string>
+    <string name="schema_display_oled">Tip OLED</string>
+    <string name="schema_display_oled_description">Suprascrie ecranul OLED automat.</string>
+    <string name="schema_display_screen_on_secs">Ecran pornit pentru</string>
+    <string name="schema_display_screen_on_secs_description">Cât timp rămâne ecranul pornit după ce butonul utilizatorului este apăsat sau mesajele sunt primite.</string>
+    <string name="schema_display_units">Unități de măsură afișate</string>
+    <string name="schema_display_units_description">Unitățile afișate pe ecranul dispozitivului.</string>
+    <string name="schema_display_use_12h_clock">Utilizaţi formatul ceasului 12h</string>
+    <string name="schema_display_use_12h_clock_description">Când este activat, dispozitivul va afișa pe ecran ora în format 12 ore.</string>
+    <string name="schema_display_wake_on_tap_or_motion">Trezire la apăsare sau mișcare</string>
+    <string name="schema_display_wake_on_tap_or_motion_description">Necesită ca dispozitivul dvs. să aibă un accelerometru.</string>
+    <string name="schema_externalnotification_active">LED de ieșire activ ridicat</string>
+    <string name="schema_externalnotification_alert_bell">LED alertă clopoțel</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">Buzzer alertă clopoțel</string>
+    <string name="schema_externalnotification_alert_bell_vibra">Vibrație alertă clopoțel</string>
+    <string name="schema_externalnotification_alert_message">LED alertă mesaj</string>
+    <string name="schema_externalnotification_alert_message_buzzer">Buzzer alertă mesaj</string>
+    <string name="schema_externalnotification_alert_message_vibra">Vibrație alertă mesaj</string>
+    <string name="schema_externalnotification_enabled">Notificare externă activată</string>
+    <string name="schema_externalnotification_output">LED ieșire (GPIO)</string>
+    <string name="schema_externalnotification_output_buzzer">Buzzer ieșire (GPIO)</string>
+    <string name="schema_externalnotification_output_vibra">Ieșire vibrație (GPIO)</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">Utilizează I2S ca buzzer</string>
+    <string name="schema_externalnotification_use_pwm">Utilizează buzzer PWM</string>
+    <string name="schema_lora_bandwidth">Lățime bandă</string>
+    <string name="schema_lora_channel_num">Slot pentru frecvenţă</string>
+    <string name="schema_lora_channel_num_description">Frecvența de funcționare a nodului dvs. este calculată pe baza regiunii, presetării modemului și a acestui câmp. Când valoarea este 0, slotul este calculat automat pe baza numelui canalului principal și se va modifica față de slotul public implicit. Reveniți la slotul public implicit dacă sunt configurate canale private principale și canale publice secundare.</string>
+    <string name="schema_lora_coding_rate">Rata de codificare</string>
+    <string name="schema_lora_config_ok_to_mqtt">Acceptă MQTT</string>
+    <string name="schema_lora_hop_limit">Numărul de Hops</string>
+    <string name="schema_lora_hop_limit_description">Setează numărul maxim de salturi, valoarea implicită fiind 3. Creșterea numărului de salturi crește și congestia și trebuie utilizată cu precauție. Mesajele de difuzare cu 0 salturi nu vor primi confirmări (ACK).</string>
+    <string name="schema_lora_ignore_mqtt">Ignoră MQTT</string>
+    <string name="schema_lora_override_duty_cycle">Suprascrie ciclul de obligații</string>
+    <string name="schema_lora_override_frequency">Suprascriere frecvență</string>
+    <string name="schema_lora_pa_fan_disabled">Ventilator PA dezactivat</string>
+    <string name="schema_lora_spread_factor">Factor de răspândire</string>
+    <string name="schema_lora_sx126x_rx_boosted_gain">Amplificare RX amplificată</string>
+    <string name="schema_lora_tx_enabled">Transmisie activată</string>
+    <string name="schema_lora_tx_power">Putere transmisie</string>
+    <string name="schema_lora_use_preset">Utilizare presetare</string>
+    <string name="schema_mqtt_enabled">MQTT activat</string>
+    <string name="schema_mqtt_encryption_enabled">Criptare activată</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">Proxy-ul pentru client activat</string>
+    <string name="schema_mqtt_root">Temă rădăcină</string>
+    <string name="schema_mqtt_username">Nume de utilizator</string>
+    <string name="schema_neighborinfo_enabled">Info vecin activat</string>
+    <string name="schema_neighborinfo_transmit_over_lora">Transmite peste LoRA</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">NeighborInfo al dvs. să fie transmis prin LoRa, pe lângă MQTT și PhoneAPI. Nu este disponibil pe un canal cu cheie și nume implicite.</string>
+    <string name="schema_network_address_mode">Mod IPv4</string>
+    <string name="schema_network_eth_enabled">Ethernet activat</string>
+    <string name="schema_network_eth_enabled_description">Activarea Ethernet va dezactiva conexiunea Bluetooth la aplicație. Conexiunile TCP ale nodului nu sunt disponibile pe dispozitivele Apple.</string>
+    <string name="schema_network_ntp_server">Server NTP</string>
+    <string name="schema_network_rsyslog_server">server rsyslog</string>
+    <string name="schema_network_wifi_ssid">Numele rețelei</string>
+    <string name="schema_paxcounter_enabled">Paxcounter activat</string>
+    <string name="schema_position_broadcast_smart_minimum_distance">Distanță inteligentă</string>
+    <string name="schema_position_broadcast_smart_minimum_distance_description">Modificarea minimă a distanței în metri care trebuie luată în considerare pentru o transmisie inteligentă a poziției.</string>
+    <string name="schema_position_broadcast_smart_minimum_interval_secs">Interval inteligent</string>
+    <string name="schema_position_gps_en_gpio">GPIO EN GPS</string>
+    <string name="schema_position_gps_mode">Mod GPS (hardware fizic)</string>
+    <string name="schema_position_gps_update_interval">Interval de actualizare GPS</string>
+    <string name="schema_position_gps_update_interval_description">Cât de des ar trebui să încercăm să obținem o poziție GPS (&lt;10sec păstrează GPS activat).</string>
+    <string name="schema_position_position_broadcast_secs">Interval de difuzare</string>
+    <string name="schema_position_position_broadcast_secs_description">Intervalul maxim care poate trece fără ca un nod să transmită o poziție.</string>
+    <string name="schema_position_position_broadcast_smart_enabled">Poziție inteligentă</string>
+    <string name="schema_position_position_flags">Steaguri poziție</string>
+    <string name="schema_position_position_flags_description">Câmpuri opționale care trebuie incluse la asamblarea mesajelor de poziție. Cu cât sunt incluse mai multe câmpuri, cu atât mesajul va fi mai mare, ceea ce va duce la un timp de transmisie mai lung și la un risc mai mare de pierdere a pachetelor.</string>
+    <string name="schema_position_rx_gpio">GPIO recepție GPS</string>
+    <string name="schema_position_tx_gpio">GPIO transmitere GPS</string>
+    <string name="schema_power_adc_multiplier_override">Raportul suprascrierii multiplicatorului ADC</string>
+    <string name="schema_power_is_power_saving">Activează modul de economisire a energiei</string>
+    <string name="schema_power_is_power_saving_description">Va păstra totul în repaus cât mai mult posibil, pentru rolul de tracker și senzor, aceasta va include și radioul LoRa. Nu utilizați această setare dacă doriți să utilizați dispozitivul cu aplicațiile telefonului sau dacă utilizați un dispozitiv fără buton de utilizator.</string>
+    <string name="schema_power_on_battery_shutdown_after_secs">Închidere la pierderea de energie</string>
+    <string name="schema_power_wait_bluetooth_secs">Așteptați pentru durata Bluetooth</string>
+    <string name="schema_rangetest_enabled">Testul de gamă activat</string>
+    <string name="schema_rangetest_save">Salvați .CSV doar în memorie (ESP32)</string>
+    <string name="schema_security_admin_key">Cheie Administrator</string>
+    <string name="schema_security_admin_key_description">Cheia publică autorizată să trimită mesaje de administrare către acest nod.</string>
+    <string name="schema_security_debug_log_api_enabled">Debug log API activat</string>
+    <string name="schema_security_debug_log_api_enabled_description">Generarea de jurnale de depanare în timp real prin serial, vizualizarea și exportarea jurnalelor dispozitivelor cu poziția redactată prin Bluetooth.</string>
+    <string name="schema_security_is_managed">Mod Gestionat</string>
+    <string name="schema_security_is_managed_description">Dispozitivul este gestionat de un administrator de rețea, utilizatorul neputând accesa niciuna dintre setările dispozitivului.</string>
+    <string name="schema_security_private_key">Cheia privată</string>
+    <string name="schema_security_serial_enabled">Consolă serială</string>
+    <string name="schema_security_serial_enabled_description">Consolă serială prin API-ul Stream.</string>
+    <string name="schema_serial_baud">Rata baud-ului serial</string>
+    <string name="schema_serial_echo">Echo activat</string>
+    <string name="schema_serial_enabled">Serial activat</string>
+    <string name="schema_serial_mode">Mod serial</string>
+    <string name="schema_serial_rxd">RX</string>
+    <string name="schema_serial_txd">TX</string>
+    <string name="schema_storeforward_heartbeat">Puls</string>
+    <string name="schema_storeforward_history_return_max">istoric număr maxim de retur</string>
+    <string name="schema_storeforward_history_return_window">Fereastra de returnare a istoricului</string>
+    <string name="schema_storeforward_is_server">Server</string>
+    <string name="schema_storeforward_records">Numarul de inregistrari</string>
+    <string name="schema_telemetry_air_quality_interval">Interval actualizare măsurători de calitate a aerului</string>
+    <string name="schema_telemetry_device_telemetry_enabled">Trimite telemetrie dispozitiv</string>
+    <string name="schema_telemetry_device_telemetry_enabled_description">Activează/dezactivează modulul de telemetrie al dispozitivului pentru a trimite metrici către rețeaua mesh. Acestea sunt valori nominale. Rețelele mesh congestionate se vor scala automat la intervale mai lungi, în funcție de numărul de noduri online.</string>
+    <string name="schema_telemetry_device_update_interval">Intervalul de actualizare a parametrilor dispozitivului</string>
+    <string name="schema_telemetry_environment_display_fahrenheit">Valorile de mediu utilizează Fahrenheit</string>
+    <string name="schema_telemetry_environment_measurement_enabled">Modul de măsurare mediu activat</string>
+    <string name="schema_telemetry_environment_screen_enabled">Valorile de mediu pe ecran sunt activate</string>
+    <string name="schema_telemetry_environment_update_interval">Interval actualizare valori mediu</string>
+    <string name="schema_telemetry_power_measurement_enabled">Modul de măsurare putere activat</string>
+    <string name="schema_telemetry_power_screen_enabled">Valori pe ecran activate</string>
+    <string name="schema_telemetry_power_update_interval">Interval actualizare măsurători de putere</string>
+</resources>

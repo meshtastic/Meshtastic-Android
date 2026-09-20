@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">Blått</string>
+    <string name="schema_ambientlighting_green">Grönt</string>
+    <string name="schema_ambientlighting_led_state">LED-läge</string>
+    <string name="schema_ambientlighting_red">Rött</string>
+    <string name="schema_audio_bitrate">CODEC2 samplingshastighet</string>
+    <string name="schema_audio_codec2_enabled">CODEC 2 aktiverat</string>
+    <string name="schema_audio_i2s_din">I2S-data ut</string>
+    <string name="schema_audio_i2s_sck">I2S-klocka</string>
+    <string name="schema_audio_i2s_sd">I2S-data in</string>
+    <string name="schema_audio_i2s_ws">I2S ordval</string>
+    <string name="schema_audio_ptt_pin">PTT pin</string>
+    <string name="schema_bluetooth_enabled">Bluetooth är aktiverad</string>
+    <string name="schema_bluetooth_mode">Parkopplingsläge</string>
+    <string name="schema_cannedmessage_send_bell">Skicka ljudavisering</string>
+    <string name="schema_detectionsensor_enabled">Detektionssensor aktiverad</string>
+    <string name="schema_detectionsensor_monitor_pin">GPIO-pin att övervaka</string>
+    <string name="schema_detectionsensor_name">Visningsnamn</string>
+    <string name="schema_detectionsensor_send_bell">Skicka ljudavisering med larmmeddelande</string>
+    <string name="schema_detectionsensor_use_pullup">Använd INPUT_PULLUP-läge</string>
+    <string name="schema_device_button_gpio">GPIO för knapp</string>
+    <string name="schema_device_buzzer_gpio">GPIO för summer</string>
+    <string name="schema_device_double_tap_as_button_press">Dubbeltryck som knapptryck</string>
+    <string name="schema_device_double_tap_as_button_press_description">Dubbelklick på supporterad accelerometer räknas som användarknapp.</string>
+    <string name="schema_device_node_info_broadcast_secs">Sändningsintervall för nod-info</string>
+    <string name="schema_device_rebroadcast_mode">Återutsändningsläge</string>
+    <string name="schema_display_auto_screen_carousel_secs_description">Växlar automatiskt till nästa sida på skärmen som en karusell, baserat på angivet intervall.</string>
+    <string name="schema_display_compass_north_top">Peka alltid mot norr</string>
+    <string name="schema_display_compass_north_top_description">Kompassens visare utanför cirkeln kommer alltid att peka mot norr.</string>
+    <string name="schema_display_compass_orientation">Kompassriktning</string>
+    <string name="schema_display_displaymode">Visningsläge</string>
+    <string name="schema_display_displaymode_description">Åsidosätt standard skärmlayout.</string>
+    <string name="schema_display_flip_screen">Vänd skärmen</string>
+    <string name="schema_display_flip_screen_description">Vänd skärmen vertikalt.</string>
+    <string name="schema_display_heading_bold">Fetstil för rubriktext</string>
+    <string name="schema_display_heading_bold_description">Gör rubriker på skärmen feta.</string>
+    <string name="schema_display_oled">OLED-typ</string>
+    <string name="schema_display_oled_description">Åsidosätt automatisk OLED-skärmdetektering.</string>
+    <string name="schema_display_screen_on_secs">Håll skärmen tänd</string>
+    <string name="schema_display_screen_on_secs_description">Hur länge skärmen är på efter att användarknappen tryckts in eller ett meddelande tagits emot.</string>
+    <string name="schema_display_units">Visa enheter</string>
+    <string name="schema_display_units_description">Enheter som visas på enhetens skärm.</string>
+    <string name="schema_display_use_12h_clock">Använd 12-timmarsformat</string>
+    <string name="schema_display_use_12h_clock_description">Visar tiden i 12-timmarsformat när denna är aktiverad.</string>
+    <string name="schema_display_wake_on_tap_or_motion">Vakna vid tryck eller rörelse</string>
+    <string name="schema_display_wake_on_tap_or_motion_description">Kräver att det finns en accelerometer på din enhet.</string>
+    <string name="schema_externalnotification_active">Utmatnings-LED aktiv hög</string>
+    <string name="schema_externalnotification_alert_bell">Larmavisering med LED</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">Larmavisering med summer</string>
+    <string name="schema_externalnotification_alert_bell_vibra">Larmavisering med vibration</string>
+    <string name="schema_externalnotification_alert_message">Larmmeddelande LED</string>
+    <string name="schema_externalnotification_alert_message_buzzer">Larmmeddelande-summer</string>
+    <string name="schema_externalnotification_alert_message_vibra">Larmmeddelande vibration</string>
+    <string name="schema_externalnotification_enabled">Externa aviseringar aktiverad</string>
+    <string name="schema_externalnotification_output">Utmatning LED (GPIO)</string>
+    <string name="schema_externalnotification_output_buzzer">Utmatning summer (GPIO)</string>
+    <string name="schema_externalnotification_output_vibra">Utmatning vibration (GPIO)</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">Använd I2S som summer</string>
+    <string name="schema_externalnotification_use_pwm">Använd PWM-summern</string>
+    <string name="schema_lora_bandwidth">Bandbredd</string>
+    <string name="schema_lora_channel_num">Frekvens-slot</string>
+    <string name="schema_lora_channel_num_description">Din nods driftfrekvens beräknas baserat på regionen, modeminställning och detta fält. När värdet är 0 beräknas det automatiskt baserat på det primära kanalnamnet och kommer att bli annan än den förvalda publika frekvensen. Ändra tillbaka till den publika standardfrekvensen om privata primära och publika sekundära kanaler är konfigurerade.</string>
+    <string name="schema_lora_coding_rate">Kodningshastighet</string>
+    <string name="schema_lora_config_ok_to_mqtt">Ok till MQTT</string>
+    <string name="schema_lora_hop_limit">Antal hopp</string>
+    <string name="schema_lora_hop_limit_description">Sätter det maximala antalet hopp, standard är 3. Ökat antal hopp ökar också trängseln och bör användas med försiktighet. 0 hopp sända meddelanden kommer inte att få ACKs.</string>
+    <string name="schema_lora_ignore_mqtt">Ignorera MQTT</string>
+    <string name="schema_lora_override_duty_cycle">Ersätt gräns för driftsperiod</string>
+    <string name="schema_lora_override_frequency">Åsidosätt </string>
+    <string name="schema_lora_spread_factor">Spridningsfaktor</string>
+    <string name="schema_lora_sx126x_rx_boosted_gain">RX förstärkt gain</string>
+    <string name="schema_lora_tx_enabled">Sändning aktiverad</string>
+    <string name="schema_lora_tx_power">Sändningseffekt</string>
+    <string name="schema_lora_use_preset">Använd förinställning</string>
+    <string name="schema_mqtt_enabled">MQTT är aktiverat</string>
+    <string name="schema_mqtt_encryption_enabled">Kryptering aktiverad</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">Proxy till klient aktiverad</string>
+    <string name="schema_mqtt_root">Rotämne (root topic)</string>
+    <string name="schema_mqtt_username">Användarnamn</string>
+    <string name="schema_neighborinfo_enabled">Grannskapsinformation aktiverat</string>
+    <string name="schema_neighborinfo_transmit_over_lora">Skicka över LoRa</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">Ange om NeighborInfo ska skickas ut över LoRa utöver igenom MQTT och PhoneAPI. Ej applicerbart på kanalen med standard namn och nyckel.</string>
+    <string name="schema_network_address_mode">IPv4-läge</string>
+    <string name="schema_network_eth_enabled">Ethernet är aktiverat</string>
+    <string name="schema_network_eth_enabled_description">Aktivering av Ethernet kommer att inaktivera Bluetooth-anslutningen till appen. TCP-nodanslutningar är inte tillgängliga på Apple-enheter.</string>
+    <string name="schema_network_ntp_server">NTP-server</string>
+    <string name="schema_network_rsyslog_server">rsyslog-server</string>
+    <string name="schema_network_wifi_ssid">SSID</string>
+    <string name="schema_paxcounter_enabled">PAX-räknare aktiverad</string>
+    <string name="schema_position_broadcast_smart_minimum_distance">Smart distans</string>
+    <string name="schema_position_broadcast_smart_minimum_distance_description">Minsta förändring av position för att smart position ska sända (meter).</string>
+    <string name="schema_position_broadcast_smart_minimum_interval_secs">Smart intervall</string>
+    <string name="schema_position_gps_en_gpio">GPS EN GPIO</string>
+    <string name="schema_position_gps_mode">GPS-läge (fysisk maskinvara)</string>
+    <string name="schema_position_gps_update_interval">Intervall för hämtning av GPS-position</string>
+    <string name="schema_position_gps_update_interval_description">Hur ofta ska vi försöka få en GPS-position (&lt;10sec håller GPS aktiv).</string>
+    <string name="schema_position_position_broadcast_secs">Sändningsintervall</string>
+    <string name="schema_position_position_broadcast_secs_description">Längsta tid som kan förflyta utan att en nod sänder en position.</string>
+    <string name="schema_position_position_broadcast_smart_enabled">Smart position</string>
+    <string name="schema_position_position_flags">Positionsflaggor</string>
+    <string name="schema_position_position_flags_description">Valfria fält att inkludera vid sammansättning av positionsmeddelanden. Ju fler fält som väljs, desto större kommer meddelandet att bli. Längre meddelanden leder till högre sändningsutnyttjande och en högre risk för paketförlust.</string>
+    <string name="schema_position_rx_gpio">GPIO för GPS-mottagning</string>
+    <string name="schema_position_tx_gpio">GPIO för GPS-sändning</string>
+    <string name="schema_power_is_power_saving">Aktivera strömsparläge</string>
+    <string name="schema_power_is_power_saving_description">Kommer att pausa allt så mycket som möjligt. För tracker- och sensor-rollen kommer detta också att omfatta lora radio. Använd inte den här inställningen om du vill använda enheten med telefonapparna eller använder en enhet utan en hårdvaruknapp.</string>
+    <string name="schema_power_on_battery_shutdown_after_secs">Stäng av vid strömförlust</string>
+    <string name="schema_power_wait_bluetooth_secs">Vänta in Bluetooth (sekunder)</string>
+    <string name="schema_rangetest_enabled">Räckvidstest aktiverat</string>
+    <string name="schema_rangetest_save">Spara .CSV i enheten (endast ESP32)</string>
+    <string name="schema_security_admin_key">Admin-nyckel</string>
+    <string name="schema_security_admin_key_description">Den publika nyckeln som ger rätt att skicka administratörsmeddelanden till den här noden.</string>
+    <string name="schema_security_debug_log_api_enabled">API för debugloggen igång</string>
+    <string name="schema_security_debug_log_api_enabled_description">Skriv felsökningsloggar över seriell kommunikation samt visa och exportera positions-rensade loggar över Bluetooth.</string>
+    <string name="schema_security_is_managed">Hanterat läge</string>
+    <string name="schema_security_is_managed_description">Enheten hanteras av en mesh-administratör. Användaren kan inte ändra enhetsinställningarna.</string>
+    <string name="schema_security_private_key">Privat nyckel</string>
+    <string name="schema_security_serial_enabled">Seriell konsol</string>
+    <string name="schema_security_serial_enabled_description">Seriell kommunikation över Stream API.</string>
+    <string name="schema_serial_baud">Den seriella kommunikationens hastighet</string>
+    <string name="schema_serial_echo">Eko aktiverad</string>
+    <string name="schema_serial_enabled">Seriell aktiverad</string>
+    <string name="schema_serial_mode">Seriellt läge</string>
+    <string name="schema_serial_rxd">RX</string>
+    <string name="schema_serial_txd">TX</string>
+    <string name="schema_storeforward_enabled">Lagra &amp; Vidarebefordra aktiverad</string>
+    <string name="schema_storeforward_heartbeat">Pulsera</string>
+    <string name="schema_storeforward_history_return_max">Maxstorlek för historik</string>
+    <string name="schema_storeforward_history_return_window">Returfönstrets storlek för historik</string>
+    <string name="schema_storeforward_is_server">Server</string>
+    <string name="schema_storeforward_records">Antal poster</string>
+    <string name="schema_telemetry_air_quality_enabled">Luftkvalitetsmätarmodul aktiverad</string>
+    <string name="schema_telemetry_air_quality_interval">Uppdateringsintervall för luftkvalitet</string>
+    <string name="schema_telemetry_device_telemetry_enabled">Skicka enhetstelemetri</string>
+    <string name="schema_telemetry_device_update_interval">Uppdateringsintervall för enhetsdata</string>
+    <string name="schema_telemetry_environment_display_fahrenheit">Miljömätvärden använder Fahrenheit</string>
+    <string name="schema_telemetry_environment_measurement_enabled">Mätmodul för miljö aktiverad</string>
+    <string name="schema_telemetry_environment_screen_enabled">Visning av miljödata på skärm är aktiverad</string>
+    <string name="schema_telemetry_environment_update_interval">Uppdateringsintervall för miljödata</string>
+    <string name="schema_telemetry_power_measurement_enabled">Strömmätarmodul aktiverad</string>
+    <string name="schema_telemetry_power_screen_enabled">Visning av strömvärden på skärm är aktiverad</string>
+    <string name="schema_telemetry_power_update_interval">Uppdateringsintervall för strömmätare</string>
+</resources>

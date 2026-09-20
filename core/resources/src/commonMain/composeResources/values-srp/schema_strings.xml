@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_cannedmessage_inputbroker_pin_a">GPIO пин за A порт ротационог енкодера</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">GPIO пин за Б порт ротационог енкодера</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">GPIO пин за порт клика ротационог енкодера</string>
+    <string name="schema_detectionsensor_name">Пријатељски назив</string>
+    <string name="schema_device_button_gpio">Дугме GPIO</string>
+    <string name="schema_device_buzzer_gpio">Звучни сигнал GPIO</string>
+    <string name="schema_device_double_tap_as_button_press">Двоструки додир као дугме</string>
+    <string name="schema_device_double_tap_as_button_press_description">Третирај двоструки тап на подржаним акцелерометрима као притисак корисничког дугмета.</string>
+    <string name="schema_device_node_info_broadcast_secs">Интервал емитовања информација о чвору</string>
+    <string name="schema_device_rebroadcast_mode">Режим реемитовања</string>
+    <string name="schema_display_auto_screen_carousel_secs_description">Аутоматски се пребацује на следећу страницу на екрану као карусел, на основу наведеног интервала.</string>
+    <string name="schema_display_compass_north_top">Увек усмеравајте на север</string>
+    <string name="schema_display_compass_north_top_description">Смер компаса на екрану изван круга увек ће указивати на север.</string>
+    <string name="schema_display_flip_screen_description">Окрени екран вертикално.</string>
+    <string name="schema_display_oled_description">Премаши аутоматско откривање OLED екрана.</string>
+    <string name="schema_display_screen_on_secs">Екран укључен за</string>
+    <string name="schema_display_screen_on_secs_description">Колико дуго екран остаје укључен након притиска корисничког дугмета или пријема порука.</string>
+    <string name="schema_display_units_description">Јединице приказане на екрану уређаја.</string>
+    <string name="schema_display_wake_on_tap_or_motion_description">Захтева да уређај има акцелерометар.</string>
+    <string name="schema_lora_bandwidth">Проток</string>
+    <string name="schema_lora_channel_num">Фреквенцијски слот</string>
+    <string name="schema_lora_coding_rate">Стопа кодирања</string>
+    <string name="schema_lora_config_ok_to_mqtt">Позитиван за MQTT</string>
+    <string name="schema_lora_hop_limit_description">Подешава максималан број скокова. Подразумевано је 3, а повећање броја одобрених скокова такође повећава загушење и треба га користити опрезно. Поруке емитоване са 0 скокова неће добити потврде пријема (ACK).</string>
+    <string name="schema_lora_ignore_mqtt">Игнориши MQTT</string>
+    <string name="schema_lora_override_frequency">Измена фреквенције</string>
+    <string name="schema_lora_spread_factor">Фактор ширења</string>
+    <string name="schema_lora_sx126x_rx_boosted_gain">Појачање пријемника</string>
+    <string name="schema_lora_tx_enabled">Трансмитер укључен</string>
+    <string name="schema_lora_use_preset">Користи предефинисано подешавање</string>
+    <string name="schema_mqtt_username">Корисничко име</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">Да ли би поред слања на MQTT и PhoneAPI, наша NeighborInfo требало да се преноси преко LoRa? Није доступно на каналу са подразумеваним кључем и именом.</string>
+    <string name="schema_position_broadcast_smart_minimum_distance_description">Минимална промена растојања у метрима која ће се узети у обзир за паметно емитовање позиције.</string>
+    <string name="schema_position_position_broadcast_secs">Интервал емитовања</string>
+    <string name="schema_position_position_broadcast_smart_enabled">Паметно позиционирање</string>
+    <string name="schema_position_position_flags">Заставице позиције</string>
+    <string name="schema_position_position_flags_description">Опциони поља за укључивање при склапању порука о позицији. Што више поља је укључено, порука ће бити већа, што доводи до дужег времена емитовања и већег ризика од губитка пакета.</string>
+    <string name="schema_position_rx_gpio">GPS пријем GPIO</string>
+    <string name="schema_position_tx_gpio">GPS предаја GPIO</string>
+    <string name="schema_power_is_power_saving_description">Спаваће све што је више могуће, за улогу трагача и сензора ово ће укључивати и лора радио. Не користите ово подешавање ако желите да користите свој уређај са мобилним апликацијама или користите уређај без корисничког дугмета.</string>
+    <string name="schema_security_debug_log_api_enabled_description">Излаз дебаговања уживо преко серијског интерфејса, прегледајте и извозите логове уређаја са редукованим позицијама преко блутута.</string>
+    <string name="schema_security_is_managed_description">Уређајем управља администратор мреже, корисник не може да приступи ниједном подешавању уређаја.</string>
+    <string name="schema_security_private_key">Приватни кључ</string>
+    <string name="schema_security_serial_enabled_description">Серијска конзола преко Stream API-ја.</string>
+    <string name="schema_storeforward_is_server">Сервер</string>
+    <string name="schema_storeforward_records">Број записа</string>
+</resources>

@@ -23,6 +23,10 @@ Thank you for your interest in contributing to Meshtastic-Android! We welcome co
 - **Strings:** Use localised strings via the **Compose Multiplatform Resource** library in `:core:resources`.
   - Do **not** use the legacy `androidApp/src/main/res/values/strings.xml`.
   - **Definition:** Add strings to `core/resources/src/commonMain/composeResources/values/strings.xml`.
+  - **Schema strings:** every label and description in the protobufs field metadata is generated into
+    `values/schema_strings.xml`, keyed by schema path (`Res.string.schema_lora_hop_limit`). A settings control
+    that edits one protobuf field uses that key. Do not edit the file or write a `schema_` key by hand
+    (`./gradlew :schema-strings:sync` regenerates it); wrong wording is a change to `meshtastic/protobufs`.
   - **Usage:**
     ```kotlin
     import org.jetbrains.compose.resources.stringResource

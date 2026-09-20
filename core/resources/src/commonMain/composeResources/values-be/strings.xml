@@ -34,7 +34,6 @@
     <string name="audio">Аўдыё</string>
     <!-- BANDWIDTH -->
     <string name="battery">Батарэя</string>
-    <string name="blue">Сіні</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_feature_config">Конфигурация</string>
@@ -123,7 +122,6 @@
     <string name="get_started">Пачаць</string>
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
-    <string name="green">Зялёны</string>
     <string name="hardware">Устройства</string>
     <string name="hide_password">Схаваць пароль</string>
     <string name="i_know_what_i_m_doing">Я ведаю, што я раблю.</string>
@@ -207,7 +205,6 @@
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Добра</string>
-    <string name="oled_type">Тып OLED</string>
     <!-- ONE -->
     <string name="one_day">24 Гадзін</string>
     <string name="one_hour">1 гадзіна</string>
@@ -229,13 +226,11 @@
     <!-- POWER -->
     <string name="preferences_language">Мова</string>
     <!-- PREVIEW -->
-    <string name="private_key">Прыватны ключ</string>
     <string name="qr_code">QR-код</string>
     <!-- QUICK -->
     <string name="quick_chat_instant">Імгненна даслаць</string>
     <string name="reboot">Перазагрузіць</string>
     <!-- REBROADCAST -->
-    <string name="red">Чырвоны</string>
     <string name="region_frequency_plan">Рэгіён</string>
     <!-- REMOTE -->
     <!-- REMOVE -->
@@ -282,7 +277,6 @@
     <string name="send">Адправіць</string>
     <!-- SERIAL -->
     <string name="serial">Паслядоўны</string>
-    <string name="server">Сервер</string>
     <string name="set_your_region">Выберыце ваш рэгіён</string>
     <string name="settings">налады</string>
     <!-- SHARE -->
@@ -295,7 +289,6 @@
     <string name="skip">Прапусціць</string>
     <string name="snr">сігнал-шум</string>
     <string name="speed">Хуткасць</string>
-    <string name="ssid">SSID</string>
     <string name="swipe_action_delete">Прыбраць</string>
     <!-- TAK -->
     <string name="tak_server_section">Сервер</string>
@@ -322,7 +315,6 @@
     <!-- USE -->
     <!-- USER -->
     <string name="user">Карыстальнік</string>
-    <string name="username">Імя карыстальніка</string>
     <string name="via_mqtt">праз MQTT</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-адрас</string>

@@ -286,6 +286,7 @@ jobs:
               :core:database:allTests
               :core:network:allTests
               :feature:widget:testDebugUnitTest
+              :schema-strings:test
             kover: >-
               :androidApp:koverXmlReportFdroidDebug
               :androidApp:koverXmlReportGoogleDebug

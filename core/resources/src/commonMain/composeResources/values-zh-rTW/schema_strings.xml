@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">藍色</string>
+    <string name="schema_ambientlighting_green">綠色</string>
+    <string name="schema_ambientlighting_led_state">LED狀態</string>
+    <string name="schema_ambientlighting_red">紅色</string>
+    <string name="schema_audio_bitrate">CODEC2 取樣率</string>
+    <string name="schema_audio_codec2_enabled">啟用 CODEC 2</string>
+    <string name="schema_audio_i2s_din">I2S 數據輸出</string>
+    <string name="schema_audio_i2s_sck">I2S 時鐘</string>
+    <string name="schema_audio_i2s_sd">I2S 數據輸入</string>
+    <string name="schema_audio_i2s_ws">I2S WS 訊號選擇</string>
+    <string name="schema_audio_ptt_pin">PTT針腳</string>
+    <string name="schema_bluetooth_enabled">藍牙已啟用</string>
+    <string name="schema_bluetooth_mode">配對模式</string>
+    <string name="schema_cannedmessage_inputbroker_event_ccw">逆時針旋轉時產生輸入事件</string>
+    <string name="schema_cannedmessage_inputbroker_event_cw">順時針旋轉時產生輸入事件</string>
+    <string name="schema_cannedmessage_inputbroker_event_press">按下時產生輸入事件</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">旋轉編碼器 A 端 GPIO 腳位</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">旋轉編碼器 B 端 GPIO 腳位</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">旋轉編碼器 按鈕 GPIO 腳位</string>
+    <string name="schema_cannedmessage_rotary1_enabled">啟用旋轉編碼器#1</string>
+    <string name="schema_cannedmessage_send_bell">發送振鈴</string>
+    <string name="schema_cannedmessage_updown1_enabled">啟用上下選擇輸入</string>
+    <string name="schema_detectionsensor_detection_trigger_type">偵測觸發類型</string>
+    <string name="schema_detectionsensor_enabled">啟用偵測感測器</string>
+    <string name="schema_detectionsensor_monitor_pin">螢幕的 GPIO 腳位</string>
+    <string name="schema_detectionsensor_name">顯示名稱</string>
+    <string name="schema_detectionsensor_send_bell">告警訊息發送提示音</string>
+    <string name="schema_detectionsensor_use_pullup">使用輸入上拉模式</string>
+    <string name="schema_device_button_gpio">按鈕腳位</string>
+    <string name="schema_device_buzzer_gpio">蜂鳴器腳位</string>
+    <string name="schema_device_double_tap_as_button_press">雙擊觸發按鈕功能</string>
+    <string name="schema_device_double_tap_as_button_press_description">將支援加速度計上的雙撃行為視作按壓使用者按鍵。</string>
+    <string name="schema_device_node_info_broadcast_secs">節點資訊廣播間隔</string>
+    <string name="schema_device_rebroadcast_mode">轉發模式</string>
+    <string name="schema_display_auto_screen_carousel_secs">輪播間隔</string>
+    <string name="schema_display_auto_screen_carousel_secs_description">根據指定的間隔時間，在螢幕上自動切換到下一頁（走馬燈效果）。</string>
+    <string name="schema_display_compass_north_top">始終指向北方</string>
+    <string name="schema_display_compass_north_top_description">指南針的方位標示將永久指向北邊。</string>
+    <string name="schema_display_compass_orientation">羅盤朝向</string>
+    <string name="schema_display_displaymode">顯示模式</string>
+    <string name="schema_display_displaymode_description">覆寫預設畫面佈局。</string>
+    <string name="schema_display_flip_screen">翻轉畫面</string>
+    <string name="schema_display_flip_screen_description">垂直翻轉螢幕。</string>
+    <string name="schema_display_heading_bold">粗體字</string>
+    <string name="schema_display_heading_bold_description">將螢幕標題文字設為粗體。</string>
+    <string name="schema_display_oled">OLED 類型</string>
+    <string name="schema_display_oled_description">覆寫 OLED 螢幕自動偵測。</string>
+    <string name="schema_display_screen_on_secs">螢幕開啟持續時間</string>
+    <string name="schema_display_screen_on_secs_description">按下按鈕或收到訊息後，螢幕持續亮起的時間。</string>
+    <string name="schema_display_units">顯示單位</string>
+    <string name="schema_display_units_description">裝置螢幕上顯示的單位。</string>
+    <string name="schema_display_use_12h_clock">使用12小時制</string>
+    <string name="schema_display_use_12h_clock_description">啟用後，裝置將在螢幕上以12小時制顯示時間。</string>
+    <string name="schema_display_wake_on_tap_or_motion">輕觸或移動喚醒</string>
+    <string name="schema_display_wake_on_tap_or_motion_description">此功能需要設備有加速度計。</string>
+    <string name="schema_externalnotification_active">輸出LED 高電平觸發</string>
+    <string name="schema_externalnotification_alert_bell">告警 LED</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">告警 蜂鳴</string>
+    <string name="schema_externalnotification_alert_bell_vibra">告警 振動</string>
+    <string name="schema_externalnotification_alert_message">警示訊息 LED</string>
+    <string name="schema_externalnotification_alert_message_buzzer">來訊警音</string>
+    <string name="schema_externalnotification_alert_message_vibra">來訊振動</string>
+    <string name="schema_externalnotification_enabled">啟用外部通知</string>
+    <string name="schema_externalnotification_output">輸出LED（GPIO）</string>
+    <string name="schema_externalnotification_output_buzzer">輸出蜂鳴（GPIO）</string>
+    <string name="schema_externalnotification_output_vibra">輸出振動（GPIO）</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">使用 I2S 控制蜂鳴器</string>
+    <string name="schema_externalnotification_use_pwm">使用PWM調製的蜂鳴</string>
+    <string name="schema_lora_bandwidth">帶寬</string>
+    <string name="schema_lora_channel_num">頻段槽位</string>
+    <string name="schema_lora_channel_num_description">節點工作頻率是透過地區、預設參數組和此欄位計算的。當設為 0 時，時隙將根據主頻道名稱自動計算，並會與公共預設時隙不同。若同時配置了私人主頻道和公共副頻道，請務必切換回公共預設時隙。</string>
+    <string name="schema_lora_coding_rate">編碼速率</string>
+    <string name="schema_lora_config_ok_to_mqtt">允許轉發至 MQTT</string>
+    <string name="schema_lora_hop_limit">中繼次數</string>
+    <string name="schema_lora_hop_limit_description">設定訊息的最大跳數，預設為 3。注意：增加跳數將導致網路擁塞，建議謹慎使用。此外，0 跳的廣播訊息將不會收到確認 (ACK)。</string>
+    <string name="schema_lora_ignore_mqtt">無視MQTT</string>
+    <string name="schema_lora_override_duty_cycle">覆蓋工作週期/佔空比</string>
+    <string name="schema_lora_override_frequency">手動設定頻率</string>
+    <string name="schema_lora_pa_fan_disabled">停用PA風扇</string>
+    <string name="schema_lora_spread_factor">擴頻因子</string>
+    <string name="schema_lora_sx126x_rx_boosted_gain">接收增益提升</string>
+    <string name="schema_lora_tx_enabled">啟用 LoRa 發射</string>
+    <string name="schema_lora_tx_power">發射功率</string>
+    <string name="schema_lora_use_preset">使用預設值</string>
+    <string name="schema_mqtt_enabled">啟用MQTT服務器</string>
+    <string name="schema_mqtt_encryption_enabled">加密已啟用</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">啟用對客戶端的代理</string>
+    <string name="schema_mqtt_root">根話題</string>
+    <string name="schema_mqtt_username">用戶名</string>
+    <string name="schema_neighborinfo_enabled">啟用鄰居資訊</string>
+    <string name="schema_neighborinfo_transmit_over_lora">通過Lora無線電傳輸</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">除了發送至 MQTT 和 PhoneAPI 之外，我們的 NeighborInfo 是否也透過 LoRa 發送？此功能無法在使用預設密鑰和名稱的頻道使用。</string>
+    <string name="schema_network_address_mode">第四代IP模式</string>
+    <string name="schema_network_eth_enabled">啟用以太網</string>
+    <string name="schema_network_eth_enabled_description">啟用乙太網路後，節點裝置的藍牙連線功能將會停用。此外，TCP 節點連線在 Apple 設備上無法使用。</string>
+    <string name="schema_network_ntp_server">時間伺服器</string>
+    <string name="schema_network_rsyslog_server">rsyslog伺服器</string>
+    <string name="schema_network_wifi_ssid">SSID</string>
+    <string name="schema_paxcounter_ble_threshold">藍牙 RSSI 閾值(預設為-80)</string>
+    <string name="schema_paxcounter_enabled">已啟用人流計數（Paxcount）</string>
+    <string name="schema_position_broadcast_smart_minimum_distance">智慧距離</string>
+    <string name="schema_position_broadcast_smart_minimum_distance_description">要觸發智慧位置廣播，節點需移動的最小距離（公尺）。</string>
+    <string name="schema_position_broadcast_smart_minimum_interval_secs">智慧間隔</string>
+    <string name="schema_position_gps_en_gpio">GPS 啟用腳位</string>
+    <string name="schema_position_gps_mode">GPS 模式（實體硬體）</string>
+    <string name="schema_position_gps_update_interval">GPS 輪詢間隔</string>
+    <string name="schema_position_gps_update_interval_description">嘗試獲取 GPS 位置的頻率（&lt; 10 秒將保持 GPS 模組開啟）。</string>
+    <string name="schema_position_position_broadcast_secs">廣播間隔</string>
+    <string name="schema_position_position_broadcast_secs_description">位置廣播的最大間隔時間。</string>
+    <string name="schema_position_position_broadcast_smart_enabled">智慧定位</string>
+    <string name="schema_position_position_flags">位置標誌</string>
+    <string name="schema_position_position_flags_description">位置訊息可選的附加欄位。包含的欄位越多，訊息越大，將造成空中時間拉長和封包遺失的風險增加。</string>
+    <string name="schema_position_rx_gpio">GPS 接收腳位</string>
+    <string name="schema_position_tx_gpio">GPS 傳送腳位</string>
+    <string name="schema_power_adc_multiplier_override">ADC乘數修正比率</string>
+    <string name="schema_power_is_power_saving">啟用省電模式</string>
+    <string name="schema_power_is_power_saving_description">將盡可能使所有元件進入睡眠狀態。對於 tracker 和 sensor 角色，此模式將包含 LoRa 無線電。如果您想搭配手機應用程式使用設備，或正在使用沒有使用者按鈕的設備，請勿啟用此設定。</string>
+    <string name="schema_power_on_battery_shutdown_after_secs">電源中斷時關機</string>
+    <string name="schema_power_wait_bluetooth_secs">藍牙等待持續時間</string>
+    <string name="schema_rangetest_enabled">啟用範圍測試</string>
+    <string name="schema_rangetest_save">將 .CSV 保存到內部儲存空間(僅限ESP32)</string>
+    <string name="schema_security_admin_key">管理員金鑰</string>
+    <string name="schema_security_admin_key_description">被授權可對此節點發送管理訊息的公鑰。</string>
+    <string name="schema_security_debug_log_api_enabled">啟用除錯日誌 API</string>
+    <string name="schema_security_debug_log_api_enabled_description">透過序列埠輸出即時除錯日誌；透過藍牙檢視並匯出已移除定位資訊的設備記錄。</string>
+    <string name="schema_security_is_managed">託管模式</string>
+    <string name="schema_security_is_managed_description">設備處於受管理狀態，使用者無法變更任何設備設定。</string>
+    <string name="schema_security_private_key">私鑰</string>
+    <string name="schema_security_serial_enabled">序列控制台</string>
+    <string name="schema_security_serial_enabled_description">透過 API 串流的序列主控台。</string>
+    <string name="schema_serial_baud">序列埠鮑率</string>
+    <string name="schema_serial_echo">啟用 Echo</string>
+    <string name="schema_serial_enabled">啟用序列埠</string>
+    <string name="schema_serial_mode">序列埠模式</string>
+    <string name="schema_serial_rxd">RX</string>
+    <string name="schema_serial_txd">TX</string>
+    <string name="schema_storeforward_enabled">已啟用儲存 &amp; 轉發</string>
+    <string name="schema_storeforward_heartbeat">心跳封包</string>
+    <string name="schema_storeforward_history_return_max">歴史紀錄最大返回值</string>
+    <string name="schema_storeforward_history_return_window">歴史紀錄返回視窗</string>
+    <string name="schema_storeforward_is_server">伺服器</string>
+    <string name="schema_storeforward_records">紀錄數目</string>
+    <string name="schema_telemetry_air_quality_enabled">啟用空氣品質模組</string>
+    <string name="schema_telemetry_air_quality_interval">空氣品質資訊更新間隔</string>
+    <string name="schema_telemetry_device_telemetry_enabled">傳送裝置遙測資料</string>
+    <string name="schema_telemetry_device_telemetry_enabled_description">啟用或停用裝置遙測模組,以控制是否將計量資料傳送至網狀網路。此處顯示的是標稱間隔值。當網狀網路出現壅塞時,系統會根據目前線上的節點數量,自動調整為更長的傳送間隔，以減輕網路負擔。</string>
+    <string name="schema_telemetry_device_update_interval">裝置資訊更新間隔</string>
+    <string name="schema_telemetry_environment_display_fahrenheit">環境指標以華氏溫度顯示</string>
+    <string name="schema_telemetry_environment_measurement_enabled">啟用環境資訊模組</string>
+    <string name="schema_telemetry_environment_screen_enabled">在螢幕上顯示環境資訊</string>
+    <string name="schema_telemetry_environment_update_interval">環境資訊更新間隔</string>
+    <string name="schema_telemetry_power_measurement_enabled">啟用電池資訊模組</string>
+    <string name="schema_telemetry_power_screen_enabled">在螢幕上顯示電量資訊</string>
+    <string name="schema_telemetry_power_update_interval">電源資訊更新間隔</string>
+</resources>

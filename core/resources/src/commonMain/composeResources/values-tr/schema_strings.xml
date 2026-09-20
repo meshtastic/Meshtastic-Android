@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">Mavi</string>
+    <string name="schema_ambientlighting_green">Yeşil</string>
+    <string name="schema_ambientlighting_led_state">LED durumu</string>
+    <string name="schema_ambientlighting_red">Kırmızı</string>
+    <string name="schema_audio_bitrate">CODEC2 örnekleme hızı</string>
+    <string name="schema_audio_codec2_enabled">CODEC 2 etkinleştirildi</string>
+    <string name="schema_audio_i2s_din">I2S veri çıkışı</string>
+    <string name="schema_audio_i2s_sck">I2S saati</string>
+    <string name="schema_audio_i2s_sd">I2S veri girişi</string>
+    <string name="schema_audio_i2s_ws">I2S kelime seçimi</string>
+    <string name="schema_audio_ptt_pin">PTT pini</string>
+    <string name="schema_bluetooth_enabled">Bluetooth Etkin</string>
+    <string name="schema_bluetooth_mode">Eşleştirme Modu</string>
+    <string name="schema_cannedmessage_inputbroker_event_ccw">CCW ile giriş olayı oluştur</string>
+    <string name="schema_cannedmessage_inputbroker_event_cw">CW ile giriş olayı oluştur</string>
+    <string name="schema_cannedmessage_inputbroker_event_press">Basıldığında giriş olayı oluştur</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">Dönen kodlayıcı A portu için GPIO pini</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">Dönen kodlayıcı B portu için GPIO pini</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">Dönen kodlayıcı Basma portu için GPIO pini</string>
+    <string name="schema_cannedmessage_rotary1_enabled">Dönen kodlayıcı #1 etkinleştirildi</string>
+    <string name="schema_cannedmessage_send_bell">Zil gönder</string>
+    <string name="schema_cannedmessage_updown1_enabled">Yukarı/Aşağı/Seçme girişi etkinleştirildi</string>
+    <string name="schema_detectionsensor_detection_trigger_type">Algılama tetikleme türü</string>
+    <string name="schema_detectionsensor_enabled">Algılama Sensörü etkinleştirildi</string>
+    <string name="schema_detectionsensor_monitor_pin">İzlenecek GPIO pini</string>
+    <string name="schema_detectionsensor_name">Arkadaşça isim</string>
+    <string name="schema_detectionsensor_send_bell">Uyarı mesajı ile zil gönder</string>
+    <string name="schema_detectionsensor_use_pullup">INPUT_PULLUP modu kullan</string>
+    <string name="schema_device_double_tap_as_button_press_description">Desteklenen ivmeölçerlere çift dokunmayı kullanıcı düğmesine basma olarak değerlendirir.</string>
+    <string name="schema_device_node_info_broadcast_secs">Node Bilgisi Yayın Aralığı</string>
+    <string name="schema_display_compass_orientation">Pusula yönü</string>
+    <string name="schema_display_displaymode">Görüntü Modu</string>
+    <string name="schema_display_flip_screen">Ekranı Çevir</string>
+    <string name="schema_display_units">Görüntü Birimleri</string>
+    <string name="schema_display_use_12h_clock">12h saat formatını kullan</string>
+    <string name="schema_display_use_12h_clock_description">Aktif edildiğinde, cihaz ekranda saati 12 saat formatında gösterecek</string>
+    <string name="schema_externalnotification_active">Çıktı LED aktif yüksek</string>
+    <string name="schema_externalnotification_alert_bell">Uyarı çanı LED</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">Uyarı çanı zırnı</string>
+    <string name="schema_externalnotification_alert_bell_vibra">Uyarı çanı titreşim</string>
+    <string name="schema_externalnotification_alert_message">Uyarı mesajı LED</string>
+    <string name="schema_externalnotification_alert_message_buzzer">Uyarı mesajı zırnı</string>
+    <string name="schema_externalnotification_alert_message_vibra">Uyarı mesajı titreşimi</string>
+    <string name="schema_externalnotification_enabled">Harici bildirim etkin</string>
+    <string name="schema_externalnotification_output">Çıktı LED (GPIO)</string>
+    <string name="schema_externalnotification_output_buzzer">Çıktı zırnı (GPIO)</string>
+    <string name="schema_externalnotification_output_vibra">Çıktı titreşim (GPIO)</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">I2S'yi zırnı olarak kullan</string>
+    <string name="schema_externalnotification_use_pwm">PWM zırnı kullan</string>
+    <string name="schema_lora_bandwidth">Bant genişliği</string>
+    <string name="schema_lora_ignore_mqtt">MQTT'yi Yoksay</string>
+    <string name="schema_lora_override_duty_cycle">Görev Döngüsünü Geçersiz Kıl</string>
+    <string name="schema_lora_pa_fan_disabled">PA fanı devre dışı</string>
+    <string name="schema_mqtt_enabled">MQTT etkin</string>
+    <string name="schema_mqtt_encryption_enabled">Şifreleme etkin</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">Vekilden istemciye etkin</string>
+    <string name="schema_mqtt_root">Ana konu</string>
+    <string name="schema_mqtt_username">Kullanıcı adı</string>
+    <string name="schema_neighborinfo_enabled">Komşu Bilgisi etkin</string>
+    <string name="schema_neighborinfo_transmit_over_lora">LoRa üzerinden ilet</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">MQTT ve PhoneAPI'ye göndermenin yanı sıra, NeighborInfo'muzun LoRa üzerinden iletilip iletilmeyeceğidir. Varsayılan anahtar ve ada sahip bir kanalda kullanılamaz.</string>
+    <string name="schema_network_address_mode">IPv4 modu</string>
+    <string name="schema_network_eth_enabled">Ethernet etkin</string>
+    <string name="schema_network_ntp_server">NTP sunucusu</string>
+    <string name="schema_network_rsyslog_server">rsyslog sunucusu</string>
+    <string name="schema_network_wifi_ssid">SSID</string>
+    <string name="schema_paxcounter_ble_threshold">BLE RSSI eşiği (varsayılan -80)</string>
+    <string name="schema_paxcounter_enabled">Pax sayacı etkin</string>
+    <string name="schema_power_adc_multiplier_override">ADC çarpanını geçersiz kılma oranı</string>
+    <string name="schema_power_is_power_saving">Güç tasarrufu modunu etkinleştir</string>
+    <string name="schema_rangetest_enabled">Menzi testi etkin</string>
+    <string name="schema_rangetest_save">.CSV'yi depolamada kaydet (sadece ESP32)</string>
+    <string name="schema_security_admin_key">Yönetici Anahtarı</string>
+    <string name="schema_security_debug_log_api_enabled">Hata ayıklama kaydı API'si etkin</string>
+    <string name="schema_security_is_managed">Yönetilen Mod</string>
+    <string name="schema_security_private_key">Özel Anahtar</string>
+    <string name="schema_security_serial_enabled">Seri konsol</string>
+    <string name="schema_serial_baud">Seri baud hızı</string>
+    <string name="schema_serial_echo">Eko etkin</string>
+    <string name="schema_serial_enabled">Seri etkin</string>
+    <string name="schema_serial_mode">Seri modu</string>
+    <string name="schema_storeforward_heartbeat">Kalp atışı</string>
+    <string name="schema_storeforward_history_return_max">Geçmiş geri dönüş maksimum</string>
+    <string name="schema_storeforward_history_return_window">Geçmiş geri dönüş penceresi</string>
+    <string name="schema_storeforward_is_server">Sunucu</string>
+    <string name="schema_storeforward_records">Kayıt sayısı</string>
+    <string name="schema_telemetry_air_quality_enabled">Hava kalitesi metrikleri modülü etkin</string>
+    <string name="schema_telemetry_environment_display_fahrenheit">Çevre metrikleri Fahrenheit kullan</string>
+    <string name="schema_telemetry_environment_measurement_enabled">Çevre metrikleri modülü etkin</string>
+    <string name="schema_telemetry_environment_screen_enabled">Çevre metrikleri ekran üzerinde etkin</string>
+    <string name="schema_telemetry_power_measurement_enabled">Güç metrikleri modülü etkin</string>
+    <string name="schema_telemetry_power_screen_enabled">Güç metrikleri ekran üzerinde etkin</string>
+</resources>

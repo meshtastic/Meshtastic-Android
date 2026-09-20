@@ -22,27 +22,18 @@
     <!-- ACTION -->
     <string name="action_delete_message">Mesajı sil</string>
     <string name="actions">işlemler</string>
-    <string name="adc_multiplier_override_ratio">ADC çarpanını geçersiz kılma oranı</string>
     <!-- ADD -->
     <string name="add">Ekle</string>
     <string name="add_network_device">Ekle</string>
     <string name="address">Adres</string>
-    <string name="admin_key">Yönetici Anahtarı</string>
     <string name="administration">Yönetim</string>
     <string name="advanced">Gelişmiş</string>
     <string name="advanced_title">Gelişmiş</string>
     <!-- AIR -->
     <string name="air_quality_icon">Hava kalitesi ikonu</string>
-    <string name="air_quality_metrics_module_enabled">Hava kalitesi metrikleri modülü etkin</string>
     <string name="air_util_definition">Son bir saat içinde kullanılan iletim için yayın süresi yüzdesi.</string>
     <!-- ALERT -->
-    <string name="alert_bell_buzzer">Uyarı çanı zırnı</string>
-    <string name="alert_bell_led">Uyarı çanı LED</string>
     <string name="alert_bell_text">Zili Çaldır!</string>
-    <string name="alert_bell_vibra">Uyarı çanı titreşim</string>
-    <string name="alert_message_buzzer">Uyarı mesajı zırnı</string>
-    <string name="alert_message_led">Uyarı mesajı LED</string>
-    <string name="alert_message_vibra">Uyarı mesajı titreşimi</string>
     <string name="all_time">Hepsi</string>
     <string name="allow_input_source">Giriş kaynağına izin ver</string>
     <string name="allow_undefined_pin_access">Tanımlanmamış pin erişimine izin ver</string>
@@ -63,15 +54,11 @@
     <string name="backup_keys">Anahtarları Yedekle</string>
     <string name="bad">Kötü</string>
     <!-- BANDWIDTH -->
-    <string name="bandwidth">Bant genişliği</string>
     <string name="battery">Pil</string>
     <string name="battery_ina_2xx_i2c_address">Pilin INA_2XX I2C adresi</string>
-    <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI eşiği (varsayılan -80)</string>
-    <string name="blue">Mavi</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_config">Bluetooth Ayarı</string>
-    <string name="bluetooth_enabled">Bluetooth Etkin</string>
     <string name="bluetooth_feature_config">Yapılandırma</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bottom_nav_settings">Ayarlar</string>
@@ -103,15 +90,10 @@
     <!-- CLEAR -->
     <string name="clear">Temizle</string>
     <string name="close">Kapat</string>
-    <string name="codec_2_enabled">CODEC 2 etkinleştirildi</string>
-    <string name="codec2_sample_rate">CODEC2 örnekleme hızı</string>
     <!-- COMPASS -->
     <string name="compass_north_top">Pusula kuzey üstte</string>
-    <string name="compass_orientation">Pusula yönü</string>
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">Desteklenen ivmeölçerlere çift dokunmayı kullanıcı düğmesine basma olarak değerlendirir.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Cihaz üzerindeki yanıp sönen LED'i kontrol eder. Çoğu cihaz için bu, en fazla 4 LED'den birini kontrol edecektir, şarj ve GPS LED'leri kontrol edilemez.</string>
-    <string name="config_device_transmitOverLora_summary">MQTT ve PhoneAPI'ye göndermenin yanı sıra, NeighborInfo'muzun LoRa üzerinden iletilip iletilmeyeceğidir. Varsayılan anahtar ve ada sahip bir kanalda kullanılamaz.</string>
     <string name="configuration">Yapılandırma</string>
     <string name="configure_critical_alerts">Kritik Uyarı Yapılandır</string>
     <string name="configure_location_permissions">Konum İzinlerini Yapılandırın</string>
@@ -130,7 +112,6 @@
     <string name="debug_default_search">Loglarda ara…</string>
     <string name="debug_filter_add">Filtre ekle</string>
     <string name="debug_filters">Filtreler</string>
-    <string name="debug_log_api_enabled">Hata ayıklama kaydı API'si etkin</string>
     <string name="debug_panel">Hata Ayıklama Paneli</string>
     <string name="debug_search_clear">Aramayı sil</string>
     <string name="debug_search_next">Sonraki eşleşme</string>
@@ -152,8 +133,6 @@
     <string name="details">Detaylar</string>
     <string name="detection_sensor">Algılama Sensörü</string>
     <string name="detection_sensor_config">Algılama Sensörü Ayarları</string>
-    <string name="detection_sensor_enabled">Algılama Sensörü etkinleştirildi</string>
-    <string name="detection_trigger_type">Algılama tetikleme türü</string>
     <!-- DEVICE -->
     <string name="device">Cihaz</string>
     <string name="device_sleeping">Cihaz uyku durumunda</string>
@@ -168,9 +147,6 @@
     <string name="discovery_stat_messages">Mesajlar</string>
     <!-- DISPLAY -->
     <string name="display">Ekran</string>
-    <string name="display_mode">Görüntü Modu</string>
-    <string name="display_time_in_12h_format">Aktif edildiğinde, cihaz ekranda saati 12 saat formatında gösterecek</string>
-    <string name="display_units">Görüntü Birimleri</string>
     <!-- DISTANCE -->
     <string name="distance">Mesafe</string>
     <string name="distance_filters">Mesafe Filtresi</string>
@@ -183,30 +159,22 @@
     <string name="doc_title_nodes">Nodelar</string>
     <string name="download">İndir</string>
     <string name="dynamic">Dinamik</string>
-    <string name="echo_enabled">Eko etkin</string>
     <string name="edit">Düzenle</string>
     <string name="eight_hours">8 Saat</string>
     <!-- EMOJI -->
-    <string name="enable_power_saving_mode">Güç tasarrufu modunu etkinleştir</string>
     <string name="enabled">Açık</string>
     <!-- ENCRYPTION -->
-    <string name="encryption_enabled">Şifreleme etkin</string>
     <string name="encryption_error">Genel Anahtar Uyuşmazlığı</string>
     <string name="encryption_pkc">Genel Anahtar Şifrelemesi</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Çevre</string>
-    <string name="environment_metrics_module_enabled">Çevre metrikleri modülü etkin</string>
-    <string name="environment_metrics_on_screen_enabled">Çevre metrikleri ekran üzerinde etkin</string>
-    <string name="environment_metrics_use_fahrenheit">Çevre metrikleri Fahrenheit kullan</string>
     <string name="error">Hata</string>
     <string name="error_duty_cycle">Zaman limitine (duty cycle) ulaşıldı. Şu anda mesaj gönderilemiyor, lütfen daha sonra tekrar deneyin.</string>
-    <string name="ethernet_enabled">Ethernet etkin</string>
     <string name="exchange_position">Konum takas et</string>
     <!-- EXPORT -->
     <string name="export_configuration">Ayarları dışa aktar</string>
     <string name="external_notification">Dış Bildirim</string>
     <string name="external_notification_config">Harici Bildirim Ayarı</string>
-    <string name="external_notification_enabled">Harici bildirim etkin</string>
     <string name="factory_reset">Fabrika ayarları</string>
     <string name="fair">İdare Eder</string>
     <string name="favorite">Favori</string>
@@ -220,49 +188,31 @@
     <string name="firmware_too_old">Yazılım güncellemesi gerekiyor.</string>
     <string name="firmware_update_failed">Güncelleme başarısız</string>
     <string name="fixed_pin">Sabit PIN</string>
-    <string name="flip_screen">Ekranı Çevir</string>
     <!-- FORMAT -->
     <string name="free_memory">Boş Hafıza</string>
     <string name="freq">Frekans</string>
-    <string name="friendly_name">Arkadaşça isim</string>
     <string name="gas_resistance">Gaz Direnci</string>
     <string name="gateway">Ağ geçidi</string>
-    <string name="generate_input_event_on_ccw">CCW ile giriş olayı oluştur</string>
-    <string name="generate_input_event_on_cw">CW ile giriş olayı oluştur</string>
-    <string name="generate_input_event_on_press">Basıldığında giriş olayı oluştur</string>
     <string name="generate_qr_code">QR kod oluştur</string>
     <!-- GEOFENCE -->
     <string name="good">İyi</string>
     <!-- GPIO -->
     <string name="gpio_pin">GPIO pini</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">Dönen kodlayıcı A portu için GPIO pini</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">Dönen kodlayıcı B portu için GPIO pini</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">Dönen kodlayıcı Basma portu için GPIO pini</string>
-    <string name="gpio_pin_to_monitor">İzlenecek GPIO pini</string>
-    <string name="green">Yeşil</string>
     <string name="hardware">Donanım</string>
     <string name="hardware_model">Donanım modeli</string>
     <string name="heading">İstikamet</string>
-    <string name="heartbeat">Kalp atışı</string>
     <string name="hide_password">Şifreyi gizle</string>
-    <string name="history_return_max">Geçmiş geri dönüş maksimum</string>
-    <string name="history_return_window">Geçmiş geri dönüş penceresi</string>
     <string name="hops_away">Atlama Üzerinden</string>
     <string name="host">Sunucu</string>
     <string name="host_metrics_log">Sunucu Ölçümleri</string>
     <string name="i_agree">Katılıyorum.</string>
     <string name="i_know_what_i_m_doing">Ne yaptığımı biliyorum.</string>
-    <string name="i2s_clock">I2S saati</string>
-    <string name="i2s_data_in">I2S veri girişi</string>
-    <string name="i2s_data_out">I2S veri çıkışı</string>
-    <string name="i2s_word_select">I2S kelime seçimi</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(İç Hava Kalitesi) Bosch BME680 tarafından ölçülen bağıl ölçekli IAQ değeri. Değer Aralığı 0–500.</string>
     <!-- IGNORE -->
     <string name="ignore">Yok say</string>
     <string name="ignore_add">Yoksay listesine '%1$s' eklensin mi? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <string name="ignore_incoming">Gelenleri Yoksay</string>
-    <string name="ignore_mqtt">MQTT'yi Yoksay</string>
     <string name="ignore_remove">Yoksay listesinden '%1$s' çıkarılsın mı? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <!-- IMPORT -->
     <string name="import_configuration">Ayarları içe aktar</string>
@@ -276,12 +226,10 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP Adresi:</string>
     <string name="ip_port">Bağlantı noktası:</string>
-    <string name="ipv4_mode">IPv4 modu</string>
     <string name="json_output_enabled">JSON çıktısı etkin</string>
     <!-- KEY -->
     <string name="latitude">Enlem</string>
     <!-- LAYER -->
-    <string name="led_state">LED durumu</string>
     <string name="legacy_admin_channel">Eski Yönetici kanalı</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Bu seçeneği aktif etmek şifrelemeyi devre dışı bırakır ve bu varsayılan Meshtastic ağı ile uyumsuzdur.</string>
@@ -302,7 +250,6 @@
     <string name="low_battery_message">%1$s Düğümünün pili düşük (%2$d%)</string>
     <string name="low_battery_title">Düşük pil: %1$s</string>
     <string name="lux">Lüks</string>
-    <string name="managed_mode">Yönetilen Mod</string>
     <string name="manual_position_request">Manuel konum isteği gerekli</string>
     <!-- MAP -->
     <string name="map_cache_info">Önbellek Kapasitesi: %1$d MB\nÖnbellek Kullanımı: %2$d MB</string>
@@ -356,7 +303,6 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT Yapılandırması</string>
-    <string name="mqtt_enabled">MQTT etkin</string>
     <string name="mqtt_status_connected">Bağlandı</string>
     <string name="mqtt_status_disconnected">Bağlantı kesildi</string>
     <string name="must_set_region">Bölge seçmelisin!</string>
@@ -371,7 +317,6 @@
     <string name="navigate_back">Geri Dön</string>
     <string name="neighbor_info">Komşu Bilgisi</string>
     <string name="neighbor_info_config">Komşu Bilgisi Ayarı</string>
-    <string name="neighbor_info_enabled">Komşu Bilgisi etkin</string>
     <string name="network">Ağ</string>
     <string name="new_channel_rcvd">Yeni Kanal Adresi(URL) alındı</string>
     <string name="next">Sonraki</string>
@@ -393,7 +338,6 @@
     <string name="node_sort_via_favorite">Favorilerden</string>
     <string name="node_sort_via_mqtt">MQTT yoluyla</string>
     <string name="nodedb_reset">NodeDB sıfırla</string>
-    <string name="nodeinfo_broadcast_interval">Node Bilgisi Yayın Aralığı</string>
     <!-- NODES -->
     <string name="nodes">Düğümler</string>
     <string name="nodes_unheard_remove">Kaldır</string>
@@ -405,8 +349,6 @@
     <string name="notifications_on_alert_bell_receipt">Uyarı/çan alındığında bildirimler</string>
     <string name="notifications_on_message_receipt">Mesaj alındığında bildirimler</string>
     <string name="now">Şimdi</string>
-    <string name="ntp_server">NTP sunucusu</string>
-    <string name="number_of_records">Kayıt sayısı</string>
     <!-- OFFLINE -->
     <string name="okay">Tamam</string>
     <!-- ONE -->
@@ -415,21 +357,13 @@
     <string name="only_favorites">Sadece Favoriler</string>
     <!-- OPEN -->
     <!-- OUTPUT -->
-    <string name="output_buzzer_gpio">Çıktı zırnı (GPIO)</string>
     <string name="output_duration_milliseconds">Çıktı süresi (milisaniye)</string>
-    <string name="output_led_active_high">Çıktı LED aktif yüksek</string>
-    <string name="output_led_gpio">Çıktı LED (GPIO)</string>
-    <string name="output_vibra_gpio">Çıktı titreşim (GPIO)</string>
     <string name="override_console_serial_port">Konsol seri portunu geçersiz kıl</string>
-    <string name="override_duty_cycle">Görev Döngüsünü Geçersiz Kıl</string>
-    <string name="pa_fan_disabled">PA fanı devre dışı</string>
     <!-- PACKET -->
-    <string name="pairing_mode">Eşleştirme Modu</string>
     <string name="password">Şifre</string>
     <!-- PAX -->
     <string name="paxcounter">Pax sayacı</string>
     <string name="paxcounter_config">Pax sayacı Ayarı</string>
-    <string name="paxcounter_enabled">Pax sayacı etkin</string>
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <string name="pin_selected">Pin</string>
@@ -441,8 +375,6 @@
     <!-- POWER -->
     <string name="power">Güç</string>
     <string name="power_config">Güç Ayarı</string>
-    <string name="power_metrics_module_enabled">Güç metrikleri modülü etkin</string>
-    <string name="power_metrics_on_screen_enabled">Güç metrikleri ekran üzerinde etkin</string>
     <string name="preferences_language">Dil</string>
     <string name="preferences_system_default">Sistem varsayılanı</string>
     <string name="press_and_drag">Yeniden sıralamak için basılı tutup sürükleyin</string>
@@ -450,11 +382,8 @@
     <!-- PREVIEW -->
     <string name="primary">Birincil</string>
     <string name="primary_channel_feature">Periyodik konum ve telemetri yayını</string>
-    <string name="private_key">Özel Anahtar</string>
     <string name="provide_location_to_mesh">Ağda telefon konumunu kullan</string>
-    <string name="proxy_to_client_enabled">Vekilden istemciye etkin</string>
     <string name="psk">PSK</string>
-    <string name="ptt_pin">PTT pini</string>
     <string name="public_key">Genel Anahtar</string>
     <string name="public_key_changed">Açık Anahtar Değiştirildi</string>
     <string name="qr_code">Karekod</string>
@@ -468,7 +397,6 @@
     <string name="radio_configuration">Cihaz ayarları</string>
     <string name="range_test">Mesafe Testi</string>
     <string name="range_test_config">Menzi Test Ayarı</string>
-    <string name="range_test_enabled">Menzi testi etkin</string>
     <string name="reboot">Yeniden başlat</string>
     <!-- REBROADCAST -->
     <string name="rebroadcast_mode_all_desc">Tespit edilen herhangi bir mesajı, özel kanalımızdaysa veya aynı LoRa parametrelerine sahip başka bir ağdan geliyorsa yeniden yayınlayın.</string>
@@ -477,7 +405,6 @@
     <string name="rebroadcast_mode_known_only_desc">LOCAL ONLY gibi yabancı ağlardan geldiği tespit edilen mesajları yok sayar, ancak düğümün bilinen listesinde bulunmayan düğümlerden gelen mesajları da yok sayarak bir adım daha ileri gider.</string>
     <string name="rebroadcast_mode_local_only_desc">Açık olan veya şifresini çözemediği yabancı ağlardan geldiği tespit edilen mesajları yok sayar. Yalnızca düğümlerin yerel birincil / ikincil kanallarında mesajı yeniden yayınlar.</string>
     <string name="rebroadcast_mode_none_desc">Yalnızca SENSOR, TRACKER ve TAK_TRACKER rolleri için izin verilir, CLIENT_MUTE rolünden farklı olarak tüm yeniden yayınları engeller.</string>
-    <string name="red">Kırmızı</string>
     <string name="region_frequency_plan">Bölge</string>
     <!-- REMOTE -->
     <string name="remote_admin">Uzaktan Yönetim</string>
@@ -508,8 +435,6 @@
     <string name="role_tak_desc">Rutin yayınları azaltarak ATAK sistemi için optimize edilmiştir.</string>
     <string name="role_tak_tracker_desc">Rutin yayınları azaltarak otomatik TAK PLI yayınlarını etkinleştirir.</string>
     <string name="role_tracker_desc">Öncelikli olarak konum paketlerini yayınlar.</string>
-    <string name="root_topic">Ana konu</string>
-    <string name="rotary_encoder_1_enabled">Dönen kodlayıcı #1 etkinleştirildi</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Negatif bir onay alındı</string>
     <string name="routing_error_no_route">Rota yok</string>
@@ -517,12 +442,10 @@
     <string name="routing_error_timeout">Zaman Aşımı</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Alınan Sinyal Gücü Göstergesi, anten tarafından alınan güç seviyesini belirlemek için kullanılan bir ölçüdür. Daha yüksek bir RSSI değeri genellikle daha güçlü ve daha istikrarlı bir bağlantıya işaret eder.</string>
-    <string name="rsyslog_server">rsyslog sunucusu</string>
     <string name="sats">Uydular</string>
     <!-- SAVE -->
     <string name="save">Kaydet</string>
     <string name="save_changes">Kaydet</string>
-    <string name="save_csv_in_storage_esp32_only">.CSV'yi depolamada kaydet (sadece ESP32)</string>
     <!-- SCAN -->
     <string name="scan">Tara</string>
     <string name="secondary">İkincil</string>
@@ -534,17 +457,10 @@
     <string name="security_icon_secure">Güvenlik</string>
     <string name="select_all">Tümünü seç</string>
     <string name="send">Gönder</string>
-    <string name="send_bell">Zil gönder</string>
-    <string name="send_bell_with_alert_message">Uyarı mesajı ile zil gönder</string>
     <string name="sender_message_interval_seconds">Gönderen mesaj aralığı (saniye)</string>
     <!-- SERIAL -->
     <string name="serial">Seri</string>
-    <string name="serial_baud_rate">Seri baud hızı</string>
     <string name="serial_config">Seri Ayarı</string>
-    <string name="serial_console">Seri konsol</string>
-    <string name="serial_enabled">Seri etkin</string>
-    <string name="serial_mode">Seri modu</string>
-    <string name="server">Sunucu</string>
     <string name="set_your_region">Bölgenizi Seçin</string>
     <string name="settings">ayarlar</string>
     <!-- SHARE -->
@@ -563,7 +479,6 @@
     <string name="slot">Yuva</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Sinyal-Gürültü Oranı, iletişimde istenen bir sinyalin seviyesini arka plan gürültüsü seviyesine mukayese ölçmek için kullanılan bir ölçüdür. Meshtastic ve diğer kablosuz sistemlerde, daha yüksek bir SNR, veri iletiminin güvenilirliğini ve kalitesini artırabilecek daha net bir sinyale işaret eder.</string>
-    <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Durum yayını (saniye)</string>
     <string name="subnet">Alt ağ</string>
     <string name="supported">Desteklenen</string>
@@ -598,7 +513,6 @@
     <string name="traceroute_log">Yol izle</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
-    <string name="transmit_over_lora">LoRa üzerinden ilet</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
@@ -618,22 +532,16 @@
     <string name="unmonitored_or_infrastructure">İzlenmeyen veya Altyapı</string>
     <string name="unmute">Sesi aç</string>
     <string name="unrecognized">Tanınmayan</string>
-    <string name="up_down_select_input_enabled">Yukarı/Aşağı/Seçme girişi etkinleştirildi</string>
     <string name="update_interval_seconds">Güncelleme aralığı (saniye)</string>
     <string name="uptime">Çalışma Süresi</string>
     <!-- URL -->
     <string name="url">URL</string>
     <!-- USE -->
-    <string name="use_12h_format">12h saat formatını kullan</string>
-    <string name="use_i2s_as_buzzer">I2S'yi zırnı olarak kullan</string>
-    <string name="use_input_pullup_mode">INPUT_PULLUP modu kullan</string>
-    <string name="use_pwm_buzzer">PWM zırnı kullan</string>
     <!-- USER -->
     <string name="user">Kullanıcı</string>
     <string name="user_config">Kullanıcı Ayarı</string>
     <string name="user_id">Kullanıcı Kimliği</string>
     <string name="user_string">Kullanıcı Karakter Dizisi</string>
-    <string name="username">Kullanıcı adı</string>
     <string name="via_mqtt">MQTT yoluyla</string>
     <string name="voltage">Voltaj</string>
     <string name="waypoint_delete">Yer işaretini sil?</string>
