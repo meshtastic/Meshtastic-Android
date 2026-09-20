@@ -1,0 +1,125 @@
+name: Protobufs Bump
+
+# A PR that moves the org.meshtastic:protobufs pin gets two things it cannot get from Renovate alone: the
+# generated schema strings re-synced and committed onto its branch (otherwise :schema-strings:test is red on
+# every bump), and one sticky comment saying what the bump carries - the upstream PRs, the .proto delta, and the
+# settings strings android will now show differently.
+#
+# The push uses the CROWDIN_GITHUB_TOKEN PAT, as scheduled-updates does, because a push by GITHUB_TOKEN starts
+# no pull_request run and the new head would carry no checks. That push re-triggers this workflow once; the
+# second run finds nothing to sync and only refreshes the comment. Renovate treats a branch someone else pushed
+# to as modified, so it neither rebases nor automerges these PRs: a bump is merged by a person.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - gradle/libs.versions.toml
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: protobufs-bump-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Fork PRs get no token that can push and no secrets worth exposing; the sync is a maintainer step there.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          filter: 'blob:none'
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+
+      - name: Read the protobufs pin on both sides
+        id: pin
+        run: |
+          line='meshtastic-protobufs = '
+          old=$(git show "origin/${{ github.base_ref }}:gradle/libs.versions.toml" | sed -n "s/^${line}\"\(.*\)\"$/\1/p")
+          new=$(sed -n "s/^${line}\"\(.*\)\"$/\1/p" gradle/libs.versions.toml)
+          echo "old=$old" >> "$GITHUB_OUTPUT"
+          echo "new=$new" >> "$GITHUB_OUTPUT"
+          if [ "$old" = "$new" ]; then
+            echo "protobufs pin unchanged ($new); nothing to do"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "protobufs $old -> $new"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Gradle Setup
+        if: steps.pin.outputs.changed == 'true'
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          job_summary_pr_comment: 'never'
+          cache_read_only: 'true'
+          cache_configuration_cache: 'false'
+          install_jetbrains_jdk: 'true'
+
+      - name: Sync the schema strings from the new pin
+        if: steps.pin.outputs.changed == 'true'
+        run: |
+          cp core/resources/src/commonMain/composeResources/values/schema_strings.xml /tmp/schema_strings.before.xml
+          ./gradlew :schema-strings:sync -Pci=true
+          python3 scripts/sort-strings.py
+
+      - name: Commit the sync onto the PR branch
+        if: steps.pin.outputs.changed == 'true'
+        id: commit
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          NEW_PIN: ${{ steps.pin.outputs.new }}
+        run: |
+          if git diff --quiet; then
+            echo "schema strings already match $NEW_PIN"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add core/resources/src/commonMain/composeResources/values/schema_strings.xml .skills/compose-ui/strings-index.txt
+          git commit -m "chore(strings): sync the schema strings for protobufs $NEW_PIN"
+          git push origin "HEAD:$HEAD_REF"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Clone protobufs at both commits
+        if: steps.pin.outputs.changed == 'true'
+        run: git clone --filter=blob:none --quiet https://github.com/meshtastic/protobufs.git /tmp/protobufs
+
+      - name: Write the summary
+        if: steps.pin.outputs.changed == 'true'
+        run: |
+          python3 scripts/protobufs-bump-summary.py \
+            "${{ steps.pin.outputs.old }}" "${{ steps.pin.outputs.new }}" \
+            --protobufs /tmp/protobufs \
+            --before /tmp/schema_strings.before.xml \
+            --after core/resources/src/commonMain/composeResources/values/schema_strings.xml \
+            > /tmp/summary.md
+          if [ "${{ steps.commit.outputs.pushed }}" = "true" ]; then
+            printf '\n_The schema strings above were synced and pushed to this branch by this workflow._\n' >> /tmp/summary.md
+          fi
+          cat /tmp/summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post or refresh the sticky comment
+        if: steps.pin.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          existing=$(gh api "repos/${{ github.repository }}/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.body | startswith("<!-- protobufs-bump-summary -->")) | .id' | head -n1)
+          if [ -n "$existing" ]; then
+            gh api --method PATCH "repos/${{ github.repository }}/issues/comments/$existing" -F body=@/tmp/summary.md > /dev/null
+          else
+            gh pr comment "$PR" --body-file /tmp/summary.md
+          fi
