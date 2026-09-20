@@ -89,6 +89,7 @@ jobs:
               - 'screenshot-tests/**'
               - 'docs-screenshots/**'
               - 'marketing-screenshots/**'
+              - 'schema-strings/**'
               # Shared build infrastructure
               - 'build-logic/**'
               - 'config/**'
