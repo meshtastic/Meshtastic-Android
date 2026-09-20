@@ -20,9 +20,11 @@ permissions:
   contents: read
   pull-requests: write
 
+# Not cancel-in-progress: the run that pushed the sync commit is still finishing when the push starts the next
+# run, and cancelling it would show a red run for work that completed.
 concurrency:
   group: protobufs-bump-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   sync:
