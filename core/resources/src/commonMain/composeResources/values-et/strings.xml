@@ -70,7 +70,6 @@
     <string name="air_quality_metrics_log">Õhu kvaliteedi näidiku logi</string>
     <string name="air_util_definition">Viimase tunni jooksul kasutatud eetriaja protsent.</string>
     <string name="air_utilization">Saate kasutus</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Häirekella sümbol!</string>
     <string name="all_time">Kõik</string>
     <string name="allow_input_source">Luba sisend allikas</string>
@@ -124,7 +123,6 @@
     <string name="backup_keys_confirmation">Salvestab avalikud ja privaatvõtmed selle seadme turvalisse ja krüpteeritud salvestusruumi.</string>
     <string name="backup_restore">Varunda &amp; Taasta</string>
     <string name="bad">Halb</string>
-    <!-- BANDWIDTH -->
     <string name="bandwidth_default">Vaikimisi (%1$s kHz)</string>
     <string name="bandwidth_option_khz">%1$s kHz</string>
     <string name="bandwidth_unsupported">Toetamata (%1$s)</string>
@@ -458,7 +456,6 @@
     <string name="discovery_unique_nodes">%1$d unikaalset sõlme</string>
     <string name="discovery_view_map">Vaata kaarti</string>
     <string name="disk_free_indexed">Vaba kettamaht %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Ekraan</string>
     <string name="display_config">Seadme ekraan</string>
     <!-- DISTANCE -->
@@ -543,12 +540,10 @@
     <string name="emoji_no_results">Emoji ei leita</string>
     <string name="emoji_recently_used">Viimati kasutatud</string>
     <string name="enabled">Lubatud</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Kokkusobimatu avalik võti</string>
     <string name="encryption_error_text">Avalikvõti ei ühti salvestatud võtmele. Võid sõlme eemaldada ja lasta uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtmevahetus oli tingitud tehaseseadete taastamisest või muust tahtlikust toimingust.</string>
     <string name="encryption_pkc">Avaliku võtme krüpteerimine</string>
     <string name="env_metrics_log">Keskkonnamõõdikud</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Keskkond</string>
     <string name="error">Viga</string>
     <string name="error_duty_cycle">Töötsükli limiit on saavutatud. Sõnumite saatmine ei ole hetkel võimalik. Proovi hiljem uuesti.</string>
@@ -751,7 +746,6 @@
     <string name="get_started">Algusesse</string>
     <string name="github_repository">GitHubi hoidla</string>
     <string name="good">Hea</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO klemm</string>
     <string name="grant_permission">Luba juurepääs</string>
@@ -773,7 +767,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Siseõhu kvaliteet (IAQ) on suhtelise skaala väärtus, näiteks mõõtes Bosch BME680 abil. Väärtuste vahemik 0–500.</string>
     <string name="icon_meanings">Ikooni tähendused</string>
-    <!-- IGNORE -->
     <string name="ignore">Eira</string>
     <string name="ignore_add">Lisa '%1$s' eiramis loendisse?</string>
     <string name="ignore_incoming">Ignoreeri sissetulevaid</string>
@@ -1240,7 +1233,6 @@
     <string name="open_wifi_settings">Ava WiFi ​​seaded</string>
     <string name="options">Valikud</string>
     <string name="orient_north">Põhja suund</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Väljundi kestvus (millisekundit)</string>
     <string name="overflow_menu">Lisa valikud</string>
     <string name="override_console_serial_port">Konsooli jadapordi alistamine</string>
@@ -1313,7 +1305,6 @@
     <string name="position_enabled">Asukoht lubatud</string>
     <string name="position_log">Asukoht</string>
     <string name="position_packet">Asukoha pakett</string>
-    <!-- POWER -->
     <string name="power">Toide</string>
     <string name="power_config">Toite sätted</string>
     <string name="power_metrics_log">Võimsusnäitajad</string>
@@ -1471,7 +1462,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vastuvõetud signaali tugevuse indikaator (RSSI), mõõt mida kasutatakse antenni poolt vastuvõetava võimsustaseme määramiseks. Kõrgem RSSI väärtus näitab üldiselt tugevamat ja stabiilsemat ühendust.</string>
     <string name="sats">Sateliit</string>
-    <!-- SAVE -->
     <string name="save">Salvesta</string>
     <string name="save_and_restart">Salvesta &amp; taaskäivitus</string>
     <string name="save_changes">Salvesta</string>
@@ -1521,7 +1511,6 @@
     <string name="selected_map_type">Vali kaardi tüüp</string>
     <string name="send">Saada</string>
     <string name="sender_message_interval_seconds">Saatja sõnumi sagedus (sekundit)</string>
-    <!-- SERIAL -->
     <string name="serial">Jadaport</string>
     <string name="serial_config">Jadapordi sätted</string>
     <string name="session_active">Sessioon aktiivne</string>
@@ -1781,7 +1770,6 @@
     <string name="url_template">URL mall</string>
     <string name="usb">USB</string>
     <string name="usb_permission_denied">USB luba keelatud. Ühenda seade uuesti ja proovi uuesti.</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">Kompaktne kodeering kirillitsa jaoks</string>
     <!-- USER -->
     <string name="user">Kasutaja</string>

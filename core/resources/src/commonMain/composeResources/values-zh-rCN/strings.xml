@@ -67,7 +67,6 @@
     <string name="air_quality_metrics_log">空气质量指标日志</string>
     <string name="air_util_definition">过去一小时内用于传输的空中占用时间百分比。</string>
     <string name="air_utilization">AirUtil</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">警铃字符！</string>
     <string name="all_time">全部</string>
     <string name="allow_input_source">允许输入源</string>
@@ -120,7 +119,6 @@
     <string name="backup_keys_confirmation">将公钥和私钥保存到该设备的安全加密存储中。</string>
     <string name="backup_restore">备份 &amp; 还原</string>
     <string name="bad">差</string>
-    <!-- BANDWIDTH -->
     <string name="baro_pressure">气压计</string>
     <string name="battery">电池</string>
     <string name="battery_ina_2xx_i2c_address">电池INA_2XX I2C 地址</string>
@@ -435,7 +433,6 @@
     <string name="discovery_unique_nodes">%1$d 独立节点</string>
     <string name="discovery_view_map">查看地图</string>
     <string name="disk_free_indexed">存储空间剩余 %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">显示</string>
     <string name="display_config">设备显示</string>
     <!-- DISTANCE -->
@@ -507,12 +504,10 @@
     <string name="eight_hours">8 小时</string>
     <!-- EMOJI -->
     <string name="enabled">启用</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">公钥不匹配</string>
     <string name="encryption_error_text">公钥与输入的密钥不匹配。 您可以移除该节点并让它再次交换密钥，但这可能会出现密钥泄露问题。 请通过另一个受信任的频道来联系用户，以确定密钥更改是否由于出厂重置或其他故意操作。</string>
     <string name="encryption_pkc">公钥加密</string>
     <string name="env_metrics_log">传感器指标</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">环境</string>
     <string name="error">错误</string>
     <string name="error_duty_cycle">触及占空比上限。暂时无法发送消息，请稍后再试。</string>
@@ -695,7 +690,6 @@
     <string name="geofence_set_area">在地图上划定范围</string>
     <string name="get_started">开始</string>
     <string name="good">良好</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO 引脚</string>
     <string name="grant_permission">授予权限</string>
@@ -717,7 +711,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">室内空气质量（Indoor Air Quality, IAQ）：由 Bosch BME680 传感器测量的相对标尺 IAQ 值，取值范围为 0–500。</string>
     <string name="icon_meanings">图标含义</string>
-    <!-- IGNORE -->
     <string name="ignore">忽略</string>
     <string name="ignore_add">添加 '%1$s' 到忽略列表？</string>
     <string name="ignore_incoming">忽略接收</string>
@@ -1129,7 +1122,6 @@
     <string name="open_wifi_settings">打开 Wi-Fi 设置</string>
     <string name="options">选项</string>
     <string name="orient_north">朝北</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">输出持续时间 (毫秒)</string>
     <string name="overflow_menu">溢出菜单</string>
     <string name="override_console_serial_port">覆盖控制台串口端口</string>
@@ -1184,7 +1176,6 @@
     <string name="position_enabled">启用位置</string>
     <string name="position_log">定位</string>
     <string name="position_packet">位置数据包</string>
-    <!-- POWER -->
     <string name="power">电源</string>
     <string name="power_config">电源配置</string>
     <string name="power_metrics_log">电源计量日志</string>
@@ -1332,7 +1323,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">接收信号强度指示（Received Signal Strength Indicator, RSSI）是一种用于测量天线接收到的信号功率的指标。较高的 RSSI 值通常表示更强、更稳定的连接。</string>
     <string name="sats">卫星</string>
-    <!-- SAVE -->
     <string name="save">保存</string>
     <string name="save_and_restart">保存 &amp; 重启</string>
     <string name="save_changes">保存</string>
@@ -1382,7 +1372,6 @@
     <string name="selected_map_type">所选地图类型</string>
     <string name="send">传送</string>
     <string name="sender_message_interval_seconds">发件人消息间隔(秒)</string>
-    <!-- SERIAL -->
     <string name="serial">串口</string>
     <string name="serial_config">串口配置</string>
     <string name="session_active">会话处于活跃状态</string>
@@ -1612,7 +1601,6 @@
     <string name="url_template">URL 模板</string>
     <string name="usb">USB</string>
     <string name="usb_permission_denied">USB 权限被拒绝.请重新连接设备以重试。</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">紧凑的Cyrillic编码</string>
     <!-- USER -->
     <string name="user">用户</string>

@@ -65,7 +65,6 @@
     <string name="air_quality_metrics_log">Metriky kvality ovzduší</string>
     <string name="air_util_definition">Procento vysílacího času použitého během poslední hodiny.</string>
     <string name="air_utilization">AirUtil</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Výstražný zvonek!</string>
     <string name="all_time">Vše</string>
     <string name="allow_undefined_pin_access">Povolit přiřazení nedefinovaného pinu</string>
@@ -113,7 +112,6 @@
     <string name="backup_keys_confirmation">Uloží veřejný a soukromý klíč do zabezpečeného, šifrovaného úložiště tohoto zařízení.</string>
     <string name="backup_restore">Zálohování a obnovení</string>
     <string name="bad">Špatný</string>
-    <!-- BANDWIDTH -->
     <string name="bandwidth_default">Výchozí (%1$s kHz)</string>
     <string name="bandwidth_option_khz">%1$s kHz</string>
     <string name="bandwidth_unsupported">Nepodporováno (%1$s)</string>
@@ -438,7 +436,6 @@
     <string name="discovery_unique_nodes">%1$d jedinečných uzlů</string>
     <string name="discovery_view_map">Zobrazit na mapě</string>
     <string name="disk_free_indexed">Volný disk %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Obrazovka</string>
     <string name="display_config">Obrazovka zařízení</string>
     <!-- DISTANCE -->
@@ -490,13 +487,11 @@
     <string name="emoji_category_symbols">Symboly</string>
     <string name="emoji_category_travel_places">Cestování a místa</string>
     <string name="enabled">Povoleno</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Neshoda veřejného klíče</string>
     <string name="encryption_error_text">Veřejný klíč neodpovídá uloženému klíči. Můžete uzel odebrat a nechat jej znovu vyměnit klíče, ale může to znamenat bezpečnostní problém. Kontaktujte uživatele jiným důvěryhodným kanálem a ověřte, zda ke změně klíče došlo v důsledku továrního resetu nebo jiné úmyslné akce.</string>
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
     <string name="encryption_pkc_text">Pro tento uzel je uložen veřejný klíč, takže komunikace s ním používá šifrování veřejným klíčem.</string>
     <string name="env_metrics_log">Metriky prostředí</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Životní prostředí</string>
     <string name="error">Chyba</string>
     <string name="error_duty_cycle">Byl dosažen limit pro cyklus. Momentálně nelze odesílat zprávy, zkuste to prosím později.</string>
@@ -675,7 +670,6 @@
     <string name="get_started">Začněte hned</string>
     <string name="github_repository">GitHub repozitář</string>
     <string name="good">Silný</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO pin</string>
     <string name="grant_permission">Udělit oprávnění</string>
@@ -698,7 +692,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Vnitřní kvalita ovzduší) relativní hodnota IAQ měřená Bosch BME680. Hodnota rozsahu 0–500.</string>
     <string name="icon_meanings">Význam ikon</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignorovat</string>
     <string name="ignore_add">Přidat '%1$s' do seznamu ignorovaných?</string>
     <string name="ignore_incoming">Ignorovat příchozí</string>
@@ -1166,7 +1159,6 @@
     <string name="open_source_libraries">Open source knihovny</string>
     <string name="open_wifi_settings">Otevřít nastavení Wi-Fi</string>
     <string name="options">Nastavení</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Doba trvání výstupu (v milisekundách)</string>
     <string name="override_console_serial_port">Přepsat sériový port komunikace</string>
     <!-- PACKET -->
@@ -1248,7 +1240,6 @@
     <string name="position_enabled">Pozice povolena</string>
     <string name="position_log">Pozice</string>
     <string name="position_packet">Polohový paket</string>
-    <!-- POWER -->
     <string name="power">Napájení</string>
     <string name="power_config">Nastavení napájení</string>
     <string name="power_metrics_log">Metriky napájení</string>
@@ -1379,7 +1370,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikátor síly přijímaného signálu, měření, které se používá k určení hladiny výkonu přijímané anténou. Vyšší hodnota RSSI obvykle znamená silnější a stabilnější spojení.</string>
     <string name="sats">Satelitů</string>
-    <!-- SAVE -->
     <string name="save">Uložit</string>
     <string name="save_and_restart">Uložit a restartovat</string>
     <string name="save_changes">Uložit</string>
@@ -1432,7 +1422,6 @@
     <string name="selected">Vybrané</string>
     <string name="send">Odeslat</string>
     <string name="sender_message_interval_seconds">Interval odesílání zpráv</string>
-    <!-- SERIAL -->
     <string name="serial">Sériový</string>
     <string name="serial_config">Konfigurace sériové komunikace</string>
     <string name="session_active">Relace aktivní</string>
@@ -1661,7 +1650,6 @@
     <string name="url_template">URL šablona</string>
     <string name="usb">USB</string>
     <string name="usb_permission_denied">Přístup k USB byl zamítnut. Odpojte a znovu připojte zařízení a zkuste to znovu.</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">Úsporné kódování pro cyriliku</string>
     <!-- USER -->
     <string name="user">Uživatel</string>

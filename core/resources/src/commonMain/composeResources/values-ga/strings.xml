@@ -27,7 +27,6 @@
     <string name="administration">Rialachas</string>
     <!-- AIR -->
     <string name="air_util_definition">Céatadán de na hamaitear úsáideach atá in úsáid laistigh de uair an chloig atá caite.</string>
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Nuashonrú feidhmchláir riachtanach</string>
     <string name="apply">Cuir i bhfeidhm</string>
@@ -35,7 +34,6 @@
     <string name="aqi_good">Maith</string>
     <string name="are_you_sure_change_default">An bhfuil tú cinnte gur mhaith leat an cainéal réamhshocraithe a athrú?</string>
     <string name="bad">Go dona</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Cúis leictreachais</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Á ríomh…</string>
@@ -80,17 +78,14 @@
     <string name="disconnected">Na ceangailte</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Direach</string>
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Sáth</string>
     <!-- DOC -->
     <string name="edit">Cuir in eagar</string>
     <string name="eight_hours">8 Uair an chloig</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Mícomhoiriúnacht na heochrach phoiblí</string>
     <string name="encryption_pkc">Cóid Poiblí Eochair</string>
-    <!-- ENVIRONMENT -->
     <string name="error">Earráid</string>
     <string name="error_duty_cycle">Teorainn na Ciorcad Oibre bainte. Ní féidir teachtaireachtaí a sheoladh faoi láthair, déan iarracht arís níos déanaí.</string>
     <!-- EXPORT -->
@@ -105,11 +100,9 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Maith</string>
-    <!-- GPIO -->
     <string name="hops_away">Céimeanna uaidh</string>
     <string name="iaq">QAÍ (Cáilíocht Aeir Inmheánach)</string>
     <string name="iaq_definition">(Cáilíocht Aeir Inmheánach) scála ábhartha den luach QAÍ a thomhas ag Bosch BME680. Scála Luach 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignóra</string>
     <string name="ignore_add">Cuir ‘%1$s’ leis an liosta ignorálacha?</string>
     <string name="ignore_remove">Bain ‘%1$s’ ón liosta ignorálacha?</string>
@@ -194,14 +187,12 @@
     <!-- ONE -->
     <string name="one_day">24 Uair an chloig</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Teanga</string>
     <string name="preferences_system_default">Réamhshocrú córas</string>
     <!-- PREVIEW -->
@@ -250,7 +241,6 @@
     <string name="routing_error_none">Faighte</string>
     <string name="routing_error_timeout">Am tráth</string>
     <string name="rssi_definition">Táscaire Cumhachta Athnuachana Aithint an Aoise, tomhas a úsáidtear chun leibhéal cumhachta atá faighte ag an antsnáithe a mheas. Léiríonn RSSI níos airde gnóthachtáil níos laige atá i gceangal seasmhach agus níos láidre.</string>
-    <!-- SAVE -->
     <string name="save">Sábháil</string>
     <string name="save_changes">Sábháil</string>
     <!-- SCAN -->
@@ -258,7 +248,6 @@
     <!-- SECURITY -->
     <string name="select_all">Roghnaigh go léir</string>
     <string name="send">Seol</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Roinn</string>
     <!-- SHOW -->
@@ -297,7 +286,6 @@
     <string name="unknown_username">Ainm Úsáideora Anaithnid</string>
     <string name="unrecognized">Neamh-aithnidiúil</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">trí MQTT</string>
     <string name="waypoint_delete">Scrios an pointe bealach?</string>

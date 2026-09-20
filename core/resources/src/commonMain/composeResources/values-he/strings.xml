@@ -25,13 +25,11 @@
     <string name="add">הוסף</string>
     <string name="add_network_device">הוסף</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">נדרש עדכון של האפליקציה</string>
     <string name="apply">החל</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">לשנות לערוץ ברירת המחדל?</string>
-    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="bottom_nav_settings">הגדרות</string>
     <string name="calculating">מחשב…</string>
@@ -71,13 +69,10 @@
     <string name="disconnected">מנותק</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_messages">הודעות</string>
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">מרחק</string>
     <!-- DOC -->
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
-    <!-- ENVIRONMENT -->
     <string name="error">שגיאה</string>
     <string name="error_duty_cycle">הגעת לרף ה-duty cycle. לא ניתן לשלוח הודעות כרגע, בבקשה נסה שוב מאוחר יותר.</string>
     <!-- EXPORT -->
@@ -90,8 +85,6 @@
     <string name="firmware_update_failed">העדכון נכשל</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
-    <!-- GPIO -->
-    <!-- IGNORE -->
     <string name="ignore">התעלם</string>
     <string name="ignore_add">הוסף '%1$s' לרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
     <string name="ignore_remove">הורד '%1$s' מרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
@@ -164,14 +157,12 @@
     <string name="okay">אישור</string>
     <!-- ONE -->
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">שפה</string>
     <string name="preferences_system_default">ברירות מחדל</string>
     <!-- PREVIEW -->
@@ -196,7 +187,6 @@
     <string name="reset_to_defaults">איפוס לברירת מחדל</string>
     <!-- ROLE -->
     <!-- ROUTING -->
-    <!-- SAVE -->
     <string name="save">שמור</string>
     <string name="save_changes">שמור</string>
     <!-- SCAN -->
@@ -204,7 +194,6 @@
     <!-- SECURITY -->
     <string name="select_all">בחר הכל</string>
     <string name="send">שלח</string>
-    <!-- SERIAL -->
     <string name="settings">הגדרות</string>
     <!-- SHARE -->
     <string name="share">שתף</string>
@@ -228,7 +217,6 @@
     <!-- UNKNOWN -->
     <string name="unknown_username">שם המשתמש אינו מוכר</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="waypoint_delete">מחק נקודת ציון?</string>
     <string name="waypoint_edit">ערוך נקודת ציון</string>

@@ -27,7 +27,6 @@
     <string name="administration">Administratë</string>
     <!-- AIR -->
     <string name="air_util_definition">Përqindja e kohës së përdorur për transmetim brenda orës së kaluar.</string>
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Përditësimi i aplikacionit kërkohet</string>
     <string name="apply">Apliko</string>
@@ -35,7 +34,6 @@
     <string name="aqi_good">Mirë</string>
     <string name="are_you_sure_change_default">A jeni të sigurt se doni të kaloni në kanalin e parazgjedhur?</string>
     <string name="bad">I Keq</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Bateria</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Po llogaritet…</string>
@@ -82,17 +80,14 @@
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Direkt</string>
     <string name="discovery_stat_messages">訊息</string>
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distanca</string>
     <!-- DOC -->
     <string name="edit">Redakto</string>
     <string name="eight_hours">8 Orë</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Përputhje e Gabuar e Çelësit Publik</string>
     <string name="encryption_pkc">Kriptimi me Çelës Publik</string>
-    <!-- ENVIRONMENT -->
     <string name="error">Gabim</string>
     <string name="error_duty_cycle">Cikli i detyrës ka arritur kufirin. Nuk mund të dërgoni mesazhe tani, ju lutem provoni përsëri më vonë.</string>
     <!-- EXPORT -->
@@ -107,10 +102,8 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Mirë</string>
-    <!-- GPIO -->
     <string name="hops_away">Hops larg</string>
     <string name="iaq_definition">(Cilësia e Ajrit të Brendshëm) shkalla relative e vlerës IAQ siç matet nga Bosch BME680. Intervali i Vlerave 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Injoro</string>
     <string name="ignore_add">Të shtohet ‘%1$s’ në listën e injoruar?</string>
     <string name="ignore_remove">Të hiqet ‘%1$s’ nga lista e injoruar?</string>
@@ -197,14 +190,12 @@
     <!-- ONE -->
     <string name="one_day">24 Orë</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Gjuhë</string>
     <string name="preferences_system_default">Parazgjedhje sistemi</string>
     <!-- PREVIEW -->
@@ -254,7 +245,6 @@
     <string name="routing_error_none">Pranuar</string>
     <string name="routing_error_timeout">Koha e skaduar</string>
     <string name="rssi_definition">Indikatori i Fuqisë së Sinjalit të Marrë, një matje e përdorur për të përcaktuar nivelin e energjisë që po merret nga antena. Një vlerë më e lartë RSSI zakonisht tregon një lidhje më të fortë dhe më të qëndrueshme.</string>
-    <!-- SAVE -->
     <string name="save">Ruaj</string>
     <string name="save_changes">Ruaj</string>
     <!-- SCAN -->
@@ -262,7 +252,6 @@
     <!-- SECURITY -->
     <string name="select_all">Përzgjedh të gjithë</string>
     <string name="send">Dërgo</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Ndaj</string>
     <!-- SHOW -->
@@ -292,7 +281,6 @@
     <string name="unknown_username">Emri i përdoruesit është i panjohur</string>
     <string name="unrecognized">I panjohur</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">përmes MQTT</string>
     <string name="waypoint_delete">Të fshihet pika e rreshtit?</string>

@@ -25,13 +25,11 @@
     <string name="add">Bæta við</string>
     <string name="add_network_device">Bæta við</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Uppfærsla á smáforriti nauðsynleg</string>
     <string name="apply">Virkja</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Ert þú viss um að þú viljir skipta yfir á sjálfgefna rás?</string>
-    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="calculating">Reiknar…</string>
     <string name="camera_permission">Aðgangur að myndavél</string>
@@ -66,12 +64,9 @@
     <string name="direct_message">Bein skilaboð</string>
     <string name="disconnected">Aftengd</string>
     <!-- DISCOVERY -->
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <!-- DOC -->
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
-    <!-- ENVIRONMENT -->
     <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
     <!-- EXPORT -->
     <string name="factory_reset">Grunnstilla</string>
@@ -82,8 +77,6 @@
     <string name="firmware_update_failed">Uppfærsla misfórst</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
-    <!-- GPIO -->
-    <!-- IGNORE -->
     <string name="ignore">Hunsa</string>
     <string name="ignore_add">Bæta '%1$s' við Ignore lista?</string>
     <string name="ignore_remove">Fjarlægja '%1$s' frá hunsa lista?</string>
@@ -145,14 +138,12 @@
     <string name="okay">Í lagi</string>
     <!-- ONE -->
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Tungumál</string>
     <string name="preferences_system_default">Grunnstilling kerfis</string>
     <!-- PREVIEW -->
@@ -177,7 +168,6 @@
     <string name="reset_to_defaults">Endursetja tæki</string>
     <!-- ROLE -->
     <!-- ROUTING -->
-    <!-- SAVE -->
     <string name="save">Vista</string>
     <string name="save_changes">Vista</string>
     <!-- SCAN -->
@@ -185,7 +175,6 @@
     <!-- SECURITY -->
     <string name="select_all">Velja allt</string>
     <string name="send">Senda</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Deila</string>
     <!-- SHOW -->
@@ -208,7 +197,6 @@
     <!-- UNKNOWN -->
     <string name="unknown_username">Óþekkt notendanafn</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="waypoint_delete">Eyða leiðarpunkti?</string>
     <string name="waypoint_edit">Breyta leiðarpunkti</string>

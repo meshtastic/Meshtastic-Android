@@ -25,13 +25,11 @@
     <string name="add">Afegir</string>
     <string name="add_network_device">Afegir</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Actualització de l'aplicació necessària</string>
     <string name="apply">Aplicar</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Estàs segur que vols canviar al canal per defecte?</string>
-    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="calculating">Calculant…</string>
     <string name="camera_permission">Permisos de la càmera</string>
@@ -70,15 +68,12 @@
     <string name="direct_message">Missatge directe</string>
     <string name="disconnected">Desconnectat</string>
     <!-- DISCOVERY -->
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distància</string>
     <!-- DOC -->
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Hores</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
-    <!-- ENVIRONMENT -->
     <string name="error">Error</string>
     <string name="error_duty_cycle">Límit del cicle de treball assolit. No es podran enviar més missatges, intenta-ho més tard.</string>
     <!-- EXPORT -->
@@ -92,8 +87,6 @@
     <string name="firmware_update_failed">Actualització fallida</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
-    <!-- GPIO -->
-    <!-- IGNORE -->
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Afegir '%1$s' a la llista d'ignorats?</string>
     <string name="ignore_remove">Treure '%1$s' de la llista d'ignorats?</string>
@@ -179,14 +172,12 @@
     <!-- ONE -->
     <string name="one_day">24 Hores</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Idioma</string>
     <string name="preferences_system_default">Defecte del sistema</string>
     <!-- PREVIEW -->
@@ -234,7 +225,6 @@
     <string name="routing_error_no_route">Sense ruta</string>
     <string name="routing_error_none">Confirmat</string>
     <string name="routing_error_timeout">Temps esgotat</string>
-    <!-- SAVE -->
     <string name="save">Desar</string>
     <string name="save_changes">Desar</string>
     <!-- SCAN -->
@@ -242,7 +232,6 @@
     <!-- SECURITY -->
     <string name="select_all">Seleccionar tot</string>
     <string name="send">Enviar</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Compartir</string>
     <!-- SHOW -->
@@ -269,7 +258,6 @@
     <string name="unknown_username">Nom d'usuari desconegut</string>
     <string name="unrecognized">No reconeguts</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">via MQTT</string>
     <string name="waypoint_delete">Esborrar punt de pas?</string>

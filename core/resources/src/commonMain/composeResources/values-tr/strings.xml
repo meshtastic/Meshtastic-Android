@@ -32,7 +32,6 @@
     <!-- AIR -->
     <string name="air_quality_icon">Hava kalitesi ikonu</string>
     <string name="air_util_definition">Son bir saat içinde kullanılan iletim için yayın süresi yüzdesi.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Zili Çaldır!</string>
     <string name="all_time">Hepsi</string>
     <string name="allow_input_source">Giriş kaynağına izin ver</string>
@@ -53,7 +52,6 @@
     <string name="available_pins">Mevcut pinler</string>
     <string name="backup_keys">Anahtarları Yedekle</string>
     <string name="bad">Kötü</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Pil</string>
     <string name="battery_ina_2xx_i2c_address">Pilin INA_2XX I2C adresi</string>
     <!-- BLUETOOTH -->
@@ -145,7 +143,6 @@
     <string name="discovery_stat_direct">Doğrudan</string>
     <string name="discovery_stat_mesh">Amatör Telsiz</string>
     <string name="discovery_stat_messages">Mesajlar</string>
-    <!-- DISPLAY -->
     <string name="display">Ekran</string>
     <!-- DISTANCE -->
     <string name="distance">Mesafe</string>
@@ -163,10 +160,8 @@
     <string name="eight_hours">8 Saat</string>
     <!-- EMOJI -->
     <string name="enabled">Açık</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Genel Anahtar Uyuşmazlığı</string>
     <string name="encryption_pkc">Genel Anahtar Şifrelemesi</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Çevre</string>
     <string name="error">Hata</string>
     <string name="error_duty_cycle">Zaman limitine (duty cycle) ulaşıldı. Şu anda mesaj gönderilemiyor, lütfen daha sonra tekrar deneyin.</string>
@@ -196,7 +191,6 @@
     <string name="generate_qr_code">QR kod oluştur</string>
     <!-- GEOFENCE -->
     <string name="good">İyi</string>
-    <!-- GPIO -->
     <string name="gpio_pin">GPIO pini</string>
     <string name="hardware">Donanım</string>
     <string name="hardware_model">Donanım modeli</string>
@@ -209,7 +203,6 @@
     <string name="i_know_what_i_m_doing">Ne yaptığımı biliyorum.</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(İç Hava Kalitesi) Bosch BME680 tarafından ölçülen bağıl ölçekli IAQ değeri. Değer Aralığı 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Yok say</string>
     <string name="ignore_add">Yoksay listesine '%1$s' eklensin mi? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <string name="ignore_incoming">Gelenleri Yoksay</string>
@@ -356,7 +349,6 @@
     <string name="one_week">1H</string>
     <string name="only_favorites">Sadece Favoriler</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Çıktı süresi (milisaniye)</string>
     <string name="override_console_serial_port">Konsol seri portunu geçersiz kıl</string>
     <!-- PACKET -->
@@ -372,7 +364,6 @@
     <string name="position">Konum</string>
     <string name="position_enabled">Pozisyon etkinleştirildi</string>
     <string name="position_log">Konum</string>
-    <!-- POWER -->
     <string name="power">Güç</string>
     <string name="power_config">Güç Ayarı</string>
     <string name="preferences_language">Dil</string>
@@ -443,7 +434,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Alınan Sinyal Gücü Göstergesi, anten tarafından alınan güç seviyesini belirlemek için kullanılan bir ölçüdür. Daha yüksek bir RSSI değeri genellikle daha güçlü ve daha istikrarlı bir bağlantıya işaret eder.</string>
     <string name="sats">Uydular</string>
-    <!-- SAVE -->
     <string name="save">Kaydet</string>
     <string name="save_changes">Kaydet</string>
     <!-- SCAN -->
@@ -458,7 +448,6 @@
     <string name="select_all">Tümünü seç</string>
     <string name="send">Gönder</string>
     <string name="sender_message_interval_seconds">Gönderen mesaj aralığı (saniye)</string>
-    <!-- SERIAL -->
     <string name="serial">Seri</string>
     <string name="serial_config">Seri Ayarı</string>
     <string name="set_your_region">Bölgenizi Seçin</string>
@@ -536,7 +525,6 @@
     <string name="uptime">Çalışma Süresi</string>
     <!-- URL -->
     <string name="url">URL</string>
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Kullanıcı</string>
     <string name="user_config">Kullanıcı Ayarı</string>

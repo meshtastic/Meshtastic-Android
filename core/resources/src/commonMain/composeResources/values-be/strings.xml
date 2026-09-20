@@ -24,7 +24,6 @@
     <string name="add">Дадаць</string>
     <string name="add_network_device">Дадаць</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <string name="all_time">Усе</string>
     <!-- APP -->
     <string name="app_settings">Праграма</string>
@@ -32,7 +31,6 @@
     <string name="apply">Прымяніць</string>
     <!-- AQI -->
     <string name="audio">Аўдыё</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Батарэя</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -91,7 +89,6 @@
     <string name="disconnected">Адлучана</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_messages">Паведамленні</string>
-    <!-- DISPLAY -->
     <string name="display">Экран</string>
     <!-- DISTANCE -->
     <string name="distance">Адлегласць</string>
@@ -103,8 +100,6 @@
     <string name="eight_hours">8 Гадзін</string>
     <!-- EMOJI -->
     <string name="enabled">Уключана</string>
-    <!-- ENCRYPTION -->
-    <!-- ENVIRONMENT -->
     <string name="environment">Асяроддзе</string>
     <string name="error">Памылка</string>
     <string name="ethernet_ip">Ethernet IP:</string>
@@ -120,13 +115,11 @@
     <string name="free_memory">Вольная памяць</string>
     <!-- GEOFENCE -->
     <string name="get_started">Пачаць</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="hardware">Устройства</string>
     <string name="hide_password">Схаваць пароль</string>
     <string name="i_know_what_i_m_doing">Я ведаю, што я раблю.</string>
     <string name="iaq">Якасць паветра</string>
-    <!-- IGNORE -->
     <string name="ignore">Ігнараваць</string>
     <!-- IMPORT -->
     <string name="info">Звесткі</string>
@@ -210,7 +203,6 @@
     <string name="one_hour">1 гадзіна</string>
     <string name="one_week">1тыд</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <string name="password">Пароль</string>
     <!-- PAX -->
@@ -223,7 +215,6 @@
     <string name="position">Месцазнаходжанне</string>
     <string name="position_log">Месцазнаходжанне</string>
     <string name="position_packet">Пакет месцазнаходжання</string>
-    <!-- POWER -->
     <string name="preferences_language">Мова</string>
     <!-- PREVIEW -->
     <string name="qr_code">QR-код</string>
@@ -266,7 +257,6 @@
     <string name="routing_error_none">Пацверджана</string>
     <string name="routing_error_timeout">Скончыўся час чакання</string>
     <string name="rssi">адносная магутнасць</string>
-    <!-- SAVE -->
     <string name="save">Запісаць</string>
     <string name="save_changes">Запісаць</string>
     <!-- SCAN -->
@@ -275,7 +265,6 @@
     <string name="security">Бяспека</string>
     <string name="select_all">Вылучыць усе</string>
     <string name="send">Адправіць</string>
-    <!-- SERIAL -->
     <string name="serial">Паслядоўны</string>
     <string name="set_your_region">Выберыце ваш рэгіён</string>
     <string name="settings">налады</string>
@@ -312,7 +301,6 @@
     <!-- UNKNOWN -->
     <string name="unrecognized">Нераспазнанае</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Карыстальнік</string>
     <string name="via_mqtt">праз MQTT</string>

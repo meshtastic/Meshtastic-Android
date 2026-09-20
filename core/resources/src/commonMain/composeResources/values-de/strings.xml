@@ -67,7 +67,6 @@
     <string name="air_quality_metrics_log"> Datenprotokoll Luftqualität</string>
     <string name="air_util_definition">Prozentuale Sendezeit für die Übertragung innerhalb der letzten Stunde.</string>
     <string name="air_utilization">Sendezeit</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Warnklingelzeichen!</string>
     <string name="all_time">Alle</string>
     <string name="allow_input_source">Eingabequelle zulassen</string>
@@ -119,7 +118,6 @@
     <string name="backup_keys_confirmation">Speichert die öffentlichen und privaten Schlüssel im sicheren, verschlüsseltem Speicher auf diesem Gerät.</string>
     <string name="backup_restore">Sichern &amp; Wiederherstellen</string>
     <string name="bad">Schlecht</string>
-    <!-- BANDWIDTH -->
     <string name="baro_pressure">Luftdruck</string>
     <string name="battery">Akku</string>
     <string name="battery_ina_2xx_i2c_address">Akku INA_2XX I2C Adresse</string>
@@ -406,7 +404,6 @@
     <string name="discovery_unique_nodes">%1$d einzigartige Knoten</string>
     <string name="discovery_view_map">Karte anschauen</string>
     <string name="disk_free_indexed">Laufwerkspeicher frei %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Display</string>
     <string name="display_config">Anzeige des Geräts</string>
     <!-- DISTANCE -->
@@ -470,12 +467,10 @@
     <string name="eight_hours">8 Stunden</string>
     <!-- EMOJI -->
     <string name="enabled">Aktiviert</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Öffentlicher Schlüssel stimmt nicht überein</string>
     <string name="encryption_error_text">Der öffentliche Schlüssel stimmt nicht mit dem gespeicherten Schlüssel überein. Sie können den Knoten entfernen und den Schlüsselaustausch erneut durchführen lassen. Dies könnte jedoch auf ein schwerwiegenderes Sicherheitsproblem hindeuten. Kontaktieren Sie den Benutzer über einen anderen vertrauenswürdigen Kanal, um zu klären, ob die Schlüsseländerung auf ein Zurücksetzen auf Werkseinstellungen oder eine andere absichtliche Handlung zurückzuführen ist.</string>
     <string name="encryption_pkc">Verschlüsselung mit öffentlichen Schlüssel</string>
     <string name="env_metrics_log">Umweltdaten</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Umgebung</string>
     <string name="error">Fehler</string>
     <string name="error_duty_cycle">Limit für den aktuellen Betriebszyklus erreicht. Nachrichten können momentan nicht gesendet werden, bitte versuchen Sie es später erneut.</string>
@@ -622,7 +617,6 @@
     <string name="geofence_off">Aus</string>
     <string name="get_started">Erste Schritte</string>
     <string name="good">Gut</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO Pin</string>
     <string name="hardware">Hardware</string>
@@ -641,7 +635,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Innenluftqualität) relativer IAQ-Wert gemessen von Bosch BME680.</string>
     <string name="icon_meanings">Symbolbedeutung</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignorieren</string>
     <string name="ignore_add">'%1$s' zur Ignorieren-Liste hinzufügen?</string>
     <string name="ignore_incoming">Eingehende ignorieren</string>
@@ -1024,7 +1017,6 @@
     <string name="open_wifi_settings">Öffne Wlan-Einstellungen</string>
     <string name="options">Optionen</string>
     <string name="orient_north">Ausrichtung Nord</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Ausgabedauer (GPIO)</string>
     <string name="overflow_menu">Überlaufmenü</string>
     <string name="override_console_serial_port">Seriellen Anschluss der Konsole überschreiben</string>
@@ -1076,7 +1068,6 @@
     <string name="position_enabled">Standort aktiviert</string>
     <string name="position_log">Standort</string>
     <string name="position_packet">Standortnachricht</string>
-    <!-- POWER -->
     <string name="power">Energie</string>
     <string name="power_config">Energie Einstellungen</string>
     <string name="power_metrics_log">Energiedaten</string>
@@ -1223,7 +1214,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator für die empfangene Signalstärke, eine Messung zur Bestimmung der von der Antenne empfangenen Leistungsstärke. Ein höherer RSSI-Wert weist im Allgemeinen auf eine stärkere und stabilere Verbindung hin.</string>
     <string name="sats">Satelliten</string>
-    <!-- SAVE -->
     <string name="save">Speichern</string>
     <string name="save_changes">Speichern</string>
     <string name="save_rangetest">Reichweitentest exportieren</string>
@@ -1267,7 +1257,6 @@
     <string name="selected_map_type">Ausgewählter Kartentyp</string>
     <string name="send">Senden</string>
     <string name="sender_message_interval_seconds">Sendernachrichtenintervall (Sekunden)</string>
-    <!-- SERIAL -->
     <string name="serial">Seriell</string>
     <string name="serial_config">Einstellungen serielle Schnittstelle</string>
     <string name="session_active">Sitzung aktiv</string>
@@ -1486,7 +1475,6 @@
     <string name="url_template">URL Vorlage</string>
     <string name="usb">USB</string>
     <string name="usb_permission_denied">USB-Berechtigung verweigert. Verbinde das Gerät erneut, um es nochmal zu versuchen.</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">Kompakte Kodierung für Kyrillisch</string>
     <!-- USER -->
     <string name="user">Benutzer</string>

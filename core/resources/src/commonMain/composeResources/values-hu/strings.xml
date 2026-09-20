@@ -39,7 +39,6 @@
     <!-- AIR -->
     <string name="air_quality_icon">Levegőminőség ikon</string>
     <string name="air_util_definition">Az elmúlt órában az adásra használt adásidő százaléka.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Riasztási harang karakter!</string>
     <string name="all_time">Összes</string>
     <string name="allow_input_source">Bemeneti forrás engedélyezése</string>
@@ -66,7 +65,6 @@
     <string name="audio_config">Hangbeállítások</string>
     <string name="available_pins">Elérhető pinek</string>
     <string name="bad">Rossz</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Akkumulátor</string>
     <string name="battery_ina_2xx_i2c_address">Akkumulátor INA_2XX I2C-cím</string>
     <!-- BLUETOOTH -->
@@ -207,7 +205,6 @@
     <string name="discovery_stat_messages">Üzenetek</string>
     <string name="discovery_stat_selected">Kijelölve</string>
     <string name="disk_free_indexed">Szabad lemezterület %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Kijelző</string>
     <!-- DISTANCE -->
     <string name="distance">Távolság</string>
@@ -227,11 +224,9 @@
     <string name="eight_hours">8 óra</string>
     <!-- EMOJI -->
     <string name="enabled">Engedélyezve</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Publikus kulcs nem egyezik</string>
     <string name="encryption_pkc">Publikus Kulcs Titkosítás</string>
     <string name="env_metrics_log">Környezeti metrikák</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Környezet</string>
     <string name="error">Hiba</string>
     <string name="error_duty_cycle">Elérte a Duty Cycle korlátot. Most nem lehet üzenetet küldeni, próbáld újra később.</string>
@@ -270,7 +265,6 @@
     <!-- GEOFENCE -->
     <string name="get_started">Kezdjük el</string>
     <string name="good">Jó</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO láb</string>
     <string name="hardware">Hardver</string>
@@ -286,7 +280,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Beltéri levegőminőség) relatív IAQ érték a Bosch BME680 szenzor alapján. Értéktartomány: 0–500.</string>
     <string name="icon_meanings">Ikonmagyarázatok</string>
-    <!-- IGNORE -->
     <string name="ignore">Mellőzés</string>
     <string name="ignore_add">Hozzáadod „%1$s”-t a figyelmen kívül hagyási listához?</string>
     <string name="ignore_incoming">Bejövő figyelmen kívül hagyása</string>
@@ -504,7 +497,6 @@
     <string name="open_settings">Beállítások megnyitása</string>
     <string name="options">Beállítások</string>
     <string name="orient_north">Északra tájolás</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Kimeneti időtartam (ezredmásodperc)</string>
     <string name="overflow_menu">További menü</string>
     <string name="override_console_serial_port">Konzol soros port felülbírálása</string>
@@ -532,7 +524,6 @@
     <string name="position_enabled">Pozíció engedélyezve</string>
     <string name="position_log">Pozíció</string>
     <string name="position_packet">Pozíciócsomag</string>
-    <!-- POWER -->
     <string name="power">Energia</string>
     <string name="power_config">Energia-beállítások</string>
     <string name="power_metrics_log">Tápellátási metrikák</string>
@@ -638,7 +629,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vett jelerősség-mutató (RSSI): az antenna által vett jel teljesítményszintjének mérése. A magasabb RSSI általában erősebb, stabilabb kapcsolatot jelez.</string>
     <string name="sats">Műholdak</string>
-    <!-- SAVE -->
     <string name="save">Mentés</string>
     <string name="save_changes">Mentés</string>
     <string name="save_rangetest">Hatótáv-teszt csomagok exportálása</string>
@@ -670,7 +660,6 @@
     <string name="selected_map_type">Kiválasztott térképtípus</string>
     <string name="send">Küldeni</string>
     <string name="sender_message_interval_seconds">Küldési üzenetintervallum (másodperc)</string>
-    <!-- SERIAL -->
     <string name="serial">Soros port</string>
     <string name="serial_config">Soros beállítások</string>
     <string name="set_your_region">Régió beállítása</string>
@@ -777,7 +766,6 @@
     <string name="url_cannot_be_empty">Az URL nem lehet üres.</string>
     <string name="url_must_contain_placeholders">Az URL-nek tartalmaznia kell helyőrzőket.</string>
     <string name="url_template">URL sablon</string>
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Felhasználó</string>
     <string name="user_config">Felhasználói beállítások</string>

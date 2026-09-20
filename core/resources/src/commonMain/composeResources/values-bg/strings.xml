@@ -62,7 +62,6 @@
     <string name="air_quality_icon">Икона за качество на въздуха</string>
     <string name="air_util_definition">Процент от ефирното време за предаване, използвано през последния час.</string>
     <string name="air_utilization">Изпол. на ефира</string>
-    <!-- ALERT -->
     <string name="all_time">Всички</string>
     <string name="alt">н.в.</string>
     <string name="altitude">Надморска височина</string>
@@ -97,7 +96,6 @@
     <string name="backup_keys_confirmation">Запазва публичните и частните ключове в защитено, криптирано хранилище на това устройство.</string>
     <string name="backup_restore">Архивиране &amp; възстановяване</string>
     <string name="bad">Лош</string>
-    <!-- BANDWIDTH -->
     <string name="bandwidth_default">По подразбиране (%1$s kHz)</string>
     <string name="bandwidth_option_khz">%1$s kHz</string>
     <string name="bandwidth_unsupported">Не се поддържа (%1$s)</string>
@@ -327,7 +325,6 @@
     <string name="discovery_unique_nodes">%1$d уникални възела</string>
     <string name="discovery_view_map">Вижте картата</string>
     <string name="disk_free_indexed">Свободен диск %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Дисплей</string>
     <!-- DISTANCE -->
     <string name="distance">Разстояние</string>
@@ -380,12 +377,10 @@
     <string name="emoji_category_travel_places">Пътуване &amp; места</string>
     <string name="emoji_recently_used">Наскоро използвани</string>
     <string name="enabled">Активиран</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Несъответствие на публичния ключ</string>
     <string name="encryption_error_text">Публичният ключ не съвпада със записания ключ. Можете да премахнете възела и да го оставите да обмени ключове отново, но това може да показва по-сериозен проблем със сигурността. Свържете се с потребителя чрез друг надежден канал, за да определите дали промяната на ключа се дължи на фабрично нулиране или друго умишлено действие.</string>
     <string name="encryption_pkc">Криптиране с публичния ключ</string>
     <string name="env_metrics_log">Показатели на околната среда</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Околна среда</string>
     <string name="error">Грешка</string>
     <string name="error_duty_cycle">Достигнат лимит на Duty Cycle. Не може да се изпрати съобщение сега, опитайте по-късно.</string>
@@ -515,7 +510,6 @@
     <string name="get_started">Започнете</string>
     <string name="github_repository">GitHub хранилище</string>
     <string name="good">Добър</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO пин</string>
     <string name="hardware">Хардуер</string>
@@ -531,7 +525,6 @@
     <string name="i_know_what_i_m_doing">Знам какво правя.</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Качество на въздуха в помещенията) относителна скала за IAQ, стойностите са измерени с Bosch BME680. Диапазон на стойностите 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Игнорирай</string>
     <string name="ignore_add">Добави '%1$s' към списъка с игнорирани?</string>
     <string name="ignore_remove">Изтрий '%1$s' от списъка с игнорирани?</string>
@@ -860,7 +853,6 @@
     <string name="open_source_libraries">Библиотеки с отворен код</string>
     <string name="open_wifi_settings">Отваряне на настройките на Wi-Fi</string>
     <string name="options">Опции</string>
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <string name="password">Парола</string>
     <!-- PAX -->
@@ -901,7 +893,6 @@
     <string name="position_config_set_fixed_from_phone">Зададено от текущото местоположение на телефона</string>
     <string name="position_enabled">Позицията е активирана</string>
     <string name="position_log">Позиция</string>
-    <!-- POWER -->
     <string name="power">Захранване</string>
     <string name="power_config">Конфигуриране на захранването</string>
     <string name="power_metrics_log">Показатели на мощност</string>
@@ -1019,7 +1010,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор за силата на получения сигнал - измерване, използвано за определяне на нивото на получения сигнал, приемано от антената. По-високата стойност на RSSI обикновено показва по-силна и по-стабилна връзка.</string>
     <string name="sats">Сат</string>
-    <!-- SAVE -->
     <string name="save">Запазване</string>
     <string name="save_and_restart">Запазване &amp; рестартиране</string>
     <string name="save_changes">Запис</string>
@@ -1060,7 +1050,6 @@
     <string name="selected">Избрани</string>
     <string name="selected_map_type">Избран тип на картата</string>
     <string name="send">Изпрати</string>
-    <!-- SERIAL -->
     <string name="serial">Серийна</string>
     <string name="serial_config">Конфигуриране на серийната връзка</string>
     <string name="set_up_connection">Настройване на връзка</string>
@@ -1225,7 +1214,6 @@
     <string name="url_cannot_be_empty">URL не може да бъде празен.</string>
     <string name="url_template">Шаблон за URL</string>
     <string name="usb">USB</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">Компактно кодиране за Кирилица</string>
     <!-- USER -->
     <string name="user">Потребител</string>

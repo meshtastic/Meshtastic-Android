@@ -37,7 +37,6 @@
     <!-- AIR -->
     <string name="air_quality_icon">Ikona jakości powietrza</string>
     <string name="air_util_definition">Procent czasu  wykorzystanego do transmisji w ciągu ostatniej godziny.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Znak ostrzegawczy!</string>
     <string name="all_time">Wszystkie</string>
     <string name="altitude">Wysokość</string>
@@ -58,7 +57,6 @@
     <string name="back">Wstecz</string>
     <string name="backup_keys">Klucze zapasowe</string>
     <string name="bad">słaby</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Bateria</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -200,7 +198,6 @@
     <string name="discovery_stat_direct">Bezpośrednio</string>
     <string name="discovery_stat_messages">Wiadomości</string>
     <string name="discovery_stat_selected">Wybrane</string>
-    <!-- DISPLAY -->
     <string name="display">Wyświetlacz</string>
     <string name="display_config">Ustawienia wyświetlacza</string>
     <!-- DISTANCE -->
@@ -216,12 +213,10 @@
     <string name="eight_hours">8 Godzin</string>
     <!-- EMOJI -->
     <string name="enabled">Włączony</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Niezgodność klucza publicznego</string>
     <string name="encryption_error_text">Klucz publiczny nie pasuje do zapisanego klucza. Możesz usunąć węzeł i pozwolić mu na ponowną wymianę kluczy, ale może to oznaczać poważniejszy problem z bezpieczeństwem. Skontaktuj się z użytkownikiem przez inny zaufany kanał, żeby sprawdzić, czy zmiana klucza była spowodowana przywróceniem ustawień fabrycznych lub innym celowym działaniem.</string>
     <string name="encryption_pkc">Szyfrowanie klucza publicznego</string>
     <string name="env_metrics_log">Metryki środowiskowe</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Środowisko</string>
     <string name="error">Błąd</string>
     <string name="error_duty_cycle">Osiągnięto limit nadawania. Nie można wysłać wiadomości w tej chwili, spróbuj później.</string>
@@ -290,7 +285,6 @@
     <!-- GEOFENCE -->
     <string name="geofence_off">Wyłączony</string>
     <string name="good">dobry</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">Pin GPIO</string>
     <string name="hardware">Sprzęt</string>
@@ -305,7 +299,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Jakość powietrza w pomieszczeniach (Indoor Air Quality) - wartość względna w skali IAQ mierzona czujnikiem BME680. Zakres wartości: 0–500.</string>
     <string name="icon_meanings">Znaczenia ikon</string>
-    <!-- IGNORE -->
     <string name="ignore">Zignoruj</string>
     <string name="ignore_add">Dodać '%1$s' do listy ignorowanych?</string>
     <string name="ignore_incoming">Ignoruj przychodzące</string>
@@ -506,7 +499,6 @@
     <string name="open_settings">Otwórz ustawienia</string>
     <string name="options">Opcje</string>
     <string name="orient_north">Zorientuj na północ</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Czas trwania (w milisekundach)</string>
     <!-- PACKET -->
     <string name="password">Hasło</string>
@@ -530,7 +522,6 @@
     <string name="position_enabled">Lokalizacja włączona</string>
     <string name="position_log">Pozycjonowanie</string>
     <string name="position_packet">Pakiet lokalizacji</string>
-    <!-- POWER -->
     <string name="power">Zasilanie</string>
     <string name="power_config">Konfiguracja zarządzania energią</string>
     <string name="power_metrics_log">Metryki zasilania</string>
@@ -617,7 +608,6 @@
     <string name="routing_error_timeout">Upłynął limit czasu</string>
     <string name="rssi">RSSI:</string>
     <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
-    <!-- SAVE -->
     <string name="save">Zapisz</string>
     <string name="save_changes">Zapisz</string>
     <string name="save_rangetest">Eksportuj pakiety zasięgu</string>
@@ -641,7 +631,6 @@
     <string name="selected">Wybrane</string>
     <string name="selected_map_type">Wybierz typ mapy</string>
     <string name="send">Wyślij</string>
-    <!-- SERIAL -->
     <string name="serial">Seryjny</string>
     <string name="serial_config">Konfiguracja seryjna</string>
     <string name="set_your_region">Wybierz swój region</string>
@@ -737,7 +726,6 @@
     <string name="uptime">Czas pracy</string>
     <!-- URL -->
     <string name="url">URL</string>
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Użytkownik</string>
     <string name="user_config">Konfiguracja użytkownika</string>

@@ -33,7 +33,6 @@
     <string name="advanced_title">Напредно</string>
     <!-- AIR -->
     <string name="air_util_definition">Проценат искоришћења ефирског времена за пренос у последњем сату.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Karakter zvona za upozorenja!</string>
     <string name="all_time">Сви</string>
     <string name="alt">Висина</string>
@@ -54,7 +53,6 @@
     <string name="are_you_sure_change_default">Да ли сте сигурни да желите да промените на подразумевани канал?</string>
     <string name="back">Назад</string>
     <string name="bad">Loš</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Батерија</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Блутут</string>
@@ -137,7 +135,6 @@
     <string name="discovery_stat_date">Датум</string>
     <string name="discovery_stat_direct">Direktno</string>
     <string name="discovery_stat_messages">Поруке</string>
-    <!-- DISPLAY -->
     <string name="display">Приказ</string>
     <!-- DISTANCE -->
     <string name="distance">Udaljenost</string>
@@ -150,11 +147,9 @@
     <string name="eight_hours">8 Сати</string>
     <!-- EMOJI -->
     <string name="enabled">Омогућено</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Неусаглашеност јавних кључева</string>
     <string name="encryption_pkc">Шифровање јавним кључем</string>
     <string name="env_metrics_log">Метрике сензора</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Окружење</string>
     <string name="error">Грешка</string>
     <string name="error_duty_cycle">Достигнут је лимит циклуса рада. Не могу слати поруке тренутно, молимо вас покушајте касније.</string>
@@ -184,7 +179,6 @@
     <!-- GEOFENCE -->
     <string name="geofence_off">Искључен</string>
     <string name="good">Dobro</string>
-    <!-- GPIO -->
     <string name="hardware">Хардвер</string>
     <string name="heading">Смер</string>
     <string name="hops_away">Скокова удаљено</string>
@@ -192,7 +186,6 @@
     <string name="i_know_what_i_m_doing">Знам шта радим.</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Kvalitet vazduha u zatvorenom prostoru) relativna skala vrednosti IAQ merena Bosch BME680. Raspon vrednosti 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Игнориши</string>
     <string name="ignore_add">Додати '%1$s' на листу игнорисаних?</string>
     <string name="ignore_remove">Уклнити '%1$s' на листу игнорисаних?</string>
@@ -314,7 +307,6 @@
     <string name="one_week">1n</string>
     <!-- OPEN -->
     <string name="options">Опције</string>
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <string name="password">Лозинка</string>
     <!-- PAX -->
@@ -325,7 +317,6 @@
     <string name="position">Позиција</string>
     <string name="position_log">Позиција</string>
     <string name="position_packet">Пакети позиција</string>
-    <!-- POWER -->
     <string name="power">Снага</string>
     <string name="power_config">Подешавања напајња</string>
     <string name="power_metrics_log">Мерни подаци о снази</string>
@@ -405,7 +396,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator jačine primljenog signala RSSI, merenje koje se koristi za određivanje nivoa snage koji antena prima. Viša vrednost RSSI generalno ukazuje na jaču i stabilniju vezu.</string>
     <string name="sats">Сателита</string>
-    <!-- SAVE -->
     <string name="save">Сачувај</string>
     <string name="save_changes">Сачувај</string>
     <!-- SCAN -->
@@ -417,7 +407,6 @@
     <string name="select">Изабери</string>
     <string name="select_all">Изабери све</string>
     <string name="send">Pošalji</string>
-    <!-- SERIAL -->
     <string name="serial">Серијска веза</string>
     <string name="serial_config">Подешавања серијске везе</string>
     <string name="settings">подешавања</string>
@@ -482,7 +471,6 @@
     <string name="unrecognized">Nekategorisano</string>
     <string name="uptime">Време рада</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Корисник</string>
     <string name="user_config">Корисничка подешавања</string>

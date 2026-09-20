@@ -29,7 +29,6 @@
     <string name="administration">Beheer</string>
     <!-- AIR -->
     <string name="air_util_definition">Percentage van de zendtijd die het afgelopen uur werd gebruikt.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Melding Bell teken!</string>
     <string name="all_time">Alles</string>
     <string name="alt">Alt</string>
@@ -45,7 +44,6 @@
     <string name="audio_config">Audioconfiguratie</string>
     <string name="available_pins">Beschikbare pinnen</string>
     <string name="bad">Slecht</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Batterij</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -116,7 +114,6 @@
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Direct</string>
     <string name="discovery_stat_messages">Berichten</string>
-    <!-- DISPLAY -->
     <string name="display">Weergave</string>
     <!-- DISTANCE -->
     <string name="distance">Afstand</string>
@@ -126,10 +123,8 @@
     <string name="edit">Wijzig</string>
     <string name="eight_hours">8 Uur</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Publieke sleutel komt niet overeen</string>
     <string name="encryption_pkc">Publieke sleutel encryptie</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Omgeving</string>
     <string name="error">Fout</string>
     <string name="error_duty_cycle">Limiet van Duty Cycle bereikt. Kan nu geen berichten verzenden, probeer het later opnieuw.</string>
@@ -155,7 +150,6 @@
     <string name="gateway">Gateway</string>
     <!-- GEOFENCE -->
     <string name="good">Goed</string>
-    <!-- GPIO -->
     <string name="gpio_pin">GPIO pin</string>
     <string name="hardware">Hardware</string>
     <string name="hardware_model">Hardwaremodel</string>
@@ -164,7 +158,6 @@
     <string name="i_know_what_i_m_doing">Ik weet waar ik mee bezig ben.</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Binnenluchtkwaliteit) relatieve schaal IAQ waarde gemeten door Bosch BME680. Waarde tussen 0 en 500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Negeer</string>
     <string name="ignore_add">Voeg '%1$s' toe aan negeerlijst?</string>
     <string name="ignore_incoming">Inkomende negeren</string>
@@ -285,7 +278,6 @@
     <string name="one_day">24 Uur</string>
     <string name="one_week">1W</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Output duur (milliseconden)</string>
     <!-- PACKET -->
     <string name="password">Wachtwoord</string>
@@ -299,7 +291,6 @@
     <string name="position">Positie</string>
     <string name="position_enabled">Positie ingeschakeld</string>
     <string name="position_log">Positie</string>
-    <!-- POWER -->
     <string name="power">Vermogen</string>
     <string name="power_config">Energie configuratie</string>
     <string name="preferences_language">Taal</string>
@@ -365,7 +356,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Ontvangen Signal Sterkte Indicator, een meting gebruikt om het stroomniveau te bepalen dat de antenne ontvangt. Een hogere RSSI-waarde geeft een sterkere en stabielere verbinding aan.</string>
     <string name="sats">Sats</string>
-    <!-- SAVE -->
     <string name="save">Opslaan</string>
     <string name="save_changes">Opslaan</string>
     <!-- SCAN -->
@@ -375,7 +365,6 @@
     <string name="security">Beveiliging</string>
     <string name="select_all">Selecteer alle</string>
     <string name="send">Verzend</string>
-    <!-- SERIAL -->
     <string name="serial">Serieel</string>
     <string name="serial_config">Seriële Configuratie</string>
     <string name="settings">instellingen</string>
@@ -442,7 +431,6 @@
     <string name="uptime">Tijd online</string>
     <!-- URL -->
     <string name="url">URL</string>
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Gebruiker</string>
     <string name="user_config">Gebruikersconfiguratie</string>

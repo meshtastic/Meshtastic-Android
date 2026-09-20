@@ -70,7 +70,6 @@
     <string name="air_quality_metrics_log">Ilmanlaatumittausten loki</string>
     <string name="air_util_definition">Viimeisen tunnin aikana käytetyn lähetyksen prosenttiosuus.</string>
     <string name="air_utilization">Lähetysajan käyttöaste</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Hälytysääni!</string>
     <string name="all_time">Kaikki</string>
     <string name="allow_input_source">Salli syötteen lähde</string>
@@ -124,7 +123,6 @@
     <string name="backup_keys_confirmation">Tallentaa julkiset ja yksityiset avaimet tämän laitteen suojattuun, salattuun tallennustilaan.</string>
     <string name="backup_restore">Varmuuskopioi &amp; palauta</string>
     <string name="bad">Huono</string>
-    <!-- BANDWIDTH -->
     <string name="bandwidth_default">Oletus (%1$s kHz)</string>
     <string name="bandwidth_option_khz">%1$s kHz</string>
     <string name="bandwidth_unsupported">Ei tuettu (%1$s)</string>
@@ -469,7 +467,6 @@
     <string name="discovery_unique_nodes">%1$d yksilöllistä radiota</string>
     <string name="discovery_view_map">Näytä kartta</string>
     <string name="disk_free_indexed">Vapaa levytila %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Näyttö</string>
     <string name="display_config">Laitteen Näyttö</string>
     <!-- DISTANCE -->
@@ -555,12 +552,10 @@
     <string name="emoji_no_results">Emoji-haku ei tuottanut tuloksia</string>
     <string name="emoji_recently_used">Viimeksi käytetyt</string>
     <string name="enabled">Käytössä</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Julkinen avain ei täsmää</string>
     <string name="encryption_error_text">Julkinen avain ei vastaa tallennettua avainta. Voit poistaa laitteen ja antaa sen vaihtaa avaimet uudelleen, mutta tämä saattaa viitata vakavampaan tietoturvaongelmaan. Ota yhteyttä käyttäjään toista luotettua kanavaa pitkin selvittääksesi, johtuuko avaimen vaihtuminen tehdasasetusten palautuksesta tai muusta tarkoituksellisesta toimenpiteestä.</string>
     <string name="encryption_pkc">Julkisen avaimen salaus</string>
     <string name="env_metrics_log">Ympäristöarvot</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Ympäristö</string>
     <string name="error">Virhe</string>
     <string name="error_duty_cycle">Duty Cyclen raja saavutettu. Viestien lähettäminen ei ole tällä hetkellä mahdollista. Yritä myöhemmin uudelleen.</string>
@@ -764,7 +759,6 @@
     <string name="get_started">Näin pääset alkuun</string>
     <string name="github_repository">GitHub-repositorio</string>
     <string name="good">Hyvä</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO pinni</string>
     <string name="grant_permission">Myönnä käyttöoikeus</string>
@@ -787,7 +781,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Sisäilman laatu (IAQ) on suhteellinen asteikko, jota voidaan mitata mm. Bosch BME680 anturilla ja sen arvoväli on 0–500.</string>
     <string name="icon_meanings">Kuvakkeiden merkitykset</string>
-    <!-- IGNORE -->
     <string name="ignore">Jätä huomiotta</string>
     <string name="ignore_add">Lisää '%1$s' jätä huomiotta listalle? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
     <string name="ignore_incoming">Ohita saapuvat</string>
@@ -1276,7 +1269,6 @@
     <string name="open_wifi_settings">Avaa Wi-Fi-asetukset</string>
     <string name="options">Valinnat</string>
     <string name="orient_north">Aseta kompassi pohjoiseen</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Ulostulon kesto (millisekuntia)</string>
     <string name="overflow_menu">Lisävalikko</string>
     <string name="override_console_serial_port">Korvaa konsolin sarjaportti</string>
@@ -1356,7 +1348,6 @@
     <string name="position_enabled">Sijainti käytössä</string>
     <string name="position_log">Sijainti</string>
     <string name="position_packet">Sijainti Paketti</string>
-    <!-- POWER -->
     <string name="power">Virta</string>
     <string name="power_config">Virran asetukset</string>
     <string name="power_metrics_log">Virranhallinnan arvot</string>
@@ -1515,7 +1506,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vastaanotetun signaalin voimakkuusindikaattori (RSSI) on mittari, jota käytetään määrittämään antennilla vastaanotetun signaalin voimakkuus. Korkeampi RSSI-arvo yleensä osoittaa vahvemman ja vakaamman yhteyden.</string>
     <string name="sats">Satelliitit</string>
-    <!-- SAVE -->
     <string name="save">Tallenna</string>
     <string name="save_and_restart">Tallenna &amp; käynnistä uudelleen</string>
     <string name="save_changes">Tallenna</string>
@@ -1565,7 +1555,6 @@
     <string name="selected_map_type">Valittu karttatyyppi</string>
     <string name="send">Lähetä</string>
     <string name="sender_message_interval_seconds">Viestien lähetyksen aikaväli (sekuntia)</string>
-    <!-- SERIAL -->
     <string name="serial">Sarjaliitäntä</string>
     <string name="serial_config">Sarjaportin asetukset</string>
     <string name="session_active">Istunto aktiivinen</string>
@@ -1830,7 +1819,6 @@
     <string name="url_template">URL-mallipohja</string>
     <string name="usb">USB</string>
     <string name="usb_permission_denied">USB-käyttöoikeus evättiin. Kytke laite uudelleen ja yritä uudestaan.</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">Kyrillisten merkkien tiivis koodaus</string>
     <!-- USER -->
     <string name="user">Käyttäjä</string>

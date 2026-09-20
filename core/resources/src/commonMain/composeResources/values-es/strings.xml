@@ -39,7 +39,6 @@
     <!-- AIR -->
     <string name="air_quality_icon">Icono de la calidad del aire</string>
     <string name="air_util_definition">Porcentaje de tiempo de transmisión utilizado en la última hora.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">¡Carácter Campana de Alerta!</string>
     <string name="all_time">Todos</string>
     <string name="allow_undefined_pin_access">Permitir el acceso sin un pin definido</string>
@@ -63,7 +62,6 @@
     <string name="audio_config">Configuración de sonido</string>
     <string name="available_pins">Pines disponibles</string>
     <string name="bad">Mal</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Batería</string>
     <string name="battery_ina_2xx_i2c_address">Dirección I2C del INA_2xx para la batería</string>
     <!-- BLUETOOTH -->
@@ -203,7 +201,6 @@
     <string name="discovery_stat_messages">Mensajes</string>
     <string name="discovery_stat_selected">Seleccionados</string>
     <string name="disk_free_indexed">Disco libre %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Pantalla</string>
     <!-- DISTANCE -->
     <string name="distance">Distancia</string>
@@ -225,11 +222,9 @@
     <string name="eight_hours">8 Horas</string>
     <!-- EMOJI -->
     <string name="enabled">Habilitado</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Clave pública no coincide</string>
     <string name="encryption_pkc">Cifrado de Clave Pública</string>
     <string name="env_metrics_log">Métricas de Entorno</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Ambiente</string>
     <string name="error">Error</string>
     <string name="error_duty_cycle">Límite de Ciclo de Trabajo alcanzado. No se pueden enviar mensajes en este momento, por favor inténtalo de nuevo más tarde.</string>
@@ -284,7 +279,6 @@
     <!-- GEOFENCE -->
     <string name="get_started">Empezar</string>
     <string name="good">Bien</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">Pin GPIO</string>
     <string name="hardware">Hardware</string>
@@ -302,7 +296,6 @@
     <string name="iaq_definition">(Calidad de Aire interior) escala relativa del valor IAQ como mediciones del sensor Bosch BME680.
 Rango de Valores 0 - 500.</string>
     <string name="icon_meanings">Significado de los iconos</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">¿Añadir '%1$s' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
     <string name="ignore_incoming">Ignorar entrante</string>
@@ -517,7 +510,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="open_settings">Abrir ajustes</string>
     <string name="options">Opciones</string>
     <string name="orient_north">Orientación norte</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Duración en las salidas (milisegundos)</string>
     <string name="override_console_serial_port">Sobreescribir el puerto serie de la consola</string>
     <!-- PACKET -->
@@ -543,7 +535,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="position_enabled">Posición activada</string>
     <string name="position_log">Posición</string>
     <string name="position_packet">Paquetes de posición</string>
-    <!-- POWER -->
     <string name="power">Consumo</string>
     <string name="power_config">Configuración de elecenergía </string>
     <string name="power_metrics_log">Métricas de Energía</string>
@@ -651,7 +642,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicador de Fuerza de Señal Recibida (RSSI en inglés), una medida utilizada para determinar el nivel de potencia que está siendo recibido por la antena. Un valor de RSSI más alto generalmente indica una conexión más fuerte y estable.</string>
     <string name="sats">Satélites</string>
-    <!-- SAVE -->
     <string name="save">Guardar</string>
     <string name="save_changes">Guardar</string>
     <string name="save_rangetest">Exportar paquetes de rangetest</string>
@@ -679,7 +669,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="selected_map_type">Tipo de mapa seleccionado</string>
     <string name="send">Enviar</string>
     <string name="sender_message_interval_seconds">Periodo entre los mensajes del transmisor (segundos)</string>
-    <!-- SERIAL -->
     <string name="serial">Conexión Serial</string>
     <string name="serial_config">Configuración serial</string>
     <string name="set_your_region">Introduzca su región</string>
@@ -784,7 +773,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="url_cannot_be_empty">URL no puede estar vacío.</string>
     <string name="url_must_contain_placeholders">La URL debe contener marcadores de posición.</string>
     <string name="url_template">Plantilla de URL</string>
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Usuario</string>
     <string name="user_config">Configuración del Usuario </string>

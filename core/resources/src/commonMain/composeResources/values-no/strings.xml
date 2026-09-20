@@ -27,7 +27,6 @@
     <string name="administration">Administrasjon</string>
     <!-- AIR -->
     <string name="air_util_definition">Prosent av lufttiden brukt i løpet av den siste timen.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Varsel, bjellekarakter!</string>
     <!-- APP -->
     <string name="app_too_old">Applikasjon for gammel</string>
@@ -36,7 +35,6 @@
     <string name="aqi_good">Godt</string>
     <string name="are_you_sure_change_default">Er du sikker på at du vil endre til standardkanalen?</string>
     <string name="bad">Dårlig</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Batteri</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Beregner…</string>
@@ -80,17 +78,14 @@
     <string name="disconnected">Frakoblet</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Direkte</string>
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distanse</string>
     <!-- DOC -->
     <string name="edit">Rediger</string>
     <string name="eight_hours">8 Timer</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Direktemeldinger bruker den nye offentlige nøkkelinfrastrukturen for kryptering. Krever firmware versjon 2.5 eller høyere.</string>
     <string name="encryption_pkc">Offentlig-nøkkel kryptering</string>
-    <!-- ENVIRONMENT -->
     <string name="error">Feil</string>
     <string name="error_duty_cycle">Grensen for sykluser er nådd. Kan ikke sende meldinger akkurat nå, prøv igjen senere.</string>
     <!-- EXPORT -->
@@ -105,11 +100,9 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Godt</string>
-    <!-- GPIO -->
     <string name="hops_away">Hopp Unna</string>
     <string name="iaq">Luftkvalitet</string>
     <string name="iaq_definition">(Innendørs luftkvalitet) relativ skala IAQ-verdi målt ved Bosch BME680. Verdi 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignorer</string>
     <string name="ignore_add">Legg til '%1$s' i ignorereringslisten?</string>
     <string name="ignore_remove">Fjern '%1$s fra ignoreringslisten?</string>
@@ -197,14 +190,12 @@
     <string name="one_day">24 Timer</string>
     <string name="one_week">1U</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Språk</string>
     <string name="preferences_system_default">System standard</string>
     <!-- PREVIEW -->
@@ -257,7 +248,6 @@
     <string name="routing_error_timeout">Tidsavbrudd</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">"Received Signal Strength Indicator", en måling som brukes til å bestemme strømnivået som mottas av antennen. Høyere RSSI verdi indikerer generelt en sterkere og mer stabil forbindelse.</string>
-    <!-- SAVE -->
     <string name="save">Lagre</string>
     <string name="save_changes">Lagre</string>
     <!-- SCAN -->
@@ -265,7 +255,6 @@
     <!-- SECURITY -->
     <string name="select_all">Velg alle</string>
     <string name="send">Send</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Del</string>
     <string name="share_to">Del med…</string>
@@ -305,7 +294,6 @@
     <string name="unknown_username">Ukjent Brukernavn</string>
     <string name="unrecognized">Ikke gjenkjent</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">via MQTT</string>
     <string name="waypoint_delete">Fjern veipunkt?</string>

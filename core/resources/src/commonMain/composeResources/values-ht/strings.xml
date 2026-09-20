@@ -27,7 +27,6 @@
     <string name="administration">Administrasyon</string>
     <!-- AIR -->
     <string name="air_util_definition">Pousantaj tan lè transmisyon te itilize nan dènye èdtan an.</string>
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Aplikasyon twò ansyen</string>
     <string name="apply">Aplike</string>
@@ -35,7 +34,6 @@
     <string name="aqi_good">Bon</string>
     <string name="are_you_sure_change_default">Eske ou sèten ou vle chanje pou kanal default la?</string>
     <string name="bad">Move</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Batri</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Ap kalkile…</string>
@@ -77,17 +75,14 @@
     <string name="disconnected">Dekonekte</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Direk</string>
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distans</string>
     <!-- DOC -->
     <string name="edit">Modifye</string>
     <string name="eight_hours">8 Èdtan</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Pa matche kle piblik</string>
     <string name="encryption_pkc">Chifreman Kle Piblik</string>
-    <!-- ENVIRONMENT -->
     <string name="error">Erè</string>
     <string name="error_duty_cycle">Limit sik devwa rive. Pa ka voye mesaj kounye a, tanpri eseye ankò pita.</string>
     <!-- EXPORT -->
@@ -102,10 +97,8 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Bon</string>
-    <!-- GPIO -->
     <string name="hops_away">Hops Lwen</string>
     <string name="iaq_definition">(Kalite Lèy Entèryè) echèl relatif valè IAQ jan li mezire pa Bosch BME680. Ranje valè 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignoré</string>
     <string name="ignore_add">Ajoute '%1$s' nan lis ignòre?</string>
     <string name="ignore_remove">Retire '%1$s' nan lis ignòre?</string>
@@ -190,14 +183,12 @@
     <!-- ONE -->
     <string name="one_day">24 Èdtan</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Lang</string>
     <string name="preferences_system_default">Sistèm default</string>
     <!-- PREVIEW -->
@@ -247,7 +238,6 @@
     <string name="routing_error_none">Rekonekte</string>
     <string name="routing_error_timeout">Tan pase</string>
     <string name="rssi_definition">Endikatè Fòs Siynal Resevwa, yon mezi ki itilize pou detèmine nivo pouvwa siynal ki resevwa pa antèn nan. Yon RSSI pi wo jeneralman endike yon koneksyon pi fò ak plis estab.</string>
-    <!-- SAVE -->
     <string name="save">Sove</string>
     <string name="save_changes">Sove</string>
     <!-- SCAN -->
@@ -255,7 +245,6 @@
     <!-- SECURITY -->
     <string name="select_all">Chwazi tout</string>
     <string name="send">Voye</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Pataje</string>
     <!-- SHOW -->
@@ -285,7 +274,6 @@
     <string name="unknown_username">Non itilizatè enkoni</string>
     <string name="unrecognized">Inkonu</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">atravè MQTT</string>
     <string name="waypoint_delete">Efase pwen?</string>

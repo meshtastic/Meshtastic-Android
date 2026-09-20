@@ -25,7 +25,6 @@
     <string name="add">Dodaj</string>
     <string name="add_network_device">Dodaj</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Potrebna je nadogradnja aplikacije</string>
     <string name="apply">Potvrdi</string>
@@ -33,7 +32,6 @@
     <string name="are_you_sure_change_default">Jeste li sigurni da želite promijeniti na zadani kanal?</string>
     <string name="audio">Zvuk</string>
     <string name="audio_config">Postavke Zvuka</string>
-    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="bluetooth_config">Postavke Bluetootha</string>
     <string name="calculating">Izračunavanje…</string>
@@ -76,15 +74,12 @@
     <string name="direct_message">Izravna poruka</string>
     <string name="disconnected">Odspojeno</string>
     <!-- DISCOVERY -->
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Udaljenost</string>
     <!-- DOC -->
     <string name="edit">Uredi</string>
     <string name="eight_hours">8 Sati</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
-    <!-- ENVIRONMENT -->
     <string name="error">Pogreška</string>
     <string name="error_duty_cycle">Dosegnuto je ograničenje radnog ciklusa. Trenutačno nije moguće poslati poruke, pokušajte ponovno kasnije.</string>
     <!-- EXPORT -->
@@ -97,8 +92,6 @@
     <string name="firmware_update_failed">Ažuriranje neuspjelo</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
-    <!-- GPIO -->
-    <!-- IGNORE -->
     <string name="ignore">Ignoriraj</string>
     <string name="ignore_add">Dodati '%1$s' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
     <string name="ignore_remove">Ukloniti '%1$s' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
@@ -179,14 +172,12 @@
     <!-- ONE -->
     <string name="one_day">24 Sati</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Jezik</string>
     <string name="preferences_system_default">Zadana vrijednost sustava</string>
     <!-- PREVIEW -->
@@ -214,7 +205,6 @@
     <!-- ROLE -->
     <!-- ROUTING -->
     <string name="routing_error_none">Potvrđeno</string>
-    <!-- SAVE -->
     <string name="save">Spremi</string>
     <string name="save_changes">Spremi</string>
     <!-- SCAN -->
@@ -222,7 +212,6 @@
     <!-- SECURITY -->
     <string name="select_all">Označi sve</string>
     <string name="send">Potvrdi</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Podijeli</string>
     <!-- SHOW -->
@@ -248,7 +237,6 @@
     <!-- UNKNOWN -->
     <string name="unknown_username">Nepoznati korisnik</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">putem MQTT</string>
     <string name="waypoint_delete">Obriši putnu točku?</string>
