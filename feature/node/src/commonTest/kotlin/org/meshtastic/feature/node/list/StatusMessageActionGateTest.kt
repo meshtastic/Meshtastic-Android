@@ -19,6 +19,7 @@ package org.meshtastic.feature.node.list
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.ExcludedModules
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -53,6 +54,20 @@ class StatusMessageActionGateTest {
         val old = node(num = 1, firmware = "2.7.19")
 
         assertFalse(canEditStatusMessage(old, old, ConnectionState.Connected))
+    }
+
+    @Test
+    fun `firmware that compiled the module out does not offer the action`() {
+        val metadata =
+            DeviceMetadata.Builder()
+                .also { wb ->
+                    wb.firmware_version = "2.8.0"
+                    wb.excluded_modules = ExcludedModules.STATUSMESSAGE_CONFIG.value
+                }
+                .build()
+        val slim = Node(num = 1, metadata = metadata)
+
+        assertFalse(canEditStatusMessage(slim, slim, ConnectionState.Connected))
     }
 
     @Test

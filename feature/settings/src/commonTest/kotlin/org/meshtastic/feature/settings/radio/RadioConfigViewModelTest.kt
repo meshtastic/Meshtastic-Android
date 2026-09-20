@@ -87,6 +87,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
+import org.meshtastic.proto.ExcludedModules
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.LoRaPresetGroup
 import org.meshtastic.proto.LoRaRegionPresetMap
@@ -157,6 +158,26 @@ class RadioConfigViewModelTest {
         viewModel.setResponseStateLoading(ConfigRoute.USER)
         advanceUntilIdle()
 
+        verifySuspend(exactly(0)) { radioConfigUseCase.getModuleConfig(any(), any(), any()) }
+    }
+
+    @Test
+    fun `USER route skips the status message config when the firmware compiled the module out`() = runTest {
+        val metadata =
+            DeviceMetadata.Builder()
+                .also { wb ->
+                    wb.firmware_version = "2.8.0"
+                    wb.excluded_modules = ExcludedModules.STATUSMESSAGE_CONFIG.value
+                }
+                .build()
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build(), metadata = metadata)
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel(destNum = 123)
+
+        viewModel.setResponseStateLoading(ConfigRoute.USER)
+        advanceUntilIdle()
+
+        verifySuspend { radioConfigUseCase.getOwner(123, any()) }
         verifySuspend(exactly(0)) { radioConfigUseCase.getModuleConfig(any(), any(), any()) }
     }
 
