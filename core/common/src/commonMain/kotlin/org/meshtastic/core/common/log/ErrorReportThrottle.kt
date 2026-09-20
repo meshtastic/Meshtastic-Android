@@ -49,9 +49,16 @@ class ErrorReportThrottle(
      */
     fun acquire(key: String): Int? = synchronized(lock) {
         val now = nowMs()
-        evictIfCrowded(now)
 
-        val bucket = buckets.getOrPut(key) { Bucket(windowStart = now, reported = 0, suppressed = 0) }
+        // Evict only when this call is about to add a key. Running it on every lookup let a capacity-triggered
+        // clear wipe the bucket of the very signature being looked up, resetting its window and losing its
+        // suppressed count — so a signature sitting at its limit would start reporting again.
+        val bucket =
+            buckets[key]
+                ?: run {
+                    evictIfCrowded(now)
+                    Bucket(windowStart = now, reported = 0, suppressed = 0).also { buckets[key] = it }
+                }
 
         if (now - bucket.windowStart >= windowMs) {
             bucket.windowStart = now

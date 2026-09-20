@@ -287,7 +287,10 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
         // Without these a crash report says nothing about which hardware or firmware produced it. Keys are sticky
         // for the process and are refreshed on every connect; there is no disconnect hook on PlatformAnalytics, so
         // a crash after an explicit disconnect still carries the last radio's values.
-        if (isFirebaseInitialized && Firebase.crashlytics.isCrashlyticsCollectionEnabled) {
+        // Deliberately not gated on isCrashlyticsCollectionEnabled: setting a key is legal while collection is off,
+        // and updateAnalyticsConsent does not replay device attributes, so gating would leave the keys unset until
+        // the next connect for anyone who grants consent after pairing a radio.
+        if (isFirebaseInitialized) {
             Firebase.crashlytics.setCustomKeys {
                 key(KEY_FIRMWARE_VERSION, semanticFirmware)
                 key(KEY_DEVICE_HARDWARE, model)
@@ -354,15 +357,17 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
 
             val suppressed = reportThrottle.acquire(ErrorReportThrottle.signature(tag, message)) ?: return
 
+            // Custom keys stay set for every later report, so this is written unconditionally — skipping it when
+            // the count is zero would leave an earlier report's positive count attached to this one.
+            Firebase.crashlytics.setCustomKeys { key(KEY_SUPPRESSED, suppressed) }
+
             if (throwable != null) {
-                if (suppressed > 0) Firebase.crashlytics.setCustomKeys { key(KEY_SUPPRESSED, suppressed) }
                 Firebase.crashlytics.recordException(throwable)
             } else {
                 Firebase.crashlytics.setCustomKeys {
                     key(KEY_PRIORITY, severity.ordinal)
                     key(KEY_TAG, tag)
                     key(KEY_MESSAGE, message)
-                    key(KEY_SUPPRESSED, suppressed)
                 }
                 Firebase.crashlytics.recordException(loggedException(message))
             }

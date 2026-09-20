@@ -71,6 +71,25 @@ class ErrorReportThrottleTest {
     }
 
     @Test
+    fun `eviction does not reset a signature that is already being throttled`() {
+        val throttle = throttle(limit = 3, maxKeys = 8)
+
+        repeat(3) { throttle.acquire("hot") }
+        repeat(5) { throttle.acquire("hot") }
+        assertNull(throttle.acquire("hot"), "hot is at its limit")
+
+        // Bring the map exactly to capacity with live, unexpired keys, so the next lookup is the one that would
+        // previously have triggered a wholesale clear.
+        repeat(7) { throttle.acquire("other-$it") }
+
+        assertNull(throttle.acquire("hot"), "a lookup at capacity must not hand `hot` a fresh window")
+
+        // 5 suppressed in the burst, plus one for each of the two assertNull probes above.
+        now += 1_000L
+        assertEquals(7, throttle.acquire("hot"), "and it must not lose the suppressed count either")
+    }
+
+    @Test
     fun `the key set stays bounded`() {
         val throttle = throttle(maxKeys = 8)
 
