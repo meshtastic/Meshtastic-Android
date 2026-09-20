@@ -381,6 +381,35 @@ the old settings. Removed nodes reappear if your node hears them again.</p>
   </tbody>
 </table>
 
+<h3 id="hardware-support-status">Hardware support status</h3>
+
+<p>When a node’s hardware is recognized, the detail view names the device and marks its support status, taken from the Meshtastic device registry rather than the app:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mark</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Rosette (green)</td>
+      <td><strong>Supported</strong> — hardware the Meshtastic project actively supports</td>
+    </tr>
+    <tr>
+      <td>Wrench (sky blue)</td>
+      <td><strong>Independent maker hardware</strong> — built and tested by an independent maker, shown as its own rung whether or not the project has promoted it yet</td>
+    </tr>
+    <tr>
+      <td>Unverified (red)</td>
+      <td><strong>Supported by Meshtastic Community</strong> — hardware the project does not actively support, including legacy boards</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The label always accompanies the mark, so the status is never conveyed by colour alone.</p>
+
 <h3 id="device-links-i-want-one">Device links (“I want one”)</h3>
 
 <p>When a node’s hardware is recognized, the detail view shows a collapsible <strong>“I want one”</strong> section linking to places to buy or learn more about that device: the vendor’s product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the <code class="language-plaintext highlighter-rouge">msh.to</code> redirect service. Devices with no matching links don’t show the section.</p>

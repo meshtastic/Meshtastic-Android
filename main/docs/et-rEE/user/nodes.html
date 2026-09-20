@@ -191,6 +191,18 @@ Tekstisisesed olekuindikaatorid näitavad peamisi mõõdikuid lühidalt:
  Viimati kuuldud | ![Viimati kuuldud](../../assets/screenshots/nodes_last_heard.png) |
  Kaugus          | ![Kaugus](../../assets/screenshots/nodes_distance_info.png)       |
 
+### Hardware support status
+
+When a node's hardware is recognized, the detail view names the device and marks its support status, taken from the Meshtastic device registry rather than the app:
+
+ Mark                                 | Tähendus                                                                                                                                        |
+ ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+ Rosette (green)   | **Supported** — hardware the Meshtastic project actively supports                                                                               |
+ Wrench (sky blue) | **Independent maker hardware** — built and tested by an independent maker, shown as its own rung whether or not the project has promoted it yet |
+ Unverified (red)  | **Supported by Meshtastic Community** — hardware the project does not actively support, including legacy boards                                 |
+
+The label always accompanies the mark, so the status is never conveyed by colour alone.
+
 ### Device links ("I want one")
 
 Kui sõlme riistvara tuvastatakse, kuvatakse detailvaates kokkupandav jaotis **„Soovin ühte”**, mis lingib kohtadele, kust seadet osta või selle kohta lisateavet saada: müüja tooteleht, tootevariandid ja piirkondlike marketplace loendid (nt AliExpress, Amazon ja toetatud jaemüüjad), mis on filtreeritud sinu riigi järgi. Iga link avaneb ümbersuunamisteenuse `msh.to` kaudu. Seadmed, millel pole vastavaid linke, seda jaotist ei kuva.

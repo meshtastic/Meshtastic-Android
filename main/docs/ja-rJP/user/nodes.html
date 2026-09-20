@@ -191,6 +191,18 @@ The Details card carries the node's short name, role, IDs, last heard time, hops
  最後の通信   | ![最後の通信](../../assets/screenshots/nodes_last_heard.png)   |
  距離      | ![距離](../../assets/screenshots/nodes_distance_info.png)   |
 
+### Hardware support status
+
+When a node's hardware is recognized, the detail view names the device and marks its support status, taken from the Meshtastic device registry rather than the app:
+
+ Mark                                 | 意味                                                                                                                                              |
+ ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+ Rosette (green)   | **Supported** — hardware the Meshtastic project actively supports                                                                               |
+ Wrench (sky blue) | **Independent maker hardware** — built and tested by an independent maker, shown as its own rung whether or not the project has promoted it yet |
+ Unverified (red)  | **Supported by Meshtastic Community** — hardware the project does not actively support, including legacy boards                                 |
+
+The label always accompanies the mark, so the status is never conveyed by colour alone.
+
 ### Device links ("I want one")
 
 ノードのハードウェアが認識されると、詳細ビューに折りたたみ式の\*\*「購入はこちら」\*\*セクションが表示され、そのデバイスを購入したり詳しく知ったりできる場所（ベンダーの製品ページ、製品バリエーション、AliExpress・Amazon・対応小売店などの地域のマーケットプレイスの掲載）が、あなたの国に合わせて絞り込まれて表示されます。各リンクは `msh.to` のリダイレクトサービスを通じて開きます。一致するリンクがないデバイスでは、このセクションは表示されません。
