@@ -47,6 +47,7 @@ import org.meshtastic.mqtt.MqttEndpoint
 import org.meshtastic.mqtt.MqttException
 import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.MqttMessage
+import org.meshtastic.mqtt.MqttProtocolVersion
 import org.meshtastic.mqtt.QoS
 import org.meshtastic.mqtt.ReasonCode
 import org.meshtastic.mqtt.packet.Subscription
@@ -710,6 +711,13 @@ class MQTTRepositoryImplTest {
 
     // region isUndeliverableDownlink — Tier 1 drop filter for MQTT client-proxy downlink packets.
 
+    private val usNum = 0x12345678
+    private val usId = "!12345678"
+
+    /** An envelope with both halves of the self-traffic decision set: who sent it, and who gatewayed it. */
+    private fun selfEnvelope(from: Int, gatewayId: String): ByteArray =
+        envelopeBytes(gatewayId = gatewayId, packet = MeshPacket.Builder().also { wb -> wb.from = from }.build())
+
     private fun envelopeBytes(
         channelId: String = "LongFast",
         gatewayId: String = "!aabbccdd",
@@ -824,6 +832,98 @@ class MQTTRepositoryImplTest {
         assertContentEquals(real, proxyMessage.data_?.toByteArray())
     }
 
+    @Test
+    fun `a 3 1 1 broker is subscribed without the MQTT 5 noLocal option`() = runTest {
+        val client = FakeMqttClientSession().apply { negotiatedProtocolVersion = MqttProtocolVersion.V3_1_1 }
+        val harness = createHarness(client = client)
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+
+        val subscriptions = harness.client.subscribeCalls.single()
+        assertTrue(subscriptions.isNotEmpty(), "a 3.1.1 broker must still be subscribed")
+        assertTrue(
+            subscriptions.none { it.noLocal },
+            "noLocal is an MQTT 5 option and makes the client reject the whole SUBSCRIBE on 3.1.1",
+        )
+
+        collector.cancel()
+    }
+
+    @Test
+    fun `a 5 0 broker keeps noLocal so the broker does not echo our own uplink`() = runTest {
+        val client = FakeMqttClientSession().apply { negotiatedProtocolVersion = MqttProtocolVersion.V5_0 }
+        val harness = createHarness(client = client)
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+
+        val subscriptions = harness.client.subscribeCalls.single()
+        assertTrue(subscriptions.isNotEmpty())
+        assertTrue(subscriptions.all { it.noLocal })
+
+        collector.cancel()
+    }
+
+    @Test
+    fun `our own uplink returning via our own gateway is forwarded as firmware reads it as a local ack`() {
+        val ours = selfEnvelope(from = usNum, gatewayId = usId)
+
+        assertEquals(MqttSelfTraffic.FORWARD, classifyMqttSelfTraffic(ours, myId = usId))
+    }
+
+    @Test
+    fun `our node id arriving via someone else's gateway is a forgery and is dropped`() {
+        val forged = selfEnvelope(from = usNum, gatewayId = "!aabbccdd")
+
+        assertEquals(MqttSelfTraffic.FORGED_SENDER, classifyMqttSelfTraffic(forged, myId = usId))
+    }
+
+    @Test
+    fun `our own uplink of someone else's packet coming back is dropped`() {
+        val bridged = selfEnvelope(from = 0xAABBCCDD.toInt(), gatewayId = usId)
+
+        assertEquals(MqttSelfTraffic.OWN_UPLINK_ECHO, classifyMqttSelfTraffic(bridged, myId = usId))
+    }
+
+    @Test
+    fun `an unrelated packet from an unrelated gateway is forwarded`() {
+        val theirs = selfEnvelope(from = 0xAABBCCDD.toInt(), gatewayId = "!99887766")
+
+        assertEquals(MqttSelfTraffic.FORWARD, classifyMqttSelfTraffic(theirs, myId = usId))
+    }
+
+    @Test
+    fun `self-traffic classification fails open before the local node id is known`() {
+        val ours = selfEnvelope(from = usNum, gatewayId = "!aabbccdd")
+
+        assertEquals(MqttSelfTraffic.FORWARD, classifyMqttSelfTraffic(ours, myId = null))
+    }
+
+    @Test
+    fun `self-traffic classification fails open on unparseable bytes`() {
+        assertEquals(MqttSelfTraffic.FORWARD, classifyMqttSelfTraffic(byteArrayOf(-1, -1, -1, -1), myId = usId))
+    }
+
+    @Test
+    fun `the json topic applies the same three-way rule`() {
+        val us = usNum.toLong() and 0xFFFFFFFFL
+        val them = 0xAABBCCDDL
+
+        assertEquals(MqttSelfTraffic.FORWARD, classifyMqttJsonSelfTraffic(us, usId, usId))
+        assertEquals(MqttSelfTraffic.FORGED_SENDER, classifyMqttJsonSelfTraffic(us, "!aabbccdd", usId))
+        assertEquals(MqttSelfTraffic.OWN_UPLINK_ECHO, classifyMqttJsonSelfTraffic(them, usId, usId))
+        assertEquals(MqttSelfTraffic.FORWARD, classifyMqttJsonSelfTraffic(them, "!99887766", usId))
+    }
+
+    @Test
+    fun `the json topic fails open when the sender or local id is unknown`() {
+        val us = usNum.toLong() and 0xFFFFFFFFL
+
+        assertEquals(MqttSelfTraffic.FORWARD, classifyMqttJsonSelfTraffic(us, null, usId))
+        assertEquals(MqttSelfTraffic.FORWARD, classifyMqttJsonSelfTraffic(us, usId, null))
+    }
+
     // endregion
 
     private fun TestScope.createHarness(
@@ -879,6 +979,7 @@ class MQTTRepositoryImplTest {
         private val mutableMessages = MutableSharedFlow<MqttMessage>(extraBufferCapacity = 8)
         override val messages: Flow<MqttMessage> = mutableMessages
         override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
+        override var negotiatedProtocolVersion: MqttProtocolVersion = MqttProtocolVersion.V5_0
         val connectCalls = mutableListOf<MqttEndpoint>()
         val subscribeCalls = mutableListOf<List<Subscription>>()
         val publishStarted = mutableListOf<MqttMessage>()

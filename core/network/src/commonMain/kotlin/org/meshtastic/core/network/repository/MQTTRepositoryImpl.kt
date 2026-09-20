@@ -48,6 +48,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.core.repository.NodeRepository
@@ -58,6 +59,7 @@ import org.meshtastic.mqtt.MqttEndpoint
 import org.meshtastic.mqtt.MqttException
 import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.MqttMessage
+import org.meshtastic.mqtt.MqttProtocolVersion
 import org.meshtastic.mqtt.QoS
 import org.meshtastic.mqtt.ReasonCode
 import org.meshtastic.mqtt.packet.Subscription
@@ -154,34 +156,6 @@ class MQTTRepositoryImpl(
         val session = ActiveMqttSession(newClient)
         closeSession(replaceActiveSession(session))
 
-        val subscriptions: List<Subscription> = buildList {
-            channelSet.subscribeList.forEach { globalId ->
-                add(
-                    Subscription(
-                        "$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+",
-                        maxQos = QoS.AT_LEAST_ONCE,
-                        noLocal = true,
-                    ),
-                )
-                if (mqttConfig?.json_enabled == true) {
-                    add(
-                        Subscription(
-                            "$rootTopic$JSON_TOPIC_LEVEL$globalId/+",
-                            maxQos = QoS.AT_LEAST_ONCE,
-                            noLocal = true,
-                        ),
-                    )
-                }
-            }
-            add(
-                Subscription(
-                    "$rootTopic$DEFAULT_TOPIC_LEVEL$PKI_CHANNEL_ID/+",
-                    maxQos = QoS.AT_LEAST_ONCE,
-                    noLocal = true,
-                ),
-            )
-        }
-
         // Collect from the SharedFlow before connecting to avoid missing retained messages
         // that arrive immediately after SUBSCRIBE.
         launch { newClient.messages.collect { msg -> processMessage(msg) } }
@@ -199,6 +173,14 @@ class MQTTRepositoryImpl(
                         }
                         newClient.connect(endpoint)
                         if (!isActiveSession(session)) return@launch
+                        // Built here, not before connect: the option set depends on the version the broker accepted.
+                        val subscriptions =
+                            buildSubscriptions(
+                                globalIds = channelSet.subscribeList,
+                                rootTopic = rootTopic,
+                                jsonEnabled = mqttConfig?.json_enabled == true,
+                                version = newClient.negotiatedProtocolVersion,
+                            )
                         if (subscriptions.isNotEmpty()) {
                             Logger.d { "MQTT subscribing to ${subscriptions.size} topics" }
                             newClient.subscribe(subscriptions)
@@ -293,6 +275,53 @@ class MQTTRepositoryImpl(
         }
     }
 
+    /**
+     * Builds the SUBSCRIBE list for the protocol version the broker actually accepted.
+     *
+     * `noLocal` stops the broker echoing our own uplink back to us, but it is an MQTT 5 subscription option. The client
+     * offers 5.0 and silently falls back to 3.1.1 when the broker refuses, and mqtt-client then rejects the whole
+     * SUBSCRIBE with `IllegalArgumentException`. Because the failure is deterministic, the connect loop retried it
+     * forever: 121,003 reported errors across 72 users in fourteen days, with MQTT never once working for them.
+     *
+     * On 3.1.1 the broker hands our own traffic back instead, which [classifyMqttSelfTraffic] sorts out. No
+     * subscription at all is strictly worse.
+     */
+    private fun buildSubscriptions(
+        globalIds: List<String>,
+        rootTopic: String,
+        jsonEnabled: Boolean,
+        version: MqttProtocolVersion,
+    ): List<Subscription> {
+        val noLocal = version == MqttProtocolVersion.V5_0
+        return buildList {
+            globalIds.forEach { globalId ->
+                add(
+                    Subscription(
+                        "$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+",
+                        maxQos = QoS.AT_LEAST_ONCE,
+                        noLocal = noLocal,
+                    ),
+                )
+                if (jsonEnabled) {
+                    add(
+                        Subscription(
+                            "$rootTopic$JSON_TOPIC_LEVEL$globalId/+",
+                            maxQos = QoS.AT_LEAST_ONCE,
+                            noLocal = noLocal,
+                        ),
+                    )
+                }
+            }
+            add(
+                Subscription(
+                    "$rootTopic$DEFAULT_TOPIC_LEVEL$PKI_CHANNEL_ID/+",
+                    maxQos = QoS.AT_LEAST_ONCE,
+                    noLocal = noLocal,
+                ),
+            )
+        }
+    }
+
     @OptIn(ExperimentalSerializationApi::class)
     private fun ProducerScope<MqttClientProxyMessage>.processMessage(msg: MqttMessage) {
         val topic = msg.topic
@@ -301,16 +330,21 @@ class MQTTRepositoryImpl(
         if (topic.contains("/json/")) {
             try {
                 val jsonStr = payload.decodeToString()
-                json.decodeFromString<MqttJsonPayload>(jsonStr)
-                trySend(
-                    MqttClientProxyMessage.Builder()
-                        .also { wb ->
-                            wb.topic = topic
-                            wb.text = jsonStr
-                            wb.retained = msg.retain
-                        }
-                        .build(),
-                )
+                val decoded = json.decodeFromString<MqttJsonPayload>(jsonStr)
+                val selfTraffic = classifyMqttJsonSelfTraffic(decoded.from, decoded.sender, nodeRepository.myId.value)
+                if (selfTraffic != MqttSelfTraffic.FORWARD) {
+                    Logger.d { "MQTT json dropped ($selfTraffic)" }
+                } else {
+                    trySend(
+                        MqttClientProxyMessage.Builder()
+                            .also { wb ->
+                                wb.topic = topic
+                                wb.text = jsonStr
+                                wb.retained = msg.retain
+                            }
+                            .build(),
+                    )
+                }
             } catch (e: JsonDecodingException) {
                 // Warn, not error: a non-conforming payload recurs for as long as a busy public broker
                 // stays subscribed, not an app defect worth a non-fatal per message.
@@ -321,29 +355,41 @@ class MQTTRepositoryImpl(
                 Logger.w(e) { "Failed to parse MQTT JSON: ${e.message}" }
             }
         } else {
-            // Drop provably-undeliverable downlink packets before spending BLE bandwidth on
-            // them. In client-proxy mode the public broker floods payload-less packet-header
-            // stubs the node can only decrypt-fail and discard; stopping them here saves BLE
-            // airtime, a decrypt attempt, and a node-side warning per packet.
-            if (isUndeliverableDownlink(payload, nodeRepository.myId.value)) {
-                Logger.d {
-                    if (buildConfigProvider.isDebug) {
-                        "MQTT downlink dropped (no payload): $topic"
-                    } else {
-                        "MQTT downlink dropped (no payload)"
+            val myId = nodeRepository.myId.value
+            val selfTraffic = classifyMqttSelfTraffic(payload, myId)
+            when {
+                // A broker that negotiated MQTT 3.1.1 cannot honour `noLocal`, so our own traffic comes straight
+                // back. Only two of the three self-traffic cases are worth dropping - our own uplink returning is
+                // what firmware reads as a local ack, so it is relayed. See [classifyMqttSelfTraffic].
+                selfTraffic == MqttSelfTraffic.FORGED_SENDER ->
+                    Logger.w { "MQTT packet claiming our node id via another gateway dropped" }
+
+                selfTraffic == MqttSelfTraffic.OWN_UPLINK_ECHO -> Logger.d { "MQTT own-uplink echo dropped" }
+
+                // Drop provably-undeliverable downlink packets before spending BLE bandwidth on
+                // them. In client-proxy mode the public broker floods payload-less packet-header
+                // stubs the node can only decrypt-fail and discard; stopping them here saves BLE
+                // airtime, a decrypt attempt, and a node-side warning per packet.
+                isUndeliverableDownlink(payload, myId) ->
+                    Logger.d {
+                        if (buildConfigProvider.isDebug) {
+                            "MQTT downlink dropped (no payload): $topic"
+                        } else {
+                            "MQTT downlink dropped (no payload)"
+                        }
                     }
-                }
-                return
+
+                else ->
+                    trySend(
+                        MqttClientProxyMessage.Builder()
+                            .also { wb ->
+                                wb.topic = topic
+                                wb.data_ = payload.toByteString()
+                                wb.retained = msg.retain
+                            }
+                            .build(),
+                    )
             }
-            trySend(
-                MqttClientProxyMessage.Builder()
-                    .also { wb ->
-                        wb.topic = topic
-                        wb.data_ = payload.toByteString()
-                        wb.retained = msg.retain
-                    }
-                    .build(),
-            )
         }
     }
 
@@ -433,6 +479,9 @@ internal interface MqttClientSession {
     val messages: Flow<MqttMessage>
     val connectionState: StateFlow<ConnectionState>
 
+    /** The version the broker accepted, valid only after [connect] returns. */
+    val negotiatedProtocolVersion: MqttProtocolVersion
+
     suspend fun connect(endpoint: MqttEndpoint)
 
     suspend fun subscribe(subscriptions: List<Subscription>)
@@ -445,6 +494,10 @@ internal interface MqttClientSession {
 private class DefaultMqttClientSession(private val delegate: MqttClient) : MqttClientSession {
     override val messages: Flow<MqttMessage> = delegate.messages
     override val connectionState: StateFlow<ConnectionState> = delegate.connectionState
+
+    // Read through on every access: the client resets it on connect and preserves it across auto-reconnects.
+    override val negotiatedProtocolVersion: MqttProtocolVersion
+        get() = delegate.negotiatedProtocolVersion
 
     override suspend fun connect(endpoint: MqttEndpoint) {
         delegate.connect(endpoint)
@@ -557,15 +610,71 @@ internal fun extractHost(address: String): String {
 
 private const val PKI_CHANNEL_ID = "PKI"
 
+/** What to do with a downlink envelope once its `from` and `gateway_id` are compared against this device. */
+internal enum class MqttSelfTraffic {
+    /** Not self-traffic, or our own uplink returning, which firmware reads as delivery. Relay it. */
+    FORWARD,
+
+    /** Our `from` via someone else's gateway: only a peer could have published it. Drop. */
+    FORGED_SENDER,
+
+    /** Our gateway id on someone else's packet: our own uplink of their traffic. We already have it. Drop. */
+    OWN_UPLINK_ECHO,
+}
+
+/**
+ * Classifies a downlink envelope by comparing both `from` and `gateway_id` against this device.
+ *
+ * `gateway_id` alone is not enough, and the three cases pull in different directions:
+ * - **ours via us** - our uplink returning. Firmware turns it into a local ack, so it must be relayed; the broker
+ *   echoes back only what it accepted, which is what makes it meaningful.
+ * - **ours via another gateway** - nothing legitimate produces this. `ReliableRouter` checks only `p->from` before
+ *   generating an implicit ack, so a peer that publishes a packet carrying our `from` manufactures a delivery receipt
+ *   for a message that was never delivered.
+ * - **theirs via us** - our own uplink of traffic we bridged, coming back. Relaying it would spend phone-API and BLE
+ *   bandwidth handing the node a packet it just gave us.
+ *
+ * This mirrors `MqttFraming.toCanonical` in meshtastic-node-kmp, which is the closest reading of the firmware rules we
+ * have. Fails open: unparseable bytes, a packet-less envelope, or an unknown local node id all forward as before.
+ */
+internal fun classifyMqttSelfTraffic(payload: ByteArray, myId: String?): MqttSelfTraffic {
+    val envelope = myId?.let { ServiceEnvelope.ADAPTER.decodeOrNull(payload) }
+    val from = envelope?.packet?.from
+
+    return if (myId == null || from == null) {
+        MqttSelfTraffic.FORWARD
+    } else {
+        selfTrafficOf(fromUs = NodeAddress.numToDefaultId(from) == myId, viaUs = envelope.gateway_id == myId)
+    }
+}
+
+/** The shared decision behind both classifiers, so the two topics cannot drift apart. */
+private fun selfTrafficOf(fromUs: Boolean, viaUs: Boolean): MqttSelfTraffic = when {
+    fromUs && !viaUs -> MqttSelfTraffic.FORGED_SENDER
+    !fromUs && viaUs -> MqttSelfTraffic.OWN_UPLINK_ECHO
+    else -> MqttSelfTraffic.FORWARD
+}
+
+/**
+ * The JSON-topic counterpart of [classifyMqttSelfTraffic]. `sender` is the gateway id and `from` the originating node.
+ */
+internal fun classifyMqttJsonSelfTraffic(from: Long, sender: String?, myId: String?): MqttSelfTraffic =
+    if (myId == null || sender == null) {
+        MqttSelfTraffic.FORWARD
+    } else {
+        selfTrafficOf(fromUs = NodeAddress.numToDefaultId(from.toInt()) == myId, viaUs = sender == myId)
+    }
+
 /**
  * Returns true when a downlink [ServiceEnvelope] is provably un-usable by the node and should be dropped before
  * forwarding over BLE (MQTT client-proxy mode).
  *
  * Fails open — returns false (forward) for anything it cannot positively prove undeliverable: unparseable bytes,
- * traffic on the `PKI` channel (public-key-encrypted direct messages the node accepts without first decrypting), our
- * own echoed-back packets (used as implicit ACKs), a packet-less envelope, or any packet that actually carries a
- * payload. The only drop case is Tier 1: a [MeshPacket] with neither `decoded` nor `encrypted` set — no legitimate
- * Meshtastic packet is payload-less.
+ * traffic on the `PKI` channel (public-key-encrypted direct messages the node accepts without first decrypting), a
+ * packet-less envelope, or any packet that actually carries a payload. Our own uplink returning still reaches this
+ * function and is guarded here, because firmware reads it as a local ack; [classifyMqttSelfTraffic] has already dropped
+ * the other two self-traffic cases. The only drop case is Tier 1: a [MeshPacket] with neither `decoded` nor `encrypted`
+ * set — no legitimate Meshtastic packet is payload-less.
  *
  * Extracted as an internal top-level function so [MQTTRepositoryImplTest] can exercise every branch without spinning up
  * the full repository.
