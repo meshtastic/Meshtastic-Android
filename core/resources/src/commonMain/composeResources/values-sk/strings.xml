@@ -28,7 +28,6 @@
     <string name="administration">Administrácia</string>
     <!-- AIR -->
     <string name="air_util_definition">Percento vysielacieho času na prenos použitého za poslednú hodinu.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Znak zvončeku upozornení!</string>
     <string name="all_time">Všetky</string>
     <string name="altitude">Nadmorská výška</string>
@@ -45,7 +44,6 @@
     <string name="audio">Zvuk</string>
     <string name="audio_config">Konfigurácia zvuku</string>
     <string name="bad">Zlý</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Batéria</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -129,7 +127,6 @@
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Priamo</string>
     <string name="discovery_stat_messages">Správy</string>
-    <!-- DISPLAY -->
     <string name="display">Obrazovka</string>
     <!-- DISTANCE -->
     <string name="distance">Vzdialenosť</string>
@@ -139,10 +136,8 @@
     <string name="edit">Upraviť</string>
     <string name="eight_hours">8 Hodín</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Nezhoda verejného kľúča</string>
     <string name="encryption_pkc">Šifrovanie verejného kľúča</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Prostredie</string>
     <string name="error">Chyba</string>
     <string name="error_duty_cycle">Dosiahnutý limit pracovného cyklu. Nedá sa teraz posielať správy, skúste neskôr.</string>
@@ -167,7 +162,6 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Dobrý</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO konektor</string>
     <string name="hardware">Hardvér</string>
@@ -177,7 +171,6 @@
     <string name="i_know_what_i_m_doing">Viem čo robím.</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Kvalita vzduchu v interiéri) relatívna hodnota IAQ meraná prístrojom Bosch BME680. Rozsah hodnôt 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignorovať</string>
     <string name="ignore_add">Pridať '%1$s' do zoznamu ignorovaných?</string>
     <string name="ignore_remove">Odstrániť '%1$s' zo zoznamu ignorovaných?</string>
@@ -310,7 +303,6 @@
     <string name="one_day">24 Hodín</string>
     <string name="one_week">1 týždeň</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <string name="password">Heslo</string>
     <!-- PAX -->
@@ -329,7 +321,6 @@
     <string name="position_enabled">Zapnutá poloha</string>
     <string name="position_log">Pozícia</string>
     <string name="position_packet">Paket Pozície</string>
-    <!-- POWER -->
     <string name="power">Napájanie</string>
     <string name="preferences_language">Jazyk</string>
     <string name="preferences_system_default">Predvolené nastavenie</string>
@@ -402,7 +393,6 @@
     <string name="routing_error_timeout">Časový limit</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikátor sily prijímaného signálu (RSSI), meranie používané na určenie úrovne výkonu prijatého skrz anténu. Vyššia hodnota RSSI vo všeobecnosti znamená silnejšie a stabilnejšie pripojenie.</string>
-    <!-- SAVE -->
     <string name="save">Uložiť</string>
     <string name="save_changes">Uložiť</string>
     <!-- SCAN -->
@@ -412,7 +402,6 @@
     <string name="security">Zabezpečenie</string>
     <string name="select_all">Vybrať všetko</string>
     <string name="send">Odoslať</string>
-    <!-- SERIAL -->
     <string name="serial">Sériový</string>
     <string name="settings">nastavenia</string>
     <!-- SHARE -->
@@ -473,7 +462,6 @@
     <string name="uptime">Doba prevádzky</string>
     <!-- URL -->
     <string name="url">URL</string>
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Užívateľ</string>
     <string name="user_id">ID používateľa</string>

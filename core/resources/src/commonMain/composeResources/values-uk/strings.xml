@@ -56,7 +56,6 @@
     <string name="air_quality_icon">Іконка якості повітря</string>
     <string name="air_util_definition">Відсоток ефірного часу, використаного для передачі за останню годину.</string>
     <string name="air_utilization">Завантаженість ефіру</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Символ звукового сповіщення!</string>
     <string name="all_time">Усі</string>
     <string name="allow_input_source">Дозволити джерело введення</string>
@@ -88,7 +87,6 @@
     <string name="back">Назад</string>
     <string name="backup_keys">Резервні ключі</string>
     <string name="bad">Поганий</string>
-    <!-- BANDWIDTH -->
     <string name="baro_pressure">Бар</string>
     <string name="battery">Батарея</string>
     <string name="battery_ina_2xx_i2c_address">I2C адреса INA_2XX батареї</string>
@@ -290,7 +288,6 @@
     <string name="discovery_unique_nodes">%1$d унікальних вузлів</string>
     <string name="discovery_view_map">Переглянути мапу</string>
     <string name="disk_free_indexed">Вільне місце %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Дисплей</string>
     <string name="display_config">Дисплей пристрою</string>
     <!-- DISTANCE -->
@@ -329,12 +326,10 @@
     <string name="eight_hours">8 Годин</string>
     <!-- EMOJI -->
     <string name="enabled">Увімкнено</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Не збігаються відкритий ключ</string>
     <string name="encryption_error_text">Публічний ключ не збігається із записаним ключем. Ви можете видалити вузол і дозволити йому обмінятися ключами знову, але це може свідчити про проблему з безпекою. Зв’яжіться з користувачем через інший довірений канал, щоб з’ясувати, чи була зміна ключа наслідком скидання до заводських налаштувань або іншої навмисної дії.</string>
     <string name="encryption_pkc">Шифрування з відкритим ключем</string>
     <string name="env_metrics_log">Показники довкілля</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Середовище</string>
     <string name="error">Помилка</string>
     <string name="error_duty_cycle">Досягнуто обмеження заповнення каналу. Неможливо надіслати повідомлення зараз, будь ласка, спробуйте ще раз пізніше.</string>
@@ -449,7 +444,6 @@
     <string name="geofence_left_title">Залишилось %1$s</string>
     <string name="get_started">З чого почати</string>
     <string name="good">Хороший</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO контакт</string>
     <string name="hardware">Апаратне забезпечення</string>
@@ -468,7 +462,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Якість повітря в приміщенні) відносна шкала IAQ за вимірюваннями Bosch BME680. Діапазон значень: 0–500.</string>
     <string name="icon_meanings">Значення іконок</string>
-    <!-- IGNORE -->
     <string name="ignore">Ігнорувати</string>
     <string name="ignore_add">Додати '%1$s' до чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
     <string name="ignore_incoming">Ігнорувати вхідні</string>
@@ -776,7 +769,6 @@
     <string name="open_source_libraries">Бібліотеки з відкритим вихідним кодом</string>
     <string name="options">Налаштування</string>
     <string name="orient_north">Орієнтація північ</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Тривалість виводу (мілісекунд)</string>
     <string name="overflow_menu">Додаткове меню</string>
     <string name="override_console_serial_port">Перевизначити послідовний порт</string>
@@ -824,7 +816,6 @@
     <string name="position_enabled">Місцезнаходження увімкнено</string>
     <string name="position_log">Місцезнаходження</string>
     <string name="position_packet">Пакет позиції</string>
-    <!-- POWER -->
     <string name="power">Живлення</string>
     <string name="power_config">Налаштування живлення</string>
     <string name="power_metrics_log">Показники живлення</string>
@@ -962,7 +953,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Показник рівня потужності сигналу — вимірювання, що використовується для визначення рівня потужності, що приймається антеною. Вище значення RSSI зазвичай вказує на міцніше та стабільніше з'єднання.</string>
     <string name="sats">Супутники</string>
-    <!-- SAVE -->
     <string name="save">Зберегти</string>
     <string name="save_changes">Зберегти</string>
     <string name="save_rangetest">Експортувати rangetest пакети</string>
@@ -999,7 +989,6 @@
     <string name="selected">Вибраний</string>
     <string name="send">Надіслати</string>
     <string name="sender_message_interval_seconds">Інтервал надсилання повідомлень (секунди)</string>
-    <!-- SERIAL -->
     <string name="serial">Серійний порт</string>
     <string name="serial_config">Налаштування послідовного порту</string>
     <string name="session_active">Сесія активна</string>
@@ -1162,7 +1151,6 @@
     <string name="url_must_contain_placeholders">URL має містити заповнювачі.</string>
     <string name="url_template">Шаблон URL</string>
     <string name="usb">USB</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">Компактне декодування кирилиці</string>
     <!-- USER -->
     <string name="user">Користувач</string>

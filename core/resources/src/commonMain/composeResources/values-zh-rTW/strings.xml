@@ -62,7 +62,6 @@
     <string name="air_quality_icon">空氣品質圖示</string>
     <string name="air_util_definition">過去一小時内傳輸所使用的通話時間（airtime）百分比。</string>
     <string name="air_utilization">空中時間使用率</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">警鈴字符！</string>
     <string name="all_time">全部</string>
     <string name="allow_input_source">允許外部輸入</string>
@@ -92,7 +91,6 @@
     <string name="backup_keys">備份金鑰</string>
     <string name="backup_restore">備份 &amp; 還原</string>
     <string name="bad">不良</string>
-    <!-- BANDWIDTH -->
     <string name="baro_pressure">氣壓</string>
     <string name="battery">電池</string>
     <string name="battery_ina_2xx_i2c_address">電池 INA_2XX I2C 地址</string>
@@ -302,7 +300,6 @@
     <string name="discovery_stat_messages">訊息</string>
     <string name="discovery_stat_selected">已選取</string>
     <string name="disk_free_indexed">硬碟可用空間：%1$d</string>
-    <!-- DISPLAY -->
     <string name="display">顯示</string>
     <string name="display_config">裝置列表</string>
     <!-- DISTANCE -->
@@ -364,12 +361,10 @@
     <string name="eight_hours">8 小時</string>
     <!-- EMOJI -->
     <string name="enabled">已啟用</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">公鑰不相符</string>
     <string name="encryption_error_text">公開金鑰與先前記錄不符。您可以移除此節點並重新進行金鑰交換,但這可能代表有更嚴重的安全性問題。建議透過其他可靠的通訊方式聯繫該使用者,確認金鑰改變是否為重設裝置或其他有意的操作。</string>
     <string name="encryption_pkc">加密公鑰</string>
     <string name="env_metrics_log">環境計量資料</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">環境</string>
     <string name="error">錯誤</string>
     <string name="error_duty_cycle">達到循環工作週期限制。目前無法發送訊息，請稍後再試。</string>
@@ -489,7 +484,6 @@
     <!-- GEOFENCE -->
     <string name="get_started">開始使用</string>
     <string name="good">良好</string>
-    <!-- GPIO -->
     <string name="gpio">腳位</string>
     <string name="gpio_pin">GPIO 引脚</string>
     <string name="hardware">硬體</string>
@@ -508,7 +502,6 @@
     <string name="iaq">室内空氣品質指標(IAQ)</string>
     <string name="iaq_definition">(室內空氣品質) 相對尺度 IAQ 值，由 Bosch BME680 測量。值範圍 0–500。</string>
     <string name="icon_meanings">圖示說明</string>
-    <!-- IGNORE -->
     <string name="ignore">忽略</string>
     <string name="ignore_add">將 '%1$s' 加入忽略清單嗎？</string>
     <string name="ignore_incoming">忽略來訊</string>
@@ -827,7 +820,6 @@
     <string name="open_source_libraries">開放原始碼函式庫</string>
     <string name="options">選項</string>
     <string name="orient_north">定位朝北</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">輸出持續時間（毫秒）</string>
     <string name="overflow_menu">溢出選單</string>
     <string name="override_console_serial_port">覆蓋控制台序列埠</string>
@@ -867,7 +859,6 @@
     <string name="position_enabled">位置已啟用</string>
     <string name="position_log">位置</string>
     <string name="position_packet">定位封包</string>
-    <!-- POWER -->
     <string name="power">電源</string>
     <string name="power_config">電源設定</string>
     <string name="power_metrics_log">電源計量資料</string>
@@ -1006,7 +997,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">接收信號強度指示（RSSI）用於測量天線所接收到信號的功率強度。 RSSI 值越高通常代表連線越強且穩定。</string>
     <string name="sats">衛星數</string>
-    <!-- SAVE -->
     <string name="save">儲存</string>
     <string name="save_changes">儲存</string>
     <string name="save_rangetest">匯出範圍測試封包</string>
@@ -1048,7 +1038,6 @@
     <string name="selected_map_type">已選擇的地圖類型</string>
     <string name="send">傳送</string>
     <string name="sender_message_interval_seconds">訊息發送間隔(秒)</string>
-    <!-- SERIAL -->
     <string name="serial">序列埠</string>
     <string name="serial_config">序列埠設定</string>
     <string name="session_active">連線階段進行中</string>
@@ -1234,7 +1223,6 @@
     <string name="url_must_contain_placeholders">網址必須包含佔位符。</string>
     <string name="url_template">URL 範本</string>
     <string name="usb">USB</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">使用同形異意字元編碼處理西里爾字母</string>
     <!-- USER -->
     <string name="user">使用者</string>

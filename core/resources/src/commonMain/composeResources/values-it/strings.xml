@@ -67,7 +67,6 @@
     <string name="air_quality_metrics_log">Registro Metriche Qualità Aria</string>
     <string name="air_util_definition">Percentuale di tempo di trasmissione utilizzato nell’ultima ora.</string>
     <string name="air_utilization">AirUtil</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Carattere Campana Di Allarme!</string>
     <string name="all_time">Tutti</string>
     <string name="allow_input_source">Consenti sorgente di input</string>
@@ -120,7 +119,6 @@
     <string name="backup_keys_confirmation">Salva le chiavi pubbliche e private in una memoria sicura e crittografata su questo dispositivo.</string>
     <string name="backup_restore">Backup &amp; Ripristino</string>
     <string name="bad">Scarso</string>
-    <!-- BANDWIDTH -->
     <string name="baro_pressure">Pressione atmosferica</string>
     <string name="battery">Batteria</string>
     <string name="battery_ina_2xx_i2c_address">Indirizzo INA_2XX I2C della batteria</string>
@@ -435,7 +433,6 @@
     <string name="discovery_unique_nodes">%1$d nodi unici</string>
     <string name="discovery_view_map">Visualizza mappa</string>
     <string name="disk_free_indexed">Disco libero %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Schermo</string>
     <string name="display_config">Schermo Dispositivo</string>
     <!-- DISTANCE -->
@@ -506,12 +503,10 @@
     <string name="eight_hours">8 Ore</string>
     <!-- EMOJI -->
     <string name="enabled">Abilitato</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Chiave pubblica errata</string>
     <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi nuovamente, ma questo può indicare un problema di sicurezza più serio. Contattare l'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
     <string name="encryption_pkc">Crittografia a Chiave Pubblica</string>
     <string name="env_metrics_log">Metriche Ambientali</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Ambiente</string>
     <string name="error">Errore</string>
     <string name="error_duty_cycle">Limite di Duty Cycle raggiunto. Impossibile inviare messaggi in questo momento, riprovare più tardi.</string>
@@ -688,7 +683,6 @@
     <string name="geofence_set_area">Imposta l'area sulla mappa</string>
     <string name="get_started">Inizia ora</string>
     <string name="good">Buono</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">Pin GPIO</string>
     <string name="grant_permission">Concedi il permesso</string>
@@ -710,7 +704,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Qualità dell'aria interna) scala relativa del valore della qualità dell'aria indoor, misurato da Bosch BME680. Valore Intervallo 0–500.</string>
     <string name="icon_meanings">Significato delle icone</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignora</string>
     <string name="ignore_add">Aggiungere '%1$s' alla lista degli ignorati?</string>
     <string name="ignore_incoming">Ignora in arrivo</string>
@@ -1118,7 +1111,6 @@
     <string name="open_wifi_settings">Apri le impostazioni Wi-Fi</string>
     <string name="options">Opzioni</string>
     <string name="orient_north">Orientamento nord</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Durata output (millisecondi)</string>
     <string name="overflow_menu">Menu di overflow</string>
     <string name="override_console_serial_port">Sovrascrivi porta seriale della console</string>
@@ -1176,7 +1168,6 @@
     <string name="position_enabled">Posizione attiva</string>
     <string name="position_log">Posizione</string>
     <string name="position_packet">Pacchetto Posizione</string>
-    <!-- POWER -->
     <string name="power">Alimentazione</string>
     <string name="power_config">Configurazione Alimentazione</string>
     <string name="power_metrics_log">Metriche Alimentazione</string>
@@ -1324,7 +1315,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicatore di forza del segnale ricevuto (Received Signal Strength Indicator), una misura utilizzata per determinare il livello di potenza ricevuto dall'antenna. Un valore RSSI più elevato indica generalmente una connessione più forte e più stabile.</string>
     <string name="sats">Sat</string>
-    <!-- SAVE -->
     <string name="save">Salva</string>
     <string name="save_and_restart">Salva &amp; riavvia</string>
     <string name="save_changes">Salva</string>
@@ -1374,7 +1364,6 @@
     <string name="selected_map_type">Tipo di mappa selezionata</string>
     <string name="send">Invia</string>
     <string name="sender_message_interval_seconds">Intervallo messaggio mittente (secondi)</string>
-    <!-- SERIAL -->
     <string name="serial">Seriale</string>
     <string name="serial_config">Configurazione Seriale</string>
     <string name="session_active">Sessione attiva</string>
@@ -1603,7 +1592,6 @@
     <string name="url_template">Template dell'URL</string>
     <string name="usb">USB</string>
     <string name="usb_permission_denied">Permesso USB negato. Riconnetti il dispositivo per riprovare.</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">Codifica compatta per cirillico</string>
     <!-- USER -->
     <string name="user">Utente</string>

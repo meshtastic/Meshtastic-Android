@@ -61,7 +61,6 @@
     <string name="air_quality">Luftkvalitet</string>
     <string name="air_quality_icon">Ikonen för luftkvalitet</string>
     <string name="air_util_definition">Procent av luftrumstid använd för sändningar inom den senaste timmen.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Varningsklocka!</string>
     <string name="all_time">Alla</string>
     <string name="allow_input_source">Tillåt indatakälla</string>
@@ -95,7 +94,6 @@
     <string name="backup_keys">Säkerhetskopiera nycklar</string>
     <string name="backup_restore">Säkerhetskopiera &amp; återställ</string>
     <string name="bad">Dålig</string>
-    <!-- BANDWIDTH -->
     <string name="baro_pressure">Tryck</string>
     <string name="battery">Batteri</string>
     <string name="battery_ina_2xx_i2c_address">Batteriets INA_2XX I2C-adress</string>
@@ -322,7 +320,6 @@
     <string name="discovery_unique_nodes">%1$d unika noder</string>
     <string name="discovery_view_map">Visa karta</string>
     <string name="disk_free_indexed">Ledigt lagringutrymme %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Display</string>
     <string name="display_config">Enhetsskärm</string>
     <!-- DISTANCE -->
@@ -365,11 +362,9 @@
     <string name="eight_hours">8 timmar</string>
     <!-- EMOJI -->
     <string name="enabled">Aktiverad</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Publik nyckel matchar inte</string>
     <string name="encryption_pkc">Kryptering med Publik nyckel</string>
     <string name="env_metrics_log">Miljövärden</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Miljö</string>
     <string name="error">Fel</string>
     <string name="error_duty_cycle">Gränsen för sändningscykeln har uppnåtts. Kan inte skicka meddelanden just nu, försök igen senare.</string>
@@ -486,7 +481,6 @@
     <string name="geofence_set_area">Sätt område på karta</string>
     <string name="get_started">Kom igång</string>
     <string name="good">Bra</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO pin</string>
     <string name="hardware">Hårdvara</string>
@@ -506,7 +500,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Indoor Air Quality) relativ skala IAQ värdet mätt med Bosch BME600. Värdeintervall 0-500.</string>
     <string name="icon_meanings">Ikonbetydelser</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignorera</string>
     <string name="ignore_add">Lägg till '%1$s' på ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
     <string name="ignore_incoming">Ignorera inkommande</string>
@@ -803,7 +796,6 @@
     <string name="open_wifi_settings">Öppna Wi-Fi inställningar</string>
     <string name="options">Alternativ</string>
     <string name="orient_north">Orientera mot norr</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Utmatningstid (millisekunder)</string>
     <string name="overflow_menu">Överflödsmeny</string>
     <!-- PACKET -->
@@ -853,7 +845,6 @@
     <string name="position_enabled">Position aktiverad</string>
     <string name="position_log">Plats</string>
     <string name="position_packet">Positionspaket</string>
-    <!-- POWER -->
     <string name="power">Ström</string>
     <string name="power_config">Ströminställningar</string>
     <string name="power_metrics_log">Strömdata</string>
@@ -990,7 +981,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, ett mått som används för att avgöra effektnivån som togs emot av antennen. Ett högre RSSI-värde indikerar generellt en starkare och stabilare anslutning.</string>
     <string name="sats">Sat.</string>
-    <!-- SAVE -->
     <string name="save">Spara</string>
     <string name="save_and_restart">Spara &amp; starta om</string>
     <string name="save_changes">Spara</string>
@@ -1038,7 +1028,6 @@
     <string name="selected_map_type">Vald karttyp</string>
     <string name="send">Skicka</string>
     <string name="sender_message_interval_seconds">Avsändarens meddelandeintervall (sekunder)</string>
-    <!-- SERIAL -->
     <string name="serial">Seriell kommunikation</string>
     <string name="serial_config">Seriell konfiguration</string>
     <string name="session_active">Session aktiv</string>
@@ -1228,7 +1217,6 @@
     <string name="url_must_contain_placeholders">URL måste innehålla platshållare.</string>
     <string name="url_template">URL-mall</string>
     <string name="usb">USB</string>
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Användare</string>
     <string name="user_config">Användarinställningar</string>

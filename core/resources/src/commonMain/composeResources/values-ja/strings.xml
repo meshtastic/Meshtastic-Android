@@ -67,7 +67,6 @@
     <string name="air_quality_metrics_log">空気品質メトリクスのログ</string>
     <string name="air_util_definition">過去1時間以内に送信に使用された通信時間の割合。</string>
     <string name="air_utilization">AirUtil</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">アラートベル！</string>
     <string name="all_time">すべて</string>
     <string name="allow_input_source">入力ソースを許可</string>
@@ -120,7 +119,6 @@
     <string name="backup_keys_confirmation">公開鍵と秘密鍵を、このデバイスの安全な暗号化ストレージに保存します。</string>
     <string name="backup_restore">バックアップと復元</string>
     <string name="bad">不良</string>
-    <!-- BANDWIDTH -->
     <string name="baro_pressure">気圧</string>
     <string name="battery">バッテリー</string>
     <string name="battery_ina_2xx_i2c_address">バッテリー INA_2XX I2C アドレス</string>
@@ -429,7 +427,6 @@
     <string name="discovery_unique_nodes">%1$d 個のユニークノード</string>
     <string name="discovery_view_map">マップを表示</string>
     <string name="disk_free_indexed">空きディスク %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">表示</string>
     <string name="display_config">デバイスの表示</string>
     <!-- DISTANCE -->
@@ -500,12 +497,10 @@
     <string name="eight_hours">8時間</string>
     <!-- EMOJI -->
     <string name="enabled">有効</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">公開鍵が一致しません</string>
     <string name="encryption_error_text">公開鍵が記録されている鍵と一致しません。ノードを削除して鍵を再交換させることもできますが、これはより深刻なセキュリティ上の問題を示している可能性があります。鍵の変更が工場出荷時リセットやその他の意図的な操作によるものかどうかを確認するため、別の信頼できる手段でユーザーに連絡してください。</string>
     <string name="encryption_pkc">公開鍵暗号化</string>
     <string name="env_metrics_log">環境メトリクス</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">環境</string>
     <string name="error">エラー</string>
     <string name="error_duty_cycle">デューティサイクル制限に達しました。現在メッセージを送信できません。しばらくしてからもう一度お試しください。</string>
@@ -682,7 +677,6 @@
     <string name="geofence_set_area">マップ上でエリアを設定</string>
     <string name="get_started">開始する</string>
     <string name="good">良</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO端子</string>
     <string name="grant_permission">権限を許可</string>
@@ -704,7 +698,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(屋内空気品質) 相対スケールIAQ値は、ボッシュBME680によって測定されます。 値の範囲は 0-500。</string>
     <string name="icon_meanings">アイコンの意味</string>
-    <!-- IGNORE -->
     <string name="ignore">無視</string>
     <string name="ignore_add">'%1$s'を無視リストに追加しますか？</string>
     <string name="ignore_incoming">無視リスト (ノード番号を登録)</string>
@@ -1114,7 +1107,6 @@
     <string name="open_wifi_settings">Wi-Fi 設定を開く</string>
     <string name="options">オプション</string>
     <string name="orient_north">北を上に向ける</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">出力時間 (ミリ秒)</string>
     <string name="overflow_menu">オーバーフローメニュー</string>
     <string name="override_console_serial_port">コンソールのシリアルポートを上書き</string>
@@ -1169,7 +1161,6 @@
     <string name="position_enabled">位置情報共有の有効化</string>
     <string name="position_log">位置</string>
     <string name="position_packet">位置情報パケット</string>
-    <!-- POWER -->
     <string name="power">電源</string>
     <string name="power_config">電源設定</string>
     <string name="power_metrics_log">電源メトリクス</string>
@@ -1316,7 +1307,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">受信信号強度インジケーター（RSSI）は、アンテナで受信している電力レベルを測定するための指標です。一般的にRSSI値が高いほど、より強力で安定した接続を示します。</string>
     <string name="sats">GPS衛星</string>
-    <!-- SAVE -->
     <string name="save">保存</string>
     <string name="save_and_restart">保存して再起動</string>
     <string name="save_changes">保存</string>
@@ -1366,7 +1356,6 @@
     <string name="selected_map_type">選択中のマップタイプ</string>
     <string name="send">送信</string>
     <string name="sender_message_interval_seconds">送信者のメッセージ間隔 (秒)</string>
-    <!-- SERIAL -->
     <string name="serial">シリアル</string>
     <string name="serial_config">シリアル設定</string>
     <string name="session_active">セッション有効</string>
@@ -1594,7 +1583,6 @@
     <string name="url_template">URL テンプレート</string>
     <string name="usb">USB</string>
     <string name="usb_permission_denied">USB の権限が拒否されました。デバイスを再接続してもう一度お試しください。</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">キリル文字向けのコンパクトエンコーディング</string>
     <!-- USER -->
     <string name="user">ユーザー</string>

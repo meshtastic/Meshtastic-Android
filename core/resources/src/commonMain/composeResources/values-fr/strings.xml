@@ -68,7 +68,6 @@
     <string name="air_quality_metrics_log">Métriques de qualité de l'air</string>
     <string name="air_util_definition">Pourcentage de temps d'antenne pour la transmission utilisée au cours de la dernière heure.</string>
     <string name="air_utilization">UtilAir</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Caractère d'appel !</string>
     <string name="all_time">Tout</string>
     <string name="allow_input_source">Autoriser la source d'entrée</string>
@@ -116,7 +115,6 @@
     <string name="backup_keys_confirmation">Sauvegardez les clés publiques et privées pour sécuriser le stockage chiffré sur cet appareil.</string>
     <string name="backup_restore">Sauvegarder &amp; Restaurer</string>
     <string name="bad">Mauvais</string>
-    <!-- BANDWIDTH -->
     <string name="bandwidth_unsupported">Non supporté (%1$s)</string>
     <string name="bandwidth_unsupported_summary">Cette bande passante n'est pas prise en charge par la radio connectée dans la région sélectionnée. Choisissez une valeur supportée avant d'enregistrer.</string>
     <string name="baro_pressure">Baro</string>
@@ -439,7 +437,6 @@
     <string name="discovery_time_remaining">%1$s restants</string>
     <string name="discovery_view_map">Voir la carte</string>
     <string name="disk_free_indexed">Disque libre %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Écran</string>
     <string name="display_config">Affichage de l'appareil</string>
     <!-- DISTANCE -->
@@ -483,12 +480,10 @@
     <string name="emoji_no_results">Aucun émoji trouvé</string>
     <string name="emoji_recently_used">Récemment utilisé</string>
     <string name="enabled">Activé</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Non-concordance de clé publique</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d'usine ou à une autre action intentionnelle.</string>
     <string name="encryption_pkc">Chiffrement de clé publique</string>
     <string name="env_metrics_log">Métriques d'environnement</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Environnement</string>
     <string name="error">Erreur</string>
     <string name="error_duty_cycle">Limite du temps d'émission autorisé par heure (duty cycle) atteinte. Vous ne pouvez pas envoyer de messages maintenant, veuillez réessayer plus tard.</string>
@@ -652,7 +647,6 @@
     <string name="get_started">Commencer</string>
     <string name="github_repository">Dépôt GitHub</string>
     <string name="good">Bon</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">Broche GPIO</string>
     <string name="hardware">Matériel</string>
@@ -670,7 +664,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Qualité de l'air intérieur) valeur de l'échelle relative IAQ mesurée par Bosch BME680. Plage de valeur 0–500.</string>
     <string name="icon_meanings">Signification des icônes</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignorer</string>
     <string name="ignore_add">Ajouter '%1$s' à la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
     <string name="ignore_incoming">Ignorer les entrées</string>
@@ -1000,7 +993,6 @@
     <string name="open_source_libraries">Bibliothèques Open Source</string>
     <string name="options">Options</string>
     <string name="orient_north">Orienter vers le nord</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Durée de sortie (en millisecondes)</string>
     <string name="overflow_menu">Menu supplémentaire</string>
     <string name="override_console_serial_port">Outrepasser le port série de la console</string>
@@ -1043,7 +1035,6 @@
     <string name="position_enabled">Position activée</string>
     <string name="position_log">Position</string>
     <string name="position_packet">Paquet de position</string>
-    <!-- POWER -->
     <string name="power">Alimentation</string>
     <string name="power_config">Configuration de l'alimentation</string>
     <string name="power_metrics_log">Métriques d'alimentation</string>
@@ -1183,7 +1174,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicateur de force du signal reçu, une mesure utilisée pour déterminer le niveau de puissance reçu par l'antenne. Une valeur RSSI plus élevée indique généralement une connexion plus forte et plus stable.</string>
     <string name="sats">Sats</string>
-    <!-- SAVE -->
     <string name="save">Enregistrer</string>
     <string name="save_changes">Sauvegarder</string>
     <string name="save_rangetest">Exporter les paquets tests de portée</string>
@@ -1225,7 +1215,6 @@
     <string name="selected_map_type">Type de carte sélectionné</string>
     <string name="send">Envoyer</string>
     <string name="sender_message_interval_seconds">Intervalle de message de l'expéditeur (secondes)</string>
-    <!-- SERIAL -->
     <string name="serial">Série</string>
     <string name="serial_config">Configuration série</string>
     <string name="session_active">Session active</string>
@@ -1400,7 +1389,6 @@
     <string name="url_must_contain_placeholders">L'URL doit contenir des espaces réservés.</string>
     <string name="url_template">Modèle d'URL</string>
     <string name="usb">USB</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">Encodage compact pour Cyrillique</string>
     <!-- USER -->
     <string name="user">Utilisateur</string>

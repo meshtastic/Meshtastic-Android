@@ -45,7 +45,6 @@
     <string name="air_quality_icon">Pictograma calităţii aerului</string>
     <string name="air_util_definition">Procentul de timp de emisie utilizat în ultima oră.</string>
     <string name="air_utilization">AirUtil</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Caracter clopoțel de alertă!</string>
     <string name="all_time">Toate</string>
     <string name="allow_input_source">Permite sursa de intrare</string>
@@ -73,7 +72,6 @@
     <string name="available_pins">Pin-uri disponibile</string>
     <string name="back">Înapoi</string>
     <string name="bad">Slab</string>
-    <!-- BANDWIDTH -->
     <string name="baro_pressure">Baro</string>
     <string name="battery">Baterie</string>
     <string name="battery_ina_2xx_i2c_address">Adresa baterie INA_2XX I2C</string>
@@ -251,7 +249,6 @@
     <string name="discovery_stat_messages">Mesaje</string>
     <string name="discovery_stat_selected">Selectat</string>
     <string name="disk_free_indexed">Disc liber %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Ecran</string>
     <string name="display_config">Ecran dispozitiv</string>
     <!-- DISTANCE -->
@@ -276,12 +273,10 @@
     <string name="eight_hours">8 Ore</string>
     <!-- EMOJI -->
     <string name="enabled">Activat</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Nepotrivire cheie publică</string>
     <string name="encryption_error_text">Cheia publică nu corespunde cu cheia înregistrată. Puteți elimina nodul și permiteți schimbul de chei din nou, dar acest lucru poate indica o problemă de securitate mai gravă. Contactați utilizatorul printr-un alt canal de încredere, pentru a determina dacă schimbarea cheii s-a datorat unei resetări la setările din fabrică sau unei alte acțiuni intenționate.</string>
     <string name="encryption_pkc">Criptare cu cheie publică</string>
     <string name="env_metrics_log">Indicatori de mediu</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Mediu</string>
     <string name="error">Eroare</string>
     <string name="error_duty_cycle">Limita Duty Cycle a fost atinsă. Nu se pot trimite mesaje acum, vă rugăm să încercați din nou mai târziu.</string>
@@ -393,7 +388,6 @@
     <!-- GEOFENCE -->
     <string name="get_started">Să începem</string>
     <string name="good">Bun</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">Pin GPIO</string>
     <string name="hardware">Dispozitive</string>
@@ -411,7 +405,6 @@
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Calitatea aerului interior) valoarea IAQ pe o scară relativă, măsurată cu Bosch BME680. Intervalul valorilor: 0–500.</string>
     <string name="icon_meanings">Semne pictograme</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignoră</string>
     <string name="ignore_add">Adaugă '%1$s' in lista de ignor? Radioul tău va reporni după ce această modificare.</string>
     <string name="ignore_incoming">Ignoră primirea</string>
@@ -681,7 +674,6 @@
     <string name="open_source_libraries">Biblioteci open source</string>
     <string name="options">Opțiuni</string>
     <string name="orient_north">Orientare spre nord</string>
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Durată ieșire (milisecunde)</string>
     <string name="overflow_menu">Meniu de Overflow</string>
     <string name="override_console_serial_port">Suprascrie portul serial al consolei</string>
@@ -716,7 +708,6 @@
     <string name="position_enabled">Poziție activată</string>
     <string name="position_log">Poziție</string>
     <string name="position_packet">Pachet de poziție</string>
-    <!-- POWER -->
     <string name="power">Alimentare</string>
     <string name="power_config">Configurare Putere</string>
     <string name="power_metrics_log">Valori putere</string>
@@ -843,7 +834,6 @@
     <string name="rssi"> RSSI</string>
     <string name="rssi_definition">Indicatorul intensității semnalului recepționat (Received Signal Strength Indicator), o măsurătoare utilizată pentru a determina nivelul de putere recepționat de antenă. O valoare RSSI mai mare indică, în general, o conexiune mai puternică și mai stabilă.</string>
     <string name="sats">Sateliți</string>
-    <!-- SAVE -->
     <string name="save">Salvează</string>
     <string name="save_changes">Salvează</string>
     <string name="save_rangetest">Exportă pachetele rangetest</string>
@@ -883,7 +873,6 @@
     <string name="selected_map_type">Tipul hărții selectate</string>
     <string name="send">Trimite</string>
     <string name="sender_message_interval_seconds">Interval mesaj expeditor (secunde)</string>
-    <!-- SERIAL -->
     <string name="serial">Serial</string>
     <string name="serial_config">Configurație serial</string>
     <string name="set_your_region">Setează-ți regiunea</string>
@@ -1045,7 +1034,6 @@
     <string name="url_must_contain_placeholders">URL-ul trebuie să conţină substituenţi.</string>
     <string name="url_template">Şablon URL</string>
     <string name="usb">USB</string>
-    <!-- USE -->
     <string name="use_homoglyph_characters_encoding">Codare compactă pentru chirilică</string>
     <!-- USER -->
     <string name="user">Utilizator</string>

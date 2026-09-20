@@ -27,7 +27,6 @@
     <string name="administration">Administravimas</string>
     <!-- AIR -->
     <string name="air_util_definition">Procentas eterio laiko naudoto perdavimams per pastarąją valandą.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Skambučio simbolis!</string>
     <!-- APP -->
     <string name="app_too_old">Reikalingas programos atnaujinimas</string>
@@ -36,7 +35,6 @@
     <string name="aqi_good">Geras</string>
     <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>
     <string name="bad">Silpnas</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Baterija</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Skaičiuojama…</string>
@@ -81,17 +79,14 @@
     <string name="disconnected">Atsijungta</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Tiesiogiai</string>
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Atstumas</string>
     <!-- DOC -->
     <string name="edit">Redaguoti</string>
     <string name="eight_hours">8 Valandos</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Viešojo rakto neatitikimas</string>
     <string name="encryption_pkc">Viešojo rakto šifruotė</string>
-    <!-- ENVIRONMENT -->
     <string name="error">Klaida</string>
     <string name="error_duty_cycle">Pasiektas veikimo ciklo limitas. Šiuo metu negalima siųsti žinučių, bandykite vėliau.</string>
     <!-- EXPORT -->
@@ -106,9 +101,7 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Geras</string>
-    <!-- GPIO -->
     <string name="hops_away">Persiuntimų kiekis</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignoruoti</string>
     <string name="ignore_add">Ar pridėti „%1$s“ į ignoruojamų sąrašą? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
     <string name="ignore_remove">Ar pašalinti „%1$s“ iš ignoruojamų sąrašo? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
@@ -197,14 +190,12 @@
     <string name="one_week">1 sav</string>
     <!-- OPEN -->
     <string name="open_settings">Atidaryti nustatymus</string>
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Kalba</string>
     <string name="preferences_system_default">Numatytoji sistema</string>
     <!-- PREVIEW -->
@@ -253,7 +244,6 @@
     <string name="routing_error_none">Pristatymas patvirtintas</string>
     <string name="routing_error_timeout">Baigėsi laikas</string>
     <string name="rssi">RSSI</string>
-    <!-- SAVE -->
     <string name="save">Išsaugoti</string>
     <string name="save_changes">Išsaugoti</string>
     <!-- SCAN -->
@@ -261,7 +251,6 @@
     <!-- SECURITY -->
     <string name="select_all">Pažymėti visus</string>
     <string name="send">Siųsti</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Dalintis</string>
     <string name="share_to">Dalintis su…</string>
@@ -303,7 +292,6 @@
     <string name="unknown_username">Nežinomas vartotojo vardas</string>
     <string name="unrecognized">Be kategorijos</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">per MQTT</string>
     <string name="waypoint_delete">Ištrinti orientyrą?</string>

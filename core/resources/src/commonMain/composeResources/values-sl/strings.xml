@@ -27,7 +27,6 @@
     <string name="administration">Administracija</string>
     <!-- AIR -->
     <string name="air_util_definition">Odstotek časa oddajanja v zadnji uri.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Znak opozorilnega zvonca!</string>
     <!-- APP -->
     <string name="app_too_old">Aplikacija je prestara</string>
@@ -36,7 +35,6 @@
     <string name="aqi_good">Dober</string>
     <string name="are_you_sure_change_default">Ali si prepričan spremeni na osnovno?</string>
     <string name="bad">Slab</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Baterija</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Preračunavam…</string>
@@ -82,17 +80,14 @@
     <string name="disconnected">Prekinjeno</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Neposreden</string>
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Razdalja</string>
     <!-- DOC -->
     <string name="edit">Uredi</string>
     <string name="eight_hours">8 Ur</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Neujemanje javnega ključa</string>
     <string name="encryption_pkc">Šifriranje javnega ključa</string>
-    <!-- ENVIRONMENT -->
     <string name="error">Napaka</string>
     <string name="error_duty_cycle">Dosežena je omejitev delovnega cikla. Trenutno ne morete pošiljati sporočil, poskusite kasneje.</string>
     <!-- EXPORT -->
@@ -107,11 +102,9 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Dober</string>
-    <!-- GPIO -->
     <string name="hops_away">Skokov stran</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Kakovost zraka v zaprtih prostorih) relativna vrednost IAQ na lestvici, izmerjena z Bosch BME680. Razpon vrednosti 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Prezri</string>
     <string name="ignore_add">Dodaj '%1$s' na prezrto listo?</string>
     <string name="ignore_remove">Odstrani '%1$s' iz prezrte liste?</string>
@@ -199,14 +192,12 @@
     <string name="one_day">24 Ur</string>
     <string name="one_week">1T</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Jezik</string>
     <string name="preferences_system_default">Privzeta sistemska</string>
     <!-- PREVIEW -->
@@ -259,7 +250,6 @@
     <string name="routing_error_timeout">Časovna omejitev</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator moči sprejetega signala je meritev, ki se uporablja za določanje ravni moči, ki jo sprejema antena. Višja vrednost RSSI na splošno pomeni močnejšo in stabilnejšo povezavo.</string>
-    <!-- SAVE -->
     <string name="save">Shrani</string>
     <string name="save_changes">Shrani</string>
     <!-- SCAN -->
@@ -267,7 +257,6 @@
     <!-- SECURITY -->
     <string name="select_all">Izberi vse</string>
     <string name="send">Pošlji</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Souporaba</string>
     <string name="share_to">Delite z…</string>
@@ -309,7 +298,6 @@
     <string name="unknown_username">Neznano uporabniško ime</string>
     <string name="unrecognized">Neprepoznano</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">Preko MQTT</string>
     <string name="waypoint_delete">Izbriši točko poti?</string>

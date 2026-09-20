@@ -30,7 +30,6 @@
     <string name="advanced_title">고급</string>
     <!-- AIR -->
     <string name="air_util_definition">지난 1시간 동안 전송에 사용된 통신 시간의 백분율.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">알람 종 문자!</string>
     <string name="all_time">All</string>
     <string name="allow_input_source">입력 소스 허용</string>
@@ -47,7 +46,6 @@
     <string name="audio">오디오</string>
     <string name="audio_config">오디오 설정</string>
     <string name="bad">나쁨</string>
-    <!-- BANDWIDTH -->
     <string name="battery">배터리</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">블루투스</string>
@@ -134,7 +132,6 @@
     <string name="discovery_stat_date">날짜</string>
     <string name="discovery_stat_direct">직접 연결</string>
     <string name="discovery_stat_messages">메시지기기</string>
-    <!-- DISPLAY -->
     <string name="display">화면</string>
     <!-- DISTANCE -->
     <string name="distance">거리</string>
@@ -147,10 +144,8 @@
     <string name="eight_hours">8 시간</string>
     <!-- EMOJI -->
     <string name="enabled">활성화</string>
-    <!-- ENCRYPTION -->
     <string name="encryption_error">공개 키가 일치하지 않습니다</string>
     <string name="encryption_pkc">공개 키 암호화</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">환경</string>
     <string name="error">오류</string>
     <string name="error_duty_cycle">듀티 사이클 제한에 도달했습니다. 지금은 메시지를 보낼 수 없습니다. 나중에 다시 시도하세요.</string>
@@ -180,7 +175,6 @@
     <string name="gateway">게이트웨이</string>
     <!-- GEOFENCE -->
     <string name="good">좋음</string>
-    <!-- GPIO -->
     <string name="gpio_pin">GPIO 핀</string>
     <string name="hardware">하드웨어</string>
     <string name="hardware_model">하드웨어 모델</string>
@@ -192,7 +186,6 @@
     <string name="i_know_what_i_m_doing">뭘하는지 알고 있습니다</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(실내공기질) Bosch BME680으로 측정한 상대적 척도 IAQ 값. 범위 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">무시하기</string>
     <string name="ignore_add">%1$s를 무시 목록에 추가하시겠습니까?</string>
     <string name="ignore_incoming">수신 무시</string>
@@ -344,7 +337,6 @@
     <string name="one_week">1주</string>
     <string name="only_favorites">즐겨찾기만 보기</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <string name="output_duration_milliseconds">출력 지속시간 (밀리초)</string>
     <!-- PACKET -->
     <string name="password">비밀번호</string>
@@ -359,7 +351,6 @@
     <string name="position">위치</string>
     <string name="position_enabled">위치 활성화</string>
     <string name="position_log">위치</string>
-    <!-- POWER -->
     <string name="power">전원</string>
     <string name="power_config">전원 설정</string>
     <string name="preferences_language">언어</string>
@@ -433,7 +424,6 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">수신 신호 강도 지표 Received Signal Strength Indicator, RSSI는 안테나가 수신하는 신호의 전력 수준을 측정하는 데 사용되는 지표입니다. RSSI 값이 높을수록 일반적으로 더 강력하고 안정적인 연결을 나타냅니다.</string>
     <string name="sats">인공위성</string>
-    <!-- SAVE -->
     <string name="save">저장</string>
     <string name="save_changes">저장</string>
     <!-- SCAN -->
@@ -446,7 +436,6 @@
     <string name="select_all">전부 선택</string>
     <string name="send">보내기</string>
     <string name="sender_message_interval_seconds">송신 장치 메시지 간격 (초)</string>
-    <!-- SERIAL -->
     <string name="serial">시리얼</string>
     <string name="serial_config">시리얼 설정</string>
     <string name="set_your_region">지역을 설정하세요</string>
@@ -526,7 +515,6 @@
     <string name="uptime">업타임</string>
     <!-- URL -->
     <string name="url">URL</string>
-    <!-- USE -->
     <!-- USER -->
     <string name="user">사용자</string>
     <string name="user_config">사용자 설정</string>

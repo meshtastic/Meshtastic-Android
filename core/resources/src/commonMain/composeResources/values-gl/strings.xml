@@ -25,13 +25,11 @@
     <string name="add">Engadir</string>
     <string name="add_network_device">Engadir</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Actualización da aplicación requerida</string>
     <string name="apply">Aplicar</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
-    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="calculating">Calculando…</string>
     <string name="camera_permission">Permiso da cámara</string>
@@ -72,15 +70,12 @@
     <string name="direct_message">Mensaxe directa</string>
     <string name="disconnected">Desconectado</string>
     <!-- DISCOVERY -->
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distancia</string>
     <!-- DOC -->
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
-    <!-- ENVIRONMENT -->
     <string name="error">Erro</string>
     <string name="error_duty_cycle">O límite do Ciclo de Traballo de Sinal foi alcanzado. Non se pode enviar mensaxes agora, inténtao despois.</string>
     <!-- EXPORT -->
@@ -93,8 +88,6 @@
     <string name="firmware_update_failed">Actualización fallou</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
-    <!-- GPIO -->
-    <!-- IGNORE -->
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Engadir '%1$s' á lista de ignorar?</string>
     <string name="ignore_remove">Quitar '%1$s' da lista de ignorar?</string>
@@ -173,14 +166,12 @@
     <!-- ONE -->
     <string name="one_day">24 Horas</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
     <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Linguaxe</string>
     <string name="preferences_system_default">Predeterminado do sistema</string>
     <!-- PREVIEW -->
@@ -209,7 +200,6 @@
     <string name="role_client">Cliente</string>
     <string name="role_client_desc">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
     <!-- ROUTING -->
-    <!-- SAVE -->
     <string name="save">Gardar</string>
     <string name="save_changes">Gardar</string>
     <!-- SCAN -->
@@ -217,7 +207,6 @@
     <!-- SECURITY -->
     <string name="select_all">Seleccionar todo</string>
     <string name="send">Enviar</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Compartir</string>
     <!-- SHOW -->
@@ -243,7 +232,6 @@
     <string name="unknown_username">Nome de usuario descoñecido</string>
     <string name="unrecognized">Non recoñecido</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">vía MQTT</string>
     <string name="waypoint_delete">Eliminar punto de ruta?</string>
