@@ -195,6 +195,18 @@ The Details card carries the node's short name, role, IDs, last heard time, hops
 | Последний раз слышен   | ![Last heard](../../assets/screenshots/nodes_last_heard.png)    |
 | Расстояние             | ![Расстояние](../../assets/screenshots/nodes_distance_info.png) |
 
+### Hardware support status
+
+When a node's hardware is recognized, the detail view names the device and marks its support status, taken from the Meshtastic device registry rather than the app:
+
+| Mark                                 | Значение                                                                                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rosette (green)   | **Supported** — hardware the Meshtastic project actively supports                                                                               |
+| Wrench (sky blue) | **Independent maker hardware** — built and tested by an independent maker, shown as its own rung whether or not the project has promoted it yet |
+| Unverified (red)  | **Supported by Meshtastic Community** — hardware the project does not actively support, including legacy boards                                 |
+
+The label always accompanies the mark, so the status is never conveyed by colour alone.
+
 ### Device links ("I want one")
 
 Когда оборудование ноды распознано, в детальном просмотре появляется сворачиваемый раздел **"Хочу такой"**, содержащий ссылки на места, где можно купить или узнать больше об этом устройстве: страницу продукта у производителя, варианты продукта и объявления на региональных торговых площадках (например, AliExpress, Amazon и у поддерживаемых продавцов), отфильтрованные по твоей стране. Каждая ссылка открывается через сервис перенаправления `msh.to`. Устройства без подходящих ссылок не показывают этот раздел.

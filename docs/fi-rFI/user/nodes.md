@@ -195,6 +195,18 @@ Rivinsisäiset tilailmaisimet näyttävät tärkeimmät tiedot yhdellä silmäyk
 | Viimeksi kuultu | ![Viimeksi kuultu](../../assets/screenshots/nodes_last_heard.png) |
 | Etäisyys        | ![Etäisyys](../../assets/screenshots/nodes_distance_info.png)     |
 
+### Hardware support status
+
+When a node's hardware is recognized, the detail view names the device and marks its support status, taken from the Meshtastic device registry rather than the app:
+
+| Mark                                 | Merkitys                                                                                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rosette (green)   | **Supported** — hardware the Meshtastic project actively supports                                                                               |
+| Wrench (sky blue) | **Independent maker hardware** — built and tested by an independent maker, shown as its own rung whether or not the project has promoted it yet |
+| Unverified (red)  | **Supported by Meshtastic Community** — hardware the project does not actively support, including legacy boards                                 |
+
+The label always accompanies the mark, so the status is never conveyed by colour alone.
+
 ### Device links ("I want one")
 
 Kun radion laitteisto tunnistetaan, tietonäkymä näyttää avattavan **"Haluan sellaisen"** -osion, jossa on linkkejä laitteen ostamiseen tai lisätietojen hankkimiseen: valmistajan tuotesivu, tuoteversiot sekä alueelliset kauppapaikkalistaukset (esim. AliExpress, Amazon ja tuetut jälleenmyyjät), suodatettuna maasi mukaan. Jokainen linkki avautuu mesh.to -uudelleenohjauspalvelun kautta. Laitteet, joille ei löydy vastaavia linkkejä, eivät näytä tätä osiota.
