@@ -33,27 +33,27 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced_device_gps
 import org.meshtastic.core.resources.altitude
-import org.meshtastic.core.resources.broadcast_interval
-import org.meshtastic.core.resources.config_position_broadcast_secs_summary
-import org.meshtastic.core.resources.config_position_broadcast_smart_minimum_distance_summary
 import org.meshtastic.core.resources.config_position_broadcast_smart_minimum_interval_secs_summary
-import org.meshtastic.core.resources.config_position_flags_summary
-import org.meshtastic.core.resources.config_position_gps_update_interval_summary
 import org.meshtastic.core.resources.device_gps
-import org.meshtastic.core.resources.fixed_position
-import org.meshtastic.core.resources.gps_en_gpio
-import org.meshtastic.core.resources.gps_mode
-import org.meshtastic.core.resources.gps_receive_gpio
-import org.meshtastic.core.resources.gps_transmit_gpio
 import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
-import org.meshtastic.core.resources.minimum_distance
-import org.meshtastic.core.resources.minimum_interval
 import org.meshtastic.core.resources.position
-import org.meshtastic.core.resources.position_flags
 import org.meshtastic.core.resources.position_packet
-import org.meshtastic.core.resources.smart_position
-import org.meshtastic.core.resources.update_interval
+import org.meshtastic.core.resources.schema_position_broadcast_smart_minimum_distance
+import org.meshtastic.core.resources.schema_position_broadcast_smart_minimum_distance_description
+import org.meshtastic.core.resources.schema_position_broadcast_smart_minimum_interval_secs
+import org.meshtastic.core.resources.schema_position_fixed_position
+import org.meshtastic.core.resources.schema_position_gps_en_gpio
+import org.meshtastic.core.resources.schema_position_gps_mode
+import org.meshtastic.core.resources.schema_position_gps_update_interval
+import org.meshtastic.core.resources.schema_position_gps_update_interval_description
+import org.meshtastic.core.resources.schema_position_position_broadcast_secs
+import org.meshtastic.core.resources.schema_position_position_broadcast_secs_description
+import org.meshtastic.core.resources.schema_position_position_broadcast_smart_enabled
+import org.meshtastic.core.resources.schema_position_position_flags
+import org.meshtastic.core.resources.schema_position_position_flags_description
+import org.meshtastic.core.resources.schema_position_rx_gpio
+import org.meshtastic.core.resources.schema_position_tx_gpio
 import org.meshtastic.core.ui.component.BitwisePreference
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -179,8 +179,8 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             TitledCard(title = stringResource(Res.string.position_packet)) {
                 val items = remember { IntervalConfiguration.POSITION_BROADCAST.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(Res.string.broadcast_interval),
-                    summary = stringResource(Res.string.config_position_broadcast_secs_summary),
+                    title = stringResource(Res.string.schema_position_position_broadcast_secs),
+                    summary = stringResource(Res.string.schema_position_position_broadcast_secs_description),
                     enabled = state.connected,
                     items = items.map { it to it.toDisplayString() },
                     selectedItem =
@@ -196,7 +196,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.smart_position),
+                    title = stringResource(Res.string.schema_position_position_broadcast_smart_enabled),
                     checked = formState.value.position_broadcast_smart_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -209,7 +209,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     HorizontalDivider()
                     val smartItems = remember { IntervalConfiguration.SMART_BROADCAST_MINIMUM.allowedIntervals }
                     DropDownPreference(
-                        title = stringResource(Res.string.minimum_interval),
+                        title = stringResource(Res.string.schema_position_broadcast_smart_minimum_interval_secs),
                         summary =
                         stringResource(Res.string.config_position_broadcast_smart_minimum_interval_secs_summary),
                         enabled = state.connected,
@@ -228,8 +228,9 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     )
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(Res.string.minimum_distance),
-                        summary = stringResource(Res.string.config_position_broadcast_smart_minimum_distance_summary),
+                        title = stringResource(Res.string.schema_position_broadcast_smart_minimum_distance),
+                        summary =
+                        stringResource(Res.string.schema_position_broadcast_smart_minimum_distance_description),
                         value = formState.value.broadcast_smart_minimum_distance,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -247,7 +248,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         item {
             TitledCard(title = stringResource(Res.string.device_gps)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.fixed_position),
+                    title = stringResource(Res.string.schema_position_fixed_position),
                     checked = formState.value.fixed_position,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -297,7 +298,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 } else {
                     HorizontalDivider()
                     DropDownPreference(
-                        title = stringResource(Res.string.gps_mode),
+                        title = stringResource(Res.string.schema_position_gps_mode),
                         enabled = state.connected,
                         items = Config.PositionConfig.GpsMode.entries.map { it to it.name },
                         selectedItem = formState.value.gps_mode,
@@ -308,8 +309,8 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     HorizontalDivider()
                     val items = remember { IntervalConfiguration.GPS_UPDATE.allowedIntervals }
                     DropDownPreference(
-                        title = stringResource(Res.string.update_interval),
-                        summary = stringResource(Res.string.config_position_gps_update_interval_summary),
+                        title = stringResource(Res.string.schema_position_gps_update_interval),
+                        summary = stringResource(Res.string.schema_position_gps_update_interval_description),
                         enabled = state.connected,
                         items = items.map { it to it.toDisplayString() },
                         selectedItem =
@@ -327,10 +328,10 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             }
         }
         item {
-            TitledCard(title = stringResource(Res.string.position_flags)) {
+            TitledCard(title = stringResource(Res.string.schema_position_position_flags)) {
                 BitwisePreference(
-                    title = stringResource(Res.string.position_flags),
-                    summary = stringResource(Res.string.config_position_flags_summary),
+                    title = stringResource(Res.string.schema_position_position_flags),
+                    summary = stringResource(Res.string.schema_position_position_flags_description),
                     value = formState.value.position_flags,
                     enabled = state.connected,
                     items =
@@ -347,7 +348,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             TitledCard(title = stringResource(Res.string.advanced_device_gps)) {
                 val pins = remember { org.meshtastic.feature.settings.util.gpioPins }
                 DropDownPreference(
-                    title = stringResource(Res.string.gps_receive_gpio),
+                    title = stringResource(Res.string.schema_position_rx_gpio),
                     enabled = state.connected,
                     items = pins,
                     selectedItem = formState.value.rx_gpio,
@@ -357,7 +358,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(Res.string.gps_transmit_gpio),
+                    title = stringResource(Res.string.schema_position_tx_gpio),
                     enabled = state.connected,
                     items = pins,
                     selectedItem = formState.value.tx_gpio,
@@ -367,7 +368,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(Res.string.gps_en_gpio),
+                    title = stringResource(Res.string.schema_position_gps_en_gpio),
                     enabled = state.connected,
                     items = pins,
                     selectedItem = formState.value.gps_en_gpio,

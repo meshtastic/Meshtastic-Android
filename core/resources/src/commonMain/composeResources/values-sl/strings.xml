@@ -57,9 +57,7 @@
     <string name="close">Zapri</string>
     <!-- COMPASS -->
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">Obravnavaj dvojni pritisk na podprtih merilnikih pospeška kot pritisk uporabnika.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Upravlja utripajočo LED na napravi. Pri večini naprav bo to krmililo eno od največ 4 LED diod, LED napajanja in GPS ni mogoče nadzorovati.</string>
-    <string name="config_device_transmitOverLora_summary">Izbira ali je treba naš NeighborInfo poleg pošiljanja v MQTT in PhoneAPI posredovati tudi prek LoRa. Ni na voljo na kanalu s privzetim ključem in imenom.</string>
     <string name="connected_sleeping">Povezan z radiem, vendar radio "spi"</string>
     <string name="copy">Kopiraj</string>
     <!-- DEBUG -->
@@ -212,7 +210,6 @@
     <string name="preferences_language">Jezik</string>
     <string name="preferences_system_default">Privzeta sistemska</string>
     <!-- PREVIEW -->
-    <string name="private_key">Zasebni ključ</string>
     <string name="provide_location_to_mesh">Zagotovi lokacijo telefona v omrežju</string>
     <string name="public_key">Javni ključ</string>
     <string name="qr_code">QR koda</string>

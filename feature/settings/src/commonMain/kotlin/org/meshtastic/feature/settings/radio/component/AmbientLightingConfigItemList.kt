@@ -28,11 +28,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ambient_lighting
 import org.meshtastic.core.resources.ambient_lighting_config
-import org.meshtastic.core.resources.blue
-import org.meshtastic.core.resources.current
-import org.meshtastic.core.resources.green
-import org.meshtastic.core.resources.led_state
-import org.meshtastic.core.resources.red
+import org.meshtastic.core.resources.schema_ambientlighting_blue
+import org.meshtastic.core.resources.schema_ambientlighting_current
+import org.meshtastic.core.resources.schema_ambientlighting_green
+import org.meshtastic.core.resources.schema_ambientlighting_led_state
+import org.meshtastic.core.resources.schema_ambientlighting_red
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -67,7 +67,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
         item {
             TitledCard(title = stringResource(Res.string.ambient_lighting_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.led_state),
+                    title = stringResource(Res.string.schema_ambientlighting_led_state),
                     checked = formState.value.led_state,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -96,7 +96,7 @@ private fun LedColorFields(
 ) {
     androidx.compose.foundation.layout.Column {
         BoundedIntEditTextPreference(
-            title = stringResource(Res.string.current),
+            title = stringResource(Res.string.schema_ambientlighting_current),
             value = config.current,
             metadata = ModuleConfig.AmbientLightingConfig.current,
             enabled = enabled,
@@ -104,7 +104,7 @@ private fun LedColorFields(
             onValueChange = { onConfigChange(config.newBuilder().also { wb -> wb.current = it }.build()) },
         )
         BoundedIntEditTextPreference(
-            title = stringResource(Res.string.red),
+            title = stringResource(Res.string.schema_ambientlighting_red),
             value = config.red,
             metadata = ModuleConfig.AmbientLightingConfig.red,
             enabled = enabled,
@@ -112,7 +112,7 @@ private fun LedColorFields(
             onValueChange = { onConfigChange(config.newBuilder().also { wb -> wb.red = it }.build()) },
         )
         BoundedIntEditTextPreference(
-            title = stringResource(Res.string.green),
+            title = stringResource(Res.string.schema_ambientlighting_green),
             value = config.green,
             metadata = ModuleConfig.AmbientLightingConfig.green,
             enabled = enabled,
@@ -120,7 +120,7 @@ private fun LedColorFields(
             onValueChange = { onConfigChange(config.newBuilder().also { wb -> wb.green = it }.build()) },
         )
         BoundedIntEditTextPreference(
-            title = stringResource(Res.string.blue),
+            title = stringResource(Res.string.schema_ambientlighting_blue),
             value = config.blue,
             metadata = ModuleConfig.AmbientLightingConfig.blue,
             enabled = enabled,

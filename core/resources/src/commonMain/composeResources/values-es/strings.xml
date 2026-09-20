@@ -24,7 +24,6 @@
     <string name="action_delete_message">Deseas eliminar el mensaje</string>
     <string name="actions">Acciones</string>
     <string name="adc_multiplier_override">Sobreescribir multiplicador ADC</string>
-    <string name="adc_multiplier_override_ratio">Sobreescribir relación del multiplicador ADC</string>
     <!-- ADD -->
     <string name="add">Añadir</string>
     <string name="add_a_note">Añadir una nota privada…</string>
@@ -32,7 +31,6 @@
     <string name="add_layer">Añadir capa</string>
     <string name="add_network_device">Añadir</string>
     <string name="address">Dirección del Servidor MQTT</string>
-    <string name="admin_key">Contraseña de administrador</string>
     <string name="admin_keys">Claves administración</string>
     <string name="administration">Administración</string>
     <string name="advanced">Avanzado</string>
@@ -40,22 +38,13 @@
     <string name="advanced_title">Avanzado</string>
     <!-- AIR -->
     <string name="air_quality_icon">Icono de la calidad del aire</string>
-    <string name="air_quality_metrics_module_enabled">Módulo para la medición de la calidad del aire activado</string>
-    <string name="air_quality_metrics_update_interval_seconds">Intervalo actualización de métricas calidad del aire</string>
     <string name="air_util_definition">Porcentaje de tiempo de transmisión utilizado en la última hora.</string>
     <!-- ALERT -->
-    <string name="alert_bell_buzzer">Notificación con el zumbador al recibir una campana</string>
-    <string name="alert_bell_led">Notificación LED al recibir una campana</string>
     <string name="alert_bell_text">¡Carácter Campana de Alerta!</string>
-    <string name="alert_bell_vibra">Notificación con vibración al recibir una campana</string>
-    <string name="alert_message_buzzer">Notificación con el buzzer al recibir un mensaje</string>
-    <string name="alert_message_led">Notificación LED al recibir un mensaje</string>
-    <string name="alert_message_vibra">Notificación con vibración al recibir un mensaje</string>
     <string name="all_time">Todos</string>
     <string name="allow_undefined_pin_access">Permitir el acceso sin un pin definido</string>
     <string name="alt">Altitud</string>
     <string name="altitude">Altitud</string>
-    <string name="always_point_north">Siempre apuntar al norte</string>
     <string name="ambient_lighting">Luz Ambiental</string>
     <string name="ambient_lighting_config">Configuración de la luz ambiental</string>
     <string name="analytics_notice">Se recopilan analíticas de uso para ayudarnos a mejorar la aplicación Android (¡gracias!), recibiremos información anónima sobre el comportamiento del usuario. Esto incluye reportes de fallos, pantallas utilizadas en la aplicación, etc.</string>
@@ -75,22 +64,14 @@
     <string name="available_pins">Pines disponibles</string>
     <string name="bad">Mal</string>
     <!-- BANDWIDTH -->
-    <string name="bandwidth">Ancho de Banda</string>
     <string name="battery">Batería</string>
     <string name="battery_ina_2xx_i2c_address">Dirección I2C del INA_2xx para la batería</string>
-    <string name="ble_rssi_threshold_defaults_to_80">Umbral mínimo de RSSI de BLE (por defecto es -80)</string>
-    <string name="blue">Azul</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_config">Configuración Bluetooth</string>
-    <string name="bluetooth_enabled">Bluetooth activado</string>
     <string name="bluetooth_feature_config">Configuración</string>
     <string name="bluetooth_permission">Bluetooth</string>
-    <string name="bold_heading">Encabezado en negrita</string>
     <string name="bottom_nav_settings">Ajustes</string>
-    <string name="broadcast_interval">Intervalo de transmisión</string>
-    <string name="button_gpio">Botón GPIO</string>
-    <string name="buzzer_gpio">Zumbador GPIO</string>
     <string name="calculating">Calculando…</string>
     <string name="camera_permission">Permisos de acceso a la cámara</string>
     <string name="cancel">Cancelar</string>
@@ -100,7 +81,6 @@
     <string name="canned_message_enabled">Mensaje predefinidos activados</string>
     <string name="cant_change_no_radio">No se puede cambiar de canal porque la radio aún no está conectada. Por favor inténtelo de nuevo.</string>
     <string name="cant_shutdown">Apagado no compatible con este dispositivo</string>
-    <string name="carousel_interval">Intervalo de carrusel</string>
     <string name="ch_util_definition">Utilización del canal actual, incluyendo TX, RX bien formado y RX mal formado (ruido similar).</string>
     <!-- CHANNEL -->
     <string name="channel_1">Canal 1</string>
@@ -130,45 +110,21 @@
     <string name="clear_selection">Limpiar selección</string>
     <string name="close">Cerrar</string>
     <string name="close_selection">Cerrar selección</string>
-    <string name="codec_2_enabled">CODEC 2 activado</string>
-    <string name="codec2_sample_rate">Frecuencia de Muestreo CODEC2</string>
-    <string name="coding_rate">Tasa de codificación</string>
     <!-- COMPASS -->
     <string name="compass_distance">Distancia: %1$s</string>
     <string name="compass_no_magnetometer">Este dispositivo no tiene un sensor de brújula. El rumbo no está disponible.</string>
     <string name="compass_north_top">La brújula apunta al norte</string>
-    <string name="compass_orientation">Orientación de la brújula</string>
     <string name="compass_title">Brújula</string>
     <string name="compromised_keys">Las claves se han visto comprometidas, selecciona OK para generar de nuevo.</string>
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">Trate un doble toque en acelerómetros soportados como una pulsación de botón de usuario.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Controla el LED parpadeante del dispositivo. Para la mayoría de los dispositivos esto controlará uno de los hasta 4 LEDs, el cargador y el GPS tienen LEDs no controlables.</string>
-    <string name="config_device_transmitOverLora_summary">Si, además de enviarlo a MQTT y a la API del móvil, nuestra información de vecinos debe ser transmitida por LoRa. (No disponible en un canal con clave y nombre por defecto).</string>
     <string name="config_device_tripleClickAsAdHocPing_summary">Envía la posición al canal primario cuando el botón de usuario se presiona tres veces.</string>
     <string name="config_device_tzdef_summary">Zona horaria para fechas en la pantalla del dispositivo y registro.</string>
     <string name="config_device_use_phone_tz">Utilizar zona horaria del teléfono</string>
-    <string name="config_display_auto_screen_carousel_secs_summary">Cambia automáticamente a la siguiente página en la pantalla como un carrusel, basado en el intervalo especificado.</string>
-    <string name="config_display_compass_north_top_summary">La dirección de la brújula en la pantalla, fuera del círculo, siempre apuntará hacia el norte.</string>
-    <string name="config_display_displaymode_summary">Anula el diseño de pantalla predeterminado.</string>
-    <string name="config_display_flip_screen_summary">Voltear la pantalla verticalmente.</string>
-    <string name="config_display_heading_bold_summary">Encabezado del texto de la pantalla en negrita.</string>
-    <string name="config_display_oled_summary">Anular detección automática de pantalla OLED.</string>
-    <string name="config_display_screen_on_secs_summary">Cuánto tiempo permanece encendido la pantalla después de pulsar el botón de usuario o recibir mensajes.</string>
-    <string name="config_display_units_summary">Unidades mostradas en la pantalla del dispositivo.</string>
-    <string name="config_display_wake_on_tap_or_motion_summary">Requiere que haya un acelerómetro en su dispositivo.</string>
-    <string name="config_lora_frequency_slot_summary">La frecuencia de funcionamiento de su nodo se calcula en base a la región, el preajuste del módem y este campo. Cuando es 0, la ranura se calcula automáticamente basándose en el nombre del canal principal y cambiará de la rama pública predeterminada. Cambie a la ranura pública por defecto si se configuran los canales privados primarios y públicos secundarios.</string>
-    <string name="config_lora_hop_limit_summary">Establece el número máximo de saltos, por defecto 3. Aumentar saltos también incrementa la congestión y debe ser utilizado con cuidado. 0 saltos de difusión no obtendrán ACKs.</string>
     <string name="config_lora_modem_preset_summary">Configuraciones de modem disponibles, por defecto es Long Fast.</string>
     <string name="config_lora_region_summary">La región donde utilizará su radio.</string>
-    <string name="config_network_eth_enabled_summary">Habilitar Ethernet desactivará la conexión bluetooth a la aplicación. Las conexiones TCP no están disponibles en dispositivos Apple.</string>
     <string name="config_network_udp_enabled_summary">Habilitar paquetes de difusión vía UDP en la red local.</string>
-    <string name="config_position_broadcast_secs_summary">El intervalo máximo que puede transcurrir sin que un nodo transmita una posición.</string>
-    <string name="config_position_broadcast_smart_minimum_distance_summary">La distancia mínima de cambio en metros que se tendrá en cuenta para una transmisión inteligente de posición.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">La máxima velocidad a la que se enviarán las actualizaciones de posición si se ha cumplido la distancia mínima.</string>
-    <string name="config_position_flags_summary">Campos opcionales a incluir al ensamblar mensajes de posición. Cuantos más campos se incluyan, mayor será el tamaño del mensaje, lo que provocará un mayor tiempo de transmisión y un mayor riesgo de pérdida de paquetes.</string>
-    <string name="config_power_is_power_saving_summary">La opción dormirá todo lo posible; los roles de rastreador y sensores y también incluirá la radio LoRa. No uses esta configuración si quieres utilizar tu dispositivo con las aplicaciones del teléfono o si estás usando un dispositivo sin botón de usuario.</string>
-    <string name="config_security_admin_key">Clave pública autorizada para enviar mensajes de administración a este nodo.</string>
-    <string name="config_security_is_managed">Dispositivo gestionado por administrador de la malla, el usuario no puede acceder a las configuraciones del dispositivo.</string>
     <string name="config_security_private_key">Utilizado para crear una clave compartida con un dispositivo remoto.</string>
     <string name="configuration">Configuración</string>
     <string name="configure_critical_alerts">Configurar alertas críticas</string>
@@ -203,7 +159,6 @@
     <string name="debug_filter_clear">Borrar todos los filtros</string>
     <string name="debug_filter_included">Filtro incluido</string>
     <string name="debug_filters">Filtros</string>
-    <string name="debug_log_api_enabled">API de registro de depuración habilitada</string>
     <string name="debug_logs_export">Exportar registros</string>
     <string name="debug_panel">Panel de depuración</string>
     <string name="debug_search_clear">Borrar búsqueda</string>
@@ -228,18 +183,13 @@
     <string name="details">Detalles</string>
     <string name="detection_sensor">Sensor de Presencia</string>
     <string name="detection_sensor_config">Configuración del sensor detector</string>
-    <string name="detection_sensor_enabled">Sensor detector activado</string>
-    <string name="detection_trigger_type">Tipo de detección para activar</string>
     <!-- DEVICE -->
     <string name="device">Dispositivo</string>
     <string name="device_configuration">Configuración del dispositivo</string>
     <string name="device_db_cache_limit">Límite de caché DB del dispositivo</string>
     <string name="device_gps">Dispositivo GPS</string>
     <string name="device_metrics_log">Métricas de Dispositivo</string>
-    <string name="device_metrics_update_interval_seconds">Intervalo actualización de métricas del dispositivo</string>
     <string name="device_sleeping">Dispositivo en reposo</string>
-    <string name="device_telemetry_enabled">Enviar telemetría del dispositivo</string>
-    <string name="device_telemetry_enabled_summary">Activar/Desactivar el módulo de telemetría del dispositivo para enviar métricas a la malla. Estos son valores nominales. Las mallas congestionadas escalarán automáticamente a intervalos más largos basados en el número de nodos en línea. Mallas con menos de  nodos escalarán a intervalos más rápidos.</string>
     <string name="dew_point">Punto de rocío</string>
     <string name="direct_message">Mensaje Directo</string>
     <string name="direct_message_key">Claves para mensaje directo</string>
@@ -255,9 +205,6 @@
     <string name="disk_free_indexed">Disco libre %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Pantalla</string>
-    <string name="display_mode">Modo de la pantalla</string>
-    <string name="display_time_in_12h_format">Si activado, el dispositivo mostrará la hora en la pantalla en el formato de 12h</string>
-    <string name="display_units">Unidades en pantalla</string>
     <!-- DISTANCE -->
     <string name="distance">Distancia</string>
     <string name="distance_filters">Filtros de distancia</string>
@@ -272,30 +219,21 @@
     <string name="doc_title_nodes">Nodos</string>
     <string name="doc_title_onboarding">Primeros Pasos</string>
     <string name="done">Hecho</string>
-    <string name="double_tap_as_button_press">Doble pulsación como botón</string>
     <string name="download">Descarga</string>
     <string name="dynamic">Dinámico</string>
-    <string name="echo_enabled">Eco activado</string>
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>
     <!-- EMOJI -->
-    <string name="enable_power_saving_mode">Activar el modo ahorro de energía</string>
     <string name="enabled">Habilitado</string>
     <!-- ENCRYPTION -->
-    <string name="encryption_enabled">Permitir Encripción</string>
     <string name="encryption_error">Clave pública no coincide</string>
     <string name="encryption_pkc">Cifrado de Clave Pública</string>
     <string name="env_metrics_log">Métricas de Entorno</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Ambiente</string>
-    <string name="environment_metrics_module_enabled">Módulo para las medidas del entorno activado</string>
-    <string name="environment_metrics_on_screen_enabled">Mostrar las medidas del entorno en la </string>
-    <string name="environment_metrics_update_interval_seconds">Intervalo actualización de métricas del entorno</string>
-    <string name="environment_metrics_use_fahrenheit">Grados Fahrenheit para la temperatura ambiente </string>
     <string name="error">Error</string>
     <string name="error_duty_cycle">Límite de Ciclo de Trabajo alcanzado. No se pueden enviar mensajes en este momento, por favor inténtalo de nuevo más tarde.</string>
     <string name="ethernet_config">Opciones Ethernet</string>
-    <string name="ethernet_enabled">Ethernet del Nodo Activado</string>
     <string name="ethernet_ip">IP Ethernet:</string>
     <string name="exchange_position">Intercambiar Posición</string>
     <string name="expires">Caduca</string>
@@ -304,7 +242,6 @@
     <string name="export_data_csv">Exportar todos los paquetes</string>
     <string name="external_notification">Notificaciones Externas</string>
     <string name="external_notification_config">Configuración de las notificaciones externas</string>
-    <string name="external_notification_enabled">Notificaciones externas activadas</string>
     <string name="factory_reset">Restablecer los valores de fábrica</string>
     <string name="fair">Aceptable</string>
     <string name="fallback_node_name">(No se ha podido obtener el nombre) Meshtastic %1$s</string>
@@ -338,51 +275,29 @@
     <string name="firmware_version">Versión del firmware: %1$s</string>
     <string name="fixed_pin">Pin fijo</string>
     <string name="fixed_position">Posición Fijada</string>
-    <string name="flip_screen">Girar la pantalla 180º</string>
     <string name="for_more_information_see_our_privacy_policy">Para más información, consulte nuestra política de privacidad.</string>
     <!-- FORMAT -->
     <string name="free_memory">Memoria disponible</string>
     <string name="freq">Frecuencia</string>
-    <string name="frequency_slot">Slot de frecuencia</string>
-    <string name="friendly_name">Mote</string>
     <string name="gas_resistance">Resistencia del Gas</string>
     <string name="gateway">Puerta enlace</string>
-    <string name="generate_input_event_on_ccw">Hacer una acción al girar en sentido contrario a las agujas del reloj</string>
-    <string name="generate_input_event_on_cw">Hacer una acción al girar en sentido de las agujas del reloj</string>
-    <string name="generate_input_event_on_press">Hacer una acción al presionar</string>
     <!-- GEOFENCE -->
     <string name="get_started">Empezar</string>
     <string name="good">Bien</string>
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">Pin GPIO</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">Pin A GPIO del Encoder</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">Pin B GPIO del Encoder</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">Pin de la Pulsación del Encoder</string>
-    <string name="gpio_pin_to_monitor">Pin GPIO para monitorizar</string>
-    <string name="gps_en_gpio">GPIO de habilitación GPS</string>
-    <string name="gps_mode">Modo GPS (dispositivo físico)</string>
-    <string name="gps_receive_gpio">GPIO de recepción GPS</string>
-    <string name="gps_transmit_gpio">GPIO de transmisión GPS</string>
-    <string name="green">Verde</string>
     <string name="hardware">Hardware</string>
     <string name="hardware_model">Modelo del dispositivo</string>
     <string name="heading">Rumbo</string>
-    <string name="heartbeat">Pulso de vida</string>
     <string name="hide_layer">Ocultar capa</string>
     <string name="hide_password">Ocultar contraseña</string>
-    <string name="history_return_max">Historial máximo devuelto</string>
-    <string name="hop_limit">Número de saltos</string>
     <string name="hops_away">Saltos de distancia</string>
     <string name="host">Anfitrión</string>
     <string name="host_metrics_log">Métricas del anfitrión</string>
     <string name="i_agree">Estoy de acuerdo.</string>
     <string name="i_agree_to_share_my_location">He leído y entiendo lo anterior. Doy mi consentimiento voluntario para la transmisión no cifrada de los datos de mi nodo a través de MQTT.</string>
     <string name="i_know_what_i_m_doing">Sé lo que estoy haciendo</string>
-    <string name="i2s_clock">Reloj del I2S</string>
-    <string name="i2s_data_in">Entrada de datos I2S</string>
-    <string name="i2s_data_out">Salida de datos I2S</string>
-    <string name="i2s_word_select">Selecionar palabras I2S</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Calidad de Aire interior) escala relativa del valor IAQ como mediciones del sensor Bosch BME680.
 Rango de Valores 0 - 500.</string>
@@ -391,7 +306,6 @@ Rango de Valores 0 - 500.</string>
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">¿Añadir '%1$s' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
     <string name="ignore_incoming">Ignorar entrante</string>
-    <string name="ignore_mqtt">Ignorar Paquetes MQTT</string>
     <string name="ignore_remove">¿Eliminar '%1$s' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
     <!-- IMPORT -->
     <string name="import_configuration">Importar una configuración</string>
@@ -409,7 +323,6 @@ Rango de Valores 0 - 500.</string>
     <string name="ip">IP</string>
     <string name="ip_address">Dirección IP:</string>
     <string name="ip_port">Puerto:</string>
-    <string name="ipv4_mode">Modo IPv4</string>
     <string name="json_output_enabled">Salida JSON activada</string>
     <!-- KEY -->
     <string name="last_heard_filter_label">Filtrar por tiempo de la última escucha: %1$s</string>
@@ -420,7 +333,6 @@ Rango de Valores 0 - 500.</string>
     <!-- LAYER -->
     <string name="learn_more">Saber más</string>
     <string name="led_heartbeat">Latido LED</string>
-    <string name="led_state">Estado de led</string>
     <string name="legacy_admin_channel">Canal de administración antiguo</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Activando esta opción se desactiva la encriptación y deja de ser compatible con la red de Meshtastic normal.</string>
@@ -453,7 +365,6 @@ Rango de Valores 0 - 500.</string>
     <string name="low_battery_title">Batería baja: %1$s</string>
     <string name="lux">Lux</string>
     <string name="manage_map_layers">Administrar capas de mapa</string>
-    <string name="managed_mode">Modo "ya terminado de configurar"</string>
     <string name="manual_position_request">Requerir solicitud manual de posición</string>
     <!-- MAP -->
     <string name="map">Mapa Mesh</string>
@@ -524,7 +435,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">Configuración MQTT</string>
-    <string name="mqtt_enabled">Activar el MQTT</string>
     <string name="mqtt_status_connected">Conectado</string>
     <string name="mqtt_status_disconnected">Desconectado</string>
     <string name="must_set_region">¡Debe establecer una región!</string>
@@ -545,7 +455,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="navigate_into_label">Navegar hacia</string>
     <string name="neighbor_info">Información de Vecinos</string>
     <string name="neighbor_info_config">Configuración de Información de Vecinos</string>
-    <string name="neighbor_info_enabled">Información de Vecinos</string>
     <string name="network">Conexión Red</string>
     <string name="new_channel_rcvd">Nueva URL de canal recibida</string>
     <string name="new_messages_below">Nuevos mensajes abajo</string>
@@ -580,7 +489,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="node_sort_via_favorite">vía Favorita</string>
     <string name="node_sort_via_mqtt">vía MQTT</string>
     <string name="nodedb_reset">Reinicio de NodeDB</string>
-    <string name="nodeinfo_broadcast_interval">Intervalo de transmisión de información del nodo</string>
     <!-- NODES -->
     <string name="nodes">Nodos</string>
     <string name="nodes_at_this_location">Nodos en esta ubicación</string>
@@ -597,12 +505,8 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="notifications_on_alert_bell_receipt">Notificaciones al recibir una alerta/campana</string>
     <string name="notifications_on_message_receipt">Notificación cuando se reciba un mensaje</string>
     <string name="now">Ahora</string>
-    <string name="ntp_server">Servidor NTP</string>
-    <string name="number_of_records">Número de registros</string>
     <!-- OFFLINE -->
-    <string name="ok_to_mqtt">Permitir MQTT</string>
     <string name="okay">Vale</string>
-    <string name="oled_type">Tipo de OLED</string>
     <!-- ONE -->
     <string name="one_day">24 Horas</string>
     <string name="one_hour">1 hora</string>
@@ -614,22 +518,13 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="options">Opciones</string>
     <string name="orient_north">Orientación norte</string>
     <!-- OUTPUT -->
-    <string name="output_buzzer_gpio">Salida buzzer (pin GPIO)</string>
     <string name="output_duration_milliseconds">Duración en las salidas (milisegundos)</string>
-    <string name="output_led_active_high">LED de salida activo en alto</string>
-    <string name="output_led_gpio">Salida LED (pin GPIO)</string>
-    <string name="output_vibra_gpio">Salida vibratoria (pin GPIO)</string>
     <string name="override_console_serial_port">Sobreescribir el puerto serie de la consola</string>
-    <string name="override_duty_cycle">Sobreescribir el Tiempo de Trabajo</string>
-    <string name="override_frequency_mhz">Sobreescribir frecuencia</string>
-    <string name="pa_fan_disabled">Ventilador del Amplificador apagado</string>
     <!-- PACKET -->
-    <string name="pairing_mode">Modo de emparejamiento</string>
     <string name="password">Contraseña</string>
     <!-- PAX -->
     <string name="paxcounter">Contador de Paquetes</string>
     <string name="paxcounter_config">Configuración del Contador de Paquetes</string>
-    <string name="paxcounter_enabled">Activar el Contador de Paquetes</string>
     <string name="periodic_position_broadcast">Transmisión periódica de posición</string>
     <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic necesita activar los permisos "Dispositivos cercanos" para encontrar y conectarse a dispositivos mediante Bluetooth. Puede desactivar cuando no esté en uso.</string>
@@ -646,16 +541,12 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="position">Posición</string>
     <string name="position_config_set_fixed_from_phone">Definir desde la ubicación actual del teléfono</string>
     <string name="position_enabled">Posición activada</string>
-    <string name="position_flags">Marcas de posición</string>
     <string name="position_log">Posición</string>
     <string name="position_packet">Paquetes de posición</string>
     <!-- POWER -->
     <string name="power">Consumo</string>
     <string name="power_config">Configuración de elecenergía </string>
     <string name="power_metrics_log">Métricas de Energía</string>
-    <string name="power_metrics_module_enabled">Módulo de medidas eléctricas activado</string>
-    <string name="power_metrics_on_screen_enabled">Medidas eléctricas en pantalla</string>
-    <string name="power_metrics_update_interval_seconds">Intervalo de actualización de métricas de energía</string>
     <string name="precise_location">Ubicación precisa</string>
     <string name="preferences_language">Idioma</string>
     <string name="preferences_system_default">Predeterminado del sistema</string>
@@ -665,12 +556,9 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <!-- PREVIEW -->
     <string name="primary">Primario</string>
     <string name="primary_channel_feature">Transmisión periódica de la posición y la telemetría</string>
-    <string name="private_key">Clave privada</string>
     <string name="provide_location_to_mesh">Proporcionar la ubicación del teléfono a la malla</string>
     <string name="provider_name_exists">El nombre ya existe.</string>
-    <string name="proxy_to_client_enabled">Compartir Internet a la Radio</string>
     <string name="psk">PSK (Contraseña)</string>
-    <string name="ptt_pin">Pin PTT</string>
     <string name="public_key">Clave Pública</string>
     <string name="public_key_changed">Contraseña pública cambiada</string>
     <string name="qr_code">Código QR</string>
@@ -686,11 +574,9 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="radio_configuration">Configuración de radio</string>
     <string name="range_test">Test de Alcance</string>
     <string name="range_test_config">Configuración del test de alcance</string>
-    <string name="range_test_enabled">Test de alcance activado</string>
     <string name="react">Reaccionar</string>
     <string name="reboot">Reiniciar</string>
     <!-- REBROADCAST -->
-    <string name="rebroadcast_mode">Modo de retransmisión</string>
     <string name="rebroadcast_mode_all_desc">Si está en nuestro canal privado o desde otra red con los mismos parámetros lora, retransmite cualquier mensaje observado.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Igual al comportamiento que TODOS pero omite la decodificación de paquetes y simplemente los retransmite. Sólo disponible en el rol repetidor. Establecer esto en cualquier otro rol dará como resultado TODOS los comportamientos.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignora paquetes de puertos no estándar, tales como los TAK, Test de Rango (Rangetest), Contador de paquetes (Pax), etc. Solo retransmite paquetes que vengan de puertos estándar como: Información de Nodo (NodeInfo), Mensajes de texto, Posición, telemetría y Routing.</string>
@@ -698,7 +584,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="rebroadcast_mode_local_only_desc">Ignora mensajes observados desde mallas foráneas que están abiertas o que no pueden descifrar. Solo retransmite mensajes en los nodos locales principales / canales secundarios.</string>
     <string name="rebroadcast_mode_none_desc">Solo permitido para los roles SENSOR, TRACKER y TAK_TRACKER, esto inhibirá todas las retransmisiones, no a diferencia del rol de CLIENT_MUTE.</string>
     <string name="recent_network_devices">Dispositivos de red recientes</string>
-    <string name="red">Rojo</string>
     <string name="regenerate_keys_confirmation">¿Estás seguro de querer regenerar tu clave privada?\n\nLos nodos que hayan intercambiado previamente las claves con este nodo tendrán que quitar ese nodo y volver a intercambiar las claves para poder reanudar la comunicación segura.</string>
     <string name="regenerate_private_key">Regenerar clave privada</string>
     <string name="region_frequency_plan">Región</string>
@@ -758,8 +643,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="role_tak_tracker_desc">Permite la transmisión automática TAK PLI y reduce las transmisiones rutinarias.</string>
     <string name="role_tracker">Rastreador</string>
     <string name="role_tracker_desc">Transmisión de paquetes de posición GPS como prioridad.</string>
-    <string name="root_topic">Tema raíz</string>
-    <string name="rotary_encoder_1_enabled">Encoder Número 1 Activado</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Recibido un reconocimiento negativo</string>
     <string name="routing_error_no_route">Sin ruta</string>
@@ -767,16 +650,13 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="routing_error_timeout">Tiempo agotado</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicador de Fuerza de Señal Recibida (RSSI en inglés), una medida utilizada para determinar el nivel de potencia que está siendo recibido por la antena. Un valor de RSSI más alto generalmente indica una conexión más fuerte y estable.</string>
-    <string name="rsyslog_server">Servidor rsyslog</string>
     <string name="sats">Satélites</string>
     <!-- SAVE -->
     <string name="save">Guardar</string>
     <string name="save_changes">Guardar</string>
-    <string name="save_csv_in_storage_esp32_only">Guardar el .CSV en el almacenamiento (Esp32)</string>
     <string name="save_rangetest">Exportar paquetes de rangetest</string>
     <!-- SCAN -->
     <string name="scan">Escanear</string>
-    <string name="screen_on_for">Pantalla activa durante</string>
     <string name="scroll_to_bottom">Desplazarse hacia abajo</string>
     <string name="secondary">Secundario </string>
     <string name="secondary_channel_position_feature">Deshabilitar la posición en el canal principal permite las emisiones de posición periódica en el primer canal secundario con la posición habilitada, de lo contrario se requiere una solicitud de posición manual.</string>
@@ -798,17 +678,10 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="selected">Seleccionados</string>
     <string name="selected_map_type">Tipo de mapa seleccionado</string>
     <string name="send">Enviar</string>
-    <string name="send_bell">Mandar campana 🔔</string>
-    <string name="send_bell_with_alert_message">Mandar la campana con el mensaje de alerta</string>
     <string name="sender_message_interval_seconds">Periodo entre los mensajes del transmisor (segundos)</string>
     <!-- SERIAL -->
     <string name="serial">Conexión Serial</string>
-    <string name="serial_baud_rate">Tasa de baudios por segundo</string>
     <string name="serial_config">Configuración serial</string>
-    <string name="serial_console">Consola serial</string>
-    <string name="serial_enabled">Comunicación serial activada</string>
-    <string name="serial_mode">Modo serial</string>
-    <string name="server">Servidor</string>
     <string name="set_your_region">Introduzca su región</string>
     <string name="settings">ajustes</string>
     <!-- SHARE -->
@@ -827,7 +700,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="show_waypoints">Mostrar marcas de posición</string>
     <string name="shutdown">Apagar</string>
     <string name="shutdown_node_name">Nodo: %1$s</string>
-    <string name="shutdown_on_power_loss">Apagar al perder energía</string>
     <string name="shutdown_warning">⚠️ Esto APAGARÁ el nodo. Se necesitará interacción física para volver a encenderlo.</string>
     <string name="signal">Señal</string>
     <string name="signal_quality">Calidad de señal</string>
@@ -835,12 +707,9 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="site_planner_section_display">Pantalla</string>
     <string name="skip">Saltar</string>
     <string name="slot">Ranura</string>
-    <string name="smart_position">Ubicación inteligente</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">SNR: Ratio de señal a ruido, una medida utilizada en las comunicaciones para cuantificar el nivel de una señal deseada respecto al nivel del ruido de fondo. En Meshtastic y otros sistemas inalámbricos, un mayor SNR indica una señal más clara que puede mejorar la fiabilidad y la calidad de la transmisión de datos.</string>
     <string name="speed">Velocidad</string>
-    <string name="spread_factor">Factor de dispersión</string>
-    <string name="ssid">SSID (Nombre la Red)</string>
     <string name="state_broadcast_seconds">Periodo entre transmisión de estado (segundos)</string>
     <string name="stay_connected_anywhere">Manténgase conectado en cualquier lugar</string>
     <string name="subnet">Subred</string>
@@ -850,7 +719,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="swipe_action_delete">Eliminar</string>
     <string name="swipe_action_mute">Silenciar</string>
     <string name="swipe_action_unmute">Desilenciar</string>
-    <string name="sx126x_rx_boosted_gain">Aumentar ganancia de RX</string>
     <string name="system_settings">Ajustes del sistema</string>
     <!-- TAK -->
     <string name="tak_server_section">Servidor</string>
@@ -885,7 +753,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="track_and_share_locations">Rastrear y comparte ubicaciones</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
-    <string name="transmit_over_lora">Transmitir en LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
@@ -894,8 +761,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="twenty_four_hours">24H</string>
     <string name="two_days">48 Horas</string>
     <string name="two_weeks">2Semanas</string>
-    <string name="tx_enabled">Transmisión Activa</string>
-    <string name="tx_power_dbm">Potencia de transmisión</string>
     <string name="type">Tipo</string>
     <string name="type_a_message">Escribe un mensaje</string>
     <!-- UNITS -->
@@ -911,7 +776,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="unmute">Desilenciar</string>
     <string name="unrecognized">No reconocido</string>
     <string name="unset">Sin establecer - 0</string>
-    <string name="up_down_select_input_enabled">Arriba/Abajo/Seleccionar Activado</string>
     <string name="update_interval_seconds">Intervalo de refresco (segundos)</string>
     <string name="uplink_feature_description">Los mensajes de la malla se enviarán a la internet pública a través de la puerta de enlace configurada de cualquier nodo.</string>
     <string name="uptime">Tiempo encendido</string>
@@ -921,23 +785,15 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="url_must_contain_placeholders">La URL debe contener marcadores de posición.</string>
     <string name="url_template">Plantilla de URL</string>
     <!-- USE -->
-    <string name="use_12h_format">Utilizar el formato de 12h para el reloj</string>
-    <string name="use_i2s_as_buzzer">Utilizar el Buzzer como uno I2S</string>
-    <string name="use_input_pullup_mode">Utilizar el modo de entrada PULL_UP</string>
-    <string name="use_modem_preset">Usar predefinido</string>
-    <string name="use_pwm_buzzer">Utilizar buzzer PWM</string>
     <!-- USER -->
     <string name="user">Usuario</string>
     <string name="user_config">Configuración del Usuario </string>
     <string name="user_id">Identificación del usuario</string>
     <string name="user_string">Cadena del usuario</string>
-    <string name="username">Usuario</string>
     <string name="uv_lux">Lux ultravioletas</string>
     <string name="via_mqtt">vía MQTT</string>
     <string name="view_on_map">Ver en el mapa</string>
     <string name="voltage">Tensión</string>
-    <string name="wait_for_bluetooth_duration_seconds">Esperar Bluetooth durante</string>
-    <string name="wake_on_tap_or_motion">Despertar al tocar o al mover</string>
     <string name="warning">Advertencia</string>
     <string name="waypoint_delete">¿Eliminar punto de referencia?</string>
     <string name="waypoint_edit">Editar punto de referencia</string>

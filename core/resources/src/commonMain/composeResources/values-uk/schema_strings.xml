@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">Синій</string>
+    <string name="schema_ambientlighting_green">Зелений</string>
+    <string name="schema_ambientlighting_led_state">Стан світлодіоду</string>
+    <string name="schema_ambientlighting_red">Червоний</string>
+    <string name="schema_audio_bitrate">Частота дискретизації CODEC2</string>
+    <string name="schema_audio_codec2_enabled">CODEC 2 увімкнено</string>
+    <string name="schema_audio_i2s_din">Вибір виходу I2S</string>
+    <string name="schema_audio_i2s_sck">I2S тактування</string>
+    <string name="schema_audio_i2s_sd">Вибір входу I2S</string>
+    <string name="schema_audio_i2s_ws">Вибір слова I2S</string>
+    <string name="schema_audio_ptt_pin">PTT контакт</string>
+    <string name="schema_bluetooth_enabled">Bluetooth увімкнено</string>
+    <string name="schema_bluetooth_mode">Режим створення пари</string>
+    <string name="schema_cannedmessage_inputbroker_event_ccw">Генерувати подію при повороті ліворуч</string>
+    <string name="schema_cannedmessage_inputbroker_event_cw">Генерувати подію при повороті праворуч</string>
+    <string name="schema_cannedmessage_inputbroker_event_press">Генерувати подію при натисканні</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">GPIO для енкодеру порт А</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">GPIO пін для енкодеру порт B</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">GPIO пін для кнопки енкодеру</string>
+    <string name="schema_cannedmessage_rotary1_enabled">Енкодер #1 активований</string>
+    <string name="schema_cannedmessage_send_bell">Надіслати дзвіночок</string>
+    <string name="schema_cannedmessage_updown1_enabled">Увімкнути керування Вгору/Вниз/Вибір</string>
+    <string name="schema_detectionsensor_detection_trigger_type">Тип тригера виявлення</string>
+    <string name="schema_detectionsensor_enabled">Датчик виявлення увімкнено</string>
+    <string name="schema_detectionsensor_monitor_pin">GPIO контакт для моніторингу</string>
+    <string name="schema_detectionsensor_name">Дружня назва</string>
+    <string name="schema_detectionsensor_send_bell">Надсилати дзвіночок з тривожним повідомленням</string>
+    <string name="schema_detectionsensor_use_pullup">Використовувати режим INPUT_PULLUP</string>
+    <string name="schema_device_button_gpio">GPIO кнопки</string>
+    <string name="schema_device_buzzer_gpio">GPIO гудка</string>
+    <string name="schema_device_double_tap_as_button_press">Подвійний дотик як натискання кнопки</string>
+    <string name="schema_device_double_tap_as_button_press_description">Розпізнавати подвійне постукування по корпусу як натискання кнопки користувача.</string>
+    <string name="schema_device_node_info_broadcast_secs">Інтервал розсилки даних про вузол</string>
+    <string name="schema_device_rebroadcast_mode">Режим ретрансляції</string>
+    <string name="schema_display_auto_screen_carousel_secs">Інтервал гортання каруселі</string>
+    <string name="schema_display_auto_screen_carousel_secs_description">Автоматично перемикає сторінки на екрані за принципом каруселі з заданим інтервалом.</string>
+    <string name="schema_display_compass_north_top">Завжди вказувати на північ</string>
+    <string name="schema_display_compass_north_top_description">Покажчик компаса за межами кола на екрані завжди вказуватиме на північ.</string>
+    <string name="schema_display_compass_orientation">Орієнтація компаса</string>
+    <string name="schema_display_displaymode">Режим екрану</string>
+    <string name="schema_display_displaymode_description">Перевизначити стандартну розмітку екрану.</string>
+    <string name="schema_display_flip_screen">Перевернути екран</string>
+    <string name="schema_display_flip_screen_description">Перевернути екран по вертикалі.</string>
+    <string name="schema_display_heading_bold">Жирні заголовки</string>
+    <string name="schema_display_heading_bold_description">Виділяти текст заголовка на екрані жирним шрифтом.</string>
+    <string name="schema_display_oled">Тип OLED</string>
+    <string name="schema_display_oled_description">Ручне керування виявленням OLED-екрану.</string>
+    <string name="schema_display_screen_on_secs">Екран включено для</string>
+    <string name="schema_display_screen_on_secs_description">Час роботи екрана після натискання кнопки або отримання повідомлень.</string>
+    <string name="schema_display_units">Одиниці виміру</string>
+    <string name="schema_display_units_description">Одиниці, що показуються на екрані пристрою.</string>
+    <string name="schema_display_use_12h_clock">Використовувати 12-г формат часу</string>
+    <string name="schema_display_use_12h_clock_description">Якщо увімкнено, пристрій буде показувати час у 12-годинному форматі на екрані.</string>
+    <string name="schema_display_wake_on_tap_or_motion">Прокидання дотиком або рухом</string>
+    <string name="schema_display_wake_on_tap_or_motion_description">Вимагає наявність акселерометра на вашому пристрої.</string>
+    <string name="schema_externalnotification_active">Активний високий рівень світлодіода</string>
+    <string name="schema_externalnotification_alert_bell">LED-індикатор сигналу тривоги</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">Зумер сигналу тривоги</string>
+    <string name="schema_externalnotification_alert_bell_vibra">Вібрація сигналу тривоги</string>
+    <string name="schema_externalnotification_alert_message">Мигання світлодіоду при повідомленнях тривоги</string>
+    <string name="schema_externalnotification_alert_message_buzzer">Звук зумеру при повідомленнях тривоги</string>
+    <string name="schema_externalnotification_alert_message_vibra">Вібрація при повідомленнях тривоги</string>
+    <string name="schema_externalnotification_enabled">Зовнішні сповіщення увімкнено</string>
+    <string name="schema_externalnotification_output">Вихідний LED (GPIO)</string>
+    <string name="schema_externalnotification_output_buzzer">Вихідний гудок (GPIO)</string>
+    <string name="schema_externalnotification_output_vibra">Вихід вібросигналу (GPIO)</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">Використовувати I2S як гудок</string>
+    <string name="schema_externalnotification_use_pwm">Використовувати зумер із ШІМ-керуванням</string>
+    <string name="schema_lora_bandwidth">Ширина смуги пропускання</string>
+    <string name="schema_lora_channel_num">Слот частоти</string>
+    <string name="schema_lora_channel_num_description">Налаштування частотного слота. При значенні 0 частота визначається назвою вашого основного каналу. Якщо у вас приватний основний канал, але ви хочете чути публічні повідомлення на додаткових, встановіть тут номер стандартного публічного слота.</string>
+    <string name="schema_lora_coding_rate">Швидкість кодування</string>
+    <string name="schema_lora_config_ok_to_mqtt">MQTT: Готово</string>
+    <string name="schema_lora_hop_limit">К-ть стрибків</string>
+    <string name="schema_lora_hop_limit_description">Встановлює максимальну кількість стрибків, стандартно — 3. Збільшення цього значення підвищує завантаженість ефіру, тому його слід використовувати обережно. Повідомлення з 0 стрибків не отримують підтвердження ACK.</string>
+    <string name="schema_lora_ignore_mqtt">Ігнорувати MQTT</string>
+    <string name="schema_lora_override_duty_cycle">Ігнорувати обмеження завантаженості каналу</string>
+    <string name="schema_lora_override_frequency">Перевизначити частоту</string>
+    <string name="schema_lora_pa_fan_disabled">Вентилятор вимкнений</string>
+    <string name="schema_lora_spread_factor">Показник розширення сигналу</string>
+    <string name="schema_lora_sx126x_rx_boosted_gain">Підсилення передачі</string>
+    <string name="schema_lora_tx_enabled">Передача активована</string>
+    <string name="schema_lora_tx_power">Потужність передачі</string>
+    <string name="schema_lora_use_preset">Використовувати пресет</string>
+    <string name="schema_mqtt_enabled">MQTT увімкнений</string>
+    <string name="schema_mqtt_encryption_enabled">Шифрування увімкнено</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">Проксі для клієнта увімкнуто</string>
+    <string name="schema_mqtt_root">Кореневий чат</string>
+    <string name="schema_mqtt_username">Ім'я користувача</string>
+    <string name="schema_neighborinfo_enabled">Інформацію про сусідів увімкнено</string>
+    <string name="schema_neighborinfo_transmit_over_lora">Передавати через LoRa</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">Дозволяє трансляцію NeighborInfo через LoRa. Дані про сусідів зазвичай надсилаються на MQTT та додаток, але ця опція вмикає їх передачу в ефір. Не працює на каналах зі стандартним ключем.</string>
+    <string name="schema_network_address_mode">Режим IPv4</string>
+    <string name="schema_network_eth_enabled">Ethernet увімкнено</string>
+    <string name="schema_network_eth_enabled_description">Увімкнення Ethernet вимкне Bluetooth-з'єднання до програми. З'єднання з вузлами через TCP недоступні на пристроях Apple.</string>
+    <string name="schema_network_ntp_server">NTP-сервер</string>
+    <string name="schema_network_rsyslog_server">rsyslog-сервер</string>
+    <string name="schema_network_wifi_ssid">SSID</string>
+    <string name="schema_paxcounter_ble_threshold">RSSI поріг BLE (за замовчуванням -80)</string>
+    <string name="schema_paxcounter_enabled">Лічильник пристроїв активований</string>
+    <string name="schema_position_broadcast_smart_minimum_distance">Інтелектуальна дистанція</string>
+    <string name="schema_position_broadcast_smart_minimum_distance_description">Мінімальна дистанція в метрах, після подолання якої вузол оновить геопозицію.</string>
+    <string name="schema_position_broadcast_smart_minimum_interval_secs">Інтелектуальний інтервал</string>
+    <string name="schema_position_gps_en_gpio">GPS EN GPIO</string>
+    <string name="schema_position_gps_mode">Режим GPS (Фізичний пристрій)</string>
+    <string name="schema_position_gps_update_interval">Інтервал опитування GPS</string>
+    <string name="schema_position_gps_update_interval_description">Як часто слід намагатися отримати позицію GPS (&lt;10 сек тримає GPS постійно увімкненим).</string>
+    <string name="schema_position_position_broadcast_secs">Інтервал трансляції</string>
+    <string name="schema_position_position_broadcast_secs_description">Максимальний інтервал, після якого вузол обов'язково надсилає свої координати.</string>
+    <string name="schema_position_position_broadcast_smart_enabled">Інтелектуальне передавання позиції</string>
+    <string name="schema_position_position_flags">Прапорці місцеположення</string>
+    <string name="schema_position_position_flags_description">Додаткові поля для пакетів позиції. Чим більше полів вибрано, тим більшим буде розмір повідомлення, що збільшує час передачі в ефірі та ризик втрати пакетів.</string>
+    <string name="schema_position_rx_gpio">GPIO отримання GPS</string>
+    <string name="schema_position_tx_gpio">GPIO передачі GPS</string>
+    <string name="schema_power_adc_multiplier_override">Множник корекції напруги</string>
+    <string name="schema_power_is_power_saving">Увімкнути енергоощадний режим</string>
+    <string name="schema_power_is_power_saving_description">Режим глибокого сну для всіх систем. У ролях «Tracker» та «Sensor» також вимикається радіомодуль. Не вмикайте це налаштування, якщо вам потрібен постійний зв'язок із додатком або якщо пристрій не має фізичної кнопки для пробудження.</string>
+    <string name="schema_power_on_battery_shutdown_after_secs">Вимкнути при втраті живлення</string>
+    <string name="schema_power_wait_bluetooth_secs">Тривалість очікування Bluetooth</string>
+    <string name="schema_rangetest_enabled">Тест на відстань увімкнений</string>
+    <string name="schema_rangetest_save">Зберегти .CSV у сховищі (лише ESP32)</string>
+    <string name="schema_security_admin_key">Ключ адміністратора</string>
+    <string name="schema_security_admin_key_description">Публічний ключ уповноважений надсилати повідомлення адміністратора на цей вузол.</string>
+    <string name="schema_security_debug_log_api_enabled">API журналу відладки увімкнено</string>
+    <string name="schema_security_debug_log_api_enabled_description">Виведення налагоджувальних логів у реальному часі через Serial; перегляд та експорт логів із прихованими координатами через Bluetooth.</string>
+    <string name="schema_security_is_managed">Керований режим</string>
+    <string name="schema_security_is_managed_description">Пристрій керується адміністратором мережі, доступ до налаштувань для користувача обмежено.</string>
+    <string name="schema_security_private_key">Приватний ключ</string>
+    <string name="schema_security_serial_enabled">Серійна консоль</string>
+    <string name="schema_security_serial_enabled_description">Послідовна консоль через Stream API.</string>
+    <string name="schema_serial_baud">Швидкість послідовного порту</string>
+    <string name="schema_serial_echo">Відлуння активоване</string>
+    <string name="schema_serial_enabled">Послідовний порт увімкнено</string>
+    <string name="schema_serial_mode">Послідовний режим</string>
+    <string name="schema_serial_rxd">RX пін</string>
+    <string name="schema_serial_txd">TX пін</string>
+    <string name="schema_storeforward_heartbeat">Пульсація</string>
+    <string name="schema_storeforward_history_return_max">Максимальний обсяг історії</string>
+    <string name="schema_storeforward_history_return_window">Максимальне вікно історії</string>
+    <string name="schema_storeforward_is_server">Сервер</string>
+    <string name="schema_storeforward_records">Кількість записів</string>
+    <string name="schema_telemetry_air_quality_enabled">Модуль показників якості повітря увімкнено</string>
+    <string name="schema_telemetry_air_quality_interval">Інтервал оновлення показників якості повітря</string>
+    <string name="schema_telemetry_device_telemetry_enabled">Надсилати телеметрію пристрою</string>
+    <string name="schema_telemetry_device_update_interval">Інтервал оновлення показників пристрою</string>
+    <string name="schema_telemetry_environment_display_fahrenheit">Екологічні показники використовують шкалу Фаренгейта</string>
+    <string name="schema_telemetry_environment_measurement_enabled">Модуль екологічних показників увімкнено</string>
+    <string name="schema_telemetry_environment_screen_enabled">Екологічні показники на екрані увімкнено</string>
+    <string name="schema_telemetry_environment_update_interval">Інтервал оновлення екологічних показників</string>
+    <string name="schema_telemetry_power_measurement_enabled">Модуль показників потужності ввімкнено</string>
+    <string name="schema_telemetry_power_screen_enabled">Показники потужності на екрані ввімкнено</string>
+    <string name="schema_telemetry_power_update_interval">Інтервал оновлення показників потужності</string>
+</resources>

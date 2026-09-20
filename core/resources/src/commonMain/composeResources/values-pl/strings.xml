@@ -29,7 +29,6 @@
     <string name="add_layer">Dodaj warstwę</string>
     <string name="add_network_device">Dodaj</string>
     <string name="address">Adres</string>
-    <string name="admin_key">Klucz administratora</string>
     <string name="admin_keys">Klucze administratora</string>
     <string name="administration">Zarządzanie</string>
     <string name="advanced">Zaawansowane</string>
@@ -37,14 +36,11 @@
     <string name="advanced_title">Zaawansowane</string>
     <!-- AIR -->
     <string name="air_quality_icon">Ikona jakości powietrza</string>
-    <string name="air_quality_metrics_module_enabled">Włącz moduł metryk jakości powietrza</string>
-    <string name="air_quality_metrics_update_interval_seconds">Czas aktualizacji metryk jakości powietrza</string>
     <string name="air_util_definition">Procent czasu  wykorzystanego do transmisji w ciągu ostatniej godziny.</string>
     <!-- ALERT -->
     <string name="alert_bell_text">Znak ostrzegawczy!</string>
     <string name="all_time">Wszystkie</string>
     <string name="altitude">Wysokość</string>
-    <string name="always_point_north">Zawsze wskazywać na północ</string>
     <string name="ambient_lighting">Oświetlenie otoczenia</string>
     <string name="analytics_okay">Zezwalaj na analizę i raportowanie awarii.</string>
     <!-- APP -->
@@ -63,27 +59,19 @@
     <string name="backup_keys">Klucze zapasowe</string>
     <string name="bad">słaby</string>
     <!-- BANDWIDTH -->
-    <string name="bandwidth">Pasmo</string>
     <string name="battery">Bateria</string>
-    <string name="blue">Niebieski</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_config">Konfiguracja Bluetooth</string>
-    <string name="bluetooth_enabled">Bluetooth włączony</string>
     <string name="bluetooth_feature_config">Konfiguracja</string>
     <string name="bluetooth_permission">Bluetooth</string>
-    <string name="bold_heading">Pogrubiony nagłówek</string>
     <string name="bottom_nav_settings">Ustawienia</string>
-    <string name="broadcast_interval">Interwał transmisji</string>
-    <string name="button_gpio">Przycisk GPIO</string>
-    <string name="buzzer_gpio">Buzzer GPIO</string>
     <string name="calculating">Obliczanie…</string>
     <string name="camera_permission">Pozwolenie na użycie kamery</string>
     <string name="cancel">Anuluj</string>
     <string name="canned_message_config">Konfiguracja gotowych wiadomości</string>
     <string name="cant_change_no_radio">Nie można zmienić kanału, ponieważ urządzenie nie jest jeszcze podłączone. Proszę, spróbuj ponownie.</string>
     <string name="cant_shutdown">Wyłączenie nie jest obsługiwane w tym urządzeniu</string>
-    <string name="carousel_interval">Interwał karuzeli</string>
     <string name="ch_util_definition">Wykorzystanie dla bieżącego kanału, w tym prawidłowego TX/RX oraz zniekształconego RX (czyli szumu).</string>
     <!-- CHANNEL -->
     <string name="channel_1">Kanał 1</string>
@@ -110,9 +98,6 @@
     <string name="clear">Czyść</string>
     <string name="close">Zamknij</string>
     <string name="close_selection">Zamknij wybór</string>
-    <string name="codec_2_enabled">CODEC 2 włączony</string>
-    <string name="codec2_sample_rate">Częstotliwość próbkowania CODEC2</string>
-    <string name="coding_rate">Szybkość kodowania</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Kurs: %1$s</string>
     <string name="compass_bearing_na">Kurs: N/A</string>
@@ -121,41 +106,19 @@
     <string name="compass_no_location_fix">Oczekiwanie na poprawkę GPS, aby obliczyć odległość i kurs.</string>
     <string name="compass_no_location_permission">Aby pokazać odległość i kurs, wymagane jest uprawnienie do lokalizacji.</string>
     <string name="compass_no_magnetometer">To urządzenie nie posiada czujnika kompasu. Kurs jest niedostępny.</string>
-    <string name="compass_orientation">Orientacja kompasu</string>
     <string name="compass_title">Kompas</string>
     <string name="compass_uncertainty">Szacowany obszar: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Szacowany obszar: nieznana dokładność</string>
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">Traktuj podwójne dotknięcie na obsługiwanych akcelerometrach jako naciśnięcie przycisku użytkownika.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Kontroluje miganie LED na urządzeniu. Dla większości urządzeń będzie to sterować jednym z maksymalnie 4 diod LED, ładowarka i diody GPS nie są sterowane.</string>
-    <string name="config_device_transmitOverLora_summary">Czy oprócz wysyłania do MQTT i PhoneAPI, NeighborInfo powinny być przesłane przez LoRa? Niedostępny na kanale z domyślnym kluczem i nazwą.</string>
     <string name="config_device_tripleClickAsAdHocPing_summary">Wyślij lokalizację na kanale głównym, gdy przycisk użytkownika jest trzykrotnie kliknięty.</string>
     <string name="config_device_tzdef_summary">Strefa czasowa dla dat na ekranie urządzenia i dzienniku.</string>
     <string name="config_device_use_phone_tz">Użyj strefy czasowej telefonu</string>
-    <string name="config_display_auto_screen_carousel_secs_summary">Automatycznie przewija się na następną stronę na ekranie jak karuzela, co określony interwał czasowy.</string>
-    <string name="config_display_displaymode_summary">Nadpisz domyślny układ ekranu.</string>
-    <string name="config_display_flip_screen_summary">Odwróć ekran pionowo.</string>
-    <string name="config_display_oled_summary">Nadpisz automatyczne wykrywanie ekranu OLED.</string>
-    <string name="config_display_screen_on_secs_summary">Jak długo ekran pozostaje włączony po naciśnięciu przycisku użytkownika lub odebraniu wiadomości.</string>
-    <string name="config_display_units_summary">Jednostki wyświetlane na ekranie urządzenia.</string>
-    <string name="config_display_wake_on_tap_or_motion_summary">Wymagany jest akcelerometr na urządzeniu.</string>
-    <string name="config_lora_frequency_slot_summary">Częstotliwość robocza węzła jest obliczana na podstawie regionu, ustawień modemu i tego pola. Gdy wartość wynosi 0, slot jest automatycznie obliczany na podstawie nazwy kanału podstawowego i zmienia się z domyślnego slotu publicznego. Jeśli skonfigurowano prywatny kanał podstawowy i publiczny kanał dodatkowy, należy przywrócić domyślny slot publiczny.</string>
-    <string name="config_lora_hop_limit_summary">Ustawia maksymalną liczbę przeskoków, domyślnie jest to 3. Zwiększenie liczby przeskoków powoduje również wzrost przeciążenia i należy stosować tę opcję ostrożnie. Komunikaty rozgłoszeniowe z 0 przeskokami nie otrzymają potwierdzeń ACK.</string>
     <string name="config_lora_modem_preset_summary">Dostępne presety modemu, domyślnie Long Fast.</string>
     <string name="config_lora_region_summary">Region, w którym będziesz używać urządzenia.</string>
-    <string name="config_network_eth_enabled_summary">Włączenie połączenia Ethernet spowoduje wyłączenie bluetootha. Połączania TCP nie są dostępne na urządzeniach Apple.</string>
     <string name="config_network_udp_enabled_summary">Włącz nadawanie pakietów poprzez UDP w lokalnej sieci.</string>
-    <string name="config_position_broadcast_secs_summary">Maksymalny odstęp czasu, jaki może upłynąć bez nadawania lokalizacji przez węzeł.</string>
-    <string name="config_position_broadcast_smart_minimum_distance_summary">Minimalna zmiana odległości w metrach, którą należy uwzględnić w przypadku inteligentnego pozycjonowania.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Kiedy najszybciej pozycja zostanie zaktualizowana, jeśli minimalna odległość została osiągnięta.</string>
-    <string name="config_position_flags_summary">Opcjonalne pola dołączane do danych lokalizacji. Im więcej pól, tym większy rozmiar pakietu, co wydłuża czas transmisji i zwiększa ryzyko jego utraty.</string>
-    <string name="config_position_gps_update_interval_summary">Jak często powinniśmy próbować uzyskać pozycję GPS (&lt;10 sekund utrzymuje GPS włączony).</string>
-    <string name="config_power_is_power_saving_summary">Uśpij wszystko na tak długo, jak to możliwe, w przypadku funkcji trackera i czujnika obejmie to również radio lora. Nie używaj tego ustawienia, jeśli chcesz korzystać z urządzenia z aplikacjami na telefon lub używasz urządzenia bez przycisków.</string>
-    <string name="config_security_admin_key">Klucz publiczny uprawniony do wysyłania wiadomości administracyjnych do tego węzła.</string>
-    <string name="config_security_debug_log_api_enabled">Pokaż na żywo logi debugowania przez połączenie szeregowe, podejrzyj i eksportuj logi węzła (bez informacji lokalizacyjnych) przez Bluetooth.</string>
-    <string name="config_security_is_managed">Urządzenie jest zarządzane przez administratora sieci mesh, użytkownik nie ma dostępu do żadnych ustawień urządzenia.</string>
     <string name="config_security_private_key">Używane do tworzenia klucza współdzielonego ze zdalnym urządzeniem.</string>
-    <string name="config_security_serial_enabled">Konsola szeregowa przez Stream API.</string>
     <string name="configuration">Konfiguracja</string>
     <string name="configure_notification_permissions">Skonfiguruj uprawnienia powiadomień</string>
     <string name="connect">Połącz</string>
@@ -218,7 +181,6 @@
     <string name="details">Szczegóły</string>
     <string name="detection_sensor">Czujnik detekcji</string>
     <string name="detection_sensor_config">Konfiguracja czujnika detekcji</string>
-    <string name="detection_sensor_enabled">Czujnik detekcji włączony</string>
     <!-- DEVICE -->
     <string name="device">Urządzenie</string>
     <string name="device_db_cache_limit">Limit pamięci podręcznej urządzenia</string>
@@ -241,8 +203,6 @@
     <!-- DISPLAY -->
     <string name="display">Wyświetlacz</string>
     <string name="display_config">Ustawienia wyświetlacza</string>
-    <string name="display_mode">Tryb wyświetlania</string>
-    <string name="display_units">Wyświetlana jednostka</string>
     <!-- DISTANCE -->
     <string name="distance">Odległość</string>
     <string name="dns">DNS</string>
@@ -251,16 +211,12 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Węzły</string>
     <string name="done">Wykonano</string>
-    <string name="double_tap_as_button_press">Podwójne dotknięcie jako naciśnięcie przycisku</string>
     <string name="download">Pobierz</string>
-    <string name="echo_enabled">Włącz echo</string>
     <string name="edit">Edytuj</string>
     <string name="eight_hours">8 Godzin</string>
     <!-- EMOJI -->
-    <string name="enable_power_saving_mode">Włącz tryb oszczędzania energii</string>
     <string name="enabled">Włączony</string>
     <!-- ENCRYPTION -->
-    <string name="encryption_enabled">Szyfrowanie włączone</string>
     <string name="encryption_error">Niezgodność klucza publicznego</string>
     <string name="encryption_error_text">Klucz publiczny nie pasuje do zapisanego klucza. Możesz usunąć węzeł i pozwolić mu na ponowną wymianę kluczy, ale może to oznaczać poważniejszy problem z bezpieczeństwem. Skontaktuj się z użytkownikiem przez inny zaufany kanał, żeby sprawdzić, czy zmiana klucza była spowodowana przywróceniem ustawień fabrycznych lub innym celowym działaniem.</string>
     <string name="encryption_pkc">Szyfrowanie klucza publicznego</string>
@@ -270,7 +226,6 @@
     <string name="error">Błąd</string>
     <string name="error_duty_cycle">Osiągnięto limit nadawania. Nie można wysłać wiadomości w tej chwili, spróbuj później.</string>
     <string name="ethernet_config">Ustawienia Ethernet</string>
-    <string name="ethernet_enabled">Ethernet włączony</string>
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Poproś o pozycję</string>
     <string name="expires">Wygasa</string>
@@ -279,7 +234,6 @@
     <string name="export_data_csv">Eksportuj wszystkie pakiety</string>
     <string name="external_notification">Zewnętrzne Powiadomienie</string>
     <string name="external_notification_config">Konfiguracja Zewnętrznego Powiadomienia</string>
-    <string name="external_notification_enabled">Powiadomienia zewnętrzne włączone</string>
     <string name="factory_reset">Ustawienia fabryczne</string>
     <string name="fair">wystarczający</string>
     <string name="favorite">Ulubiony</string>
@@ -329,10 +283,7 @@
     <string name="firmware_version">Wersja oprogramowania: %1$s</string>
     <string name="fixed_pin">Stały PIN</string>
     <string name="fixed_position">Położenie stałe</string>
-    <string name="flip_screen">Odwróć ekran</string>
     <!-- FORMAT -->
-    <string name="frequency_slot">Slot częstotliwości</string>
-    <string name="friendly_name">Przyjazna nazwa</string>
     <string name="gas_resistance">Rezystancja gazu</string>
     <string name="gateway">Brama domyślna</string>
     <string name="generate_qr_code">Generuj Kod QR</string>
@@ -342,14 +293,8 @@
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">Pin GPIO</string>
-    <string name="gpio_pin_to_monitor">Pin GPIO do monitorowania</string>
-    <string name="gps_en_gpio">GPS EN GPIO</string>
-    <string name="gps_receive_gpio">GPS Rx GPIO</string>
-    <string name="gps_transmit_gpio">GPS Tx GPIO</string>
-    <string name="green">Zielony</string>
     <string name="hardware">Sprzęt</string>
     <string name="heading">Kierunek</string>
-    <string name="heartbeat">Bicie serca</string>
     <string name="hide_layer">Ukryj warstwę</string>
     <string name="hide_password">Ukryj hasło</string>
     <string name="hops_away">Skoków</string>
@@ -357,7 +302,6 @@
     <string name="i_agree">Zgadzam się.</string>
     <string name="i_agree_to_share_my_location">Przeczytałem powyższe informacje i rozumiem je. Wyrażam dobrowolną zgodę na niezaszyfrowaną transmisję danych mojego węzła za pośrednictwem protokołu MQTT</string>
     <string name="i_know_what_i_m_doing">Wiem, co robię.</string>
-    <string name="i2s_clock">Zegar I2S</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Jakość powietrza w pomieszczeniach (Indoor Air Quality) - wartość względna w skali IAQ mierzona czujnikiem BME680. Zakres wartości: 0–500.</string>
     <string name="icon_meanings">Znaczenia ikon</string>
@@ -365,7 +309,6 @@
     <string name="ignore">Zignoruj</string>
     <string name="ignore_add">Dodać '%1$s' do listy ignorowanych?</string>
     <string name="ignore_incoming">Ignoruj przychodzące</string>
-    <string name="ignore_mqtt">Zignoruj MQTT</string>
     <string name="ignore_remove">Usunąć '%1$s' z listy ignorowanych? Twoje urządzenie zostanie zrestartowane po tej zmianie.</string>
     <!-- IMPORT -->
     <string name="import_configuration">Import konfiguracji</string>
@@ -379,7 +322,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">Adres IP:</string>
     <string name="ip_port">Port:</string>
-    <string name="ipv4_mode">Tryb IPv4</string>
     <string name="json_output_enabled">Włącz wyjście JSON</string>
     <!-- KEY -->
     <string name="last_position_update">Ostatnia aktualizacja lokalizacji</string>
@@ -389,7 +331,6 @@
     <!-- LAYER -->
     <string name="learn_more">Dowiedz się więcej</string>
     <string name="led_heartbeat">LED bicia serca</string>
-    <string name="led_state">Stan diody LED</string>
     <!-- LICENSED -->
     <!-- LOAD -->
     <string name="loading">Ładowanie</string>
@@ -488,7 +429,6 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">Konfiguracja MQTT</string>
-    <string name="mqtt_enabled">Włącz MQTT</string>
     <string name="mqtt_status_connected">Połączony</string>
     <string name="mqtt_status_disconnected">Rozłączono</string>
     <string name="must_set_region">Musisz ustawić region!</string>
@@ -508,7 +448,6 @@
     <string name="navigate_back">Przejdź wstecz</string>
     <string name="neighbor_info">Informacje o sąsiadze</string>
     <string name="neighbor_info_config">Konfiguracja Info o sąsiedzie</string>
-    <string name="neighbor_info_enabled">Włącz informacje o sąsiedzie</string>
     <string name="network">Sieć</string>
     <string name="new_channel_rcvd">Otrzymano nowy URL kanału</string>
     <string name="new_messages_below">Nowe wiadomości poniżej</string>
@@ -543,7 +482,6 @@
     <string name="node_sort_via_favorite">Przez ulubione</string>
     <string name="node_sort_via_mqtt">Przez MQTT</string>
     <string name="nodedb_reset">Zresetuj NodeDB</string>
-    <string name="nodeinfo_broadcast_interval">Interwał transmisji informacji o węźle</string>
     <!-- NODES -->
     <string name="nodes">Węzły</string>
     <string name="nodes_at_this_location">Węzły w tej lokalizacji</string>
@@ -556,11 +494,8 @@
     <!-- NOTIFICATIONS -->
     <string name="notifications_on_message_receipt">Powiadomienia o otrzymaniu wiadomości</string>
     <string name="now">Teraz</string>
-    <string name="ntp_server">Serwer NTP</string>
     <!-- OFFLINE -->
-    <string name="ok_to_mqtt">Ok dla MQTT</string>
     <string name="okay">OK</string>
-    <string name="oled_type">Typ ekranu OLED</string>
     <!-- ONE -->
     <string name="one_day">24 Godzin</string>
     <string name="one_hour">1 godzina</string>
@@ -572,13 +507,8 @@
     <string name="options">Opcje</string>
     <string name="orient_north">Zorientuj na północ</string>
     <!-- OUTPUT -->
-    <string name="output_buzzer_gpio">Wyjście buzzera (GPIO)</string>
     <string name="output_duration_milliseconds">Czas trwania (w milisekundach)</string>
-    <string name="output_led_gpio">Wyjście LED (GPIO)</string>
-    <string name="output_vibra_gpio">Wyjście silnika wibracyjnego (GPIO)</string>
-    <string name="override_duty_cycle">Nadpisz cykl pracy</string>
     <!-- PACKET -->
-    <string name="pairing_mode">Tryb parowania</string>
     <string name="password">Hasło</string>
     <!-- PAX -->
     <string name="paxcounter">Paxcounter</string>
@@ -598,26 +528,20 @@
     <!-- POSITION -->
     <string name="position">Pozycjonowanie</string>
     <string name="position_enabled">Lokalizacja włączona</string>
-    <string name="position_flags">Flagi położenia</string>
     <string name="position_log">Pozycjonowanie</string>
     <string name="position_packet">Pakiet lokalizacji</string>
     <!-- POWER -->
     <string name="power">Zasilanie</string>
     <string name="power_config">Konfiguracja zarządzania energią</string>
     <string name="power_metrics_log">Metryki zasilania</string>
-    <string name="power_metrics_module_enabled">Włącz moduł metryk zasilania</string>
-    <string name="power_metrics_on_screen_enabled">Wyświetlaj metryki zasilania na ekranie</string>
-    <string name="power_metrics_update_interval_seconds">Czas aktualizacji metryk zasilania</string>
     <string name="precise_location">Precyzyjna lokalizacja</string>
     <string name="preferences_language">Język</string>
     <string name="preferences_system_default">Domyślny systemu</string>
     <string name="pressure">Ciśnienie</string>
     <!-- PREVIEW -->
     <string name="primary">Podstawowy</string>
-    <string name="private_key">Klucz prywatny</string>
     <string name="provide_location_to_mesh">Podaj lokalizację telefonu do sieci</string>
     <string name="psk">PSK</string>
-    <string name="ptt_pin">Pin PTT (Push-To-Talk)</string>
     <string name="public_key">Klucz publiczny</string>
     <string name="qr_code">Kod QR</string>
     <!-- QUICK -->
@@ -634,14 +558,12 @@
     <string name="range_test_config">Konfiguracja testu zasięgu</string>
     <string name="reboot">Restart</string>
     <!-- REBROADCAST -->
-    <string name="rebroadcast_mode">Tryb retransmisji</string>
     <string name="rebroadcast_mode_all_desc">Przekazuje ponownie każdy odebrany pakiet, niezależnie od tego, czy został wysłany na nasz prywatny kanał, czy z innej sieci Mesh o tych samych parametrach radia.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">To samo zachowanie co ALL, ale pomija dekodowanie pakietów i po prostu je retransmituje. Dostępne tylko w roli REPEATER. Ustawienie tego w innych rolach spowoduje zachowanie jak ALL.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignoruje niestandardowe pakiety (non-standard portnums) takie jak: TAK, RangeTest, PaxCounter, itp. Przekazuje dalej jedynie standardowe pakiety (standard portnums): NodeInfo, Text, Position, Telemetry oraz Routing.</string>
     <string name="rebroadcast_mode_known_only_desc">Ignoruje odebrane pakiety z obcych sieci, podobnie jak LOCAL_ONLY, ale idzie o krok dalej, ignorując również pakiety z węzłów, które nie znajdują się jeszcze na liście znanych węzłów.</string>
     <string name="rebroadcast_mode_local_only_desc">Ignoruje odebrane pakiety z obcych sieci Mesh, które są otwarte lub których nie można odszyfrować. Retransmituje wiadomość tylko na lokalnych kanałach primary / secondary.</string>
     <string name="rebroadcast_mode_none_desc">Dozwolone wyłącznie dla ról SENSOR, TRACKER i TAK_TRACKER. Spowoduje to zablokowanie wszystkich retransmisji, podobnie jak rola CLIENT_MUTE.</string>
-    <string name="red">Czerwony</string>
     <string name="region_frequency_plan">Region</string>
     <!-- REMOTE -->
     <string name="remote_admin">Zdalne zarządzanie</string>
@@ -688,7 +610,6 @@
     <string name="role_tak_desc">Zoptymalizowany pod kątem komunikacji systemowej ATAK, redukuje nadmiarowe transmisje.</string>
     <string name="role_tak_tracker_desc">Umożliwia automatyczne transmisje TAK PLI i zmniejsza liczbę nadmiarowych transmisji.</string>
     <string name="role_tracker_desc">Tracker - Do użytku z urządzeniami przeznaczonymi jako śledzenie GPS. Pakiety pozycyjne wysyłane z tego urządzenia będą miały wyższy priorytet, z nadawaniem pozycji co dwie minuty. Inteligentna transmisja pozycji będzie domyślnie wyłączona.</string>
-    <string name="root_topic">Główny temat</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Otrzymano negatywne potwierdzenie</string>
     <string name="routing_error_no_route">Brak trasy</string>
@@ -696,14 +617,12 @@
     <string name="routing_error_timeout">Upłynął limit czasu</string>
     <string name="rssi">RSSI:</string>
     <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
-    <string name="rsyslog_server">Serwer rsyslog</string>
     <!-- SAVE -->
     <string name="save">Zapisz</string>
     <string name="save_changes">Zapisz</string>
     <string name="save_rangetest">Eksportuj pakiety zasięgu</string>
     <!-- SCAN -->
     <string name="scan">Skanowanie</string>
-    <string name="screen_on_for">Ekran włączony na</string>
     <string name="scroll_to_bottom">Przewiń w dół</string>
     <string name="secondary">Wtórny</string>
     <!-- SECURITY -->
@@ -724,11 +643,7 @@
     <string name="send">Wyślij</string>
     <!-- SERIAL -->
     <string name="serial">Seryjny</string>
-    <string name="serial_baud_rate">Prędkość transmisji</string>
     <string name="serial_config">Konfiguracja seryjna</string>
-    <string name="serial_enabled">Włącz tryb serial</string>
-    <string name="serial_mode">Tryb serial</string>
-    <string name="server">Serwer</string>
     <string name="set_your_region">Wybierz swój region</string>
     <string name="settings">ustawienia</string>
     <!-- SHARE -->
@@ -750,11 +665,9 @@
     <!-- SITE -->
     <string name="site_planner_section_display">Wyświetlacz</string>
     <string name="skip">Pomiń</string>
-    <string name="smart_position">Inteligentne Pozycjonowanie</string>
     <string name="snr">SNR:</string>
     <string name="snr_definition">Współczynnik sygnału do szumu (Signal-to-Noise Ratio) - miara stosowana w komunikacji do określania poziomu pożądanego sygnału w stosunku do poziomu szumu tła. W Meshtastic i innych systemach bezprzewodowych wyższy współczynnik SNR oznacza czystszy sygnał, który może zwiększyć niezawodność i jakość transmisji danych.</string>
     <string name="speed">Prędkość</string>
-    <string name="ssid">SSID</string>
     <string name="subnet">Podsieć</string>
     <string name="supported">Obsługiwane</string>
     <string name="swipe_action_delete">Usuń</string>
@@ -801,7 +714,6 @@
     <!-- TRAFFIC -->
     <string name="traffic_management_enabled">Moduł Włączony</string>
     <!-- TRANSLATION -->
-    <string name="transmit_over_lora">Nadaj przez LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
@@ -809,8 +721,6 @@
     <string name="twenty_four_hours">24H</string>
     <string name="two_days">48 Godzin</string>
     <string name="two_weeks">2W</string>
-    <string name="tx_enabled">Nadawanie włączone</string>
-    <string name="tx_power_dbm">Moc nadawania</string>
     <string name="type">Typ</string>
     <!-- UNITS -->
     <string name="units_follow_system">Domyślny systemu</string>
@@ -828,21 +738,14 @@
     <!-- URL -->
     <string name="url">URL</string>
     <!-- USE -->
-    <string name="use_12h_format">Użyj formatu 12-godzinnego</string>
-    <string name="use_i2s_as_buzzer">Użyj I2S jako buzzer</string>
-    <string name="use_input_pullup_mode">Użyj trybu INPUT_PULLUP</string>
-    <string name="use_modem_preset">Użyj predefiniowanych ustawień</string>
-    <string name="use_pwm_buzzer">Użyj buzzer PWM</string>
     <!-- USER -->
     <string name="user">Użytkownik</string>
     <string name="user_config">Konfiguracja użytkownika</string>
     <string name="user_id">ID użytkownika</string>
     <string name="userinfo">Informacje o użytkowniku</string>
-    <string name="username">Nazwa użytkownika</string>
     <string name="via_mqtt">Przez MQTT</string>
     <string name="view_on_map">Pokaż na mapie</string>
     <string name="voltage">Napięcie</string>
-    <string name="wake_on_tap_or_motion">Wybudź przy dotknięciu lub ruchu</string>
     <string name="warning">Uwaga</string>
     <string name="waypoint_delete">Usuń punkt nawigacji?</string>
     <string name="waypoint_edit">Edytuj punkt nawigacji</string>

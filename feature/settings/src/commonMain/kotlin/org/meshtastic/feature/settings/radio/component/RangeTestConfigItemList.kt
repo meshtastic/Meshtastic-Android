@@ -26,8 +26,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.range_test
 import org.meshtastic.core.resources.range_test_config
-import org.meshtastic.core.resources.range_test_enabled
-import org.meshtastic.core.resources.save_csv_in_storage_esp32_only
+import org.meshtastic.core.resources.schema_rangetest_enabled
+import org.meshtastic.core.resources.schema_rangetest_save
 import org.meshtastic.core.resources.sender_message_interval_seconds
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -65,7 +65,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         item {
             TitledCard(title = stringResource(Res.string.range_test_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.range_test_enabled),
+                    title = stringResource(Res.string.schema_rangetest_enabled),
                     checked = formState.value.enabled,
                     enabled = canConfigure || formState.value.enabled,
                     onCheckedChange = {
@@ -86,7 +86,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.save_csv_in_storage_esp32_only),
+                    title = stringResource(Res.string.schema_rangetest_save),
                     checked = formState.value.save,
                     enabled = canConfigure,
                     onCheckedChange = {

@@ -44,7 +44,6 @@
     <string name="action_translate_message">メッセージを翻訳</string>
     <string name="actions">アクション</string>
     <string name="adc_multiplier_override">ADC倍率のオーバーライド</string>
-    <string name="adc_multiplier_override_ratio">ADC倍率のオーバーライド比</string>
     <!-- ADD -->
     <string name="add">追加</string>
     <string name="add_a_note">プライベートメモを追加…</string>
@@ -57,7 +56,6 @@
     <string name="add_network_device_manually">手動でデバイスを追加…</string>
     <string name="add_network_layer">ネットワークレイヤーを追加</string>
     <string name="address">アドレス</string>
-    <string name="admin_key">管理者キー</string>
     <string name="admin_keys">管理者キー</string>
     <string name="administration">管理</string>
     <string name="advanced">詳細設定</string>
@@ -67,24 +65,15 @@
     <string name="air_quality">空気質</string>
     <string name="air_quality_icon">空気品質アイコン</string>
     <string name="air_quality_metrics_log">空気品質メトリクスのログ</string>
-    <string name="air_quality_metrics_module_enabled">空気品質測定モジュールを有効化</string>
-    <string name="air_quality_metrics_update_interval_seconds">空気品質メトリクスの更新間隔</string>
     <string name="air_util_definition">過去1時間以内に送信に使用された通信時間の割合。</string>
     <string name="air_utilization">AirUtil</string>
     <!-- ALERT -->
-    <string name="alert_bell_buzzer">ブザー</string>
-    <string name="alert_bell_led">LED</string>
     <string name="alert_bell_text">アラートベル！</string>
-    <string name="alert_bell_vibra">バイブレーション</string>
-    <string name="alert_message_buzzer">ブザー</string>
-    <string name="alert_message_led">LED</string>
-    <string name="alert_message_vibra">バイブレーション</string>
     <string name="all_time">すべて</string>
     <string name="allow_input_source">入力ソースを許可</string>
     <string name="allow_undefined_pin_access">未定義のピンへのアクセスを許可</string>
     <string name="alt">高度</string>
     <string name="altitude">標高</string>
-    <string name="always_point_north">常に北を上にする</string>
     <string name="ambient_lighting">環境照明</string>
     <string name="ambient_lighting_config">環境照明設定</string>
     <string name="analytics_notice">Android アプリの改善に役立てるため、分析データを収集します（ご協力ありがとうございます）。ユーザー行動に関する匿名化された情報を受け取ります。これにはクラッシュレポートやアプリ内で使用された画面などが含まれます。</string>
@@ -132,19 +121,15 @@
     <string name="backup_restore">バックアップと復元</string>
     <string name="bad">不良</string>
     <!-- BANDWIDTH -->
-    <string name="bandwidth">帯域</string>
     <string name="baro_pressure">気圧</string>
     <string name="battery">バッテリー</string>
     <string name="battery_ina_2xx_i2c_address">バッテリー INA_2XX I2C アドレス</string>
     <string name="ble_devices">Bluetooth デバイス</string>
-    <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI閾値（デフォルトは -80）</string>
-    <string name="blue">青</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_available_devices">利用可能な Bluetooth デバイス</string>
     <string name="bluetooth_config">Bluetooth 設定</string>
     <string name="bluetooth_disabled">Bluetooth がオフです。近くのデバイスをスキャンするにはオンにしてください。</string>
-    <string name="bluetooth_enabled">Bluetoothを有効</string>
     <string name="bluetooth_feature_config">設定</string>
     <string name="bluetooth_feature_config_description">デバイスの設定とチャンネルをワイヤレスで管理します。</string>
     <string name="bluetooth_feature_discovery">探索</string>
@@ -156,14 +141,10 @@
     <plurals name="bluetooth_scan_too_frequent">
         <item quantity="other">Bluetooth スキャンの上限に達しました。%1$d 秒後にもう一度お試しください。</item>
     </plurals>
-    <string name="bold_heading">太字の見出し</string>
     <string name="bonding_failed_permissions">ペアリングに失敗しました。付近のデバイスの権限を許可して、もう一度お試しください。</string>
     <string name="bonding_failed_retry">ペアリングが完了しませんでした。もう一度ペアリングしてください。</string>
     <string name="bottom_nav_settings">設定</string>
-    <string name="broadcast_interval">ブロードキャスト間隔</string>
     <string name="busy_noise_floor">ビジーフロア</string>
-    <string name="button_gpio">ボタン GPIO</string>
-    <string name="buzzer_gpio">ブザー GPIO</string>
     <string name="calculating">計算中…</string>
     <string name="call_sign">コールサイン</string>
     <string name="camera_permission">カメラの権限</string>
@@ -176,7 +157,6 @@
     <string name="canned_message_enabled">定型メッセージを有効化</string>
     <string name="cant_change_no_radio">デバイスが未接続のため、チャンネルが変更できませんでした。もう一度やり直してください。</string>
     <string name="cant_shutdown">このデバイスでシャットダウンはサポートされていません</string>
-    <string name="carousel_interval">カルーセルの間隔</string>
     <string name="ch_util_definition">現在のチャンネルの使用率。正常な送信（TX）、正常な受信（RX）、および不正な受信 (ノイズ)を含みます。</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -231,9 +211,6 @@
     <string name="co2">CO₂</string>
     <string name="co2_humidity">CO₂ 湿度</string>
     <string name="co2_temperature">CO₂ 温度</string>
-    <string name="codec_2_enabled">CODEC 2 を有効化</string>
-    <string name="codec2_sample_rate">CODEC2 サンプルレート</string>
-    <string name="coding_rate">符号化レート</string>
     <string name="collapse_chart">チャートを折りたたむ</string>
     <string name="collapsed">折りたたみ済み</string>
     <string name="communicate_off_the_grid">携帯電話の電波がなくても、友人やコミュニティとオフグリッドで通信できます。</string>
@@ -246,47 +223,23 @@
     <string name="compass_no_location_permission">距離と方位を表示するには位置情報の権限が必要です。</string>
     <string name="compass_no_magnetometer">このデバイスにはコンパスセンサーがありません。方位は利用できません。</string>
     <string name="compass_north_top">ノースアップ表示</string>
-    <string name="compass_orientation">コンパスの向き</string>
     <string name="compass_title">コンパス</string>
     <string name="compass_uncertainty">推定範囲：\u00b1%1$s（\u00b1%2$s）</string>
     <string name="compass_uncertainty_unknown">推定範囲：精度不明</string>
     <string name="compromised_keys">危殆化した鍵が検出されました。再生成するには OK を選択してください。</string>
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">加速度センサー搭載デバイスで本体をダブルタップすると、ボタンのプッシュと同じ動作として扱います。</string>
     <string name="config_device_ledHeartbeatEnabled_summary">デバイスの点滅するLEDを制御します。ほとんどのデバイスでは、最大4つあるLEDのうちの1つを制御します。充電用LEDとGPS用LEDは制御できません。</string>
-    <string name="config_device_transmitOverLora_summary">近隣ノード情報(NeighborInfo)をMQTTやPhoneAPIへ送信することに加えて、LoRa無線経由でも送信すべきかどうかを設定します。デフォルトの名前とキーが設定されたチャンネルでは利用できません。</string>
     <string name="config_device_tripleClickAsAdHocPing_summary">ユーザーボタンをトリプルクリックすると、プライマリチャンネルに位置情報を送信します。</string>
     <string name="config_device_tzdef_summary">デバイスの画面とログ上の日付のタイムゾーン。</string>
     <string name="config_device_use_phone_tz">デバイスのタイムゾーンを使用</string>
-    <string name="config_display_auto_screen_carousel_secs_summary">指定した間隔に基づき、画面上でカルーセルのように自動的に次のページに切り替わります。</string>
-    <string name="config_display_compass_north_top_summary">円外側の画面上のコンパス方位は、常に北を指します。</string>
-    <string name="config_display_displaymode_summary">デフォルト画面レイアウトを上書きします。</string>
-    <string name="config_display_flip_screen_summary">画面を上下に反転させる。</string>
-    <string name="config_display_heading_bold_summary">画面の見出しテキストを太字にします。</string>
-    <string name="config_display_oled_summary">OLED 画面の自動検出を上書きします。</string>
-    <string name="config_display_screen_on_secs_summary">ユーザーボタンが押された後、またはメッセージが受信された後、画面がオンになっている期間。</string>
-    <string name="config_display_units_summary">デバイスの画面に表示されている単位。</string>
-    <string name="config_display_wake_on_tap_or_motion_summary">お使いのデバイスに加速度センサーがあることが必要です。</string>
-    <string name="config_lora_frequency_slot_summary">ノードの動作周波数は、リージョン、モデムプリセット、およびこのフィールドに基づいて計算されます。0 の場合、スロットはプライマリーチャンネル名に基づいて自動的に計算され、デフォルトのパブリックスロットから変更されます。プライベートなプライマリーチャンネルとパブリックなセカンダリーチャンネルを設定している場合は、パブリックのデフォルトスロットに戻してください。</string>
-    <string name="config_lora_hop_limit_summary">最大ホップ数を設定し、初期値は3ホップです。ホップ数を増やすと輻輳も増加するため、控えめに運用しましょう。0ホップのブロードキャストメッセージはACKを受信しなくなります。</string>
     <string name="config_lora_modem_preset_licensed_summary">このリージョンのプリセットは、免許を持つ（アマチュア無線）運用者専用です。選択するには、ユーザー設定で「免許制アマチュア無線（Ham）」を有効にしてください。</string>
     <string name="config_lora_modem_preset_summary">使用可能なモデムプリセット、デフォルトはロングファーストです。</string>
     <string name="config_lora_region_summary">無線デバイスを使用される地域を指定してくだい。</string>
-    <string name="config_network_eth_enabled_summary">イーサネットを有効にすると、アプリへの Bluetooth 接続が無効になります。TCP でのノード接続は Apple デバイスでは利用できません。</string>
     <string name="config_network_udp_enabled_summary">UDP 経由でローカルネットワーク上のパケットのブロードキャスト通信を有効にする。</string>
-    <string name="config_position_broadcast_secs_summary">ノードが位置情報をブロードキャストせずに経過し得る最大間隔。</string>
-    <string name="config_position_broadcast_smart_minimum_distance_summary">スマート位置情報ブロードキャストの対象とする最小の移動距離（メートル）。</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">最小距離を満たした場合に位置情報の更新を送信する最短間隔。</string>
-    <string name="config_position_flags_summary">位置情報メッセージを構成する際に含めるオプションのフィールド。含めるフィールドが多いほどメッセージは大きくなり、エアタイムが長くなってパケット損失のリスクが高まります。</string>
-    <string name="config_position_gps_update_interval_summary">GPS 位置情報を取得する頻度（&lt;10 秒で GPS をオンに保ちます）。</string>
-    <string name="config_power_is_power_saving_summary">可能な限りすべてをスリープさせます。トラッカーおよびセンサーの役割の場合は、LoRa 無線機も対象になります。スマートフォンアプリでデバイスを使用したい場合や、ユーザーボタンのないデバイスを使用している場合は、この設定を使用しないでください。</string>
     <string name="config_saved_restarting">ノードが再起動しており、しばらく接続できなくなります。</string>
-    <string name="config_security_admin_key">このノードに管理メッセージを送信することを許可された公開鍵。</string>
-    <string name="config_security_debug_log_api_enabled">シリアル経由でライブデバッグログを出力し、位置情報を秘匿したデバイスログを Bluetooth 経由で表示・エクスポートします。</string>
-    <string name="config_security_is_managed">デバイスはメッシュ管理者によって管理されており、ユーザーはデバイス設定にアクセスできません。</string>
     <string name="config_security_private_key">リモートデバイスとの共有鍵を作成するために使用されます。</string>
     <string name="config_security_public_key">秘密鍵から生成され、メッシュ上の他のノードに送信されて、共有秘密鍵を計算できるようにします。</string>
-    <string name="config_security_serial_enabled">Stream API 経由のシリアルコンソール。</string>
     <string name="configuration">設定</string>
     <string name="configure_bluetooth_permissions">Bluetooth の権限を設定</string>
     <string name="configure_critical_alerts">重要なアラートを設定</string>
@@ -329,7 +282,6 @@
     <string name="debug_filter_included">フィルタを含む</string>
     <string name="debug_filter_preset_title">プリセットフィルタ</string>
     <string name="debug_filters">フィルタ</string>
-    <string name="debug_log_api_enabled">デバッグログAPIを有効化</string>
     <string name="debug_logcat_empty">表示するアプリログがありません</string>
     <string name="debug_logcat_refresh">更新</string>
     <string name="debug_logs_export">ログのエクスポート</string>
@@ -377,8 +329,6 @@
     <string name="details">詳細</string>
     <string name="detection_sensor">検出センサー</string>
     <string name="detection_sensor_config">検出センサ設定</string>
-    <string name="detection_sensor_enabled">検出センサーを有効化</string>
-    <string name="detection_trigger_type">検出トリガーの種類</string>
     <!-- DEVICE -->
     <string name="device">デバイス</string>
     <string name="device_configuration">デバイス設定</string>
@@ -392,12 +342,9 @@
     <string name="device_metrics_log">デバイスメトリクス</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s：%2$s%%</string>
-    <string name="device_metrics_update_interval_seconds">デバイスメトリクスの更新間隔</string>
     <string name="device_metrics_voltage_value">%1$s：%2$s V</string>
     <string name="device_sleeping">デバイスはスリープ状態です</string>
     <string name="device_storage_ui_title">デバイスストレージと UI（読み取り専用）</string>
-    <string name="device_telemetry_enabled">デバイステレメトリを送信</string>
-    <string name="device_telemetry_enabled_summary">デバイステレメトリモジュールの有効/無効を切り替えて、メトリクスをメッシュに送信します。これらは公称値です。混雑したメッシュでは、オンラインノード数に応じて間隔が自動的に長くなります。</string>
     <string name="device_theme_language">テーマ：%1$s、言語：%2$s</string>
     <string name="dew_point">露点</string>
     <string name="direct_message">ダイレクトメッセージ</string>
@@ -485,9 +432,6 @@
     <!-- DISPLAY -->
     <string name="display">表示</string>
     <string name="display_config">デバイスの表示</string>
-    <string name="display_mode">表示モード</string>
-    <string name="display_time_in_12h_format">有効にすると、デバイスは時刻を12時間形式で表示します。</string>
-    <string name="display_units">表示単位</string>
     <!-- DISTANCE -->
     <string name="distance">距離</string>
     <string name="distance_filters">距離フィルター</string>
@@ -546,38 +490,29 @@
     <string name="doc_title_widget">ホーム画面ウィジェット</string>
     <string name="done">完了</string>
     <string name="dont_show_again_for_device">このデバイスでは今後表示しない</string>
-    <string name="double_tap_as_button_press">ダブルタップをボタンとして使用</string>
     <string name="downlink_feature_description">パブリックなインターネットゲートウェイからのメッセージが、ローカルメッシュに転送されます。ゼロホップポリシーにより、デフォルトの MQTT サーバーからのトラフィックはこのデバイスより先には伝播しません。</string>
     <string name="download">ダウンロード</string>
     <string name="duplicated_public_key_title">公開鍵の重複を検出</string>
     <string name="dynamic">動的</string>
     <string name="easily_set_up_private_mesh_networks">遠隔地での安全で信頼性の高い通信のために、プライベートメッシュネットワークを簡単にセットアップできます。</string>
-    <string name="echo_enabled">Echoを有効化</string>
     <string name="edit">編集</string>
     <string name="edit_custom_tile_source">ネットワークタイルソースを編集</string>
     <string name="eight_hours">8時間</string>
     <!-- EMOJI -->
-    <string name="enable_power_saving_mode">省電力モードを有効化</string>
     <string name="enabled">有効</string>
     <!-- ENCRYPTION -->
-    <string name="encryption_enabled">暗号化の有効化</string>
     <string name="encryption_error">公開鍵が一致しません</string>
     <string name="encryption_error_text">公開鍵が記録されている鍵と一致しません。ノードを削除して鍵を再交換させることもできますが、これはより深刻なセキュリティ上の問題を示している可能性があります。鍵の変更が工場出荷時リセットやその他の意図的な操作によるものかどうかを確認するため、別の信頼できる手段でユーザーに連絡してください。</string>
     <string name="encryption_pkc">公開鍵暗号化</string>
     <string name="env_metrics_log">環境メトリクス</string>
     <!-- ENVIRONMENT -->
     <string name="environment">環境</string>
-    <string name="environment_metrics_module_enabled">環境メトリクスモジュールを有効化</string>
-    <string name="environment_metrics_on_screen_enabled">環境メトリクスを画面上で有効化</string>
-    <string name="environment_metrics_update_interval_seconds">環境メトリクスの更新間隔</string>
-    <string name="environment_metrics_use_fahrenheit">環境メトリクスは華氏を使用</string>
     <string name="error">エラー</string>
     <string name="error_duty_cycle">デューティサイクル制限に達しました。現在メッセージを送信できません。しばらくしてからもう一度お試しください。</string>
     <string name="error_recovery_exhausted">繰り返し試行しましたが、安定した接続を確立できませんでした。ノードを選択し直して再試行してください。</string>
     <string name="establish_session">接続して管理</string>
     <string name="establishing_session">リモートセッションを確立しています…</string>
     <string name="ethernet_config">イーサネットオプション</string>
-    <string name="ethernet_enabled">イーサネット有効</string>
     <string name="ethernet_ip">イーサネット IP：</string>
     <string name="event_use_event_theme">イベントテーマを使用</string>
     <string name="exchange_position">位置交換</string>
@@ -591,7 +526,6 @@
     <string name="export_tak_data_package">TAK データパッケージをエクスポート</string>
     <string name="external_notification">外部通知</string>
     <string name="external_notification_config">外部通知設定</string>
-    <string name="external_notification_enabled">外部通知を有効化</string>
     <string name="factory_reset">出荷時にリセット</string>
     <string name="fair">普通</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
@@ -713,7 +647,6 @@
     <string name="firmware_version">ファームウェアバージョン：%1$s</string>
     <string name="fixed_pin">固定PIN</string>
     <string name="fixed_position">固定位置</string>
-    <string name="flip_screen">画面反転</string>
     <string name="for_more_information_see_our_privacy_policy">詳細については、プライバシーポリシーをご覧ください。</string>
     <!-- FORMAT -->
     <string name="format_bold">太字</string>
@@ -724,13 +657,8 @@
     <string name="free_memory">空きメモリ</string>
     <string name="free_memory_description">利用可能なシステムメモリ（バイト単位）</string>
     <string name="freq">周波数</string>
-    <string name="frequency_slot">周波数スロット</string>
-    <string name="friendly_name">名前</string>
     <string name="gas_resistance">ガス抵抗</string>
     <string name="gateway">ゲートウェイ</string>
-    <string name="generate_input_event_on_ccw">CCWで入力イベントを生成</string>
-    <string name="generate_input_event_on_cw">CWで入力イベントを生成</string>
-    <string name="generate_input_event_on_press">プレスで入力イベントを生成</string>
     <string name="generate_qr_code">QRコード生成</string>
     <!-- GEOFENCE -->
     <string name="geofence">ジオフェンス</string>
@@ -757,28 +685,15 @@
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO端子</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">ロータリーエンコーダAポート用のGPIOピン</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">ロータリーエンコーダBポート用GPIOピン</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">ロータリーエンコーダプレスポート用GPIOピン</string>
-    <string name="gpio_pin_to_monitor">モニターのGPIOピン</string>
-    <string name="gps_en_gpio">GPS EN GPIO</string>
-    <string name="gps_mode">GPS モード（物理ハードウェア）</string>
-    <string name="gps_receive_gpio">GPS RX GPIO</string>
-    <string name="gps_transmit_gpio">GPS TX GPIO</string>
     <string name="grant_permission">権限を許可</string>
-    <string name="green">緑</string>
     <string name="hardware">ハードウェア</string>
     <string name="hardware_model">ハードウェアのモデル</string>
     <string name="heading">方角</string>
-    <string name="heartbeat">ハートビート</string>
     <string name="help_and_documentation">ヘルプとドキュメント</string>
     <string name="hide_layer">レイヤーを非表示</string>
     <string name="hide_password">パスワードを非表示</string>
-    <string name="history_return_max">リクエスト可能な最大の履歴件数</string>
-    <string name="history_return_window">リクエスト可能な履歴の期間  (分)</string>
     <string name="hop_histogram_empty">この期間に受信したノードはありません</string>
     <string name="hop_histogram_title">ホップごとのノード数</string>
-    <string name="hop_limit">ホップ数</string>
     <string name="hops_away">ホップ数</string>
     <string name="host">ホスト</string>
     <string name="host_metrics_log">ホストのメトリクス</string>
@@ -786,10 +701,6 @@
     <string name="i_agree">同意します。</string>
     <string name="i_agree_to_share_my_location">上記を読んで理解しています。MQTTを通じて自分のノードデータの暗号化されていない送信に自発的に同意します</string>
     <string name="i_know_what_i_m_doing">はい、了承します。</string>
-    <string name="i2s_clock">I2S クロック</string>
-    <string name="i2s_data_in">I2S データ IN</string>
-    <string name="i2s_data_out">I2S データ OUT</string>
-    <string name="i2s_word_select">I2S ワードセレクト</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(屋内空気品質) 相対スケールIAQ値は、ボッシュBME680によって測定されます。 値の範囲は 0-500。</string>
     <string name="icon_meanings">アイコンの意味</string>
@@ -797,7 +708,6 @@
     <string name="ignore">無視</string>
     <string name="ignore_add">'%1$s'を無視リストに追加しますか？</string>
     <string name="ignore_incoming">無視リスト (ノード番号を登録)</string>
-    <string name="ignore_mqtt">MQTT を無視</string>
     <string name="ignore_remove">'%1$s'を無視リストから削除しますか？</string>
     <!-- IMPORT -->
     <string name="import_configuration">設定をインポート</string>
@@ -823,7 +733,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IPアドレス：</string>
     <string name="ip_port">ポート：</string>
-    <string name="ipv4_mode">IPv4 モード</string>
     <string name="json_output_enabled">JSON出力の有効化</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
@@ -843,7 +752,6 @@
     <!-- LAYER -->
     <string name="learn_more">詳細</string>
     <string name="led_heartbeat">LED ハートビート</string>
-    <string name="led_state">LEDの状態</string>
     <string name="legacy_admin_channel">レガシー管理チャンネル</string>
     <string name="library_count">%1$d 個のライブラリ</string>
     <!-- LICENSED -->
@@ -929,7 +837,6 @@
     <string name="lux">ルクス</string>
     <string name="manage_custom_tile_sources">カスタムタイルソースを管理</string>
     <string name="manage_map_layers">マップレイヤーを管理</string>
-    <string name="managed_mode">管理モード</string>
     <string name="manual_position_request">手動での位置情報のリクエストが必要</string>
     <!-- MAP -->
     <string name="map">メッシュマップ</string>
@@ -1039,8 +946,6 @@
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">最小</string>
     <string name="minimum_broadcast_seconds">最小ブロードキャスト間隔(秒)</string>
-    <string name="minimum_distance">スマート距離</string>
-    <string name="minimum_interval">スマート間隔</string>
     <string name="minimum_wake_time_seconds">最小起動時間</string>
     <string name="modem_preset">プリセット</string>
     <string name="module_settings">追加機能の設定</string>
@@ -1050,7 +955,6 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT設定</string>
-    <string name="mqtt_enabled">MQTTを有効化</string>
     <string name="mqtt_error_connection_lost">MQTT：接続が失われました</string>
     <string name="mqtt_error_credentials_rejected">MQTT：接続が拒否されました（認証情報を確認してください）</string>
     <string name="mqtt_error_proxy_failed">MQTT プロキシに失敗しました：%1$s</string>
@@ -1095,7 +999,6 @@
     <string name="navigate_into_label">ナビゲートする</string>
     <string name="neighbor_info">隣接ノード情報</string>
     <string name="neighbor_info_config">近隣ノード情報  (Neighbor Info) の設定</string>
-    <string name="neighbor_info_enabled">近隣ノード情報を有効化</string>
     <string name="network">ネットワーク</string>
     <string name="new_channel_rcvd">新しいチャンネルURLを受信しました</string>
     <string name="new_messages_below">下に新着メッセージ</string>
@@ -1167,7 +1070,6 @@
     <string name="node_sort_via_favorite">お気に入り経由</string>
     <string name="node_sort_via_mqtt">MQTT経由</string>
     <string name="nodedb_reset">NodeDBをリセット</string>
-    <string name="nodeinfo_broadcast_interval">ノード情報のブロードキャスト間隔</string>
     <!-- NODES -->
     <string name="nodes">ノード</string>
     <string name="nodes_at_this_location">この場所のノード</string>
@@ -1193,12 +1095,8 @@
     <string name="notifications_on_alert_bell_receipt">アラートベル受信時の通知</string>
     <string name="notifications_on_message_receipt">メッセージ受信時の通知</string>
     <string name="now">今</string>
-    <string name="ntp_server">NTPサーバー</string>
-    <string name="number_of_records">サーバーの最大保管レコード数  (デフォルト 約11,000レコード)</string>
     <!-- OFFLINE -->
-    <string name="ok_to_mqtt">MQTT への送信を許可</string>
     <string name="okay">OK</string>
-    <string name="oled_type">OLED タイプ</string>
     <!-- ONE -->
     <string name="one_day">24時間</string>
     <string name="one_hour">1時間</string>
@@ -1217,16 +1115,9 @@
     <string name="options">オプション</string>
     <string name="orient_north">北を上に向ける</string>
     <!-- OUTPUT -->
-    <string name="output_buzzer_gpio">ブザー出力(GPIO)</string>
     <string name="output_duration_milliseconds">出力時間 (ミリ秒)</string>
-    <string name="output_led_active_high">LED出力 アクティブハイ</string>
-    <string name="output_led_gpio">LED出力 (GPIO)</string>
-    <string name="output_vibra_gpio">バイブレーション出力 (GPIO)</string>
     <string name="overflow_menu">オーバーフローメニュー</string>
     <string name="override_console_serial_port">コンソールのシリアルポートを上書き</string>
-    <string name="override_duty_cycle">デューティサイクルを上書き</string>
-    <string name="override_frequency_mhz">周波数の上書き</string>
-    <string name="pa_fan_disabled">PAファン無効</string>
     <!-- PACKET -->
     <string name="packet_authenticity">パケットの真正性</string>
     <string name="packet_authenticity_balanced">バランス：認証済みを優先</string>
@@ -1240,7 +1131,6 @@
     <string name="packet_authenticity_strict_summary">暗号的に認証されたメッシュパケットのみを表示・処理します。古いノードや大きすぎるパケットは表示されなくなることがあります。</string>
     <string name="packet_authenticity_strict_title">厳格な認証を有効にしますか？</string>
     <string name="packet_authenticity_unsupported">この接続中のデバイスは、パケット署名の検証に対応していません。</string>
-    <string name="pairing_mode">ペアリングモード</string>
     <string name="password">パスワード</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
@@ -1252,7 +1142,6 @@
     <string name="pax_wifi_format">W:%1$d</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Paxcounter 設定</string>
-    <string name="paxcounter_enabled">Paxcounter を有効化</string>
     <string name="periodic_position_broadcast">定期的な位置情報ブロードキャスト</string>
     <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic が Bluetooth でデバイスを検出して接続するには、「付近のデバイス」の権限を有効にする必要があります。使用しないときは無効にできます。</string>
@@ -1278,16 +1167,12 @@
     <string name="position">位置</string>
     <string name="position_config_set_fixed_from_phone">現在のスマートフォンの位置から設定</string>
     <string name="position_enabled">位置情報共有の有効化</string>
-    <string name="position_flags">位置情報フラグ</string>
     <string name="position_log">位置</string>
     <string name="position_packet">位置情報パケット</string>
     <!-- POWER -->
     <string name="power">電源</string>
     <string name="power_config">電源設定</string>
     <string name="power_metrics_log">電源メトリクス</string>
-    <string name="power_metrics_module_enabled">電源メトリクスモジュール有効</string>
-    <string name="power_metrics_on_screen_enabled">電源メトリクスを画面上で有効化</string>
-    <string name="power_metrics_update_interval_seconds">電源メトリクスの更新間隔</string>
     <string name="powered">給電</string>
     <string name="ppm">ppm</string>
     <string name="precise_location">正確な位置情報</string>
@@ -1309,12 +1194,9 @@
     <string name="preview_text">テキスト</string>
     <string name="primary">プライマリ</string>
     <string name="primary_channel_feature">定期的な位置情報とテレメトリのブロードキャスト</string>
-    <string name="private_key">秘密鍵</string>
     <string name="provide_location_to_mesh">メッシュネットワークにスマホの位置情報を提供</string>
     <string name="provider_name_exists">プロバイダー名がすでに存在します。</string>
-    <string name="proxy_to_client_enabled">クライアントへのプロキシの有効化</string>
     <string name="psk">PSK</string>
-    <string name="ptt_pin">PTT端子</string>
     <string name="public_key">公開鍵</string>
     <string name="public_key_changed">公開鍵が変更されました</string>
     <string name="qr_code">QRコード</string>
@@ -1332,11 +1214,9 @@
     <string name="rainfall_24h">降水量（24時間）</string>
     <string name="range_test">レンジテスト</string>
     <string name="range_test_config">レンジテスト設定</string>
-    <string name="range_test_enabled">レンジテストを有効化</string>
     <string name="react">リアクション</string>
     <string name="reboot">再起動</string>
     <!-- REBROADCAST -->
-    <string name="rebroadcast_mode">再送信モード</string>
     <string name="rebroadcast_mode_all_desc">受信メッセージが、参加しているプライベートチャンネル上のもの、または同じLoRaパラメータを持つ別のメッシュからのものであれば再ブロードキャストします。</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">ALLと同じ動作ですが、パケットのデコードをスキップして単純に再ブロードキャストします。 リピーターロールでのみ使用できます。他のロールに設定すると、ALLの動作になります。</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">TAK、RangeTest、PaxCounterなどの非標準ポート番号からのパケットを無視。NodeInfo、Text、Position、Telemetry、Routingなどの標準ポート番号を持つパケットのみを再ブロードキャスト。</string>
@@ -1345,7 +1225,6 @@
     <string name="rebroadcast_mode_none_desc">SENSOR、TRACKER、およびTAK_TRACKERロールでのみ許可。CLIENT_MUTEロールとは異なり、すべての再ブロードキャストを禁止。</string>
     <string name="recent_network_devices">最近のネットワークデバイス</string>
     <string name="reconnecting">再接続しています…</string>
-    <string name="red">赤</string>
     <string name="refresh">更新</string>
     <string name="refresh_metadata">メタデータを更新</string>
     <string name="regenerate_keys_confirmation">秘密鍵を再生成してもよろしいですか？\n\n以前にこのノードと鍵を交換したことのあるノードは、安全な通信を再開するために、そのノードを削除して鍵を再交換する必要があります。</string>
@@ -1423,8 +1302,6 @@
     <string name="role_tak_tracker_desc">TAK PLIの自動ブロードキャストを有効にし、ルーチンブロードキャストを削減します。</string>
     <string name="role_tracker">トラッカー</string>
     <string name="role_tracker_desc">GPSの位置情報パケットを優先してブロードキャストします。</string>
-    <string name="root_topic">ルート トピック</string>
-    <string name="rotary_encoder_1_enabled">ロータリーエンコーダ #1 を有効化</string>
     <string name="router_role_confirmation_text">&lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;デバイスの役割に関するドキュメント&lt;/a&gt;と、&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;適切なデバイスの役割の選び方&lt;/a&gt;に関するブログ記事を読みました。</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">相手が正常に受信できませんでした</string>
@@ -1438,13 +1315,11 @@
     <string name="routing_error_too_large">メッセージが大きすぎて送信できません</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">受信信号強度インジケーター（RSSI）は、アンテナで受信している電力レベルを測定するための指標です。一般的にRSSI値が高いほど、より強力で安定した接続を示します。</string>
-    <string name="rsyslog_server">rsyslogサーバー</string>
     <string name="sats">GPS衛星</string>
     <!-- SAVE -->
     <string name="save">保存</string>
     <string name="save_and_restart">保存して再起動</string>
     <string name="save_changes">保存</string>
-    <string name="save_csv_in_storage_esp32_only">ストレージにCSVファイルを保存(ESP32のみ)</string>
     <string name="save_rangetest">レンジテストのパケットをエクスポート</string>
     <!-- SCAN -->
     <string name="scan">スキャン</string>
@@ -1458,7 +1333,6 @@
     <string name="scan_shared_contact_qr">共有連絡先のQRコードをスキャン</string>
     <string name="scanning_bluetooth">スキャンしています…</string>
     <string name="scanning_network">スキャンしています…</string>
-    <string name="screen_on_for">画面オンの時間</string>
     <string name="scroll_to_bottom">一番下までスクロール</string>
     <string name="search_emoji">絵文字を検索…</string>
     <string name="search_messages">メッセージを検索…</string>
@@ -1491,19 +1365,10 @@
     <string name="selected">選択済み</string>
     <string name="selected_map_type">選択中のマップタイプ</string>
     <string name="send">送信</string>
-    <string name="send_bell">ベルを送信</string>
-    <string name="send_bell_with_alert_message">アラートメッセージ付きのベルを送信</string>
     <string name="sender_message_interval_seconds">送信者のメッセージ間隔 (秒)</string>
     <!-- SERIAL -->
     <string name="serial">シリアル</string>
-    <string name="serial_baud_rate">シリアルボーレイト</string>
     <string name="serial_config">シリアル設定</string>
-    <string name="serial_console">シリアルコンソール</string>
-    <string name="serial_enabled">シリアル通信を有効化</string>
-    <string name="serial_mode">シリアルモード</string>
-    <string name="serial_rx_pin">RX</string>
-    <string name="serial_tx_pin">TX</string>
-    <string name="server">サーバー</string>
     <string name="session_active">セッション有効</string>
     <string name="session_refresh_required">更新が必要</string>
     <string name="set_time">時刻を設定</string>
@@ -1532,7 +1397,6 @@
     <string name="show_waypoints">ウェイポイントを表示</string>
     <string name="shutdown">シャットダウン</string>
     <string name="shutdown_node_name">ノード：%1$s</string>
-    <string name="shutdown_on_power_loss">電源喪失時にシャットダウン</string>
     <string name="shutdown_warning">⚠️ ノードをシャットダウンします。再びオンにするには物理的な操作が必要になります。</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号品質</string>
@@ -1564,7 +1428,6 @@
     <string name="site_planner_use_node_location">現在のノードの位置を使用</string>
     <string name="skip">スキップ</string>
     <string name="slot">スロット</string>
-    <string name="smart_position">スマート位置情報</string>
     <string name="snr">SN比</string>
     <string name="snr_definition">信号対ノイズ比（SN比）は、通信において、目的の信号のレベルを背景ノイズのレベルに対して定量化するために使用される尺度です。Meshtasticや他の無線システムでは、SN比が高いほど信号が鮮明であることを示し、データ伝送の信頼性と品質を向上させることができます。</string>
     <string name="soil_moisture">土壌水分</string>
@@ -1572,15 +1435,12 @@
     <string name="speed">速度</string>
     <string name="speed_kmh">%1$d km/h</string>
     <string name="speed_mph">%1$d mph</string>
-    <string name="spread_factor">拡散率</string>
-    <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">状態のブロードキャスト間隔 (秒)</string>
     <string name="status_message">ステータスメッセージ</string>
     <string name="stay_connected_anywhere">どこでもつながる</string>
     <string name="stop_connecting">接続を停止</string>
     <string name="store_forward">ストアアンドフォワード</string>
     <string name="store_forward_config">ストアアンドフォワード設定</string>
-    <string name="store_forward_enabled">ストアアンドフォワード有効</string>
     <string name="subnet">サブネット</string>
     <string name="success">成功</string>
     <string name="super_deep_sleep_duration_seconds">スーパーディープスリープの時間</string>
@@ -1589,7 +1449,6 @@
     <string name="swipe_action_delete">削除</string>
     <string name="swipe_action_mute">ミュート</string>
     <string name="swipe_action_unmute">ミュート解除</string>
-    <string name="sx126x_rx_boosted_gain">RX ブーストゲイン</string>
     <string name="system_settings">システム設定</string>
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
@@ -1692,7 +1551,6 @@
     <string name="translation_failed">メッセージを翻訳できません</string>
     <string name="translation_model_download_failed">翻訳モデルのダウンロードに失敗しました</string>
     <string name="translation_not_required">メッセージはすでにあなたの言語です</string>
-    <string name="transmit_over_lora">LoRaで送信</string>
     <!-- TRANSPORT -->
     <string name="transport">接続方式</string>
     <string name="transport_api">API</string>
@@ -1706,8 +1564,6 @@
     <string name="twenty_four_hours">24時間</string>
     <string name="two_days">48時間</string>
     <string name="two_weeks">2週間</string>
-    <string name="tx_enabled">送信を有効化</string>
-    <string name="tx_power_dbm">送信出力</string>
     <string name="type">種別</string>
     <string name="type_a_message">メッセージを入力</string>
     <string name="udp_enabled">UDP ブロードキャスト</string>
@@ -1727,8 +1583,6 @@
     <string name="unmute_selected">選択項目のミュートを解除</string>
     <string name="unrecognized">不明</string>
     <string name="unset">未設定 - 0</string>
-    <string name="up_down_select_input_enabled">上下/選択入力を有効化</string>
-    <string name="update_interval">GPS ポーリング間隔</string>
     <string name="update_interval_seconds">更新間隔 (秒)</string>
     <string name="updated">更新済み</string>
     <string name="uplink_feature_description">メッシュからのメッセージは、いずれかのノードに設定されたゲートウェイを通じてパブリックなインターネットに送信されます。</string>
@@ -1741,12 +1595,7 @@
     <string name="usb">USB</string>
     <string name="usb_permission_denied">USB の権限が拒否されました。デバイスを再接続してもう一度お試しください。</string>
     <!-- USE -->
-    <string name="use_12h_format">12時間の時計形式を使用</string>
     <string name="use_homoglyph_characters_encoding">キリル文字向けのコンパクトエンコーディング</string>
-    <string name="use_i2s_as_buzzer">I2Sをブザーとして使用</string>
-    <string name="use_input_pullup_mode">INPUT_PULLUP モードを使用</string>
-    <string name="use_modem_preset">プリセットを使用</string>
-    <string name="use_pwm_buzzer">PWMブザーを使用</string>
     <!-- USER -->
     <string name="user">ユーザー</string>
     <string name="user_config">ユーザー設定</string>
@@ -1754,7 +1603,6 @@
     <string name="user_info">ユーザー情報</string>
     <string name="user_string">ユーザー文字列</string>
     <string name="userinfo">ユーザー情報</string>
-    <string name="username">ユーザー名</string>
     <string name="uv_lux">UV ルクス</string>
     <string name="via_api">API 経由</string>
     <string name="via_mqtt">MQTT経由</string>
@@ -1762,8 +1610,6 @@
     <string name="view_on_map">マップで表示</string>
     <string name="view_release">リリースを表示</string>
     <string name="voltage">電圧</string>
-    <string name="wait_for_bluetooth_duration_seconds">Bluetooth 待機時間</string>
-    <string name="wake_on_tap_or_motion">タップまたは動作で起動</string>
     <string name="warning">警告</string>
     <string name="waypoint_delete">ウェイポイントを削除しますか？</string>
     <string name="waypoint_edit">ウェイポイントを編集</string>

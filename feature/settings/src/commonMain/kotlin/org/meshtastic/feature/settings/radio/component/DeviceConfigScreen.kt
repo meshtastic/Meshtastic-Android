@@ -56,11 +56,8 @@ import org.meshtastic.core.model.util.isDebug
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.accept
 import org.meshtastic.core.resources.are_you_sure
-import org.meshtastic.core.resources.button_gpio
-import org.meshtastic.core.resources.buzzer_gpio
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.clear_time_zone
-import org.meshtastic.core.resources.config_device_doubleTapAsButtonPress_summary
 import org.meshtastic.core.resources.config_device_ledHeartbeatEnabled_summary
 import org.meshtastic.core.resources.config_device_tripleClickAsAdHocPing_summary
 import org.meshtastic.core.resources.config_device_tzdef_summary
@@ -68,7 +65,6 @@ import org.meshtastic.core.resources.config_device_use_phone_tz
 import org.meshtastic.core.resources.device
 import org.meshtastic.core.resources.device_storage_ui_title
 import org.meshtastic.core.resources.device_theme_language
-import org.meshtastic.core.resources.double_tap_as_button_press
 import org.meshtastic.core.resources.file_entry
 import org.meshtastic.core.resources.files_available
 import org.meshtastic.core.resources.gpio
@@ -76,9 +72,7 @@ import org.meshtastic.core.resources.hardware
 import org.meshtastic.core.resources.i_know_what_i_m_doing
 import org.meshtastic.core.resources.led_heartbeat
 import org.meshtastic.core.resources.no_files_manifested
-import org.meshtastic.core.resources.nodeinfo_broadcast_interval
 import org.meshtastic.core.resources.options
-import org.meshtastic.core.resources.rebroadcast_mode
 import org.meshtastic.core.resources.rebroadcast_mode_all_desc
 import org.meshtastic.core.resources.rebroadcast_mode_all_skip_decoding_desc
 import org.meshtastic.core.resources.rebroadcast_mode_core_portnums_only_desc
@@ -100,6 +94,12 @@ import org.meshtastic.core.resources.role_tak_desc
 import org.meshtastic.core.resources.role_tak_tracker_desc
 import org.meshtastic.core.resources.role_tracker_desc
 import org.meshtastic.core.resources.router_role_confirmation_text
+import org.meshtastic.core.resources.schema_device_button_gpio
+import org.meshtastic.core.resources.schema_device_buzzer_gpio
+import org.meshtastic.core.resources.schema_device_double_tap_as_button_press
+import org.meshtastic.core.resources.schema_device_double_tap_as_button_press_description
+import org.meshtastic.core.resources.schema_device_node_info_broadcast_secs
+import org.meshtastic.core.resources.schema_device_rebroadcast_mode
 import org.meshtastic.core.resources.time_zone
 import org.meshtastic.core.resources.triple_click_adhoc_ping
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -206,7 +206,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 val currentRebroadcastMode = formState.value.rebroadcast_mode
                 DropDownPreference(
-                    title = stringResource(Res.string.rebroadcast_mode),
+                    title = stringResource(Res.string.schema_device_rebroadcast_mode),
                     enabled = state.connected,
                     selectedItem = currentRebroadcastMode,
                     onItemSelected = {
@@ -219,7 +219,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(Res.string.nodeinfo_broadcast_interval),
+                    title = stringResource(Res.string.schema_device_node_info_broadcast_secs),
                     selectedItem = formState.value.node_info_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
@@ -234,8 +234,8 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
         item {
             TitledCard(title = stringResource(Res.string.hardware)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.double_tap_as_button_press),
-                    summary = stringResource(Res.string.config_device_doubleTapAsButtonPress_summary),
+                    title = stringResource(Res.string.schema_device_double_tap_as_button_press),
+                    summary = stringResource(Res.string.schema_device_double_tap_as_button_press_description),
                     checked = formState.value.double_tap_as_button_press,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -331,7 +331,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
         item {
             TitledCard(title = stringResource(Res.string.gpio)) {
                 EditTextPreference(
-                    title = stringResource(Res.string.button_gpio),
+                    title = stringResource(Res.string.schema_device_button_gpio),
                     value = formState.value.button_gpio,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -343,7 +343,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
 
                 EditTextPreference(
-                    title = stringResource(Res.string.buzzer_gpio),
+                    title = stringResource(Res.string.schema_device_buzzer_gpio),
                     value = formState.value.buzzer_gpio,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

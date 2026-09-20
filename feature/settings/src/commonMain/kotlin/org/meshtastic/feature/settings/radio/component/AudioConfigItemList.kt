@@ -27,13 +27,13 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.audio
 import org.meshtastic.core.resources.audio_config
-import org.meshtastic.core.resources.codec2_sample_rate
-import org.meshtastic.core.resources.codec_2_enabled
-import org.meshtastic.core.resources.i2s_clock
-import org.meshtastic.core.resources.i2s_data_in
-import org.meshtastic.core.resources.i2s_data_out
-import org.meshtastic.core.resources.i2s_word_select
-import org.meshtastic.core.resources.ptt_pin
+import org.meshtastic.core.resources.schema_audio_bitrate
+import org.meshtastic.core.resources.schema_audio_codec2_enabled
+import org.meshtastic.core.resources.schema_audio_i2s_din
+import org.meshtastic.core.resources.schema_audio_i2s_sck
+import org.meshtastic.core.resources.schema_audio_i2s_sd
+import org.meshtastic.core.resources.schema_audio_i2s_ws
+import org.meshtastic.core.resources.schema_audio_ptt_pin
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -65,7 +65,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         item {
             TitledCard(title = stringResource(Res.string.audio_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.codec_2_enabled),
+                    title = stringResource(Res.string.schema_audio_codec2_enabled),
                     checked = formState.value.codec2_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -75,7 +75,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.ptt_pin),
+                    title = stringResource(Res.string.schema_audio_ptt_pin),
                     value = formState.value.ptt_pin,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -84,7 +84,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     },
                 )
                 DropDownPreference(
-                    title = stringResource(Res.string.codec2_sample_rate),
+                    title = stringResource(Res.string.schema_audio_bitrate),
                     enabled = state.connected,
                     items = ModuleConfig.AudioConfig.Audio_Baud.entries.map { it to it.name },
                     selectedItem = formState.value.bitrate,
@@ -94,7 +94,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.i2s_word_select),
+                    title = stringResource(Res.string.schema_audio_i2s_ws),
                     value = formState.value.i2s_ws,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -103,7 +103,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     },
                 )
                 EditTextPreference(
-                    title = stringResource(Res.string.i2s_data_in),
+                    title = stringResource(Res.string.schema_audio_i2s_sd),
                     value = formState.value.i2s_sd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -112,7 +112,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     },
                 )
                 EditTextPreference(
-                    title = stringResource(Res.string.i2s_data_out),
+                    title = stringResource(Res.string.schema_audio_i2s_din),
                     value = formState.value.i2s_din,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -121,7 +121,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     },
                 )
                 EditTextPreference(
-                    title = stringResource(Res.string.i2s_clock),
+                    title = stringResource(Res.string.schema_audio_i2s_sck),
                     value = formState.value.i2s_sck,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

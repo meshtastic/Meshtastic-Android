@@ -33,9 +33,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.bluetooth_config
-import org.meshtastic.core.resources.bluetooth_enabled
 import org.meshtastic.core.resources.fixed_pin
-import org.meshtastic.core.resources.pairing_mode
+import org.meshtastic.core.resources.schema_bluetooth_enabled
+import org.meshtastic.core.resources.schema_bluetooth_mode
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -69,7 +69,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         item {
             TitledCard(title = stringResource(Res.string.bluetooth_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.bluetooth_enabled),
+                    title = stringResource(Res.string.schema_bluetooth_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -79,7 +79,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(Res.string.pairing_mode),
+                    title = stringResource(Res.string.schema_bluetooth_mode),
                     enabled = state.connected,
                     items =
                     Config.BluetoothConfig.PairingMode.entries

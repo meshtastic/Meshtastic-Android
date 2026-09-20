@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">Синий</string>
+    <string name="schema_ambientlighting_green">Зеленый</string>
+    <string name="schema_ambientlighting_led_state">Состояние LED</string>
+    <string name="schema_ambientlighting_red">Красный</string>
+    <string name="schema_audio_bitrate">Частота дискретизации CODEC2</string>
+    <string name="schema_audio_codec2_enabled">CODEC 2 включен</string>
+    <string name="schema_audio_i2s_din">I2S Data Out</string>
+    <string name="schema_audio_i2s_sck">I2S Clock</string>
+    <string name="schema_audio_i2s_sd">I2S Data In</string>
+    <string name="schema_audio_i2s_ws">I2S Word Select</string>
+    <string name="schema_audio_ptt_pin">Контакт PTT</string>
+    <string name="schema_bluetooth_enabled">Bluetooth включен</string>
+    <string name="schema_bluetooth_mode">Режим сопряжения</string>
+    <string name="schema_cannedmessage_inputbroker_event_ccw">Создать событие ввода для CCW</string>
+    <string name="schema_cannedmessage_inputbroker_event_cw">Создать событие ввода для CW</string>
+    <string name="schema_cannedmessage_inputbroker_event_press">Создать событие ввода при нажатии</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">Контакт GPIO для порта A поворотного энкодера</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">Контакт GPIO для порта B поворотного энкодера</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">Контакт GPIO для порта Press поворотного энкодера</string>
+    <string name="schema_cannedmessage_rotary1_enabled">Поворотный энкодер #1 включен</string>
+    <string name="schema_cannedmessage_send_bell">Отправить колокольчик</string>
+    <string name="schema_cannedmessage_updown1_enabled">Вверх/Вниз/Выбирать включён</string>
+    <string name="schema_detectionsensor_detection_trigger_type">Тип триггера обнаружения</string>
+    <string name="schema_detectionsensor_enabled">Датчик определения включен</string>
+    <string name="schema_detectionsensor_monitor_pin">GPIO контакт для мониторинга</string>
+    <string name="schema_detectionsensor_name">Понятное имя</string>
+    <string name="schema_detectionsensor_send_bell">Отправить колокол с уведомлением</string>
+    <string name="schema_detectionsensor_use_pullup">Использовать режим INPUT_PULLUP</string>
+    <string name="schema_device_button_gpio">Кнопка GPIO</string>
+    <string name="schema_device_buzzer_gpio">Зуммер GPIO</string>
+    <string name="schema_device_double_tap_as_button_press">Двойное нажатие как кнопка</string>
+    <string name="schema_device_double_tap_as_button_press_description">Рассматривать двойное нажатие на поддерживаемых акселерометрах как нажатие пользовательской кнопки.</string>
+    <string name="schema_device_node_info_broadcast_secs">Интервал вещания передачи информации об узле</string>
+    <string name="schema_device_rebroadcast_mode">Режим ретрансляции</string>
+    <string name="schema_display_auto_screen_carousel_secs">Интервал карусели</string>
+    <string name="schema_display_auto_screen_carousel_secs_description">Автоматически переключает на следующую страницу на экране как карусель, основываясь на заданном интервале.</string>
+    <string name="schema_display_compass_north_top">Всегда указывать на север</string>
+    <string name="schema_display_compass_north_top_description">Стрелка компаса на экране за пределами круга всегда указывает на север.</string>
+    <string name="schema_display_compass_orientation">Направление компаса</string>
+    <string name="schema_display_displaymode">Режим экрана</string>
+    <string name="schema_display_displaymode_description">Переопределить макет экрана по умолчанию.</string>
+    <string name="schema_display_flip_screen">Повернуть экран</string>
+    <string name="schema_display_flip_screen_description">Отразить экран по вертикали.</string>
+    <string name="schema_display_heading_bold">Выделять заголовок жирным</string>
+    <string name="schema_display_heading_bold_description">Жирный шрифт заголовка на экране.</string>
+    <string name="schema_display_oled">Тип OLED</string>
+    <string name="schema_display_oled_description">Переопределить автоматическое распознавание экрана OLED.</string>
+    <string name="schema_display_screen_on_secs">Включать экран на</string>
+    <string name="schema_display_screen_on_secs_description">Как долго экран остается включенным после нажатия пользовательской кнопки или получения сообщений.</string>
+    <string name="schema_display_units">Система измерения</string>
+    <string name="schema_display_units_description">Единицы измерения, отображаемые на экране устройства.</string>
+    <string name="schema_display_use_12h_clock">Использовать 12-часовой формат времени</string>
+    <string name="schema_display_use_12h_clock_description">Если включено, устройство будет отображать время на экране в 12-часовом формате.</string>
+    <string name="schema_display_wake_on_tap_or_motion">Включать экран при касании или движении</string>
+    <string name="schema_display_wake_on_tap_or_motion_description">Необходимо наличие акселерометра на вашем устройстве.</string>
+    <string name="schema_externalnotification_active">Вывод светодиода активный высокий</string>
+    <string name="schema_externalnotification_alert_bell">Светодиодный индикатор</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">Бузер оповещений</string>
+    <string name="schema_externalnotification_alert_bell_vibra">Вибросигнал</string>
+    <string name="schema_externalnotification_alert_message">LED-индикатор уведомлений</string>
+    <string name="schema_externalnotification_alert_message_buzzer">Звуковой уведомитель сообщений</string>
+    <string name="schema_externalnotification_alert_message_vibra">Вибрация при уведомлении</string>
+    <string name="schema_externalnotification_enabled">Внешние уведомления включены</string>
+    <string name="schema_externalnotification_output">Выход LED (GPIO)</string>
+    <string name="schema_externalnotification_output_buzzer">Выход Буззера (GPIO)</string>
+    <string name="schema_externalnotification_output_vibra">Вибросигнал (GPIO)</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">Использовать I2S как буззер</string>
+    <string name="schema_externalnotification_use_pwm">Использовать PWM-звукоизлучатель</string>
+    <string name="schema_lora_bandwidth">Ширина канала</string>
+    <string name="schema_lora_channel_num">Частота слота</string>
+    <string name="schema_lora_channel_num_description">Рабочая частота вашей ноды рассчитывается на основе региона, настроек модема и этого поля. При значении 0 интервал автоматически рассчитывается на основе названия основного канала и изменяется с публичного интервала по умолчанию. Вернитесь к публичному интервалу по умолчанию, если настроены частный основной и общедоступный дополнительный каналы.</string>
+    <string name="schema_lora_coding_rate">Частота кодирования</string>
+    <string name="schema_lora_config_ok_to_mqtt">ОК в MQTT</string>
+    <string name="schema_lora_hop_limit">Количество прыжков</string>
+    <string name="schema_lora_hop_limit_description">Задает максимальное количество прыжков, по умолчанию - 3. Увеличение количества также увеличивает перегрузку и должно использоваться с осторожностью. Сообщения с 0 прыжков не будут получать подтверждения.</string>
+    <string name="schema_lora_ignore_mqtt">Игнорировать MQTT</string>
+    <string name="schema_lora_override_duty_cycle">Переопределить рабочий цикл</string>
+    <string name="schema_lora_override_frequency">Переопределить частоту</string>
+    <string name="schema_lora_pa_fan_disabled">PA вентилятор выключен</string>
+    <string name="schema_lora_spread_factor">Коэффициент распространения</string>
+    <string name="schema_lora_sx126x_rx_boosted_gain">Усиление RX</string>
+    <string name="schema_lora_tx_enabled">Передача включена</string>
+    <string name="schema_lora_tx_power">Мощность передатчика</string>
+    <string name="schema_lora_use_preset">Использовать шаблон</string>
+    <string name="schema_mqtt_enabled">MQTT включен</string>
+    <string name="schema_mqtt_encryption_enabled">Шифрование включено</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">Прокси клиенту включен</string>
+    <string name="schema_mqtt_root">Корневая тема</string>
+    <string name="schema_mqtt_username">Имя пользователя</string>
+    <string name="schema_neighborinfo_enabled">Информация о соседях включена</string>
+    <string name="schema_neighborinfo_transmit_over_lora">Передать через LoRa</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">В дополнение к отправке на MQTT и PhoneAPI, наши NeighborInfo должны быть переданы через LoRa. Недоступно на канале с ключом и именем по умолчанию.</string>
+    <string name="schema_network_address_mode">Режим IPv4</string>
+    <string name="schema_network_eth_enabled">Ethernet включен</string>
+    <string name="schema_network_eth_enabled_description">Включение Ethernet отключит Bluetooth-соединение с приложением. TCP-соединения не доступны на устройствах Apple.</string>
+    <string name="schema_network_ntp_server">NTP-сервер</string>
+    <string name="schema_network_rsyslog_server">Сервер rsyslog</string>
+    <string name="schema_network_wifi_enabled">Wi-Fi включен</string>
+    <string name="schema_network_wifi_enabled_description">Включение WiFi отключит Bluetooth-подключение к приложению.</string>
+    <string name="schema_network_wifi_ssid">Название сети</string>
+    <string name="schema_paxcounter_ble_threshold">BLE RSSI порог (по умолчанию -80)</string>
+    <string name="schema_paxcounter_enabled">Paxcounter включен</string>
+    <string name="schema_paxcounter_wifi_threshold">Порог WiFi RSSI (по умолчанию -80)</string>
+    <string name="schema_position_broadcast_smart_minimum_distance">Умное расстояние</string>
+    <string name="schema_position_broadcast_smart_minimum_distance_description">Минимальное расстояние для умной рассылки координаты.</string>
+    <string name="schema_position_broadcast_smart_minimum_interval_secs">Умный интервал</string>
+    <string name="schema_position_gps_en_gpio">GPIO EN GPS</string>
+    <string name="schema_position_gps_mode">Режим GPS (физическое оборудование)</string>
+    <string name="schema_position_gps_update_interval">Интервал опроса GPS</string>
+    <string name="schema_position_gps_update_interval_description">Как часто запрашивать координаты GPS (&lt;10 секунд держит GPS включенным постоянно).</string>
+    <string name="schema_position_position_broadcast_secs">Период рассылки</string>
+    <string name="schema_position_position_broadcast_secs_description">Максимальное время между передачами позиции нодой.</string>
+    <string name="schema_position_position_broadcast_smart_enabled">Умная позиция</string>
+    <string name="schema_position_position_flags">Флаги позиции</string>
+    <string name="schema_position_position_flags_description">Необязательные поля в сообщении о местоположении. Чем больше полей включено, тем больше сообщение, а значит больше время передачи и риск потери пакетов.</string>
+    <string name="schema_position_rx_gpio">GPIO приёма GPS</string>
+    <string name="schema_position_tx_gpio">GPIO передачи GPS</string>
+    <string name="schema_power_adc_multiplier_override">Коэффициент переопределения ADC</string>
+    <string name="schema_power_is_power_saving">Включить режим энергосбережения</string>
+    <string name="schema_power_is_power_saving_description">Все компоненты устройства будут  засыпать, насколько возможно. Для ролей TRACKER или SENSOR также будет засыпать радиопередатчик. Не включай режим, если используешь ноду с телефоном или у ноды нет кнопки для пробуждения.</string>
+    <string name="schema_power_on_battery_shutdown_after_secs">Выключение при потере мощности</string>
+    <string name="schema_power_wait_bluetooth_secs">Длительность ожидания Bluetooth</string>
+    <string name="schema_rangetest_enabled">Проверка дальности включена</string>
+    <string name="schema_rangetest_save">Сохранить .CSV в хранилище (только ESP32)</string>
+    <string name="schema_security_admin_key">Ключ администратора</string>
+    <string name="schema_security_admin_key_description">Открытый ключ для администрирования данной ноды</string>
+    <string name="schema_security_debug_log_api_enabled">API журнала отладки включен</string>
+    <string name="schema_security_debug_log_api_enabled_description">Вывод журнала отладки по последовательному каналу, просматривайте и выгружайте журналы устройства с измененным местоположением по Bluetooth.</string>
+    <string name="schema_security_is_managed">Управляемый режим</string>
+    <string name="schema_security_is_managed_description">Устройство управляется сетевым администратором, пользователь не может изменять настройки устройства.</string>
+    <string name="schema_security_private_key">Приватный ключ</string>
+    <string name="schema_security_serial_enabled">Консоль COM-порта</string>
+    <string name="schema_security_serial_enabled_description">Последовательная консоль через Stream API.</string>
+    <string name="schema_serial_baud">Скорость COM-порта</string>
+    <string name="schema_serial_echo">Echo включен</string>
+    <string name="schema_serial_enabled">COM-порт включен</string>
+    <string name="schema_serial_mode">Режим COM-порта</string>
+    <string name="schema_serial_rxd">RX</string>
+    <string name="schema_serial_txd">TX</string>
+    <string name="schema_storeforward_enabled">Store &amp; Forward включена</string>
+    <string name="schema_storeforward_heartbeat">Heartbeat</string>
+    <string name="schema_storeforward_history_return_max">Макс возврат истории</string>
+    <string name="schema_storeforward_history_return_window">Окно возврата истории</string>
+    <string name="schema_storeforward_is_server">Сервер</string>
+    <string name="schema_storeforward_records">Количество записей</string>
+    <string name="schema_telemetry_air_quality_enabled">Модуль измерения качества воздуха включен</string>
+    <string name="schema_telemetry_air_quality_interval">Интервал обновления данных качества воздуха</string>
+    <string name="schema_telemetry_device_telemetry_enabled">Отправлять телеметрию устройства</string>
+    <string name="schema_telemetry_device_telemetry_enabled_description">Включите/выключите модуль телеметрии устройства, чтобы отправлять показатели в сеть. Это номинальные значения. Перегруженные сети будут автоматически масштабироваться на более длительные интервалы в зависимости от количества подключенных нод.</string>
+    <string name="schema_telemetry_device_update_interval">Интервал обновления метрик устройства</string>
+    <string name="schema_telemetry_environment_display_fahrenheit">Использовать метрику окружения в Fahrenheit</string>
+    <string name="schema_telemetry_environment_measurement_enabled">Модуль метрик окружения включен</string>
+    <string name="schema_telemetry_environment_screen_enabled">Показатели окружения на экране включены</string>
+    <string name="schema_telemetry_environment_update_interval">Интервал обновления метрик среды</string>
+    <string name="schema_telemetry_power_measurement_enabled">Модуль метрик питания включен</string>
+    <string name="schema_telemetry_power_screen_enabled">Включить метрики питания на экране</string>
+    <string name="schema_telemetry_power_update_interval">Интервал обновления метрик электропитания</string>
+</resources>

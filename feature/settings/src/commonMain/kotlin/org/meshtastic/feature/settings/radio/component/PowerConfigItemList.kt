@@ -27,16 +27,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.adc_multiplier_override
-import org.meshtastic.core.resources.adc_multiplier_override_ratio
 import org.meshtastic.core.resources.battery_ina_2xx_i2c_address
-import org.meshtastic.core.resources.config_power_is_power_saving_summary
-import org.meshtastic.core.resources.enable_power_saving_mode
 import org.meshtastic.core.resources.minimum_wake_time_seconds
 import org.meshtastic.core.resources.power
 import org.meshtastic.core.resources.power_config
-import org.meshtastic.core.resources.shutdown_on_power_loss
+import org.meshtastic.core.resources.schema_power_adc_multiplier_override
+import org.meshtastic.core.resources.schema_power_is_power_saving
+import org.meshtastic.core.resources.schema_power_is_power_saving_description
+import org.meshtastic.core.resources.schema_power_on_battery_shutdown_after_secs
+import org.meshtastic.core.resources.schema_power_wait_bluetooth_secs
 import org.meshtastic.core.resources.super_deep_sleep_duration_seconds
-import org.meshtastic.core.resources.wait_for_bluetooth_duration_seconds
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -68,8 +68,8 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         item {
             TitledCard(title = stringResource(Res.string.power_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.enable_power_saving_mode),
-                    summary = stringResource(Res.string.config_power_is_power_saving_summary),
+                    title = stringResource(Res.string.schema_power_is_power_saving),
+                    summary = stringResource(Res.string.schema_power_is_power_saving_description),
                     checked = formState.value.is_power_saving,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -80,7 +80,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 val items = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(Res.string.shutdown_on_power_loss),
+                    title = stringResource(Res.string.schema_power_on_battery_shutdown_after_secs),
                     selectedItem = formState.value.on_battery_shutdown_after_secs.toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
@@ -109,7 +109,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 if (formState.value.adc_multiplier_override > 0f) {
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(Res.string.adc_multiplier_override_ratio),
+                        title = stringResource(Res.string.schema_power_adc_multiplier_override),
                         value = formState.value.adc_multiplier_override,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -122,7 +122,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 val waitBluetoothItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(Res.string.wait_for_bluetooth_duration_seconds),
+                    title = stringResource(Res.string.schema_power_wait_bluetooth_secs),
                     selectedItem = formState.value.wait_bluetooth_secs.toLong(),
                     enabled = state.connected,
                     items = waitBluetoothItems.map { it.value to it.toDisplayString() },

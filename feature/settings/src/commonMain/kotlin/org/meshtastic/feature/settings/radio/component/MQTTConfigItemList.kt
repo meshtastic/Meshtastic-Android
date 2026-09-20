@@ -54,13 +54,10 @@ import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.effectiveTlsEnabled
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.address
-import org.meshtastic.core.resources.encryption_enabled
 import org.meshtastic.core.resources.json_output_enabled
 import org.meshtastic.core.resources.map_reporting
 import org.meshtastic.core.resources.mqtt
 import org.meshtastic.core.resources.mqtt_config
-import org.meshtastic.core.resources.mqtt_enabled
 import org.meshtastic.core.resources.mqtt_probe_dns_failure
 import org.meshtastic.core.resources.mqtt_probe_other_failure
 import org.meshtastic.core.resources.mqtt_probe_rejected
@@ -81,11 +78,14 @@ import org.meshtastic.core.resources.mqtt_status_reconnecting
 import org.meshtastic.core.resources.mqtt_status_reconnecting_with_attempt
 import org.meshtastic.core.resources.mqtt_test_connection
 import org.meshtastic.core.resources.password
-import org.meshtastic.core.resources.proxy_to_client_enabled
-import org.meshtastic.core.resources.root_topic
+import org.meshtastic.core.resources.schema_mqtt_address
+import org.meshtastic.core.resources.schema_mqtt_enabled
+import org.meshtastic.core.resources.schema_mqtt_encryption_enabled
+import org.meshtastic.core.resources.schema_mqtt_proxy_to_client_enabled
+import org.meshtastic.core.resources.schema_mqtt_root
+import org.meshtastic.core.resources.schema_mqtt_username
 import org.meshtastic.core.resources.tls_enabled
 import org.meshtastic.core.resources.tls_enabled_public_broker_summary
-import org.meshtastic.core.resources.username
 import org.meshtastic.core.ui.component.EditPasswordPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -169,7 +169,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         item {
             TitledCard(title = stringResource(Res.string.mqtt_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.mqtt_enabled),
+                    title = stringResource(Res.string.schema_mqtt_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -188,7 +188,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.username),
+                    title = stringResource(Res.string.schema_mqtt_username),
                     value = formState.value.username,
                     maxSize = 63, // username max_size:64
                     enabled = state.connected,
@@ -213,7 +213,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.encryption_enabled),
+                    title = stringResource(Res.string.schema_mqtt_encryption_enabled),
                     checked = formState.value.encryption_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -244,7 +244,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.root_topic),
+                    title = stringResource(Res.string.schema_mqtt_root),
                     value = formState.value.root,
                     maxSize = 31, // root max_size:32
                     enabled = state.connected,
@@ -258,7 +258,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.proxy_to_client_enabled),
+                    title = stringResource(Res.string.schema_mqtt_proxy_to_client_enabled),
                     checked = formState.value.proxy_to_client_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -396,7 +396,7 @@ private fun MqttAddressAndProbe(
     onClearProbe: () -> Unit,
 ) {
     EditTextPreference(
-        title = stringResource(Res.string.address),
+        title = stringResource(Res.string.schema_mqtt_address),
         value = formState.value.address,
         maxSize = 63, // address max_size:64
         enabled = enabled,

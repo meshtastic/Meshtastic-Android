@@ -45,29 +45,29 @@ import org.meshtastic.core.model.util.handleMeshtasticUri
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.cancel
-import org.meshtastic.core.resources.config_network_eth_enabled_summary
 import org.meshtastic.core.resources.config_network_udp_enabled_summary
-import org.meshtastic.core.resources.config_network_wifi_enabled_summary
 import org.meshtastic.core.resources.connection_status
 import org.meshtastic.core.resources.dns
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.ethernet_config
-import org.meshtastic.core.resources.ethernet_enabled
 import org.meshtastic.core.resources.ethernet_ip
 import org.meshtastic.core.resources.gateway
-import org.meshtastic.core.resources.ipv4_mode
 import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.nfc_disabled
-import org.meshtastic.core.resources.ntp_server
 import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.resources.password
-import org.meshtastic.core.resources.rsyslog_server
 import org.meshtastic.core.resources.scan_nfc
-import org.meshtastic.core.resources.ssid
+import org.meshtastic.core.resources.schema_network_address_mode
+import org.meshtastic.core.resources.schema_network_eth_enabled
+import org.meshtastic.core.resources.schema_network_eth_enabled_description
+import org.meshtastic.core.resources.schema_network_ntp_server
+import org.meshtastic.core.resources.schema_network_rsyslog_server
+import org.meshtastic.core.resources.schema_network_wifi_enabled
+import org.meshtastic.core.resources.schema_network_wifi_enabled_description
+import org.meshtastic.core.resources.schema_network_wifi_ssid
 import org.meshtastic.core.resources.subnet
 import org.meshtastic.core.resources.udp_enabled
 import org.meshtastic.core.resources.wifi_config
-import org.meshtastic.core.resources.wifi_enabled
 import org.meshtastic.core.resources.wifi_ip
 import org.meshtastic.core.resources.wifi_qr_code_error
 import org.meshtastic.core.resources.wifi_qr_code_scan
@@ -206,8 +206,8 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
         item {
             TitledCard(title = stringResource(Res.string.wifi_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.wifi_enabled),
-                    summary = stringResource(Res.string.config_network_wifi_enabled_summary),
+                    title = stringResource(Res.string.schema_network_wifi_enabled),
+                    summary = stringResource(Res.string.schema_network_wifi_enabled_description),
                     checked = formState.value.wifi_enabled,
                     onCheckedChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.wifi_enabled = it }.build()
@@ -217,7 +217,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                 if (formState.value.wifi_enabled) {
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(Res.string.ssid),
+                        title = stringResource(Res.string.schema_network_wifi_ssid),
                         value = formState.value.wifi_ssid,
                         maxSize = 32, // wifi_ssid max_size:33
                         enabled = state.connected,
@@ -260,8 +260,8 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
             item {
                 TitledCard(title = stringResource(Res.string.ethernet_config)) {
                     SwitchPreference(
-                        title = stringResource(Res.string.ethernet_enabled),
-                        summary = stringResource(Res.string.config_network_eth_enabled_summary),
+                        title = stringResource(Res.string.schema_network_eth_enabled),
+                        summary = stringResource(Res.string.schema_network_eth_enabled_description),
                         checked = formState.value.eth_enabled,
                         onCheckedChange = {
                             formState.value = formState.value.newBuilder().also { wb -> wb.eth_enabled = it }.build()
@@ -274,7 +274,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
         item {
             TitledCard(title = stringResource(Res.string.advanced)) {
                 EditTextPreference(
-                    title = stringResource(Res.string.ntp_server),
+                    title = stringResource(Res.string.schema_network_ntp_server),
                     value = formState.value.ntp_server,
                     maxSize = 32, // ntp_server max_size:33
                     enabled = state.connected,
@@ -288,7 +288,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.rsyslog_server),
+                    title = stringResource(Res.string.schema_network_rsyslog_server),
                     value = formState.value.rsyslog_server,
                     maxSize = 32, // rsyslog_server max_size:33
                     enabled = state.connected,
@@ -325,7 +325,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     HorizontalDivider()
                 }
                 DropDownPreference(
-                    title = stringResource(Res.string.ipv4_mode),
+                    title = stringResource(Res.string.schema_network_address_mode),
                     enabled = state.connected,
                     selectedItem = formState.value.address_mode,
                     onItemSelected = {

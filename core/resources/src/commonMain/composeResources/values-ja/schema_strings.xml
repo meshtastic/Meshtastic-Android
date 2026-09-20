@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">青</string>
+    <string name="schema_ambientlighting_green">緑</string>
+    <string name="schema_ambientlighting_led_state">LEDの状態</string>
+    <string name="schema_ambientlighting_red">赤</string>
+    <string name="schema_audio_bitrate">CODEC2 サンプルレート</string>
+    <string name="schema_audio_codec2_enabled">CODEC 2 を有効化</string>
+    <string name="schema_audio_i2s_din">I2S データ OUT</string>
+    <string name="schema_audio_i2s_sck">I2S クロック</string>
+    <string name="schema_audio_i2s_sd">I2S データ IN</string>
+    <string name="schema_audio_i2s_ws">I2S ワードセレクト</string>
+    <string name="schema_audio_ptt_pin">PTT端子</string>
+    <string name="schema_bluetooth_enabled">Bluetoothを有効</string>
+    <string name="schema_bluetooth_mode">ペアリングモード</string>
+    <string name="schema_cannedmessage_inputbroker_event_ccw">CCWで入力イベントを生成</string>
+    <string name="schema_cannedmessage_inputbroker_event_cw">CWで入力イベントを生成</string>
+    <string name="schema_cannedmessage_inputbroker_event_press">プレスで入力イベントを生成</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">ロータリーエンコーダAポート用のGPIOピン</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">ロータリーエンコーダBポート用GPIOピン</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">ロータリーエンコーダプレスポート用GPIOピン</string>
+    <string name="schema_cannedmessage_rotary1_enabled">ロータリーエンコーダ #1 を有効化</string>
+    <string name="schema_cannedmessage_send_bell">ベルを送信</string>
+    <string name="schema_cannedmessage_updown1_enabled">上下/選択入力を有効化</string>
+    <string name="schema_detectionsensor_detection_trigger_type">検出トリガーの種類</string>
+    <string name="schema_detectionsensor_enabled">検出センサーを有効化</string>
+    <string name="schema_detectionsensor_monitor_pin">モニターのGPIOピン</string>
+    <string name="schema_detectionsensor_name">名前</string>
+    <string name="schema_detectionsensor_send_bell">アラートメッセージ付きのベルを送信</string>
+    <string name="schema_detectionsensor_use_pullup">INPUT_PULLUP モードを使用</string>
+    <string name="schema_device_button_gpio">ボタン GPIO</string>
+    <string name="schema_device_buzzer_gpio">ブザー GPIO</string>
+    <string name="schema_device_double_tap_as_button_press">ダブルタップをボタンとして使用</string>
+    <string name="schema_device_double_tap_as_button_press_description">加速度センサー搭載デバイスで本体をダブルタップすると、ボタンのプッシュと同じ動作として扱います。</string>
+    <string name="schema_device_node_info_broadcast_secs">ノード情報のブロードキャスト間隔</string>
+    <string name="schema_device_rebroadcast_mode">再送信モード</string>
+    <string name="schema_display_auto_screen_carousel_secs">カルーセルの間隔</string>
+    <string name="schema_display_auto_screen_carousel_secs_description">指定した間隔に基づき、画面上でカルーセルのように自動的に次のページに切り替わります。</string>
+    <string name="schema_display_compass_north_top">常に北を上にする</string>
+    <string name="schema_display_compass_north_top_description">円外側の画面上のコンパス方位は、常に北を指します。</string>
+    <string name="schema_display_compass_orientation">コンパスの向き</string>
+    <string name="schema_display_displaymode">表示モード</string>
+    <string name="schema_display_displaymode_description">デフォルト画面レイアウトを上書きします。</string>
+    <string name="schema_display_flip_screen">画面反転</string>
+    <string name="schema_display_flip_screen_description">画面を上下に反転させる。</string>
+    <string name="schema_display_heading_bold">太字の見出し</string>
+    <string name="schema_display_heading_bold_description">画面の見出しテキストを太字にします。</string>
+    <string name="schema_display_oled">OLED タイプ</string>
+    <string name="schema_display_oled_description">OLED 画面の自動検出を上書きします。</string>
+    <string name="schema_display_screen_on_secs">画面オンの時間</string>
+    <string name="schema_display_screen_on_secs_description">ユーザーボタンが押された後、またはメッセージが受信された後、画面がオンになっている期間。</string>
+    <string name="schema_display_units">表示単位</string>
+    <string name="schema_display_units_description">デバイスの画面に表示されている単位。</string>
+    <string name="schema_display_use_12h_clock">12時間の時計形式を使用</string>
+    <string name="schema_display_use_12h_clock_description">有効にすると、デバイスは時刻を12時間形式で表示します。</string>
+    <string name="schema_display_wake_on_tap_or_motion">タップまたは動作で起動</string>
+    <string name="schema_display_wake_on_tap_or_motion_description">お使いのデバイスに加速度センサーがあることが必要です。</string>
+    <string name="schema_externalnotification_active">LED出力 アクティブハイ</string>
+    <string name="schema_externalnotification_alert_bell">LED</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">ブザー</string>
+    <string name="schema_externalnotification_alert_bell_vibra">バイブレーション</string>
+    <string name="schema_externalnotification_alert_message">LED</string>
+    <string name="schema_externalnotification_alert_message_buzzer">ブザー</string>
+    <string name="schema_externalnotification_alert_message_vibra">バイブレーション</string>
+    <string name="schema_externalnotification_enabled">外部通知を有効化</string>
+    <string name="schema_externalnotification_output">LED出力 (GPIO)</string>
+    <string name="schema_externalnotification_output_buzzer">ブザー出力(GPIO)</string>
+    <string name="schema_externalnotification_output_vibra">バイブレーション出力 (GPIO)</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">I2Sをブザーとして使用</string>
+    <string name="schema_externalnotification_use_pwm">PWMブザーを使用</string>
+    <string name="schema_lora_bandwidth">帯域</string>
+    <string name="schema_lora_channel_num">周波数スロット</string>
+    <string name="schema_lora_channel_num_description">ノードの動作周波数は、リージョン、モデムプリセット、およびこのフィールドに基づいて計算されます。0 の場合、スロットはプライマリーチャンネル名に基づいて自動的に計算され、デフォルトのパブリックスロットから変更されます。プライベートなプライマリーチャンネルとパブリックなセカンダリーチャンネルを設定している場合は、パブリックのデフォルトスロットに戻してください。</string>
+    <string name="schema_lora_coding_rate">符号化レート</string>
+    <string name="schema_lora_config_ok_to_mqtt">MQTT への送信を許可</string>
+    <string name="schema_lora_hop_limit">ホップ数</string>
+    <string name="schema_lora_hop_limit_description">最大ホップ数を設定し、初期値は3ホップです。ホップ数を増やすと輻輳も増加するため、控えめに運用しましょう。0ホップのブロードキャストメッセージはACKを受信しなくなります。</string>
+    <string name="schema_lora_ignore_mqtt">MQTT を無視</string>
+    <string name="schema_lora_override_duty_cycle">デューティサイクルを上書き</string>
+    <string name="schema_lora_override_frequency">周波数の上書き</string>
+    <string name="schema_lora_pa_fan_disabled">PAファン無効</string>
+    <string name="schema_lora_spread_factor">拡散率</string>
+    <string name="schema_lora_sx126x_rx_boosted_gain">RX ブーストゲイン</string>
+    <string name="schema_lora_tx_enabled">送信を有効化</string>
+    <string name="schema_lora_tx_power">送信出力</string>
+    <string name="schema_lora_use_preset">プリセットを使用</string>
+    <string name="schema_mqtt_enabled">MQTTを有効化</string>
+    <string name="schema_mqtt_encryption_enabled">暗号化の有効化</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">クライアントへのプロキシの有効化</string>
+    <string name="schema_mqtt_root">ルート トピック</string>
+    <string name="schema_mqtt_username">ユーザー名</string>
+    <string name="schema_neighborinfo_enabled">近隣ノード情報を有効化</string>
+    <string name="schema_neighborinfo_transmit_over_lora">LoRaで送信</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">近隣ノード情報(NeighborInfo)をMQTTやPhoneAPIへ送信することに加えて、LoRa無線経由でも送信すべきかどうかを設定します。デフォルトの名前とキーが設定されたチャンネルでは利用できません。</string>
+    <string name="schema_network_address_mode">IPv4 モード</string>
+    <string name="schema_network_eth_enabled">イーサネット有効</string>
+    <string name="schema_network_eth_enabled_description">イーサネットを有効にすると、アプリへの Bluetooth 接続が無効になります。TCP でのノード接続は Apple デバイスでは利用できません。</string>
+    <string name="schema_network_ntp_server">NTPサーバー</string>
+    <string name="schema_network_rsyslog_server">rsyslogサーバー</string>
+    <string name="schema_network_wifi_ssid">SSID</string>
+    <string name="schema_paxcounter_ble_threshold">BLE RSSI閾値（デフォルトは -80）</string>
+    <string name="schema_paxcounter_enabled">Paxcounter を有効化</string>
+    <string name="schema_position_broadcast_smart_minimum_distance">スマート距離</string>
+    <string name="schema_position_broadcast_smart_minimum_distance_description">スマート位置情報ブロードキャストの対象とする最小の移動距離（メートル）。</string>
+    <string name="schema_position_broadcast_smart_minimum_interval_secs">スマート間隔</string>
+    <string name="schema_position_gps_en_gpio">GPS EN GPIO</string>
+    <string name="schema_position_gps_mode">GPS モード（物理ハードウェア）</string>
+    <string name="schema_position_gps_update_interval">GPS ポーリング間隔</string>
+    <string name="schema_position_gps_update_interval_description">GPS 位置情報を取得する頻度（&lt;10 秒で GPS をオンに保ちます）。</string>
+    <string name="schema_position_position_broadcast_secs">ブロードキャスト間隔</string>
+    <string name="schema_position_position_broadcast_secs_description">ノードが位置情報をブロードキャストせずに経過し得る最大間隔。</string>
+    <string name="schema_position_position_broadcast_smart_enabled">スマート位置情報</string>
+    <string name="schema_position_position_flags">位置情報フラグ</string>
+    <string name="schema_position_position_flags_description">位置情報メッセージを構成する際に含めるオプションのフィールド。含めるフィールドが多いほどメッセージは大きくなり、エアタイムが長くなってパケット損失のリスクが高まります。</string>
+    <string name="schema_position_rx_gpio">GPS RX GPIO</string>
+    <string name="schema_position_tx_gpio">GPS TX GPIO</string>
+    <string name="schema_power_adc_multiplier_override">ADC倍率のオーバーライド比</string>
+    <string name="schema_power_is_power_saving">省電力モードを有効化</string>
+    <string name="schema_power_is_power_saving_description">可能な限りすべてをスリープさせます。トラッカーおよびセンサーの役割の場合は、LoRa 無線機も対象になります。スマートフォンアプリでデバイスを使用したい場合や、ユーザーボタンのないデバイスを使用している場合は、この設定を使用しないでください。</string>
+    <string name="schema_power_on_battery_shutdown_after_secs">電源喪失時にシャットダウン</string>
+    <string name="schema_power_wait_bluetooth_secs">Bluetooth 待機時間</string>
+    <string name="schema_rangetest_enabled">レンジテストを有効化</string>
+    <string name="schema_rangetest_save">ストレージにCSVファイルを保存(ESP32のみ)</string>
+    <string name="schema_security_admin_key">管理者キー</string>
+    <string name="schema_security_admin_key_description">このノードに管理メッセージを送信することを許可された公開鍵。</string>
+    <string name="schema_security_debug_log_api_enabled">デバッグログAPIを有効化</string>
+    <string name="schema_security_debug_log_api_enabled_description">シリアル経由でライブデバッグログを出力し、位置情報を秘匿したデバイスログを Bluetooth 経由で表示・エクスポートします。</string>
+    <string name="schema_security_is_managed">管理モード</string>
+    <string name="schema_security_is_managed_description">デバイスはメッシュ管理者によって管理されており、ユーザーはデバイス設定にアクセスできません。</string>
+    <string name="schema_security_private_key">秘密鍵</string>
+    <string name="schema_security_serial_enabled">シリアルコンソール</string>
+    <string name="schema_security_serial_enabled_description">Stream API 経由のシリアルコンソール。</string>
+    <string name="schema_serial_baud">シリアルボーレイト</string>
+    <string name="schema_serial_echo">Echoを有効化</string>
+    <string name="schema_serial_enabled">シリアル通信を有効化</string>
+    <string name="schema_serial_mode">シリアルモード</string>
+    <string name="schema_serial_rxd">RX</string>
+    <string name="schema_serial_txd">TX</string>
+    <string name="schema_storeforward_enabled">ストアアンドフォワード有効</string>
+    <string name="schema_storeforward_heartbeat">ハートビート</string>
+    <string name="schema_storeforward_history_return_max">リクエスト可能な最大の履歴件数</string>
+    <string name="schema_storeforward_history_return_window">リクエスト可能な履歴の期間  (分)</string>
+    <string name="schema_storeforward_is_server">サーバー</string>
+    <string name="schema_storeforward_records">サーバーの最大保管レコード数  (デフォルト 約11,000レコード)</string>
+    <string name="schema_telemetry_air_quality_enabled">空気品質測定モジュールを有効化</string>
+    <string name="schema_telemetry_air_quality_interval">空気品質メトリクスの更新間隔</string>
+    <string name="schema_telemetry_device_telemetry_enabled">デバイステレメトリを送信</string>
+    <string name="schema_telemetry_device_telemetry_enabled_description">デバイステレメトリモジュールの有効/無効を切り替えて、メトリクスをメッシュに送信します。これらは公称値です。混雑したメッシュでは、オンラインノード数に応じて間隔が自動的に長くなります。</string>
+    <string name="schema_telemetry_device_update_interval">デバイスメトリクスの更新間隔</string>
+    <string name="schema_telemetry_environment_display_fahrenheit">環境メトリクスは華氏を使用</string>
+    <string name="schema_telemetry_environment_measurement_enabled">環境メトリクスモジュールを有効化</string>
+    <string name="schema_telemetry_environment_screen_enabled">環境メトリクスを画面上で有効化</string>
+    <string name="schema_telemetry_environment_update_interval">環境メトリクスの更新間隔</string>
+    <string name="schema_telemetry_power_measurement_enabled">電源メトリクスモジュール有効</string>
+    <string name="schema_telemetry_power_screen_enabled">電源メトリクスを画面上で有効化</string>
+    <string name="schema_telemetry_power_update_interval">電源メトリクスの更新間隔</string>
+</resources>

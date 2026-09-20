@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">蓝</string>
+    <string name="schema_ambientlighting_green">绿</string>
+    <string name="schema_ambientlighting_led_state">LED 状态</string>
+    <string name="schema_ambientlighting_red">红</string>
+    <string name="schema_audio_bitrate">CODEC2 采样率</string>
+    <string name="schema_audio_codec2_enabled">启用CODEC2</string>
+    <string name="schema_audio_i2s_din">I2S 数据 OUT</string>
+    <string name="schema_audio_i2s_sck">I2S 时钟</string>
+    <string name="schema_audio_i2s_sd">I2S 数据 IN</string>
+    <string name="schema_audio_i2s_ws">I2S 字选择</string>
+    <string name="schema_audio_ptt_pin">PTT 引脚</string>
+    <string name="schema_bluetooth_enabled">启用蓝牙</string>
+    <string name="schema_bluetooth_mode">配对模式</string>
+    <string name="schema_cannedmessage_inputbroker_event_ccw">CCW时生成输入事件</string>
+    <string name="schema_cannedmessage_inputbroker_event_cw">CW 时生成输入事件</string>
+    <string name="schema_cannedmessage_inputbroker_event_press">按下时生成输入事件</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">用于旋转编码器A端口的 GPIO 引脚</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">用于旋转编码器B端口的 GPIO 引脚</string>
+    <string name="schema_cannedmessage_inputbroker_pin_press">用于旋转编码器按键端口的 GPIO 引脚</string>
+    <string name="schema_cannedmessage_rotary1_enabled">启用旋转编码器 #1 </string>
+    <string name="schema_cannedmessage_send_bell">发送响铃</string>
+    <string name="schema_cannedmessage_updown1_enabled">启用Up/Down/select 输入</string>
+    <string name="schema_detectionsensor_detection_trigger_type">检测触发器类型</string>
+    <string name="schema_detectionsensor_enabled">启用检测传感器</string>
+    <string name="schema_detectionsensor_monitor_pin">显示器的 GPIO 引脚</string>
+    <string name="schema_detectionsensor_name">易记名称</string>
+    <string name="schema_detectionsensor_send_bell">发送带有警报消息的响铃声</string>
+    <string name="schema_detectionsensor_use_pullup">使用 输入上拉 模式</string>
+    <string name="schema_device_button_gpio">按钮 GPIO</string>
+    <string name="schema_device_buzzer_gpio">蜂鸣器 GPIO</string>
+    <string name="schema_device_double_tap_as_button_press">双击作为按钮</string>
+    <string name="schema_device_double_tap_as_button_press_description">将支持的加速度计上的双击操作视为 User 按键的按压动作。</string>
+    <string name="schema_device_node_info_broadcast_secs">节点信息广播间隔</string>
+    <string name="schema_device_rebroadcast_mode">转播模式</string>
+    <string name="schema_display_auto_screen_carousel_secs">轮播间隔</string>
+    <string name="schema_display_auto_screen_carousel_secs_description">根据指定的时间间隔，像旋转木马一样自动切换到屏幕上的下一页。</string>
+    <string name="schema_display_compass_north_top">总是朝北</string>
+    <string name="schema_display_compass_north_top_description">屏幕上的指南针总是指向北。</string>
+    <string name="schema_display_compass_orientation">罗盘方向</string>
+    <string name="schema_display_displaymode">显示模式</string>
+    <string name="schema_display_displaymode_description">覆盖默认屏幕布局。</string>
+    <string name="schema_display_flip_screen">翻转屏幕</string>
+    <string name="schema_display_flip_screen_description">垂直翻转屏幕。</string>
+    <string name="schema_display_heading_bold">加粗标题</string>
+    <string name="schema_display_heading_bold_description">屏幕上的标题文字加粗。</string>
+    <string name="schema_display_oled">OLED 类型</string>
+    <string name="schema_display_oled_description">覆盖自动OLED屏幕检测。</string>
+    <string name="schema_display_screen_on_secs">开启屏幕</string>
+    <string name="schema_display_screen_on_secs_description">按下用户按钮或收到消息后屏幕保持亮屏的时间。</string>
+    <string name="schema_display_units">显示单位</string>
+    <string name="schema_display_units_description">设备屏幕显示的单位。</string>
+    <string name="schema_display_use_12h_clock">使用 12 小时制格式</string>
+    <string name="schema_display_use_12h_clock_description">如果启用，设备将在屏幕上以12小时制格式显示时间。</string>
+    <string name="schema_display_wake_on_tap_or_motion">点击或移动时唤醒屏幕</string>
+    <string name="schema_display_wake_on_tap_or_motion_description">需要在设备上有一个加速计。</string>
+    <string name="schema_externalnotification_active">输出 LED 活动高</string>
+    <string name="schema_externalnotification_alert_bell">警铃 LED</string>
+    <string name="schema_externalnotification_alert_bell_buzzer">警铃蜂鸣</string>
+    <string name="schema_externalnotification_alert_bell_vibra">警铃震动</string>
+    <string name="schema_externalnotification_alert_message">警告消息指示灯</string>
+    <string name="schema_externalnotification_alert_message_buzzer">警告消息蜂鸣</string>
+    <string name="schema_externalnotification_alert_message_vibra">警告消息振动</string>
+    <string name="schema_externalnotification_enabled">启用外部通知</string>
+    <string name="schema_externalnotification_output">输出 LED (GPIO)</string>
+    <string name="schema_externalnotification_output_buzzer">输出震动(GPIO)</string>
+    <string name="schema_externalnotification_output_vibra">输出振动 (GPIO)</string>
+    <string name="schema_externalnotification_use_i2s_as_buzzer">使用 I2S 作为蜂鸣器</string>
+    <string name="schema_externalnotification_use_pwm">使用 PWM 蜂鸣器</string>
+    <string name="schema_lora_bandwidth">带宽</string>
+    <string name="schema_lora_channel_num">频率</string>
+    <string name="schema_lora_channel_num_description">您的节点运行频率是根据地区、调制解调器预设和此字段计算的。 当0时，插槽会自动根据主频道名称计算，并会从默认的公共插槽中改变。 如果配置了私有的主频道和公立中等频道，则更改到公共默认频道。</string>
+    <string name="schema_lora_coding_rate">编码率</string>
+    <string name="schema_lora_config_ok_to_mqtt">使用MQTT</string>
+    <string name="schema_lora_hop_limit">节点数</string>
+    <string name="schema_lora_hop_limit_description">设置节点的最大次数，默认值为 3。 增加频率也会增加拥塞，应该谨慎使用。0个节点广播消息不会得到ACK。</string>
+    <string name="schema_lora_ignore_mqtt">忽略 MQTT</string>
+    <string name="schema_lora_override_duty_cycle">覆盖占空比</string>
+    <string name="schema_lora_override_frequency">频率覆盖</string>
+    <string name="schema_lora_pa_fan_disabled">PA风扇已禁用</string>
+    <string name="schema_lora_spread_factor">扩散因子</string>
+    <string name="schema_lora_sx126x_rx_boosted_gain">RX 增益</string>
+    <string name="schema_lora_tx_enabled">启用传输</string>
+    <string name="schema_lora_tx_power">发送强度</string>
+    <string name="schema_lora_use_preset">使用预设</string>
+    <string name="schema_mqtt_enabled">启用MQTT</string>
+    <string name="schema_mqtt_encryption_enabled">启用加密</string>
+    <string name="schema_mqtt_proxy_to_client_enabled">启用客户端代理</string>
+    <string name="schema_mqtt_root">根主题</string>
+    <string name="schema_mqtt_username">用户名</string>
+    <string name="schema_neighborinfo_enabled">启用邻居信息</string>
+    <string name="schema_neighborinfo_transmit_over_lora">通过 LoRa 传输</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">是否除了发送到 MQTT 和 PhoneAPI 外，还应通过 LoRa 传输我们的邻居信息（NeighborInfo）。在具有默认密钥和名称的通道上不可用。</string>
+    <string name="schema_network_address_mode">IPv4模式</string>
+    <string name="schema_network_eth_enabled">启用以太网</string>
+    <string name="schema_network_eth_enabled_description">启用以太网将禁用蓝牙连接。TCP节点连接在 Apple 设备上不可用。</string>
+    <string name="schema_network_ntp_server">NTP 服务器</string>
+    <string name="schema_network_rsyslog_server">rsyslog 服务器</string>
+    <string name="schema_network_wifi_ssid">SSID</string>
+    <string name="schema_paxcounter_ble_threshold">BLE RSSI 阈值(默认为-80)</string>
+    <string name="schema_paxcounter_enabled">启用 Paxcount</string>
+    <string name="schema_position_broadcast_smart_minimum_distance">自动距离大小</string>
+    <string name="schema_position_broadcast_smart_minimum_distance_description">智能位置广播考虑的最小距离变化以米为单位。</string>
+    <string name="schema_position_broadcast_smart_minimum_interval_secs">自动时间间隔</string>
+    <string name="schema_position_gps_en_gpio">GPS 使能 GPIO</string>
+    <string name="schema_position_gps_mode">GPS 模式 (物理硬件)</string>
+    <string name="schema_position_gps_update_interval">GPS 轮询间隔</string>
+    <string name="schema_position_gps_update_interval_description">应该以多长的时间尝试获取 GPS 位置(&lt;10秒将GPS保持开启)。</string>
+    <string name="schema_position_position_broadcast_secs">广播间隔</string>
+    <string name="schema_position_position_broadcast_secs_description">无节点广播位置的最大间隔。</string>
+    <string name="schema_position_position_broadcast_smart_enabled">智能位置</string>
+    <string name="schema_position_position_flags">位置标记</string>
+    <string name="schema_position_position_flags_description">包含位置消息时可选择包含的附加字段。包含的字段越多，消息体积就越大——这会导致占用更长的空中传输时间并增加丢包的风险。</string>
+    <string name="schema_position_rx_gpio">GPS 接收GPIO</string>
+    <string name="schema_position_tx_gpio">GPS 输出 GPIO</string>
+    <string name="schema_power_adc_multiplier_override">ADC乘数修正比率</string>
+    <string name="schema_power_is_power_saving">启用节能模式</string>
+    <string name="schema_power_is_power_saving_description">尽可能让所有设备处于睡眠状态，对于跟踪器和传感器来说，这也包括 LoRa 无线电。如果您想将电台与手机 App 一起使用，或使用没有用户按钮的电台，请不要使用此设置。</string>
+    <string name="schema_power_on_battery_shutdown_after_secs">断电时关机</string>
+    <string name="schema_power_wait_bluetooth_secs">等待蓝牙持续时间 </string>
+    <string name="schema_rangetest_enabled">启用范围测试</string>
+    <string name="schema_rangetest_save">保存 CSV 到存储 (仅ESP32)</string>
+    <string name="schema_security_admin_key">管理员密钥</string>
+    <string name="schema_security_admin_key_description">授权向该节点发送管理员密钥。</string>
+    <string name="schema_security_debug_log_api_enabled">启用调试日志 API </string>
+    <string name="schema_security_debug_log_api_enabled_description">通过串行或蓝牙导出设备调试日志。</string>
+    <string name="schema_security_is_managed">管理模式</string>
+    <string name="schema_security_is_managed_description">设备由 Mesh 管理员管理，用户无法访问任何设备设置。</string>
+    <string name="schema_security_private_key">私钥</string>
+    <string name="schema_security_serial_enabled">串口控制</string>
+    <string name="schema_security_serial_enabled_description">串口控制 API</string>
+    <string name="schema_serial_baud">串口波特率</string>
+    <string name="schema_serial_echo">启用Echo</string>
+    <string name="schema_serial_enabled">启用串口</string>
+    <string name="schema_serial_mode">串口模式</string>
+    <string name="schema_serial_rxd">接收</string>
+    <string name="schema_serial_txd">发送</string>
+    <string name="schema_storeforward_enabled">存储 &amp; 已启用转发</string>
+    <string name="schema_storeforward_heartbeat">心跳</string>
+    <string name="schema_storeforward_history_return_max">历史记录最大返回值</string>
+    <string name="schema_storeforward_history_return_window">历史记录返回窗口</string>
+    <string name="schema_storeforward_is_server">服务器</string>
+    <string name="schema_storeforward_records">记录数</string>
+    <string name="schema_telemetry_air_quality_enabled">启用空气质量计量模块</string>
+    <string name="schema_telemetry_air_quality_interval">空气质量计量更新间隔</string>
+    <string name="schema_telemetry_device_telemetry_enabled">发送设备远程数据</string>
+    <string name="schema_telemetry_device_telemetry_enabled_description">启用/禁用设备遥测模块，以将指标发送至网络。这些是标称值。拥堵的网络会根据在线节点的数量自动调整为更长的间隔。节点少于个的网络会调整为更快的间隔。</string>
+    <string name="schema_telemetry_device_update_interval">设备计量更新间隔 </string>
+    <string name="schema_telemetry_environment_display_fahrenheit">环境测量值使用华氏度</string>
+    <string name="schema_telemetry_environment_measurement_enabled">启用环境计量模块</string>
+    <string name="schema_telemetry_environment_screen_enabled">屏幕显示环境指标</string>
+    <string name="schema_telemetry_environment_update_interval">环境计量更新间隔</string>
+    <string name="schema_telemetry_power_measurement_enabled">启用电源计量模块</string>
+    <string name="schema_telemetry_power_screen_enabled">在屏幕上启用电源指标</string>
+    <string name="schema_telemetry_power_update_interval">电量计更新间隔</string>
+</resources>

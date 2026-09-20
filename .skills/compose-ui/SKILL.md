@@ -44,6 +44,14 @@ Choose the right tool for the job:
   2. Run `python3 scripts/sort-strings.py` — keeps the file sorted and regenerates `strings-index.txt`.
   3. Use the generated `org.meshtastic.core.resources.<key>` symbol.
   4. Validate UI presentation.
+- **Schema strings are generated, not written.** Every label and description in the protobufs field metadata is
+  in `values/schema_strings.xml`, keyed by schema path: `Config.LoRaConfig.hop_limit` is
+  `Res.string.schema_lora_hop_limit`, its summary `schema_lora_hop_limit_description`, the enum value
+  `PositionFlags.DOP` `schema_position_positionflags_dop` (all indexed under `### SCHEMA` in `strings-index.txt`).
+  A control that edits one whole schema field uses that key; a control that edits a bit, a threshold, a negation or
+  drops a unit keeps a hand-written string. Never edit the generated file or write a `schema_` key by hand;
+  `:schema-strings:test` fails on both. Wrong wording is a `protobufs` change; a new protobufs pin is followed by
+  `./gradlew :schema-strings:sync`.
 
 ## 3. Tooling & Capabilities
 - **Image Loading:** Use `libs.coil` (Coil Compose) in feature modules. Configuration/Networking for Coil (`coil-network-ktor3`) happens strictly in the `androidApp` and `desktopApp` host modules.

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="schema_ambientlighting_blue">Modrá</string>
+    <string name="schema_ambientlighting_green">Zelená</string>
+    <string name="schema_ambientlighting_led_state">Stav LED</string>
+    <string name="schema_ambientlighting_red">Červená</string>
+    <string name="schema_audio_bitrate">CODEC2 vzorkovacia frekvencia</string>
+    <string name="schema_audio_codec2_enabled">CODEC 2 zapnutý</string>
+    <string name="schema_audio_i2s_din">I2S výstup dát</string>
+    <string name="schema_audio_i2s_sck">I2S čas</string>
+    <string name="schema_audio_i2s_sd">I2S vstup dát</string>
+    <string name="schema_audio_i2s_ws">I2C výber slova</string>
+    <string name="schema_audio_ptt_pin">PTT pin</string>
+    <string name="schema_bluetooth_enabled">Bluetooth zapnuté</string>
+    <string name="schema_bluetooth_mode">Režim párovania</string>
+    <string name="schema_cannedmessage_inputbroker_pin_a">GPIO konektor pre Enkóder A port</string>
+    <string name="schema_cannedmessage_inputbroker_pin_b">GPIO konektor pre Enkóder B port</string>
+    <string name="schema_cannedmessage_rotary1_enabled">Enkóder #1 aktivovaný</string>
+    <string name="schema_device_double_tap_as_button_press_description">Vykoná dvojklepnutie na podporovaných akcelerometroch ako stlačenie užívateľského tlačidla.</string>
+    <string name="schema_display_flip_screen">Otoč Obrazovku</string>
+    <string name="schema_display_flip_screen_description">Otočiť obrazovku vertikálne.</string>
+    <string name="schema_display_screen_on_secs_description">Doba počas ktorej ostane obrazovka zapnutá potom ako je stlačené používateľské tlačidlo alebo bola prijatá správa.</string>
+    <string name="schema_lora_bandwidth">Šírka pásma</string>
+    <string name="schema_mqtt_username">Používateľské meno</string>
+    <string name="schema_neighborinfo_transmit_over_lora">Vysielať cez sieť LoRa</string>
+    <string name="schema_neighborinfo_transmit_over_lora_description">Okrem odoslania do MQTT a PhoneAPI je prenášanie informácii o susedoch prostredníctvom LoRa. Nedostupné na kanáli s predvoleným kľúčom a názvom.</string>
+    <string name="schema_network_address_mode">IPv4 režim</string>
+    <string name="schema_network_eth_enabled">Ethernet zapnutý</string>
+    <string name="schema_network_ntp_server">NTP server</string>
+    <string name="schema_network_wifi_ssid">SSID</string>
+    <string name="schema_position_position_broadcast_secs">Broadcastový Interval</string>
+    <string name="schema_position_position_broadcast_smart_enabled">Inteligentná poloha</string>
+    <string name="schema_security_private_key">Súkromný kľúč</string>
+</resources>
