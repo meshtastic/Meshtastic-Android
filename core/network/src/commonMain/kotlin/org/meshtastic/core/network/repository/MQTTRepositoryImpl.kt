@@ -274,17 +274,16 @@ class MQTTRepositoryImpl(
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     /**
      * Builds the SUBSCRIBE list for the protocol version the broker actually accepted.
      *
-     * `noLocal` stops the broker echoing our own uplink back to us, but it is an MQTT 5 subscription option. The
-     * client offers 5.0 and silently falls back to 3.1.1 when the broker refuses, and mqtt-client then rejects the
-     * whole SUBSCRIBE with `IllegalArgumentException`. Because the failure is deterministic, the connect loop retried
-     * it forever: 121,003 reported errors across 72 users in fourteen days, with MQTT never once working for them.
+     * `noLocal` stops the broker echoing our own uplink back to us, but it is an MQTT 5 subscription option. The client
+     * offers 5.0 and silently falls back to 3.1.1 when the broker refuses, and mqtt-client then rejects the whole
+     * SUBSCRIBE with `IllegalArgumentException`. Because the failure is deterministic, the connect loop retried it
+     * forever: 121,003 reported errors across 72 users in fourteen days, with MQTT never once working for them.
      *
-     * On 3.1.1 we take the echo instead. The radio already discards a packet it has seen, and receiving our own
-     * uplink is what every 3.1.1 client lives with; no subscription at all is strictly worse.
+     * On 3.1.1 we take the echo instead. The radio already discards a packet it has seen, and receiving our own uplink
+     * is what every 3.1.1 client lives with; no subscription at all is strictly worse.
      */
     private fun buildSubscriptions(
         globalIds: List<String>,
@@ -322,6 +321,7 @@ class MQTTRepositoryImpl(
         }
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     private fun ProducerScope<MqttClientProxyMessage>.processMessage(msg: MqttMessage) {
         val topic = msg.topic
         val payload = msg.payload.toByteArray()
@@ -329,16 +329,20 @@ class MQTTRepositoryImpl(
         if (topic.contains("/json/")) {
             try {
                 val jsonStr = payload.decodeToString()
-                json.decodeFromString<MqttJsonPayload>(jsonStr)
-                trySend(
-                    MqttClientProxyMessage.Builder()
-                        .also { wb ->
-                            wb.topic = topic
-                            wb.text = jsonStr
-                            wb.retained = msg.retain
-                        }
-                        .build(),
-                )
+                val decoded = json.decodeFromString<MqttJsonPayload>(jsonStr)
+                if (isOwnMqttJsonEcho(decoded.sender, nodeRepository.myId.value)) {
+                    Logger.d { "MQTT echo dropped (json)" }
+                } else {
+                    trySend(
+                        MqttClientProxyMessage.Builder()
+                            .also { wb ->
+                                wb.topic = topic
+                                wb.text = jsonStr
+                                wb.retained = msg.retain
+                            }
+                            .build(),
+                    )
+                }
             } catch (e: JsonDecodingException) {
                 // Warn, not error: a non-conforming payload recurs for as long as a busy public broker
                 // stays subscribed, not an app defect worth a non-fatal per message.
@@ -349,29 +353,38 @@ class MQTTRepositoryImpl(
                 Logger.w(e) { "Failed to parse MQTT JSON: ${e.message}" }
             }
         } else {
-            // Drop provably-undeliverable downlink packets before spending BLE bandwidth on
-            // them. In client-proxy mode the public broker floods payload-less packet-header
-            // stubs the node can only decrypt-fail and discard; stopping them here saves BLE
-            // airtime, a decrypt attempt, and a node-side warning per packet.
-            if (isUndeliverableDownlink(payload, nodeRepository.myId.value)) {
-                Logger.d {
-                    if (buildConfigProvider.isDebug) {
-                        "MQTT downlink dropped (no payload): $topic"
-                    } else {
-                        "MQTT downlink dropped (no payload)"
+            val myId = nodeRepository.myId.value
+            when {
+                // A broker that negotiated MQTT 3.1.1 cannot honour `noLocal`, so it hands our own uplink straight
+                // back. Relaying it would spend phone-API and BLE bandwidth pushing the radio packets it just gave
+                // us. Dropping it here makes 3.1.1 behave the way 5.0 already does, where `noLocal` means these
+                // never arrive at all - so nobody loses an implicit ACK they were previously getting.
+                isOwnMqttEcho(payload, myId) -> Logger.d { "MQTT echo dropped" }
+
+                // Drop provably-undeliverable downlink packets before spending BLE bandwidth on
+                // them. In client-proxy mode the public broker floods payload-less packet-header
+                // stubs the node can only decrypt-fail and discard; stopping them here saves BLE
+                // airtime, a decrypt attempt, and a node-side warning per packet.
+                isUndeliverableDownlink(payload, myId) ->
+                    Logger.d {
+                        if (buildConfigProvider.isDebug) {
+                            "MQTT downlink dropped (no payload): $topic"
+                        } else {
+                            "MQTT downlink dropped (no payload)"
+                        }
                     }
-                }
-                return
+
+                else ->
+                    trySend(
+                        MqttClientProxyMessage.Builder()
+                            .also { wb ->
+                                wb.topic = topic
+                                wb.data_ = payload.toByteString()
+                                wb.retained = msg.retain
+                            }
+                            .build(),
+                    )
             }
-            trySend(
-                MqttClientProxyMessage.Builder()
-                    .also { wb ->
-                        wb.topic = topic
-                        wb.data_ = payload.toByteString()
-                        wb.retained = msg.retain
-                    }
-                    .build(),
-            )
         }
     }
 
@@ -593,14 +606,28 @@ internal fun extractHost(address: String): String {
 private const val PKI_CHANNEL_ID = "PKI"
 
 /**
+ * `true` when this binary payload is our own uplink handed back to us by the broker.
+ *
+ * `gateway_id` names the gateway that uploaded the envelope, so it equals our node id only for a message this device
+ * published. A packet another node rebroadcast carries *that* node's gateway id and is never matched here.
+ *
+ * Fails open: unparseable bytes, or an unknown local node id, forward as before.
+ */
+internal fun isOwnMqttEcho(payload: ByteArray, myId: String?): Boolean =
+    myId != null && ServiceEnvelope.ADAPTER.decodeOrNull(payload)?.gateway_id == myId
+
+/** `true` when a decoded JSON payload's `sender` marks it as our own uplink. See [isOwnMqttEcho]. */
+internal fun isOwnMqttJsonEcho(sender: String?, myId: String?): Boolean = myId != null && sender == myId
+
+/**
  * Returns true when a downlink [ServiceEnvelope] is provably un-usable by the node and should be dropped before
  * forwarding over BLE (MQTT client-proxy mode).
  *
  * Fails open — returns false (forward) for anything it cannot positively prove undeliverable: unparseable bytes,
- * traffic on the `PKI` channel (public-key-encrypted direct messages the node accepts without first decrypting), our
- * own echoed-back packets (used as implicit ACKs), a packet-less envelope, or any packet that actually carries a
- * payload. The only drop case is Tier 1: a [MeshPacket] with neither `decoded` nor `encrypted` set — no legitimate
- * Meshtastic packet is payload-less.
+ * traffic on the `PKI` channel (public-key-encrypted direct messages the node accepts without first decrypting), a
+ * packet-less envelope, or any packet that actually carries a payload. Our own echoed-back packets no longer reach this
+ * function - [isOwnMqttEcho] drops them first. The only drop case is Tier 1: a [MeshPacket] with neither `decoded` nor
+ * `encrypted` set — no legitimate Meshtastic packet is payload-less.
  *
  * Extracted as an internal top-level function so [MQTTRepositoryImplTest] can exercise every branch without spinning up
  * the full repository.

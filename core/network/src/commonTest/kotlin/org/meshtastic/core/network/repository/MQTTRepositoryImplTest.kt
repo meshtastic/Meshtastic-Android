@@ -858,6 +858,38 @@ class MQTTRepositoryImplTest {
         collector.cancel()
     }
 
+    @Test
+    fun `our own uplink echoed back by the broker is detected`() {
+        assertTrue(isOwnMqttEcho(envelopeBytes(gatewayId = "!12345678"), myId = "!12345678"))
+    }
+
+    @Test
+    fun `a packet another gateway uploaded is not an echo`() {
+        assertFalse(isOwnMqttEcho(envelopeBytes(gatewayId = "!aabbccdd"), myId = "!12345678"))
+    }
+
+    @Test
+    fun `echo detection fails open before the local node id is known`() {
+        assertFalse(isOwnMqttEcho(envelopeBytes(gatewayId = "!12345678"), myId = null))
+    }
+
+    @Test
+    fun `echo detection fails open on unparseable bytes`() {
+        assertFalse(isOwnMqttEcho(byteArrayOf(-1, -1, -1, -1), myId = "!12345678"))
+    }
+
+    @Test
+    fun `a json payload we gatewayed is an echo`() {
+        assertTrue(isOwnMqttJsonEcho(sender = "!12345678", myId = "!12345678"))
+    }
+
+    @Test
+    fun `a json payload from another gateway is not an echo`() {
+        assertFalse(isOwnMqttJsonEcho(sender = "!aabbccdd", myId = "!12345678"))
+        assertFalse(isOwnMqttJsonEcho(sender = null, myId = "!12345678"))
+        assertFalse(isOwnMqttJsonEcho(sender = "!12345678", myId = null))
+    }
+
     // endregion
 
     private fun TestScope.createHarness(
