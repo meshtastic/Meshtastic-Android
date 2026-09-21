@@ -45,6 +45,7 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.mqtt.MqttException
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.mqtt.ConnectionState as MqttConnectionState
 import org.meshtastic.proto.Position as ProtoPosition
@@ -183,6 +184,8 @@ class NoopMQTTRepository : MQTTRepository {
     override fun publish(topic: String, data: ByteArray, retained: Boolean) {}
 
     override val connectionState = MutableStateFlow<MqttConnectionState>(MqttConnectionState.Disconnected.Idle)
+
+    override val subscriptionRefusal = MutableStateFlow<MqttException.SubscriptionRefused?>(null)
 }
 
 // endregion

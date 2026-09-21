@@ -76,6 +76,8 @@ import org.meshtastic.core.resources.mqtt_status_disconnected_with_reason
 import org.meshtastic.core.resources.mqtt_status_inactive
 import org.meshtastic.core.resources.mqtt_status_reconnecting
 import org.meshtastic.core.resources.mqtt_status_reconnecting_with_attempt
+import org.meshtastic.core.resources.mqtt_status_topics_refused_all
+import org.meshtastic.core.resources.mqtt_status_topics_refused_some
 import org.meshtastic.core.resources.mqtt_test_connection
 import org.meshtastic.core.resources.password
 import org.meshtastic.core.resources.schema_mqtt_address
@@ -360,6 +362,15 @@ private fun MqttStatusRow(state: MqttConnectionState) {
             is MqttConnectionState.Connecting -> stringResource(Res.string.mqtt_status_connecting) to AmberColor
 
             is MqttConnectionState.Connected -> stringResource(Res.string.mqtt_status_connected) to GreenColor
+
+            is MqttConnectionState.SubscriptionRefused -> {
+                val topics = state.refused.entries.joinToString { (topic, reason) -> "$topic ($reason)" }
+                if (state.granted == 0) {
+                    stringResource(Res.string.mqtt_status_topics_refused_all, topics) to MaterialTheme.colorScheme.error
+                } else {
+                    stringResource(Res.string.mqtt_status_topics_refused_some, topics) to AmberColor
+                }
+            }
 
             is MqttConnectionState.Reconnecting -> {
                 val err = state.lastError

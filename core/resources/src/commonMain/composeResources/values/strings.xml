@@ -1165,6 +1165,8 @@
     <string name="mqtt_status_inactive">Inactive</string>
     <string name="mqtt_status_reconnecting">Reconnecting…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Reconnecting (attempt %1$d) — %2$s</string>
+    <string name="mqtt_status_topics_refused_all">Connected, but the broker refused every topic: %1$s</string>
+    <string name="mqtt_status_topics_refused_some">Connected, but the broker refused %1$s</string>
     <string name="mqtt_test_connection">Test connection</string>
     <string name="must_set_region">You must set a region!</string>
     <string name="must_update">You must update this application on the app store (or Github). It is too old to talk to this radio firmware.  Please read our <a href="https://meshtastic.org/docs/software/android/installation">docs</a> on this topic.</string>

@@ -1129,6 +1129,8 @@ mqtt_status_disconnected_with_reason
 mqtt_status_inactive
 mqtt_status_reconnecting
 mqtt_status_reconnecting_with_attempt
+mqtt_status_topics_refused_all
+mqtt_status_topics_refused_some
 mqtt_test_connection
 must_set_region
 must_update
