@@ -91,8 +91,8 @@ internal fun SecondaryMapSurface(
     interactions: MapInteractions = SecondaryMapInteractions,
     uiOptions: MapUiOptions = MapUiOptions.Standard,
 ) {
-    // Same guard as MeshMap, and in the same place: the state is pure Kotlin, the map view is what loads the
-    // native library. The style content is never composed without a presentation, so it stops here too.
+    // Same guard as MeshMap, and in the same place: the style content is never composed without a presentation, so
+    // it stops here too. Like MeshMap's, it covers the view and not the state.
     if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
 
     val zoomRange = basemaps.current.zoomRange()

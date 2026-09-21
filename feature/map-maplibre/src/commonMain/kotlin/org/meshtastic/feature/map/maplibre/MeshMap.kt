@@ -216,8 +216,9 @@ fun MeshMap(
     /** Called with the tapped position. Used to collect the two corners of a waypoint's geofence bounding box. */
     onMapClick: (Position) -> Unit = {},
 ) {
-    // No engine on this device means presenting a map is the UnsatisfiedLinkError crash in #7001. Guarded here and
-    // not at the state, which is pure Kotlin: the native library is loaded by the map *view*.
+    // No engine on this device means presenting a map is the UnsatisfiedLinkError crash in #7001. Covers the view
+    // only: `rememberMapState` builds the native runtime itself, so a runtime that cannot come up at all has already
+    // thrown by the time this is reached.
     if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
 
     val zoomRange = basemap.zoomRange()
