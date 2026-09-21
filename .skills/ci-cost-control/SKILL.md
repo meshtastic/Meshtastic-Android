@@ -1,3 +1,8 @@
+---
+name: ci-cost-control
+description: Keep GitHub Actions spend down on Meshtastic-Android - avoid redundant runs, cancel superseded ones, and pick the narrowest CI path for the change. Use this whenever you are about to push repeatedly, re-run a workflow, touch `.github/workflows/`, or someone asks why CI is slow, queued or expensive.
+---
+
 # Skill: CI Cost Control & Monitoring
 
 ## Description

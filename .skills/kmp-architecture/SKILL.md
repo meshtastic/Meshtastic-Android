@@ -1,3 +1,8 @@
+---
+name: kmp-architecture
+description: Kotlin Multiplatform source-set rules for Meshtastic-Android - where commonMain ends, how expect/actual is bridged, and the networking, database and platform-integration boundaries. Use this whenever you add a file to a KMP module, move code between source sets, or hit a compile error that appears on only one target.
+---
+
 # Skill: KMP Architecture & Source-Set Bridging
 
 ## Description

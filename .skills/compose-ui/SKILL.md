@@ -1,3 +1,8 @@
+---
+name: compose-ui
+description: Build shared Compose Multiplatform UI in Meshtastic-Android - adaptive layouts on Material 3 Adaptive, plus the string and resource rules. Use this whenever you add or change a composable, add a user-facing string, or work on tablet, desktop or landscape layout. Consult the bundled `strings-index.txt` rather than opening the raw `strings.xml`, which is guarded for size.
+---
+
 # Skill: Compose Multiplatform (CMP) UI
 
 ## Description

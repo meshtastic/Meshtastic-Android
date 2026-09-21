@@ -1,3 +1,8 @@
+---
+name: code-review
+description: Review a Meshtastic-Android change against KMP architecture, Compose Multiplatform and Modern Android Development conventions, starting from the four defect classes that keep recurring because neither the compiler, detekt nor spotless can see them. Use this for any PR review, for self-review before pushing, and whenever asked whether a change is safe to merge.
+---
+
 # Skill: Code Review
 
 ## Description
