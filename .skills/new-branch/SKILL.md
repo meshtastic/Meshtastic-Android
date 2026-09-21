@@ -1,3 +1,8 @@
+---
+name: new-branch
+description: The canonical recipe for starting a fresh working branch off a freshly fetched `origin/main` in Meshtastic-Android. Use this whenever a unit of work starts - "new branch off main", "peel off a fresh branch", "dust off #NNNN" - so the branch is based correctly and nothing is carried over from the last one.
+---
+
 # Skill: New Branch Bootstrap
 
 ## Description
@@ -66,12 +71,18 @@ When the user says *"rebase #NNNN"* or *"dust off PR NNNN"*:
 ```bash
 git fetch upstream --prune
 gh pr checkout <NNNN>          # checks out the PR head locally
+git branch --show-current      # confirm this is the PR you meant, before any push
 git rebase upstream/main
 # Resolve conflicts, then:
 git push --force-with-lease
 ```
 
 Never use plain `--force`. Always `--force-with-lease` to avoid clobbering collaborator pushes.
+
+Read that branch name before you push. A mistyped `<NNNN>` is a valid PR number
+belonging to someone else, and `--force-with-lease` will not save you: it only
+refuses when the remote ref moved after you fetched it, which is exactly not the
+case here. The lease is intact and the wrong branch gets rewritten.
 
 ## Post-Branch Checklist
 - [ ] Branch name carries a conventional prefix, or is a spec-driven name (numeric or `YYYYMMDD-HHMMSS-`) per Branch Naming above.

@@ -1,3 +1,8 @@
+---
+name: testing-ci
+description: Decide what to run locally before pushing Meshtastic-Android, and read the CI pipeline. Use this whenever you finish a change and need the right verification for its change type, when a CI job fails or is skipped, or when you need to know why the merge queue behaved the way it did.
+---
+
 # Skill: Testing and CI Verification
 
 ## Description

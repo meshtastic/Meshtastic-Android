@@ -1,3 +1,8 @@
+---
+name: implement-feature
+description: The end-to-end workflow for adding a feature to Meshtastic-Android, in the order that keeps KMP source sets and the architecture intact. Use this whenever you start implementing a new feature or a sizeable behaviour change, before writing any code.
+---
+
 # Skill: Implement a Feature
 
 ## Description

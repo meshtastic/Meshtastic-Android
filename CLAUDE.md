@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Claude-Specific Instructions
 
-- **Skills:** Load only the `.skills/` module relevant to the current task — don't read them all. Start with `.skills/project-overview/SKILL.md` (codebase map, bootstrap, troubleshooting).
+- **Skills:** Load only the `.skills/` module relevant to the current task — don't read them all. Start with `.skills/project-overview/SKILL.md` (codebase map, bootstrap, troubleshooting). Each module is symlinked into `.claude/skills/` so it can also be selected by name, since that is the only directory Claude Code discovers skills from.
 - **Plan Mode:** Use it for changes spanning multiple modules; write plans to `.agent_plans/` (git-ignored).
 - **Delegate to keep context lean** (this is a 20+ module KMP repo):
   - **Broad searches** ("where is X used", "find all implementers of Y") → dispatch the `Explore` subagent so file dumps stay out of the main context; you get back the conclusion.

@@ -1,3 +1,8 @@
+---
+name: navigation-and-di
+description: Koin Annotations dependency injection and JetBrains Navigation 3 in Meshtastic-Android, including the anti-patterns that compile cleanly and then fail at runtime. Use this whenever you add a screen, a route, a ViewModel or a Koin module, or when navigation or injection behaves unexpectedly.
+---
+
 # Skill: DI and Navigation 3 Architecture
 
 ## Description
