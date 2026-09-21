@@ -65,6 +65,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -505,6 +506,56 @@ class MQTTRepositoryImplTest {
         runCurrent()
         assertEquals(1, harness.client.connectCalls.size)
         assertEquals(1, harness.client.subscribeCalls.size)
+
+        advanceTimeBy(1_000)
+        runCurrent()
+        assertEquals(2, harness.client.connectCalls.size)
+        assertEquals(2, harness.client.subscribeCalls.size)
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `a refused topic filter is recorded for the UI without restarting the connection`() = runTest {
+        val harness = createHarness()
+        val refusal =
+            MqttException.SubscriptionRefused(
+                reasonCode = ReasonCode.NOT_AUTHORIZED,
+                message = "The broker refused 'msh/2/e/alpha/+' (NOT_AUTHORIZED)",
+                refused = mapOf("msh/2/e/alpha/+" to ReasonCode.NOT_AUTHORIZED),
+                granted = listOf("msh/2/e/PKI/+"),
+            )
+        harness.client.failSubscribeWith(refusal)
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+        assertEquals(1, harness.client.connectCalls.size)
+        assertEquals(1, harness.client.subscribeCalls.size)
+        assertSame(refusal, harness.repository.subscriptionRefusal.value)
+
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(1, harness.client.connectCalls.size)
+        assertEquals(1, harness.client.subscribeCalls.size)
+
+        collector.cancelAndJoin()
+        runCurrent()
+        assertNull(harness.repository.subscriptionRefusal.value)
+    }
+
+    @Test
+    fun `a malformed SUBACK fails the attempt and the connect loop retries it`() = runTest {
+        val harness = createHarness()
+        harness.client.failSubscribeWith(
+            MqttException.ProtocolError(ReasonCode.PROTOCOL_ERROR, "SUBACK carried 1 reason codes for 2 topic filters"),
+        )
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+        assertEquals(1, harness.client.connectCalls.size)
+        assertEquals(1, harness.client.subscribeCalls.size)
+        assertNull(harness.repository.subscriptionRefusal.value)
 
         advanceTimeBy(1_000)
         runCurrent()

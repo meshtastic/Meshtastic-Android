@@ -114,6 +114,11 @@ class MQTTRepositoryImpl(
             .onEach(::logConnectionState)
             .stateIn(scope, SharingStarted.Eagerly, ConnectionState.Disconnected.Idle)
 
+    override val subscriptionRefusal: StateFlow<MqttException.SubscriptionRefused?> =
+        activeSession
+            .flatMapLatest { session -> session?.subscriptionRefusal ?: flowOf(null) }
+            .stateIn(scope, SharingStarted.Eagerly, null)
+
     @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
         ignoreUnknownKeys = true
@@ -183,7 +188,7 @@ class MQTTRepositoryImpl(
                             )
                         if (subscriptions.isNotEmpty()) {
                             Logger.d { "MQTT subscribing to ${subscriptions.size} topics" }
-                            newClient.subscribe(subscriptions)
+                            subscribe(session, subscriptions)
                         }
                         Logger.i { "MQTT connected and subscribed" }
                     }
@@ -230,6 +235,23 @@ class MQTTRepositoryImpl(
         awaitClose {
             activeSession.compareAndSet(session, null)
             closeSession(session)
+        }
+    }
+
+    // A refusal is the broker's verdict on a filter, not a failed attempt: the client keeps the filters it granted,
+    // and retrying the connect would only draw the same SUBACK on a backoff for ever. Record it for the UI instead.
+    private suspend fun subscribe(session: ActiveMqttSession, subscriptions: List<Subscription>) {
+        try {
+            session.client.subscribe(subscriptions)
+        } catch (e: MqttException.SubscriptionRefused) {
+            Logger.w {
+                if (buildConfigProvider.isDebug) {
+                    "MQTT broker refused ${e.refused.size} of ${subscriptions.size} topics: ${e.message}"
+                } else {
+                    "MQTT broker refused ${e.refused.size} of ${subscriptions.size} topics"
+                }
+            }
+            session.subscriptionRefusal.value = e
         }
     }
 
@@ -429,6 +451,7 @@ class MQTTRepositoryImpl(
 private class ActiveMqttSession(val client: MqttClientSession) {
     val closeStarted = atomic(false)
     val connectJob = atomic<Job?>(null)
+    val subscriptionRefusal = MutableStateFlow<MqttException.SubscriptionRefused?>(null)
 }
 
 /**

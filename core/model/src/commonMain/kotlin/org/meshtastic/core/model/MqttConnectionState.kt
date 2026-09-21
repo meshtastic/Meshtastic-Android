@@ -34,6 +34,14 @@ sealed class MqttConnectionState {
     data object Connected : MqttConnectionState()
 
     /**
+     * The MQTT client is connected, but the broker refused some or all of the topic filters it asked for.
+     *
+     * @property refused Refused topic filter to the broker's reason code name (for example `NOT_AUTHORIZED`).
+     * @property granted How many filters the broker accepted; `0` means the proxy hears nothing from the broker.
+     */
+    data class SubscriptionRefused(val refused: Map<String, String>, val granted: Int) : MqttConnectionState()
+
+    /**
      * The MQTT client lost connection and is attempting to reconnect.
      *
      * @property attempt 1-based attempt counter for the current reconnect loop.

@@ -19,6 +19,7 @@ package org.meshtastic.core.network.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.mqtt.ConnectionState
+import org.meshtastic.mqtt.MqttException
 import org.meshtastic.proto.MqttClientProxyMessage
 
 /** Interface defining the MQTT interactions used for proxying messages to and from the mesh. */
@@ -43,4 +44,10 @@ interface MQTTRepository {
 
     /** Observable MQTT connection lifecycle state (DISCONNECTED → CONNECTING → CONNECTED → RECONNECTING). */
     val connectionState: StateFlow<ConnectionState>
+
+    /**
+     * The broker's refusal of one or more topic filters on the current connection, or `null` when every filter was
+     * granted or nothing has been subscribed yet. Cleared when the session ends.
+     */
+    val subscriptionRefusal: StateFlow<MqttException.SubscriptionRefused?>
 }

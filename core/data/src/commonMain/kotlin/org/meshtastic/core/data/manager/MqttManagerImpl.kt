@@ -75,8 +75,22 @@ class MqttManagerImpl(
     override val proxyActive: StateFlow<Boolean> = _proxyActive.asStateFlow()
 
     override val mqttConnectionState: StateFlow<MqttConnectionState> =
-        combine(_proxyActive, mqttRepository.connectionState) { active, libState ->
-            if (!active) MqttConnectionState.Inactive else libState.toAppState()
+        combine(_proxyActive, mqttRepository.connectionState, mqttRepository.subscriptionRefusal) {
+                active,
+                libState,
+                refusal,
+            ->
+            when {
+                !active -> MqttConnectionState.Inactive
+
+                libState is ConnectionState.Connected && refusal != null ->
+                    MqttConnectionState.SubscriptionRefused(
+                        refused = refusal.refused.mapValues { (_, code) -> code.name },
+                        granted = refusal.granted.size,
+                    )
+
+                else -> libState.toAppState()
+            }
         }
             .stateIn(scope, SharingStarted.Eagerly, MqttConnectionState.Inactive)
 
