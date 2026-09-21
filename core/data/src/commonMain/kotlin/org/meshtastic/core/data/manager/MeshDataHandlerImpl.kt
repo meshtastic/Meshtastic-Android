@@ -399,6 +399,7 @@ class MeshDataHandlerImpl(
             r.error_reason?.value ?: 0,
             dataPacket.relayNode,
             session,
+            ackProofStatus = packet.ack_proof_status.value,
         )
     }
 
@@ -409,11 +410,14 @@ class MeshDataHandlerImpl(
         routingError: Int,
         relayNode: Int?,
         session: RadioSessionContext,
+        ackProofStatus: Int = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT.value,
     ) {
         radioInterfaceService.launchSessionWork(scope, session) {
             val isAck = routingError == Routing.Error.NONE.value
-            val packets =
-                packetRepository.value.findPacketsWithId(requestId).filter { it.status != MessageStatus.RECEIVED }
+            val absentAckProof = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT.value
+            val provenAckProof = MeshPacket.AckProofStatus.ACK_PROOF_VALID.value
+            val allPackets = packetRepository.value.findPacketsWithId(requestId)
+            val packets = allPackets.filter { it.status != MessageStatus.RECEIVED }
             val reactions =
                 packetRepository.value.findReactionsWithId(requestId).filter { it.status != MessageStatus.RECEIVED }
             val p = packets.filter { it.to == fromId }.singleOrNull() ?: packets.singleOrNull()
@@ -434,8 +438,25 @@ class MeshDataHandlerImpl(
                 }
             if (p != null && p.status != MessageStatus.RECEIVED) {
                 val updatedPacket =
-                    p.copy(status = m, relays = if (isAck) p.relays + 1 else p.relays, relayNode = relayNode)
+                    p.copy(
+                        status = m,
+                        relays = if (isAck) p.relays + 1 else p.relays,
+                        relayNode = relayNode,
+                        // Several acks can close out one packet, and only the addressed node's carries a proof. An
+                        // unproven later ack must not erase the verdict an earlier one established.
+                        ackProofStatus = ackProofStatus.takeIf { it != absentAckProof } ?: p.ackProofStatus,
+                    )
                 packetRepository.value.update(updatedPacket, routingError = routingError)
+            } else if (p == null && ackProofStatus == provenAckProof) {
+                // A forged ack can arrive first and settle the packet as RECEIVED, which hides it from every later
+                // ack. Let the addressed node's proof still be recorded, without disturbing the settled status.
+                val settled = allPackets.filter { it.to == fromId }.singleOrNull() ?: allPackets.singleOrNull()
+                if (settled != null && settled.ackProofStatus != provenAckProof) {
+                    packetRepository.value.update(
+                        settled.copy(ackProofStatus = provenAckProof),
+                        routingError = routingError,
+                    )
+                }
             }
 
             reaction?.let { r ->

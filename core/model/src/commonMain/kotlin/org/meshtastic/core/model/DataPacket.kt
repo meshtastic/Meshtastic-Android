@@ -65,6 +65,11 @@ data class DataPacket(
     var transportMechanism: Int = 0,
     /** True when the radio verified this broadcast's XEdDSA signature ([MeshPacket.xeddsa_signed]). */
     var xeddsaSigned: Boolean = false,
+    /**
+     * The radio's verdict on the ack that closed out this outgoing packet (see [MeshPacket.AckProofStatus]). Written
+     * when the ack arrives, not when the packet is sent, so it stays absent for anything still enroute.
+     */
+    var ackProofStatus: Int = 0,
 ) {
 
     /** If there was an error with this message, this string describes what was wrong. */

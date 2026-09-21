@@ -73,6 +73,7 @@ data class PacketEntity(
             filtered = filtered,
             transportMechanism = data.transportMechanism,
             xeddsaSigned = data.xeddsaSigned,
+            ackProofStatus = data.ackProofStatus,
             translatedText = translatedText,
             showTranslated = showTranslated,
         )
