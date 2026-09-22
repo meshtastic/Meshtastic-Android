@@ -20,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.settings.appfunctions.PreviewAppFunctionsSettings
+import org.meshtastic.feature.settings.search.SettingsSearchNoResultsPreview
+import org.meshtastic.feature.settings.search.SettingsSearchResultsPreview
 import org.meshtastic.feature.settings.component.AppInfoSectionPreview
 import org.meshtastic.feature.settings.component.AppearanceSectionPreview
 import org.meshtastic.feature.settings.component.NodeLayoutSettingsCompactMinimalPreview
@@ -266,4 +268,18 @@ fun ScreenshotSampleNodeCompleteToggleMatrix() {
 @Composable
 fun ScreenshotAppFunctionsSettings() {
     PreviewAppFunctionsSettings()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSettingsSearchResults() {
+    SettingsSearchResultsPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSettingsSearchNoResults() {
+    SettingsSearchNoResultsPreview()
 }

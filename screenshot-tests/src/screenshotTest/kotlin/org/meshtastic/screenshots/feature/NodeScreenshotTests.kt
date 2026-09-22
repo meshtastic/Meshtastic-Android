@@ -21,6 +21,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.node.component.AirQualityInfoCardsPreview
 import org.meshtastic.feature.node.component.AirQualityInfoCardsStatusPreview
+import org.meshtastic.feature.node.component.NodeFilterSearchBarEmptyPreview
+import org.meshtastic.feature.node.component.NodeFilterSearchBarWithQueryPreview
 import org.meshtastic.feature.node.component.DeviceActionsLocalPreview
 import org.meshtastic.feature.node.component.DeviceActionsRemotePreview
 import org.meshtastic.feature.node.component.EnvironmentMetricsLightningPreview
@@ -358,4 +360,18 @@ fun ScreenshotEnvironmentMetricsContentLightning() {
 @Composable
 fun ScreenshotAirQualityCardsStatus() {
     PreviewAirQualityCardsStatus()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeFilterSearchBarEmpty() {
+    NodeFilterSearchBarEmptyPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeFilterSearchBarWithQuery() {
+    NodeFilterSearchBarWithQueryPreview()
 }

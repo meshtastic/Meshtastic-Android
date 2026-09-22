@@ -65,31 +65,40 @@ fun SettingsSearchBar(viewModel: SettingsSearchViewModel, onNavigate: (Route) ->
         placeholder = stringResource(Res.string.settings_search_placeholder),
         modifier = modifier,
         inputFieldTag = SETTINGS_SEARCH_BAR_INPUT_FIELD_TAG,
-        expandedContent = {
-            if (query.isNotBlank() && results.isEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.settings_search_no_results),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            } else {
-                // No item key: two entries can legitimately share a title and a destination (six controls are called
-                // "Enabled"), and a duplicate key crashes the list.
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(results) { entry ->
-                        SettingsSearchResult(entry = entry, onClick = { onNavigate(entry.route) })
-                        HorizontalDivider()
-                    }
-                }
-            }
-        },
+        expandedContent = { SettingsSearchResults(results = results, query = query, onSelect = onNavigate) },
     )
+}
+
+/** The results shown under the expanded field: the matches, or a line saying there were none. */
+@Composable
+internal fun SettingsSearchResults(
+    results: List<ResolvedSettingsEntry>,
+    query: String,
+    onSelect: (Route) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (query.isNotBlank() && results.isEmpty()) {
+        Column(
+            modifier = modifier.fillMaxSize().padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = stringResource(Res.string.settings_search_no_results),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    } else {
+        // No item key: two entries can legitimately share a title and a destination (six controls are called
+        // "Enabled"), and a duplicate key crashes the list.
+        LazyColumn(modifier = modifier.fillMaxSize()) {
+            items(results) { entry ->
+                SettingsSearchResult(entry = entry, onClick = { onSelect(entry.route) })
+                HorizontalDivider()
+            }
+        }
+    }
 }
 
 @Composable
