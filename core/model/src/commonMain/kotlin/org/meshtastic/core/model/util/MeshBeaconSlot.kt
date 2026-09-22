@@ -29,9 +29,9 @@ import org.meshtastic.proto.MeshBeacon
  * The frequency slot this beacon advertises outright, or `null` when it advertises none and the slot must be derived
  * from the offered region, channel name and preset the way [LoRaConfig.channelNum] does.
  *
- * A mesh sends this only when derivation would produce the wrong answer — it pins a slot the offered name does not
- * hash to. A value outside [lora]'s slot count is unaddressable here, so it falls back to derivation rather than
- * refusing the join: that is the behaviour we had before the field existed, and the offer is advisory either way.
+ * A mesh sends this only when derivation would produce the wrong answer — it pins a slot the offered name does not hash
+ * to. A value outside [lora]'s slot count is unaddressable here, so it falls back to derivation rather than refusing
+ * the join: that is the behaviour we had before the field existed, and the offer is advisory either way.
  */
 internal fun MeshBeacon.advertisedFrequencySlot(lora: LoRaConfig): Int? =
     offer_frequency_slot?.takeIf { it in 1..lora.numChannels }

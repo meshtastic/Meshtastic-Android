@@ -643,11 +643,13 @@ class MeshBeaconConfigPolicyTest {
         assertEquals(listOf(MeshBeaconConfig.BroadcastTarget.Builder().build()), updated)
     }
 
+    // US, not EU_868: EU_868 is 869.4-869.65 MHz, a single slot, so there would be no second slot to pin to and the
+    // pinned-radio case below could not be expressed at all.
     private val presetRadio =
         Config.LoRaConfig.Builder()
             .also { wb ->
-                wb.region = RegionCode.EU_868
-                wb.modem_preset = ModemPreset.MEDIUM_FAST
+                wb.region = RegionCode.US
+                wb.modem_preset = ModemPreset.LONG_FAST
                 wb.use_preset = true
             }
             .build()
@@ -655,8 +657,9 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun stampBeaconConfigForSave_pinnedRadio_advertisesTheSlotItActuallySitsOn() {
+        assertTrue(presetRadio.numChannels > 1, "a one-slot region makes this vacuous")
         val derived = Channel(primaryChannel, presetRadio).channelNum
-        val pin = if (derived < presetRadio.numChannels) derived + 1 else derived - 1
+        val pin = if (derived == 1) 2 else 1
         val radioLora = presetRadio.newBuilder().also { wb -> wb.channel_num = pin }.build()
 
         val stamped =
