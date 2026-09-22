@@ -49,6 +49,8 @@ import org.meshtastic.feature.settings.radio.component.TakServerSectionFailedPre
 import org.meshtastic.feature.settings.radio.component.TakTestCardIdlePreview
 import org.meshtastic.feature.settings.radio.component.TakTestCardResultsPreview
 import org.meshtastic.feature.settings.radio.component.TakTestCardRunningPreview
+import org.meshtastic.feature.settings.search.SettingsSearchNoResultsPreview
+import org.meshtastic.feature.settings.search.SettingsSearchResultsPreview
 
 @PreviewTest
 @PreviewLightDark
@@ -266,4 +268,18 @@ fun ScreenshotSampleNodeCompleteToggleMatrix() {
 @Composable
 fun ScreenshotAppFunctionsSettings() {
     PreviewAppFunctionsSettings()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSettingsSearchResults() {
+    SettingsSearchResultsPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSettingsSearchNoResults() {
+    SettingsSearchNoResultsPreview()
 }

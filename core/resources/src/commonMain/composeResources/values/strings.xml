@@ -1627,6 +1627,8 @@
     <string name="set_up_connection">Set up connection</string>
     <string name="set_your_region">Set your region</string>
     <string name="settings">settings</string>
+    <string name="settings_search_no_results">No settings match that</string>
+    <string name="settings_search_placeholder">Search settings</string>
     <!-- SHARE -->
     <string name="share">Share</string>
     <string name="share_action">Share link</string>

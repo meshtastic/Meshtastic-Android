@@ -1576,6 +1576,8 @@ set_time
 set_up_connection
 set_your_region
 settings
+settings_search_no_results
+settings_search_placeholder
 ### SHARE ###
 share
 share_action

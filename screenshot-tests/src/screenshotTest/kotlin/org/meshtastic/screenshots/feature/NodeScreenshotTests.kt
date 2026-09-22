@@ -30,6 +30,8 @@ import org.meshtastic.feature.node.component.HopHistogramEmptyPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionSignedPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionWithMakerDeviceHeroPreview
+import org.meshtastic.feature.node.component.NodeFilterSearchBarEmptyPreview
+import org.meshtastic.feature.node.component.NodeFilterSearchBarWithQueryPreview
 import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompactAllFieldsPreview
 import org.meshtastic.feature.node.component.NodeItemCompactMinimalPreview
@@ -358,4 +360,18 @@ fun ScreenshotEnvironmentMetricsContentLightning() {
 @Composable
 fun ScreenshotAirQualityCardsStatus() {
     PreviewAirQualityCardsStatus()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeFilterSearchBarEmpty() {
+    NodeFilterSearchBarEmptyPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeFilterSearchBarWithQuery() {
+    NodeFilterSearchBarWithQueryPreview()
 }

@@ -302,7 +302,7 @@ private val Node.unsignedNum: Long
     get() = num.toLong().let { if (it < 0) it + UNSIGNED_INT_OFFSET else it }
 
 /**
- * Matches node search text (long/short name, hex id, decimal id) with Unicode-aware case folding.
+ * Matches node search text (long/short name, hex id, decimal id, status message) with Unicode-aware case folding.
  *
  * Must run in Kotlin, not SQL: SQLite's LIKE/UPPER/LOWER only case-fold ASCII a-z/A-Z, so a query like "kolså" can
  * never match a stored name of "KOLSÅS" via a SQL WHERE clause (#6750).
@@ -311,4 +311,5 @@ fun Node.matchesSearch(filter: String): Boolean = filter.isBlank() ||
     user.long_name.contains(filter, ignoreCase = true) ||
     user.short_name.contains(filter, ignoreCase = true) ||
     user.id.contains(filter, ignoreCase = true) ||
+    nodeStatus?.contains(filter, ignoreCase = true) == true ||
     unsignedNum.toString().contains(filter, ignoreCase = true)
