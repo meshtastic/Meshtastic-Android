@@ -51,6 +51,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.repository.DiscoveryPacketCollector
@@ -587,19 +588,23 @@ class DiscoveryScanEngine(
             // Beacon custom-channel target: apply the offered preset+region, take the slot the mesh pinned or reset
             // channel_num so firmware derives it from the new name, then tune the primary channel to the offered
             // name+PSK so nodes on that mesh are heard. The original primary channel is restored after the scan.
+            val targetLora =
+                base
+                    .newBuilder()
+                    .also { wb ->
+                        wb.use_preset = true
+                        wb.modem_preset = target.preset.modemPreset
+                        wb.region = target.region ?: base.region
+                    }
+                    .build()
+            // Bound the pinned slot against the config we are about to apply, not the one we are leaving: a nonzero
+            // channel_num is taken verbatim, so an unaddressable slot would tune the scan to a frequency that does
+            // not exist. Zero puts us back on deriving it from the offered name.
+            val frequencySlot = target.frequencySlot?.takeIf { it in 1..targetLora.numChannels } ?: 0
             radioController.setLocalConfig(
                 Config.Builder()
                     .also { wb ->
-                        wb.lora =
-                            base
-                                .newBuilder()
-                                .also { wb ->
-                                    wb.use_preset = true
-                                    wb.modem_preset = target.preset.modemPreset
-                                    wb.region = target.region ?: base.region
-                                    wb.channel_num = target.frequencySlot ?: 0
-                                }
-                                .build()
+                        wb.lora = targetLora.newBuilder().also { lb -> lb.channel_num = frequencySlot }.build()
                     }
                     .build(),
             )
