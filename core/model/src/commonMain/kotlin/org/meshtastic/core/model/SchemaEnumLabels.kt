@@ -68,6 +68,36 @@ fun Enum<*>.schemaDescriptionRes(): StringResource? = when (this) {
     else -> null
 }
 
+/**
+ * The resource prefix every value of a labelled enum shares, one per enum. A consumer that has to tell an enum value's
+ * resource from a field's - settings search, which indexes fields and not the values they offer - reads this rather
+ * than keeping its own copy of the list.
+ */
+val schemaEnumValuePrefixes: Set<String> =
+    setOf(
+        "schema_bluetooth_pairingmode_",
+        "schema_device_rebroadcastmode_",
+        "schema_device_role_",
+        "schema_display_compassorientation_",
+        "schema_display_displaymode_",
+        "schema_display_displayunits_",
+        "schema_display_oledtype_",
+        "schema_lora_modempreset_",
+        "schema_lora_regioncode_",
+        "schema_network_addressmode_",
+        "schema_network_protocolflags_",
+        "schema_position_gpsmode_",
+        "schema_position_positionflags_",
+        "schema_security_packetsignaturepolicy_",
+        "schema_memberrole_",
+        "schema_audio_audio_baud_",
+        "schema_cannedmessage_inputeventchar_",
+        "schema_detectionsensor_triggertype_",
+        "schema_serial_serial_baud_",
+        "schema_serial_serial_mode_",
+        "schema_team_",
+    )
+
 private fun Enum<*>.schemaLabel(prefix: String): StringResource? = Res.allStringResources[prefix + name.lowercase()]
 
 private fun Enum<*>.schemaDescription(prefix: String): StringResource? =

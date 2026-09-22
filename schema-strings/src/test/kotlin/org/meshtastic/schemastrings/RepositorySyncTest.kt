@@ -88,6 +88,22 @@ class RepositorySyncTest {
     }
 
     @Test
+    fun `the generated set names the prefix of every labelled enum`() {
+        if (sync.recordedEnumLabelsPin != sync.catalogPin) {
+            println("protobufs moved to ${sync.catalogPin}; scheduled-updates re-syncs SchemaEnumLabels.kt")
+            return
+        }
+        val declared =
+            EnumLabelsKt.prefixEntryPattern.findAll(sync.enumLabels.readText()).map { it.groupValues[1] }.toSet()
+
+        assertEquals(
+            SchemaCatalog.labelledEnums().map { it.prefix }.toSet(),
+            declared,
+            "${EnumLabelsKt.PREFIXES} in SchemaEnumLabels.kt is stale: run ./gradlew :schema-strings:sync",
+        )
+    }
+
+    @Test
     fun `every labelled enum builds a prefix the generated strings carry`() {
         val strings = StringsXml.bodies(sync.englishSchemaStrings.readText()).keys
         val missing = SchemaCatalog.labelledEnums().filter { enum -> strings.none { it.startsWith(enum.prefix) } }
