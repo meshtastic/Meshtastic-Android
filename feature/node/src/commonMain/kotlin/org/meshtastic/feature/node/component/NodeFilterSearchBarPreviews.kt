@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.ui.theme.AppTheme
@@ -48,7 +48,8 @@ private val previewToggles =
         onToggleOnlyEncrypted = {},
     )
 
-@Preview
+@Suppress("PreviewPublic")
+@PreviewLightDark
 @Composable
 fun NodeFilterSearchBarEmptyPreview() {
     AppTheme {
@@ -65,7 +66,8 @@ fun NodeFilterSearchBarEmptyPreview() {
     }
 }
 
-@Preview
+@Suppress("PreviewPublic")
+@PreviewLightDark
 @Composable
 fun NodeFilterSearchBarWithQueryPreview() {
     AppTheme {

@@ -21,8 +21,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.node.component.AirQualityInfoCardsPreview
 import org.meshtastic.feature.node.component.AirQualityInfoCardsStatusPreview
-import org.meshtastic.feature.node.component.NodeFilterSearchBarEmptyPreview
-import org.meshtastic.feature.node.component.NodeFilterSearchBarWithQueryPreview
 import org.meshtastic.feature.node.component.DeviceActionsLocalPreview
 import org.meshtastic.feature.node.component.DeviceActionsRemotePreview
 import org.meshtastic.feature.node.component.EnvironmentMetricsLightningPreview
@@ -32,6 +30,8 @@ import org.meshtastic.feature.node.component.HopHistogramEmptyPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionSignedPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionWithMakerDeviceHeroPreview
+import org.meshtastic.feature.node.component.NodeFilterSearchBarEmptyPreview
+import org.meshtastic.feature.node.component.NodeFilterSearchBarWithQueryPreview
 import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompactAllFieldsPreview
 import org.meshtastic.feature.node.component.NodeItemCompactMinimalPreview

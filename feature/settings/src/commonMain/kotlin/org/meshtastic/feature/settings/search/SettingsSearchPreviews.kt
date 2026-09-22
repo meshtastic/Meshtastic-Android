@@ -18,7 +18,7 @@ package org.meshtastic.feature.settings.search
 
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.ui.theme.AppTheme
 
@@ -45,13 +45,15 @@ private val hopResults =
         ),
     )
 
-@Preview
+@Suppress("PreviewPublic")
+@PreviewLightDark
 @Composable
 fun SettingsSearchResultsPreview() {
     AppTheme { Surface { SettingsSearchResults(results = hopResults, query = "hop", onSelect = {}) } }
 }
 
-@Preview
+@Suppress("PreviewPublic")
+@PreviewLightDark
 @Composable
 fun SettingsSearchNoResultsPreview() {
     AppTheme { Surface { SettingsSearchResults(results = emptyList(), query = "xyzzy", onSelect = {}) } }
