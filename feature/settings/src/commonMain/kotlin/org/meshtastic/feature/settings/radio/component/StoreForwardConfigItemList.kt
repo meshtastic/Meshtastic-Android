@@ -26,10 +26,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.schema_storeforward_enabled
+import org.meshtastic.core.resources.schema_storeforward_enabled_description
 import org.meshtastic.core.resources.schema_storeforward_heartbeat
+import org.meshtastic.core.resources.schema_storeforward_heartbeat_description
 import org.meshtastic.core.resources.schema_storeforward_history_return_max
 import org.meshtastic.core.resources.schema_storeforward_history_return_window
 import org.meshtastic.core.resources.schema_storeforward_is_server
+import org.meshtastic.core.resources.schema_storeforward_is_server_description
 import org.meshtastic.core.resources.schema_storeforward_records
 import org.meshtastic.core.resources.store_forward
 import org.meshtastic.core.resources.store_forward_config
@@ -64,6 +67,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
             TitledCard(title = stringResource(Res.string.store_forward_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_storeforward_enabled),
+                    summary = stringResource(Res.string.schema_storeforward_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -74,6 +78,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_storeforward_heartbeat),
+                    summary = stringResource(Res.string.schema_storeforward_heartbeat_description),
                     checked = formState.value.heartbeat,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -115,6 +120,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_storeforward_is_server),
+                    summary = stringResource(Res.string.schema_storeforward_is_server_description),
                     checked = formState.value.is_server,
                     enabled = state.connected,
                     onCheckedChange = {

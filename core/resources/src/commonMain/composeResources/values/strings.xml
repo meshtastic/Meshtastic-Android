@@ -268,7 +268,6 @@
     <string name="config_lora_modem_preset_summary">Available modem presets, default is Long Fast.</string>
     <string name="config_lora_region_summary">The region where you will be using your radios.</string>
     <string name="config_network_udp_enabled_summary">Enable broadcasting packets via UDP over the local network.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">The fastest that position updates will be sent if the minimum distance has been satisfied.</string>
     <string name="config_saved_restarting">The node is restarting and will be briefly unreachable.</string>
     <string name="config_security_private_key">Used to create a shared key with a remote device.</string>
     <string name="config_security_private_key_remote">The device does not share its private key over remote administration. You can set a new key, but it can never be read back.</string>
@@ -485,7 +484,6 @@
     <string name="distance_filters_description">Filter the node list and mesh map based on proximity to your phone.</string>
     <string name="distance_measurements">Distance Measurements</string>
     <string name="distance_measurements_description">Display the distance between your phone and other Meshtastic nodes with positions.</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Clear search</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
@@ -738,7 +736,6 @@
     <string name="firmware_update_wipe_label">Erase device during update</string>
     <string name="firmware_update_wipe_usb_detail">Wipes the device's flash completely, then installs the selected firmware from scratch.</string>
     <string name="firmware_version">Firmware version: %1$s</string>
-    <string name="fixed_pin">Fixed PIN</string>
     <string name="fixed_position">Fixed Position</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
     <!-- FORMAT -->
@@ -752,7 +749,6 @@
     <string name="free_memory_description">Available system memory in bytes</string>
     <string name="freq">Freq</string>
     <string name="gas_resistance">Gas Resistance</string>
-    <string name="gateway">Gateway</string>
     <string name="generate_qr_code">Generate QR Code</string>
     <!-- GEOFENCE -->
     <string name="geofence">Geofence</string>
@@ -853,7 +849,6 @@
     <string name="layer_type_kml" translatable="false">KML</string>
     <string name="layer_type_network">Network layer</string>
     <string name="learn_more">Learn more</string>
-    <string name="led_heartbeat">LED Heartbeat</string>
     <string name="legacy_admin_channel">Legacy Admin channel</string>
     <string name="library_count">%1$d libraries</string>
     <string name="license">License</string>
@@ -1007,11 +1002,9 @@
     <string name="map_overlay_weather_radar">Weather radar</string>
     <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
     <string name="map_purge_success">SQL Cache purged for %1$s</string>
-    <string name="map_reporting">Map reporting</string>
     <string name="map_reporting_consent_header">Consent to Share Unencrypted Node Data via MQTT</string>
     <string name="map_reporting_consent_text">By enabling this feature, you acknowledge and expressly consent to the transmission of your device’s real-time geographic location over the MQTT protocol without encryption. This location data may be used for purposes such as live map reporting, device tracking, and related telemetry functions.</string>
     <string name="map_reporting_interval_seconds">Map reporting interval (seconds)</string>
-    <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
     <string name="map_select_download_region">Select download region</string>
     <string name="map_start_download">Start Download</string>
     <string name="map_style_selection">Map style selection</string>
@@ -1042,7 +1035,6 @@
     <string name="mesh_beacon_invitations_title">Mesh invitations</string>
     <string name="mesh_beacon_listen">Listen for beacons</string>
     <string name="mesh_beacon_listen_summary">Capture invitations advertised by nearby meshes</string>
-    <string name="mesh_beacon_message">Beacon message</string>
     <string name="mesh_beacon_message_error">Maximum %1$d bytes</string>
     <string name="mesh_beacon_no_channels">No channels available</string>
     <string name="mesh_beacon_notification_body">A nearby mesh invited you to join</string>
@@ -1485,7 +1477,6 @@
     <string name="refresh_metadata">Refresh metadata</string>
     <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
     <string name="regenerate_private_key">Regenerate Private Key</string>
-    <string name="region_frequency_plan">Region</string>
     <plurals name="relays">
         <item quantity="one">Heard %1$d relay</item>
         <item quantity="other">Heard %1$d relays</item>
@@ -1719,7 +1710,6 @@
     <string name="stop_connecting">Stop Connecting</string>
     <string name="store_forward">Store &amp; Forward</string>
     <string name="store_forward_config">Store &amp; Forward Config</string>
-    <string name="subnet">Subnet</string>
     <string name="success">Success</string>
     <string name="super_deep_sleep_duration_seconds">Super deep sleep duration</string>
     <string name="supported">Supported</string>
@@ -1732,7 +1722,6 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK Configuration</string>
-    <string name="tak_role">Member Role</string>
     <string name="tak_server">TAK Server</string>
     <string name="tak_server_channel">TAK Mesh Channel</string>
     <string name="tak_server_channel_desc">Meshtastic channel used for outgoing TAK traffic</string>
@@ -1767,7 +1756,6 @@
     <string name="tak_server_test_run">Run</string>
     <string name="tak_server_test_running">Running: %1$s</string>
     <string name="tak_server_v1_fallback_notice">Connected node firmware doesn't support full TAK integration — only location and chat messages will bridge to ATAK. Markers and other event types need firmware 2.8.0 or newer.</string>
-    <string name="tak_team">Team Color</string>
     <string name="telemetry">Telemetry</string>
     <string name="telemetry_config">Telemetry Config</string>
     <string name="temperature">Temp</string>
@@ -1776,10 +1764,8 @@
     <string name="theme_light">Light</string>
     <string name="theme_system">System default</string>
     <string name="time">Time</string>
-    <string name="time_zone">Time Zone</string>
     <string name="timeout">Timeout</string>
     <string name="timestamp">Timestamp</string>
-    <string name="tls_enabled">TLS enabled</string>
     <string name="tls_enabled_public_broker_summary">When this phone relays MQTT it always connects to mqtt.meshtastic.org over TLS. This setting applies when the radio reaches the broker over its own Wi-Fi or Ethernet.</string>
     <string name="toggle_my_position">Toggle my position</string>
     <string name="trace_route">Trace Route</string>

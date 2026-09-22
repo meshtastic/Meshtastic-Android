@@ -33,7 +33,6 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced_device_gps
 import org.meshtastic.core.resources.altitude
-import org.meshtastic.core.resources.config_position_broadcast_smart_minimum_interval_secs_summary
 import org.meshtastic.core.resources.device_gps
 import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
@@ -42,8 +41,11 @@ import org.meshtastic.core.resources.position_packet
 import org.meshtastic.core.resources.schema_position_broadcast_smart_minimum_distance
 import org.meshtastic.core.resources.schema_position_broadcast_smart_minimum_distance_description
 import org.meshtastic.core.resources.schema_position_broadcast_smart_minimum_interval_secs
+import org.meshtastic.core.resources.schema_position_broadcast_smart_minimum_interval_secs_description
 import org.meshtastic.core.resources.schema_position_fixed_position
+import org.meshtastic.core.resources.schema_position_fixed_position_description
 import org.meshtastic.core.resources.schema_position_gps_en_gpio
+import org.meshtastic.core.resources.schema_position_gps_en_gpio_description
 import org.meshtastic.core.resources.schema_position_gps_mode
 import org.meshtastic.core.resources.schema_position_gps_update_interval
 import org.meshtastic.core.resources.schema_position_gps_update_interval_description
@@ -53,7 +55,9 @@ import org.meshtastic.core.resources.schema_position_position_broadcast_smart_en
 import org.meshtastic.core.resources.schema_position_position_flags
 import org.meshtastic.core.resources.schema_position_position_flags_description
 import org.meshtastic.core.resources.schema_position_rx_gpio
+import org.meshtastic.core.resources.schema_position_rx_gpio_description
 import org.meshtastic.core.resources.schema_position_tx_gpio
+import org.meshtastic.core.resources.schema_position_tx_gpio_description
 import org.meshtastic.core.ui.component.BitwisePreference
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -211,7 +215,9 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     DropDownPreference(
                         title = stringResource(Res.string.schema_position_broadcast_smart_minimum_interval_secs),
                         summary =
-                        stringResource(Res.string.config_position_broadcast_smart_minimum_interval_secs_summary),
+                        stringResource(
+                            Res.string.schema_position_broadcast_smart_minimum_interval_secs_description,
+                        ),
                         enabled = state.connected,
                         items = smartItems.map { it to it.toDisplayString() },
                         selectedItem =
@@ -249,6 +255,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             TitledCard(title = stringResource(Res.string.device_gps)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_position_fixed_position),
+                    summary = stringResource(Res.string.schema_position_fixed_position_description),
                     checked = formState.value.fixed_position,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -348,6 +355,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 val pins = remember { org.meshtastic.feature.settings.util.gpioPins }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_position_rx_gpio),
+                    summary = stringResource(Res.string.schema_position_rx_gpio_description),
                     enabled = state.connected,
                     items = pins,
                     selectedItem = formState.value.rx_gpio,
@@ -358,6 +366,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_position_tx_gpio),
+                    summary = stringResource(Res.string.schema_position_tx_gpio_description),
                     enabled = state.connected,
                     items = pins,
                     selectedItem = formState.value.tx_gpio,
@@ -368,6 +377,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_position_gps_en_gpio),
+                    summary = stringResource(Res.string.schema_position_gps_en_gpio_description),
                     enabled = state.connected,
                     items = pins,
                     selectedItem = formState.value.gps_en_gpio,

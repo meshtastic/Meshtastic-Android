@@ -46,7 +46,6 @@ import org.meshtastic.core.resources.config_lora_modem_preset_summary
 import org.meshtastic.core.resources.config_lora_region_summary
 import org.meshtastic.core.resources.lora
 import org.meshtastic.core.resources.options
-import org.meshtastic.core.resources.region_frequency_plan
 import org.meshtastic.core.resources.schema_lora_bandwidth
 import org.meshtastic.core.resources.schema_lora_channel_num
 import org.meshtastic.core.resources.schema_lora_channel_num_description
@@ -55,15 +54,22 @@ import org.meshtastic.core.resources.schema_lora_config_ok_to_mqtt
 import org.meshtastic.core.resources.schema_lora_hop_limit
 import org.meshtastic.core.resources.schema_lora_hop_limit_description
 import org.meshtastic.core.resources.schema_lora_ignore_mqtt
+import org.meshtastic.core.resources.schema_lora_ignore_mqtt_description
 import org.meshtastic.core.resources.schema_lora_modem_preset
 import org.meshtastic.core.resources.schema_lora_override_duty_cycle
 import org.meshtastic.core.resources.schema_lora_override_frequency
 import org.meshtastic.core.resources.schema_lora_pa_fan_disabled
+import org.meshtastic.core.resources.schema_lora_region
 import org.meshtastic.core.resources.schema_lora_spread_factor
+import org.meshtastic.core.resources.schema_lora_spread_factor_description
 import org.meshtastic.core.resources.schema_lora_sx126x_rx_boosted_gain
+import org.meshtastic.core.resources.schema_lora_sx126x_rx_boosted_gain_description
 import org.meshtastic.core.resources.schema_lora_tx_enabled
+import org.meshtastic.core.resources.schema_lora_tx_enabled_description
 import org.meshtastic.core.resources.schema_lora_tx_power
+import org.meshtastic.core.resources.schema_lora_tx_power_description
 import org.meshtastic.core.resources.schema_lora_use_preset
+import org.meshtastic.core.resources.schema_lora_use_preset_description
 import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -180,7 +186,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     }
                 val presetsGated = presetConstraint?.isGated(state.localIsLicensed) == true
                 DropDownPreference(
-                    title = stringResource(Res.string.region_frequency_plan),
+                    title = stringResource(Res.string.schema_lora_region),
                     summary = stringResource(Res.string.config_lora_region_summary),
                     enabled = state.connected,
                     items =
@@ -210,6 +216,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_lora_use_preset),
+                    summary = stringResource(Res.string.schema_lora_use_preset_description),
                     checked = formState.value.use_preset,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -258,6 +265,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.advanced)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_lora_ignore_mqtt),
+                    summary = stringResource(Res.string.schema_lora_ignore_mqtt_description),
                     checked = formState.value.ignore_mqtt,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -278,6 +286,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_lora_tx_enabled),
+                    summary = stringResource(Res.string.schema_lora_tx_enabled_description),
                     checked = formState.value.tx_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -334,6 +343,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_lora_sx126x_rx_boosted_gain),
+                    summary = stringResource(Res.string.schema_lora_sx126x_rx_boosted_gain_description),
                     checked = formState.value.sx126x_rx_boosted_gain,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -362,6 +372,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SignedIntegerEditTextPreference(
                     title = stringResource(Res.string.schema_lora_tx_power),
+                    summary = stringResource(Res.string.schema_lora_tx_power_description),
                     value = formState.value.tx_power,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -406,6 +417,7 @@ private fun ManualModemSettings(
         HorizontalDivider()
         EditTextPreference(
             title = stringResource(Res.string.schema_lora_spread_factor),
+            summary = stringResource(Res.string.schema_lora_spread_factor_description),
             value = config.spread_factor,
             enabled = enabled,
             isError = config.spread_factor !in SPREAD_FACTOR_RANGE,

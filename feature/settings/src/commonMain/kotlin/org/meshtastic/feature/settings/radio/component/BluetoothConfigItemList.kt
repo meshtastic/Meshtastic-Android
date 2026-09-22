@@ -33,9 +33,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.bluetooth_config
-import org.meshtastic.core.resources.fixed_pin
 import org.meshtastic.core.resources.schema_bluetooth_enabled
+import org.meshtastic.core.resources.schema_bluetooth_enabled_description
+import org.meshtastic.core.resources.schema_bluetooth_fixed_pin
 import org.meshtastic.core.resources.schema_bluetooth_mode
+import org.meshtastic.core.resources.schema_bluetooth_mode_description
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -70,6 +72,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.bluetooth_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_bluetooth_enabled),
+                    summary = stringResource(Res.string.schema_bluetooth_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -80,6 +83,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_bluetooth_mode),
+                    summary = stringResource(Res.string.schema_bluetooth_mode_description),
                     enabled = state.connected,
                     items =
                     Config.BluetoothConfig.PairingMode.entries
@@ -116,7 +120,7 @@ private fun FixedPinPreference(
     var pinState by remember(pinValue) { mutableStateOf(pinValue.toString().padStart(PIN_LENGTH, '0')) }
     val pinIsError = pinState.length != PIN_LENGTH || !pinState.all { it.isDigit() }
     EditTextPreference(
-        title = stringResource(Res.string.fixed_pin),
+        title = stringResource(Res.string.schema_bluetooth_fixed_pin),
         value = pinState,
         enabled = enabled,
         isError = pinIsError,

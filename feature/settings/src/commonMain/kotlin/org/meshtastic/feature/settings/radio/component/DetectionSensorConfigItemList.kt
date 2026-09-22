@@ -33,11 +33,17 @@ import org.meshtastic.core.resources.detection_sensor
 import org.meshtastic.core.resources.detection_sensor_config
 import org.meshtastic.core.resources.minimum_broadcast_seconds
 import org.meshtastic.core.resources.schema_detectionsensor_detection_trigger_type
+import org.meshtastic.core.resources.schema_detectionsensor_detection_trigger_type_description
 import org.meshtastic.core.resources.schema_detectionsensor_enabled
+import org.meshtastic.core.resources.schema_detectionsensor_enabled_description
 import org.meshtastic.core.resources.schema_detectionsensor_monitor_pin
+import org.meshtastic.core.resources.schema_detectionsensor_monitor_pin_description
 import org.meshtastic.core.resources.schema_detectionsensor_name
+import org.meshtastic.core.resources.schema_detectionsensor_name_description
 import org.meshtastic.core.resources.schema_detectionsensor_send_bell
+import org.meshtastic.core.resources.schema_detectionsensor_send_bell_description
 import org.meshtastic.core.resources.schema_detectionsensor_use_pullup
+import org.meshtastic.core.resources.schema_detectionsensor_use_pullup_description
 import org.meshtastic.core.resources.state_broadcast_seconds
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -75,6 +81,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
             TitledCard(title = stringResource(Res.string.detection_sensor_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_detectionsensor_enabled),
+                    summary = stringResource(Res.string.schema_detectionsensor_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -111,6 +118,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_detectionsensor_send_bell),
+                    summary = stringResource(Res.string.schema_detectionsensor_send_bell_description),
                     checked = formState.value.send_bell,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -121,6 +129,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_detectionsensor_name),
+                    summary = stringResource(Res.string.schema_detectionsensor_name_description),
                     value = formState.value.name,
                     maxSize = 19, // name max_size:20
                     enabled = state.connected,
@@ -136,6 +145,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 val pins = remember { gpioPins }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_detectionsensor_monitor_pin),
+                    summary = stringResource(Res.string.schema_detectionsensor_monitor_pin_description),
                     items = pins,
                     selectedItem = formState.value.monitor_pin,
                     enabled = state.connected,
@@ -146,6 +156,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_detectionsensor_detection_trigger_type),
+                    summary = stringResource(Res.string.schema_detectionsensor_detection_trigger_type_description),
                     enabled = state.connected,
                     selectedItem = formState.value.detection_trigger_type,
                     onItemSelected = {
@@ -156,6 +167,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_detectionsensor_use_pullup),
+                    summary = stringResource(Res.string.schema_detectionsensor_use_pullup_description),
                     checked = formState.value.use_pullup,
                     enabled = state.connected,
                     onCheckedChange = {

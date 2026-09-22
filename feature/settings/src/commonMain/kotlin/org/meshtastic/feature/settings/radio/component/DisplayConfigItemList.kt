@@ -33,6 +33,7 @@ import org.meshtastic.core.resources.schema_display_auto_screen_carousel_secs_de
 import org.meshtastic.core.resources.schema_display_compass_north_top
 import org.meshtastic.core.resources.schema_display_compass_north_top_description
 import org.meshtastic.core.resources.schema_display_compass_orientation
+import org.meshtastic.core.resources.schema_display_compass_orientation_description
 import org.meshtastic.core.resources.schema_display_displaymode
 import org.meshtastic.core.resources.schema_display_displaymode_description
 import org.meshtastic.core.resources.schema_display_flip_screen
@@ -216,6 +217,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_display_compass_orientation),
+                    summary = stringResource(Res.string.schema_display_compass_orientation_description),
                     enabled = state.connected,
                     selectedItem = formState.value.compass_orientation,
                     onItemSelected = {

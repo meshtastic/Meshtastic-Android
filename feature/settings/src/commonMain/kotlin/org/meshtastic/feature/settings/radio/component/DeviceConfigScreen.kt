@@ -70,18 +70,21 @@ import org.meshtastic.core.resources.files_available
 import org.meshtastic.core.resources.gpio
 import org.meshtastic.core.resources.hardware
 import org.meshtastic.core.resources.i_know_what_i_m_doing
-import org.meshtastic.core.resources.led_heartbeat
 import org.meshtastic.core.resources.no_files_manifested
 import org.meshtastic.core.resources.options
-import org.meshtastic.core.resources.role
 import org.meshtastic.core.resources.router_role_confirmation_text
 import org.meshtastic.core.resources.schema_device_button_gpio
+import org.meshtastic.core.resources.schema_device_button_gpio_description
 import org.meshtastic.core.resources.schema_device_buzzer_gpio
+import org.meshtastic.core.resources.schema_device_buzzer_gpio_description
 import org.meshtastic.core.resources.schema_device_double_tap_as_button_press
 import org.meshtastic.core.resources.schema_device_double_tap_as_button_press_description
+import org.meshtastic.core.resources.schema_device_led_heartbeat_disabled
 import org.meshtastic.core.resources.schema_device_node_info_broadcast_secs
+import org.meshtastic.core.resources.schema_device_node_info_broadcast_secs_description
 import org.meshtastic.core.resources.schema_device_rebroadcast_mode
-import org.meshtastic.core.resources.time_zone
+import org.meshtastic.core.resources.schema_device_role
+import org.meshtastic.core.resources.schema_device_tzdef
 import org.meshtastic.core.resources.triple_click_adhoc_ping
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -138,7 +141,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             TitledCard(title = stringResource(Res.string.options)) {
                 val currentRole = formState.value.role
                 DropDownPreference(
-                    title = stringResource(Res.string.role),
+                    title = stringResource(Res.string.schema_device_role),
                     enabled = state.connected,
                     selectedItem = currentRole,
                     onItemSelected = { selectedRole = it },
@@ -164,6 +167,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_device_node_info_broadcast_secs),
+                    summary = stringResource(Res.string.schema_device_node_info_broadcast_secs_description),
                     selectedItem = formState.value.node_info_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
@@ -206,7 +210,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 InsetDivider()
 
                 SwitchPreference(
-                    title = stringResource(Res.string.led_heartbeat),
+                    title = stringResource(Res.string.schema_device_led_heartbeat_disabled),
                     summary = stringResource(Res.string.config_device_ledHeartbeatEnabled_summary),
                     checked = !formState.value.led_heartbeat_disabled,
                     enabled = state.connected,
@@ -219,7 +223,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             }
         }
         item {
-            TitledCard(title = stringResource(Res.string.time_zone)) {
+            TitledCard(title = stringResource(Res.string.schema_device_tzdef)) {
                 val appTzPosixString = rememberSystemTimeZonePosixString()
 
                 EditTextPreference(
@@ -276,6 +280,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             TitledCard(title = stringResource(Res.string.gpio)) {
                 EditTextPreference(
                     title = stringResource(Res.string.schema_device_button_gpio),
+                    summary = stringResource(Res.string.schema_device_button_gpio_description),
                     value = formState.value.button_gpio,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -288,6 +293,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 EditTextPreference(
                     title = stringResource(Res.string.schema_device_buzzer_gpio),
+                    summary = stringResource(Res.string.schema_device_buzzer_gpio_description),
                     value = formState.value.buzzer_gpio,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

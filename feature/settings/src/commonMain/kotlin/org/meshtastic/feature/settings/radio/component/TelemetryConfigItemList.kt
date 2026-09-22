@@ -26,17 +26,27 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.schema_telemetry_air_quality_enabled
+import org.meshtastic.core.resources.schema_telemetry_air_quality_enabled_description
 import org.meshtastic.core.resources.schema_telemetry_air_quality_interval
+import org.meshtastic.core.resources.schema_telemetry_air_quality_interval_description
 import org.meshtastic.core.resources.schema_telemetry_device_telemetry_enabled
 import org.meshtastic.core.resources.schema_telemetry_device_telemetry_enabled_description
 import org.meshtastic.core.resources.schema_telemetry_device_update_interval
+import org.meshtastic.core.resources.schema_telemetry_device_update_interval_description
 import org.meshtastic.core.resources.schema_telemetry_environment_display_fahrenheit
+import org.meshtastic.core.resources.schema_telemetry_environment_display_fahrenheit_description
 import org.meshtastic.core.resources.schema_telemetry_environment_measurement_enabled
+import org.meshtastic.core.resources.schema_telemetry_environment_measurement_enabled_description
 import org.meshtastic.core.resources.schema_telemetry_environment_screen_enabled
+import org.meshtastic.core.resources.schema_telemetry_environment_screen_enabled_description
 import org.meshtastic.core.resources.schema_telemetry_environment_update_interval
+import org.meshtastic.core.resources.schema_telemetry_environment_update_interval_description
 import org.meshtastic.core.resources.schema_telemetry_power_measurement_enabled
+import org.meshtastic.core.resources.schema_telemetry_power_measurement_enabled_description
 import org.meshtastic.core.resources.schema_telemetry_power_screen_enabled
+import org.meshtastic.core.resources.schema_telemetry_power_screen_enabled_description
 import org.meshtastic.core.resources.schema_telemetry_power_update_interval
+import org.meshtastic.core.resources.schema_telemetry_power_update_interval_description
 import org.meshtastic.core.resources.telemetry
 import org.meshtastic.core.resources.telemetry_config
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -90,6 +100,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val items = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_telemetry_device_update_interval),
+                    summary = stringResource(Res.string.schema_telemetry_device_update_interval_description),
                     selectedItem = formState.value.device_update_interval.toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
@@ -101,6 +112,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_environment_measurement_enabled),
+                    summary = stringResource(Res.string.schema_telemetry_environment_measurement_enabled_description),
                     checked = formState.value.environment_measurement_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -113,6 +125,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val envItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_telemetry_environment_update_interval),
+                    summary = stringResource(Res.string.schema_telemetry_environment_update_interval_description),
                     selectedItem = formState.value.environment_update_interval.toLong(),
                     enabled = state.connected,
                     items = envItems.map { it.value to it.toDisplayString() },
@@ -127,6 +140,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_environment_screen_enabled),
+                    summary = stringResource(Res.string.schema_telemetry_environment_screen_enabled_description),
                     checked = formState.value.environment_screen_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -138,6 +152,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_environment_display_fahrenheit),
+                    summary = stringResource(Res.string.schema_telemetry_environment_display_fahrenheit_description),
                     checked = formState.value.environment_display_fahrenheit,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -149,6 +164,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_air_quality_enabled),
+                    summary = stringResource(Res.string.schema_telemetry_air_quality_enabled_description),
                     checked = formState.value.air_quality_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -161,6 +177,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val airItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_telemetry_air_quality_interval),
+                    summary = stringResource(Res.string.schema_telemetry_air_quality_interval_description),
                     selectedItem = formState.value.air_quality_interval.toLong(),
                     enabled = state.connected,
                     items = airItems.map { it.value to it.toDisplayString() },
@@ -172,6 +189,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_power_measurement_enabled),
+                    summary = stringResource(Res.string.schema_telemetry_power_measurement_enabled_description),
                     checked = formState.value.power_measurement_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -184,6 +202,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val powerItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_telemetry_power_update_interval),
+                    summary = stringResource(Res.string.schema_telemetry_power_update_interval_description),
                     selectedItem = formState.value.power_update_interval.toLong(),
                     enabled = state.connected,
                     items = powerItems.map { it.value to it.toDisplayString() },
@@ -195,6 +214,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_telemetry_power_screen_enabled),
+                    summary = stringResource(Res.string.schema_telemetry_power_screen_enabled_description),
                     checked = formState.value.power_screen_enabled,
                     enabled = state.connected,
                     onCheckedChange = {

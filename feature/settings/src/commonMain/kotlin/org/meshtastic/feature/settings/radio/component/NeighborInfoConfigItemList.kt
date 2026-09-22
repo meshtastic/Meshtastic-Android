@@ -28,6 +28,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.neighbor_info_config
 import org.meshtastic.core.resources.schema_neighborinfo_enabled
+import org.meshtastic.core.resources.schema_neighborinfo_enabled_description
 import org.meshtastic.core.resources.schema_neighborinfo_transmit_over_lora
 import org.meshtastic.core.resources.schema_neighborinfo_transmit_over_lora_description
 import org.meshtastic.core.resources.update_interval_seconds
@@ -62,6 +63,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
             TitledCard(title = stringResource(Res.string.neighbor_info_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_neighborinfo_enabled),
+                    summary = stringResource(Res.string.schema_neighborinfo_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {

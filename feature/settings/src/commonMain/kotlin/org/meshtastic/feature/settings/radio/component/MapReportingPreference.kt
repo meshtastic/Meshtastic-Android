@@ -45,11 +45,11 @@ import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.i_agree
 import org.meshtastic.core.resources.i_agree_to_share_my_location
-import org.meshtastic.core.resources.map_reporting
 import org.meshtastic.core.resources.map_reporting_consent_header
 import org.meshtastic.core.resources.map_reporting_consent_text
 import org.meshtastic.core.resources.map_reporting_interval_seconds
-import org.meshtastic.core.resources.map_reporting_summary
+import org.meshtastic.core.resources.schema_mqtt_map_reporting_enabled
+import org.meshtastic.core.resources.schema_mqtt_map_reporting_enabled_description
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
@@ -78,8 +78,8 @@ fun MapReportingPreference(
         // [mapReportingEnabled] so an externally-changed config wins over a stale local toggle.
         var showMapReportingWarning by rememberSaveable(mapReportingEnabled) { mutableStateOf(mapReportingEnabled) }
         SwitchPreference(
-            title = stringResource(Res.string.map_reporting),
-            summary = stringResource(Res.string.map_reporting_summary),
+            title = stringResource(Res.string.schema_mqtt_map_reporting_enabled),
+            summary = stringResource(Res.string.schema_mqtt_map_reporting_enabled_description),
             checked = showMapReportingWarning,
             enabled = enabled,
             onCheckedChange = { checked ->

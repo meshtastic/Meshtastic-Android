@@ -47,25 +47,28 @@ import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.config_network_udp_enabled_summary
 import org.meshtastic.core.resources.connection_status
-import org.meshtastic.core.resources.dns
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.ethernet_config
 import org.meshtastic.core.resources.ethernet_ip
-import org.meshtastic.core.resources.gateway
 import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.nfc_disabled
 import org.meshtastic.core.resources.open_settings
-import org.meshtastic.core.resources.password
 import org.meshtastic.core.resources.scan_nfc
 import org.meshtastic.core.resources.schema_network_address_mode
 import org.meshtastic.core.resources.schema_network_eth_enabled
 import org.meshtastic.core.resources.schema_network_eth_enabled_description
+import org.meshtastic.core.resources.schema_network_ipv4_dns
+import org.meshtastic.core.resources.schema_network_ipv4_gateway
+import org.meshtastic.core.resources.schema_network_ipv4_ip
+import org.meshtastic.core.resources.schema_network_ipv4_subnet
 import org.meshtastic.core.resources.schema_network_ntp_server
+import org.meshtastic.core.resources.schema_network_ntp_server_description
 import org.meshtastic.core.resources.schema_network_rsyslog_server
 import org.meshtastic.core.resources.schema_network_wifi_enabled
 import org.meshtastic.core.resources.schema_network_wifi_enabled_description
+import org.meshtastic.core.resources.schema_network_wifi_psk
 import org.meshtastic.core.resources.schema_network_wifi_ssid
-import org.meshtastic.core.resources.subnet
+import org.meshtastic.core.resources.schema_network_wifi_ssid_description
 import org.meshtastic.core.resources.udp_enabled
 import org.meshtastic.core.resources.wifi_config
 import org.meshtastic.core.resources.wifi_ip
@@ -218,6 +221,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(Res.string.schema_network_wifi_ssid),
+                        summary = stringResource(Res.string.schema_network_wifi_ssid_description),
                         value = formState.value.wifi_ssid,
                         maxSize = 32, // wifi_ssid max_size:33
                         enabled = state.connected,
@@ -231,7 +235,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     )
                     HorizontalDivider()
                     EditPasswordPreference(
-                        title = stringResource(Res.string.password),
+                        title = stringResource(Res.string.schema_network_wifi_psk),
                         value = formState.value.wifi_psk,
                         maxSize = 64, // wifi_psk max_size:65
                         enabled = state.connected,
@@ -275,6 +279,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
             TitledCard(title = stringResource(Res.string.advanced)) {
                 EditTextPreference(
                     title = stringResource(Res.string.schema_network_ntp_server),
+                    summary = stringResource(Res.string.schema_network_ntp_server_description),
                     value = formState.value.ntp_server,
                     maxSize = 32, // ntp_server max_size:33
                     enabled = state.connected,
@@ -336,7 +341,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     HorizontalDivider()
                     val ipv4 = formState.value.ipv4_config ?: Config.NetworkConfig.IpV4Config.Builder().build()
                     EditIPv4Preference(
-                        title = stringResource(Res.string.wifi_ip),
+                        title = stringResource(Res.string.schema_network_ipv4_ip),
                         value = ipv4.ip,
                         enabled = state.connected,
                         onValueChanged = {
@@ -350,7 +355,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     )
                     HorizontalDivider()
                     EditIPv4Preference(
-                        title = stringResource(Res.string.gateway),
+                        title = stringResource(Res.string.schema_network_ipv4_gateway),
                         value = ipv4.gateway,
                         enabled = state.connected,
                         onValueChanged = {
@@ -366,7 +371,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     )
                     HorizontalDivider()
                     EditIPv4Preference(
-                        title = stringResource(Res.string.subnet),
+                        title = stringResource(Res.string.schema_network_ipv4_subnet),
                         value = ipv4.subnet,
                         enabled = state.connected,
                         onValueChanged = {
@@ -382,7 +387,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     )
                     HorizontalDivider()
                     EditIPv4Preference(
-                        title = stringResource(Res.string.dns),
+                        title = stringResource(Res.string.schema_network_ipv4_dns),
                         value = ipv4.dns,
                         enabled = state.connected,
                         onValueChanged = {

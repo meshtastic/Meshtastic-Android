@@ -48,7 +48,6 @@ import org.meshtastic.core.resources.mesh_beacon_interval
 import org.meshtastic.core.resources.mesh_beacon_interval_error
 import org.meshtastic.core.resources.mesh_beacon_listen
 import org.meshtastic.core.resources.mesh_beacon_listen_summary
-import org.meshtastic.core.resources.mesh_beacon_message
 import org.meshtastic.core.resources.mesh_beacon_no_channels
 import org.meshtastic.core.resources.mesh_beacon_offer_channel_name
 import org.meshtastic.core.resources.mesh_beacon_on_preset
@@ -61,6 +60,7 @@ import org.meshtastic.core.resources.mesh_beacon_target_default
 import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.mesh_beacon_targets
 import org.meshtastic.core.resources.plurals_seconds
+import org.meshtastic.core.resources.schema_meshbeacon_broadcast_message
 import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -238,7 +238,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                 if (broadcastGate.sectionsVisible) {
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(Res.string.mesh_beacon_message),
+                        title = stringResource(Res.string.schema_meshbeacon_broadcast_message),
                         value = formState.value.broadcast_message,
                         maxSize = MESSAGE_MAX_BYTES,
                         enabled = broadcastGate.sectionsEnabled,
