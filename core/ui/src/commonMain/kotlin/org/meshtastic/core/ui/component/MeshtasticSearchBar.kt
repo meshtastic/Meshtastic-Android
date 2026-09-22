@@ -88,6 +88,7 @@ fun MeshtasticSearchBar(
     onQueryChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
+    clearDescription: String = stringResource(Res.string.clear),
     inputFieldTag: String = SEARCH_BAR_INPUT_FIELD_TAG,
     scrollBehavior: SearchBarScrollBehavior? = null,
     trailingActions: @Composable RowScope.() -> Unit = {},
@@ -116,6 +117,7 @@ fun MeshtasticSearchBar(
             textFieldState = textFieldState,
             searchBarState = searchBarState,
             placeholder = placeholder,
+            clearDescription = clearDescription,
             testTag = tag,
             trailingActions = trailingActions,
         )
@@ -156,12 +158,12 @@ private fun SearchInputField(
     textFieldState: TextFieldState,
     searchBarState: SearchBarState,
     placeholder: String,
+    clearDescription: String,
     testTag: String,
     trailingActions: @Composable RowScope.() -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val isExpanded = searchBarState.currentValue == SearchBarValue.Expanded
-    val clearDescription = stringResource(Res.string.clear)
     val backDescription = stringResource(Res.string.navigate_back)
 
     SearchBarDefaults.InputField(
