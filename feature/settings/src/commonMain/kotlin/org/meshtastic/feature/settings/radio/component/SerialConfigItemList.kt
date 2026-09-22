@@ -108,7 +108,6 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 DropDownPreference(
                     title = stringResource(Res.string.schema_serial_baud),
                     enabled = state.connected,
-                    items = ModuleConfig.SerialConfig.Serial_Baud.entries.map { it to it.name },
                     selectedItem = formState.value.baud,
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.baud = it }.build()
@@ -128,7 +127,6 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 DropDownPreference(
                     title = stringResource(Res.string.schema_serial_mode),
                     enabled = state.connected,
-                    items = ModuleConfig.SerialConfig.Serial_Mode.entries.map { it to it.name },
                     selectedItem = formState.value.mode,
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build()

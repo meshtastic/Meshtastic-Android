@@ -16,65 +16,7 @@
  */
 package org.meshtastic.core.model
 
-import org.jetbrains.compose.resources.StringResource
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.tak_role_forwardobserver
-import org.meshtastic.core.resources.tak_role_hq
-import org.meshtastic.core.resources.tak_role_k9
-import org.meshtastic.core.resources.tak_role_medic
-import org.meshtastic.core.resources.tak_role_rto
-import org.meshtastic.core.resources.tak_role_sniper
-import org.meshtastic.core.resources.tak_role_teamlead
-import org.meshtastic.core.resources.tak_role_teammember
-import org.meshtastic.core.resources.tak_role_unspecified
-import org.meshtastic.core.resources.tak_team_blue
-import org.meshtastic.core.resources.tak_team_brown
-import org.meshtastic.core.resources.tak_team_cyan
-import org.meshtastic.core.resources.tak_team_dark_blue
-import org.meshtastic.core.resources.tak_team_dark_green
-import org.meshtastic.core.resources.tak_team_green
-import org.meshtastic.core.resources.tak_team_magenta
-import org.meshtastic.core.resources.tak_team_maroon
-import org.meshtastic.core.resources.tak_team_orange
-import org.meshtastic.core.resources.tak_team_purple
-import org.meshtastic.core.resources.tak_team_red
-import org.meshtastic.core.resources.tak_team_teal
-import org.meshtastic.core.resources.tak_team_unspecified_color
-import org.meshtastic.core.resources.tak_team_white
-import org.meshtastic.core.resources.tak_team_yellow
-import org.meshtastic.proto.MemberRole
 import org.meshtastic.proto.Team
-
-@Suppress("CyclomaticComplexMethod")
-fun getStringResFrom(team: Team): StringResource = when (team) {
-    Team.Unspecifed_Color -> Res.string.tak_team_unspecified_color
-    Team.White -> Res.string.tak_team_white
-    Team.Yellow -> Res.string.tak_team_yellow
-    Team.Orange -> Res.string.tak_team_orange
-    Team.Magenta -> Res.string.tak_team_magenta
-    Team.Red -> Res.string.tak_team_red
-    Team.Maroon -> Res.string.tak_team_maroon
-    Team.Purple -> Res.string.tak_team_purple
-    Team.Dark_Blue -> Res.string.tak_team_dark_blue
-    Team.Blue -> Res.string.tak_team_blue
-    Team.Cyan -> Res.string.tak_team_cyan
-    Team.Teal -> Res.string.tak_team_teal
-    Team.Green -> Res.string.tak_team_green
-    Team.Dark_Green -> Res.string.tak_team_dark_green
-    Team.Brown -> Res.string.tak_team_brown
-}
-
-fun getStringResFrom(role: MemberRole): StringResource = when (role) {
-    MemberRole.Unspecifed -> Res.string.tak_role_unspecified
-    MemberRole.TeamMember -> Res.string.tak_role_teammember
-    MemberRole.TeamLead -> Res.string.tak_role_teamlead
-    MemberRole.HQ -> Res.string.tak_role_hq
-    MemberRole.Sniper -> Res.string.tak_role_sniper
-    MemberRole.Medic -> Res.string.tak_role_medic
-    MemberRole.ForwardObserver -> Res.string.tak_role_forwardobserver
-    MemberRole.RTO -> Res.string.tak_role_rto
-    MemberRole.K9 -> Res.string.tak_role_k9
-}
 
 @Suppress("CyclomaticComplexMethod", "MagicNumber")
 fun getColorFrom(team: Team): Long = when (team) {

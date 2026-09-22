@@ -86,7 +86,6 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 DropDownPreference(
                     title = stringResource(Res.string.schema_audio_bitrate),
                     enabled = state.connected,
-                    items = ModuleConfig.AudioConfig.Audio_Baud.entries.map { it to it.name },
                     selectedItem = formState.value.bitrate,
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.bitrate = it }.build()

@@ -300,7 +300,6 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     DropDownPreference(
                         title = stringResource(Res.string.schema_position_gps_mode),
                         enabled = state.connected,
-                        items = Config.PositionConfig.GpsMode.entries.map { it to it.name },
                         selectedItem = formState.value.gps_mode,
                         onItemSelected = {
                             formState.value = formState.value.newBuilder().also { wb -> wb.gps_mode = it }.build()
