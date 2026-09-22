@@ -104,7 +104,7 @@ until you agree:</p>
       <td>The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads <em>±</em> the resulting distance, in your own units</td>
     </tr>
     <tr>
-      <td>Intervalle de rapport cartographique (secondes)</td>
+      <td>Map Publish Interval</td>
       <td>How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered</td>
     </tr>
   </tbody>
@@ -207,11 +207,11 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
       <td>Send the alert through an I2S audio output instead</td>
     </tr>
     <tr>
-      <td>Durée de sortie (en millisecondes)</td>
+      <td>GPIO Output Duration</td>
       <td>How long a single alert lasts</td>
     </tr>
     <tr>
-      <td>Durée de répétition de la sortie (secondes)</td>
+      <td>Délai d’expiration du message</td>
       <td>Keep repeating the alert for this long until it is acknowledged. 0 disables nagging</td>
     </tr>
     <tr>
@@ -288,7 +288,7 @@ reverted to public.</p>
       <td>Activate range testing</td>
     </tr>
     <tr>
-      <td>Intervalle de message de l’expéditeur (secondes)</td>
+      <td>Sender Interval</td>
       <td>Time between test transmissions, chosen from a dropdown of fixed intervals</td>
     </tr>
     <tr>
@@ -504,7 +504,7 @@ battery health often and sensors rarely.</p>
       <td>Activate neighbor broadcasting</td>
     </tr>
     <tr>
-      <td>Intervalle de mise à jour (secondes)</td>
+      <td>Fréquence de récupération GPS</td>
       <td>How often to broadcast neighbor list</td>
     </tr>
     <tr>
@@ -572,11 +572,11 @@ battery health often and sensors rarely.</p>
       <td>Enable the pin’s internal pull-up resistor</td>
     </tr>
     <tr>
-      <td>Diffusion minimale (secondes)</td>
+      <td>Minimum time between detection broadcasts</td>
       <td>Minimum time between alert broadcasts</td>
     </tr>
     <tr>
-      <td>Diffusion de l’État (secondes)</td>
+      <td>State Broadcast Interval</td>
       <td>Periodic state broadcast interval</td>
     </tr>
     <tr>
@@ -607,15 +607,15 @@ battery health often and sensors rarely.</p>
       <td>Activate people counting</td>
     </tr>
     <tr>
-      <td>Intervalle de mise à jour (secondes)</td>
+      <td>Fréquence de récupération GPS</td>
       <td>How often to report counts</td>
     </tr>
     <tr>
-      <td>Wi-Fi RSSI threshold</td>
+      <td>WiFi Threshold (dBm)</td>
       <td>Ignore Wi-Fi probes weaker than this, so distant devices aren’t counted (defaults to −80 dBm)</td>
     </tr>
     <tr>
-      <td>BLE RSSI threshold</td>
+      <td>BLE Threshold (dBm)</td>
       <td>The same cut-off for BLE advertisements (defaults to −80 dBm)</td>
     </tr>
   </tbody>

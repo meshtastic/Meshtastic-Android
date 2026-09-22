@@ -51,11 +51,11 @@ Turning **Map reporting** on reveals a consent card headed _Consent to Share Une
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
 until you agree:
 
- Asetus                                                    | Kuvaus                                                                                                                                                                                   |
- --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- Hyväksyn.                                 | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
- Precision slider                                          | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
- Karttaraportoinnin aikaväli (sekuntia) | Kuinka usein sijainti julkaistaan. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                    |
+ Asetus                    | Kuvaus                                                                                                                                                                                   |
+ ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Hyväksyn. | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
+ Precision slider          | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
+ Map Publish Interval      | Kuinka usein sijainti julkaistaan. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                    |
 
 Katso [MQTT](mqtt) saadaksesi yksityiskohtaisen käyttöoppaan, joka sisältää salauksen, tietosuojan ja välityspalvelimen määrityksen.
 
@@ -90,8 +90,8 @@ Käynnistimiä on kaksi – saapuva **viesti** ja vastaanotettu **BEL**-ohjausme
  Ulostulon värinä (GPIO)            | Värinämoottori on kytketty nastaan                                                                          |
  Käytä PWM-äänimerkkiä                                 | Ohjaa summeria PWM:llä, jolloin voidaan toistaa ääniä yhden kiinteän taajuuden sijaan       |
  Käytä I2S protokollaa äänimerkille                    | Lähetä hälytys sen sijaan I2S-äänilähdön kautta                                                             |
- Ulostulon kesto (millisekuntia)    | Kuinka kauan yksittäinen hälytys kestää                                                                     |
- Hälytysaikakatkaisu (sekuntia)     | Toista hälytystä tämän ajan, kunnes se kuitataan. 0 poistaa toistuvan muistutuksen käytöstä |
+ GPIO Output Duration                                  | Kuinka kauan yksittäinen hälytys kestää                                                                     |
+ Toistokehotuksen aikakatkaisu                         | Toista hälytystä tämän ajan, kunnes se kuitataan. 0 poistaa toistuvan muistutuksen käytöstä |
  Soittoääni                                            | PWM-summerilla toistettava RTTTL-soittoääni. Voidaan tuoda tiedostosta                      |
 
 ### Store &amp; Forward module
@@ -121,7 +121,7 @@ Automaattinen kuuluvuustestityökalu radioiden välisen yhteyden laadun arvioint
  Asetus                                                              | Kuvaus                                                                                   |
  ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
  Kuuluvuustesti käytössä                                             | Ota kuuluvuustesti käyttöön                                                              |
- Viestien lähetyksen aikaväli (sekuntia)          | Time between test transmissions, chosen from a dropdown of fixed intervals               |
+ Sender Interval                                                     | Time between test transmissions, chosen from a dropdown of fixed intervals               |
  Tallenna .CSV (ESP32 ainoastaan) | Log received test data to the node's own filesystem. ESP32 hardware only |
 
 ### Telemetry module
@@ -193,11 +193,11 @@ GPIO-ohjaus mesh-verkon kautta. Mahdollistaa etäradion lukea tai kirjoittaa GPI
 
 Lähettää tietoa suoraan kuulluista naapureista mahdollistaen verkon topologian kartoituksen. Jokainen käyttöön otettu radio jakaa säännöllisesti luettelon muista radioista, jotka se kuulee, sekä niiden signaalin laadun.
 
- Asetus                                             | Kuvaus                                                                                                                                                                                              |
- -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- Naapuritiedot käytössä                             | Ota naapuritiedon lähetys käyttöön                                                                                                                                                                  |
- Päivityksen aikaväli (sekuntia) | Kuinka usein naapuriluettelo lähetetään                                                                                                                                                             |
- Lähetä LoRa:n kautta               | Lähetä myös naapuritiedot LoRa:n kautta, ei pelkästään MQTT:n tai puhelimen kautta. Ei käytettävissä kanavalla, joka käyttää oletusavainta ja nimeä |
+ Asetus                               | Kuvaus                                                                                                                                                                                              |
+ ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Naapuritiedot käytössä               | Ota naapuritiedon lähetys käyttöön                                                                                                                                                                  |
+ GPS-kyselyn aikaväli                 | Kuinka usein naapuriluettelo lähetetään                                                                                                                                                             |
+ Lähetä LoRa:n kautta | Lähetä myös naapuritiedot LoRa:n kautta, ei pelkästään MQTT:n tai puhelimen kautta. Ei käytettävissä kanavalla, joka käyttää oletusavainta ja nimeä |
 
 Katso [Paikallinen mesh-haku](discovery), miten naapuritietoja käytetään mesh-verkon rakenteen tutkimiseen.
 
@@ -215,27 +215,27 @@ Ohjaa tuetuissa laitteissa olevaa NeoPixeliä tai muita osoitteellisia RGB-LEDej
 
 Muuttaa radiosi liike- tai ovitunnistimeen perustuvaksi hälytysjärjestelmäksi. Kun GPIO-pinni havaitsee tilamuutoksen (liike havaittu, ovi avattu), radio lähettää hälytysviestin verkkoon.
 
- Asetus                                           | Kuvaus                                                                                                                                    |
- ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
- Tunnistinsensori käytössä                        | Ota tunnistusanturi käyttöön                                                                                                              |
- GPIO-pinni valvontaa varten                      | Anturiin kytketty GPIO-pinni                                                                                                              |
- Tunnistuksen tyyppi                              | Miten pinnin tila vastaa havaitsemistapahtumaa (esim. aktiivinen korkea/matala taso tai reunalaukaisu) |
- Käytä INPUT_PULLUP tilaa    | Ota pinnin sisäinen ylösvetovastus käyttöön                                                                                               |
- Minimilähetys (sekuntia)      | Hälytyslähetysten vähimmäisaika                                                                                                           |
- Tilatiedon lähetys (sekuntia) | Tilatiedon lähetysväli                                                                                                                    |
- Lähetä äänimerkki hälytyssanoman kanssa          | Sisällytä soittomerkkimerkki hälytyksiin                                                                                                  |
- Käyttäjäystävällinen nimi                        | Tälle anturille määritetty nimi                                                                                                           |
+ Asetus                                        | Kuvaus                                                                                                                                    |
+ --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+ Tunnistinsensori käytössä                     | Ota tunnistusanturi käyttöön                                                                                                              |
+ GPIO-pinni valvontaa varten                   | Anturiin kytketty GPIO-pinni                                                                                                              |
+ Tunnistuksen tyyppi                           | Miten pinnin tila vastaa havaitsemistapahtumaa (esim. aktiivinen korkea/matala taso tai reunalaukaisu) |
+ Käytä INPUT_PULLUP tilaa | Ota pinnin sisäinen ylösvetovastus käyttöön                                                                                               |
+ Minimum time between detection broadcasts     | Hälytyslähetysten vähimmäisaika                                                                                                           |
+ State Broadcast Interval                      | Tilatiedon lähetysväli                                                                                                                    |
+ Lähetä äänimerkki hälytyssanoman kanssa       | Sisällytä soittomerkkimerkki hälytyksiin                                                                                                  |
+ Käyttäjäystävällinen nimi                     | Tälle anturille määritetty nimi                                                                                                           |
 
 ### Paxcounter module
 
 Henkilöt, jotka lasketaan WiFi- ja BLE-hakukyselyiden perusteella. Laskee lähellä olevia laitteita kuuntelemalla passiivisesti koepyyntöjä, joita puhelimet ja kannettavat tietokoneet lähettävät etsiessään verkkoja. Saatavilla vain ESP32-laitteissa.
 
- Asetus                                             | Kuvaus                                                                                                           |
- -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
- PAX-laskuri käytössä                               | Ota henkilölaskenta käyttöön                                                                                     |
- Päivityksen aikaväli (sekuntia) | Kuinka usein laskentatiedot raportoidaan                                                                         |
- WiFi-signaalin RSSI-kynnys                         | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
- BLE-signaalin RSSI-kynnys                          | Sama raja-arvo BLE-mainospaketeille (oletus: -80 dBm)                         |
+ Asetus                                  | Kuvaus                                                                                                           |
+ --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+ PAX-laskuri käytössä                    | Ota henkilölaskenta käyttöön                                                                                     |
+ GPS-kyselyn aikaväli                    | Kuinka usein laskentatiedot raportoidaan                                                                         |
+ WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
+ BLE Threshold (dBm)  | Sama raja-arvo BLE-mainospaketeille (oletus: -80 dBm)                         |
 
 &gt; 💡 **Vinkki:** PAX-laskuri on hyödyllinen jalankulkijamäärien arviointiin retkeilyreittien lähtöpisteissä, tapahtumapaikoilla tai muissa kohteissa. Laskentatulokset ovat arvioita — yhdellä henkilöllä voi olla useita laitteita mukana.
 
