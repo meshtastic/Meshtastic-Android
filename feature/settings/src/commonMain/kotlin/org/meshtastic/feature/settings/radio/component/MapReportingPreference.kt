@@ -47,7 +47,8 @@ import org.meshtastic.core.resources.i_agree
 import org.meshtastic.core.resources.i_agree_to_share_my_location
 import org.meshtastic.core.resources.map_reporting_consent_header
 import org.meshtastic.core.resources.map_reporting_consent_text
-import org.meshtastic.core.resources.map_reporting_interval_seconds
+import org.meshtastic.core.resources.schema_mapreportsettings_publish_interval_secs
+import org.meshtastic.core.resources.schema_mapreportsettings_publish_interval_secs_description
 import org.meshtastic.core.resources.schema_mqtt_map_reporting_enabled
 import org.meshtastic.core.resources.schema_mqtt_map_reporting_enabled_description
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -140,7 +141,8 @@ fun MapReportingPreference(
                     val publishItems = remember { IntervalConfiguration.BROADCAST_MEDIUM.allowedIntervals }
                     DropDownPreference(
                         modifier = Modifier.padding(bottom = 16.dp),
-                        title = stringResource(Res.string.map_reporting_interval_seconds),
+                        title = stringResource(Res.string.schema_mapreportsettings_publish_interval_secs),
+                        summary = stringResource(Res.string.schema_mapreportsettings_publish_interval_secs_description),
                         items = publishItems.map { it to it.toDisplayString() },
                         selectedItem =
                         FixedUpdateIntervals.fromValue(publishIntervalSecs.toLong()) ?: publishItems.first(),

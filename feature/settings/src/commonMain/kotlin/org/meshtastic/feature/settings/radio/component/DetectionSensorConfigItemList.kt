@@ -31,20 +31,22 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.detection_sensor
 import org.meshtastic.core.resources.detection_sensor_config
-import org.meshtastic.core.resources.minimum_broadcast_seconds
 import org.meshtastic.core.resources.schema_detectionsensor_detection_trigger_type
 import org.meshtastic.core.resources.schema_detectionsensor_detection_trigger_type_description
 import org.meshtastic.core.resources.schema_detectionsensor_enabled
 import org.meshtastic.core.resources.schema_detectionsensor_enabled_description
+import org.meshtastic.core.resources.schema_detectionsensor_minimum_broadcast_secs
+import org.meshtastic.core.resources.schema_detectionsensor_minimum_broadcast_secs_description
 import org.meshtastic.core.resources.schema_detectionsensor_monitor_pin
 import org.meshtastic.core.resources.schema_detectionsensor_monitor_pin_description
 import org.meshtastic.core.resources.schema_detectionsensor_name
 import org.meshtastic.core.resources.schema_detectionsensor_name_description
 import org.meshtastic.core.resources.schema_detectionsensor_send_bell
 import org.meshtastic.core.resources.schema_detectionsensor_send_bell_description
+import org.meshtastic.core.resources.schema_detectionsensor_state_broadcast_secs
+import org.meshtastic.core.resources.schema_detectionsensor_state_broadcast_secs_description
 import org.meshtastic.core.resources.schema_detectionsensor_use_pullup
 import org.meshtastic.core.resources.schema_detectionsensor_use_pullup_description
-import org.meshtastic.core.resources.state_broadcast_seconds
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -94,7 +96,8 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                     IntervalConfiguration.DETECTION_SENSOR_MINIMUM.allowedIntervals
                 }
                 DropDownPreference(
-                    title = stringResource(Res.string.minimum_broadcast_seconds),
+                    title = stringResource(Res.string.schema_detectionsensor_minimum_broadcast_secs),
+                    summary = stringResource(Res.string.schema_detectionsensor_minimum_broadcast_secs_description),
                     selectedItem = formState.value.minimum_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = minimumBroadcastIntervals.map { it.value to it.toDisplayString() },
@@ -106,7 +109,8 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
 
                 val stateBroadcastIntervals = remember { IntervalConfiguration.DETECTION_SENSOR_STATE.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(Res.string.state_broadcast_seconds),
+                    title = stringResource(Res.string.schema_detectionsensor_state_broadcast_secs),
+                    summary = stringResource(Res.string.schema_detectionsensor_state_broadcast_secs_description),
                     selectedItem = formState.value.state_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = stateBroadcastIntervals.map { it.value to it.toDisplayString() },

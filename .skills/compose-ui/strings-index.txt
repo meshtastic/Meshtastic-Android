@@ -807,6 +807,7 @@ key_backup_saved
 key_verification_final_title
 key_verification_request_title
 key_verification_title
+label_with_unit
 last_heard_filter_label
 last_position_update
 latest_alpha_firmware
@@ -968,7 +969,6 @@ map_purge_fail
 map_purge_success
 map_reporting_consent_header
 map_reporting_consent_text
-map_reporting_interval_seconds
 map_select_download_region
 map_start_download
 map_style_selection
@@ -1088,7 +1088,6 @@ messages
 metric_channel_label
 micrograms_per_cubic_meter
 min
-minimum_broadcast_seconds
 minimum_wake_time_seconds
 modem_preset
 module_settings
@@ -1138,7 +1137,6 @@ mute_status_always
 mute_status_muted_for_days
 mute_status_muted_for_hours
 mute_status_unmuted
-nag_timeout_seconds
 name
 name_cannot_be_empty
 navigate_back
@@ -1295,7 +1293,6 @@ open_wifi_settings
 options
 orient_north
 orp
-output_duration_milliseconds
 overflow_menu
 override_console_serial_port
 ### PACKET ###
@@ -1567,7 +1564,6 @@ select_all
 selected
 selected_map_type
 send
-sender_message_interval_seconds
 serial
 serial_config
 session_active
@@ -1652,7 +1648,6 @@ solar_irradiance
 speed
 speed_kmh
 speed_mph
-state_broadcast_seconds
 status_message
 status_message_summary
 stay_connected_anywhere
@@ -1779,6 +1774,9 @@ type
 type_a_message
 udp_enabled
 undo
+unit_dbm
+unit_khz
+unit_meters
 ### UNITS ###
 units
 units_follow_system
@@ -1799,7 +1797,6 @@ unmute_selected
 unpin_selected
 unrecognized
 unset
-update_interval_seconds
 update_status
 updated
 uplink_enabled

@@ -77,11 +77,14 @@ import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.util.fieldTitle
 import org.meshtastic.feature.settings.util.intRange
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
+import org.meshtastic.proto.bandwidth
 import org.meshtastic.proto.hop_limit
+import org.meshtastic.proto.tx_power
 
 private val SPREAD_FACTOR_RANGE = 5..12
 private val CODING_RATE_RANGE = 5..8
@@ -371,7 +374,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 SignedIntegerEditTextPreference(
-                    title = stringResource(Res.string.schema_lora_tx_power),
+                    title = fieldTitle(Res.string.schema_lora_tx_power, Config.LoRaConfig.tx_power),
                     summary = stringResource(Res.string.schema_lora_tx_power_description),
                     value = formState.value.tx_power,
                     enabled = state.connected,
@@ -455,7 +458,7 @@ internal fun LoRaBandwidthPreference(
     val options = selection.options
     if (options == null) {
         EditTextPreference(
-            title = stringResource(Res.string.schema_lora_bandwidth),
+            title = fieldTitle(Res.string.schema_lora_bandwidth, Config.LoRaConfig.bandwidth),
             value = config.bandwidth,
             enabled = enabled,
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
