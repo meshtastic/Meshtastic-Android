@@ -23,13 +23,12 @@ import kotlin.test.assertTrue
 
 class SettingsSearchMatcherTest {
 
-    private fun entry(title: String, description: String? = null, screen: String = "LoRa") =
-        ResolvedSettingsEntry(
-            title = title,
-            description = description,
-            screenTitle = screen,
-            route = SettingsRoute.LoRa,
-        )
+    private fun entry(title: String, description: String? = null, screen: String = "LoRa") = ResolvedSettingsEntry(
+        title = title,
+        description = description,
+        screenTitle = screen,
+        route = SettingsRoute.LoRa,
+    )
 
     @Test
     fun blankQueryMatchesNothing() {

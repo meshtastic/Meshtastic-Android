@@ -70,11 +70,13 @@ const val SEARCH_BAR_EXPANDED_TAG_SUFFIX = "Expanded"
  * The expanded half follows Material's own rule rather than the caller's: full-screen on compact width, docked on
  * anything wider, because a full-screen dialog over a tablet or desktop window hides context the user was reading.
  *
- * @param query the current query. A change from outside is mirrored into the field, so a query that survives process
- *   death (one persisted in preferences, say) restores into the bar.
+ * @param query the text the field starts with, so a query that survived process death restores into the bar. Later
+ *   changes to it are ignored; the field is the source of truth once it exists. See [resetKey].
  * @param onQueryChange called for every edit made through the field.
  * @param placeholder shown in the empty field, and the field's accessibility name.
- * @param inputFieldTag test tag for the collapsed field; the expanded one takes it plus [SEARCH_BAR_EXPANDED_TAG_SUFFIX].
+ * @param resetKey change this to make the field take [query] again, for a caller that clears the search from outside.
+ * @param inputFieldTag test tag for the collapsed field; the expanded one takes it plus
+ *   [SEARCH_BAR_EXPANDED_TAG_SUFFIX].
  * @param scrollBehavior lets the bar react to the content scrolling under it; see
  *   [SearchBarDefaults.enterAlwaysSearchBarScrollBehavior].
  * @param trailingActions extra icons after the clear button, for controls that belong to the search itself (a sort
@@ -89,20 +91,26 @@ fun MeshtasticSearchBar(
     placeholder: String,
     modifier: Modifier = Modifier,
     clearDescription: String = stringResource(Res.string.clear),
+    resetKey: Any? = Unit,
     inputFieldTag: String = SEARCH_BAR_INPUT_FIELD_TAG,
     scrollBehavior: SearchBarScrollBehavior? = null,
     trailingActions: @Composable RowScope.() -> Unit = {},
     expandedContent: @Composable ColumnScope.() -> Unit = {},
 ) {
+    // The field owns the text; [query] only seeds it, and [resetKey] is how a caller replaces it.
+    //
+    // Feeding [query] back in on every change would lose keystrokes wherever it makes a round trip that lags the
+    // typing - the node list's does, through SavedStateHandle and a combined flow - because a stale value arriving
+    // while the field is further ahead overwrites what was typed.
     val textFieldState = rememberTextFieldState(query)
     val searchBarState = rememberSearchBarState()
     val latestOnQueryChange by rememberUpdatedState(onQueryChange)
+    val latestQuery by rememberUpdatedState(query)
 
-    // A caller-driven query change (an external reset, or a restored preference) must be mirrored into the field.
-    LaunchedEffect(query, textFieldState) {
-        if (textFieldState.text.toString() != query) {
+    LaunchedEffect(resetKey) {
+        if (textFieldState.text.toString() != latestQuery) {
             textFieldState.edit {
-                replace(0, length, query)
+                replace(0, length, latestQuery)
                 placeCursorAtEnd()
             }
         }

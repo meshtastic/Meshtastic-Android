@@ -72,8 +72,8 @@ import org.meshtastic.core.ui.icon.Sort
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 
 /**
- * The node list's search field: a Material 3 [MeshtasticSearchBar] whose expanded surface shows the matching nodes, with
- * the sort and filter menu as its trailing action.
+ * The node list's search field: a Material 3 [MeshtasticSearchBar] whose expanded surface shows the matching nodes,
+ * with the sort and filter menu as its trailing action.
  *
  * The "showing ignored nodes" banner sits under the collapsed bar rather than inside it: it reports a filter that is
  * already applied to the list below, not a search result.
@@ -95,11 +95,7 @@ fun NodeFilterSearchBar(
             placeholder = stringResource(Res.string.node_filter_placeholder),
             inputFieldTag = NODE_FILTER_SEARCH_BAR_INPUT_FIELD_TAG,
             trailingActions = {
-                NodeSortButton(
-                    currentSortOption = currentSortOption,
-                    onSortSelect = onSortSelect,
-                    toggles = toggles,
-                )
+                NodeSortButton(currentSortOption = currentSortOption, onSortSelect = onSortSelect, toggles = toggles)
             },
             expandedContent = searchResults,
         )

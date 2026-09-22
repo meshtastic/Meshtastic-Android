@@ -142,11 +142,13 @@ object SettingsSearchCatalog {
         )
 
     /** The settings destinations themselves, so a query for a screen's own name finds it. */
-    private fun screenEntries(): List<SettingsSearchEntry> =
-        (ConfigRoute.entries.map { it.title to it.route } + ModuleRoute.entries.map { it.title to it.route })
-            .map { (title, route) ->
-                SettingsSearchEntry(title = title, description = null, route = route, screenTitle = title)
-            }
+    private fun screenEntries(): List<SettingsSearchEntry> = (
+        ConfigRoute.entries.map {
+            it.title to it.route
+        } + ModuleRoute.entries.map { it.title to it.route }
+        ).map { (title, route) ->
+        SettingsSearchEntry(title = title, description = null, route = route, screenTitle = title)
+    }
 
     /** App-level settings, which have no schema behind them and so are listed by hand. */
     private val appSettings: List<Pair<StringResource, Route>> =
@@ -168,8 +170,10 @@ object SettingsSearchCatalog {
     private fun schemaEntries(): List<SettingsSearchEntry> {
         val all = Res.allStringResources
         val screenTitleByRoute =
-            (ConfigRoute.entries.associate { it.route to it.title } +
-                ModuleRoute.entries.associate { it.route to it.title })
+            (
+                ConfigRoute.entries.associate { it.route to it.title } +
+                    ModuleRoute.entries.associate { it.route to it.title }
+                )
 
         return schemaPrefixes.flatMap { (route, messages) ->
             val screenTitle = screenTitleByRoute[route] ?: return@flatMap emptyList()

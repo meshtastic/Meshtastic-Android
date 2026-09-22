@@ -53,9 +53,10 @@ class SettingsSearchCatalogTest {
 
     @Test
     fun everyDeclaredEnumStillHasValuesInTheSchema() {
-        val stale = SettingsSearchCatalog.declaredEnumValuePrefixes().filter { prefix ->
-            schemaKeys.none { it.startsWith(prefix) }
-        }
+        val stale =
+            SettingsSearchCatalog.declaredEnumValuePrefixes().filter { prefix ->
+                schemaKeys.none { it.startsWith(prefix) }
+            }
 
         assertEquals(
             emptyList(),
@@ -76,9 +77,8 @@ class SettingsSearchCatalogTest {
 
     @Test
     fun noDescriptionIsOfferedAsASetting() {
-        val leaked = SettingsSearchCatalog.entries().mapNotNull { keyOf(it.title) }.filter {
-            it.endsWith("_description")
-        }
+        val leaked =
+            SettingsSearchCatalog.entries().mapNotNull { keyOf(it.title) }.filter { it.endsWith("_description") }
 
         assertEquals(emptyList(), leaked.sorted(), "a field's explanation is its subtitle, never a result of its own")
     }
