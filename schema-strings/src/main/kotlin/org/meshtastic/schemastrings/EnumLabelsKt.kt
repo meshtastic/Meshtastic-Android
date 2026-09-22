@@ -49,6 +49,10 @@ object EnumLabelsKt {
         append("fun Enum<*>.schemaDescriptionRes(): StringResource? = when (this) {\n")
         enums.filter { it.hasDescriptions }.forEach { append(branch(it, "schemaDescription")) }
         append("    else -> null\n}\n")
+        append(PREFIXES_DOC)
+        append("val $PREFIXES: Set<String> =\n    setOf(\n")
+        enums.forEach { append("        \"").append(it.prefix).append("\",\n") }
+        append("    )\n")
         append(HELPER)
     }
 
@@ -61,6 +65,12 @@ object EnumLabelsKt {
         require(line.length <= MAX_LINE) { "branch for ${enum.path} is ${line.length} characters, over $MAX_LINE" }
         return "$line\n"
     }
+
+    /** The name of the generated set, so the test and the renderer cannot disagree about it. */
+    const val PREFIXES = "schemaEnumValuePrefixes"
+
+    /** `"schema_lora_modempreset_",` as the committed file spells one entry of that set. */
+    val prefixEntryPattern: Regex = Regex("""^\s{8}"(schema_[a-z0-9_]+_)",$""", RegexOption.MULTILINE)
 
     /** `is Config.DeviceConfig.Role -> ...`, as the committed file spells it, for the drift check. */
     val branchPattern: Regex =
@@ -92,6 +102,17 @@ object EnumLabelsKt {
         | * The schema's label for this enum value, or null where the schema does not name it. A picker shows this in
         | * place of the constant's Kotlin name, and falls back to that name when it is null, so a value the schema has
         | * not reached still renders.
+        | */
+        |"""
+            .trimMargin()
+
+    private val PREFIXES_DOC =
+        """
+        |
+        |/**
+        | * The resource prefix every value of a labelled enum shares, one per enum. A consumer that has to tell an enum
+        | * value's resource from a field's - settings search, which indexes fields and not the values they offer - reads
+        | * this rather than keeping its own copy of the list.
         | */
         |"""
             .trimMargin()
