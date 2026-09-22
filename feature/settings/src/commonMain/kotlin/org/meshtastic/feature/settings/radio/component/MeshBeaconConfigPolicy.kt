@@ -16,10 +16,9 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.model.constraintFor
-import org.meshtastic.core.model.numChannels
+import org.meshtastic.core.model.util.beaconOfferFrequencySlot
 import org.meshtastic.core.model.util.isChannelPlaceholder
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.proto.ChannelSettings
@@ -83,13 +82,12 @@ internal fun beaconOfferChannelIndex(
 
 /**
  * Applies design#140's save-time invariants to [form] before it is written. When [radioLora] uses a standard modem
- * preset (`use_preset = true`): the radio's own region (behavior 1), configured preset (behavior 4) and frequency
- * slot ([beaconOfferFrequencySlot]) are always stamped, never user-chosen; every broadcast target's region is kept in
- * lockstep; and an untouched offered channel
- * defaults to the radio's primary channel (behavior 3's required-channel rule), while an already-set offered channel
- * (even one that no longer matches a radio channel) is kept. Only the offered channel's name and PSK are carried over,
- * never the radio's own channel_index/id/uplink/downlink/module flags, which have no meaning for a channel someone
- * else's radio is being invited to join.
+ * preset (`use_preset = true`): the radio's own region (behavior 1), configured preset (behavior 4) and frequency slot
+ * ([beaconOfferFrequencySlot]) are always stamped, never user-chosen; every broadcast target's region is kept in
+ * lockstep; and an untouched offered channel defaults to the radio's primary channel (behavior 3's required-channel
+ * rule), while an already-set offered channel (even one that no longer matches a radio channel) is kept. Only the
+ * offered channel's name and PSK are carried over, never the radio's own channel_index/id/uplink/downlink/module flags,
+ * which have no meaning for a channel someone else's radio is being invited to join.
  *
  * When the radio uses custom LoRa parameters (`use_preset = false`), `modem_preset` is meaningless, so every broadcast
  * field instead carries over from [stored] verbatim: stamping a stale preset would mint a live on-air lie about what
@@ -137,27 +135,6 @@ internal fun stampBeaconConfigForSave(
             wb.broadcast_targets = stored.broadcast_targets
         }
         .build()
-}
-
-/**
- * The frequency slot to advertise alongside the offer, or `null` to leave the field unset.
- *
- * Firmware sends this on the air only where it differs from the slot a receiver derives from the offered region,
- * channel name and preset, so stamping the radio's real slot costs nothing until the two diverge. They diverge in
- * exactly the cases the field exists for: a radio pinned to an explicit `channel_num`, a region that mandates a slot,
- * or an offered channel whose name hashes somewhere other than where the radio actually sits. Without this the radio
- * advertises a frequency it is not on, and a client that joins hears nothing.
- */
-internal fun beaconOfferFrequencySlot(
-    offerChannel: ChannelSettings?,
-    primaryChannel: ChannelSettings?,
-    radioLora: Config.LoRaConfig,
-): Int? {
-    if (offerChannel == null || radioLora.numChannels <= 0) return null
-    val actual = Channel(primaryChannel ?: ChannelSettings.Builder().build(), radioLora).channelNum
-    // Derive the way a receiver must: off the offered channel's name with our own pin removed.
-    val derived = Channel(offerChannel, radioLora.newBuilder().also { wb -> wb.channel_num = 0 }.build()).channelNum
-    return actual.takeIf { it != derived }
 }
 
 /**

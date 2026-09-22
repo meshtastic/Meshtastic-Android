@@ -180,29 +180,17 @@ fun MeshBeacon.beaconJoinOption(currentLora: LoRaConfig?, currentChannels: List<
 }
 
 /**
- * The frequency slot this beacon advertises outright, or `null` when it advertises none and the slot must be derived
- * from the offered region, channel name and preset the way [LoRaConfig.channelNum] does.
- *
- * A mesh sends this only when derivation would produce the wrong answer — it pins a slot the offered name does not
- * hash to. Slot numbering is 1-based to match [LoRaConfig.channel_num], and 0 is defined as "not sent". A value
- * outside [lora]'s slot count is unaddressable here, so it falls back to derivation rather than refusing the join:
- * that is the behaviour we had before the field existed, and the offer is advisory either way.
- */
-private fun MeshBeacon.advertisedFrequencySlot(lora: LoRaConfig): Int? =
-    offer_frequency_slot?.takeIf { it in 1..lora.numChannels }
-
-/**
  * Builds the [ChannelSet] to hand the QR channel-import dialog for a given [option].
  *
  * [ADD][BeaconJoinOption.ADD] omits `lora_config` so the dialog merges the offered channel into a free secondary slot
  * with no reboot. [SWITCH][BeaconJoinOption.SWITCH] carries a **fresh** `lora_config` (not a copy of [currentLora])
  * with `use_preset = true`, the advertised preset+region applied, and every RF field left at its default. Starting
  * blank guarantees no stale slot/frequency pin (`channel_num`, `override_frequency`, manual
- * bandwidth/spread_factor/coding_rate) from the old mesh survives the retune. `channel_num` is then set to the slot
- * the beacon advertises, or left zero so firmware re-derives it from the offered channel name (Apple FR-006) when it
+ * bandwidth/spread_factor/coding_rate) from the old mesh survives the retune. `channel_num` is then set to the slot the
+ * beacon advertises, or left zero so firmware re-derives it from the offered channel name (Apple FR-006) when it
  * advertises none. Only `region` is carried from [currentLora] when the beacon doesn't advertise one — this config is
- * sent as a full LoRaConfig replacement, and a zero region disables transmit; `hop_limit`/`tx_enabled` fall back to
- * the app's standard defaults. Returns `null` for [NONE][BeaconJoinOption.NONE] or a beacon with no offered channel.
+ * sent as a full LoRaConfig replacement, and a zero region disables transmit; `hop_limit`/`tx_enabled` fall back to the
+ * app's standard defaults. Returns `null` for [NONE][BeaconJoinOption.NONE] or a beacon with no offered channel.
  *
  * Both paths strip position sharing from the offered channel ([withoutPositionSharing]) so joining a stranger's mesh
  * never leaks our location — matching Apple's `joinBeaconMesh`/`addBeaconChannel`.
@@ -236,8 +224,7 @@ fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfi
             ChannelSet.Builder()
                 .also { wb ->
                     wb.settings = listOf(offerChannel)
-                    wb.lora_config =
-                        loraConfig.newBuilder().also { lb -> lb.channel_num = advertisedSlot ?: 0 }.build()
+                    wb.lora_config = loraConfig.newBuilder().also { lb -> lb.channel_num = advertisedSlot ?: 0 }.build()
                 }
                 .build()
         }

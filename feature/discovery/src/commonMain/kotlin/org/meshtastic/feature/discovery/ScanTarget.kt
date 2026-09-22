@@ -37,8 +37,8 @@ data class ScanTarget(
     val region: RegionCode? = null,
     /**
      * The frequency slot the advertising mesh pinned, when it advertised one. Null means derive the slot from
-     * [channel]'s name the way any node on it would — a mesh that pins a slot its name does not hash to would
-     * otherwise be scanned for on the wrong frequency and never heard.
+     * [channel]'s name the way any node on it would — a mesh that pins a slot its name does not hash to would otherwise
+     * be scanned for on the wrong frequency and never heard.
      */
     val frequencySlot: Int? = null,
 )
