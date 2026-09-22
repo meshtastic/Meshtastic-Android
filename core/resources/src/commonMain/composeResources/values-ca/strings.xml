@@ -191,14 +191,6 @@
     <string name="quick_chat_new">Nova conversa ràpida</string>
     <string name="radio_configuration">Configuració de ràdio</string>
     <string name="reboot">Reiniciar</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Reenvia qualsevol missatge observat si era al nostre canal privat o d’una altra malla.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">.Mateix comportament que ALL, però sense decodificar paquets, només els reenvia. Només disponible en rol de Repeater. Configurar-ho en qualsevol altre rol resultarà en el comportament ALL.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignora paquets amb ports no estàndard com: TAK, RangeTest, PaxCounter, etc. Només reenvia paquets amb ports estàndard: NodeInfo, Text, Position, Telemetry i Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignora els missatges observats de malles externes com LOCAL ONLY, però va més enllà i també ignora missatges de nodes que no figuren a la llista de nodes coneguts del node.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignora els missatges observats de malles externes obertes o que no pot desxifrar. Només reenvia missatges als canals primari/secundari locals del node.</string>
-    <string name="rebroadcast_mode_none_desc">Només permès per als rols SENSOR, TRACKER i TAK_TRACKER; això inhibirà tots els reenviaments, de manera similar al rol CLIENT_MUTE.</string>
-    <string name="region_frequency_plan">Regió</string>
     <!-- REMOTE -->
     <!-- REMOVE -->
     <string name="remove">Eliminar</string>
@@ -209,17 +201,6 @@
     <string name="reset">Restablir</string>
     <string name="reset_to_defaults">Restablir els defectes</string>
     <!-- ROLE -->
-    <string name="role_client_desc">Dispositiu de missatgeria, connectat o autònom.</string>
-    <string name="role_client_hidden_desc">Dispositiu que només difon quan cal, per discreció o estalvi d’energia.</string>
-    <string name="role_client_mute_desc">Dispositiu sense reenviament de paquets.</string>
-    <string name="role_repeater_desc">Node d’infraestructura per ampliar cobertura amb mínima càrrega. Ocult a la llista de nodes.</string>
-    <string name="role_router_client_desc">Combinació ROUTER + CLIENT. No mòbils.</string>
-    <string name="role_router_desc">Node d’infraestructura per ampliar cobertura. Apareix a la llista de nodes.</string>
-    <string name="role_router_late_desc">Node d’infraestructura que sempre reenvia els paquets una vegada però només després de tots els altres modes, assegurant cobertura addicional per a clusters locals. Visible a la llista de nodes.</string>
-    <string name="role_sensor_desc">Difon telemetria com a prioritat</string>
-    <string name="role_tak_desc">Optimitzat per sistema ATAK, redueix les rutines de difusió.</string>
-    <string name="role_tak_tracker_desc">Activa les difusions automàtiques TAK PLI i redueix les difusions rutinàries.</string>
-    <string name="role_tracker_desc">Difon paquets de posició GPS com a prioritat</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Rebuda confirmació negativa</string>
     <string name="routing_error_no_route">Sense ruta</string>

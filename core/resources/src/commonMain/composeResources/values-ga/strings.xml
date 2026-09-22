@@ -206,13 +206,6 @@
     <string name="quick_chat_new">Comhrá tapa nua</string>
     <string name="radio_configuration">Cumraíocht raidió</string>
     <string name="reboot">Athmhaoinigh</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Athsheoladh aon teachtaireacht i ndáiríre má bhí sí oiriúnach le do cheist go léannais foghlamhrúcháin.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Ceim misniúla thosaí go lucht shnaithte!</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Cuireann sé bac ar phacáistí ó phortníomhaíochtaí neamhchaighdeánacha mar: TAK, RangeTest, PaxCounter, srl. Ní athdháileann ach pacáistí le portníomhaíochtaí caighdeánacha: NodeInfo, Text, Position, Telemetry, agus Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Cuireann sé bac ar theachtaireachtaí a fhaightear ó mhóilíní seachtracha cosúil le LOCAL ONLY, ach téann sé céim níos faide trí theachtaireachtaí ó nóid nach bhfuil sa liosta aitheanta ag an nóid a chosc freisin.</string>
-    <string name="rebroadcast_mode_none_desc">Ceadaítear é seo ach amháin do na róil SENSOR, TRACKER agus TAK_TRACKER, agus cuirfidh sé bac ar gach athdháileadh, cosúil leis an róil CLIENT_MUTE.</string>
-    <string name="region_frequency_plan">Réigiún</string>
     <!-- REMOTE -->
     <string name="remote_admin">Rialú iargúlta</string>
     <!-- REMOVE -->
@@ -225,16 +218,6 @@
     <string name="reset">Athshocraigh</string>
     <string name="reset_to_defaults">Athshocrú go dtí na réamhshocruithe</string>
     <!-- ROLE -->
-    <string name="role_client_desc">Feiste nascaithe nó feiste teachtaireachtaí standálaí.</string>
-    <string name="role_client_hidden_desc">Feiste a seolann ach nuair is gá, chun éalú nó do chumas cothromóige.</string>
-    <string name="role_client_mute_desc">Feiste nach dtarchuir pacáistí ó ghléasanna eile.</string>
-    <string name="role_repeater_desc">Ceannaire infreastruchtúrtha chun clúdach líonra a leathnú trí theachtaireachtaí a athsheoladh le níos lú romha.</string>
-    <string name="role_router_client_desc">Comhcheangail de dhá ról ROUTER agus CLIENT. Ní do ghléasanna soghluaiste.</string>
-    <string name="role_router_desc">Ceannaire infreastruchtúrtha chun clúdach líonra a leathnú trí theachtaireachtaí a athsheoladh. Infheicthe i liosta na nóid.</string>
-    <string name="role_sensor_desc">Bíonn sé ag seoladh pacáistí teiliméadair mar thosaíocht.</string>
-    <string name="role_tak_desc">Optamaithe le haghaidh cumarsáide ATAK, laghdaíonn sé cainéil seirbhíse beacht.</string>
-    <string name="role_tak_tracker_desc">Ceadaíonn fadhb beathú do bhoganna PLI i sórtú  PLI i feidhm reatha.</string>
-    <string name="role_tracker_desc">Bíonn sé ag seoladh pacáistí suíomh GPS mar thosaíocht.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Fáilte atá faighte le haghaidh niúúáil</string>
     <string name="routing_error_no_route">Gan route</string>

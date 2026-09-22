@@ -272,7 +272,6 @@
     <string name="config_lora_modem_preset_summary">Доступные пресеты модема, по умолчанию - Long Fast.</string>
     <string name="config_lora_region_summary">Регион, в котором вы будете использовать ваше радио.</string>
     <string name="config_network_udp_enabled_summary">Включить вещание пакетов через UDP в локальной сети.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Чем меньше расстояние, тем быстрее будет отправляться обновление позицию.</string>
     <string name="config_saved_restarting">Нода перезапускается и будет недоступна короткое время.</string>
     <string name="config_security_private_key">Используется для создания общего ключа с удаленным устройством.</string>
     <string name="config_security_private_key_remote">Устройство не передаёт свой приватный ключ через удалённое администрирование. Вы можете задать новый ключ, но его невозможно будет прочитать обратно.</string>
@@ -489,7 +488,6 @@
     <string name="distance_filters_description">Фильтровать список нод и сеть на основе близости к вашему телефону.</string>
     <string name="distance_measurements">Измерения расстояния</string>
     <string name="distance_measurements_description">Показать расстояния между вашим телефоном и другими нодами Meshstatic с позициями.</string>
-    <string name="dns">Служба доменных имен (DNS)</string>
     <!-- DOC -->
     <string name="doc_clear_search">Очистить условия поиска</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
@@ -740,7 +738,6 @@
     <string name="firmware_update_wipe_label">Очистить устройство при обновлении</string>
     <string name="firmware_update_wipe_usb_detail">Полностью стирает флэш-память устройства, а затем устанавливает выбранную прошивку с нуля.</string>
     <string name="firmware_version">Версия прошивки: %1$s</string>
-    <string name="fixed_pin">Фиксированный PIN-код</string>
     <string name="fixed_position">Фиксированная позиция</string>
     <string name="for_more_information_see_our_privacy_policy">Дополнительная информация доступна в нашей политике конфиденциальности.</string>
     <!-- FORMAT -->
@@ -753,7 +750,6 @@
     <string name="free_memory_description">Доступная оперативная память в байтах</string>
     <string name="freq">Частота</string>
     <string name="gas_resistance">Сопротивление газа</string>
-    <string name="gateway">Шлюз</string>
     <string name="generate_qr_code">Сгенерировать QR-код</string>
     <!-- GEOFENCE -->
     <string name="geofence">Геозона</string>
@@ -852,7 +848,6 @@
     <string name="layer_type_coverage">Оценка покрытия</string>
     <string name="layer_type_network">Сетевой уровень</string>
     <string name="learn_more">Подробности</string>
-    <string name="led_heartbeat">Сердцебиение светодиодом</string>
     <string name="legacy_admin_channel">Устаревший канал Администратора</string>
     <string name="library_count">%1$d библиотек</string>
     <string name="license">Лицензия</string>
@@ -1010,11 +1005,8 @@
     <string name="map_overlay_weather_radar">Метеорадары</string>
     <string name="map_purge_fail">Ошибка очистки кэша SQL, подробности в logcat</string>
     <string name="map_purge_success">Кэш SQL очищен для %1$s</string>
-    <string name="map_reporting">Отчёты по карте</string>
     <string name="map_reporting_consent_header">Согласие на передачу незашифрованных данных ноды через MQTT</string>
     <string name="map_reporting_consent_text">Включая данную функцию, вы подтверждаете и прямо соглашаетесь на передачу географического местоположения вашего устройства в реальном времени через протокол MQTT без шифрования. Эти данные о местоположении могут быть использованы для таких целей, как отчёты карты в реальном времени, отслеживание устройства и подобные функции телеметрии.</string>
-    <string name="map_reporting_interval_seconds">Интервал отчета карты (в секундах)</string>
-    <string name="map_reporting_summary">Ваша нода будет периодически отправлять незашифрованный пакет отчёта карты на настроенный MQTT-сервер, что включает ID, полное и краткое имя, примерное местоположение, модель аппаратного обеспечения, роль, версию прошивки, регион LoRa, режим работы передатчика и имя основного канала.</string>
     <string name="map_select_download_region">Выберите регион загрузки</string>
     <string name="map_start_download">Начать скачивание</string>
     <string name="map_style_selection">Выбор стиля карты</string>
@@ -1044,7 +1036,6 @@
     <string name="mesh_beacon_invitations_title">Приглашения в сеть</string>
     <string name="mesh_beacon_listen">Слушать маяки</string>
     <string name="mesh_beacon_listen_summary">Захват приглашений, рекламируемых ближайшими сетями</string>
-    <string name="mesh_beacon_message">Сообщение маяка</string>
     <string name="mesh_beacon_message_error">Максимум %1$d байт</string>
     <string name="mesh_beacon_no_channels">Нет доступных каналов</string>
     <string name="mesh_beacon_notification_body">Ближайшая сеть пригласила тебя присоединиться</string>
@@ -1134,7 +1125,6 @@
     <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
-    <string name="minimum_broadcast_seconds">Минимальная трансляция (в секундах)</string>
     <string name="minimum_wake_time_seconds">Минимальное время бодрствования</string>
     <string name="modem_preset">Шаблоны</string>
     <string name="module_settings">Настройки модуля</string>
@@ -1181,7 +1171,6 @@
     <string name="mute_status_muted_for_days">Обеззвучен на %1$d дней, %2$s часов</string>
     <string name="mute_status_muted_for_hours">Обеззвучен на %1$s часов</string>
     <string name="mute_status_unmuted">Не заглушен</string>
-    <string name="nag_timeout_seconds">Таймаут Nag (в секундах)</string>
     <string name="name">Имя</string>
     <string name="name_cannot_be_empty">Имя не может быть пустым.</string>
     <string name="navigate_back">Вернуться</string>
@@ -1337,7 +1326,6 @@
     <string name="options">Опции</string>
     <string name="orient_north">Ориентация на север</string>
     <string name="orp">ОВП</string>
-    <string name="output_duration_milliseconds">Продолжительность вывода (миллисекунды)</string>
     <string name="overflow_menu">Переполнение меню</string>
     <string name="override_console_serial_port">Переопределить COM-порт консоли</string>
     <!-- PACKET -->
@@ -1482,20 +1470,12 @@
     <string name="range_test_config">Настройка проверки дальности</string>
     <string name="react">Среагировать</string>
     <string name="reboot">Перезагрузка</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Ретранслировать замеченное сообщение, если оно было на нашем частном канале или из другой сетки с теми же параметрами lora.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Так же, как и ALL, но пропускает декодирование пакетов и просто ретранслирует их. Доступно только в роли Repeater. Установка этого параметра для любых других ролей приведет к изменению поведения ALL.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Игнорирует пакеты из нестандартных портов, таких как: TAK, RangeTest, PaxCounter и т. д. Только ретранслирует пакеты со стандартными номерами портов: NodeInfo, Text, Position, Telemetry, Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Игнорируемые сообщения из других сетей, таких как LOCAL ONLY, но так же, и игнорирует сообщения от узлов, которые еще не включены в известный список узлов.</string>
-    <string name="rebroadcast_mode_local_only_desc">Игнорирует обнаруженные сообщения из чужих mesh-сетей, которые открыты или не могут быть расшифрованы. Ретранслирует сообщение только на локальных основных / дополнительных каналах нод.</string>
-    <string name="rebroadcast_mode_none_desc">Разрешено только для ролей SENSOR, TRACKER и TAK_TRACKER, это запретит все ретрансляции, не похожие на роль CLIENT_MUTE.</string>
     <string name="recent_network_devices">Недавние сетевые устройства</string>
     <string name="reconnecting">Восстановление связи…</string>
     <string name="refresh">Обновить</string>
     <string name="refresh_metadata">Обновить метаданные</string>
     <string name="regenerate_keys_confirmation">Вы уверены, что хотите пересоздать свой приватный ключ?\n\nНоды, которые ранее обменивались ключами с этой нодой, должны будут удалить её и повторно обменяться ключами для того, чтобы возобновить защищённую связь.</string>
     <string name="regenerate_private_key">Пересоздать приватный ключ</string>
-    <string name="region_frequency_plan">Регион / Страна</string>
     <plurals name="relays">
         <item quantity="one">Услышано %1$d ретранслятором</item>
         <item quantity="few">Услышано %1$d ретрансляторами</item>
@@ -1549,30 +1529,17 @@
     <string name="role">Роль устройства</string>
     <string name="role_client">Client</string>
     <string name="role_client_base">Client Base</string>
-    <string name="role_client_base_desc">Обрабатывает пакеты от избранных нод как ROUTER_LATE, а все остальные пакеты - как от CLIENT.</string>
-    <string name="role_client_desc">Приложение подключено или автономное устройство обмена сообщениями.</string>
     <string name="role_client_hidden">Client Hidden</string>
-    <string name="role_client_hidden_desc">Устройство, которое передает сигнал только при необходимости для скрытности или экономии энергии.</string>
     <string name="role_client_mute">Client Mute</string>
-    <string name="role_client_mute_desc">Устройство, которое не пересылает пакеты с других устройств.</string>
     <string name="role_lost_and_found">Lost and Found</string>
-    <string name="role_lost_and_found_desc">Регулярно отправляет местоположение в виде сообщения в основной канал, чтобы помочь с восстановлением устройства.</string>
     <string name="role_repeater">Repeater</string>
-    <string name="role_repeater_desc">Инфраструктурная нода для расширения покрытия сети путем передачи сообщений с минимальными накладными расходами. Не видна в списке нод.</string>
     <string name="role_router">Router</string>
     <string name="role_router_client">Router Client</string>
-    <string name="role_router_client_desc">Сочетание ROUTER и CLIENT. Не для носимых устройств.</string>
-    <string name="role_router_desc">Инфраструктурная нода для расширения охвата сети путем передачи сообщений. Видима в списке нод.</string>
     <string name="role_router_late">Router Late</string>
-    <string name="role_router_late_desc">Инфраструктурная нода, которая всегда ретранслирует пакеты один раз, но только после всех остальных режимов, обеспечивая дополнительное покрытие для локальных кластеров. Видима в списке.</string>
     <string name="role_sensor">Sensor</string>
-    <string name="role_sensor_desc">Транслирует пакеты телеметрии в приоритетном порядке.</string>
     <string name="role_tak">Тактический</string>
-    <string name="role_tak_desc">Оптимизировано для связи с системой ATAK, сокращает текущие передачи.</string>
     <string name="role_tak_tracker">TAK Tracker</string>
-    <string name="role_tak_tracker_desc">Включает автоматические трансляции TAK PLI и сокращает рутинные трансляции.</string>
     <string name="role_tracker">Tracker</string>
-    <string name="role_tracker_desc">Транслирует пакеты местоположения GPS в приоритетном порядке.</string>
     <string name="router_role_confirmation_text">Я прочитал &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Документацию по роли устройств&lt;/a&gt; и пост в блоге о &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Выборе верной роли устройства&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Сеанс администратора истёк</string>
@@ -1651,7 +1618,6 @@
     <string name="selected">Выбрано</string>
     <string name="selected_map_type">Выбранный тип карты</string>
     <string name="send">Отправить</string>
-    <string name="sender_message_interval_seconds">Интервал сообщений отправителя (в секундах)</string>
     <string name="serial">COM-порт</string>
     <string name="serial_config">Настройка COM-порта</string>
     <string name="session_active">Сессия активна</string>
@@ -1736,14 +1702,12 @@
     <string name="speed">Скорость</string>
     <string name="speed_kmh">%1$d км/ч</string>
     <string name="speed_mph">%1$d миль/ч</string>
-    <string name="state_broadcast_seconds">Трансляция состояния (в секундах)</string>
     <string name="status_message">Состояние сообщения</string>
     <string name="status_message_summary">Публичное сообщение о статусе, которое отправляется в сеть при изменении и каждые 12 часов.</string>
     <string name="stay_connected_anywhere">Оставайтесь на связи везде</string>
     <string name="stop_connecting">Остановить подключение</string>
     <string name="store_forward">Store &amp; Forward</string>
     <string name="store_forward_config">Настройка Store &amp; Forward</string>
-    <string name="subnet">Подсеть</string>
     <string name="success">Успешно</string>
     <string name="super_deep_sleep_duration_seconds">Длительность супер-глубокого сна</string>
     <string name="supported">Поддерживается</string>
@@ -1756,16 +1720,6 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Настройка TAK</string>
-    <string name="tak_role">Роль участника</string>
-    <string name="tak_role_forwardobserver">Вперёдсмотрящий</string>
-    <string name="tak_role_hq">Штаб-квартира</string>
-    <string name="tak_role_k9">Собака (К9)</string>
-    <string name="tak_role_medic">Санитар</string>
-    <string name="tak_role_rto">Оператор радиотелефона</string>
-    <string name="tak_role_sniper">Снайпер</string>
-    <string name="tak_role_teamlead">Руководитель команды</string>
-    <string name="tak_role_teammember">Участник команды</string>
-    <string name="tak_role_unspecified">Не определена</string>
     <string name="tak_server">Сервер TAK</string>
     <string name="tak_server_channel">Меш-канал TAK</string>
     <string name="tak_server_channel_desc">Канал Meshtastic используется для исходящего трафика TAK</string>
@@ -1802,22 +1756,6 @@
     <string name="tak_server_test_run">Запустить</string>
     <string name="tak_server_test_running">Запущено: %1$s</string>
     <string name="tak_server_v1_fallback_notice">Прошивка подключённой ноды не поддерживает полную интеграцию с TAK — в ATAK будут передаваться только сообщения о местоположении и чате. Маркеры и другие типы событий требуют прошивки 2.8.0 или новее.</string>
-    <string name="tak_team">Цвет команды</string>
-    <string name="tak_team_blue">Синий</string>
-    <string name="tak_team_brown">Коричневый</string>
-    <string name="tak_team_cyan">Голубой</string>
-    <string name="tak_team_dark_blue">Тёмно-синий</string>
-    <string name="tak_team_dark_green">Тёмно-зеленый</string>
-    <string name="tak_team_green">Зеленый</string>
-    <string name="tak_team_magenta">Пурпурный</string>
-    <string name="tak_team_maroon">Бордовый</string>
-    <string name="tak_team_orange">Оранжевый</string>
-    <string name="tak_team_purple">Фиолетовый</string>
-    <string name="tak_team_red">Красный</string>
-    <string name="tak_team_teal">Бирюзовый</string>
-    <string name="tak_team_unspecified_color">Не указан</string>
-    <string name="tak_team_white">Белый</string>
-    <string name="tak_team_yellow">Жёлтый</string>
     <string name="telemetry">Телеметрия</string>
     <string name="telemetry_config">Настройка телеметрии</string>
     <string name="temperature">Темп</string>
@@ -1826,10 +1764,8 @@
     <string name="theme_light">Светлая</string>
     <string name="theme_system">По умолчанию</string>
     <string name="time">Время</string>
-    <string name="time_zone">Часовой пояс</string>
     <string name="timeout">Время ожидания истекло</string>
     <string name="timestamp">Отметка времени</string>
-    <string name="tls_enabled">TLS включен</string>
     <string name="tls_enabled_public_broker_summary">Когда этот телефон ретранслирует MQTT, он всегда подключается к mqtt.meshtastic.org через TLS. Эта настройка применяется, когда радио достигает брокера через собственный Wi-Fi или Ethernet.</string>
     <string name="toggle_my_position">Переключить мою позицию</string>
     <string name="trace_route">Трассировка маршрута</string>
@@ -1902,6 +1838,8 @@
     <string name="type_a_message">Написать сообщение</string>
     <string name="udp_enabled">UDP трансляция</string>
     <string name="undo">Отменить</string>
+    <string name="unit_dbm">дБм</string>
+    <string name="unit_meters">м</string>
     <!-- UNITS -->
     <string name="units">Единицы измерения</string>
     <string name="units_follow_system">По умолчанию</string>
@@ -1922,7 +1860,6 @@
     <string name="unpin_selected">Открепить</string>
     <string name="unrecognized">Нераспознанный</string>
     <string name="unset">Не задано - 0</string>
-    <string name="update_interval_seconds">Интервал обновления (в секундах)</string>
     <string name="update_status">Обновить статус</string>
     <string name="updated">Обновлено</string>
     <string name="uplink_enabled">MQTT Uplink включён</string>

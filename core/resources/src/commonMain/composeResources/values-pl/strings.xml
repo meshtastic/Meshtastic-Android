@@ -115,7 +115,6 @@
     <string name="config_lora_modem_preset_summary">Dostępne presety modemu, domyślnie Long Fast.</string>
     <string name="config_lora_region_summary">Region, w którym będziesz używać urządzenia.</string>
     <string name="config_network_udp_enabled_summary">Włącz nadawanie pakietów poprzez UDP w lokalnej sieci.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Kiedy najszybciej pozycja zostanie zaktualizowana, jeśli minimalna odległość została osiągnięta.</string>
     <string name="config_security_private_key">Używane do tworzenia klucza współdzielonego ze zdalnym urządzeniem.</string>
     <string name="configuration">Konfiguracja</string>
     <string name="configure_notification_permissions">Skonfiguruj uprawnienia powiadomień</string>
@@ -202,7 +201,6 @@
     <string name="display_config">Ustawienia wyświetlacza</string>
     <!-- DISTANCE -->
     <string name="distance">Odległość</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Wyczyść wyszukiwanie</string>
     <string name="doc_title_mqtt">MQTT</string>
@@ -276,11 +274,9 @@
     <string name="firmware_update_waiting_reboot">Oczekiwanie na ponowne uruchomienie urządzenia w trybie OTA...</string>
     <string name="firmware_update_waiting_reconnect">Oczekiwanie na ponowne połączenie urządzenia...</string>
     <string name="firmware_version">Wersja oprogramowania: %1$s</string>
-    <string name="fixed_pin">Stały PIN</string>
     <string name="fixed_position">Położenie stałe</string>
     <!-- FORMAT -->
     <string name="gas_resistance">Rezystancja gazu</string>
-    <string name="gateway">Brama domyślna</string>
     <string name="generate_qr_code">Generuj Kod QR</string>
     <!-- GEOFENCE -->
     <string name="geofence_off">Wyłączony</string>
@@ -323,7 +319,6 @@
     <string name="latitude">Szerokość geograficzna</string>
     <!-- LAYER -->
     <string name="learn_more">Dowiedz się więcej</string>
-    <string name="led_heartbeat">LED bicia serca</string>
     <!-- LICENSED -->
     <!-- LOAD -->
     <string name="loading">Ładowanie</string>
@@ -374,11 +369,8 @@
     <string name="map_offline_manager">Menedżer map offline</string>
     <string name="map_purge_fail">Usuwanie pamięci podręcznej SQL nie powiodło się, zobacz logcat</string>
     <string name="map_purge_success">Pamięć podręczna wyczyszczona dla %1$s</string>
-    <string name="map_reporting">Raportowanie map</string>
     <string name="map_reporting_consent_header">Zgoda na udostępnianie niezaszyfrowanych danych węzła za pośrednictwem protokołu MQTT</string>
     <string name="map_reporting_consent_text">Włączając tę funkcję, użytkownik przyjmuje do wiadomości i wyraźnie wyraża zgodę na przesyłanie informacji o aktualnej lokalizacji geograficznej swojego urządzenia za pośrednictwem protokołu MQTT bez szyfrowania. Dane dotyczące lokalizacji mogą być wykorzystywane do takich celów, jak raportowanie na żywo na mapie, śledzenie urządzeń i powiązane funkcje telemetryczne.</string>
-    <string name="map_reporting_interval_seconds">Interwał raportowania map (sekundy)</string>
-    <string name="map_reporting_summary">Twój węzeł będzie okresowo wysyłał niezaszyfrowany pakiet raportu mapy do skonfigurowanego serwera MQTT, zawierający identyfikator, długą i krótką nazwę, przybliżoną lokalizację, model sprzętu, rolę, wersję oprogramowania układowego, region LoRa, ustawienia modemu i nazwę głównego kanału.</string>
     <string name="map_select_download_region">Wybierz region do pobrania</string>
     <string name="map_start_download">Rozpocznij pobieranie</string>
     <string name="map_subDescription">kierunek: %1$d° odległość: %2$s</string>
@@ -416,7 +408,6 @@
     <string name="message_status_queued">Zakolejkowane do wysłania</string>
     <string name="message_status_unknown">Nieznany</string>
     <string name="messages">Wiadomości</string>
-    <string name="minimum_broadcast_seconds">Minimalny czas transmisji (sekundy)</string>
     <string name="modem_preset">Presety</string>
     <string name="module_settings">Ustawienia modułu</string>
     <!-- MQTT -->
@@ -499,7 +490,6 @@
     <string name="open_settings">Otwórz ustawienia</string>
     <string name="options">Opcje</string>
     <string name="orient_north">Zorientuj na północ</string>
-    <string name="output_duration_milliseconds">Czas trwania (w milisekundach)</string>
     <!-- PACKET -->
     <string name="password">Hasło</string>
     <!-- PAX -->
@@ -548,14 +538,6 @@
     <string name="range_test">Test zasięgu</string>
     <string name="range_test_config">Konfiguracja testu zasięgu</string>
     <string name="reboot">Restart</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Przekazuje ponownie każdy odebrany pakiet, niezależnie od tego, czy został wysłany na nasz prywatny kanał, czy z innej sieci Mesh o tych samych parametrach radia.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">To samo zachowanie co ALL, ale pomija dekodowanie pakietów i po prostu je retransmituje. Dostępne tylko w roli REPEATER. Ustawienie tego w innych rolach spowoduje zachowanie jak ALL.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignoruje niestandardowe pakiety (non-standard portnums) takie jak: TAK, RangeTest, PaxCounter, itp. Przekazuje dalej jedynie standardowe pakiety (standard portnums): NodeInfo, Text, Position, Telemetry oraz Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignoruje odebrane pakiety z obcych sieci, podobnie jak LOCAL_ONLY, ale idzie o krok dalej, ignorując również pakiety z węzłów, które nie znajdują się jeszcze na liście znanych węzłów.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignoruje odebrane pakiety z obcych sieci Mesh, które są otwarte lub których nie można odszyfrować. Retransmituje wiadomość tylko na lokalnych kanałach primary / secondary.</string>
-    <string name="rebroadcast_mode_none_desc">Dozwolone wyłącznie dla ról SENSOR, TRACKER i TAK_TRACKER. Spowoduje to zablokowanie wszystkich retransmisji, podobnie jak rola CLIENT_MUTE.</string>
-    <string name="region_frequency_plan">Region</string>
     <!-- REMOTE -->
     <string name="remote_admin">Zdalne zarządzanie</string>
     <!-- REMOVE -->
@@ -584,23 +566,12 @@
     <!-- ROLE -->
     <string name="role">Rola urządzenia</string>
     <string name="role_client">Klient</string>
-    <string name="role_client_desc">Urządzenie samodzielne lub sparowane z aplikacją.</string>
-    <string name="role_client_hidden_desc"> Used for nodes that "only speak when spoken to" Turns all of the routine broadcasts but allows for ad-hoc communication. Still rebroadcasts, but with local only rebroadcast mode (known meshes only). Can be used for private operation or to dramatically reduce airtime / power consumption.</string>
     <string name="role_client_mute">Klient pasywny</string>
-    <string name="role_client_mute_desc">Wyciszenie klienta - To samo, co klient, z wyjątkiem pakietów, które nie przeskakują przez ten węzeł, nie przyczynia się do routingu pakietów dla siatki.</string>
     <string name="role_repeater">Repeater</string>
-    <string name="role_repeater_desc">Węzeł infrastruktury do rozszerzenia zasięgu sieci poprzez przekazywanie pakietów z minimalnym narzutem. Niewidoczny na liście węzłów.</string>
     <string name="role_router">Router</string>
     <string name="role_router_client">Router Klienta</string>
-    <string name="role_router_client_desc">Połączenie zarówno trybu ROUTER, jak i CLIENT. Nie dla urządzeń przenośnych.</string>
-    <string name="role_router_desc">Węzeł infrastruktury do rozszerzenia zasięgu sieci poprzez przekazywanie pakietów. Widoczny na liście węzłów.</string>
-    <string name="role_router_late_desc">Węzeł infrastruktury, który zawsze powtarza pakiety raz, ale tylko po wszystkich innych trybach, zapewniając dodatkowe pokrycie lokalnych klastrów. Widoczne na liście węzłów.</string>
     <string name="role_sensor">Czujnik</string>
-    <string name="role_sensor_desc">Nadaje priorytetowo pakiety telemetryczne.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Zoptymalizowany pod kątem komunikacji systemowej ATAK, redukuje nadmiarowe transmisje.</string>
-    <string name="role_tak_tracker_desc">Umożliwia automatyczne transmisje TAK PLI i zmniejsza liczbę nadmiarowych transmisji.</string>
-    <string name="role_tracker_desc">Tracker - Do użytku z urządzeniami przeznaczonymi jako śledzenie GPS. Pakiety pozycyjne wysyłane z tego urządzenia będą miały wyższy priorytet, z nadawaniem pozycji co dwie minuty. Inteligentna transmisja pozycji będzie domyślnie wyłączona.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Otrzymano negatywne potwierdzenie</string>
     <string name="routing_error_no_route">Brak trasy</string>
@@ -657,7 +628,6 @@
     <string name="snr">SNR:</string>
     <string name="snr_definition">Współczynnik sygnału do szumu (Signal-to-Noise Ratio) - miara stosowana w komunikacji do określania poziomu pożądanego sygnału w stosunku do poziomu szumu tła. W Meshtastic i innych systemach bezprzewodowych wyższy współczynnik SNR oznacza czystszy sygnał, który może zwiększyć niezawodność i jakość transmisji danych.</string>
     <string name="speed">Prędkość</string>
-    <string name="subnet">Podsieć</string>
     <string name="supported">Obsługiwane</string>
     <string name="swipe_action_delete">Usuń</string>
     <string name="swipe_action_mute">Wycisz</string>
@@ -665,9 +635,6 @@
     <!-- TAK -->
     <string name="tak_server_section">Serwer</string>
     <string name="tak_server_status_off">Wyłączony</string>
-    <string name="tak_team_blue">Niebieski</string>
-    <string name="tak_team_green">Zielony</string>
-    <string name="tak_team_red">Czerwony</string>
     <string name="telemetry">Telemetria</string>
     <string name="telemetry_config">Konfiguracja telemetrii</string>
     <string name="theme">Motyw</string>
@@ -675,10 +642,8 @@
     <string name="theme_light">Jasny</string>
     <string name="theme_system">Domyślne ustawienie systemowe</string>
     <string name="time">Czas</string>
-    <string name="time_zone">Strefa czasowa</string>
     <string name="timeout">Limit czasu</string>
     <string name="timestamp">Znacznik czasu</string>
-    <string name="tls_enabled">Włącz TLS</string>
     <string name="toggle_my_position">Pokaż moją pozycję</string>
     <string name="trace_route">Śledzenie trasy</string>
     <!-- TRACEROUTE -->
@@ -711,6 +676,8 @@
     <string name="two_days">48 Godzin</string>
     <string name="two_weeks">2W</string>
     <string name="type">Typ</string>
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_meters">m</string>
     <!-- UNITS -->
     <string name="units_follow_system">Domyślny systemu</string>
     <!-- UNKNOWN -->
@@ -722,7 +689,6 @@
     <string name="unmessageable">Nie przyjmuje wiadomości</string>
     <string name="unmonitored_or_infrastructure">Niemonitorowany lub infrastruktura</string>
     <string name="unrecognized">Nierozpoznany</string>
-    <string name="update_interval_seconds">Częstotliwość aktualizacji (w sekundach)</string>
     <string name="uptime">Czas pracy</string>
     <!-- URL -->
     <string name="url">URL</string>

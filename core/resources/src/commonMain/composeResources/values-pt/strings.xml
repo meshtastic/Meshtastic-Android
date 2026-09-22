@@ -161,12 +161,10 @@
     <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo. Para mais informações consultar <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Nosso guia de instalação de firmware</a>.</string>
     <string name="firmware_too_old">Necessário atualização de firmware.</string>
     <string name="firmware_update_failed">Atualização falhou</string>
-    <string name="fixed_pin">PIN fixo</string>
     <string name="fixed_position">Posição fixa</string>
     <!-- FORMAT -->
     <string name="free_memory">Memória livre</string>
     <string name="freq">Freq</string>
-    <string name="gateway">Gateway</string>
     <!-- GEOFENCE -->
     <string name="good">Bom</string>
     <string name="gpio_pin">Pin GPIO</string>
@@ -233,11 +231,8 @@
     <string name="map_offline_manager">Gerenciador offline</string>
     <string name="map_purge_fail">Falha na remoção do cache SQL, consulte logcat para obter detalhes</string>
     <string name="map_purge_success">Cache SQL removido para %1$s</string>
-    <string name="map_reporting">Enviar para o mapa</string>
     <string name="map_reporting_consent_header">Consentimento para partilhar dados não criptografados do node via MQTT</string>
     <string name="map_reporting_consent_text">Ao ativar este recurso, reconhece e consente expressamente com a transmissão da localização geográfica em tempo real do seu dispositivo pelo protocolo MQTT sem criptografia. Esses dados de localização podem ser usados para propósitos como relatório de mapas ao vivo, rastreamento do dispositivo e funções de telemetria relacionadas.</string>
-    <string name="map_reporting_interval_seconds">Intervalo de envio (segundos)</string>
-    <string name="map_reporting_summary">O seu node enviará periodicamente um pacote de relatório de mapa não criptografado para o servidor MQTT configurado, isso inclui id, nome longo e curto nome. localização aproximada, modelo de hardware, papel, versão do firmware, região LoRa, predefinição de modem e nome do canal primário.</string>
     <string name="map_select_download_region">Selecione a região para download</string>
     <string name="map_start_download">Iniciar download</string>
     <string name="map_subDescription">direção: %1$d° distância: %2$s</string>
@@ -263,7 +258,6 @@
     <string name="message_input_label">Mensagem</string>
     <string name="message_status_queued">Na fila de envio</string>
     <string name="messages">Mensagens</string>
-    <string name="minimum_broadcast_seconds">Transmissão mínima (segundos)</string>
     <string name="module_settings">Configurações dos módulos</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
@@ -277,7 +271,6 @@
     <string name="mute_8_hours">8 horas</string>
     <string name="mute_always">Sempre</string>
     <string name="mute_notifications">Silenciar notificações</string>
-    <string name="nag_timeout_seconds">Tempo limite a incomodar (segundos)</string>
     <string name="name">Nome</string>
     <string name="navigate_back">Retroceder</string>
     <string name="neighbor_info">Informações da vizinhança</string>
@@ -322,7 +315,6 @@
     <string name="one_day">24 Horas</string>
     <string name="one_week">1sem</string>
     <!-- OPEN -->
-    <string name="output_duration_milliseconds">Duração da Saída (milissegundos)</string>
     <string name="override_console_serial_port">Substituir porta série do console</string>
     <!-- PACKET -->
     <string name="password">Palavra-passe</string>
@@ -361,14 +353,6 @@
     <string name="range_test">Teste de Alcance</string>
     <string name="range_test_config">Configuração de Teste de Alcance</string>
     <string name="reboot">Reiniciar</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Se estiver no nosso canal privado ou de outra rede com os mesmos parâmetros LoRa, retransmite qualquer mensagem observada.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Modo indêntico ao ALL, mas apenas retransmite os dados sem os descodificar. Apenas disponível em modo Repeater. Esta opção em qualquer outro modo resulta em comportamento igual ao ALL.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignora pacotes de portas não padrão, tais como: TAK, RangeTest, PaxCounter, etc. Apenas retransmite pacotes com portas padrão: NodeInfo, Texto, Posição, Telemetria e Roteamento.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignora mensagens observadas de malhas estrangeiras, como APENAS LOCAL, mas leva mais longe ignorando também mensagens de nodes que não já estão na lista conhecida do node.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignora mensagens observadas de malhas estrangeiras que estão abertas ou aquelas que não pode desencriptar. Apenas retransmite mensagem nos canais primários / secundários locais.</string>
-    <string name="rebroadcast_mode_none_desc">Permitido apenas para SENSOR, TRACKER e TAK_TRACKER, isto irá desativar todas as retransmissões, como o papel CLIENT_MUTE.</string>
-    <string name="region_frequency_plan">Região</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administração Remota</string>
     <string name="remote_hardware">Equipamento remoto</string>
@@ -387,26 +371,15 @@
     <string name="ringtone">Toque</string>
     <!-- ROLE -->
     <string name="role_client">Cliente</string>
-    <string name="role_client_desc">Ligado por app, ou dispositivo autónomo de mensagens.</string>
     <string name="role_client_hidden">Cliente oculto</string>
-    <string name="role_client_hidden_desc">Dispositivo que só transmite quando necessário para economizar energia ou anonimidade.</string>
     <string name="role_client_mute">Cliente silenciado</string>
-    <string name="role_client_mute_desc">Dispositivo que não encaminha mensagens de outros dispositivos.</string>
     <string name="role_lost_and_found">Perdidos e Achados</string>
     <string name="role_repeater">Repetidor</string>
-    <string name="role_repeater_desc">Node de infraestrutura para estender a cobertura da rede retransmitindo mensagens com overhead mínimo. Não visível na lista de nodes.</string>
     <string name="role_router">Roteador</string>
     <string name="role_router_client">Cliente Roteador</string>
-    <string name="role_router_client_desc">Combinação de ROUTER e CLIENT. Não indicado para dispositivos móveis.</string>
-    <string name="role_router_desc">Node de infraestrutura que retransmite mensagens para estender a cobertura da rede (Router). Visível na lista de nodes.</string>
-    <string name="role_router_late_desc">Node de infraestrutura que vai sempre retransmitir dados uma vez, mas apenas após todos os outros modos, garantindo cobertura adicional para grupos locais. Visível na lista de nós.</string>
     <string name="role_sensor">Sensor</string>
-    <string name="role_sensor_desc">Transmite dados de telemetria como prioridade.</string>
     <string name="role_tak">TAK — ‘Kit’ de Consciencialização da Equipa</string>
-    <string name="role_tak_desc">Otimizado para comunicação do sistema ATAK, reduz as transmissões de rotina.</string>
-    <string name="role_tak_tracker_desc">Permite transmissões automáticas do TAK PLI e reduz as transmissões de rotina.</string>
     <string name="role_tracker">Monitor</string>
-    <string name="role_tracker_desc">Transmite dados de posições GPS como prioridade.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Recebida uma confirmação negativa</string>
     <string name="routing_error_no_route">Sem rota</string>
@@ -445,17 +418,12 @@
     <string name="slot">Slot</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Relação sinal-para-ruído, uma medida utilizada nas comunicações para quantificar o nível de um sinal desejado com o nível de ruído de fundo. Em Meshtastic e outros sistemas sem fio. Quanto mais alta for a relação sinal-ruído, menor é o efeito do ruído de fundo sobre a deteção ou medição do sinal.</string>
-    <string name="state_broadcast_seconds">Transmissão de estado (segundos)</string>
-    <string name="subnet">Subnet</string>
     <string name="supported">Suportado</string>
     <string name="swipe_action_delete">Excluir</string>
     <string name="swipe_action_mute">Silenciar</string>
     <string name="swipe_action_unmute">Tirar mute</string>
     <!-- TAK -->
     <string name="tak_server_section">Servidor</string>
-    <string name="tak_team_blue">Azul</string>
-    <string name="tak_team_green">Verde</string>
-    <string name="tak_team_red">Vermelho</string>
     <string name="telemetry">Telemetria</string>
     <string name="telemetry_config">Configuração de Telemetria</string>
     <string name="theme">Tema</string>
@@ -464,7 +432,6 @@
     <string name="theme_system">Padrão do sistema</string>
     <string name="timeout">Timeout</string>
     <string name="timestamp">Data e hora</string>
-    <string name="tls_enabled">Ativar TLS</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traçar rota</string>
     <string name="traceroute_diff">Saltos em direção a %1$d Saltos de regresso %2$d</string>
@@ -492,7 +459,6 @@
     <string name="unmonitored_or_infrastructure">Não monitorizado ou infraestrutura</string>
     <string name="unmute">Tirar mute</string>
     <string name="unrecognized">Desconhecido</string>
-    <string name="update_interval_seconds">Intervalo de atualização (segundos)</string>
     <string name="uptime">Tempo ativo</string>
     <!-- URL -->
     <string name="url">URL</string>

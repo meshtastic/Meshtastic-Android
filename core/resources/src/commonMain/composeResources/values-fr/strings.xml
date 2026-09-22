@@ -248,7 +248,6 @@
     <string name="config_lora_modem_preset_summary">Préréglages de modem disponibles, la valeur par défaut est Long Fast.</string>
     <string name="config_lora_region_summary">La région où vous allez utiliser vos radios.</string>
     <string name="config_network_udp_enabled_summary">Activer les paquets de diffusion via UDP sur le réseau local.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Intervalle minimum auquel les mises à jour de position seront envoyées si la distance minimale est respectée.</string>
     <string name="config_saved_restarting">Le nœud est en cours de redémarrage et sera brièvement inaccessible.</string>
     <string name="config_security_private_key">Utilisée pour créer une clé partagée avec un appareil distant.</string>
     <string name="config_security_private_key_remote">L'appareil ne partage pas sa clé privée sur l'administration à distance. Vous pouvez définir une nouvelle clé, mais elle ne pourra ne jamais être lue de nouveau.</string>
@@ -445,7 +444,6 @@
     <string name="distance_filters_description">Filtrer la liste de nœuds et la carte de maillage en fonction de la proximité de votre téléphone.</string>
     <string name="distance_measurements">Mesures de distance</string>
     <string name="distance_measurements_description">Afficher la distance entre votre téléphone et les autres nœuds Meshtastic avec des positions.</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Effacer la recherche</string>
     <string name="doc_search_placeholder">Rechercher dans la documentation</string>
@@ -621,7 +619,6 @@
     <string name="firmware_update_waiting_reboot">En attente du redémarrage de l'appareil en mode OTA...</string>
     <string name="firmware_update_waiting_reconnect">En attente de la reconnexion de l'appareil ...</string>
     <string name="firmware_version">Version du firmware : %1$s</string>
-    <string name="fixed_pin">Code PIN fixe</string>
     <string name="fixed_position">Position fixe</string>
     <string name="for_more_information_see_our_privacy_policy">Pour plus d'informations, consultez notre politique de confidentialité.</string>
     <!-- FORMAT -->
@@ -634,7 +631,6 @@
     <string name="free_memory_description">Mémoire système disponible en octets</string>
     <string name="freq">Fréq</string>
     <string name="gas_resistance">Résistance au gaz</string>
-    <string name="gateway">Passerelle</string>
     <string name="generate_qr_code">Générer un QR Code</string>
     <!-- GEOFENCE -->
     <string name="geofence">Zone géographique</string>
@@ -700,7 +696,6 @@
     <string name="latitude">Latitude</string>
     <!-- LAYER -->
     <string name="learn_more">En savoir plus</string>
-    <string name="led_heartbeat">LED de vérification de fonctionnement (heartbeat)</string>
     <string name="legacy_admin_channel">Ancien canal Admin</string>
     <string name="library_count">%1$d Bibliothèques</string>
     <!-- LICENSED -->
@@ -806,11 +801,8 @@
     <string name="map_offline_manager">Gestionnaire hors-ligne</string>
     <string name="map_purge_fail">La purge du cache SQL a échoué, consultez « logcat » pour plus de détails</string>
     <string name="map_purge_success">Cache SQL purgé pour %1$s</string>
-    <string name="map_reporting">Rapport cartographique</string>
     <string name="map_reporting_consent_header">Consentir au partage des données non chiffrées du nœud via MQTT</string>
     <string name="map_reporting_consent_text">En activant cette fonctionnalité, vous reconnaissez et consentez expressément à la transmission de la position géographique en temps réel de votre appareil via le protocole MQTT, sans chiffrement. Ces données de localisation peuvent être utilisées à des fins telles que l’affichage sur une carte en temps réel, le suivi de l’appareil et d’autres fonctions de télémétrie associées.</string>
-    <string name="map_reporting_interval_seconds">Intervalle de rapport cartographique (secondes)</string>
-    <string name="map_reporting_summary">Votre nœud enverra périodiquement un paquet de rapport de position non chiffré au serveur MQTT configuré. Ce paquet inclut l'identifiant, les noms long et court, la position approximative, le modèle matériel, le rôle, la version du micrologiciel, la région LoRa, le préréglage du modem et le nom du canal principal.</string>
     <string name="map_select_download_region">Sélectionnez la région de téléchargement</string>
     <string name="map_start_download">Commencer le téléchargement</string>
     <string name="map_style_selection">Sélection du style de carte</string>
@@ -857,7 +849,6 @@
     <string name="message_status_unknown">Inconnu</string>
     <string name="messages">Messages</string>
     <string name="min">Min</string>
-    <string name="minimum_broadcast_seconds">Diffusion minimale (secondes)</string>
     <string name="minimum_wake_time_seconds">Durée minimale de réveil</string>
     <string name="modem_preset">Préréglages</string>
     <string name="module_settings">Réglages du module</string>
@@ -895,7 +886,6 @@
     <string name="mute_status_muted_for_days">Muet pour %1$d jours, %2$s heures</string>
     <string name="mute_status_muted_for_hours">Muet pour %1$s heures</string>
     <string name="mute_status_unmuted">Non muet</string>
-    <string name="nag_timeout_seconds">Durée de répétition de la sortie (secondes)</string>
     <string name="name">Nom</string>
     <string name="name_cannot_be_empty">Le nom ne peut pas être vide.</string>
     <string name="navigate_back">Précédent</string>
@@ -993,7 +983,6 @@
     <string name="open_source_libraries">Bibliothèques Open Source</string>
     <string name="options">Options</string>
     <string name="orient_north">Orienter vers le nord</string>
-    <string name="output_duration_milliseconds">Durée de sortie (en millisecondes)</string>
     <string name="overflow_menu">Menu supplémentaire</string>
     <string name="override_console_serial_port">Outrepasser le port série de la console</string>
     <!-- PACKET -->
@@ -1080,20 +1069,12 @@
     <string name="range_test_config">Configuration des tests de portée</string>
     <string name="react">Réagir</string>
     <string name="reboot">Redémarrer</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Rediffuser tout message observé, s'il était sur notre canal privé ou à partir d'un autre maillage avec les mêmes paramètres LoRa.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Identique au comportement de TOUS mais ignore le décodage des paquets et les rediffuse simplement. Uniquement disponible pour le rôle Répéteur. Définir cela sur tout autre rôle entraînera le comportement de TOUS.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignore les paquets de portnums non standards tels que : TAK, RangeTest, PaxCounter, etc. Retransmet seulement les paquets avec des portnums standard : NodeInfo, Text, Position, Télémétrie et Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignore les messages observés depuis des maillages distants comme LOCAL SEULEMENT, mais va plus loin en ignorant également les messages des nœuds qui ne sont pas déjà dans la liste connue du nœud.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignore les messages observés à partir de maillages étrangers qui sont ouverts ou ceux qu'il ne peut pas déchiffrer. Ne diffuse que le message sur les nœuds des canaux primaires / secondaires.</string>
-    <string name="rebroadcast_mode_none_desc">Seulement autorisé pour les rôles SENSOR, TRACKER et TAK_TRACKER, cela empêchera toutes les rediffusions, contrairement au rôle CLIENT_MUTE.</string>
     <string name="recent_network_devices">Périphériques réseaux récents</string>
     <string name="reconnecting">Reconnexion…</string>
     <string name="refresh">Actualiser</string>
     <string name="refresh_metadata">Actualiser les métadonnées</string>
     <string name="regenerate_keys_confirmation">Êtes-vous sûr de vouloir régénérer votre clé privée ?\n\nLes nœuds qui peuvent avoir précédemment échangé des clés avec ce nœud devront supprimer ce nœud et ré-échanger des clés afin de reprendre une communication sécurisée.</string>
     <string name="regenerate_private_key">Régénérer la clé privée</string>
-    <string name="region_frequency_plan">Région</string>
     <plurals name="relays">
         <item quantity="one">Entendu par %1$d relai</item>
         <item quantity="other">Entendu par %1$d relais</item>
@@ -1142,29 +1123,17 @@
     <string name="role">Rôle de l'appareil</string>
     <string name="role_client">Client</string>
     <string name="role_client_base">Base Client</string>
-    <string name="role_client_base_desc">Traite les paquets depuis ou vers les nœuds favoris comme Routeur avec retard (ROUTER_LATE), et tous les autres paquets comme CLIENT.</string>
-    <string name="role_client_desc">Dispositif de messagerie autonome ou connecté à l'application.</string>
     <string name="role_client_hidden">Client masqué</string>
-    <string name="role_client_hidden_desc">Appareil ne diffusant que si nécessaire pour la discrétion et l'économie d'énergie.</string>
     <string name="role_client_mute">Client muet</string>
-    <string name="role_client_mute_desc">Appareil ne transmettant pas les paquets provenant d'autres appareils.</string>
     <string name="role_lost_and_found">Objets trouvés</string>
     <string name="role_repeater">Répéteur</string>
-    <string name="role_repeater_desc">Nœud d'infrastructure pour étendre la couverture réseau en relayant les messages avec une surcharge minimale. Non visible dans la liste des nœuds.</string>
     <string name="role_router">Routeur</string>
     <string name="role_router_client">Routeur Client</string>
-    <string name="role_router_client_desc">Combinaison à la fois du ROUTER et du CLIENT. Pas pour les appareils mobiles.</string>
-    <string name="role_router_desc">Nœud d'infrastructure pour étendre la couverture réseau en relayant les messages. Visible dans la liste des nœuds.</string>
     <string name="role_router_late">Routeur avec retard</string>
-    <string name="role_router_late_desc">Nœud d'infrastructure qui retransmet toujours les paquets une fois mais seulement après tous les autres modes, assurant une couverture supplémentaire pour les clusters locaux. Visible dans la liste des nœuds.</string>
     <string name="role_sensor">Capteur</string>
-    <string name="role_sensor_desc">Transmet les paquets de télémétrie en priorité.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Optimisé pour le système de communication ATAK, diminue les émissions de routine.</string>
     <string name="role_tak_tracker">Traqueur TAK</string>
-    <string name="role_tak_tracker_desc">Active les diffusions automatiques de TAK PLI et réduit les diffusions de routine.</string>
     <string name="role_tracker">Traqueur</string>
-    <string name="role_tracker_desc">Transmet les paquets de positions GPS en priorité.</string>
     <string name="router_role_confirmation_text">J'ai lu la &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Documentation du rôle de l'appareil&lt;/a&gt; et le billet de blog sur comment &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choisir le rôle de l'appareil approprié&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Accusé de réception négatif</string>
@@ -1214,7 +1183,6 @@
     <string name="selected">Sélectionné</string>
     <string name="selected_map_type">Type de carte sélectionné</string>
     <string name="send">Envoyer</string>
-    <string name="sender_message_interval_seconds">Intervalle de message de l'expéditeur (secondes)</string>
     <string name="serial">Série</string>
     <string name="serial_config">Configuration série</string>
     <string name="session_active">Session active</string>
@@ -1253,12 +1221,10 @@
     <string name="soil_temperature">Temp sol</string>
     <string name="speed">Vitesse</string>
     <string name="speed_kmh">%1$d Km/h</string>
-    <string name="state_broadcast_seconds">Diffusion de l'État (secondes)</string>
     <string name="status_message">Statut du message</string>
     <string name="stay_connected_anywhere">Restez connecté n'importe où</string>
     <string name="store_forward">Stocker &amp; Transférer</string>
     <string name="store_forward_config">Stocker &amp; Transférer la configuration</string>
-    <string name="subnet">Sous-réseau</string>
     <string name="super_deep_sleep_duration_seconds">Durée du sommeil extra profond</string>
     <string name="supported">Pris en charge</string>
     <string name="supported_by_community">Soutenu par la communauté Meshtastic</string>
@@ -1269,35 +1235,9 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Configuration TAK</string>
-    <string name="tak_role">Rôle Membre</string>
-    <string name="tak_role_forwardobserver">Observateur de transfert</string>
-    <string name="tak_role_hq">Quartier général</string>
-    <string name="tak_role_k9">Doggo (K9)</string>
-    <string name="tak_role_medic">Medic</string>
-    <string name="tak_role_rto">Opérateur de radio téléphonie</string>
-    <string name="tak_role_sniper">Tireur d'élite</string>
-    <string name="tak_role_teamlead">Chef d'équipe</string>
-    <string name="tak_role_teammember">Membre de l'équipe</string>
-    <string name="tak_role_unspecified">Non spécifié</string>
     <string name="tak_server_enabled">Activer le serveur TAK local</string>
     <string name="tak_server_section">Serveur</string>
     <string name="tak_server_status_off">Éteint</string>
-    <string name="tak_team">Couleur de l'équipe</string>
-    <string name="tak_team_blue">Bleu</string>
-    <string name="tak_team_brown">Marron</string>
-    <string name="tak_team_cyan">Cyan</string>
-    <string name="tak_team_dark_blue">Bleu foncé</string>
-    <string name="tak_team_dark_green">Vert Foncé</string>
-    <string name="tak_team_green">Vert</string>
-    <string name="tak_team_magenta">Magenta</string>
-    <string name="tak_team_maroon">Marron</string>
-    <string name="tak_team_orange">Orange</string>
-    <string name="tak_team_purple">Pourpre</string>
-    <string name="tak_team_red">Rouge</string>
-    <string name="tak_team_teal">Turquoise</string>
-    <string name="tak_team_unspecified_color">Non spécifié</string>
-    <string name="tak_team_white">Blanc</string>
-    <string name="tak_team_yellow">Jaune</string>
     <string name="telemetry">Télémétrie</string>
     <string name="telemetry_config">Configuration de la Télémétrie</string>
     <string name="temperature">Temp</string>
@@ -1306,10 +1246,8 @@
     <string name="theme_light">Clair</string>
     <string name="theme_system">Valeur par défaut du système</string>
     <string name="time">Heure</string>
-    <string name="time_zone">Fuseau horaire</string>
     <string name="timeout">Délai d'expiration</string>
     <string name="timestamp">Horodatage</string>
-    <string name="tls_enabled">TLS activé</string>
     <string name="toggle_my_position">Basculer ma position</string>
     <string name="trace_route">Tracer la route</string>
     <!-- TRACEROUTE -->
@@ -1364,6 +1302,8 @@
     <string name="two_weeks">2S</string>
     <string name="type">Type</string>
     <string name="type_a_message">Composer un message</string>
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_meters">m</string>
     <!-- UNITS -->
     <string name="units_follow_system">Valeur par défaut du système</string>
     <string name="units_metric">Métrique</string>
@@ -1379,7 +1319,6 @@
     <string name="unmute">Désactiver Muet</string>
     <string name="unrecognized">Non reconnu</string>
     <string name="unset">Non défini - 0</string>
-    <string name="update_interval_seconds">Intervalle de mise à jour (secondes)</string>
     <string name="updated">Mis à jour</string>
     <string name="uplink_feature_description">Les messages provenant du maillage seront envoyés à Internet public via la passerelle configurée sur n'importe quel nœud.</string>
     <string name="uptime">Durée de fonctionnement</string>

@@ -251,7 +251,6 @@
     <string name="config_lora_modem_preset_summary">Dostupné předvolby modemu, výchozí je Long Fast.</string>
     <string name="config_lora_region_summary">Oblast, ve které budete svá rádia používat.</string>
     <string name="config_network_udp_enabled_summary">Povolit vysílání paketů přes UDP v místní síti.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Nejkratší interval, ve kterém budou odesílány aktualizace polohy, pokud byla splněna minimální vzdálenost.</string>
     <string name="config_saved_restarting">Uzel se restartuje a bude krátce nedostupný.</string>
     <string name="config_security_private_key">Slouží k vytvoření sdíleného klíče se vzdáleným zařízením.</string>
     <string name="config_security_private_key_remote">Zařízení nepředává soukromý klíč prostřednictvím vzdálené správy. Nový klíč můžete nastavit, ale nelze jej zpětně načíst.</string>
@@ -444,7 +443,6 @@
     <string name="distance_filters_description">Filtrovat seznam uzlů a mesh mapu podle vzdálenosti od vašeho telefonu.</string>
     <string name="distance_measurements">Měření vzdálenosti</string>
     <string name="distance_measurements_description">Zobrazí vzdálenost mezi vaším telefonem a ostatními uzly Meshtastic s určenou polohou.</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Vymazat hledání</string>
     <string name="doc_search_placeholder">Hledat v dokumentaci…</string>
@@ -637,7 +635,6 @@
     <string name="firmware_update_wipe_label">Vymazat zařízení během aktualizace</string>
     <string name="firmware_update_wipe_usb_detail">Úplně vymaže paměť zařízení a poté od začátku nainstaluje vybraný firmware.</string>
     <string name="firmware_version">Verze firmware: %1$s</string>
-    <string name="fixed_pin">Pevný PIN</string>
     <string name="fixed_position">Pevná poloha</string>
     <string name="for_more_information_see_our_privacy_policy">Další informace naleznete v našich zásadách ochrany osobních údajů.</string>
     <!-- FORMAT -->
@@ -645,7 +642,6 @@
     <string name="free_memory_description">Dostupná systémová paměť v bajtech</string>
     <string name="freq">Frekv</string>
     <string name="gas_resistance">Odpor plynu</string>
-    <string name="gateway">Gateway/Brána</string>
     <string name="generate_qr_code">Vytvořit QR kód</string>
     <!-- GEOFENCE -->
     <string name="geofence">Geozóna</string>
@@ -737,7 +733,6 @@
     <string name="layer_subtitle">%1$s • %2$s</string>
     <string name="layer_type_coverage">Odhad pokrytí</string>
     <string name="learn_more">Zjistit více</string>
-    <string name="led_heartbeat">Blikání LED při provozu</string>
     <string name="legacy_admin_channel">Starý kanál správce</string>
     <string name="library_count">%1$d knihoven</string>
     <string name="license">Licence</string>
@@ -871,11 +866,8 @@
     <string name="map_overlay_weather_radar">Meteorologický radar</string>
     <string name="map_purge_fail">Vyčištění mezipaměti SQL selhalo, podrobnosti naleznete v logcat</string>
     <string name="map_purge_success">Mezipaměť SQL vyčištěna pro %1$s</string>
-    <string name="map_reporting">Hlášení mapy</string>
     <string name="map_reporting_consent_header">Souhlas se sdílením nešifrovaných dat uzlu prostřednictvím MQTT</string>
     <string name="map_reporting_consent_text">Povolením této funkce potvrzujete a výslovně souhlasíte s přenosem zeměpisné polohy vašeho zařízení v reálném čase přes MQTT protokol bez šifrování. Tato lokalizační data mohou být použita pro účely, jako je hlášení živých map, sledování zařízení a související telemetrické funkce.</string>
-    <string name="map_reporting_interval_seconds">Interval hlášení mapy</string>
-    <string name="map_reporting_summary">Váš uzel bude pravidelně odesílat nešifrovaný mapový paket na konfigurovaný MQTT server, který zahrnuje id, dlouhé a krátké jméno. přibližné umístění, hardwarový model, role, verze firmwaru, region LoRa, předvolba modemu a název primárního kanálu.</string>
     <string name="map_select_download_region">Vyberte oblast stahování</string>
     <string name="map_start_download">Zahájit stahování</string>
     <string name="map_style_selection">Výběr stylu mapy</string>
@@ -898,7 +890,6 @@
     <string name="mesh_beacon_invitations_title">Pozvánky do mesh sítí</string>
     <string name="mesh_beacon_listen">Naslouchat majákům</string>
     <string name="mesh_beacon_listen_summary">Zachytávat pozvánky vysílané okolními mesh sítěmi</string>
-    <string name="mesh_beacon_message">Majáková zpráva</string>
     <string name="mesh_beacon_notification_body">Blízká mesh síť vás pozvala k připojení</string>
     <string name="mesh_beacon_notification_title">Pozvánka do mesh sítě</string>
     <string name="mesh_beacon_offer_add">Přidat kanál</string>
@@ -975,7 +966,6 @@
     <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">μg/m3</string>
     <string name="min">Min</string>
-    <string name="minimum_broadcast_seconds">Minimální vysílání (sekundy)</string>
     <string name="minimum_wake_time_seconds">Minimální doba probuzení</string>
     <string name="modem_preset">Předvolby</string>
     <string name="module_settings">Nastavení modulů</string>
@@ -1011,7 +1001,6 @@
     <string name="mute_status_muted_for_days">Ztlumeno na %1$d dní, %2$s hodiny</string>
     <string name="mute_status_muted_for_hours">Ztlumeno na %1$s hodin</string>
     <string name="mute_status_unmuted">Neztlumeno</string>
-    <string name="nag_timeout_seconds">Interval opakovaného zvonění</string>
     <string name="name">Jméno</string>
     <string name="name_cannot_be_empty">Název nesmí být prázdný.</string>
     <string name="navigate_back">Přejít zpět</string>
@@ -1159,7 +1148,6 @@
     <string name="open_source_libraries">Open source knihovny</string>
     <string name="open_wifi_settings">Otevřít nastavení Wi-Fi</string>
     <string name="options">Nastavení</string>
-    <string name="output_duration_milliseconds">Doba trvání výstupu (v milisekundách)</string>
     <string name="override_console_serial_port">Přepsat sériový port komunikace</string>
     <!-- PACKET -->
     <string name="packet_authenticity">Pravost paketu</string>
@@ -1275,19 +1263,11 @@
     <string name="range_test_config">Nastavení testu pokrytí</string>
     <string name="react">Odpovědět</string>
     <string name="reboot">Restartovat</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Znovu odeslat jakoukoli pozorovanou zprávu, pokud byla na našem soukromém kanálu nebo z jiné sítě se stejnými parametry lory.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Stejné chování jako ALL, ale přeskočí dekódování paketů a jednoduše je znovu vysílá. Dostupné pouze v roli Repeater. Nastavení této možnosti pro jiné role povede k chování jako u ALL.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignoruje pakety z nestandardních portů, jako jsou: TAK, RangeTest, PaxCounter atd. Opakuje pouze pakety se standardními porty: NodeInfo, Text, Position, Telemetry a Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignoruje přijaté zprávy z cizích mesh sítí, jako je LOCAL ONLY, ale jde ještě o krok dál tím, že také ignoruje zprávy od uzlů, které již nejsou v seznamu známých uzlů daného uzlu.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignoruje přijaté zprávy z cizích mesh sítí, které jsou otevřené nebo které nelze dešifrovat. Opakuje pouze zprávy na primárních / sekundárních kanálech místního uzlu.</string>
-    <string name="rebroadcast_mode_none_desc">Povoleno pouze pro role SENSOR, TRACKER a TAK_TRACKER. Toto nastavení zabrání všem opakovaným vysíláním, podobně jako role CLIENT_MUTE.</string>
     <string name="recent_network_devices">Nedávná síťová zařízení</string>
     <string name="refresh">Obnovit</string>
     <string name="refresh_metadata">Obnovit metadata</string>
     <string name="regenerate_keys_confirmation">Jste si jisti, že chcete obnovit svůj soukromý klíč?\n\nUzly, které si již vyměnily klíče s tímto uzlem, budou muset odebrat tento uzel a vyměnit klíče pro obnovení bezpečné komunikace.</string>
     <string name="regenerate_private_key">Obnovit soukromý klíč</string>
-    <string name="region_frequency_plan">Region</string>
     <plurals name="relays">
         <item quantity="one">Zachyceno %1$d přeposlání</item>
         <item quantity="few">Zachyceno %1$d přeposlání</item>
@@ -1338,21 +1318,8 @@
     <string name="ringtone_imported">Importované vyzvánění</string>
     <!-- ROLE -->
     <string name="role">Role zařízení</string>
-    <string name="role_client_base_desc">Pakety od oblíbených uzlů nebo směrované k nim jsou označeny jako ROUTER_LATE, ostatní pakety jako CLIENT.</string>
-    <string name="role_client_desc">Připojená aplikace nebo nezávislé zařízení.</string>
-    <string name="role_client_hidden_desc">Zařízení, které vysílá pouze podle potřeby pro utajení nebo úsporu energie.</string>
-    <string name="role_client_mute_desc">Zařízení, které nepřeposílá pakety ostatních zařízení.</string>
-    <string name="role_lost_and_found_desc">Pravidelně vysílá polohu jako zprávu na výchozí kanál, aby usnadnila nalezení zařízení.</string>
-    <string name="role_repeater_desc">Uzel infrastruktury pro rozšíření pokrytí sítě přenosem zpráv s minimální režií. Není viditelné v seznamu uzlů.</string>
-    <string name="role_router_client_desc">Kombinace ROUTER a CLIENT. Ne u mobilních zařízení.</string>
-    <string name="role_router_desc">Uzel infrastruktury pro rozšíření pokrytí sítě přeposíláním zpráv. Viditelné v seznamu uzlů.</string>
-    <string name="role_router_late_desc">Uzel infrastruktury, který vždy jednou zopakuje pakety, ale až po všech ostatních režimech, čímž zajišťuje lepší pokrytí místních clusterů. Je viditelný v seznamu uzlů.</string>
     <string name="role_sensor">Senzor</string>
-    <string name="role_sensor_desc">Prioritně vysílá pakety s telemetrií.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Optimalizované pro systémy komunikace ATAK, snižuje rutinní vysílání.</string>
-    <string name="role_tak_tracker_desc">Povolí automatické vysílání TAK PLI a snižuje běžné vysílání.</string>
-    <string name="role_tracker_desc">Prioritně vysílá pakety s pozicí GPS.</string>
     <string name="router_role_confirmation_text">Seznámil jsem se s &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;dokumentací k rolím zařízení&lt;/a&gt; a příspěvkem na blogu o &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;výběru správné role zařízení&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_public_key_unauthorized">Klíč správce není autorizován</string>
@@ -1421,7 +1388,6 @@
     <string name="select_all">Vybrat vše</string>
     <string name="selected">Vybrané</string>
     <string name="send">Odeslat</string>
-    <string name="sender_message_interval_seconds">Interval odesílání zpráv</string>
     <string name="serial">Sériový</string>
     <string name="serial_config">Konfigurace sériové komunikace</string>
     <string name="session_active">Relace aktivní</string>
@@ -1489,14 +1455,12 @@
     <string name="speed">Rychlost</string>
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="speed_mph">%1$d mph</string>
-    <string name="state_broadcast_seconds">Vysílání stavu (v sekundách)</string>
     <string name="status_message">Stavová zpráva</string>
     <string name="status_message_summary">Veřejná stavová zpráva vysílaná do mesh sítě při změně a každých 12 hodin.</string>
     <string name="stay_connected_anywhere">Zůstaňte připojeni kdekoliv</string>
     <string name="stop_connecting">Zastavit připojování</string>
     <string name="store_forward">Ukládání a předávání</string>
     <string name="store_forward_config">Nastavení ukládání a předávání</string>
-    <string name="subnet">Podsíť</string>
     <string name="super_deep_sleep_duration_seconds">Doba super hlubokého spánku</string>
     <string name="supported">Podporované</string>
     <string name="supported_by_community">Podporováno komunitou Meshtastic</string>
@@ -1507,8 +1471,6 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Nastavení TAK</string>
-    <string name="tak_role">Role člena</string>
-    <string name="tak_role_unspecified">Nespecifikováno</string>
     <string name="tak_server">TAK server</string>
     <string name="tak_server_channel">TAK mesh kanál</string>
     <string name="tak_server_channel_desc">Kanál Meshtastic používaný pro odchozí provoz TAK</string>
@@ -1535,22 +1497,6 @@
     <string name="tak_server_test_result_expected_drop">Není v schématu v1 (očekáváno)</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_server_v1_fallback_notice">Firmware připojeného uzlu nepodporuje plnou integraci TAK – do ATAK se budou přenášet pouze polohy a chatové zprávy. Značky a další typy událostí vyžadují firmware verze 2.8.0 nebo novější.</string>
-    <string name="tak_team">Barva týmu</string>
-    <string name="tak_team_blue">Modrá</string>
-    <string name="tak_team_brown">Hnědá</string>
-    <string name="tak_team_cyan">Azurová</string>
-    <string name="tak_team_dark_blue">Tmavě modrá</string>
-    <string name="tak_team_dark_green">Tmavě zelená</string>
-    <string name="tak_team_green">Zelená</string>
-    <string name="tak_team_magenta">Purpurová</string>
-    <string name="tak_team_maroon">Vínová</string>
-    <string name="tak_team_orange">Oranžová</string>
-    <string name="tak_team_purple">Fialová</string>
-    <string name="tak_team_red">Červená</string>
-    <string name="tak_team_teal">Tyrkysová</string>
-    <string name="tak_team_unspecified_color">Nespecifikováno</string>
-    <string name="tak_team_white">Bílá</string>
-    <string name="tak_team_yellow">Žlutá</string>
     <string name="telemetry">Telemetrie</string>
     <string name="telemetry_config">Nastavení telemetrie</string>
     <string name="temperature">Teplota</string>
@@ -1559,10 +1505,8 @@
     <string name="theme_light">Světlý</string>
     <string name="theme_system">Podle systému</string>
     <string name="time">Čas</string>
-    <string name="time_zone">Časové pásmo</string>
     <string name="timeout">Vypršel čas spojení</string>
     <string name="timestamp">Časová značka</string>
-    <string name="tls_enabled">TLS povoleno</string>
     <string name="toggle_my_position">Zapnout/vypnout pozici</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
@@ -1636,7 +1580,6 @@
     <string name="unmute">Zrušit ztlumení</string>
     <string name="unrecognized">Neznámý</string>
     <string name="unset">Nenastaveno – 0</string>
-    <string name="update_interval_seconds">Interval aktualizace (v sekundách)</string>
     <string name="update_status">Aktualizovat stav</string>
     <string name="updated">Aktualizováno</string>
     <string name="uplink_enabled">Odesílání MQTT dat povoleno</string>

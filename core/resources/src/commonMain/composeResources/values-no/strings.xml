@@ -210,14 +210,6 @@
     <string name="quick_chat_new">Ny enkelchat</string>
     <string name="radio_configuration">Radiokonfigurasjon</string>
     <string name="reboot">Omstart</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Alle observerte meldinger sendes på nytt hvis den var på vår private kanal eller fra en annen mesh med samme lora-parametere.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Samme atferd som alle andre, men hopper over pakkedekoding og sender dem ganske enkelt på nytt. Kun tilgjengelig i Repeater-rollen. Å sette dette på andre roller vil resultere i ALL oppførsel.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignorerer pakker fra ikke-standard portnumre som: TAK, RangeTest, PaxCounter, etc. Kringkaster kun pakker med standard portnum: NodeInfo, Text, Position, Telemetrær og Ruting.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignorer observerte meldinger fra utenlandske mesher som KUN LOKALE men tar det steget videre, ved å også ignorere meldinger fra noder som ikke allerede er i nodens kjente liste.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignorerer observerte meldinger fra fremmede mesh'er som er åpne eller de som ikke kan dekrypteres. Sender kun meldingen på nytt på nodene lokale primære / sekundære kanaler.</string>
-    <string name="rebroadcast_mode_none_desc">Bare tillatt for SENSOR, TRACKER og TAK_TRACKER roller, så vil dette hindre alle rekringkastinger, ikke i motsetning til CLIENT_MUTE rollen.</string>
-    <string name="region_frequency_plan">Region</string>
     <!-- REMOTE -->
     <string name="remote_admin">Fjernadministrasjon</string>
     <!-- REMOVE -->
@@ -230,17 +222,6 @@
     <string name="reset">Nullstill</string>
     <string name="reset_to_defaults">Tilbakestill til standard</string>
     <!-- ROLE -->
-    <string name="role_client_desc">App-tilkoblet eller frittstående meldingsenhet.</string>
-    <string name="role_client_hidden_desc">Enhet som bare kringkaster når nødvendig, for stealth eller strømsparing.</string>
-    <string name="role_client_mute_desc">Enhet som ikke videresender pakker fra andre enheter.</string>
-    <string name="role_repeater_desc">Infrastruktur-node for utvidelse av nettverksdekning ved å videresende meldinger med minimal overhead. Ikke synlig i nodelisten.</string>
-    <string name="role_router_client_desc">Kombinasjon av ROUTER og CLIENT. Ikke for mobile enheter.</string>
-    <string name="role_router_desc">Infrastruktur-node for utvidelse av nettverksdekning ved å videresende meldinger. Synlig i nodelisten.</string>
-    <string name="role_router_late_desc">Infrastrukturnode som alltid sender pakker på nytt én gang, men bare etter alle andre moduser og sikrer ekstra dekning for lokale klynger. Synlig i nodelisten.</string>
-    <string name="role_sensor_desc">Sender telemetripakker som prioritet.</string>
-    <string name="role_tak_desc">Optimalisert for ATAK systemkommunikasjon, reduserer rutinemessige kringkastinger.</string>
-    <string name="role_tak_tracker_desc">Aktiverer automatiske TAK PLI-sendinger og reduserer rutinesendinger.</string>
-    <string name="role_tracker_desc">Sender GPS-posisjonspakker som prioritert.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Mottok negativ bekreftelse</string>
     <string name="routing_error_no_route">Ingen rute</string>

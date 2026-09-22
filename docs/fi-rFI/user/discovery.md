@@ -168,7 +168,7 @@ Naapuritieto-moduuli antaa jokaisen radion lähettää listan radioista, jotka s
 
 1. Navigate to **Settings → Module configuration → Neighbor Info**.
 2. Ota moduuli käyttöön.
-3. Set **Update interval (seconds)**. The app accepts whatever you type; the firmware enforces its own minimum and resets a value below it.
+3. Set **Update Interval**. The app accepts whatever you type; the firmware enforces its own minimum and resets a value below it.
 4. Turn on **Transmit over LoRa**. Without it, your neighbor list goes only to MQTT and to this app, never over the air.
 
 Once enabled and transmitting over LoRa, your node periodically broadcasts its neighbor list. Myös muut radiot, joissa naapuritieto on käytössä, toimivat samalla tavalla.

@@ -234,7 +234,6 @@
     <string name="config_lora_modem_preset_summary">使用可能なモデムプリセット、デフォルトはロングファーストです。</string>
     <string name="config_lora_region_summary">無線デバイスを使用される地域を指定してくだい。</string>
     <string name="config_network_udp_enabled_summary">UDP 経由でローカルネットワーク上のパケットのブロードキャスト通信を有効にする。</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">最小距離を満たした場合に位置情報の更新を送信する最短間隔。</string>
     <string name="config_saved_restarting">ノードが再起動しており、しばらく接続できなくなります。</string>
     <string name="config_security_private_key">リモートデバイスとの共有鍵を作成するために使用されます。</string>
     <string name="config_security_public_key">秘密鍵から生成され、メッシュ上の他のノードに送信されて、共有秘密鍵を計算できるようにします。</string>
@@ -435,7 +434,6 @@
     <string name="distance_filters_description">スマートフォンからの距離に基づいて、ノードリストとメッシュマップをフィルタリングします。</string>
     <string name="distance_measurements">距離の計測</string>
     <string name="distance_measurements_description">位置情報を持つ他の Meshtastic ノードとスマートフォンの間の距離を表示します。</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">検索をクリア</string>
     <string name="doc_keywords_app_functions">システムAI,Gemini,アシスタント,機能,自動化,音声,system ai,gemini,assistant,functions,automation,voice</string>
@@ -640,7 +638,6 @@
     <string name="firmware_update_waiting_reboot">デバイスが OTA モードで再起動するのを待っています…</string>
     <string name="firmware_update_waiting_reconnect">デバイスの再接続を待っています…</string>
     <string name="firmware_version">ファームウェアバージョン：%1$s</string>
-    <string name="fixed_pin">固定PIN</string>
     <string name="fixed_position">固定位置</string>
     <string name="for_more_information_see_our_privacy_policy">詳細については、プライバシーポリシーをご覧ください。</string>
     <!-- FORMAT -->
@@ -653,7 +650,6 @@
     <string name="free_memory_description">利用可能なシステムメモリ（バイト単位）</string>
     <string name="freq">周波数</string>
     <string name="gas_resistance">ガス抵抗</string>
-    <string name="gateway">ゲートウェイ</string>
     <string name="generate_qr_code">QRコード生成</string>
     <!-- GEOFENCE -->
     <string name="geofence">ジオフェンス</string>
@@ -744,7 +740,6 @@
     <string name="latitude">緯度</string>
     <!-- LAYER -->
     <string name="learn_more">詳細</string>
-    <string name="led_heartbeat">LED ハートビート</string>
     <string name="legacy_admin_channel">レガシー管理チャンネル</string>
     <string name="library_count">%1$d 個のライブラリ</string>
     <!-- LICENSED -->
@@ -851,11 +846,8 @@
     <string name="map_offline_manager">オフライン地図の管理</string>
     <string name="map_purge_fail">SQL キャッシュの削除に失敗しました。詳細は logcat を参照してください。</string>
     <string name="map_purge_success">%1$sがSQLキャッシュから削除されました。</string>
-    <string name="map_reporting">マップレポート</string>
     <string name="map_reporting_consent_header">MQTT 経由で暗号化されていないノードデータの共有に同意する</string>
     <string name="map_reporting_consent_text">この機能を有効にすると、デバイスのリアルタイムの位置情報が暗号化されていないMQTTプロトコルで送信されることに同意したと見なされます。この位置データは、ライブマップへの表示、デバイスの追跡、および関連するテレメトリ機能といった目的で利用される可能性があります。</string>
-    <string name="map_reporting_interval_seconds">マップレポートの間隔 (秒)</string>
-    <string name="map_reporting_summary">お使いのノードは、設定済みのMQTTサーバーに対し、暗号化されていないマップレポートのパケットを定期的に送信します。これには、ID、正式名称と短縮名、概算位置、ハードウェアのモデル、ロール、ファームウェアのバージョン、LoRaリージョン、モデムのプリセット、そしてプライマリチャンネル名が含まれています。</string>
     <string name="map_select_download_region">指定範囲の地図タイルをダウンロード</string>
     <string name="map_start_download">ダウンロード開始</string>
     <string name="map_style_selection">マップスタイルの選択</string>
@@ -878,7 +870,6 @@
     <string name="mesh_beacon_invitations_title">メッシュへの招待</string>
     <string name="mesh_beacon_listen">ビーコンを受信</string>
     <string name="mesh_beacon_listen_summary">近くのメッシュが発信する招待を受け取ります</string>
-    <string name="mesh_beacon_message">ビーコンメッセージ</string>
     <string name="mesh_beacon_message_error">最大 %1$d バイト</string>
     <string name="mesh_beacon_notification_body">近くのメッシュから参加への招待が届きました</string>
     <string name="mesh_beacon_notification_title">メッシュへの招待</string>
@@ -938,7 +929,6 @@
     <string name="messages">メッセージ</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">最小</string>
-    <string name="minimum_broadcast_seconds">最小ブロードキャスト間隔(秒)</string>
     <string name="minimum_wake_time_seconds">最小起動時間</string>
     <string name="modem_preset">プリセット</string>
     <string name="module_settings">追加機能の設定</string>
@@ -985,7 +975,6 @@
     <string name="mute_status_muted_for_days">%1$d 日 %2$s 時間ミュート中</string>
     <string name="mute_status_muted_for_hours">%1$s 時間ミュート中</string>
     <string name="mute_status_unmuted">ミュートなし</string>
-    <string name="nag_timeout_seconds">繰り返し通知間隔（秒）</string>
     <string name="name">名前</string>
     <string name="name_cannot_be_empty">名前を空にすることはできません。</string>
     <string name="navigate_back">前に戻る</string>
@@ -1107,7 +1096,6 @@
     <string name="open_wifi_settings">Wi-Fi 設定を開く</string>
     <string name="options">オプション</string>
     <string name="orient_north">北を上に向ける</string>
-    <string name="output_duration_milliseconds">出力時間 (ミリ秒)</string>
     <string name="overflow_menu">オーバーフローメニュー</string>
     <string name="override_console_serial_port">コンソールのシリアルポートを上書き</string>
     <!-- PACKET -->
@@ -1207,20 +1195,12 @@
     <string name="range_test_config">レンジテスト設定</string>
     <string name="react">リアクション</string>
     <string name="reboot">再起動</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">受信メッセージが、参加しているプライベートチャンネル上のもの、または同じLoRaパラメータを持つ別のメッシュからのものであれば再ブロードキャストします。</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">ALLと同じ動作ですが、パケットのデコードをスキップして単純に再ブロードキャストします。 リピーターロールでのみ使用できます。他のロールに設定すると、ALLの動作になります。</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">TAK、RangeTest、PaxCounterなどの非標準ポート番号からのパケットを無視。NodeInfo、Text、Position、Telemetry、Routingなどの標準ポート番号を持つパケットのみを再ブロードキャスト。</string>
-    <string name="rebroadcast_mode_known_only_desc">LOCAL ONLYのような外部メッシュからのメッセージを無視します。 さらに一歩進んで既知のノードリストにないノードからのメッセージを無視します。</string>
-    <string name="rebroadcast_mode_local_only_desc">開いている外部メッシュや復号できないメッシュからのメッセージを無視。 ノードのローカルプライマリー/セカンダリーチャンネルでのみメッセージを再ブロードキャスト。</string>
-    <string name="rebroadcast_mode_none_desc">SENSOR、TRACKER、およびTAK_TRACKERロールでのみ許可。CLIENT_MUTEロールとは異なり、すべての再ブロードキャストを禁止。</string>
     <string name="recent_network_devices">最近のネットワークデバイス</string>
     <string name="reconnecting">再接続しています…</string>
     <string name="refresh">更新</string>
     <string name="refresh_metadata">メタデータを更新</string>
     <string name="regenerate_keys_confirmation">秘密鍵を再生成してもよろしいですか？\n\n以前にこのノードと鍵を交換したことのあるノードは、安全な通信を再開するために、そのノードを削除して鍵を再交換する必要があります。</string>
     <string name="regenerate_private_key">秘密鍵を再生成</string>
-    <string name="region_frequency_plan">リージョン</string>
     <plurals name="relays">
         <item quantity="other">%1$d 件のリレーを受信</item>
     </plurals>
@@ -1270,29 +1250,17 @@
     <string name="role">デバイスの役割</string>
     <string name="role_client">クライアント</string>
     <string name="role_client_base">クライアント・ベース</string>
-    <string name="role_client_base_desc">お気に入りのノードとの間のパケットを ROUTER_LATE として扱い、その他のすべてのパケットを CLIENT として扱います。</string>
-    <string name="role_client_desc">アプリに接続されているか、スタンドアロンのメッセージングデバイスです。</string>
     <string name="role_client_hidden">クライアント・非表示</string>
-    <string name="role_client_hidden_desc">ステルスまたは電力節約のため、必要に応じてのみブロードキャストするデバイス。</string>
     <string name="role_client_mute">クライアント・ミュート</string>
-    <string name="role_client_mute_desc">このデバイスは他のデバイスからのパケットを転送しません。</string>
     <string name="role_lost_and_found">紛失モード</string>
     <string name="role_repeater">リピーター</string>
-    <string name="role_repeater_desc">最小限のオーバーヘッドでメッセージを中継することでネットワークの通信範囲を拡大するためのインフラストラクチャノード。ノードリストには表示されません。</string>
     <string name="role_router">ルーター</string>
     <string name="role_router_client">ルータークライアント</string>
-    <string name="role_router_client_desc">ROUTERとCLIENTの組み合わせ。モバイルデバイス向けではありません。</string>
-    <string name="role_router_desc">メッセージを中継することでネットワークの通信範囲を拡大するためのインフラストラクチャノード。ノードリストに表示されます。</string>
     <string name="role_router_late">ルーター・レイト</string>
-    <string name="role_router_late_desc">周辺クラスターの通信範囲を拡大させるインフラストラクチャノード。他のすべてのノードが通信し終わった後で、必ずパケットを1回だけ再ブロードキャストする。ノードリストに表示される。</string>
     <string name="role_sensor">センサー</string>
-    <string name="role_sensor_desc">テレメトリパケットを優先してブロードキャストします。</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">ATAKシステムとの通信に最適化し、定期的なブロードキャストを削減します。</string>
     <string name="role_tak_tracker">TAK Tracker</string>
-    <string name="role_tak_tracker_desc">TAK PLIの自動ブロードキャストを有効にし、ルーチンブロードキャストを削減します。</string>
     <string name="role_tracker">トラッカー</string>
-    <string name="role_tracker_desc">GPSの位置情報パケットを優先してブロードキャストします。</string>
     <string name="router_role_confirmation_text">&lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;デバイスの役割に関するドキュメント&lt;/a&gt;と、&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;適切なデバイスの役割の選び方&lt;/a&gt;に関するブログ記事を読みました。</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">相手が正常に受信できませんでした</string>
@@ -1355,7 +1323,6 @@
     <string name="selected">選択済み</string>
     <string name="selected_map_type">選択中のマップタイプ</string>
     <string name="send">送信</string>
-    <string name="sender_message_interval_seconds">送信者のメッセージ間隔 (秒)</string>
     <string name="serial">シリアル</string>
     <string name="serial_config">シリアル設定</string>
     <string name="session_active">セッション有効</string>
@@ -1424,13 +1391,11 @@
     <string name="speed">速度</string>
     <string name="speed_kmh">%1$d km/h</string>
     <string name="speed_mph">%1$d mph</string>
-    <string name="state_broadcast_seconds">状態のブロードキャスト間隔 (秒)</string>
     <string name="status_message">ステータスメッセージ</string>
     <string name="stay_connected_anywhere">どこでもつながる</string>
     <string name="stop_connecting">接続を停止</string>
     <string name="store_forward">ストアアンドフォワード</string>
     <string name="store_forward_config">ストアアンドフォワード設定</string>
-    <string name="subnet">サブネット</string>
     <string name="success">成功</string>
     <string name="super_deep_sleep_duration_seconds">スーパーディープスリープの時間</string>
     <string name="supported">対応済み</string>
@@ -1442,16 +1407,6 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK 設定</string>
-    <string name="tak_role">メンバーロール</string>
-    <string name="tak_role_forwardobserver">前線観測員 (FO)</string>
-    <string name="tak_role_hq">本部</string>
-    <string name="tak_role_k9">イッヌ (K9)</string>
-    <string name="tak_role_medic">衛生兵</string>
-    <string name="tak_role_rto">無線通信手</string>
-    <string name="tak_role_sniper">スナイパー</string>
-    <string name="tak_role_teamlead">チームリーダー</string>
-    <string name="tak_role_teammember">チームメンバー</string>
-    <string name="tak_role_unspecified">未指定</string>
     <string name="tak_server">TAK サーバー</string>
     <string name="tak_server_enabled">ローカル TAK サーバーを有効化</string>
     <string name="tak_server_loading">…</string>
@@ -1464,22 +1419,6 @@
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_server_test_run">実行</string>
     <string name="tak_server_test_running">実行中：%1$s</string>
-    <string name="tak_team">チームカラー</string>
-    <string name="tak_team_blue">青</string>
-    <string name="tak_team_brown">茶色</string>
-    <string name="tak_team_cyan">シアン</string>
-    <string name="tak_team_dark_blue">紺色</string>
-    <string name="tak_team_dark_green">ダークグリーン</string>
-    <string name="tak_team_green">緑</string>
-    <string name="tak_team_magenta">マゼンタ</string>
-    <string name="tak_team_maroon">栗色</string>
-    <string name="tak_team_orange">オレンジ</string>
-    <string name="tak_team_purple">紫色</string>
-    <string name="tak_team_red">赤</string>
-    <string name="tak_team_teal">ティール</string>
-    <string name="tak_team_unspecified_color">未指定</string>
-    <string name="tak_team_white">白色</string>
-    <string name="tak_team_yellow">黄色</string>
     <string name="telemetry">テレメトリ</string>
     <string name="telemetry_config">テレメトリ設定</string>
     <string name="temperature">温度</string>
@@ -1488,10 +1427,8 @@
     <string name="theme_light">ライト</string>
     <string name="theme_system">システムのデフォルト</string>
     <string name="time">時刻</string>
-    <string name="time_zone">タイムゾーン</string>
     <string name="timeout">タイムアウト</string>
     <string name="timestamp">タイムスタンプ</string>
-    <string name="tls_enabled">TLS の有効化</string>
     <string name="toggle_my_position">自分の位置を切り替え</string>
     <string name="trace_route">トレースルート</string>
     <!-- TRACEROUTE -->
@@ -1572,7 +1509,6 @@
     <string name="unmute_selected">選択項目のミュートを解除</string>
     <string name="unrecognized">不明</string>
     <string name="unset">未設定 - 0</string>
-    <string name="update_interval_seconds">更新間隔 (秒)</string>
     <string name="updated">更新済み</string>
     <string name="uplink_feature_description">メッシュからのメッセージは、いずれかのノードに設定されたゲートウェイを通じてパブリックなインターネットに送信されます。</string>
     <string name="uptime">連続稼働時間</string>

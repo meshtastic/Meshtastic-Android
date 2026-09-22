@@ -54,11 +54,11 @@ Turning **Map reporting** on reveals a consent card headed _Consent to Share Une
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
 until you agree:
 
-| Setting                                             | Descripció                                                                                                                                                                               |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| I agree.                            | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
-| Precision slider                                    | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
-| Map reporting interval (seconds) | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
+| Setting                  | Descripció                                                                                                                                                                               |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| I agree. | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
+| Precision slider         | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
+| Map Publish Interval     | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
 
 See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and broker setup.
 
@@ -83,20 +83,20 @@ Controls buzzer, LED, or vibration alerts on your node hardware. Useful for devi
 There are two independent triggers — an incoming **message**, and a received **bell** character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
 
-| Setting                                           | Descripció                                                                                          |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| External notification enabled                     | Master toggle for the module                                                                        |
-| Alert message LED / buzzer / vibra                | Which outputs fire on an incoming message                                                           |
-| Alert bell LED / buzzer / vibra                   | Which outputs fire on a received bell character                                                     |
-| Output LED (GPIO)              | Pin the LED is wired to                                                                             |
-| Output LED active high                            | Whether the LED pin is active high or low                                                           |
-| Output buzzer (GPIO)           | Pin the buzzer is wired to                                                                          |
-| Output vibra (GPIO)            | Pin the vibration motor is wired to                                                                 |
-| Use PWM buzzer                                    | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
-| Use I2S as buzzer                                 | Send the alert through an I2S audio output instead                                                  |
-| Output duration (milliseconds) | How long a single alert lasts                                                                       |
-| Nag timeout (seconds)          | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
-| Ringtone                                          | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
+| Setting                                 | Descripció                                                                                          |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| External notification enabled           | Master toggle for the module                                                                        |
+| Alert message LED / buzzer / vibra      | Which outputs fire on an incoming message                                                           |
+| Alert bell LED / buzzer / vibra         | Which outputs fire on a received bell character                                                     |
+| Output LED (GPIO)    | Pin the LED is wired to                                                                             |
+| Output LED active high                  | Whether the LED pin is active high or low                                                           |
+| Output buzzer (GPIO) | Pin the buzzer is wired to                                                                          |
+| Output vibra (GPIO)  | Pin the vibration motor is wired to                                                                 |
+| Use PWM buzzer                          | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+| Use I2S as buzzer                       | Send the alert through an I2S audio output instead                                                  |
+| GPIO Output Duration                    | How long a single alert lasts                                                                       |
+| Nag Timeout                             | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+| Ringtone                                | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Store & Forward module
 
@@ -125,7 +125,7 @@ Automated range testing tool for evaluating link quality between nodes. When ena
 | Setting                                                              | Descripció                                                                               |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Range test enabled                                                   | Activate range testing                                                                   |
-| Sender message interval (seconds)                 | Time between test transmissions, chosen from a dropdown of fixed intervals               |
+| Sender Interval                                                      | Time between test transmissions, chosen from a dropdown of fixed intervals               |
 | Save .CSV in storage (ESP32 only) | Log received test data to the node's own filesystem. ESP32 hardware only |
 
 ### Telemetry module
@@ -198,11 +198,11 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 
 Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
 
-| Setting                                      | Descripció                                                                                                                           |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Neighbor Info enabled                        | Activate neighbor broadcasting                                                                                                       |
-| Update interval (seconds) | How often to broadcast neighbor list                                                                                                 |
-| Transmit over LoRa                           | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
+| Setting               | Descripció                                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Neighbor Info enabled | Activate neighbor broadcasting                                                                                                       |
+| Update Interval       | How often to broadcast neighbor list                                                                                                 |
+| Transmit over LoRa    | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
@@ -220,27 +220,27 @@ Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. C
 
 Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
 
-| Setting                                        | Descripció                                                                                                                              |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Detection Sensor enabled                       | Activate detection sensor                                                                                                               |
-| GPIO pin to monitor                            | GPIO pin connected to sensor                                                                                                            |
-| Detection trigger type                         | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
-| Use INPUT_PULLUP mode     | Enable the pin's internal pull-up resistor                                                                                              |
-| Minimum broadcast (seconds) | Minimum time between alert broadcasts                                                                                                   |
-| State broadcast (seconds)   | Periodic state broadcast interval                                                                                                       |
-| Send bell with alert message                   | Include bell character in alerts                                                                                                        |
-| Friendly name                                  | Custom name for this sensor                                                                                                             |
+| Setting                                    | Descripció                                                                                                                              |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Detection Sensor enabled                   | Activate detection sensor                                                                                                               |
+| GPIO pin to monitor                        | GPIO pin connected to sensor                                                                                                            |
+| Detection trigger type                     | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
+| Use INPUT_PULLUP mode | Enable the pin's internal pull-up resistor                                                                                              |
+| Minimum time between detection broadcasts  | Minimum time between alert broadcasts                                                                                                   |
+| State Broadcast Interval                   | Periodic state broadcast interval                                                                                                       |
+| Send bell with alert message               | Include bell character in alerts                                                                                                        |
+| Friendly name                              | Custom name for this sensor                                                                                                             |
 
 ### Paxcounter module
 
 People counter using Wi-Fi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Setting                                      | Descripció                                                                                                       |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Paxcounter enabled                           | Activate people counting                                                                                         |
-| Update interval (seconds) | How often to report counts                                                                                       |
-| Wi-Fi RSSI threshold                         | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
-| BLE RSSI threshold                           | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
+| Setting                                 | Descripció                                                                                                       |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Paxcounter enabled                      | Activate people counting                                                                                         |
+| Update Interval                         | How often to report counts                                                                                       |
+| WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
+| BLE Threshold (dBm)  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
 
 > 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
 

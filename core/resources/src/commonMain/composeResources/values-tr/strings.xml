@@ -148,7 +148,6 @@
     <string name="distance">Mesafe</string>
     <string name="distance_filters">Mesafe Filtresi</string>
     <string name="distance_measurements">Uzaklık Ölçüsü</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Aramayı sil</string>
     <string name="doc_title_connections">Bağlantılar</string>
@@ -182,12 +181,10 @@
     <string name="firmware_old">Radyo yazılımı bu uygulamayla iletişim kurmak için çok eski. Bu konuda daha fazla bilgi için: <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Yazılım yükleme kılavuzumuza</a> bakın.</string>
     <string name="firmware_too_old">Yazılım güncellemesi gerekiyor.</string>
     <string name="firmware_update_failed">Güncelleme başarısız</string>
-    <string name="fixed_pin">Sabit PIN</string>
     <!-- FORMAT -->
     <string name="free_memory">Boş Hafıza</string>
     <string name="freq">Frekans</string>
     <string name="gas_resistance">Gaz Direnci</string>
-    <string name="gateway">Ağ geçidi</string>
     <string name="generate_qr_code">QR kod oluştur</string>
     <!-- GEOFENCE -->
     <string name="good">İyi</string>
@@ -260,8 +257,6 @@
     <string name="map_offline_manager">Çevrim dışı işlemleri</string>
     <string name="map_purge_fail">SQL Önbellek temizleme başarısız, ayrıntılar için logcat' e bakın</string>
     <string name="map_purge_success">%1$s için SQL önbelleği temizlendi</string>
-    <string name="map_reporting">Harita raporlama</string>
-    <string name="map_reporting_interval_seconds">Harita raporlama aralığı (saniye)</string>
     <string name="map_select_download_region">İndirilecek bölgeyi seçin</string>
     <string name="map_start_download">İndirmeye başla</string>
     <string name="map_subDescription">yön: %1$d° mesafe: %2$s</string>
@@ -291,7 +286,6 @@
     <string name="message_status_queued">Gönderilmek üzere sırada</string>
     <string name="message_status_unknown">Bilinmeyen</string>
     <string name="messages">Mesajlar</string>
-    <string name="minimum_broadcast_seconds">Minimum yayın (saniye)</string>
     <string name="module_settings">Modül ayarları</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
@@ -305,7 +299,6 @@
     <string name="mute_8_hours">8 saat</string>
     <string name="mute_always">Her zaman</string>
     <string name="mute_notifications">Bildirimleri sessize al</string>
-    <string name="nag_timeout_seconds">Nag zaman aşımı (saniye)</string>
     <string name="name">İsmi</string>
     <string name="navigate_back">Geri Dön</string>
     <string name="neighbor_info">Komşu Bilgisi</string>
@@ -349,7 +342,6 @@
     <string name="one_week">1H</string>
     <string name="only_favorites">Sadece Favoriler</string>
     <!-- OPEN -->
-    <string name="output_duration_milliseconds">Çıktı süresi (milisaniye)</string>
     <string name="override_console_serial_port">Konsol seri portunu geçersiz kıl</string>
     <!-- PACKET -->
     <string name="password">Şifre</string>
@@ -389,14 +381,6 @@
     <string name="range_test">Mesafe Testi</string>
     <string name="range_test_config">Menzi Test Ayarı</string>
     <string name="reboot">Yeniden başlat</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Tespit edilen herhangi bir mesajı, özel kanalımızdaysa veya aynı LoRa parametrelerine sahip başka bir ağdan geliyorsa yeniden yayınlayın.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">ALL ile aynı davranış, ancak paketleri çözmeksizin yeniden yayınlar. Yalnızca Repeater rolünde kullanılabilir. Bunu başka herhangi bir rolde ayarlamak ALL davranışıyla sonuçlanacaktır.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">TAK, RangeTest, PaxCounter gibi standart olmayan portnum'ları yok sayarken sadece standart portnum'lar olan NodeInfo, Text, Position, Telemetry ve Routing'i yeniden yayınlar.</string>
-    <string name="rebroadcast_mode_known_only_desc">LOCAL ONLY gibi yabancı ağlardan geldiği tespit edilen mesajları yok sayar, ancak düğümün bilinen listesinde bulunmayan düğümlerden gelen mesajları da yok sayarak bir adım daha ileri gider.</string>
-    <string name="rebroadcast_mode_local_only_desc">Açık olan veya şifresini çözemediği yabancı ağlardan geldiği tespit edilen mesajları yok sayar. Yalnızca düğümlerin yerel birincil / ikincil kanallarında mesajı yeniden yayınlar.</string>
-    <string name="rebroadcast_mode_none_desc">Yalnızca SENSOR, TRACKER ve TAK_TRACKER rolleri için izin verilir, CLIENT_MUTE rolünden farklı olarak tüm yeniden yayınları engeller.</string>
-    <string name="region_frequency_plan">Bölge</string>
     <!-- REMOTE -->
     <string name="remote_admin">Uzaktan Yönetim</string>
     <string name="remote_hardware">Uzaktan Donanım</string>
@@ -415,17 +399,6 @@
     <string name="reset_to_defaults">Varsayılana dön</string>
     <string name="ringtone">Zil tipi</string>
     <!-- ROLE -->
-    <string name="role_client_desc">Uygulamaya bağlı veya bağımsız mesajlaşma cihazı.</string>
-    <string name="role_client_hidden_desc">Gizlilik veya güç tasarrufu için sadece gerektiğinde yayın yapan cihaz.</string>
-    <string name="role_client_mute_desc">Diğer cihazlardan gelen paketleri tekrarlamayan cihaz.</string>
-    <string name="role_repeater_desc">Mesajları minimum ek yük ile tekrarlayarak ağ kapsamını genişletmek için altyapı düğümü. Düğümler listesinde görünmez.</string>
-    <string name="role_router_client_desc">Hem ROUTER hem de CLIENT'ın bir kombinasyonu. Mobil cihazlar için değildir.</string>
-    <string name="role_router_desc">Mesajları tekrarlayarak ağ kapsamını genişletmek için altyapı düğümü. Düğümler listesinde görünür.</string>
-    <string name="role_router_late_desc">Tüm diğer modlardan sonra paketleri her zaman bir kez yeniden yayınlayan ve yerel kümeler için ek kapsama alanı sağlayan altyapı düğümü. Düğümler listesinde görünür.</string>
-    <string name="role_sensor_desc">Öncelikli olarak telemetri paketlerini yayınlar.</string>
-    <string name="role_tak_desc">Rutin yayınları azaltarak ATAK sistemi için optimize edilmiştir.</string>
-    <string name="role_tak_tracker_desc">Rutin yayınları azaltarak otomatik TAK PLI yayınlarını etkinleştirir.</string>
-    <string name="role_tracker_desc">Öncelikli olarak konum paketlerini yayınlar.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Negatif bir onay alındı</string>
     <string name="routing_error_no_route">Rota yok</string>
@@ -447,7 +420,6 @@
     <string name="security_icon_secure">Güvenlik</string>
     <string name="select_all">Tümünü seç</string>
     <string name="send">Gönder</string>
-    <string name="sender_message_interval_seconds">Gönderen mesaj aralığı (saniye)</string>
     <string name="serial">Seri</string>
     <string name="serial_config">Seri Ayarı</string>
     <string name="set_your_region">Bölgenizi Seçin</string>
@@ -468,17 +440,12 @@
     <string name="slot">Yuva</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Sinyal-Gürültü Oranı, iletişimde istenen bir sinyalin seviyesini arka plan gürültüsü seviyesine mukayese ölçmek için kullanılan bir ölçüdür. Meshtastic ve diğer kablosuz sistemlerde, daha yüksek bir SNR, veri iletiminin güvenilirliğini ve kalitesini artırabilecek daha net bir sinyale işaret eder.</string>
-    <string name="state_broadcast_seconds">Durum yayını (saniye)</string>
-    <string name="subnet">Alt ağ</string>
     <string name="supported">Desteklenen</string>
     <string name="swipe_action_delete">Sil</string>
     <string name="swipe_action_mute">Sessiz</string>
     <string name="swipe_action_unmute">Sesi aç</string>
     <!-- TAK -->
     <string name="tak_server_section">Sunucu</string>
-    <string name="tak_team_blue">Mavi</string>
-    <string name="tak_team_green">Yeşil</string>
-    <string name="tak_team_red">Kırmızı</string>
     <string name="telemetry">Telemetri</string>
     <string name="telemetry_config">Telemetri Ayarı</string>
     <string name="theme">Tema</string>
@@ -488,7 +455,6 @@
     <string name="time">Zaman</string>
     <string name="timeout">Zaman Aşımı</string>
     <string name="timestamp">Zaman Damgası</string>
-    <string name="tls_enabled">TLS etkin</string>
     <string name="toggle_my_position">Konumunumu aç/kapa</string>
     <string name="trace_route">Rotayı Takip Et</string>
     <!-- TRACEROUTE -->
@@ -510,6 +476,8 @@
     <string name="two_weeks">2H</string>
     <string name="type">Tip</string>
     <string name="type_a_message">Mesaj yaz</string>
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_meters">m</string>
     <!-- UNITS -->
     <string name="units_follow_system">Sistem varsayılanı</string>
     <!-- UNKNOWN -->
@@ -521,7 +489,6 @@
     <string name="unmonitored_or_infrastructure">İzlenmeyen veya Altyapı</string>
     <string name="unmute">Sesi aç</string>
     <string name="unrecognized">Tanınmayan</string>
-    <string name="update_interval_seconds">Güncelleme aralığı (saniye)</string>
     <string name="uptime">Çalışma Süresi</string>
     <!-- URL -->
     <string name="url">URL</string>

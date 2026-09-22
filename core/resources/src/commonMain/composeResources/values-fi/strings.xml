@@ -263,7 +263,6 @@
     <string name="config_lora_modem_preset_summary">Saatavilla olevat modeemiesiasetukset, oletus on Long Fast.</string>
     <string name="config_lora_region_summary">Alue, jossa aiot käyttää radiolaitteitasi.</string>
     <string name="config_network_udp_enabled_summary">Ota käyttöön pakettien lähettäminen UDP:n kautta paikallisverkossa.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Nopein mahdollinen sijaintipäivitysten lähetysväli, kun minimietäisyys on täyttynyt.</string>
     <string name="config_saved_restarting">Radio käynnistyy uudelleen ja on hetken aikaa tavoittamattomissa.</string>
     <string name="config_security_private_key">Käytetään jaetun avaimen luomiseen etälaitteen kanssa.</string>
     <string name="config_security_private_key_remote">Laite ei jaa yksityistä avaintaan etähallinnan kautta. Voit asettaa uuden avaimen, mutta aiemmin asetettua avainta ei voi lukea takaisin.</string>
@@ -475,7 +474,6 @@
     <string name="distance_filters_description">Suodata laitelista ja meshtastic kartta puhelimesi läheisyyden perusteella.</string>
     <string name="distance_measurements">Etäisyyden mittaukset</string>
     <string name="distance_measurements_description">Näytä etäisyys puhelimen ja muiden sijainnin jakavien Meshtastic laitteiden välillä.</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Tyhjennä haku</string>
     <string name="doc_keywords_app_functions">järjestelmätekoäly, gemini, avustaja, toiminnot, automaatio, ääni</string>
@@ -721,7 +719,6 @@
     <string name="firmware_update_wipe_label">Tyhjennä laite päivityksen aikana</string>
     <string name="firmware_update_wipe_usb_detail">Tyhjentää laitteen flash-muistin kokonaan ja asentaa sen jälkeen valitun laiteohjelmiston alusta alkaen.</string>
     <string name="firmware_version">Firmwaren versio: %1$s</string>
-    <string name="fixed_pin">Kiinteä PIN-koodi</string>
     <string name="fixed_position">Kiinteä sijainti</string>
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
     <!-- FORMAT -->
@@ -734,7 +731,6 @@
     <string name="free_memory_description">Käytettävissä oleva järjestelmämuisti tavuina</string>
     <string name="freq">Taajuus</string>
     <string name="gas_resistance">Kaasuvastus</string>
-    <string name="gateway">Yhdyskäytävä</string>
     <string name="generate_qr_code">Generoi QR-koodi</string>
     <!-- GEOFENCE -->
     <string name="geofence">Aluerajaus</string>
@@ -833,7 +829,6 @@
     <string name="layer_type_coverage">Kuuluvuusalueen arvio</string>
     <string name="layer_type_network">Verkkotaso</string>
     <string name="learn_more">Lue lisää</string>
-    <string name="led_heartbeat">Ledin valvontasignaali</string>
     <string name="legacy_admin_channel">Vanha järjestelmänvalvojan kanava</string>
     <string name="library_count">%1$d kirjastot</string>
     <!-- LICENSED -->
@@ -964,11 +959,8 @@
     <string name="map_overlay_weather_radar">Säätutka</string>
     <string name="map_purge_fail">SQL-välimuistin tyhjennys epäonnistui, katso logcat saadaksesi lisätietoja</string>
     <string name="map_purge_success">SQL-välimuisti tyhjennetty %1$s: lle</string>
-    <string name="map_reporting">Karttaraportointi</string>
     <string name="map_reporting_consent_header">Salli salaamattomien laitetietojen jakaminen MQTT:n kautta</string>
     <string name="map_reporting_consent_text">Ottamalla tämän ominaisuuden käyttöön hyväksyt ja annat suostumuksen siihen, että laitteesi reaaliaikainen sijaintitieto lähetetään MQTT-protokollan kautta ilman salausta. Näitä sijaintitietoja voidaan käyttää esimerkiksi reaaliaikaiseen karttaraportointiin, laitteen seurantaan ja muihin vastaaviin telemetriatoimintoihin.</string>
-    <string name="map_reporting_interval_seconds">Karttaraportoinnin aikaväli (sekuntia)</string>
-    <string name="map_reporting_summary">Laitteesi lähettää määräajoin salaamattoman karttaraporttipaketin määritettyyn MQTT-palvelimeen. Tämä paketti sisältää seuraavat tiedot: tunnisteen, pitkän ja lyhyen nimen, likimääräisen sijainnin, laitemallin, roolin, laiteohjelmiston version, LoRa-alueen, modeemiesiasetuksen ja ensisijaisen kanavan nimen.</string>
     <string name="map_select_download_region">Valitse ladattava kartta-alue</string>
     <string name="map_start_download">Aloita Lataus</string>
     <string name="map_style_selection">Karttatyylin valinta</string>
@@ -997,7 +989,6 @@
     <string name="mesh_beacon_invitations_title">Mesh-verkon kutsut</string>
     <string name="mesh_beacon_listen">Kuuntele verkkokutsuja</string>
     <string name="mesh_beacon_listen_summary">Vastaanota lähellä olevien mesh-verkkojen lähettämiä verkkokutsuja</string>
-    <string name="mesh_beacon_message">Verkkokutsuviesti</string>
     <string name="mesh_beacon_message_error">Enintään %1$d tavua</string>
     <string name="mesh_beacon_no_channels">Kanavia ei ole käytettävissä</string>
     <string name="mesh_beacon_notification_body">Lähellä oleva mesh-verkko kutsuu sinut liittymään</string>
@@ -1087,7 +1078,6 @@
     <string name="metric_channel_label">%1$s%2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Minimi</string>
-    <string name="minimum_broadcast_seconds">Minimilähetys (sekuntia)</string>
     <string name="minimum_wake_time_seconds">Vähimmäisherätyksen kesto</string>
     <string name="modem_preset">Esiasetukset</string>
     <string name="module_settings">Moduulin asetukset</string>
@@ -1134,7 +1124,6 @@
     <string name="mute_status_muted_for_days">Mykistetty %1$d päiväksi, %2$s tunniksi</string>
     <string name="mute_status_muted_for_hours">Mykistetty %1$s tunniksi</string>
     <string name="mute_status_unmuted">Ei mykistetty</string>
-    <string name="nag_timeout_seconds">Hälytysaikakatkaisu (sekuntia)</string>
     <string name="name">Nimi</string>
     <string name="name_cannot_be_empty">Nimi ei voi olla tyhjä.</string>
     <string name="navigate_back">Siirry takaisin</string>
@@ -1269,7 +1258,6 @@
     <string name="open_wifi_settings">Avaa Wi-Fi-asetukset</string>
     <string name="options">Valinnat</string>
     <string name="orient_north">Aseta kompassi pohjoiseen</string>
-    <string name="output_duration_milliseconds">Ulostulon kesto (millisekuntia)</string>
     <string name="overflow_menu">Lisävalikko</string>
     <string name="override_console_serial_port">Korvaa konsolin sarjaportti</string>
     <!-- PACKET -->
@@ -1395,20 +1383,12 @@
     <string name="range_test_config">Kuuluvuustestin asetukset</string>
     <string name="react">Reagoi</string>
     <string name="reboot">Käynnistä uudelleen</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Uudelleenlähettää kaikki havaitut viestit, jos ne ovat olleet omalla yksityisellä kanavalla tai toisessa mesh-verkosta, jossa on samat LoRa-parametrit.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Käyttäytyy samalla tavalla kuin ALL, mutta jättää pakettien purkamisen väliin ja lähettää niitä vain uudelleen. Mahdollista käyttää vain Repeater-roolissa. Tämän asettaminen muille rooleille johtaa ALL-käyttäytymiseen.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ei ota huomioon paketteja, jotka tulevat ei-standardeista porttinumeroista, kuten: TAK, RangeTest, PaxCounter jne. Lähettää uudelleen vain paketteja, jotka käyttävät standardeja porttinumeroita: NodeInfo, Text, Position, Telemetry ja Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ei ota huomioon havaittuja viestejä ulkomaisista verkoista kuten LOCAL ONLY, mutta menee askeleen pidemmälle myös jättämällä huomiotta viestit laitteista, joita ei ole jo laitteen tuntemassa listassa.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ei ota huomioon havaittuja viestejä ulkomaisista verkoista, jotka ovat avoimia tai joita se ei voi purkaa. Lähettää uudelleen viestin vain laitteen paikallisilla ensisijaisilla / toissijaisilla kanavilla.</string>
-    <string name="rebroadcast_mode_none_desc">Sallittu vain SENSOR-, TRACKER- ja TAK_TRACKER -rooleille. Tämä estää kaikki uudelleenlähetykset, toisin kuin CLIENT_MUTE -roolissa.</string>
     <string name="recent_network_devices">Äskettäin havaitut verkkolaitteet</string>
     <string name="reconnecting">Yhdistetään uudelleen…</string>
     <string name="refresh">Päivitä</string>
     <string name="refresh_metadata">Päivitä metatiedot</string>
     <string name="regenerate_keys_confirmation">Haluatko varmasti luoda yksityisen avaimen uudelleen?\n\nLaitteet, jotka ovat aiemmin vaihtaneet avaimia tämän laitteen kanssa, joutuvat poistamaan kyseisen laitteen ja vaihtamaan avaimet uudelleen, jotta suojattu viestintä voi jatkua.</string>
     <string name="regenerate_private_key">Luo uusi yksityinen avain</string>
-    <string name="region_frequency_plan">Alue</string>
     <plurals name="relays">
         <item quantity="one">Kuultu %1$d radion kautta</item>
         <item quantity="other">Kuultu %1$d radion kautta</item>
@@ -1459,30 +1439,17 @@
     <string name="role">Laitteen rooli</string>
     <string name="role_client">Client</string>
     <string name="role_client_base">Client Base</string>
-    <string name="role_client_base_desc">Suosikkiradioihin liittyvät paketit käsitellään ROUTER_LATE-tilassa, muut paketit CLIENT-tilassa.</string>
-    <string name="role_client_desc">Yhdistetty sovellukseen tai itsenäinen viestintälaite.</string>
     <string name="role_client_hidden">Client Hidden</string>
-    <string name="role_client_hidden_desc">Laite, joka lähettää vain tarvittaessa tai virransäästotilassa.</string>
     <string name="role_client_mute">Client Mute</string>
-    <string name="role_client_mute_desc">Laite, joka ei välitä paketteja muilta laitteilta.</string>
     <string name="role_lost_and_found">Lost and Found</string>
-    <string name="role_lost_and_found_desc">Lähettää sijainnin säännöllisesti oletuskanavalle helpottaakseen laitteen löytämistä.</string>
     <string name="role_repeater">Repeater</string>
-    <string name="role_repeater_desc">Laite, joka laajentaa verkon kattavuutta välittämällä viestejä verkkoa kuormittamatta. Ei näy laitelistauksessa.</string>
     <string name="role_router">Router</string>
     <string name="role_router_client">Router Client</string>
-    <string name="role_router_client_desc">Yhdistelmä ROUTER sekä CLIENT roolista. Ei mobiililaitteille.</string>
-    <string name="role_router_desc">Laite, joka laajentaa verkon infrastruktuuria viestejä välittämällä. Näkyy laitelistauksessa.</string>
     <string name="role_router_late">Router Late</string>
-    <string name="role_router_late_desc">Muuten samanlainen kuin ROUTER rooli, mutta se uudelleen lähettää paketteja vasta kaikkien muiden tilojen jälkeen, varmistaen paremman peittoalueen muille laitteille. Laite näkyy mesh-verkon laiteluettelossa muille käyttäjille.</string>
     <string name="role_sensor">Sensor</string>
-    <string name="role_sensor_desc">Lähettää telemetriatiedot ensisijaisesti.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Optimoitu ATAK-järjestelmän viestintään, joka vähentää tavanomaisia lähetyksiä.</string>
     <string name="role_tak_tracker">TAK Tracker</string>
-    <string name="role_tak_tracker_desc">Ottaa käyttöön automaattisen TAK PLI -lähetyksen vähentäen tavanomaisia lähetyksiä.</string>
     <string name="role_tracker">Tracker</string>
-    <string name="role_tracker_desc">Lähettää GPS-sijaintitiedot ensisijaisesti.</string>
     <string name="router_role_confirmation_text">Olen lukenut &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;dokumentaation&lt;/a&gt; sekä blogikirjoituksen &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Ylläpitoistunto on vanhentunut</string>
@@ -1554,7 +1521,6 @@
     <string name="selected">Valittu</string>
     <string name="selected_map_type">Valittu karttatyyppi</string>
     <string name="send">Lähetä</string>
-    <string name="sender_message_interval_seconds">Viestien lähetyksen aikaväli (sekuntia)</string>
     <string name="serial">Sarjaliitäntä</string>
     <string name="serial_config">Sarjaportin asetukset</string>
     <string name="session_active">Istunto aktiivinen</string>
@@ -1627,14 +1593,12 @@
     <string name="speed">Nopeus</string>
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="speed_mph">%1$d mph</string>
-    <string name="state_broadcast_seconds">Tilatiedon lähetys (sekuntia)</string>
     <string name="status_message">Tilaviesti</string>
     <string name="status_message_summary">Julkinen tilaviesti, joka lähetetään mesh-verkkoon aina muuttuessaan ja lisäksi 12 tunnin välein.</string>
     <string name="stay_connected_anywhere">Pysy yhteydessä kaikkialla</string>
     <string name="stop_connecting">Lopeta yhdistäminen</string>
     <string name="store_forward">Varastoi &amp; välitä</string>
     <string name="store_forward_config">Varastoi &amp; välitä asetukset</string>
-    <string name="subnet">Aliverkko</string>
     <string name="success">Valmis</string>
     <string name="super_deep_sleep_duration_seconds">Super-syväunen kesto</string>
     <string name="supported">Tuettu</string>
@@ -1646,16 +1610,6 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK-asetukset</string>
-    <string name="tak_role">Jäsenen rooli</string>
-    <string name="tak_role_forwardobserver">Havaitsija etulinjassa</string>
-    <string name="tak_role_hq">Päämaja</string>
-    <string name="tak_role_k9">Koiraseuranta (K9)</string>
-    <string name="tak_role_medic">Lääkäri</string>
-    <string name="tak_role_rto">Radiopuhelinoperaattori</string>
-    <string name="tak_role_sniper">Tarkka-ampuja</string>
-    <string name="tak_role_teamlead">Joukkueen johtaja</string>
-    <string name="tak_role_teammember">Tiimin jäsen</string>
-    <string name="tak_role_unspecified">Määrittelemätön</string>
     <string name="tak_server">TAK palvelin</string>
     <string name="tak_server_channel">TAK-mesh-kanava</string>
     <string name="tak_server_channel_desc">Lähtevään TAK-liikenteeseen käytettävä Meshtastic-kanava</string>
@@ -1690,22 +1644,6 @@
     <string name="tak_server_test_run">Suorita</string>
     <string name="tak_server_test_running">Käynnissä: %1$s</string>
     <string name="tak_server_v1_fallback_notice">Yhdistetyn radion laiteohjelmisto ei tue täydellistä TAK-integraatiota – vain sijaintitiedot ja chat-viestit välitetään ATAKiin. Merkit ja muut tapahtumatyypit edellyttävät laiteohjelmiston versiota 2.8.0 tai uudempaa.</string>
-    <string name="tak_team">Tiimin väri</string>
-    <string name="tak_team_blue">Sininen</string>
-    <string name="tak_team_brown">Ruskea</string>
-    <string name="tak_team_cyan">Turkoosi</string>
-    <string name="tak_team_dark_blue">Tummansininen</string>
-    <string name="tak_team_dark_green">Tummanvihreä</string>
-    <string name="tak_team_green">Vihreä</string>
-    <string name="tak_team_magenta">Purppura</string>
-    <string name="tak_team_maroon">Viininpunainen</string>
-    <string name="tak_team_orange">Oranssi</string>
-    <string name="tak_team_purple">Liila</string>
-    <string name="tak_team_red">Punainen</string>
-    <string name="tak_team_teal">Sinivihreä</string>
-    <string name="tak_team_unspecified_color">Määrittelemätön</string>
-    <string name="tak_team_white">Valkoinen</string>
-    <string name="tak_team_yellow">Keltainen</string>
     <string name="telemetry">Telemetria</string>
     <string name="telemetry_config">Ympäristön asetukset</string>
     <string name="temperature">Lämpötila</string>
@@ -1714,10 +1652,8 @@
     <string name="theme_light">Vaalea</string>
     <string name="theme_system">Järjestelmän oletus</string>
     <string name="time">Aika</string>
-    <string name="time_zone">Aikavyöhyke</string>
     <string name="timeout">Aikakatkaisu</string>
     <string name="timestamp">Aikaleima</string>
-    <string name="tls_enabled">TLS käytössä</string>
     <string name="toggle_my_position">Kytke sijainti päälle</string>
     <string name="trace_route">Reitinselvitys</string>
     <!-- TRACEROUTE -->
@@ -1786,6 +1722,8 @@
     <string name="type_a_message">Kirjoita viesti</string>
     <string name="udp_enabled">UDP-lähetys</string>
     <string name="undo">Kumoa</string>
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_meters">m</string>
     <!-- UNITS -->
     <string name="units">Yksiköt</string>
     <string name="units_follow_system">Järjestelmän oletus</string>
@@ -1806,7 +1744,6 @@
     <string name="unpin_selected">Poista kiinnitys</string>
     <string name="unrecognized">Tuntematon</string>
     <string name="unset">Ei asetettu – 0</string>
-    <string name="update_interval_seconds">Päivityksen aikaväli (sekuntia)</string>
     <string name="updated">Päivitetty</string>
     <string name="uplink_enabled">MQTT-lähetys käytössä</string>
     <string name="uplink_feature_description">Verkosta tulevat viestit lähetetään julkiseen internetiin minkä tahansa laitteen määritetyn yhdyskäytävän kautta.</string>

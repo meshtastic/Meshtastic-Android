@@ -54,11 +54,11 @@ Turning **Map reporting** on reveals a consent card headed _Consent to Share Une
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
 until you agree:
 
-| Sätted                                             | Kirjeldus                                                                                                                                                                                |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nõustun.                           | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
-| Precision slider                                   | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
-| Kaardi raporti sagedus (sekund) | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
+| Sätted                   | Kirjeldus                                                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nõustun. | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
+| Precision slider         | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
+| Map Publish Interval     | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
 
 Vaata [MQTT](mqtt) üksikasjalikumat kasutusjuhendit, mis sisaldab teavet krüpteerimise, privaatsuse ja vahendaja seadistamise kohta,.
 
@@ -83,20 +83,20 @@ Controls buzzer, LED, or vibration alerts on your node hardware. Kasulik seadmet
 There are two independent triggers — an incoming **message**, and a received **bell** character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
 
-| Sätted                                              | Kirjeldus                                                                                           |
-| --------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Luba Välised teated                                 | Master toggle for the module                                                                        |
-| Alert message LED / buzzer / vibra                  | Which outputs fire on an incoming message                                                           |
-| Alert bell LED / buzzer / vibra                     | Which outputs fire on a received bell character                                                     |
-| Väljund LED (GPIO)               | Pin the LED is wired to                                                                             |
-| Väljund LED aktiivne                                | Whether the LED pin is active high or low                                                           |
-| Väljund summer (GPIO)            | Pin the buzzer is wired to                                                                          |
-| Väljund värin (GPIO)             | Pin the vibration motor is wired to                                                                 |
-| Kasuta PWM summerit                                 | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
-| Kasuta I2S summerina                                | Send the alert through an I2S audio output instead                                                  |
-| Väljundi kestvus (millisekundit) | How long a single alert lasts                                                                       |
-| Häire ajalõpp (sekundit)         | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
-| Helin                                               | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
+| Sätted                                   | Kirjeldus                                                                                           |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Luba Välised teated                      | Master toggle for the module                                                                        |
+| Alert message LED / buzzer / vibra       | Which outputs fire on an incoming message                                                           |
+| Alert bell LED / buzzer / vibra          | Which outputs fire on a received bell character                                                     |
+| Väljund LED (GPIO)    | Pin the LED is wired to                                                                             |
+| Väljund LED aktiivne                     | Whether the LED pin is active high or low                                                           |
+| Väljund summer (GPIO) | Pin the buzzer is wired to                                                                          |
+| Väljund värin (GPIO)  | Pin the vibration motor is wired to                                                                 |
+| Kasuta PWM summerit                      | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+| Kasuta I2S summerina                     | Send the alert through an I2S audio output instead                                                  |
+| GPIO Output Duration                     | How long a single alert lasts                                                                       |
+| Nag Timeout                              | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+| Helin                                    | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Store & Forward module
 
@@ -125,7 +125,7 @@ Automatiseeritud vahemiku testimise tööriist sõlmede vahelise ühenduse kvali
 | Sätted                                                                | Kirjeldus                                                                                |
 | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Ulatustest lubatud                                                    | Aktiveeri levi test                                                                      |
-| Saatja sõnumi sagedus (sekundit)                   | Time between test transmissions, chosen from a dropdown of fixed intervals               |
+| Sender Interval                                                       | Time between test transmissions, chosen from a dropdown of fixed intervals               |
 | Salvesta .CSV faili (ainult ESP32) | Log received test data to the node's own filesystem. ESP32 hardware only |
 
 ### Telemetry module
@@ -198,11 +198,11 @@ GPIO juhtimine kärgvõrgu kaudu. Võimaldab kaugsõlmel lugeda või kirjutada G
 
 Levitab teavet otse kuuldud naabrite kohta, võimaldades kärgvõrgu topoloogia kaardistamist. Iga lubatud sõlm jagab perioodiliselt nimekirja teistest sõlmedest, mida ta kuuleb ja nende signaali kvaliteedist.
 
-| Sätted                                          | Kirjeldus                                                                                                                                   |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Naabruskonna teave lubatud                      | Aktiveeri naabrite leviring                                                                                                                 |
-| Uuenduste sagedus (sekundit) | Kui tihti naabrite nimekirja levitada                                                                                                       |
-| Saada LoRa kaudu                                | Edasta naabriinfot ka LoRa kaudu, mitte ainult MQTT/telefoni kaudu. Vaikimisi võtit ja nime kasutavat kanalit pole saadaval |
+| Sätted                     | Kirjeldus                                                                                                                                   |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Naabruskonna teave lubatud | Aktiveeri naabrite leviring                                                                                                                 |
+| GPS-i küsimise intervall   | Kui tihti naabrite nimekirja levitada                                                                                                       |
+| Saada LoRa kaudu           | Edasta naabriinfot ka LoRa kaudu, mitte ainult MQTT/telefoni kaudu. Vaikimisi võtit ja nime kasutavat kanalit pole saadaval |
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
@@ -220,27 +220,27 @@ Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Saab ka
 
 Muudab sõlme liikumis- või ukseanduri hoiatussüsteemiks. Kui GPIO sisend tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
 
-| Sätted                                            | Kirjeldus                                                                                                         |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Tuvastusandur lubatud                             | Aktiveeri tuvastusandur                                                                                           |
-| GPIO klemmi jälgimine                             | GPIO sisend on anduriga ühendatud                                                                                 |
-| Identifitseerimistüüp                             | Kuidas klemmi olek vastab tuvastussündmusele (nt aktiivne kõrge/madal, serva poolt käivitatav) |
-| Kasuta INPUT_PULLUP režiimi  | Enable the pin's internal pull-up resistor                                                                        |
-| Minimaalne edastusaeg (sekund) | Minimaalne aeg hoiatusteadete levitamisel                                                                         |
-| Oleku edastus (sekund)         | Perioodilise oleku levitamise intervall                                                                           |
-| Saada kõll koos hoiatussõnumiga                   | Lisa märguannetesse hoiatuskella sümbol                                                                           |
-| Kasutajasõbralik nimi                             | Selle anduri kohandatud nimi                                                                                      |
+| Sätted                                           | Kirjeldus                                                                                                         |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Tuvastusandur lubatud                            | Aktiveeri tuvastusandur                                                                                           |
+| GPIO klemmi jälgimine                            | GPIO sisend on anduriga ühendatud                                                                                 |
+| Identifitseerimistüüp                            | Kuidas klemmi olek vastab tuvastussündmusele (nt aktiivne kõrge/madal, serva poolt käivitatav) |
+| Kasuta INPUT_PULLUP režiimi | Enable the pin's internal pull-up resistor                                                                        |
+| Minimum time between detection broadcasts        | Minimaalne aeg hoiatusteadete levitamisel                                                                         |
+| State Broadcast Interval                         | Perioodilise oleku levitamise intervall                                                                           |
+| Saada kõll koos hoiatussõnumiga                  | Lisa märguannetesse hoiatuskella sümbol                                                                           |
+| Kasutajasõbralik nimi                            | Selle anduri kohandatud nimi                                                                                      |
 
 ### Paxcounter module
 
 People counter using Wi-Fi and BLE probe requests. Loendab lähedalasuvaid seadmeid, kuulates passiivselt sondimistaotlusi, mida telefonid ja sülearvutid võrkude skannimisel edastavad. Available only on ESP32 devices.
 
-| Sätted                                          | Kirjeldus                                                                                                        |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Paxcounter lubatud                              | Aktiveeri inimeste loendamine                                                                                    |
-| Uuenduste sagedus (sekundit) | Kui tihti loendeid esitada                                                                                       |
-| Wi-Fi RSSI threshold                            | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
-| BLE RSSI threshold                              | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
+| Sätted                                  | Kirjeldus                                                                                                        |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Paxcounter lubatud                      | Aktiveeri inimeste loendamine                                                                                    |
+| GPS-i küsimise intervall                | Kui tihti loendeid esitada                                                                                       |
+| WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
+| BLE Threshold (dBm)  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
 
 > 💡 **Vihje:** Paxloendur on kasulik jalakäijate liikluse hindamiseks matkaradade alguses, ürituste toimumiskohtades või muudes kohtades. Arvud on ligikaudsed – üks inimene võib kaasas kanda mitut seadet.
 

@@ -191,8 +191,6 @@
     <string name="quick_chat_new">Novi brzi razgovor</string>
     <string name="radio_configuration">Konfiguracija uređaja</string>
     <string name="reboot">Ponovno pokreni</string>
-    <!-- REBROADCAST -->
-    <string name="region_frequency_plan">Regija</string>
     <!-- REMOTE -->
     <!-- REMOVE -->
     <string name="remove">Ukloni</string>
@@ -220,7 +218,6 @@
     <string name="swipe_action_delete">Obriši</string>
     <string name="swipe_action_mute">Utišaj</string>
     <!-- TAK -->
-    <string name="tak_team_red">Crveno</string>
     <string name="theme">Tema</string>
     <string name="theme_dark">Tamna</string>
     <string name="theme_light">Svijetla</string>

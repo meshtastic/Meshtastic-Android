@@ -167,7 +167,6 @@
     <string name="config_lora_modem_preset_summary">Доступні пресети для модема, за замовчуванням — Long Fast.</string>
     <string name="config_lora_region_summary">Регіон, де ви будете використовувати радіо.</string>
     <string name="config_network_udp_enabled_summary">Увімкнути трансляцію пакетів через UDP через локальну мережу.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Найменший проміжок часу між розсилками координат при активному русі.</string>
     <string name="config_security_private_key">Використовується для створення спільного ключа з віддаленим пристроєм.</string>
     <string name="config_security_public_key">Генерується на основі вашого приватного ключа та надсилається іншим вузлам мережі, щоб вони могли обчислити спільний секретний ключ.</string>
     <string name="configuration">Налаштування</string>
@@ -294,7 +293,6 @@
     <string name="distance">Відстань</string>
     <string name="distance_filters">Фільтри відстані</string>
     <string name="distance_measurements">Вимірювання відстані</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Очистити пошук</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
@@ -424,7 +422,6 @@
     <string name="firmware_update_verifying">Перевірка оновлення...</string>
     <string name="firmware_update_waiting_reconnect">Очікування на перепідключення пристрою...</string>
     <string name="firmware_version">Версія прошивки: %1$s</string>
-    <string name="fixed_pin">Фіксований PIN</string>
     <string name="fixed_position">Фіксована позиція</string>
     <string name="for_more_information_see_our_privacy_policy">Для додаткової інформації, перегляньте нашу політику конфіденційності.</string>
     <!-- FORMAT -->
@@ -437,7 +434,6 @@
     <string name="free_memory_description">Доступно системної пам'яті в байтах</string>
     <string name="freq">Част</string>
     <string name="gas_resistance">Опір газового сенсора</string>
-    <string name="gateway">Шлюз</string>
     <string name="generate_qr_code">Згенерувати QR-код</string>
     <!-- GEOFENCE -->
     <string name="geofence_edit_area">Редагувати область</string>
@@ -498,7 +494,6 @@
     <string name="latitude">Широта</string>
     <!-- LAYER -->
     <string name="learn_more">Докладніше</string>
-    <string name="led_heartbeat">Частота мигання світлодіоду</string>
     <string name="legacy_admin_channel">Застарілий адмін канал</string>
     <string name="library_count">%1$d Бібліотеки</string>
     <!-- LICENSED -->
@@ -578,11 +573,8 @@
     <string name="map_offline_manager">Управління в автономному режимі</string>
     <string name="map_purge_fail">Помилка очищення кешу SQL, перегляньте logcat для деталей</string>
     <string name="map_purge_success">SQL кеш очищено для %1$s</string>
-    <string name="map_reporting">Відображення на мапі</string>
     <string name="map_reporting_consent_header">Згода на поширення незашифрованих даних вузла через MQTT</string>
     <string name="map_reporting_consent_text">Увімкнувши цю функцію, ви визнаєте і прямо погоджуєтесь з передачею географічного розташування вашого пристрою в режимі реального часу через протокол MQTT без шифрування. Ці дані можуть використовуватися для таких цілей, як відображення розташування на мапах, відстеження пристроїв і пов'язаних з цим функцій телеметрії.</string>
-    <string name="map_reporting_interval_seconds">Інтервал звітування на мапі (секунди)</string>
-    <string name="map_reporting_summary">Ваш вузол періодично надсилатиме незашифрований пакет звіту на налаштований MQTT-сервер. Він містить: ID, повні та короткі назви, приблизне місцезнаходження, модель пристрою, роль, версію прошивки, регіон LoRa, пресет модему та назву основного каналу.</string>
     <string name="map_select_download_region">Оберіть регіон завантаження</string>
     <string name="map_start_download">Почати завантаження</string>
     <string name="map_subDescription">прийом: %1$d° відстань: %2$s</string>
@@ -629,7 +621,6 @@
     <string name="messages">Повідомлення</string>
     <string name="micrograms_per_cubic_meter">мкг/м³</string>
     <string name="min">Мінімум</string>
-    <string name="minimum_broadcast_seconds">Мінімальний період розсилки (секунди)</string>
     <string name="minimum_wake_time_seconds">Мінімальний час в робочому режимі</string>
     <string name="modem_preset">Пресети</string>
     <string name="module_settings">Налаштування модуля</string>
@@ -669,7 +660,6 @@
     <string name="mute_status_muted_for_days">Режим без звуку %1$d днів, %2$s годин</string>
     <string name="mute_status_muted_for_hours">Режим без звуку %1$s годин</string>
     <string name="mute_status_unmuted">Не в безшумному режимі</string>
-    <string name="nag_timeout_seconds">Інтервал нагадувань (секунди)</string>
     <string name="name">Ім'я</string>
     <string name="name_cannot_be_empty">Назва не може бути порожньою.</string>
     <string name="navigate_back">Перейти назад</string>
@@ -769,7 +759,6 @@
     <string name="open_source_libraries">Бібліотеки з відкритим вихідним кодом</string>
     <string name="options">Налаштування</string>
     <string name="orient_north">Орієнтація північ</string>
-    <string name="output_duration_milliseconds">Тривалість виводу (мілісекунд)</string>
     <string name="overflow_menu">Додаткове меню</string>
     <string name="override_console_serial_port">Перевизначити послідовний порт</string>
     <!-- PACKET -->
@@ -860,20 +849,12 @@
     <string name="range_test_config">Налаштування тесту дальності</string>
     <string name="react">Реакція</string>
     <string name="reboot">Перевантажити</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Ретранслювати будь-яке виявлене повідомлення, якщо воно з нашого приватного каналу або з іншої мережі з такими ж параметрами LoRa.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Така сама поведінка, як і ВСІ (ALL), але пропускає декодування і просто пересилає їх. Доступно лише в ролі Repeater. Установка цієї опції на будь-які інші ролі призведе до поведінки ВСІ.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ігнорує пакети з нестандартними номерами портів: TAK, RangeTest, PaxCounter, тощо. Ретранслює лише стандартні типи: дані вузла, текст, координати, телеметрію та маршрутизацію.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ігнорує отримані повідомлення від чужих мереж, як-от LOCAL ONLY, але робить крок далі, також ігноруючи повідомлення від вузлів, яких немає в списку відомих вузлів.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ігнорує чужі mesh-мережі та пакети, які неможливо розшифрувати. Повторно передає повідомлення лише для власних каналів пристрою.</string>
-    <string name="rebroadcast_mode_none_desc">Дозволяється лише для таких ролей, як SENSOR, TRACKER та TAK_TRACKER, і гальмуватиме всі перенаправлення, на відміну від ролі CLIENT_MUTE.</string>
     <string name="recent_network_devices">Нещодавні пристрої в мережі</string>
     <string name="reconnecting">Роз'єднання…</string>
     <string name="refresh">Оновити</string>
     <string name="refresh_metadata">Оновити метаданні</string>
     <string name="regenerate_keys_confirmation">Ви впевнені, що хочете новий закритий ключ?\n\nВузли, які, можливо, раніше обмінялись ключами з цим вузлом, повинні будуть видалити даний вузол і знову обмінятись ключами щоб відновити безпечний зв'язок.</string>
     <string name="regenerate_private_key">Згенерувати закритий ключ</string>
-    <string name="region_frequency_plan">Регіон</string>
     <plurals name="relays">
         <item quantity="one">Пройшло через %1$d вузол</item>
         <item quantity="few">Пройшло через %1$d вузли</item>
@@ -921,29 +902,17 @@
     <string name="role">Роль пристрою</string>
     <string name="role_client">Клієнт</string>
     <string name="role_client_base">Client Base</string>
-    <string name="role_client_base_desc">Розглядає пакети від або до улюблених вузлів так само як ROUTER_LATE, а всі інші пакети як CLIENT.</string>
-    <string name="role_client_desc">Застосунок з'єднано або автономний режим обміну повідомленнями.</string>
     <string name="role_client_hidden">Client Hidden</string>
-    <string name="role_client_hidden_desc">Пристрій, який передає лише у разі потреби для економії енергії або скритності.</string>
     <string name="role_client_mute">Client Mute</string>
-    <string name="role_client_mute_desc">Пристрій, який не пересилає пакети з інших пристроїв.</string>
     <string name="role_lost_and_found">Loast and Found</string>
     <string name="role_repeater">Repeater</string>
-    <string name="role_repeater_desc">Інфраструктурний вузол для покриття мережі. Пересилає повідомлення з мінімальним навантаженням. Не показується в списку вузлів.</string>
     <string name="role_router">Router</string>
     <string name="role_router_client">Router Client</string>
-    <string name="role_router_client_desc">Комбінація ROUTER і CLIENT. Не для мобільних пристроїв.</string>
-    <string name="role_router_desc">Вузол інфраструктури для розширення покриття мережею повторними повідомленнями. Видимий у списку вузлів.</string>
     <string name="role_router_late">Router Late</string>
-    <string name="role_router_late_desc">Інфраструктурний вузол, що завжди ретранслює пакети один раз після всіх інших режимів, забезпечуючи додаткове покриття для локальних груп. Показується у списку вузлів.</string>
     <string name="role_sensor">Датчик</string>
-    <string name="role_sensor_desc">Пріоритетна передача пакетів телеметрії.</string>
     <string name="role_tak">ТАК</string>
-    <string name="role_tak_desc">Оптимізовано для з'єднання з системою ATAK, зменшує рутинні радіо трансляції.</string>
     <string name="role_tak_tracker">TAK Tracker</string>
-    <string name="role_tak_tracker_desc">Увімкнути автоматичну передачу TAK PLI та зменшити кількість звичайних трансляцій.</string>
     <string name="role_tracker">Трекер</string>
-    <string name="role_tracker_desc">Пріоритетна трансляція GPS-координат.</string>
     <string name="router_role_confirmation_text">Я прочитав(-ла) &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Device Role Documentation&lt;/a&gt; і допис у блозі про &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Отримано негативне підтвердження</string>
@@ -988,7 +957,6 @@
     <string name="select_all">Вибрати все</string>
     <string name="selected">Вибраний</string>
     <string name="send">Надіслати</string>
-    <string name="sender_message_interval_seconds">Інтервал надсилання повідомлень (секунди)</string>
     <string name="serial">Серійний порт</string>
     <string name="serial_config">Налаштування послідовного порту</string>
     <string name="session_active">Сесія активна</string>
@@ -1033,10 +1001,8 @@
     <string name="soil_temperature">Температура ґрунту</string>
     <string name="speed">Швидкість</string>
     <string name="speed_kmh">%1$d км/год</string>
-    <string name="state_broadcast_seconds">Інтервал трансляції стану (секунди)</string>
     <string name="status_message">Статус повідомлення</string>
     <string name="stay_connected_anywhere">Залишайтесь на зв'язку будь-де</string>
-    <string name="subnet">Підмережа</string>
     <string name="super_deep_sleep_duration_seconds">Тривалість глибокого сну</string>
     <string name="supported">Підтримується</string>
     <string name="supported_by_community">Підтримується спільнотою Meshtastic</string>
@@ -1045,35 +1011,11 @@
     <string name="swipe_action_unmute">Увімкнути звук</string>
     <string name="system_settings">Системі налаштування</string>
     <!-- TAK -->
-    <string name="tak_role_forwardobserver">Спостерігач</string>
-    <string name="tak_role_hq">Штаб</string>
-    <string name="tak_role_k9">Собака (K9)</string>
-    <string name="tak_role_medic">Санітар</string>
-    <string name="tak_role_rto">Телефоніст</string>
-    <string name="tak_role_sniper">Снайпер</string>
-    <string name="tak_role_teamlead">Лідер команди</string>
-    <string name="tak_role_teammember">Член команди</string>
-    <string name="tak_role_unspecified">Невизначений</string>
     <string name="tak_server">Сервер TAK</string>
     <string name="tak_server_section">Сервер</string>
     <string name="tak_server_status">Статус</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_team_blue">Синій</string>
-    <string name="tak_team_brown">Коричневий</string>
-    <string name="tak_team_cyan">Ціановий</string>
-    <string name="tak_team_dark_blue">Темно синій</string>
-    <string name="tak_team_dark_green">Темно зелений</string>
-    <string name="tak_team_green">Зелений</string>
-    <string name="tak_team_magenta">Фіолетовий</string>
-    <string name="tak_team_maroon">Бордовий</string>
-    <string name="tak_team_orange">Помаранчевий</string>
-    <string name="tak_team_purple">Пурпурний</string>
-    <string name="tak_team_red">Червоний</string>
-    <string name="tak_team_teal">Бірюзовий</string>
-    <string name="tak_team_unspecified_color">Невизначений</string>
-    <string name="tak_team_white">Білий</string>
-    <string name="tak_team_yellow">Жовтий</string>
     <string name="telemetry">Телеметрія</string>
     <string name="telemetry_config">Налаштування телеметрії</string>
     <string name="temperature">Температура</string>
@@ -1082,10 +1024,8 @@
     <string name="theme_light">Світла</string>
     <string name="theme_system">Системна</string>
     <string name="time">Час</string>
-    <string name="time_zone">Часовий пояс</string>
     <string name="timeout">Таймаут</string>
     <string name="timestamp">Мітка часу</string>
-    <string name="tls_enabled">TLS увімкнений</string>
     <string name="toggle_my_position">Змінити мою позицію</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Маршрут</string>
@@ -1128,6 +1068,8 @@
     <string name="two_weeks">2Т</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Введіть повідомлення</string>
+    <string name="unit_dbm">дБм</string>
+    <string name="unit_meters">м</string>
     <!-- UNITS -->
     <string name="units_follow_system">Системна</string>
     <!-- UNKNOWN -->
@@ -1142,7 +1084,6 @@
     <string name="unmute">Увімкнути звук</string>
     <string name="unrecognized">Невпізнанно</string>
     <string name="unset">Невстановлене - 0</string>
-    <string name="update_interval_seconds">Інтервал оновлення (секунд)</string>
     <string name="updated">Оновлено</string>
     <string name="uptime">Час роботи</string>
     <!-- URL -->

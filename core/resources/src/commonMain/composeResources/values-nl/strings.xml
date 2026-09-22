@@ -144,10 +144,8 @@
     <string name="firmware_old">De radio firmware is te oud om met deze applicatie te praten. Voor meer informatie over deze zaak, zie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">onze Firmware Installation gids</a>.</string>
     <string name="firmware_too_old">Firmware-update vereist.</string>
     <string name="firmware_update_failed">Bijwerken mislukt</string>
-    <string name="fixed_pin">Vaste PIN</string>
     <!-- FORMAT -->
     <string name="freq">Freq</string>
-    <string name="gateway">Gateway</string>
     <!-- GEOFENCE -->
     <string name="good">Goed</string>
     <string name="gpio_pin">GPIO pin</string>
@@ -207,7 +205,6 @@
     <string name="map_offline_manager">Offline Manager</string>
     <string name="map_purge_fail">SQL cache verwijderen mislukt, zie logcat voor details</string>
     <string name="map_purge_success">SQL cache gewist voor %1$s</string>
-    <string name="map_reporting">Kaartrapportage</string>
     <string name="map_select_download_region">Selecteer regio om te downloaden</string>
     <string name="map_start_download">Download starten</string>
     <string name="map_subDescription">richting: %1$d° afstand: %2$s</string>
@@ -230,7 +227,6 @@
     <string name="message_input_label">Bericht</string>
     <string name="message_status_queued">In behandeling</string>
     <string name="messages">Berichten</string>
-    <string name="minimum_broadcast_seconds">Minimale broadcast (seconden)</string>
     <string name="module_settings">Module-configuratie</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
@@ -278,7 +274,6 @@
     <string name="one_day">24 Uur</string>
     <string name="one_week">1W</string>
     <!-- OPEN -->
-    <string name="output_duration_milliseconds">Output duur (milliseconden)</string>
     <!-- PACKET -->
     <string name="password">Wachtwoord</string>
     <!-- PAX -->
@@ -313,14 +308,6 @@
     <string name="radio_configuration">Radioconfiguratie</string>
     <string name="range_test">Bereik Test</string>
     <string name="reboot">Herstart</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Herzend ontvangen berichten indien ontvangen op eigen privé kanaal of van een ander toestel met dezelfde lora instellingen.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Hetzelfde gedrag als ALL maar sla pakketdecodering over en herzendt opnieuw. Alleen beschikbaar in Repeater rol. Het instellen van dit op andere rollen resulteert in ALL gedrag.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Negeert pakketten van niet-standaard portnums, zoals: TAK, RangeTest, PaxCounter, etc. Herzendt alleen pakketten met standaard portnummers: NodeInfo, Text, Positie, Telemetry, en Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Negeert alleen waargenomen berichten van vreemde meshes zoals LOCAL ONLY, maar gaat een stap verder door ook berichten van knooppunten te negeren die nog niet in de bekende lijst van knooppunten staan.</string>
-    <string name="rebroadcast_mode_local_only_desc">Negeert waargenomen berichten van open vreemde mazen of die welke niet kunnen decoderen. Alleen heruitzenden bericht op de nodes lokale primaire / secundaire kanalen.</string>
-    <string name="rebroadcast_mode_none_desc">Alleen toegestaan voor SENSOR, TRACKER en TAK_TRACKER rollen, dit zal alle heruitzendingen beperken, niet in tegenstelling tot CLIENT_MUTE rol.</string>
-    <string name="region_frequency_plan">Regio</string>
     <!-- REMOTE -->
     <string name="remote_admin">Extern beheer</string>
     <string name="remote_hardware">Externe Hardware</string>
@@ -337,17 +324,6 @@
     <string name="reset_to_defaults">Standaardinstellingen terugzetten</string>
     <string name="ringtone">Beltoon</string>
     <!-- ROLE -->
-    <string name="role_client_desc">Toestel geeft geen pakketten door van andere toestellen.</string>
-    <string name="role_client_hidden_desc">Apparaat dat alleen uitzendt als dat nodig is voor stealth of energiebesparing.</string>
-    <string name="role_client_mute_desc">Apparaat stuurt geen pakketten van andere apparaten.</string>
-    <string name="role_repeater_desc">Infrastructuur node om netwerk bereik te vergroten door berichten door te geven zonder overtolligheid. Niet zichtbaar in noden lijst.</string>
-    <string name="role_router_client_desc">Combinatie van ROUTER en CLIENT. Niet voor mobiele toestellen.</string>
-    <string name="role_router_desc">Infrastructuur node om netwerk bereik te vergroten door berichten door te geven. Zichtbare in noden lijst.</string>
-    <string name="role_router_late_desc">Infrastructuurknooppunt dat altijd pakketten één keer opnieuw uitzendt, maar pas nadat alle andere modi zijn voltooid, om extra dekking te bieden voor lokale clusters. Zichtbaar in de lijst met knooppunten.</string>
-    <string name="role_sensor_desc">Zendt telemetriepakketten met prioriteit uit.</string>
-    <string name="role_tak_desc">Geoptimaliseerd voor ATAK-systeemcommunicatie, beperkt routine uitzendingen.</string>
-    <string name="role_tak_tracker_desc">Activeer automatisch zenden TAK PLI en beperk routine zendingen.</string>
-    <string name="role_tracker_desc">Zendt GPS-positiepakketten met prioriteit uit.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Negatieve bevestiging ontvangen</string>
     <string name="routing_error_no_route">Geen route</string>
@@ -382,16 +358,12 @@
     <string name="slot">Slot</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, een meeting die wordt gebruikt in de communicatie om het niveau van een gewenst signaal tegenover achtergrondlawaai te kwantificeren. In Meshtastische en andere draadloze systemen geeft een hoger SNR een zuiverder signaal aan dat de betrouwbaarheid en kwaliteit van de gegevensoverdracht kan verbeteren.</string>
-    <string name="subnet">Subnet</string>
     <string name="supported">Ondersteund</string>
     <string name="swipe_action_delete">Verwijder</string>
     <string name="swipe_action_mute">Demp</string>
     <string name="swipe_action_unmute">Dempen opheffen</string>
     <!-- TAK -->
     <string name="tak_server_section">Server</string>
-    <string name="tak_team_blue">Blauw</string>
-    <string name="tak_team_green">Groen</string>
-    <string name="tak_team_red">Rood</string>
     <string name="telemetry">Telemetrie</string>
     <string name="theme">Thema</string>
     <string name="theme_dark">Donker</string>
@@ -399,7 +371,6 @@
     <string name="theme_system">Systeemstandaard</string>
     <string name="timeout">Time-Out</string>
     <string name="timestamp">Tijdstempel</string>
-    <string name="tls_enabled">TLS ingeschakeld</string>
     <string name="toggle_my_position">Wissel mijn positie</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
@@ -427,7 +398,6 @@
     <string name="unmessageable">Niet berichtbaar</string>
     <string name="unmute">Dempen opheffen</string>
     <string name="unrecognized">Niet herkend</string>
-    <string name="update_interval_seconds">Update-interval (seconden)</string>
     <string name="uptime">Tijd online</string>
     <!-- URL -->
     <string name="url">URL</string>
