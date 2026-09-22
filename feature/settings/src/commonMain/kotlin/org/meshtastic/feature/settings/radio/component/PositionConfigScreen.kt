@@ -67,8 +67,10 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
+import org.meshtastic.feature.settings.util.fieldTitle
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.broadcast_smart_minimum_distance
 
 @Composable
 expect fun DeviceLocationButton(
@@ -234,7 +236,11 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     )
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(Res.string.schema_position_broadcast_smart_minimum_distance),
+                        title =
+                        fieldTitle(
+                            Res.string.schema_position_broadcast_smart_minimum_distance,
+                            Config.PositionConfig.broadcast_smart_minimum_distance,
+                        ),
                         summary =
                         stringResource(Res.string.schema_position_broadcast_smart_minimum_distance_description),
                         value = formState.value.broadcast_smart_minimum_distance,

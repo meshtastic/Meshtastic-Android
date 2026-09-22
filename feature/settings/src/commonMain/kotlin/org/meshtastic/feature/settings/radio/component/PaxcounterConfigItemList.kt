@@ -32,9 +32,10 @@ import org.meshtastic.core.resources.schema_paxcounter_ble_threshold
 import org.meshtastic.core.resources.schema_paxcounter_ble_threshold_description
 import org.meshtastic.core.resources.schema_paxcounter_enabled
 import org.meshtastic.core.resources.schema_paxcounter_enabled_description
+import org.meshtastic.core.resources.schema_paxcounter_paxcounter_update_interval
+import org.meshtastic.core.resources.schema_paxcounter_paxcounter_update_interval_description
 import org.meshtastic.core.resources.schema_paxcounter_wifi_threshold
 import org.meshtastic.core.resources.schema_paxcounter_wifi_threshold_description
-import org.meshtastic.core.resources.update_interval_seconds
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -42,8 +43,11 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.util.IntervalConfiguration
+import org.meshtastic.feature.settings.util.fieldTitle
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.ble_threshold
+import org.meshtastic.proto.wifi_threshold
 
 @Composable
 fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -83,7 +87,8 @@ private fun PaxcounterSettings(formState: ConfigState<ModuleConfig.PaxcounterCon
         HorizontalDivider()
         val items = remember { IntervalConfiguration.PAX_COUNTER.allowedIntervals }
         DropDownPreference(
-            title = stringResource(Res.string.update_interval_seconds),
+            title = stringResource(Res.string.schema_paxcounter_paxcounter_update_interval),
+            summary = stringResource(Res.string.schema_paxcounter_paxcounter_update_interval_description),
             selectedItem = (formState.value.paxcounter_update_interval).toLong(),
             enabled = enabled,
             items = items.map { it.value to it.toDisplayString() },
@@ -94,7 +99,8 @@ private fun PaxcounterSettings(formState: ConfigState<ModuleConfig.PaxcounterCon
         )
         HorizontalDivider()
         SignedIntegerEditTextPreference(
-            title = stringResource(Res.string.schema_paxcounter_wifi_threshold),
+            title =
+            fieldTitle(Res.string.schema_paxcounter_wifi_threshold, ModuleConfig.PaxcounterConfig.wifi_threshold),
             summary = stringResource(Res.string.schema_paxcounter_wifi_threshold_description),
             value = formState.value.wifi_threshold,
             enabled = enabled,
@@ -105,7 +111,7 @@ private fun PaxcounterSettings(formState: ConfigState<ModuleConfig.PaxcounterCon
         )
         HorizontalDivider()
         SignedIntegerEditTextPreference(
-            title = stringResource(Res.string.schema_paxcounter_ble_threshold),
+            title = fieldTitle(Res.string.schema_paxcounter_ble_threshold, ModuleConfig.PaxcounterConfig.ble_threshold),
             summary = stringResource(Res.string.schema_paxcounter_ble_threshold_description),
             value = formState.value.ble_threshold,
             enabled = enabled,

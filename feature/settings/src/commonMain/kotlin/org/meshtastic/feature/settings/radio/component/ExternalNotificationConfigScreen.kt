@@ -36,10 +36,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.external_notification
 import org.meshtastic.core.resources.external_notification_config
-import org.meshtastic.core.resources.nag_timeout_seconds
 import org.meshtastic.core.resources.notifications_on_alert_bell_receipt
 import org.meshtastic.core.resources.notifications_on_message_receipt
-import org.meshtastic.core.resources.output_duration_milliseconds
 import org.meshtastic.core.resources.ringtone
 import org.meshtastic.core.resources.schema_externalnotification_active
 import org.meshtastic.core.resources.schema_externalnotification_active_description
@@ -57,10 +55,14 @@ import org.meshtastic.core.resources.schema_externalnotification_alert_message_v
 import org.meshtastic.core.resources.schema_externalnotification_alert_message_vibra_description
 import org.meshtastic.core.resources.schema_externalnotification_enabled
 import org.meshtastic.core.resources.schema_externalnotification_enabled_description
+import org.meshtastic.core.resources.schema_externalnotification_nag_timeout
+import org.meshtastic.core.resources.schema_externalnotification_nag_timeout_description
 import org.meshtastic.core.resources.schema_externalnotification_output
 import org.meshtastic.core.resources.schema_externalnotification_output_buzzer
 import org.meshtastic.core.resources.schema_externalnotification_output_buzzer_description
 import org.meshtastic.core.resources.schema_externalnotification_output_description
+import org.meshtastic.core.resources.schema_externalnotification_output_ms
+import org.meshtastic.core.resources.schema_externalnotification_output_ms_description
 import org.meshtastic.core.resources.schema_externalnotification_output_vibra
 import org.meshtastic.core.resources.schema_externalnotification_output_vibra_description
 import org.meshtastic.core.resources.schema_externalnotification_use_i2s_as_buzzer
@@ -273,7 +275,8 @@ fun ExternalNotificationConfigScreenCommon(
                 HorizontalDivider()
                 val outputItems = remember { IntervalConfiguration.OUTPUT.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(Res.string.output_duration_milliseconds),
+                    title = stringResource(Res.string.schema_externalnotification_output_ms),
+                    summary = stringResource(Res.string.schema_externalnotification_output_ms_description),
                     items = outputItems.map { it.value to it.toDisplayString() },
                     selectedItem = formState.value.output_ms.toLong(),
                     enabled = state.connected,
@@ -284,7 +287,8 @@ fun ExternalNotificationConfigScreenCommon(
                 HorizontalDivider()
                 val nagItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(Res.string.nag_timeout_seconds),
+                    title = stringResource(Res.string.schema_externalnotification_nag_timeout),
+                    summary = stringResource(Res.string.schema_externalnotification_nag_timeout_description),
                     items = nagItems.map { it.value to it.toDisplayString() },
                     selectedItem = formState.value.nag_timeout.toLong(),
                     enabled = state.connected,

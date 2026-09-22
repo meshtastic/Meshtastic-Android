@@ -73,6 +73,24 @@ object SchemaCatalog {
         return out
     }
 
+    /**
+     * Every distinct unit symbol the schema declares on a field. The app names these in `FieldMetadataUnits.kt`, which
+     * renders nothing for a symbol it does not know, so a new one has to be added there deliberately.
+     */
+    fun units(): Set<String> {
+        val out = sortedSetOf<String>()
+        for (path in generatedTypePaths()) {
+            val type = Class.forName(GENERATED_PACKAGE + path.replace('.', '$'))
+            if (type.enumConstants != null) continue
+            type.declaredFields.forEach { property ->
+                val tag = property.getAnnotation(WireField::class.java)?.tag ?: return@forEach
+                val unit = FieldMetadataRegistry.get(PROTO_PACKAGE + path, tag)?.unit
+                if (!unit.isNullOrBlank()) out += unit
+            }
+        }
+        return out
+    }
+
     /** Every enum the schema labels, in proto-path order, for the Kotlin accessors that read those labels. */
     fun labelledEnums(): List<EnumLabelsKt.LabelledEnum> = generatedTypePaths().mapNotNull { path ->
         val type = Class.forName(GENERATED_PACKAGE + path.replace('.', '$'))

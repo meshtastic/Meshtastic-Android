@@ -31,7 +31,8 @@ import org.meshtastic.core.resources.schema_neighborinfo_enabled
 import org.meshtastic.core.resources.schema_neighborinfo_enabled_description
 import org.meshtastic.core.resources.schema_neighborinfo_transmit_over_lora
 import org.meshtastic.core.resources.schema_neighborinfo_transmit_over_lora_description
-import org.meshtastic.core.resources.update_interval_seconds
+import org.meshtastic.core.resources.schema_neighborinfo_update_interval
+import org.meshtastic.core.resources.schema_neighborinfo_update_interval_description
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -73,7 +74,8 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.update_interval_seconds),
+                    title = stringResource(Res.string.schema_neighborinfo_update_interval),
+                    summary = stringResource(Res.string.schema_neighborinfo_update_interval_description),
                     value = formState.value.update_interval,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

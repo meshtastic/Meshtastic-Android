@@ -64,6 +64,11 @@ class SchemaStringsTest {
     }
 
     @Test
+    fun `the schema declares only the unit symbols the app can name`() {
+        assertEquals(setOf("dBm", "kHz", "m", "ms", "s"), SchemaCatalog.units())
+    }
+
+    @Test
     fun `the notice carries the pin and reads back`() {
         val pin = "2.8.0.111-g45f6b7e-SNAPSHOT"
         val xml = StringsXml.render("", emptyMap(), notice = SchemaStringsSync.notice(pin))

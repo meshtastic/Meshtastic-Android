@@ -30,7 +30,8 @@ import org.meshtastic.core.resources.schema_rangetest_enabled
 import org.meshtastic.core.resources.schema_rangetest_enabled_description
 import org.meshtastic.core.resources.schema_rangetest_save
 import org.meshtastic.core.resources.schema_rangetest_save_description
-import org.meshtastic.core.resources.sender_message_interval_seconds
+import org.meshtastic.core.resources.schema_rangetest_sender
+import org.meshtastic.core.resources.schema_rangetest_sender_description
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -79,7 +80,8 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 val rangeItems = remember { IntervalConfiguration.RANGE_TEST_SENDER.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(Res.string.sender_message_interval_seconds),
+                    title = stringResource(Res.string.schema_rangetest_sender),
+                    summary = stringResource(Res.string.schema_rangetest_sender_description),
                     selectedItem = (formState.value.sender).toLong(),
                     enabled = canConfigure,
                     items = rangeItems.map { it.value to it.toDisplayString() },
