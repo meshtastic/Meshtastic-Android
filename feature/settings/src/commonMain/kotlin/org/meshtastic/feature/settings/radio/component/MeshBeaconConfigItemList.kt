@@ -78,7 +78,8 @@ import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 
-private const val MESSAGE_MAX_BYTES = 100
+// nanopb's max_size is 61 because it counts the terminator; the string itself gets a round 60.
+private const val MESSAGE_MAX_BYTES = 60
 private val MIN_INTERVAL_SECS = FixedUpdateIntervals.ONE_HOUR.value.toInt()
 
 // Sentinel DropDownItem values (design#140's never-render-blank rule): -1 marks a stale stored value that no longer

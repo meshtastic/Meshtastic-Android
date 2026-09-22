@@ -216,6 +216,7 @@ class DiscoveryViewModel(
                                 }
                                 .build(),
                             region = bc.region.takeIf { it != RegionCode.UNSET },
+                            frequencySlot = bc.frequencySlot,
                         )
                     }
             val targets = presetTargets + channelTargets
@@ -276,6 +277,7 @@ internal fun filterAlreadyJoinedBeaconChannels(
             psk = ch.psk,
             preset = ChannelOption.from(offer.beacon.offer_preset),
             region = offer.beacon.offer_region,
+            frequencySlot = offer.beacon.offer_frequency_slot?.takeIf { it > 0 },
         )
     }
     .distinctBy { it.id }

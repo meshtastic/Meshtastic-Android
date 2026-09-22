@@ -20,6 +20,7 @@ import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.MeshBeaconOffer
+import org.meshtastic.core.model.numChannels
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
@@ -421,5 +422,71 @@ class MeshBeaconOfferTest {
                 }
                 .build()
         assertEquals(false, beacon.isAlreadyJoined(radioLora, configured))
+    }
+
+    private fun slotOf(name: String, lora: LoRaConfig = radioLora): Int =
+        Channel(ChannelSettings.Builder().also { wb -> wb.name = name }.build(), lora).channelNum
+
+    private fun offerOn(name: String, slot: Int? = null): MeshBeacon = MeshBeacon.Builder()
+        .also { wb ->
+            wb.offer_channel = ChannelSettings.Builder().also { cb -> cb.name = name }.build()
+            wb.offer_preset = ModemPreset.LONG_FAST
+            wb.offer_region = RegionCode.US
+            wb.offer_frequency_slot = slot
+        }
+        .build()
+
+    @Test
+    fun `an advertised slot is honoured over the offered channel name hash`() {
+        // A mesh that pins a slot its channel name does not hash to can only be described by the advertised slot.
+        val homeSlot = slotOf("HomeMesh")
+        val offered = generateSequence(0) { it + 1 }.map { "PinnedMesh$it" }.first { slotOf(it) != homeSlot }
+        assertEquals(BeaconJoinOption.ADD, offerOn(offered, slot = homeSlot).beaconJoinOption(radioLora, radioChannels))
+        // Same offer without the slot derives elsewhere, so it is only addable because the slot was advertised.
+        assertEquals(BeaconJoinOption.SWITCH, offerOn(offered).beaconJoinOption(radioLora, radioChannels))
+    }
+
+    @Test
+    fun `an advertised slot away from ours forces SWITCH even when the names hash alike`() {
+        // The NYMesh case: the offered name hashes to our slot, but the mesh actually sits elsewhere. Deriving would
+        // call this a no-reboot ADD and the user would join and hear nothing.
+        val homeSlot = slotOf("HomeMesh")
+        val elsewhere = if (homeSlot < radioLora.numChannels) homeSlot + 1 else homeSlot - 1
+        assertEquals(
+            BeaconJoinOption.SWITCH,
+            offerOn("HomeMesh", slot = elsewhere).beaconJoinOption(radioLora, radioChannels),
+        )
+    }
+
+    @Test
+    fun `a pinned radio compares against an advertised slot instead of refusing to reason`() {
+        val pinned = radioLora.newBuilder().also { wb -> wb.channel_num = 48 }.build()
+        assertEquals(BeaconJoinOption.ADD, offerOn("AnyName", slot = 48).beaconJoinOption(pinned, radioChannels))
+        assertEquals(BeaconJoinOption.SWITCH, offerOn("AnyName", slot = 49).beaconJoinOption(pinned, radioChannels))
+        // With nothing advertised there is still nothing to compare a pin against.
+        assertEquals(BeaconJoinOption.SWITCH, offerOn("HomeMesh").beaconJoinOption(pinned, radioChannels))
+    }
+
+    @Test
+    fun `an advertised slot outside the region falls back to the name hash`() {
+        // Unaddressable here, so behave as though the field were absent rather than refuse an advisory offer.
+        assertEquals(
+            BeaconJoinOption.ADD,
+            offerOn("HomeMesh", slot = radioLora.numChannels + 1).beaconJoinOption(radioLora, radioChannels),
+        )
+        assertEquals(BeaconJoinOption.ADD, offerOn("HomeMesh", slot = 0).beaconJoinOption(radioLora, radioChannels))
+    }
+
+    @Test
+    fun `a switch carries the advertised slot into channel_num`() {
+        val beacon = offerOn("PinnedMesh", slot = 48)
+        val set = assertNotNull(beacon.toJoinChannelSet(BeaconJoinOption.SWITCH, radioLora))
+        assertEquals(48, assertNotNull(set.lora_config).channel_num)
+    }
+
+    @Test
+    fun `a switch with no advertised slot leaves channel_num zero for firmware to derive`() {
+        val set = assertNotNull(offerOn("PinnedMesh").toJoinChannelSet(BeaconJoinOption.SWITCH, radioLora))
+        assertEquals(0, assertNotNull(set.lora_config).channel_num)
     }
 }
