@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +53,7 @@ const val SETTINGS_SEARCH_BAR_INPUT_FIELD_TAG = "SettingsSearchBarInputField"
  * Results route to the destination, not to the individual control: android lays its settings screens out by hand, so
  * there is no anchor to scroll to. Meshtastic-Apple lands on the control because its forms are generated.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsSearchBar(viewModel: SettingsSearchViewModel, onNavigate: (Route) -> Unit, modifier: Modifier = Modifier) {
     val query by viewModel.query.collectAsStateWithLifecycle()

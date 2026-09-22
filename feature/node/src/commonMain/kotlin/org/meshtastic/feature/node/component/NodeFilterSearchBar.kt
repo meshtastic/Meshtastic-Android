@@ -31,6 +31,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -78,6 +79,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
  * The "showing ignored nodes" banner sits under the collapsed bar rather than inside it: it reports a filter that is
  * already applied to the list below, not a search result.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NodeFilterSearchBar(
     filterText: String,
