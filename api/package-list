@@ -188,6 +188,7 @@ org.meshtastic.feature.settings.radio
 org.meshtastic.feature.settings.radio.channel
 org.meshtastic.feature.settings.radio.channel.component
 org.meshtastic.feature.settings.radio.component
+org.meshtastic.feature.settings.search
 org.meshtastic.feature.settings.tak
 org.meshtastic.feature.settings.util
 module:feature-widget
