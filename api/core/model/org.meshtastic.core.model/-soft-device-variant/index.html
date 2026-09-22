@@ -96,7 +96,7 @@
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="index.html">SoftDeviceVariant</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="index.html">SoftDeviceVariant</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/model/src/commonMain/kotlin/org/meshtastic/core/model/BootloaderOtaQuirk.kt#L43">source</a>)</span></span></div><p class="paragraph">The Nordic SoftDevice an nRF52840 board's firmware is linked against. Static hardware fact, derived from the board's <code class="lang-kotlin">build.arduino.ldscript</code> in <code class="lang-kotlin">meshtastic/firmware</code> (<code class="lang-kotlin">nrf52840_s140_v6.ld</code> / <code class="lang-kotlin">_v7.ld</code>).</p><p class="paragraph">Load-bearing for factory erase: the erase images are linked for a specific application start address (0x26000 for 6.1.1, 0x27000 for 7.3.0) and the UF2 bootloader's write guard begins at <code class="lang-kotlin">MBR_SIZE</code> (0x1000), so the SoftDevice region is writable. Flashing the 6.1.1 image to a 7.3.0 device erases the SoftDevice's last page, which needs SWD or serial DFU to recover. Never infer this value — an unresolved variant must refuse the operation.</p></div></div>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="ENTRY">Entries</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button><button class="section-tab" data-togglable="ENTRY">Entries</button></div>
     <div class="tabs-section-body">
       <div data-togglable="ENTRY">
         <h2 class="tableheader">Entries</h2>
@@ -202,7 +202,37 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="695462111%2FFunctions%2F394437785" anchor-label="valueOf" id="695462111%2FFunctions%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+        <div class="table"><a data-name="-1869078737%2FFunctions%2F394437785" anchor-label="schemaDescriptionRes" id="-1869078737%2FFunctions%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../schema-description-res.html"><span>schema</span><wbr><span>Description</span><wbr><span><span>Res</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1869078737%2FFunctions%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../schema-description-res.html"><span class="token function">schemaDescriptionRes</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The schema's one-sentence explanation of this enum value, or null where it has none.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1857799001%2FFunctions%2F394437785" anchor-label="schemaLabelRes" id="-1857799001%2FFunctions%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../schema-label-res.html"><span>schema</span><wbr><span>Label</span><wbr><span><span>Res</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1857799001%2FFunctions%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../schema-label-res.html"><span class="token function">schemaLabelRes</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The schema's label for this enum value, or null where the schema does not name it. A picker shows this in place of the constant's Kotlin name, and falls back to that name when it is null, so a value the schema has not reached still renders.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="695462111%2FFunctions%2F394437785" anchor-label="valueOf" id="695462111%2FFunctions%2F394437785" data-filterable-set=":core:model/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
