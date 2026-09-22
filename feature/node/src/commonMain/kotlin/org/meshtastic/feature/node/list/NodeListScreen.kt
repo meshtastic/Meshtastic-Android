@@ -358,7 +358,18 @@ fun NodeListScreen(
                             onSortSelect = viewModel::setSortOption,
                             modifier = Modifier.fillMaxWidth(),
                             searchResults = {
+                                // On compact width the expanded bar covers the sticky header, so the counts repeat
+                                // here.
                                 LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    item {
+                                        NodeCountSummary(
+                                            onlineCount = onlineNodeCount,
+                                            shownCount = nodes.size,
+                                            totalCount = totalNodeCount,
+                                            modifier =
+                                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                                        )
+                                    }
                                     items(nodes, key = { it.num }, itemContent = nodeRow)
                                 }
                             },
