@@ -25,7 +25,6 @@ import org.meshtastic.core.resources.about
 import org.meshtastic.core.resources.acknowledgements
 import org.meshtastic.core.resources.allStringResources
 import org.meshtastic.core.resources.app_settings
-import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.debug_panel
 import org.meshtastic.core.resources.device_links
 import org.meshtastic.core.resources.filter_settings
@@ -149,12 +148,8 @@ object SettingsSearchCatalog {
                 SettingsSearchEntry(title = title, description = null, route = route, screenTitle = title)
             }
 
-    /** App-level settings, which have no schema behind them. */
-    private fun appEntries(): List<SettingsSearchEntry> = APP_SETTINGS.map { (title, route) ->
-        SettingsSearchEntry(title = title, description = null, route = route, screenTitle = Res.string.app_settings)
-    }
-
-    private val APP_SETTINGS: List<Pair<StringResource, Route>> =
+    /** App-level settings, which have no schema behind them and so are listed by hand. */
+    private val appSettings: List<Pair<StringResource, Route>> =
         listOf(
             Res.string.node_layout_section_title to SettingsRoute.NodeList,
             Res.string.wifi_devices to WifiProvisionRoute.WifiProvision(),
@@ -164,6 +159,10 @@ object SettingsSearchCatalog {
             Res.string.about to SettingsRoute.About,
             Res.string.acknowledgements to SettingsRoute.Acknowledgements,
         )
+
+    private fun appEntries(): List<SettingsSearchEntry> = appSettings.map { (title, route) ->
+        SettingsSearchEntry(title = title, description = null, route = route, screenTitle = Res.string.app_settings)
+    }
 
     /** Every proto-backed control the schema labels, attributed to the screen that owns its message. */
     private fun schemaEntries(): List<SettingsSearchEntry> {
@@ -204,7 +203,4 @@ object SettingsSearchCatalog {
     internal fun excusedMessagePrefixes(): Set<String> = notSearchable.keys
 
     internal fun declaredEnumValuePrefixes(): Set<String> = enumValuePrefixes
-
-    /** The settings root, named as the section app-level results sit under. */
-    internal val rootTitle: StringResource = Res.string.bottom_nav_settings
 }

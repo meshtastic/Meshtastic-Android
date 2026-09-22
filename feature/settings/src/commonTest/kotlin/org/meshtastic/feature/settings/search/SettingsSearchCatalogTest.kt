@@ -16,8 +16,11 @@
  */
 package org.meshtastic.feature.settings.search
 
+import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.allStringResources
+import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -81,13 +84,14 @@ class SettingsSearchCatalogTest {
     }
 
     @Test
-    fun everyScreenAppearsInTheIndex() {
+    fun everyConfigurationScreenIsReachableFromSearch() {
         val routes = SettingsSearchCatalog.entries().map { it.route }.toSet()
+        val missing = (ConfigRoute.entries.map { it.route } + ModuleRoute.entries.map { it.route }) - routes
 
-        assertTrue(routes.size > 1, "the index should cover more than one destination")
+        assertEquals(emptyList(), missing, "these settings screens cannot be found by searching for their own name")
     }
 
     /** The resource's registered name, which is what the catalog keys off. */
-    private fun keyOf(resource: org.jetbrains.compose.resources.StringResource): String? =
+    private fun keyOf(resource: StringResource): String? =
         Res.allStringResources.entries.firstOrNull { it.value == resource }?.key
 }

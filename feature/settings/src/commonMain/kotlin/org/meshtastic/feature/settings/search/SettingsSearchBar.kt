@@ -77,8 +77,10 @@ fun SettingsSearchBar(viewModel: SettingsSearchViewModel, onNavigate: (Route) ->
                     )
                 }
             } else {
+                // No item key: two entries can legitimately share a title and a destination (six controls are called
+                // "Enabled"), and a duplicate key crashes the list.
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(results, key = { it.route.toString() + it.title }) { entry ->
+                    items(results) { entry ->
                         SettingsSearchResult(entry = entry, onClick = { onNavigate(entry.route) })
                         HorizontalDivider()
                     }
