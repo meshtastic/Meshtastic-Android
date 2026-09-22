@@ -37,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.common.util.UnitsOverride
 import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.Route
@@ -81,7 +82,6 @@ import org.meshtastic.feature.settings.component.FullMessageTimestampsSetting
 import org.meshtastic.feature.settings.component.HomoglyphSetting
 import org.meshtastic.feature.settings.component.NotificationSection
 import org.meshtastic.feature.settings.component.ThemePickerDialog
-import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.feature.settings.component.UnitsOption
 import org.meshtastic.feature.settings.component.UnitsPickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
