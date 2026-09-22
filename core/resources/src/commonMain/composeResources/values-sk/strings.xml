@@ -157,7 +157,6 @@
     <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a>.</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru.</string>
     <string name="firmware_update_failed">Aktualizácia zlyhala</string>
-    <string name="fixed_pin">Pevný PIN</string>
     <string name="fixed_position">Fixná Pozícia</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
@@ -341,14 +340,6 @@
     <string name="radio_configuration">Konfigurácia vysielača</string>
     <string name="range_test">Test dosahu</string>
     <string name="reboot">Reštartovať</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Preposiela akúkoľvek pozorovanú správu, ak bola na našom súkromnom kanáli alebo z inej siete s rovnakými parametrami lora.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Rovnaké ako správanie ako ALL, ale preskočí dekódovanie paketov a jednoducho ich prepošle. Dostupné iba v úlohe Opakovača. Nastavenie tejto možnosti na akékoľvek iné roly bude mať za následok správania sa ako ALL.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignoruje pakety z neštandardných portov, ako sú: TAK, RangeTest, PaxCounter atď. Opätovne vysiela iba pakety so štandardnými portami: NodeInfo, Text, Position, Telemetry a Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignoruje pozorované správy z cudzích sietí, ako napríklad LOCAL ONLY, ale ide o krok ďalej tým, že ignoruje aj správy z uzlov, ktoré ešte nie sú v známom zozname uzla.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignoruje pozorované správy z cudzích sietí, ktoré sú otvorené alebo tie, ktoré nedokáže dešifrovať. Opätovne vysiela správu iba na lokálnych primárnych / sekundárnych kanáloch uzlov.</string>
-    <string name="rebroadcast_mode_none_desc">Povolené len pre role SENSOR, TRACKER a TAK_TRACKER, zamedzí to všetkým opätovným vysielaniam, na rozdiel od roly CLIENT_MUTE.</string>
-    <string name="region_frequency_plan">Región</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administrácia na diaľku</string>
     <string name="remote_hardware">Vzdialený hardvér</string>
@@ -364,28 +355,17 @@
     <string name="ringtone">Zvonenie</string>
     <!-- ROLE -->
     <string name="role_client">Klient</string>
-    <string name="role_client_desc">Pripojená aplikácia, alebo samostatné zariadenie na odosielanie správ.</string>
     <string name="role_client_hidden">Skrytý Klient</string>
-    <string name="role_client_hidden_desc">Zariadenie, ktoré vysiela len podľa potreby pre utajenie, alebo úsporu energie.</string>
     <string name="role_client_mute">Stlmený Klient</string>
-    <string name="role_client_mute_desc">Zariadenie, ktoré nepreposiela pakety z ďalších zariadení.</string>
     <string name="role_lost_and_found">Straty a nálezy</string>
     <string name="role_repeater">Opakovač</string>
-    <string name="role_repeater_desc">Uzol infraštruktúry na rozšírenie pokrytia siete prenosom správ s minimálnou réžiou. Nezobrazuje sa v zozname uzlov.</string>
     <string name="role_router">Smerovač</string>
     <string name="role_router_client">Smerovač Klient</string>
-    <string name="role_router_client_desc">Kombinácia ROUTER a CLIENT. Nie pre mobilné zariadenia.</string>
-    <string name="role_router_desc">Uzol infraštruktúry na rozšírenie pokrytia siete prenosom správ. Viditeľný v zozname uzlov.</string>
     <string name="role_router_late">Smerovač s Oneskorením</string>
-    <string name="role_router_late_desc">Uzol infraštruktúry, ktorý vždy preposiela pakety raz, ale až po všetkých ostatných režimoch, čím zabezpečuje dodatočné pokrytie pre miestne zväzky. Viditeľný v zozname uzlov.</string>
     <string name="role_sensor">Senzor</string>
-    <string name="role_sensor_desc">Prioritne vysiela telemetrické pakety.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Optimalizované pre systémovú komunikáciu ATAK, znižuje rutinné vysielanie.</string>
     <string name="role_tak_tracker">TAK Sledovač</string>
-    <string name="role_tak_tracker_desc">Umožňuje automatické vysielanie TAK PLI a znižuje rutinné vysielanie.</string>
     <string name="role_tracker">Sledovač</string>
-    <string name="role_tracker_desc">Prioritne vysiela pakety polohy GPS.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Prijaté negatívne potvrdenie</string>
     <string name="routing_error_no_route">Žiadna trasa</string>
@@ -422,9 +402,6 @@
     <string name="swipe_action_delete">Vymazať</string>
     <string name="swipe_action_mute">Stlmiť</string>
     <!-- TAK -->
-    <string name="tak_team_blue">Modrá</string>
-    <string name="tak_team_green">Zelená</string>
-    <string name="tak_team_red">Červená</string>
     <string name="telemetry">Telemetria</string>
     <string name="theme">Téma</string>
     <string name="theme_dark">Tmavá</string>

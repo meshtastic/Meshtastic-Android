@@ -188,8 +188,6 @@
     <!-- QUICK -->
     <string name="radio_configuration">إعدادات الراديو</string>
     <string name="reboot">إعادة التشغيل</string>
-    <!-- REBROADCAST -->
-    <string name="region_frequency_plan">الجهة</string>
     <!-- REMOTE -->
     <!-- REMOVE -->
     <string name="replace">استبدال</string>

@@ -208,8 +208,6 @@
     <string name="quick_chat_new">Νέα γρήγορη συνομιλία</string>
     <string name="radio_configuration">Ρυθμίσεις συσκευής</string>
     <string name="reboot">Επανεκκίνηση</string>
-    <!-- REBROADCAST -->
-    <string name="region_frequency_plan">Περιφέρεια</string>
     <!-- REMOTE -->
     <string name="remote_admin">Απομακρυσμένη Διαχείριση</string>
     <!-- REMOVE -->
@@ -244,9 +242,6 @@
     <string name="swipe_action_delete">Διαγραφή</string>
     <string name="swipe_action_mute">Σίγαση</string>
     <!-- TAK -->
-    <string name="tak_team_blue">Μπλε</string>
-    <string name="tak_team_green">Πράσινο</string>
-    <string name="tak_team_red">Κόκκινο</string>
     <string name="telemetry">Τηλεμετρία</string>
     <string name="theme">Θέμα</string>
     <string name="theme_dark">Σκούρο</string>

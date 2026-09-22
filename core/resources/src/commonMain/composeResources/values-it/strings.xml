@@ -234,7 +234,6 @@
     <string name="config_lora_modem_preset_summary">Le preimpostazioni del modem disponibili, la predefinita è Long Fast.</string>
     <string name="config_lora_region_summary">La regione in cui utilizzerai le radio.</string>
     <string name="config_network_udp_enabled_summary">Abilita la trasmissione di pacchetti tramite UDP sulla rete locale.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Il tempo minimo tra un invio e l'altro per aggiornare della posizione, se la distanza minima è stata raggiunta.</string>
     <string name="config_saved_restarting">Il nodo si sta riavviando e sarà irraggiungibile per qualche secondo.</string>
     <string name="config_security_private_key">Usata per creare una chiave condivisa con un dispositivo remoto.</string>
     <string name="config_security_public_key">Generata a partire dalla chiave privata e inviata agli altri nodi della mesh per permettere loro di calcolare una chiave segreta condivisa.</string>
@@ -441,7 +440,6 @@
     <string name="distance_filters_description">Filtra l'elenco dei nodi e la mappa mesh in base alla prossimità al tuo telefono.</string>
     <string name="distance_measurements">Misure di distanza</string>
     <string name="distance_measurements_description">Visualizza la distanza tra il telefono e gli altri nodi Meshtastic con posizione attiva.</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Azzera ricerca</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistente,funzioni,automazione,voce</string>
@@ -646,7 +644,6 @@
     <string name="firmware_update_waiting_reboot">In attesa che il dispositivo si riavvii in modalità OTA...</string>
     <string name="firmware_update_waiting_reconnect">In attesa che il dispositivo si riconnetta...</string>
     <string name="firmware_version">Versione firmware: %1$s</string>
-    <string name="fixed_pin">PIN Fisso</string>
     <string name="fixed_position">Posizione Fissa</string>
     <string name="for_more_information_see_our_privacy_policy">Per ulteriori informazioni, consulta la nostra informativa sulla privacy.</string>
     <!-- FORMAT -->
@@ -659,7 +656,6 @@
     <string name="free_memory_description">Memoria di sistema disponibile in byte</string>
     <string name="freq">Freq</string>
     <string name="gas_resistance">Resistenza Ai Gas</string>
-    <string name="gateway">Gateway</string>
     <string name="generate_qr_code">Genera codice QR</string>
     <!-- GEOFENCE -->
     <string name="geofence">Geofence</string>
@@ -750,7 +746,6 @@
     <string name="latitude">Latitudine</string>
     <!-- LAYER -->
     <string name="learn_more">Maggiori informazioni</string>
-    <string name="led_heartbeat">Battito Cuore Led</string>
     <string name="legacy_admin_channel">Canale di Amministrazione legacy</string>
     <string name="library_count">%1$d librerie</string>
     <!-- LICENSED -->
@@ -859,11 +854,8 @@
     <string name="map_offline_manager">Gestore Offline</string>
     <string name="map_purge_fail">Eliminazione della cache SQL non riuscita, vedere logcat per i dettagli</string>
     <string name="map_purge_success">Cache SQL eliminata per %1$s</string>
-    <string name="map_reporting">Segnalazione su mappa</string>
     <string name="map_reporting_consent_header">Do il consenso a condividere i dati non cifrati del nodo tramite MQTT</string>
     <string name="map_reporting_consent_text">Abilitando questa funzione, l'utente riconosce e acconsente espressamente alla trasmissione della posizione geografica in tempo reale del suo dispositivo su protocollo MQTT senza crittografia. Questi dati di localizzazione possono essere utilizzati per scopi quali la compilazione di mappe in tempo reale, il tracking del dispositivo e le relative funzioni di telemetria.</string>
-    <string name="map_reporting_interval_seconds">Intervallo di segnalazione su mappa (secondi)</string>
-    <string name="map_reporting_summary">Il nodo invierà periodicamente un pacchetto di report mappa non cifrato al server MQTT configurato, questo include il nome id lungo e breve, posizione approssimativa, modello hardware, ruolo, versione firmware, regione LoRa, configurazione modem e nome del canale primario.</string>
     <string name="map_select_download_region">Seleziona la regione da scaricare</string>
     <string name="map_start_download">Inizia download</string>
     <string name="map_style_selection">Selezione stile mappa</string>
@@ -886,7 +878,6 @@
     <string name="mesh_beacon_invitations_title">Inviti mesh</string>
     <string name="mesh_beacon_listen">Ascolta i beacon</string>
     <string name="mesh_beacon_listen_summary">Cattura gli inviti annunciati dalle mesh vicine</string>
-    <string name="mesh_beacon_message">Messaggio del beacon</string>
     <string name="mesh_beacon_message_error">Massimo %1$d byte</string>
     <string name="mesh_beacon_notification_body">Una mesh vicina ti ha invitato a unirti</string>
     <string name="mesh_beacon_notification_title">Invito mesh</string>
@@ -946,7 +937,6 @@
     <string name="messages">Messaggi</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
-    <string name="minimum_broadcast_seconds">Trasmissione minima (secondi)</string>
     <string name="minimum_wake_time_seconds">Tempo minimo di risveglio</string>
     <string name="modem_preset">Preset</string>
     <string name="module_settings">Impostazioni moduli</string>
@@ -989,7 +979,6 @@
     <string name="mute_status_muted_for_days">Mutato per %1$d giorni, %2$s ore</string>
     <string name="mute_status_muted_for_hours">Mutato per %1$s ore</string>
     <string name="mute_status_unmuted">Non silenziato</string>
-    <string name="nag_timeout_seconds">Timeout chiusura popup (secondi)</string>
     <string name="name">Nome</string>
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
     <string name="navigate_back">Torna Indietro</string>
@@ -1111,7 +1100,6 @@
     <string name="open_wifi_settings">Apri le impostazioni Wi-Fi</string>
     <string name="options">Opzioni</string>
     <string name="orient_north">Orientamento nord</string>
-    <string name="output_duration_milliseconds">Durata output (millisecondi)</string>
     <string name="overflow_menu">Menu di overflow</string>
     <string name="override_console_serial_port">Sovrascrivi porta seriale della console</string>
     <!-- PACKET -->
@@ -1214,20 +1202,12 @@
     <string name="range_test_config">Configurazione Test Distanza Massima</string>
     <string name="react">Rispondi</string>
     <string name="reboot">Riavvia</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Ritrasmettere qualsiasi messaggio osservato, se era sul nostro canale privato o da un'altra mesh con gli stessi parametri lora.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Stesso comportamento di ALL ma salta la decodifica dei pacchetti e semplicemente li ritrasmette. Disponibile solo nel ruolo Repeater. Attivando questo su qualsiasi altro ruolo, si otterrà il comportamento di ALL.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignora pacchetti da numeri di porta non standard come: TAK, RangeTest, PaxCounter, ecc. Ritrasmette solo pacchetti con numeri di porta standard: NodeInfo, Testo, Posizione, Telemetria e Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignora i messaggi osservati da mesh esterne come fa LOCAL ONLY, ma in più ignora i messaggi da nodi non presenti nella lista dei nodi conosciuti.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignora i messaggi osservati da mesh esterne aperte o quelli che non possono essere decifrati. Ritrasmette il messaggio solo nei canali locali primario / secondario dei nodi.</string>
-    <string name="rebroadcast_mode_none_desc">Permesso solo per i ruoli SENSOR, TRACKER e TAK_TRACKER, questo inibirà tutte le ritrasmissioni, come il ruolo CLIENT_MUTE.</string>
     <string name="recent_network_devices">Dispositivi di rete recenti</string>
     <string name="reconnecting">Riconnessione…</string>
     <string name="refresh">Aggiorna</string>
     <string name="refresh_metadata">Aggiorna metadati</string>
     <string name="regenerate_keys_confirmation">Sei sicuro di voler rigenerare la tua chiave privata?\n\nI nodi che potrebbero aver precedentemente scambiato le chiavi con questo nodo dovranno rimuovere quel nodo ed effettuare di nuovo lo scambio di chiavi per ristabilire la sicurezza nella comunicazione.</string>
     <string name="regenerate_private_key">Rigenera Chiavi Private</string>
-    <string name="region_frequency_plan">Regione</string>
     <plurals name="relays">
         <item quantity="one">Sentito %1$d relay</item>
         <item quantity="other">Sentiti %1$d relay</item>
@@ -1278,29 +1258,17 @@
     <string name="role">Ruolo Del Dispositivo</string>
     <string name="role_client">Client</string>
     <string name="role_client_base">Base Client</string>
-    <string name="role_client_base_desc">Tratta i pacchetti da o verso i nodi preferiti come ROUTER_LATE, e tutti gli altri pacchetti come CLIENT.</string>
-    <string name="role_client_desc">App collegata o dispositivo di messaggistica standalone.</string>
     <string name="role_client_hidden">Client Nascosto</string>
-    <string name="role_client_hidden_desc">Dispositivo che trasmette solo quando necessario, per risparmiare energia o restare invisibile.</string>
     <string name="role_client_mute">Client Mute</string>
-    <string name="role_client_mute_desc">Dispositivo che non inoltra pacchetti da altri dispositivi.</string>
     <string name="role_lost_and_found">Oggetti Smarriti</string>
     <string name="role_repeater">Repeater</string>
-    <string name="role_repeater_desc">Nodo d'infrastruttura per estendere la copertura della rete tramite inoltro dei messaggi con overhead minimo. Non visibile nell'elenco dei nodi.</string>
     <string name="role_router">Router</string>
     <string name="role_router_client">Router Client</string>
-    <string name="role_router_client_desc">Combinazione di ROUTER e CLIENT. Non per dispositivi mobili.</string>
-    <string name="role_router_desc">Nodo d'infrastruttura per estendere la copertura di rete tramite inoltro dei messaggi. Visibile nell'elenco dei nodi.</string>
     <string name="role_router_late">Router Late</string>
-    <string name="role_router_late_desc">Nodo dell'infrastruttura che ritrasmette sempre i pacchetti una volta ma solo dopo tutte le altre modalità, garantendo una copertura aggiuntiva per i cluster locali. Visibile nella lista dei nodi.</string>
     <string name="role_sensor">Sensore</string>
-    <string name="role_sensor_desc">Dà priorità alla trasmissione di pacchetti di telemetria.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Ottimizzato per la comunicazione del sistema ATAK, riduce le trasmissioni di routine.</string>
     <string name="role_tak_tracker">TAK Tracker</string>
-    <string name="role_tak_tracker_desc">Abilita le trasmissioni automatiche TAK PLI e riduce le trasmissioni di routine.</string>
     <string name="role_tracker">Tracker</string>
-    <string name="role_tracker_desc">Dà priorità alla trasmissione di pacchetti di posizione GPS.</string>
     <string name="router_role_confirmation_text">Ho letto la &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;documentazione sui ruoli del dispositivo&lt;/a&gt; e l'articolo del blog su &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;come scegliere il ruolo giusto per il dispositivo&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Ricevuta una conferma negativa</string>
@@ -1363,7 +1331,6 @@
     <string name="selected">Selezionato</string>
     <string name="selected_map_type">Tipo di mappa selezionata</string>
     <string name="send">Invia</string>
-    <string name="sender_message_interval_seconds">Intervallo messaggio mittente (secondi)</string>
     <string name="serial">Seriale</string>
     <string name="serial_config">Configurazione Seriale</string>
     <string name="session_active">Sessione attiva</string>
@@ -1431,13 +1398,11 @@
     <string name="speed">Velocità</string>
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="speed_mph">%1$d mph</string>
-    <string name="state_broadcast_seconds">Trasmissione stato (secondi)</string>
     <string name="status_message">Messaggio di Stato</string>
     <string name="stay_connected_anywhere">Rimani connesso ovunque</string>
     <string name="stop_connecting">Interrompi Connessione</string>
     <string name="store_forward">Store &amp; Forward</string>
     <string name="store_forward_config">Configurazione Store &amp; Forward</string>
-    <string name="subnet">Subnet</string>
     <string name="success">Operazione riuscita</string>
     <string name="super_deep_sleep_duration_seconds">Durata super deep sleep</string>
     <string name="supported">Supportato</string>
@@ -1449,16 +1414,6 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Configurazione TAK</string>
-    <string name="tak_role">Ruolo membro</string>
-    <string name="tak_role_forwardobserver">Osservatore avanzato</string>
-    <string name="tak_role_hq">Quartier generale</string>
-    <string name="tak_role_k9">Cane (K9)</string>
-    <string name="tak_role_medic">Soccorritore</string>
-    <string name="tak_role_rto">Radiotelefonista</string>
-    <string name="tak_role_sniper">Tiratore scelto</string>
-    <string name="tak_role_teamlead">Capo squadra</string>
-    <string name="tak_role_teammember">Membro della squadra</string>
-    <string name="tak_role_unspecified">Non specificato</string>
     <string name="tak_server">Server TAK</string>
     <string name="tak_server_enabled">Abilita server TAK locale</string>
     <string name="tak_server_loading">…</string>
@@ -1471,22 +1426,6 @@
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_server_test_run">Esegui</string>
     <string name="tak_server_test_running">In esecuzione: %1$s</string>
-    <string name="tak_team">Colore squadra</string>
-    <string name="tak_team_blue">Blu</string>
-    <string name="tak_team_brown">Marrone</string>
-    <string name="tak_team_cyan">Ciano</string>
-    <string name="tak_team_dark_blue">Blu scuro</string>
-    <string name="tak_team_dark_green">Verde scuro</string>
-    <string name="tak_team_green">Verde</string>
-    <string name="tak_team_magenta">Magenta</string>
-    <string name="tak_team_maroon">Bordeaux</string>
-    <string name="tak_team_orange">Arancione</string>
-    <string name="tak_team_purple">Viola</string>
-    <string name="tak_team_red">Rosso</string>
-    <string name="tak_team_teal">Verde acqua</string>
-    <string name="tak_team_unspecified_color">Non specificato</string>
-    <string name="tak_team_white">Bianco</string>
-    <string name="tak_team_yellow">Giallo</string>
     <string name="telemetry">Telemetria</string>
     <string name="telemetry_config">Configurazione Telemetria</string>
     <string name="temperature">Temperatura</string>
@@ -1495,10 +1434,8 @@
     <string name="theme_light">Chiaro</string>
     <string name="theme_system">Predefinito di sistema</string>
     <string name="time">Ora</string>
-    <string name="time_zone">Fuso Orario</string>
     <string name="timeout">Timeout</string>
     <string name="timestamp">Data e ora</string>
-    <string name="tls_enabled">TLS abilitato</string>
     <string name="toggle_my_position">Attiva/disattiva posizione</string>
     <string name="trace_route">Trace Route</string>
     <!-- TRACEROUTE -->
@@ -1564,6 +1501,8 @@
     <string name="type">Tipo</string>
     <string name="type_a_message">Inserisci un messaggio</string>
     <string name="udp_enabled">Trasmissione UDP</string>
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_meters">m</string>
     <!-- UNITS -->
     <string name="units_follow_system">Predefinito di sistema</string>
     <string name="units_imperial">Imperiale</string>
@@ -1581,7 +1520,6 @@
     <string name="unmute_selected">Riattiva selezionati</string>
     <string name="unrecognized">Non riconosciuto</string>
     <string name="unset">Disattiva - 0</string>
-    <string name="update_interval_seconds">Intervallo di aggiornamento (secondi)</string>
     <string name="updated">Aggiornato</string>
     <string name="uplink_feature_description">I messaggi provenienti dalla rete mesh saranno inviati alla rete Internet pubblica attraverso il gateway configurato di qualsiasi nodo.</string>
     <string name="uptime">Tempo di attività</string>

@@ -202,14 +202,6 @@
     <string name="quick_chat_new">Nouvo chat rapid</string>
     <string name="radio_configuration">Konfigirasyon radyo</string>
     <string name="reboot">Rekòmanse</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Rebroadcast nenpòt mesaj obsève, si li te sou kanal prive nou oswa soti nan yon lòt mesh ak menm paramèt lora.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Menm jan ak konpòtman kòm "ALL" men sote dekodaj pakè yo epi senpleman rebroadcast yo. Disponib sèlman nan wòl Repeater. Mete sa sou nenpòt lòt wòl ap bay konpòtman "ALL".</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignoré pakè soti nan portnum ki pa estanda tankou: TAK, RangeTest, PaxCounter, elatriye. Sèlman rebroadcast pakè ak portnum estanda: NodeInfo, Tèks, Pozisyon, Telemetri, ak Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignoré mesaj obsève soti nan meshes etranje tankou "LOCAL ONLY", men ale yon etap pi lwen pa tou ignorer mesaj ki soti nan nœud ki poko nan lis konnen nœud la.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignoré mesaj obsève soti nan meshes etranje ki louvri oswa sa yo li pa ka dekripte. Sèlman rebroadcast mesaj sou kanal prensipal / segondè lokal nœud.</string>
-    <string name="rebroadcast_mode_none_desc">Sèlman pèmèt pou wòl SENSOR, TRACKER ak TAK_TRACKER, sa a ap entèdi tout rebroadcasts, pa diferan de wòl CLIENT_MUTE.</string>
-    <string name="region_frequency_plan">Rejyon</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administrasyon Remote</string>
     <!-- REMOVE -->
@@ -222,16 +214,6 @@
     <string name="reset">Reyajiste</string>
     <string name="reset_to_defaults">Reyajiste nan paramèt default yo</string>
     <!-- ROLE -->
-    <string name="role_client_desc">Aplikasyon konekte oswa aparèy mesaj endepandan.</string>
-    <string name="role_client_hidden_desc">Aparèy ki sèlman voye kòm sa nesesè pou kachèt oswa ekonomi pouvwa.</string>
-    <string name="role_client_mute_desc">Aparèy ki pa voye pake soti nan lòt aparèy.</string>
-    <string name="role_repeater_desc">Nœud enfrastrikti pou elaji kouvèti rezo pa relaye mesaj avèk ti overhead. Pa vizib nan lis nœud.</string>
-    <string name="role_router_client_desc">Kombinasyon de toude ROUTER ak CLIENT. Pa pou aparèy mobil.</string>
-    <string name="role_router_desc">Nœud enfrastrikti pou elaji kouvèti rezo pa relaye mesaj. Vizyèl nan lis nœud.</string>
-    <string name="role_sensor_desc">Voye pakè telemetri kòm priyorite.</string>
-    <string name="role_tak_desc">Optimizé pou kominikasyon sistèm ATAK, redwi emisyon regilye.</string>
-    <string name="role_tak_tracker_desc">Pèmèt emisyon TAK PLI otomatik epi redwi emisyon regilye.</string>
-    <string name="role_tracker_desc">Voye pakè pozisyon GPS kòm priyorite.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Rekòmanse avèk yon refi negatif</string>
     <string name="routing_error_no_route">Pa gen wout</string>

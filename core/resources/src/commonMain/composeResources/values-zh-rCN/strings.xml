@@ -234,7 +234,6 @@
     <string name="config_lora_modem_preset_summary">可用的调制解调器预置，默认为 “Long Fast”。</string>
     <string name="config_lora_region_summary">使用电台的地区。</string>
     <string name="config_network_udp_enabled_summary">在本地网络上启用通过 UDP广播数据包。</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">如果达到最小距离，位置更新将会发送最快的。</string>
     <string name="config_saved_restarting">该节点正在重启，将在短时间内无法连接。</string>
     <string name="config_security_private_key">用来创建远程设备共享密钥</string>
     <string name="config_security_public_key">从您的私钥生成并发送到网络上的其他节点，让它们能够计算共享的密钥。</string>
@@ -441,7 +440,6 @@
     <string name="distance_filters_description">根据靠近您的手机的位置筛选节点列表和网格地图。</string>
     <string name="distance_measurements">距离测量</string>
     <string name="distance_measurements_description">显示您的手机和其他带有位置的 Meshtastic 节点之间的距离。</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">清除搜索</string>
     <string name="doc_keywords_app_functions">我们既需要仰望星空,利用systemAI和Gemini 探索智能的上限;也需要脚踏实地用 Meshtastic 这样的技术守住安全的底线</string>
@@ -653,7 +651,6 @@
     <string name="firmware_update_waiting_reboot">正在等待设备重启到 OTA 模式...</string>
     <string name="firmware_update_waiting_reconnect">等待设备重新连接...</string>
     <string name="firmware_version">固件版本</string>
-    <string name="fixed_pin">固定PIN码</string>
     <string name="fixed_position">固定位置</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多信息，请参阅我们的隐私政策。</string>
     <!-- FORMAT -->
@@ -666,7 +663,6 @@
     <string name="free_memory_description">可用系统内存</string>
     <string name="freq">频率</string>
     <string name="gas_resistance">气体电阻性</string>
-    <string name="gateway">网关</string>
     <string name="generate_qr_code">生成二维码</string>
     <!-- GEOFENCE -->
     <string name="geofence">地图围栏</string>
@@ -759,7 +755,6 @@
     <string name="layer_subtitle">%1$s • %2$s</string>
     <string name="layer_type_network">网络层</string>
     <string name="learn_more">更多信息</string>
-    <string name="led_heartbeat">LED 心跳</string>
     <string name="legacy_admin_channel">旧版管理频道</string>
     <string name="library_count">%1$d 库</string>
     <!-- LICENSED -->
@@ -866,11 +861,8 @@
     <string name="map_offline_manager">离线管理</string>
     <string name="map_purge_fail">清除 SQL 缓存失败，请查看 logcat 纪录</string>
     <string name="map_purge_success">清除 %1$s 的 SQL 缓存</string>
-    <string name="map_reporting">地图报告</string>
     <string name="map_reporting_consent_header">同意通过 MQTT 分享未加密的节点数据</string>
     <string name="map_reporting_consent_text">通过启用此功能，您确认并明确同意通过MQTT协议不加密地传输您设备的实时地理位置。 这一位置数据可用于现场地图报告、设备跟踪和相关的遥测功能。</string>
-    <string name="map_reporting_interval_seconds">地图报告间隔 (秒)</string>
-    <string name="map_reporting_summary">您的节点将定期向配置的MQTT服务器发送一个未加密的地图报告数据包，这包括id、长和短的名称， 大致位置、硬件型号、角色、固件版本、LoRa区域、调制解调器预设和主频道名称。</string>
     <string name="map_select_download_region">选择下载地区</string>
     <string name="map_start_download">开始下载</string>
     <string name="map_style_selection">地图样式选择</string>
@@ -893,7 +885,6 @@
     <string name="mesh_beacon_invitations_title">Mesh 活动邀请</string>
     <string name="mesh_beacon_listen">接收广播信标</string>
     <string name="mesh_beacon_listen_summary">搜索附近设备广播的邀请</string>
-    <string name="mesh_beacon_message">广播信标内容消息</string>
     <string name="mesh_beacon_message_error">最大值 %1$d 字节</string>
     <string name="mesh_beacon_notification_body">附近的一个 Mesh邀请你加入</string>
     <string name="mesh_beacon_notification_title">Mesh 组网加入邀请</string>
@@ -953,7 +944,6 @@
     <string name="messages">消息</string>
     <string name="micrograms_per_cubic_meter">微克每立方米</string>
     <string name="min">最小值</string>
-    <string name="minimum_broadcast_seconds">最小广播时间(秒)</string>
     <string name="minimum_wake_time_seconds">最小唤醒时间</string>
     <string name="modem_preset">预设</string>
     <string name="module_settings">模块设定</string>
@@ -1000,7 +990,6 @@
     <string name="mute_status_muted_for_days">%1$d 天静音， %2$s 小时</string>
     <string name="mute_status_muted_for_hours">%1$s 小时静音</string>
     <string name="mute_status_unmuted">非静音</string>
-    <string name="nag_timeout_seconds">屏幕超时(秒)</string>
     <string name="name">名称</string>
     <string name="name_cannot_be_empty">名称不能为空。</string>
     <string name="navigate_back">回溯导航</string>
@@ -1122,7 +1111,6 @@
     <string name="open_wifi_settings">打开 Wi-Fi 设置</string>
     <string name="options">选项</string>
     <string name="orient_north">朝北</string>
-    <string name="output_duration_milliseconds">输出持续时间 (毫秒)</string>
     <string name="overflow_menu">溢出菜单</string>
     <string name="override_console_serial_port">覆盖控制台串口端口</string>
     <!-- PACKET -->
@@ -1223,20 +1211,12 @@
     <string name="range_test_config">范围测试设置</string>
     <string name="react">互动</string>
     <string name="reboot">重启</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">重新广播任何观察到的消息，无论是来自我们的私有频道还是具有相同 LoRa 参数的其他网状网络。</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">与 ALL 模式的行为相同，但跳过数据包解码，仅简单地重新广播它们。仅适用于中继器角色。在其他角色中设置此选项将表现为 ALL 模式。</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">忽略来自非标准端口号（如 TAK、RangeTest、PaxCounter 等）的数据包，仅重新广播标准端口号的数据包：NodeInfo、Text、Position、Telemetry 和 Routing。</string>
-    <string name="rebroadcast_mode_known_only_desc">与 LOCAL_ONLY 类似，忽略来自其他网状网络的消息，但更进一步，忽略来自不在节点已知列表中的节点的消息。</string>
-    <string name="rebroadcast_mode_local_only_desc">忽略来自开放网状网络或无法解密的消息，仅在节点的本地主/次频道上重新广播消息。</string>
-    <string name="rebroadcast_mode_none_desc">仅限 SENSOR、TRACKER 和 TAK_TRACKER 角色，此模式将禁止所有重新广播，与 CLIENT_MUTE 角色类似。</string>
     <string name="recent_network_devices">最近使用的网络设备</string>
     <string name="reconnecting">正在重新连接…</string>
     <string name="refresh">刷新</string>
     <string name="refresh_metadata">刷新元数据</string>
     <string name="regenerate_keys_confirmation">您确定要重新生成您的私钥吗？\n\n曾与此节点交换过密钥的节点将需要删除该节点并重新交换密钥以恢复安全通信。</string>
     <string name="regenerate_private_key">重新生成私钥</string>
-    <string name="region_frequency_plan">区域</string>
     <plurals name="relays">
         <item quantity="other">连接到的 %1$d 中继节点</item>
     </plurals>
@@ -1286,29 +1266,17 @@
     <string name="role">设备角色</string>
     <string name="role_client">客户端</string>
     <string name="role_client_base">客户群</string>
-    <string name="role_client_base_desc">将来自或收藏节点的数据包视为ROUTER_LATE，所有其他数据包均为CLIENT。</string>
-    <string name="role_client_desc">应用配对或独立使用的消息传递设备</string>
     <string name="role_client_hidden">客户端隐藏</string>
-    <string name="role_client_hidden_desc">只在需要时才广播的设备，以达到隐蔽或省电的目的。</string>
     <string name="role_client_mute">客户端静默</string>
-    <string name="role_client_mute_desc">不转发其他设备数据包的设备。</string>
     <string name="role_lost_and_found">失物招领</string>
     <string name="role_repeater">中继</string>
-    <string name="role_repeater_desc">通过最低开销转发消息扩展网络覆盖的基础设施节点。不可见于节点列表。</string>
     <string name="role_router">路由</string>
     <string name="role_router_client">路由客户端</string>
-    <string name="role_router_client_desc">同时兼具路由器和客户端功能的设备。不适用于移动设备。</string>
-    <string name="role_router_desc">用于通过转发消息扩展网络覆盖范围的基础设施节点。可在节点列表中看到。</string>
     <string name="role_router_late">延迟时间</string>
-    <string name="role_router_late_desc">基础设施节点，总是在所有其他模式之后重新广播数据包一次，以确保本地集群的额外覆盖范围。会在节点列表中显示。</string>
     <string name="role_sensor">传感器</string>
-    <string name="role_sensor_desc">将遥测数据包优先广播。</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">针对 ATAK 系统通信进行优化，减少常规广播。</string>
     <string name="role_tak_tracker">TAK 追踪器</string>
-    <string name="role_tak_tracker_desc">启用自动 TAK PLI（Position Location Information）广播，并减少常规广播。</string>
     <string name="role_tracker">追踪器</string>
-    <string name="role_tracker_desc">定位模式 - 用于作为 GPS 跟踪器。从该设备发送的定位数据包优先级较高，每两分钟广播一次。智能位置广播默认为关闭。</string>
     <string name="router_role_confirmation_text">我已经阅读了 &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;设备角色文档&lt;/a&gt; 这篇博客文章&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;选择合适的设备角色&lt;/a&gt;。</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">接收到否定确认</string>
@@ -1371,7 +1339,6 @@
     <string name="selected">选择</string>
     <string name="selected_map_type">所选地图类型</string>
     <string name="send">传送</string>
-    <string name="sender_message_interval_seconds">发件人消息间隔(秒)</string>
     <string name="serial">串口</string>
     <string name="serial_config">串口配置</string>
     <string name="session_active">会话处于活跃状态</string>
@@ -1440,13 +1407,11 @@
     <string name="speed">速度</string>
     <string name="speed_kmh">%1$d 公里/小时</string>
     <string name="speed_mph">%1$d 英里每小时</string>
-    <string name="state_broadcast_seconds">状态广播(秒)</string>
     <string name="status_message">状态消息</string>
     <string name="stay_connected_anywhere">随时随地保持联系</string>
     <string name="stop_connecting">停止连接</string>
     <string name="store_forward">存储 &amp; 转发</string>
     <string name="store_forward_config">存储 &amp; 转发配置</string>
-    <string name="subnet">子网</string>
     <string name="success">成功</string>
     <string name="super_deep_sleep_duration_seconds">深度睡眠时间</string>
     <string name="supported">已支持</string>
@@ -1458,16 +1423,6 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK 配置</string>
-    <string name="tak_role">成员角色</string>
-    <string name="tak_role_forwardobserver">转发观察员</string>
-    <string name="tak_role_hq">指挥中心</string>
-    <string name="tak_role_k9">Doggo (K9)</string>
-    <string name="tak_role_medic">医疗</string>
-    <string name="tak_role_rto">无线电电话操作员</string>
-    <string name="tak_role_sniper">狙击手</string>
-    <string name="tak_role_teamlead">团队组长</string>
-    <string name="tak_role_teammember">团队成员</string>
-    <string name="tak_role_unspecified">未指定</string>
     <string name="tak_server">TAK 服务器</string>
     <string name="tak_server_enabled">启用本地 TAK 服务器</string>
     <string name="tak_server_loading">…</string>
@@ -1481,22 +1436,6 @@
     <string name="tak_server_test_result_unknown_error">失败</string>
     <string name="tak_server_test_run">运行</string>
     <string name="tak_server_test_running">正在运行: %1$s</string>
-    <string name="tak_team">队伍颜色</string>
-    <string name="tak_team_blue">蓝</string>
-    <string name="tak_team_brown">棕色</string>
-    <string name="tak_team_cyan">蓝绿色</string>
-    <string name="tak_team_dark_blue">深蓝色</string>
-    <string name="tak_team_dark_green">深绿色</string>
-    <string name="tak_team_green">绿</string>
-    <string name="tak_team_magenta">品红</string>
-    <string name="tak_team_maroon">栗色</string>
-    <string name="tak_team_orange">橙色</string>
-    <string name="tak_team_purple">紫色</string>
-    <string name="tak_team_red">红</string>
-    <string name="tak_team_teal">蓝绿色</string>
-    <string name="tak_team_unspecified_color">未指定</string>
-    <string name="tak_team_white">白色</string>
-    <string name="tak_team_yellow">黄色</string>
     <string name="telemetry">遥测</string>
     <string name="telemetry_config">远程配置</string>
     <string name="temperature">温度</string>
@@ -1505,10 +1444,8 @@
     <string name="theme_light">浅色</string>
     <string name="theme_system">系统默认设置</string>
     <string name="time">时间</string>
-    <string name="time_zone">时区</string>
     <string name="timeout">超时</string>
     <string name="timestamp">时间戳</string>
-    <string name="tls_enabled">启用TLS</string>
     <string name="toggle_my_position">切换我的位置</string>
     <string name="trace_route">追踪路径</string>
     <!-- TRACEROUTE -->
@@ -1573,6 +1510,8 @@
     <string name="type">类型</string>
     <string name="type_a_message">输入一条消息</string>
     <string name="udp_enabled">UDP 广播</string>
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_meters">m</string>
     <!-- UNITS -->
     <string name="units_follow_system">系统默认设置</string>
     <string name="units_imperial">英制</string>
@@ -1590,7 +1529,6 @@
     <string name="unmute_selected">取消休眠所选节点</string>
     <string name="unrecognized">无法识别的</string>
     <string name="unset">未设定 - 0</string>
-    <string name="update_interval_seconds">更新间隔（秒）</string>
     <string name="updated">更新</string>
     <string name="uplink_feature_description">网格中的消息将通过节点配置的网关发送到公共互联网。</string>
     <string name="uptime">正常运行时间</string>

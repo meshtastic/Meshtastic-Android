@@ -123,7 +123,6 @@
     <string name="config_lora_modem_preset_summary">Elérhető modem-előbeállítások, alapértelmezés: Nagy hatótáv – Gyors.</string>
     <string name="config_lora_region_summary">A régió, ahol a rádiókat használni fogja.</string>
     <string name="config_network_udp_enabled_summary">Csomagok sugárzásának engedélyezése UDP-n a helyi hálózaton.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">A pozíciófrissítések legnagyobb gyakorisága, ha a minimális távolságváltozás teljesült.</string>
     <string name="config_security_private_key">Távoli eszközzel közös kulcs létrehozására használatos.</string>
     <string name="configure_critical_alerts">Kritikus riasztások beállítása</string>
     <string name="configure_location_permissions">Helyhozzáférés beállítása</string>
@@ -254,14 +253,12 @@
     <string name="firmware_too_old">Firmware frissítés szükséges.</string>
     <string name="firmware_update_failed">A frissítés sikertelen</string>
     <string name="firmware_version">Firmware-verzió: %1$s</string>
-    <string name="fixed_pin">Rögzített PIN</string>
     <string name="fixed_position">Rögzített pozíció</string>
     <string name="for_more_information_see_our_privacy_policy">További információért lásd az adatvédelmi irányelveinket.</string>
     <!-- FORMAT -->
     <string name="free_memory">Szabad memória</string>
     <string name="freq">Frekvencia</string>
     <string name="gas_resistance">Gázellenállás</string>
-    <string name="gateway">Átjáró</string>
     <!-- GEOFENCE -->
     <string name="get_started">Kezdjük el</string>
     <string name="good">Jó</string>
@@ -307,7 +304,6 @@
     <string name="latest_stable_firmware">Legújabb stabil</string>
     <string name="latitude">Szélesség</string>
     <!-- LAYER -->
-    <string name="led_heartbeat">LED ütemjelzés</string>
     <string name="legacy_admin_channel">Régi admin csatorna</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ennek az opciónak az engedélyezése letiltja a titkosítást, és nem kompatibilis az alapértelmezett Meshtastic hálózattal.</string>
@@ -362,11 +358,8 @@
     <string name="map_offline_manager">Offline kezelő</string>
     <string name="map_purge_fail">SQL gyorsítótár kiürítése sikertelen, a részleteket lásd a logcat-ben</string>
     <string name="map_purge_success">SQL gyorsítótár kiürítve %1$s számára</string>
-    <string name="map_reporting">Térképadat-jelentés</string>
     <string name="map_reporting_consent_header">Hozzájárulás a csomópont titkosítatlan adatainak MQTT-n keresztüli megosztásához</string>
     <string name="map_reporting_consent_text">E funkció engedélyezésével tudomásul veszed és kifejezetten hozzájárulsz ahhoz, hogy az eszköz valós idejű földrajzi helyzete titkosítás nélkül kerüljön továbbításra az MQTT protokollon keresztül. Ez a helyadat felhasználható például élő térképes jelentéshez, eszközkövetéshez és egyéb telemetriai funkciókhoz.</string>
-    <string name="map_reporting_interval_seconds">Térképadat-jelentés intervalluma (másodperc)</string>
-    <string name="map_reporting_summary">A csomópont időszakosan titkosítatlan térképadat-csomagot küld a beállított MQTT szerverre, amely tartalmazza az azonosítót, a hosszú és rövid nevet, a hozzávetőleges helyet, a hardvermodellt, a szerepkört, a firmware-verziót, a LoRa régiót, a modem-előbeállítást és az elsődleges csatorna nevét.</string>
     <string name="map_select_download_region">Válassz letöltési régiót</string>
     <string name="map_start_download">Letöltés indítása</string>
     <string name="map_subDescription">irányszög: %1$d° távolság: %2$s</string>
@@ -406,7 +399,6 @@
     <string name="message_status_queued">Elküldésre vár</string>
     <string name="message_status_unknown">Ismeretlen</string>
     <string name="messages">Üzenetek</string>
-    <string name="minimum_broadcast_seconds">Minimális sugárzási idő (másodperc)</string>
     <string name="minimum_wake_time_seconds">Minimális ébrenléti idő</string>
     <string name="modem_preset">Előbeállítások</string>
     <string name="module_settings">Modul beállítások</string>
@@ -428,7 +420,6 @@
     <string name="mute_status_muted_for_days">Némítva ennyi ideig: %1$d nap, %2$s óra</string>
     <string name="mute_status_muted_for_hours">Némítva: %1$s óra</string>
     <string name="mute_status_unmuted">Nincs némítva</string>
-    <string name="nag_timeout_seconds">Ismétlő riasztás időkorlát (másodperc)</string>
     <string name="name">Név</string>
     <string name="name_cannot_be_empty">A név nem lehet üres.</string>
     <string name="navigate_back">Vissza</string>
@@ -497,7 +488,6 @@
     <string name="open_settings">Beállítások megnyitása</string>
     <string name="options">Beállítások</string>
     <string name="orient_north">Északra tájolás</string>
-    <string name="output_duration_milliseconds">Kimeneti időtartam (ezredmásodperc)</string>
     <string name="overflow_menu">További menü</string>
     <string name="override_console_serial_port">Konzol soros port felülbírálása</string>
     <!-- PACKET -->
@@ -555,17 +545,9 @@
     <string name="range_test_config">Hatótáv-teszt beállításai</string>
     <string name="react">Reagálás</string>
     <string name="reboot">Újraindítás</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Újrasugároz minden észlelt üzenetet, ha az a privát csatornánkon volt, vagy más, azonos LoRa-paraméterű hálózatból származik.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Ugyanaz, mint az „ALL” viselkedés, de kihagyja a csomag dekódolását és egyszerűen újrasugározza. Csak Ismétlő (Repeater) szerepkörben elérhető; más szerepkörben az „ALL” mód érvényesül.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Figyelmen kívül hagyja a nem szabványos portszámú csomagokat (pl. TAK, RangeTest, PaxCounter), és csak a szabványos portszámúakat sugározza újra: NodeInfo, Text, Position, Telemetry, Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Hasonló a „LOCAL ONLY”-hoz, de tovább megy: figyelmen kívül hagyja az olyan csomópontok üzeneteit is, amelyek nem szerepelnek az ismert listában.</string>
-    <string name="rebroadcast_mode_local_only_desc">Figyelmen kívül hagyja a nyílt vagy nem dekódolható idegen hálózatok üzeneteit. Csak a csomópont helyi elsődleges / másodlagos csatornáin sugároz újra.</string>
-    <string name="rebroadcast_mode_none_desc">Csak SENSOR, TRACKER és TAK_TRACKER szerepkörben engedélyezett; minden újraküldést letilt, hasonlóan a CLIENT_MUTE szerephez.</string>
     <string name="recent_network_devices">Legutóbbi hálózati eszközök</string>
     <string name="regenerate_keys_confirmation">Biztosan újragenerálod a privát kulcsot?\n\nAzoknak a csomópontoknak, amelyek korábban kulcsot cseréltek ezzel a csomóponttal, el kell távolítaniuk a csomópontot és újra kell cserélniük a kulcsokat a biztonságos kommunikáció helyreállításához.</string>
     <string name="regenerate_private_key">Privát kulcs újragenerálása</string>
-    <string name="region_frequency_plan">Régió</string>
     <!-- REMOTE -->
     <string name="remote">Távoli</string>
     <string name="remote_admin">Távoli Adminisztráció</string>
@@ -599,28 +581,17 @@
     <!-- ROLE -->
     <string name="role">Eszköz szerepköre</string>
     <string name="role_client">Kliens</string>
-    <string name="role_client_desc">Alkalmazáshoz csatlakoztatott vagy önálló üzenetküldő eszköz.</string>
     <string name="role_client_hidden">Rejtett Kliens</string>
-    <string name="role_client_hidden_desc">Eszköz, amely csak szükség esetén sugároz, rejtettség vagy energiatakarékosság miatt.</string>
     <string name="role_client_mute">Néma Kliens</string>
-    <string name="role_client_mute_desc">Olyan eszköz, amely nem továbbít más eszközöktől érkező csomagokat.</string>
     <string name="role_lost_and_found">Elveszett és Megkerült</string>
     <string name="role_repeater">Jelismétlő</string>
-    <string name="role_repeater_desc">Hálózati lefedettséget bővítő infrastruktúra-csomópont, amely minimális terheléssel továbbítja az üzeneteket. Nem látható a listában.</string>
     <string name="role_router">Router</string>
     <string name="role_router_client">Router Kliens</string>
-    <string name="role_router_client_desc">ROUTER és CLIENT kombinációja. Nem hordozható eszközökhöz.</string>
-    <string name="role_router_desc">Hálózati lefedettséget bővítő infrastruktúra-csomópont, amely továbbítja az üzeneteket. Látható a csomópont-listában.</string>
     <string name="role_router_late">Késő Router</string>
-    <string name="role_router_late_desc">Infrastruktúra-csomópont, amely minden csomagot egyszer újraküld, de csak az összes más mód után, extra lefedettséget biztosítva a helyi klasztereknek. Látható a listában.</string>
     <string name="role_sensor">Szenzor</string>
-    <string name="role_sensor_desc">Telemetriai csomagok elsődleges sugárzása.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">ATAK rendszerkommunikációra optimalizált, csökkenti a rutin-sugárzásokat.</string>
     <string name="role_tak_tracker">TAK Tracker</string>
-    <string name="role_tak_tracker_desc">Automatikus TAK PLI sugárzást engedélyez és csökkenti a rutin-sugárzásokat.</string>
     <string name="role_tracker">Tracker</string>
-    <string name="role_tracker_desc">GPS-pozíció csomagok elsődleges sugárzása.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Negatív visszaigazolás érkezett</string>
     <string name="routing_error_no_route">Nincs út</string>
@@ -659,7 +630,6 @@
     <string name="selected">Kijelölve</string>
     <string name="selected_map_type">Kiválasztott térképtípus</string>
     <string name="send">Küldeni</string>
-    <string name="sender_message_interval_seconds">Küldési üzenetintervallum (másodperc)</string>
     <string name="serial">Soros port</string>
     <string name="serial_config">Soros beállítások</string>
     <string name="set_your_region">Régió beállítása</string>
@@ -691,9 +661,7 @@
     <string name="snr">SNR</string>
     <string name="snr_definition">Jel–zaj arány (SNR): a kommunikációban a kívánt jel szintjének és a háttérzaj szintjének aránya. A Meshtastic és más vezeték nélküli rendszerek esetében a magasabb SNR tisztább jelet jelent, ami javítja az adatátvitel megbízhatóságát és minőségét.</string>
     <string name="speed">Sebesség</string>
-    <string name="state_broadcast_seconds">Állapot-sugárzás (másodperc)</string>
     <string name="stay_connected_anywhere">Maradj kapcsolatban bárhol</string>
-    <string name="subnet">Alhálózat</string>
     <string name="super_deep_sleep_duration_seconds">Szuper mélyalvás időtartama</string>
     <string name="supported">Támogatott</string>
     <string name="supported_by_community">Meshtastic közösség által támogatott</string>
@@ -703,9 +671,6 @@
     <string name="system_settings">Rendszerbeállítások</string>
     <!-- TAK -->
     <string name="tak_server_section">Szerver</string>
-    <string name="tak_team_blue">Kék</string>
-    <string name="tak_team_green">Zöld</string>
-    <string name="tak_team_red">Piros</string>
     <string name="telemetry">Telemetria</string>
     <string name="telemetry_config">Telemetria beállítások</string>
     <string name="theme">Téma</string>
@@ -713,10 +678,8 @@
     <string name="theme_light">Világos</string>
     <string name="theme_system">Rendszer alapértelmezett</string>
     <string name="time">Idő</string>
-    <string name="time_zone">Időzóna</string>
     <string name="timeout">Időtúllépés</string>
     <string name="timestamp">Időbélyeg</string>
-    <string name="tls_enabled">TLS engedélyezve</string>
     <string name="toggle_my_position">Saját pozíció váltása</string>
     <string name="trace_route">Traceroute</string>
     <!-- TRACEROUTE -->
@@ -746,6 +709,8 @@
     <string name="two_weeks">2 hét</string>
     <string name="type">Típus</string>
     <string name="type_a_message">Írj üzenetet</string>
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_meters">m</string>
     <!-- UNITS -->
     <string name="units_follow_system">Rendszer alapértelmezett</string>
     <!-- UNKNOWN -->
@@ -758,7 +723,6 @@
     <string name="unmute">Némítás feloldása</string>
     <string name="unrecognized">Ismeretlen</string>
     <string name="unset">Nincs beállítva – 0</string>
-    <string name="update_interval_seconds">Frissítési intervallum (másodperc)</string>
     <string name="uplink_feature_description">A mesh üzenetei bármely csomópont beállított átjáróján keresztül kerülnek az internetre.</string>
     <string name="uptime">Működési idő</string>
     <!-- URL -->

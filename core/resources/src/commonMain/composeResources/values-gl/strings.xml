@@ -185,8 +185,6 @@
     <string name="quick_chat_new">Nova conversa rápida</string>
     <string name="radio_configuration">Configuración de radio</string>
     <string name="reboot">Reiniciar</string>
-    <!-- REBROADCAST -->
-    <string name="region_frequency_plan">Rexión</string>
     <!-- REMOTE -->
     <!-- REMOVE -->
     <string name="remove">Eliminar</string>
@@ -198,7 +196,6 @@
     <string name="reset_to_defaults">Restablecer a por defecto</string>
     <!-- ROLE -->
     <string name="role_client">Cliente</string>
-    <string name="role_client_desc">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
     <!-- ROUTING -->
     <string name="save">Gardar</string>
     <string name="save_changes">Gardar</string>

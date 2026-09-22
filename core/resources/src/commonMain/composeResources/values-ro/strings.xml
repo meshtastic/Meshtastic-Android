@@ -149,7 +149,6 @@
     <string name="config_lora_modem_preset_summary">Presetările modemului disponibile, implicit este Long Fast (Rază lungă - rapid).</string>
     <string name="config_lora_region_summary">Regiunea în care veți folosi radioul.</string>
     <string name="config_network_udp_enabled_summary">Activați transmisiunea pachetelor prin UDP în rețeaua locală.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Cea mai rapidă actualizare a poziției care va fi trimisă dacă distanța minimă a fost respectată.</string>
     <string name="config_security_private_key">Utilizat pentru a crea o cheie partajată cu un dispozitiv la distanță.</string>
     <string name="config_security_public_key">Generată din cheia publică și trimisă către alte noduri din rețea pentru a le permite să calculeze o cheie secretă comună.</string>
     <string name="configure_bluetooth_permissions">Configuraţi permisiunile Bluetooth</string>
@@ -257,7 +256,6 @@
     <string name="distance_filters_description">Filtrează lista de noduri și harta plasei în funcție de proximitatea telefonului tău.</string>
     <string name="distance_measurements">Măsurătorile distanței</string>
     <string name="distance_measurements_description">Afișează distanța dintre telefonul dvs. și alte noduri Meshtastice cu poziții.</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Ștergeți căutarea</string>
     <string name="doc_title_mqtt">MQTT</string>
@@ -376,14 +374,12 @@
     <string name="firmware_update_waiting_reboot">Se așteaptă ca dispozitivul să se repornească în modul OTA...</string>
     <string name="firmware_update_waiting_reconnect">Se așteaptă ca dispozitivul să se reconecte...</string>
     <string name="firmware_version">Versiune firmware: %1$s</string>
-    <string name="fixed_pin">PIN fix</string>
     <string name="fixed_position">Poziție fixă</string>
     <string name="for_more_information_see_our_privacy_policy">Pentru mai multe informații, consultați politica noastră de confidențialitate.</string>
     <!-- FORMAT -->
     <string name="free_memory">Memorie Liberă</string>
     <string name="freq">Frecvență</string>
     <string name="gas_resistance">Rezistența la gaz</string>
-    <string name="gateway">Poartă de acces</string>
     <string name="generate_qr_code">Generați codul QR</string>
     <!-- GEOFENCE -->
     <string name="get_started">Să începem</string>
@@ -438,7 +434,6 @@
     <string name="latest_stable_firmware">Ultimul stabil</string>
     <string name="latitude">Latitudine</string>
     <!-- LAYER -->
-    <string name="led_heartbeat">Puls LED</string>
     <string name="legacy_admin_channel">Canal implicit de administrator</string>
     <string name="library_count">Librării %1$d</string>
     <!-- LICENSED -->
@@ -517,11 +512,8 @@
     <string name="map_offline_manager">Manager offline</string>
     <string name="map_purge_fail">Ștergerea cache-ului SQL a eșuat, vedeți logcat pentru detalii</string>
     <string name="map_purge_success">Cache SQL șters pentru %1$s</string>
-    <string name="map_reporting">Raportarea hărții</string>
     <string name="map_reporting_consent_header">Consimțământ pentru a Partaja date Node necriptate prin MQTT</string>
     <string name="map_reporting_consent_text">Prin activarea acestei caracteristici, acceptați și consimți în mod expres transmiterea locației geografice în timp real a dispozitivului dvs. peste protocolul MQTT fără criptare. Aceste date de localizare pot fi utilizate în scopuri cum ar fi raportarea hărților live, urmărirea dispozitivelor și funcțiile telemetrice aferente.</string>
-    <string name="map_reporting_interval_seconds">Intervalul de raportare hartă (secunde)</string>
-    <string name="map_reporting_summary">Nodul tău va trimite periodic un pachet de rapoarte de hărți necriptate serverului MQTT configurat, acesta include un nume id, lung și scurt, aproximează locația, modelul hardware, rolul, versiunea firmware, regiunea LoRa, presetarea modemului și numele canalului primar.</string>
     <string name="map_select_download_region">Selectați regiunea pentru descărcare</string>
     <string name="map_start_download">Pornește descărcarea</string>
     <string name="map_style_selection">Selecție stil hartă</string>
@@ -566,7 +558,6 @@
     <string name="message_status_sfpp_routing">Rutare prin lanțul SF++…</string>
     <string name="message_status_unknown">Necunoscut</string>
     <string name="messages">Mesaje</string>
-    <string name="minimum_broadcast_seconds">Difuzare minimă (secunde)</string>
     <string name="minimum_wake_time_seconds">Durata minimă a trezirii</string>
     <string name="modem_preset">Presetări</string>
     <string name="module_settings">Configurare modul</string>
@@ -591,7 +582,6 @@
     <string name="mute_status_muted_for_days">Silențios pentru %1$d zile, %2$s ore</string>
     <string name="mute_status_muted_for_hours">Silențios pentru %1$s ore</string>
     <string name="mute_status_unmuted">Nu este silențios</string>
-    <string name="nag_timeout_seconds">Durată notificare (secunde)</string>
     <string name="name">Nume</string>
     <string name="name_cannot_be_empty">Numele nu poate fi gol</string>
     <string name="navigate_back">Navigați înapoi</string>
@@ -674,7 +664,6 @@
     <string name="open_source_libraries">Biblioteci open source</string>
     <string name="options">Opțiuni</string>
     <string name="orient_north">Orientare spre nord</string>
-    <string name="output_duration_milliseconds">Durată ieșire (milisecunde)</string>
     <string name="overflow_menu">Meniu de Overflow</string>
     <string name="override_console_serial_port">Suprascrie portul serial al consolei</string>
     <!-- PACKET -->
@@ -753,18 +742,10 @@
     <string name="range_test_config">Configurare test interval</string>
     <string name="react">Reacţionează</string>
     <string name="reboot">Restartează</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Retransmite orice mesaj observat, dacă acesta se afla pe canalul nostru privat sau provine de la o altă rețea cu aceiași parametri LoRa.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Același comportament ca „Toate”, dar omite decodarea pachetelor și le retransmite direct. Disponibil numai în rolul Releu. Setarea acestei opțiuni pentru orice alt rol va avea ca rezultat comportamentul „Toate”</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignoră pachetele provenite de la numere de port non-standard, cum ar fi: TAK, RangeTest, PaxCounter etc. Retransmite numai pachetele cu numere de port standard: NodeInfo, Text, Position, Telemetry și Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignoră mesajele observate din rețele străine, cum ar fi „Numai local”, dar merge mai departe, ignorând și mesajele de la noduri care nu se află deja în lista cunoscută a nodului.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignoră mesajele observate provenite de la rețele străine deschise sau pe care nu le poate decripta. Retransmite mesajele numai pe canalele locale primare/secundare ale nodurilor.</string>
-    <string name="rebroadcast_mode_none_desc">Permis numai pentru rolurile SENSOR, TRACKER și TAK_TRACKER, aceasta va inhiba toate retransmisiile, similar rolului CLIENT_MUTE.</string>
     <string name="recent_network_devices">Dispozitive recente de rețea</string>
     <string name="refresh">Reimprospatare</string>
     <string name="regenerate_keys_confirmation">Sunteţi sigur că doriţi să vă regeneraţi cheia privată?\n\nNodurile care ar fi putut schimba anterior chei cu acest modul vor trebui să elimine acel nod și să schimbe din nou tastele pentru a relua comunicarea securizată.</string>
     <string name="regenerate_private_key">Regenerează Cheia privată</string>
-    <string name="region_frequency_plan">Regiune</string>
     <!-- REMOTE -->
     <string name="remote">De la distanta</string>
     <string name="remote_admin">Administrare la distanță</string>
@@ -803,29 +784,17 @@
     <string name="role">Rolul dispozitivului</string>
     <string name="role_client">Client</string>
     <string name="role_client_base">Client bază</string>
-    <string name="role_client_base_desc">Tratează pachetele provenite de la sau destinate nodurilor favorite ca ROUTER_LATE, iar toate celelalte pachete ca CLIENT.</string>
-    <string name="role_client_desc">Dispozitiv de mesagerie conectat la aplicație sau independent.</string>
     <string name="role_client_hidden">Client ascuns</string>
-    <string name="role_client_hidden_desc">Dispozitiv care transmite numai atunci când este necesar pentru a asigura discreția sau economisirea energiei.</string>
     <string name="role_client_mute">Client mut</string>
-    <string name="role_client_mute_desc">Dispozitiv care nu redirecționează pachetele de la alte dispozitive.</string>
     <string name="role_lost_and_found">Pierdut și găsit</string>
     <string name="role_repeater">Releu</string>
-    <string name="role_repeater_desc">Nod de infrastructură pentru extinderea acoperirii rețelei prin retransmiterea mesajelor cu un consum suplimentar minim. Nu este vizibil în lista de noduri.</string>
     <string name="role_router">Ruter</string>
     <string name="role_router_client">Ruter client</string>
-    <string name="role_router_client_desc">Combinație între ROUTER și CLIENT. Nu este compatibil cu dispozitivele mobile.</string>
-    <string name="role_router_desc">Nod de infrastructură pentru extinderea acoperirii rețelei prin retransmiterea mesajelor. Vizibil în lista de noduri.</string>
     <string name="role_router_late">Ruter cu întârziere</string>
-    <string name="role_router_late_desc">Nod de infrastructură care retransmite întotdeauna pachetele o singură dată, dar numai după toate celelalte moduri, asigurând acoperire suplimentară pentru clusterele locale. Vizibil în lista de noduri.</string>
     <string name="role_sensor">Senzor</string>
-    <string name="role_sensor_desc">Transmite pachete telemetrice ca prioritate.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Optimizat pentru comunicarea de sistem ATAK, reduce emisiunile de rutină.</string>
     <string name="role_tak_tracker">Tracker TAK</string>
-    <string name="role_tak_tracker_desc">Activează transmisiile TAK PLI automate și reduce transmisiile de rutină.</string>
     <string name="role_tracker">Tracker</string>
-    <string name="role_tracker_desc">Transmite de poziție GPS ca prioritate.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">S-a primit o confirmare negativă</string>
     <string name="routing_error_no_route">Nici o rută</string>
@@ -872,7 +841,6 @@
     <string name="selected">Selectat</string>
     <string name="selected_map_type">Tipul hărții selectate</string>
     <string name="send">Trimite</string>
-    <string name="sender_message_interval_seconds">Interval mesaj expeditor (secunde)</string>
     <string name="serial">Serial</string>
     <string name="serial_config">Configurație serial</string>
     <string name="set_your_region">Setează-ți regiunea</string>
@@ -907,7 +875,6 @@
     <string name="soil_temperature">Temp sol</string>
     <string name="speed">Viteza</string>
     <string name="speed_kmh">%1$d Km/h</string>
-    <string name="state_broadcast_seconds">Difuzare stare (secunde)</string>
     <string name="status_message">Mesaj de stare:</string>
     <string name="stay_connected_anywhere">Rămâneţi conectat oriunde</string>
     <string name="super_deep_sleep_duration_seconds">Durată maximă de somn</string>
@@ -919,34 +886,8 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Configurare TAK</string>
-    <string name="tak_role">Rolul membrului</string>
-    <string name="tak_role_forwardobserver">Retrimite observatorul</string>
-    <string name="tak_role_hq">Sediul Principal</string>
-    <string name="tak_role_k9">caine</string>
-    <string name="tak_role_medic">Medic</string>
-    <string name="tak_role_rto">Operator Radio Telefon</string>
-    <string name="tak_role_sniper">Lunetist</string>
-    <string name="tak_role_teamlead">Lider de echipă</string>
-    <string name="tak_role_teammember">Membrii Echipei</string>
-    <string name="tak_role_unspecified">Nespecificat</string>
     <string name="tak_server_enabled">Activare server TAK local</string>
     <string name="tak_server_section">Server</string>
-    <string name="tak_team">Culoarea echipei</string>
-    <string name="tak_team_blue">Albastru</string>
-    <string name="tak_team_brown">Maro</string>
-    <string name="tak_team_cyan">Azuriu</string>
-    <string name="tak_team_dark_blue">Albastru închis</string>
-    <string name="tak_team_dark_green">Verde închis</string>
-    <string name="tak_team_green">Verde</string>
-    <string name="tak_team_magenta">Mov</string>
-    <string name="tak_team_maroon">Maro</string>
-    <string name="tak_team_orange">Portocaliu</string>
-    <string name="tak_team_purple">Violet</string>
-    <string name="tak_team_red">Roșu</string>
-    <string name="tak_team_teal">Albastru-verzui</string>
-    <string name="tak_team_unspecified_color">Nespecificat</string>
-    <string name="tak_team_white">Alb</string>
-    <string name="tak_team_yellow">Galben</string>
     <string name="telemetry">Telemetrie</string>
     <string name="telemetry_config">Configurare telemetrie</string>
     <string name="temperature">Temp</string>
@@ -955,10 +896,8 @@
     <string name="theme_light">Luminos</string>
     <string name="theme_system">Setarea telefonului</string>
     <string name="time">Timp</string>
-    <string name="time_zone">Fus orar</string>
     <string name="timeout">Expirat</string>
     <string name="timestamp">Data si ora</string>
-    <string name="tls_enabled">TLS activat</string>
     <string name="toggle_my_position">Comută poziția mea</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Trasare traseu</string>
@@ -1024,7 +963,6 @@
     <string name="unmute">Activare sunet</string>
     <string name="unrecognized">Nerecunoscut</string>
     <string name="unset">Nesetat - 0</string>
-    <string name="update_interval_seconds">Interval de actualizare (secunde)</string>
     <string name="updated">Actualizat</string>
     <string name="uplink_feature_description">Mesajele de la mesageria va fi trimise pe internet public prin intermediul oricărui portal configurat de nod.</string>
     <string name="uptime">Timp de functionare</string>

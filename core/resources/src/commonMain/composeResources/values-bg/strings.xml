@@ -192,7 +192,6 @@
     <string name="config_device_use_phone_tz">Използване на часовата зона на телефона</string>
     <string name="config_lora_modem_preset_summary">Налични предварително зададени настройки на модема, по подразбиране е Дълъг Бърз.</string>
     <string name="config_lora_region_summary">Регионът, където ще използвате радиостанциите си.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Най-бързо ще бъдат изпратени актуализации на позицията, ако е спазено минималното разстояние.</string>
     <string name="config_saved_restarting">Възелът се рестартира и ще бъде за кратко недостъпен.</string>
     <string name="config_security_private_key">Използва се за създаване на споделен ключ с отдалечено устройство.</string>
     <string name="config_security_public_key">Генерира се от вашия частен ключ и се изпраща до други възли в mesh за да им позволи да изчислят споделен секретен ключ.</string>
@@ -330,7 +329,6 @@
     <string name="distance">Разстояние</string>
     <string name="distance_measurements">Измервания на разстояния</string>
     <string name="distance_measurements_description">Показване на разстоянието между вашия телефон и други възли на Meshtastic с позиции.</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Изчистване на търсенето</string>
     <string name="doc_loading">Зареждане на документацията…</string>
@@ -488,7 +486,6 @@
     <string name="firmware_update_waiting_reboot">Изчаква се устройството да се рестартира в режим OTA...</string>
     <string name="firmware_update_waiting_reconnect">Чака се устройството да се свърже отново...</string>
     <string name="firmware_version">Версия на фърмуера: %1$s</string>
-    <string name="fixed_pin">Фиксиран ПИН</string>
     <string name="fixed_position">Фиксирана позиция</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
     <!-- FORMAT -->
@@ -499,7 +496,6 @@
     <string name="free_memory">Свободна памет</string>
     <string name="free_memory_description">Налична системна памет в байтове</string>
     <string name="freq">Чест.</string>
-    <string name="gateway">Шлюз</string>
     <string name="generate_qr_code">Генериране на QR код</string>
     <!-- GEOFENCE -->
     <string name="geofence_box_use_view">Използване на текущия изглед</string>
@@ -650,7 +646,6 @@
     <string name="map_purge_success">Свалените SQL данни бяха изчистени успешно за %1$s</string>
     <string name="map_reporting_consent_header">Съгласие за споделяне на некриптирани данни от възела чрез MQTT</string>
     <string name="map_reporting_consent_text">С активирането на тази функция, вие потвърждавате и изрично се съгласявате с предаването на географското местоположение на вашето устройство в реално време по протокола MQTT без криптиране. Тези данни за местоположението могат да бъдат използвани за цели като отчитане на карта в реално време, проследяване на устройства и свързани телеметрични функции.</string>
-    <string name="map_reporting_summary">Вашият възел периодично ще изпраща некриптиран пакет с отчет за картата до конфигурирания MQTT сървър, който включва идентификатор, дълго и кратко име, приблизително местоположение, хардуерен модел, роля, версия на фърмуера, LoRa регион, предварително зададена настройка на модема и име на основния канал.</string>
     <string name="map_select_download_region">Избор на регион за сваляне</string>
     <string name="map_start_download">Започни свалянето</string>
     <string name="map_style_selection">Избор на стил на картата</string>
@@ -930,15 +925,12 @@
     <string name="range_test">Тест на обхвата</string>
     <string name="range_test_config">Конфигуриране на Тест на обхвата</string>
     <string name="reboot">Рестартиране</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Препредава всяко наблюдавано съобщение, ако е било на нашия частен канал или от друга мрежа със същите параметри на lora.</string>
     <string name="recent_network_devices">Скорошни мрежови устройства</string>
     <string name="reconnecting">Повторно свързване…</string>
     <string name="refresh">Опресняване</string>
     <string name="refresh_metadata">Обновяване на метаданните</string>
     <string name="regenerate_keys_confirmation">Сигурни ли сте, че искате да генерирате отново своя частен ключ?\n\nВъзлите, които може да са обменяли преди това ключове с възела, ще трябва да го премахнат и да обменят отново ключове, за да възобновят защитената комуникация.</string>
     <string name="regenerate_private_key">Регенериране на частния ключ</string>
-    <string name="region_frequency_plan">Регион</string>
     <!-- REMOTE -->
     <string name="remote">Отдалечен</string>
     <string name="remote_admin">Отдалечено администриране</string>
@@ -978,25 +970,14 @@
     <!-- ROLE -->
     <string name="role">Роля на устройството</string>
     <string name="role_client">Клиент</string>
-    <string name="role_client_base_desc">Третира пакетите от или до предпочитани възли като ROUTER_LATE, а всички останали пакети като CLIENT.</string>
-    <string name="role_client_desc">Свързано с приложение или самостоятелно устройство за съобщения.</string>
     <string name="role_client_hidden">Скрит клиент</string>
-    <string name="role_client_hidden_desc">Устройство, което излъчва само при необходимост за скритост или пестене на енергия.</string>
-    <string name="role_client_mute_desc">Устройство, което не препредава пакети от други устройства.фигурир</string>
     <string name="role_lost_and_found">Загубено и намерено</string>
     <string name="role_repeater">Ретранслатор</string>
-    <string name="role_repeater_desc">Инфраструктурен възел за разширяване на мрежовото покритие чрез препредаване на съобщения с минимални разходи. Не се вижда в списъка с възли.</string>
     <string name="role_router">Рутер</string>
     <string name="role_router_client">Рутер клиент</string>
-    <string name="role_router_client_desc">Комбинация от РУТЕР и КЛИЕНТ. Не е за мобилни устройства.</string>
-    <string name="role_router_desc">Инфраструктурен възел за разширяване на мрежовото покритие чрез препредаване на съобщения. Вижда се в списъка с възли.</string>
-    <string name="role_router_late_desc">Инфраструктурен възел, който винаги препредава пакети веднъж, но само след всички останали режими, осигурявайки допълнително покритие за локалните клъстери. Вижда се в списъка с възли.</string>
     <string name="role_sensor">Сензор</string>
-    <string name="role_sensor_desc">Излъчва приоритетно телеметрични пакети.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Оптимизирано за комуникация със системата ATAK, намалява рутинните излъчвания.</string>
     <string name="role_tracker">Тракер</string>
-    <string name="role_tracker_desc">Излъчва приоритетно пакети за GPS позиция</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
     <string name="routing_error_max_retransmit">Неуспешно доставяне към mesh</string>
@@ -1096,7 +1077,6 @@
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="speed_mph">%1$d mph</string>
     <string name="stay_connected_anywhere">Останете свързани навсякъде</string>
-    <string name="subnet">Подмрежа</string>
     <string name="success">Успех</string>
     <string name="super_deep_sleep_duration_seconds">Продължителност на супер дълбок сън</string>
     <string name="supported">Поддържан</string>
@@ -1108,14 +1088,6 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Конфигурация на TAK</string>
-    <string name="tak_role">Роля на члена</string>
-    <string name="tak_role_hq">Щаб</string>
-    <string name="tak_role_medic">Медик</string>
-    <string name="tak_role_rto">Радиотелефонен оператор</string>
-    <string name="tak_role_sniper">Снайперист</string>
-    <string name="tak_role_teamlead">Ръководител на екипа</string>
-    <string name="tak_role_teammember">Член на екипа</string>
-    <string name="tak_role_unspecified">Неопределена</string>
     <string name="tak_server">TAK сървър</string>
     <string name="tak_server_enabled">Активиране на локален TAK сървър</string>
     <string name="tak_server_loading">…</string>
@@ -1124,22 +1096,6 @@
     <string name="tak_server_status_failed">Не може да се стартира TAK сървъра. Изключете го и го включете, за да опитате отново.</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_team">Цвят на екипа</string>
-    <string name="tak_team_blue">Син</string>
-    <string name="tak_team_brown">Кафяв</string>
-    <string name="tak_team_cyan">Циан</string>
-    <string name="tak_team_dark_blue">Тъмно син</string>
-    <string name="tak_team_dark_green">Тъмно зелен</string>
-    <string name="tak_team_green">Зелен</string>
-    <string name="tak_team_magenta">Магента</string>
-    <string name="tak_team_maroon">Кестеняв</string>
-    <string name="tak_team_orange">Оранжев</string>
-    <string name="tak_team_purple">Лилав</string>
-    <string name="tak_team_red">Червен</string>
-    <string name="tak_team_teal">Тийл</string>
-    <string name="tak_team_unspecified_color">Неопределен</string>
-    <string name="tak_team_white">Бял</string>
-    <string name="tak_team_yellow">Жълт</string>
     <string name="telemetry">Телеметрия</string>
     <string name="telemetry_config">Конфигуриране на телеметрията</string>
     <string name="temperature">Темп</string>
@@ -1148,9 +1104,7 @@
     <string name="theme_light">Светла</string>
     <string name="theme_system">По подразбиране на системата</string>
     <string name="time">Време</string>
-    <string name="time_zone">Часова зона</string>
     <string name="timestamp">Времево клеймо</string>
-    <string name="tls_enabled">TLS е активиран</string>
     <string name="trace_route">Проследяване на маршрута</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Трасиране на маршрут</string>
@@ -1189,6 +1143,8 @@
     <string name="two_weeks">2С</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Въведете съобщение</string>
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_meters">m</string>
     <!-- UNITS -->
     <string name="units_follow_system">По подразбиране на системата</string>
     <string name="units_imperial">Имперски</string>
@@ -1205,7 +1161,6 @@
     <string name="unmute">Включване на звука</string>
     <string name="unrecognized">Неразпознат</string>
     <string name="unset">Не е зададен - 0</string>
-    <string name="update_interval_seconds">Интервал на актуализиране (секунди)</string>
     <string name="updated">Актуализирано</string>
     <string name="uplink_feature_description">Съобщенията от mesh мрежата ще бъдат изпращани до публичния интернет през конфигурирания шлюз на всеки възел.</string>
     <string name="uptime">Време на работа</string>

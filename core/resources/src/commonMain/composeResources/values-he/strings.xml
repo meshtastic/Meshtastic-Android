@@ -176,8 +176,6 @@
     <string name="quick_chat_new">צ'ט מהיר חדש</string>
     <string name="radio_configuration">הגדרות רדיו</string>
     <string name="reboot">אתחול מחדש</string>
-    <!-- REBROADCAST -->
-    <string name="region_frequency_plan">אזור</string>
     <!-- REMOTE -->
     <!-- REMOVE -->
     <string name="report">דווח</string>

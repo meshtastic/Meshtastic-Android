@@ -210,11 +210,6 @@
     <string name="quick_chat_new">Naujas greitas pokalbis</string>
     <string name="radio_configuration">Radijo modulio konfigūracija</string>
     <string name="reboot">Perkrauti</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Persiųsti visas žinutes, nesvarbu jos iš Jūsų privataus tinklo ar iš kito tinklo su analogiškais LoRa parametrais.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Taip pat kaip ir VISI bet nebando dekoduoti paketų ir juos tiesiog persiunčia. Galima naudoti tik Repeater rolės įtaise. Įjungus bet kokiame kitame įtaise - veiks tiesiog kaip VISI.</string>
-    <string name="rebroadcast_mode_none_desc">Leidžiama tik SENSOR, TRACKER ar TAK_TRACKER rolių įtaisams. Tai užblokuos visas retransliacijas, ne taip kaip CLIENT_MUTE atveju.</string>
-    <string name="region_frequency_plan">Regionas</string>
     <!-- REMOTE -->
     <string name="remote_admin">Nuotolinis administravimas</string>
     <!-- REMOVE -->
@@ -228,16 +223,6 @@
     <string name="reset">Nustatyti iš naujo</string>
     <string name="reset_to_defaults">Atkurti numatytuosius parametrus</string>
     <!-- ROLE -->
-    <string name="role_client_desc">Programėlė prijungta prie atskiro susirašinėjimo įtaiso.</string>
-    <string name="role_client_hidden_desc">Įtaisas transliuojantis tik prireikus. Naudojama slaptumo ar energijos taupymui.</string>
-    <string name="role_client_mute_desc">Įtaisas kuris nepersiunčia kitų įtaisų paketų.</string>
-    <string name="role_repeater_desc">Stacionarus įtaisas tinklo išplėtimui, persiunčiantis žinutes. Nerodomas įtaisų sąraše.</string>
-    <string name="role_router_client_desc">ROUTER ir CLIENT kombinacija. Neskirta mobiliems įtaisams.</string>
-    <string name="role_router_desc">Stacionarus aukštuminis įtaisas geresniam tinklo padengimui. Matomas node`ų sąraše.</string>
-    <string name="role_sensor_desc">Pirmenybinis telemetrijos paketų siuntimas</string>
-    <string name="role_tak_desc">Optimizuota ATAK komunikacijai, sumažinta rutininių transliacijų</string>
-    <string name="role_tak_tracker_desc">Įgalina automatines TAK PLI transliacijas ir sumažina rutininių transliacijų kiekį.</string>
-    <string name="role_tracker_desc">Pirmenybinis GPS pozicijos paketų siuntimas</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Gautas negatyvus patvirtinimas</string>
     <string name="routing_error_no_route">Nėra maršruto</string>
@@ -263,7 +248,6 @@
     <string name="swipe_action_delete">Ištrinti</string>
     <string name="swipe_action_mute">Nutildyti</string>
     <!-- TAK -->
-    <string name="tak_team_red">Raudona</string>
     <string name="theme">Išvaizda</string>
     <string name="theme_dark">Tamsi</string>
     <string name="theme_light">Šviesi</string>

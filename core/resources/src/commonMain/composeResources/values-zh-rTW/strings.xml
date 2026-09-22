@@ -188,7 +188,6 @@
     <string name="config_lora_modem_preset_summary">可選的預設參數組，預設值是 Long Fast。</string>
     <string name="config_lora_region_summary">請選擇您將使用無線電設備的地區。</string>
     <string name="config_network_udp_enabled_summary">允許透過本地網路上的 UDP 廣播封包。</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">滿足最小距離限制時，位置更新的最快發送間隔。</string>
     <string name="config_security_private_key">用於與遠端設備交換密鑰。</string>
     <string name="config_security_public_key">從您的私鑰生成並傳送給網狀網路中的其他節點，以供它們計算出共享密鑰。</string>
     <string name="configuration">設定</string>
@@ -308,7 +307,6 @@
     <string name="distance_filters_description">根據您手機的距離，篩選節點列表和 Mesh 網路地圖。</string>
     <string name="distance_measurements">距離量測</string>
     <string name="distance_measurements_description">顯示您手機與其他有定位資訊的 Meshtastic 節點之間的距離。</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">清除搜尋結果</string>
     <string name="doc_keywords_connections">藍牙,usb,tcp,配對,序列,wifi</string>
@@ -471,7 +469,6 @@
     <string name="firmware_update_waiting_reboot">等待裝置重新啟動至 OTA 模式⋯⋯</string>
     <string name="firmware_update_waiting_reconnect">等待裝置重新連線⋯⋯</string>
     <string name="firmware_version">韌體版本：%1$s</string>
-    <string name="fixed_pin">固定藍牙PIN碼</string>
     <string name="fixed_position">固定位置</string>
     <string name="for_more_information_see_our_privacy_policy">如欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <!-- FORMAT -->
@@ -479,7 +476,6 @@
     <string name="free_memory_description">可用系統記憶體（位元組）</string>
     <string name="freq">頻率</string>
     <string name="gas_resistance">氣體感測器</string>
-    <string name="gateway">網閘</string>
     <string name="generate_qr_code">產生 QR Code</string>
     <!-- GEOFENCE -->
     <string name="get_started">開始使用</string>
@@ -537,7 +533,6 @@
     <string name="latitude">緯度</string>
     <!-- LAYER -->
     <string name="learn_more">瞭解詳情</string>
-    <string name="led_heartbeat">LED 心跳指示</string>
     <string name="legacy_admin_channel">舊版管理頻道</string>
     <string name="library_count">%1$d 函式庫</string>
     <!-- LICENSED -->
@@ -618,11 +613,8 @@
     <string name="map_offline_manager">離線管理</string>
     <string name="map_purge_fail">SQL快取清除失敗，請查看 logcat 以獲取詳細資訊。</string>
     <string name="map_purge_success">清除 %1$s 的 SQL 快取</string>
-    <string name="map_reporting">地圖報告</string>
     <string name="map_reporting_consent_header">同意透過 MQTT 分享未加密的節點資料</string>
     <string name="map_reporting_consent_text">啟用此功能即表示您認知並明確同意透過 MQTT 協議傳輸您裝置的即時地理位置，且不進行加密。此位置資料可能用於即時地圖回報、裝置追蹤及相關遙測功能等用途。</string>
-    <string name="map_reporting_interval_seconds">地圖報告間隔（秒）</string>
-    <string name="map_reporting_summary">您的節點將定期發送未加密的地圖回報封包至已設定的 MQTT 伺服器，包含 ID、長名稱與短名稱、大約位置、硬體型號、角色、韌體版本、LoRa 區域、數據機預設值以及主要頻道名稱。</string>
     <string name="map_select_download_region">選擇下載地區</string>
     <string name="map_start_download">開始下載</string>
     <string name="map_style_selection">地圖樣式選擇</string>
@@ -668,7 +660,6 @@
     <string name="message_status_unknown">不明</string>
     <string name="messages">訊息</string>
     <string name="min">最小</string>
-    <string name="minimum_broadcast_seconds">最短廣播間隔 (秒)</string>
     <string name="minimum_wake_time_seconds">最小喚醒時間</string>
     <string name="modem_preset">預設值</string>
     <string name="module_settings">模組設定</string>
@@ -709,7 +700,6 @@
     <string name="mute_status_muted_for_days">已靜音 %1$d 天 %2$s 小時</string>
     <string name="mute_status_muted_for_hours">已靜音 %1$s 小時</string>
     <string name="mute_status_unmuted">未靜音</string>
-    <string name="nag_timeout_seconds">通知逾時時間（秒）</string>
     <string name="name">名稱</string>
     <string name="name_cannot_be_empty">名稱不得空白。</string>
     <string name="navigate_back">返回上一頁</string>
@@ -820,7 +810,6 @@
     <string name="open_source_libraries">開放原始碼函式庫</string>
     <string name="options">選項</string>
     <string name="orient_north">定位朝北</string>
-    <string name="output_duration_milliseconds">輸出持續時間（毫秒）</string>
     <string name="overflow_menu">溢出選單</string>
     <string name="override_console_serial_port">覆蓋控制台序列埠</string>
     <!-- PACKET -->
@@ -904,20 +893,12 @@
     <string name="range_test_config">範圍測試設定</string>
     <string name="react">回應</string>
     <string name="reboot">重新開機</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">重播任何觀察到的訊息，如果它是在我們的私人頻道上或來自具有相同 lora 參數的其他網路上。</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">與「ALL」行為相同，但會跳過封包解碼，僅重新廣播它們。此功能僅適用於中繼器角色。在其他角色上設定此功能將導致「ALL」行為。</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">忽略來自非標準通訊埠號（諸如 TAK、RangeTest、PaxCounter 等）的封包，僅重新廣播標準通訊埠號的封包：NodeInfo、Text、Position、Telemetry 和 Routing。</string>
-    <string name="rebroadcast_mode_known_only_desc">近似於 LOCAL_ONLY 角色，將忽略來自外部 Mesh 節點的訊息，同時也忽略已知節點列表以外節點的訊息。</string>
-    <string name="rebroadcast_mode_local_only_desc">忽略來自開放的或無法解密的外部 Mesh 觀察到的訊息。僅轉播來自本地節點的主要/次要頻道的訊息。</string>
-    <string name="rebroadcast_mode_none_desc">僅允許 SENSOR、TRACKER 和 TAK_TRACKER 角色，與 CLIENT_MUTE 角色不同，此模式將禁止所有重新廣播行為。</string>
     <string name="recent_network_devices">最近的網路裝置</string>
     <string name="reconnecting">重新連接中…</string>
     <string name="refresh">重新整理</string>
     <string name="refresh_metadata">重新整理中繼資料</string>
     <string name="regenerate_keys_confirmation">您確定要重新產生密鑰嗎?\n\n連線過的其他節點需要刪除並重新交換金鑰後才能恢復加密通訊連線。</string>
     <string name="regenerate_private_key">重新產生私鑰</string>
-    <string name="region_frequency_plan">地區</string>
     <plurals name="relays">
         <item quantity="other">聽到 %1$d 個中繼</item>
     </plurals>
@@ -965,29 +946,17 @@
     <string name="role">裝置角色</string>
     <string name="role_client">Client</string>
     <string name="role_client_base">客戶端基礎模式</string>
-    <string name="role_client_base_desc">將來自或發往我的最愛節點的封包視為 ROUTER_LATE，其他所有封包視為 CLIENT。</string>
-    <string name="role_client_desc">應用程式連接或獨立收發裝置。</string>
     <string name="role_client_hidden">Client Hidden</string>
-    <string name="role_client_hidden_desc">基於省電或隱私需求，僅提供最低限度廣播通訊的節點。</string>
     <string name="role_client_mute">Client Mute</string>
-    <string name="role_client_mute_desc">對其他裝置封包不予轉播的節點。</string>
     <string name="role_lost_and_found">Lost and Found</string>
     <string name="role_repeater">Repeater</string>
-    <string name="role_repeater_desc">加強網路覆蓋的中繼基地台節點，但轉播時僅添加最低限度的額外負擔（Overhead）。不會顯示在節點列表上。</string>
     <string name="role_router">Router</string>
     <string name="role_router_client">Router Client</string>
-    <string name="role_router_client_desc">兼具路由器和用戶端功能的節點。行動裝置不宜使用。</string>
-    <string name="role_router_desc">加強網路覆蓋的中繼基地台節點。顯示在節點列表上。</string>
     <string name="role_router_late">Router Late</string>
-    <string name="role_router_late_desc">基礎建設節點，總是在所有其他模式之後才重新廣播一次封包，以確保本地群集有額外的覆蓋範圍。在節點清單中可見。</string>
     <string name="role_sensor">Sensor</string>
-    <string name="role_sensor_desc">優先廣播遙測資料封包。</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">最佳化以供 ATAK 系統通訊使用，減少日常廣播量。</string>
     <string name="role_tak_tracker">TAK Tracker</string>
-    <string name="role_tak_tracker_desc">啓用自動 TAK PLI 廣播，將減少定期廣播。</string>
     <string name="role_tracker">Repeater</string>
-    <string name="role_tracker_desc">優先廣播 GPS 位置封包。</string>
     <string name="router_role_confirmation_text">我已閱讀&lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;裝置角色說明文件&lt;/a&gt;以及關於&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;選擇正確裝置角色&lt;/a&gt;的部落格文章。</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">接收到拒絕確認</string>
@@ -1037,7 +1006,6 @@
     <string name="selected">已選取</string>
     <string name="selected_map_type">已選擇的地圖類型</string>
     <string name="send">傳送</string>
-    <string name="sender_message_interval_seconds">訊息發送間隔(秒)</string>
     <string name="serial">序列埠</string>
     <string name="serial_config">序列埠設定</string>
     <string name="session_active">連線階段進行中</string>
@@ -1076,12 +1044,10 @@
     <string name="soil_temperature">土壤溫度</string>
     <string name="speed">速度</string>
     <string name="speed_kmh">%1$d Km/h</string>
-    <string name="state_broadcast_seconds">狀態廣播間隔 (秒)</string>
     <string name="status_message">狀態訊息</string>
     <string name="stay_connected_anywhere">隨時隨地保持連線</string>
     <string name="store_forward">儲存 &amp; 轉發</string>
     <string name="store_forward_config">儲存 &amp; 轉發設定</string>
-    <string name="subnet">子網</string>
     <string name="success">成功</string>
     <string name="super_deep_sleep_duration_seconds">超深度睡眠時長</string>
     <string name="supported">已支援</string>
@@ -1093,16 +1059,6 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK 設定</string>
-    <string name="tak_role">隊員角色</string>
-    <string name="tak_role_forwardobserver">前進觀測員 (FO)</string>
-    <string name="tak_role_hq">司令部 (HQ)</string>
-    <string name="tak_role_k9">汪星人 (K9)</string>
-    <string name="tak_role_medic">醫療兵</string>
-    <string name="tak_role_rto">無線電兵</string>
-    <string name="tak_role_sniper">狙擊手</string>
-    <string name="tak_role_teamlead">隊長</string>
-    <string name="tak_role_teammember">隊伍成員</string>
-    <string name="tak_role_unspecified">未指定</string>
     <string name="tak_server">TAK 伺服器</string>
     <string name="tak_server_enabled">啓用本地 TAK 伺服器</string>
     <string name="tak_server_loading">…</string>
@@ -1113,22 +1069,6 @@
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_server_test_run">執行</string>
     <string name="tak_server_test_running">執行中：%1$s</string>
-    <string name="tak_team">隊伍顏色</string>
-    <string name="tak_team_blue">Blue - 藍色</string>
-    <string name="tak_team_brown">咖啡色</string>
-    <string name="tak_team_cyan">天青色</string>
-    <string name="tak_team_dark_blue">深藍色</string>
-    <string name="tak_team_dark_green">墨綠色</string>
-    <string name="tak_team_green">Green - 綠色</string>
-    <string name="tak_team_magenta">洋紅色</string>
-    <string name="tak_team_maroon">栗紅色</string>
-    <string name="tak_team_orange">橙色</string>
-    <string name="tak_team_purple">紫色</string>
-    <string name="tak_team_red">Red - 紅色</string>
-    <string name="tak_team_teal">羽青色</string>
-    <string name="tak_team_unspecified_color">未指定</string>
-    <string name="tak_team_white">白色</string>
-    <string name="tak_team_yellow">黃色</string>
     <string name="telemetry">遙測</string>
     <string name="telemetry_config">遙測設定</string>
     <string name="temperature">溫度</string>
@@ -1137,10 +1077,8 @@
     <string name="theme_light">淺色</string>
     <string name="theme_system">系統預設</string>
     <string name="time">時間</string>
-    <string name="time_zone">時區</string>
     <string name="timeout">逾時</string>
     <string name="timestamp">時間戳記</string>
-    <string name="tls_enabled">TLS已啟用</string>
     <string name="toggle_my_position">切換我的位置</string>
     <string name="trace_route">路由追蹤</string>
     <!-- TRACEROUTE -->
@@ -1196,6 +1134,8 @@
     <string name="type">類別</string>
     <string name="type_a_message">請輸入訊息</string>
     <string name="udp_enabled">UDP 廣播</string>
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_meters">公尺</string>
     <!-- UNITS -->
     <string name="units_follow_system">系統預設</string>
     <string name="units_imperial">英制（英里/英尺）</string>
@@ -1213,7 +1153,6 @@
     <string name="unmute_selected">取消靜音選取項目</string>
     <string name="unrecognized">無法識別</string>
     <string name="unset">預設值 - 0</string>
-    <string name="update_interval_seconds">更新間隔（秒）</string>
     <string name="updated">已更新</string>
     <string name="uplink_feature_description">來自網狀網路的訊息會經由任何配置閘道的節點傳送到網際網路。</string>
     <string name="uptime">運行時間</string>

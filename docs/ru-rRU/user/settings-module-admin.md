@@ -54,11 +54,11 @@ Turning **Map reporting** on reveals a consent card headed _Consent to Share Une
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
 until you agree:
 
-| Настройка                                             | Описание                                                                                                                                                                                 |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Я согласен.                           | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
-| Precision slider                                      | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
-| Интервал отчета карты (в секундах) | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
+| Настройка                   | Описание                                                                                                                                                                                 |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Я согласен. | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
+| Precision slider            | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
+| Map Publish Interval        | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
 
 См. [MQTT](mqtt) для подробного руководства по использованию, включая шифрование, конфиденциальность и настройку брокера.
 
@@ -83,20 +83,20 @@ Controls buzzer, LED, or vibration alerts on your node hardware. Полезно 
 There are two independent triggers — an incoming **message**, and a received **bell** character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
 
-| Настройка                                                  | Описание                                                                                            |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Внешние уведомления включены                               | Master toggle for the module                                                                        |
-| Alert message LED / buzzer / vibra                         | Which outputs fire on an incoming message                                                           |
-| Alert bell LED / buzzer / vibra                            | Which outputs fire on a received bell character                                                     |
-| Выход LED (GPIO)                        | Pin the LED is wired to                                                                             |
-| Вывод светодиода активный высокий                          | Whether the LED pin is active high or low                                                           |
-| Выход Буззера (GPIO)                    | Pin the buzzer is wired to                                                                          |
-| Вибросигнал (GPIO)                      | Pin the vibration motor is wired to                                                                 |
-| Использовать PWM-звукоизлучатель                           | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
-| Использовать I2S как буззер                                | Send the alert through an I2S audio output instead                                                  |
-| Продолжительность вывода (миллисекунды) | How long a single alert lasts                                                                       |
-| Таймаут Nag (в секундах)                | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
-| Рингтон                                                    | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
+| Настройка                               | Описание                                                                                            |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Внешние уведомления включены            | Master toggle for the module                                                                        |
+| Alert message LED / buzzer / vibra      | Which outputs fire on an incoming message                                                           |
+| Alert bell LED / buzzer / vibra         | Which outputs fire on a received bell character                                                     |
+| Выход LED (GPIO)     | Pin the LED is wired to                                                                             |
+| Вывод светодиода активный высокий       | Whether the LED pin is active high or low                                                           |
+| Выход Буззера (GPIO) | Pin the buzzer is wired to                                                                          |
+| Вибросигнал (GPIO)   | Pin the vibration motor is wired to                                                                 |
+| Использовать PWM-звукоизлучатель        | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+| Использовать I2S как буззер             | Send the alert through an I2S audio output instead                                                  |
+| GPIO Output Duration                    | How long a single alert lasts                                                                       |
+| Интервал повтора                        | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+| Рингтон                                 | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Store & Forward module
 
@@ -125,7 +125,7 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 | Настройка                                                                    | Описание                                                                                 |
 | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Проверка дальности включена                                                  | Активировать проверку дальности                                                          |
-| Интервал сообщений отправителя (в секундах)               | Time between test transmissions, chosen from a dropdown of fixed intervals               |
+| Sender Interval                                                              | Time between test transmissions, chosen from a dropdown of fixed intervals               |
 | Сохранить .CSV в хранилище (только ESP32) | Log received test data to the node's own filesystem. ESP32 hardware only |
 
 ### Telemetry module
@@ -198,11 +198,11 @@ Pre-configured messages accessible from the node's physical buttons (for nodes w
 
 Транслирует информацию о доступных услышанных соседей, включив ячейку сеточной топологии. Каждый включенный узел периодически делится списком других узлов которые он может слышать и их качество сигнала.
 
-| Настройка                                           | Описание                                                                                                                                         |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Информация о соседях включена                       | Включить трансляцию соседей                                                                                                                      |
-| Интервал обновления (в секундах) | Как часто транслировать список соседей                                                                                                           |
-| Передать через LoRa                                 | Также транслировать информацию соседей по LoRa, а не только MQTT/телефон. Недоступно на канале используя ключ по умолчанию и имя |
+| Настройка                     | Описание                                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Информация о соседях включена | Включить трансляцию соседей                                                                                                                      |
+| Интервал опроса GPS           | Как часто транслировать список соседей                                                                                                           |
+| Передать через LoRa           | Также транслировать информацию соседей по LoRa, а не только MQTT/телефон. Недоступно на канале используя ключ по умолчанию и имя |
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
@@ -220,27 +220,27 @@ See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topo
 
 Превращает ваш узел в систему сигнализации на основе датчика движения или открытия двери. При обнаружении изменения состояния на выводе GPIO (например, сработал датчик движения или открылась дверь) узел отправляет по меш-сети оповещение.
 
-| Настройка                                              | Описание                                                                                                                                           |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Датчик определения включен                             | Активировать датчик обнаружения                                                                                                                    |
-| GPIO контакт для мониторинга                           | Пин GPIO, подключенный к датчику                                                                                                                   |
-| Тип триггера обнаружения                               | Как состояние пина интерпретируется как событие обнаружения (например, активный высокий/низкий уровень, срабатывание по фронту) |
-| Использовать режим INPUT_PULLUP   | Включить внутренний подтягивающий резистор пина                                                                                                    |
-| Минимальная трансляция (в секундах) | Минимальный интервал между оповещениями                                                                                                            |
-| Трансляция состояния (в секундах)   | Интервал периодической отправки состояния                                                                                                          |
-| Отправить колокол с уведомлением                       | Включать символ колокола в оповещения                                                                                                              |
-| Понятное имя                                           | Пользовательское имя для этого датчика                                                                                                             |
+| Настройка                                            | Описание                                                                                                                                           |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Датчик определения включен                           | Активировать датчик обнаружения                                                                                                                    |
+| GPIO контакт для мониторинга                         | Пин GPIO, подключенный к датчику                                                                                                                   |
+| Тип триггера обнаружения                             | Как состояние пина интерпретируется как событие обнаружения (например, активный высокий/низкий уровень, срабатывание по фронту) |
+| Использовать режим INPUT_PULLUP | Включить внутренний подтягивающий резистор пина                                                                                                    |
+| Minimum time between detection broadcasts            | Минимальный интервал между оповещениями                                                                                                            |
+| State Broadcast Interval                             | Интервал периодической отправки состояния                                                                                                          |
+| Отправить колокол с уведомлением                     | Включать символ колокола в оповещения                                                                                                              |
+| Понятное имя                                         | Пользовательское имя для этого датчика                                                                                                             |
 
 ### Paxcounter module
 
 People counter using Wi-Fi and BLE probe requests. Засчитывает ближайшие устройства, пассивно прослушивая зондирующие запросы, чтобы телефоны и ноутбуки излучали при сканировании сетей. Доступно только на устройствах ESP32.
 
-| Настройка                                           | Описание                                                                                                         |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Paxcounter включен                                  | Активировать подсчет людей                                                                                       |
-| Интервал обновления (в секундах) | Как часто сообщать подсчитывания                                                                                 |
-| Wi-Fi RSSI threshold                                | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
-| BLE RSSI threshold                                  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
+| Настройка                               | Описание                                                                                                         |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Paxcounter включен                      | Активировать подсчет людей                                                                                       |
+| Интервал опроса GPS                     | Как часто сообщать подсчитывания                                                                                 |
+| WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
+| BLE Threshold (dBm)  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
 
 > 💡 **Совет:** Paxcounter полезен для приблизительной оценки пешеходного потока в местах начала маршрутов, на мероприятийных площадках или в других локациях. Счетчики приблизительны — один человек может иметь несколько устройств.
 
