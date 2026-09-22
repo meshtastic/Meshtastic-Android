@@ -70,6 +70,9 @@ hs_err_pid*.log
 replay_pid*.log
 .attach_pid*
 
+# Local build output redirected to a file
+/build.log
+
 # Local library development clones
 /coil/
 /kable/
