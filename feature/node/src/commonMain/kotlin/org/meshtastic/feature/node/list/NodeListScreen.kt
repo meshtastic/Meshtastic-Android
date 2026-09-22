@@ -358,7 +358,17 @@ fun NodeListScreen(
                             onSortSelect = viewModel::setSortOption,
                             modifier = Modifier.fillMaxWidth(),
                             searchResults = {
+                                // The full-screen expanded bar hides the sticky header's counts.
                                 LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    item {
+                                        NodeCountSummary(
+                                            onlineCount = onlineNodeCount,
+                                            shownCount = nodes.size,
+                                            totalCount = totalNodeCount,
+                                            modifier =
+                                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                                        )
+                                    }
                                     items(nodes, key = { it.num }, itemContent = nodeRow)
                                 }
                             },
