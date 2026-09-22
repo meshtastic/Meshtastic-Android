@@ -17,6 +17,7 @@
 package org.meshtastic.feature.settings.search
 
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.model.schemaEnumValuePrefixes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
@@ -114,34 +115,12 @@ object SettingsSearchCatalog {
      * Keys that name an enum *value* rather than a field, so search does not offer "Long Fast" as though it were a
      * setting. Meshtastic-Apple's settings search excludes them the same way (spec 019, FR-004).
      *
-     * Hand-listed because nothing in the key's spelling separates `schema_bluetooth_fixed_pin` (a field) from
-     * `schema_bluetooth_pairingmode_fixed_pin` (a value of one). `SettingsSearchCatalogTest` pins the list against the
-     * registry. Once the generated enum-label lookup lands this set can be derived from it instead.
+     * Generated alongside the enum labels, because nothing in a key's spelling separates `schema_bluetooth_fixed_pin`
+     * (a field) from `schema_bluetooth_pairingmode_fixed_pin` (a value of one). An enum the schema starts or stops
+     * labelling moves this set on the next sync rather than leaving search filtering on a stale copy.
      */
-    private val enumValuePrefixes: Set<String> =
-        setOf(
-            "schema_audio_audio_baud_",
-            "schema_bluetooth_pairingmode_",
-            "schema_cannedmessage_inputeventchar_",
-            "schema_detectionsensor_triggertype_",
-            "schema_device_rebroadcastmode_",
-            "schema_device_role_",
-            "schema_display_compassorientation_",
-            "schema_display_displaymode_",
-            "schema_display_displayunits_",
-            "schema_display_oledtype_",
-            "schema_lora_modempreset_",
-            "schema_lora_regioncode_",
-            "schema_memberrole_",
-            "schema_network_addressmode_",
-            "schema_network_protocolflags_",
-            "schema_position_gpsmode_",
-            "schema_position_positionflags_",
-            "schema_security_packetsignaturepolicy_",
-            "schema_serial_serial_baud_",
-            "schema_serial_serial_mode_",
-            "schema_team_",
-        )
+    private val enumValuePrefixes: Set<String>
+        get() = schemaEnumValuePrefixes
 
     /** The settings destinations themselves, so a query for a screen's own name finds it. */
     private fun screenEntries(): List<SettingsSearchEntry> = (

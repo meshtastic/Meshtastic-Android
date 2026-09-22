@@ -51,6 +51,10 @@ class SettingsSearchCatalogTest {
         )
     }
 
+    /**
+     * The generated set is pinned against the registry upstream; this checks the other half, that every prefix in it
+     * reaches a resource this module can actually see, which is what the index filters on.
+     */
     @Test
     fun everyDeclaredEnumStillHasValuesInTheSchema() {
         val stale =
@@ -61,8 +65,8 @@ class SettingsSearchCatalogTest {
         assertEquals(
             emptyList(),
             stale.sorted(),
-            "these enums no longer carry labelled values, so excluding them from search does nothing. " +
-                "Drop them from enumValuePrefixes.",
+            "these enum prefixes match no string resource, so the index is filtering on something that is not there. " +
+                "The generated set and schema_strings.xml have diverged; re-run :schema-strings:sync.",
         )
     }
 
