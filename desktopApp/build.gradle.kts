@@ -16,11 +16,16 @@
  */
 
 import dev.detekt.gradle.Detekt
+import org.gradle.api.file.FileSystemOperations
+import org.gradle.process.ExecOperations
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.maplibreDesktopRuntime
 import org.meshtastic.buildlogic.resolveVersionInfo
+import java.io.File
+import javax.inject.Inject
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -272,6 +277,59 @@ compose.desktop {
             description = "Meshtastic Desktop Application"
             vendor = "Meshtastic LLC"
         }
+    }
+}
+
+// ── .deb dependency names ────────────────────────────────────────────────────
+// jpackage names each dependency by running `dpkg -S` on the build host, so a deb built on
+// Ubuntu 24.04 requires `libasound2t64` and `libpng16-16t64`, which Debian 12 Bookworm and
+// Raspberry Pi OS do not have — the package is uninstallable there. Stripping the suffix
+// resolves on both: Bookworm ships the plain names, and the t64 packages Provide them.
+//
+// Rewriting the built archive is the only lever. jpackage's --linux-package-deps maps to
+// `additionalDependencies` (add-only, it cannot drop a detected name), and the Compose plugin
+// owns --resource-dir and clears it inside the task, so a custom control template cannot be
+// injected. This runs as the deb task's own final action rather than a separate task, which
+// would have to declare jpackage's output directory as its input and mutate it in place.
+abstract class RewriteDebDependencyNames : Action<Task> {
+    @get:Inject abstract val execOps: ExecOperations
+
+    @get:Inject abstract val fileOps: FileSystemOperations
+
+    // Held here, not at script scope: a task action that referenced a script property would
+    // capture the build script itself and the configuration cache would reject it.
+    private val dependencyLine = Regex("^(?:Depends|Pre-Depends|Recommends):.*$", RegexOption.MULTILINE)
+    private val t64Suffix = Regex("(lib[a-z0-9.+-]*)t64(?=[,( ]|$)")
+    private val t64Survivor = Regex("\\blib[a-z0-9.+-]*t64\\b")
+
+    override fun execute(task: Task) {
+        val debs = (task as AbstractJPackageTask).destinationDir.get().asFile.listFiles { f -> f.extension == "deb" }
+        debs?.forEach { deb -> rewrite(task, deb) }
+    }
+
+    private fun rewrite(task: Task, deb: File) {
+        val work = File.createTempFile("deb-", "").apply { delete() }
+        try {
+            execOps.exec { commandLine("dpkg-deb", "-R", deb.absolutePath, work.absolutePath) }
+            val control = work.resolve("DEBIAN/control")
+            val rewritten =
+                dependencyLine.replace(control.readText()) { line ->
+                    t64Suffix.replace(line.value) { it.groupValues[1] }
+                }
+            val survivor = dependencyLine.findAll(rewritten).firstOrNull { t64Survivor.containsMatchIn(it.value) }
+            check(survivor == null) { "t64 dependency name survived the rewrite in ${deb.name}: ${survivor?.value}" }
+            control.writeText(rewritten)
+            execOps.exec { commandLine("dpkg-deb", "-b", "--root-owner-group", work.absolutePath, deb.absolutePath) }
+            task.logger.lifecycle("Rewrote t64 dependency names in ${deb.name}")
+        } finally {
+            fileOps.delete { delete(work) }
+        }
+    }
+}
+
+tasks.withType<AbstractJPackageTask>().configureEach {
+    if (targetFormat == TargetFormat.Deb) {
+        doLast(objects.newInstance<RewriteDebDependencyNames>())
     }
 }
 
