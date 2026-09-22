@@ -19,37 +19,52 @@ package org.meshtastic.feature.settings.search
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.app_settings
+import org.meshtastic.core.resources.device
+import org.meshtastic.core.resources.lora
+import org.meshtastic.core.resources.node_layout_section_title
+import org.meshtastic.core.resources.schema_device_rebroadcast_mode
+import org.meshtastic.core.resources.schema_lora_hop_limit
+import org.meshtastic.core.resources.schema_lora_hop_limit_description
 import org.meshtastic.core.ui.theme.AppTheme
 
-/** Matches for "hop", as the schema labels them, so the row layout is reviewable without a radio. */
-private val hopResults =
-    listOf(
-        ResolvedSettingsEntry(
-            title = "Hop limit",
-            description = "Maximum number of hops a packet may take before it is dropped.",
-            screenTitle = "LoRa",
-            route = SettingsRoute.LoRa,
-        ),
-        ResolvedSettingsEntry(
-            title = "Rebroadcast mode",
-            description = "How this node repeats packets it hears for other nodes.",
-            screenTitle = "Device",
-            route = SettingsRoute.Device,
-        ),
-        ResolvedSettingsEntry(
-            title = "Hops away",
-            description = null,
-            screenTitle = "Node list",
-            route = SettingsRoute.NodeList,
-        ),
-    )
+/**
+ * What a query for "hop" matches, resolved from the same resources the index reads, so the preview shows the wording
+ * the schema actually ships and follows it into every other language.
+ */
+@Composable
+private fun hopResults(): List<ResolvedSettingsEntry> = listOf(
+    ResolvedSettingsEntry(
+        title = stringResource(Res.string.schema_lora_hop_limit),
+        description = stringResource(Res.string.schema_lora_hop_limit_description),
+        screenTitle = stringResource(Res.string.lora),
+        route = SettingsRoute.LoRa,
+    ),
+    // A field the schema labels but does not explain, which is the commonest shape in the index.
+    ResolvedSettingsEntry(
+        title = stringResource(Res.string.schema_device_rebroadcast_mode),
+        description = null,
+        screenTitle = stringResource(Res.string.device),
+        route = SettingsRoute.Device,
+    ),
+    // An app-level entry, with no schema behind it at all.
+    ResolvedSettingsEntry(
+        title = stringResource(Res.string.node_layout_section_title),
+        description = null,
+        screenTitle = stringResource(Res.string.app_settings),
+        route = SettingsRoute.NodeList,
+        isAppLocal = true,
+    ),
+)
 
 @Suppress("PreviewPublic")
 @PreviewLightDark
 @Composable
 fun SettingsSearchResultsPreview() {
-    AppTheme { Surface { SettingsSearchResults(results = hopResults, query = "hop", onSelect = {}) } }
+    AppTheme { Surface { SettingsSearchResults(results = hopResults(), query = "hop", onSelect = {}) } }
 }
 
 @Suppress("PreviewPublic")
