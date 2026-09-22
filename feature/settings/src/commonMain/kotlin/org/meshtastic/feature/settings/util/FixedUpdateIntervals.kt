@@ -103,7 +103,6 @@ enum class IntervalConfiguration {
     DETECTION_SENSOR_MINIMUM,
     DETECTION_SENSOR_STATE,
     NAG_TIMEOUT,
-    OUTPUT,
     PAX_COUNTER,
     POSITION,
     POSITION_BROADCAST,
@@ -197,17 +196,6 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.THIRTY_SIX_HOURS,
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
-                )
-
-            OUTPUT ->
-                listOf(
-                    FixedUpdateIntervals.UNSET,
-                    FixedUpdateIntervals.ONE_SECOND,
-                    FixedUpdateIntervals.TWO_SECONDS,
-                    FixedUpdateIntervals.THREE_SECONDS,
-                    FixedUpdateIntervals.FOUR_SECONDS,
-                    FixedUpdateIntervals.FIVE_SECONDS,
-                    FixedUpdateIntervals.TEN_SECONDS,
                 )
 
             DETECTION_SENSOR_MINIMUM ->

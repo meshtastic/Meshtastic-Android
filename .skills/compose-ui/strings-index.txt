@@ -1348,6 +1348,7 @@ phosphorus
 pin_selected
 play
 plurals_hours
+plurals_milliseconds
 plurals_minutes
 plurals_seconds
 ### PM ###

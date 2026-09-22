@@ -28,3 +28,12 @@ fun FixedUpdateIntervals.toDisplayString(): String = if (pluralRes != null && qu
 } else {
     ""
 }
+
+@Composable
+fun FixedOutputDurations.toDisplayString(): String = if (pluralRes != null && quantity != null) {
+    pluralStringResource(pluralRes, quantity, quantity)
+} else if (textRes != null) {
+    stringResource(textRes)
+} else {
+    ""
+}

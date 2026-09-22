@@ -74,6 +74,7 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.util.FixedOutputDurations
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfig
@@ -273,7 +274,7 @@ fun ExternalNotificationConfigScreenCommon(
                     },
                 )
                 HorizontalDivider()
-                val outputItems = remember { IntervalConfiguration.OUTPUT.allowedIntervals }
+                val outputItems = remember { FixedOutputDurations.allowed }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_externalnotification_output_ms),
                     summary = stringResource(Res.string.schema_externalnotification_output_ms_description),
