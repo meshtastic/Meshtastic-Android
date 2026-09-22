@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
@@ -99,7 +100,7 @@ import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
 import org.meshtastic.feature.node.component.LocalNodeContextMenu
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeCountSummary
-import org.meshtastic.feature.node.component.NodeFilterTextField
+import org.meshtastic.feature.node.component.NodeFilterSearchBar
 import org.meshtastic.feature.node.component.NodeFilterToggles
 import org.meshtastic.feature.node.component.NodeHopHistogramSheet
 import org.meshtastic.feature.node.component.NodeListHelp
@@ -197,6 +198,88 @@ fun NodeListScreen(
         SharedContactDialog(contact = ourNode, onDismiss = { showShareContact = false }, isOwnContact = true)
     }
 
+    // One row renderer, used by the list itself and by the search bar's expanded results, so the two can never drift.
+    // It stays a LazyItemScope lambda rather than a composable of its own because animateItem() needs that receiver.
+    val nodeRow: @Composable LazyItemScope.(Node) -> Unit = { node ->
+        var expanded by remember { mutableStateOf(false) }
+
+        Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+            val isThisNode = node.num == ourNode?.num
+            val canEditStatus = canEditStatusMessage(node, ourNode, connectionState)
+            // Our own node only earns a long press while it has something to offer, or it opens an empty menu.
+            val longClick =
+                if (!isThisNode || canEditStatus) {
+                    { expanded = true }
+                } else {
+                    null
+                }
+
+            val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
+
+            when (density) {
+                NodeListDensity.COMPLETE ->
+                    NodeItem(
+                        modifier = Modifier.animateItem(),
+                        thisNode = ourNode,
+                        thatNode = node,
+                        distanceUnits = state.distanceUnits,
+                        tempInFahrenheit = state.tempInFahrenheit,
+                        onClick = { navigateToNodeDetails(node.num) },
+                        onLongClick = longClick,
+                        connectionState = connectionState,
+                        deviceType = deviceType,
+                        isActive = isActive,
+                        showTelemetry = showTelemetry,
+                        deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
+                    )
+
+                NodeListDensity.COMPACT ->
+                    NodeItemCompact(
+                        modifier = Modifier.animateItem(),
+                        thisNode = ourNode,
+                        thatNode = node,
+                        distanceUnits = state.distanceUnits,
+                        onClick = { navigateToNodeDetails(node.num) },
+                        onLongClick = longClick,
+                        isActive = isActive,
+                        showPower = showPower,
+                        showLastHeard = showLastHeard,
+                        lastHeardIsRelative = lastHeardIsRelative,
+                        showLocation = showLocation,
+                        showHops = showHops,
+                        showSignal = showSignal,
+                        showChannel = showChannel,
+                        showRole = showRole,
+                        showTelemetry = showTelemetry,
+                        tempInFahrenheit = state.tempInFahrenheit,
+                        deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
+                    )
+            }
+            if (canEditStatus) {
+                LocalNodeContextMenu(
+                    expanded = expanded,
+                    onUpdateStatus = onEditStatusMessage,
+                    onDismiss = { expanded = false },
+                )
+            } else if (!isThisNode) {
+                NodeContextMenu(
+                    expanded = expanded,
+                    node = node,
+                    onFavorite = { viewModel.favoriteNode(node) },
+                    onMute = { viewModel.muteNode(node) },
+                    onMessage = {
+                        val route = viewModel.getDirectMessageRoute(node)
+                        navigateToMessages(route)
+                    },
+                    onTraceRoute = { viewModel.traceRoute(node) },
+                    onIgnore = { viewModel.ignoreNode(node) },
+                    onRemove = { viewModel.removeNode(node) },
+                    onDismiss = { expanded = false },
+                )
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -268,12 +351,17 @@ fun NodeListScreen(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                         )
                         val filterPrefs = viewModel.nodeFilterPreferences
-                        NodeFilterTextField(
+                        NodeFilterSearchBar(
                             filterText = state.filter.filterText,
                             onTextChange = { viewModel.nodeFilterText = it },
                             currentSortOption = state.sort,
                             onSortSelect = viewModel::setSortOption,
                             modifier = Modifier.fillMaxWidth(),
+                            searchResults = {
+                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    items(nodes, key = { it.num }, itemContent = nodeRow)
+                                }
+                            },
                             toggles =
                             NodeFilterToggles(
                                 includeUnknown = state.filter.includeUnknown,
@@ -300,86 +388,7 @@ fun NodeListScreen(
                     }
                 }
 
-                items(nodes, key = { it.num }) { node ->
-                    var expanded by remember { mutableStateOf(false) }
-
-                    Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                        val isThisNode = node.num == ourNode?.num
-                        val canEditStatus = canEditStatusMessage(node, ourNode, connectionState)
-                        // Our own node only earns a long press while it has something to offer, or it opens an
-                        // empty menu.
-                        val longClick =
-                            if (!isThisNode || canEditStatus) {
-                                { expanded = true }
-                            } else {
-                                null
-                            }
-
-                        val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
-
-                        when (density) {
-                            NodeListDensity.COMPLETE ->
-                                NodeItem(
-                                    modifier = Modifier.animateItem(),
-                                    thisNode = ourNode,
-                                    thatNode = node,
-                                    distanceUnits = state.distanceUnits,
-                                    tempInFahrenheit = state.tempInFahrenheit,
-                                    onClick = { navigateToNodeDetails(node.num) },
-                                    onLongClick = longClick,
-                                    connectionState = connectionState,
-                                    deviceType = deviceType,
-                                    isActive = isActive,
-                                    showTelemetry = showTelemetry,
-                                    deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
-                                )
-
-                            NodeListDensity.COMPACT ->
-                                NodeItemCompact(
-                                    modifier = Modifier.animateItem(),
-                                    thisNode = ourNode,
-                                    thatNode = node,
-                                    distanceUnits = state.distanceUnits,
-                                    onClick = { navigateToNodeDetails(node.num) },
-                                    onLongClick = longClick,
-                                    isActive = isActive,
-                                    showPower = showPower,
-                                    showLastHeard = showLastHeard,
-                                    lastHeardIsRelative = lastHeardIsRelative,
-                                    showLocation = showLocation,
-                                    showHops = showHops,
-                                    showSignal = showSignal,
-                                    showChannel = showChannel,
-                                    showRole = showRole,
-                                    showTelemetry = showTelemetry,
-                                    tempInFahrenheit = state.tempInFahrenheit,
-                                    deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
-                                )
-                        }
-                        if (canEditStatus) {
-                            LocalNodeContextMenu(
-                                expanded = expanded,
-                                onUpdateStatus = onEditStatusMessage,
-                                onDismiss = { expanded = false },
-                            )
-                        } else if (!isThisNode) {
-                            NodeContextMenu(
-                                expanded = expanded,
-                                node = node,
-                                onFavorite = { viewModel.favoriteNode(node) },
-                                onMute = { viewModel.muteNode(node) },
-                                onMessage = {
-                                    val route = viewModel.getDirectMessageRoute(node)
-                                    navigateToMessages(route)
-                                },
-                                onTraceRoute = { viewModel.traceRoute(node) },
-                                onIgnore = { viewModel.ignoreNode(node) },
-                                onRemove = { viewModel.removeNode(node) },
-                                onDismiss = { expanded = false },
-                            )
-                        }
-                    }
-                }
+                items(nodes, key = { it.num }, itemContent = nodeRow)
                 if (nodes.isEmpty() && !state.filter.isActive) {
                     item {
                         NodeListEmptyState(

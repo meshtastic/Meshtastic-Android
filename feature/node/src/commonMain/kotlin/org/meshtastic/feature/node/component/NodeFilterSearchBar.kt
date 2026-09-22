@@ -20,16 +20,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuGroup
@@ -38,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,18 +44,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.clear
-import org.meshtastic.core.resources.desc_node_filter_clear
 import org.meshtastic.core.resources.node_filter_exclude_infrastructure
 import org.meshtastic.core.resources.node_filter_exclude_mqtt
 import org.meshtastic.core.resources.node_filter_exclude_unheard
@@ -74,34 +64,45 @@ import org.meshtastic.core.resources.node_filter_show_ignored
 import org.meshtastic.core.resources.node_filter_title
 import org.meshtastic.core.resources.node_sort_button
 import org.meshtastic.core.resources.node_sort_title
+import org.meshtastic.core.ui.component.MeshtasticSearchBar
 import org.meshtastic.core.ui.component.SignedNodeIcon
-import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.icon.Sort
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 
+/**
+ * The node list's search field: a Material 3 [MeshtasticSearchBar] whose expanded surface shows the matching nodes, with
+ * the sort and filter menu as its trailing action.
+ *
+ * The "showing ignored nodes" banner sits under the collapsed bar rather than inside it: it reports a filter that is
+ * already applied to the list below, not a search result.
+ */
 @Composable
-fun NodeFilterTextField(
+fun NodeFilterSearchBar(
     filterText: String,
     onTextChange: (String) -> Unit,
     currentSortOption: NodeSortOption,
     onSortSelect: (NodeSortOption) -> Unit,
     toggles: NodeFilterToggles,
     modifier: Modifier = Modifier,
+    searchResults: @Composable ColumnScope.() -> Unit = {},
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
-        Row {
-            NodeFilterTextField(filterText = filterText, onTextChange = onTextChange, modifier = Modifier.weight(1f))
-
-            NodeSortButton(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                currentSortOption = currentSortOption,
-                onSortSelect = onSortSelect,
-                toggles = toggles,
-            )
-        }
+        MeshtasticSearchBar(
+            query = filterText,
+            onQueryChange = onTextChange,
+            placeholder = stringResource(Res.string.node_filter_placeholder),
+            inputFieldTag = NODE_FILTER_SEARCH_BAR_INPUT_FIELD_TAG,
+            trailingActions = {
+                NodeSortButton(
+                    currentSortOption = currentSortOption,
+                    onSortSelect = onSortSelect,
+                    toggles = toggles,
+                )
+            },
+            expandedContent = searchResults,
+        )
         if (toggles.showIgnored) {
             Box(
                 modifier =
@@ -121,6 +122,9 @@ fun NodeFilterTextField(
         }
     }
 }
+
+/** Tag for the collapsed node search field, so a test can target it rather than the expanded overlay's copy. */
+const val NODE_FILTER_SEARCH_BAR_INPUT_FIELD_TAG = "NodeFilterSearchBarInputField"
 
 data class NodeFilterToggles(
     val includeUnknown: Boolean,
@@ -143,50 +147,6 @@ data class NodeFilterToggles(
     val onlyEncrypted: Boolean,
     val onToggleOnlyEncrypted: () -> Unit,
 )
-
-@Composable
-private fun NodeFilterTextField(filterText: String, onTextChange: (String) -> Unit, modifier: Modifier = Modifier) {
-    val focusManager = LocalFocusManager.current
-    var isFocused by remember { mutableStateOf(false) }
-
-    OutlinedTextField(
-        modifier = modifier.defaultMinSize(minHeight = 48.dp).onFocusEvent { isFocused = it.isFocused },
-        value = filterText,
-        placeholder = {
-            Text(
-                text = stringResource(Res.string.node_filter_placeholder),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35F),
-            )
-        },
-        leadingIcon = {
-            Icon(MeshtasticIcons.Search, contentDescription = stringResource(Res.string.node_filter_placeholder))
-        },
-        onValueChange = onTextChange,
-        trailingIcon = {
-            if (filterText.isNotEmpty() || isFocused) {
-                val clearLabel = stringResource(Res.string.clear)
-                Icon(
-                    MeshtasticIcons.Close,
-                    contentDescription = stringResource(Res.string.desc_node_filter_clear),
-                    modifier =
-                    Modifier.clickable(
-                        onClickLabel = clearLabel,
-                        role = Role.Button,
-                        onClick = {
-                            onTextChange("")
-                            focusManager.clearFocus()
-                        },
-                    ),
-                )
-            }
-        },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onBackground),
-        maxLines = 1,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-    )
-}
 
 @Suppress("LongMethod")
 @Composable
