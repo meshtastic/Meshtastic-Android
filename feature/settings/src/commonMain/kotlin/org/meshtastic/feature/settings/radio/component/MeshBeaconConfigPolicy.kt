@@ -16,8 +16,10 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
+import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.model.constraintFor
+import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.util.isChannelPlaceholder
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.proto.ChannelSettings
@@ -81,8 +83,9 @@ internal fun beaconOfferChannelIndex(
 
 /**
  * Applies design#140's save-time invariants to [form] before it is written. When [radioLora] uses a standard modem
- * preset (`use_preset = true`): the radio's own region (behavior 1) and configured preset (behavior 4) are always
- * stamped, never user-chosen; every broadcast target's region is kept in lockstep; and an untouched offered channel
+ * preset (`use_preset = true`): the radio's own region (behavior 1), configured preset (behavior 4) and frequency
+ * slot ([beaconOfferFrequencySlot]) are always stamped, never user-chosen; every broadcast target's region is kept in
+ * lockstep; and an untouched offered channel
  * defaults to the radio's primary channel (behavior 3's required-channel rule), while an already-set offered channel
  * (even one that no longer matches a radio channel) is kept. Only the offered channel's name and PSK are carried over,
  * never the radio's own channel_index/id/uplink/downlink/module flags, which have no meaning for a channel someone
@@ -100,20 +103,23 @@ internal fun stampBeaconConfigForSave(
     radioLora: Config.LoRaConfig,
     channelList: List<ChannelSettings>,
 ): MeshBeaconConfig = if (radioLora.use_preset) {
+    val offerChannel =
+        (form.broadcast_offer_channel ?: channelList.getOrNull(0))?.let {
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.name = it.name
+                    wb.psk = it.psk
+                }
+                .build()
+        }
     form
         .newBuilder()
         .also { wb ->
             wb.broadcast_offer_region = radioLora.region
             wb.broadcast_offer_preset = radioLora.modem_preset
-            wb.broadcast_offer_channel =
-                (form.broadcast_offer_channel ?: channelList.getOrNull(0))?.let {
-                    ChannelSettings.Builder()
-                        .also { wb ->
-                            wb.name = it.name
-                            wb.psk = it.psk
-                        }
-                        .build()
-                }
+            wb.broadcast_offer_channel = offerChannel
+            wb.broadcast_offer_frequency_slot =
+                beaconOfferFrequencySlot(offerChannel, channelList.getOrNull(0), radioLora)
             wb.broadcast_targets =
                 form.broadcast_targets.map { it.newBuilder().also { wb -> wb.region = radioLora.region }.build() }
         }
@@ -127,9 +133,31 @@ internal fun stampBeaconConfigForSave(
             wb.broadcast_offer_region = stored.broadcast_offer_region
             wb.broadcast_offer_preset = stored.broadcast_offer_preset
             wb.broadcast_offer_channel = stored.broadcast_offer_channel
+            wb.broadcast_offer_frequency_slot = stored.broadcast_offer_frequency_slot
             wb.broadcast_targets = stored.broadcast_targets
         }
         .build()
+}
+
+/**
+ * The frequency slot to advertise alongside the offer, or `null` to leave the field unset.
+ *
+ * Firmware sends this on the air only where it differs from the slot a receiver derives from the offered region,
+ * channel name and preset, so stamping the radio's real slot costs nothing until the two diverge. They diverge in
+ * exactly the cases the field exists for: a radio pinned to an explicit `channel_num`, a region that mandates a slot,
+ * or an offered channel whose name hashes somewhere other than where the radio actually sits. Without this the radio
+ * advertises a frequency it is not on, and a client that joins hears nothing.
+ */
+internal fun beaconOfferFrequencySlot(
+    offerChannel: ChannelSettings?,
+    primaryChannel: ChannelSettings?,
+    radioLora: Config.LoRaConfig,
+): Int? {
+    if (offerChannel == null || radioLora.numChannels <= 0) return null
+    val actual = Channel(primaryChannel ?: ChannelSettings.Builder().build(), radioLora).channelNum
+    // Derive the way a receiver must: off the offered channel's name with our own pin removed.
+    val derived = Channel(offerChannel, radioLora.newBuilder().also { wb -> wb.channel_num = 0 }.build()).channelNum
+    return actual.takeIf { it != derived }
 }
 
 /**

@@ -35,6 +35,12 @@ data class ScanTarget(
     val label: String,
     val channel: ChannelSettings? = null,
     val region: RegionCode? = null,
+    /**
+     * The frequency slot the advertising mesh pinned, when it advertised one. Null means derive the slot from
+     * [channel]'s name the way any node on it would — a mesh that pins a slot its name does not hash to would
+     * otherwise be scanned for on the wrong frequency and never heard.
+     */
+    val frequencySlot: Int? = null,
 )
 
 /**
@@ -43,7 +49,15 @@ data class ScanTarget(
  * — but a different PSK is a different network, so it must not collapse into another row (that would send the user to
  * the wrong mesh).
  */
-data class BeaconChannel(val name: String, val psk: ByteString, val preset: ChannelOption?, val region: RegionCode) {
+data class BeaconChannel(
+    val name: String,
+    val psk: ByteString,
+    val preset: ChannelOption?,
+    val region: RegionCode,
+    val frequencySlot: Int? = null,
+) {
+    // The slot is part of the identity: the same name and PSK pinned to two different slots are two meshes on two
+    // frequencies, and collapsing them would silently scan only whichever row won.
     val id: String
-        get() = "$name|${preset?.name.orEmpty()}|${psk.hex()}"
+        get() = "$name|${preset?.name.orEmpty()}|${psk.hex()}|${frequencySlot ?: ""}"
 }

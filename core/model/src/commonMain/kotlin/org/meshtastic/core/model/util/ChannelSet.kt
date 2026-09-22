@@ -149,9 +149,10 @@ enum class BeaconJoinOption {
 /**
  * Decides whether a beacon can be joined by simply **adding** its channel (no reboot) or requires a **switch**
  * (retune + reboot). Adding works only when the offered mesh sits on the radio's *current* frequency slot — Meshtastic
- * secondary channels ride the primary channel's frequency, so the offered channel must resolve (name-hash) to the same
- * slot the radio's primary is on, under a matching preset and region. Mirrors the Apple `014-mesh-beacons`
- * FR-016/FR-017 logic.
+ * secondary channels ride the primary channel's frequency, so the offered channel must resolve to the same slot the
+ * radio's primary is on, under a matching preset and region. The offered slot comes from
+ * [MeshBeacon.offer_frequency_slot] when the beacon advertises one and from the channel-name hash otherwise; see
+ * [advertisedFrequencySlot]. Mirrors the Apple `014-mesh-beacons` FR-016/FR-017 logic.
  *
  * @param currentLora The radio's current [LoRaConfig] (`null` → can't reason, so [SWITCH]).
  * @param currentChannels The radio's current channel settings, index 0 = primary.
@@ -165,28 +166,43 @@ fun MeshBeacon.beaconJoinOption(currentLora: LoRaConfig?, currentChannels: List<
     // offer_region == UNSET (0) means "not offered"; only a set, differing region forces a switch.
     val regionMatches = offer_region == RegionCode.UNSET || offer_region == lora.region
     if (!presetMatches || !regionMatches) return BeaconJoinOption.SWITCH
-    // With an explicit slot override we can't compare the offered mesh's slot; be safe and switch.
-    if (lora.channel_num != 0 || lora.numChannels <= 0) return BeaconJoinOption.SWITCH
+    if (lora.numChannels <= 0) return BeaconJoinOption.SWITCH
+    val advertisedSlot = advertisedFrequencySlot(lora)
+    // Only an advertised slot makes a pinned radio comparable: our own channel_num describes where we sit, never
+    // where the offered mesh sits, so without one there is nothing to compare a pin against.
+    if (advertisedSlot == null && lora.channel_num != 0) return BeaconJoinOption.SWITCH
     // Hash the *effective* names: an empty channel name resolves to its preset display name ("LongFast", …), which is
     // what firmware hashes for the slot — comparing raw "" on both sides would misclassify an unnamed primary.
     val currentSlot =
         lora.channelNum(Channel(currentChannels.firstOrNull() ?: ChannelSettings.Builder().build(), lora).name)
-    val offeredSlot = lora.channelNum(Channel(offer, lora).name)
+    val offeredSlot = advertisedSlot ?: lora.channelNum(Channel(offer, lora).name)
     return if (offeredSlot == currentSlot) BeaconJoinOption.ADD else BeaconJoinOption.SWITCH
 }
+
+/**
+ * The frequency slot this beacon advertises outright, or `null` when it advertises none and the slot must be derived
+ * from the offered region, channel name and preset the way [LoRaConfig.channelNum] does.
+ *
+ * A mesh sends this only when derivation would produce the wrong answer — it pins a slot the offered name does not
+ * hash to. Slot numbering is 1-based to match [LoRaConfig.channel_num], and 0 is defined as "not sent". A value
+ * outside [lora]'s slot count is unaddressable here, so it falls back to derivation rather than refusing the join:
+ * that is the behaviour we had before the field existed, and the offer is advisory either way.
+ */
+private fun MeshBeacon.advertisedFrequencySlot(lora: LoRaConfig): Int? =
+    offer_frequency_slot?.takeIf { it in 1..lora.numChannels }
 
 /**
  * Builds the [ChannelSet] to hand the QR channel-import dialog for a given [option].
  *
  * [ADD][BeaconJoinOption.ADD] omits `lora_config` so the dialog merges the offered channel into a free secondary slot
  * with no reboot. [SWITCH][BeaconJoinOption.SWITCH] carries a **fresh** `lora_config` (not a copy of [currentLora])
- * with `use_preset = true`, the advertised preset+region applied, and every RF field left at its default — notably
- * `channel_num`/`override_frequency` zeroed so firmware re-derives the frequency from the offered channel name (Apple
- * FR-006). Starting blank guarantees no stale slot/frequency pin (`channel_num`, `override_frequency`, manual
- * bandwidth/spread_factor/coding_rate) from the old mesh survives the retune. Only `region` is carried from
- * [currentLora] when the beacon doesn't advertise one — this config is sent as a full LoRaConfig replacement, and a
- * zero region disables transmit; `hop_limit`/`tx_enabled` fall back to the app's standard defaults. Returns `null` for
- * [NONE][BeaconJoinOption.NONE] or a beacon with no offered channel.
+ * with `use_preset = true`, the advertised preset+region applied, and every RF field left at its default. Starting
+ * blank guarantees no stale slot/frequency pin (`channel_num`, `override_frequency`, manual
+ * bandwidth/spread_factor/coding_rate) from the old mesh survives the retune. `channel_num` is then set to the slot
+ * the beacon advertises, or left zero so firmware re-derives it from the offered channel name (Apple FR-006) when it
+ * advertises none. Only `region` is carried from [currentLora] when the beacon doesn't advertise one — this config is
+ * sent as a full LoRaConfig replacement, and a zero region disables transmit; `hop_limit`/`tx_enabled` fall back to
+ * the app's standard defaults. Returns `null` for [NONE][BeaconJoinOption.NONE] or a beacon with no offered channel.
  *
  * Both paths strip position sharing from the offered channel ([withoutPositionSharing]) so joining a stranger's mesh
  * never leaks our location — matching Apple's `joinBeaconMesh`/`addBeaconChannel`.
@@ -202,10 +218,9 @@ fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfi
             // Start from the shared device default ([Channel.default] — use_preset=true, hop_limit/tx_enabled set,
             // every RF field blank) rather than a copy of the current config: any stale RF pin on the connected radio
             // — an explicit channel_num, override_frequency, or manual bandwidth/spread_factor/coding_rate — would
-            // otherwise strand it on the old slot. use_preset + the default (zero) channel_num/override_frequency lets
-            // firmware re-derive the frequency from the offered channel name (Apple FR-006). This is sent as a full
-            // LoRaConfig replacement, so carry region (a zero region disables transmit); the beacon proto advertises
-            // no other RF fields.
+            // otherwise strand it on the old slot. This is sent as a full LoRaConfig replacement, so carry region (a
+            // zero region disables transmit); preset, region and the frequency slot are the only RF fields the beacon
+            // proto advertises.
             val base = currentLora ?: LoRaConfig.Builder().build()
             val loraConfig =
                 Channel.default.loraConfig
@@ -215,10 +230,14 @@ fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfi
                         wb.region = if (offer_region != RegionCode.UNSET) offer_region else base.region
                     }
                     .build()
+            // Bound the advertised slot against the config we are about to send, not the one we are leaving: the
+            // offered region can have a different slot count from ours. Zero leaves firmware to derive it.
+            val advertisedSlot = advertisedFrequencySlot(loraConfig)
             ChannelSet.Builder()
                 .also { wb ->
                     wb.settings = listOf(offerChannel)
-                    wb.lora_config = loraConfig
+                    wb.lora_config =
+                        loraConfig.newBuilder().also { lb -> lb.channel_num = advertisedSlot ?: 0 }.build()
                 }
                 .build()
         }

@@ -584,9 +584,9 @@ class DiscoveryScanEngine(
             )
             Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (use_preset=true)" }
         } else {
-            // Beacon custom-channel target: apply the offered preset+region, reset channel_num so firmware derives the
-            // frequency from the new name, then tune the primary channel to the offered name+PSK so nodes on that mesh
-            // are heard. The original primary channel is restored after the scan.
+            // Beacon custom-channel target: apply the offered preset+region, take the slot the mesh pinned or reset
+            // channel_num so firmware derives it from the new name, then tune the primary channel to the offered
+            // name+PSK so nodes on that mesh are heard. The original primary channel is restored after the scan.
             radioController.setLocalConfig(
                 Config.Builder()
                     .also { wb ->
@@ -597,7 +597,7 @@ class DiscoveryScanEngine(
                                     wb.use_preset = true
                                     wb.modem_preset = target.preset.modemPreset
                                     wb.region = target.region ?: base.region
-                                    wb.channel_num = 0
+                                    wb.channel_num = target.frequencySlot ?: 0
                                 }
                                 .build()
                     }

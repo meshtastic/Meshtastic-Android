@@ -17,6 +17,8 @@
 package org.meshtastic.feature.settings.radio.component
 
 import okio.ByteString.Companion.encodeUtf8
+import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.numChannels
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.proto.ChannelSettings
@@ -639,5 +641,56 @@ class MeshBeaconConfigPolicyTest {
         val updated = removeBeaconTarget(targets, index = 0)
 
         assertEquals(listOf(MeshBeaconConfig.BroadcastTarget.Builder().build()), updated)
+    }
+
+    private val presetRadio =
+        Config.LoRaConfig.Builder()
+            .also { wb ->
+                wb.region = RegionCode.EU_868
+                wb.modem_preset = ModemPreset.MEDIUM_FAST
+                wb.use_preset = true
+            }
+            .build()
+    private val primaryChannel = ChannelSettings.Builder().also { wb -> wb.name = "HomeMesh" }.build()
+
+    @Test
+    fun stampBeaconConfigForSave_pinnedRadio_advertisesTheSlotItActuallySitsOn() {
+        val derived = Channel(primaryChannel, presetRadio).channelNum
+        val pin = if (derived < presetRadio.numChannels) derived + 1 else derived - 1
+        val radioLora = presetRadio.newBuilder().also { wb -> wb.channel_num = pin }.build()
+
+        val stamped =
+            stampBeaconConfigForSave(
+                MeshBeaconConfig.Builder().build(),
+                MeshBeaconConfig.Builder().build(),
+                radioLora,
+                channelList = listOf(primaryChannel),
+            )
+
+        assertEquals(pin, stamped.broadcast_offer_frequency_slot)
+    }
+
+    @Test
+    fun stampBeaconConfigForSave_derivableSlot_advertisesNothing() {
+        val stamped =
+            stampBeaconConfigForSave(
+                MeshBeaconConfig.Builder().build(),
+                MeshBeaconConfig.Builder().build(),
+                presetRadio,
+                channelList = listOf(primaryChannel),
+            )
+
+        // A receiver works this slot out from the offer itself, so spending bytes on it would be waste.
+        assertNull(stamped.broadcast_offer_frequency_slot)
+    }
+
+    @Test
+    fun stampBeaconConfigForSave_customLoraParams_preservesTheStoredSlot() {
+        val radioLora = presetRadio.newBuilder().also { wb -> wb.use_preset = false }.build()
+        val stored = MeshBeaconConfig.Builder().also { wb -> wb.broadcast_offer_frequency_slot = 48 }.build()
+
+        val stamped = stampBeaconConfigForSave(MeshBeaconConfig.Builder().build(), stored, radioLora, emptyList())
+
+        assertEquals(48, stamped.broadcast_offer_frequency_slot)
     }
 }
