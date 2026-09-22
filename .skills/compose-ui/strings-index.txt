@@ -244,7 +244,6 @@ config_lora_modem_preset_licensed_summary
 config_lora_modem_preset_summary
 config_lora_region_summary
 config_network_udp_enabled_summary
-config_position_broadcast_smart_minimum_interval_secs_summary
 config_saved_restarting
 config_security_private_key
 config_security_private_key_remote
@@ -455,7 +454,6 @@ distance_filters
 distance_filters_description
 distance_measurements
 distance_measurements_description
-dns
 ### DOC ###
 doc_clear_search
 doc_keywords_app_functions
@@ -708,7 +706,6 @@ firmware_update_wipe_confirm_warning
 firmware_update_wipe_label
 firmware_update_wipe_usb_detail
 firmware_version
-fixed_pin
 fixed_position
 for_more_information_see_our_privacy_policy
 ### FORMAT ###
@@ -722,7 +719,6 @@ free_memory
 free_memory_description
 freq
 gas_resistance
-gateway
 generate_qr_code
 ### GEOFENCE ###
 geofence
@@ -823,7 +819,6 @@ layer_type_geojson
 layer_type_kml
 layer_type_network
 learn_more
-led_heartbeat
 legacy_admin_channel
 library_count
 license
@@ -971,11 +966,9 @@ map_overlay_precipitation
 map_overlay_weather_radar
 map_purge_fail
 map_purge_success
-map_reporting
 map_reporting_consent_header
 map_reporting_consent_text
 map_reporting_interval_seconds
-map_reporting_summary
 map_select_download_region
 map_start_download
 map_style_selection
@@ -1006,7 +999,6 @@ mesh_beacon_interval_error
 mesh_beacon_invitations_title
 mesh_beacon_listen
 mesh_beacon_listen_summary
-mesh_beacon_message
 mesh_beacon_message_error
 mesh_beacon_no_channels
 mesh_beacon_notification_body
@@ -1437,7 +1429,6 @@ refresh
 refresh_metadata
 regenerate_keys_confirmation
 regenerate_private_key
-region_frequency_plan
 relays
 ### REMOTE ###
 remote
@@ -1668,7 +1659,6 @@ stay_connected_anywhere
 stop_connecting
 store_forward
 store_forward_config
-subnet
 success
 super_deep_sleep_duration_seconds
 supported
@@ -1681,7 +1671,6 @@ system_settings
 ### TAK ###
 tak
 tak_config
-tak_role
 tak_server
 tak_server_channel
 tak_server_channel_desc
@@ -1713,7 +1702,6 @@ tak_server_test_results_v2
 tak_server_test_run
 tak_server_test_running
 tak_server_v1_fallback_notice
-tak_team
 telemetry
 telemetry_config
 temperature
@@ -1722,10 +1710,8 @@ theme_dark
 theme_light
 theme_system
 time
-time_zone
 timeout
 timestamp
-tls_enabled
 tls_enabled_public_broker_summary
 toggle_my_position
 trace_route

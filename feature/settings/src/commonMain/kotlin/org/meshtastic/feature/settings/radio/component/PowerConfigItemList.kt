@@ -35,6 +35,7 @@ import org.meshtastic.core.resources.schema_power_adc_multiplier_override
 import org.meshtastic.core.resources.schema_power_is_power_saving
 import org.meshtastic.core.resources.schema_power_is_power_saving_description
 import org.meshtastic.core.resources.schema_power_on_battery_shutdown_after_secs
+import org.meshtastic.core.resources.schema_power_on_battery_shutdown_after_secs_description
 import org.meshtastic.core.resources.schema_power_wait_bluetooth_secs
 import org.meshtastic.core.resources.super_deep_sleep_duration_seconds
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -81,6 +82,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val items = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_power_on_battery_shutdown_after_secs),
+                    summary = stringResource(Res.string.schema_power_on_battery_shutdown_after_secs_description),
                     selectedItem = formState.value.on_battery_shutdown_after_secs.toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },

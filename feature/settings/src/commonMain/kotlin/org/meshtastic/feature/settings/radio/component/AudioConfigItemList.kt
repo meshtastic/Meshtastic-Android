@@ -28,12 +28,15 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.audio
 import org.meshtastic.core.resources.audio_config
 import org.meshtastic.core.resources.schema_audio_bitrate
+import org.meshtastic.core.resources.schema_audio_bitrate_description
 import org.meshtastic.core.resources.schema_audio_codec2_enabled
+import org.meshtastic.core.resources.schema_audio_codec2_enabled_description
 import org.meshtastic.core.resources.schema_audio_i2s_din
 import org.meshtastic.core.resources.schema_audio_i2s_sck
 import org.meshtastic.core.resources.schema_audio_i2s_sd
 import org.meshtastic.core.resources.schema_audio_i2s_ws
 import org.meshtastic.core.resources.schema_audio_ptt_pin
+import org.meshtastic.core.resources.schema_audio_ptt_pin_description
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -66,6 +69,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.audio_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_audio_codec2_enabled),
+                    summary = stringResource(Res.string.schema_audio_codec2_enabled_description),
                     checked = formState.value.codec2_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -76,6 +80,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_audio_ptt_pin),
+                    summary = stringResource(Res.string.schema_audio_ptt_pin_description),
                     value = formState.value.ptt_pin,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -85,6 +90,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 DropDownPreference(
                     title = stringResource(Res.string.schema_audio_bitrate),
+                    summary = stringResource(Res.string.schema_audio_bitrate_description),
                     enabled = state.connected,
                     selectedItem = formState.value.bitrate,
                     onItemSelected = {

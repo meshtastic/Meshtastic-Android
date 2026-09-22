@@ -61,9 +61,10 @@ import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.export_tak_data_package
+import org.meshtastic.core.resources.schema_tak_role
+import org.meshtastic.core.resources.schema_tak_team
 import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.tak_config
-import org.meshtastic.core.resources.tak_role
 import org.meshtastic.core.resources.tak_server
 import org.meshtastic.core.resources.tak_server_channel
 import org.meshtastic.core.resources.tak_server_channel_desc
@@ -94,7 +95,6 @@ import org.meshtastic.core.resources.tak_server_test_results_v2
 import org.meshtastic.core.resources.tak_server_test_run
 import org.meshtastic.core.resources.tak_server_test_running
 import org.meshtastic.core.resources.tak_server_v1_fallback_notice
-import org.meshtastic.core.resources.tak_team
 import org.meshtastic.core.takserver.TAKDataPackageGenerator
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
@@ -170,7 +170,7 @@ internal fun TakConfigCard(
 ) {
     TitledCard(title = stringResource(Res.string.tak_config)) {
         DropDownPreference(
-            title = stringResource(Res.string.tak_team),
+            title = stringResource(Res.string.schema_tak_team),
             enabled = enabled,
             selectedItem = team,
             itemColor = { Color(getColorFrom(it)) },
@@ -178,7 +178,7 @@ internal fun TakConfigCard(
         )
         HorizontalDivider()
         DropDownPreference(
-            title = stringResource(Res.string.tak_role),
+            title = stringResource(Res.string.schema_tak_role),
             enabled = enabled,
             selectedItem = role,
             onItemSelected = onRoleSelected,

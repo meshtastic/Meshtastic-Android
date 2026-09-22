@@ -27,12 +27,19 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.override_console_serial_port
 import org.meshtastic.core.resources.schema_serial_baud
+import org.meshtastic.core.resources.schema_serial_baud_description
 import org.meshtastic.core.resources.schema_serial_echo
+import org.meshtastic.core.resources.schema_serial_echo_description
 import org.meshtastic.core.resources.schema_serial_enabled
+import org.meshtastic.core.resources.schema_serial_enabled_description
 import org.meshtastic.core.resources.schema_serial_mode
+import org.meshtastic.core.resources.schema_serial_mode_description
 import org.meshtastic.core.resources.schema_serial_rxd
+import org.meshtastic.core.resources.schema_serial_rxd_description
 import org.meshtastic.core.resources.schema_serial_timeout
+import org.meshtastic.core.resources.schema_serial_timeout_description
 import org.meshtastic.core.resources.schema_serial_txd
+import org.meshtastic.core.resources.schema_serial_txd_description
 import org.meshtastic.core.resources.serial
 import org.meshtastic.core.resources.serial_config
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -67,6 +74,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.serial_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_serial_enabled),
+                    summary = stringResource(Res.string.schema_serial_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -77,6 +85,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_serial_echo),
+                    summary = stringResource(Res.string.schema_serial_echo_description),
                     checked = formState.value.echo,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -87,6 +96,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_serial_rxd),
+                    summary = stringResource(Res.string.schema_serial_rxd_description),
                     value = formState.value.rxd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -97,6 +107,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_serial_txd),
+                    summary = stringResource(Res.string.schema_serial_txd_description),
                     value = formState.value.txd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -107,6 +118,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_serial_baud),
+                    summary = stringResource(Res.string.schema_serial_baud_description),
                     enabled = state.connected,
                     selectedItem = formState.value.baud,
                     onItemSelected = {
@@ -116,6 +128,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_serial_timeout),
+                    summary = stringResource(Res.string.schema_serial_timeout_description),
                     value = formState.value.timeout,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -126,6 +139,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_serial_mode),
+                    summary = stringResource(Res.string.schema_serial_mode_description),
                     enabled = state.connected,
                     selectedItem = formState.value.mode,
                     onItemSelected = {
