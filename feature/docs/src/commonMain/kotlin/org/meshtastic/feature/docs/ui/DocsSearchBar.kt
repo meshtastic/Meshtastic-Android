@@ -17,6 +17,7 @@
 package org.meshtastic.feature.docs.ui
 
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SearchBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,6 +37,7 @@ const val DOCS_SEARCH_BAR_INPUT_FIELD_TAG = "DocsSearchBarInputField"
 const val DOCS_SEARCH_BAR_EXPANDED_INPUT_FIELD_TAG = DOCS_SEARCH_BAR_INPUT_FIELD_TAG + SEARCH_BAR_EXPANDED_TAG_SUFFIX
 
 /** Search bar for filtering documentation pages by keywords. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocsSearchBar(
     query: String,
