@@ -27,6 +27,7 @@ import org.meshtastic.proto.bandwidth
 import org.meshtastic.proto.ble_threshold
 import org.meshtastic.proto.broadcast_smart_minimum_distance
 import org.meshtastic.proto.tx_power
+import org.meshtastic.proto.wifi_threshold
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -37,6 +38,7 @@ class FieldMetadataUnitsTest {
     fun theUnitComesFromTheSchema_notTheCallSite() {
         assertEquals(Res.string.unit_dbm, Config.LoRaConfig.tx_power.unitLabelRes)
         assertEquals(Res.string.unit_dbm, ModuleConfig.PaxcounterConfig.ble_threshold.unitLabelRes)
+        assertEquals(Res.string.unit_dbm, ModuleConfig.PaxcounterConfig.wifi_threshold.unitLabelRes)
         assertEquals(Res.string.unit_meters, Config.PositionConfig.broadcast_smart_minimum_distance.unitLabelRes)
         assertEquals(Res.string.unit_khz, Config.LoRaConfig.bandwidth.unitLabelRes)
     }
