@@ -91,6 +91,19 @@ class SettingsSearchCatalogTest {
         assertEquals(emptyList(), missing, "these settings screens cannot be found by searching for their own name")
     }
 
+    @Test
+    fun onlyThisPhonesOwnSettingsAreMarkedAppLocal() {
+        val entries = SettingsSearchCatalog.entries()
+        val appLocal = entries.filter { it.isAppLocal }
+
+        // A remote session drops these, so a proto-backed control must never be caught by that filter.
+        assertTrue(appLocal.isNotEmpty(), "the app's own settings should be searchable on a local session")
+        assertTrue(
+            appLocal.none { entry -> keyOf(entry.title)?.startsWith("schema_") == true },
+            "a radio setting was marked app-local and would vanish during remote administration",
+        )
+    }
+
     /** The resource's registered name, which is what the catalog keys off. */
     private fun keyOf(resource: StringResource): String? =
         Res.allStringResources.entries.firstOrNull { it.value == resource }?.key

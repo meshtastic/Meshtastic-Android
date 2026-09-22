@@ -164,7 +164,12 @@ fun DesktopSettingsScreen(
             modifier = Modifier.padding(paddingValues).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            SettingsSearchBar(viewModel = koinViewModel<SettingsSearchViewModel>(), onNavigate = onNavigate)
+            SettingsSearchBar(
+                viewModel = koinViewModel<SettingsSearchViewModel>(),
+                onNavigate = onNavigate,
+                // This phone's own settings are hidden below while administering another node; search hides them too.
+                includeAppLocal = state.isLocal,
+            )
 
             RadioConfigItemList(
                 state = state,

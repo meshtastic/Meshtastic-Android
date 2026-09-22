@@ -46,6 +46,8 @@ data class SettingsSearchEntry(
     val description: StringResource?,
     val route: Route,
     val screenTitle: StringResource,
+    /** True for settings that belong to this phone rather than to a radio, which a remote session must not offer. */
+    val isAppLocal: Boolean = false,
 )
 
 /**
@@ -163,7 +165,13 @@ object SettingsSearchCatalog {
         )
 
     private fun appEntries(): List<SettingsSearchEntry> = appSettings.map { (title, route) ->
-        SettingsSearchEntry(title = title, description = null, route = route, screenTitle = Res.string.app_settings)
+        SettingsSearchEntry(
+            title = title,
+            description = null,
+            route = route,
+            screenTitle = Res.string.app_settings,
+            isAppLocal = true,
+        )
     }
 
     /** Every proto-backed control the schema labels, attributed to the screen that owns its message. */

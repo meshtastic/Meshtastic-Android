@@ -42,8 +42,16 @@ class SettingsSearchViewModel : ViewModel() {
 
     private val resolved = MutableStateFlow<List<ResolvedSettingsEntry>>(emptyList())
 
+    /**
+     * Whether this phone's own settings are offered. False while administering another node remotely: both settings
+     * screens hide their app-settings section then, and search must not be a way back in to what they hide.
+     */
+    private val _includeAppLocal = MutableStateFlow(true)
+
     val results: StateFlow<List<ResolvedSettingsEntry>> =
-        combine(resolved, _query) { entries, query -> SettingsSearchMatcher.rank(entries, query) }
+        combine(resolved, _query, _includeAppLocal) { entries, query, includeAppLocal ->
+            SettingsSearchMatcher.rank(entries.filter { includeAppLocal || !it.isAppLocal }, query)
+        }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), emptyList())
 
     init {
@@ -55,6 +63,7 @@ class SettingsSearchViewModel : ViewModel() {
                         description = entry.description?.let { getStringSuspend(it) },
                         screenTitle = getStringSuspend(entry.screenTitle),
                         route = entry.route,
+                        isAppLocal = entry.isAppLocal,
                     )
                 }
         }
@@ -62,6 +71,10 @@ class SettingsSearchViewModel : ViewModel() {
 
     fun setQuery(query: String) {
         _query.value = query
+    }
+
+    fun setIncludeAppLocal(include: Boolean) {
+        _includeAppLocal.value = include
     }
 
     private companion object {

@@ -30,6 +30,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,9 +56,16 @@ const val SETTINGS_SEARCH_BAR_INPUT_FIELD_TAG = "SettingsSearchBarInputField"
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsSearchBar(viewModel: SettingsSearchViewModel, onNavigate: (Route) -> Unit, modifier: Modifier = Modifier) {
+fun SettingsSearchBar(
+    viewModel: SettingsSearchViewModel,
+    onNavigate: (Route) -> Unit,
+    modifier: Modifier = Modifier,
+    includeAppLocal: Boolean = true,
+) {
     val query by viewModel.query.collectAsStateWithLifecycle()
     val results by viewModel.results.collectAsStateWithLifecycle()
+
+    LaunchedEffect(includeAppLocal) { viewModel.setIncludeAppLocal(includeAppLocal) }
 
     MeshtasticSearchBar(
         query = query,
