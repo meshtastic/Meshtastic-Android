@@ -147,7 +147,6 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 DropDownPreference(
                     title = stringResource(Res.string.schema_detectionsensor_detection_trigger_type),
                     enabled = state.connected,
-                    items = ModuleConfig.DetectionSensorConfig.TriggerType.entries.map { it to it.name },
                     selectedItem = formState.value.detection_trigger_type,
                     onItemSelected = {
                         formState.value =

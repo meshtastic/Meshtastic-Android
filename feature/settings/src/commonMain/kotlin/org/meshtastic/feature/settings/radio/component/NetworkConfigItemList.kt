@@ -331,7 +331,6 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.address_mode = it }.build()
                     },
-                    itemLabel = { it.name },
                 )
                 if (formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC) {
                     HorizontalDivider()

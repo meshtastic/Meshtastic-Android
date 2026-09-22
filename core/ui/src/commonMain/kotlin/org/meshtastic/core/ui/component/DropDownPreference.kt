@@ -44,6 +44,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.jvm.JvmName
 
@@ -59,14 +61,18 @@ fun <T : Enum<T>> DropDownPreference(
     itemColor: @Composable ((T) -> Color)? = null,
     itemLabel: @Composable ((T) -> String)? = null,
 ) {
+    // A deprecated value the radio currently holds stays on the list: dropping it leaves the field showing nothing and
+    // writes a different value on the next save.
     val enumConstants =
         remember(selectedItem) {
-            enumEntriesOf(selectedItem).filter { it.name != "UNRECOGNIZED" && !it.isDeprecatedEnumEntry() }
+            enumEntriesOf(selectedItem).filter {
+                it.name != "UNRECOGNIZED" && (it == selectedItem || !it.isDeprecatedEnumEntry())
+            }
         }
 
     val items =
         enumConstants.map {
-            val label = itemLabel?.invoke(it) ?: it.name
+            val label = itemLabel?.invoke(it) ?: it.schemaLabel()
             val icon = itemIcon?.invoke(it)
             val color = itemColor?.invoke(it)
             DropDownItem(it, label, icon, color)
@@ -217,6 +223,9 @@ fun <T> DropDownPreference(
 internal expect fun <T : Enum<T>> enumEntriesOf(selectedItem: T): List<T>
 
 internal expect fun Enum<*>.isDeprecatedEnumEntry(): Boolean
+
+/** The label the schema gives this value, falling back to the constant's name where the schema does not name it. */
+@Composable private fun Enum<*>.schemaLabel(): String = schemaLabelRes()?.let { stringResource(it) } ?: name
 
 @Preview(showBackground = true)
 @Composable

@@ -17,13 +17,15 @@
 package org.meshtastic.schemastrings
 
 import java.io.File
+import java.time.Year
 
 /** The repository view of the sync: where the files live, what the English file should contain, how to write it. */
-class SchemaStringsSync(rootDir: File) {
+class SchemaStringsSync(private val rootDir: File) {
     private val valuesRoot = rootDir.resolve("core/resources/src/commonMain/composeResources")
     private val catalog = rootDir.resolve("gradle/libs.versions.toml")
     val englishStrings: File = valuesRoot.resolve("values/$HAND_WRITTEN")
     val englishSchemaStrings: File = valuesRoot.resolve("values/$GENERATED")
+    val enumLabels: File = rootDir.resolve("core/model/src/commonMain/kotlin/$GENERATED_KT")
 
     /** Every hand-written strings file: the English one and one per locale. */
     val handWrittenFiles: List<File>
@@ -51,6 +53,25 @@ class SchemaStringsSync(rootDir: File) {
         notice = notice(catalogPin),
     )
 
+    /**
+     * The Kotlin accessors the registry implies. The licence header is the committed file's own where there is one, so
+     * a rerun does not restamp a year Spotless is happy with - everything before `package` is that header.
+     */
+    fun expectedEnumLabels(): String = EnumLabelsKt.render(
+        header = enumLabels.takeIf { it.isFile }?.let { licenceHeader(it.readText()) } ?: freshLicenceHeader(),
+        pin = catalogPin,
+        enums = SchemaCatalog.labelledEnums(),
+    )
+
+    /** The pin the committed Kotlin file says it was built from, or null when it is absent or unmarked. */
+    val recordedEnumLabelsPin: String?
+        get() = enumLabels.takeIf { it.isFile }?.let { noticePin.find(it.readText())?.groupValues?.get(1) }
+
+    private fun licenceHeader(kotlin: String): String = kotlin.substringBefore("package ").substringBefore("// ")
+
+    private fun freshLicenceHeader(): String =
+        rootDir.resolve("config/spotless/copyright.kt").readText().replace("\$YEAR", YEAR) + "\n"
+
     /** Schema-named keys that someone wrote into a hand-written file, by file. Those files must never carry one. */
     fun strays(): Map<File, Set<String>> = handWrittenFiles
         .associateWith { file -> schemaKeys(StringsXml.bodies(file.readText()).keys) }
@@ -59,7 +80,9 @@ class SchemaStringsSync(rootDir: File) {
     fun apply(): String {
         val text = expectedEnglish()
         englishSchemaStrings.writeText(text)
-        return "wrote ${englishSchemaStrings.path} (${StringsXml.bodies(text).size} strings from protobufs $catalogPin)"
+        enumLabels.writeText(expectedEnumLabels())
+        return "wrote ${StringsXml.bodies(text).size} strings and " +
+            "${SchemaCatalog.labelledEnums().size} enum accessors from protobufs $catalogPin"
     }
 
     private fun schemaKeys(names: Set<String>): Set<String> = names.filterTo(HashSet()) { it.startsWith("schema_") }
@@ -67,6 +90,8 @@ class SchemaStringsSync(rootDir: File) {
     companion object {
         const val HAND_WRITTEN = "strings.xml"
         const val GENERATED = "schema_strings.xml"
+        const val GENERATED_KT = "org/meshtastic/core/model/SchemaEnumLabels.kt"
+        private val YEAR = Year.now().toString()
 
         private val catalogPinLine = Regex("""^meshtastic-protobufs = "([^"]+)"$""", RegexOption.MULTILINE)
         private val noticePin = Regex("""from org\.meshtastic:protobufs (\S+)\.""")

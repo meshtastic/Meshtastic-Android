@@ -129,7 +129,6 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.schema_display_units),
                     summary = stringResource(Res.string.schema_display_units_description),
                     enabled = state.connected,
-                    items = Config.DisplayConfig.DisplayUnits.entries.map { it to it.name },
                     selectedItem = formState.value.units,
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.units = it }.build()
@@ -199,7 +198,6 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.schema_display_displaymode),
                     summary = stringResource(Res.string.schema_display_displaymode_description),
                     enabled = state.connected,
-                    items = Config.DisplayConfig.DisplayMode.entries.map { it to it.name },
                     selectedItem = formState.value.displaymode,
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.displaymode = it }.build()
@@ -210,7 +208,6 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.schema_display_oled),
                     summary = stringResource(Res.string.schema_display_oled_description),
                     enabled = state.connected,
-                    items = Config.DisplayConfig.OledType.entries.map { it to it.name },
                     selectedItem = formState.value.oled,
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.oled = it }.build()
@@ -220,7 +217,6 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 DropDownPreference(
                     title = stringResource(Res.string.schema_display_compass_orientation),
                     enabled = state.connected,
-                    items = Config.DisplayConfig.CompassOrientation.entries.map { it to it.name },
                     selectedItem = formState.value.compass_orientation,
                     onItemSelected = {
                         formState.value =

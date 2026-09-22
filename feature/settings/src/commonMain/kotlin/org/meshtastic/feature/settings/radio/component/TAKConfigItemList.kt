@@ -55,7 +55,6 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.getColorFrom
-import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.TakPrefs
@@ -174,7 +173,6 @@ internal fun TakConfigCard(
             title = stringResource(Res.string.tak_team),
             enabled = enabled,
             selectedItem = team,
-            itemLabel = { stringResource(getStringResFrom(it)) },
             itemColor = { Color(getColorFrom(it)) },
             onItemSelected = onTeamSelected,
         )
@@ -183,7 +181,6 @@ internal fun TakConfigCard(
             title = stringResource(Res.string.tak_role),
             enabled = enabled,
             selectedItem = role,
-            itemLabel = { stringResource(getStringResFrom(it)) },
             onItemSelected = onRoleSelected,
         )
     }

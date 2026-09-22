@@ -1478,13 +1478,6 @@
     <string name="range_test_config">Range Test Config</string>
     <string name="react">React</string>
     <string name="reboot">Reboot</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Rebroadcast any observed message, if it was on our private channel or from another mesh with the same lora parameters.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Same as behavior as ALL but skips packet decoding and simply rebroadcasts them. Only available in Repeater role. Setting this on any other roles will result in ALL behavior.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignores packets from non-standard portnums such as: TAK, RangeTest, PaxCounter, etc. Only rebroadcasts packets with standard portnums: NodeInfo, Text, Position, Telemetry, and Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignores observed messages from foreign meshes like LOCAL ONLY, but takes it step further by also ignoring messages from nodes not already in the node's known list.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignores observed messages from foreign meshes that are open or those which it cannot decrypt. Only rebroadcasts message on the nodes local primary / secondary channels.</string>
-    <string name="rebroadcast_mode_none_desc">Only permitted for SENSOR, TRACKER and TAK_TRACKER roles, this will inhibit all rebroadcasts, not unlike CLIENT_MUTE role.</string>
     <string name="recent_network_devices">Recent Network Devices</string>
     <string name="reconnecting">Reconnecting…</string>
     <string name="redacted" translatable="false">***[REDACTED]***</string>
@@ -1544,30 +1537,17 @@
     <string name="role">Device Role</string>
     <string name="role_client">Client</string>
     <string name="role_client_base">Client Base</string>
-    <string name="role_client_base_desc">Treats packets from or to favorited nodes as ROUTER_LATE, and all other packets as CLIENT.</string>
-    <string name="role_client_desc">App connected or standalone messaging device.</string>
     <string name="role_client_hidden">Client Hidden</string>
-    <string name="role_client_hidden_desc">Device that only broadcasts as needed for stealth or power savings.</string>
     <string name="role_client_mute">Client Mute</string>
-    <string name="role_client_mute_desc">Device that does not forward packets from other devices.</string>
     <string name="role_lost_and_found">Lost and Found</string>
-    <string name="role_lost_and_found_desc">Broadcasts location as message to default channel regularly to assist with device recovery.</string>
     <string name="role_repeater">Repeater</string>
-    <string name="role_repeater_desc">Infrastructure node for extending network coverage by relaying messages with minimal overhead. Not visible in nodes list.</string>
     <string name="role_router">Router</string>
     <string name="role_router_client">Router Client</string>
-    <string name="role_router_client_desc">Combination of both ROUTER and CLIENT. Not for mobile devices.</string>
-    <string name="role_router_desc">Infrastructure node for extending network coverage by relaying messages. Visible in nodes list.</string>
     <string name="role_router_late">Router Late</string>
-    <string name="role_router_late_desc">Infrastructure node that always rebroadcasts packets once but only after all other modes, ensuring additional coverage for local clusters. Visible in nodes list.</string>
     <string name="role_sensor">Sensor</string>
-    <string name="role_sensor_desc">Broadcasts telemetry packets as priority.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Optimized for ATAK system communication, reduces routine broadcasts.</string>
     <string name="role_tak_tracker">TAK Tracker</string>
-    <string name="role_tak_tracker_desc">Enables automatic TAK PLI broadcasts and reduces routine broadcasts.</string>
     <string name="role_tracker">Tracker</string>
-    <string name="role_tracker_desc">Broadcasts GPS position packets as priority.</string>
     <string name="router_role_confirmation_text">I have read the &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Device Role Documentation&lt;/a&gt; and the blog post about &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Admin session expired</string>
@@ -1753,15 +1733,6 @@
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK Configuration</string>
     <string name="tak_role">Member Role</string>
-    <string name="tak_role_forwardobserver">Forward Observer</string>
-    <string name="tak_role_hq">Headquarters</string>
-    <string name="tak_role_k9">Doggo (K9)</string>
-    <string name="tak_role_medic">Medic</string>
-    <string name="tak_role_rto">Radio Telephone Operator</string>
-    <string name="tak_role_sniper">Sniper</string>
-    <string name="tak_role_teamlead">Team Lead</string>
-    <string name="tak_role_teammember">Team Member</string>
-    <string name="tak_role_unspecified">Unspecified</string>
     <string name="tak_server">TAK Server</string>
     <string name="tak_server_channel">TAK Mesh Channel</string>
     <string name="tak_server_channel_desc">Meshtastic channel used for outgoing TAK traffic</string>
@@ -1797,21 +1768,6 @@
     <string name="tak_server_test_running">Running: %1$s</string>
     <string name="tak_server_v1_fallback_notice">Connected node firmware doesn't support full TAK integration — only location and chat messages will bridge to ATAK. Markers and other event types need firmware 2.8.0 or newer.</string>
     <string name="tak_team">Team Color</string>
-    <string name="tak_team_blue">Blue</string>
-    <string name="tak_team_brown">Brown</string>
-    <string name="tak_team_cyan">Cyan</string>
-    <string name="tak_team_dark_blue">Dark Blue</string>
-    <string name="tak_team_dark_green">Dark Green</string>
-    <string name="tak_team_green">Green</string>
-    <string name="tak_team_magenta">Magenta</string>
-    <string name="tak_team_maroon">Maroon</string>
-    <string name="tak_team_orange">Orange</string>
-    <string name="tak_team_purple">Purple</string>
-    <string name="tak_team_red">Red</string>
-    <string name="tak_team_teal">Teal</string>
-    <string name="tak_team_unspecified_color">Unspecified</string>
-    <string name="tak_team_white">White</string>
-    <string name="tak_team_yellow">Yellow</string>
     <string name="telemetry">Telemetry</string>
     <string name="telemetry_config">Telemetry Config</string>
     <string name="temperature">Temp</string>

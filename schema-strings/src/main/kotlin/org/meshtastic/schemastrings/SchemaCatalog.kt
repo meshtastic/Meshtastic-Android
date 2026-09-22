@@ -73,6 +73,22 @@ object SchemaCatalog {
         return out
     }
 
+    /** Every enum the schema labels, in proto-path order, for the Kotlin accessors that read those labels. */
+    fun labelledEnums(): List<EnumLabelsKt.LabelledEnum> = generatedTypePaths().mapNotNull { path ->
+        val type = Class.forName(GENERATED_PACKAGE + path.replace('.', '$'))
+        val constants = type.enumConstants ?: return@mapNotNull null
+        val metadata =
+            constants.filterIsInstance<WireEnum>().mapNotNull {
+                FieldMetadataRegistry.forEnumValue(PROTO_PACKAGE + path, it.value)
+            }
+        if (metadata.none { !it.label.isNullOrBlank() }) return@mapNotNull null
+        EnumLabelsKt.LabelledEnum(
+            path = path,
+            prefix = keyFor(path, ""),
+            hasDescriptions = metadata.any { !it.description.isNullOrBlank() },
+        )
+    }
+
     /**
      * The resource for a field or enum value. Each message segment is lowercased with a trailing `Config` dropped, and
      * the `Config`/`ModuleConfig` container is dropped: `ModuleConfig.MQTTConfig.address` is `schema_mqtt_address`.

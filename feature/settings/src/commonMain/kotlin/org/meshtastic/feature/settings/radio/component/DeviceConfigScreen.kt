@@ -50,8 +50,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.schemaDescriptionRes
 import org.meshtastic.core.model.util.isDebug
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.accept
@@ -73,26 +73,7 @@ import org.meshtastic.core.resources.i_know_what_i_m_doing
 import org.meshtastic.core.resources.led_heartbeat
 import org.meshtastic.core.resources.no_files_manifested
 import org.meshtastic.core.resources.options
-import org.meshtastic.core.resources.rebroadcast_mode_all_desc
-import org.meshtastic.core.resources.rebroadcast_mode_all_skip_decoding_desc
-import org.meshtastic.core.resources.rebroadcast_mode_core_portnums_only_desc
-import org.meshtastic.core.resources.rebroadcast_mode_known_only_desc
-import org.meshtastic.core.resources.rebroadcast_mode_local_only_desc
-import org.meshtastic.core.resources.rebroadcast_mode_none_desc
 import org.meshtastic.core.resources.role
-import org.meshtastic.core.resources.role_client_base_desc
-import org.meshtastic.core.resources.role_client_desc
-import org.meshtastic.core.resources.role_client_hidden_desc
-import org.meshtastic.core.resources.role_client_mute_desc
-import org.meshtastic.core.resources.role_lost_and_found_desc
-import org.meshtastic.core.resources.role_repeater_desc
-import org.meshtastic.core.resources.role_router_client_desc
-import org.meshtastic.core.resources.role_router_desc
-import org.meshtastic.core.resources.role_router_late_desc
-import org.meshtastic.core.resources.role_sensor_desc
-import org.meshtastic.core.resources.role_tak_desc
-import org.meshtastic.core.resources.role_tak_tracker_desc
-import org.meshtastic.core.resources.role_tracker_desc
 import org.meshtastic.core.resources.router_role_confirmation_text
 import org.meshtastic.core.resources.schema_device_button_gpio
 import org.meshtastic.core.resources.schema_device_buzzer_gpio
@@ -118,42 +99,6 @@ import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
 
 @Composable expect fun rememberSystemTimeZonePosixString(): String
-
-@Suppress("DEPRECATION")
-private val Config.DeviceConfig.Role.description: StringResource
-    get() =
-        when (this) {
-            Config.DeviceConfig.Role.CLIENT -> Res.string.role_client_desc
-            Config.DeviceConfig.Role.CLIENT_BASE -> Res.string.role_client_base_desc
-            Config.DeviceConfig.Role.CLIENT_MUTE -> Res.string.role_client_mute_desc
-            Config.DeviceConfig.Role.ROUTER -> Res.string.role_router_desc
-            Config.DeviceConfig.Role.ROUTER_CLIENT -> Res.string.role_router_client_desc
-            Config.DeviceConfig.Role.REPEATER -> Res.string.role_repeater_desc
-            Config.DeviceConfig.Role.TRACKER -> Res.string.role_tracker_desc
-            Config.DeviceConfig.Role.SENSOR -> Res.string.role_sensor_desc
-            Config.DeviceConfig.Role.TAK -> Res.string.role_tak_desc
-            Config.DeviceConfig.Role.CLIENT_HIDDEN -> Res.string.role_client_hidden_desc
-            Config.DeviceConfig.Role.LOST_AND_FOUND -> Res.string.role_lost_and_found_desc
-            Config.DeviceConfig.Role.TAK_TRACKER -> Res.string.role_tak_tracker_desc
-            Config.DeviceConfig.Role.ROUTER_LATE -> Res.string.role_router_late_desc
-        }
-
-private val Config.DeviceConfig.RebroadcastMode.description: StringResource
-    get() =
-        when (this) {
-            Config.DeviceConfig.RebroadcastMode.ALL -> Res.string.rebroadcast_mode_all_desc
-
-            Config.DeviceConfig.RebroadcastMode.ALL_SKIP_DECODING -> Res.string.rebroadcast_mode_all_skip_decoding_desc
-
-            Config.DeviceConfig.RebroadcastMode.LOCAL_ONLY -> Res.string.rebroadcast_mode_local_only_desc
-
-            Config.DeviceConfig.RebroadcastMode.KNOWN_ONLY -> Res.string.rebroadcast_mode_known_only_desc
-
-            Config.DeviceConfig.RebroadcastMode.NONE -> Res.string.rebroadcast_mode_none_desc
-
-            Config.DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY ->
-                Res.string.rebroadcast_mode_core_portnums_only_desc
-        }
 
 @Suppress("DEPRECATION", "LongMethod")
 @Composable
@@ -197,9 +142,8 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     enabled = state.connected,
                     selectedItem = currentRole,
                     onItemSelected = { selectedRole = it },
-                    summary = stringResource(currentRole.description),
+                    summary = currentRole.schemaDescriptionRes()?.let { stringResource(it) },
                     itemIcon = { MeshtasticIcons.role(it) },
-                    itemLabel = { it.name },
                 )
 
                 HorizontalDivider()
@@ -212,7 +156,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.rebroadcast_mode = it }.build()
                     },
-                    summary = stringResource(currentRebroadcastMode.description),
+                    summary = currentRebroadcastMode.schemaDescriptionRes()?.let { stringResource(it) },
                 )
 
                 HorizontalDivider()

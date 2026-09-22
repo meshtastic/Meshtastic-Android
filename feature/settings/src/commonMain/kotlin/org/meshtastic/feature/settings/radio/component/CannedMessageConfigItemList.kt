@@ -144,7 +144,6 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 DropDownPreference(
                     title = stringResource(Res.string.schema_cannedmessage_inputbroker_event_press),
                     enabled = state.connected,
-                    items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
                     selectedItem = formState.value.inputbroker_event_press,
                     onItemSelected = {
                         formState.value =
@@ -155,7 +154,6 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 DropDownPreference(
                     title = stringResource(Res.string.schema_cannedmessage_inputbroker_event_cw),
                     enabled = state.connected,
-                    items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
                     selectedItem = formState.value.inputbroker_event_cw,
                     onItemSelected = {
                         formState.value =
@@ -166,7 +164,6 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 DropDownPreference(
                     title = stringResource(Res.string.schema_cannedmessage_inputbroker_event_ccw),
                     enabled = state.connected,
-                    items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
                     selectedItem = formState.value.inputbroker_event_ccw,
                     onItemSelected = {
                         formState.value =
