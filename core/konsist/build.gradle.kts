@@ -36,3 +36,17 @@ kotlin {
         }
     }
 }
+
+// The rules read every module's source from disk, which Gradle cannot see, so declare it or the task stays
+// up to date (and replays from cache) while the code it guards changes.
+tasks.named<Test>("jvmTest") {
+    inputs
+        .files(
+            fileTree(isolated.rootProject.projectDirectory) {
+                include("**/*.kt", "**/*.kts")
+                exclude("**/build/**", "**/.gradle/**", "**/.kotlin/**", ".claude/**", "**/node_modules/**")
+            },
+        )
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+        .withPropertyName("konsistScannedSources")
+}
