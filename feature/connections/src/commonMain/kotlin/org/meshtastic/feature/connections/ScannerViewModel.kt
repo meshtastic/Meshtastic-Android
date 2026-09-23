@@ -367,21 +367,26 @@ open class ScannerViewModel(
 
     /**
      * The currently-selected device address, or `null` when nothing is selected. A BLE address on hardware without
-     * Bluetooth LE reads as `null`: the radio service keeps it saved but never connects to it.
+     * Bluetooth LE, or a serial address on hardware without USB host, reads as `null`: the radio service keeps it saved
+     * but it can never connect.
      */
     val selectedAddressFlow: StateFlow<String?> =
-        if (bluetoothSupported) {
+        if (bluetoothSupported && usbSupported) {
             radioInterfaceService.currentDeviceAddressFlow
         } else {
             // Eager so the auto-scan checks that read `.value` see the masked address without a subscriber.
             radioInterfaceService.currentDeviceAddressFlow
-                .map { it.takeUnless(::isBleAddress) }
+                .map { it.takeUnless(::isUnsupportedAddress) }
                 .stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.Eagerly,
-                    initialValue = radioInterfaceService.currentDeviceAddressFlow.value.takeUnless(::isBleAddress),
+                    initialValue =
+                    radioInterfaceService.currentDeviceAddressFlow.value.takeUnless(::isUnsupportedAddress),
                 )
         }
+
+    private fun isUnsupportedAddress(address: String?): Boolean = (!bluetoothSupported && isBleAddress(address)) ||
+        (!usbSupported && address?.firstOrNull() == InterfaceId.SERIAL.id)
 
     /** The persisted device name from the last selection, for use as a UI fallback. */
     val persistedDeviceName: StateFlow<String?> = radioPrefs.devName
@@ -396,7 +401,13 @@ open class ScannerViewModel(
 
     /** The single transport pane currently rendered by the Connections screen. */
     val activeTransport: StateFlow<DeviceType> =
-        combine(uiPrefs.selectedConnectionTransport, selectedAddressFlow, showUsbTransport, ::resolveActiveTransport)
+        // The unmasked address, so a restored serial address still resolves to Network rather than the BLE default.
+        combine(
+            uiPrefs.selectedConnectionTransport,
+            radioInterfaceService.currentDeviceAddressFlow,
+            showUsbTransport,
+            ::resolveActiveTransport,
+        )
             .distinctUntilChanged()
             .stateIn(
                 scope = viewModelScope,
@@ -404,7 +415,7 @@ open class ScannerViewModel(
                 initialValue =
                 resolveActiveTransport(
                     uiPrefs.selectedConnectionTransport.value,
-                    selectedAddressFlow.value,
+                    radioInterfaceService.currentDeviceAddressFlow.value,
                     showUsbTransport.value,
                 ),
             )

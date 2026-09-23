@@ -497,6 +497,31 @@ class ScannerViewModelTest {
     }
 
     @Test
+    fun `a restored serial address reads as no device and lets Network auto-scan run without USB host`() {
+        harness.currentDeviceAddressFlow.value = "s/dev/bus/usb/001/002"
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            assertEquals(null, noUsb.selectedAddressFlow.value)
+
+            noUsb.startNetworkAutoScan()
+            assertEquals(true, noUsb.isNetworkScanning.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
+    fun `the Demo Mode address stays selected without USB host`() {
+        harness.currentDeviceAddressFlow.value = "m"
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            assertEquals("m", noUsb.selectedAddressFlow.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
     fun `selectTransport ignores USB on hardware without USB host`() {
         val noUsb = harness.buildBase(usbSupported = false)
         try {
