@@ -394,6 +394,7 @@ fun MessageTopBar(
     showQuickChat: Boolean,
     onToggleQuickChat: () -> Unit,
     onNavigateToQuickChatOptions: () -> Unit = {},
+    showFilterToggle: Boolean = true,
     filteringDisabled: Boolean = false,
     onToggleFilteringDisabled: () -> Unit = {},
     filteredCount: Int = 0,
@@ -433,6 +434,7 @@ fun MessageTopBar(
             onNavigateToQuickChatOptions = onNavigateToQuickChatOptions,
             channelIndex = channelIndex,
             mismatchKey = mismatchKey,
+            showFilterToggle = showFilterToggle,
             filteringDisabled = filteringDisabled,
             onToggleFilteringDisabled = onToggleFilteringDisabled,
             filteredCount = filteredCount,
@@ -450,6 +452,7 @@ private fun MessageTopBarActions(
     onNavigateToQuickChatOptions: () -> Unit,
     channelIndex: Int?,
     mismatchKey: Boolean,
+    showFilterToggle: Boolean,
     filteringDisabled: Boolean,
     onToggleFilteringDisabled: () -> Unit,
     filteredCount: Int,
@@ -471,6 +474,7 @@ private fun MessageTopBarActions(
             showQuickChat = showQuickChat,
             onToggleQuickChat = onToggleQuickChat,
             onNavigateToQuickChatOptions = onNavigateToQuickChatOptions,
+            showFilterToggle = showFilterToggle,
             filteringDisabled = filteringDisabled,
             onToggleFilteringDisabled = onToggleFilteringDisabled,
             filteredCount = filteredCount,
@@ -488,6 +492,7 @@ private fun OverFlowMenu(
     showQuickChat: Boolean,
     onToggleQuickChat: () -> Unit,
     onNavigateToQuickChatOptions: () -> Unit,
+    showFilterToggle: Boolean,
     filteringDisabled: Boolean,
     onToggleFilteringDisabled: () -> Unit,
     filteredCount: Int,
@@ -505,7 +510,9 @@ private fun OverFlowMenu(
                 if (filteredCount > 0 && !filteringDisabled) {
                     FilteredMessagesMenuItem(showFiltered, filteredCount, onDismiss, onToggleShowFiltered)
                 }
-                FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
+                if (showFilterToggle) {
+                    FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
+                }
                 FilterSettingsMenuItem(onDismiss, onNavigateToFilterSettings)
             }
         }

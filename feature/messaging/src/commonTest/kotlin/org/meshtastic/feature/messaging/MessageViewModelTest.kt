@@ -48,6 +48,7 @@ import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.meshtastic.core.testing.FakeFilterPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -81,6 +82,7 @@ class MessageViewModelTest {
     private val customEmojiPrefs: CustomEmojiPrefs = mock(MockMode.autofill)
     private val homoglyphPrefs: HomoglyphPrefs = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
+    private lateinit var filterPrefs: FakeFilterPrefs
     private val meshNotificationManager: org.meshtastic.core.repository.MeshNotificationManager =
         mock(MockMode.autofill)
     private val activeConversationTracker = ActiveConversationTracker()
@@ -100,6 +102,7 @@ class MessageViewModelTest {
         Dispatchers.setMain(testDispatcher)
         savedStateHandle = SavedStateHandle(mapOf("contactKey" to "0!12345678"))
         nodeRepository = FakeNodeRepository()
+        filterPrefs = FakeFilterPrefs()
 
         connectionStateFlow.value = ConnectionState.Disconnected
         showQuickChatFlow.value = false
@@ -141,6 +144,7 @@ class MessageViewModelTest {
                 sendMessageUseCase = sendMessageUseCase,
                 customEmojiPrefs = customEmojiPrefs,
                 homoglyphEncodingPrefs = homoglyphPrefs,
+                filterPrefs = filterPrefs,
                 uiPrefs = uiPrefs,
                 meshNotificationManager = meshNotificationManager,
                 activeConversationTracker = activeConversationTracker,
@@ -179,6 +183,13 @@ class MessageViewModelTest {
     }
 
     @Test fun testInitialization() = runTest { assertNotNull(viewModel) }
+
+    @Test
+    fun testMessageFilterEnabledFollowsTheGlobalSetting() = runTest {
+        assertEquals(false, viewModel.messageFilterEnabled.value)
+        filterPrefs.setFilterEnabled(true)
+        assertEquals(true, viewModel.messageFilterEnabled.value)
+    }
 
     private val draftContact = "0!12345678"
 
