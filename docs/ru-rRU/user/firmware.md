@@ -17,7 +17,7 @@ aliases:
 
 ## Проверка обновлений
 
-1. Откройте конфигурацию подключённого радио и в разделе **"Дополнительно"** нажмите **"Обновление прошивки"**. The entry appears only for OTA-capable radios.
+1. Откройте конфигурацию подключённого радио и в разделе **"Дополнительно"** нажмите **"Обновление прошивки"**. Этот пункт появляется только для устройств, поддерживающих OTA.
 2. Приложение проверяет доступные версии прошивки.
 3. Доступные обновления показывают номер версии и сводку изменений.
 
@@ -27,12 +27,12 @@ aliases:
 
 Наиболее распространённый способ обновления для пользователей Android:
 
-> ⚠️ **Warning:** Interrupting a firmware update can leave the radio unable to boot. Keep the phone nearby and both devices powered until the update completes.
+> ⚠️ **Предупреждение:** Прерывание обновления прошивки может привести к невозможности загрузки устройства. Держите телефон рядом и оба устройства включенными до завершения обновления.
 
 1. Убедитесь, что твоё радио подключено по Bluetooth.
 2. Перейдите на экран "Обновление прошивки".
 3. Выберите нужную версию прошивки.
-4. Tap **Update**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
+4. Нажмите **Обновить**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Дождитесь завершения обновления — **не отключайте устройство** во время обновления.
 
 ![Проверка обновлений прошивки](../../assets/screenshots/firmware_checking.png)
