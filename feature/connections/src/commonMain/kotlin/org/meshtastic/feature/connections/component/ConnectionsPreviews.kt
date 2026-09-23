@@ -285,6 +285,30 @@ private fun UsbPaneEmptyPreview() {
     }
 }
 
+@PreviewLightDark
+@Composable
+fun DemoModeSectionPreview() {
+    AppTheme {
+        DeviceList(
+            connectionState = ConnectionState.Disconnected,
+            selectedDevice = "",
+            bleDevices = emptyList(),
+            usbDevices = emptyList(),
+            discoveredTcpDevices = emptyList(),
+            recentTcpDevices = emptyList(),
+            isBleScanning = false,
+            isNetworkScanning = false,
+            activeTransport = DeviceType.TCP,
+            onSelectDevice = {},
+            onToggleBleScan = {},
+            onToggleNetworkScan = {},
+            onAddManualAddress = { _, _ -> },
+            onRemoveRecentAddress = {},
+            virtualDevices = listOf(DeviceListEntry.Mock("Demo Mode"), DeviceListEntry.Replay("Demo Mode (Replay)")),
+        )
+    }
+}
+
 private class PreviewBleDevice(
     override val address: String,
     override val name: String?,

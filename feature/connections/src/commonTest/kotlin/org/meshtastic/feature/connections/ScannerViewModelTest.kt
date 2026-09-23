@@ -479,7 +479,6 @@ class ScannerViewModelTest {
         val noUsb = harness.buildBase(usbSupported = false)
         try {
             assertEquals(DeviceType.TCP, noUsb.activeTransport.value)
-            assertEquals(false, noUsb.showUsbTransport.value)
         } finally {
             harness.clearViewModel(noUsb)
         }
@@ -536,45 +535,48 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `Demo Mode keeps the USB pane reachable on hardware without USB host`() {
-        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.USB)
-        val noUsb = harness.buildBase(usbSupported = false)
-        try {
-            assertEquals(DeviceType.TCP, noUsb.activeTransport.value)
-
-            harness.mockTransportEnabled.value = true
-
-            assertEquals(true, noUsb.showUsbTransport.value)
-            assertEquals(DeviceType.USB, noUsb.activeTransport.value)
-        } finally {
-            harness.clearViewModel(noUsb)
-        }
-    }
-
-    @Test
-    fun `choosing Network over a USB fallback survives Demo Mode turning on`() {
+    fun `choosing Network over a USB fallback persists it`() {
         harness.uiPrefs.setSelectedConnectionTransport(DeviceType.USB)
         val noUsb = harness.buildBase(usbSupported = false)
         try {
             noUsb.selectTransport(DeviceType.TCP)
-            harness.mockTransportEnabled.value = true
 
-            assertEquals(DeviceType.TCP, noUsb.activeTransport.value)
+            assertEquals(DeviceType.TCP, harness.uiPrefs.selectedConnectionTransport.value)
         } finally {
             harness.clearViewModel(noUsb)
         }
     }
 
     @Test
-    fun `selectTransport accepts USB while Demo Mode is on without USB host`() {
+    fun `Demo Mode entries are listed apart from USB devices without USB host`() = runTest {
         harness.mockTransportEnabled.value = true
+        baseDevicesFlow.value = DiscoveredDevices(virtualDevices = listOf(DeviceListEntry.Mock("Demo Mode")))
         val noUsb = harness.buildBase(usbSupported = false)
         try {
-            noUsb.selectTransport(DeviceType.USB)
-
-            assertEquals(DeviceType.USB, noUsb.activeTransport.value)
+            noUsb.virtualDevicesForUi.test {
+                assertEquals(listOf<DeviceListEntry>(DeviceListEntry.Mock("Demo Mode")), expectMostRecentItem())
+                cancelAndIgnoreRemainingEvents()
+            }
+            noUsb.usbDevicesForUi.test {
+                assertEquals(emptyList(), expectMostRecentItem())
+                cancelAndIgnoreRemainingEvents()
+            }
         } finally {
             harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
+    fun `a selected Demo Mode address does not choose a transport pane`() {
+        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
+        val subject = harness.buildBase()
+        try {
+            subject.onSelected(DeviceListEntry.Mock("Demo Mode"))
+
+            assertEquals(DeviceType.TCP, subject.activeTransport.value)
+            assertEquals(DeviceType.TCP, harness.uiPrefs.selectedConnectionTransport.value)
+        } finally {
+            harness.clearViewModel(subject)
         }
     }
 

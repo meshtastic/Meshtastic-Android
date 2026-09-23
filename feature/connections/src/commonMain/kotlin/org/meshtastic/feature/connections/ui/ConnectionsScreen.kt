@@ -243,7 +243,7 @@ fun ConnectionsScreen(
     val isBleScanning by scanModel.isBleScanning.collectAsStateWithLifecycle()
     val isNetworkScanning by scanModel.isNetworkScanning.collectAsStateWithLifecycle()
     val activeTransport by scanModel.activeTransport.collectAsStateWithLifecycle()
-    val showUsbTransport by scanModel.showUsbTransport.collectAsStateWithLifecycle()
+    val virtualDevices by scanModel.virtualDevicesForUi.collectAsStateWithLifecycle()
     val blePermissionRefusal by scanModel.blePermissionRefusal.collectAsStateWithLifecycle()
     val bleAutoScan by scanModel.bleAutoScan.collectAsStateWithLifecycle()
     val networkAutoScan by scanModel.networkAutoScan.collectAsStateWithLifecycle()
@@ -488,6 +488,7 @@ fun ConnectionsScreen(
                                                 discoveredTcpDevices = discoveredTcpDevices,
                                                 recentTcpDevices = recentTcpDevices,
                                                 usbDevices = usbDevices,
+                                                virtualDevices = virtualDevices,
                                                 connectionStatus = connectionStatus,
                                                 connectionProgress = connectionProgress,
                                                 onClickDisconnect = { scanModel.disconnect() },
@@ -594,12 +595,12 @@ fun ConnectionsScreen(
                         // Transport selector sits between the connection card and device list; it controls only the
                         // visible discovery pane, not the globally selected/connected device shown above.
                         // With Network as the only pane left, a one-segment control would select nothing.
-                        if (scanModel.bluetoothSupported || showUsbTransport) {
+                        if (scanModel.bluetoothSupported || scanModel.usbSupported) {
                             TransportSelector(
                                 activeTransport = activeTransport,
                                 onSelectTransport = scanModel::selectTransport,
                                 showBluetooth = scanModel.bluetoothSupported,
-                                showUsb = showUsbTransport,
+                                showUsb = scanModel.usbSupported,
                             )
                         }
 
@@ -705,6 +706,7 @@ fun ConnectionsScreen(
                                 selectedDevice = selectedDevice,
                                 bleDevices = bleDevices,
                                 usbDevices = usbDevices,
+                                virtualDevices = virtualDevices,
                                 discoveredTcpDevices = discoveredTcpDevices,
                                 recentTcpDevices = recentTcpDevices,
                                 isBleScanning = isBleScanning,
@@ -882,6 +884,7 @@ private fun ConnectingDeviceContent(
     discoveredTcpDevices: List<DeviceListEntry>,
     recentTcpDevices: List<DeviceListEntry>,
     usbDevices: List<DeviceListEntry>,
+    virtualDevices: List<DeviceListEntry>,
     connectionStatus: ConnectionStatus,
     connectionProgress: String?,
     onClickDisconnect: () -> Unit,
@@ -891,6 +894,7 @@ private fun ConnectingDeviceContent(
             ?: discoveredTcpDevices.find { it.fullAddress == selectedDevice }
             ?: recentTcpDevices.find { it.fullAddress == selectedDevice }
             ?: usbDevices.find { it.fullAddress == selectedDevice }
+            ?: virtualDevices.find { it.fullAddress == selectedDevice }
 
     // Use the entry name if found in scan lists, otherwise fall back to the persisted name
     // from the last successful selection, and only show "Unknown Device" as a last resort.

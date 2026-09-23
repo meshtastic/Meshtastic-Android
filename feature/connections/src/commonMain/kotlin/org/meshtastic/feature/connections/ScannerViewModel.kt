@@ -156,8 +156,8 @@ open class ScannerViewModel(
     private val bleScanner: BleScanner? = null,
     /** False on hardware with no Bluetooth LE: the BLE pane is hidden and never selected or scanned. */
     val bluetoothSupported: Boolean = true,
-    /** False on hardware with no USB host: the USB pane is offered only while Demo Mode needs it. */
-    private val usbSupported: Boolean = true,
+    /** False on hardware with no USB host: the USB pane is hidden and never selected. */
+    val usbSupported: Boolean = true,
 ) : ViewModel() {
 
     // ── Mock / demo transport ─────────────────────────────────────────────────────────────────
@@ -176,15 +176,6 @@ open class ScannerViewModel(
      * mock — so the entry stays hidden rather than advertising behaviour it cannot deliver.
      */
     val showReplayTransport: StateFlow<Boolean> = _showReplayTransport.asStateFlow()
-
-    /**
-     * Whether the USB pane is offered. The Demo Mode entries render in that pane, so it stays reachable while Demo Mode
-     * is on even on hardware with no USB host.
-     */
-    val showUsbTransport: StateFlow<Boolean> =
-        showMockTransport
-            .map { usbSupported || it }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, usbSupported || showMockTransport.value)
 
     // ── Connection-progress chatter (surfaced as the bottom status pill) ──────────────────────
     private val _connectionProgressText = MutableStateFlow<String?>(null)
@@ -348,6 +339,10 @@ open class ScannerViewModel(
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow.map { it.usbDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
 
+    /** Demo Mode entries, listed under whichever transport pane is showing. */
+    val virtualDevicesForUi: StateFlow<List<DeviceListEntry>> =
+        discoveredDevicesFlow.map { it.virtualDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
+
     /** Discovered (NSD) TCP devices for the Connections device list, gated by the network-scan flag. */
     val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow.map { it.discoveredTcpDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
@@ -405,7 +400,6 @@ open class ScannerViewModel(
         combine(
             uiPrefs.selectedConnectionTransport,
             radioInterfaceService.currentDeviceAddressFlow,
-            showUsbTransport,
             ::resolveActiveTransport,
         )
             .distinctUntilChanged()
@@ -416,14 +410,13 @@ open class ScannerViewModel(
                 resolveActiveTransport(
                     uiPrefs.selectedConnectionTransport.value,
                     radioInterfaceService.currentDeviceAddressFlow.value,
-                    showUsbTransport.value,
                 ),
             )
 
     /** Selects one Connections transport pane and stops scans that cannot belong to that pane. */
     fun selectTransport(type: DeviceType) {
         if (type == DeviceType.BLE && !bluetoothSupported) return
-        if (type == DeviceType.USB && !showUsbTransport.value) return
+        if (type == DeviceType.USB && !usbSupported) return
         when (type) {
             DeviceType.BLE -> stopNetworkScan()
             DeviceType.TCP -> stopBleScan()
@@ -809,16 +802,12 @@ open class ScannerViewModel(
         }
     }
 
-    private fun resolveActiveTransport(
-        preferred: DeviceType?,
-        selectedAddress: String?,
-        usbPaneAvailable: Boolean,
-    ): DeviceType {
+    private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType {
         // A persisted pane or a restored address can still name a transport this hardware lacks; Network always works.
         val resolved = preferred ?: selectedAddress?.let(DeviceType::fromAddress) ?: DeviceType.BLE
         return when {
             resolved == DeviceType.BLE && !bluetoothSupported -> DeviceType.TCP
-            resolved == DeviceType.USB && !usbPaneAvailable -> DeviceType.TCP
+            resolved == DeviceType.USB && !usbSupported -> DeviceType.TCP
             else -> resolved
         }
     }

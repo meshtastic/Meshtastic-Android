@@ -66,12 +66,11 @@ open class CommonGetDiscoveredDevicesUseCase(
             val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager)
             val recentTcpForUi = buildRecentTcpEntries(recentList, discoveredTcpAddresses, db, databaseManager)
 
-            val mockEntries = virtualDeviceEntries(showMock, showReplay)
-
             DiscoveredDevices(
                 discoveredTcpDevices = discoveredTcpForUi,
                 recentTcpDevices = recentTcpForUi,
-                usbDevices = usbList + mockEntries,
+                usbDevices = usbList,
+                virtualDevices = virtualDeviceEntries(showMock, showReplay),
             )
         }
     }
