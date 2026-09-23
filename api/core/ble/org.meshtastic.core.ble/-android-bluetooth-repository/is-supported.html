@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>disconnect</title>
+    <title>isSupported</title>
 <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:connections/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:ble/androidMain">android</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -51,11 +51,11 @@
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
-                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":feature:connections/commonMain" data-filter=":feature:connections/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":core:ble/androidMain" data-filter=":core:ble/androidMain">
                                 <span class="checkbox--icon"></span>
-                                common
+                                android
                             </label>
                         </li>
                 </ul>
@@ -89,12 +89,14 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="feature-connections::org.meshtastic.feature.connections/ScannerViewModel/disconnect/#/PointingToDeclaration//-1202228022">
-  <div class="breadcrumbs"><a href="../../index.html">feature-connections</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.connections</a><span class="delimiter">/</span><a href="index.html">ScannerViewModel</a><span class="delimiter">/</span><span class="current">disconnect</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="core-ble::org.meshtastic.core.ble/AndroidBluetoothRepository/isSupported/#/PointingToDeclaration//1066873135">
+  <div class="breadcrumbs"><a href="../../index.html">core-ble</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.ble</a><span class="delimiter">/</span><a href="index.html">AndroidBluetoothRepository</a><span class="delimiter">/</span><span class="current">isSupported</span></div>
   <div class="cover ">
-    <h1 class="cover"><span><span>disconnect</span></span></h1>
+    <h1 class="cover"><span>is</span><wbr><span><span>Supported</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="disconnect.html"><span class="token function">disconnect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/connections/src/commonMain/kotlin/org/meshtastic/feature/connections/ScannerViewModel.kt#L739">source</a>)</span></span></div><p class="paragraph">Clears the persisted device name and tells the radio controller to disconnect.</p></div></div>
+  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:ble/androidMain" data-filterable-set=":core:ble/androidMain" data-active="" data-toggle=":core:ble/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="is-supported.html">isSupported</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/ble/src/androidMain/kotlin/org/meshtastic/core/ble/AndroidBluetoothRepository.kt#L65">source</a>)</span></span></div><p class="paragraph">False when the device has no Bluetooth LE hardware, so no BLE transport can ever work (e.g. Android XR).</p></div>  </div>
 </div>
     <div class="footer">
         <div class="footer--container">
