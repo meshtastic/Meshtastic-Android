@@ -38,6 +38,9 @@ fun Context.hasGps(): Boolean {
 /** Checks if the device has Bluetooth LE hardware at all, as distinct from Bluetooth being switched off. */
 fun Context.hasBluetoothLe(): Boolean = packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
 
+/** Checks if the device can act as a USB host, which USB serial radios need (Android XR headsets cannot). */
+fun Context.hasUsbHost(): Boolean = packageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
+
 /** Checks if the device has a GPS receiver and it is currently disabled. */
 fun Context.gpsDisabled(): Boolean {
     val lm = getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return false

@@ -174,6 +174,18 @@ fun TransportSelectorNoBluetoothPreview() {
 
 @PreviewLightDark
 @Composable
+fun TransportSelectorNoUsbPreview() {
+    AppTheme {
+        Surface {
+            Box(modifier = Modifier.width(360.dp).padding(16.dp)) {
+                TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {}, showUsb = false)
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
 private fun BluetoothPanePreview() {
     AppTheme {
         DeviceList(

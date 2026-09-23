@@ -474,6 +474,111 @@ class ScannerViewModelTest {
     }
 
     @Test
+    fun `active transport falls back to Network on hardware without USB host`() {
+        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.USB)
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            assertEquals(DeviceType.TCP, noUsb.activeTransport.value)
+            assertEquals(false, noUsb.showUsbTransport.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
+    fun `a restored serial address does not select the USB pane on hardware without USB host`() {
+        harness.currentDeviceAddressFlow.value = "s/dev/bus/usb/001/002"
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            assertEquals(DeviceType.TCP, noUsb.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
+    fun `a restored serial address reads as no device and lets Network auto-scan run without USB host`() {
+        harness.currentDeviceAddressFlow.value = "s/dev/bus/usb/001/002"
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            assertEquals(null, noUsb.selectedAddressFlow.value)
+
+            noUsb.startNetworkAutoScan()
+            assertEquals(true, noUsb.isNetworkScanning.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
+    fun `the Demo Mode address stays selected without USB host`() {
+        harness.currentDeviceAddressFlow.value = "m"
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            assertEquals("m", noUsb.selectedAddressFlow.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
+    fun `selectTransport ignores USB on hardware without USB host`() {
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            noUsb.selectTransport(DeviceType.TCP)
+            noUsb.selectTransport(DeviceType.USB)
+
+            assertEquals(DeviceType.TCP, noUsb.activeTransport.value)
+            assertEquals(DeviceType.TCP, harness.uiPrefs.selectedConnectionTransport.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
+    fun `Demo Mode keeps the USB pane reachable on hardware without USB host`() {
+        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.USB)
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            assertEquals(DeviceType.TCP, noUsb.activeTransport.value)
+
+            harness.mockTransportEnabled.value = true
+
+            assertEquals(true, noUsb.showUsbTransport.value)
+            assertEquals(DeviceType.USB, noUsb.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
+    fun `choosing Network over a USB fallback survives Demo Mode turning on`() {
+        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.USB)
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            noUsb.selectTransport(DeviceType.TCP)
+            harness.mockTransportEnabled.value = true
+
+            assertEquals(DeviceType.TCP, noUsb.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
+    fun `selectTransport accepts USB while Demo Mode is on without USB host`() {
+        harness.mockTransportEnabled.value = true
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            noUsb.selectTransport(DeviceType.USB)
+
+            assertEquals(DeviceType.USB, noUsb.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
     fun `startBleScan never scans on hardware without Bluetooth`() {
         val noBluetooth = harness.buildBase(bluetoothSupported = false)
         try {

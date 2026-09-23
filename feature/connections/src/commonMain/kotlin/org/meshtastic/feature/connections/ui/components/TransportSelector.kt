@@ -47,6 +47,7 @@ import org.meshtastic.core.ui.icon.Wifi
  * "selected".
  *
  * @param showBluetooth false on hardware with no Bluetooth LE, where the BLE segment could never find anything.
+ * @param showUsb false on hardware with no USB host, unless Demo Mode needs the USB pane.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,8 +56,10 @@ fun TransportSelector(
     onSelectTransport: (DeviceType) -> Unit,
     modifier: Modifier = Modifier,
     showBluetooth: Boolean = true,
+    showUsb: Boolean = true,
 ) {
-    val transports = if (showBluetooth) DeviceType.entries else DeviceType.entries - DeviceType.BLE
+    val transports =
+        DeviceType.entries.filter { (it != DeviceType.BLE || showBluetooth) && (it != DeviceType.USB || showUsb) }
     // Fill the width so the control reads as one deliberate group spanning the same width as the connection card
     // above; each SegmentedButton carries an internal weight(1f), so the segments divide the row evenly.
     SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
