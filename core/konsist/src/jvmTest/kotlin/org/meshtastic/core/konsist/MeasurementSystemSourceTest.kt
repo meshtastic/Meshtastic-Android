@@ -32,10 +32,10 @@ import kotlin.test.assertTrue
 class MeasurementSystemSourceTest {
 
     /**
-     * The one legitimate reference: the radio settings screen that *configures* the device's own display units. It
-     * edits the proto field; it does not format app UI with it.
+     * The one legitimate reference: the schema label map behind the radio settings picker that *configures* the
+     * device's own display units. It names the proto enum's values; it does not format app UI with them.
      */
-    private val deviceConfigAllowlist = listOf("feature/settings/", "DisplayConfigItemList.kt")
+    private val deviceConfigAllowlist = listOf("core/model/", "SchemaEnumLabels.kt")
 
     // The rule enforcer itself names the forbidden symbol in its strings, so it is excluded from its own scan.
     private fun scannedFiles() = Konsist.scopeFromProject()
@@ -60,7 +60,7 @@ class MeasurementSystemSourceTest {
 
         assertTrue(
             allowlisted.any { "DisplayConfig.DisplayUnits" in it.text },
-            "DisplayConfigItemList.kt no longer references DisplayConfig.DisplayUnits — the allowlist is stale, " +
+            "SchemaEnumLabels.kt no longer references DisplayConfig.DisplayUnits — the allowlist is stale, " +
                 "update or remove it so this rule keeps verifying something.",
         )
     }
