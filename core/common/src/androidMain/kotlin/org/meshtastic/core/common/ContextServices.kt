@@ -35,6 +35,9 @@ fun Context.hasGps(): Boolean {
     return lm?.allProviders?.contains(LocationManager.GPS_PROVIDER) == true
 }
 
+/** Checks if the device has Bluetooth LE hardware at all, as distinct from Bluetooth being switched off. */
+fun Context.hasBluetoothLe(): Boolean = packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
+
 /** Checks if the device has a GPS receiver and it is currently disabled. */
 fun Context.gpsDisabled(): Boolean {
     val lm = getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return false

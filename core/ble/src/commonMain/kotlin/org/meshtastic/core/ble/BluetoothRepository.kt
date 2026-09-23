@@ -23,6 +23,10 @@ interface BluetoothRepository {
     /** The current state of Bluetooth on the device. */
     val state: StateFlow<BluetoothState>
 
+    /** False when the device has no Bluetooth LE hardware, so no BLE transport can ever work (e.g. Android XR). */
+    val isSupported: Boolean
+        get() = true
+
     /** Refreshes the Bluetooth state. */
     fun refreshState()
 

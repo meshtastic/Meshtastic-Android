@@ -143,7 +143,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
      * Build the platform-neutral [ScannerViewModel]. Call only after `Dispatchers.setMain(testDispatcher)` because the
      * ViewModel's `init` launches work on `viewModelScope` (Main).
      */
-    fun buildBase(): ScannerViewModel = ScannerViewModel(
+    fun buildBase(bluetoothSupported: Boolean = true): ScannerViewModel = ScannerViewModel(
         serviceRepository = serviceRepository,
         radioController = radioController,
         radioInterfaceService = radioInterfaceService,
@@ -155,6 +155,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         uiPrefs = uiPrefs,
         firmwareRecoveryDataSource = firmwareRecoveryDataSource,
         bleScanner = bleScanner,
+        bluetoothSupported = bluetoothSupported,
     )
 
     /**

@@ -150,6 +150,8 @@ open class ScannerViewModel(
     private val uiPrefs: UiPrefs,
     private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
     private val bleScanner: BleScanner? = null,
+    /** False on hardware with no Bluetooth LE: the BLE pane is hidden and never selected or scanned. */
+    val bluetoothSupported: Boolean = true,
 ) : ViewModel() {
 
     // ── Mock / demo transport ─────────────────────────────────────────────────────────────────
@@ -377,6 +379,7 @@ open class ScannerViewModel(
 
     /** Selects one Connections transport pane and stops scans that cannot belong to that pane. */
     fun selectTransport(type: DeviceType) {
+        if (type == DeviceType.BLE && !bluetoothSupported) return
         when (type) {
             DeviceType.BLE -> stopNetworkScan()
             DeviceType.TCP -> stopBleScan()
@@ -395,7 +398,9 @@ open class ScannerViewModel(
      * prior scan cannot reset the flag on this new scan's state.
      */
     fun startBleScan() {
-        if (_isBleScanning.value || bleScanner == null || scanStartFailureCooldownActive.value) return
+        if (_isBleScanning.value || bleScanner == null || !bluetoothSupported || scanStartFailureCooldownActive.value) {
+            return
+        }
         // Cancel the other scan first so only one flag is ever true. Both stop methods are idempotent.
         stopNetworkScan()
 
@@ -759,8 +764,11 @@ open class ScannerViewModel(
         }
     }
 
-    private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType =
-        preferred ?: selectedAddress?.let(DeviceType::fromAddress) ?: DeviceType.BLE
+    private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType {
+        // A persisted BLE pane or a restored BLE address can still resolve here on a device with no Bluetooth.
+        val resolved = preferred ?: selectedAddress?.let(DeviceType::fromAddress) ?: DeviceType.BLE
+        return if (resolved == DeviceType.BLE && !bluetoothSupported) DeviceType.TCP else resolved
+    }
 
     private fun recordSelectedTransport(fullAddress: String) {
         DeviceType.fromAddress(fullAddress)?.let(uiPrefs::setSelectedConnectionTransport)

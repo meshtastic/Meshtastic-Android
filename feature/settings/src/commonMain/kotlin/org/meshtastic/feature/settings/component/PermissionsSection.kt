@@ -71,6 +71,7 @@ import org.meshtastic.core.ui.util.PermissionGateAction
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.PermissionUiState
 import org.meshtastic.core.ui.util.bleScanRequiresLocationServices
+import org.meshtastic.core.ui.util.isBluetoothSupported
 import org.meshtastic.core.ui.util.permissionGateAction
 import org.meshtastic.core.ui.util.rememberBluetoothPermissionState
 import org.meshtastic.core.ui.util.rememberCameraPermissionState
@@ -125,6 +126,7 @@ internal fun ColumnScope.PermissionsSettingsContent() {
             camera = camera,
             localNetwork = localNetwork,
             bluetoothIsLocation = bluetoothIsLocation,
+            bluetoothSupported = isBluetoothSupported(),
         )
 
     // Rows that need nothing from the user are collapsed by default. Five rows reading "Allowed" is a wall every
@@ -199,6 +201,7 @@ private fun permissionRows(
     camera: PermissionUiState,
     localNetwork: PermissionUiState,
     bluetoothIsLocation: Boolean,
+    bluetoothSupported: Boolean,
 ): List<PermissionRow> = buildList {
     // Pre-Android-12 the Bluetooth gate *is* ACCESS_FINE_LOCATION. Two rows there would offer two controls for
     // one system grant and let them contradict each other on screen, so a single Location row stands for both.
@@ -213,15 +216,17 @@ private fun permissionRows(
             ),
         )
     } else {
-        add(
-            PermissionRow(
-                titleRes = Res.string.nearby_devices_permission,
-                summaryRes = Res.string.permission_nearby_devices_summary,
-                rationaleRes = Res.string.bluetooth_permission_rationale,
-                icon = MeshtasticIcons.Bluetooth,
-                state = bluetooth,
-            ),
-        )
+        if (bluetoothSupported) {
+            add(
+                PermissionRow(
+                    titleRes = Res.string.nearby_devices_permission,
+                    summaryRes = Res.string.permission_nearby_devices_summary,
+                    rationaleRes = Res.string.bluetooth_permission_rationale,
+                    icon = MeshtasticIcons.Bluetooth,
+                    state = bluetooth,
+                ),
+            )
+        }
         add(
             PermissionRow(
                 titleRes = Res.string.location_permission,

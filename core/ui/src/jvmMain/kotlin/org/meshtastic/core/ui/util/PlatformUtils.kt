@@ -162,6 +162,8 @@ actual val bleScanRequiresLocationServices: Boolean = false
 /** JVM — Bluetooth adapter state is not surfaced on Desktop. */
 @Composable actual fun isBluetoothDisabled(): Boolean = false
 
+@Composable actual fun isBluetoothSupported(): Boolean = true
+
 /** JVM — local-network availability is not gated on Desktop. */
 @Composable actual fun isWifiUnavailable(): Boolean = false
 

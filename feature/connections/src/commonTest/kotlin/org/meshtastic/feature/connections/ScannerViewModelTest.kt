@@ -20,6 +20,8 @@ import app.cash.turbine.test
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
+import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -418,6 +420,44 @@ class ScannerViewModelTest {
         viewModel.selectTransport(DeviceType.BLE)
 
         assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
+    }
+
+    @Test
+    fun `active transport falls back to Network on hardware without Bluetooth`() {
+        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.BLE)
+        val noBluetooth = harness.buildBase(bluetoothSupported = false)
+        try {
+            assertEquals(DeviceType.TCP, noBluetooth.activeTransport.value)
+
+            noBluetooth.selectTransport(DeviceType.BLE)
+            assertEquals(DeviceType.TCP, noBluetooth.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noBluetooth)
+        }
+    }
+
+    @Test
+    fun `a restored BLE address does not select the BLE pane on hardware without Bluetooth`() {
+        harness.currentDeviceAddressFlow.value = "xAA:BB:CC:DD:EE:FF"
+        val noBluetooth = harness.buildBase(bluetoothSupported = false)
+        try {
+            assertEquals(DeviceType.TCP, noBluetooth.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noBluetooth)
+        }
+    }
+
+    @Test
+    fun `startBleScan never scans on hardware without Bluetooth`() {
+        val noBluetooth = harness.buildBase(bluetoothSupported = false)
+        try {
+            noBluetooth.startBleScan()
+
+            assertEquals(false, noBluetooth.isBleScanning.value)
+            verify(mode = VerifyMode.not) { bleScanner.scan(any(), any()) }
+        } finally {
+            harness.clearViewModel(noBluetooth)
+        }
     }
 
     @Test

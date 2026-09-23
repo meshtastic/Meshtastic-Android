@@ -102,6 +102,9 @@ expect val bleScanRequiresLocationServices: Boolean
  */
 @Composable expect fun isBluetoothDisabled(): Boolean
 
+/** Returns whether the device has Bluetooth LE hardware at all, so a BLE surface is worth offering. */
+@Composable expect fun isBluetoothSupported(): Boolean
+
 /**
  * Returns whether the device currently lacks any transport that can back the network-scan discovery (no active Wi-Fi,
  * Ethernet, or VPN). Cellular alone is **not** sufficient — a carrier uplink does not place the device on the same

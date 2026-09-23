@@ -36,6 +36,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
+import org.meshtastic.core.common.hasBluetoothLe
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.util.anonymize
 import kotlin.time.Duration
@@ -58,8 +59,10 @@ class AndroidBluetoothRepository(
     private val dispatchers: CoroutineDispatchers,
     @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
 ) : BluetoothRepository {
-    private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+    private val bluetoothAdapter: BluetoothAdapter? =
+        (context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
+
+    override val isSupported: Boolean = context.hasBluetoothLe()
 
     private val _state = MutableStateFlow(BluetoothState(hasPermissions = hasBluetoothPermissions()))
     override val state: StateFlow<BluetoothState> = _state.asStateFlow()

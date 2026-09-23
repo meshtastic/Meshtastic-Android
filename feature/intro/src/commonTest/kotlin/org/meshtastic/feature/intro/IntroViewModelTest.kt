@@ -42,6 +42,12 @@ class IntroViewModelTest {
     }
 
     @Test
+    fun testWelcomeSkipsBluetoothOnHardwareWithoutIt() {
+        val next = viewModel.getNextKey(Welcome, allPermissionsGranted = false, bluetoothSupported = false)
+        assertEquals(Location, next)
+    }
+
+    @Test
     fun testBluetoothNavigatesToLocation() {
         val next = viewModel.getNextKey(Bluetooth, allPermissionsGranted = false)
         assertEquals(Location, next)
