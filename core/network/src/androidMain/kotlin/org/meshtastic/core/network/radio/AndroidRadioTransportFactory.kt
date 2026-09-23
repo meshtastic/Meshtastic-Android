@@ -17,7 +17,6 @@
 package org.meshtastic.core.network.radio
 
 import android.content.Context
-import android.hardware.usb.UsbManager
 import android.provider.Settings
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +45,6 @@ class AndroidRadioTransportFactory(
     private val context: Context,
     private val buildConfigProvider: BuildConfigProvider,
     private val usbRepository: UsbRepository,
-    private val usbManager: UsbManager,
     hiddenFeaturesUnlock: HiddenFeaturesUnlock,
     scanner: BleScanner,
     bluetoothRepository: BluetoothRepository,
@@ -85,27 +83,11 @@ class AndroidRadioTransportFactory(
         runCatching { context.assets.open(REPLAY_ASSET_NAME).use { it.read() != -1 } }.getOrDefault(false)
     }
 
-    override fun isPlatformAddressValid(address: String): Boolean {
-        val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) } ?: return false
-        val rest = address.substring(1)
-        return when (interfaceId) {
-            InterfaceId.MOCK,
-            InterfaceId.NOP,
-            InterfaceId.REPLAY,
-            InterfaceId.TCP,
-            -> true
+    override val isSerialSupported: Boolean = usbRepository.isSupported
 
-            InterfaceId.SERIAL -> {
-                val deviceMap = usbRepository.serialDevices.value
-                // Older installs may still hold the former path-based USB address. When exactly one serial device is
-                // present, retain the historical self-healing fallback instead of rejecting an otherwise usable radio.
-                val driver = resolveSerialDevice(deviceMap, rest)
-                driver != null && usbManager.hasPermission(driver.device)
-            }
-
-            InterfaceId.BLUETOOTH -> true // Handled by base class
-        }
-    }
+    // Presence and USB permission are left to SerialRadioTransport, which reports a denied permission to the user.
+    override fun isPlatformAddressValid(address: String): Boolean =
+        address.firstOrNull()?.let { InterfaceId.forIdChar(it) } == InterfaceId.NOP
 
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
         val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
