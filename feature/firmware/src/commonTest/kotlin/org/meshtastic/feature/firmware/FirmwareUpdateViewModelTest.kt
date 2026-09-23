@@ -56,6 +56,7 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_battery_low
+import org.meshtastic.core.resources.firmware_update_no_device
 import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -580,6 +581,30 @@ class FirmwareUpdateViewModelTest {
         assertTrue(state.isRecovery, "Expected recovery Ready but was $state")
         assertEquals("1234abcd", state.address) // fullAddress.drop(1)
         assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
+    }
+
+    @Test
+    fun `recovery is not offered on hardware without Bluetooth`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "STABLE",
+                    deviceName = "My Node",
+                ),
+            )
+        bluetoothRepository.isSupported = false
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val errorState = assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        val error = assertIs<UiText.Resource>(errorState.error)
+        assertEquals(Res.string.firmware_update_no_device, error.res)
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
     }
 
     @Test

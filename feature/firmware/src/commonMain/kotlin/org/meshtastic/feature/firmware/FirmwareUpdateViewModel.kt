@@ -370,7 +370,8 @@ class FirmwareUpdateViewModel(
      * first reconnecting (the bootloader exposes no mesh service to connect to). No record ⇒ the usual "no device".
      */
     private suspend fun enterRecoveryModeOrError() {
-        val recovery = firmwareRecoveryDataSource.pending.first()
+        // Recovery re-flashes over BLE only; without Bluetooth LE the record is kept but not offered.
+        val recovery = firmwareRecoveryDataSource.pending.first()?.takeIf { bluetoothRepository.isSupported }
         if (recovery == null) {
             clearDeviceMetadata()
             _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_no_device))
