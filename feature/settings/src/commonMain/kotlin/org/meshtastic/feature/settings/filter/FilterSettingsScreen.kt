@@ -64,7 +64,8 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 @Composable
 fun FilterSettingsScreen(viewModel: FilterSettingsViewModel, onBack: () -> Unit) {
     val filterEnabled by viewModel.filterEnabled.collectAsStateWithLifecycle()
-    val filterWords by viewModel.filterWords.collectAsStateWithLifecycle()
+    val storedWords by viewModel.filterWords.collectAsStateWithLifecycle()
+    val filterWords = remember(storedWords) { storedWords.sorted() }
     var newWord by remember { mutableStateOf("") }
 
     Scaffold(
