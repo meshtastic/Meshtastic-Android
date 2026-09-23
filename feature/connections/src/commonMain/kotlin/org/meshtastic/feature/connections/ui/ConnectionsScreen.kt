@@ -595,6 +595,7 @@ fun ConnectionsScreen(
                         TransportSelector(
                             activeTransport = activeTransport,
                             onSelectTransport = scanModel::selectTransport,
+                            showBluetooth = scanModel.bluetoothSupported,
                         )
 
                         // Adapter-off hints: shown only when the relevant permission is granted but the radio/network

@@ -40,13 +40,13 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 
-private const val TRANSPORT_COUNT = 3
-
 /**
  * Single-choice transport selector rendered below the connection card. A Material 3 [SingleChoiceSegmentedButtonRow]
  * makes the mutually-exclusive choice explicit: the segments read as one grouped control and the selected transport
  * shows a check, rather than three independent chips whose filled state was read as "enabled/available" instead of
  * "selected".
+ *
+ * @param showBluetooth false on hardware with no Bluetooth LE, where the BLE segment could never find anything.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,33 +54,41 @@ fun TransportSelector(
     activeTransport: DeviceType,
     onSelectTransport: (DeviceType) -> Unit,
     modifier: Modifier = Modifier,
+    showBluetooth: Boolean = true,
 ) {
+    val transports = if (showBluetooth) DeviceType.entries else DeviceType.entries - DeviceType.BLE
     // Fill the width so the control reads as one deliberate group spanning the same width as the connection card
-    // above; each SegmentedButton carries an internal weight(1f), so the three segments divide the row evenly.
+    // above; each SegmentedButton carries an internal weight(1f), so the segments divide the row evenly.
     SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
-        TransportSegment(
-            selected = activeTransport == DeviceType.BLE,
-            index = 0,
-            label = Res.string.bluetooth,
-            icon = MeshtasticIcons.Bluetooth,
-            onClick = { onSelectTransport(DeviceType.BLE) },
-        )
-        TransportSegment(
-            selected = activeTransport == DeviceType.TCP,
-            index = 1,
-            label = Res.string.network,
-            icon = MeshtasticIcons.Wifi,
-            onClick = { onSelectTransport(DeviceType.TCP) },
-        )
-        TransportSegment(
-            selected = activeTransport == DeviceType.USB,
-            index = 2,
-            label = Res.string.usb,
-            icon = MeshtasticIcons.Usb,
-            onClick = { onSelectTransport(DeviceType.USB) },
-        )
+        transports.forEachIndexed { index, transport ->
+            TransportSegment(
+                selected = activeTransport == transport,
+                index = index,
+                count = transports.size,
+                label = transport.label,
+                icon = transport.icon,
+                onClick = { onSelectTransport(transport) },
+            )
+        }
     }
 }
+
+private val DeviceType.label: StringResource
+    get() =
+        when (this) {
+            DeviceType.BLE -> Res.string.bluetooth
+            DeviceType.TCP -> Res.string.network
+            DeviceType.USB -> Res.string.usb
+        }
+
+private val DeviceType.icon: ImageVector
+    @Composable
+    get() =
+        when (this) {
+            DeviceType.BLE -> MeshtasticIcons.Bluetooth
+            DeviceType.TCP -> MeshtasticIcons.Wifi
+            DeviceType.USB -> MeshtasticIcons.Usb
+        }
 
 /**
  * A single transport segment: shows a check when [selected] and the transport [icon] otherwise, so selection is
@@ -91,6 +99,7 @@ fun TransportSelector(
 private fun SingleChoiceSegmentedButtonRowScope.TransportSegment(
     selected: Boolean,
     index: Int,
+    count: Int,
     label: StringResource,
     icon: ImageVector,
     onClick: () -> Unit,
@@ -98,7 +107,7 @@ private fun SingleChoiceSegmentedButtonRowScope.TransportSegment(
     SegmentedButton(
         selected = selected,
         onClick = onClick,
-        shape = SegmentedButtonDefaults.itemShape(index = index, count = TRANSPORT_COUNT),
+        shape = SegmentedButtonDefaults.itemShape(index = index, count = count),
         icon = {
             SegmentedButtonDefaults.Icon(active = selected) {
                 Icon(

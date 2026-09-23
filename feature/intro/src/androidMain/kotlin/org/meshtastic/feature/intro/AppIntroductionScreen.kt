@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import org.meshtastic.core.ui.component.MeshtasticNavDisplay
+import org.meshtastic.core.ui.util.isBluetoothSupported
 import org.meshtastic.core.ui.util.rememberBluetoothPermissionState
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.rememberNotificationPermissionState
@@ -59,6 +60,7 @@ fun AppIntroductionScreen(onDone: () -> Unit, viewModel: IntroViewModel) {
             location = locationPermissionState,
             notification = notificationPermissionState,
             bluetoothRequiresLocation = bluetoothRequiresLocation,
+            bluetoothSupported = isBluetoothSupported(),
         )
     val settingsNavigator = remember(context) { AndroidIntroSettingsNavigator(context) }
     val backStack = rememberNavBackStack(Welcome)

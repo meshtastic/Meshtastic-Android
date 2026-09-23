@@ -162,6 +162,18 @@ fun TransportSelectorPreview() {
 
 @PreviewLightDark
 @Composable
+fun TransportSelectorNoBluetoothPreview() {
+    AppTheme {
+        Surface {
+            Box(modifier = Modifier.width(360.dp).padding(16.dp)) {
+                TransportSelector(activeTransport = DeviceType.TCP, onSelectTransport = {}, showBluetooth = false)
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
 private fun BluetoothPanePreview() {
     AppTheme {
         DeviceList(

@@ -23,6 +23,7 @@ import org.meshtastic.feature.connections.component.ConnectingDeviceInfoPreview
 import org.meshtastic.feature.connections.component.DeviceListItemPreview
 import org.meshtastic.feature.connections.component.DeviceSectionHeaderPreview
 import org.meshtastic.feature.connections.component.DisconnectButtonPreview
+import org.meshtastic.feature.connections.component.TransportSelectorNoBluetoothPreview
 import org.meshtastic.feature.connections.component.TransportSelectorPreview
 
 @PreviewTest
@@ -58,4 +59,11 @@ fun ScreenshotDeviceSectionHeader() {
 @Composable
 fun ScreenshotTransportSelector() {
     TransportSelectorPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotTransportSelectorNoBluetooth() {
+    TransportSelectorNoBluetoothPreview()
 }

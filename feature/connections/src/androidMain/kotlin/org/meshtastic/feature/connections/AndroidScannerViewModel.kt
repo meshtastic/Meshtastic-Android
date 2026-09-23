@@ -71,6 +71,7 @@ class AndroidScannerViewModel(
     uiPrefs,
     firmwareRecoveryDataSource,
     bleScanner,
+    bluetoothSupported = bluetoothRepository.isSupported,
 ) {
     override fun requestBonding(entry: DeviceListEntry.Ble) {
         Logger.i { "Starting bonding for ${entry.device.address.anonymize}" }

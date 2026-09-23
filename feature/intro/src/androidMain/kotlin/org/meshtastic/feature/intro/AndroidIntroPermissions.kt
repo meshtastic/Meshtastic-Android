@@ -30,4 +30,5 @@ internal class AndroidIntroPermissions(
     override val location: PermissionUiState,
     override val notification: PermissionUiState?,
     override val bluetoothRequiresLocation: Boolean,
+    override val bluetoothSupported: Boolean,
 ) : IntroPermissions
