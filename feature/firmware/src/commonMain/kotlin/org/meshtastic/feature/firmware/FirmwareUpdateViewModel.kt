@@ -38,6 +38,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.state.OperationLease
@@ -132,6 +133,7 @@ class FirmwareUpdateViewModel(
     private val hiddenFeaturesUnlock: HiddenFeaturesUnlock,
     private val analytics: PlatformAnalytics,
     private val nodeRestartTracker: NodeRestartTracker,
+    private val bluetoothRepository: BluetoothRepository,
 ) : ViewModel() {
 
     /** The USB maintenance sequence's hold on the radio. Spans several passes, so it cannot use `withOperation`. */
@@ -309,7 +311,14 @@ class FirmwareUpdateViewModel(
                                     }
                                 }
 
-                                radioPrefs.isBle() -> FirmwareUpdateMethod.Ble
+                                // A saved BLE address restored onto hardware with no Bluetooth LE has no BLE path.
+                                radioPrefs.isBle() -> {
+                                    if (bluetoothRepository.isSupported) {
+                                        FirmwareUpdateMethod.Ble
+                                    } else {
+                                        FirmwareUpdateMethod.Unknown
+                                    }
+                                }
 
                                 radioPrefs.isTcp() -> {
                                     // WiFi OTA is ESP32-only; nRF52/RP2040 have no TCP update path.
@@ -361,7 +370,8 @@ class FirmwareUpdateViewModel(
      * first reconnecting (the bootloader exposes no mesh service to connect to). No record ⇒ the usual "no device".
      */
     private suspend fun enterRecoveryModeOrError() {
-        val recovery = firmwareRecoveryDataSource.pending.first()
+        // Recovery re-flashes over BLE only; without Bluetooth LE the record is kept but not offered.
+        val recovery = firmwareRecoveryDataSource.pending.first()?.takeIf { bluetoothRepository.isSupported }
         if (recovery == null) {
             clearDeviceMetadata()
             _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_no_device))

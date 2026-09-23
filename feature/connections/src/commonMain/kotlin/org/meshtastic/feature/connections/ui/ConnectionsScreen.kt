@@ -530,7 +530,7 @@ fun ConnectionsScreen(
                         // path (it uses the live connection when connected); cleared automatically once the device
                         // returns on its own.
                         pendingRecovery
-                            ?.takeIf { connectionState !is ConnectionState.Connected }
+                            ?.takeIf { connectionState !is ConnectionState.Connected && scanModel.bluetoothSupported }
                             ?.let { recovery ->
                                 Spacer(modifier = Modifier.height(8.dp))
                                 RecoveryCard(

@@ -51,6 +51,7 @@ import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.RadioController
@@ -124,6 +125,9 @@ private fun untranslatedScanStartFailureMessage(reason: BleScanStartFailureReaso
         BleScanStartFailureReason.MissingScanPermission,
         -> BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK
     }
+
+private fun isBleAddress(address: String?): Boolean =
+    address?.firstOrNull().let { it == InterfaceId.BLUETOOTH.id || it == '!' }
 
 private fun Duration.roundedUpWholeSeconds(): Long {
     val completeSeconds = inWholeSeconds
@@ -350,8 +354,23 @@ open class ScannerViewModel(
 
     // ── Current selection ────────────────────────────────────────────────────────────────────
 
-    /** The currently-selected device address, or `null` when nothing is selected. */
-    val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
+    /**
+     * The currently-selected device address, or `null` when nothing is selected. A BLE address on hardware without
+     * Bluetooth LE reads as `null`: the radio service keeps it saved but never connects to it.
+     */
+    val selectedAddressFlow: StateFlow<String?> =
+        if (bluetoothSupported) {
+            radioInterfaceService.currentDeviceAddressFlow
+        } else {
+            // Eager so the auto-scan checks that read `.value` see the masked address without a subscriber.
+            radioInterfaceService.currentDeviceAddressFlow
+                .map { it.takeUnless(::isBleAddress) }
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = radioInterfaceService.currentDeviceAddressFlow.value.takeUnless(::isBleAddress),
+                )
+        }
 
     /** The persisted device name from the last selection, for use as a UI fallback. */
     val persistedDeviceName: StateFlow<String?> = radioPrefs.devName

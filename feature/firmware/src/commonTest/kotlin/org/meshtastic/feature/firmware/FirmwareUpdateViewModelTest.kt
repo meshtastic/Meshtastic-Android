@@ -56,7 +56,9 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_battery_low
+import org.meshtastic.core.resources.firmware_update_no_device
 import org.meshtastic.core.resources.firmware_update_unknown_hardware
+import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
@@ -89,6 +91,7 @@ class FirmwareUpdateViewModelTest {
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
     private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
+    private val bluetoothRepository = FakeBluetoothRepository()
 
     private lateinit var viewModel: FirmwareUpdateViewModel
 
@@ -158,6 +161,7 @@ class FirmwareUpdateViewModelTest {
         hiddenFeaturesUnlock,
         analytics,
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
+        bluetoothRepository,
     )
 
     @Test
@@ -467,6 +471,19 @@ class FirmwareUpdateViewModelTest {
     }
 
     @Test
+    fun `update method is Unknown for a BLE address on hardware without Bluetooth`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+        bluetoothRepository.isSupported = false
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertIs<FirmwareUpdateMethod.Unknown>(state.updateMethod)
+    }
+
+    @Test
     fun `update method is Wifi for TCP-prefixed address`() = runTest {
         val hardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
@@ -564,6 +581,30 @@ class FirmwareUpdateViewModelTest {
         assertTrue(state.isRecovery, "Expected recovery Ready but was $state")
         assertEquals("1234abcd", state.address) // fullAddress.drop(1)
         assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
+    }
+
+    @Test
+    fun `recovery is not offered on hardware without Bluetooth`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "STABLE",
+                    deviceName = "My Node",
+                ),
+            )
+        bluetoothRepository.isSupported = false
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val errorState = assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        val error = assertIs<UiText.Resource>(errorState.error)
+        assertEquals(Res.string.firmware_update_no_device, error.res)
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
     }
 
     @Test

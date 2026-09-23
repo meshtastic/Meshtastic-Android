@@ -42,10 +42,13 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.ble.BleConnectionFactory
+import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.network.radio.BaseRadioTransportFactory
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -382,6 +385,68 @@ class SharedRadioInterfaceServiceLivenessTest {
                 assertEquals(2L, service.activeSession.value?.generation)
                 assertEquals("t192.0.2.1", service.activeSession.value?.address)
                 assertEquals(1, createdTransports.size, "the successful retry must publish exactly one transport")
+            } finally {
+                service.disconnect()
+            }
+        }
+
+    /**
+     * The path `MeshServiceOrchestrator.coldStartConnect` takes with a persisted `x` address restored from a backup.
+     */
+    @Test
+    fun `cold start with a saved BLE address arms no transport on hardware without Bluetooth`() =
+        runTest(testDispatcher) {
+            bluetoothRepository.isSupported = false
+            every { networkRepository.networkAvailable } returns MutableStateFlow(true)
+            every { networkRepository.resolvedList } returns MutableSharedFlow()
+            every { analytics.isPlatformServicesAvailable } returns false
+            val requestedTransports = mutableListOf<String>()
+            val realFactory =
+                object :
+                    BaseRadioTransportFactory(
+                        scanner = mock<BleScanner>(MockMode.autofill),
+                        bluetoothRepository = bluetoothRepository,
+                        connectionFactory = mock<BleConnectionFactory>(MockMode.autofill),
+                        dispatchers = dispatchers,
+                    ) {
+                    override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP)
+
+                    override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
+
+                    override val isReplayTransportAvailable: Boolean = false
+
+                    override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport {
+                        requestedTransports += address
+                        return super.createTransport(address, service)
+                    }
+
+                    override fun createPlatformTransport(address: String, service: RadioInterfaceService) =
+                        FakeRadioTransport()
+                }
+            val savedAddress = "xAA:BB:CC:DD:EE:FF"
+            radioPrefs.setDevAddr(savedAddress)
+            bluetoothRepository.setBluetoothEnabled(false)
+            val service =
+                SharedRadioInterfaceService(
+                    dispatchers = dispatchers,
+                    bluetoothRepository = bluetoothRepository,
+                    networkRepository = networkRepository,
+                    serialDevicePresence = serialDevicePresence,
+                    processLifecycle = processLifecycleOwner.lifecycle,
+                    radioPrefs = radioPrefs,
+                    transportFactory = realFactory,
+                    analytics = analytics,
+                    radioOperationLock = radioOperationLock,
+                )
+            try {
+                service.connect()
+                // A Bluetooth-state recovery must not arm it either.
+                bluetoothRepository.setBluetoothEnabled(true)
+
+                assertTrue(requestedTransports.isEmpty(), "no transport may be built for an unusable BLE address")
+                assertNull(service.activeSession.value)
+                assertEquals(ConnectionState.Disconnected, service.connectionState.value)
+                assertEquals(savedAddress, radioPrefs.devAddr.value, "the saved address is kept, not cleared")
             } finally {
                 service.disconnect()
             }
