@@ -1035,6 +1035,28 @@ class MeshConnectionManagerImplTest {
     }
 
     @Test
+    fun `Demo Mode keeps the fast stall budget and names MOCK`() = runTest(testDispatcher) {
+        every { radioInterfaceService.getDeviceAddress() } returns "m"
+        val logs = captureLogs()
+        manager = createManager(backgroundScope)
+        radioConnectionState.value = ConnectionState.Connected
+        advanceTimeBy(200)
+        advanceUntilIdle()
+
+        advanceTimeBy(13_000L)
+        advanceUntilIdle()
+
+        val stall = logs.messages(Severity.Error).single { it.startsWith("Handshake stall detected") }
+        assertTrue(
+            stall.startsWith(
+                "Handshake stall detected at Stage 1 on MOCK after 12s without progress (progressSignals=0",
+            ),
+            "Demo Mode stall report must name MOCK: $stall",
+        )
+        verifySuspend(exactly(1)) { radioInterfaceService.restartTransport() }
+    }
+
+    @Test
     fun `BLE Stage 1 stall report names BLE`() = runTest(testDispatcher) {
         every { radioInterfaceService.getDeviceAddress() } returns "xAA:BB:CC:DD:EE:FF"
         val logs = captureLogs()

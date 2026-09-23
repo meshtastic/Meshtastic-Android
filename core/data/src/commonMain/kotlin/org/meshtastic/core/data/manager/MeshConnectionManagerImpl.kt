@@ -39,6 +39,7 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
@@ -782,7 +783,7 @@ class MeshConnectionManagerImpl(
         )
 
         // DataDog RUM custom action matching Apple's "connect" event for cross-platform analytics.
-        val transportType = radioInterfaceService.getDeviceAddress()?.let { DeviceType.fromAddress(it)?.name }
+        val transportType = currentDeviceType()?.name ?: currentVirtualInterface()?.name
         analytics.trackConnect(
             firmwareVersion = myNode?.firmwareVersion,
             transportType = transportType,
@@ -798,22 +799,27 @@ class MeshConnectionManagerImpl(
     }
 
     /**
-     * True when the active transport is a TCP or USB serial connection — i.e. a transport whose firmware handshake
-     * reliably completes in roughly 1s when healthy and therefore benefits from aggressive silent-restart on stall.
-     * Uses the same [DeviceType.fromAddress] pattern as [reportConnection] for transport classification. BLE is
-     * excluded because its GATT latency budget is high and variable enough that the long-and-retry stall-guard budgets
-     * remain the right trade-off.
+     * True when the active transport is a TCP or USB serial connection, or the Demo Mode mock — i.e. one whose
+     * handshake reliably completes in roughly 1s when healthy and therefore benefits from aggressive silent-restart on
+     * stall. BLE is excluded because its GATT latency budget is high and variable enough that the long-and-retry
+     * stall-guard budgets remain the right trade-off.
      */
-    private fun isFastRecoveryTransport(): Boolean = currentDeviceType() in FAST_RECOVERY_TYPES
+    private fun isFastRecoveryTransport(): Boolean =
+        currentDeviceType() in FAST_RECOVERY_TYPES || currentVirtualInterface() == InterfaceId.MOCK
 
     private fun currentDeviceType(): DeviceType? =
         radioInterfaceService.getDeviceAddress()?.let { DeviceType.fromAddress(it) }
 
+    private fun currentVirtualInterface(): InterfaceId? =
+        radioInterfaceService.getDeviceAddress()?.firstOrNull()?.let(InterfaceId::forIdChar)?.takeIf { it.isVirtual }
+
     /**
-     * Names the concrete transport (BLE, TCP, USB) in stall reports. TCP and USB share the fast-recovery budget but
-     * fail for different reasons, and the field reports can only be split by transport if the report says which one.
+     * Names the concrete transport (BLE, TCP, USB, MOCK, REPLAY) in stall reports. TCP and USB share the fast-recovery
+     * budget but fail for different reasons, and the field reports can only be split by transport if the report says
+     * which one.
      */
-    private fun transportLabel(): String = currentDeviceType()?.name ?: UNKNOWN_TRANSPORT_LABEL
+    private fun transportLabel(): String =
+        currentDeviceType()?.name ?: currentVirtualInterface()?.name ?: UNKNOWN_TRANSPORT_LABEL
 
     override fun onHandshakeProgress() {
         // Progress only matters while a handshake is live, before the completion latch has fired.

@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.connections.component.ConnectingDeviceInfoPreview
+import org.meshtastic.feature.connections.component.DemoModeSectionPreview
 import org.meshtastic.feature.connections.component.DeviceListItemPreview
 import org.meshtastic.feature.connections.component.DeviceSectionHeaderPreview
 import org.meshtastic.feature.connections.component.DisconnectButtonPreview
@@ -74,4 +75,11 @@ fun ScreenshotTransportSelectorNoBluetooth() {
 @Composable
 fun ScreenshotTransportSelectorNoUsb() {
     TransportSelectorNoUsbPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotDemoModeSection() {
+    DemoModeSectionPreview()
 }

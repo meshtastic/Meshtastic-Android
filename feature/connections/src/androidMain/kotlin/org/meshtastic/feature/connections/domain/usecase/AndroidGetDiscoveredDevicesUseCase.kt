@@ -121,7 +121,8 @@ class AndroidGetDiscoveredDevicesUseCase(
             val recentList = args[5] as List<RecentAddress>
 
             val bleForUi = matchBleNodes(bondedBle, db)
-            val usbForUi = matchUsbNodes(usbDevices, showMock, showReplay, db)
+            val usbForUi = matchNodesByName(usbDevices, db)
+            val virtualForUi = matchNodesByName(virtualDeviceEntries(showMock, showReplay), db)
 
             val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager)
             val discoveredTcpAddresses = processedTcp.map { it.fullAddress }.toSet()
@@ -132,6 +133,7 @@ class AndroidGetDiscoveredDevicesUseCase(
                 usbDevices = usbForUi,
                 discoveredTcpDevices = discoveredTcpForUi,
                 recentTcpDevices = recentTcpForUi,
+                virtualDevices = virtualForUi,
             )
         }
     }
@@ -155,12 +157,8 @@ class AndroidGetDiscoveredDevicesUseCase(
             }
             .sortedBy { it.name }
 
-    private suspend fun matchUsbNodes(
-        usbDevices: List<DeviceListEntry.Usb>,
-        showMock: Boolean,
-        showReplay: Boolean,
-        db: Map<Int, Node>,
-    ): List<DeviceListEntry> = (usbDevices + virtualDeviceEntries(showMock, showReplay)).map { entry ->
-        entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, db, databaseManager))
-    }
+    private suspend fun matchNodesByName(entries: List<DeviceListEntry>, db: Map<Int, Node>): List<DeviceListEntry> =
+        entries.map { entry ->
+            entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, db, databaseManager))
+        }
 }
