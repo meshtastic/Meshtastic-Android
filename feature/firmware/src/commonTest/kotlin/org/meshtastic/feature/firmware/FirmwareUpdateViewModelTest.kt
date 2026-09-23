@@ -57,6 +57,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_unknown_hardware
+import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
@@ -89,6 +90,7 @@ class FirmwareUpdateViewModelTest {
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
     private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
+    private val bluetoothRepository = FakeBluetoothRepository()
 
     private lateinit var viewModel: FirmwareUpdateViewModel
 
@@ -158,6 +160,7 @@ class FirmwareUpdateViewModelTest {
         hiddenFeaturesUnlock,
         analytics,
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
+        bluetoothRepository,
     )
 
     @Test
@@ -464,6 +467,19 @@ class FirmwareUpdateViewModelTest {
         val state = viewModel.state.value
         assertIs<FirmwareUpdateState.Ready>(state)
         assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
+    }
+
+    @Test
+    fun `update method is Unknown for a BLE address on hardware without Bluetooth`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+        bluetoothRepository.isSupported = false
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertIs<FirmwareUpdateMethod.Unknown>(state.updateMethod)
     }
 
     @Test

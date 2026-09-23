@@ -448,6 +448,32 @@ class ScannerViewModelTest {
     }
 
     @Test
+    fun `a restored BLE address reads as no device on hardware without Bluetooth`() = runTest {
+        harness.currentDeviceAddressFlow.value = "xAA:BB:CC:DD:EE:FF"
+        val noBluetooth = harness.buildBase(bluetoothSupported = false)
+        try {
+            assertEquals(null, noBluetooth.selectedAddressFlow.value)
+            noBluetooth.selectedNotNullFlow.test { assertEquals(NO_DEVICE_SELECTED, awaitItem()) }
+
+            harness.currentDeviceAddressFlow.value = "t10.0.0.2"
+            assertEquals("t10.0.0.2", noBluetooth.selectedAddressFlow.value)
+        } finally {
+            harness.clearViewModel(noBluetooth)
+        }
+    }
+
+    @Test
+    fun `a BLE address stays selected when Bluetooth is present`() = runTest {
+        harness.currentDeviceAddressFlow.value = "xAA:BB:CC:DD:EE:FF"
+        val withBluetooth = harness.buildBase()
+        try {
+            withBluetooth.selectedNotNullFlow.test { assertEquals("xAA:BB:CC:DD:EE:FF", awaitItem()) }
+        } finally {
+            harness.clearViewModel(withBluetooth)
+        }
+    }
+
+    @Test
     fun `startBleScan never scans on hardware without Bluetooth`() {
         val noBluetooth = harness.buildBase(bluetoothSupported = false)
         try {

@@ -140,8 +140,12 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         }
 
         val p =
-            meshtasticDevice.advertisement?.let { adv -> Peripheral(adv) { commonConfig() } }
-                ?: createPeripheral(device.address) { commonConfig() }
+            try {
+                meshtasticDevice.advertisement?.let { adv -> Peripheral(adv) { commonConfig() } }
+                    ?: createPeripheral(device.address) { commonConfig() }
+            } catch (ex: IllegalStateException) {
+                throw ex.asBluetoothUnsupportedExceptionOrNull() ?: ex
+            }
 
         // Install ownership of the new peripheral atomically. Cancellation between
         // peripheral construction and field assignment would strand `p` (Kable allocates

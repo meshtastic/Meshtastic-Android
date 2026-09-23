@@ -61,6 +61,7 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_extracting
+import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
@@ -180,6 +181,7 @@ class FirmwareUpdateViewModelFileTest {
         HiddenFeaturesUnlock(),
         analytics,
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
+        FakeBluetoothRepository(),
     )
 
     private fun firmwareUri(fileName: String): CommonUri = CommonUri.parse("file:///downloads/$fileName")
