@@ -418,7 +418,8 @@ open class ScannerViewModel(
             DeviceType.TCP -> stopBleScan()
             DeviceType.USB -> stopAllScans()
         }
-        if (activeTransport.value != type) uiPrefs.setSelectedConnectionTransport(type)
+        // Compared with the preference, not the pane: a fallback pane is shown without being persisted.
+        if (uiPrefs.selectedConnectionTransport.value != type) uiPrefs.setSelectedConnectionTransport(type)
     }
 
     // ── Scan commands ────────────────────────────────────────────────────────────────────────

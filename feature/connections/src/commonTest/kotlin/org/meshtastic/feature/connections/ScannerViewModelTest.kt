@@ -527,6 +527,20 @@ class ScannerViewModelTest {
     }
 
     @Test
+    fun `choosing Network over a USB fallback survives Demo Mode turning on`() {
+        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.USB)
+        val noUsb = harness.buildBase(usbSupported = false)
+        try {
+            noUsb.selectTransport(DeviceType.TCP)
+            harness.mockTransportEnabled.value = true
+
+            assertEquals(DeviceType.TCP, noUsb.activeTransport.value)
+        } finally {
+            harness.clearViewModel(noUsb)
+        }
+    }
+
+    @Test
     fun `selectTransport accepts USB while Demo Mode is on without USB host`() {
         harness.mockTransportEnabled.value = true
         val noUsb = harness.buildBase(usbSupported = false)
