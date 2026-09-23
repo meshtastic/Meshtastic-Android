@@ -371,6 +371,32 @@ class ConnectionsViewModelTest {
     }
 
     @Test
+    fun `a device saved with the legacy bang prefix gets the firmware update notice`() = runTest {
+        val target = "tbeam"
+        deviceHardwareRepository.setHardware(
+            hwModel = HardwareModel.TBEAM.value,
+            target = target,
+            device = DeviceHardware(architecture = "esp32", platformioTarget = target),
+        )
+        nodeRepository.setMyId("!local")
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
+        nodeRepository.setOurNode(
+            org.meshtastic.core.model.Node(
+                num = 1,
+                user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+            ),
+        )
+        radioPrefs.setDevAddr("!AA:BB:CC:DD:EE:FF")
+        firmwareReleaseRepository.setManifestTargets("v2.8.0", setOf(target))
+        firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0"))
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+
+        advanceUntilIdle()
+
+        assertNotNull(viewModel.firmwareUpdateNotice.value)
+    }
+
+    @Test
     fun `does not persist firmware notification dedupe when scheduling is unavailable`() = runTest {
         val hardwareModel = HardwareModel.TBEAM.value
         val target = "tbeam"

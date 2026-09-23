@@ -17,9 +17,8 @@
 package org.meshtastic.core.service
 
 import org.meshtastic.core.common.util.isValidDeviceAddress
-
-/** Prefix the app uses for a persisted BLE device address. TCP is `t`, USB is `s`. */
-private const val BLE_ADDRESS_PREFIX = 'x'
+import org.meshtastic.core.model.DeviceAddress
+import org.meshtastic.core.model.InterfaceId
 
 /** What a boot / package-replaced broadcast should do about the previously selected device. */
 enum class BootReconnectDecision {
@@ -53,7 +52,7 @@ enum class BootReconnectDecision {
 fun bootReconnectDecision(address: String?, hasBluetoothPermission: Boolean): BootReconnectDecision = when {
     !isValidDeviceAddress(address) -> BootReconnectDecision.NO_DEVICE
 
-    address?.firstOrNull() == BLE_ADDRESS_PREFIX && !hasBluetoothPermission ->
+    DeviceAddress.parse(address)?.interfaceId == InterfaceId.BLUETOOTH && !hasBluetoothPermission ->
         BootReconnectDecision.BLE_PERMISSION_MISSING
 
     else -> BootReconnectDecision.START_SERVICE

@@ -648,6 +648,28 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     @Test
+    fun `BLE liveness timeout restarts a transport saved with the legacy bang prefix`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("!AA:BB:CC:DD:EE:FF")
+        try {
+            clock = 65_000L
+            service.checkLiveness()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                2,
+                createdTransports.size,
+                "A silent legacy BLE link should be restarted like any BLE link",
+            )
+            assertTrue(createdTransports.first().closeCalled, "Old transport must be closed")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    @Test
     fun `BLE liveness restart contains factory failure and a later connect can retry`() = runTest(testDispatcher) {
         clock = 0L
         var failRestart = false

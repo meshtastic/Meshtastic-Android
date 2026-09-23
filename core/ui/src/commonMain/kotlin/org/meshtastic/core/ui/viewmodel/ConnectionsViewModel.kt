@@ -35,10 +35,12 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.FirmwareUpdateNoticePolicy
 import org.meshtastic.core.model.FirmwareUpdateTransport
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.TimeConstants
@@ -245,7 +247,8 @@ class ConnectionsViewModel(
         combine(firmwareUpdateInputs, localHardware) { inputs, hardware ->
             val state = inputs.connectionState
             if (state !is ConnectionState.Connected) return@combine null
-            val transport = inputs.address?.firstOrNull()?.toFirmwareUpdateTransport() ?: return@combine null
+            val transport =
+                DeviceAddress.parse(inputs.address)?.interfaceId?.toFirmwareUpdateTransport() ?: return@combine null
             val stableRelease = inputs.stableRelease ?: return@combine null
             val deviceHardware = hardware ?: return@combine null
             FirmwareUpdateCandidate(
@@ -353,9 +356,15 @@ private data class FirmwareUpdateCandidate(
     val transport: FirmwareUpdateTransport,
 )
 
-private fun Char.toFirmwareUpdateTransport(): FirmwareUpdateTransport? = when (this) {
-    'x' -> FirmwareUpdateTransport.Bluetooth
-    's' -> FirmwareUpdateTransport.Serial
-    't' -> FirmwareUpdateTransport.Tcp
-    else -> null
+private fun InterfaceId.toFirmwareUpdateTransport(): FirmwareUpdateTransport? = when (this) {
+    InterfaceId.BLUETOOTH -> FirmwareUpdateTransport.Bluetooth
+
+    InterfaceId.SERIAL -> FirmwareUpdateTransport.Serial
+
+    InterfaceId.TCP -> FirmwareUpdateTransport.Tcp
+
+    InterfaceId.MOCK,
+    InterfaceId.NOP,
+    InterfaceId.REPLAY,
+    -> null
 }

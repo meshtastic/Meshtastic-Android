@@ -66,6 +66,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
@@ -113,7 +114,11 @@ private data class UsbRecoveryTriggerState(
 )
 
 private fun selectedSerialPresence(address: String?, keys: Set<String>): SelectedSerialPresence {
-    val key = address?.takeIf { it.firstOrNull() == InterfaceId.SERIAL.id }?.drop(1)?.takeIf { it.isNotEmpty() }
+    val key =
+        DeviceAddress.parse(address)
+            ?.takeIf { it.interfaceId == InterfaceId.SERIAL }
+            ?.identity
+            ?.takeIf { it.isNotEmpty() }
     return SelectedSerialPresence(key = key, present = key != null && key in keys)
 }
 
@@ -929,7 +934,7 @@ class SharedRadioInterfaceService(
             }
             throw publicationFailure
         }
-        runningTransportId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
+        runningTransportId = DeviceAddress.parse(address)?.interfaceId
         isStarted = true
         startHeartbeat()
     }
