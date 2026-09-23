@@ -156,6 +156,8 @@ open class ScannerViewModel(
     private val bleScanner: BleScanner? = null,
     /** False on hardware with no Bluetooth LE: the BLE pane is hidden and never selected or scanned. */
     val bluetoothSupported: Boolean = true,
+    /** False on hardware with no USB host: the USB pane is offered only while Demo Mode needs it. */
+    private val usbSupported: Boolean = true,
 ) : ViewModel() {
 
     // ── Mock / demo transport ─────────────────────────────────────────────────────────────────
@@ -174,6 +176,15 @@ open class ScannerViewModel(
      * mock — so the entry stays hidden rather than advertising behaviour it cannot deliver.
      */
     val showReplayTransport: StateFlow<Boolean> = _showReplayTransport.asStateFlow()
+
+    /**
+     * Whether the USB pane is offered. The Demo Mode entries render in that pane, so it stays reachable while Demo Mode
+     * is on even on hardware with no USB host.
+     */
+    val showUsbTransport: StateFlow<Boolean> =
+        showMockTransport
+            .map { usbSupported || it }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, usbSupported || showMockTransport.value)
 
     // ── Connection-progress chatter (surfaced as the bottom status pill) ──────────────────────
     private val _connectionProgressText = MutableStateFlow<String?>(null)
@@ -385,20 +396,23 @@ open class ScannerViewModel(
 
     /** The single transport pane currently rendered by the Connections screen. */
     val activeTransport: StateFlow<DeviceType> =
-        combine(uiPrefs.selectedConnectionTransport, selectedAddressFlow) { preferred, selectedAddress ->
-            resolveActiveTransport(preferred, selectedAddress)
-        }
+        combine(uiPrefs.selectedConnectionTransport, selectedAddressFlow, showUsbTransport, ::resolveActiveTransport)
             .distinctUntilChanged()
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Eagerly,
                 initialValue =
-                resolveActiveTransport(uiPrefs.selectedConnectionTransport.value, selectedAddressFlow.value),
+                resolveActiveTransport(
+                    uiPrefs.selectedConnectionTransport.value,
+                    selectedAddressFlow.value,
+                    showUsbTransport.value,
+                ),
             )
 
     /** Selects one Connections transport pane and stops scans that cannot belong to that pane. */
     fun selectTransport(type: DeviceType) {
         if (type == DeviceType.BLE && !bluetoothSupported) return
+        if (type == DeviceType.USB && !showUsbTransport.value) return
         when (type) {
             DeviceType.BLE -> stopNetworkScan()
             DeviceType.TCP -> stopBleScan()
@@ -783,10 +797,18 @@ open class ScannerViewModel(
         }
     }
 
-    private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType {
-        // A persisted BLE pane or a restored BLE address can still resolve here on a device with no Bluetooth.
+    private fun resolveActiveTransport(
+        preferred: DeviceType?,
+        selectedAddress: String?,
+        usbPaneAvailable: Boolean,
+    ): DeviceType {
+        // A persisted pane or a restored address can still name a transport this hardware lacks; Network always works.
         val resolved = preferred ?: selectedAddress?.let(DeviceType::fromAddress) ?: DeviceType.BLE
-        return if (resolved == DeviceType.BLE && !bluetoothSupported) DeviceType.TCP else resolved
+        return when {
+            resolved == DeviceType.BLE && !bluetoothSupported -> DeviceType.TCP
+            resolved == DeviceType.USB && !usbPaneAvailable -> DeviceType.TCP
+            else -> resolved
+        }
     }
 
     private fun recordSelectedTransport(fullAddress: String) {

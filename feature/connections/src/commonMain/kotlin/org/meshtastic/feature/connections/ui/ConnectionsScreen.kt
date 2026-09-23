@@ -243,6 +243,7 @@ fun ConnectionsScreen(
     val isBleScanning by scanModel.isBleScanning.collectAsStateWithLifecycle()
     val isNetworkScanning by scanModel.isNetworkScanning.collectAsStateWithLifecycle()
     val activeTransport by scanModel.activeTransport.collectAsStateWithLifecycle()
+    val showUsbTransport by scanModel.showUsbTransport.collectAsStateWithLifecycle()
     val blePermissionRefusal by scanModel.blePermissionRefusal.collectAsStateWithLifecycle()
     val bleAutoScan by scanModel.bleAutoScan.collectAsStateWithLifecycle()
     val networkAutoScan by scanModel.networkAutoScan.collectAsStateWithLifecycle()
@@ -592,11 +593,15 @@ fun ConnectionsScreen(
 
                         // Transport selector sits between the connection card and device list; it controls only the
                         // visible discovery pane, not the globally selected/connected device shown above.
-                        TransportSelector(
-                            activeTransport = activeTransport,
-                            onSelectTransport = scanModel::selectTransport,
-                            showBluetooth = scanModel.bluetoothSupported,
-                        )
+                        // With Network as the only pane left, a one-segment control would select nothing.
+                        if (scanModel.bluetoothSupported || showUsbTransport) {
+                            TransportSelector(
+                                activeTransport = activeTransport,
+                                onSelectTransport = scanModel::selectTransport,
+                                showBluetooth = scanModel.bluetoothSupported,
+                                showUsb = showUsbTransport,
+                            )
+                        }
 
                         // Adapter-off hints: shown only when the relevant permission is granted but the radio/network
                         // is unavailable, so they don't overlap the permission-recovery flow on the scan toggles.

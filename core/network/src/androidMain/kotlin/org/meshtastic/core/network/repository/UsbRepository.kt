@@ -38,6 +38,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
+import org.meshtastic.core.common.hasUsbHost
 import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.common.util.registerReceiverCompat
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -58,6 +59,9 @@ class UsbRepository(
     private val usbManagerLazy: Lazy<UsbManager?>,
     private val usbSerialProberLazy: Lazy<UsbSerialProber>,
 ) {
+    /** False when the device cannot act as a USB host, so no USB serial transport can ever work (e.g. Android XR). */
+    val isSupported: Boolean = application.hasUsbHost()
+
     private val _serialDevices = MutableStateFlow(emptyMap<String, UsbDevice>())
 
     val serialDevices =
