@@ -586,10 +586,6 @@
     <string name="files_available">Saatavilla olevat tiedostot (%1$d):</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Lisää sana tai regex-sääntö</string>
-    <string name="filter_disable_for_contact">Poista suodatus käytöstä</string>
-    <string name="filter_enable">Ota suodatus käyttöön</string>
-    <string name="filter_enable_for_contact">Ota suodatus käyttöön</string>
-    <string name="filter_enable_summary">Piilota suodatussanoja sisältävät viestit</string>
     <string name="filter_hide_count">Piilota %1$d suodatettu</string>
     <string name="filter_icon">Suodatus</string>
     <string name="filter_message_label">Suodatettu</string>

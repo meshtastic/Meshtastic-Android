@@ -70,7 +70,7 @@ The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived
 
 Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is **separate from the BME680 IAQ reading** listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.
 
-| Метрични              | Unit      | Описание                                                                                                                                                                                                                         |
+| Метрични              | Единица   | Описание                                                                                                                                                                                                                         |
 | --------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | PM1.0 | µg/m³     | Particulate matter up to 1.0 micron                                                                                                                                                                              |
 | PM2.5 | µg/m³     | Particulate matter up to 2.5 microns                                                                                                                                                                             |

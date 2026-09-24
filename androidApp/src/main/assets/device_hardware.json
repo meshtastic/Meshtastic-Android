@@ -1220,6 +1220,24 @@
     ]
   },
   {
+    "hwModel": 132,
+    "hwModelSlug": "HELTEC_V4_R8",
+    "platformioTarget": "heltec-v4-r8-oled",
+    "architecture": "esp32-s3",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "Heltec V4 R8",
+    "tags": [
+      "Heltec"
+    ],
+    "requiresDfu": true,
+    "hasMui": true,
+    "partitionScheme": "16MB",
+    "images": [
+      "heltec_v4_r8_base.svg"
+    ]
+  },
+  {
     "hwModel": 106,
     "hwModelSlug": "RAK3312",
     "platformioTarget": "rak3312",

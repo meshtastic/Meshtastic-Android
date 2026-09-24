@@ -498,10 +498,6 @@
     <string name="files_available">Verfügbare Dateien (%1$d):</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Wort oder Regex Muster hinzufügen</string>
-    <string name="filter_disable_for_contact">Filter deaktivieren</string>
-    <string name="filter_enable">Filter aktivieren</string>
-    <string name="filter_enable_for_contact">Filter aktivieren</string>
-    <string name="filter_enable_summary">Nachrichten ausblenden, die Filterwörter enthalten</string>
     <string name="filter_hide_count">%1$d gefilterte ausblenden</string>
     <string name="filter_icon">Filter</string>
     <string name="filter_message_label">Gefiltert</string>

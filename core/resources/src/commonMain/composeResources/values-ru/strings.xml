@@ -606,9 +606,9 @@
     <!-- FILTER -->
     <string name="filter_add_placeholder">Добавьте слово или регулярное выражение:шаблон</string>
     <string name="filter_disable_for_contact">Отключить фильтрацию</string>
-    <string name="filter_enable">Включить фильтрацию</string>
+    <string name="filter_enable">Фильтровать все диалоги</string>
     <string name="filter_enable_for_contact">Включить фильтрацию</string>
-    <string name="filter_enable_summary">Скрывать сообщения, содержащие слова-фильтры</string>
+    <string name="filter_enable_summary">Скрывать сообщения, содержащие фильтры в каждом канале и ЛС. Выключает их для одного разговора из меню.</string>
     <string name="filter_hide_count">Скрыть %1$d отфильтрованных</string>
     <string name="filter_icon">Фильтр</string>
     <string name="filter_message_label">Отфильтрованные</string>
@@ -1113,10 +1113,12 @@
     <string name="message_routing_error_timeout_detail">Подтверждение не было получено вовремя. Повтори попытку, когда улучшится сигнал или покрытие mesh-сети.</string>
     <string name="message_routing_error_too_large">Слишком большое сообщение для отправки</string>
     <string name="message_routing_error_too_large_detail">Сократи сообщение и отправь его снова.</string>
+    <string name="message_status_ack_proof_invalid">Сбой проверки доставки</string>
     <string name="message_status_delivered">Отправлено в сеть</string>
     <string name="message_status_enroute">Отправка...</string>
     <string name="message_status_queued">В очереди на отправку</string>
     <string name="message_status_recipient_delivered">Доставлено получателю</string>
+    <string name="message_status_recipient_delivered_proven">Доставлено получателю - доказано</string>
     <string name="message_status_relayed_not_confirmed">Передано, не подтверждено получателем</string>
     <string name="message_status_sfpp_confirmed">Подтверждено в цепочке SF++</string>
     <string name="message_status_sfpp_routing">Маршрутизация по SF++ цепочке…</string>
@@ -1597,6 +1599,12 @@
     <string name="secondary_no_telemetry">Нет периодической телеметрической передачи</string>
     <!-- SECURITY -->
     <string name="security">Безопасность</string>
+    <string name="security_ack_proof_failed">Сбой проверки доставки</string>
+    <string name="security_ack_proof_failed_info">Что-то признало это сообщение без ключа, только зацепки получателя.</string>
+    <string name="security_ack_proof_no_key">Доказательство доставки не проверено</string>
+    <string name="security_ack_proof_no_key_info">Доказательство доставки прибыло, но не было ключа для его проверки.</string>
+    <string name="security_ack_proof_verified">Доставка проверена</string>
+    <string name="security_ack_proof_verified_info">Упомянутая вами нода подтвердила, что она получил это сообщение.</string>
     <string name="security_icon_badge_warning_description">Предупреждающий Знак</string>
     <string name="security_icon_description">Статус безопасности</string>
     <string name="security_icon_help_dismiss">Отменить</string>

@@ -233,8 +233,6 @@
     <string name="favorite_add">Dodać węzeł '%1$s' do ulubionych?</string>
     <string name="favorite_remove">Usunąć węzeł '%1$s' z ulubionych?</string>
     <!-- FILTER -->
-    <string name="filter_enable">Włącz filtrowanie</string>
-    <string name="filter_enable_summary">Ukryj wiadomości zawierające filtrowane słowa</string>
     <string name="filter_icon">Filtr</string>
     <string name="filter_settings">Filtry wiadomości</string>
     <string name="filter_words">Filtruj słowa</string>

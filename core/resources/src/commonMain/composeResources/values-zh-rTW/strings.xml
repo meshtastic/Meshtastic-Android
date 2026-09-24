@@ -389,10 +389,6 @@
     <string name="files_available">可使用檔案（%1$d）：</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">新增關鍵字或正規表示式</string>
-    <string name="filter_disable_for_contact">停用篩選</string>
-    <string name="filter_enable">啟用篩選</string>
-    <string name="filter_enable_for_contact">啟用篩選</string>
-    <string name="filter_enable_summary">隱藏符合篩選條件的訊息</string>
     <string name="filter_hide_count">隱藏已篩選 %1$d 則</string>
     <string name="filter_icon">過濾器</string>
     <string name="filter_message_label">已篩選</string>

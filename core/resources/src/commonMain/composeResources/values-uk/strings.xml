@@ -352,10 +352,6 @@
     <string name="favorite_remove">Видалити '%1$s' з обраних вузлів?</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Додати слово або regex:pattern</string>
-    <string name="filter_disable_for_contact">Вимкнути фільтрацію</string>
-    <string name="filter_enable">Увімкнути фільтрацію</string>
-    <string name="filter_enable_for_contact">Увімкнути фільтрацію</string>
-    <string name="filter_enable_summary">Приховати повідомлення, які містять слова для фільтрації</string>
     <string name="filter_icon">Фільтри</string>
     <string name="filter_message_label">Відфільтровано</string>
     <string name="filter_no_words">Жодного фільтра не налаштовано</string>
