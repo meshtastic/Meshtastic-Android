@@ -44,9 +44,10 @@ abstract class BaseRadioTransportFactory(
     override fun isAddressValid(address: String?): Boolean {
         val spec = address?.firstOrNull() ?: return false
         return when (spec) {
-            InterfaceId.TCP.id,
-            InterfaceId.SERIAL.id,
-            -> true
+            InterfaceId.TCP.id -> true
+
+            // A saved serial address restored onto hardware with no USB host is kept but never armed.
+            InterfaceId.SERIAL.id -> isSerialSupported
 
             // A saved BLE address restored onto hardware with no Bluetooth LE is kept but never armed.
             InterfaceId.BLUETOOTH.id,
@@ -63,6 +64,9 @@ abstract class BaseRadioTransportFactory(
             else -> isPlatformAddressValid(address)
         }
     }
+
+    /** Whether this hardware can host a USB serial radio. */
+    protected open val isSerialSupported: Boolean = true
 
     protected open fun isPlatformAddressValid(address: String): Boolean = false
 
