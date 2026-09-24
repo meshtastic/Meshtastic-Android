@@ -132,7 +132,7 @@ abstract class BaseMeshtasticAppFunctionService : AppFunctionService() {
      *
      * @param contactName Optional name of a node or channel to filter messages from. If omitted, returns messages from
      *   all contacts sorted by most recent.
-     * @param limit Maximum number of messages to return (1–50). Defaults to 20.
+     * @param limit Maximum number of messages to return: 1, 5, 10, 20 or 50. Defaults to 20.
      * @return A [GetRecentMessagesResponse] containing the list of recent messages.
      */
     @AppFunction(isDescribedByKDoc = true)
