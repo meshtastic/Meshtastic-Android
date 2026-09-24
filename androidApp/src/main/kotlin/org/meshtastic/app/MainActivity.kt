@@ -60,6 +60,7 @@ import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.nfc.NfcEmulatorEffect
@@ -101,7 +102,6 @@ import org.meshtastic.core.ui.util.brandHighlightOrNull
 import org.meshtastic.core.ui.util.brandPalette
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
-import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import org.meshtastic.feature.intro.IntroViewModel
 import org.meshtastic.feature.map.MapScreen
@@ -408,8 +408,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showConnectionsPageIfNoDeviceSelected() {
-        val selectedAddress = model.currentDeviceAddressFlow.value
-        if (!selectedAddress.isNullOrBlank() && selectedAddress != NO_DEVICE_SELECTED) return
+        if (DeviceAddress.parse(model.currentDeviceAddressFlow.value) != null) return
 
         handleMeshtasticUri("$DEEP_LINK_BASE_URI/connections".toUri())
     }

@@ -17,7 +17,9 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.InterfaceId
 
 /** Reactive interface for analytics-related preferences. */
 interface AnalyticsPrefs {
@@ -342,15 +344,17 @@ interface RadioPrefs {
     fun setDevName(name: String?)
 }
 
-fun RadioPrefs.isBle() = devAddr.value?.startsWith("x") == true
+/** The saved selection, parsed; `null` when nothing is selected. */
+val RadioPrefs.selectedDevice: DeviceAddress?
+    get() = DeviceAddress.parse(devAddr.value)
 
-fun RadioPrefs.isSerial() = devAddr.value?.startsWith("s") == true
+fun RadioPrefs.isBle() = selectedDevice?.interfaceId == InterfaceId.BLUETOOTH
 
-fun RadioPrefs.isMock() = devAddr.value?.startsWith("m") == true
+fun RadioPrefs.isSerial() = selectedDevice?.interfaceId == InterfaceId.SERIAL
 
-fun RadioPrefs.isTcp() = devAddr.value?.startsWith("t") == true
+fun RadioPrefs.isMock() = selectedDevice?.interfaceId == InterfaceId.MOCK
 
-fun RadioPrefs.isNoop() = devAddr.value?.startsWith("n") == true
+fun RadioPrefs.isTcp() = selectedDevice?.interfaceId == InterfaceId.TCP
 
 /** Reactive interface for mesh connection settings. */
 interface MeshPrefs {

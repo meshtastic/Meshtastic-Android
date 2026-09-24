@@ -52,6 +52,7 @@ import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MyNodeInfo
@@ -67,6 +68,7 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
+import org.meshtastic.core.repository.selectedDevice
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_maintenance_cdc_unblock_failed
@@ -274,7 +276,7 @@ class FirmwareUpdateViewModel(
                 _state.value = FirmwareUpdateState.Checking
                 safeCatching {
                     val ourNode = nodeRepository.myNodeInfo.value
-                    val address = radioPrefs.devAddr.value?.drop(1)
+                    val address = radioPrefs.selectedDevice?.identity
                     if (address == null || ourNode == null) {
                         // Not connected: offer to re-flash a device stranded in bootloader mode if we saved a
                         // recovery record when its (now-interrupted) update was triggered. Otherwise, no device.
@@ -1329,7 +1331,7 @@ private fun isValidBluetoothAddress(address: String?): Boolean =
     address != null && BLUETOOTH_ADDRESS_REGEX.matches(address)
 
 private fun isBluetoothInterfaceAddress(address: String): Boolean =
-    address.startsWith(InterfaceId.BLUETOOTH.id) || address.startsWith("!")
+    DeviceAddress.parse(address)?.interfaceId == InterfaceId.BLUETOOTH
 
 private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType): Flow<FirmwareRelease?> = when (type) {
     FirmwareReleaseType.STABLE -> stableRelease

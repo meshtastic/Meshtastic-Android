@@ -34,6 +34,7 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
@@ -122,10 +123,7 @@ fun MainScreen() {
 }
 
 private fun initialRoute(deviceAddress: String?): NavKey =
-    if (deviceAddress.isNullOrSelectedNone()) TopLevelDestination.Connect.route else NodesRoute.Nodes
-
-/** True when no device address is persisted, or the address is the "none" sentinel (`"n"`). */
-private fun String?.isNullOrSelectedNone(): Boolean = isNullOrBlank() || this == "n"
+    if (DeviceAddress.parse(deviceAddress) == null) TopLevelDestination.Connect.route else NodesRoute.Nodes
 
 @Composable
 @Suppress("LongMethod", "CyclomaticComplexMethod")

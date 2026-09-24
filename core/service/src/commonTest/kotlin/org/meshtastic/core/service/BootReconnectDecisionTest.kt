@@ -54,6 +54,14 @@ class BootReconnectDecisionTest {
     }
 
     @Test
+    fun `a legacy bang BLE device is not reconnected without the Bluetooth permission`() {
+        assertEquals(
+            BootReconnectDecision.BLE_PERMISSION_MISSING,
+            bootReconnectDecision("!AA:BB:CC:DD:EE:FF", hasBluetoothPermission = false),
+        )
+    }
+
+    @Test
     fun `TCP and USB devices reconnect regardless of the Bluetooth permission`() {
         // Gating these would break reconnection for users who have deliberately never granted Bluetooth access.
         assertEquals(

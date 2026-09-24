@@ -80,6 +80,7 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.desktopDataDir
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
@@ -396,7 +397,7 @@ private fun ApplicationScope.MeshtasticWindow(
     val multiBackstack =
         rememberMultiBackstack(
             // Land on Connections for first-run / no-device-selected; otherwise on Nodes.
-            if (uiViewModel.currentDeviceAddressFlow.value.let { it.isNullOrBlank() || it == "n" }) {
+            if (DeviceAddress.parse(uiViewModel.currentDeviceAddressFlow.value) == null) {
                 TopLevelDestination.Connect.route
             } else {
                 TopLevelDestination.Nodes.route
