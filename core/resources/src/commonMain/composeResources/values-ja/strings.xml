@@ -529,10 +529,6 @@
     <string name="files_available">利用可能なファイル（%1$d）：</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">単語または regex:パターンを追加</string>
-    <string name="filter_disable_for_contact">フィルタを無効にする</string>
-    <string name="filter_enable">フィルタリングを有効化</string>
-    <string name="filter_enable_for_contact">フィルタリングを有効化</string>
-    <string name="filter_enable_summary">フィルター単語を含むメッセージを非表示にします</string>
     <string name="filter_hide_count">フィルター済み %1$d 件を非表示</string>
     <string name="filter_icon">絞り込み</string>
     <string name="filter_message_label">フィルター済み</string>

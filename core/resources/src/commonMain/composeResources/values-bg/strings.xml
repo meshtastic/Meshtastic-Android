@@ -405,9 +405,6 @@
     <string name="file_entry">- %1$s (%2$d байта)</string>
     <string name="files_available">Налични файлове (%1$d):</string>
     <!-- FILTER -->
-    <string name="filter_disable_for_contact">Дезактивиране на филтрирането</string>
-    <string name="filter_enable">Активиране на филтрирането</string>
-    <string name="filter_enable_for_contact">Активиране на филтрирането</string>
     <string name="filter_hide_count">Скриване на %1$d филтрирани</string>
     <string name="filter_icon">Филтър</string>
     <string name="filter_message_label">Филтрирани</string>
@@ -445,6 +442,7 @@
     <string name="firmware_update_extracting">Извличане на фърмуера...</string>
     <string name="firmware_update_failed">Неуспешна актуализация</string>
     <string name="firmware_update_flashing">Програмиране на устройството, моля изчакайте...</string>
+    <string name="firmware_update_in_progress">Актуализиране на фърмуера…</string>
     <string name="firmware_update_keep_device_close">Дръжте устройството близо до телефона си.</string>
     <string name="firmware_update_latest">Актуализиране до: %1$s</string>
     <string name="firmware_update_local_file">Локален файл</string>
@@ -552,6 +550,7 @@
     <string name="key_verification_final_title">Проверката на ключа е завършена</string>
     <string name="key_verification_request_title">Заявка за проверка на ключ</string>
     <string name="key_verification_title">Проверка на ключ</string>
+    <string name="label_with_unit">%1$s (%2$s)</string>
     <string name="last_heard_filter_label">Филтриране по време на последното чуване: %1$s</string>
     <string name="last_position_update">Последна актуализация на позицията</string>
     <string name="latest_alpha_firmware">Най-новия алфа</string>
@@ -562,6 +561,8 @@
     <string name="layer_type_network">Мрежов слой</string>
     <string name="learn_more">Научете повече</string>
     <string name="library_count">%1$d библиотеки</string>
+    <string name="license">Лиценз</string>
+    <string name="license_notice">Свободен софтуер, разпространяван под лиценза GNU General Public License v3, без гаранция. Можете да го разпространявате повторно при условията на същия лиценз.</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Лицензиран радиолюбител (Ham)</string>
     <string name="licensed_amateur_radio_text">Активирането на тази опция дезактивира криптирането и не е съвместимо с мрежата Meshtastic по подразбиране.</string>
@@ -1144,11 +1145,14 @@
     <string name="type">Тип</string>
     <string name="type_a_message">Въведете съобщение</string>
     <string name="unit_dbm">dBm</string>
+    <string name="unit_khz">kHz</string>
     <string name="unit_meters">m</string>
     <!-- UNITS -->
+    <string name="units">Единици</string>
     <string name="units_follow_system">По подразбиране на системата</string>
     <string name="units_imperial">Имперски</string>
     <string name="units_metric">Метрични</string>
+    <string name="units_scope_summary">Начинът, по който това приложение показва разстояние, надморска височина, скорост и температура. Екранът на самото устройство следва собствените си настройки на дисплея.</string>
     <!-- UNKNOWN -->
     <string name="unknown">Неизвестно</string>
     <string name="unknown_age">Неизвестна възраст</string>

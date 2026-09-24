@@ -512,10 +512,6 @@
     <string name="files_available">Fichiers disponibles (%1$d ) :</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Ajouter un mot ou une expression régulière : modèle</string>
-    <string name="filter_disable_for_contact">Désactiver le filtrage</string>
-    <string name="filter_enable">Activer le filtrage</string>
-    <string name="filter_enable_for_contact">Activer le filtrage</string>
-    <string name="filter_enable_summary">Cacher les messages contenant les mots du filtre</string>
     <string name="filter_hide_count">Masquer %1$d filtré</string>
     <string name="filter_icon">Filtre</string>
     <string name="filter_message_label">Filtré</string>

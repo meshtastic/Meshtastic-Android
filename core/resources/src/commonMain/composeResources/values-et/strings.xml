@@ -574,10 +574,6 @@
     <string name="files_available">Saadaval failid (%1$d):</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Lisa sõna või regulaaravaldise:muster</string>
-    <string name="filter_disable_for_contact">Keela filtreerimine</string>
-    <string name="filter_enable">Luba filtreerimine</string>
-    <string name="filter_enable_for_contact">Luba filtreerimine</string>
-    <string name="filter_enable_summary">Peida filtrisõnu sisaldavad sõnumid</string>
     <string name="filter_hide_count">Peida %1$d filtreeritud</string>
     <string name="filter_icon">Filtreeri</string>
     <string name="filter_message_label">Filtreeritud</string>

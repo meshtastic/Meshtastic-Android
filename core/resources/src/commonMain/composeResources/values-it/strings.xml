@@ -535,10 +535,6 @@
     <string name="files_available">File disponibili (%1$d):</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Aggiungi parola o regex:pattern</string>
-    <string name="filter_disable_for_contact">Disabilita filtro</string>
-    <string name="filter_enable">Abilita Filtro</string>
-    <string name="filter_enable_for_contact">Abilita filtro</string>
-    <string name="filter_enable_summary">Nascondi messaggi contenenti parole del filtro</string>
     <string name="filter_hide_count">Nascondi %1$d filtrati</string>
     <string name="filter_icon">Filtro</string>
     <string name="filter_message_label">Filtrato</string>

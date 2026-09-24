@@ -536,10 +536,6 @@
     <string name="files_available">可用文件 (%1$d)：</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">添加词语或正则表达式：模式</string>
-    <string name="filter_disable_for_contact">禁用过滤</string>
-    <string name="filter_enable">启用过滤</string>
-    <string name="filter_enable_for_contact">启用过滤</string>
-    <string name="filter_enable_summary">隐藏包含过滤词的消息</string>
     <string name="filter_hide_count">隐藏 %1$d 过滤</string>
     <string name="filter_icon">搜索节点</string>
     <string name="filter_message_label">已过滤</string>

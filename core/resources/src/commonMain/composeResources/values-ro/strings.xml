@@ -297,10 +297,6 @@
     <string name="files_available">Fișiere disponibile (%1$d):</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Adaugă cuvânt sau regex:pattern-ul</string>
-    <string name="filter_disable_for_contact">Dezactivați filtrarea</string>
-    <string name="filter_enable">Activați filtrarea</string>
-    <string name="filter_enable_for_contact">Activați filtrarea</string>
-    <string name="filter_enable_summary">Ascunde mesajele ce conțin cuvinte filtre</string>
     <string name="filter_hide_count">Ascunde %1$d filtrate</string>
     <string name="filter_icon">Filtru</string>
     <string name="filter_message_label">Filtrat</string>

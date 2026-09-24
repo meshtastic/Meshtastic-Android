@@ -109,11 +109,11 @@ Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and 
 
 Some units are international standards and are displayed the same way regardless of your locale:
 
-| Measurement                      | Unit                           | Why                                   |
+| Measurement                      | Единица                        | Why                                   |
 | -------------------------------- | ------------------------------ | ------------------------------------- |
 | Barometric pressure              | hPa                            | International meteorological standard |
 | Heading / bearing                | ° (degrees) | Universal navigation convention       |
-| Радиация                         | µR/h                           | Standard dosimetry unit               |
+| Радиация                         | µR/h                           | Стандартна дозиметрична единица       |
 | GPS coordinates                  | decimal degrees                | Universal geographic standard         |
 | Humidity, battery, soil moisture | %                              | Universal                             |
 

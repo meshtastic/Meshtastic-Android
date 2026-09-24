@@ -390,10 +390,6 @@
     <string name="files_available">Tillgängliga filer (%1$d):</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Lägg till ord eller regex:mönster</string>
-    <string name="filter_disable_for_contact">Inaktivera filtrering</string>
-    <string name="filter_enable">Aktivera filtrering</string>
-    <string name="filter_enable_for_contact">Aktivera filtrering</string>
-    <string name="filter_enable_summary">Dölj meddelanden som innehåller filterord</string>
     <string name="filter_hide_count">Dölj %1$d filtrerade</string>
     <string name="filter_icon">Filter</string>
     <string name="filter_message_label">Filtrerad</string>

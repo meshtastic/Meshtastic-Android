@@ -513,10 +513,6 @@
     <string name="favorite_remove">Odstranit '%1$s' z oblíbených uzlů?</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Přidat slovo nebo regex:vzor</string>
-    <string name="filter_disable_for_contact">Vypnout filtrování</string>
-    <string name="filter_enable">Zapnout filtrování</string>
-    <string name="filter_enable_for_contact">Zapnout filtrování</string>
-    <string name="filter_enable_summary">Skrýt zprávy obsahující filtrovaná slova</string>
     <string name="filter_hide_count">Skrýt %1$d filtrované</string>
     <string name="filter_icon">Filtr</string>
     <string name="filter_message_label">Filtrované</string>
