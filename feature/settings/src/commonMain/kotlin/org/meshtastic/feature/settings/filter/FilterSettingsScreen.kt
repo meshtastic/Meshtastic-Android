@@ -115,8 +115,6 @@ fun FilterSettingsScreen(viewModel: FilterSettingsViewModel, onBack: () -> Unit)
 
 @Composable
 private fun FilterEnableCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
-    // The pref write is async; track taps locally so a second tap before it lands still flips.
-    var checked by remember(enabled) { mutableStateOf(enabled) }
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -131,13 +129,7 @@ private fun FilterEnableCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Switch(
-                checked = checked,
-                onCheckedChange = {
-                    checked = it
-                    onToggle(it)
-                },
-            )
+            Switch(checked = enabled, onCheckedChange = onToggle)
         }
     }
 }
