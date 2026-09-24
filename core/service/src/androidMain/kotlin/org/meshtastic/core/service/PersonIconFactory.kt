@@ -33,6 +33,7 @@ import androidx.core.graphics.drawable.IconCompat
 internal object PersonIconFactory {
 
     private const val ICON_SIZE = 128
+    private const val ADAPTIVE_ICON_SIZE = ICON_SIZE * 108 / 72
     private const val TEXT_SIZE_RATIO = 0.5f
 
     // Leave a margin so multi-character labels (e.g. a 4-char node short name) don't touch the edge.
@@ -58,8 +59,36 @@ internal object PersonIconFactory {
     fun createLabel(label: String, backgroundColor: Int, foregroundColor: Int, rounded: Boolean): IconCompat =
         render(label.ifBlank { "?" }, backgroundColor, foregroundColor, rounded)
 
+    /**
+     * Full-bleed adaptive avatar showing [label], for notification bubbles: Android 10 rejects a plain bitmap bubble
+     * icon, and the system applies its own mask shape.
+     */
+    fun createAdaptive(label: String, backgroundColor: Int, foregroundColor: Int): IconCompat {
+        val bitmap = createBitmap(ADAPTIVE_ICON_SIZE, ADAPTIVE_ICON_SIZE)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(backgroundColor)
+        // The system shows only the central 72/108 of an adaptive bitmap, so the label is fitted to that safe zone.
+        drawLabel(canvas, label.ifBlank { "?" }, foregroundColor, contentSize = ICON_SIZE.toFloat())
+        return IconCompat.createWithAdaptiveBitmap(bitmap)
+    }
+
     private fun firstInitial(name: String): String =
         if (name.isEmpty()) "?" else String(Character.toChars(name.codePointAt(0))).uppercase()
+
+    private fun drawLabel(canvas: Canvas, text: String, foregroundColor: Int, contentSize: Float) {
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        paint.color = foregroundColor
+        paint.textAlign = Paint.Align.CENTER
+        paint.textSize = contentSize * TEXT_SIZE_RATIO
+        // Shrink the text if it would overflow the icon (keeps 4-char short names inside the shape).
+        val measured = paint.measureText(text)
+        val maxWidth = contentSize * MAX_TEXT_WIDTH_RATIO
+        if (measured > maxWidth) paint.textSize *= maxWidth / measured
+
+        val xPos = canvas.width / 2f
+        val yPos = canvas.height / 2f - (paint.descent() + paint.ascent()) / 2f
+        canvas.drawText(text, xPos, yPos, paint)
+    }
 
     private fun render(text: String, backgroundColor: Int, foregroundColor: Int, rounded: Boolean): IconCompat {
         val bitmap = createBitmap(ICON_SIZE, ICON_SIZE)
@@ -79,17 +108,7 @@ internal object PersonIconFactory {
             canvas.drawRoundRect(0f, top, size, size - top, cap, cap, paint)
         }
 
-        paint.color = foregroundColor
-        paint.textAlign = Paint.Align.CENTER
-        paint.textSize = ICON_SIZE * TEXT_SIZE_RATIO
-        // Shrink the text if it would overflow the icon (keeps 4-char short names inside the circle).
-        val measured = paint.measureText(text)
-        val maxWidth = ICON_SIZE * MAX_TEXT_WIDTH_RATIO
-        if (measured > maxWidth) paint.textSize *= maxWidth / measured
-
-        val xPos = canvas.width / 2f
-        val yPos = canvas.height / 2f - (paint.descent() + paint.ascent()) / 2f
-        canvas.drawText(text, xPos, yPos, paint)
+        drawLabel(canvas, text, foregroundColor, contentSize = size)
 
         return IconCompat.createWithBitmap(bitmap)
     }

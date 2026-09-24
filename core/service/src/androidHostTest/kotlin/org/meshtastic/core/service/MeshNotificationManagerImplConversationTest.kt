@@ -203,6 +203,11 @@ class MeshNotificationManagerImplConversationTest {
         val bubble = posted.bubbleMetadata
         assertNotNull(bubble, "conversation notifications must offer a bubble")
         assertNotNull(bubble.icon, "a bubble without an icon is rejected")
+        assertEquals(
+            android.graphics.drawable.Icon.TYPE_ADAPTIVE_BITMAP,
+            bubble.icon?.type,
+            "Android 10 rejects a plain bitmap bubble icon",
+        )
         assertEquals("0^all", posted.shortcutId, "the bubble needs its long-lived conversation shortcut")
         assertTrue(
             posted.extras.containsKey(Notification.EXTRA_PEOPLE_LIST),
@@ -231,6 +236,18 @@ class MeshNotificationManagerImplConversationTest {
             shadowIntent.flags and android.app.PendingIntent.FLAG_MUTABLE != 0,
             "bubble PendingIntents are the documented exception to preferring FLAG_IMMUTABLE",
         )
+    }
+
+    @Test
+    @Config(sdk = [29])
+    fun `conversation notifications post on Android 10`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
+        mockHistory(message("hello", read = false, receivedTime = 1_000))
+
+        manager.updateMessageNotification("0^all", "Hawk Ridge", "hello", isBroadcast = true, channelName = "LongFast")
+        advanceUntilIdle()
+
+        assertNotNull(activeByTag("message").single().notification.bubbleMetadata)
     }
 
     @Test

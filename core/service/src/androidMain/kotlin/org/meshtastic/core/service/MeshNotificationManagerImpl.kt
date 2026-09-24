@@ -188,10 +188,10 @@ class MeshNotificationManagerImpl(
      */
     private val personIconCache = ConcurrentHashMap<String, IconCompat>()
 
-    /** Rounded variant, for surfaces that mask the icon into a circle (notification bubbles). */
-    private fun cachedRoundedPersonIcon(key: String, shortName: String, backgroundColor: Int, foregroundColor: Int) =
-        personIconCache.getOrPut("rounded|$key|$shortName|$backgroundColor|$foregroundColor") {
-            PersonIconFactory.createLabel(shortName, backgroundColor, foregroundColor, rounded = true)
+    /** Adaptive variant, for notification bubbles, which the system masks to its own shape. */
+    private fun cachedBubblePersonIcon(key: String, shortName: String, backgroundColor: Int, foregroundColor: Int) =
+        personIconCache.getOrPut("adaptive|$key|$shortName|$backgroundColor|$foregroundColor") {
+            PersonIconFactory.createAdaptive(shortName, backgroundColor, foregroundColor)
         }
 
     /** Circular, node-colored avatar holding the sender's full short name (e.g. "2c3d"), not just its first letter. */
@@ -849,7 +849,7 @@ class MeshNotificationManagerImpl(
         // The bubble wears the other party's avatar, not ours — a bubble is recognised by who is in it.
         val bubbleNode = lastMessage.node
         val bubbleIcon =
-            cachedRoundedPersonIcon(
+            cachedBubblePersonIcon(
                 bubbleNode.user.id,
                 bubbleNode.user.short_name,
                 bubbleNode.colors.second,
