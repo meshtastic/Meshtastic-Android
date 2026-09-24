@@ -485,6 +485,33 @@ class MeshtasticDatabaseMigrationTest {
         }
     }
 
+    /**
+     * 62→63 adds `reactions.xeddsa_signed` and `reactions.ack_proof_status`. A stored reaction keeps its delivery
+     * state, and both columns arrive as 0: unsigned and ACK_PROOF_ABSENT, which is what every reaction before them was.
+     */
+    @Test
+    fun reactionAuthenticityColumnsAddedWithoutDisturbingReactions() = runTest {
+        helper.createDatabase(REACTION_AUTH_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO reactions (myNodeNum, reply_id, user_id, emoji, timestamp, packet_id, status, relays, " +
+                    "`to`) VALUES (7, 1001, '!0000abcd', '👍', 5000, 2002, 3, 1, '!0000beef')",
+            )
+        }
+
+        helper.runMigrationsAndValidate(
+            REACTION_AUTH_TO_VERSION,
+            listOf(MeshtasticDatabase.MIGRATION_52_53),
+        ).use { connection ->
+            val row = "FROM reactions WHERE reply_id = 1001"
+            assertEquals(listOf("2002"), queryColumn(connection, "SELECT packet_id $row"))
+            assertEquals(listOf("3"), queryColumn(connection, "SELECT status $row"))
+            assertEquals(listOf("1"), queryColumn(connection, "SELECT relays $row"))
+            assertEquals(listOf("!0000beef"), queryColumn(connection, "SELECT `to` $row"))
+            assertEquals(listOf("0"), queryColumn(connection, "SELECT xeddsa_signed $row"))
+            assertEquals(listOf("0"), queryColumn(connection, "SELECT ack_proof_status $row"))
+        }
+    }
+
     private fun queryColumn(connection: SQLiteConnection, sql: String): List<String?> =
         connection.prepare(sql).use { statement ->
             buildList {
@@ -517,6 +544,8 @@ class MeshtasticDatabaseMigrationTest {
         const val KEY_MATCH_TO_VERSION = 59
         const val IS_MAKER_FROM_VERSION = 61
         const val IS_MAKER_TO_VERSION = 62
+        const val REACTION_AUTH_FROM_VERSION = 62
+        const val REACTION_AUTH_TO_VERSION = 63
         const val PUBLIC_KEY_BYTES = 32
 
         /** Room's runtime FTS content-sync triggers, verbatim from the generated MeshtasticDatabase_Impl. */

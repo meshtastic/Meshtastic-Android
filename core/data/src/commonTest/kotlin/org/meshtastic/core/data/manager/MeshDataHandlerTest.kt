@@ -831,6 +831,68 @@ class MeshDataHandlerTest {
         assertEquals(MessageStatus.RECEIVED, updated.status)
     }
 
+    private fun sentReaction(ackProofStatus: Int = 0, status: MessageStatus = MessageStatus.ENROUTE) = Reaction(
+        replyId = 42,
+        user = User.Builder().also { wb -> wb.id = NodeAddress.ID_LOCAL }.build(),
+        emoji = "👍",
+        timestamp = 1000L,
+        snr = null,
+        rssi = null,
+        hopsAway = 0,
+        packetId = 99,
+        status = status,
+        to = "!remote",
+        ackProofStatus = ackProofStatus,
+    )
+
+    @Test
+    fun `a proven ack records its verdict on the reaction it acknowledges`() = testScope.runTest {
+        val updates = mutableListOf<Reaction>()
+        everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(sentReaction())
+        everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(
+            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            123,
+        )
+        advanceUntilIdle()
+
+        val updated = updates.single()
+        assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updated.ackProofStatus)
+        assertEquals(MessageStatus.RECEIVED, updated.status)
+    }
+
+    @Test
+    fun `an unproven ack does not erase a verdict an earlier ack established on a reaction`() = testScope.runTest {
+        val updates = mutableListOf<Reaction>()
+        val proven = MeshPacket.AckProofStatus.ACK_PROOF_VALID.value
+        everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(sentReaction(proven))
+        everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
+        advanceUntilIdle()
+
+        assertEquals(proven, updates.single().ackProofStatus)
+    }
+
+    @Test
+    fun `a genuine proof is still recorded after a forged ack has settled the reaction`() = testScope.runTest {
+        val updates = mutableListOf<Reaction>()
+        val forged = sentReaction(MeshPacket.AckProofStatus.ACK_PROOF_INVALID.value, MessageStatus.RECEIVED)
+        everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(forged)
+        everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(
+            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            123,
+        )
+        advanceUntilIdle()
+
+        val updated = updates.single()
+        assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updated.ackProofStatus)
+        assertEquals(MessageStatus.RECEIVED, updated.status)
+    }
+
     @Test
     fun `routing nak completes dispatched response as rejected`() = testScope.runTest {
         // NO_ROUTE keeps this ownership test independent of errors that also raise localized UI warnings.
@@ -1208,6 +1270,51 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         verifySuspend { packetRepository.insertReaction(any(), 123) }
+    }
+
+    @Test
+    fun `a signed broadcast reaction is persisted as signed`() = testScope.runTest {
+        val emojiBytes = "👍".encodeToByteArray()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 99
+                    wb.from = 456
+                    wb.to = NodeAddress.NODENUM_BROADCAST
+                    wb.xeddsa_signed = true
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emojiBytes.toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
+        var persistedReaction: Reaction? = null
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                id = 99,
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = emojiBytes.toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                xeddsaSigned = true,
+            )
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        everySuspend { packetRepository.findReactionsWithId(99) } returns emptyList()
+        everySuspend { packetRepository.insertReaction(any(), 123) } calls
+            {
+                persistedReaction = it.args[0] as Reaction
+            }
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        assertEquals(true, assertNotNull(persistedReaction).xeddsaSigned)
     }
 
     @Test
