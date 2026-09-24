@@ -41,6 +41,7 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
@@ -719,12 +720,16 @@ class MeshDataHandlerTest {
 
     // --- Routing/ACK-NAK handling ---
 
-    private fun routingPacket(error: Routing.Error): MeshPacket {
+    private fun routingPacket(
+        error: Routing.Error,
+        ackProofStatus: MeshPacket.AckProofStatus = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT,
+    ): MeshPacket {
         val routing = Routing.Builder().also { wb -> wb.error_reason = error }.build()
         val packet =
             MeshPacket.Builder()
                 .also { wb ->
                     wb.from = 456
+                    wb.ack_proof_status = ackProofStatus
                     wb.decoded =
                         Data.Builder()
                             .also { wb ->
@@ -752,6 +757,78 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         verifySuspend { packetHandler.completeDispatchedResponse(99, complete = true) }
+    }
+
+    private fun sentPacket(ackProofStatus: Int = 0) = DataPacket(
+        from = NodeAddress.ID_LOCAL,
+        to = "!remote",
+        bytes = byteArrayOf(1).toByteString(),
+        dataType = PortNum.TEXT_MESSAGE_APP.value,
+        id = 99,
+        status = MessageStatus.ENROUTE,
+        ackProofStatus = ackProofStatus,
+    )
+
+    @Test
+    fun `a proven ack records its verdict on the packet it acknowledges`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(
+            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            123,
+        )
+        advanceUntilIdle()
+
+        assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updates.single().ackProofStatus)
+    }
+
+    @Test
+    fun `a forged ack is recorded as invalid rather than as a plain delivery`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(
+            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_INVALID),
+            123,
+        )
+        advanceUntilIdle()
+
+        assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_INVALID.value, updates.single().ackProofStatus)
+    }
+
+    @Test
+    fun `an unproven ack does not erase a verdict an earlier ack established`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        val proven = MeshPacket.AckProofStatus.ACK_PROOF_VALID.value
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket(proven))
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
+        advanceUntilIdle()
+
+        assertEquals(proven, updates.single().ackProofStatus)
+    }
+
+    @Test
+    fun `a genuine proof is still recorded after a forged ack has settled the packet`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        val forged =
+            sentPacket(MeshPacket.AckProofStatus.ACK_PROOF_INVALID.value).copy(status = MessageStatus.RECEIVED)
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(forged)
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(
+            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            123,
+        )
+        advanceUntilIdle()
+
+        val updated = updates.single()
+        assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updated.ackProofStatus)
+        assertEquals(MessageStatus.RECEIVED, updated.status)
     }
 
     @Test

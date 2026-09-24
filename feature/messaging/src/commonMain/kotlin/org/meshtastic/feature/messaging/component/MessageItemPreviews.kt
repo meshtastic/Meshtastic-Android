@@ -35,6 +35,7 @@ import org.meshtastic.core.resources.sample_message
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.messaging.isSameGroup
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Routing
 
 @Suppress("PreviewPublic")
@@ -73,6 +74,66 @@ fun MessageItemSignedPreview() {
                     node = msg.node,
                     selected = false,
                     ourNode = NodePreviewParameterProvider().mickeyMouse,
+                    onReply = {},
+                    sendReaction = {},
+                    onShowReactions = {},
+                    onClick = {},
+                    onLongClick = {},
+                    onDoubleClick = {},
+                    onClickChip = {},
+                    onNavigateToOriginalMessage = {},
+                )
+            }
+        }
+    }
+}
+
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun MessageItemAckProofPreview() {
+    val ourNode = NodePreviewParameterProvider().mickeyMouse
+    val proven =
+        Message(
+            text = "Proven delivery - the addressed node signed for it.",
+            time = "14:10",
+            fromLocal = true,
+            status = MessageStatus.RECEIVED,
+            snr = null,
+            rssi = null,
+            hopsAway = 0,
+            uuid = 30L,
+            receivedTime = nowMillis,
+            node = ourNode,
+            read = true,
+            routingError = 0,
+            packetId = 7001,
+            emojis = listOf(),
+            replyId = null,
+            viaMqtt = false,
+            ackProofStatus = MeshPacket.AckProofStatus.ACK_PROOF_VALID.value,
+        )
+    val forged =
+        proven.copy(
+            text = "Somebody acked this without the key.",
+            time = "14:11",
+            uuid = 31L,
+            packetId = 7002,
+            ackProofStatus = MeshPacket.AckProofStatus.ACK_PROOF_INVALID.value,
+        )
+    val unproven = proven.copy(text = "No proof carried.", time = "14:12", uuid = 32L, ackProofStatus = 0)
+    AppTheme {
+        Column(
+            modifier =
+            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp),
+        ) {
+            listOf(proven, forged, unproven).forEach { msg ->
+                MessageItem(
+                    message = msg,
+                    node = msg.node,
+                    selected = false,
+                    ourNode = ourNode,
+                    isDirectMessage = true,
                     onReply = {},
                     sendReaction = {},
                     onShowReactions = {},

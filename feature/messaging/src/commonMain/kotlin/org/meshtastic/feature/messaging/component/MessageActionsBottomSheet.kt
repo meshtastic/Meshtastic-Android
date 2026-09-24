@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.getAckProofStatusRes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.action_copy_message
 import org.meshtastic.core.resources.action_delete_message
@@ -69,14 +70,17 @@ import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.translate
 import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.Copy
+import org.meshtastic.core.ui.icon.Dangerous
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.History
+import org.meshtastic.core.ui.icon.KeyOff
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.More
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.icon.Translate
+import org.meshtastic.proto.MeshPacket
 
 @Suppress("LongMethod")
 @Composable
@@ -95,6 +99,7 @@ fun MessageActionsContent(
     status: MessageStatus? = null,
     timestamp: String? = null,
     xeddsaSigned: Boolean = false,
+    ackProofStatus: Int = 0,
     translationRowState: TranslationRowState? = null,
     onTranslate: () -> Unit = {},
     onToggleTranslation: () -> Unit = {},
@@ -121,6 +126,8 @@ fun MessageActionsContent(
                 },
             )
         }
+
+        AckProofListItem(ackProofStatus)
 
         // The caller supplies the same compact or full timestamp shown in the conversation header.
         if (timestamp != null) {
@@ -223,6 +230,33 @@ fun MessageActionsContent(
             ),
         )
     }
+}
+
+/**
+ * The radio's verdict on the ack that closed out this message. Silent when no proof was carried, which is every ack
+ * from firmware predating [MeshPacket.AckProofStatus] and every ack that simply did not carry one.
+ */
+@Composable
+private fun AckProofListItem(ackProofStatus: Int) {
+    val (headline, supporting) = getAckProofStatusRes(ackProofStatus) ?: return
+    val proofStatus = MeshPacket.AckProofStatus.fromValue(ackProofStatus)
+    val icon =
+        when (proofStatus) {
+            MeshPacket.AckProofStatus.ACK_PROOF_INVALID -> MeshtasticIcons.Dangerous
+            MeshPacket.AckProofStatus.ACK_PROOF_NO_KEY -> MeshtasticIcons.KeyOff
+            else -> MeshtasticIcons.ShieldCheck
+        }
+    val tint =
+        when (proofStatus) {
+            MeshPacket.AckProofStatus.ACK_PROOF_INVALID -> MaterialTheme.colorScheme.error
+            MeshPacket.AckProofStatus.ACK_PROOF_NO_KEY -> MaterialTheme.colorScheme.onSurfaceVariant
+            else -> MaterialTheme.colorScheme.primary
+        }
+    ListItem(
+        headlineContent = { Text(stringResource(headline)) },
+        supportingContent = { Text(stringResource(supporting)) },
+        leadingContent = { Icon(icon, contentDescription = null, tint = tint) },
+    )
 }
 
 internal const val MAX_EMOJI_ROW_SIZE = 6

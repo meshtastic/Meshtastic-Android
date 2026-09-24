@@ -1111,10 +1111,12 @@
     <string name="message_routing_error_timeout_detail">No acknowledgment was received in time. Try again when you have better signal or more mesh coverage.</string>
     <string name="message_routing_error_too_large">Message is too large to send</string>
     <string name="message_routing_error_too_large_detail">Shorten the message and send it again.</string>
+    <string name="message_status_ack_proof_invalid">Delivery proof failed</string>
     <string name="message_status_delivered">Delivered to mesh</string>
     <string name="message_status_enroute">Sending...</string>
     <string name="message_status_queued">Queued for sending</string>
     <string name="message_status_recipient_delivered">Delivered to recipient</string>
+    <string name="message_status_recipient_delivered_proven">Delivered to recipient · proven</string>
     <string name="message_status_relayed_not_confirmed">Relayed, not confirmed by recipient</string>
     <string name="message_status_sfpp_confirmed">Confirmed on SF++ chain</string>
     <string name="message_status_sfpp_routing">Routing via SF++ chain…</string>
@@ -1589,6 +1591,12 @@
     <string name="secondary_no_telemetry">No periodic telemetry broadcast</string>
     <!-- SECURITY -->
     <string name="security">Security</string>
+    <string name="security_ack_proof_failed">Delivery proof failed</string>
+    <string name="security_ack_proof_failed_info">Something acknowledged this message without the key only the recipient holds.</string>
+    <string name="security_ack_proof_no_key">Delivery proof unchecked</string>
+    <string name="security_ack_proof_no_key_info">A delivery proof arrived, but there was no key to check it against.</string>
+    <string name="security_ack_proof_verified">Delivery proven</string>
+    <string name="security_ack_proof_verified_info">The node you addressed proved it received this message.</string>
     <string name="security_icon_badge_warning_description">Warning Badge</string>
     <string name="security_icon_description">Security Status</string>
     <string name="security_icon_help_dismiss">Dismiss</string>
