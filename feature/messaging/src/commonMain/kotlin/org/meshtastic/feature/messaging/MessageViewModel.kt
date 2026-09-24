@@ -50,6 +50,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.ActiveConversationTracker
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.CustomEmojiPrefs
+import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessagingController
@@ -105,6 +106,7 @@ class MessageViewModel(
     private val uiPrefs: UiPrefs,
     private val customEmojiPrefs: CustomEmojiPrefs,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
+    filterPrefs: FilterPrefs,
     private val meshNotificationManager: MeshNotificationManager,
     private val activeConversationTracker: ActiveConversationTracker,
     private val sendMessageUseCase: SendMessageUseCase,
@@ -192,6 +194,8 @@ class MessageViewModel(
     val showQuickChat = uiPrefs.showQuickChat
 
     val showFullMessageTimestamps = uiPrefs.showFullMessageTimestamps
+
+    val messageFilterEnabled = filterPrefs.filterEnabled
 
     private val _showFiltered = MutableStateFlow(false)
     val showFiltered: StateFlow<Boolean> = _showFiltered.asStateFlow()

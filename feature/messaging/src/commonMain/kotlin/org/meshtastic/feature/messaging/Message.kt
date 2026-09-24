@@ -187,6 +187,7 @@ fun MessageScreen(
     val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
+    val messageFilterEnabled by viewModel.messageFilterEnabled.collectAsStateWithLifecycle()
     val isSearchActive by viewModel.isSearchActive.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
@@ -462,6 +463,7 @@ fun MessageScreen(
                     showQuickChat = showQuickChat,
                     onToggleQuickChat = viewModel::toggleShowQuickChat,
                     onNavigateToQuickChatOptions = navigateToQuickChatOptions,
+                    showFilterToggle = messageFilterEnabled,
                     filteringDisabled = filteringDisabled,
                     onToggleFilteringDisabled = {
                         viewModel.setContactFilteringDisabled(contactKey, !filteringDisabled)

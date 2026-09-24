@@ -602,10 +602,10 @@
     <string name="files_available">Files available (%1$d):</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Add word or regex:pattern</string>
-    <string name="filter_disable_for_contact">Disable filtering</string>
-    <string name="filter_enable">Enable Filtering</string>
-    <string name="filter_enable_for_contact">Enable filtering</string>
-    <string name="filter_enable_summary">Hide messages containing filter words</string>
+    <string name="filter_disable_for_contact">Disable filter here</string>
+    <string name="filter_enable">Filter all conversations</string>
+    <string name="filter_enable_for_contact">Enable filter here</string>
+    <string name="filter_enable_summary">Hide messages containing filter words in every channel and DM. Turn it off for one conversation from its menu.</string>
     <string name="filter_hide_count">Hide %1$d filtered</string>
     <string name="filter_icon">Filter</string>
     <string name="filter_message_label">Filtered</string>
