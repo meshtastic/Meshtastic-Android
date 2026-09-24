@@ -134,7 +134,8 @@ class AppFunctionStateSync(
         ): List<Pair<String, Boolean>> =
             if (actual == null) desired else desired.filter { (id, enabled) -> actual[id] != enabled }
 
-        private const val CLASS_PREFIX = "org.meshtastic.app.ai.appfunctions.MeshtasticAppFunctions#"
+        // Mirrors the generated MeshtasticAppFunctionService.FUNCTION_ID_* constants, which are API 36 only.
+        private const val CLASS_PREFIX = "org.meshtastic.app.ai.appfunctions.BaseMeshtasticAppFunctionService#"
 
         const val SEND_MESSAGE_ID = "${CLASS_PREFIX}sendMessage"
         const val GET_MESH_STATUS_ID = "${CLASS_PREFIX}getMeshStatus"

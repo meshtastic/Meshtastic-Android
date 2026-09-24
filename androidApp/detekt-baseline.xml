@@ -32,13 +32,13 @@
     <ID>ReturnCount:MlKitMessageTranslator.kt:MlKitMessageTranslator$override suspend fun downloadLanguageModels: DownloadResult</ID>
     <ID>ReturnCount:MlKitMessageTranslator.kt:MlKitMessageTranslator$override suspend fun translate: TranslationResult</ID>
     <ID>SwallowedException:MapViewModel.kt:MapViewModel$e: Exception</ID>
-    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getChannelInfo: GetChannelInfoResponse</ID>
-    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getDeviceStatus: GetDeviceStatusResponse</ID>
-    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getMeshMetrics: GetMeshMetricsResponse</ID>
-    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getNodeDetails: GetNodeDetailsResponse</ID>
-    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getNodeList: GetNodeListResponse</ID>
-    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getRecentMessages: GetRecentMessagesResponse</ID>
-    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun sendMessage: SendMessageResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$suspend fun getChannelInfo: GetChannelInfoResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$suspend fun getDeviceStatus: GetDeviceStatusResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$suspend fun getMeshMetrics: GetMeshMetricsResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$suspend fun getNodeDetails: GetNodeDetailsResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$suspend fun getNodeList: GetNodeListResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$suspend fun getRecentMessages: GetRecentMessagesResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$suspend fun sendMessage: SendMessageResponse</ID>
     <ID>TooGenericExceptionCaught:FdroidMapOverlayRenderer.kt:FdroidMapOverlayRenderer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$e: Exception</ID>
     <ID>TooGenericExceptionCaught:MapView.kt:e: Exception</ID>
