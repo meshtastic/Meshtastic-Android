@@ -42,6 +42,7 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioTransportFactory
 
 /**
  * Android foreground service that hosts the Meshtastic mesh radio connection.
@@ -53,6 +54,8 @@ import org.meshtastic.core.repository.RadioInterfaceService
 class MeshService : Service() {
 
     private val radioInterfaceService: RadioInterfaceService by inject()
+
+    private val transportFactory: RadioTransportFactory by inject()
 
     private val connectionManager: MeshConnectionManager by inject()
 
@@ -170,7 +173,7 @@ class MeshService : Service() {
         }
 
         val address = radioInterfaceService.getDeviceAddress()
-        if (isValidDeviceAddress(address)) {
+        if (isValidDeviceAddress(address) && transportFactory.isAddressValid(address)) {
             // Address is already loaded and valid — proceed normally.
             addressWaitJob?.cancel()
             addressWaitJob = null
@@ -205,7 +208,9 @@ class MeshService : Service() {
                     withTimeoutOrNull(DEVICE_ADDRESS_SETTLE_MS) {
                         radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
                     }
-                when (serviceStayAliveDecision(resolved, radioOperationLock.isActive)) {
+                when (
+                    serviceStayAliveDecision(resolved, radioOperationLock.isActive, transportFactory::isAddressValid)
+                ) {
                     ServiceStayAliveDecision.STAY_FOR_DEVICE -> {
                         Logger.i {
                             "MeshService: selected device resolved (${resolved.anonymize}) after address-flow wait"
@@ -217,7 +222,7 @@ class MeshService : Service() {
                         Logger.i { "MeshService: no device selected, but a radio operation is in flight; staying up" }
 
                     ServiceStayAliveDecision.STOP -> {
-                        Logger.i { "MeshService: no device selected after address flow settled; stopping" }
+                        Logger.i { "MeshService: no connectable device selected after address flow settled; stopping" }
                         stopServiceCleanly()
                     }
                 }

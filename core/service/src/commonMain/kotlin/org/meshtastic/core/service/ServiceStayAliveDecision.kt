@@ -46,8 +46,16 @@ enum class ServiceStayAliveDecision {
  * that failed dependency injection or could not enter the foreground — in the latter case ActivityManager has already
  * armed the pending-start watchdog, and refusing to stop would turn a recoverable refusal into a process kill.
  */
-fun serviceStayAliveDecision(address: String?, hasActiveRadioOperation: Boolean): ServiceStayAliveDecision = when {
-    isValidDeviceAddress(address) -> ServiceStayAliveDecision.STAY_FOR_DEVICE
+fun serviceStayAliveDecision(
+    address: String?,
+    hasActiveRadioOperation: Boolean,
+    canConnect: (String) -> Boolean,
+): ServiceStayAliveDecision = when {
+    // A saved address this hardware cannot connect to (a serial radio with no USB host) must not hold the service.
+    address != null && isValidDeviceAddress(address) && canConnect(address) ->
+        ServiceStayAliveDecision.STAY_FOR_DEVICE
+
     hasActiveRadioOperation -> ServiceStayAliveDecision.STAY_FOR_OPERATION
+
     else -> ServiceStayAliveDecision.STOP
 }
