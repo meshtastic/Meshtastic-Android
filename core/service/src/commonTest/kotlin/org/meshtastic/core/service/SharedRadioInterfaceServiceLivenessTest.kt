@@ -53,6 +53,7 @@ import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.TransportDisconnectReason
@@ -287,6 +288,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         transportProvider: () -> RadioTransport = { FakeRadioTransport().also { createdTransports.add(it) } },
         networkAvailability: MutableStateFlow<Boolean> = MutableStateFlow(true),
         startConnected: Boolean = true,
+        radioPrefs: RadioPrefs = this.radioPrefs,
     ): SharedRadioInterfaceService {
         every { networkRepository.networkAvailable } returns networkAvailability
         every { networkRepository.resolvedList } returns MutableSharedFlow()
@@ -451,6 +453,59 @@ class SharedRadioInterfaceServiceLivenessTest {
                 service.disconnect()
             }
         }
+
+    /** Persists like DataStore: a write lands only when the test commits it, in order. */
+    private class DeferredRadioPrefs(saved: String?) : RadioPrefs {
+        override val devAddr = MutableStateFlow(saved)
+        override val devName = MutableStateFlow<String?>(null)
+        private val pending = ArrayDeque<String?>()
+
+        override fun setDevAddr(address: String?) {
+            pending.addLast(address)
+        }
+
+        override fun setDevName(name: String?) {
+            devName.value = name
+        }
+
+        fun commitThrough(address: String) {
+            do {
+                val next = pending.removeFirst()
+                devAddr.value = next
+            } while (next != address)
+        }
+    }
+
+    @Test
+    fun `a late commit of an older selection does not rewind the selected address`() = runTest(testDispatcher) {
+        val prefs = DeferredRadioPrefs(saved = "xAA:AA:AA:AA:AA:AA")
+        val service = createConnectedService("xAA:AA:AA:AA:AA:AA", startConnected = false, radioPrefs = prefs)
+        try {
+            service.setDeviceAddress("xBB:BB:BB:BB:BB:BB")
+            service.setDeviceAddress("xCC:CC:CC:CC:CC:CC")
+
+            prefs.commitThrough("xBB:BB:BB:BB:BB:BB")
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals("xCC:CC:CC:CC:CC:CC", service.currentDeviceAddressFlow.value)
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `the saved address still reaches the flow when it loads after construction`() = runTest(testDispatcher) {
+        val prefs = DeferredRadioPrefs(saved = null)
+        val service = createConnectedService("xAA:AA:AA:AA:AA:AA", startConnected = false, radioPrefs = prefs)
+        try {
+            prefs.devAddr.value = "xAA:AA:AA:AA:AA:AA"
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals("xAA:AA:AA:AA:AA:AA", service.currentDeviceAddressFlow.value)
+        } finally {
+            service.disconnect()
+        }
+    }
 
     @Test
     fun `setDeviceAddress contains factory failure and same-address repair can retry`() = runTest(testDispatcher) {

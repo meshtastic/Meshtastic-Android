@@ -198,6 +198,11 @@ class SharedRadioInterfaceService(
     private val _currentDeviceAddressFlow = MutableStateFlow<String?>(radioPrefs.devAddr.value)
     override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
 
+    private val selectionLock = SynchronizedObject()
+
+    /** Set by the first [setDeviceAddress]; from then on this process owns the selection, not the prefs mirror. */
+    private var selectionPublished = false
+
     // Monotonically increasing generation bumped on every transport start (including same-address reconnect). Exposed
     // through [sessionGeneration] so the controller layer can clear connection-session identity at each session
     // boundary instead of only when the selected address changes.
@@ -571,11 +576,12 @@ class SharedRadioInterfaceService(
         // starts a transport. Transport start remains driven exclusively by connect() (initial),
         // setDeviceAddress() (explicit user switch), BLE/network state changes (environment
         // recovery), and liveness restarts (zombie recovery) — see startTransportLocked() callers.
-        // _currentDeviceAddressFlow is a MutableStateFlow (atomic .value), so the unconditional
-        // assignment here is race-free without holding transportMutex; same-address writes are
-        // idempotent no-ops.
+        // It stops at the first setDeviceAddress(): prefs commit asynchronously, so a later emission can carry an
+        // older selection than the one already published.
         radioPrefs.devAddr
-            .onEach { addr -> _currentDeviceAddressFlow.value = addr }
+            .onEach { addr ->
+                synchronized(selectionLock) { if (!selectionPublished) _currentDeviceAddressFlow.value = addr }
+            }
             .catch { Logger.e(it) { "radioPrefs.devAddr address-sync flow crashed" } }
             .launchIn(processLifecycle.coroutineScope)
     }
@@ -834,7 +840,10 @@ class SharedRadioInterfaceService(
 
         Logger.d { "Setting bonded device to ${sanitized?.anonymize}" }
         radioPrefs.setDevAddr(sanitized)
-        _currentDeviceAddressFlow.value = sanitized
+        synchronized(selectionLock) {
+            selectionPublished = true
+            _currentDeviceAddressFlow.value = sanitized
+        }
 
         processLifecycle.coroutineScope.launch {
             transportMutex.withLock {
