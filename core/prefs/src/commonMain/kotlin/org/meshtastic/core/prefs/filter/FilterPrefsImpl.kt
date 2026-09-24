@@ -21,6 +21,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -35,11 +36,22 @@ import org.meshtastic.core.repository.FilterPrefs
 class FilterPrefsImpl(private val dataStore: FilterDataStore, dispatchers: CoroutineDispatchers) : FilterPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
+    // One ordered writer: separate launches on a multi-threaded dispatcher can land out of order.
+    private val filterEnabledWrites = Channel<Boolean>(Channel.CONFLATED)
+
+    init {
+        scope.launch {
+            for (enabled in filterEnabledWrites) {
+                dataStore.edit { prefs -> prefs[KEY_FILTER_ENABLED_PREF] = enabled }
+            }
+        }
+    }
+
     override val filterEnabled: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_FILTER_ENABLED_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setFilterEnabled(enabled: Boolean) {
-        scope.launch { dataStore.edit { prefs -> prefs[KEY_FILTER_ENABLED_PREF] = enabled } }
+        filterEnabledWrites.trySend(enabled)
     }
 
     override val filterWords: StateFlow<Set<String>> =

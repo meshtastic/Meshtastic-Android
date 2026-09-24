@@ -76,6 +76,14 @@ class FilterPrefsTest {
     }
 
     @Test
+    fun `rapid filterEnabled writes persist the last value`() = testScope.runTest {
+        filterPrefs.setFilterEnabled(true)
+        filterPrefs.setFilterEnabled(false)
+        filterPrefs.setFilterEnabled(true)
+        assertTrue(filterPrefs.filterEnabled.value)
+    }
+
+    @Test
     fun `setting filterWords updates preference`() = testScope.runTest {
         val words = setOf("test", "word")
         filterPrefs.setFilterWords(words)
