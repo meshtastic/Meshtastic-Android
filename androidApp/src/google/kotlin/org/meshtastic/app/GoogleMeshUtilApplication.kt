@@ -16,21 +16,12 @@
  */
 package org.meshtastic.app
 
-import androidx.appfunctions.AppFunctionConfiguration
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
 import org.meshtastic.app.ai.appfunctions.AppFunctionStateSync
-import org.meshtastic.app.ai.appfunctions.MeshtasticAppFunctions
 
-/**
- * Google flavor Application subclass that configures App Functions.
- *
- * Registers a custom factory so the AppFunctions runtime can instantiate [MeshtasticAppFunctions] with its Koin-managed
- * dependencies.
- */
-class GoogleMeshUtilApplication :
-    MeshUtilApplication(),
-    AppFunctionConfiguration.Provider {
+/** Google flavor Application subclass that starts the App Functions enabled-state sync. */
+class GoogleMeshUtilApplication : MeshUtilApplication() {
 
     override fun onCreate() {
         super.onCreate()
@@ -40,12 +31,4 @@ class GoogleMeshUtilApplication :
         // Off-main: construction forces the AppFunctionsPrefs subgraph and fires AppSearch binder calls.
         applicationScope.launch { getKoin().get<AppFunctionStateSync>() }
     }
-
-    override val appFunctionConfiguration: AppFunctionConfiguration
-        get() =
-            AppFunctionConfiguration.Builder()
-                .addEnclosingClassFactory(MeshtasticAppFunctions::class.java) {
-                    getKoin().get<MeshtasticAppFunctions>()
-                }
-                .build()
 }
