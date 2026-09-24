@@ -1338,7 +1338,7 @@
     <string name="packet_authenticity_balanced">Balanced — Prefer authenticated</string>
     <string name="packet_authenticity_balanced_summary">Recommended. Reject unsigned downgrade attempts from nodes known to sign.</string>
     <string name="packet_authenticity_compatible">Compatible — Accept unsigned</string>
-    <string name="packet_authenticity_compatible_summary">Authenticate packets when possible, but accept unsigned traffic for maximum compatibility.</string>
+    <string name="packet_authenticity_compatible_summary">Accept unsigned traffic for maximum compatibility. A signature that can be checked and is wrong still drops the packet.</string>
     <string name="packet_authenticity_level">Protection level</string>
     <string name="packet_authenticity_strict">Strict — Require authentication</string>
     <string name="packet_authenticity_strict_confirm">Enable Strict</string>

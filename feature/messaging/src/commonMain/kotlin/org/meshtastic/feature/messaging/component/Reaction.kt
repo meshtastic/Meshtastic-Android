@@ -61,10 +61,12 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.getMessageStatusDetailRes
 import org.meshtastic.core.model.getMessageStatusStringRes
+import org.meshtastic.core.model.isAckProofForged
 import org.meshtastic.core.model.isMessageStatusRetryable
 import org.meshtastic.core.model.util.getShortDateTime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.react
+import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
@@ -72,6 +74,9 @@ import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.ShieldCheck
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.feature.messaging.DeliveryInfo
 
 @Composable
@@ -80,6 +85,7 @@ internal fun ReactionItem(
     emoji: String,
     emojiCount: Int = 1,
     status: MessageStatus = MessageStatus.UNKNOWN,
+    isWarning: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
@@ -104,10 +110,10 @@ internal fun ReactionItem(
         BorderStroke(
             width = 1.dp,
             color =
-            if (isError) {
-                MaterialTheme.colorScheme.error
-            } else {
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            when {
+                isError -> MaterialTheme.colorScheme.error
+                isWarning -> MaterialTheme.colorScheme.StatusYellow
+                else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
             },
         ),
     ) {
@@ -152,6 +158,7 @@ internal fun ReactionRow(
                     emoji = emoji,
                     emojiCount = reactions.size,
                     status = localReaction?.status ?: MessageStatus.RECEIVED,
+                    isWarning = localReaction != null && isAckProofForged(localReaction.ackProofStatus),
                     onClick = { if (canReact) onSendReaction(emoji) },
                     onLongClick = onShowReactions,
                 )
@@ -216,7 +223,13 @@ internal fun ReactionDialog(
     var showStatusDialog by remember { mutableStateOf<Reaction?>(null) }
     showStatusDialog?.let { reaction ->
         val isDirectMessage = NodeAddress.fromString(reaction.to) !is NodeAddress.Broadcast
-        val (title, text) = getMessageStatusStringRes(reaction.status, reaction.routingError, isDirectMessage)
+        val (title, text) =
+            getMessageStatusStringRes(
+                reaction.status,
+                reaction.routingError,
+                isDirectMessage,
+                reaction.ackProofStatus,
+            )
 
         DeliveryInfo(
             title = title,
@@ -276,12 +289,32 @@ internal fun ReactionDialog(
                         } else {
                             reaction.user.long_name
                         }
-                    Text(text = displayName, style = MaterialTheme.typography.titleMedium)
+                    Row(
+                        modifier = Modifier.weight(1f, fill = false),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = displayName,
+                            modifier = Modifier.weight(1f, fill = false),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        // Set only on verified broadcasts, so a DM reaction never shows it.
+                        if (!isLocal && reaction.xeddsaSigned) {
+                            Icon(
+                                imageVector = MeshtasticIcons.ShieldCheck,
+                                contentDescription = stringResource(Res.string.security_signed_verified),
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.StatusGreen,
+                            )
+                        }
+                    }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (isLocal) {
                             MessageStatusButton(
                                 status = reaction.status,
                                 fromLocal = true,
+                                isWarning = isAckProofForged(reaction.ackProofStatus),
                                 onStatusClick = { showStatusDialog = reaction },
                             )
                         }
