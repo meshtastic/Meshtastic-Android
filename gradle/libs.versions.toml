@@ -112,7 +112,7 @@ meshtastic-protobufs = "2.8.0.116-g51028ca-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
-develocity = "4.5.1"
+develocity = "4.6.0"
 foojay-resolver = "1.0.0"
 
 
