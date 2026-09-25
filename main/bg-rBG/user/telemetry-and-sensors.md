@@ -73,7 +73,7 @@ Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, d
 
 ### Weather and Other Readings
 
-| Метрични                                               | Unit                 | Where it appears                                                                                                                                            |
+| Метрични                                               | Единица              | Where it appears                                                                                                                                            |
 | ------------------------------------------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Wind speed                                             | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card |
 | Wind direction, gust, and lull                         | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
@@ -122,12 +122,12 @@ hand-tune them for mesh size. Lengthen them deliberately only to save battery.
 
 Nodes with particulate matter or CO₂ sensors report air quality data:
 
-| Метрични              | Unit  | Описание                     |
-| --------------------- | ----- | ---------------------------- |
-| PM1.0 | µg/m³ | Ultrafine particulate matter |
-| PM2.5 | µg/m³ | Fine particulate matter      |
-| PM10                  | µg/m³ | Coarse particulate matter    |
-| CO₂                   | ppm   | Carbon dioxide concentration |
+| Метрични              | Единица | Описание                     |
+| --------------------- | ------- | ---------------------------- |
+| PM1.0 | µg/m³   | Ultrafine particulate matter |
+| PM2.5 | µg/m³   | Fine particulate matter      |
+| PM10                  | µg/m³   | Coarse particulate matter    |
+| CO₂                   | ppm     | Carbon dioxide concentration |
 
 CO₂ sensors such as the SCD4x also report their own temperature and humidity, which appear alongside the readings above. From PM2.5 history the app additionally derives an **EPA NowCast AQI** value.
 
