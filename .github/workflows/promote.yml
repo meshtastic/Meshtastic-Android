@@ -247,6 +247,7 @@ jobs:
           git push origin ${{ inputs.final_tag }}
 
       - name: Update GitHub Release with gh CLI
+        id: release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -350,9 +351,10 @@ jobs:
           git checkout -b "changelog/v${VERSION}" origin/main
 
           # The full-range notes from the step above, minus the boilerplate.
-          # Missing when that step failed: the section is then stamped empty
-          # rather than skipped, so the gap is visible in the PR.
-          FLAT_NOTES=""
+          # The file is the record whether or not the release edit went
+          # through; the checklist reports that edit. No file means generation
+          # failed, and the section says so instead of stamping empty.
+          FLAT_NOTES="*Release notes were not generated; run the Update Changelog workflow.*"
           if [ -s "$RUNNER_TEMP/notes-raw.md" ]; then
             FLAT_NOTES=$(sed '/^<!-- .* -->/d' "$RUNNER_TEMP/notes-raw.md" \
               | sed '/^## What'\''s Changed$/d' \
@@ -430,6 +432,7 @@ jobs:
           TAG: ${{ inputs.final_tag }}
           REPO: ${{ github.repository }}
           ALREADY_ON_TRACK: ${{ needs.promote-release.outputs.already_on_track }}
+          RELEASE: ${{ steps.release.outcome }}
           NOTES: ${{ steps.notes.outcome }}
           DOCS: ${{ steps.docs.outcome }}
           WINGET: ${{ steps.winget.outcome }}
@@ -448,7 +451,7 @@ jobs:
             else
               row "Play promotion" "done, changelogs uploaded"
             fi
-            row "GitHub release" "https://github.com/${REPO}/releases/tag/${TAG}"
+            row "GitHub release" "$RELEASE - https://github.com/${REPO}/releases/tag/${TAG}"
             row "Docs Release dispatched" "$DOCS"
             if [[ "$CHANNEL" == "production" ]]; then
               row "Release notes rewritten (full range)" "$NOTES"
