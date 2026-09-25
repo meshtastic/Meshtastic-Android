@@ -121,13 +121,6 @@ jobs:
           echo "### Flatpak Sources Summary (${{ matrix.arch }})" >> "$GITHUB_STEP_SUMMARY"
           echo "- URLs captured: $(jq length flatpak-sources.json)" >> "$GITHUB_STEP_SUMMARY"
 
-      # flatpak-builder re-downloads the whole closure anyway; a second copy just eats disk.
-      # The daemon from the previous step still writes into this home, so stop it first.
-      - name: Reclaim the isolated Gradle home
-        run: |
-          ./gradlew -Dgradle.user.home="$RUNNER_TEMP/flatpak-gradle-home" --stop
-          rm -rf "$RUNNER_TEMP/flatpak-gradle-home"
-
       - name: Clone the Flathub packaging repo
         run: |
           git clone --depth 1 --recurse-submodules \
