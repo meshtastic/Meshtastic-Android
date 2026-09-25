@@ -211,19 +211,25 @@ jobs:
       # The listing is the tag's text for every locale plus the screenshots the
       # internal cut rendered and attached to the release. Without the attachment
       # the committed set goes up instead, and the checklist says so.
+      # An absent asset (a tag cut before the render job existed) falls back to
+      # the committed set. A present asset that fails to download is an error,
+      # and the listing step stays out rather than publish the wrong images.
       - name: Fetch the rendered store screenshots
         id: screenshots
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag_name }}
         run: |
-          if gh release download "$TAG" --pattern 'store-listing-screenshots-*.zip' --dir "$RUNNER_TEMP/shots"; then
-            unzip -qo "$RUNNER_TEMP"/shots/store-listing-screenshots-*.zip -d fastlane/metadata/android/en-US/images
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
+          ASSET=$(gh release view "$TAG" --json assets --jq '.assets[].name | select(startswith("store-listing-screenshots-"))' | head -1)
+          if [[ -z "$ASSET" ]]; then
             echo "::warning::No rendered screenshots attached to $TAG; the listing keeps the committed set."
             echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          gh release download "$TAG" --pattern "$ASSET" --dir "$RUNNER_TEMP/shots"
+          unzip -qo "$RUNNER_TEMP/shots/$ASSET" -d fastlane/metadata/android/en-US/images
+          echo "found=true" >> "$GITHUB_OUTPUT"
 
       # A dry run on the testing tracks, so a bad locale or image dimension fails
       # here and not on production, where the edit is committed. Held as "changes
@@ -231,6 +237,7 @@ jobs:
       # for it. Soft-fail: the track promotion above already happened.
       - name: Publish the Play listing
         id: listing
+        if: ${{ steps.screenshots.outcome == 'success' }}
         continue-on-error: true
         env:
           VALIDATE_ONLY: ${{ inputs.channel != 'production' && 'true' || 'false' }}
@@ -468,10 +475,13 @@ jobs:
           VERSION: ${{ inputs.base_version }}
           REPO: ${{ github.repository }}
         run: |
-          if ! gh release download "$TAG" --pattern 'store-listing-screenshots-*.zip' --pattern 'meshtastic-desktop-*.png' --dir "$RUNNER_TEMP/shots"; then
+          ASSET=$(gh release view "$TAG" --json assets --jq '.assets[].name | select(startswith("store-listing-screenshots-"))' | head -1)
+          if [[ -z "$ASSET" ]]; then
             echo "::warning::No rendered screenshots attached to $TAG; the committed set stays."
+            echo "refreshed=none" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          gh release download "$TAG" --pattern "$ASSET" --pattern 'meshtastic-desktop-*.png' --dir "$RUNNER_TEMP/shots"
           git fetch origin main
           BRANCH="automation/store-screenshots-v${VERSION}"
           git checkout -B "$BRANCH" origin/main
@@ -480,6 +490,7 @@ jobs:
           git add fastlane/metadata/android/en-US/images desktopApp/packaging/linux/screenshots
           if git diff --cached --quiet; then
             echo "Committed screenshots already match v${VERSION}."
+            echo "refreshed=match" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
@@ -525,6 +536,8 @@ jobs:
           SCREENSHOTS: ${{ needs.promote-release.outputs.screenshots }}
           LISTING: ${{ needs.promote-release.outputs.listing }}
           SHOTS_PR: ${{ steps.shots_pr.outputs.pr_url }}
+          SHOTS_PR_OUTCOME: ${{ steps.shots_pr.outcome }}
+          SHOTS_REFRESHED: ${{ steps.shots_pr.outputs.refreshed }}
           RELEASE: ${{ steps.release.outcome }}
           NOTES: ${{ steps.notes.outcome }}
           DOCS: ${{ steps.docs.outcome }}
@@ -557,7 +570,13 @@ jobs:
             fi
             row "Docs Release dispatched" "$DOCS"
             if [[ "$CHANNEL" == "production" ]]; then
-              row "Committed screenshots refresh PR" "${SHOTS_PR:-none needed}"
+              if [[ -n "$SHOTS_PR" ]]; then
+                row "Committed screenshots refresh PR" "$SHOTS_PR"
+              elif [[ "$SHOTS_PR_OUTCOME" == "success" ]]; then
+                row "Committed screenshots refresh PR" "none needed (${SHOTS_REFRESHED:-no change})"
+              else
+                row "Committed screenshots refresh PR" "$SHOTS_PR_OUTCOME"
+              fi
               row "Release notes rewritten (full range)" "$NOTES"
               row "CHANGELOG.md stamp" "$STAMP ${STAMP_PR:+- $STAMP_PR}"
               row "winget dispatched" "$WINGET"

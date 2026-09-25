@@ -355,7 +355,7 @@ jobs:
           fi
           # Flathub wants screenshot links from a tag or a commit, never a branch. Ours
           # are the release assets the internal cut attaches, so they name the version.
-          if grep '<image>' "$METAINFO" | grep -qv "/releases/download/v$VERSION/"; then
+          if grep '<image>' "$METAINFO" | grep -qvF "/releases/download/v$VERSION/"; then
             echo "::error file=$METAINFO::Every <image> URL must point at the v$VERSION release assets (releases/download/v$VERSION/...). Update them alongside the VERSION_NAME_BASE bump."
             exit 1
           fi
