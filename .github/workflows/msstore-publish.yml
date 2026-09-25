@@ -46,6 +46,13 @@ jobs:
       # than silently skipping.
       HAS_MSSTORE_CREDS: ${{ secrets.MSSTORE_PRODUCT_ID != '' && 'true' || 'false' }}
     steps:
+      # A skipped submission must not read as a published one.
+      - name: Report an unconfigured Store publish
+        if: env.HAS_MSSTORE_CREDS != 'true'
+        run: |
+          echo "::warning::MSSTORE_PRODUCT_ID is not set; nothing was submitted to the Microsoft Store."
+          echo "- Microsoft Store: skipped, MSSTORE_* secrets not set" >> "$GITHUB_STEP_SUMMARY"
+
       # The Store requires a versioned, immutable installer URL — per-tag
       # GitHub release asset URLs are exactly that. Fails loudly if the
       # release carries no MSI (e.g. the Windows build leg failed) rather

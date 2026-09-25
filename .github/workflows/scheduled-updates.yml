@@ -473,6 +473,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Create Pull Request if changes occurred
+        id: pr
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
@@ -512,3 +513,24 @@ jobs:
             l10n
             firmware
             hardware
+
+      # "Merge when ready": the merge queue takes the PR once its checks pass.
+      # No merge method is passed; the queue sets it. Re-run on every update,
+      # since a fresh push can clear a previous request.
+      - name: Enable auto-merge
+        if: ${{ steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.pull-request-number }}
+        run: |
+          PR_ID=$(gh pr view "$PR_NUMBER" --json id --jq .id)
+          QUERY=$(cat <<'GQL'
+          mutation($id: ID!) {
+            enablePullRequestAutoMerge(input: { pullRequestId: $id }) {
+              pullRequest { number autoMergeRequest { enabledAt } }
+            }
+          }
+          GQL
+          )
+          gh api graphql -f query="$QUERY" -F id="$PR_ID"
