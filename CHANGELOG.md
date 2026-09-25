@@ -8,29 +8,28 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.2-internal.13)
-Changes since [`v2.8.2-open.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2-open.3):
+### Internal (v2.8.2-internal.15)
+Changes since [`v2.8.2-open.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2-open.4):
 
 #### 🏗️ Features
-* feat(settings): hide module settings the node reports compiled out by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7272
-* feat(mqtt): surface a refused subscription from the broker by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7290
-* feat(settings): drive the module gates from the schema by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7296
-* feat(settings): label enum pickers from the schema by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7298
-* feat(settings): read the labels and helper text the schema already has by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7302
-* feat(beacon): honour the advertised frequency slot by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7305
-* feat(settings): emit the enum key prefixes the schema strings use by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7306
-* feat(search): one M3 search bar, settings search, and node status in search by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7303
-* feat(settings): show the unit the schema declares by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7304
+* feat(connections): handle hardware without Bluetooth for Android XR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7318
+* feat(connections): handle hardware without USB host for Android XR by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7322
+* refactor(connections): give Demo Mode its own section by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7326
+* feat(messaging): show whether a delivery receipt was proven by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7284
+* feat(messaging): record signing and ack proof on reactions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7339
 #### 🖥️ Desktop
-* fix(desktop): keep MapLibre's FFI upcall methods through ProGuard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7287
+* refactor(model): parse the selected device address once by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7328
 #### 🛠️ Fixes
-* fix(connection): name the transport in handshake stall reports by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7276
-* fix(mqtt): subscribe with the options the negotiated protocol version allows by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7273
-* fix(analytics): give crash reports the radio that produced them, a real blame frame, and a ceiling by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7274
-* fix(settings): write the external notification duration in milliseconds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7307
-* fix(node): keep the node counts visible while searching by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7311
+* fix(ble): don't arm a BLE transport on hardware without Bluetooth by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7321
+* fix(connections): refuse serial addresses without USB host by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7327
+* fix(service): stop a stale saved address overwriting a newer selection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7329
+* fix(service): stay foreground only for an address that can connect by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7330
+* fix(messaging): clarify the message filter controls by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7324
+* fix(notifications): give bubbles an adaptive icon by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7336
+#### 📝 Other Changes
+* refactor(appfunctions): migrate to AppFunctionServiceEntryPoint by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7340
 
-### Open Beta (v2.8.2-open.3)
+### Open Beta (v2.8.2-open.4)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
 
 #### 🏗️ Features
@@ -74,11 +73,21 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(telemetry): surface lightning, PM status and soil-water metrics by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7237
 * feat(node): rank maker hardware between supported and community in the device badge by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7263
 * feat(settings): gate config fields on the schema's firmware versions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7262
+* feat(settings): hide module settings the node reports compiled out by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7272
+* feat(mqtt): surface a refused subscription from the broker by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7290
+* feat(settings): drive the module gates from the schema by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7296
+* feat(settings): label enum pickers from the schema by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7298
+* feat(settings): read the labels and helper text the schema already has by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7302
+* feat(beacon): honour the advertised frequency slot by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7305
+* feat(settings): emit the enum key prefixes the schema strings use by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7306
+* feat(search): one M3 search bar, settings search, and node status in search by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7303
+* feat(settings): show the unit the schema declares by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7304
 #### 🖥️ Desktop
 * fix(desktop): disable macOS notifications when the process has no app bundle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6876
 * fix(desktop): test the bundle path, not the identifier, before notifying by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6885
 * fix(desktop): use standard SPDX license identifier for RPM packaging by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/7043
 * fix(desktop): pin the Flathub screenshots to a commit that survives the squash by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7243
+* fix(desktop): keep MapLibre's FFI upcall methods through ProGuard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7287
 #### 🛠️ Fixes
 * fix(navigation): clear deep-link replay cache once applied to the backstack by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6796
 * fix(ui): give feedback when a contact or channel import arrives while disconnected by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6798
@@ -139,6 +148,11 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(settings): name config exports after the long name, not the short name by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7248
 * fix(nodes): the direct filter no longer returns MQTT nodes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7256
 * fix(mqtt): TLS switch shows and sets the stored flag for the public broker by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7255
+* fix(connection): name the transport in handshake stall reports by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7276
+* fix(mqtt): subscribe with the options the negotiated protocol version allows by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7273
+* fix(analytics): give crash reports the radio that produced them, a real blame frame, and a ceiling by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7274
+* fix(settings): write the external notification duration in milliseconds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7307
+* fix(node): keep the node counts visible while searching by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7311
 #### 📝 Other Changes
 * refactor(settings): edit the status message on the user screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6951
 * refactor(map): retire the maps-utils workarounds its 5.1 fixes made stale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7046
