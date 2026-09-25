@@ -120,6 +120,8 @@ jobs:
     needs: [ prepare-build-info ]
     outputs:
       already_on_track: ${{ steps.preflight.outputs.already_on_track }}
+      screenshots: ${{ steps.screenshots.outputs.found }}
+      listing: ${{ steps.listing.outcome }}
     env:
       FROM_TRACK: ${{ inputs.from_channel == 'closed' && 'NewAlpha' || (inputs.from_channel == 'open' && 'beta' || 'internal') }}
       TO_TRACK: ${{ inputs.channel == 'closed' && 'NewAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
@@ -205,6 +207,43 @@ jobs:
           PKG=$(grep '^APPLICATION_ID=' config.properties | cut -d'=' -f2)
           bash .workflow-ref/scripts/play-track-preflight.sh \
             fastlane/play-store-credentials.json "$PKG" "$TO_TRACK" "$VERSION_CODE" verify
+
+      # The listing is the tag's text for every locale plus the screenshots the
+      # internal cut rendered and attached to the release. Without the attachment
+      # the committed set goes up instead, and the checklist says so.
+      # An absent asset (a tag cut before the render job existed) falls back to
+      # the committed set. A present asset that fails to download is an error,
+      # and the listing step stays out rather than publish the wrong images.
+      - name: Fetch the rendered store screenshots
+        id: screenshots
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag_name }}
+        run: |
+          ASSET=$(gh release view "$TAG" --json assets --jq '.assets[].name | select(startswith("store-listing-screenshots-"))' | head -1)
+          if [[ -z "$ASSET" ]]; then
+            echo "::warning::No rendered screenshots attached to $TAG; the listing keeps the committed set."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          gh release download "$TAG" --pattern "$ASSET" --dir "$RUNNER_TEMP/shots"
+          unzip -qo "$RUNNER_TEMP/shots/$ASSET" -d fastlane/metadata/android/en-US/images
+          echo "found=true" >> "$GITHUB_OUTPUT"
+
+      # A dry run on the testing tracks, so a bad locale or image dimension fails
+      # here and not on production, where the edit is committed. Held as "changes
+      # not sent for review" either way; Play does not restart a release review
+      # for it. Soft-fail: the track promotion above already happened.
+      - name: Publish the Play listing
+        id: listing
+        if: ${{ steps.screenshots.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          VALIDATE_ONLY: ${{ inputs.channel != 'production' && 'true' || 'false' }}
+        run: |
+          python3 .workflow-ref/scripts/check-store-metadata.py
+          bundle exec fastlane play_listing validate_only:"$VALIDATE_ONLY"
 
       - name: Clean up credentials
         if: always()
@@ -421,6 +460,68 @@ jobs:
               -f description="Skipped — changelog-only PR"
           }
 
+      # F-Droid and IzzyOnDroid read fastlane/ straight from git, so the committed
+      # set follows what production shipped: the rendered screenshots come back from
+      # the release into a bot PR that merges itself. The Flathub metainfo reads the
+      # release assets directly and needs nothing here. Nothing to open when the
+      # files already match.
+      - name: Refresh the committed store screenshots
+        id: shots_pr
+        if: ${{ inputs.channel == 'production' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+          VERSION: ${{ inputs.base_version }}
+          REPO: ${{ github.repository }}
+        run: |
+          ASSET=$(gh release view "$TAG" --json assets --jq '.assets[].name | select(startswith("store-listing-screenshots-"))' | head -1)
+          if [[ -z "$ASSET" ]]; then
+            echo "::warning::No rendered screenshots attached to $TAG; the committed set stays."
+            echo "refreshed=none" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          gh release download "$TAG" --pattern "$ASSET" --pattern 'meshtastic-desktop-*.png' --dir "$RUNNER_TEMP/shots"
+          git fetch origin main
+          BRANCH="automation/store-screenshots-v${VERSION}"
+          git checkout -B "$BRANCH" origin/main
+          unzip -qo "$RUNNER_TEMP"/shots/store-listing-screenshots-*.zip -d fastlane/metadata/android/en-US/images
+          cp "$RUNNER_TEMP"/shots/meshtastic-desktop-*.png desktopApp/packaging/linux/screenshots/
+          git add fastlane/metadata/android/en-US/images desktopApp/packaging/linux/screenshots
+          if git diff --cached --quiet; then
+            echo "Committed screenshots already match v${VERSION}."
+            echo "refreshed=match" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(store): refresh the committed screenshots from v${VERSION}"
+          git push origin "$BRANCH" --force
+          PR_URL=$(gh pr create \
+            --title "chore(store): refresh the committed screenshots from v${VERSION}" \
+            --body "The screenshots rendered for the v${VERSION} release, so the fastlane tree F-Droid reads matches what shipped." \
+            --head "$BRANCH" \
+            --base main \
+            --label "automation" \
+            --label "skip-changelog")
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          # GITHUB_TOKEN pushes start no workflows: post the status the queue
+          # requires, as the changelog stamp does, then let the queue take it.
+          gh api "repos/${REPO}/statuses/$(git rev-parse HEAD)" \
+            -f state="success" \
+            -f context="Check Workflow Status" \
+            -f description="Skipped — screenshot-only PR"
+          PR_ID=$(gh pr view "$PR_URL" --json id --jq .id)
+          QUERY=$(cat <<'GQL'
+          mutation($id: ID!) {
+            enablePullRequestAutoMerge(input: { pullRequestId: $id }) {
+              pullRequest { number autoMergeRequest { enabledAt } }
+            }
+          }
+          GQL
+          )
+          gh api graphql -f query="$QUERY" -F id="$PR_ID" || gh pr merge "$PR_URL"
+
       # One place to read what this promotion did, what it dispatched, and what
       # is still done by hand. The store dispatches report the dispatch only;
       # each store workflow skips inside itself until its secrets exist. The
@@ -432,6 +533,11 @@ jobs:
           TAG: ${{ inputs.final_tag }}
           REPO: ${{ github.repository }}
           ALREADY_ON_TRACK: ${{ needs.promote-release.outputs.already_on_track }}
+          SCREENSHOTS: ${{ needs.promote-release.outputs.screenshots }}
+          LISTING: ${{ needs.promote-release.outputs.listing }}
+          SHOTS_PR: ${{ steps.shots_pr.outputs.pr_url }}
+          SHOTS_PR_OUTCOME: ${{ steps.shots_pr.outcome }}
+          SHOTS_REFRESHED: ${{ steps.shots_pr.outputs.refreshed }}
           RELEASE: ${{ steps.release.outcome }}
           NOTES: ${{ steps.notes.outcome }}
           DOCS: ${{ steps.docs.outcome }}
@@ -452,8 +558,25 @@ jobs:
               row "Play promotion" "done, changelogs uploaded"
             fi
             row "GitHub release" "$RELEASE - https://github.com/${REPO}/releases/tag/${TAG}"
+            if [[ "$SCREENSHOTS" == "true" ]]; then
+              row "Store screenshots" "rendered set from the release"
+            else
+              row "Store screenshots" "none attached, committed set used"
+            fi
+            if [[ "$CHANNEL" == "production" ]]; then
+              row "Play listing published" "$LISTING"
+            else
+              row "Play listing validated (dry run)" "$LISTING"
+            fi
             row "Docs Release dispatched" "$DOCS"
             if [[ "$CHANNEL" == "production" ]]; then
+              if [[ -n "$SHOTS_PR" ]]; then
+                row "Committed screenshots refresh PR" "$SHOTS_PR"
+              elif [[ "$SHOTS_PR_OUTCOME" == "success" ]]; then
+                row "Committed screenshots refresh PR" "none needed (${SHOTS_REFRESHED:-no change})"
+              else
+                row "Committed screenshots refresh PR" "$SHOTS_PR_OUTCOME"
+              fi
               row "Release notes rewritten (full range)" "$NOTES"
               row "CHANGELOG.md stamp" "$STAMP ${STAMP_PR:+- $STAMP_PR}"
               row "winget dispatched" "$WINGET"

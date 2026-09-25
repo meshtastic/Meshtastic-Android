@@ -1,10 +1,11 @@
 name: Play Store Listing
 
 # Uploads fastlane/metadata/android - every locale's title, descriptions,
-# feature graphic, icon and screenshots - to the Google Play listing. Manual
-# only: a listing commit is a Play submission, and a submission sent for review
-# cancels and restarts any release review in flight. Nothing here touches a
-# build or a track.
+# feature graphic, icon and screenshots - to the Google Play listing from the
+# committed tree. Every promotion does this from the tag (promote.yml), so this
+# is the hand path for a listing change between releases. A listing commit is a
+# Play submission, and a submission sent for review cancels and restarts any
+# release review in flight. Nothing here touches a build or a track.
 #
 # The default is a dry run. Play validates the whole edit (unknown locales,
 # overlength text, bad image dimensions) and discards it; tick `publish` to

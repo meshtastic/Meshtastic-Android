@@ -494,8 +494,92 @@ jobs:
         with:
           subject-path: flatpak-sources.json
 
+  # The store-listing screenshots are an output of the tag, not a hand shot: rendered
+  # on the JVM with no display, attached to the release, and published to the Play
+  # listing by the production promotion. A render failure must not lose the release
+  # or its tag: the job cannot fail the run (the caller deletes the tag on a failed
+  # run), github-release does not gate on it, and a failed render attaches the
+  # committed set in its place.
+  store-screenshots:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    continue-on-error: true
+    needs: [prepare-build-info]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag_name }}
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      # The module pins the JetBrains toolchain, as desktopApp does.
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          cache_read_only: 'true'
+          install_jetbrains_jdk: 'true'
+
+      # The map renders through Vulkan; lavapipe is the software device.
+      - name: Install a Vulkan software device
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libvulkan1 mesa-vulkan-drivers
+
+      # The committed set is what gets attached when this fails: the metainfo
+      # names these assets, so a release without them has no Flathub screenshots.
+      - name: Render the store screenshots
+        id: render
+        continue-on-error: true
+        run: ./gradlew :marketing-screenshots:updateMarketingScreenshots
+
+      # One zip for the Play listing (the fastlane images tree), the desktop set as
+      # loose PNGs so metainfo.xml can point at them by name. A render that died
+      # part way leaves a mixed tree, so the fallback restores the committed files
+      # before packaging.
+      - name: Package the screenshots
+        id: package
+        continue-on-error: true
+        env:
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          RENDERED: ${{ steps.render.outcome }}
+        run: |
+          echo "### Store screenshots" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$RENDERED" == "success" ]]; then
+            CHANGED=$(git status --porcelain -- fastlane/metadata/android/en-US/images desktopApp/packaging/linux/screenshots | wc -l)
+            echo "- Rendered from the tag; ${CHANGED} file(s) differ from the committed set." >> "$GITHUB_STEP_SUMMARY"
+          else
+            git checkout -- fastlane/metadata/android/en-US/images desktopApp/packaging/linux/screenshots
+            git clean -fdq -- fastlane/metadata/android/en-US/images desktopApp/packaging/linux/screenshots
+            echo "::warning::Store screenshots did not render; the committed set is attached instead."
+            echo "- Render failed; the committed set is attached instead." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          mkdir -p out
+          (cd fastlane/metadata/android/en-US/images && zip -qr "$GITHUB_WORKSPACE/out/store-listing-screenshots-${VERSION_CODE}.zip" .)
+          cp desktopApp/packaging/linux/screenshots/*.png out/
+
+      - name: Upload store screenshots artifact
+        if: ${{ steps.package.outcome == 'success' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: store-screenshots
+          path: out/*
+          retention-days: 1
+
+  # Gates on the build jobs by name: store-screenshots is in needs only so its
+  # artifact exists before the download below, and its result is not consulted.
   github-release:
-    if: ${{ !cancelled() && !failure() }}
+    if: >-
+      ${{ !cancelled()
+        && needs.prepare-build-info.result == 'success'
+        && needs.release-google.result == 'success'
+        && needs.release-fdroid.result == 'success'
+        && (needs.release-desktop.result == 'success' || !inputs.build_desktop)
+        && (needs.release-flatpak-src.result == 'success' || !inputs.build_flatpak_src) }}
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     needs:
@@ -504,6 +588,7 @@ jobs:
       - release-fdroid
       - release-desktop
       - release-flatpak-src
+      - store-screenshots
     permissions:
       contents: write
       id-token: write
