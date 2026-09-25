@@ -96,9 +96,9 @@
   </screenshots>
 
   <releases>
-    <release version="2.8.2" date="2026-08-21">
+    <release version="2.8.2" date="2026-09-25">
       <description>
-        <p>Stability and reliability fixes.</p>
+        <p>Messaging: swipe to reply, double-tap reactions, per-contact drafts, pinned and unread conversations, bubbles, proven delivery receipts. A Units setting. One search bar for nodes, messages, settings and docs. Settings take labels, units and firmware gates from the schema. Map layer opacity and role filters. Lightning, particulate and soil telemetry. Tap phones to share a contact or channel. KML import works again.</p>
       </description>
     </release>
     <release version="2.8.1" date="2026-08-02">
