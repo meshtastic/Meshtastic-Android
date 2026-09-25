@@ -1,0 +1,257 @@
+<h1 id="desktop-app">Desktop App</h1>
+
+<p>This page covers installing the Meshtastic desktop app, connecting a radio, and how it differs from Android. The desktop app shares its core codebase with Android via Kotlin Multiplatform, so most features work identically across Linux, macOS, and Windows.</p>
+
+<h2 id="installation">Installation</h2>
+
+<h3 id="linux">Linux</h3>
+
+<ul>
+  <li>Download the <code class="language-plaintext highlighter-rouge">.deb</code>, <code class="language-plaintext highlighter-rouge">.rpm</code>, or <code class="language-plaintext highlighter-rouge">.AppImage</code> package from the <a href="https://github.com/meshtastic/Meshtastic-Android/releases">releases page</a></li>
+  <li>Or install from Flathub: <code class="language-plaintext highlighter-rouge">flatpak install flathub org.meshtastic.MeshtasticDesktop</code></li>
+  <li>Or build from source using <code class="language-plaintext highlighter-rouge">./gradlew :desktopApp:run</code></li>
+</ul>
+
+<h3 id="macos">macOS</h3>
+
+<ul>
+  <li>Download the <code class="language-plaintext highlighter-rouge">.dmg</code> package from the <a href="https://github.com/meshtastic/Meshtastic-Android/releases">releases page</a></li>
+  <li>Or build from source</li>
+</ul>
+
+<h3 id="windows">Windows</h3>
+
+<ul>
+  <li>Download the <code class="language-plaintext highlighter-rouge">.msi</code> or <code class="language-plaintext highlighter-rouge">.exe</code> installer from the <a href="https://github.com/meshtastic/Meshtastic-Android/releases">releases page</a></li>
+  <li>Or build from source</li>
+</ul>
+
+<h2 id="connecting-your-radio">Connecting Your Radio</h2>
+
+<h3 id="usb-serial-primary">USB Serial (Primary)</h3>
+
+<p>The most reliable connection method on desktop:</p>
+
+<p>Connect your radio via USB. The app detects the serial port automatically; if it doesn’t, select the port from the Connect menu.</p>
+
+<h3 id="tcpip">TCP/IP</h3>
+
+<p>For network-connected radios:</p>
+
+<ol>
+  <li>Enter the radio’s IP address and port (default: 4403).</li>
+  <li>Click <strong>Connect</strong>.</li>
+</ol>
+
+<h3 id="bluetooth-ble">Bluetooth (BLE)</h3>
+
+<p>Bluetooth Low Energy is supported on desktop via the <a href="https://github.com/JuulLabs/kable">Kable</a> library:</p>
+
+<ol>
+  <li>Ensure your system has a Bluetooth adapter. The app scans for nearby Meshtastic radios automatically.</li>
+  <li>Select your radio from the Connect screen.</li>
+</ol>
+
+<h2 id="feature-parity">Feature Parity</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Android</th>
+      <th>Desktop</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Messaging</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>Full parity</td>
+    </tr>
+    <tr>
+      <td>Node List</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>Full parity</td>
+    </tr>
+    <tr>
+      <td>Carte</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>Interactive MapLibre map, with base map and overlay pickers and custom tile sources. Offline terrain (hillshade and contours) can be downloaded; offline base-map packs and local <code class="language-plaintext highlighter-rouge">.mbtiles</code> archives cannot</td>
+    </tr>
+    <tr>
+      <td>Map layers (<code class="language-plaintext highlighter-rouge">.kml</code>/<code class="language-plaintext highlighter-rouge">.kmz</code>/GeoJSON)</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>Same layer store and sheet as Android; imported files draw on the desktop map</td>
+    </tr>
+    <tr>
+      <td>Site Planner</td>
+      <td>✓</td>
+      <td>✓*</td>
+      <td>*Opens in your browser on desktop; the estimate is not drawn on the desktop map</td>
+    </tr>
+    <tr>
+      <td>Réglages</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>Full parity</td>
+    </tr>
+    <tr>
+      <td>Bluetooth (BLE)</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>Via Kable on desktop</td>
+    </tr>
+    <tr>
+      <td>Mise à jour du firmware</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>In-app USB, BLE, and Wi-Fi (ESP32) update work the same as Android. The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only</td>
+    </tr>
+    <tr>
+      <td>Notifications</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>Native OS notifications</td>
+    </tr>
+    <tr>
+      <td>Widgets</td>
+      <td>✓</td>
+      <td>✗</td>
+      <td>Android-only</td>
+    </tr>
+    <tr>
+      <td>AI Assistant (Chirpy)</td>
+      <td>✓*</td>
+      <td>✗</td>
+      <td>Google flavor Android only</td>
+    </tr>
+    <tr>
+      <td>App Functions (system AI)</td>
+      <td>✓†</td>
+      <td>✗</td>
+      <td>Google flavor Android only</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>*Chirpy AI requires Android 14+ on Google flavor builds with supported hardware.</p>
+
+<p>†App Functions exposes app actions to the Android system AI on Google flavor builds. See <a href="app-functions">App Functions</a>.</p>
+
+<h2 id="ui-differences">UI Differences</h2>
+
+<p>The desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.</p>
+
+<h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
+
+<p>Shortcuts use <strong>⌘</strong> (Command) on macOS and <strong>Ctrl</strong> on Windows and Linux. (The Super / Windows key is not bound.)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Shortcut</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>⌘/Ctrl+Q</strong></td>
+      <td>Quit the app</td>
+    </tr>
+    <tr>
+      <td><strong>⌘/Ctrl+,</strong></td>
+      <td>Open Settings</td>
+    </tr>
+    <tr>
+      <td><strong>⌘/Ctrl+1</strong></td>
+      <td>Switch to Messages tab</td>
+    </tr>
+    <tr>
+      <td><strong>⌘/Ctrl+2</strong></td>
+      <td>Switch to Nodes tab</td>
+    </tr>
+    <tr>
+      <td><strong>⌘/Ctrl+3</strong></td>
+      <td>Switch to Map tab</td>
+    </tr>
+    <tr>
+      <td><strong>⌘/Ctrl+4</strong></td>
+      <td>Switch to Connect tab</td>
+    </tr>
+    <tr>
+      <td><strong>⌘/Ctrl+/</strong></td>
+      <td>Open About</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="window--system-tray">Window &amp; System Tray</h3>
+
+<ul>
+  <li><strong>Window resizing</strong> — responsive layout adapts to window dimensions</li>
+  <li><strong>System tray</strong> — closing the window minimizes to the system tray for background mesh operation. On a desktop environment with no tray, there is nowhere to minimize to, so closing quits the app instead</li>
+  <li><strong>Tray menu</strong> — right-click the tray icon to show window or quit</li>
+  <li><strong>Mouse interaction</strong> — hover states and standard desktop navigation</li>
+</ul>
+
+<h3 id="notification-preferences">Notification Preferences</h3>
+
+<p>The desktop app provides in-app toggles for controlling which notifications are shown. Find them in the <strong>App Notifications</strong> section of the Settings screen: <strong>Direct message notifications</strong>, <strong>New node notifications</strong>, and <strong>Low battery notifications</strong>.</p>
+
+<h2 id="built-in-documentation-browser">Built-in Documentation Browser</h2>
+
+<p>The desktop app includes a built-in documentation browser for quick access to help content without leaving the app.</p>
+
+<p><img src="../../assets/screenshots/docs-browser_toc.png" alt="Docs browser with table of contents" /></p>
+
+<p>The browser supports full-text search across all documentation:</p>
+
+<p><img src="../../assets/screenshots/docs-browser_search.png" alt="Searching the docs browser" /></p>
+
+<p>Individual doc pages render with full formatting:</p>
+
+<p><img src="../../assets/screenshots/docs-browser_page.png" alt="A documentation page" /></p>
+
+<h2 id="building-from-source">Building from Source</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/meshtastic/Meshtastic-Android.git
+<span class="nb">cd </span>Meshtastic-Android
+./gradlew :desktopApp:run
+</code></pre></div></div>
+
+<p>Requirements:</p>
+
+<ul>
+  <li>JDK 25 (Gradle can provision the toolchain itself via foojay)</li>
+  <li>No Android SDK required for desktop-only builds</li>
+</ul>
+
+<h2 id="known-limitations">Known Limitations</h2>
+
+<ul>
+  <li>Offline base-map downloads and local <code class="language-plaintext highlighter-rouge">.mbtiles</code> archives are not available on desktop. Offline terrain is — see <a href="map-and-waypoints">Map &amp; Waypoints</a>.</li>
+  <li><code class="language-plaintext highlighter-rouge">.kml</code>/<code class="language-plaintext highlighter-rouge">.kmz</code>/GeoJSON layer import works — see
+<a href="map-and-waypoints#map-layers">Map &amp; Waypoints</a>. Site Planner opens in your browser
+rather than in the app; to bring its coverage estimate onto the map, click the transmitter pin
+in the browser and use the planner’s GeoJSON export, then add the file as a layer — not the KML
+export, which is a ground-overlay image this map cannot draw. Custom network tile sources work
+too — see <a href="map-and-waypoints#adding-your-own-tile-source">Map &amp; Waypoints</a></li>
+  <li>The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
+desktop app does not offer it. Use the <a href="https://flasher.meshtastic.org">Web Flasher</a> instead</li>
+  <li>Some Android-specific features (widgets, specific notification channels) are unavailable</li>
+  <li>Performance may vary on low-spec hardware running Compose Desktop</li>
+  <li>BLE bonding is not yet supported on desktop (pairing works without bonding)</li>
+</ul>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="connections">Connections</a> — connection methods overview</li>
+  <li><a href="firmware">Firmware Updates</a> — in-app USB, BLE, and Wi-Fi update all work the same as on Android</li>
+  <li><a href="map-and-waypoints">Map &amp; Waypoints</a> — base maps, layers, custom tile sources, and what the desktop map does not do</li>
+</ul>

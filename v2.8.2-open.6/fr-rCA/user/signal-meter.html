@@ -1,0 +1,96 @@
+<h1 id="how-the-meshtastic-signal-meter-works">How the Meshtastic Signal Meter Works</h1>
+
+<p>The Meshtastic signal meter — the bars or status color next to a node — is calculated differently from the bars on a cell phone or Wi-Fi router. This page explains what it measures and why the same reading can mean something different on another preset.</p>
+
+<h2 id="rssi-and-snr">RSSI and SNR</h2>
+
+<p>Every time the LoRa radio receives a message, it reports two measurements:</p>
+
+<ul>
+  <li><strong>RSSI (Received Signal Strength Indicator)</strong> — the raw power hitting the antenna.</li>
+  <li><strong>SNR (Signal-to-Noise Ratio)</strong> — how far the signal stands above the background noise.</li>
+</ul>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Think of RSSI as how loud a friend is talking and SNR as how easily you can pick their voice out of the noise in the room. A friend shouting at a rock concert can be loud (high RSSI) yet unintelligible (bad SNR), while a whisper in a quiet library is faint (low RSSI) yet perfectly clear (great SNR).</p>
+</blockquote>
+
+<h2 id="decoding-below-the-noise-floor">Decoding Below the Noise Floor</h2>
+
+<p>Standard radios such as FM or Wi-Fi lose a signal to static once the background noise is louder than it (a negative SNR). LoRa’s spread spectrum modulation lets the radio pull a signal out of the noise even when the noise is louder, so negative SNR values are common and expected in Meshtastic — for example, −10 dB means the signal is 10 decibels weaker than the background noise.</p>
+
+<p>Each modem preset has an SNR limit: the lowest SNR at which that preset can still decode a message. Slower presets tolerate a weaker, noisier signal (a more negative limit, longer range); faster presets need a stronger signal (a less negative limit, shorter range).</p>
+
+<h2 id="rating-signal-quality">Rating Signal Quality</h2>
+
+<p>The app rates signal quality (None, Bad, Fair, or Good) from SNR relative to the active preset’s SNR limit. When RSSI and a noise-floor reading are both available, it also rates the difference between them against that limit and uses the worse rating. Otherwise, it uses SNR alone.</p>
+
+<p>Because the rating is relative to the preset, the same SNR rates differently on different presets. An SNR of −16 dB rates Good on Long Fast (SNR limit −17.5 dB) but None on Short Fast (SNR limit −7.5 dB). Let <code class="language-plaintext highlighter-rouge">limit</code> be the active preset’s SNR limit:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Level</th>
+      <th>Bars</th>
+      <th>Criteria</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bon</td>
+      <td>Full</td>
+      <td>SNR above <code class="language-plaintext highlighter-rouge">limit</code></td>
+      <td>Comfortably above the demodulation floor — a healthy connection.</td>
+    </tr>
+    <tr>
+      <td>Passable</td>
+      <td>3</td>
+      <td>less than 5.5 dB below <code class="language-plaintext highlighter-rouge">limit</code></td>
+      <td>Decodable, but approaching the floor.</td>
+    </tr>
+    <tr>
+      <td>Mauvais</td>
+      <td>2</td>
+      <td>5.5 dB to 7.5 dB below <code class="language-plaintext highlighter-rouge">limit</code></td>
+      <td>At the edge of what the preset can recover.</td>
+    </tr>
+    <tr>
+      <td>Aucun</td>
+      <td>1</td>
+      <td>more than 7.5 dB below <code class="language-plaintext highlighter-rouge">limit</code></td>
+      <td>Far below the preset’s floor; further packets from this node are likely to be lost.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The icon never goes blank, so count the bars carefully: a single bar means None, not a weak but usable link, and Good is a solid wedge rather than a set of bars. A gray three-bar icon labeled Unknown is a different state again — the packet carried no SNR measurement at all, which is not the same as measuring one and finding it too weak.</p>
+
+<blockquote>
+  <p>ℹ️ <strong>Note:</strong> Traceroute and neighbor-info SNR colors use the active preset’s limits too. RSSI text has separate strength colors: green above −115 dBm, yellow above −120 dBm, orange above −126 dBm, and red at or below −126 dBm.</p>
+</blockquote>
+
+<h2 id="diagnosing-local-interference">Diagnosing Local Interference</h2>
+
+<p>A great RSSI paired with a one- or two-bar rating (None or Bad) points to local interference, not distance. A cheap power supply, a noisy computer, or a nearby transmitter can create enough static to drown out an otherwise strong signal.</p>
+
+<h2 id="where-signal-information-appears">Where Signal Information Appears</h2>
+
+<p>In the app, signal data appears in several places:</p>
+
+<ul>
+  <li><strong>Node list</strong> — a signal-bars icon, shown only for nodes your radio heard directly. A node reached through a relay shows its hop count instead, because the SNR your radio measured describes the last hop, not the whole path</li>
+  <li><strong>Node detail</strong> — SNR, RSSI, and the quality word in the <strong>Details</strong> card at the top of the screen</li>
+  <li><strong>Traceroute</strong> — per-hop signal quality for each relay node</li>
+  <li><strong>Signal Quality</strong> — historical SNR and RSSI data in the metrics charts</li>
+</ul>
+
+<p><img src="../../assets/screenshots/nodes_signal_info.png" alt="Node list entry showing a Good signal rating: 12.5 dB SNR, −42 dBm RSSI, and the green signal-strength icon" /></p>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="nodes">Nodes</a> — where signal bars appear in the node list</li>
+  <li><a href="node-metrics">Node Metrics</a> — SNR/RSSI history and the per-node signal quality reference</li>
+  <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — modem presets and their SNR limits</li>
+</ul>
