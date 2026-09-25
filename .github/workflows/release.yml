@@ -497,11 +497,13 @@ jobs:
   # The store-listing screenshots are an output of the tag, not a hand shot: rendered
   # on the JVM with no display, attached to the release, and published to the Play
   # listing by the production promotion. A render failure must not lose the release
-  # or its tag: every step here soft-fails, a failed render attaches the committed
-  # set in its place, and github-release goes ahead either way.
+  # or its tag: the job cannot fail the run (the caller deletes the tag on a failed
+  # run), github-release does not gate on it, and a failed render attaches the
+  # committed set in its place.
   store-screenshots:
     runs-on: ubuntu-26.04
     timeout-minutes: 30
+    continue-on-error: true
     needs: [prepare-build-info]
     steps:
       - name: Checkout code
@@ -568,8 +570,16 @@ jobs:
           path: out/*
           retention-days: 1
 
+  # Gates on the build jobs by name: store-screenshots is in needs only so its
+  # artifact exists before the download below, and its result is not consulted.
   github-release:
-    if: ${{ !cancelled() && !failure() }}
+    if: >-
+      ${{ !cancelled()
+        && needs.prepare-build-info.result == 'success'
+        && needs.release-google.result == 'success'
+        && needs.release-fdroid.result == 'success'
+        && (needs.release-desktop.result == 'success' || !inputs.build_desktop)
+        && (needs.release-flatpak-src.result == 'success' || !inputs.build_flatpak_src) }}
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     needs:
