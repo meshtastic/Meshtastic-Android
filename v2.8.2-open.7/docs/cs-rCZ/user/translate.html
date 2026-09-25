@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="cs-rCZ" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Překlad aplikace</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="translate" data-locale="cs-rCZ">
+<pre class="markdown-content"># Překlad aplikace
+
+Aplikace a její dokumentace v aplikaci se překládají na Crowdin – tato stránka ukazuje, jak přispívat k překladům. Aplikace používá [Crowdin](https://crowdin.com/) ke správě komunitních překladů uživatelského rozhraní i dokumentace přímo v aplikaci.
+
+## Co se překládá
+
+ Zdroj                        | Umístění zdroje                                                     | Poznámka                                                        |
+ ---------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------- |
+ UI řetězce                   | `core/resources/src/commonMain/composeResources/values/strings.xml` | Tlačítka, popisky, zprávy a veškerý text zobrazený uživateli    |
+ Stránky uživatelské příručky | `docs/en/user/*.md`                                                 | Dokumentace v aplikaci zobrazená v části Nápověda a dokumentace |
+ Fastlane metadata            | `fastlane/metadata/android/en-US/`                                  | Google Play listing title, description, and changelogs          |
+
+&gt; ℹ️ **Poznámka:** Stránky Vývojářské příručky jsou pouze v angličtině. Dokumentace zaměřená na kód pro přispěvatele se nepřekládá.
+
+## Jak přispět
+
+1. **Navštivte projekt na Crowdinu.** Otevřete [Meshtastic Android Crowdin project](https://crowdin.com/project/meshtastic-android) a přihlaste se nebo si zdarma vytvořte účet.
+2. **Vyberte svůj jazyk.** Vyberte některý z dostupných jazyků nebo požádejte o přidání nového jazyka založením [GitHub problému](https://github.com/meshtastic/Meshtastic-Android/issues/new).
+3. **Přeložte řetězce.** Crowdin zobrazuje vlevo anglický zdrojový text a vpravo váš překlad. Přeložte každý řetězec a uložte ho.
+4. **Zkontrolujte kontext.** Mnoho řetězců obsahuje snímky obrazovky nebo poznámky ke kontextu – podívejte se na ně, abyste zjistili, kde se text v aplikaci zobrazuje. Naplánovaná úloha stáhne schválené překlady z Crowdin a vytvoří pull request. Překlady se dostanou do aplikace, jakmile jej správce sloučí a vyjde nová verze.
+
+&gt; 💡 **Tip:** Překlady udržujte krátké. UI řetězce se často zobrazují na tlačítkách, štítcích nebo v úzkých sloupcích. Pokud je překlad výrazně delší než anglický originál, zvažte jeho zkrácení, pokud zůstane význam jasný.
+
+## Přidání nového jazyka
+
+Pokud váš jazyk ještě není na Crowdinu uveden:
+
+1. Otevřete problém na [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new) s žádostí o přidání nového jazyka.
+2. Správce přidá jazyk do Crowdinu a nastaví `crowdin.yml`.
+3. Jakmile bude přidán, můžete začít překládat.
+
+## Jak jsou překlady uspořádány
+
+The Android app uses **Compose Multiplatform resources** for all user-visible strings:
+
+```text
+core/resources/src/commonMain/composeResources/
+├── values/              ← English (default)
+│   └── strings.xml
+├── values-de/           ← German
+│   └── strings.xml
+├── values-fr/           ← French
+│   └── strings.xml
+└── ...
+```
+
+In-app documentation follows a similar pattern under `docs/`:
+
+```text
+docs/
+├── en/user/             ← English source (default)
+│   ├── onboarding.md
+│   └── ...
+├── fr-rFR/user/         ← French (France)
+│   ├── onboarding.md
+│   └── ...
+├── de-rDE/user/         ← German (Germany)
+│   └── ...
+└── ...
+```
+
+Doc locale folders use Android locale qualifiers, either `{lang}` or `{lang}-r{REGION}` (for example `fr`, `fr-rFR`, `de-rDE`, `ja-rJP`). The `values-*` folders for app strings use bare language codes instead (`values-fr`, `values-de`, `values-ja`), because `crowdin.yml` writes strings with `%two_letters_code%` and doc pages with `%android_code%`. The two sets do not line up one-to-one.
+
+The app automatically selects the correct locale based on your phone's **Language &amp; Region** settings.
+
+A page that came from Crowdin is labeled **Community translated** under its title in the app. If a page has no Crowdin translation for your language yet, the Google-flavor Android build machine-translates the English source on the fly and labels it **Auto-translated** instead; F-Droid and desktop builds show the English page. Your Crowdin translation replaces the machine one as soon as it lands.
+
+## Pokyny pro překlad
+
+- Technické výrazy jako „LoRa“, „MQTT“, „BLE“, „TAK“, „SNR“ nebo „RSSI“ nepřekládejte – jsou univerzální.
+- \*\*Zástupné symboly ponechte beze změny. \*\* Řetězce jako `%1$s` nebo `%d`se doplňují za běhu aplikace. Neodstraňujte je ani neměňte jejich pořadí, pokud to nevyžaduje gramatika vašeho jazyka.
+- **Dodržujte tón komunikace.** Aplikace používá přátelský a přímý styl. Vyhněte se příliš formálnímu jazyku.
+- **Pokud můžete, překlad otestujte.** Přepněte jazyk telefonu a otevřete aplikaci, abyste viděli, jak překlady vypadají v kontextu.
+
+## Máte dotazy?
+
+Pokud máte dotazy ke kontextu konkrétního řetězce nebo potřebujete pomoct se začátky, založte diskuzi na stránce [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions).
+
+Děkujeme, že pomáháte rozšiřovat Meshtastic.
+
+## Související témata
+
+- [Units &amp; Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
+- [Help &amp; Documentation](help-and-docs) — the in-app docs browser these pages are published to
+- [Onboarding](onboarding) — where a new user first meets the translated strings
+</pre>
+</body>
+</html>
