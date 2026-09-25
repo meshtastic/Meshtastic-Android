@@ -353,6 +353,12 @@ jobs:
             echo "::error file=$METAINFO::Missing <release version=\"$VERSION\"> entry. Add it alongside the VERSION_NAME_BASE bump."
             exit 1
           fi
+          # Flathub wants screenshot links from a tag or a commit, never a branch. Ours
+          # are the release assets the internal cut attaches, so they name the version.
+          if grep '<image>' "$METAINFO" | grep -qv "/releases/download/v$VERSION/"; then
+            echo "::error file=$METAINFO::Every <image> URL must point at the v$VERSION release assets (releases/download/v$VERSION/...). Update them alongside the VERSION_NAME_BASE bump."
+            exit 1
+          fi
 
       # Flathub runs this exact command (flatpak-builder-lint checks/metainfo.py) and turns any
       # non-zero exit into appstream-failed-validation at publish time. Nothing here ran it, so a

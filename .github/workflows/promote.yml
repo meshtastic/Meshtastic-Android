@@ -455,8 +455,9 @@ jobs:
 
       # F-Droid and IzzyOnDroid read fastlane/ straight from git, so the committed
       # set follows what production shipped: the rendered screenshots come back from
-      # the release into a bot PR that merges itself. Nothing to open when they
-      # already match.
+      # the release into a bot PR that merges itself. The Flathub metainfo reads the
+      # release assets directly and needs nothing here. Nothing to open when the
+      # files already match.
       - name: Refresh the committed store screenshots
         id: shots_pr
         if: ${{ inputs.channel == 'production' }}
