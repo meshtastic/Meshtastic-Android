@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja-rJP" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ファームウェア更新</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="firmware" data-locale="ja-rJP">
+<pre class="markdown-content"># ファームウェア更新
+
+新機能、バグ修正、セキュリティ改善のために、Meshtastic 無線機を最新のファームウェアに保ちましょう。
+
+## 更新を確認する
+
+1. 接続中の無線機の設定を開き、「**詳細設定**」で「**ファームウェア更新**」をタップします。 The entry appears only for OTA-capable radios.
+2. アプリが、利用可能なファームウェアバージョンを確認します。
+3. 利用可能な更新には、バージョン番号と変更履歴の概要が表示されます。
+
+## 更新方法
+
+### Bluetooth 経由の OTA（無線更新）
+
+Android ユーザーにとって最も一般的な更新方法です：
+
+&gt; ⚠️ **Warning:** Interrupting a firmware update can leave the radio unable to boot. Keep the phone nearby and both devices powered until the update completes.
+
+1. 無線機が Bluetooth で接続されていることを確認します。
+2. ファームウェア更新画面に移動します。
+3. 希望するファームウェアバージョンを選択します。
+4. Tap **Update**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
+5. 更新が完了するまで待ちます。更新中は**接続を切断しないでください**。
+
+![ファームウェアの更新を確認中](../../assets/screenshots/firmware_checking.png)
+
+#### Erase device during update
+
+Where the app offers it, an **Erase device during update** checkbox appears next to the update button. It is a per-update opt-in and is never remembered.
+
+ Method          | What erasing does                                                                                                                      |
+ --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+ BLE / Wi-Fi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
+ USB             | Wipes the device's flash completely, then installs the selected firmware from scratch.                                 |
+
+It is not offered for a local firmware file, during a recovery update, on USB devices whose board does not support the erase step, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. Afterwards the device needs setting up — and pairing — again.
+
+### OTA via Wi-Fi (network-connected ESP32)
+
+When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **Wi-Fi OTA**, which pushes the same update over TCP:
+
+1. Connect to the radio over the network (see [Connections](connections)).
+2. Open the Firmware Update screen and pick a version.
+3. Tap **Update**. Keep the radio and phone on the same network for the whole transfer.
+
+Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
+
+### アプリ内での USB 更新
+
+無線機が（Bluetooth ではなく）**USB／シリアル**で接続されている場合、ファームウェア更新画面に「**USB ファイル転送**」が表示されます。アプリはデバイスを DFU モードで再起動し、システムのファイル選択画面を使って `.uf2` ファイルをデバイスの DFU ドライブに保存するよう促します。このオプションは USB／シリアル接続でのみ表示され、Bluetooth では利用できません。
+
+&gt; ℹ️ **Note:** A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
+
+### Factory Erase and Bootloader Upgrade
+
+On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it.
+
+Both are Android-only. They depend on Android's update-drive checks, so the desktop app does not show them — use the [Web Flasher](https://flasher.meshtastic.org) there instead.
+
+Select a firmware version before either one: the app hides both until a release is chosen, because the firmware is reinstalled after the device is wiped or the new bootloader is written.
+
+Both a USB erase and a bootloader upgrade write two files in turn, so you are asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
+
+The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything.
+
+On nRF52 the app must already know which Bluetooth stack your device uses before it starts, because it can't read the bootloader until the device has rebooted. If it can't confirm the stack, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
+
+Once the drive is readable, how an nRF52 device is erased depends on its bootloader:
+
+- **Newer bootloaders erase themselves.** A bootloader that advertises factory-erase support in `INFO_UF2.TXT` (newer OTAFIX bootloaders) takes a single, board-agnostic erase file. The bootloader wipes your settings, channels, keys and the stored node list itself, leaves the installed firmware in place, and comes back as an update drive a second or two later for the firmware file. There is no Bluetooth-stack choice to get wrong on this path.
+- **Older bootloaders need a Bluetooth-stack-specific erase.** On these the app writes a small erase program matched to your device's Bluetooth stack, then starts it over the serial port. If the drive reports a different stack than expected, the app refuses rather than guessing.
+
+The app picks the path from what the drive reports; you don't choose it.
+
+### その他の書き込み方法
+
+復旧時、または OTA とアプリ内 USB のどちらも使えない場合：
+
+- [Meshtastic Web Flasher](https://flasher.meshtastic.org) を使用する
+- または、デスクトップで [Meshtastic CLI ツール](https://meshtastic.org/docs/getting-started/flashing-firmware) を使用する
+
+## バージョンチャンネル
+
+ チャンネル    | 説明                                      |
+ -------- | --------------------------------------- |
+ 安定版      | ほとんどのユーザーに推奨。テスト済みのリリース                 |
+ アルファ版    | プレビューリリース。バグを含む場合があります                  |
+ ローカルファイル | ダウンロードしたリリースではなく、自分で選んだファームウェアファイルを書き込む |
+
+## 更新前のチェックリスト
+
+更新する前に：
+
+- [ ] バッテリー 50% 以上
+- [ ] 安定した Bluetooth 接続
+- [ ] 現在の設定を控えておく（メジャーバージョンの変更時にリセットされることがあります）
+- [ ] 破壊的変更がないか、リリースノートを確認する
+- [ ] Update the Meshtastic app itself, before or alongside firmware updates, to ensure compatibility
+
+## 更新後
+
+ファームウェアの書き込み後、アプリは更新を検証し、デバイスが再びオンラインになるのを待ちます：
+
+![更新を検証し、デバイスの再接続を待っている様子](../../assets/screenshots/firmware_verifying.png)
+
+更新が成功すると：
+
+- The radio reboots automatically
+- The Bluetooth connection re-establishes
+- 設定が保持されているか確認します
+- ファームウェア更新画面の「**現在インストール済み**」で新しいバージョンを確認します。バージョンは、ノードの詳細ページや接続画面にも表示されます
+
+![ファームウェア更新の成功](../../assets/screenshots/firmware_success.png)
+
+## トラブルシューティング
+
+### 更新が止まる
+
+更新が固まったように見える場合：
+
+- Give it a minute. After writing the image the app waits up to **60 seconds** for the radio to come back and report its new version, so a pause at the verify step is expected.
+- If it is still stuck after that, power-cycle the radio.
+- Attempt the update again.
+
+The message **Verification timed out. Device did not reconnect in time.** means the image was written but the radio did not come back within that window — power-cycle it and check the version under **Currently Installed** before re-running the update.
+
+![ファームウェア更新のエラー](../../assets/screenshots/firmware_error.png)
+
+### Radio Won't Boot After Update
+
+If the app told you the Bluetooth update could not be finished, follow the instruction it gave: connect the radio to a computer over USB and re-flash it with the vendor's serial DFU tool, such as `adafruit-nrfutil`. A stock nRF bootloader cannot reliably complete an interrupted over-the-air update.
+
+Otherwise, if your radio fails to boot:
+
+1. USB でコンピューターに接続してみる
+2. リカバリー／DFU モードで Web Flasher を使用する
+3. 動作確認済みのファームウェアバージョンを書き込む
+4. デバイス固有の復旧手順については、Meshtastic の Discord を確認する
+
+### 互換性の警告
+
+On connecting, the app compares the radio's firmware against two thresholds and reacts differently to each:
+
+ ファームウェアバージョン                                                                                                    | What you see                                     | What happens                                                                                                         |
+ --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+ Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It does not operate against firmware this old.   |
+ **2.3.15** up to, but not including, **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |
+ **2.5.14** or newer                                                             | Nothing                                          | —                                                                                                                    |
+
+A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.
+
+## 関連トピック
+
+- [コネクション](connections)：ファームウェア更新後の再接続
+- [ファームウェア書き込みガイド](https://meshtastic.org/docs/getting-started/flashing-firmware)：meshtastic.org にあるファームウェア書き込みの完全な手順
+- [対応デバイス](https://meshtastic.org/docs/hardware/devices)：デバイスごとのファームウェア互換性を確認
+- [FAQ](https://meshtastic.org/docs/faq/)：meshtastic.org のよくある質問
+</pre>
+</body>
+</html>
