@@ -121,6 +121,12 @@ jobs:
           echo "### Flatpak Sources Summary (${{ matrix.arch }})" >> "$GITHUB_STEP_SUMMARY"
           echo "- URLs captured: $(jq length flatpak-sources.json)" >> "$GITHUB_STEP_SUMMARY"
 
+      # The sandbox build below starts its own Gradle and Kotlin daemons. The pair
+      # this step left running holds the other half of the runner's memory, and the
+      # VM stalls and is shut down mid-compile. Stop them; the home itself can stay.
+      - name: Stop the outer Gradle daemon
+        run: ./gradlew -Dgradle.user.home="$RUNNER_TEMP/flatpak-gradle-home" --stop
+
       - name: Clone the Flathub packaging repo
         run: |
           git clone --depth 1 --recurse-submodules \
