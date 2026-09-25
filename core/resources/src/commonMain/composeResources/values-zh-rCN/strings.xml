@@ -1114,7 +1114,6 @@
     <string name="packet_authenticity_balanced">平衡模式 —优先验证身份</string>
     <string name="packet_authenticity_balanced_summary">推荐设置拒绝来自已知签名节点的未签名降级尝试。</string>
     <string name="packet_authenticity_compatible">兼容模式 —接受未签名消息</string>
-    <string name="packet_authenticity_compatible_summary">在可能的情况下对数据包进行身份验证，但为了获得最大的兼容性，也会接受未签名的流量。</string>
     <string name="packet_authenticity_level">安全等级</string>
     <string name="packet_authenticity_strict">严格模式 —强制要求身份验证</string>
     <string name="packet_authenticity_strict_confirm">启用严格模式</string>

@@ -1103,7 +1103,6 @@
     <string name="packet_authenticity_balanced">Bilanciato — Preferisci autenticati</string>
     <string name="packet_authenticity_balanced_summary">Consigliato. Rifiuta i tentativi di downgrade non firmati provenienti da nodi noti per firmare.</string>
     <string name="packet_authenticity_compatible">Compatibile — Accetta non firmati</string>
-    <string name="packet_authenticity_compatible_summary">Autentica i pacchetti quando possibile, ma accetta traffico non firmato per la massima compatibilità.</string>
     <string name="packet_authenticity_level">Livello di protezione</string>
     <string name="packet_authenticity_strict">Rigoroso — Richiedi l'autenticazione</string>
     <string name="packet_authenticity_strict_confirm">Attiva Rigoroso</string>
