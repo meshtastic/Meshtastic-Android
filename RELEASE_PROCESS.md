@@ -18,12 +18,14 @@ The entire release process is managed by a single GitHub Action: **`Create or Pr
         already in flight. Internal releases and dry runs are exempt (Play internal testing
         skips full review).
 -   **Automation:** The workflow handles everything automatically:
-    -   **Generates Changelog:** Categorizes merged PRs by their labels (per `.github/release.yml`) into GitHub's auto-generated release notes; a production release also opens a PR folding the same notes into `CHANGELOG.md`. Between releases that file is only refreshed by dispatching the `Update Changelog` workflow by hand.
+    -   **Generates Changelog:** Categorizes merged PRs by their labels (per `.github/release.yml`) into GitHub's auto-generated release notes. The internal draft's notes cover the PRs since the previous published pre-release; a production promotion rewrites them over the whole range since the previous production tag, with the metainfo `<description>` for the version as a Highlights section on top, and opens a PR folding the same notes into `CHANGELOG.md`. Between releases that file is only refreshed by dispatching the `Update Changelog` workflow by hand.
     -   **Tags & Builds** *(internal releases)*: Pushes the incremental tag first — there is no lint/test gate in this workflow, that's the separate PR/CI pipeline — then builds the Android bundle/APK and Desktop installers from that tag; if the build fails, an automatic cleanup job deletes the tag so a retry starts clean. Promotions skip this entirely and retag the already-built artifact (see below).
-    -   **Deploys Android:** Uploads the build to the correct Google Play track and attaches artifacts (`.aab`/`.apk`) to a GitHub Release.
+    -   **Deploys Android:** Uploads the build to the correct Google Play track and attaches artifacts (`.aab`/`.apk`) to a GitHub Release. Each promotion also uploads the Play "What's new" text for every locale from `fastlane/metadata/android/<locale>/changelogs/default.txt`, which `scripts/sync-play-changelog.py` renders from the metainfo `<description>` and Crowdin translates.
+    -   **Publishes docs:** Every promotion dispatches `docs-release.yml` on the new tag (the tag is created with `GITHUB_TOKEN`, so its tag trigger never fires on its own).
+    -   **Writes a checklist:** The promotion run's summary lists what it did, what it dispatched, and what is still done by hand.
     -   **Deploys Desktop** *(internal releases)*: Builds native installers (DMG, MSI, EXE, DEB, RPM, AppImage) and Flatpak sources on a matrix of runners and attaches them to the GitHub Release.
 -   **Changelog:** Both the GitHub Release notes and `CHANGELOG.md` are generated from merged PR labels, not raw commit messages — label PRs correctly (`enhancement`, `bugfix`, etc.) to keep them accurate.
--   **Not part of this workflow:** Firmware/hardware/device-links lists and Crowdin translations are kept current by a separate hourly workflow, `scheduled-updates.yml` ("Scheduled Updates (Firmware, Hardware, Translations)"), which opens its own PR rather than committing directly — it never runs as part of a release. `VERSION_NAME_BASE` in `config.properties` is likewise never written by automation: a maintainer bumps it by hand in an ordinary PR (e.g. "chore: bump VERSION_NAME_BASE to 2.8.2 (#6820)") before starting a release for a new base version, paired with a matching `<release>` entry in `desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml` — a `pull-request.yml` check fails the PR if that entry is missing. `Create or Promote Release` only *reads* `VERSION_NAME_BASE`/`VERSION_CODE_OFFSET` from `config.properties` to compute the build's version name/code.
+-   **Not part of this workflow:** Firmware/hardware/device-links lists and Crowdin translations are kept current by a separate hourly workflow, `scheduled-updates.yml` ("Scheduled Updates (Firmware, Hardware, Translations)"), which opens its own PR rather than committing directly and enables auto-merge on it, so it lands through the merge queue once its checks pass — it never runs as part of a release. `VERSION_NAME_BASE` in `config.properties` is likewise never written by automation: a maintainer bumps it by hand in an ordinary PR (e.g. "chore: bump VERSION_NAME_BASE to 2.8.2 (#6820)") before starting a release for a new base version, paired with a matching `<release>` entry in `desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml` — a `pull-request.yml` check fails the PR if that entry is missing. `Create or Promote Release` only *reads* `VERSION_NAME_BASE`/`VERSION_CODE_OFFSET` from `config.properties` to compute the build's version name/code.
 
 ## Release Steps
 
@@ -63,11 +65,17 @@ After testing is complete on all pre-release channels, you can create the final 
 
 ### 4. Post-Release
 
-1.  **Verify Android:** Check the Google Play Console to ensure the build is available on the correct track.
+Start from the promotion run's summary: it lists what the run did and dispatched, and what
+remains by hand.
+
+1.  **Verify Android:** Check the Google Play Console to ensure the build is available on the correct track. A production promotion starts a staged rollout; complete it in the console.
 2.  **Verify Desktop:** Download and smoke-test at least one installer (DMG, MSI, or AppImage) from the GitHub Release.
 3.  **Verify the desktop store submissions** *(production only — see below)*: the Microsoft Store
     submission in Partner Center, and the pull request opened against `microsoft/winget-pkgs`.
-4.  **Merge:** If a `release/*` branch was used for stabilization (CI runs the same PR checks
+    Each store workflow warns in its summary when its secrets are not set and it submitted nothing.
+4.  **Flathub** *(production only)*: bump the manifest in `flathub/org.meshtastic.MeshtasticDesktop` (see Flatpak below).
+5.  **Post-Release Cleanup** *(production only)*: once `Docs Release` has published `/vX.Y.Z/`, dispatch `post-release-cleanup.yml` with `confirm_deletion: true` to delete the cycle's pre-releases and tags.
+6.  **Merge:** If a `release/*` branch was used for stabilization (CI runs the same PR checks
     against PRs targeting `release/**` as it does for `main`), merge it back into `main` now
     that production has shipped.
 
@@ -119,7 +127,7 @@ Desktop uses the same version resolution chain as Android — both read `VERSION
 
 ### Flatpak
 
-Flatpak packaging is maintained externally at [flathub/org.meshtastic.MeshtasticDesktop](https://github.com/flathub/org.meshtastic.MeshtasticDesktop). It builds `:desktopApp:packageUberJarForCurrentOS` (not the native distribution pipeline) and handles JBR bundling; the AppStream metainfo and `.desktop` entry it installs come from this repo, out of the tag it builds. So the desktop screenshots and the `<release>` notes ship with the tag - nothing to do on the Flathub side beyond the version bump. The offline-build sources it consumes are captured in-repo by `scripts/verify-flatpak/` (see its README).
+Flatpak packaging is maintained externally at [flathub/org.meshtastic.MeshtasticDesktop](https://github.com/flathub/org.meshtastic.MeshtasticDesktop). It builds `:desktopApp:packageUberJarForCurrentOS` (not the native distribution pipeline) and handles JBR bundling; the AppStream metainfo and `.desktop` entry it installs come from this repo, out of the tag it builds. So the desktop screenshots and the `<release>` notes ship with the tag. The Flathub bump is a hand-opened PR that moves four things together: the tag and commit, the Gradle distribution zip URL and sha256 (from the tag's `gradle/wrapper/gradle-wrapper.properties`), and the release's `flatpak-sources.json` asset. Every flathubbot zip-bump PR so far has failed its test build; close them rather than merge them. The offline-build sources it consumes are captured in-repo by `scripts/verify-flatpak/` (see its README).
 
 ## Build Attestations & Provenance
 

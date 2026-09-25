@@ -43,6 +43,13 @@ jobs:
       # the token is configured.
       HAS_WINGET_TOKEN: ${{ secrets.WINGET_TOKEN != '' && 'true' || 'false' }}
     steps:
+      # A skipped submission must not read as a published one.
+      - name: Report an unconfigured winget publish
+        if: env.HAS_WINGET_TOKEN != 'true'
+        run: |
+          echo "::warning::WINGET_TOKEN is not set; nothing was submitted to microsoft/winget-pkgs."
+          echo "- winget: skipped, WINGET_TOKEN not set" >> "$GITHUB_STEP_SUMMARY"
+
       # Prerequisites (both manual, one-time):
       #   1. Meshtastic.MeshtasticDesktop must already exist in
       #      microsoft/winget-pkgs — winget-releaser only updates existing

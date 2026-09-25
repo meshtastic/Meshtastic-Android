@@ -118,6 +118,8 @@ jobs:
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 30
     needs: [ prepare-build-info ]
+    outputs:
+      already_on_track: ${{ steps.preflight.outputs.already_on_track }}
     env:
       FROM_TRACK: ${{ inputs.from_channel == 'closed' && 'NewAlpha' || (inputs.from_channel == 'open' && 'beta' || 'internal') }}
       TO_TRACK: ${{ inputs.channel == 'closed' && 'NewAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
@@ -174,6 +176,10 @@ jobs:
       # --version_code pins release selection. Without it supply picks the
       # source release by status (default "completed"), so a staged inProgress
       # rollout on the source track silently promotes the OLD release instead.
+      # Changelogs are not skipped: with --track_promote_to, supply writes each
+      # locale's changelogs/default.txt (rendered from metainfo.xml by
+      # scripts/sync-play-changelog.py, translated by Crowdin) onto the promoted
+      # release in the same edit, so the Play "What's new" is never empty.
       - name: Promote to next channel
         if: ${{ steps.preflight.outputs.already_on_track != 'true' }}
         env:
@@ -186,7 +192,6 @@ jobs:
             --rollout "$USER_FRACTION" \
             --changes_not_sent_for_review true \
             --skip_upload_metadata \
-            --skip_upload_changelogs \
             --skip_upload_images \
             --skip_upload_screenshots
 
@@ -226,6 +231,15 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
 
+      # Same reasoning as promote-release: scripts come from the caller's commit,
+      # not the tag, so a tag cut before a script landed still gets it.
+      - name: Checkout release scripts from caller commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: .workflow-ref
+          sparse-checkout: scripts
+
       - name: Push Git Tag on Success
         if: ${{ inputs.commit_sha != '' }}
         run: |
@@ -233,6 +247,7 @@ jobs:
           git push origin ${{ inputs.final_tag }}
 
       - name: Update GitHub Release with gh CLI
+        id: release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -242,12 +257,50 @@ jobs:
             --draft=false \
             --prerelease=${{ inputs.channel != 'production' }}
 
+      # The draft's notes were generated at the internal cut and cover only the
+      # PRs since the previous published pre-release. A production release is
+      # what users read, so regenerate its notes over the whole range since the
+      # previous production tag, highlights first. The raw notes are kept for
+      # the CHANGELOG.md stamp below. Soft-fail: the drafted notes stay in place
+      # when this step cannot produce better ones.
+      - name: Rewrite release notes for the full range
+        id: notes
+        if: ${{ inputs.channel == 'production' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+          VERSION: ${{ inputs.base_version }}
+          REPO: ${{ github.repository }}
+        run: |
+          PREV_PROD=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^v${VERSION}$" | head -1)
+          if [[ -z "$PREV_PROD" ]]; then
+            echo "::warning::No previous production tag found; leaving the drafted release notes in place."
+            exit 1
+          fi
+          echo "Previous production tag: $PREV_PROD"
+
+          gh api "repos/${REPO}/releases/generate-notes" \
+            -f tag_name="$TAG" \
+            -f target_commitish="$(git rev-parse HEAD)" \
+            -f previous_tag_name="$PREV_PROD" \
+            --jq '.body' > "$RUNNER_TEMP/notes-raw.md"
+
+          cp "$RUNNER_TEMP/notes-raw.md" "$RUNNER_TEMP/release-notes.md"
+          python3 .workflow-ref/scripts/release-highlights.py \
+            desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml \
+            config.properties \
+            "$RUNNER_TEMP/release-notes.md"
+          gh release edit "$TAG" --notes-file "$RUNNER_TEMP/release-notes.md"
+
       # The edit above is made with GITHUB_TOKEN, and GITHUB_TOKEN-caused
       # events never start workflow runs — winget-publish.yml's `released`
       # trigger will not fire from it. workflow_dispatch is exempt from that
       # suppression, so dispatch it explicitly. Soft-fail: a winget hiccup
       # must not block the changelog stamp or Discord notification.
       - name: Dispatch winget publish
+        id: winget
         if: ${{ inputs.channel == 'production' }}
         continue-on-error: true
         env:
@@ -257,6 +310,7 @@ jobs:
 
       # Same GITHUB_TOKEN-suppression story as the winget dispatch above.
       - name: Dispatch Microsoft Store publish
+        id: msstore
         if: ${{ inputs.channel == 'production' }}
         continue-on-error: true
         env:
@@ -264,13 +318,31 @@ jobs:
           TAG: ${{ inputs.final_tag }}
         run: gh workflow run msstore-publish.yml --ref main -f "tag=$TAG"
 
-      - name: Stamp CHANGELOG.md for release
-        if: ${{ inputs.channel == 'production' }}
+      # docs-release.yml's tag trigger never fires either: the release edit
+      # above creates the tag with GITHUB_TOKEN. Run it on the tag ref, which
+      # publishes /vX.Y.Z/ (plus the root and /api/ for production) or the
+      # /vX.Y.Z-open.N/ snapshot. The tag appears a moment after the undraft.
+      - name: Dispatch docs release
+        id: docs
+        if: ${{ inputs.channel != 'internal' }}
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.final_tag }}
-          VERSION: ${{ inputs.base_version }}
           REPO: ${{ github.repository }}
+        run: |
+          for _ in 1 2 3 4 5 6; do
+            gh api "repos/${REPO}/git/ref/tags/${TAG}" --silent && break
+            sleep 10
+          done
+          gh workflow run docs-release.yml --ref "$TAG"
+
+      - name: Stamp CHANGELOG.md for release
+        id: stamp
+        if: ${{ inputs.channel == 'production' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.base_version }}
         run: |
           DATE=$(date -u +%Y-%m-%d)
 
@@ -278,21 +350,13 @@ jobs:
           git fetch origin main
           git checkout -b "changelog/v${VERSION}" origin/main
 
-          # Find the previous production tag for the full-range notes
-          PREV_PROD=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^v${VERSION}$" | head -1)
-
-          # Generate a single flat changelog for the entire release using GitHub API
-          FLAT_NOTES=""
-          if [ -n "$PREV_PROD" ]; then
-            FLAT_NOTES=$(gh api "repos/${REPO}/releases/generate-notes" \
-              -f tag_name="$TAG" \
-              -f target_commitish="$(git rev-parse "$TAG")" \
-              -f previous_tag_name="$PREV_PROD" \
-              --jq '.body' 2>/dev/null || true)
-
-            # Strip boilerplate
-            FLAT_NOTES=$(echo "$FLAT_NOTES" \
-              | sed '/^<!-- .* -->/d' \
+          # The full-range notes from the step above, minus the boilerplate.
+          # The file is the record whether or not the release edit went
+          # through; the checklist reports that edit. No file means generation
+          # failed, and the section says so instead of stamping empty.
+          FLAT_NOTES="*Release notes were not generated; run the Update Changelog workflow.*"
+          if [ -s "$RUNNER_TEMP/notes-raw.md" ]; then
+            FLAT_NOTES=$(sed '/^<!-- .* -->/d' "$RUNNER_TEMP/notes-raw.md" \
               | sed '/^## What'\''s Changed$/d' \
               | sed '/^\*\*Full Changelog\*\*/d' \
               | sed '/./,$!d' \
@@ -340,13 +404,14 @@ jobs:
             git commit -m "docs: release CHANGELOG.md for v${VERSION}"
             git push origin "$BRANCH" --force
 
-            gh pr create \
+            PR_URL=$(gh pr create \
               --title "docs: release CHANGELOG.md for v${VERSION}" \
               --body "Automated changelog stamp for production release v${VERSION}." \
               --head "$BRANCH" \
               --base main \
               --label "automation" \
-              --label "skip-changelog"
+              --label "skip-changelog")
+            echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
 
             # Post required commit status so the PR isn't blocked
             COMMIT_SHA=$(git rev-parse HEAD)
@@ -355,6 +420,51 @@ jobs:
               -f context="Check Workflow Status" \
               -f description="Skipped — changelog-only PR"
           }
+
+      # One place to read what this promotion did, what it dispatched, and what
+      # is still done by hand. The store dispatches report the dispatch only;
+      # each store workflow skips inside itself until its secrets exist. The
+      # hand-done list stays out of the Discord post, which is an announcement.
+      - name: Release checklist
+        if: ${{ always() }}
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          TAG: ${{ inputs.final_tag }}
+          REPO: ${{ github.repository }}
+          ALREADY_ON_TRACK: ${{ needs.promote-release.outputs.already_on_track }}
+          RELEASE: ${{ steps.release.outcome }}
+          NOTES: ${{ steps.notes.outcome }}
+          DOCS: ${{ steps.docs.outcome }}
+          WINGET: ${{ steps.winget.outcome }}
+          MSSTORE: ${{ steps.msstore.outcome }}
+          STAMP: ${{ steps.stamp.outcome }}
+          STAMP_PR: ${{ steps.stamp.outputs.pr_url }}
+        run: |
+          row() { printf '| %s | %s |\n' "$1" "$2"; }
+          {
+            echo "## Release checklist: ${TAG} (${CHANNEL})"
+            echo
+            echo "| Step | Result |"
+            echo "|---|---|"
+            if [[ "$ALREADY_ON_TRACK" == "true" ]]; then
+              row "Play promotion" "no-op, versionCode already on the track"
+            else
+              row "Play promotion" "done, changelogs uploaded"
+            fi
+            row "GitHub release" "$RELEASE - https://github.com/${REPO}/releases/tag/${TAG}"
+            row "Docs Release dispatched" "$DOCS"
+            if [[ "$CHANNEL" == "production" ]]; then
+              row "Release notes rewritten (full range)" "$NOTES"
+              row "CHANGELOG.md stamp" "$STAMP ${STAMP_PR:+- $STAMP_PR}"
+              row "winget dispatched" "$WINGET"
+              row "Microsoft Store dispatched" "$MSSTORE"
+              echo
+              echo "Still by hand:"
+              echo "- Play Console: the production rollout is staged; complete it there."
+              echo "- Flathub: bump flathub/org.meshtastic.MeshtasticDesktop (tag, commit, gradle zip and sha256, flatpak-sources.json)."
+              echo "- Post-Release Cleanup: dispatch with confirm_deletion=true once Docs Release has published /${TAG}/."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Notify Discord
         if: ${{ inputs.channel != 'internal' }}
@@ -423,12 +533,14 @@ jobs:
           TAG: ${{ inputs.final_tag }}
         run: |
           if [[ -z "$TAP_TOKEN" ]]; then
-            echo "HOMEBREW_TAP_TOKEN not set; skipping Homebrew cask update."
+            echo "::warning::HOMEBREW_TAP_TOKEN not set; skipping Homebrew cask update."
+            echo "- Homebrew cask: skipped, HOMEBREW_TAP_TOKEN not set" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           # Tags cut before the template landed check out without it — skip, don't fail.
           if [[ ! -f .github/homebrew/meshtastic-desktop.rb ]]; then
-            echo "Cask template not present at this tag; skipping Homebrew cask update."
+            echo "::warning::Cask template not present at this tag; skipping Homebrew cask update."
+            echo "- Homebrew cask: skipped, no template at this tag" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
@@ -459,8 +571,9 @@ jobs:
           fi
           git commit -m "meshtastic-desktop ${VERSION}"
           git push -fu origin "$BRANCH"
-          GH_TOKEN="$TAP_TOKEN" gh pr create --repo meshtastic/homebrew-tap \
+          PR_URL=$(GH_TOKEN="$TAP_TOKEN" gh pr create --repo meshtastic/homebrew-tap \
             --head "$BRANCH" --base main \
             --title "meshtastic-desktop ${VERSION}" \
             --body "Automated cask bump for the ${TAG} production release of [Meshtastic-Android](https://github.com/${{ github.repository }}/releases/tag/${TAG})." \
-            || echo "PR already exists for $BRANCH; branch updated."
+            || echo "PR already exists for $BRANCH; branch updated.")
+          echo "- Homebrew cask: $PR_URL" >> "$GITHUB_STEP_SUMMARY"
