@@ -272,12 +272,16 @@ class CommandSenderImpl(
     }
 
     override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
+        // Firmware coarsens a phone-originated position to the channel precision, so an explicit 0,0 goes out as a
+        // real-looking coordinate. Leave the fields absent when we have none.
         val meshPosition =
             ProtoPosition.Builder()
                 .also { wb ->
-                    wb.latitude_i = Position.degI(currentPosition.latitude)
-                    wb.longitude_i = Position.degI(currentPosition.longitude)
-                    wb.altitude = currentPosition.altitude
+                    if (currentPosition.isValid()) {
+                        wb.latitude_i = Position.degI(currentPosition.latitude)
+                        wb.longitude_i = Position.degI(currentPosition.longitude)
+                        wb.altitude = currentPosition.altitude
+                    }
                     wb.time = (nowMillis / MILLIS_PER_SECOND).toInt()
                 }
                 .build()
