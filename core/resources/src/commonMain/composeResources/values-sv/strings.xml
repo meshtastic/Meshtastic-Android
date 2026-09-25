@@ -789,7 +789,6 @@
     <string name="packet_authenticity">Paket auktoritet</string>
     <string name="packet_authenticity_balanced">Balanserad - Föredra autentiserad</string>
     <string name="packet_authenticity_compatible">Kompatibel - Tillåt osignerad</string>
-    <string name="packet_authenticity_compatible_summary">Autentisera paket när det är möjligt, men acceptera osignerad trafik för maximal kompatibilitet.</string>
     <string name="packet_authenticity_level">Skyddsnivå</string>
     <string name="packet_authenticity_strict">Strikt - Kräv autentisering</string>
     <string name="packet_authenticity_strict_confirm">Aktivera strikt läge</string>

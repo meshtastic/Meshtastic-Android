@@ -1099,7 +1099,6 @@
     <string name="packet_authenticity_balanced">バランス：認証済みを優先</string>
     <string name="packet_authenticity_balanced_summary">推奨。署名することが分かっているノードからの、署名なしへのダウングレードを拒否します。</string>
     <string name="packet_authenticity_compatible">互換：署名なしを許可</string>
-    <string name="packet_authenticity_compatible_summary">可能な場合はパケットを認証しますが、互換性を最大にするため署名なしの通信も受け入れます。</string>
     <string name="packet_authenticity_level">保護レベル</string>
     <string name="packet_authenticity_strict">厳格：認証を必須にする</string>
     <string name="packet_authenticity_strict_confirm">厳格を有効にする</string>

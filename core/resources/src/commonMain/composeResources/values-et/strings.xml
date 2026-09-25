@@ -1225,7 +1225,6 @@
     <string name="packet_authenticity_balanced">Tasakaalustatud — eelista autentitud</string>
     <string name="packet_authenticity_balanced_summary">Soovitatav. Keeldu allkirjastamata madalamale versioonile ülemineku katsetest sõlmedelt, mis teadaolevalt allkirjastavad.</string>
     <string name="packet_authenticity_compatible">Ühildub – aktsepteeri allkirjastamata</string>
-    <string name="packet_authenticity_compatible_summary">Autentige pakette võimaluse korral, kuid maksimaalse ühilduvuse tagamiseks aktsepteerige allkirjastamata liiklust.</string>
     <string name="packet_authenticity_level">Kaitsetase</string>
     <string name="packet_authenticity_strict">Range – nõuab autentimist</string>
     <string name="packet_authenticity_strict_confirm">Luba range</string>
