@@ -16,11 +16,11 @@
  */
 package org.meshtastic.feature.map.maplibre
 
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.ui.unit.dp
 import org.maplibre.compose.camera.CameraAnimation
 import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.map.MapState
+import org.maplibre.compose.util.DpPadding
 import org.maplibre.spatialk.geojson.BoundingBox
 
 /**
@@ -35,7 +35,7 @@ import org.maplibre.spatialk.geojson.BoundingBox
 internal suspend fun MapState.zoomBy(delta: Double, range: ClosedFloatingPointRange<Float>) {
     val target = (cameraPosition.zoom + delta).coerceIn(range.start.toDouble(), range.endInclusive.toDouble())
     if (target != cameraPosition.zoom) {
-        animateCameraPosition(cameraPosition.copy(zoom = target), animation = CameraAnimation.Ease())
+        animateCamera(CameraUpdate(zoom = target), CameraAnimation.Ease())
     }
 }
 
@@ -46,9 +46,9 @@ internal const val ZOOM_STEP = 1.0
  * Frames [bounds] without zooming past [FRAME_MAX_ZOOM]: the fit is computed first and capped before the camera moves,
  * so nodes standing metres apart open on their surroundings rather than on empty tiles. Eased, not the default flight.
  */
-internal suspend fun MapState.frameBounds(bounds: BoundingBox, padding: PaddingValues = PaddingValues(0.dp)) {
-    val fitted = cameraForBounds(bounds, padding = padding)
-    animateCameraPosition(fitted.cappedTo(FRAME_MAX_ZOOM), CameraAnimation.Ease())
+internal suspend fun MapState.frameBounds(bounds: BoundingBox, padding: DpPadding = DpPadding.Zero) {
+    val fitted = cameraForBounds(bounds, fitPadding = padding)
+    animateCamera(fitted.cappedTo(FRAME_MAX_ZOOM).toCameraUpdate(), CameraAnimation.Ease())
 }
 
 /** This position, zoomed out to [maxZoom] if it is tighter than that. */

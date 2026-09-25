@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.font.createFontFamilyResolver
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -39,6 +40,7 @@ import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.feature.map.maplibre.layers.NodeLayers
 import org.meshtastic.feature.map.maplibre.style.Basemaps
 import java.nio.file.Files
+import java.util.concurrent.Executors
 
 /** One capture: the map area in dp at the screen density, and the zoom the form factor asks for. */
 internal data class MapArea(val widthDp: Int, val heightDp: Int, val density: Float, val zoom: Double)
@@ -52,6 +54,12 @@ internal object MapSnapshot {
     private const val CAPTURE_TIMEOUT_MS = 180_000L
     private const val MAX_SETTLE_RUNTIMES = 4
 
+    // The generator is headless and has no Dispatchers.Main, so the runtime owns this thread instead, and every map
+    // state call runs on it because map state rejects any other thread. Daemon, so it never holds the JVM open.
+    private val mapThread =
+        Executors.newSingleThreadExecutor { Thread(it, "maplibre-main").apply { isDaemon = true } }
+            .asCoroutineDispatcher()
+
     fun capture(areas: List<MapArea>, mesh: SampleMesh): Map<MapArea, ImageBitmap> =
         areas.associateWith { area -> captureUntilStable(area, mesh) }
 
@@ -62,7 +70,7 @@ internal object MapSnapshot {
      * shared tile cache: the first fills the cache from the network, the ones after it read the cache in a stable
      * order, and two consecutive runtimes agreeing means the run is reproducible. A warm runtime costs about a second.
      */
-    private fun captureUntilStable(area: MapArea, mesh: SampleMesh): ImageBitmap = runBlocking {
+    private fun captureUntilStable(area: MapArea, mesh: SampleMesh): ImageBitmap = runBlocking(mapThread) {
         val cacheDir = Files.createTempDirectory("marketing-maplibre")
         val cacheFile = Path(cacheDir.resolve("cache.db").toString())
         try {
@@ -82,7 +90,7 @@ internal object MapSnapshot {
     }
 
     private suspend fun captureOnce(cacheFile: Path, area: MapArea, mesh: SampleMesh): ImageBitmap {
-        val runtime = createMapRuntime(MapRuntimeOptions(cacheFile = cacheFile))
+        val runtime = createMapRuntime(MapRuntimeOptions(cacheFile = cacheFile, mainDispatcher = mapThread))
         return try {
             withTimeout(CAPTURE_TIMEOUT_MS) { runtime.capture(area, mesh) }
         } finally {

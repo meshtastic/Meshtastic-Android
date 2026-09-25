@@ -36,12 +36,12 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import org.maplibre.compose.camera.CameraAnimation
 import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.interaction.ClickResult
 import org.maplibre.compose.interaction.MapInteractions
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.location.BearingUpdate
-import org.maplibre.compose.location.LocationPuck
 import org.maplibre.compose.location.LocationState
 import org.maplibre.compose.location.LocationTrackingEffect
 import org.maplibre.compose.location.updateCamera
@@ -51,7 +51,7 @@ import org.maplibre.compose.map.LocalViewport
 import org.maplibre.compose.map.MapState
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.rememberMapState
-import org.maplibre.compose.material3.LocationPuckDefaults
+import org.maplibre.compose.material3.LocationIndicatorLayer
 import org.maplibre.compose.overlay.include
 import org.maplibre.compose.util.MaplibreComposable
 import org.maplibre.spatialk.geojson.BoundingBox
@@ -280,9 +280,9 @@ private fun MeshMapNodeLayers(
                 val current = mapState.cameraPosition
                 // A cluster that cannot report an expansion zoom answers with a sentinel (0 on
                 // Android and desktop, -1 on iOS), so clamp — never zoom out on a tap.
-                mapState.animateCameraPosition(
-                    current.copy(target = centre, zoom = maxOf(expansionZoom, current.zoom)),
-                    animation = CameraAnimation.Ease(),
+                mapState.animateCamera(
+                    CameraUpdate(target = centre, zoom = maxOf(expansionZoom, current.zoom)),
+                    CameraAnimation.Ease(),
                 )
             }
         },
@@ -342,10 +342,11 @@ private fun FollowUserLocation(
 @Composable
 @MaplibreComposable
 private fun UserLocationPuck(locationState: LocationState?, visible: Boolean) {
-    if (locationState == null || !visible) return
+    if (locationState == null) return
 
-    // The state overload, which resolves the latest measurement and its most accurate bearing itself.
-    LocationPuck(idPrefix = "user-location", locationState = locationState, colors = LocationPuckDefaults.colors())
+    // The state overload, which resolves the latest measurement and its most accurate bearing itself. Hidden rather
+    // than unmounted when tracking stops, since layer additions are queued and a quick toggle could lose the re-add.
+    LocationIndicatorLayer(id = "user-location", locationState = locationState, visible = visible)
 }
 
 /**

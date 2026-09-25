@@ -27,7 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.overlay.DisappearingScaleBar
-import org.maplibre.compose.overlay.LocalCameraPadding
+import org.maplibre.compose.overlay.LocalViewportInsets
 import org.maplibre.compose.overlay.include
 import org.maplibre.compose.overlay.MapOverlay as MaplibreOverlay
 
@@ -46,21 +46,21 @@ import org.maplibre.compose.overlay.MapOverlay as MaplibreOverlay
  */
 internal val MeshMapOrnaments: MaplibreOverlay = MaplibreOverlay {
     val mapState = checkNotNull(LocalMapState.current)
-    val cameraPadding = LocalCameraPadding.current
+    val viewportInsets = LocalViewportInsets.current
 
     // A custom overlay fills the map and the library keeps its own inset helper internal, so the scale bar has to
-    // carry the camera padding, safe-area insets and edge margin that the built-in controls apply for themselves.
+    // carry the viewport insets, safe-area insets and edge margin that the built-in controls apply for themselves.
     Box(
         modifier =
         Modifier.fillMaxSize()
-            .padding(cameraPadding)
-            .consumeWindowInsets(cameraPadding)
+            .padding(viewportInsets)
+            .consumeWindowInsets(viewportInsets)
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(MaplibreOverlay.Spacing),
     ) {
         DisappearingScaleBar(
-            metersPerDp = mapState.viewport?.metersPerDpAtTarget ?: 0.0,
-            zoom = mapState.cameraPosition.zoom,
+            metersPerDp = { mapState.viewport?.metersPerDpAtTarget ?: 0.0 },
+            zoom = { mapState.cameraPosition.zoom },
             modifier = Modifier.align(Alignment.TopStart),
         )
     }
