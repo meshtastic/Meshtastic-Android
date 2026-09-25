@@ -494,6 +494,71 @@ jobs:
         with:
           subject-path: flatpak-sources.json
 
+  # The store-listing screenshots are an output of the tag, not a hand shot: rendered
+  # on the JVM with no display, attached to the release, and published to the Play
+  # listing by the production promotion. A render failure must not lose the release
+  # or its tag, so the render step soft-fails, nothing is attached, and promote.yml
+  # warns that the listing kept the committed set.
+  store-screenshots:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    needs: [prepare-build-info]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag_name }}
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          cache_read_only: 'true'
+
+      # The map renders through Vulkan; lavapipe is the software device.
+      - name: Install a Vulkan software device
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libvulkan1 mesa-vulkan-drivers
+
+      - name: Render the store screenshots
+        id: render
+        continue-on-error: true
+        run: ./gradlew :marketing-screenshots:updateMarketingScreenshots
+
+      - name: Report a failed render
+        if: ${{ steps.render.outcome != 'success' }}
+        run: |
+          echo "::warning::Store screenshots did not render; nothing is attached to this release."
+          echo "- Store screenshots: render failed, nothing attached" >> "$GITHUB_STEP_SUMMARY"
+
+      # One zip for the Play listing (the fastlane images tree), the desktop set as
+      # loose PNGs so metainfo.xml can point at them by name.
+      - name: Package the screenshots
+        if: ${{ steps.render.outcome == 'success' }}
+        env:
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+        run: |
+          mkdir -p out
+          (cd fastlane/metadata/android/en-US/images && zip -qr "$GITHUB_WORKSPACE/out/store-listing-screenshots-${VERSION_CODE}.zip" .)
+          cp desktopApp/packaging/linux/screenshots/*.png out/
+          CHANGED=$(git status --porcelain -- fastlane/metadata/android/en-US/images desktopApp/packaging/linux/screenshots | wc -l)
+          {
+            echo "### Store screenshots"
+            echo "- Rendered from the tag; ${CHANGED} file(s) differ from the committed set."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload store screenshots artifact
+        if: ${{ steps.render.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: store-screenshots
+          path: out/*
+          retention-days: 1
+
   github-release:
     if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-26.04-arm
@@ -504,6 +569,7 @@ jobs:
       - release-fdroid
       - release-desktop
       - release-flatpak-src
+      - store-screenshots
     permissions:
       contents: write
       id-token: write
