@@ -483,6 +483,37 @@ class CommandSenderImplTest {
         verify(exactly(0)) { neighborInfoHandler.recordStartTime(any()) }
     }
 
+    // --- requestPosition ---
+
+    @Test
+    fun requestPosition_leavesCoordinatesAbsentWhenWeHaveNoPosition() = runTest {
+        val packets = mutableListOf<MeshPacket>()
+        everySuspend { packetHandler.sendToRadio(capture(packets)) } returns true
+
+        commandSender.requestPosition(DEST_NODE, Position(0.0, 0.0, 0))
+
+        val decoded = requireNotNull(packets.single().decoded)
+        assertTrue(decoded.want_response)
+        val sent = org.meshtastic.proto.Position.ADAPTER.decode(decoded.payload)
+        assertEquals(null, sent.latitude_i)
+        assertEquals(null, sent.longitude_i)
+        assertEquals(null, sent.altitude)
+        assertNotEquals(0, sent.time)
+    }
+
+    @Test
+    fun requestPosition_attachesOurCoordinatesWhenValid() = runTest {
+        val packets = mutableListOf<MeshPacket>()
+        everySuspend { packetHandler.sendToRadio(capture(packets)) } returns true
+
+        commandSender.requestPosition(DEST_NODE, Position(1.0, 2.0, 30))
+
+        val sent = org.meshtastic.proto.Position.ADAPTER.decode(requireNotNull(packets.single().decoded).payload)
+        assertEquals(10_000_000, sent.latitude_i)
+        assertEquals(20_000_000, sent.longitude_i)
+        assertEquals(30, sent.altitude)
+    }
+
     // --- sendPosition ---
 
     @Test
