@@ -16,7 +16,8 @@ inputs:
   install_jetbrains_jdk:
     description: |
       Also install JetBrains JDK 25 with setup-java. Gradle detects it through ~/.m2/toolchains.xml
-      instead of provisioning one through foojay, which flatpak-sources would record as a source.
+      instead of provisioning one through foojay, so the Linux release installers bundle this JBR
+      and flatpak-sources records no foojay download as a source.
     default: 'false'
   gradle_encryption_key:
     description: 'Encryption key for Gradle remote cache'
