@@ -57,13 +57,18 @@ channels (GitHub Pages must be configured to serve from that branch):
 
 | Path | Content | Published by |
 |------|---------|--------------|
-| `/` | Latest production release (default landing) | `docs-release.yml` on `vX.Y.Z` tags |
-| `/vX.Y.Z/` | Permanent per-release copy | `docs-release.yml` on `vX.Y.Z` tags |
-| `/vX.Y.Z-open.N/` | Per-tag open-testing snapshot | `docs-release.yml` on `vX.Y.Z-open.N` tags |
-| `/vX.Y.Z-closed.N/` | Per-tag closed-testing snapshot | `docs-release.yml` on `vX.Y.Z-closed.N` tags |
+| `/` | Latest production release (default landing) | `docs-release.yml` on `vX.Y.Z` tags, dispatched by `promote.yml` |
+| `/vX.Y.Z/` | Permanent per-release copy | `docs-release.yml` on `vX.Y.Z` tags, dispatched by `promote.yml` |
+| `/vX.Y.Z-open.N/` | Per-tag open-testing snapshot | `docs-release.yml` on `vX.Y.Z-open.N` tags, dispatched by `promote.yml` |
+| `/vX.Y.Z-closed.N/` | Per-tag closed-testing snapshot | `docs-release.yml` on `vX.Y.Z-closed.N` tags, dispatched by `promote.yml` |
 | `/main/` | Snapshot of the `main` branch | `docs-deploy.yml` on pushes to `main` that touch the site |
 | `/api/` | Dokka API reference | `docs-deploy.yml` daily, plus production releases |
 | `/versions.json` | Version manifest for the site's version switcher | regenerated on every deploy |
+
+`promote.yml` dispatches `docs-release.yml` after every open, closed and
+production promotion, because the tag it creates with `GITHUB_TOKEN` starts no
+workflow. The tag trigger of
+`docs-release.yml` covers a tag pushed by hand.
 
 `-internal.N` tags are deliberately not published — they are cut many times per
 cycle and are not a documented channel.

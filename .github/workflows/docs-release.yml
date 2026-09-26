@@ -2,6 +2,11 @@ name: Docs Release
 
 # Publishes release docs to the persistent gh-pages branch.
 #
+# promote.yml dispatches this on the tag after every open, closed and production
+# promotion, because a tag created with GITHUB_TOKEN starts no workflow. The tag trigger covers a tag
+# pushed by hand, and a manual run against a tag ref (re)publishes that version
+# without cutting a new tag.
+#
 # Production tags (vX.Y.Z) own the site root and get a permanent /vX.Y.Z/ copy,
 # plus a refreshed Dokka reference at /api/.
 #
@@ -14,9 +19,6 @@ name: Docs Release
 # reaped by post-release-cleanup.yml, which a production publish dispatches.
 #
 # The /main/ snapshot is owned by docs-deploy.yml and is left untouched here.
-#
-# workflow_dispatch exists for backfill: run it against a tag ref to (re)publish
-# that version without cutting a new tag.
 
 on:
   push:
@@ -105,32 +107,37 @@ jobs:
         if: steps.version.outputs.is_production == 'true'
         run: ./gradlew generateDocsBundle publishDocsSite -Pdocs.channel=root -Pci=true
 
-      # Dokka API reference (/api/) — production releases only.
-      - name: Build Dokka HTML documentation
-        if: steps.version.outputs.is_production == 'true'
-        run: ./gradlew :dokkaGeneratePublicationHtml
-
-      - name: Compile Jekyll Sites
+      # The versioned source leaves build/_site/ first so the root site does not
+      # nest it. The Jekyll builds read only the generated sites and Dokka (the
+      # /api/ reference, production only) only the sources, so all three overlap.
+      - name: Build Jekyll Sites and Dokka
         env:
           DOCS_VERSION: ${{ steps.version.outputs.docs_version }}
           IS_PRODUCTION: ${{ steps.version.outputs.is_production }}
         run: |
           set -euo pipefail
-          # Versioned site
-          BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
-            --source "build/_site/v${DOCS_VERSION}" \
-            --destination build/jekyll_release \
-            --baseurl "/${{ github.event.repository.name }}/v${DOCS_VERSION}"
-
-          # Move the versioned source out of the root source tree so the root
-          # build below doesn't try to nest it.
+          site_name="${GITHUB_REPOSITORY#*/}"
           mv "build/_site/v${DOCS_VERSION}" build/v_temp
 
+          BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
+            --source build/v_temp \
+            --destination build/jekyll_release \
+            --baseurl "/${site_name}/v${DOCS_VERSION}" &
+          release_pid=$!
+
+          root_pid=""
           if [ "$IS_PRODUCTION" = "true" ]; then
             BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
               --source build/_site \
               --destination build/jekyll_root \
-              --baseurl "/${{ github.event.repository.name }}"
+              --baseurl "/${site_name}" &
+            root_pid=$!
+            ./gradlew :dokkaGeneratePublicationHtml
+          fi
+
+          wait "$release_pid"
+          if [ -n "$root_pid" ]; then
+            wait "$root_pid"
           fi
 
       - name: Stage channels
