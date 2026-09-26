@@ -1,6 +1,6 @@
 ---
 title: 桌面版應用程式
-parent: 使用者指南
+parent: User Guide
 nav_order: 14
 last_updated: 2026-09-11
 description: 在 Linux、macOS 及 Windows 上安裝並使用 Meshtastic 桌面版應用程式——涵蓋連線方式、功能對等性與鍵盤快速鍵。

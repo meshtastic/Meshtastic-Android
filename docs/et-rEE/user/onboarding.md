@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-parent: Kasutusjuhend
+parent: User Guide
 nav_order: 1
 last_updated: 2026-08-30
 description: Esimese käivitamise seadistus — õigused, sissejuhatav voog ja järgmised sammud pärast raadio ühendamist.

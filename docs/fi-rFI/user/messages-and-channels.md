@@ -1,6 +1,6 @@
 ---
 title: Viestit ja kanavat
-parent: Käyttöopas
+parent: User Guide
 nav_order: 3
 last_updated: 2026-09-14
 description: Lähetä ja vastaanota viestejä, hallitse kanavia, määritä salaus, hae keskusteluja sekä käytä pikachatia, reaktioita ja viestitoimintoja.

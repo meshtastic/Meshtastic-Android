@@ -1,6 +1,6 @@
 ---
 title: Kodu
-layout: vaikimisi
+layout: default
 nav_order: 0
 ---
 

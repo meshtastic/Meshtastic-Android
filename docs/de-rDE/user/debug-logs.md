@@ -1,6 +1,6 @@
 ---
 title: Fehlersuchprotokolle
-parent: Benutzerhandbuch
+parent: User Guide
 nav_order: 22
 last_updated: 2026-08-30
 description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.

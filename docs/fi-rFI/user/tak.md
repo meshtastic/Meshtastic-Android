@@ -1,6 +1,6 @@
 ---
 title: TAK-integraatio
-parent: Käyttöopas
+parent: User Guide
 nav_order: 10
 last_updated: 2026-09-11
 description: ATAK:n ja WinTAK:n yhteentoimivuus — CoT-sijaintijako, TAK-roolit ja lisäosien käyttöönotto.

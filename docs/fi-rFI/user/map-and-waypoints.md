@@ -1,6 +1,6 @@
 ---
 title: Kartta ja reittipisteet
-parent: Käyttöopas
+parent: User Guide
 nav_order: 6
 last_updated: 2026-09-11
 description: Näytä radioiden sijainnit kartalla, luo ja jaa reittipisteitä, hallitse karttatasoja ja Site Planneria sekä säädä sijainnin jakamista ja tietosuoja-asetuksia.

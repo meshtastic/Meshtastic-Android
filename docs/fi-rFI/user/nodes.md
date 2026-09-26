@@ -1,6 +1,6 @@
 ---
 title: Laitteet
-parent: Käyttöopas
+parent: User Guide
 nav_order: 4
 last_updated: 2026-09-19
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.

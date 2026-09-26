@@ -1,6 +1,6 @@
 ---
 title: Kaart ja teekonnapunktid
-parent: Kasutusjuhend
+parent: User Guide
 nav_order: 6
 last_updated: 2026-09-11
 description: Vaata sõlmede asukohti kaardil, loo ja jaga teekonnapunkte ning halda asukoha jagamist ja privaatsust.

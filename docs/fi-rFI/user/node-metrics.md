@@ -1,6 +1,6 @@
 ---
 title: Radion mittarit
-parent: Käyttöopas
+parent: User Guide
 nav_order: 5
 last_updated: 2026-09-09
 description: Telemetrianäkymät jokaiselle verkon radiolle — laitteen kunto, ympäristöanturit, ilmanlaatu, signaalin laatu, virta, reitinselvitys ja sijaintihistoria.

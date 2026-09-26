@@ -1,6 +1,6 @@
 ---
 title: How the Meshtastic Signal Meter Works
-parent: Ръководство за потребители
+parent: User Guide
 nav_order: 15
 last_updated: 2026-09-09
 description: How the signal meter rates quality from SNR relative to the LoRa modem preset — spread spectrum, presets, and what the bars really mean.

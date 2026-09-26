@@ -1,6 +1,6 @@
 ---
 title: Sätted - moodulid & admin
-parent: Kasutusjuhend
+parent: User Guide
 nav_order: 8
 last_updated: 2026-09-19
 description: Muuda valikulisi funktsioonimooduleid (MQTT, telemeetria, salvestatud sõnumid, TAK ja palju muud) ja teosta seadme haldamist.

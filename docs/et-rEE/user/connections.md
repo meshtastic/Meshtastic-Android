@@ -1,6 +1,6 @@
 ---
 title: Ühendus
-parent: Kasutusjuhend
+parent: User Guide
 nav_order: 2
 last_updated: 2026-08-30
 description: Ühenda oma telefon või arvuti Meshtastic raadioga Bluetoothi, USB või TCP/IP kaudu.

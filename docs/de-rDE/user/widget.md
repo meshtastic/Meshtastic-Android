@@ -1,6 +1,6 @@
 ---
 title: Home Screen Widget
-parent: Benutzerhandbuch
+parent: User Guide
 nav_order: 20
 last_updated: 2026-08-30
 description: Add the Meshtastic home screen widget to glance at your connected radio's local stats without opening the app.

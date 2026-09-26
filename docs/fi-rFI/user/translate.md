@@ -1,6 +1,6 @@
 ---
 title: Käännä sovellus
-parent: Käyttöopas
+parent: User Guide
 nav_order: 17
 last_updated: 2026-09-11
 description: Miten sovellus ja sen dokumentaatio käännetään Crowdinin avulla sekä ohjeet käännöksiin osallistumiseen.

@@ -1,6 +1,6 @@
 ---
 title: Ohjeet jasovelluksen sisäinen dokumentaatio
-parent: Käyttöopas
+parent: User Guide
 nav_order: 21
 last_updated: 2026-09-11
 description: Selaa tätä dokumentaatiota sovelluksessa, hae siitä tietoa ja kysy Meshtasticiin liittyviä kysymyksiä Chirpyltä — laitteella toimivalta tekoälyavustajalta.
