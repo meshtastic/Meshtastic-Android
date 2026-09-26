@@ -90,7 +90,9 @@ jobs:
         id: schema_pin
         run: |
           xml=core/resources/src/commonMain/composeResources/values/schema_strings.xml
+          strings=core/resources/src/commonMain/composeResources/values/strings.xml
           recorded_pin() { sed -n 's/.*from org\.meshtastic:protobufs \([^ ]*\)\..*/\1/p' | head -n1; }
+          xml_header() { sed '/<resources>/q'; }
           catalog=$(sed -n 's/^meshtastic-protobufs = "\(.*\)"$/\1/p' gradle/libs.versions.toml)
           recorded=$(recorded_pin < "$xml")
           echo "catalog=$catalog" >> "$GITHUB_OUTPUT"
@@ -102,9 +104,13 @@ jobs:
             echo "schema strings reflect protobufs $recorded, catalog has $catalog"
             echo "changed=true" >> "$GITHUB_OUTPUT"
             branch_xml="$RUNNER_TEMP/scheduled-updates.schema_strings.xml"
+            # The file is a function of the pin, the generator in schema-strings/ and the strings.xml header it
+            # borrows, so a copy built before either of the last two changed on main is regenerated.
             if git fetch --no-tags --depth=1 --quiet origin scheduled-updates 2>/dev/null \
               && git show "FETCH_HEAD:$xml" > "$branch_xml" 2>/dev/null \
-              && [ "$(recorded_pin < "$branch_xml")" = "$catalog" ]; then
+              && [ "$(recorded_pin < "$branch_xml")" = "$catalog" ] \
+              && [ "$(git rev-parse FETCH_HEAD:schema-strings 2>/dev/null)" = "$(git rev-parse HEAD:schema-strings)" ] \
+              && [ "$(xml_header < "$branch_xml")" = "$(xml_header < "$strings")" ]; then
               echo "scheduled-updates already carries the schema strings for protobufs $catalog; reusing them"
               echo "reuse=$branch_xml" >> "$GITHUB_OUTPUT"
             fi
