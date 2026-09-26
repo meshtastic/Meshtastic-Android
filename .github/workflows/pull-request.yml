@@ -112,14 +112,14 @@ jobs:
       - name: Verify every module with tests is wired into a CI test shard
         run: python3 scripts/check-test-shards.py
 
-  # 1c. STORE METADATA: Enforce store-listing length limits (e.g. the F-Droid /
-  # Play 80-char short_description). These files are mirrored from Crowdin, so
-  # this guard intentionally runs on the translation-sync PRs too (no
+  # 1c. REPO CHECKS: actionlint, shellcheck, the script self-tests, and the store-listing,
+  # AppStream and generated-file checks. Store listings are mirrored from Crowdin, so
+  # this job intentionally runs on the translation-sync PRs too (no
   # scheduled-updates skip) -- that is where overlength translations
   # land. It is a standalone lightweight job, decoupled from the Gradle build so
   # a one-line translation fix never triggers a full assemble/test cycle.
   check-metadata:
-    name: Check Store Metadata
+    name: Check Workflows, Scripts & Metadata
     if: github.repository == 'meshtastic/Meshtastic-Android'
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
@@ -259,7 +259,7 @@ jobs:
           fi
 
           if [[ "${{ needs.check-metadata.result }}" == "failure" || "${{ needs.check-metadata.result }}" == "cancelled" ]]; then
-            echo "::error::Store metadata length check failed"
+            echo "::error::Workflow, script or metadata checks failed"
             exit 1
           fi
 
