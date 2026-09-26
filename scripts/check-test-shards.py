@@ -47,6 +47,8 @@ def main() -> None:
     modules = set(re.findall(r'"(:[^"]+)"', settings))
 
     shards = check.split('# ── Sharded Unit Tests')[1].split('# ── Android Build')[0]
+    # A commented-out task runs nothing, so it must not count as coverage.
+    shards = '\n'.join(re.sub(r'(^|\s)#.*$', '', line) for line in shards.splitlines())
 
     problems = []
     for m in sorted(modules):

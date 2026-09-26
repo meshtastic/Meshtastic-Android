@@ -45,10 +45,8 @@ def main() -> None:
     }
     expected_roots = module_roots | ALLOWED_EXTRA_ROOTS
 
-    filter_paths = {
-        path.split('/')[0]
-        for path in re.findall(r"-\s*'([^']+/\*\*)'", android_filter(workflow))
-    }
+    # Only a whole-root entry covers a root: 'core/ble/**' leaves the rest of core/ unfiltered.
+    filter_paths = set(re.findall(r"-\s*'([^'/]+)/\*\*'", android_filter(workflow)))
 
     missing = sorted(expected_roots - filter_paths)
     unexpected = sorted(filter_paths - expected_roots - ALLOWED_INFRA_ROOTS)
