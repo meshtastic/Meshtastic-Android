@@ -176,6 +176,7 @@ import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
+import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.MapBounds
 import org.meshtastic.feature.map.MapNodePolicy
 import org.meshtastic.feature.map.component.ClusterMemberEntry
@@ -462,12 +463,12 @@ fun MapView(
     val mapColorScheme = if (dark) ComposeMapColorScheme.DARK else ComposeMapColorScheme.LIGHT
 
     // --- Mode-specific data ---
-    // Node track: apply time filter
+    // Node track: apply time filter. The log is newest-first; the overlay reads oldest-first.
     val sortedTrackPositions =
         if (mode is GoogleMapMode.NodeTrack) {
             val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
             remember(mode.positions, lastHeardTrackFilter) {
-                mode.positions.filter { lastHeardTrackFilter.includes(it.time, nowSeconds) }.sortedBy { it.time }
+                filterSortedTrackPositions(mode.positions, lastHeardTrackFilter, nowSeconds)
             }
         } else {
             emptyList()
@@ -1357,13 +1358,124 @@ private fun WaypointGeofenceOverlay(waypoint: Waypoint) {
 
 // region --- Node Track Overlay ---
 
+/** Evenly spaced position dots. The list selection may add one marker beyond this. */
+internal const val NODE_TRACK_MARKER_BUDGET = 200
+
+/** Contiguous gradient polylines. The route itself is not simplified to fit. */
+internal const val NODE_TRACK_LINE_BUCKET_BUDGET = 32
+
+internal data class NodeTrackMarker(val index: Int, val alpha: Float, val isNewest: Boolean)
+
+internal data class NodeTrackLineBucket(
+    val startIndex: Int,
+    val endIndex: Int,
+    val alpha: Float,
+    val points: List<LatLng>,
+)
+
+/** Memoized map decoration for one filtered, oldest-first track. Selection is applied with [withSelectedMarker]. */
+internal data class NodeTrackRenderBudget(
+    val coordinates: List<LatLng>,
+    val markers: List<NodeTrackMarker>,
+    val lines: List<NodeTrackLineBucket>,
+)
+
 /**
- * Renders the position track polyline segments and markers inside a [GoogleMap] content scope. Each marker fades from
- * transparent (oldest) to opaque (newest). The newest position shows the node's [NodeChip]; older positions show a
- * [TripOrigin] dot with an info-window on tap.
+ * Oldest-first positions the track map draws.
+ *
+ * The position log arrives newest-first. Fade, the route gradient, and the newest-node chip all read this order. The
+ * age filter still compares each point's own timestamp.
+ */
+internal fun filterSortedTrackPositions(
+    positions: List<Position>,
+    lastHeardTrackFilter: LastHeardFilter,
+    nowSeconds: Long,
+): List<Position> = positions.filter { lastHeardTrackFilter.includes(it.time, nowSeconds) }.sortedBy { it.time }
+
+/**
+ * First filtered point whose time matches [selectedPositionTime], or null when that time was filtered out.
+ *
+ * Same timestamp contract the camera already uses. Equal timestamps are not disambiguated.
+ */
+internal fun selectedTrackIndex(positions: List<Position>, selectedPositionTime: Int?): Int? =
+    selectedPositionTime?.let { selected -> positions.indexOfFirst { it.time == selected }.takeIf { it >= 0 } }
+
+/**
+ * Marker sample and gradient polylines for [positions].
+ *
+ * At most [NODE_TRACK_MARKER_BUDGET] markers, always including the oldest and newest point. At most
+ * [NODE_TRACK_LINE_BUCKET_BUDGET] polylines cover every original edge; neighbors share the boundary coordinate. Fade
+ * uses the original index, so a one-segment track does not divide by zero. Coordinate conversion happens here and is
+ * remembered with the filtered list; a later [withSelectedMarker] does not rebuild it.
+ */
+internal fun nodeTrackRenderBudget(positions: List<Position>): NodeTrackRenderBudget {
+    val coordinates = positions.map { it.toLatLng() }
+    return NodeTrackRenderBudget(
+        coordinates = coordinates,
+        markers = nodeTrackMarkerPlans(coordinates.size, selectedIndex = null),
+        lines = nodeTrackLineBuckets(coordinates),
+    )
+}
+
+/** Adds the list-selected index when the even sample missed it. Line geometry stays the same instance. */
+internal fun NodeTrackRenderBudget.withSelectedMarker(selectedIndex: Int?): NodeTrackRenderBudget {
+    val updated = nodeTrackMarkerPlans(coordinates.size, selectedIndex)
+    return if (updated == markers) this else copy(markers = updated)
+}
+
+/** 0 at the oldest point, 1 at the newest. A single point is opaque; [lastIndex] is never used as a zero divisor. */
+private fun trackFadeAlpha(index: Int, lastIndex: Int): Float =
+    if (lastIndex <= 0) 1f else index.toFloat() / lastIndex.toFloat()
+
+private fun nodeTrackMarkerPlans(positionCount: Int, selectedIndex: Int?): List<NodeTrackMarker> {
+    val sampled = evenlyDistributedMarkerIndices(positionCount, NODE_TRACK_MARKER_BUDGET)
+    val extra = selectedIndex?.takeIf { it in 0 until positionCount && it !in sampled }
+    val indices = if (extra == null) sampled else (sampled + extra).sorted()
+    val lastIndex = positionCount - 1
+    return indices.map { index ->
+        NodeTrackMarker(index = index, alpha = trackFadeAlpha(index, lastIndex), isNewest = index == lastIndex)
+    }
+}
+
+/** [budget] is at least 2 in production, so both ends fit and the step denominator is not zero. */
+private fun evenlyDistributedMarkerIndices(positionCount: Int, budget: Int): List<Int> = when {
+    positionCount <= budget -> (0 until positionCount).toList()
+
+    else -> {
+        val last = positionCount - 1
+        val slots = budget - 1
+        List(budget) { slot -> (slot.toLong() * last / slots).toInt() }
+    }
+}
+
+private fun nodeTrackLineBuckets(coordinates: List<LatLng>): List<NodeTrackLineBucket> {
+    val edgeCount = coordinates.size - 1
+    if (edgeCount <= 0) return emptyList()
+    val bucketCount = minOf(NODE_TRACK_LINE_BUCKET_BUDGET, edgeCount)
+    val lastIndex = coordinates.lastIndex
+    return List(bucketCount) { bucket ->
+        val startIndex = (bucket.toLong() * edgeCount / bucketCount).toInt()
+        val endIndex = ((bucket + 1L) * edgeCount / bucketCount).toInt()
+        NodeTrackLineBucket(
+            startIndex = startIndex,
+            endIndex = endIndex,
+            alpha = trackFadeAlpha(endIndex, lastIndex),
+            points = coordinates.subList(startIndex, endIndex + 1).toList(),
+        )
+    }
+}
+
+/**
+ * Renders a position track inside a [GoogleMap] content scope.
+ *
+ * Markers fade from transparent (oldest) to opaque (newest) by original index. The newest position shows the node's
+ * [NodeChip]; older positions show a [TripOrigin] dot with an info-window on tap. Histories keep at most
+ * [NODE_TRACK_MARKER_BUDGET] of those markers, plus the list selection, and draw the whole route as at most
+ * [NODE_TRACK_LINE_BUCKET_BUDGET] gradient polylines.
  *
  * When [selectedPositionTime] matches a marker's `Position.time`, that marker is highlighted with the primary color and
- * elevated z-index. Tapping a marker invokes [onPositionSelect] for list synchronization.
+ * elevated z-index. Tapping a marker invokes [onPositionSelect] for list synchronization. Identity is the original
+ * index: equal timestamps are a valid history and cannot be told apart by time alone.
  */
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
@@ -1379,25 +1491,20 @@ private fun NodeTrackOverlay(
     val isHighPriority = focusedNode.num == myNodeNum || focusedNode.isFavorite
     val activeNodeZIndex = if (isHighPriority) 5f else 4f
     val selectedColor = MaterialTheme.colorScheme.primary
+    val trackColor = Color(focusedNode.colors.second)
+    // Lines and coordinates follow the filtered track only. Selection is a separate, cheap marker update.
+    val baseBudget = remember(sortedPositions) { nodeTrackRenderBudget(sortedPositions) }
+    val selectedIndex =
+        remember(sortedPositions, selectedPositionTime) { selectedTrackIndex(sortedPositions, selectedPositionTime) }
+    val markers = remember(baseBudget, selectedIndex) { baseBudget.withSelectedMarker(selectedIndex).markers }
 
-    sortedPositions.forEachIndexed { index, position ->
-        key(position.time) {
-            val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
-            val alpha =
-                if (sortedPositions.size > 1) {
-                    index.toFloat() / (sortedPositions.size.toFloat() - 1)
-                } else {
-                    1f
-                }
+    markers.forEach { marker ->
+        val position = sortedPositions[marker.index]
+        key(marker.index) {
+            val markerState = rememberUpdatedMarkerState(position = baseBudget.coordinates[marker.index])
+            // Timestamp equality, not the sampled index: duplicates stay selected together.
             val isSelected = position.time == selectedPositionTime
-            val color =
-                if (isSelected) {
-                    selectedColor
-                } else {
-                    Color(focusedNode.colors.second).copy(alpha = alpha)
-                }
-
-            if (index == sortedPositions.lastIndex) {
+            if (marker.isNewest) {
                 MarkerComposable(
                     state = markerState,
                     zIndex = activeNodeZIndex,
@@ -1410,11 +1517,12 @@ private fun NodeTrackOverlay(
                     NodeChip(node = focusedNode)
                 }
             } else {
+                val color = if (isSelected) selectedColor else trackColor.copy(alpha = marker.alpha)
                 MarkerInfoWindowComposable(
                     state = markerState,
                     title = stringResource(Res.string.position),
                     snippet = formatAgo(position.time),
-                    zIndex = if (isSelected) activeNodeZIndex - 0.5f else 1f + alpha,
+                    zIndex = if (isSelected) activeNodeZIndex - 0.5f else 1f + marker.alpha,
                     onClick = {
                         onPositionSelect?.invoke(position.time)
                         false // Allow default info window behavior
@@ -1432,19 +1540,14 @@ private fun NodeTrackOverlay(
         }
     }
 
-    // Gradient polyline segments
-    if (sortedPositions.size > 1) {
-        val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
-        segments.forEachIndexed { index, segmentPoints ->
-            val alpha = index.toFloat() / (segments.size.toFloat() - 1)
-            Polyline(
-                points = segmentPoints.map { it.toLatLng() },
-                jointType = JointType.ROUND,
-                color = Color(focusedNode.colors.second).copy(alpha = alpha),
-                width = 8f,
-                zIndex = 0.6f,
-            )
-        }
+    baseBudget.lines.forEach { bucket ->
+        Polyline(
+            points = bucket.points,
+            jointType = JointType.ROUND,
+            color = trackColor.copy(alpha = bucket.alpha),
+            width = 8f,
+            zIndex = 0.6f,
+        )
     }
 }
 
