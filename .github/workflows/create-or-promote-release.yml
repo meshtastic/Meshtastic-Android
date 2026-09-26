@@ -230,16 +230,32 @@ jobs:
     if: ${{ (failure() || cancelled()) && !inputs.dry_run && inputs.channel == 'internal' }}
     runs-on: ubuntu-slim
     timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Delete Failed or Cancelled Tag
         env:
           FINAL_TAG: ${{ needs.determine-tags.outputs.final_tag }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
         run: |
-          if [ -n "$FINAL_TAG" ]; then
-            echo "Release workflow failed or was cancelled. Deleting tag $FINAL_TAG to allow a clean retry..."
-            git push origin :refs/tags/"$FINAL_TAG" || echo "Tag was not pushed or already deleted."
-          else
+          if [ -z "$FINAL_TAG" ]; then
             echo "No tag was created to delete."
+            exit 0
           fi
+          # Play keeps an uploaded versionCode, so once publish-play succeeded the tag stays with it.
+          PLAY=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs?per_page=100" \
+            --jq '[.jobs[] | select(.name | endswith("publish-play")) | .conclusion][0] // ""') || {
+            echo "::warning::Could not read this run's jobs, so $FINAL_TAG stays. Delete it by hand if Play has no build from it."
+            exit 0
+          }
+          if [ "$PLAY" = "success" ]; then
+            echo "::warning::Play already has the build from $FINAL_TAG, so the tag stays. Re-run the failed jobs to finish the release."
+            exit 0
+          fi
+          echo "Release workflow failed or was cancelled. Deleting tag $FINAL_TAG to allow a clean retry..."
+          git push origin :refs/tags/"$FINAL_TAG" || echo "Tag was not pushed or already deleted."
