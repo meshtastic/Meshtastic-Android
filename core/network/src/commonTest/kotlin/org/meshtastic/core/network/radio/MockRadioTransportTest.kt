@@ -509,6 +509,65 @@ class MockRadioTransportTest {
         }
     }
 
+    @Test
+    fun `the showcase address plays the showcase mesh under its own identity`() = runTest {
+        val callback = RecordingCallback()
+        val scope = transportScope()
+        try {
+            val transport = MockRadioTransport(callback, scope, address = MockScenario.SHOWCASE_ADDRESS)
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
+
+            val myInfo = assertNotNull(callback.received.firstNotNullOfOrNull { it.my_info })
+            assertEquals(MockScenario.SHOWCASE.myNode, myInfo.my_node_num)
+            val names = callback.nodeInfos.map { it.user?.long_name }
+            assertEquals(listOf("Base Camp") + MockScenario.SHOWCASE.peers.map { it.longName }, names)
+            assertFalse(names.contains("Demo Handset"), "the showcase must not carry Demo Mode's identity")
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun `any other address plays the demo mesh`() = runTest {
+        val callback = RecordingCallback()
+        val scope = transportScope()
+        try {
+            val transport = MockRadioTransport(callback, scope, address = "anything")
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
+
+            assertEquals(MockScenario.DEMO.myNode, callback.received.firstNotNullOfOrNull { it.my_info }?.my_node_num)
+            assertEquals("Demo Handset", callback.nodeInfos.first().user?.long_name)
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun `the showcase seeds its thread once and then stays still`() = runTest {
+        val callback = RecordingCallback()
+        val scope = transportScope()
+        try {
+            val transport = MockRadioTransport(callback, scope, address = MockScenario.SHOWCASE_ADDRESS)
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
+            testScheduler.advanceTimeBy(SEED_WINDOW_MS)
+
+            val texts = callback.packetsOn(PortNum.TEXT_MESSAGE_APP)
+            assertEquals(
+                MockScenario.SHOWCASE.channelConversation.size + MockScenario.SHOWCASE.directConversation.size,
+                texts.size,
+            )
+            val afterSeed = callback.received.size
+
+            testScheduler.advanceTimeBy(LIVE_TICK_MS * LIVE_TICKS_AFTER_CLOSE)
+            assertEquals(afterSeed, callback.received.size, "a capture must see the same numbers however late it runs")
+        } finally {
+            scope.cancel()
+        }
+    }
+
     private companion object {
         const val BROADCAST_ADDR = -1
         const val MIN_DEMO_NODES = 8

@@ -26,10 +26,12 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.network.SerialTransport
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
+import org.meshtastic.core.network.radio.MockRadioTransport
 import org.meshtastic.core.network.radio.TcpRadioTransport
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
+import org.meshtastic.desktop.DesktopBuildConfig
 
 /**
  * Desktop implementation of [RadioTransportFactory] delegating multiplatform transports (BLE, TCP) and providing
@@ -47,13 +49,22 @@ class DesktopRadioTransportFactory(
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP, DeviceType.BLE, DeviceType.USB)
 
-    // Desktop has no unlock gesture and no demo entry in its picker; the virtual transports stay inadmissible.
-    override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
+    // Desktop has no unlock gesture, so Demo Mode is a debug-build feature: it admits the `m` addresses, including
+    // the hidden showcase, and offers the demo entry in the picker.
+    override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(DesktopBuildConfig.IS_DEBUG)
 
     /** Desktop bundles no capture asset, and [createPlatformTransport] does not wire a replay address. */
     override val isReplayTransportAvailable: Boolean = false
 
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport = when {
+        address.startsWith(InterfaceId.MOCK.id) -> {
+            MockRadioTransport(
+                callback = service,
+                scope = service.serviceScope,
+                address = address.removePrefix(InterfaceId.MOCK.id.toString()),
+            )
+        }
+
         address.startsWith(InterfaceId.TCP.id) -> {
             TcpRadioTransport(
                 callback = service,
