@@ -77,7 +77,7 @@ runs:
       run: echo "::warning::JBR setup-java failed (likely GitHub API rate limit). Gradle will auto-provision JBR via Foojay toolchain resolver."
 
     # ~/.konan and ~/.m2 sit outside the Gradle User Home, so setup-gradle does not cache them.
-    # A composite has no post step: writers take actions/cache for its end-of-job save, readers only restore.
+    # A save step here would run before ./gradlew, so writers rely on actions/cache's end-of-job save.
     - name: Read the Kotlin version
       if: inputs.cache_konan == 'true'
       id: kotlin
