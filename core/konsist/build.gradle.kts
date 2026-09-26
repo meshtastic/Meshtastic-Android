@@ -49,4 +49,6 @@ tasks.named<Test>("jvmTest") {
         )
         .withPathSensitivity(PathSensitivity.RELATIVE)
         .withPropertyName("konsistScannedSources")
+    // Gradle checks overlap against the tree root, so the include filter does not hide these outputs under src/.
+    mustRunAfter(":feature:docs:syncDocsToComposeResources", ":feature:docs:syncTranslatedDocsToComposeResources")
 }
