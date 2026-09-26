@@ -125,17 +125,14 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        if (BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_ONBOARDING, false)) {
+        // MainActivity is exported, so any app can send these extras; only the shell can start the debug alias.
+        val automationLaunch = BuildConfig.DEBUG && intent.component?.className == AUTOMATION_LAUNCHER
+        if (automationLaunch && intent.getBooleanExtra(EXTRA_SKIP_ONBOARDING, false)) {
+            launchOptions.skipOnboarding = true
             model.onAppIntroCompleted()
         }
-        // The activity is exported and debug snapshots are user-installed, so any app could send the extra. Honour it
-        // only on a launch the shell made: the system records the launcher's uid, the sender cannot forge it, and it
-        // describes this launch alone, which is why a later intent turns the switch back off.
         launchOptions.skipDeepLinkConfirmation =
-            BuildConfig.DEBUG &&
-            intent.getBooleanExtra(EXTRA_SKIP_CONNECT_CONFIRM, false) &&
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
-            launchedFromUid == SHELL_UID
+            automationLaunch && intent.getBooleanExtra(EXTRA_SKIP_CONNECT_CONFIRM, false)
 
         enableEdgeToEdge()
 
@@ -176,7 +173,7 @@ class MainActivity : AppCompatActivity() {
                     // once we've decided whether to show the intro or the main screen.
                     ReportDrawnWhen { true }
 
-                    if (appIntroCompleted) {
+                    if (appIntroCompleted || launchOptions.skipOnboarding) {
                         MainScreen()
                     } else {
                         val introViewModel = koinViewModel<IntroViewModel>()
@@ -188,6 +185,7 @@ class MainActivity : AppCompatActivity() {
 
         // Listen for new intents (e.g. deep links, NFC) without overriding onNewIntent
         addOnNewIntentListener { intent ->
+            // The switch covers the launch it came with; a link that arrives later still asks.
             launchOptions.skipDeepLinkConfirmation = false
             handleIntent(intent)
         }
@@ -430,8 +428,8 @@ class MainActivity : AppCompatActivity() {
         const val EXTRA_SKIP_ONBOARDING = "skip_onboarding"
         const val EXTRA_SKIP_CONNECT_CONFIRM = "skip_connect_confirm"
 
-        /** `android.os.Process.SHELL_UID`, which is not public API: the uid `adb shell` and UiAutomation run as. */
-        const val SHELL_UID = 2000
+        /** The DUMP-guarded alias in the debug manifest. */
+        const val AUTOMATION_LAUNCHER = "org.meshtastic.app.AutomationLauncher"
     }
 }
 

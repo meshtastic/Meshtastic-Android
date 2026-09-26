@@ -19,12 +19,15 @@ package org.meshtastic.core.common.state
 import org.koin.core.annotation.Single
 
 /**
- * Switches the platform entry point sets from its own launch arguments, for automation such as the store-screenshot
- * pipeline. Only the entry point writes them, and only in a debug build; a deep link can never set one, because the
- * trust checks they relax exist to stop links.
+ * Switches a debug build's entry point sets for automation such as the store-screenshot pipeline: Android from a launch
+ * through its shell-only automation alias, desktop from its command line. A deep link can never set one, because the
+ * checks they relax exist to stop links.
  */
 @Single
 class LaunchOptions {
+    /** Show the main screen without onboarding, before the persisted "intro completed" flag has loaded. */
+    var skipOnboarding: Boolean = false
+
     /** Apply a `connections` deep link's address without asking the user to confirm it. */
     var skipDeepLinkConfirmation: Boolean = false
 }

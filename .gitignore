@@ -15,6 +15,7 @@
 .cxx
 /app/release
 **/debug/**
+!/androidApp/src/debug/**
 **/release/**
 
 # Java KeyStore certificates

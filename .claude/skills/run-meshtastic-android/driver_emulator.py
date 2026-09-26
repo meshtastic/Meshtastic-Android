@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Drive the Meshtastic Android app on an emulator/device over adb.
 
-Scripted bring-up (never hand-walk onboarding): launches MainActivity with the
-debug-only skip_onboarding extra and a /connections deeplink that auto-connects
-to a TCP radio — pair it with a replay-sim radio (an AVD reaches the host at
+Scripted bring-up (never hand-walk onboarding): launches the debug build's
+shell-only AutomationLauncher alias with the skip_onboarding extra and a
+/connections deeplink that auto-connects to a TCP radio — pair it with a
+replay-sim radio (an AVD reaches the host at
 10.0.2.2). Handles the trust dialog newer builds pop on first connect.
 
 Usage:
@@ -38,7 +39,7 @@ import xml.etree.ElementTree as ET
 
 SERIAL = None
 PKG = "com.geeksville.mesh.fdroid.debug"
-ACTIVITY = "org.meshtastic.app.MainActivity"
+ACTIVITY = "org.meshtastic.app.AutomationLauncher"
 
 
 def adb(*args):
@@ -125,8 +126,8 @@ def connect(addr):
         "-a", "android.intent.action.VIEW",
         "-d", f"https://meshtastic.org/connections?address={addr}",
     )
-    # Debug builds on Android 14+ that know skip_connect_confirm apply the address with
-    # no dialog; older ones pop the trust dialog, sometimes late on a slow emulator.
+    # Debug builds with the AutomationLauncher alias apply the address with no dialog;
+    # older ones pop the trust dialog, sometimes late on a slow emulator.
     # Watch for either for 30 s. Match the dialog's title, not bare "Connect", which
     # also matches "Stop Connecting".
     deadline = time.time() + 30
