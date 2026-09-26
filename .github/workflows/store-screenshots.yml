@@ -37,8 +37,10 @@ on:
 permissions:
   contents: read
 
+# A called workflow's github.workflow is the caller's name, so a prefix built from it
+# equals release.yml's own group on the same tag and GitHub cancels the call as a deadlock.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.ref || github.ref }}
+  group: store-screenshots-${{ github.event.pull_request.number || inputs.ref || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
