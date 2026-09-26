@@ -36,6 +36,8 @@ on:
         required: false
       CROWDIN_GITHUB_TOKEN:
         required: false
+      FLATHUB_TOKEN:
+        required: false
 
 # Never cancel a promotion mid-flight: being killed between the Play edit
 # commit and the GitHub release/tag update leaves the two disagreeing. The
@@ -473,6 +475,7 @@ jobs:
           STAMP: ${{ steps.stamp.outcome }}
           STAMP_PR: ${{ steps.stamp_pr.outputs.url }}
           STAMP_PR_OUTCOME: ${{ steps.stamp_pr.outcome }}
+          HAS_FLATHUB_TOKEN: ${{ secrets.FLATHUB_TOKEN != '' }}
         run: |
           row() { printf '| %s | %s |\n' "$1" "$2"; }
           {
@@ -522,10 +525,19 @@ jobs:
               row "Microsoft Store dispatched" "$MSSTORE"
               row "Version bump dispatched" "$BUMP"
               row "Post-Release Cleanup" "dispatched by Docs Release once /${TAG}/ is published"
+              if [[ "$HAS_FLATHUB_TOKEN" == "true" ]]; then
+                row "Flathub update PR" "opened by the update-flathub job after this one"
+              else
+                row "Flathub update PR" "will skip: FLATHUB_TOKEN unset"
+              fi
               echo
               echo "Still by hand:"
               echo "- Play Console: the production rollout is staged; complete it there."
-              echo "- Flathub: bump flathub/org.meshtastic.MeshtasticDesktop (tag, commit, gradle zip and sha256, flatpak-sources.json)."
+              if [[ "$HAS_FLATHUB_TOKEN" == "true" ]]; then
+                echo "- Flathub: merge the update-flathub PR once its test build passes."
+              else
+                echo "- Flathub: bump flathub/org.meshtastic.MeshtasticDesktop (tag, commit, gradle zip and sha256, flatpak-sources.json)."
+              fi
               echo "- Release notes: replace the placeholder <description> the version bump PR wrote for the next line."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
@@ -642,3 +654,82 @@ jobs:
             --body "Automated cask bump for the ${TAG} production release of [Meshtastic-Android](https://github.com/${{ github.repository }}/releases/tag/${TAG})." \
             || echo "PR already exists for $BRANCH; branch updated.")
           echo "- Homebrew cask: $PR_URL" >> "$GITHUB_STEP_SUMMARY"
+
+  # The same for flathub/org.meshtastic.MeshtasticDesktop: the tag and its commit, the Gradle
+  # zip that tag's wrapper pins, and the release's flatpak-sources.json. The JBR, runtime and
+  # patches stay as they are; Flathub's test build on the PR checks them against the tag.
+  update-flathub:
+    if: ${{ inputs.channel == 'production' }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    needs: [ update-github-release ]
+    steps:
+      # From the caller's commit, like the scripts in the jobs above.
+      - name: Checkout the manifest bump script from caller commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: scripts/verify-flatpak
+
+      - name: Update the manifest and open PR against flathub/org.meshtastic.MeshtasticDesktop
+        env:
+          FLATHUB_TOKEN: ${{ secrets.FLATHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [[ -z "$FLATHUB_TOKEN" ]]; then
+            echo "::notice::FLATHUB_TOKEN not set; skipping the Flathub update."
+            echo "- Flathub: skipped, FLATHUB_TOKEN not set" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          VERSION=${TAG#v}
+
+          # The tag appears a moment after the undraft.
+          TYPE="" COMMIT=""
+          for _ in 1 2 3 4 5 6; do
+            if OBJ=$(gh api "repos/${REPO}/git/ref/tags/${TAG}" --jq '.object.type + " " + .object.sha' 2>/dev/null); then
+              read -r TYPE COMMIT <<< "$OBJ"
+              break
+            fi
+            sleep 10
+          done
+          if [[ -z "$COMMIT" ]]; then
+            echo "::error::Tag $TAG not found."
+            exit 1
+          fi
+          if [[ "$TYPE" == "tag" ]]; then
+            COMMIT=$(gh api "repos/${REPO}/git/tags/${COMMIT}" --jq .object.sha)
+          fi
+
+          gh api "repos/${REPO}/contents/gradle/wrapper/gradle-wrapper.properties?ref=${COMMIT}" \
+            -H 'Accept: application/vnd.github.raw' > "$RUNNER_TEMP/gradle-wrapper.properties"
+          gh release download "$TAG" --repo "$REPO" --pattern flatpak-sources.json --dir "$RUNNER_TEMP"
+          jq empty "$RUNNER_TEMP/flatpak-sources.json"
+
+          FLATHUB="$RUNNER_TEMP/flathub"
+          git clone "https://x-access-token:${FLATHUB_TOKEN}@github.com/flathub/org.meshtastic.MeshtasticDesktop.git" "$FLATHUB"
+          BASE=$(git -C "$FLATHUB" rev-parse --abbrev-ref HEAD)
+          BRANCH="update-${VERSION}"
+          git -C "$FLATHUB" checkout -b "$BRANCH"
+          python3 scripts/verify-flatpak/bump-flathub-manifest.py \
+            "$FLATHUB/org.meshtastic.MeshtasticDesktop.yaml" "$TAG" "$COMMIT" "$RUNNER_TEMP/gradle-wrapper.properties"
+          cp "$RUNNER_TEMP/flatpak-sources.json" "$FLATHUB/flatpak-sources.json"
+
+          cd "$FLATHUB"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add org.meshtastic.MeshtasticDesktop.yaml flatpak-sources.json
+          if git diff --cached --quiet; then
+            echo "Flathub manifest already at ${TAG}."
+            echo "- Flathub: already at ${TAG}" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -m "Update to ${TAG}"
+          git push -fu origin "$BRANCH"
+          PR_URL=$(GH_TOKEN="$FLATHUB_TOKEN" gh pr create --repo flathub/org.meshtastic.MeshtasticDesktop \
+            --head "$BRANCH" --base "$BASE" \
+            --title "Update to ${TAG}" \
+            --body "$(printf 'Update Meshtastic Desktop to version %s\nhttps://github.com/%s/releases/tag/%s\n' "$TAG" "$REPO" "$TAG")" \
+            || echo "PR already exists for $BRANCH; branch updated.")
+          echo "- Flathub: $PR_URL" >> "$GITHUB_STEP_SUMMARY"
