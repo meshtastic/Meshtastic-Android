@@ -2,13 +2,16 @@ name: Scheduled Updates (Firmware, Hardware, Translations)
 
 on:
   schedule:
-    # Hourly. This job is cheap (curl + Crowdin + PR; Gradle only in the hour after
-    # a protobufs bump merges) — the slow emulator/graph work lives in
-    # scheduled-baseline.yml on a daily cron.
-    - cron: '0 * * * *'
+    # Cheap (curl + Crowdin + PR; Gradle only when the protobufs pin moves). The emulator and
+    # graph work lives in scheduled-baseline.yml.
+    - cron: '17 */6 * * *'
+  # A protobufs pin change on main regenerates the schema strings without waiting for the cron.
+  push:
+    branches: [main]
+    paths: [gradle/libs.versions.toml]
   workflow_dispatch:       # Allow manual triggering
 
-# Hourly cron + manual dispatch must never stack: overlapping runs race on the
+# Cron, push and manual dispatch must never stack: overlapping runs race on the
 # scheduled-updates branch force-push. Later runs queue (at most one pending).
 concurrency:
   group: ${{ github.workflow }}
@@ -266,7 +269,7 @@ jobs:
           fi
 
       # values/schema_strings.xml is generated from the org.meshtastic:protobufs pin and records which one. Gradle
-      # runs here only when main's pin has moved past the recorded one, so the hourly job stays cheap between bumps;
+      # runs here only when main's pin has moved past the recorded one, so the job stays cheap between bumps;
       # the regenerated English goes up to Crowdin in the step below and rides this PR with the translations.
       - name: Check whether the schema strings lag the protobufs pin
         id: schema_pin
