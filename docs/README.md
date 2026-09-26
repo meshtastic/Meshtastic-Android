@@ -67,8 +67,7 @@ channels (GitHub Pages must be configured to serve from that branch):
 
 `promote.yml` dispatches `docs-release.yml` after every open, closed and
 production promotion, because the tag it creates with `GITHUB_TOKEN` starts no
-workflow. The tag trigger of
-`docs-release.yml` covers a tag pushed by hand.
+workflow. The tag trigger of `docs-release.yml` covers a tag pushed by hand.
 
 `-internal.N` tags are deliberately not published — they are cut many times per
 cycle and are not a documented channel.
