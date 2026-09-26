@@ -48,7 +48,7 @@ jobs:
     name: Android
     # Hosted x64 runners expose KVM; the emulator needs it.
     runs-on: ubuntu-26.04
-    timeout-minutes: 60
+    timeout-minutes: 35
     continue-on-error: ${{ inputs.soft == true }}
     steps:
       - name: Checkout code
@@ -148,7 +148,7 @@ jobs:
   desktop:
     name: Desktop
     runs-on: ubuntu-26.04
-    timeout-minutes: 45
+    timeout-minutes: 20
     continue-on-error: ${{ inputs.soft == true }}
     steps:
       - name: Checkout code
