@@ -83,7 +83,7 @@ runs:
       id: kotlin
       shell: bash
       run: |
-        version=$(grep -m1 -E '^kotlin *= *"' gradle/libs.versions.toml | cut -d'"' -f2)
+        version=$(awk -F'"' '/^kotlin *= *"/ { print $2; exit }' gradle/libs.versions.toml)
         if [ -z "$version" ]; then
           echo "::error file=gradle/libs.versions.toml::no kotlin version entry"
           exit 1
