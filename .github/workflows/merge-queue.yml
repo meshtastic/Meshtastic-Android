@@ -15,9 +15,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Docs-only queue entries (changelog updates, markdown fixes) cannot affect the build;
-  # skip the heavy pipeline for them. Anything outside docs/ and *.md runs full CI.
-  # Mirrors the paths-ignore list in main-check.yml.
+  # Docs-only queue entries (changelog updates, markdown fixes, store listings, Obtainium
+  # configs) cannot affect the build; skip the heavy pipeline for them. Anything outside
+  # docs/, fastlane/, obtainium/ and *.md runs full CI. Mirrors the paths-ignore list in
+  # main-check.yml.
   # No checkout, no toolchain: gh api only.
   check-changes:
     name: Check Changes
@@ -66,7 +67,7 @@ jobs:
           echo "Changed files ($count):"
           echo "$changed"
           # The compare API lists at most 300 files, so a list that long may be truncated.
-          if [ "$count" -ge 300 ] || echo "$changed" | grep -qvE '^docs/|\.md$|^$'; then
+          if [ "$count" -ge 300 ] || echo "$changed" | grep -qvE '^docs/|^fastlane/|^obtainium/|\.md$|^$'; then
             echo "android=true" >> "$GITHUB_OUTPUT"
           else
             echo "android=false" >> "$GITHUB_OUTPUT"
