@@ -58,9 +58,9 @@ jobs:
   # jobs could even enter the queue. Its two outputs are now sourced without a
   # job: cache writability is the pure expression above, and the versionCode
   # comes from one of two places:
-  #   - Jobs whose artifacts ship (android-check, build-desktop,
-  #     build-flatpak-src) check out full — blob-less — history so the build's
-  #     GitVersionValueSource derives the real commit-count versionCode.
+  #   - Jobs whose artifacts ship (android-check, build-desktop) check out full,
+  #     blob-less history so the build's GitVersionValueSource derives the real
+  #     commit-count versionCode.
   #   - Validation-only jobs (lint, screenshot, test shards) pin VERSION_CODE
   #     to a constant instead: their outputs are never shipped, and the real
   #     value changes on every commit, which poisons the versionCode-dependent
@@ -104,7 +104,7 @@ jobs:
           # upstream; VERSION_CODE is still pinned above so entries would reuse.
           cache_configuration_cache: 'false'
 
-      - name: Lint, Analysis & KMP Smoke Compile
+      - name: Spotless, Detekt & Android Lint
         run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true --continue
 
   # ── Screenshot Test Validation ──────────────────────────────────────
@@ -208,7 +208,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    timeout-minutes: 45
+    timeout-minutes: 35
     if: inputs.run_unit_tests == true
     env:
       VERSION_CODE: 30000000 # pinned for cache stability -- see comment above
@@ -456,12 +456,13 @@ jobs:
           retention-days: 7
 
   # ── Android Build ────────────────────────────────────────────────────
-  # Also generates the dependency graph — assembling both flavors resolves the widest set.
+  # On main it also submits the dependency graph, since assembling both flavors resolves
+  # the widest set.
   android-check:
     runs-on: ubuntu-26.04
     # No permissions block on purpose: inherits the caller's. main grants contents: write
-    # (graph submit); PRs grant read (upload only).
-    timeout-minutes: 60
+    # for the graph submit.
+    timeout-minutes: 30
     if: inputs.run_android_build == true
 
     steps:
@@ -603,7 +604,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    timeout-minutes: 60
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:

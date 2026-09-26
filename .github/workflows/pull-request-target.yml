@@ -118,7 +118,7 @@ jobs:
           const author = context.payload.pull_request.user.login;
           const headRef = context.payload.pull_request.head.ref;
           const skipAuthors = ['renovate[bot]', 'github-actions[bot]', 'dependabot[bot]'];
-          const skipRefs = ['scheduled-updates', 'l10n_main'];
+          const skipRefs = ['scheduled-updates'];
           if (!skipAuthors.includes(author) && !skipRefs.includes(headRef)) {
             const requiredLabels = ['bugfix', 'enhancement', 'automation', 'dependencies', 'repo', 'release', 'refactor', 'desktop', 'chore', 'ci', 'build', 'testing', 'documentation'];
             const effectiveLabels = new Set([
