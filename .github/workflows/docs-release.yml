@@ -3,9 +3,9 @@ name: Docs Release
 # Publishes release docs to the persistent gh-pages branch.
 #
 # promote.yml dispatches this on the tag after every open, closed and production
-# promotion, because a tag created with GITHUB_TOKEN starts no workflow. The tag trigger covers a tag
-# pushed by hand, and a manual run against a tag ref (re)publishes that version
-# without cutting a new tag.
+# promotion, because a tag created with GITHUB_TOKEN starts no workflow. The tag
+# trigger covers a tag pushed by hand, and a manual run against a tag ref
+# (re)publishes that version without cutting a new tag.
 #
 # Production tags (vX.Y.Z) own the site root and get a permanent /vX.Y.Z/ copy,
 # plus a refreshed Dokka reference at /api/.
@@ -89,7 +89,7 @@ jobs:
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
-        # Unset ruby-version reads the root .ruby-version; the bundle is still docs/Gemfile.
+        # With ruby-version unset this reads the root .ruby-version; the bundle is docs/Gemfile.
         env:
           BUNDLE_GEMFILE: docs/Gemfile
         with:
