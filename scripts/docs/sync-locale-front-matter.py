@@ -165,7 +165,12 @@ def main() -> int:
             shown = page.relative_to(REPO_ROOT) if page.is_relative_to(REPO_ROOT) else page
             locale = FrontMatter.parse(page.read_bytes().decode("utf-8"))
             if locale is None:
-                annotate("warning", shown, 1, "no front matter, while its docs/en page has one")
+                missing = [key for key in STRUCTURAL_KEYS if english.get(key) is not None]
+                if args.check and missing:
+                    drifted += 1
+                    annotate("error", shown, 1, f"no front matter, so no {', '.join(missing)}; docs/en has them")
+                else:
+                    annotate("warning", shown, 1, "no front matter, while its docs/en page has one")
                 continue
             lines = {key: locale.line_of(key) for key in STRUCTURAL_KEYS}
             changes = sync(locale, english)
