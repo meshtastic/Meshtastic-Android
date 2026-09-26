@@ -60,8 +60,6 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          submodules: recursive
 
       # Renovate mirrors wrapper bumps into the manifest's distribution URL but cannot
       # rewrite its sha256, so on a wrapper bump this drift is expected: fail here in
