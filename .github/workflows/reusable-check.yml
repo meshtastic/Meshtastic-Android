@@ -320,6 +320,7 @@ jobs:
           cache_configuration_cache: 'false'
           # Shards run different task graphs; kover flips the graph again.
           cache_key_suffix: ${{ matrix.shard.name }}${{ inputs.run_coverage && '-kover' || '' }}
+          cache_konan: 'true'
 
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
         run: |

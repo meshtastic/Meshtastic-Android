@@ -2,7 +2,13 @@ name: Gradle Setup
 description: Setup Java and Gradle for KMP builds
 inputs:
   cache_read_only:
-    description: 'Whether Gradle cache is read-only'
+    description: 'Whether the Gradle, Kotlin/Native and Robolectric caches are read-only'
+    default: 'true'
+  cache_konan:
+    description: 'Cache ~/.konan. Only jobs that run Kotlin/Native tasks read it.'
+    default: 'false'
+  cache_robolectric:
+    description: 'Cache the Robolectric android-all jars in ~/.m2'
     default: 'true'
   jdk_distribution:
     description: 'JDK distribution (temurin or jetbrains)'
@@ -79,27 +85,61 @@ runs:
       shell: bash
       run: echo "::warning::JBR setup-java failed (likely GitHub API rate limit). Gradle will auto-provision JBR via Foojay toolchain resolver."
 
-    # Kotlin/Native lives in ~/.konan, OUTSIDE the Gradle home that
-    # setup-gradle caches — without this every job re-downloads the K/N
-    # toolchain (downloadKotlinNativeDistribution) and the iOS-target compile
-    # tasks it feeds miss the build cache, while the identical tasks hit
-    # FROM-CACHE locally. Keyed on the version catalog: over-invalidates on
-    # unrelated bumps, but konan re-downloads are exactly what it prevents.
-    - name: Cache Kotlin/Native toolchain
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+    # ~/.konan and ~/.m2 sit outside the Gradle User Home, so setup-gradle does not cache them.
+    # A composite has no post step: writers take actions/cache for its end-of-job save, readers only restore.
+    - name: Read the Kotlin version
+      if: inputs.cache_konan == 'true'
+      id: kotlin
+      shell: bash
+      run: |
+        version=$(grep -m1 -E '^kotlin *= *"' gradle/libs.versions.toml | cut -d'"' -f2)
+        if [ -z "$version" ]; then
+          echo "::error file=gradle/libs.versions.toml::no kotlin version entry"
+          exit 1
+        fi
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+
+    - name: Restore the Kotlin/Native toolchain
+      if: inputs.cache_konan == 'true' && inputs.cache_read_only == 'true'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.konan
-        key: konan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml') }}
+        key: konan-${{ runner.os }}-${{ runner.arch }}-${{ steps.kotlin.outputs.version }}
+        restore-keys: |
+          konan-${{ runner.os }}-${{ runner.arch }}-
 
-    # Robolectric downloads its android-all-instrumented jars to the local Maven
-    # repo, which lives outside the Gradle User Home and so isn't covered by
-    # setup-gradle's caching. (This was previously attempted via
-    # gradle-home-cache-includes, but those entries resolve relative to the
-    # Gradle User Home — the `~/.m2/...` line expanded to the literal path
-    # `<gradle-home>/~/.m2/...` and never matched anything.) Keyed on the
-    # version catalog, which pins the Robolectric version.
-    - name: Cache Robolectric android-all jars
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+    - name: Cache the Kotlin/Native toolchain
+      if: inputs.cache_konan == 'true' && inputs.cache_read_only != 'true'
+      id: konan
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.konan
+        key: konan-${{ runner.os }}-${{ runner.arch }}-${{ steps.kotlin.outputs.version }}
+        restore-keys: |
+          konan-${{ runner.os }}-${{ runner.arch }}-
+
+    # A restore-keys match brings the previous Kotlin's bundle along; without this the saved entry grows every bump.
+    - name: Drop other Kotlin/Native bundles before the save
+      if: inputs.cache_konan == 'true' && inputs.cache_read_only != 'true' && steps.konan.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        KOTLIN_VERSION: ${{ steps.kotlin.outputs.version }}
+      run: |
+        [ -d ~/.konan ] || exit 0
+        find ~/.konan -mindepth 1 -maxdepth 1 -name 'kotlin-native-prebuilt-*' ! -name "kotlin-native-prebuilt-*-${KOTLIN_VERSION}" -print -exec rm -rf {} +
+
+    - name: Restore the Robolectric android-all jars
+      if: inputs.cache_robolectric == 'true' && inputs.cache_read_only == 'true'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.m2/repository/org/robolectric
+        key: robolectric-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml') }}
+        restore-keys: |
+          robolectric-${{ runner.os }}-${{ runner.arch }}-
+
+    - name: Cache the Robolectric android-all jars
+      if: inputs.cache_robolectric == 'true' && inputs.cache_read_only != 'true'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.m2/repository/org/robolectric
         key: robolectric-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml') }}
