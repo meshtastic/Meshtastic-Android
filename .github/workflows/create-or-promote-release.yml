@@ -210,6 +210,23 @@ jobs:
       version_code: ${{ needs.determine-tags.outputs.version_code }}
     secrets: inherit
 
+  # A production promotion stamps CHANGELOG.md itself; every other cut refreshes [Unreleased].
+  update-changelog:
+    needs: [call-release-workflow, call-promote-workflow]
+    if: >-
+      ${{ !cancelled() && !inputs.dry_run && inputs.channel != 'production'
+        && (needs.call-release-workflow.result == 'success' || needs.call-promote-workflow.result == 'success') }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Dispatch Update Changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run update-changelog.yml --ref main
+
   cleanup-on-failure:
     needs: [determine-tags, call-release-workflow]
     if: ${{ (failure() || cancelled()) && !inputs.dry_run && inputs.channel == 'internal' }}

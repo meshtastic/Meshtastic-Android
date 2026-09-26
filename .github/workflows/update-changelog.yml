@@ -1,7 +1,8 @@
 name: Update Changelog
 
-# Manual only: promote.yml stamps the released section at release time on its
-# own. Dispatch this to refresh the [Unreleased] section between releases.
+# Create or Promote Release dispatches this after every internal, closed and open run;
+# a production promotion stamps the released section itself. Dispatch it by hand to
+# refresh the [Unreleased] section at any other time.
 on:
   workflow_dispatch:
 
