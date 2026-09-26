@@ -117,6 +117,19 @@
         "/^io\\.insert-koin\\.compiler\\.plugin/"
       ],
       "automerge": false
+    },
+    {
+      "description": "One weekly PR for everything the github-actions manager finds, since each .github-only PR runs the whole PR pipeline. Majors still get their own PR. Ruby stays out so the setup-ruby inputs move with .ruby-version. Vulnerability fixes are not held: Renovate forces an empty schedule and no group on them.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepNames": [
+        "!ruby"
+      ],
+      "groupName": "github-actions",
+      "schedule": [
+        "before 6am on monday"
+      ]
     }
   ],
   "customManagers": [
