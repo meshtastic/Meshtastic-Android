@@ -108,12 +108,7 @@ class StoreScreenshots {
             open("connections?address=$SHOWCASE_ADDRESS", clearTask = true)
             val deadline = SystemClock.uptimeMillis() + CONNECT_TIMEOUT_MS
             while (SystemClock.uptimeMillis() < deadline) {
-                if (onElementOrNull(POLL_MS) { hasText(SHOWCASE_NODE_NAME) } != null) {
-                    // Our node's name comes with the handshake; the thread and telemetry follow in the seed pass.
-                    // A thread opened mid-seed keeps a "new messages below" marker.
-                    SystemClock.sleep(SEED_PASS_MS)
-                    return
-                }
+                if (onElementOrNull(POLL_MS) { hasText(SHOWCASE_NODE_NAME) } != null) return
                 if (onElementOrNull(0) { hasText(TRUST_DIALOG_TITLE) } != null) {
                     onElementOrNull(0) { hasText(TRUST_DIALOG_CONFIRM) }?.click()
                 }
@@ -127,6 +122,14 @@ class StoreScreenshots {
     }
 
     private fun UiAutomatorTestScope.capture(formFactor: FormFactor, shot: Shot) {
+        if (shot.readFirst) {
+            // A thread with unread messages opens at the first of them, behind a "new messages below" divider and a
+            // jump-to-latest pill. Opening it once marks it read; the capture then opens it at the latest message.
+            open(shot.path)
+            SystemClock.sleep(READ_WARM_UP_MS)
+            open(Shot.Nodes.path)
+            SystemClock.sleep(READ_WARM_UP_MS)
+        }
         open(shot.path)
         SystemClock.sleep(shot.minimumWaitMs)
         val stable =
@@ -189,9 +192,10 @@ class StoreScreenshots {
         val minimumWaitMs: Long = 2_000,
         val stableTimeoutMs: Long = 30_000,
         val stableIntervalMs: Long = 2_000,
+        val readFirst: Boolean = false,
     ) {
         // The primary channel's contact key, raw: `am start` takes it literally and Uri.parse accepts the caret.
-        Messages("1_messages", "messages/0^all"),
+        Messages("1_messages", "messages/0^all", readFirst = true),
         Nodes("2_nodes", "nodes"),
         Map("3_map", "map", minimumWaitMs = 45_000, stableTimeoutMs = 120_000, stableIntervalMs = 8_000),
         NodeDetail("4_node_detail", "nodes/$RIDGE_TOP_NUM"),
@@ -220,8 +224,7 @@ class StoreScreenshots {
         const val SYSTEM_UI_SETTLE_MS = 3_000L
         const val DEMO_BURSTS = 2
 
-        /** Comfortably past the showcase's seed pass, ~3 s of frames 120 ms apart (MockRadioTransport). */
-        const val SEED_PASS_MS = 10_000L
+        const val READ_WARM_UP_MS = 3_000L
 
         const val CONNECT_ATTEMPTS = 3
         const val CONNECT_TIMEOUT_MS = 60_000L
