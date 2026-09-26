@@ -58,9 +58,9 @@ jobs:
   # jobs could even enter the queue. Its two outputs are now sourced without a
   # job: cache writability is the pure expression above, and the versionCode
   # comes from one of two places:
-  #   - Jobs whose artifacts ship (android-check, build-desktop,
-  #     build-flatpak-src) check out full — blob-less — history so the build's
-  #     GitVersionValueSource derives the real commit-count versionCode.
+  #   - Jobs whose artifacts ship (android-check, build-desktop) check out full,
+  #     blob-less history so the build's GitVersionValueSource derives the real
+  #     commit-count versionCode.
   #   - Validation-only jobs (lint, screenshot, test shards) pin VERSION_CODE
   #     to a constant instead: their outputs are never shipped, and the real
   #     value changes on every commit, which poisons the versionCode-dependent
@@ -105,7 +105,7 @@ jobs:
           cache_configuration_cache: 'false'
           install_jetbrains_jdk: 'true'
 
-      - name: Lint, Analysis & KMP Smoke Compile
+      - name: Spotless, Detekt & Android Lint
         run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true --continue
 
   # ── Screenshot Test Validation ──────────────────────────────────────
