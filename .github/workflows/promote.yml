@@ -214,16 +214,22 @@ jobs:
             scripts
             .github/actions/bot-pr
 
+      # A rerun finds the release already moved to the final tag, so that is looked up first.
       - name: Update GitHub Release with gh CLI
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag_name }}
+          FINAL_TAG: ${{ inputs.final_tag }}
+          VERSION_CODE: ${{ inputs.version_code }}
+          PRERELEASE: ${{ inputs.channel != 'production' }}
         run: |
-          gh release edit ${{ inputs.tag_name }} \
-            --tag ${{ inputs.final_tag }} \
-            --title "${{ inputs.final_tag }} (${{ inputs.version_code }})" \
+          CURRENT=$(gh release view "$FINAL_TAG" --json tagName --jq .tagName 2>/dev/null || echo "$TAG")
+          gh release edit "$CURRENT" \
+            --tag "$FINAL_TAG" \
+            --title "$FINAL_TAG ($VERSION_CODE)" \
             --draft=false \
-            --prerelease=${{ inputs.channel != 'production' }}
+            --prerelease="$PRERELEASE"
 
       # The draft's notes were generated at the internal cut and cover only the
       # PRs since the previous published pre-release. A production release is
@@ -512,8 +518,9 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Announces once the release is published, whatever happened to the steps after it.
       - name: Notify Discord
-        if: ${{ inputs.channel != 'internal' }}
+        if: ${{ always() && steps.release.outcome == 'success' && inputs.channel != 'internal' }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_ANDROID }}
           VERSION: ${{ inputs.final_tag }}
