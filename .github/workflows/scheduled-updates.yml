@@ -475,8 +475,38 @@ jobs:
             echo "PREOF"
           } >> "$GITHUB_OUTPUT"
 
+      # GitHub refuses a push to the head branch of a queued PR (GH006), so a queued PR is left to land.
+      # gh pr view --json does not expose isInMergeQueue; GraphQL does.
+      - name: Check whether the scheduled PR is in the merge queue
+        id: merge_queue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          query=$(cat <<'GQL'
+          query($owner: String!, $name: String!) {
+            repository(owner: $owner, name: $name) {
+              pullRequests(headRefName: "scheduled-updates", baseRefName: "main", states: OPEN, first: 1) {
+                nodes { number isInMergeQueue }
+              }
+            }
+          }
+          GQL
+          )
+          if ! queued=$(gh api graphql -f query="$query" -f owner="$GITHUB_REPOSITORY_OWNER" -f name="${GITHUB_REPOSITORY#*/}" \
+            --jq '.data.repository.pullRequests.nodes[] | select(.isInMergeQueue) | .number'); then
+            echo "::warning::Could not read the merge queue state of the scheduled PR; updating it anyway."
+            queued=""
+          fi
+          if [ -n "$queued" ]; then
+            echo "::notice::#$queued is in the merge queue; leaving its branch alone until it lands."
+            echo "in_queue=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "in_queue=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create Pull Request if changes occurred
         id: pr
+        if: steps.merge_queue.outputs.in_queue != 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
@@ -524,7 +554,7 @@ jobs:
       # A failure fails the run: the PR exists either way, and a request that
       # cannot be made is something to fix, not to hide.
       - name: Enable auto-merge
-        if: ${{ steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated' }}
+        if: ${{ steps.merge_queue.outputs.in_queue != 'true' && (steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated') }}
         env:
           GH_TOKEN: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
           PR_NUMBER: ${{ steps.pr.outputs.pull-request-number }}
