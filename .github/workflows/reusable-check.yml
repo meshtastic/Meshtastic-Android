@@ -456,11 +456,12 @@ jobs:
           retention-days: 7
 
   # ── Android Build ────────────────────────────────────────────────────
-  # Also generates the dependency graph — assembling both flavors resolves the widest set.
+  # On main it also submits the dependency graph, since assembling both flavors resolves
+  # the widest set.
   android-check:
     runs-on: ubuntu-26.04
     # No permissions block on purpose: inherits the caller's. main grants contents: write
-    # (graph submit); PRs grant read (upload only).
+    # for the graph submit.
     timeout-minutes: 30
     if: inputs.run_android_build == true
 
@@ -479,8 +480,7 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          # main submits; PRs upload (no contents: write), dependency-graph-submit.yml finishes.
-          dependency_graph: ${{ github.event_name == 'pull_request' && 'generate-and-upload' || (github.ref == 'refs/heads/main' && 'generate-and-submit' || 'disabled') }}
+          dependency_graph: ${{ github.ref == 'refs/heads/main' && 'generate-and-submit' || 'disabled' }}
 
       - name: Tag main-branch builds as -SNAPSHOT
         if: github.event_name == 'push'

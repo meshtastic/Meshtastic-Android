@@ -117,7 +117,7 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as parall
 
 ### Runner Strategy (Four Tiers)
 - **`ubuntu-slim`** — The cheapest tier, and where lightweight jobs belong since #6674/#6677: status gates, labelers, triage, run-cancellers, stale, changelog and release cleanup. Container-backed and starts in seconds, but **single-CPU, unprivileged, x64-only, with a hard 15-minute job cap** — so it fits `gh`/`jq`/`git`/stdlib-`python3`/`github-script` work and nothing needing `sudo`, `apt-get`, Docker, a mounted filesystem, or a long full-history clone.
-- **`ubuntu-24.04-arm`** — Lightweight jobs that break any of those `ubuntu-slim` constraints (release metadata, `main-check`, promotion, dependency-graph submission). Shorter queue times than x64.
+- **`ubuntu-24.04-arm`** runs the lightweight jobs that break any of those `ubuntu-slim` constraints (release metadata, `main-check`, promotion). Shorter queue times than x64.
 - **`ubuntu-24.04`** — Gradle-heavy jobs. Every single-runner job in `reusable-check.yml` pins it (`lint-check`, `screenshot-check`, `rb-check`, `test-shards`, `android-check`), as do release builds, Dokka and docs publishing. The `build-desktop` matrix job spans several runners instead, as does `verify-flatpak` in its own workflow. Pin for reproducibility.
 - **Desktop runners:** Multi-OS matrix (`macos-latest`, `windows-latest`, `ubuntu-24.04`, `ubuntu-24.04-arm`) for the `build-desktop` job, `verify-flatpak`, and release packaging.
 
