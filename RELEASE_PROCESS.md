@@ -97,8 +97,9 @@ or `beta` track. Its inputs are the `track`, an `action` and, for `rollout`, a `
 | `halt` | Stops the rollout at its current fraction |
 
 It carries the same `no_review_in_flight` gate as a promotion, because a committed change
-cancels and restarts any review in flight, and it shares `Create or Promote Release`'s
-concurrency group, so it never edits Play while a promotion does. The run stops without
+cancels and restarts any review in flight. It runs in its own concurrency group, not
+`Create or Promote Release`'s, since a group keeps one pending run and a rollout queued there
+would cancel a pending promotion. The run stops without
 changing anything unless the track holds exactly one `inProgress` release, and it verifies the
 new status and fraction on the track afterwards. A halted release is resumed or completed in the
 Play Console, since `supply` only acts on `inProgress` releases. When Play will not send a change

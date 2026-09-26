@@ -35,10 +35,9 @@ on:
 permissions:
   contents: read
 
-# The group is Create or Promote Release's (its workflow name), so a rollout change never
-# edits Play while a promotion does.
+# Not the promotion's group: a group keeps one pending run, so this would cancel a pending promotion.
 concurrency:
-  group: Create or Promote Release
+  group: play-rollout
   cancel-in-progress: false
 
 jobs:
