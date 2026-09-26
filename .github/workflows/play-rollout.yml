@@ -1,0 +1,173 @@
+name: Play Rollout
+
+# Moves the staged rollout already on a Play track: the one inProgress release a promotion
+# leaves there (production at 10%, beta at 50%). rollout widens it to `fraction`, complete
+# ships it to every user, halt stops it where it is. supply acts only on inProgress releases,
+# so a halted release is resumed or completed in the Play Console.
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play track holding the staged release'
+        required: true
+        type: choice
+        options:
+          - production
+          - beta
+      action:
+        description: 'rollout widens it to fraction, complete ships it to everyone, halt stops it'
+        required: true
+        type: choice
+        options:
+          - rollout
+          - complete
+          - halt
+      fraction:
+        description: 'rollout only: the new user fraction, above the current one and below 1 (e.g., 0.5)'
+        required: false
+        type: string
+      no_review_in_flight:
+        description: 'I checked Publishing overview > Submission activity and no submission is In review. A committed rollout change CANCELS and RESTARTS any review in flight.'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# The group is Create or Promote Release's (its workflow name), so a rollout change never
+# edits Play while a promotion does.
+concurrency:
+  group: Create or Promote Release
+  cancel-in-progress: false
+
+jobs:
+  rollout:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 15
+    env:
+      TRACK: ${{ inputs.track }}
+      ACTION: ${{ inputs.action }}
+    steps:
+      - name: Require review-in-flight confirmation
+        if: ${{ !inputs.no_review_in_flight }}
+        run: |
+          echo "::error::Rollout change blocked: confirm no Play review is in flight. Check Play Console > Publishing overview > Submission activity; if a submission shows 'In review', wait. If clear, re-dispatch with 'no_review_in_flight' checked."
+          exit 1
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: '4.0.7'
+          bundler-cache: true
+
+      - name: Decode Play Store credentials
+        env:
+          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+        run: printf '%s\n' "$GOOGLE_PLAY_JSON_KEY" > fastlane/play-store-credentials.json
+
+      # Exactly one inProgress release, or nothing is changed: that release's version code
+      # pins supply's selection, and its fraction is what a halt keeps.
+      - name: Find the staged release
+        id: staged
+        env:
+          FRACTION: ${{ inputs.fraction }}
+        run: |
+          bundle exec fastlane play_track_releases track:"$TRACK" out:"$RUNNER_TEMP/before.json"
+          STAGED=$(jq -c '[.[] | select(.status == "inProgress")]' "$RUNNER_TEMP/before.json")
+          if [[ $(jq length <<< "$STAGED") -ne 1 ]]; then
+            echo "::error::Track '$TRACK' needs exactly one inProgress release; it holds: $(jq -c . "$RUNNER_TEMP/before.json")"
+            exit 1
+          fi
+          VERSION_CODE=$(jq -r '.[0].version_codes | max' <<< "$STAGED")
+          CURRENT=$(jq -r '.[0].user_fraction // empty' <<< "$STAGED")
+          if [[ ! "$VERSION_CODE" =~ ^[0-9]+$ || ! "$CURRENT" =~ ^0?\.[0-9]+$ ]]; then
+            echo "::error::The inProgress release on '$TRACK' has no usable version code or fraction: $STAGED"
+            exit 1
+          fi
+
+          STATUS=""
+          case "$ACTION" in
+            rollout)
+              if [[ ! "$FRACTION" =~ ^0?\.[0-9]+$ ]] || ! awk -v c="$CURRENT" -v n="$FRACTION" 'BEGIN { exit !(n > c && n < 1) }'; then
+                echo "::error::fraction '$FRACTION' must be above the current $CURRENT and below 1; use complete to ship to everyone."
+                exit 1
+              fi
+              ROLLOUT="$FRACTION"
+              ;;
+            complete) ROLLOUT=1 ;;
+            halt)
+              ROLLOUT="$CURRENT"
+              STATUS=halted
+              ;;
+          esac
+          echo "versionCode $VERSION_CODE on '$TRACK' at $CURRENT: $ACTION to $ROLLOUT${STATUS:+ ($STATUS)}"
+          {
+            echo "version_code=$VERSION_CODE"
+            echo "current=$CURRENT"
+            echo "rollout=$ROLLOUT"
+            echo "status=$STATUS"
+          } >> "$GITHUB_OUTPUT"
+
+      # Every upload is skipped, so the edit changes only this release's status and fraction.
+      - name: Change the rollout
+        env:
+          VERSION_CODE: ${{ steps.staged.outputs.version_code }}
+          ROLLOUT: ${{ steps.staged.outputs.rollout }}
+          STATUS: ${{ steps.staged.outputs.status }}
+        run: |
+          bundle exec fastlane supply \
+            --track "$TRACK" \
+            --version_code "$VERSION_CODE" \
+            --rollout "$ROLLOUT" \
+            ${STATUS:+--release_status "$STATUS"} \
+            --skip_upload_apk \
+            --skip_upload_aab \
+            --skip_upload_metadata \
+            --skip_upload_changelogs \
+            --skip_upload_images \
+            --skip_upload_screenshots
+
+      # supply exits 0 even when its edit changed nothing. The script's verify counts only
+      # completed and inProgress releases, so a halt is confirmed from a fresh read instead.
+      - name: Verify the release on the track
+        env:
+          VERSION_CODE: ${{ steps.staged.outputs.version_code }}
+          CURRENT: ${{ steps.staged.outputs.current }}
+          ROLLOUT: ${{ steps.staged.outputs.rollout }}
+        run: |
+          PKG=$(grep '^APPLICATION_ID=' config.properties | cut -d'=' -f2)
+          if [[ "$ACTION" != "halt" ]]; then
+            bash scripts/play-track-preflight.sh \
+              fastlane/play-store-credentials.json "$PKG" "$TRACK" "$VERSION_CODE" verify
+          fi
+          case "$ACTION" in
+            rollout) WANT=inProgress ;;
+            complete) WANT=completed ;;
+            halt) WANT=halted ;;
+          esac
+          bundle exec fastlane play_track_releases track:"$TRACK" out:"$RUNNER_TEMP/after.json"
+          AFTER=$(jq -c --argjson vc "$VERSION_CODE" '[.[] | select(.version_codes | index($vc))] | first // empty' "$RUNNER_TEMP/after.json")
+          if [[ "$(jq -r '.status' <<< "${AFTER:-null}")" != "$WANT" ]]; then
+            echo "::error::versionCode $VERSION_CODE on '$TRACK' is not $WANT after the change: ${AFTER:-absent}"
+            exit 1
+          fi
+          if [[ "$ACTION" == "rollout" ]] && ! awk -v a="$(jq -r '.user_fraction' <<< "$AFTER")" -v w="$ROLLOUT" 'BEGIN { exit !(a == w) }'; then
+            echo "::error::versionCode $VERSION_CODE on '$TRACK' is not at $ROLLOUT after the change: $AFTER"
+            exit 1
+          fi
+          {
+            echo "## Play rollout: ${TRACK}"
+            echo
+            echo "versionCode ${VERSION_CODE}: ${ACTION}, from ${CURRENT} to $(jq -r '.user_fraction // "all users"' <<< "$AFTER") (${WANT})."
+            echo
+            echo "A change Play could not send for review on its own waits under Publishing overview in the Play Console."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f fastlane/play-store-credentials.json

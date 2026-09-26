@@ -555,7 +555,7 @@ jobs:
               fi
               echo
               echo "Still by hand:"
-              echo "- Play Console: the production rollout is staged; complete it there."
+              echo "- Play: the production rollout is staged; widen, complete or halt it with the Play Rollout workflow."
               if [[ "$HAS_FLATHUB_TOKEN" == "true" ]]; then
                 echo "- Flathub: merge the update-flathub PR once its test build passes."
               else

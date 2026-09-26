@@ -31,6 +31,14 @@ Upload a built Google release bundle to the internal track on Google Play. Pass 
 
 Upload the store listing - title, descriptions, feature graphic, icon and screenshots - for every locale under fastlane/metadata/android. Touches no build or track. Dry-runs unless validate_only:false
 
+### android play_track_releases
+
+```sh
+[bundle exec] fastlane android play_track_releases
+```
+
+Write every release on a Play track (status, version codes, user fraction) as JSON. Pass track:<name> out:<path>. Reads only; the edit is discarded
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

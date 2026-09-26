@@ -1,5 +1,6 @@
 # Lanes are invoked by the workflows in .github/workflows (release.yml,
-# promote.yml, play-listing.yml); `bundle exec fastlane lanes` lists them.
+# promote.yml, play-listing.yml, play-rollout.yml); `bundle exec fastlane lanes`
+# lists them.
 # Play credentials come from fastlane/play-store-credentials.json, written by
 # the workflow from the GOOGLE_PLAY_JSON_KEY secret and deleted afterwards.
 
@@ -47,5 +48,29 @@ platform :android do
       changes_not_sent_for_review: true,
       validate_only: validate_only,
     )
+  end
+
+  desc "Write every release on a Play track (status, version codes, user fraction) as JSON. Pass track:<name> out:<path>. Reads only; the edit is discarded"
+  lane :play_track_releases do |options|
+    UI.user_error!("Pass track:<name> and out:<path>") if options[:track].to_s.empty? || options[:out].to_s.empty?
+
+    require 'json'
+    require 'supply'
+    require 'supply/options'
+    require 'supply/reader'
+
+    # Lane code runs in ./fastlane, and the Appfile's key path is relative to the project root.
+    Dir.chdir('..') do
+      Supply.config = FastlaneCore::Configuration.create(Supply::Options.available_options, { track: options[:track].to_s })
+      track = Supply::Reader.new.track_meta
+      releases = (track&.releases || []).map do |release|
+        {
+          status: release.status,
+          version_codes: (release.version_codes || []).map(&:to_i),
+          user_fraction: release.user_fraction,
+        }
+      end
+      File.write(options[:out], JSON.pretty_generate(releases))
+    end
   end
 end
