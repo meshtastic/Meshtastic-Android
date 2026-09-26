@@ -13,7 +13,7 @@ name: Docs Release
 # cycle would cost far more than it refreshes.
 #
 # These per-tag prerelease directories accumulate during a version cycle and are
-# reaped by post-release-cleanup.yml once the production vX.Y.Z tag ships.
+# reaped by post-release-cleanup.yml, which a production publish dispatches.
 #
 # The /main/ snapshot is owned by docs-deploy.yml and is left untouched here.
 #
@@ -43,6 +43,11 @@ jobs:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     runs-on: ubuntu-26.04
     timeout-minutes: 45
+    # actions: write is only for the cleanup dispatch; job permissions replace the
+    # workflow block, so contents: write is restated.
+    permissions:
+      contents: write
+      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -148,3 +153,12 @@ jobs:
 
       - name: Publish to gh-pages
         run: scripts/docs/publish-to-gh-pages.sh build/pages_staging ${{ steps.stage.outputs.channels }}
+
+      # The cleanup refuses to reap until /vX.Y.Z/ is on gh-pages, which the push above
+      # just made true. A dispatch is exempt from GITHUB_TOKEN's event suppression.
+      - name: Dispatch post-release cleanup
+        if: steps.version.outputs.is_production == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_VERSION: ${{ steps.version.outputs.docs_version }}
+        run: gh workflow run post-release-cleanup.yml --ref main -f "base_version=$BASE_VERSION" -f confirm_deletion=true
