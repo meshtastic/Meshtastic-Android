@@ -214,7 +214,7 @@ class StoreScreenshots {
         const val SHOWCASE_NODE_NAME = "Base Camp"
 
         /** Ridge Top, the showcase's router with a full detail page. */
-        const val RIDGE_TOP_NUM = 0x1a2b3c4d
+        const val RIDGE_TOP_NUM = 0xe1e22a35.toInt()
 
         const val TRUST_DIALOG_TITLE = "Connect to this device?"
         const val TRUST_DIALOG_CONFIRM = "Connect"
