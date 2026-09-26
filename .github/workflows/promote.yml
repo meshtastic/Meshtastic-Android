@@ -38,6 +38,11 @@ on:
         required: false
       FLATHUB_TOKEN:
         required: false
+      # Read only for presence, so the checklist says whether each store workflow will skip.
+      WINGET_TOKEN:
+        required: false
+      MSSTORE_PRODUCT_ID:
+        required: false
 
 # Never cancel a promotion mid-flight: being killed between the Play edit
 # commit and the GitHub release/tag update leaves the two disagreeing. The
@@ -449,9 +454,8 @@ jobs:
             skip-changelog
 
       # One place to read what this promotion did, what it dispatched, and what
-      # is still done by hand. The store dispatches report the dispatch only;
-      # each store workflow skips inside itself until its secrets exist. The
-      # hand-done list stays out of the Discord post, which is an announcement.
+      # is still done by hand. The hand-done list stays out of the Discord post,
+      # which is an announcement.
       - name: Release checklist
         if: ${{ always() }}
         env:
@@ -476,8 +480,22 @@ jobs:
           STAMP_PR: ${{ steps.stamp_pr.outputs.url }}
           STAMP_PR_OUTCOME: ${{ steps.stamp_pr.outcome }}
           HAS_FLATHUB_TOKEN: ${{ secrets.FLATHUB_TOKEN != '' }}
+          HAS_WINGET_TOKEN: ${{ secrets.WINGET_TOKEN != '' }}
+          HAS_MSSTORE_PRODUCT_ID: ${{ secrets.MSSTORE_PRODUCT_ID != '' }}
+          HAS_HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
         run: |
           row() { printf '| %s | %s |\n' "$1" "$2"; }
+          # A store workflow skips inside itself when its secret is unset, so a successful
+          # dispatch alone does not mean anything was submitted.
+          store_row() {
+            if [[ "$2" != "success" ]]; then
+              row "$1" "$2"
+            elif [[ "$3" != "true" ]]; then
+              row "$1" "will skip: $4 unset"
+            else
+              row "$1" "dispatched"
+            fi
+          }
           {
             echo "## Release checklist: ${TAG} (${CHANNEL})"
             echo
@@ -521,10 +539,15 @@ jobs:
               else
                 row "CHANGELOG.md stamp PR" "stamp $STAMP, PR ${STAMP_PR_OUTCOME:-skipped}"
               fi
-              row "winget dispatched" "$WINGET"
-              row "Microsoft Store dispatched" "$MSSTORE"
+              store_row "winget" "$WINGET" "$HAS_WINGET_TOKEN" WINGET_TOKEN
+              store_row "Microsoft Store" "$MSSTORE" "$HAS_MSSTORE_PRODUCT_ID" MSSTORE_PRODUCT_ID
               row "Version bump dispatched" "$BUMP"
               row "Post-Release Cleanup" "dispatched by Docs Release once /${TAG}/ is published"
+              if [[ "$HAS_HOMEBREW_TAP_TOKEN" == "true" ]]; then
+                row "Homebrew cask PR" "opened by the update-homebrew-cask job after this one"
+              else
+                row "Homebrew cask PR" "will skip: HOMEBREW_TAP_TOKEN unset"
+              fi
               if [[ "$HAS_FLATHUB_TOKEN" == "true" ]]; then
                 row "Flathub update PR" "opened by the update-flathub job after this one"
               else
