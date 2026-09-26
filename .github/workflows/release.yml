@@ -7,6 +7,14 @@ on:
         description: 'The tag that triggered the release'
         required: true
         type: string
+      version_name:
+        description: 'The version name the build carries (e.g., 2.3.0)'
+        required: true
+        type: string
+      version_code:
+        description: 'The version code the build carries'
+        required: true
+        type: string
     secrets:
       GSERVICES:
         required: true
@@ -61,51 +69,9 @@ permissions:
   attestations: write
 
 jobs:
-  prepare-build-info:
-    runs-on: ubuntu-26.04-arm
-    timeout-minutes: 10
-    outputs:
-      APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
-      APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ inputs.tag_name }}
-          fetch-depth: 0
-      - name: Prep APP_VERSION_NAME
-        id: prep_version
-        env:
-          INPUT_TAG_NAME: ${{ inputs.tag_name }}
-        run: |
-          VERSION_NAME=$(echo "$INPUT_TAG_NAME" | sed 's/-.*//' | sed 's/v//')
-          echo "APP_VERSION_NAME=$VERSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "Parsed Version: $VERSION_NAME"
-
-      - name: Extract VERSION_CODE_OFFSET from config.properties
-        id: get_version_code_offset
-        run: |
-          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
-          echo "VERSION_CODE_OFFSET=$OFFSET" >> "$GITHUB_OUTPUT"
-
-      - name: Calculate Version Code from Git Commit Count
-        id: calculate_version_code
-        env:
-          VERSION_CODE_OFFSET: ${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
-        run: |
-          COMMIT_COUNT=$(git rev-list --count HEAD)
-          if ! [[ "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
-            echo "::error::VERSION_CODE_OFFSET from config.properties is not numeric: '$VERSION_CODE_OFFSET'"
-            exit 1
-          fi
-          VERSION_CODE=$((COMMIT_COUNT + VERSION_CODE_OFFSET))
-          echo "versionCode=$VERSION_CODE" >> "$GITHUB_OUTPUT"
-        shell: bash
-
   release-google:
     runs-on: ubuntu-26.04
     timeout-minutes: 90
-    needs: [prepare-build-info]
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -150,8 +116,8 @@ jobs:
 
       - name: Build and Deploy Google Play to Internal Track with Fastlane
         env:
-          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          VERSION_NAME: ${{ inputs.version_name }}
+          VERSION_CODE: ${{ inputs.version_code }}
         run: bundle exec fastlane internal
 
       - name: List outputs
@@ -188,7 +154,6 @@ jobs:
   release-fdroid:
     runs-on: ubuntu-26.04
     timeout-minutes: 90
-    needs: [prepare-build-info]
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -220,8 +185,8 @@ jobs:
 
       - name: Build F-Droid with Fastlane
         env:
-          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          VERSION_NAME: ${{ inputs.version_name }}
+          VERSION_CODE: ${{ inputs.version_code }}
         run: bundle exec fastlane fdroid_build
 
       - name: List outputs
@@ -244,7 +209,6 @@ jobs:
   release-desktop:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
-    needs: [prepare-build-info]
     strategy:
       fail-fast: false
       matrix:
@@ -273,8 +237,8 @@ jobs:
 
       - name: Package Native Distributions
         env:
-          ORG_GRADLE_PROJECT_appVersionName: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          ORG_GRADLE_PROJECT_appVersionName: ${{ inputs.version_name }}
+          VERSION_CODE: ${{ inputs.version_code }}
           APPIMAGE_EXTRACT_AND_RUN: 1
           SIGN_MACOS: ${{ runner.os == 'macOS' && secrets.APPLE_SIGNING_IDENTITY != '' && 'true' || 'false' }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
@@ -338,7 +302,7 @@ jobs:
       - name: Build AppImage from jpackage app-image
         if: runner.os == 'Linux'
         env:
-          APP_VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+          APP_VERSION_NAME: ${{ inputs.version_name }}
         run: scripts/build-appimage.sh
 
       - name: List Desktop Binaries
@@ -377,7 +341,6 @@ jobs:
   create-flatpak-src:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
-    needs: [prepare-build-info]
     strategy:
       fail-fast: false
       matrix:
@@ -470,7 +433,6 @@ jobs:
   # (the caller deletes the tag on a failed run): the capture runs soft, github-release
   # does not gate on it, and packaging falls back to the committed sets.
   store-screenshots:
-    needs: [prepare-build-info]
     uses: ./.github/workflows/store-screenshots.yml
     with:
       ref: ${{ inputs.tag_name }}
@@ -486,7 +448,7 @@ jobs:
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     continue-on-error: true
-    needs: [prepare-build-info, store-screenshots]
+    needs: [store-screenshots]
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -502,7 +464,7 @@ jobs:
 
       - name: Package the screenshots
         env:
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          VERSION_CODE: ${{ inputs.version_code }}
         run: |
           mkdir -p out
           echo "### Store screenshots" >> "$GITHUB_STEP_SUMMARY"
@@ -542,7 +504,6 @@ jobs:
   github-release:
     if: >-
       ${{ !cancelled()
-        && needs.prepare-build-info.result == 'success'
         && needs.release-google.result == 'success'
         && needs.release-fdroid.result == 'success'
         && needs.release-desktop.result == 'success'
@@ -550,7 +511,6 @@ jobs:
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     needs:
-      - prepare-build-info
       - release-google
       - release-fdroid
       - release-desktop
@@ -619,7 +579,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag_name }}
           target_commitish: ${{ github.sha }}
-          name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
+          name: ${{ inputs.tag_name }} (${{ inputs.version_code }})
           body_path: release-notes.md
           files: ./artifacts/**/*
           draft: true

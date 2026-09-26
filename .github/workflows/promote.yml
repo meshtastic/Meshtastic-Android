@@ -23,6 +23,10 @@ on:
         description: 'The channel to promote from'
         required: true
         type: string
+      version_code:
+        description: 'The version code of the build being promoted'
+        required: true
+        type: string
     secrets:
       GOOGLE_PLAY_JSON_KEY:
         required: true
@@ -45,52 +49,9 @@ permissions:
   statuses: write
 
 jobs:
-  prepare-build-info:
-    runs-on: ubuntu-26.04-arm
-    timeout-minutes: 10
-    outputs:
-      APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
-      APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ inputs.tag_name }}
-          fetch-depth: 0
-
-      - name: Prep APP_VERSION_NAME
-        id: prep_version
-        env:
-          INPUT_TAG_NAME: ${{ inputs.tag_name }}
-        run: |
-          VERSION_NAME=$(echo "$INPUT_TAG_NAME" | sed 's/-.*//' | sed 's/v//')
-          echo "APP_VERSION_NAME=$VERSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "Parsed Version: $VERSION_NAME"
-
-      - name: Extract VERSION_CODE_OFFSET from config.properties
-        id: get_version_code_offset
-        run: |
-          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
-          echo "VERSION_CODE_OFFSET=$OFFSET" >> "$GITHUB_OUTPUT"
-
-      - name: Calculate Version Code from Git Commit Count
-        id: calculate_version_code
-        env:
-          VERSION_CODE_OFFSET: ${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
-        run: |
-          COMMIT_COUNT=$(git rev-list --count HEAD)
-          if ! [[ "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
-            echo "::error::VERSION_CODE_OFFSET from config.properties is not numeric: '$VERSION_CODE_OFFSET'"
-            exit 1
-          fi
-          VERSION_CODE=$((COMMIT_COUNT + VERSION_CODE_OFFSET))
-          echo "versionCode=$VERSION_CODE" >> "$GITHUB_OUTPUT"
-        shell: bash
-
   promote-release:
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 30
-    needs: [ prepare-build-info ]
     outputs:
       already_on_track: ${{ steps.preflight.outputs.already_on_track }}
       screenshots: ${{ steps.screenshots.outputs.found }}
@@ -142,7 +103,7 @@ jobs:
       - name: Preflight — is this versionCode already on the target track?
         id: preflight
         env:
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          VERSION_CODE: ${{ inputs.version_code }}
         run: |
           PKG=$(grep '^APPLICATION_ID=' config.properties | cut -d'=' -f2)
           bash .workflow-ref/scripts/play-track-preflight.sh \
@@ -158,7 +119,7 @@ jobs:
       - name: Promote to next channel
         if: ${{ steps.preflight.outputs.already_on_track != 'true' }}
         env:
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          VERSION_CODE: ${{ inputs.version_code }}
         run: |
           bundle exec fastlane supply \
             --track "$FROM_TRACK" \
@@ -175,7 +136,7 @@ jobs:
       - name: Verify versionCode landed on the target track
         if: ${{ steps.preflight.outputs.already_on_track != 'true' }}
         env:
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          VERSION_CODE: ${{ inputs.version_code }}
         run: |
           PKG=$(grep '^APPLICATION_ID=' config.properties | cut -d'=' -f2)
           bash .workflow-ref/scripts/play-track-preflight.sh \
@@ -225,7 +186,7 @@ jobs:
   update-github-release:
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
-    needs: [ prepare-build-info, promote-release ]
+    needs: [ promote-release ]
     # actions: write is scoped here — only this job's publish-workflow
     # dispatch needs it, and the other jobs must not get it. Job-level
     # permissions replace the workflow-level block, so the full set this
@@ -258,7 +219,7 @@ jobs:
         run: |
           gh release edit ${{ inputs.tag_name }} \
             --tag ${{ inputs.final_tag }} \
-            --title "${{ inputs.final_tag }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})" \
+            --title "${{ inputs.final_tag }} (${{ inputs.version_code }})" \
             --draft=false \
             --prerelease=${{ inputs.channel != 'production' }}
 

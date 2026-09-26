@@ -45,6 +45,8 @@ jobs:
       tag_to_process: ${{ steps.calculate_tags.outputs.tag_to_process }}
       final_tag: ${{ steps.calculate_tags.outputs.final_tag }}
       from_channel: ${{ steps.calculate_tags.outputs.from_channel }}
+      version_name: ${{ steps.version.outputs.version_name }}
+      version_code: ${{ steps.version.outputs.version_code }}
     steps:
       # Internal releases are exempt: Play internal testing skips full review,
       # so only promotions (closed/open/production) can clobber an in-flight
@@ -126,6 +128,32 @@ jobs:
           fi
         shell: bash
 
+      # Name from the tag, code from the commit count plus VERSION_CODE_OFFSET, both at the
+      # commit being released: for a promotion the promoted tag's, which main has moved past.
+      - name: Calculate version
+        id: version
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          TAG: ${{ steps.calculate_tags.outputs.tag_to_process }}
+        run: |
+          if [[ "$CHANNEL" == "internal" ]]; then REF=HEAD; else REF="$TAG"; fi
+          git show "${REF}:config.properties" > "$RUNNER_TEMP/config.properties"
+
+          VERSION_NAME=$(echo "$TAG" | sed 's/-.*//' | sed 's/v//')
+          VERSION_CODE_OFFSET=$(grep '^VERSION_CODE_OFFSET=' "$RUNNER_TEMP/config.properties" | cut -d'=' -f2 || true)
+          if ! [[ "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
+            echo "::error::VERSION_CODE_OFFSET from config.properties is not numeric: '$VERSION_CODE_OFFSET'"
+            exit 1
+          fi
+          VERSION_CODE=$(( $(git rev-list --count "$REF") + VERSION_CODE_OFFSET ))
+
+          echo "Version: $VERSION_NAME ($VERSION_CODE) from $REF"
+          {
+            echo "version_name=$VERSION_NAME"
+            echo "version_code=$VERSION_CODE"
+          } >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - name: Create and Push Release Tag
         if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
         env:
@@ -142,6 +170,8 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.determine-tags.outputs.final_tag }}
+      version_name: ${{ needs.determine-tags.outputs.version_name }}
+      version_code: ${{ needs.determine-tags.outputs.version_code }}
     secrets: inherit
 
   call-promote-workflow:
@@ -164,6 +194,7 @@ jobs:
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
       from_channel: ${{ needs.determine-tags.outputs.from_channel }}
+      version_code: ${{ needs.determine-tags.outputs.version_code }}
     secrets: inherit
 
   cleanup-on-failure:
