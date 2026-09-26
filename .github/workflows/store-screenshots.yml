@@ -1,0 +1,191 @@
+name: Store Screenshots
+
+# Captures the store-listing screenshots from the real debug apps, connected to Demo
+# Mode's hidden showcase mesh. Android runs `:store-screenshots` on an emulator: the
+# google flavor feeds the Play listing, the fdroid flavor the fastlane tree F-Droid and
+# IzzyOnDroid read, each uploaded as `store-screenshots-<flavor>` laid out as
+# `images/<type>Screenshots/<n>_<name>.png`. Desktop runs the real app on a virtual
+# display (`store-screenshots/capture-desktop.sh`) and uploads the five Flathub PNGs as
+# `store-screenshots-desktop`.
+#
+# release.yml calls this on every internal cut. It also runs on a pull request that
+# touches the renderer or the showcase mesh, so a change is seen on an emulator
+# before it reaches a release.
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'The ref to capture (the release tag)'
+        required: true
+        type: string
+      soft:
+        # A caller cannot mark a reusable workflow allowed-to-fail, and a failed job in
+        # release.yml deletes the internal tag. With soft, a failed capture fails nothing.
+        description: 'Let a failed capture pass without failing the calling run'
+        required: false
+        type: boolean
+        default: false
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'store-screenshots/**'
+      - 'core/network/src/commonMain/kotlin/org/meshtastic/core/network/radio/MockScenario.kt'
+      - '.github/workflows/store-screenshots.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  android:
+    name: Android (${{ matrix.flavor }})
+    # Hosted x64 runners expose KVM; the emulator needs it.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    continue-on-error: ${{ inputs.soft == true }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - flavor: google
+            task: Google
+          - flavor: fdroid
+            task: Fdroid
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          cache_read_only: 'true'
+
+      # The google flavor draws Google Maps, which needs the debug Maps key; the fdroid
+      # flavor draws MapLibre and needs nothing.
+      - name: Provide the debug Maps key
+        if: ${{ matrix.flavor == 'google' }}
+        env:
+          GOOGLE_MAPS_API_KEY_DEBUG: ${{ secrets.GOOGLE_MAPS_API_KEY_DEBUG }}
+        run: |
+          if [ -n "$GOOGLE_MAPS_API_KEY_DEBUG" ]; then
+            echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY_DEBUG" >> ./google.properties
+          else
+            echo "::warning::GOOGLE_MAPS_API_KEY_DEBUG is unset -- the google-flavor map shot will be blank."
+          fi
+
+      # Built before the emulator boots, so the emulator step only installs and runs.
+      - name: Build the app and the capture module
+        run: ./gradlew :androidApp:assemble${{ matrix.task }}Debug :store-screenshots:assemble${{ matrix.task }}Debug
+
+      - name: Enable KVM (for the emulator)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # The runner's `script:` runs each line in its own shell. The capture copies each
+      # PNG to /data/local/tmp, which outlives the test app's uninstall at the end of the
+      # connected run. --no-configuration-cache: connected tasks in a com.android.test
+      # module are not configuration-cache serializable (see scheduled-baseline.yml).
+      - name: Capture on the emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader -noaudio -no-boot-anim -camera-back none
+          script: |
+            ./gradlew :store-screenshots:connected${{ matrix.task }}DebugAndroidTest -Dorg.gradle.isolated-projects=false --no-configuration-cache
+            mkdir -p out/images && adb pull /data/local/tmp/store-screenshots/. out/images/
+
+      - name: Summarize the captures
+        if: ${{ always() }}
+        env:
+          FLAVOR: ${{ matrix.flavor }}
+        run: |
+          {
+            echo "### Store screenshots (${FLAVOR})"
+            if [ -d out/images ]; then
+              find out/images -name '*.png' | sort | sed 's|^out/images/|- |'
+            else
+              echo "- none captured"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the captures
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: store-screenshots-${{ matrix.flavor }}
+          path: out/images
+          if-no-files-found: warn
+          retention-days: 7
+
+  # The five Flathub shots, from the real desktop debug build on a virtual display.
+  desktop:
+    name: Desktop
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    continue-on-error: ${{ inputs.soft == true }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          cache_read_only: 'true'
+          install_jetbrains_jdk: 'true'
+
+      - name: Build the desktop app
+        run: ./gradlew :desktopApp:createDistributable
+
+      # Software GL through zink over lavapipe, because Skiko refuses llvmpipe by name.
+      - name: Install a virtual display and software GL
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb openbox xdotool imagemagick \
+            libvulkan1 mesa-vulkan-drivers libgl1 libglx-mesa0 libegl1 libgl1-mesa-dri
+
+      - name: Capture on a virtual display
+        run: |
+          store-screenshots/capture-desktop.sh \
+            "desktopApp/build/compose/binaries/main/app/Meshtastic Desktop/bin/Meshtastic Desktop" \
+            out/desktop
+
+      - name: Summarize the captures
+        if: ${{ always() }}
+        run: |
+          {
+            echo "### Store screenshots (desktop)"
+            find out/desktop -name '*.png' 2>/dev/null | sort | sed 's|^out/desktop/|- |' || echo "- none captured"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the captures
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: store-screenshots-desktop
+          path: out/desktop
+          if-no-files-found: warn
+          retention-days: 7
