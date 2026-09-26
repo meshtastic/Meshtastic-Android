@@ -240,8 +240,8 @@ jobs:
 
   # 3. WORKFLOW STATUS: Ensures required checks are satisfied
   # Pure gate job: no checkout, no toolchain, just reads `needs` results. It is the required
-  # check, so it runs on the label the rest of the workflow already gets slots on, not on
-  # ubuntu-slim's separate pool: an aggregator queued behind slim blocks a finished build.
+  # check, so it runs on a hosted Ubuntu label that shares the org's pool with the build jobs,
+  # not on ubuntu-slim's separate pool: an aggregator queued behind slim blocks a finished build.
   check-workflow-status:
     name: Check Workflow Status
     runs-on: ubuntu-26.04-arm
