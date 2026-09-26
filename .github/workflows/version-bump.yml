@@ -1,0 +1,146 @@
+name: Bump Version Name
+
+# Opens the next patch line once a version ships to production, through a bot PR that
+# merges itself: VERSION_NAME_BASE, its AppStream <release> entry and the Play
+# what's-new, all written by scripts/bump-version-name.py.
+#
+# promote.yml flips the release to production with GITHUB_TOKEN, whose events start no
+# workflows, so it dispatches this one explicitly, as it does winget-publish.yml. The
+# release trigger covers a release published by hand; workflow_dispatch is the retry path.
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Production release tag that shipped (e.g., v2.8.2)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  statuses: write
+
+# A release event overlapping a dispatch would open two PRs for the same version.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    if: ${{ github.repository == 'meshtastic/Meshtastic-Android' && !github.event.release.prerelease && !github.event.release.draft }}
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 10
+    env:
+      TAG: ${{ inputs.tag || github.event.release.tag_name }}
+      METAINFO: desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml
+    steps:
+      # A release event checks out the tag by default; the bump branches from main.
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+
+      - name: Resolve next version
+        id: next
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "::error::'$TAG' is not a production tag (vX.Y.Z)."
+            exit 1
+          fi
+          SHIPPED="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+          NEXT="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))"
+          BRANCH="automation/version-name-${NEXT}"
+          CURRENT=$(sed -n 's/^VERSION_NAME_BASE=//p' config.properties)
+
+          # A hand bump that already landed (a minor line, say) wins over the patch default.
+          if [[ "$CURRENT" != "$SHIPPED" && "$(printf '%s\n%s\n' "$CURRENT" "$SHIPPED" | sort -V | tail -1)" == "$CURRENT" ]]; then
+            echo "::notice::main is already on $CURRENT, past $SHIPPED; nothing to bump."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          OPEN=$(gh pr list --state open --limit 200 --json number,title,headRefName \
+            | jq -r --arg b "$BRANCH" --arg t "VERSION_NAME_BASE to $NEXT" \
+                '.[] | select(.headRefName == $b or (.title | contains($t))) | .number')
+          if [[ -n "$OPEN" ]]; then
+            echo "::notice::A bump to $NEXT is already open: #$OPEN."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          {
+            echo "skip=false"
+            echo "shipped=$SHIPPED"
+            echo "next=$NEXT"
+            echo "branch=$BRANCH"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Install appstream
+        if: ${{ steps.next.outputs.skip == 'false' }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq appstream
+
+      # The PR's own checks never run (GITHUB_TOKEN pushes start no workflows) and the
+      # status posted below stands in for them, so pull-request.yml's metainfo and
+      # store-text gates run here instead, before anything is pushed.
+      - name: Bump and verify
+        if: ${{ steps.next.outputs.skip == 'false' }}
+        env:
+          NEXT: ${{ steps.next.outputs.next }}
+        run: |
+          set -euo pipefail
+          python3 scripts/bump-version-name.py "$NEXT"
+          grep -q "version=\"$NEXT\"" "$METAINFO"
+          if grep '<image>' "$METAINFO" | grep -qvF "/releases/download/v$NEXT/"; then
+            echo "::error file=$METAINFO::An <image> URL does not point at v$NEXT."
+            exit 1
+          fi
+          appstreamcli validate --no-net "$METAINFO"
+          python3 scripts/sync-play-changelog.py --check
+          python3 scripts/check-store-metadata.py
+          git diff --stat
+
+      - name: Open the bump PR
+        if: ${{ steps.next.outputs.skip == 'false' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHIPPED: ${{ steps.next.outputs.shipped }}
+          NEXT: ${{ steps.next.outputs.next }}
+          BRANCH: ${{ steps.next.outputs.branch }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add config.properties "$METAINFO" fastlane/metadata/android/en-US/changelogs/default.txt
+          git commit -m "chore: bump VERSION_NAME_BASE to ${NEXT}"
+          git push origin "$BRANCH" --force
+          BODY="Opens the ${NEXT} line now that v${SHIPPED} has shipped. The metainfo \`<description>\` for ${NEXT} is a placeholder: rewrite it and re-run \`python3 scripts/sync-play-changelog.py\` before the ${NEXT} internal cut, or it ships as the Play what's-new."
+          PR_URL=$(gh pr create \
+            --title "chore: bump VERSION_NAME_BASE to ${NEXT}" \
+            --body "$BODY" \
+            --head "$BRANCH" \
+            --base main \
+            --label "automation" \
+            --label "skip-changelog")
+          echo "Opened $PR_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "$BODY" >> "$GITHUB_STEP_SUMMARY"
+          gh api "repos/${REPO}/statuses/$(git rev-parse HEAD)" \
+            -f state="success" \
+            -f context="Check Workflow Status" \
+            -f description="Gates ran in Bump Version Name"
+          PR_ID=$(gh pr view "$PR_URL" --json id --jq .id)
+          QUERY=$(cat <<'GQL'
+          mutation($id: ID!) {
+            enablePullRequestAutoMerge(input: { pullRequestId: $id }) {
+              pullRequest { number autoMergeRequest { enabledAt } }
+            }
+          }
+          GQL
+          )
+          gh api graphql -f query="$QUERY" -F id="$PR_ID" || gh pr merge "$PR_URL"
