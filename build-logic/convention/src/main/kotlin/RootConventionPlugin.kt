@@ -81,10 +81,8 @@ private val DEVICE_TEST_MODULES = listOf(":core:database", ":core:model")
  * Modules that participate in root aggregation (Dokka, Kover) and `kmpSmokeCompile`.
  *
  * Hand-maintained rather than derived, because `subprojects {}` iteration is incompatible with Isolated Projects.
- * The `verify-module-list` guard in `pull-request.yml` fails the build when this drifts from
- * `settings.gradle.kts`, so a new module cannot silently fall out of the gate — which is how
- * `:feature:discovery`, `:feature:docs` and `:feature:map-maplibre` went unaggregated and uncompiled by
- * `kmpSmokeCompile` for several releases.
+ * `scripts/check-module-list.py`, run by the `check-changes` job in `pull-request.yml`, fails the PR when this drifts
+ * from `settings.gradle.kts`, so a new module cannot silently fall out of the gate.
  */
 private val ALL_MODULES_FULL =
     listOf(
@@ -131,11 +129,11 @@ private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:barcode", ":featu
  * Modules excluded from Dokka aggregation.
  *
  * These are test harnesses and build-time generators with no API surface a reader would look up: they exist to run
- * checks or emit artifacts, not to be called from other modules. Aggregating them only added generation time and
- * empty pages to the published `/api/` reference.
+ * checks or emit artifacts, not to be called from other modules. Aggregating them only added generation time and empty
+ * pages to the published `/api/` reference.
  *
- * `:core:testing` is deliberately NOT excluded — it is a shared fixture library that other modules' tests consume,
- * so its API docs are useful to contributors writing tests.
+ * `:core:testing` is deliberately NOT excluded. It is a shared fixture library that other modules' tests consume, so
+ * its API docs are useful to contributors writing tests.
  */
 private val DOKKA_EXCLUDED_MODULES =
     setOf(
