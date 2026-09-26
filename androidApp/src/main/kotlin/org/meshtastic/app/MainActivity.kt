@@ -60,6 +60,7 @@ import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
+import org.meshtastic.core.common.state.LaunchOptions
 import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.network.repository.UsbRepository
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity() {
 
     private val usbRepository: UsbRepository by inject()
     private val mapLayersManager: MapLayersManager by inject()
+    private val launchOptions: LaunchOptions by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -306,6 +308,10 @@ class MainActivity : AppCompatActivity() {
 
     @Suppress("NestedBlockDepth")
     private fun handleIntent(intent: Intent) {
+        // Automation switch, debug builds only; set before this intent's deep link is handled.
+        if (BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_CONNECT_CONFIRM, false)) {
+            launchOptions.skipDeepLinkConfirmation = true
+        }
         val appLinkAction = intent.action
         val appLinkData: Uri? = intent.data
 
@@ -415,6 +421,7 @@ class MainActivity : AppCompatActivity() {
 
     private companion object {
         const val EXTRA_SKIP_ONBOARDING = "skip_onboarding"
+        const val EXTRA_SKIP_CONNECT_CONFIRM = "skip_connect_confirm"
     }
 }
 

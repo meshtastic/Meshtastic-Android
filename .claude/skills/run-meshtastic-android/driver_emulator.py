@@ -121,12 +121,14 @@ def connect(addr):
     adb(
         "shell", "am", "start", "-n", f"{PKG}/{ACTIVITY}",
         "--ez", "skip_onboarding", "true",
+        "--ez", "skip_connect_confirm", "true",
         "-a", "android.intent.action.VIEW",
         "-d", f"https://meshtastic.org/connections?address={addr}",
     )
-    # Builds >2.8.1 pop a trust dialog on first connect to a new device. Match its
-    # title, not bare "Connect" — that substring also matches "Stop Connecting".
-    r = wait_text("Connect to this device", timeout=30)
+    # Debug builds that know skip_connect_confirm apply the address with no dialog.
+    # Older ones pop the trust dialog: match its title, not bare "Connect", which
+    # also matches "Stop Connecting".
+    r = wait_text("Connect to this device", timeout=10)
     if r.startswith("found"):
         print(tap_text("Connect"))
     else:
