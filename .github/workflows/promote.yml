@@ -321,6 +321,16 @@ jobs:
           done
           gh workflow run docs-release.yml --ref "$TAG"
 
+      # The Obtainium table in README.md follows the channel releases; this refreshes it
+      # now rather than at the next hourly run.
+      - name: Dispatch scheduled updates
+        id: sched
+        if: ${{ inputs.channel != 'internal' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run scheduled-updates.yml --ref main
+
       # bot-pr resets the checked-out branch to its origin copy before branching the PR,
       # so the edits below are made on a local main, never on a branch origin lacks.
       - name: Stamp CHANGELOG.md for release
@@ -456,6 +466,7 @@ jobs:
           RELEASE: ${{ steps.release.outcome }}
           NOTES: ${{ steps.notes.outcome }}
           DOCS: ${{ steps.docs.outcome }}
+          SCHED: ${{ steps.sched.outcome }}
           WINGET: ${{ steps.winget.outcome }}
           MSSTORE: ${{ steps.msstore.outcome }}
           BUMP: ${{ steps.bump.outcome }}
@@ -486,6 +497,7 @@ jobs:
               row "Play listing validated (dry run)" "$LISTING"
             fi
             row "Docs Release dispatched" "$DOCS"
+            row "Scheduled Updates dispatched (Obtainium table)" "$SCHED"
             if [[ "$CHANNEL" == "production" ]]; then
               if [[ -n "$SHOTS_PR" ]]; then
                 row "Committed screenshots refresh PR" "$SHOTS_PR"
