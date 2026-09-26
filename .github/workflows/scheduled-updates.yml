@@ -337,6 +337,11 @@ jobs:
           CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
+      # Crowdin translates layout, parent and nav_order along with the prose; docs-quality.yml
+      # fails the PR if they differ from docs/en.
+      - name: Restore locale docs front matter
+        run: python3 scripts/docs/sync-locale-front-matter.py
+
       # Early warning for store-listing translations just pulled from Crowdin
       # (overlength text, unmapped locale codes, forbidden HTML). Non-blocking on
       # purpose: a hard failure here would abort the job and stop the PR from
