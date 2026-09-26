@@ -261,8 +261,8 @@ jobs:
             exit 1
           fi
 
-          # If changes were detected but build failed, fail the status check
-          if [[ "${{ needs.check-changes.outputs.android }}" == "true" && ("${{ needs.validate-and-build.result }}" == "failure" || "${{ needs.validate-and-build.result }}" == "cancelled") ]]; then
+          # skipped means neither the android nor the desktop filter matched
+          if [[ "${{ needs.validate-and-build.result }}" == "failure" || "${{ needs.validate-and-build.result }}" == "cancelled" ]]; then
             echo "::error::Android Check failed"
             exit 1
           fi

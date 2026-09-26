@@ -118,7 +118,7 @@ jobs:
             echo "::error::Change detection failed"
             exit 1
           fi
-          if [[ "${{ needs.check-changes.outputs.android }}" == "true" && ("${{ needs.android-check.result }}" == "failure" || "${{ needs.android-check.result }}" == "cancelled") ]]; then
+          if [[ "${{ needs.android-check.result }}" == "failure" || "${{ needs.android-check.result }}" == "cancelled" ]]; then
             echo "::error::Android Check failed"
             exit 1
           fi
