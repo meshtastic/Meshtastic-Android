@@ -54,7 +54,6 @@ wireless-install.sh
 docs/_site/
 docs/.jekyll-cache/
 docs/.jekyll-metadata
-docs/Gemfile.lock
 
 # Git worktrees
 .worktrees/
