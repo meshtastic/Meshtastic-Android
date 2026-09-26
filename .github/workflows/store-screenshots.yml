@@ -1,10 +1,12 @@
 name: Store Screenshots
 
-# Captures the store-listing screenshots from the real debug app on an emulator,
-# connected to Demo Mode's hidden showcase mesh (`:store-screenshots`). The google
-# flavor feeds the Play listing, the fdroid flavor the fastlane tree F-Droid and
-# IzzyOnDroid read. Each flavor uploads a `store-screenshots-<flavor>` artifact laid
-# out as `images/<type>Screenshots/<n>_<name>.png`.
+# Captures the store-listing screenshots from the real debug apps, connected to Demo
+# Mode's hidden showcase mesh. Android runs `:store-screenshots` on an emulator: the
+# google flavor feeds the Play listing, the fdroid flavor the fastlane tree F-Droid and
+# IzzyOnDroid read, each uploaded as `store-screenshots-<flavor>` laid out as
+# `images/<type>Screenshots/<n>_<name>.png`. Desktop runs the real app on a virtual
+# display (`store-screenshots/capture-desktop.sh`) and uploads the five Flathub PNGs as
+# `store-screenshots-desktop`.
 #
 # release.yml calls this on every internal cut. It also runs on a pull request that
 # touches the renderer or the showcase mesh, so a change is seen on an emulator
@@ -122,5 +124,59 @@ jobs:
         with:
           name: store-screenshots-${{ matrix.flavor }}
           path: out/images
+          if-no-files-found: warn
+          retention-days: 7
+
+  # The five Flathub shots, from the real desktop debug build on a virtual display.
+  desktop:
+    name: Desktop
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          cache_read_only: 'true'
+          install_jetbrains_jdk: 'true'
+
+      - name: Build the desktop app
+        run: ./gradlew :desktopApp:createDistributable
+
+      # Software GL through zink over lavapipe, because Skiko refuses llvmpipe by name.
+      - name: Install a virtual display and software GL
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb openbox xdotool imagemagick \
+            libvulkan1 mesa-vulkan-drivers libgl1 libglx-mesa0 libegl1 libgl1-mesa-dri
+
+      - name: Capture on a virtual display
+        run: |
+          store-screenshots/capture-desktop.sh \
+            "desktopApp/build/compose/binaries/main/app/Meshtastic Desktop/bin/Meshtastic Desktop" \
+            out/desktop
+
+      - name: Summarize the captures
+        if: ${{ always() }}
+        run: |
+          {
+            echo "### Store screenshots (desktop)"
+            find out/desktop -name '*.png' 2>/dev/null | sort | sed 's|^out/desktop/|- |' || echo "- none captured"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the captures
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: store-screenshots-desktop
+          path: out/desktop
           if-no-files-found: warn
           retention-days: 7
