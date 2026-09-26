@@ -22,7 +22,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // PNGs are left on the device in /data/local/tmp/store-screenshots, laid out like fastlane's images/; pull them with
 //   adb pull /data/local/tmp/store-screenshots/. <dir>
 // .github/workflows/store-screenshots.yml does this on an emulator.
-plugins { alias(libs.plugins.android.test) }
+plugins {
+    alias(libs.plugins.android.test)
+    alias(libs.plugins.meshtastic.detekt)
+    alias(libs.plugins.meshtastic.spotless)
+}
 
 android {
     namespace = "org.meshtastic.storescreenshots"

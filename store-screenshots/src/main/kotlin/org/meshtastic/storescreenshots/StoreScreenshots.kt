@@ -42,6 +42,7 @@ class StoreScreenshots {
 
     private val arguments = InstrumentationRegistry.getArguments()
     private val appId = requireNotNull(arguments.getString("targetAppId")) { "targetAppId argument missing" }
+
     // Shared media storage: the one app directory the shell user can read, so [save] can copy out of it.
     @Suppress("DEPRECATION")
     private val mediaDir = InstrumentationRegistry.getInstrumentation().context.externalMediaDirs.first()
@@ -180,6 +181,7 @@ class StoreScreenshots {
     private fun AccessibilityNodeInfo.hasText(value: String) = text?.toString() == value
 
     /** The three surfaces `fastlane supply` uploads, at the sizes the store asks for. */
+    @Suppress("detekt:MagicNumber")
     private enum class FormFactor(val folder: String, val widthPx: Int, val heightPx: Int, val densityDpi: Int) {
         Phone("phoneScreenshots", 1080, 1920, 400),
         SevenInch("sevenInchScreenshots", 1080, 1920, 288),
