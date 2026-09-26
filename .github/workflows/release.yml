@@ -386,8 +386,8 @@ jobs:
           retention-days: 1
 
   release-flatpak-src:
-    runs-on: ubuntu-26.04
-    timeout-minutes: 30
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
     needs: [create-flatpak-src]
     steps:
       - name: Download Flatpak source artifacts
@@ -553,7 +553,7 @@ jobs:
   # the draft github-release created, so the draft never waits on the emulator.
   store-screenshots-assets:
     if: ${{ !cancelled() && needs.github-release.result == 'success' }}
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 10
     continue-on-error: true
     needs: [store-screenshots, github-release]

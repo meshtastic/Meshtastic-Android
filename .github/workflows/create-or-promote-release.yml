@@ -39,7 +39,7 @@ concurrency:
 
 jobs:
   determine-tags:
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 10
     outputs:
       tag_to_process: ${{ steps.calculate_tags.outputs.tag_to_process }}
@@ -230,13 +230,11 @@ jobs:
   cleanup-on-failure:
     needs: [determine-tags, call-release-workflow]
     if: ${{ (failure() || cancelled()) && !inputs.dry_run && inputs.channel == 'internal' }}
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
       - name: Delete Failed or Cancelled Tag
         env:
           FINAL_TAG: ${{ needs.determine-tags.outputs.final_tag }}

@@ -31,7 +31,7 @@ concurrency:
 jobs:
   bump:
     if: ${{ github.repository == 'meshtastic/Meshtastic-Android' && !github.event.release.prerelease && !github.event.release.draft }}
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 10
     env:
       TAG: ${{ inputs.tag || github.event.release.tag_name }}

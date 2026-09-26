@@ -186,7 +186,7 @@ jobs:
         run: rm -f fastlane/play-store-credentials.json
 
   update-github-release:
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 10
     needs: [ promote-release ]
     # actions: write is scoped here — only this job's publish-workflow
@@ -583,7 +583,7 @@ jobs:
   # promoted to homebrew/cask, replace the tap PR with `brew bump-cask-pr`.
   update-homebrew-cask:
     if: ${{ inputs.channel == 'production' }}
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 15
     needs: [ update-github-release ]
     steps:
