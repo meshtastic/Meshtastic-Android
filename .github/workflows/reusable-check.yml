@@ -460,7 +460,7 @@ jobs:
   android-check:
     runs-on: ubuntu-26.04
     # No permissions block on purpose: inherits the caller's. main grants contents: write
-    # (graph submit); PRs grant read.
+    # (graph submit); PRs grant read (upload only).
     timeout-minutes: 60
     if: inputs.run_android_build == true
 
