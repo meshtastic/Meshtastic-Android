@@ -1,18 +1,19 @@
 # Lanes are invoked by the workflows in .github/workflows (release.yml,
-# promote.yml, play-listing.yml); `bundle exec fastlane lanes` lists them.
+# promote.yml, play-listing.yml, play-rollout.yml); `bundle exec fastlane lanes`
+# lists them.
 # Play credentials come from fastlane/play-store-credentials.json, written by
 # the workflow from the GOOGLE_PLAY_JSON_KEY secret and deleted afterwards.
 
 default_platform(:android)
 
 platform :android do
-  desc "Deploy a new version to the internal track on Google Play"
-  lane :internal do |options|
-    aab_path = build_google_release
+  desc "Upload a built Google release bundle to the internal track on Google Play. Pass aab:<path>"
+  lane :upload_internal do |options|
+    UI.user_error!("Pass the bundle to upload as aab:<path>") if options[:aab].to_s.empty?
 
     upload_to_play_store(
       track: 'internal',
-      aab: aab_path,
+      aab: options[:aab],
       release_status: 'completed',
       skip_upload_apk: true,
       skip_upload_metadata: true,
@@ -49,31 +50,27 @@ platform :android do
     )
   end
 
-  desc "Build the F-Droid release"
-  lane :fdroid_build do
-    gradle(
-      task: "assembleFdroidRelease",
-      properties: {
-        "android.injected.version.name" => ENV['VERSION_NAME'],
-        "android.injected.version.code" => ENV['VERSION_CODE'],
-        # Intentionally omit aboutLibraries.release — fdroid builds must use
-        # offlineMode so the output matches F-Droid's reproducible rebuild.
-      }
-    )
-  end
+  desc "Write every release on a Play track (status, version codes, user fraction) as JSON. Pass track:<name> out:<path>. Reads only; the edit is discarded"
+  lane :play_track_releases do |options|
+    UI.user_error!("Pass track:<name> and out:<path>") if options[:track].to_s.empty? || options[:out].to_s.empty?
 
-  desc "Build the Google Release"
-  private_lane :build_google_release do
-    gradle(
-      task: "bundleGoogleRelease assembleGoogleRelease",
-      print_command: false,
-      properties: {
-        "android.injected.version.name" => ENV['VERSION_NAME'],
-        "android.injected.version.code" => ENV['VERSION_CODE'],
-        "aboutLibraries.release" => "true",
-        "meshtastic.disableAbiSplits" => "true"
-      }
-    )
-    lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
+    require 'json'
+    require 'supply'
+    require 'supply/options'
+    require 'supply/reader'
+
+    # Lane code runs in ./fastlane, and the Appfile's key path is relative to the project root.
+    Dir.chdir('..') do
+      Supply.config = FastlaneCore::Configuration.create(Supply::Options.available_options, { track: options[:track].to_s })
+      track = Supply::Reader.new.track_meta
+      releases = (track&.releases || []).map do |release|
+        {
+          status: release.status,
+          version_codes: (release.version_codes || []).map(&:to_i),
+          user_fraction: release.user_fraction,
+        }
+      end
+      File.write(options[:out], JSON.pretty_generate(releases))
+    end
   end
 end

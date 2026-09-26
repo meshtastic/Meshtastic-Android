@@ -19,9 +19,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // Captures the store-listing screenshots from the real debug app on a device or emulator:
 //   ./gradlew :store-screenshots:connectedGoogleDebugAndroidTest   (Play)
 //   ./gradlew :store-screenshots:connectedFdroidDebugAndroidTest   (F-Droid, IzzyOnDroid)
-// PNGs are left on the device in /data/local/tmp/store-screenshots, laid out like fastlane's images/; pull them with
-//   adb pull /data/local/tmp/store-screenshots/. <dir>
-// .github/workflows/store-screenshots.yml does this on an emulator.
+// PNGs are left on the device in /data/local/tmp/store-screenshots/<flavor>, laid out like fastlane's images/; pull
+// them with
+//   adb pull /data/local/tmp/store-screenshots/<flavor>/. <dir>
+// .github/workflows/store-screenshots.yml does this for both flavors on one emulator.
 plugins {
     alias(libs.plugins.android.test)
     alias(libs.plugins.meshtastic.detekt)
@@ -52,13 +53,20 @@ android {
         create("google") {
             dimension = "marketplace"
             testInstrumentationRunnerArguments["targetAppId"] = "com.geeksville.mesh.google.debug"
+            testInstrumentationRunnerArguments["flavor"] = "google"
         }
         create("fdroid") {
             dimension = "marketplace"
             testInstrumentationRunnerArguments["targetAppId"] = "com.geeksville.mesh.fdroid.debug"
+            testInstrumentationRunnerArguments["flavor"] = "fdroid"
         }
     }
 }
+
+// Both flavors can capture on one device in one invocation; each run resizes that device's display.
+tasks
+    .named { it == "connectedFdroidDebugAndroidTest" }
+    .configureEach { mustRunAfter("connectedGoogleDebugAndroidTest") }
 
 kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_21) } }
 

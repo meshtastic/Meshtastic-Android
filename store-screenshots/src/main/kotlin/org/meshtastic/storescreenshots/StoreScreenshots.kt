@@ -42,6 +42,7 @@ class StoreScreenshots {
 
     private val arguments = InstrumentationRegistry.getArguments()
     private val appId = requireNotNull(arguments.getString("targetAppId")) { "targetAppId argument missing" }
+    private val flavor = requireNotNull(arguments.getString("flavor")) { "flavor argument missing" }
 
     // Shared media storage: the one app directory the shell user can read, so [save] can copy out of it.
     @Suppress("DEPRECATION")
@@ -172,7 +173,7 @@ class StoreScreenshots {
         val file = File(mediaDir, name)
         file.parentFile?.mkdirs()
         file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, PNG_QUALITY, it) }
-        val target = "$DEVICE_OUTPUT/$name"
+        val target = "$DEVICE_OUTPUT/$flavor/$name"
         shell("mkdir -p ${target.substringBeforeLast('/')}")
         shell("cp ${file.path} $target")
         Log.i(TAG, "saved $target")
@@ -208,7 +209,7 @@ class StoreScreenshots {
     private companion object {
         const val TAG = "StoreScreenshots"
 
-        /** Where the captures are left for `adb pull`, laid out as fastlane's `images/` folder. */
+        /** Where the captures are left for `adb pull`: a folder per flavor, laid out as fastlane's `images/`. */
         const val DEVICE_OUTPUT = "/data/local/tmp/store-screenshots"
 
         /** Demo Mode's hidden showcase mesh; `MockScenario.SHOWCASE` in `:core:network`. */

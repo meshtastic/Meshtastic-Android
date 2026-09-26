@@ -3,32 +3,18 @@ name: Make Release
 on:
   workflow_call:
     inputs:
-      base_version:
-        description: 'The base version for the release (e.g., 2.3.0)'
-        required: true
-        type: string
       tag_name:
         description: 'The tag that triggered the release'
         required: true
         type: string
-      commit_sha:
-        description: 'The commit SHA to build and tag'
-        required: false
-        type: string
-      channel:
-        description: 'The channel to create a release for or promote to'
+      version_name:
+        description: 'The version name the build carries (e.g., 2.3.0)'
         required: true
         type: string
-      build_desktop:
-        description: 'Whether to build the desktop distribution'
-        required: false
-        type: boolean
-        default: false
-      build_flatpak_src:
-        description: 'Whether to build the Flatpak sources'
-        required: false
-        type: boolean
-        default: false
+      version_code:
+        description: 'The version code the build carries'
+        required: true
+        type: string
     secrets:
       GSERVICES:
         required: true
@@ -79,64 +65,19 @@ concurrency:
 
 permissions:
   contents: write
-  pull-requests: read
   id-token: write
   attestations: write
 
 jobs:
-  prepare-build-info:
-    runs-on: ubuntu-26.04-arm
-    timeout-minutes: 10
-    outputs:
-      APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
-      APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ inputs.tag_name }}
-          fetch-depth: 0
-          submodules: 'recursive'
-      - name: Prep APP_VERSION_NAME
-        id: prep_version
-        env:
-          INPUT_TAG_NAME: ${{ inputs.tag_name }}
-        run: |
-          VERSION_NAME=$(echo "$INPUT_TAG_NAME" | sed 's/-.*//' | sed 's/v//')
-          echo "APP_VERSION_NAME=$VERSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "Parsed Version: $VERSION_NAME"
-
-      - name: Extract VERSION_CODE_OFFSET from config.properties
-        id: get_version_code_offset
-        run: |
-          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
-          echo "VERSION_CODE_OFFSET=$OFFSET" >> "$GITHUB_OUTPUT"
-
-      - name: Calculate Version Code from Git Commit Count
-        id: calculate_version_code
-        env:
-          VERSION_CODE_OFFSET: ${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
-        run: |
-          COMMIT_COUNT=$(git rev-list --count HEAD)
-          if ! [[ "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
-            echo "::error::VERSION_CODE_OFFSET from config.properties is not numeric: '$VERSION_CODE_OFFSET'"
-            exit 1
-          fi
-          VERSION_CODE=$((COMMIT_COUNT + VERSION_CODE_OFFSET))
-          echo "versionCode=$VERSION_CODE" >> "$GITHUB_OUTPUT"
-        shell: bash
-
   release-google:
     runs-on: ubuntu-26.04
-    timeout-minutes: 90
-    needs: [prepare-build-info]
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -154,7 +95,6 @@ jobs:
           DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
           DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
         run: |
           rm -f ./androidApp/google-services.json
           echo "$GSERVICES" > ./androidApp/google-services.json
@@ -165,19 +105,18 @@ jobs:
             echo "datadogClientToken=$DATADOG_CLIENT_TOKEN"
             echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY"
           } >> ./secrets.properties
-          echo "$GOOGLE_PLAY_JSON_KEY" > ./fastlane/play-store-credentials.json
 
-      - name: Setup Fastlane
-        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
-        with:
-          ruby-version: '4.0.7'
-          bundler-cache: true
-
-      - name: Build and Deploy Google Play to Internal Track with Fastlane
+      # Build only: publish-play uploads the bundle once every leg has built.
+      - name: Build the Google release
         env:
-          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-        run: bundle exec fastlane internal
+          VERSION_NAME: ${{ inputs.version_name }}
+          VERSION_CODE: ${{ inputs.version_code }}
+        run: >
+          ./gradlew :androidApp:bundleGoogleRelease :androidApp:assembleGoogleRelease
+          -Pandroid.injected.version.name="$VERSION_NAME"
+          -Pandroid.injected.version.code="$VERSION_CODE"
+          -PaboutLibraries.release=true
+          -Pmeshtastic.disableAbiSplits=true
 
       - name: List outputs
         run: ls -R androidApp/build/outputs/
@@ -212,15 +151,13 @@ jobs:
 
   release-fdroid:
     runs-on: ubuntu-26.04
-    timeout-minutes: 90
-    needs: [prepare-build-info]
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -238,17 +175,15 @@ jobs:
           echo "$KEYSTORE" | base64 -di > "./androidApp/$KEYSTORE_FILENAME"
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
-      - name: Setup Fastlane
-        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
-        with:
-          ruby-version: '4.0.7'
-          bundler-cache: true
-
-      - name: Build F-Droid with Fastlane
+      # No aboutLibraries.release: offlineMode keeps the output matching F-Droid's reproducible rebuild.
+      - name: Build the F-Droid release
         env:
-          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-        run: bundle exec fastlane fdroid_build
+          VERSION_NAME: ${{ inputs.version_name }}
+          VERSION_CODE: ${{ inputs.version_code }}
+        run: >
+          ./gradlew :androidApp:assembleFdroidRelease
+          -Pandroid.injected.version.name="$VERSION_NAME"
+          -Pandroid.injected.version.code="$VERSION_CODE"
 
       - name: List outputs
         run: ls -R androidApp/build/outputs/
@@ -268,10 +203,8 @@ jobs:
           subject-path: androidApp/build/outputs/apk/fdroid/release/*.apk
 
   release-desktop:
-    if: ${{ inputs.build_desktop }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
-    needs: [prepare-build-info]
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -285,7 +218,6 @@ jobs:
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -301,8 +233,8 @@ jobs:
 
       - name: Package Native Distributions
         env:
-          ORG_GRADLE_PROJECT_appVersionName: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          ORG_GRADLE_PROJECT_appVersionName: ${{ inputs.version_name }}
+          VERSION_CODE: ${{ inputs.version_code }}
           APPIMAGE_EXTRACT_AND_RUN: 1
           SIGN_MACOS: ${{ runner.os == 'macOS' && secrets.APPLE_SIGNING_IDENTITY != '' && 'true' || 'false' }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
@@ -366,7 +298,7 @@ jobs:
       - name: Build AppImage from jpackage app-image
         if: runner.os == 'Linux'
         env:
-          APP_VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+          APP_VERSION_NAME: ${{ inputs.version_name }}
         run: scripts/build-appimage.sh
 
       - name: List Desktop Binaries
@@ -403,10 +335,8 @@ jobs:
             desktopApp/build/compose/jars/*-release.jar
 
   create-flatpak-src:
-    if: ${{ inputs.build_flatpak_src }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
-    needs: [prepare-build-info]
     strategy:
       fail-fast: false
       matrix:
@@ -419,7 +349,6 @@ jobs:
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -457,9 +386,8 @@ jobs:
           retention-days: 1
 
   release-flatpak-src:
-    if: ${{ inputs.build_flatpak_src }}
-    runs-on: ubuntu-26.04
-    timeout-minutes: 30
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
     needs: [create-flatpak-src]
     steps:
       - name: Download Flatpak source artifacts
@@ -501,96 +429,55 @@ jobs:
   # (the caller deletes the tag on a failed run): the capture runs soft, github-release
   # does not gate on it, and packaging falls back to the committed sets.
   store-screenshots:
-    needs: [prepare-build-info]
     uses: ./.github/workflows/store-screenshots.yml
     with:
       ref: ${{ inputs.tag_name }}
       soft: true
     secrets: inherit
 
-  # One zip per flavor laid out as fastlane's images/ folder (google feeds the Play
-  # listing, fdroid the committed tree F-Droid reads) and the five desktop PNGs loose,
-  # so metainfo.xml can point at them by name. A flavor or the desktop set with a shot
-  # missing is replaced whole by the committed one, never mixed.
-  store-screenshots-assets:
-    if: ${{ !cancelled() }}
+  # Play receives the bundle only after every leg has built: a failed leg makes the caller
+  # delete the tag, and Play keeps any versionCode it has been sent.
+  publish-play:
     runs-on: ubuntu-26.04-arm
-    timeout-minutes: 10
-    continue-on-error: true
-    needs: [prepare-build-info, store-screenshots]
+    timeout-minutes: 15
+    needs: [release-google, release-fdroid, release-desktop, release-flatpak-src]
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag_name }}
 
-      - name: Download the captures
-        continue-on-error: true
+      - name: Download the Google AAB
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          pattern: store-screenshots-*
-          path: shots
+          name: google-aab
+          path: ${{ runner.temp }}/google-aab
 
-      - name: Package the screenshots
-        env:
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-        run: |
-          mkdir -p out
-          echo "### Store screenshots" >> "$GITHUB_STEP_SUMMARY"
-          # Three form factors times five shots.
-          for flavor in google fdroid; do
-            src="shots/store-screenshots-$flavor"
-            count=$(find "$src" -name '*.png' 2>/dev/null | wc -l)
-            if [ "$count" -ne 15 ]; then
-              echo "::warning::$flavor captured $count of 15 shots; the committed set is attached instead."
-              echo "- $flavor: $count of 15 captured, committed set attached" >> "$GITHUB_STEP_SUMMARY"
-              src=fastlane/metadata/android/en-US/images
-            else
-              echo "- $flavor: captured from the tag" >> "$GITHUB_STEP_SUMMARY"
-            fi
-            (cd "$src" && zip -qr "$GITHUB_WORKSPACE/out/store-listing-screenshots-$flavor-${VERSION_CODE}.zip" .)
-          done
-          src=shots/store-screenshots-desktop
-          count=$(find "$src" -name 'meshtastic-desktop-*.png' 2>/dev/null | wc -l)
-          if [ "$count" -ne 5 ]; then
-            echo "::warning::desktop captured $count of 5 shots; the committed set is attached instead."
-            echo "- desktop: $count of 5 captured, committed set attached" >> "$GITHUB_STEP_SUMMARY"
-            src=desktopApp/packaging/linux/screenshots
-          else
-            echo "- desktop: captured from the tag" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          cp "$src"/meshtastic-desktop-*.png out/
-
-      - name: Upload store screenshots artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
         with:
-          name: store-screenshots
-          path: out/*
-          retention-days: 1
+          bundler-cache: true
 
-  # Gates on the build jobs by name: store-screenshots-assets is in needs only so its
-  # artifact exists before the download below, and its result is not consulted.
+      - name: Decode Play Store credentials
+        env:
+          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+        run: printf '%s\n' "$GOOGLE_PLAY_JSON_KEY" > fastlane/play-store-credentials.json
+
+      - name: Upload to the internal track
+        env:
+          AAB: ${{ runner.temp }}/google-aab/androidApp-google-release.aab
+        run: bundle exec fastlane upload_internal aab:"$AAB"
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f fastlane/play-store-credentials.json
+
   github-release:
-    if: >-
-      ${{ !cancelled()
-        && needs.prepare-build-info.result == 'success'
-        && needs.release-google.result == 'success'
-        && needs.release-fdroid.result == 'success'
-        && (needs.release-desktop.result == 'success' || !inputs.build_desktop)
-        && (needs.release-flatpak-src.result == 'success' || !inputs.build_flatpak_src) }}
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
-    needs:
-      - prepare-build-info
-      - release-google
-      - release-fdroid
-      - release-desktop
-      - release-flatpak-src
-      - store-screenshots-assets
+    needs: [publish-play]
     permissions:
       contents: write
-      id-token: write
-      attestations: write
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -602,7 +489,7 @@ jobs:
         with:
           path: ./artifacts
 
-      # The raw captures are packaged by store-screenshots-assets; only its artifact ships.
+      # Raw captures already uploaded stay out: store-screenshots-assets packages and attaches them.
       - name: Exclude intermediate artifacts from release
         run: rm -rf ./artifacts/flatpak-multisrc-* ./artifacts/store-screenshots-*
 
@@ -617,7 +504,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           TAG: ${{ inputs.tag_name }}
-          TARGET: ${{ inputs.commit_sha || github.sha }}
+          TARGET: ${{ github.sha }}
         run: |
           # Fail the step if the listing itself fails — an empty PREV must only ever
           # mean "no published v* release exists yet", never a swallowed API error,
@@ -651,9 +538,72 @@ jobs:
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         with:
           tag_name: ${{ inputs.tag_name }}
-          target_commitish: ${{ inputs.commit_sha || github.sha }}
-          name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
+          target_commitish: ${{ github.sha }}
+          name: ${{ inputs.tag_name }} (${{ inputs.version_code }})
           body_path: release-notes.md
           files: ./artifacts/**/*
           draft: true
           prerelease: true
+
+  # One zip per flavor laid out as fastlane's images/ folder (google feeds the Play
+  # listing, fdroid the committed tree F-Droid reads) and the five desktop PNGs loose,
+  # so metainfo.xml can point at them by name. A flavor or the desktop set with a shot
+  # missing is replaced whole by the committed one, never mixed. They are attached to
+  # the draft github-release created, so the draft never waits on the emulator.
+  store-screenshots-assets:
+    if: ${{ !cancelled() && needs.github-release.result == 'success' }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    continue-on-error: true
+    needs: [store-screenshots, github-release]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag_name }}
+
+      - name: Download the captures
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: store-screenshots-*
+          path: shots
+
+      - name: Package the screenshots
+        env:
+          VERSION_CODE: ${{ inputs.version_code }}
+        run: |
+          mkdir -p out
+          echo "### Store screenshots" >> "$GITHUB_STEP_SUMMARY"
+          # Three form factors times five shots.
+          for flavor in google fdroid; do
+            src="shots/store-screenshots-$flavor"
+            count=$(find "$src" -name '*.png' 2>/dev/null | wc -l)
+            if [ "$count" -ne 15 ]; then
+              echo "::warning::$flavor captured $count of 15 shots; the committed set is attached instead."
+              echo "- $flavor: $count of 15 captured, committed set attached" >> "$GITHUB_STEP_SUMMARY"
+              src=fastlane/metadata/android/en-US/images
+            else
+              echo "- $flavor: captured from the tag" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            (cd "$src" && zip -qr "$GITHUB_WORKSPACE/out/store-listing-screenshots-$flavor-${VERSION_CODE}.zip" .)
+          done
+          src=shots/store-screenshots-desktop
+          count=$(find "$src" -name 'meshtastic-desktop-*.png' 2>/dev/null | wc -l)
+          if [ "$count" -ne 5 ]; then
+            echo "::warning::desktop captured $count of 5 shots; the committed set is attached instead."
+            echo "- desktop: $count of 5 captured, committed set attached" >> "$GITHUB_STEP_SUMMARY"
+            src=desktopApp/packaging/linux/screenshots
+          else
+            echo "- desktop: captured from the tag" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          cp "$src"/meshtastic-desktop-*.png out/
+
+      - name: Attach the screenshots to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag_name }}
+        run: gh release upload "$TAG" out/* --clobber --repo "$REPO"

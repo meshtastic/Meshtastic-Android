@@ -75,14 +75,14 @@ Rendering is host-deterministic here (layoutlib): a local `update` produces refe
 
 The store-listing screenshots (Play, F-Droid, IzzyOnDroid, and the desktop app's Flathub listing) are taken from the real apps, connected to Demo Mode's hidden showcase mesh (`/connections?address=mshowcase`, `MockScenario.SHOWCASE` in `:core:network`), rather than drawn. Every screen is reached by its deep link, so the flow does not depend on the display language, and each shot is kept once the window has stopped changing.
 
-- **Android: `:store-screenshots`**, a UiAutomator 2.4 test module targeting `:androidApp`. For each surface `fastlane supply` uploads it sets the display size and density, relaunches the debug app through its shell-only `AutomationLauncher` alias with `skip_onboarding` and `skip_connect_confirm`, and saves the five listing shots, full screen with a SystemUI demo-mode status bar, to `/data/local/tmp/store-screenshots` on the device.
+- **Android: `:store-screenshots`**, a UiAutomator 2.4 test module targeting `:androidApp`. For each surface `fastlane supply` uploads it sets the display size and density, relaunches the debug app through its shell-only `AutomationLauncher` alias with `skip_onboarding` and `skip_connect_confirm`, and saves the five listing shots, full screen with a SystemUI demo-mode status bar, to `/data/local/tmp/store-screenshots/<flavor>` on the device.
 - **Desktop: `store-screenshots/capture-desktop.sh`** runs the real desktop debug build on an Xvfb display, one launch per screen with that screen's deep link, and saves the five Flathub shots. The map needs Skiko's OpenGL renderer and Skiko refuses any GL adapter named `llvmpipe` or `virgl`, so Mesa runs GL through zink over lavapipe.
 
 On an emulator or device, one flavor at a time:
 
 ```shell
 ./gradlew :store-screenshots:connectedFdroidDebugAndroidTest
-adb pull /data/local/tmp/store-screenshots/. fastlane/metadata/android/en-US/images/
+adb pull /data/local/tmp/store-screenshots/fdroid/. fastlane/metadata/android/en-US/images/
 ```
 
 | Folder | Size | Window | Uploaded by |
@@ -92,7 +92,7 @@ adb pull /data/local/tmp/store-screenshots/. fastlane/metadata/android/en-US/ima
 | `tenInchScreenshots/` | 2560×1440 @320 dpi | expanded: rail, list beside detail | `fastlane supply` |
 | `desktopApp/packaging/linux/screenshots/` | 1280×800 | expanded: rail, list beside detail | Flathub, through the release assets `metainfo.xml` names |
 
-`.github/workflows/store-screenshots.yml` runs both on hosted runners, per flavor for Android (google for the Play listing, fdroid for the committed tree), on every internal release, on demand, and on pull requests that touch the renderer or the showcase mesh. The release pipeline attaches the captures to the release, publishes the Play listing from them on production, and opens a self-merging PR that writes the fdroid and desktop sets back here (`RELEASE_PROCESS.md`).
+`.github/workflows/store-screenshots.yml` runs both on hosted runners, with both Android flavors in one job on one emulator (google for the Play listing, fdroid for the committed tree), on every internal release, on demand, and on pull requests that touch the renderer or the showcase mesh. The release pipeline attaches the captures to the release, publishes the Play listing from them on production, and opens a self-merging PR that writes the fdroid and desktop sets back here (`RELEASE_PROCESS.md`).
 
 ### Baseline Profile / startup performance
 

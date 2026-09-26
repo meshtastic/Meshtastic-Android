@@ -11,17 +11,9 @@ on:
         description: 'The tag that triggered the release'
         required: true
         type: string
-      release_name:
-        description: 'The desired name for the GitHub release'
-        required: true
-        type: string
       final_tag:
         description: 'The final tag for the release'
         required: true
-        type: string
-      commit_sha:
-        description: 'The commit SHA to tag'
-        required: false
         type: string
       channel:
         description: 'The channel to promote to'
@@ -31,28 +23,25 @@ on:
         description: 'The channel to promote from'
         required: true
         type: string
+      version_code:
+        description: 'The version code of the build being promoted'
+        required: true
+        type: string
     secrets:
-      GSERVICES:
-        required: true
-      KEYSTORE:
-        required: true
-      KEYSTORE_FILENAME:
-        required: true
-      KEYSTORE_PROPERTIES:
-        required: true
-      DATADOG_APPLICATION_ID:
-        required: true
-      DATADOG_CLIENT_TOKEN:
-        required: true
-      GOOGLE_MAPS_API_KEY:
-        required: true
       GOOGLE_PLAY_JSON_KEY:
-        required: true
-      GRADLE_ENCRYPTION_KEY:
         required: true
       DISCORD_WEBHOOK_ANDROID:
         required: false
       HOMEBREW_TAP_TOKEN:
+        required: false
+      CROWDIN_GITHUB_TOKEN:
+        required: false
+      FLATHUB_TOKEN:
+        required: false
+      # Read only for presence, so the checklist says whether each store workflow will skip.
+      WINGET_TOKEN:
+        required: false
+      MSSTORE_PRODUCT_ID:
         required: false
 
 # Never cancel a promotion mid-flight: being killed between the Play edit
@@ -65,59 +54,11 @@ concurrency:
 
 permissions:
   contents: write
-  pull-requests: write
-  statuses: write
-  id-token: write
-  attestations: write
 
 jobs:
-  prepare-build-info:
-    runs-on: ubuntu-26.04-arm
-    timeout-minutes: 10
-    outputs:
-      APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
-      APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ inputs.commit_sha || inputs.tag_name }}
-          fetch-depth: 0
-          submodules: 'recursive'
-
-      - name: Prep APP_VERSION_NAME
-        id: prep_version
-        env:
-          INPUT_TAG_NAME: ${{ inputs.tag_name }}
-        run: |
-          VERSION_NAME=$(echo "$INPUT_TAG_NAME" | sed 's/-.*//' | sed 's/v//')
-          echo "APP_VERSION_NAME=$VERSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "Parsed Version: $VERSION_NAME"
-
-      - name: Extract VERSION_CODE_OFFSET from config.properties
-        id: get_version_code_offset
-        run: |
-          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
-          echo "VERSION_CODE_OFFSET=$OFFSET" >> "$GITHUB_OUTPUT"
-
-      - name: Calculate Version Code from Git Commit Count
-        id: calculate_version_code
-        env:
-          VERSION_CODE_OFFSET: ${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
-        run: |
-          COMMIT_COUNT=$(git rev-list --count HEAD)
-          if ! [[ "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
-            echo "::error::VERSION_CODE_OFFSET from config.properties is not numeric: '$VERSION_CODE_OFFSET'"
-            exit 1
-          fi
-          VERSION_CODE=$((COMMIT_COUNT + VERSION_CODE_OFFSET))
-          echo "versionCode=$VERSION_CODE" >> "$GITHUB_OUTPUT"
-        shell: bash
-
   promote-release:
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 30
-    needs: [ prepare-build-info ]
     outputs:
       already_on_track: ${{ steps.preflight.outputs.already_on_track }}
       screenshots: ${{ steps.screenshots.outputs.found }}
@@ -130,16 +71,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+          ref: ${{ inputs.tag_name }}
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
         with:
-          ruby-version: '4.0.7'
           bundler-cache: true
 
       - name: Decode Play Store credentials
-        run: echo '${{ secrets.GOOGLE_PLAY_JSON_KEY }}' > fastlane/play-store-credentials.json
+        env:
+          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+        run: printf '%s\n' "$GOOGLE_PLAY_JSON_KEY" > fastlane/play-store-credentials.json
 
       # A re-dispatched promotion whose versionCode is already live on the
       # target track must no-op: every redundant `supply` commit creates a new
@@ -169,7 +111,7 @@ jobs:
       - name: Preflight — is this versionCode already on the target track?
         id: preflight
         env:
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          VERSION_CODE: ${{ inputs.version_code }}
         run: |
           PKG=$(grep '^APPLICATION_ID=' config.properties | cut -d'=' -f2)
           bash .workflow-ref/scripts/play-track-preflight.sh \
@@ -185,7 +127,7 @@ jobs:
       - name: Promote to next channel
         if: ${{ steps.preflight.outputs.already_on_track != 'true' }}
         env:
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          VERSION_CODE: ${{ inputs.version_code }}
         run: |
           bundle exec fastlane supply \
             --track "$FROM_TRACK" \
@@ -202,7 +144,7 @@ jobs:
       - name: Verify versionCode landed on the target track
         if: ${{ steps.preflight.outputs.already_on_track != 'true' }}
         env:
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          VERSION_CODE: ${{ inputs.version_code }}
         run: |
           PKG=$(grep '^APPLICATION_ID=' config.properties | cut -d'=' -f2)
           bash .workflow-ref/scripts/play-track-preflight.sh \
@@ -250,51 +192,50 @@ jobs:
         run: rm -f fastlane/play-store-credentials.json
 
   update-github-release:
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 10
-    needs: [ prepare-build-info, promote-release ]
+    needs: [ promote-release ]
     # actions: write is scoped here — only this job's publish-workflow
     # dispatch needs it, and the other jobs must not get it. Job-level
     # permissions replace the workflow-level block, so the full set this
-    # job uses is listed.
+    # job uses is listed. Its PRs are opened with CROWDIN_GITHUB_TOKEN.
     permissions:
       contents: write
-      pull-requests: write
-      statuses: write
       actions: write
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+          ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
-      # Same reasoning as promote-release: scripts come from the caller's commit,
-      # not the tag, so a tag cut before a script landed still gets it.
+      # Same reasoning as promote-release: scripts and the bot-pr action come from the
+      # caller's commit, not the tag, so a tag cut before either landed still gets it.
       - name: Checkout release scripts from caller commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           path: .workflow-ref
-          sparse-checkout: scripts
+          sparse-checkout: |
+            scripts
+            .github/actions/bot-pr
 
-      - name: Push Git Tag on Success
-        if: ${{ inputs.commit_sha != '' }}
-        run: |
-          git tag ${{ inputs.final_tag }} ${{ inputs.commit_sha }}
-          git push origin ${{ inputs.final_tag }}
-
+      # A rerun finds the release already moved to the final tag, so that is looked up first.
       - name: Update GitHub Release with gh CLI
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag_name }}
+          FINAL_TAG: ${{ inputs.final_tag }}
+          VERSION_CODE: ${{ inputs.version_code }}
+          PRERELEASE: ${{ inputs.channel != 'production' }}
         run: |
-          gh release edit ${{ inputs.tag_name }} \
-            --tag ${{ inputs.final_tag }} \
-            --title "${{ inputs.release_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})" \
+          CURRENT=$(gh release view "$FINAL_TAG" --json tagName --jq .tagName 2>/dev/null || echo "$TAG")
+          gh release edit "$CURRENT" \
+            --tag "$FINAL_TAG" \
+            --title "$FINAL_TAG ($VERSION_CODE)" \
             --draft=false \
-            --prerelease=${{ inputs.channel != 'production' }}
+            --prerelease="$PRERELEASE"
 
       # The draft's notes were generated at the internal cut and cover only the
       # PRs since the previous published pre-release. A production release is
@@ -386,18 +327,28 @@ jobs:
           done
           gh workflow run docs-release.yml --ref "$TAG"
 
+      # The Obtainium table in README.md follows the channel releases; this refreshes it
+      # now rather than at the next hourly run.
+      - name: Dispatch scheduled updates
+        id: sched
+        if: ${{ inputs.channel != 'internal' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run scheduled-updates.yml --ref main
+
+      # bot-pr resets the checked-out branch to its origin copy before branching the PR,
+      # so the edits below are made on a local main, never on a branch origin lacks.
       - name: Stamp CHANGELOG.md for release
         id: stamp
         if: ${{ inputs.channel == 'production' }}
         env:
-          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.base_version }}
         run: |
           DATE=$(date -u +%Y-%m-%d)
 
-          # Checkout CHANGELOG.md from main (we're on a tag checkout)
           git fetch origin main
-          git checkout -b "changelog/v${VERSION}" origin/main
+          git checkout -B main origin/main
 
           # The full-range notes from the step above, minus the boilerplate.
           # The file is the record whether or not the release edit went
@@ -444,98 +395,66 @@ jobs:
               f.write(new_content)
           " "$VERSION" "$DATE" "$FLAT_NOTES"
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git diff --cached --quiet || {
-            BRANCH="automation/changelog-v${VERSION}"
-            git checkout -B "$BRANCH"
-            git commit -m "docs: release CHANGELOG.md for v${VERSION}"
-            git push origin "$BRANCH" --force
-
-            PR_URL=$(gh pr create \
-              --title "docs: release CHANGELOG.md for v${VERSION}" \
-              --body "Automated changelog stamp for production release v${VERSION}." \
-              --head "$BRANCH" \
-              --base main \
-              --label "automation" \
-              --label "skip-changelog")
-            echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
-
-            # Post required commit status so the PR isn't blocked
-            COMMIT_SHA=$(git rev-parse HEAD)
-            gh api "repos/${{ github.repository }}/statuses/${COMMIT_SHA}" \
-              -f state="success" \
-              -f context="Check Workflow Status" \
-              -f description="Skipped — changelog-only PR"
-          }
+      - name: Open the CHANGELOG.md PR
+        id: stamp_pr
+        if: ${{ inputs.channel == 'production' }}
+        uses: ./.workflow-ref/.github/actions/bot-pr
+        with:
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          branch: automation/changelog-v${{ inputs.base_version }}
+          title: 'docs: release CHANGELOG.md for v${{ inputs.base_version }}'
+          body: 'Automated changelog stamp for production release v${{ inputs.base_version }}.'
+          add-paths: CHANGELOG.md
+          labels: |
+            automation
+            skip-changelog
 
       # F-Droid and IzzyOnDroid read fastlane/ straight from git, so the committed set
       # follows what production shipped: the fdroid-flavor captures come back from the
       # release into a bot PR that merges itself, with the desktop set beside them. The
       # Flathub metainfo reads the release assets directly and needs nothing here.
-      # Nothing to open when the files already match.
-      - name: Refresh the committed store screenshots
-        id: shots_pr
+      # Nothing is opened when the files already match.
+      - name: Stage the store screenshots from the release
+        id: shots
         if: ${{ inputs.channel == 'production' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.final_tag }}
-          VERSION: ${{ inputs.base_version }}
-          REPO: ${{ github.repository }}
         run: |
           ASSET=$(gh release view "$TAG" --json assets --jq '.assets[].name | select(startswith("store-listing-screenshots-fdroid-"))' | head -1)
           if [[ -z "$ASSET" ]]; then
             echo "::warning::No rendered screenshots attached to $TAG; the committed set stays."
-            echo "refreshed=none" >> "$GITHUB_OUTPUT"
+            echo "found=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           gh release download "$TAG" --pattern "$ASSET" --pattern 'meshtastic-desktop-*.png' --dir "$RUNNER_TEMP/shots"
           git fetch origin main
-          BRANCH="automation/store-screenshots-v${VERSION}"
-          git checkout -B "$BRANCH" origin/main
+          git checkout -B main origin/main
           unzip -qo "$RUNNER_TEMP/shots/$ASSET" -d fastlane/metadata/android/en-US/images
           cp "$RUNNER_TEMP"/shots/meshtastic-desktop-*.png desktopApp/packaging/linux/screenshots/
-          git add fastlane/metadata/android/en-US/images desktopApp/packaging/linux/screenshots
-          if git diff --cached --quiet; then
-            echo "Committed screenshots already match v${VERSION}."
-            echo "refreshed=match" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(store): refresh the committed screenshots from v${VERSION}"
-          git push origin "$BRANCH" --force
-          PR_URL=$(gh pr create \
-            --title "chore(store): refresh the committed screenshots from v${VERSION}" \
-            --body "The screenshots rendered for the v${VERSION} release, so the fastlane tree F-Droid reads matches what shipped." \
-            --head "$BRANCH" \
-            --base main \
-            --label "automation" \
-            --label "skip-changelog")
-          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
-          # GITHUB_TOKEN pushes start no workflows: post the status the queue
-          # requires, as the changelog stamp does, then let the queue take it.
-          gh api "repos/${REPO}/statuses/$(git rev-parse HEAD)" \
-            -f state="success" \
-            -f context="Check Workflow Status" \
-            -f description="Skipped — screenshot-only PR"
-          PR_ID=$(gh pr view "$PR_URL" --json id --jq .id)
-          QUERY=$(cat <<'GQL'
-          mutation($id: ID!) {
-            enablePullRequestAutoMerge(input: { pullRequestId: $id }) {
-              pullRequest { number autoMergeRequest { enabledAt } }
-            }
-          }
-          GQL
-          )
-          gh api graphql -f query="$QUERY" -F id="$PR_ID" || gh pr merge "$PR_URL"
+          echo "found=true" >> "$GITHUB_OUTPUT"
+
+      - name: Refresh the committed store screenshots
+        id: shots_pr
+        if: ${{ steps.shots.outputs.found == 'true' }}
+        continue-on-error: true
+        uses: ./.workflow-ref/.github/actions/bot-pr
+        with:
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          branch: automation/store-screenshots-v${{ inputs.base_version }}
+          title: 'chore(store): refresh the committed screenshots from v${{ inputs.base_version }}'
+          body: 'The screenshots rendered for the v${{ inputs.base_version }} release, so the fastlane tree F-Droid reads matches what shipped.'
+          add-paths: |
+            fastlane/metadata/android/en-US/images
+            desktopApp/packaging/linux/screenshots
+          labels: |
+            automation
+            skip-changelog
 
       # One place to read what this promotion did, what it dispatched, and what
-      # is still done by hand. The store dispatches report the dispatch only;
-      # each store workflow skips inside itself until its secrets exist. The
-      # hand-done list stays out of the Discord post, which is an announcement.
+      # is still done by hand. The hand-done list stays out of the Discord post,
+      # which is an announcement.
       - name: Release checklist
         if: ${{ always() }}
         env:
@@ -545,19 +464,37 @@ jobs:
           ALREADY_ON_TRACK: ${{ needs.promote-release.outputs.already_on_track }}
           SCREENSHOTS: ${{ needs.promote-release.outputs.screenshots }}
           LISTING: ${{ needs.promote-release.outputs.listing }}
-          SHOTS_PR: ${{ steps.shots_pr.outputs.pr_url }}
+          SHOTS: ${{ steps.shots.outcome }}
+          SHOTS_FOUND: ${{ steps.shots.outputs.found }}
+          SHOTS_PR: ${{ steps.shots_pr.outputs.url }}
           SHOTS_PR_OUTCOME: ${{ steps.shots_pr.outcome }}
-          SHOTS_REFRESHED: ${{ steps.shots_pr.outputs.refreshed }}
           RELEASE: ${{ steps.release.outcome }}
           NOTES: ${{ steps.notes.outcome }}
           DOCS: ${{ steps.docs.outcome }}
+          SCHED: ${{ steps.sched.outcome }}
           WINGET: ${{ steps.winget.outcome }}
           MSSTORE: ${{ steps.msstore.outcome }}
           BUMP: ${{ steps.bump.outcome }}
           STAMP: ${{ steps.stamp.outcome }}
-          STAMP_PR: ${{ steps.stamp.outputs.pr_url }}
+          STAMP_PR: ${{ steps.stamp_pr.outputs.url }}
+          STAMP_PR_OUTCOME: ${{ steps.stamp_pr.outcome }}
+          HAS_FLATHUB_TOKEN: ${{ secrets.FLATHUB_TOKEN != '' }}
+          HAS_WINGET_TOKEN: ${{ secrets.WINGET_TOKEN != '' }}
+          HAS_MSSTORE_PRODUCT_ID: ${{ secrets.MSSTORE_PRODUCT_ID != '' }}
+          HAS_HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
         run: |
           row() { printf '| %s | %s |\n' "$1" "$2"; }
+          # A store workflow skips inside itself when its secret is unset, so a successful
+          # dispatch alone does not mean anything was submitted.
+          store_row() {
+            if [[ "$2" != "success" ]]; then
+              row "$1" "$2"
+            elif [[ "$3" != "true" ]]; then
+              row "$1" "will skip: $4 unset"
+            else
+              row "$1" "dispatched"
+            fi
+          }
           {
             echo "## Release checklist: ${TAG} (${CHANNEL})"
             echo
@@ -580,30 +517,56 @@ jobs:
               row "Play listing validated (dry run)" "$LISTING"
             fi
             row "Docs Release dispatched" "$DOCS"
+            row "Scheduled Updates dispatched (Obtainium table)" "$SCHED"
             if [[ "$CHANNEL" == "production" ]]; then
               if [[ -n "$SHOTS_PR" ]]; then
                 row "Committed screenshots refresh PR" "$SHOTS_PR"
+              elif [[ "$SHOTS" != "success" ]]; then
+                row "Committed screenshots refresh PR" "$SHOTS"
+              elif [[ "$SHOTS_FOUND" != "true" ]]; then
+                row "Committed screenshots refresh PR" "none needed (no rendered set attached)"
               elif [[ "$SHOTS_PR_OUTCOME" == "success" ]]; then
-                row "Committed screenshots refresh PR" "none needed (${SHOTS_REFRESHED:-no change})"
+                row "Committed screenshots refresh PR" "none needed (committed set matches)"
               else
                 row "Committed screenshots refresh PR" "$SHOTS_PR_OUTCOME"
               fi
               row "Release notes rewritten (full range)" "$NOTES"
-              row "CHANGELOG.md stamp" "$STAMP ${STAMP_PR:+- $STAMP_PR}"
-              row "winget dispatched" "$WINGET"
-              row "Microsoft Store dispatched" "$MSSTORE"
+              if [[ -n "$STAMP_PR" ]]; then
+                row "CHANGELOG.md stamp PR" "$STAMP_PR"
+              elif [[ "$STAMP" == "success" && "$STAMP_PR_OUTCOME" == "success" ]]; then
+                row "CHANGELOG.md stamp PR" "none needed (already stamped)"
+              else
+                row "CHANGELOG.md stamp PR" "stamp $STAMP, PR ${STAMP_PR_OUTCOME:-skipped}"
+              fi
+              store_row "winget" "$WINGET" "$HAS_WINGET_TOKEN" WINGET_TOKEN
+              store_row "Microsoft Store" "$MSSTORE" "$HAS_MSSTORE_PRODUCT_ID" MSSTORE_PRODUCT_ID
               row "Version bump dispatched" "$BUMP"
               row "Post-Release Cleanup" "dispatched by Docs Release once /${TAG}/ is published"
+              if [[ "$HAS_HOMEBREW_TAP_TOKEN" == "true" ]]; then
+                row "Homebrew cask PR" "opened by the update-homebrew-cask job after this one"
+              else
+                row "Homebrew cask PR" "will skip: HOMEBREW_TAP_TOKEN unset"
+              fi
+              if [[ "$HAS_FLATHUB_TOKEN" == "true" ]]; then
+                row "Flathub update PR" "opened by the update-flathub job after this one"
+              else
+                row "Flathub update PR" "will skip: FLATHUB_TOKEN unset"
+              fi
               echo
               echo "Still by hand:"
-              echo "- Play Console: the production rollout is staged; complete it there."
-              echo "- Flathub: bump flathub/org.meshtastic.MeshtasticDesktop (tag, commit, gradle zip and sha256, flatpak-sources.json)."
+              echo "- Play: the production rollout is staged; widen, complete or halt it with the Play Rollout workflow."
+              if [[ "$HAS_FLATHUB_TOKEN" == "true" ]]; then
+                echo "- Flathub: merge the update-flathub PR once its test build passes."
+              else
+                echo "- Flathub: bump flathub/org.meshtastic.MeshtasticDesktop (tag, commit, gradle zip and sha256, flatpak-sources.json)."
+              fi
               echo "- Release notes: replace the placeholder <description> the version bump PR wrote for the next line."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Announces once the release is published, whatever happened to the steps after it.
       - name: Notify Discord
-        if: ${{ inputs.channel != 'internal' }}
+        if: ${{ always() && steps.release.outcome == 'success' && inputs.channel != 'internal' }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_ANDROID }}
           VERSION: ${{ inputs.final_tag }}
@@ -654,14 +617,14 @@ jobs:
   # promoted to homebrew/cask, replace the tap PR with `brew bump-cask-pr`.
   update-homebrew-cask:
     if: ${{ inputs.channel == 'production' }}
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 15
     needs: [ update-github-release ]
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+          ref: ${{ inputs.tag_name }}
 
       - name: Render cask and open PR against meshtastic/homebrew-tap
         env:
@@ -713,3 +676,82 @@ jobs:
             --body "Automated cask bump for the ${TAG} production release of [Meshtastic-Android](https://github.com/${{ github.repository }}/releases/tag/${TAG})." \
             || echo "PR already exists for $BRANCH; branch updated.")
           echo "- Homebrew cask: $PR_URL" >> "$GITHUB_STEP_SUMMARY"
+
+  # The same for flathub/org.meshtastic.MeshtasticDesktop: the tag and its commit, the Gradle
+  # zip that tag's wrapper pins, and the release's flatpak-sources.json. The JBR, runtime and
+  # patches stay as they are; Flathub's test build on the PR checks them against the tag.
+  update-flathub:
+    if: ${{ inputs.channel == 'production' }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    needs: [ update-github-release ]
+    steps:
+      # From the caller's commit, like the scripts in the jobs above.
+      - name: Checkout the manifest bump script from caller commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: scripts/verify-flatpak
+
+      - name: Update the manifest and open PR against flathub/org.meshtastic.MeshtasticDesktop
+        env:
+          FLATHUB_TOKEN: ${{ secrets.FLATHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [[ -z "$FLATHUB_TOKEN" ]]; then
+            echo "::notice::FLATHUB_TOKEN not set; skipping the Flathub update."
+            echo "- Flathub: skipped, FLATHUB_TOKEN not set" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          VERSION=${TAG#v}
+
+          # The tag appears a moment after the undraft.
+          TYPE="" COMMIT=""
+          for _ in 1 2 3 4 5 6; do
+            if OBJ=$(gh api "repos/${REPO}/git/ref/tags/${TAG}" --jq '.object.type + " " + .object.sha' 2>/dev/null); then
+              read -r TYPE COMMIT <<< "$OBJ"
+              break
+            fi
+            sleep 10
+          done
+          if [[ -z "$COMMIT" ]]; then
+            echo "::error::Tag $TAG not found."
+            exit 1
+          fi
+          if [[ "$TYPE" == "tag" ]]; then
+            COMMIT=$(gh api "repos/${REPO}/git/tags/${COMMIT}" --jq .object.sha)
+          fi
+
+          gh api "repos/${REPO}/contents/gradle/wrapper/gradle-wrapper.properties?ref=${COMMIT}" \
+            -H 'Accept: application/vnd.github.raw' > "$RUNNER_TEMP/gradle-wrapper.properties"
+          gh release download "$TAG" --repo "$REPO" --pattern flatpak-sources.json --dir "$RUNNER_TEMP"
+          jq empty "$RUNNER_TEMP/flatpak-sources.json"
+
+          FLATHUB="$RUNNER_TEMP/flathub"
+          git clone "https://x-access-token:${FLATHUB_TOKEN}@github.com/flathub/org.meshtastic.MeshtasticDesktop.git" "$FLATHUB"
+          BASE=$(git -C "$FLATHUB" rev-parse --abbrev-ref HEAD)
+          BRANCH="update-${VERSION}"
+          git -C "$FLATHUB" checkout -b "$BRANCH"
+          python3 scripts/verify-flatpak/bump-flathub-manifest.py \
+            "$FLATHUB/org.meshtastic.MeshtasticDesktop.yaml" "$TAG" "$COMMIT" "$RUNNER_TEMP/gradle-wrapper.properties"
+          cp "$RUNNER_TEMP/flatpak-sources.json" "$FLATHUB/flatpak-sources.json"
+
+          cd "$FLATHUB"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add org.meshtastic.MeshtasticDesktop.yaml flatpak-sources.json
+          if git diff --cached --quiet; then
+            echo "Flathub manifest already at ${TAG}."
+            echo "- Flathub: already at ${TAG}" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -m "Update to ${TAG}"
+          git push -fu origin "$BRANCH"
+          PR_URL=$(GH_TOKEN="$FLATHUB_TOKEN" gh pr create --repo flathub/org.meshtastic.MeshtasticDesktop \
+            --head "$BRANCH" --base "$BASE" \
+            --title "Update to ${TAG}" \
+            --body "$(printf 'Update Meshtastic Desktop to version %s\nhttps://github.com/%s/releases/tag/%s\n' "$TAG" "$REPO" "$TAG")" \
+            || echo "PR already exists for $BRANCH; branch updated.")
+          echo "- Flathub: $PR_URL" >> "$GITHUB_STEP_SUMMARY"

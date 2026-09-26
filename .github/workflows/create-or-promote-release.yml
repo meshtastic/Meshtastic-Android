@@ -28,8 +28,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
-  statuses: write
   id-token: write
   attestations: write
 
@@ -41,13 +39,14 @@ concurrency:
 
 jobs:
   determine-tags:
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 10
     outputs:
       tag_to_process: ${{ steps.calculate_tags.outputs.tag_to_process }}
-      release_name: ${{ steps.calculate_tags.outputs.release_name }}
       final_tag: ${{ steps.calculate_tags.outputs.final_tag }}
       from_channel: ${{ steps.calculate_tags.outputs.from_channel }}
+      version_name: ${{ steps.version.outputs.version_name }}
+      version_code: ${{ steps.version.outputs.version_code }}
     steps:
       # Internal releases are exempt: Play internal testing skips full review,
       # so only promotions (closed/open/production) can clobber an in-flight
@@ -66,9 +65,14 @@ jobs:
 
       - name: Calculate tags
         id: calculate_tags
+        env:
+          BASE_VERSION: ${{ inputs.base_version }}
+          CHANNEL: ${{ inputs.channel }}
         run: |
-          BASE_VERSION="${{ inputs.base_version }}"
-          CHANNEL="${{ inputs.channel }}"
+          if [[ ! "$BASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::base_version '$BASE_VERSION' is not X.Y.Z (e.g., 2.8.3)."
+            exit 1
+          fi
 
           if [[ "$CHANNEL" == "internal" ]]; then
             # This is a new build, create a new internal tag
@@ -84,7 +88,6 @@ jobs:
             echo "Calculated new tag: $NEW_TAG"
             {
               echo "tag_to_process=$NEW_TAG"
-              echo "release_name=$NEW_TAG"
               echo "final_tag=$NEW_TAG"
             } >> "$GITHUB_OUTPUT"
           else
@@ -121,15 +124,47 @@ jobs:
                 NEW_TAG="v${BASE_VERSION}"
             fi
 
-            echo "New release name will be: $NEW_TAG"
             echo "Final tag will be: $NEW_TAG"
             {
               echo "from_channel=${FROM_CHANNEL}"
               echo "tag_to_process=${LATEST_TAG_TO_PROMOTE}"
-              echo "release_name=${NEW_TAG}"
               echo "final_tag=${NEW_TAG}"
             } >> "$GITHUB_OUTPUT"
           fi
+        shell: bash
+
+      # Name from the tag, code from the commit count plus VERSION_CODE_OFFSET, both at the
+      # commit being released: for a promotion the promoted tag's, which main has moved past.
+      - name: Calculate version
+        id: version
+        env:
+          BASE_VERSION: ${{ inputs.base_version }}
+          CHANNEL: ${{ inputs.channel }}
+          TAG: ${{ steps.calculate_tags.outputs.tag_to_process }}
+        run: |
+          if [[ "$CHANNEL" == "internal" ]]; then REF=HEAD; else REF="$TAG"; fi
+          git show "${REF}:config.properties" > "$RUNNER_TEMP/config.properties"
+
+          # The release highlights and the Play what's-new are looked up by VERSION_NAME_BASE.
+          CONFIG_BASE=$(sed -n 's/^VERSION_NAME_BASE=//p' "$RUNNER_TEMP/config.properties")
+          if [[ "$CONFIG_BASE" != "$BASE_VERSION" ]]; then
+            echo "::error::base_version is $BASE_VERSION but config.properties at $REF has VERSION_NAME_BASE=${CONFIG_BASE:-<unset>}."
+            exit 1
+          fi
+
+          VERSION_NAME=$(echo "$TAG" | sed 's/-.*//' | sed 's/v//')
+          VERSION_CODE_OFFSET=$(grep '^VERSION_CODE_OFFSET=' "$RUNNER_TEMP/config.properties" | cut -d'=' -f2 || true)
+          if ! [[ "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
+            echo "::error::VERSION_CODE_OFFSET from config.properties is not numeric: '$VERSION_CODE_OFFSET'"
+            exit 1
+          fi
+          VERSION_CODE=$(( $(git rev-list --count "$REF") + VERSION_CODE_OFFSET ))
+
+          echo "Version: $VERSION_NAME ($VERSION_CODE) from $REF"
+          {
+            echo "version_name=$VERSION_NAME"
+            echo "version_code=$VERSION_CODE"
+          } >> "$GITHUB_OUTPUT"
         shell: bash
 
       - name: Create and Push Release Tag
@@ -148,10 +183,8 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.determine-tags.outputs.final_tag }}
-      channel: ${{ inputs.channel }}
-      base_version: ${{ inputs.base_version }}
-      build_desktop: true
-      build_flatpak_src: true
+      version_name: ${{ needs.determine-tags.outputs.version_name }}
+      version_code: ${{ needs.determine-tags.outputs.version_code }}
     secrets: inherit
 
   call-promote-workflow:
@@ -164,38 +197,65 @@ jobs:
     # so call-release-workflow doesn't carry it.
     permissions:
       contents: write
-      pull-requests: write
-      statuses: write
-      id-token: write
-      attestations: write
       actions: write
     uses: ./.github/workflows/promote.yml
     with:
       tag_name: ${{ needs.determine-tags.outputs.tag_to_process }}
-      release_name: ${{ needs.determine-tags.outputs.release_name }}
       final_tag: ${{ needs.determine-tags.outputs.final_tag }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
       from_channel: ${{ needs.determine-tags.outputs.from_channel }}
+      version_code: ${{ needs.determine-tags.outputs.version_code }}
     secrets: inherit
+
+  # A production promotion stamps CHANGELOG.md itself; every other cut refreshes [Unreleased].
+  update-changelog:
+    needs: [call-release-workflow, call-promote-workflow]
+    if: >-
+      ${{ !cancelled() && !inputs.dry_run && inputs.channel != 'production'
+        && (needs.call-release-workflow.result == 'success' || needs.call-promote-workflow.result == 'success') }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Dispatch Update Changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run update-changelog.yml --ref main
 
   cleanup-on-failure:
     needs: [determine-tags, call-release-workflow]
     if: ${{ (failure() || cancelled()) && !inputs.dry_run && inputs.channel == 'internal' }}
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
       - name: Delete Failed or Cancelled Tag
         env:
           FINAL_TAG: ${{ needs.determine-tags.outputs.final_tag }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
         run: |
-          if [ -n "$FINAL_TAG" ]; then
-            echo "Release workflow failed or was cancelled. Deleting tag $FINAL_TAG to allow a clean retry..."
-            git push origin :refs/tags/"$FINAL_TAG" || echo "Tag was not pushed or already deleted."
-          else
+          if [ -z "$FINAL_TAG" ]; then
             echo "No tag was created to delete."
+            exit 0
           fi
+          # Play keeps an uploaded versionCode, so once publish-play succeeded the tag stays with it.
+          PLAY=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs?per_page=100" \
+            --jq '[.jobs[] | select(.name | endswith("publish-play")) | .conclusion][0] // ""') || {
+            echo "::warning::Could not read this run's jobs, so $FINAL_TAG stays. Delete it by hand if Play has no build from it."
+            exit 0
+          }
+          if [ "$PLAY" = "success" ]; then
+            echo "::warning::Play already has the build from $FINAL_TAG, so the tag stays. Re-run the failed jobs to finish the release."
+            exit 0
+          fi
+          echo "Release workflow failed or was cancelled. Deleting tag $FINAL_TAG to allow a clean retry..."
+          git push origin :refs/tags/"$FINAL_TAG" || echo "Tag was not pushed or already deleted."
