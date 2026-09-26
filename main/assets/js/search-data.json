@@ -37465,7 +37465,7 @@
   },"5352": {
     "doc": "Testing",
     "title": "CI integration",
-    "content": "Tests run automatically on: . | Pull request creation/update | Push to main | Pre-release validation | . Single-runner jobs in reusable-check.yml run on ubuntu-26.04 with JDK 25 and Gradle caching. Two jobs use a matrix: test-shards splits into shard-core, shard-feature and shard-app, and build-desktop runs across macOS, Windows and Linux, still pinned to ubuntu-24.04/-arm. Flatpak verification is its own workflow, not a job here. The ARM (ubuntu-26.04-arm) and container-backed ubuntu-slim runners carry the lightweight utility workflows — see .skills/testing-ci/SKILL.md for the four-tier rule, which still quotes the older labels. ",
+    "content": "Tests run automatically on: . | Pull request creation/update | Push to main | Pre-release validation | . Single-runner jobs in reusable-check.yml run on the pinned Ubuntu LTS x64 label with JDK 25 and Gradle caching. Two jobs use a matrix: test-shards splits into shard-core, shard-feature and shard-app, and build-desktop runs across macOS, Windows and Linux x64 and arm64, on the labels its own matrix lists. Flatpak verification is its own workflow, not a job here. The pinned Ubuntu LTS arm label and the container-backed ubuntu-slim runners carry the lightweight jobs.skills/testing-ci/SKILL.md has the four-tier rule. ",
     "url": "/Meshtastic-Android/main/en/developer/testing.html#ci-integration",
     
     "relUrl": "/en/developer/testing.html#ci-integration"
