@@ -83,14 +83,16 @@ jobs:
           fi
 
       # values/schema_strings.xml is generated from the org.meshtastic:protobufs pin and records which one. Gradle
-      # runs here only when main's pin has moved past the recorded one, so the job stays cheap between bumps;
+      # runs here only when main's pin has moved past the recorded one and the scheduled-updates branch does not
+      # already carry the file for that pin, so the job stays cheap between bumps and while the PR waits;
       # the regenerated English goes up to Crowdin in the step below and rides this PR with the translations.
       - name: Check whether the schema strings lag the protobufs pin
         id: schema_pin
         run: |
           xml=core/resources/src/commonMain/composeResources/values/schema_strings.xml
+          recorded_pin() { sed -n 's/.*from org\.meshtastic:protobufs \([^ ]*\)\..*/\1/p' | head -n1; }
           catalog=$(sed -n 's/^meshtastic-protobufs = "\(.*\)"$/\1/p' gradle/libs.versions.toml)
-          recorded=$(sed -n 's/.*from org\.meshtastic:protobufs \([^ ]*\)\..*/\1/p' "$xml" | head -n1)
+          recorded=$(recorded_pin < "$xml")
           echo "catalog=$catalog" >> "$GITHUB_OUTPUT"
           echo "recorded=$recorded" >> "$GITHUB_OUTPUT"
           if [ "$catalog" = "$recorded" ]; then
@@ -99,10 +101,17 @@ jobs:
           else
             echo "schema strings reflect protobufs $recorded, catalog has $catalog"
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            branch_xml="$RUNNER_TEMP/scheduled-updates.schema_strings.xml"
+            if git fetch --no-tags --depth=1 --quiet origin scheduled-updates 2>/dev/null \
+              && git show "FETCH_HEAD:$xml" > "$branch_xml" 2>/dev/null \
+              && [ "$(recorded_pin < "$branch_xml")" = "$catalog" ]; then
+              echo "scheduled-updates already carries the schema strings for protobufs $catalog; reusing them"
+              echo "reuse=$branch_xml" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Gradle Setup
-        if: steps.schema_pin.outputs.changed == 'true'
+        if: steps.schema_pin.outputs.changed == 'true' && steps.schema_pin.outputs.reuse == ''
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
@@ -118,10 +127,18 @@ jobs:
         env:
           RECORDED: ${{ steps.schema_pin.outputs.recorded }}
           CATALOG: ${{ steps.schema_pin.outputs.catalog }}
+          REUSE: ${{ steps.schema_pin.outputs.reuse }}
         run: |
           xml=core/resources/src/commonMain/composeResources/values/schema_strings.xml
           cp "$xml" /tmp/schema_strings.before.xml
-          if ./gradlew :schema-strings:sync -Pci=true && python3 scripts/sort-strings.py; then
+          # Only the xml is taken from the branch: strings-index.txt also lists main's hand-written strings,
+          # which may have moved since the branch was built, so sort-strings.py rebuilds it either way.
+          if [ -n "$REUSE" ]; then
+            regenerate=(cp "$REUSE" "$xml")
+          else
+            regenerate=(./gradlew :schema-strings:sync -Pci=true)
+          fi
+          if "${regenerate[@]}" && python3 scripts/sort-strings.py; then
             git clone --filter=blob:none --quiet https://github.com/meshtastic/protobufs.git /tmp/protobufs
             python3 scripts/protobufs-bump-summary.py "$RECORDED" "$CATALOG" --protobufs /tmp/protobufs \
               --before /tmp/schema_strings.before.xml --after "$xml" > /tmp/schema-summary.md || true
