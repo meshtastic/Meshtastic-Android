@@ -40,15 +40,27 @@ import xml.etree.ElementTree as ET
 SERIAL = None
 PKG = "com.geeksville.mesh.fdroid.debug"
 ACTIVITY = "org.meshtastic.app.AutomationLauncher"
+# Builds without the alias; they ignore the launch switches.
+FALLBACK_ACTIVITY = "org.meshtastic.app.MainActivity"
 
 
 def adb(*args):
     cmd = ["adb"] + (["-s", SERIAL] if SERIAL else []) + list(args)
     r = subprocess.run(cmd, capture_output=True, timeout=120)
     if r.returncode != 0:
-        err = (r.stderr or b"").decode(errors="replace").strip()
+        # am start reports a missing component on stdout
+        err = ((r.stderr or b"") + (r.stdout or b"")).decode(errors="replace").strip()
         raise RuntimeError(f"adb {' '.join(args)} failed ({r.returncode}): {err[:300]}")
     return (r.stdout or b"").decode(errors="replace")
+
+
+def start_app(*extras):
+    try:
+        return adb("shell", "am", "start", "-n", f"{PKG}/{ACTIVITY}", *extras)
+    except RuntimeError as e:
+        if "does not exist" not in str(e):
+            raise
+    return adb("shell", "am", "start", "-n", f"{PKG}/{FALLBACK_ACTIVITY}", *extras)
 
 
 def ui_dump():
@@ -119,8 +131,7 @@ def wait_text(text, timeout=60):
 def connect(addr):
     adb("shell", "am", "force-stop", PKG)
     time.sleep(1)
-    adb(
-        "shell", "am", "start", "-n", f"{PKG}/{ACTIVITY}",
+    start_app(
         "--ez", "skip_onboarding", "true",
         "--ez", "skip_connect_confirm", "true",
         "-a", "android.intent.action.VIEW",
@@ -171,7 +182,7 @@ def main():
             if res.startswith("FAILED"):
                 return 1
         elif name == "launch":
-            adb("shell", "am", "start", "-n", f"{PKG}/{ACTIVITY}", "--ez", "skip_onboarding", "true")
+            start_app("--ez", "skip_onboarding", "true")
             print("launched")
         elif name == "stop":
             adb("shell", "am", "force-stop", PKG)
