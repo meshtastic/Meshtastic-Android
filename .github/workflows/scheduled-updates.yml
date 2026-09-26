@@ -353,6 +353,40 @@ jobs:
         continue-on-error: true
         run: python3 scripts/check-store-metadata.py
 
+      # Each label fires a labeler run, so a category is labelled only when this run changed it.
+      - name: Pick the PR labels
+        id: labels
+        env:
+          FIRMWARE_STATUS: ${{ steps.firmware.outputs.status }}
+          EVENT_FIRMWARE_STATUS: ${{ steps.event_firmware.outputs.status }}
+          MAINTENANCE_UF2_STATUS: ${{ steps.maintenance_uf2.outputs.status }}
+          HARDWARE_STATUS: ${{ steps.hardware.outputs.status }}
+          DEVICE_LINKS_STATUS: ${{ steps.device_links.outputs.status }}
+          BOOTLOADER_QUIRKS_STATUS: ${{ steps.bootloader_quirks.outputs.status }}
+          SCHEMA_STRINGS_STATUS: ${{ steps.schema_strings.outputs.status }}
+        run: |
+          any_updated() {
+            for status in "$@"; do [ "$status" = updated ] && return 0; done
+            return 1
+          }
+          labels=automation
+          if any_updated "$FIRMWARE_STATUS" "$EVENT_FIRMWARE_STATUS" "$MAINTENANCE_UF2_STATUS"; then
+            labels+=,firmware
+          fi
+          if any_updated "$HARDWARE_STATUS" "$DEVICE_LINKS_STATUS" "$BOOTLOADER_QUIRKS_STATUS"; then
+            labels+=,hardware
+          fi
+          # Crowdin reports no status, so its downloads are read off the tree: the locale copies, never the English sources.
+          translations=$(git status --porcelain --untracked-files=all -- \
+            ':(glob)**/composeResources/values-*/**' \
+            ':(glob)fastlane/metadata/android/**' ':(exclude,glob)fastlane/metadata/android/en-US/**' \
+            ':(glob)docs/**' ':(exclude,glob)docs/en/**')
+          if [ -n "$translations" ] || any_updated "$SCHEMA_STRINGS_STATUS"; then
+            labels+=,l10n
+          fi
+          echo "Labels: $labels"
+          echo "labels=$labels" >> "$GITHUB_OUTPUT"
+
       - name: Build PR body
         id: pr_body
         env:
@@ -541,11 +575,7 @@ jobs:
             docs/**/*.md
             README.md
             obtainium/**
-          labels: |
-            automation
-            l10n
-            firmware
-            hardware
+          labels: ${{ steps.labels.outputs.labels }}
 
       # "Merge when ready": the merge queue takes the PR once its checks pass.
       # No merge method is passed; the queue sets it. Re-run on every update,
