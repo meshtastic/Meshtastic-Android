@@ -8,29 +8,17 @@ on:
     paths:
       - 'scripts/verify-flatpak/**'
       - '.github/workflows/verify-flatpak.yml'
-  # The dependency surface the manifest captures is verified post-merge. This is not a
-  # required check and never ran in the merge queue, so per-PR it cost ~2 runner slots
-  # for a signal that blocks nothing; post-merge still catches a break within one merge,
-  # and `main` itself was previously never verified at all.
+  # Post-merge only for what the check itself depends on. The offline manifest pins the
+  # Gradle distribution apart from the wrapper, so a wrapper bump is checked on merge.
   push:
     branches: [ main ]
     paths:
       - 'scripts/verify-flatpak/**'
       - '.github/workflows/verify-flatpak.yml'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      # The desktop module's build config shapes the uber jar the flatpak wraps.
-      - 'desktopApp/**'
-      # The offline manifest pins the Gradle distribution independently of the wrapper —
-      # a wrapper bump without a manifest update breaks the offline build silently.
       - 'gradle/wrapper/**'
-      # build.gradle.kts reads compose-multiplatform from the catalog (#6911), so a
-      # catalog-only bump changes the manifest's platform URLs. Deliberately the whole
-      # file and not a key filter: a filter naming today's keys goes stale silently the
-      # moment the manifest reads another one — the failure #6911 existed to remove.
-      - 'gradle/libs.versions.toml'
-  # Drift no path filter can see: a Flathub runtime bump, or an upstream artifact that
-  # moved or vanished. Nothing in this repo changes, so no other trigger would fire.
+  # The dependency surface the manifest captures (desktopApp/**, the version catalog, the
+  # root build scripts) is verified nightly, as is drift no path filter can see: a
+  # Flathub runtime bump, or an upstream artifact that moved or vanished.
   schedule:
     - cron: '0 4 * * *'
   workflow_dispatch:
