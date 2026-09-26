@@ -75,27 +75,32 @@
   <screenshots>
     <screenshot type="default">
       <caption>Track every node on the mesh at a glance</caption>
-      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.2/meshtastic-desktop-01-nodes.png</image>
+      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.3/meshtastic-desktop-01-nodes.png</image>
     </screenshot>
     <screenshot>
       <caption>Chat with your mesh, channel by channel</caption>
-      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.2/meshtastic-desktop-02-messages.png</image>
+      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.3/meshtastic-desktop-02-messages.png</image>
     </screenshot>
     <screenshot>
       <caption>See the whole mesh on a map</caption>
-      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.2/meshtastic-desktop-03-map.png</image>
+      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.3/meshtastic-desktop-03-map.png</image>
     </screenshot>
     <screenshot>
       <caption>Connect over Bluetooth, USB, or Wi-Fi</caption>
-      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.2/meshtastic-desktop-04-connections.png</image>
+      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.3/meshtastic-desktop-04-connections.png</image>
     </screenshot>
     <screenshot>
       <caption>Full radio and module configuration</caption>
-      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.2/meshtastic-desktop-05-settings.png</image>
+      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.3/meshtastic-desktop-05-settings.png</image>
     </screenshot>
   </screenshots>
 
   <releases>
+    <release version="2.8.3" date="2026-09-26">
+      <description>
+        <p>Stability and reliability fixes.</p>
+      </description>
+    </release>
     <release version="2.8.2" date="2026-09-25">
       <description>
         <p>Messaging: swipe to reply, double-tap reactions, per-contact drafts, pinned and unread conversations, bubbles, proven delivery receipts. A Units setting. One search bar for nodes, messages, settings and docs. Settings take labels, units and firmware gates from the schema. Map layer opacity and role filters. Lightning, particulate and soil telemetry. Tap phones to share a contact or channel. KML import works again.</p>
