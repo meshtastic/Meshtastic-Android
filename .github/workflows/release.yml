@@ -490,7 +490,7 @@ jobs:
         with:
           path: ./artifacts
 
-      # store-screenshots-assets packages any raw captures already here and attaches them itself.
+      # Raw captures already uploaded stay out: store-screenshots-assets packages and attaches them.
       - name: Exclude intermediate artifacts from release
         run: rm -rf ./artifacts/flatpak-multisrc-* ./artifacts/store-screenshots-*
 

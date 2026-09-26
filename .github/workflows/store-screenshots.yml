@@ -2,9 +2,9 @@ name: Store Screenshots
 
 # Captures the store-listing screenshots from the real debug apps, connected to Demo
 # Mode's hidden showcase mesh. Android runs `:store-screenshots` for both flavors on one
-# emulator: the google flavor feeds the Play listing, the fdroid flavor the fastlane tree F-Droid and
-# IzzyOnDroid read, each uploaded as `store-screenshots-<flavor>` laid out as
-# `images/<type>Screenshots/<n>_<name>.png`. Desktop runs the real app on a virtual
+# emulator: the google flavor feeds the Play listing, the fdroid flavor the fastlane
+# tree F-Droid and IzzyOnDroid read, each uploaded as `store-screenshots-<flavor>` laid
+# out as `images/<type>Screenshots/<n>_<name>.png`. Desktop runs the real app on a virtual
 # display (`store-screenshots/capture-desktop.sh`) and uploads the five Flathub PNGs as
 # `store-screenshots-desktop`.
 #
