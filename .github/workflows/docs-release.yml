@@ -8,9 +8,7 @@ name: Docs Release
 # Open- and closed-testing tags (vX.Y.Z-open.N / vX.Y.Z-closed.N) publish a
 # per-tag snapshot at /vX.Y.Z-open.N/ only. They deliberately do NOT touch the
 # root or /api/: the root belongs to production releases, and /api/ is an
-# unversioned channel already kept current by docs-deploy.yml on every push to
-# main — rebuilding Dokka (~14 min) for each of the many prerelease tags in a
-# cycle would cost far more than it refreshes.
+# unversioned channel that docs-deploy.yml rebuilds from main every day.
 #
 # These per-tag prerelease directories accumulate during a version cycle and are
 # reaped by post-release-cleanup.yml, which a production publish dispatches.

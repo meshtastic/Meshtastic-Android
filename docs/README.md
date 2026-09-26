@@ -61,8 +61,8 @@ channels (GitHub Pages must be configured to serve from that branch):
 | `/vX.Y.Z/` | Permanent per-release copy | `docs-release.yml` on `vX.Y.Z` tags |
 | `/vX.Y.Z-open.N/` | Per-tag open-testing snapshot | `docs-release.yml` on `vX.Y.Z-open.N` tags |
 | `/vX.Y.Z-closed.N/` | Per-tag closed-testing snapshot | `docs-release.yml` on `vX.Y.Z-closed.N` tags |
-| `/main/` | Snapshot of the `main` branch | `docs-deploy.yml` on pushes to `main` |
-| `/api/` | Dokka API reference | `docs-deploy.yml`, plus production releases |
+| `/main/` | Snapshot of the `main` branch | `docs-deploy.yml` on pushes to `main` that touch the site |
+| `/api/` | Dokka API reference | `docs-deploy.yml` daily, plus production releases |
 | `/versions.json` | Version manifest for the site's version switcher | regenerated on every deploy |
 
 `-internal.N` tags are deliberately not published — they are cut many times per
@@ -75,9 +75,8 @@ dispatches **Post-Release Cleanup**, which reaps every open and closed directory
 and prerelease tag at or below `X.Y.Z`. A manual dispatch defaults to a dry run.
 
 Only production releases own `/` and rebuild `/api/`. Prerelease tags publish
-their own directory only: `/api/` is unversioned and already refreshed by every
-push to `main`, so rebuilding Dokka (~14 min) per prerelease tag would cost far
-more than it refreshes. Until a production release exists, `/` redirects to the
+their own directory only, since `/api/` is unversioned and `docs-deploy.yml`
+rebuilds it from `main` every day. Until a production release exists, `/` redirects to the
 best available channel — newest open, then newest closed, then `/main/` — and
 upgrades automatically as better channels appear. Real release content at the
 root is never overwritten by that fallback.
