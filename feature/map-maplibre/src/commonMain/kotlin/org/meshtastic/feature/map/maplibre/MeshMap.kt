@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.maplibre
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -51,6 +53,7 @@ import org.maplibre.compose.map.LocalViewport
 import org.maplibre.compose.map.MapState
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.rememberMapState
+import org.maplibre.compose.material3.LocationIndicatorDefaults
 import org.maplibre.compose.material3.LocationIndicatorLayer
 import org.maplibre.compose.overlay.include
 import org.maplibre.compose.util.MaplibreComposable
@@ -81,6 +84,8 @@ import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.feature.map.maplibre.style.zoomRange
 import kotlin.math.floor
+import kotlin.time.Duration.Companion.seconds
+import org.maplibre.compose.layers.LocationIndicatorDefaults as CoreLocationIndicatorDefaults
 
 /**
  * Everything the mesh map draws, as one [MapState].
@@ -344,10 +349,38 @@ private fun FollowUserLocation(
 private fun UserLocationPuck(locationState: LocationState?, visible: Boolean) {
     if (locationState == null) return
 
+    // The indicator has no notion of age, so a fix that stops arriving is greyed and loses its accuracy ring here,
+    // or an old position reads as a current one.
+    val mark = locationState.lastLocationMeasurementMark
+    var stale by remember(mark) { mutableStateOf(mark != null && mark.elapsedNow() > STALE_LOCATION_AFTER) }
+    LaunchedEffect(mark) {
+        if (mark == null || stale) return@LaunchedEffect
+        delay(STALE_LOCATION_AFTER - mark.elapsedNow())
+        stale = true
+    }
+    val colors = MaterialTheme.colorScheme
+
     // The state overload, which resolves the latest measurement and its most accurate bearing itself. Hidden rather
     // than unmounted when tracking stops, since layer additions are queued and a quick toggle could lose the re-add.
-    LocationIndicatorLayer(id = "user-location", locationState = locationState, visible = visible)
+    LocationIndicatorLayer(
+        id = "user-location",
+        locationState = locationState,
+        visible = visible,
+        accuracyRadiusColor = if (stale) Color.Transparent else colors.primary.copy(alpha = ACCURACY_FILL_ALPHA),
+        accuracyRadiusBorderColor = if (stale) Color.Transparent else colors.primary,
+        topImage =
+        if (stale) {
+            CoreLocationIndicatorDefaults.topImage(colors.surfaceDim, colors.onPrimary)
+        } else {
+            LocationIndicatorDefaults.topImage()
+        },
+    )
 }
+
+/** How long a location fix counts as current, the threshold the library's own puck used before 0.18. */
+private val STALE_LOCATION_AFTER = 30.seconds
+
+private const val ACCURACY_FILL_ALPHA = 0.15f
 
 /**
  * The first corner tapped while authoring a geofence box.
