@@ -8,15 +8,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Unreleased (not yet in any build)
+*No changes yet.*
+<!-- UNRELEASED_END -->
 
-#### 🛠️ Fixes
-* fix(position): send no coordinates with a position request when we have none by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7361
+<!-- RELEASED_START -->
 
-### Open Beta (v2.8.2-open.6)
-Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
+## [2.8.2] - 2026-09-26
 
-#### 🏗️ Features
+### 🏗️ Features
 * perf(ui): render QR codes at display density instead of fixed 960px by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6793
 * feat: report Android 17 memory-limiter kills via ApplicationExitInfo by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6792
 * feat(privacy): shield sensitive UI content from non-tool accessibility services by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6794
@@ -71,14 +70,14 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * refactor(connections): give Demo Mode its own section by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7326
 * feat(messaging): show whether a delivery receipt was proven by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7284
 * feat(messaging): record signing and ack proof on reactions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7339
-#### 🖥️ Desktop
+### 🖥️ Desktop
 * fix(desktop): disable macOS notifications when the process has no app bundle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6876
 * fix(desktop): test the bundle path, not the identifier, before notifying by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6885
 * fix(desktop): use standard SPDX license identifier for RPM packaging by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/7043
 * fix(desktop): pin the Flathub screenshots to a commit that survives the squash by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7243
 * fix(desktop): keep MapLibre's FFI upcall methods through ProGuard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7287
 * refactor(model): parse the selected device address once by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7328
-#### 🛠️ Fixes
+### 🛠️ Fixes
 * fix(navigation): clear deep-link replay cache once applied to the backstack by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6796
 * fix(ui): give feedback when a contact or channel import arrives while disconnected by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6798
 * fix(database): rebuild the packet FTS index after the schema-52 table recreation by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6808
@@ -149,7 +148,8 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(service): stay foreground only for an address that can connect by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7330
 * fix(messaging): clarify the message filter controls by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7324
 * fix(notifications): give bubbles an adaptive icon by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7336
-#### 📝 Other Changes
+* fix(position): send no coordinates with a position request when we have none by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7361
+### 📝 Other Changes
 * refactor(settings): edit the status message on the user screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6951
 * refactor(map): retire the maps-utils workarounds its 5.1 fixes made stale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7046
 * refactor(prefs): keep each surface's filters in one state object by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7120
@@ -158,9 +158,7 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 ## New Contributors
 * @azchohfi made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6864
 * @gargomoma made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7119
-<!-- UNRELEASED_END -->
 
-<!-- RELEASED_START -->
 
 ## [2.8.1] - 2026-08-20
 
