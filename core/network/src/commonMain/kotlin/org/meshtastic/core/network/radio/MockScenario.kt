@@ -42,11 +42,12 @@ internal data class MockScenario(
     val directConversation: List<String>,
     /** The first peers, which report device telemetry on connect and, with [liveTelemetry], every tick after. */
     val telemetryPeerCount: Int,
-    val weatherPeerIndexes: List<Int>,
-    /** Status line of peer 1, the one that reports a node status. */
-    val peerNodeStatus: String,
     /** Keep reporting telemetry after the seed pass. Off where a stable picture matters more than a live one. */
     val liveTelemetry: Boolean,
+    /** 101 is what firmware reports with no battery or while charging. */
+    val myBatteryLevel: Int = 78,
+    /** Null without a battery, which firmware leaves off the wire. */
+    val myVoltage: Float? = 3.98f,
 ) {
     companion object {
         /** The suffix that selects [SHOWCASE]: `mshowcase`. */
@@ -104,6 +105,7 @@ internal data class MockScenario(
                         hops = 0,
                         secondsSinceHeard = 130,
                         uptimeSeconds = 41_900,
+                        status = "Solar powered, up on the ridge.",
                     ),
                     SimPeer(
                         num = DEMO_NODE + 3,
@@ -155,6 +157,12 @@ internal data class MockScenario(
                         hops = 1,
                         secondsSinceHeard = 210,
                         uptimeSeconds = 512_000,
+                        environment =
+                        SimEnvironment(
+                            temperature = 18.5f,
+                            relativeHumidity = 47f,
+                            barometricPressure = 1013.2f,
+                        ),
                     ),
                     SimPeer(
                         num = DEMO_NODE + 6,
@@ -223,12 +231,10 @@ internal data class MockScenario(
                     "No rush — just let me know before you set off.",
                 ),
                 telemetryPeerCount = 4,
-                weatherPeerIndexes = listOf(4),
-                peerNodeStatus = "Solar powered, up on the ridge.",
                 liveTelemetry = true,
             )
 
-        private const val SHOWCASE_NODE = 0x2b3c4d5e
+        private const val SHOWCASE_NODE = 0xb22c94ef.toInt()
         private const val SHOWCASE_LAT = 32.7767
         private const val SHOWCASE_LON = -96.797
 
@@ -237,7 +243,9 @@ internal data class MockScenario(
 
         /**
          * The store listing's mesh: a hiking group around a base camp, every node named for a place or a person, and a
-         * channel thread that tells one morning. Static after the seed pass, so every capture shows the same numbers.
+         * channel thread that tells one morning. Each peer's number is the CRC-32 of its public key, as firmware 2.8
+         * derives it, and the keys give every node a distinct avatar colour. Static after the seed pass, so every
+         * capture shows the same numbers.
          */
         val SHOWCASE =
             MockScenario(
@@ -251,7 +259,7 @@ internal data class MockScenario(
                 peers =
                 listOf(
                     SimPeer(
-                        num = 0x1a2b3c4d,
+                        num = 0xe1e22a35.toInt(),
                         longName = "Ridge Top",
                         shortName = "RDGE",
                         hwModel = HardwareModel.RAK4631,
@@ -260,15 +268,26 @@ internal data class MockScenario(
                         longitude = SHOWCASE_LON + 0.03,
                         altitude = 214,
                         batteryLevel = 88,
-                        voltage = 4.02f,
-                        snr = 11.5f,
-                        rssi = -68,
+                        voltage = 4.04f,
+                        snr = 10.5f,
+                        rssi = -86,
                         hops = 0,
                         secondsSinceHeard = heard(2),
                         uptimeSeconds = 19 * 86_400 + 7 * 3_600,
+                        publicKey = "836124f1bec84c1145fa1c46ae436b8ded03b14f346c36f99144bd6ae10da527",
+                        channelUtilization = 14.6f,
+                        airUtilTx = 3.1f,
+                        environment =
+                        SimEnvironment(
+                            temperature = 18.0f,
+                            relativeHumidity = 66f,
+                            barometricPressure = 990.9f,
+                        ),
+                        status = "Relay for the valley trails.",
+                        favorite = true,
                     ),
                     SimPeer(
-                        num = 0x5e6f7081,
+                        num = 0x13f09802,
                         longName = "Summit Solar",
                         shortName = "SMMT",
                         hwModel = HardwareModel.RAK4631,
@@ -276,16 +295,28 @@ internal data class MockScenario(
                         latitude = SHOWCASE_LAT + 0.05,
                         longitude = SHOWCASE_LON - 0.04,
                         altitude = 249,
-                        batteryLevel = 91,
-                        voltage = 4.09f,
-                        snr = 3.5f,
-                        rssi = -110,
+                        batteryLevel = 101,
+                        voltage = 4.14f,
+                        snr = 3.0f,
+                        rssi = -109,
                         hops = 2,
                         secondsSinceHeard = heard(15),
                         uptimeSeconds = 63 * 86_400 + 2 * 3_600,
+                        publicKey = "469c03ba5432902d3a8404ce80b06354982bce1e7004b2a9872db6ec988e1b69",
+                        channelUtilization = 12.2f,
+                        airUtilTx = 2.4f,
+                        environment =
+                        SimEnvironment(
+                            temperature = 19.6f,
+                            relativeHumidity = 61f,
+                            barometricPressure = 986.8f,
+                            voltage = 5.71f,
+                            current = 186f,
+                        ),
+                        status = "Solar powered, up on the summit.",
                     ),
                     SimPeer(
-                        num = 0x3c4d5e6f,
+                        num = 0xbf4f9846.toInt(),
                         longName = "Trailhead",
                         shortName = "TRLH",
                         hwModel = HardwareModel.TBEAM,
@@ -294,15 +325,18 @@ internal data class MockScenario(
                         longitude = SHOWCASE_LON + 0.045,
                         altitude = 231,
                         batteryLevel = 72,
-                        voltage = 3.89f,
-                        snr = 8.25f,
-                        rssi = -92,
+                        voltage = 3.91f,
+                        snr = 7.75f,
+                        rssi = -97,
                         hops = 1,
                         secondsSinceHeard = heard(3),
                         uptimeSeconds = 6 * 3_600,
+                        publicKey = "81c7cb197b6e047c7fdf0a262cbe9374bdc81ecbdcd5d63357d5a962544fe673",
+                        channelUtilization = 8.9f,
+                        airUtilTx = 1.1f,
                     ),
                     SimPeer(
-                        num = 0x8192a3b4.toInt(),
+                        num = 0xe69233a3.toInt(),
                         longName = "Sarah's Truck",
                         shortName = "SRAH",
                         hwModel = HardwareModel.T_DECK,
@@ -311,15 +345,19 @@ internal data class MockScenario(
                         longitude = SHOWCASE_LON + 0.01,
                         altitude = 176,
                         batteryLevel = 83,
-                        voltage = 3.98f,
-                        snr = 9.0f,
-                        rssi = -85,
-                        hops = 1,
+                        voltage = 4.01f,
+                        snr = 8.5f,
+                        rssi = -94,
+                        hops = 0,
                         secondsSinceHeard = heard(4),
                         uptimeSeconds = 4 * 3_600,
+                        publicKey = "50dd259c31af84f61ec364c8759681d63279248503370a8a9b91b49900eae451",
+                        channelUtilization = 7.4f,
+                        airUtilTx = 0.9f,
+                        favorite = true,
                     ),
                     SimPeer(
-                        num = 0x4d5e6f70,
+                        num = 0x3804847e,
                         longName = "River Crossing",
                         shortName = "RIVR",
                         hwModel = HardwareModel.T_ECHO,
@@ -329,14 +367,17 @@ internal data class MockScenario(
                         altitude = 128,
                         batteryLevel = 64,
                         voltage = 3.84f,
-                        snr = 6.0f,
-                        rssi = -101,
+                        snr = 5.25f,
+                        rssi = -104,
                         hops = 1,
                         secondsSinceHeard = heard(7),
                         uptimeSeconds = 2 * 86_400,
+                        publicKey = "a02b20ee4fd5863190277fab08953bfd685bac345f30ad5a537a690f3425e978",
+                        channelUtilization = 6.8f,
+                        airUtilTx = 0.3f,
                     ),
                     SimPeer(
-                        num = 0xa3b4c5d6.toInt(),
+                        num = 0x07f9e628,
                         longName = "Ham Shack",
                         shortName = "SHCK",
                         hwModel = HardwareModel.STATION_G2,
@@ -344,16 +385,27 @@ internal data class MockScenario(
                         latitude = SHOWCASE_LAT - 0.02,
                         longitude = SHOWCASE_LON - 0.035,
                         altitude = 162,
-                        batteryLevel = 77,
-                        voltage = 3.92f,
+                        batteryLevel = 101,
+                        voltage = null,
                         snr = 4.5f,
                         rssi = -104,
                         hops = 2,
                         secondsSinceHeard = heard(11),
                         uptimeSeconds = 41 * 86_400,
+                        publicKey = "ab68a145efd254a18457923ceb699c72954b76f95a2ecf8f2d4657afb571f07f",
+                        channelUtilization = 9.7f,
+                        airUtilTx = 1.8f,
+                        environment =
+                        SimEnvironment(
+                            temperature = 22.6f,
+                            relativeHumidity = 46f,
+                            barometricPressure = 997.0f,
+                            iaq = 44,
+                        ),
+                        status = "On mains, listening 24/7.",
                     ),
                     SimPeer(
-                        num = 0x6f708192,
+                        num = 0x9dd51959.toInt(),
                         longName = "Kayak Dan",
                         shortName = "KDAN",
                         hwModel = HardwareModel.HELTEC_WIRELESS_TRACKER,
@@ -362,29 +414,41 @@ internal data class MockScenario(
                         longitude = SHOWCASE_LON - 0.042,
                         altitude = 120,
                         batteryLevel = 58,
-                        voltage = 3.79f,
-                        snr = 2.75f,
-                        rssi = -113,
+                        voltage = 3.78f,
+                        snr = 2.0f,
+                        rssi = -110,
                         hops = 2,
                         secondsSinceHeard = heard(25),
                         uptimeSeconds = 3 * 3_600,
+                        publicKey = "a170af3ac2fd3ff64be3e90a8c98383fe950ce94e9afdea73a61d04d03dfdb25",
+                        channelUtilization = 5.1f,
+                        airUtilTx = 1.3f,
                     ),
                     SimPeer(
-                        num = 0x708192a3,
+                        num = 0xb64352a4.toInt(),
                         longName = "Old Fire Lookout",
                         shortName = "LOOK",
                         hwModel = HardwareModel.TBEAM,
                         role = Config.DeviceConfig.Role.CLIENT,
-                        latitude = SHOWCASE_LAT - 0.01,
-                        longitude = SHOWCASE_LON + 0.02,
+                        latitude = SHOWCASE_LAT - 0.065,
+                        longitude = SHOWCASE_LON + 0.07,
                         altitude = 268,
                         batteryLevel = 47,
-                        voltage = 3.72f,
-                        snr = -1.5f,
+                        voltage = 3.69f,
+                        snr = -6.0f,
                         rssi = -118,
                         hops = 3,
                         secondsSinceHeard = heard(60),
                         uptimeSeconds = 9 * 86_400,
+                        publicKey = "fb30f6029d4924b2d6a32d464df0b2b544e31e8956f8ea758045621fa78a6c5f",
+                        channelUtilization = 4.3f,
+                        airUtilTx = 0.4f,
+                        environment =
+                        SimEnvironment(
+                            temperature = 17.6f,
+                            relativeHumidity = 67f,
+                            barometricPressure = 984.5f,
+                        ),
                     ),
                 ),
                 channelConversation =
@@ -398,10 +462,10 @@ internal data class MockScenario(
                 ),
                 directPeerIndex = 6,
                 directConversation = listOf("Paddling past the crossing now.", "Can you see me on the map yet?"),
-                telemetryPeerCount = 4,
-                weatherPeerIndexes = listOf(0),
-                peerNodeStatus = "Solar powered, up on the summit.",
+                telemetryPeerCount = 8,
                 liveTelemetry = false,
+                myBatteryLevel = 101,
+                myVoltage = null,
             )
     }
 }
@@ -415,13 +479,33 @@ internal data class SimPeer(
     val latitude: Double,
     val longitude: Double,
     val altitude: Int,
+    /** 101 is what firmware reports with no battery or while charging. */
     val batteryLevel: Int,
-    val voltage: Float,
+    /** On firmware's LiPo curve for [batteryLevel]; null without a battery. */
+    val voltage: Float?,
     val snr: Float,
     val rssi: Int,
     val hops: Int,
     val secondsSinceHeard: Int,
     val uptimeSeconds: Int,
+    /** Hex X25519 public key, whose CRC-32 is [num] on firmware 2.8. */
+    val publicKey: String? = null,
+    val channelUtilization: Float? = null,
+    val airUtilTx: Float? = null,
+    /** Reported on connect, and by the first such peer every few ticks under [MockScenario.liveTelemetry]. */
+    val environment: SimEnvironment? = null,
+    val status: String? = null,
+    val favorite: Boolean = false,
+)
+
+/** An environment sensor's readings; [voltage] and [current] are an INA power monitor's. */
+internal data class SimEnvironment(
+    val temperature: Float,
+    val relativeHumidity: Float,
+    val barometricPressure: Float,
+    val iaq: Int? = null,
+    val voltage: Float? = null,
+    val current: Float? = null,
 )
 
 /** Latitude/longitude/altitude triple, converted to the proto's scaled-integer representation on demand. */
