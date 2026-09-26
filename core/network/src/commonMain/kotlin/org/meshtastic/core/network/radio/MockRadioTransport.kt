@@ -404,13 +404,17 @@ class MockRadioTransport(
      */
     private suspend fun seedTraffic() {
         scenario.peers.forEach { peer ->
-            lifecycle.runIfOpen { callback.handleFromRadio(peer.positionPacket(nextPacketId()).encode()) }
+            lifecycle.runIfOpen {
+                callback.handleFromRadio(peer.positionPacket(nextPacketId(), peer.secondsSinceHeard).encode())
+            }
             delay(SEED_SPACING_MS)
         }
 
         scenario.peers.take(scenario.telemetryPeerCount).forEach { peer ->
             lifecycle.runIfOpen {
-                callback.handleFromRadio(peer.deviceTelemetryPacket(nextPacketId(), tick = 0).encode())
+                callback.handleFromRadio(
+                    peer.deviceTelemetryPacket(nextPacketId(), tick = 0, ageSeconds = peer.secondsSinceHeard).encode(),
+                )
             }
             delay(SEED_SPACING_MS)
         }
@@ -419,20 +423,38 @@ class MockRadioTransport(
             val environment = peer.environment ?: return@forEach
             lifecycle.runIfOpen {
                 callback.handleFromRadio(
-                    peer.environmentTelemetryPacket(nextPacketId(), environment, tick = 0).encode(),
+                    peer
+                        .environmentTelemetryPacket(nextPacketId(), environment, tick = 0, peer.secondsSinceHeard)
+                        .encode(),
                 )
             }
             delay(SEED_SPACING_MS)
         }
 
-        lifecycle.runIfOpen { callback.handleFromRadio(scenario.peers[0].neighborInfoPacket(nextPacketId()).encode()) }
+        lifecycle.runIfOpen {
+            callback.handleFromRadio(
+                scenario.peers[0].let { it.neighborInfoPacket(nextPacketId(), it.secondsSinceHeard) }.encode(),
+            )
+        }
         delay(SEED_SPACING_MS)
         scenario.peers.forEach { peer ->
             val status = peer.status ?: return@forEach
-            lifecycle.runIfOpen { callback.handleFromRadio(peer.nodeStatusPacket(nextPacketId(), status).encode()) }
+            lifecycle.runIfOpen {
+                callback.handleFromRadio(peer.nodeStatusPacket(nextPacketId(), status, peer.secondsSinceHeard).encode())
+            }
             delay(SEED_SPACING_MS)
         }
 
+        seedConversations()
+
+        if (scenario.liveTelemetry) streamLiveTelemetry()
+    }
+
+    /**
+     * Seeded last: the app takes a node's last-heard time from the latest packet it processes, so a peer that spoke
+     * reads as heard when it last spoke.
+     */
+    private suspend fun seedConversations() {
         // Each message is stamped progressively closer to now, so the thread reads as a conversation that unfolded over
         // the last while rather than a block of messages that all arrived in the same second.
         scenario.channelConversation.forEachIndexed { index, (peerIndex, text) ->
@@ -467,8 +489,6 @@ class MockRadioTransport(
             }
             delay(SEED_SPACING_MS)
         }
-
-        if (scenario.liveTelemetry) streamLiveTelemetry()
     }
 
     /** How long ago the message at [index] of a [count]-message seeded thread was "received". Oldest first. */
@@ -566,13 +586,13 @@ class MockRadioTransport(
         }
         .build()
 
-    private fun SimPeer.positionPacket(id: Int) = FromRadio.Builder()
+    private fun SimPeer.positionPacket(id: Int, ageSeconds: Int = 0) = FromRadio.Builder()
         .also { wb ->
             wb.packet =
                 packet(
                     id = id,
                     to = BROADCAST_ADDR,
-                    ageSeconds = 0,
+                    ageSeconds = ageSeconds,
                     data =
                     Data.Builder()
                         .also { wb ->
@@ -592,7 +612,7 @@ class MockRadioTransport(
      * takes the voltage through 0V inside a couple of hours and the battery and telemetry views then render a cell that
      * cannot physically exist.
      */
-    private fun SimPeer.deviceTelemetryPacket(id: Int, tick: Int): FromRadio {
+    private fun SimPeer.deviceTelemetryPacket(id: Int, tick: Int, ageSeconds: Int = 0): FromRadio {
         // Above 100 is no battery or charging, neither of which drains.
         val powered = batteryLevel > MAX_BATTERY_PERCENT
         val driftedBattery =
@@ -609,7 +629,7 @@ class MockRadioTransport(
                     packet(
                         id = id,
                         to = BROADCAST_ADDR,
-                        ageSeconds = 0,
+                        ageSeconds = ageSeconds,
                         data =
                         Data.Builder()
                             .also { wb ->
@@ -640,54 +660,58 @@ class MockRadioTransport(
             .build()
     }
 
-    private fun SimPeer.environmentTelemetryPacket(id: Int, environment: SimEnvironment, tick: Int) =
-        FromRadio.Builder()
-            .also { wb ->
-                wb.packet =
-                    packet(
-                        id = id,
-                        to = BROADCAST_ADDR,
-                        ageSeconds = 0,
-                        data =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.TELEMETRY_APP
-                                wb.payload =
-                                    Telemetry.Builder()
-                                        .also { wb ->
-                                            wb.environment_metrics =
-                                                EnvironmentMetrics.Builder()
-                                                    .also { wb ->
-                                                        // Temperature AND humidity must both be present or the
-                                                        // Environment tab
-                                                        // stays empty.
-                                                        wb.temperature = environment.temperature + (tick % 7) * 0.4f
-                                                        wb.relative_humidity =
-                                                            environment.relativeHumidity + (tick % 5) * 1.5f
-                                                        wb.barometric_pressure =
-                                                            environment.barometricPressure + (tick % 3) * 0.3f
-                                                        wb.iaq = environment.iaq
-                                                        wb.voltage = environment.voltage
-                                                        wb.current = environment.current
-                                                    }
-                                                    .build()
-                                        }
-                                        .build()
-                                        .encode()
-                                        .toByteString()
-                            }
-                            .build(),
-                    )
-            }
-            .build()
-
-    private fun SimPeer.neighborInfoPacket(id: Int) = FromRadio.Builder()
+    private fun SimPeer.environmentTelemetryPacket(
+        id: Int,
+        environment: SimEnvironment,
+        tick: Int,
+        ageSeconds: Int = 0,
+    ) = FromRadio.Builder()
         .also { wb ->
             wb.packet =
                 packet(
                     id = id,
                     to = BROADCAST_ADDR,
-                    ageSeconds = 0,
+                    ageSeconds = ageSeconds,
+                    data =
+                    Data.Builder()
+                        .also { wb ->
+                            wb.portnum = PortNum.TELEMETRY_APP
+                            wb.payload =
+                                Telemetry.Builder()
+                                    .also { wb ->
+                                        wb.environment_metrics =
+                                            EnvironmentMetrics.Builder()
+                                                .also { wb ->
+                                                    // Temperature AND humidity must both be present or the
+                                                    // Environment tab
+                                                    // stays empty.
+                                                    wb.temperature = environment.temperature + (tick % 7) * 0.4f
+                                                    wb.relative_humidity =
+                                                        environment.relativeHumidity + (tick % 5) * 1.5f
+                                                    wb.barometric_pressure =
+                                                        environment.barometricPressure + (tick % 3) * 0.3f
+                                                    wb.iaq = environment.iaq
+                                                    wb.voltage = environment.voltage
+                                                    wb.current = environment.current
+                                                }
+                                                .build()
+                                    }
+                                    .build()
+                                    .encode()
+                                    .toByteString()
+                        }
+                        .build(),
+                )
+        }
+        .build()
+
+    private fun SimPeer.neighborInfoPacket(id: Int, ageSeconds: Int = 0) = FromRadio.Builder()
+        .also { wb ->
+            wb.packet =
+                packet(
+                    id = id,
+                    to = BROADCAST_ADDR,
+                    ageSeconds = ageSeconds,
                     data =
                     Data.Builder()
                         .also { wb ->
@@ -719,13 +743,13 @@ class MockRadioTransport(
         }
         .build()
 
-    private fun SimPeer.nodeStatusPacket(id: Int, status: String) = FromRadio.Builder()
+    private fun SimPeer.nodeStatusPacket(id: Int, status: String, ageSeconds: Int = 0) = FromRadio.Builder()
         .also { wb ->
             wb.packet =
                 packet(
                     id = id,
                     to = BROADCAST_ADDR,
-                    ageSeconds = 0,
+                    ageSeconds = ageSeconds,
                     data =
                     Data.Builder()
                         .also { wb ->
