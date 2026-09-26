@@ -5,7 +5,7 @@ on:
     # Once a day. Baseline-profile regeneration needs a booted emulator (~14 min)
     # and the profile/graphs rarely change, so this is decoupled from the frequent
     # firmware/hardware/translation job in scheduled-updates.yml.
-    - cron: '0 0 * * *'
+    - cron: '23 2 * * *'
   workflow_dispatch:       # Allow manual triggering
 
 # Emulator runs take up to ~1 h; a manual dispatch overlapping the daily cron
