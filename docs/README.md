@@ -70,9 +70,9 @@ cycle and are not a documented channel.
 
 Prerelease snapshots accumulate during a version cycle so testers can read the
 docs for the exact build they are running. Once the production `vX.Y.Z` tag
-ships, `/vX.Y.Z/` supersedes them and **Post-Release Cleanup** (run with
-`base_version=X.Y.Z`) reaps the `vX.Y.Z-open.*` / `vX.Y.Z-closed.*` directories
-along with the prerelease tags. That workflow defaults to a dry run.
+ships, `/vX.Y.Z/` supersedes them, and once it is published Docs Release
+dispatches **Post-Release Cleanup**, which reaps every open and closed directory
+and prerelease tag at or below `X.Y.Z`. A manual dispatch defaults to a dry run.
 
 Only production releases own `/` and rebuild `/api/`. Prerelease tags publish
 their own directory only: `/api/` is unversioned and already refreshed by every
