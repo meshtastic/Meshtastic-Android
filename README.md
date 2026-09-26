@@ -98,7 +98,7 @@ BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll serve \
 
 **API Reference (Dokka):**
 ```bash
-./gradlew dokkaGeneratePublicationHtml
+./gradlew :dokkaGeneratePublicationHtml
 # Output: build/dokka/html/index.html
 ```
 

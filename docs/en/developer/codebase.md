@@ -2,7 +2,7 @@
 title: Codebase
 parent: Developer Guide
 nav_order: 2
-last_updated: 2026-09-11
+last_updated: 2026-09-26
 description: Repository layout, package namespacing, and the Gradle build system — convention plugins, build variants, and key tasks.
 aliases:
   - repository-layout
@@ -143,7 +143,7 @@ block rather than assuming a plugin does or does not exist.
 ./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
 
 # API reference (Dokka HTML → build/dokka/html)
-./gradlew dokkaGeneratePublicationHtml
+./gradlew :dokkaGeneratePublicationHtml
 ```
 
 ## Version Catalog Highlights

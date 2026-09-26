@@ -109,7 +109,7 @@ jobs:
       # Dokka API reference (/api/) — production releases only.
       - name: Build Dokka HTML documentation
         if: steps.version.outputs.is_production == 'true'
-        run: ./gradlew dokkaGeneratePublicationHtml
+        run: ./gradlew :dokkaGeneratePublicationHtml
 
       - name: Compile Jekyll Sites
         env:
