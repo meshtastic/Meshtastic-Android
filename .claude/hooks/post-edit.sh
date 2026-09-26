@@ -8,14 +8,14 @@
 #   - base strings.xml      -> run scripts/sort-strings.py (keeps the file sorted
 #                              and regenerates .skills/compose-ui/strings-index.txt;
 #                              AGENTS.md mandates this but no CI job enforces it)
-#   - fastlane/metadata/**  -> run scripts/check-metadata-length.py and BLOCK on
-#                              overlength store listings (the pull-request.yml
+#   - fastlane/metadata/**  -> run scripts/check-store-metadata.py and BLOCK on
+#                              store-rule violations (the pull-request.yml
 #                              check-metadata job is blocking; F-Droid #4262)
 #   - settings.gradle.kts   -> remind about the pull-request.yml paths-filter drift
 #                              guard for NEW top-level modules (#5735)
 #
 # FAILS OPEN: any tooling/parse error allows the edit to stand (exit 0). Notes are
-# surfaced to Claude via PostToolUse additionalContext; only the metadata length
+# surfaced to Claude via PostToolUse additionalContext; only the store metadata
 # check blocks (exit 2), because that one is a hard CI gate.
 
 input=$(cat)
@@ -51,11 +51,13 @@ $out"
     ;;
 
   *fastlane/metadata/android/*)
-    out=$( (cd "$repo_root" && python3 scripts/check-metadata-length.py) 2>&1 )
-    if [ $? -ne 0 ]; then
+    out=$( (cd "$repo_root" && python3 scripts/check-store-metadata.py) 2>&1 )
+    rc=$?
+    # 1 is a store-rule violation; any other failure is tooling and fails open.
+    if [ "$rc" -eq 1 ]; then
       {
-        printf '%s\n' "Store-listing metadata exceeds a length limit (scripts/check-metadata-length.py)."
-        printf '%s\n' "Fix this before it lands — the pull-request.yml check-metadata job is blocking (F-Droid #4262; limits count Unicode code points, not bytes). Details:"
+        printf '%s\n' "Store-listing metadata breaks a store rule (scripts/check-store-metadata.py)."
+        printf '%s\n' "Fix this before it lands: the pull-request.yml check-metadata job is blocking (F-Droid #4262; limits count Unicode code points, not bytes). Details:"
         printf '%s\n' "$out"
       } >&2
       exit 2
