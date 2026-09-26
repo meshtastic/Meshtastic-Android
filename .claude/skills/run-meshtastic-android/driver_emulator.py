@@ -125,14 +125,20 @@ def connect(addr):
         "-a", "android.intent.action.VIEW",
         "-d", f"https://meshtastic.org/connections?address={addr}",
     )
-    # Debug builds that know skip_connect_confirm apply the address with no dialog.
-    # Older ones pop the trust dialog: match its title, not bare "Connect", which
+    # Debug builds on Android 14+ that know skip_connect_confirm apply the address with
+    # no dialog; older ones pop the trust dialog, sometimes late on a slow emulator.
+    # Watch for either for 30 s. Match the dialog's title, not bare "Connect", which
     # also matches "Stop Connecting".
-    r = wait_text("Connect to this device", timeout=10)
-    if r.startswith("found"):
-        print(tap_text("Connect"))
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        if any(True for _ in find("Disconnect")):
+            break
+        if any(True for _ in find("Connect to this device")):
+            print(tap_text("Connect"))
+            break
+        time.sleep(3)
     else:
-        print("no trust dialog seen — verifying the connection directly")
+        print("neither the trust dialog nor a connection appeared in 30 s")
     # A missing dialog does not prove success (the launch or deeplink may have failed):
     # require the Connection screen's Disconnect button before claiming victory.
     v = wait_text("Disconnect", timeout=60)

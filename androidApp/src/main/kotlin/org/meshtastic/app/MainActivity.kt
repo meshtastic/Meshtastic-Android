@@ -128,6 +128,14 @@ class MainActivity : AppCompatActivity() {
         if (BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_ONBOARDING, false)) {
             model.onAppIntroCompleted()
         }
+        // The activity is exported and debug snapshots are user-installed, so any app could send the extra. Honour it
+        // only on a launch the shell made: the system records the launcher's uid, the sender cannot forge it, and it
+        // describes this launch alone, which is why a later intent turns the switch back off.
+        launchOptions.skipDeepLinkConfirmation =
+            BuildConfig.DEBUG &&
+            intent.getBooleanExtra(EXTRA_SKIP_CONNECT_CONFIRM, false) &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+            launchedFromUid == SHELL_UID
 
         enableEdgeToEdge()
 
@@ -179,7 +187,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Listen for new intents (e.g. deep links, NFC) without overriding onNewIntent
-        addOnNewIntentListener { intent -> handleIntent(intent) }
+        addOnNewIntentListener { intent ->
+            launchOptions.skipDeepLinkConfirmation = false
+            handleIntent(intent)
+        }
 
         handleIntent(intent)
     }
@@ -308,10 +319,6 @@ class MainActivity : AppCompatActivity() {
 
     @Suppress("NestedBlockDepth")
     private fun handleIntent(intent: Intent) {
-        // Automation switch, debug builds only; set before this intent's deep link is handled.
-        if (BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_CONNECT_CONFIRM, false)) {
-            launchOptions.skipDeepLinkConfirmation = true
-        }
         val appLinkAction = intent.action
         val appLinkData: Uri? = intent.data
 
@@ -422,6 +429,9 @@ class MainActivity : AppCompatActivity() {
     private companion object {
         const val EXTRA_SKIP_ONBOARDING = "skip_onboarding"
         const val EXTRA_SKIP_CONNECT_CONFIRM = "skip_connect_confirm"
+
+        /** `android.os.Process.SHELL_UID`, which is not public API: the uid `adb shell` and UiAutomation run as. */
+        const val SHELL_UID = 2000
     }
 }
 

@@ -127,8 +127,9 @@ python3 .claude/skills/run-meshtastic-android/driver_emulator.py -s emulator-555
 debug-only `skip_onboarding` and `skip_connect_confirm` extras and the
 `/connections?address=` deeplink (`t` = TCP, `x` = BLE, `s` = serial, `n` = disconnect —
 full path list in `docs/en/developer/navigation-and-deep-links.md`). With
-`skip_connect_confirm` the address is applied with no trust dialog; a build that
-predates the extra still pops it, and the driver taps its **Connect** button. Desktop
+`skip_connect_confirm` the address is applied with no trust dialog, on Android 14+ and
+only because the shell made the launch; an older emulator, or a build that predates
+the extra, still pops it, and the driver taps its **Connect** button. Desktop
 takes the same switch as a `--skip-connect-confirm` argument in a non-release build. Success looks like the Connection
 screen showing `RPLY Replay Observer` with a **Disconnect** button, and
 `replay_status` reporting `connected:true`.

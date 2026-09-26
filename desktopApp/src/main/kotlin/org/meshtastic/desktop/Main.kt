@@ -175,7 +175,7 @@ fun main(args: Array<String>) {
         val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
         val httpClient = remember { koinApp.koin.get<HttpClient>() }
 
-        DeepLinkHandler(args, uiViewModel)
+        DeepLinkHandler(args, uiViewModel, remember { koinApp.koin.get<LaunchOptions>() })
         MeshServiceLifecycle()
         ThemeAndLocaleProvider(uiViewModel)
     }
@@ -198,7 +198,11 @@ fun main(args: Array<String>) {
 
 /** Processes deep-link URIs from CLI arguments and OS-level URI handlers. */
 @Composable
-private fun ApplicationScope.DeepLinkHandler(args: Array<String>, uiViewModel: UIViewModel) {
+private fun ApplicationScope.DeepLinkHandler(
+    args: Array<String>,
+    uiViewModel: UIViewModel,
+    launchOptions: LaunchOptions,
+) {
     LaunchedEffect(args) {
         args.forEach { arg ->
             if (
@@ -216,6 +220,8 @@ private fun ApplicationScope.DeepLinkHandler(args: Array<String>, uiViewModel: U
     LaunchedEffect(Unit) {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.APP_OPEN_URI)) {
             Desktop.getDesktop().setOpenURIHandler { event ->
+                // The launch switch covers the links this process was started with, never one the OS hands over later.
+                launchOptions.skipDeepLinkConfirmation = false
                 val uriStr = event.uri.toString()
                 uiViewModel.handleDeepLink(CommonUri.parse(uriStr)) { Logger.e { "Invalid URI from OS: $uriStr" } }
             }
