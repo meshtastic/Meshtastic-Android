@@ -45,7 +45,7 @@ jobs:
   android:
     name: Android (${{ matrix.flavor }})
     # Hosted x64 runners expose KVM; the emulator needs it.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     continue-on-error: ${{ inputs.soft == true }}
     strategy:
@@ -138,7 +138,7 @@ jobs:
   # The five Flathub shots, from the real desktop debug build on a virtual display.
   desktop:
     name: Desktop
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 45
     continue-on-error: ${{ inputs.soft == true }}
     steps:
