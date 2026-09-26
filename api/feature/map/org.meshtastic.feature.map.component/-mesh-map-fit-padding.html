@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>MeshMap</title>
+    <title>MeshMapFitPadding</title>
 <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map-maplibre/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -53,7 +53,7 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":feature:map-maplibre/commonMain" data-filter=":feature:map-maplibre/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map/commonMain" data-filter=":feature:map/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
                             </label>
@@ -89,12 +89,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="feature-map-maplibre::org.meshtastic.feature.map.maplibre//MeshMap/#org.maplibre.compose.map.MapState#androidx.compose.ui.Modifier#org.meshtastic.feature.map.maplibre.style.Basemap#kotlin.Function1[org.maplibre.spatialk.geojson.Position,kotlin.Unit]#kotlin.Function1[org.maplibre.spatialk.geojson.Position,kotlin.Unit]/PointingToDeclaration//-831320004">
-  <div class="breadcrumbs"><a href="../index.html">feature-map-maplibre</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.feature.map.maplibre</a><span class="delimiter">/</span><span class="current">MeshMap</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="feature-map::org.meshtastic.feature.map.component//MeshMapFitPadding/#/PointingToDeclaration//-1707802287">
+  <div class="breadcrumbs"><a href="../index.html">feature-map</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.feature.map.component</a><span class="delimiter">/</span><span class="current">MeshMapFitPadding</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>Mesh</span><wbr><span><span>Map</span></span></h1>
+    <h1 class="cover"><span>Mesh</span><wbr><span>Map</span><wbr><span>Fit</span><wbr><span><span>Padding</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-mesh-map.html"><span class="token function">MeshMap</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapState<span class="token operator">: </span><span data-unresolved-link="org.maplibre.compose.map/MapState///PointingToDeclaration/">MapState</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">basemap<span class="token operator">: </span><a href="../org.meshtastic.feature.map.maplibre.style/-basemap/index.html">Basemap</a><span class="token operator"> = </span>Basemaps.default<span class="token punctuation">, </span></span><span class="parameter ">onMapLongClick<span class="token operator">: </span><span class="token punctuation">(</span><span data-unresolved-link="org.maplibre.spatialk.geojson/Position///PointingToDeclaration/">Position</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onMapClick<span class="token operator">: </span><span class="token punctuation">(</span><span data-unresolved-link="org.maplibre.spatialk.geojson/Position///PointingToDeclaration/">Position</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map-maplibre/src/commonMain/kotlin/org/meshtastic/feature/map/maplibre/MeshMap.kt#L217">source</a>)</span></span></div><p class="paragraph">The mesh map, rendered by MapLibre.</p><p class="paragraph">Presents <a href="-mesh-map.html">mapState</a> and nothing else; what gets drawn is declared by <a href="remember-mesh-map-state.html">rememberMeshMapState</a>.</p><p class="paragraph"><a href="-mesh-map.html">basemap</a> must be the same one that state was built with: it supplies the zoom range the camera is held to, and a different value here would clamp the camera to a range the loaded style cannot serve.</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-mesh-map-fit-padding.html">MeshMapFitPadding</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/PaddingValues.html">PaddingValues</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map/src/commonMain/kotlin/org/meshtastic/feature/map/component/MapFitPadding.kt#L29">source</a>)</span></span></div><p class="paragraph">How far the mesh map keeps each framed node from the edges, so the node's chip clears the map's own chrome.</p><p class="paragraph">Asymmetric because the chrome is: <a href="-map-controls-overlay.html">MapControlsOverlay</a> reaches 72dp down from the top, the zoom pair reaches 72dp in from the lower trailing corner, and the logo and attribution run along the foot. A node chip is about 64 by 28dp, centred on its point, so each edge also leaves half a chip.</p></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">
