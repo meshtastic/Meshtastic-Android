@@ -81,12 +81,16 @@ class StoreScreenshots {
 
     /** SystemUI demo mode, sent again after every display change, which can rebuild the status bar. */
     private fun UiAutomatorTestScope.cleanStatusBar() {
-        SystemClock.sleep(SYSTEM_UI_SETTLE_MS)
-        demo("enter")
-        demo("clock -e hhmm 0941")
-        demo("battery -e level 100 -e plugged false")
-        demo("network -e wifi show -e level 4 -e fully true -e mobile show -e datatype none -e level 4")
-        demo("notifications -e visible false")
+        // The first burst after demo mode is allowed is dropped on a cold emulator (measured: the first form factor
+        // kept the real clock, the later ones took the demo); a second burst after a settle lands.
+        repeat(DEMO_BURSTS) {
+            SystemClock.sleep(SYSTEM_UI_SETTLE_MS)
+            demo("enter")
+            demo("clock -e hhmm 0941")
+            demo("battery -e level 100 -e plugged false")
+            demo("network -e wifi show -e level 4 -e fully true -e mobile show -e datatype none -e level 4")
+            demo("notifications -e visible false")
+        }
         SystemClock.sleep(SYSTEM_UI_SETTLE_MS)
     }
 
@@ -208,7 +212,8 @@ class StoreScreenshots {
 
         /** Pixel Launcher on the google_apis emulator images: the stalls, and the tablet taskbar. */
         const val LAUNCHER = "com.google.android.apps.nexuslauncher"
-        const val SYSTEM_UI_SETTLE_MS = 2_000L
+        const val SYSTEM_UI_SETTLE_MS = 3_000L
+        const val DEMO_BURSTS = 2
 
         const val CONNECT_ATTEMPTS = 3
         const val CONNECT_TIMEOUT_MS = 60_000L
