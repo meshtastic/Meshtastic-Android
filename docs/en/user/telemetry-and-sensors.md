@@ -76,7 +76,7 @@ Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, d
 | Wind speed | km/h or mph | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card |
 | Wind direction, gust, and lull | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted |
 | Rainfall, last hour and last 24 hours | mm or in | Listed with each reading on the Environment Metrics screen; not charted |
-| Lightning, strikes in the last hour and storm distance | count, km or mi | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector |
+| Lightning, strikes in the last hour and storm distance | count, km or mi | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometres |
 | Radiation | µR/h | Card and chart |
 | Weight | kg or lb | Card only — load cells, such as a beehive scale |
 | Distance | mm or in | Card only — water level, from a distance sensor |
