@@ -90,7 +90,7 @@ fun NodeFilterSearchBar(
     modifier: Modifier = Modifier,
     searchResults: @Composable ColumnScope.() -> Unit = {},
 ) {
-    Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
+    Column(modifier = modifier) {
         MeshtasticSearchBar(
             query = filterText,
             onQueryChange = onTextChange,
