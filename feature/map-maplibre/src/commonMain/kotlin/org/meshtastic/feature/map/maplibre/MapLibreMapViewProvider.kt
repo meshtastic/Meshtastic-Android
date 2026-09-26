@@ -38,6 +38,7 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.compose.camera.CameraAnimation
 import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.location.BearingUpdate
 import org.maplibre.compose.location.LocationPermission
 import org.maplibre.compose.location.LocationState
@@ -343,12 +344,7 @@ private fun SitePlannerSlot(
             nodeNum = nodeNum,
             mapCenter = { mapState.cameraPosition.target },
             moveTo = { target ->
-                scope.launch {
-                    mapState.animateCameraPosition(
-                        mapState.cameraPosition.copy(target = target),
-                        animation = CameraAnimation.Ease(),
-                    )
-                }
+                scope.launch { mapState.animateCamera(CameraUpdate(target = target), CameraAnimation.Ease()) }
             },
             onDismiss = onDismiss,
         ),
@@ -395,12 +391,7 @@ private fun BoxScope.MapToolbar(
             if (location.following) {
                 location.onToggleBearingLock()
             } else {
-                scope.launch {
-                    mapState.animateCameraPosition(
-                        mapState.cameraPosition.copy(bearing = 0.0),
-                        animation = CameraAnimation.Ease(),
-                    )
-                }
+                scope.launch { mapState.animateCamera(CameraUpdate(bearing = 0.0), CameraAnimation.Ease()) }
             }
         },
         filterDropdownContent = {
