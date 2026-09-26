@@ -28,8 +28,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
-  statuses: write
   id-token: write
   attestations: write
 
@@ -45,7 +43,6 @@ jobs:
     timeout-minutes: 10
     outputs:
       tag_to_process: ${{ steps.calculate_tags.outputs.tag_to_process }}
-      release_name: ${{ steps.calculate_tags.outputs.release_name }}
       final_tag: ${{ steps.calculate_tags.outputs.final_tag }}
       from_channel: ${{ steps.calculate_tags.outputs.from_channel }}
     steps:
@@ -84,7 +81,6 @@ jobs:
             echo "Calculated new tag: $NEW_TAG"
             {
               echo "tag_to_process=$NEW_TAG"
-              echo "release_name=$NEW_TAG"
               echo "final_tag=$NEW_TAG"
             } >> "$GITHUB_OUTPUT"
           else
@@ -121,12 +117,10 @@ jobs:
                 NEW_TAG="v${BASE_VERSION}"
             fi
 
-            echo "New release name will be: $NEW_TAG"
             echo "Final tag will be: $NEW_TAG"
             {
               echo "from_channel=${FROM_CHANNEL}"
               echo "tag_to_process=${LATEST_TAG_TO_PROMOTE}"
-              echo "release_name=${NEW_TAG}"
               echo "final_tag=${NEW_TAG}"
             } >> "$GITHUB_OUTPUT"
           fi
@@ -148,10 +142,6 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.determine-tags.outputs.final_tag }}
-      channel: ${{ inputs.channel }}
-      base_version: ${{ inputs.base_version }}
-      build_desktop: true
-      build_flatpak_src: true
     secrets: inherit
 
   call-promote-workflow:
@@ -166,13 +156,10 @@ jobs:
       contents: write
       pull-requests: write
       statuses: write
-      id-token: write
-      attestations: write
       actions: write
     uses: ./.github/workflows/promote.yml
     with:
       tag_name: ${{ needs.determine-tags.outputs.tag_to_process }}
-      release_name: ${{ needs.determine-tags.outputs.release_name }}
       final_tag: ${{ needs.determine-tags.outputs.final_tag }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}

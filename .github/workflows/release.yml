@@ -3,32 +3,10 @@ name: Make Release
 on:
   workflow_call:
     inputs:
-      base_version:
-        description: 'The base version for the release (e.g., 2.3.0)'
-        required: true
-        type: string
       tag_name:
         description: 'The tag that triggered the release'
         required: true
         type: string
-      commit_sha:
-        description: 'The commit SHA to build and tag'
-        required: false
-        type: string
-      channel:
-        description: 'The channel to create a release for or promote to'
-        required: true
-        type: string
-      build_desktop:
-        description: 'Whether to build the desktop distribution'
-        required: false
-        type: boolean
-        default: false
-      build_flatpak_src:
-        description: 'Whether to build the Flatpak sources'
-        required: false
-        type: boolean
-        default: false
     secrets:
       GSERVICES:
         required: true
@@ -79,7 +57,6 @@ concurrency:
 
 permissions:
   contents: write
-  pull-requests: read
   id-token: write
   attestations: write
 
@@ -96,7 +73,6 @@ jobs:
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
       - name: Prep APP_VERSION_NAME
         id: prep_version
         env:
@@ -136,7 +112,6 @@ jobs:
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -220,7 +195,6 @@ jobs:
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -268,7 +242,6 @@ jobs:
           subject-path: androidApp/build/outputs/apk/fdroid/release/*.apk
 
   release-desktop:
-    if: ${{ inputs.build_desktop }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     needs: [prepare-build-info]
@@ -285,7 +258,6 @@ jobs:
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -403,7 +375,6 @@ jobs:
             desktopApp/build/compose/jars/*-release.jar
 
   create-flatpak-src:
-    if: ${{ inputs.build_flatpak_src }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     needs: [prepare-build-info]
@@ -419,7 +390,6 @@ jobs:
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -457,7 +427,6 @@ jobs:
           retention-days: 1
 
   release-flatpak-src:
-    if: ${{ inputs.build_flatpak_src }}
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     needs: [create-flatpak-src]
@@ -576,8 +545,8 @@ jobs:
         && needs.prepare-build-info.result == 'success'
         && needs.release-google.result == 'success'
         && needs.release-fdroid.result == 'success'
-        && (needs.release-desktop.result == 'success' || !inputs.build_desktop)
-        && (needs.release-flatpak-src.result == 'success' || !inputs.build_flatpak_src) }}
+        && needs.release-desktop.result == 'success'
+        && needs.release-flatpak-src.result == 'success' }}
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     needs:
@@ -589,8 +558,6 @@ jobs:
       - store-screenshots-assets
     permissions:
       contents: write
-      id-token: write
-      attestations: write
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -617,7 +584,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           TAG: ${{ inputs.tag_name }}
-          TARGET: ${{ inputs.commit_sha || github.sha }}
+          TARGET: ${{ github.sha }}
         run: |
           # Fail the step if the listing itself fails — an empty PREV must only ever
           # mean "no published v* release exists yet", never a swallowed API error,
@@ -651,7 +618,7 @@ jobs:
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         with:
           tag_name: ${{ inputs.tag_name }}
-          target_commitish: ${{ inputs.commit_sha || github.sha }}
+          target_commitish: ${{ github.sha }}
           name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
           body_path: release-notes.md
           files: ./artifacts/**/*

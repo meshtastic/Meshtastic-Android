@@ -11,17 +11,9 @@ on:
         description: 'The tag that triggered the release'
         required: true
         type: string
-      release_name:
-        description: 'The desired name for the GitHub release'
-        required: true
-        type: string
       final_tag:
         description: 'The final tag for the release'
         required: true
-        type: string
-      commit_sha:
-        description: 'The commit SHA to tag'
-        required: false
         type: string
       channel:
         description: 'The channel to promote to'
@@ -32,23 +24,7 @@ on:
         required: true
         type: string
     secrets:
-      GSERVICES:
-        required: true
-      KEYSTORE:
-        required: true
-      KEYSTORE_FILENAME:
-        required: true
-      KEYSTORE_PROPERTIES:
-        required: true
-      DATADOG_APPLICATION_ID:
-        required: true
-      DATADOG_CLIENT_TOKEN:
-        required: true
-      GOOGLE_MAPS_API_KEY:
-        required: true
       GOOGLE_PLAY_JSON_KEY:
-        required: true
-      GRADLE_ENCRYPTION_KEY:
         required: true
       DISCORD_WEBHOOK_ANDROID:
         required: false
@@ -67,8 +43,6 @@ permissions:
   contents: write
   pull-requests: write
   statuses: write
-  id-token: write
-  attestations: write
 
 jobs:
   prepare-build-info:
@@ -81,9 +55,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+          ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Prep APP_VERSION_NAME
         id: prep_version
@@ -130,7 +103,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+          ref: ${{ inputs.tag_name }}
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
@@ -266,9 +239,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+          ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       # Same reasoning as promote-release: scripts come from the caller's commit,
       # not the tag, so a tag cut before a script landed still gets it.
@@ -279,12 +251,6 @@ jobs:
           path: .workflow-ref
           sparse-checkout: scripts
 
-      - name: Push Git Tag on Success
-        if: ${{ inputs.commit_sha != '' }}
-        run: |
-          git tag ${{ inputs.final_tag }} ${{ inputs.commit_sha }}
-          git push origin ${{ inputs.final_tag }}
-
       - name: Update GitHub Release with gh CLI
         id: release
         env:
@@ -292,7 +258,7 @@ jobs:
         run: |
           gh release edit ${{ inputs.tag_name }} \
             --tag ${{ inputs.final_tag }} \
-            --title "${{ inputs.release_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})" \
+            --title "${{ inputs.final_tag }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})" \
             --draft=false \
             --prerelease=${{ inputs.channel != 'production' }}
 
@@ -661,7 +627,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+          ref: ${{ inputs.tag_name }}
 
       - name: Render cask and open PR against meshtastic/homebrew-tap
         env:

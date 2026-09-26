@@ -64,7 +64,6 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.sha }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -149,7 +148,6 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.sha }}
           fetch-depth: 0
-          submodules: 'recursive'
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
