@@ -107,6 +107,8 @@ manifest entry fails CI.
  `/firmware` | `FirmwareRoute.FirmwareGraph` | Firmware screen |
  `/firmware/update` | `FirmwareRoute.FirmwareUpdate` | Firmware update flow |
 
+Demo Mode's addresses start with `m`. In a debug build, or once hidden features are unlocked, `/connections?address=m` connects to the demo mesh and `/connections?address=mshowcase` to the store-screenshot mesh, which the device picker never lists. `MockScenario` in `:core:network` holds both.
+
 ### Backstack synthesis
 
 Deep links synthesize a full backstack, not just the target screen:
