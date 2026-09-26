@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Drive the Meshtastic Android app on an emulator/device over adb.
 
-Scripted bring-up (never hand-walk onboarding): launches MainActivity with the
-debug-only skip_onboarding extra and a /connections deeplink that auto-connects
-to a TCP radio — pair it with a replay-sim radio (an AVD reaches the host at
+Scripted bring-up (never hand-walk onboarding): launches the debug build's
+shell-only AutomationLauncher alias with the skip_onboarding extra and a
+/connections deeplink that auto-connects to a TCP radio — pair it with a
+replay-sim radio (an AVD reaches the host at
 10.0.2.2). Handles the trust dialog newer builds pop on first connect.
 
 Usage:
@@ -38,16 +39,28 @@ import xml.etree.ElementTree as ET
 
 SERIAL = None
 PKG = "com.geeksville.mesh.fdroid.debug"
-ACTIVITY = "org.meshtastic.app.MainActivity"
+ACTIVITY = "org.meshtastic.app.AutomationLauncher"
+# Builds without the alias; they ignore the launch switches.
+FALLBACK_ACTIVITY = "org.meshtastic.app.MainActivity"
 
 
 def adb(*args):
     cmd = ["adb"] + (["-s", SERIAL] if SERIAL else []) + list(args)
     r = subprocess.run(cmd, capture_output=True, timeout=120)
     if r.returncode != 0:
-        err = (r.stderr or b"").decode(errors="replace").strip()
+        # am start reports a missing component on stdout
+        err = ((r.stderr or b"") + (r.stdout or b"")).decode(errors="replace").strip()
         raise RuntimeError(f"adb {' '.join(args)} failed ({r.returncode}): {err[:300]}")
     return (r.stdout or b"").decode(errors="replace")
+
+
+def start_app(*extras):
+    try:
+        return adb("shell", "am", "start", "-n", f"{PKG}/{ACTIVITY}", *extras)
+    except RuntimeError as e:
+        if "does not exist" not in str(e):
+            raise
+    return adb("shell", "am", "start", "-n", f"{PKG}/{FALLBACK_ACTIVITY}", *extras)
 
 
 def ui_dump():
@@ -118,19 +131,26 @@ def wait_text(text, timeout=60):
 def connect(addr):
     adb("shell", "am", "force-stop", PKG)
     time.sleep(1)
-    adb(
-        "shell", "am", "start", "-n", f"{PKG}/{ACTIVITY}",
+    start_app(
         "--ez", "skip_onboarding", "true",
+        "--ez", "skip_connect_confirm", "true",
         "-a", "android.intent.action.VIEW",
         "-d", f"https://meshtastic.org/connections?address={addr}",
     )
-    # Builds >2.8.1 pop a trust dialog on first connect to a new device. Match its
-    # title, not bare "Connect" — that substring also matches "Stop Connecting".
-    r = wait_text("Connect to this device", timeout=30)
-    if r.startswith("found"):
-        print(tap_text("Connect"))
+    # Debug builds with the AutomationLauncher alias apply the address with no dialog;
+    # older ones pop the trust dialog, sometimes late on a slow emulator.
+    # Watch for either for 30 s. Match the dialog's title, not bare "Connect", which
+    # also matches "Stop Connecting".
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        if any(True for _ in find("Disconnect")):
+            break
+        if any(True for _ in find("Connect to this device")):
+            print(tap_text("Connect"))
+            break
+        time.sleep(3)
     else:
-        print("no trust dialog seen — verifying the connection directly")
+        print("neither the trust dialog nor a connection appeared in 30 s")
     # A missing dialog does not prove success (the launch or deeplink may have failed):
     # require the Connection screen's Disconnect button before claiming victory.
     v = wait_text("Disconnect", timeout=60)
@@ -162,7 +182,7 @@ def main():
             if res.startswith("FAILED"):
                 return 1
         elif name == "launch":
-            adb("shell", "am", "start", "-n", f"{PKG}/{ACTIVITY}", "--ez", "skip_onboarding", "true")
+            start_app("--ez", "skip_onboarding", "true")
             print("launched")
         elif name == "stop":
             adb("shell", "am", "force-stop", PKG)

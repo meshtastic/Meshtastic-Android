@@ -78,6 +78,7 @@ import org.maplibre.compose.desktop.ProvideMapPresentationHost
 import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.InMemoryLogBuffer
+import org.meshtastic.core.common.state.LaunchOptions
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.model.DeviceAddress
@@ -127,6 +128,9 @@ import coil3.util.Logger as CoilLogger
 private const val MEMORY_CACHE_MAX_BYTES = 64L * 1024L * 1024L // 64 MiB
 private const val DISK_CACHE_MAX_BYTES = 32L * 1024L * 1024L // 32 MiB
 
+/** Debug builds only: apply a `connections` deep link from the command line without the trust dialog. */
+private const val SKIP_CONNECT_CONFIRM_ARG = "--skip-connect-confirm"
+
 /**
  * Loads an SVG from JVM classpath resources and returns a [Painter].
  *
@@ -160,13 +164,18 @@ fun main(args: Array<String>) {
             Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
             Logger.i { "Meshtastic Desktop — Starting" }
             startKoin<DesktopKoinApp> {}
+                .also { app ->
+                    if (DesktopBuildConfig.IS_DEBUG && SKIP_CONNECT_CONFIRM_ARG in args) {
+                        app.koin.get<LaunchOptions>().skipDeepLinkConfirmation = true
+                    }
+                }
         }
         LaunchedEffect(Unit) { publishExitApplication(::exitApplication) }
         val systemLocale = remember { Locale.getDefault() }
         val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
         val httpClient = remember { koinApp.koin.get<HttpClient>() }
 
-        DeepLinkHandler(args, uiViewModel)
+        DeepLinkHandler(args, uiViewModel, remember { koinApp.koin.get<LaunchOptions>() })
         MeshServiceLifecycle()
         ThemeAndLocaleProvider(uiViewModel)
     }
@@ -189,7 +198,11 @@ fun main(args: Array<String>) {
 
 /** Processes deep-link URIs from CLI arguments and OS-level URI handlers. */
 @Composable
-private fun ApplicationScope.DeepLinkHandler(args: Array<String>, uiViewModel: UIViewModel) {
+private fun ApplicationScope.DeepLinkHandler(
+    args: Array<String>,
+    uiViewModel: UIViewModel,
+    launchOptions: LaunchOptions,
+) {
     LaunchedEffect(args) {
         args.forEach { arg ->
             if (
@@ -207,6 +220,8 @@ private fun ApplicationScope.DeepLinkHandler(args: Array<String>, uiViewModel: U
     LaunchedEffect(Unit) {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.APP_OPEN_URI)) {
             Desktop.getDesktop().setOpenURIHandler { event ->
+                // The launch switch covers the links this process was started with, never one the OS hands over later.
+                launchOptions.skipDeepLinkConfirmation = false
                 val uriStr = event.uri.toString()
                 uiViewModel.handleDeepLink(CommonUri.parse(uriStr)) { Logger.e { "Invalid URI from OS: $uriStr" } }
             }

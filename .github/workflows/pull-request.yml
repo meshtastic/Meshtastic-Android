@@ -88,7 +88,7 @@ jobs:
               - 'feature/**'
               - 'screenshot-tests/**'
               - 'docs-screenshots/**'
-              - 'marketing-screenshots/**'
+              - 'store-screenshots/**'
               - 'schema-strings/**'
               # Shared build infrastructure
               - 'build-logic/**'
@@ -172,9 +172,9 @@ jobs:
               ':baselineprofile',
               ':core:konsist',
               ':docs-screenshots',
-              ':marketing-screenshots',
               ':schema-strings',
               ':screenshot-tests',
+              ':store-screenshots',
           }
 
           missing = sorted(modules - listed - exempt)
@@ -230,13 +230,13 @@ jobs:
               ':screenshot-tests',   # dedicated screenshot-check job
               ':docs-screenshots',   # doc-screenshot generation (screenshot tooling)
               ':baselineprofile',    # benchmark module, instrumented-only
+              ':store-screenshots',  # store-listing screenshots from the real app, instrumented-only
           }
           # Modules with no unit-test sources yet. One of these gaining test
           # sources fails the guard: move it into a shard in reusable-check.yml
           # and remove it from this list.
           no_tests_yet = {
               ':core:di',
-              ':marketing-screenshots',  # store-listing screenshot generator, a JVM program
               ':core:nfc',
               ':core:resources',
           }
