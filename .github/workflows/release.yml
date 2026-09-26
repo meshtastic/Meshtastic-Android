@@ -95,7 +95,6 @@ jobs:
           DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
           DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
         run: |
           rm -f ./androidApp/google-services.json
           echo "$GSERVICES" > ./androidApp/google-services.json
@@ -106,19 +105,18 @@ jobs:
             echo "datadogClientToken=$DATADOG_CLIENT_TOKEN"
             echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY"
           } >> ./secrets.properties
-          echo "$GOOGLE_PLAY_JSON_KEY" > ./fastlane/play-store-credentials.json
 
-      - name: Setup Fastlane
-        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
-        with:
-          ruby-version: '4.0.7'
-          bundler-cache: true
-
-      - name: Build and Deploy Google Play to Internal Track with Fastlane
+      # Build only: publish-play uploads the bundle once every leg has built.
+      - name: Build the Google release
         env:
           VERSION_NAME: ${{ inputs.version_name }}
           VERSION_CODE: ${{ inputs.version_code }}
-        run: bundle exec fastlane internal
+        run: >
+          ./gradlew :androidApp:bundleGoogleRelease :androidApp:assembleGoogleRelease
+          -Pandroid.injected.version.name="$VERSION_NAME"
+          -Pandroid.injected.version.code="$VERSION_CODE"
+          -PaboutLibraries.release=true
+          -Pmeshtastic.disableAbiSplits=true
 
       - name: List outputs
         run: ls -R androidApp/build/outputs/
@@ -177,17 +175,15 @@ jobs:
           echo "$KEYSTORE" | base64 -di > "./androidApp/$KEYSTORE_FILENAME"
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
-      - name: Setup Fastlane
-        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
-        with:
-          ruby-version: '4.0.7'
-          bundler-cache: true
-
-      - name: Build F-Droid with Fastlane
+      # No aboutLibraries.release: offlineMode keeps the output matching F-Droid's reproducible rebuild.
+      - name: Build the F-Droid release
         env:
           VERSION_NAME: ${{ inputs.version_name }}
           VERSION_CODE: ${{ inputs.version_code }}
-        run: bundle exec fastlane fdroid_build
+        run: >
+          ./gradlew :androidApp:assembleFdroidRelease
+          -Pandroid.injected.version.name="$VERSION_NAME"
+          -Pandroid.injected.version.code="$VERSION_CODE"
 
       - name: List outputs
         run: ls -R androidApp/build/outputs/
@@ -499,6 +495,44 @@ jobs:
           path: out/*
           retention-days: 1
 
+  # Play receives the bundle only after every leg has built: a failed leg makes the caller
+  # delete the tag, and Play keeps any versionCode it has been sent.
+  publish-play:
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 15
+    needs: [release-google, release-fdroid, release-desktop, release-flatpak-src]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag_name }}
+
+      - name: Download the Google AAB
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: google-aab
+          path: ${{ runner.temp }}/google-aab
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: '4.0.7'
+          bundler-cache: true
+
+      - name: Decode Play Store credentials
+        env:
+          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+        run: printf '%s\n' "$GOOGLE_PLAY_JSON_KEY" > fastlane/play-store-credentials.json
+
+      - name: Upload to the internal track
+        env:
+          AAB: ${{ runner.temp }}/google-aab/androidApp-google-release.aab
+        run: bundle exec fastlane upload_internal aab:"$AAB"
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f fastlane/play-store-credentials.json
+
   # Gates on the build jobs by name: store-screenshots-assets is in needs only so its
   # artifact exists before the download below, and its result is not consulted.
   github-release:
@@ -507,7 +541,8 @@ jobs:
         && needs.release-google.result == 'success'
         && needs.release-fdroid.result == 'success'
         && needs.release-desktop.result == 'success'
-        && needs.release-flatpak-src.result == 'success' }}
+        && needs.release-flatpak-src.result == 'success'
+        && needs.publish-play.result == 'success' }}
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     needs:
@@ -515,6 +550,7 @@ jobs:
       - release-fdroid
       - release-desktop
       - release-flatpak-src
+      - publish-play
       - store-screenshots-assets
     permissions:
       contents: write

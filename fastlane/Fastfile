@@ -6,13 +6,13 @@
 default_platform(:android)
 
 platform :android do
-  desc "Deploy a new version to the internal track on Google Play"
-  lane :internal do |options|
-    aab_path = build_google_release
+  desc "Upload a built Google release bundle to the internal track on Google Play. Pass aab:<path>"
+  lane :upload_internal do |options|
+    UI.user_error!("Pass the bundle to upload as aab:<path>") if options[:aab].to_s.empty?
 
     upload_to_play_store(
       track: 'internal',
-      aab: aab_path,
+      aab: options[:aab],
       release_status: 'completed',
       skip_upload_apk: true,
       skip_upload_metadata: true,
@@ -47,33 +47,5 @@ platform :android do
       changes_not_sent_for_review: true,
       validate_only: validate_only,
     )
-  end
-
-  desc "Build the F-Droid release"
-  lane :fdroid_build do
-    gradle(
-      task: "assembleFdroidRelease",
-      properties: {
-        "android.injected.version.name" => ENV['VERSION_NAME'],
-        "android.injected.version.code" => ENV['VERSION_CODE'],
-        # Intentionally omit aboutLibraries.release — fdroid builds must use
-        # offlineMode so the output matches F-Droid's reproducible rebuild.
-      }
-    )
-  end
-
-  desc "Build the Google Release"
-  private_lane :build_google_release do
-    gradle(
-      task: "bundleGoogleRelease assembleGoogleRelease",
-      print_command: false,
-      properties: {
-        "android.injected.version.name" => ENV['VERSION_NAME'],
-        "android.injected.version.code" => ENV['VERSION_CODE'],
-        "aboutLibraries.release" => "true",
-        "meshtastic.disableAbiSplits" => "true"
-      }
-    )
-    lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
   end
 end

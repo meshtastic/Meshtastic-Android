@@ -15,13 +15,13 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## Android
 
-### android internal
+### android upload_internal
 
 ```sh
-[bundle exec] fastlane android internal
+[bundle exec] fastlane android upload_internal
 ```
 
-Deploy a new version to the internal track on Google Play
+Upload a built Google release bundle to the internal track on Google Play. Pass aab:<path>
 
 ### android play_listing
 
@@ -30,14 +30,6 @@ Deploy a new version to the internal track on Google Play
 ```
 
 Upload the store listing - title, descriptions, feature graphic, icon and screenshots - for every locale under fastlane/metadata/android. Touches no build or track. Dry-runs unless validate_only:false
-
-### android fdroid_build
-
-```sh
-[bundle exec] fastlane android fdroid_build
-```
-
-Build the F-Droid release
 
 ----
 
