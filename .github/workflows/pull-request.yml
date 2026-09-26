@@ -125,12 +125,12 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # Workflow linting (actionlint + its shellcheck integration over every run: block).
-      # Version-pinned; the runner image ships shellcheck. ~1s over the whole tree.
+      # actionlint plus its shellcheck pass over every run: block. The image bundles
+      # shellcheck and reads .github/actionlint.yaml from the mounted workspace.
       - name: Lint GitHub workflows (actionlint)
-        run: |
-          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12 /tmp
-          /tmp/actionlint -color
+        uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        with:
+          args: -color
       - name: Lint repo shell scripts (shellcheck)
         # -x so sourced libraries are followed into rather than reported as SC1091, and
         # find rather than a glob: scripts/*.sh missed scripts/lib/, scripts/docs/ and
