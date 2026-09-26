@@ -55,25 +55,39 @@ class StoreScreenshots {
             FormFactor.entries.forEach { formFactor ->
                 shell("wm size ${formFactor.widthPx}x${formFactor.heightPx}")
                 shell("wm density ${formFactor.densityDpi}")
+                cleanStatusBar()
                 connectToShowcase()
                 Shot.entries.forEach { shot -> capture(formFactor, shot) }
             }
         } finally {
             shell("wm size reset")
             shell("wm density reset")
-            shell("am broadcast -a com.android.systemui.demo -e command exit")
+            demo("exit")
+            shell("pm enable $LAUNCHER")
         }
     }
 
-    /** A clean status bar, and no system dialog over a stalled launcher on a cold, software-rendered emulator. */
+    /**
+     * No system dialog over a stalled launcher on a cold, software-rendered emulator, and no launcher at all: on a
+     * large screen its taskbar would sit along the bottom of every shot.
+     */
     private fun UiAutomatorTestScope.prepareDevice() {
         shell("settings put global hide_error_dialogs 1")
+        shell("pm disable-user --user 0 $LAUNCHER")
         shell("settings put global sysui_demo_allowed 1")
+        // SystemUI reads the setting asynchronously; a demo command sent before it has is dropped.
+        SystemClock.sleep(SYSTEM_UI_SETTLE_MS)
+    }
+
+    /** SystemUI demo mode, sent again after every display change, which can rebuild the status bar. */
+    private fun UiAutomatorTestScope.cleanStatusBar() {
+        SystemClock.sleep(SYSTEM_UI_SETTLE_MS)
         demo("enter")
         demo("clock -e hhmm 0941")
         demo("battery -e level 100 -e plugged false")
-        demo("network -e wifi show -e level 4 -e mobile show -e datatype none -e level 4")
+        demo("network -e wifi show -e level 4 -e fully true -e mobile show -e datatype none -e level 4")
         demo("notifications -e visible false")
+        SystemClock.sleep(SYSTEM_UI_SETTLE_MS)
     }
 
     private fun UiAutomatorTestScope.demo(command: String) =
@@ -191,6 +205,10 @@ class StoreScreenshots {
         const val TRUST_DIALOG_TITLE = "Connect to this device?"
         const val TRUST_DIALOG_CONFIRM = "Connect"
         const val ONBOARDING_START = "Get started"
+
+        /** Pixel Launcher on the google_apis emulator images: the stalls, and the tablet taskbar. */
+        const val LAUNCHER = "com.google.android.apps.nexuslauncher"
+        const val SYSTEM_UI_SETTLE_MS = 2_000L
 
         const val CONNECT_ATTEMPTS = 3
         const val CONNECT_TIMEOUT_MS = 60_000L
