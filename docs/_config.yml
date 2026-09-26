@@ -3,15 +3,11 @@ description: "User and developer documentation for the Meshtastic Android, Deskt
 baseurl: ""
 url: ""
 
-# just-the-docs theme
-# Local builds use `gem "just-the-docs"` from Gemfile.
-# GitHub Pages uses remote_theme for hosted builds.
+# just-the-docs theme, the gem version pinned in Gemfile.lock
 theme: just-the-docs
-remote_theme: just-the-docs/just-the-docs@v0.11.0
 
 # Plugins
 plugins:
-  - jekyll-remote-theme
   - jekyll-redirect-from
 
 # Navigation

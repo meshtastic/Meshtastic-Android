@@ -160,7 +160,7 @@ jobs:
           fi
 
       - name: Sync with Crowdin
-        uses: crowdin/github-action@9c23991700c0ec5256fd41089b9d9d7d540e424e # v3
+        uses: crowdin/github-action@9c23991700c0ec5256fd41089b9d9d7d540e424e # v3.3.0
         with:
           base_url: 'https://meshtastic.crowdin.com/api/v2'
           config: 'crowdin.yml'
@@ -168,18 +168,20 @@ jobs:
           upload_sources: true
           upload_translations: false
           download_translations: true
-          create_pull_request: false
-          commit_message: 'chore(l10n): New Crowdin Translations from scheduled update'
           push_translations: false
           push_sources: false
-          localization_branch_name: ${{ github.ref_name }}
+          # Runs the container as the owner of .git, so the downloaded files are not root-owned.
+          user: 'auto'
         env:
           GITHUB_TOKEN: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
           CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
-      - name: Fix file permissions
-        run: sudo chown -R "$USER:$USER" .
+      # Crowdin translates layout and nav_order along with the prose; docs-quality.yml
+      # fails the PR if they differ from docs/en, so a failure here must not stop the PR opening.
+      - name: Restore locale docs front matter
+        continue-on-error: true
+        run: python3 scripts/docs/sync-locale-front-matter.py
 
       # Early warning for store-listing translations just pulled from Crowdin
       # (overlength text, unmapped locale codes, forbidden HTML). Non-blocking on

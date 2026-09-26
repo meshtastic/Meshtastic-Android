@@ -1,0 +1,86 @@
+name: Docs Link Check
+
+# Checks the web links in docs/en every week and keeps one open issue listing
+# the broken ones. docs-quality.yml checks the internal links on every docs PR.
+
+on:
+  schedule:
+    - cron: '23 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run at a time, so two runs can never both find no issue and open two.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # http(s) only: Jekyll's extensionless page links are not files lychee can
+      # resolve. Discord rate-limits invite lookups, and a 429 is not a broken link.
+      - name: Check links
+        id: lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          fail: false
+          args: >-
+            --no-progress
+            --scheme https
+            --scheme http
+            --max-retries 3
+            --accept '100..=103,200..=299,429'
+            --exclude '^https?://(www\.)?discord\.(gg|com)/'
+            'docs/en/**/*.md'
+
+      # lychee exits 2 when links are broken; any other non-zero code is the
+      # check itself failing, which fails the run instead of filing an issue.
+      - name: Open or update the broken-links issue
+        if: steps.lychee.outputs.exit_code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXIT_CODE: ${{ steps.lychee.outputs.exit_code }}
+          TITLE: Broken links in docs/en
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [ "$EXIT_CODE" != "2" ]; then
+            echo "lychee exited $EXIT_CODE; see the Check links step." >&2
+            exit 1
+          fi
+          { printf 'Found by the weekly link check: %s\n\n' "$RUN_URL"; cat lychee/out.md; } > "$RUNNER_TEMP/body.md"
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --label documentation \
+            --search "\"$TITLE\" in:title" --json number,title \
+            --jq '[.[] | select(.title == env.TITLE)][0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --label documentation \
+              --body-file "$RUNNER_TEMP/body.md"
+          fi
+
+      - name: Close the broken-links issue
+        if: steps.lychee.outputs.exit_code == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: Broken links in docs/en
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --label documentation \
+            --search "\"$TITLE\" in:title" --json number,title \
+            --jq '[.[] | select(.title == env.TITLE)][0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue close "$number" --repo "$GITHUB_REPOSITORY" --comment "Every link passed in $RUN_URL."
+          fi

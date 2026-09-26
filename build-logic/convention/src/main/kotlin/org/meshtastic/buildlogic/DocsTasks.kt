@@ -35,8 +35,9 @@ private const val DEFAULT_NAV_ORDER = 999
 private const val MIN_KEYWORD_LENGTH = 3
 private const val MAX_KEYWORDS = 30
 private const val BYTES_PER_MB = 1024.0 * 1024.0
-// Catches accidental bloat, not real content — the bundle only feeds Pages. One corpus-wide
-// English audit adds ~1.9 MB once Crowdin fans it across 42 locales; the gap clears one cycle.
+
+// Catches accidental bloat, not real content; the bundle ships in the app, not in the Pages output.
+// One corpus-wide English audit adds ~1.9 MB once Crowdin fans it across 42 locales; the gap clears one cycle.
 private const val BUNDLE_SIZE_HARD_LIMIT_MB = 20.0
 private const val BUNDLE_SIZE_WARN_THRESHOLD_MB = 16.0
 private val LOCALE_PATTERN = Regex("^[a-z]{2,3}(-r[A-Z]{2})?$")
@@ -77,10 +78,8 @@ class DocsTasks : Plugin<Project> {
 
         project.tasks.register<PublishDocsSiteTask>("publishDocsSite") {
             group = "documentation"
-            description = "Assemble the final Pages artifact from generated docs."
-            dependsOn("generateDocsBundle")
+            description = "Assemble the Jekyll source tree for one Pages channel."
             sourceDir.set(docsDir)
-            bundleDir.set(outputDir.map { it.dir("common") })
             siteOutputDir.set(project.layout.buildDirectory.dir("_site"))
             channel.set(project.providers.gradleProperty("docs.channel").orElse("beta"))
             version.set(project.providers.gradleProperty("docs.version").orElse("beta"))
@@ -366,8 +365,6 @@ abstract class ValidateDocsBundleTask : DefaultTask() {
 abstract class PublishDocsSiteTask : DefaultTask() {
     @get:InputDirectory abstract val sourceDir: DirectoryProperty
 
-    @get:InputDirectory abstract val bundleDir: DirectoryProperty
-
     @get:OutputDirectory abstract val siteOutputDir: DirectoryProperty
 
     @get:Input abstract val channel: Property<String>
@@ -385,8 +382,6 @@ abstract class PublishDocsSiteTask : DefaultTask() {
             }
         val outDir = if (channelPath.isEmpty()) siteDir else File(siteDir, channelPath)
         outDir.mkdirs()
-
-        bundleDir.get().asFile.copyRecursively(outDir, overwrite = true)
 
         sourceDir
             .get()
