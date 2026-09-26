@@ -22,6 +22,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Paint
 import android.location.Location
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,7 +43,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -59,7 +59,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.core.graphics.applyCanvas
+import androidx.core.graphics.createBitmap
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
@@ -70,6 +74,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.GroundOverlay
@@ -77,6 +82,8 @@ import com.google.android.gms.maps.model.GroundOverlayOptions
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.StrokeStyle
+import com.google.android.gms.maps.model.StyleSpan
 import com.google.maps.android.SphericalUtil
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.Circle
@@ -88,7 +95,7 @@ import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.MarkerComposable
-import com.google.maps.android.compose.MarkerInfoWindowComposable
+import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
@@ -167,7 +174,6 @@ import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.TripOrigin
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.ActiveWhileStarted
 import org.meshtastic.core.ui.util.KeepScreenOn
@@ -273,6 +279,15 @@ private const val TERRAIN_HILLSHADE_Z_INDEX = -0.9f
 /** Clears Google's own logo and the zoom controls, both of which sit along the bottom edge. */
 private val ATTRIBUTION_BOTTOM_PADDING = 4.dp
 private const val ATTRIBUTION_SCRIM_ALPHA = 0.7f
+
+/** Faded rather than transparent, so the oldest point stays visible and tappable, as on the MapLibre track. */
+private const val OLDEST_TRACK_ALPHA = 0.25f
+private const val TRACK_FADE_LEVELS = 8
+private const val MAX_TRACK_MARKERS = 500
+private const val TRACK_POINT_SIZE_DP = 24f
+private const val SELECTED_TRACK_POINT_SIZE_DP = 32f
+private const val TRACK_POINT_OUTER_FRACTION = 10f / 24f
+private const val TRACK_POINT_RING_FRACTION = 4f / 24f
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class)
@@ -1358,9 +1373,9 @@ private fun WaypointGeofenceOverlay(waypoint: Waypoint) {
 // region --- Node Track Overlay ---
 
 /**
- * Renders the position track polyline segments and markers inside a [GoogleMap] content scope. Each marker fades from
- * transparent (oldest) to opaque (newest). The newest position shows the node's [NodeChip]; older positions show a
- * [TripOrigin] dot with an info-window on tap.
+ * Renders the position track polyline and markers inside a [GoogleMap] content scope. Markers fade from faint (oldest)
+ * to opaque (newest). The newest position shows the node's [NodeChip]; older positions show a ring with an info-window
+ * on tap. Beyond the newest [MAX_TRACK_MARKERS] points the track is drawn by the line alone.
  *
  * When [selectedPositionTime] matches a marker's `Position.time`, that marker is highlighted with the primary color and
  * elevated z-index. Tapping a marker invokes [onPositionSelect] for list synchronization.
@@ -1378,24 +1393,31 @@ private fun NodeTrackOverlay(
 ) {
     val isHighPriority = focusedNode.num == myNodeNum || focusedNode.isFavorite
     val activeNodeZIndex = if (isHighPriority) 5f else 4f
+    val trackColor = Color(focusedNode.colors.second)
     val selectedColor = MaterialTheme.colorScheme.primary
+    val density = LocalDensity.current.density
+
+    // Every point shares one of a few prebuilt icons. A composable rendered to a bitmap per point runs on the main
+    // thread, and a track holds up to DEFAULT_MAX_LOGS points.
+    val pointIcons =
+        remember(trackColor, density) {
+            List(TRACK_FADE_LEVELS) { level ->
+                trackPointIcon(trackColor.copy(alpha = trackFadeAlpha(level)), TRACK_POINT_SIZE_DP, density)
+            }
+        }
+    val selectedIcon = remember(selectedColor, density) {
+        trackPointIcon(selectedColor, SELECTED_TRACK_POINT_SIZE_DP, density)
+    }
+    val pointTitle = stringResource(Res.string.position)
+    val pointDescription = stringResource(Res.string.track_point)
+    // Every marker is added on the main thread, so only the newest points and the selected one get one.
+    val firstMarkerIndex = (sortedPositions.size - MAX_TRACK_MARKERS).coerceAtLeast(0)
 
     sortedPositions.forEachIndexed { index, position ->
+        val isSelected = position.time == selectedPositionTime
+        if (index < firstMarkerIndex && !isSelected) return@forEachIndexed
         key(position.time) {
             val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
-            val alpha =
-                if (sortedPositions.size > 1) {
-                    index.toFloat() / (sortedPositions.size.toFloat() - 1)
-                } else {
-                    1f
-                }
-            val isSelected = position.time == selectedPositionTime
-            val color =
-                if (isSelected) {
-                    selectedColor
-                } else {
-                    Color(focusedNode.colors.second).copy(alpha = alpha)
-                }
 
             if (index == sortedPositions.lastIndex) {
                 MarkerComposable(
@@ -1410,42 +1432,61 @@ private fun NodeTrackOverlay(
                     NodeChip(node = focusedNode)
                 }
             } else {
-                MarkerInfoWindowComposable(
+                val level = trackFadeLevel(index, sortedPositions.lastIndex)
+                MarkerInfoWindow(
                     state = markerState,
-                    title = stringResource(Res.string.position),
+                    contentDescription = pointDescription,
+                    icon = if (isSelected) selectedIcon else pointIcons[level],
+                    title = pointTitle,
                     snippet = formatAgo(position.time),
-                    zIndex = if (isSelected) activeNodeZIndex - 0.5f else 1f + alpha,
+                    zIndex = if (isSelected) activeNodeZIndex - 0.5f else 1f + trackFadeAlpha(level),
                     onClick = {
                         onPositionSelect?.invoke(position.time)
                         false // Allow default info window behavior
                     },
-                    infoContent = { PositionInfoWindowContent(position = position, displayUnits = displayUnits) },
                 ) {
-                    Icon(
-                        imageVector = MeshtasticIcons.TripOrigin,
-                        contentDescription = stringResource(Res.string.track_point),
-                        tint = color,
-                        modifier = if (isSelected) Modifier.size(32.dp) else Modifier,
-                    )
+                    PositionInfoWindowContent(position = position, displayUnits = displayUnits)
                 }
             }
         }
     }
 
-    // Gradient polyline segments
     if (sortedPositions.size > 1) {
-        val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
-        segments.forEachIndexed { index, segmentPoints ->
-            val alpha = index.toFloat() / (segments.size.toFloat() - 1)
-            Polyline(
-                points = segmentPoints.map { it.toLatLng() },
-                jointType = JointType.ROUND,
-                color = Color(focusedNode.colors.second).copy(alpha = alpha),
-                width = 8f,
-                zIndex = 0.6f,
-            )
-        }
+        val points = remember(sortedPositions) { sortedPositions.map { it.toLatLng() } }
+        // A span without a segment count covers only the first segment.
+        val spans =
+            remember(trackColor, points.size) {
+                val gradient =
+                    StrokeStyle.gradientBuilder(trackColor.copy(alpha = OLDEST_TRACK_ALPHA).toArgb(), trackColor.toArgb())
+                        .build()
+                listOf(StyleSpan(gradient, (points.size - 1).toDouble()))
+            }
+        Polyline(points = points, spans = spans, jointType = JointType.ROUND, width = 8f, zIndex = 0.6f)
     }
+}
+
+/** Buckets a point's position along the track so that appending a point changes the icon of only a few markers. */
+private fun trackFadeLevel(index: Int, lastIndex: Int): Int =
+    if (lastIndex <= 0) TRACK_FADE_LEVELS - 1 else index * (TRACK_FADE_LEVELS - 1) / lastIndex
+
+private fun trackFadeAlpha(level: Int): Float =
+    OLDEST_TRACK_ALPHA + (1f - OLDEST_TRACK_ALPHA) * level / (TRACK_FADE_LEVELS - 1)
+
+/** A ring, drawn straight to a bitmap so building it never composes. */
+private fun trackPointIcon(color: Color, sizeDp: Float, density: Float): BitmapDescriptor {
+    val sizePx = (sizeDp * density).roundToInt().coerceAtLeast(1)
+    val bitmap = createBitmap(sizePx, sizePx)
+    val stroke = sizePx * TRACK_POINT_RING_FRACTION
+    val paint =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = stroke
+            this.color = color.toArgb()
+        }
+    // The ring's outer edge sits inside a 24-unit box at radius 10, matching the TripOrigin glyph.
+    val outerRadius = sizePx * TRACK_POINT_OUTER_FRACTION
+    bitmap.applyCanvas { drawCircle(sizePx / 2f, sizePx / 2f, outerRadius - stroke / 2f, paint) }
+    return BitmapDescriptorFactory.fromBitmap(bitmap)
 }
 
 @Composable
