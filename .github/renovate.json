@@ -130,6 +130,13 @@
       "schedule": [
         "before 6am on monday"
       ]
+    },
+    {
+      "description": "Ruby waits a week: setup-ruby learns a new Ruby some days after its release, and a bump that reaches main first breaks every job that installs Ruby. The depName covers .ruby-version and the setup-ruby ruby-version inputs alike.",
+      "matchDepNames": [
+        "ruby"
+      ],
+      "minimumReleaseAge": "7 days"
     }
   ],
   "customManagers": [
