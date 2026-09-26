@@ -6,10 +6,9 @@ name: Update Changelog
 on:
   workflow_dispatch:
 
+# The PR is opened and queued with CROWDIN_GITHUB_TOKEN through .github/actions/bot-pr.
 permissions:
   contents: write
-  pull-requests: write
-  statuses: write
 
 concurrency:
   group: changelog-${{ github.ref }}
@@ -267,41 +266,13 @@ jobs:
 
       - name: Create or update changelog PR
         if: steps.tags.outputs.prod != '' && steps.update.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          BRANCH="automation/update-changelog"
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Force-update the automation branch
-          git checkout -B "$BRANCH"
-          git add CHANGELOG.md
-          git commit -m "docs: update CHANGELOG.md"
-          git push origin "$BRANCH" --force
-
-          # Create or update the PR
-          EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number -q '.[0].number')
-          if [ -n "$EXISTING_PR" ]; then
-            echo "Updated existing PR #$EXISTING_PR"
-          else
-            gh pr create \
-              --title "docs: update CHANGELOG.md" \
-              --body "Automated changelog refresh, dispatched from main." \
-              --head "$BRANCH" \
-              --base main \
-              --label "automation" \
-              --label "skip-changelog"
-            echo "Created new changelog PR"
-          fi
-
-          # Post the required "Check Workflow Status" commit status so the PR
-          # isn't blocked. PRs from GITHUB_TOKEN don't trigger pull_request
-          # workflows, so the normal CI never runs. CHANGELOG-only PRs don't
-          # need CI checks.
-          COMMIT_SHA=$(git rev-parse HEAD)
-          gh api "repos/${{ github.repository }}/statuses/${COMMIT_SHA}" \
-            -f state="success" \
-            -f context="Check Workflow Status" \
-            -f description="Skipped — changelog-only PR"
+        uses: ./.github/actions/bot-pr
+        with:
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          branch: automation/update-changelog
+          title: 'docs: update CHANGELOG.md'
+          body: 'Automated changelog refresh, dispatched from main.'
+          add-paths: CHANGELOG.md
+          labels: |
+            automation
+            skip-changelog

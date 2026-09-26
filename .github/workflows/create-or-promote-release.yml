@@ -197,8 +197,6 @@ jobs:
     # so call-release-workflow doesn't carry it.
     permissions:
       contents: write
-      pull-requests: write
-      statuses: write
       actions: write
     uses: ./.github/workflows/promote.yml
     with:
