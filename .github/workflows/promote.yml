@@ -357,6 +357,16 @@ jobs:
           TAG: ${{ inputs.final_tag }}
         run: gh workflow run msstore-publish.yml --ref main -f "tag=$TAG"
 
+      # Same suppression again: version-bump.yml opens the next patch line on main.
+      - name: Dispatch version bump
+        id: bump
+        if: ${{ inputs.channel == 'production' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+        run: gh workflow run version-bump.yml --ref main -f "tag=$TAG"
+
       # docs-release.yml's tag trigger never fires either: the release edit
       # above creates the tag with GITHUB_TOKEN. Run it on the tag ref, which
       # publishes /vX.Y.Z/ (plus the root and /api/ for production) or the
@@ -543,6 +553,7 @@ jobs:
           DOCS: ${{ steps.docs.outcome }}
           WINGET: ${{ steps.winget.outcome }}
           MSSTORE: ${{ steps.msstore.outcome }}
+          BUMP: ${{ steps.bump.outcome }}
           STAMP: ${{ steps.stamp.outcome }}
           STAMP_PR: ${{ steps.stamp.outputs.pr_url }}
         run: |
@@ -581,11 +592,13 @@ jobs:
               row "CHANGELOG.md stamp" "$STAMP ${STAMP_PR:+- $STAMP_PR}"
               row "winget dispatched" "$WINGET"
               row "Microsoft Store dispatched" "$MSSTORE"
+              row "Version bump dispatched" "$BUMP"
+              row "Post-Release Cleanup" "dispatched by Docs Release once /${TAG}/ is published"
               echo
               echo "Still by hand:"
               echo "- Play Console: the production rollout is staged; complete it there."
               echo "- Flathub: bump flathub/org.meshtastic.MeshtasticDesktop (tag, commit, gradle zip and sha256, flatpak-sources.json)."
-              echo "- Post-Release Cleanup: dispatch with confirm_deletion=true once Docs Release has published /${TAG}/."
+              echo "- Release notes: replace the placeholder <description> the version bump PR wrote for the next line."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
