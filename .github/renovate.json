@@ -14,9 +14,6 @@
   "labels": [
     "dependencies"
   ],
-  "git-submodules": {
-    "enabled": true
-  },
   "bundler": {
     "enabled": true
   },
@@ -86,9 +83,6 @@
         "/^org\\.jetbrains\\.kotlin/",
         "/^org\\.jetbrains\\.kotlinx/",
         "/^org\\.jetbrains\\.compose/",
-        "/^com\\.google\\.dagger/",
-        "/^androidx\\.hilt/",
-        "/^com\\.google\\.protobuf/",
         "/^androidx\\.lifecycle/",
         "/^androidx\\.navigation/",
         "/^androidx\\.datastore/",
