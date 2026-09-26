@@ -143,6 +143,7 @@ private val DOKKA_EXCLUDED_MODULES =
         ":screenshot-tests", // Paparazzi/Roborazzi harness for the screenshot gate
         ":docs-screenshots", // generate-only module that emits documentation screenshots
         ":baselineprofile", // macrobenchmark module that generates baseline-prof.txt
+        ":store-screenshots", // instrumented module that captures the store-listing screenshots
     )
 
 private fun allModules(): List<String> = ALL_MODULES_FULL

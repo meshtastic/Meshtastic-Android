@@ -128,4 +128,5 @@ include(
     ":marketing-screenshots",
     ":schema-strings",
     ":baselineprofile",
+    ":store-screenshots",
 )
