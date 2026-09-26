@@ -12,9 +12,10 @@ on:
 permissions:
   contents: read
 
+# Not cancelled: one run plus one pending per ref, so every run that starts finishes.
 concurrency:
   group: main-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   # Every commit on main arrives via the merge queue, which already ran lint,
