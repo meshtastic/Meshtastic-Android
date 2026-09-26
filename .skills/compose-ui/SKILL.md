@@ -55,8 +55,8 @@ Choose the right tool for the job:
   `PositionFlags.DOP` `schema_position_positionflags_dop` (all indexed under `### SCHEMA` in `strings-index.txt`).
   A control that edits one whole schema field uses that key; a control that edits a bit, a threshold, a negation or
   drops a unit keeps a hand-written string. Never edit the generated file or write a `schema_` key by hand;
-  `:schema-strings:test` fails on both. Wrong wording is a `protobufs` change. After a protobufs pin bump the
-  hourly `scheduled-updates` run regenerates the file (it records the pin it was built from); run
+  `:schema-strings:test` fails on both. Wrong wording is a `protobufs` change. A merged protobufs pin bump
+  triggers a `scheduled-updates` run on main that regenerates the file (it records the pin it was built from); run
   `./gradlew :schema-strings:sync` yourself only when you need a new key before that PR lands.
 
 ## 3. Tooling & Capabilities
