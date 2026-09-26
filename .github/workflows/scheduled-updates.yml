@@ -293,7 +293,7 @@ jobs:
           job_summary_pr_comment: 'never'
           cache_read_only: 'true'
           cache_configuration_cache: 'false'
-          install_jetbrains_jdk: 'true'
+          cache_robolectric: 'false'
 
       - name: Regenerate the schema strings
         id: schema_strings

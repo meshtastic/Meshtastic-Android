@@ -67,7 +67,10 @@ class MeshtasticDevelocitySettingsPlugin : Plugin<Settings> {
                 // unmerged code out of it. Fork PRs have no key and are excluded twice
                 // over, and local builds are excluded by isCI.
                 val event = System.getenv("GITHUB_EVENT_NAME")
-                val trustedForPush = event == "push" || event == "merge_group"
+                // A reusable workflow sees its caller's ref, so a release cut dispatched from main passes.
+                val dispatchedFromMain =
+                    event == "workflow_dispatch" && System.getenv("GITHUB_REF") == "refs/heads/main"
+                val trustedForPush = event == "push" || event == "merge_group" || dispatchedFromMain
                 isPush = isCI && trustedForPush && !accessKey.isNullOrEmpty()
             }
         }
