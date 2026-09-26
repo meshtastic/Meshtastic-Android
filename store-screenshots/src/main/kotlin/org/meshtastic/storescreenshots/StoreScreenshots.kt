@@ -98,9 +98,8 @@ class StoreScreenshots {
         shell("am broadcast -a com.android.systemui.demo -e command $command")
 
     /**
-     * Relaunches the app into the showcase mesh and waits for our node's name. A build that predates
-     * `skip_connect_confirm` still shows the trust dialog, and the first launch after install can come up in onboarding
-     * although `skip_onboarding` was passed; both are handled here rather than failing the run.
+     * Relaunches the app into the showcase mesh and waits for our node's name. The launch switches skip onboarding and
+     * the trust dialog; if either still appears it is logged and handled rather than failing the run.
      */
     private fun UiAutomatorTestScope.connectToShowcase() {
         repeat(CONNECT_ATTEMPTS) { attempt ->
@@ -110,6 +109,7 @@ class StoreScreenshots {
             while (SystemClock.uptimeMillis() < deadline) {
                 if (onElementOrNull(POLL_MS) { hasText(SHOWCASE_NODE_NAME) } != null) return
                 if (onElementOrNull(0) { hasText(TRUST_DIALOG_TITLE) } != null) {
+                    Log.w(TAG, "the trust dialog survived skip_connect_confirm on attempt ${attempt + 1}; confirming")
                     onElementOrNull(0) { hasText(TRUST_DIALOG_CONFIRM) }?.click()
                 }
                 if (onElementOrNull(0) { hasText(ONBOARDING_START) } != null) {
@@ -148,11 +148,12 @@ class StoreScreenshots {
         save(bitmap, name)
     }
 
+    /** Launches through the debug build's shell-only alias, the one launch the app honours the switches on. */
     private fun UiAutomatorTestScope.open(path: String, clearTask: Boolean = false) {
         val flags = if (clearTask) "--activity-clear-task " else ""
         shell(
             "am start -W $flags-a android.intent.action.VIEW -d https://meshtastic.org/$path " +
-                "-n $appId/org.meshtastic.app.MainActivity " +
+                "-n $appId/org.meshtastic.app.AutomationLauncher " +
                 "--ez skip_onboarding true --ez skip_connect_confirm true",
         )
     }
