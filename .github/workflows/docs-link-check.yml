@@ -69,3 +69,18 @@ jobs:
             gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --label documentation \
               --body-file "$RUNNER_TEMP/body.md"
           fi
+
+      - name: Close the broken-links issue
+        if: steps.lychee.outputs.exit_code == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: Broken links in docs/en
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --label documentation \
+            --search "\"$TITLE\" in:title" --json number,title \
+            --jq '[.[] | select(.title == env.TITLE)][0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue close "$number" --repo "$GITHUB_REPOSITORY" --comment "Every link passed in $RUN_URL."
+          fi
