@@ -24,6 +24,7 @@ on:
       - 'settings.gradle.kts'
       - '.github/workflows/docs-deploy.yml'
       - 'scripts/docs/**'
+      - '.ruby-version'
 
   workflow_dispatch:
 
@@ -57,10 +58,11 @@ jobs:
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        # Unset ruby-version reads the root .ruby-version; the bundle is still docs/Gemfile.
+        env:
+          BUNDLE_GEMFILE: docs/Gemfile
         with:
-          ruby-version: '4.0.7'
           bundler-cache: true
-          working-directory: docs
 
       # Dokka is the slowest part of this workflow (~14 min) but KDoc changes far
       # less often than the prose docs. Rebuild /api/ only when something that can
