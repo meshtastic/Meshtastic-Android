@@ -66,7 +66,7 @@ $out"
     ;;
 
   *settings.gradle.kts)
-    emit_context "You edited settings.gradle.kts. If you added a NEW TOP-LEVEL module directory, add its '<root>/**' line to the 'android:' paths-filter in .github/workflows/pull-request.yml (case-sensitive) or the verify-check-changes-filter drift guard will fail the PR (bit us on #5735). New sub-modules under an already-listed root (core/**, feature/**, etc.) are already covered — no change needed."
+    emit_context "You edited settings.gradle.kts. If you added a NEW TOP-LEVEL module directory, add its '<root>/**' line to the 'android:' paths-filter in .github/workflows/pull-request.yml (case-sensitive) or scripts/check-changes-filter.py will fail the PR, and add the module to ALL_MODULES_FULL in RootConventionPlugin.kt or scripts/check-module-list.py will. New sub-modules under an already-listed root (core/**, feature/**, etc.) need no filter change."
     ;;
 
   */src/commonMain/*.kt|*/src/commonTest/*.kt)
