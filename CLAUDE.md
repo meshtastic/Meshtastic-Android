@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Delegate to keep context lean** (this is a 20+ module KMP repo):
   - **Broad searches** ("where is X used", "find all implementers of Y") → dispatch the `Explore` subagent so file dumps stay out of the main context; you get back the conclusion.
   - **Gradle builds/tests/lint** → dispatch the `gradle-runner` subagent. A full `assembleDebug`/`allTests` log is thousands of lines; the subagent returns only pass/fail + failing tests. Don't run heavy `./gradlew` tasks inline.
-  - **Symbol navigation** ("where is this defined", "who calls this", "find implementers") → use the `LSP` tool (`goToDefinition` / `findReferences` / `goToImplementation`) instead of reading whole files. `kotlin-language-server` is supplied by the `nixtastic` plugin; this repo configures nothing. If the `LSP` tool answers "No LSP server available for file type: .kt", the plugin is not loaded or the binary is not on PATH — there is nothing to fix in this repo.
+  - **Symbol navigation** ("where is this defined", "who calls this", "find implementers") → `rg` for the symbol, then read only the matching range. There is no Kotlin LSP server: none available today handles KMP reliably, so the `LSP` tool answering "No LSP server available for file type: .kt" is expected.
 - **Big files are guarded, not free:** `.claude/settings.json` denies the Crowdin locale `strings.xml` files and prompts before reading the base `strings.xml`, `firmware_releases.json`, `emoji-data.json`, and `flatpak-sources.json`. For strings, consult `.skills/compose-ui/strings-index.txt` instead of the raw file.
 
 ## Quick Reference
