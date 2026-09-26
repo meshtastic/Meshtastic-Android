@@ -35,7 +35,6 @@ import org.maplibre.compose.map.MapState
 import org.maplibre.compose.map.MapUiOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.rememberMapState
-import org.maplibre.compose.util.DpPadding
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.feature.map.component.MapEngineUnavailable
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
@@ -155,16 +154,7 @@ internal fun FitBoundsOnceVisible(
     // is cancelled by user input as well as by [key]: a fit lost that way is not retried until [key] changes
     // again, which for these maps may be never.
     val hasViewport = mapState.viewport != null
-    // MapLibre takes physical edges; resolving start/end here keeps the wide trailing inset on the zoom pair's side
-    // in RTL too.
-    val layoutDirection = LocalLayoutDirection.current
-    val fitPadding =
-        DpPadding(
-            left = padding.calculateLeftPadding(layoutDirection),
-            top = padding.calculateTopPadding(),
-            right = padding.calculateRightPadding(layoutDirection),
-            bottom = padding.calculateBottomPadding(),
-        )
+    val fitPadding = padding.toDpPadding(LocalLayoutDirection.current)
     LaunchedEffect(key, hasViewport) {
         if (!hasViewport) return@LaunchedEffect
         currentBounds()?.let { mapState.frameBounds(it, padding = fitPadding) }
