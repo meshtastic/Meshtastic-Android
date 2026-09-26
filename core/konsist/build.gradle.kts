@@ -37,18 +37,16 @@ kotlin {
     }
 }
 
-// The rules read every module's source from disk, which Gradle cannot see, so declare it or the task stays
-// up to date (and replays from cache) while the code it guards changes.
+// Konsist reads every `.kt` in the checkout from disk, which Gradle cannot see. The patterns are anchored at the
+// source roots because a leading `**` also claims the directories other tasks write, such as the docs sync targets.
 tasks.named<Test>("jvmTest") {
     inputs
         .files(
             fileTree(isolated.rootProject.projectDirectory) {
-                include("**/*.kt", "**/*.kts")
-                exclude("**/build/**", "**/.gradle/**", "**/.kotlin/**", ".claude/**", "**/node_modules/**")
+                include("*/src/*/kotlin/**/*.kt", "*/*/src/*/kotlin/**/*.kt", "config/spotless/*.kt")
+                exclude("**/build/**")
             },
         )
         .withPathSensitivity(PathSensitivity.RELATIVE)
         .withPropertyName("konsistScannedSources")
-    // Gradle checks overlap against the tree root, so the include filter does not hide these outputs under src/.
-    mustRunAfter(":feature:docs:syncDocsToComposeResources", ":feature:docs:syncTranslatedDocsToComposeResources")
 }
