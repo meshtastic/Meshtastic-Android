@@ -64,8 +64,8 @@ jobs:
             exit 0
           fi
           OPEN=$(gh pr list --state open --limit 200 --json number,title,headRefName \
-            | jq -r --arg b "$BRANCH" --arg t "VERSION_NAME_BASE to $NEXT" \
-                '.[] | select(.headRefName != $b and (.title | contains($t))) | .number')
+            | jq -r --arg b "$BRANCH" --arg n "$NEXT" \
+                '.[] | select(.headRefName != $b and (.title | test("VERSION_NAME_BASE to " + ($n | gsub("[.]"; "[.]")) + "([^0-9.]|$)"))) | .number')
           if [[ -n "$OPEN" ]]; then
             echo "::notice::A hand bump to $NEXT is already open: #$OPEN."
             echo "skip=true" >> "$GITHUB_OUTPUT"
