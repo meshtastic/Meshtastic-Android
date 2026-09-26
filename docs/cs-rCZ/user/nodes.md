@@ -1,6 +1,6 @@
 ---
 title: Uzly
-parent: User Guide
+parent: Uživatelská příručka
 nav_order: 4
 last_updated: 2026-09-19
 description: Procházet, filtrovat a třídit uzly sítě – zobrazit podrobnosti, kvalitu signálu, role a rychlé akce.

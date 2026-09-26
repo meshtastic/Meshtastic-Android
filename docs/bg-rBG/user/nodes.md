@@ -1,6 +1,6 @@
 ---
 title: Възли
-parent: User Guide
+parent: Ръководство за потребители
 nav_order: 4
 last_updated: 2026-09-19
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.

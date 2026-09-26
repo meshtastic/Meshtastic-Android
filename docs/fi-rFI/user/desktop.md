@@ -1,6 +1,6 @@
 ---
 title: Työpöytäsovellus
-parent: User Guide
+parent: Käyttöopas
 nav_order: 14
 last_updated: 2026-09-11
 description: Asenna ja käytä Meshtastic-työpöytäsovellusta Linuxilla, macOS:llä ja Windowsilla — yhteydet, ominaisuuksien yhtenevyys ja pikanäppäimet.

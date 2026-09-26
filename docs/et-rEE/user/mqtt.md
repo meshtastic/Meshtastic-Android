@@ -1,6 +1,6 @@
 ---
 title: MQTT
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 11
 last_updated: 2026-09-19
 description: Silda oma võrk internetiga – MQTT maakleri seadistamine, krüpteerimiskihid ja kaardiaruandlus.

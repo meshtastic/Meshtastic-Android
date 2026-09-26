@@ -1,6 +1,6 @@
 ---
 title: 地圖與航點
-parent: User Guide
+parent: 使用者指南
 nav_order: 6
 last_updated: 2026-09-11
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.

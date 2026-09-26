@@ -1,6 +1,6 @@
 ---
 title: Rakenduse funktsioonid
-parent: User Guide
+parent: Kasutaja juhis
 nav_order: 19
 last_updated: 2026-08-30
 description: Ava kärgvõrgu funktsioonid Androidi süsteemile ja seadme tehisintellektil põhinevatele assistentidele (nt Gemini), et nad saaksid kärgvõrgu töövooge käivitada rakendust avamata.

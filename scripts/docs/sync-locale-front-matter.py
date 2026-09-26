@@ -6,14 +6,15 @@ structure the site reads rather than prose:
 
     layout     names a file in _layouts/ or the theme; a translated name renders
                the page without the theme.
-    parent     just-the-docs matches it against another page's title, and the
-               only page with a parent's title is the English one, because the
-               locale trees carry no section pages.
     nav_order  a number the theme sorts by.
 
 Each of these keys in docs/<locale>/<path>.md is set to what docs/en/<path>.md
 has, verbatim, including multi-line values and absence. Every other line is left
 as Crowdin wrote it.
+
+parent is not restored: just-the-docs lists every page whose parent matches a
+page's title in that page's table of contents, nav_exclude or not, so an English
+parent would put the locale page into the English guide's contents.
 
 A locale page with no front matter while its English page has one is reported
 but not rewritten: Crowdin rebuilds each translation from the English source's
@@ -35,7 +36,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-STRUCTURAL_KEYS = ("layout", "parent", "nav_order")
+STRUCTURAL_KEYS = ("layout", "nav_order")
 LOCALE_DIR = re.compile(r"^[a-z]{2,3}(-r[A-Za-z]+)?$")
 TOP_LEVEL_KEY = re.compile(r"^([A-Za-z_][A-Za-z0-9_-]*)\s*:(\s|$)")
 IN_GITHUB_ACTIONS = os.environ.get("GITHUB_ACTIONS") == "true"

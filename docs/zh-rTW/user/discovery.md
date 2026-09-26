@@ -1,6 +1,6 @@
 ---
 title: Local Mesh Discovery
-parent: User Guide
+parent: 使用者指南
 nav_order: 12
 last_updated: 2026-09-19
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.

@@ -1,6 +1,6 @@
 ---
 title: MQTT
-parent: User Guide
+parent: Käyttöopas
 nav_order: 11
 last_updated: 2026-09-19
 description: Siltaa mesh-verkko internetiin — MQTT-välityspalvelimen käyttöönotto, salauskerrokset ja karttadatan välitys.

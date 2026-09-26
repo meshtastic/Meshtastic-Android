@@ -1,6 +1,6 @@
 ---
 title: Help & In-App Docs
-parent: User Guide
+parent: Kasutaja juhis
 nav_order: 21
 last_updated: 2026-09-11
 description: Sirvi seda dokumentatsiooni rakenduses, otsi seda ja küsi Chirpylt – seadmesisesele TI assistendile – küsimusi Meshtasticu kohta.

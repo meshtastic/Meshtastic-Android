@@ -1,6 +1,6 @@
 ---
 title: Интеграция TAK
-parent: User Guide
+parent: Руководство пользователя
 nav_order: 10
 last_updated: 2026-09-11
 description: Взаимодействие с ATAK и WinTAK — передача данных CoT о местоположении, роли TAK и настройка плагина.

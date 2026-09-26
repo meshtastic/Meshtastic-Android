@@ -1,6 +1,6 @@
 ---
 title: 韌體更新
-parent: User Guide
+parent: 使用者指南
 nav_order: 13
 last_updated: 2026-09-06
 description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.

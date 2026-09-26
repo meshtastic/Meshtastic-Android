@@ -1,6 +1,6 @@
 ---
 title: MQTT
-parent: User Guide
+parent: Руководство пользователя
 nav_order: 11
 last_updated: 2026-09-19
 description: Подключите свою mesh-сеть к интернету — настройка MQTT-брокера, уровни шифрования и отчётность на карте.

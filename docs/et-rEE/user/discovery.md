@@ -1,6 +1,6 @@
 ---
 title: Kohalik kärgvõrgu avastaja
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 12
 last_updated: 2026-09-19
 description: Avasta oma kärgvõrku – kohalik kärgvõrgu avastaja skanner, traceroute'i teed, naabri-kaardid ja sõlmede avastamise tööriistad.

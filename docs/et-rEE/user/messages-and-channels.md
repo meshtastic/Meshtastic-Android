@@ -1,6 +1,6 @@
 ---
 title: Sõnumid ja kanalid
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 3
 last_updated: 2026-09-14
 description: Saada ja võta vastu sõnumeid, halda kanaleid, konfigureeri krüpteerimist ning kasuta kiirvestlust, reaktsioone ja sõnumitoiminguid.

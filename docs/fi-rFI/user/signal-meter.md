@@ -1,6 +1,6 @@
 ---
 title: Kuinka Meshtastic-signaalimittari toimii
-parent: User Guide
+parent: Käyttöopas
 nav_order: 15
 last_updated: 2026-09-09
 description: Miten signaalimittari arvioi signaalin laadun SNR-arvon perusteella suhteessa LoRa-modeemiesiasetukseen — hajaspektri, esiasetukset ja mitä palkit todellisuudessa tarkoittavat.

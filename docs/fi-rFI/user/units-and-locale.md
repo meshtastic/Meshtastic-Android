@@ -1,6 +1,6 @@
 ---
 title: Yksiköt, mittaus ja kieli- ja alueasetukset
-parent: User Guide
+parent: Käyttöopas
 nav_order: 16
 last_updated: 2026-08-30
 description: Miten sovellus muotoilee lämpötilan, etäisyyden, nopeuden ja muut mittayksiköt laitteesi alueasetusten perusteella.

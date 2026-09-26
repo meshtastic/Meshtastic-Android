@@ -1,6 +1,6 @@
 ---
 title: Aloitusnäytön widget
-parent: User Guide
+parent: Käyttöopas
 nav_order: 20
 last_updated: 2026-08-30
 description: Lisää Meshtasticin aloitusnäytön widget, jotta näet yhdellä silmäyksellä yhdistetyn radiosi paikalliset tilastot ilman, että avaat sovelluksen.

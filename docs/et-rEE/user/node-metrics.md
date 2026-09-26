@@ -1,6 +1,6 @@
 ---
 title: Sõlme mõõdikud
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 5
 last_updated: 2026-09-09
 description: Telemeetria armatuurlauad iga võrgusõlme kohta – seadme tervis, keskkonnaandurid, õhu kvaliteet, signaali kvaliteet, võimsus, marsruut ja asukoha ajalugu.

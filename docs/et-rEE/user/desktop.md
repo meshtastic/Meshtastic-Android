@@ -1,6 +1,6 @@
 ---
 title: Desktop App
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 14
 last_updated: 2026-09-11
 description: Meshtastic arvuti rakendus pakub samu võrgusuhtluse funktsioone Linuxis, macOS-is ja Windowsis.
