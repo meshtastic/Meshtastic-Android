@@ -84,7 +84,7 @@ The two documentation sites below are deployed to GitHub Pages automatically on 
 
 | Site | URL | Contents |
 |---|---|---|
-| **User & Developer Docs** | [meshtastic.github.io/Meshtastic-Android](https://meshtastic.github.io/Meshtastic-Android/) | Jekyll site — user guide, developer guide, in-app doc content |
+| **User & Developer Docs** | [meshtastic.github.io/Meshtastic-Android](https://meshtastic.github.io/Meshtastic-Android/) | Jekyll site with the user and developer guides |
 | **API Reference** | [meshtastic.github.io/Meshtastic-Android/api](https://meshtastic.github.io/Meshtastic-Android/api/) | Dokka-generated KDoc for all public APIs |
 
 ### Generating Locally
