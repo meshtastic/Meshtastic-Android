@@ -369,6 +369,7 @@ dependencies {
     implementation(projects.feature.messaging)
     implementation(projects.feature.connections)
     implementation(projects.feature.map)
+    implementation(projects.feature.coverage)
     implementation(projects.feature.discovery)
     implementation(projects.feature.firmware)
     implementation(projects.feature.wifiProvision)
@@ -379,6 +380,8 @@ dependencies {
 
     // The MapLibre map surfaces, shared with the F-Droid Android flavor.
     implementation(projects.feature.mapMaplibre)
+    // TerrainTileStore: the site planner keeps its downloaded terrain between launches.
+    implementation(projects.feature.mapTerrain)
 
     // Exactly one native runtime, the one matching this build host (see maplibreDesktopRuntime()).
     maplibreDesktopRuntime()

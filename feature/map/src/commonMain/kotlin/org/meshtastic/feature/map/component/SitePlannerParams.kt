@@ -40,6 +40,10 @@ data class SitePlannerParams(
     val maxDbm: Double = DEFAULT_MAX_DBM,
     val overlayTransparency: Int = DEFAULT_OVERLAY_TRANSPARENCY,
 ) {
+    /** The hosted planner's own ceiling for the current mode. */
+    private val hostedMaxRangeKm: Double
+        get() = if (highResolution) MAX_RANGE_HIGH_RES_KM else MAX_RANGE_STANDARD_KM
+
     /**
      * Build the planner URL that prefills these params and auto-runs the simulation (`run=1`).
      *
@@ -61,7 +65,10 @@ data class SitePlannerParams(
             append("&color_scale=").append(encodeQueryComponent(colorScale))
             append("&rx_sensitivity=").append(rxSensitivityDbm)
             append("&rx_height=").append(rxHeightMeters)
-            append("&max_range=").append(maxRangeKm)
+            // Free-text field, so this can exceed what the hosted planner's SPLAT!-in-wasm accepts —
+            // lower still in high-resolution mode. Only the URL is clamped; the local engine has no
+            // such ceiling.
+            append("&max_range=").append(maxRangeKm.coerceAtMost(hostedMaxRangeKm))
             if (highResolution) append("&high_res=1")
             append("&min_dbm=").append(minDbm)
             append("&max_dbm=").append(maxDbm)

@@ -365,6 +365,9 @@ takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "ta
 meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "meshtastic-protobufs" }
 
 
+# SPIKE: unpublished; resolved from mavenLocal via -PuseMavenLocal.
+kp1812 = { module = "org.meshtastic:kp1812", version = "0.1.0" }
+
 [bundles]
 # Datadog RUM/telemetry stack — always consumed together (androidApp google flavor)
 dd-sdk-android = [
