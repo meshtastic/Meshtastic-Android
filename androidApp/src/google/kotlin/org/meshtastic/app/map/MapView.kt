@@ -60,8 +60,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.applyCanvas
 import androidx.core.graphics.createBitmap
@@ -193,6 +198,7 @@ import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterSheet
+import org.meshtastic.feature.map.component.MeshMapFitPadding
 import org.meshtastic.feature.map.component.NodeTrackFilterMenu
 import org.meshtastic.feature.map.component.OfflineStatusBanner
 import org.meshtastic.feature.map.component.RasterOverlayToggles
@@ -257,6 +263,26 @@ sealed interface GoogleMapMode {
 
 private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
+
+/**
+ * Fits [bounds] inside [MeshMapFitPadding], clear of the toolbar and the zoom pair. `newLatLngBounds` takes one padding
+ * for every edge and centres the fit, so it fits the padded box and then moves that box to where the padding puts it.
+ */
+private fun CameraPositionState.frameInsideChrome(
+    bounds: LatLngBounds,
+    mapSize: IntSize,
+    density: Density,
+    layoutDirection: LayoutDirection,
+) = with(density) {
+    val left = MeshMapFitPadding.calculateLeftPadding(layoutDirection).roundToPx()
+    val right = MeshMapFitPadding.calculateRightPadding(layoutDirection).roundToPx()
+    val top = MeshMapFitPadding.calculateTopPadding().roundToPx()
+    val bottom = MeshMapFitPadding.calculateBottomPadding().roundToPx()
+    val width = (mapSize.width - left - right).coerceAtLeast(1)
+    val height = (mapSize.height - top - bottom).coerceAtLeast(1)
+    move(CameraUpdateFactory.newLatLngBounds(bounds, width, height, 0))
+    move(CameraUpdateFactory.scrollBy((right - left) / 2f, (bottom - top) / 2f))
+}
 
 // Shared geofence overlay styling (orange, matching the fdroid flavor).
 private val GEOFENCE_OVERLAY_COLOR = Color(0xFFFF9800)
@@ -436,7 +462,12 @@ fun MapView(
 
     val filteredNodes = MapNodePolicy.visibleNodes(allNodes, mapFilterState, nowSeconds, ourNodeInfo?.num)
 
-    LaunchedEffect(mode, cameraInitialization, isMapLoaded, filteredNodes) {
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    var mapSize by remember { mutableStateOf(IntSize.Zero) }
+    LaunchedEffect(mode, cameraInitialization, isMapLoaded, filteredNodes, mapSize) {
+        // The fit is sized to the map, so it waits for the first layout.
+        if (mapSize == IntSize.Zero) return@LaunchedEffect
         if (
             mode is GoogleMapMode.Main &&
             cameraInitialization == CameraInitialization.FitNodes &&
@@ -444,17 +475,14 @@ fun MapView(
             filteredNodes.isNotEmpty()
         ) {
             val points = filteredNodes.map { it.position.toLatLng() }
-            val cameraUpdate =
-                if (points.size == 1) {
-                    CameraUpdateFactory.newLatLngZoom(points.first(), 12f)
-                } else {
-                    // Shared with the MapLibre map, which pads a degenerate box rather than handing the camera
-                    // something it cannot fit to.
-                    val bounds = MapBounds.aroundNodes(filteredNodes)?.toLatLngBounds()
-                    if (bounds == null) return@LaunchedEffect
-                    CameraUpdateFactory.newLatLngBounds(bounds, 80)
-                }
-            cameraPositionState.move(cameraUpdate)
+            if (points.size == 1) {
+                cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(points.first(), 12f))
+            } else {
+                // Shared with the MapLibre map, which pads a degenerate box rather than handing the camera
+                // something it cannot fit to.
+                val bounds = MapBounds.aroundNodes(filteredNodes)?.toLatLngBounds() ?: return@LaunchedEffect
+                cameraPositionState.frameInsideChrome(bounds, mapSize, density, layoutDirection)
+            }
             mapViewModel.onInitialNodeBoundsApplied()
         }
     }
@@ -642,7 +670,7 @@ fun MapView(
     Box(modifier = modifier) {
         GoogleMap(
             mapColorScheme = mapColorScheme,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().onSizeChanged { mapSize = it },
             cameraPositionState = cameraPositionState,
             uiSettings =
             MapUiSettings(

@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.map.maplibre
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.unit.LayoutDirection
 import org.maplibre.compose.camera.CameraAnimation
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraUpdate
@@ -50,6 +52,17 @@ internal suspend fun MapState.frameBounds(bounds: BoundingBox, padding: DpPaddin
     val fitted = cameraForBounds(bounds, fitPadding = padding)
     animateCamera(fitted.cappedTo(FRAME_MAX_ZOOM).toCameraUpdate(), CameraAnimation.Ease())
 }
+
+/**
+ * These insets as the physical edges MapLibre takes. Resolving start and end here keeps the wide trailing inset on the
+ * zoom pair's side in RTL too.
+ */
+internal fun PaddingValues.toDpPadding(layoutDirection: LayoutDirection) = DpPadding(
+    left = calculateLeftPadding(layoutDirection),
+    top = calculateTopPadding(),
+    right = calculateRightPadding(layoutDirection),
+    bottom = calculateBottomPadding(),
+)
 
 /** This position, zoomed out to [maxZoom] if it is tighter than that. */
 internal fun CameraPosition.cappedTo(maxZoom: Double): CameraPosition =

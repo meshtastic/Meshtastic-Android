@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
@@ -67,6 +68,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.MapNodePolicy
 import org.meshtastic.feature.map.component.MapEngineUnavailable
+import org.meshtastic.feature.map.component.MeshMapFitPadding
 import org.meshtastic.feature.map.maplibre.component.MeshMapOrnaments
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
@@ -312,6 +314,7 @@ private fun FrameOnce(enabled: Boolean, nodes: List<Node>, mapState: MapState) {
     // packet re-frames over them) one of the two failure modes was always reachable. Nothing here restarts on
     // node changes now, so the latch and the fit cannot come apart.
     val currentNodes by rememberUpdatedState(nodes)
+    val fitPadding = MeshMapFitPadding.toDpPadding(LocalLayoutDirection.current)
     // An effect, not composition-body work: a launch from composition fires even if the composition is
     // abandoned, while its state write is rolled back — a camera jump with no framing recorded. Fitting before
     // the map reports a viewport silently lands on a default, hence the gate.
@@ -320,7 +323,7 @@ private fun FrameOnce(enabled: Boolean, nodes: List<Node>, mapState: MapState) {
         // Waits for the first node set that has anything to frame; a mesh still filling in reports none.
         val box = snapshotFlow { nodesBoundingBox(currentNodes) }.filterNotNull().first()
         hasFramed = true
-        mapState.frameBounds(box)
+        mapState.frameBounds(box, padding = fitPadding)
     }
 }
 
