@@ -24,8 +24,8 @@ import kotlin.test.assertTrue
 
 /**
  * The committed generated file is checked against the registry only while it records the pin the build resolves. A
- * merged protobufs bump leaves the two apart until the hourly scheduled-updates run re-syncs; that window is not an
- * error, a hand edit at a matching pin is.
+ * merged protobufs bump leaves the two apart until the scheduled-updates run it triggers re-syncs; that window is not
+ * an error, a hand edit at a matching pin is.
  */
 class RepositorySyncTest {
 
