@@ -49,8 +49,8 @@ What those two channels point at right now:
 
 | Channel | Currently | Released |
 |---|---|---|
-| **Latest release** | `v2.8.1` | 2026-08-20 |
-| **Open beta** | `v2.8.2-open.7` | 2026-09-25 |
+| **Latest release** | `v2.8.2` | 2026-09-25 |
+| **Open beta** | *none published right now* | — |
 
 <!-- END GENERATED STATUS -->
 
