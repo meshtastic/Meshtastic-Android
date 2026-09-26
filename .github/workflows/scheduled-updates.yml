@@ -294,7 +294,6 @@ jobs:
           cache_read_only: 'true'
           cache_configuration_cache: 'false'
           cache_robolectric: 'false'
-          install_jetbrains_jdk: 'true'
 
       - name: Regenerate the schema strings
         id: schema_strings

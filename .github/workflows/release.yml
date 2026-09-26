@@ -293,7 +293,6 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'false'
-          install_jetbrains_jdk: 'true'
 
       - name: Install dependencies for AppImage
         if: runner.os == 'Linux'

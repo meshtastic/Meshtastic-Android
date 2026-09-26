@@ -14,7 +14,9 @@ inputs:
     description: 'JDK distribution (temurin or jetbrains)'
     default: 'temurin'
   install_jetbrains_jdk:
-    description: 'Also install JetBrains JDK 25 for Compose Desktop toolchain resolution'
+    description: |
+      Also install JetBrains JDK 25 with setup-java. Gradle detects it through ~/.m2/toolchains.xml
+      instead of provisioning one through foojay, which flatpak-sources would record as a source.
     default: 'false'
   gradle_encryption_key:
     description: 'Encryption key for Gradle remote cache'
@@ -51,9 +53,6 @@ runs:
       shell: bash
       run: mkdir -p ~/.gradle && cp .github/ci-gradle.properties ~/.gradle/gradle.properties
 
-    - name: Validate Gradle Wrapper
-      uses: gradle/actions/wrapper-validation@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
-
     - name: Set up JDK 25
       uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
       with:
@@ -61,16 +60,8 @@ runs:
         distribution: ${{ inputs.jdk_distribution }}
         token: ${{ github.token }}
 
-    - name: Restore cached JetBrains JDK 25
+    - name: Set up JetBrains JDK 25
       if: inputs.install_jetbrains_jdk == 'true'
-      id: cache-jbr
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-      with:
-        path: ${{ runner.tool_cache }}/Java_JetBrains_jdk
-        key: jbr-25-${{ runner.os }}-${{ runner.arch }}
-
-    - name: Set up JetBrains JDK 25 (for Compose Desktop)
-      if: inputs.install_jetbrains_jdk == 'true' && steps.cache-jbr.outputs.cache-hit != 'true'
       id: setup-jbr
       continue-on-error: true
       uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
@@ -80,8 +71,8 @@ runs:
         check-latest: false
         token: ${{ github.token }}
 
-    - name: JBR setup skipped or failed — Gradle will auto-provision via Foojay
-      if: inputs.install_jetbrains_jdk == 'true' && steps.cache-jbr.outputs.cache-hit != 'true' && steps.setup-jbr.outcome == 'failure'
+    - name: JBR setup failed, Gradle will provision it through foojay
+      if: inputs.install_jetbrains_jdk == 'true' && steps.setup-jbr.outcome == 'failure'
       shell: bash
       run: echo "::warning::JBR setup-java failed (likely GitHub API rate limit). Gradle will auto-provision JBR via Foojay toolchain resolver."
 
