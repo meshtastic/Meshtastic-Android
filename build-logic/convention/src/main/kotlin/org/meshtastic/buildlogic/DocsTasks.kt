@@ -36,7 +36,7 @@ private const val MIN_KEYWORD_LENGTH = 3
 private const val MAX_KEYWORDS = 30
 private const val BYTES_PER_MB = 1024.0 * 1024.0
 
-// Catches accidental bloat, not real content; the bundle is a build check and ships nowhere.
+// Catches accidental bloat, not real content; the bundle ships in the app, not in the Pages output.
 // One corpus-wide English audit adds ~1.9 MB once Crowdin fans it across 42 locales; the gap clears one cycle.
 private const val BUNDLE_SIZE_HARD_LIMIT_MB = 20.0
 private const val BUNDLE_SIZE_WARN_THRESHOLD_MB = 16.0
