@@ -480,7 +480,8 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          dependency_graph: ${{ github.ref == 'refs/heads/main' && 'generate-and-submit' || 'disabled' }}
+          # main submits; PRs upload (no contents: write), dependency-graph-submit.yml finishes.
+          dependency_graph: ${{ github.event_name == 'pull_request' && 'generate-and-upload' || (github.ref == 'refs/heads/main' && 'generate-and-submit' || 'disabled') }}
 
       - name: Tag main-branch builds as -SNAPSHOT
         if: github.event_name == 'push'
