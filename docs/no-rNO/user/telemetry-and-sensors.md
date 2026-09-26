@@ -1,4 +1,4 @@
-\| Lightning, strikes in the last hour and storm distance | count, km or mi | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometres |---
+---
 title: Telemetry & Sensors
 parent: User Guide
 nav_order: 9
