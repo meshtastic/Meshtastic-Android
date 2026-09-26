@@ -102,7 +102,7 @@ jobs:
       # Root site (/) — production releases only.
       - name: Build Root Docs Site
         if: steps.version.outputs.is_production == 'true'
-        run: ./gradlew generateDocsBundle publishDocsSite -Pdocs.channel=root -Pci=true
+        run: ./gradlew publishDocsSite -Pdocs.channel=root -Pci=true
 
       # The versioned source leaves build/_site/ first so the root site does not
       # nest it. The Jekyll builds read only the generated sites and Dokka (the
