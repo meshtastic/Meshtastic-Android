@@ -62,9 +62,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.applyCanvas
 import androidx.core.graphics.createBitmap
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -184,6 +184,7 @@ import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.MapBounds
 import org.meshtastic.feature.map.MapNodePolicy
+import org.meshtastic.feature.map.TRACK_STOP_RADIUS_METERS
 import org.meshtastic.feature.map.component.ClusterMemberEntry
 import org.meshtastic.feature.map.component.ClusterMembersDialog
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
@@ -207,6 +208,7 @@ import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
+import org.meshtastic.feature.map.mergeStationaryRuns
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
@@ -1373,12 +1375,13 @@ private fun WaypointGeofenceOverlay(waypoint: Waypoint) {
 // region --- Node Track Overlay ---
 
 /**
- * Renders the position track polyline and markers inside a [GoogleMap] content scope. Markers fade from faint (oldest)
- * to opaque (newest). The newest position shows the node's [NodeChip]; older positions show a ring with an info-window
- * on tap. Beyond the newest [MAX_TRACK_MARKERS] points the track is drawn by the line alone.
+ * Renders the position track polyline and markers inside a [GoogleMap] content scope. Consecutive fixes within
+ * [TRACK_STOP_RADIUS_METERS] of each other draw as one point, the newest fix of their run. Markers fade from faint
+ * (oldest) to opaque (newest). The newest point shows the node's [NodeChip]; older points show a ring with an
+ * info-window on tap. Beyond the newest [MAX_TRACK_MARKERS] points the track is drawn by the line alone.
  *
- * When [selectedPositionTime] matches a marker's `Position.time`, that marker is highlighted with the primary color and
- * elevated z-index. Tapping a marker invokes [onPositionSelect] for list synchronization.
+ * When [selectedPositionTime] falls within a point's run, that marker is highlighted with the primary color and
+ * elevated z-index. Tapping a marker invokes [onPositionSelect] with its fix's time for list synchronization.
  */
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
@@ -1405,21 +1408,23 @@ private fun NodeTrackOverlay(
                 trackPointIcon(trackColor.copy(alpha = trackFadeAlpha(level)), TRACK_POINT_SIZE_DP, density)
             }
         }
-    val selectedIcon = remember(selectedColor, density) {
-        trackPointIcon(selectedColor, SELECTED_TRACK_POINT_SIZE_DP, density)
-    }
+    val selectedIcon =
+        remember(selectedColor, density) { trackPointIcon(selectedColor, SELECTED_TRACK_POINT_SIZE_DP, density) }
     val pointTitle = stringResource(Res.string.position)
     val pointDescription = stringResource(Res.string.track_point)
+    val runs = remember(sortedPositions) { mergeStationaryRuns(sortedPositions) }
     // Every marker is added on the main thread, so only the newest points and the selected one get one.
-    val firstMarkerIndex = (sortedPositions.size - MAX_TRACK_MARKERS).coerceAtLeast(0)
+    val firstMarkerIndex = (runs.size - MAX_TRACK_MARKERS).coerceAtLeast(0)
 
-    sortedPositions.forEachIndexed { index, position ->
-        val isSelected = position.time == selectedPositionTime
+    runs.forEachIndexed { index, run ->
+        val position = run.position
+        val isSelected = selectedPositionTime?.let(run::covers) == true
         if (index < firstMarkerIndex && !isSelected) return@forEachIndexed
-        key(position.time) {
+        // Keyed on the run's start: its newest fix changes while the node stays put.
+        key(run.firstTime) {
             val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
 
-            if (index == sortedPositions.lastIndex) {
+            if (index == runs.lastIndex) {
                 MarkerComposable(
                     state = markerState,
                     zIndex = activeNodeZIndex,
@@ -1432,7 +1437,7 @@ private fun NodeTrackOverlay(
                     NodeChip(node = focusedNode)
                 }
             } else {
-                val level = trackFadeLevel(index, sortedPositions.lastIndex)
+                val level = trackFadeLevel(index, runs.lastIndex)
                 MarkerInfoWindow(
                     state = markerState,
                     contentDescription = pointDescription,
@@ -1451,14 +1456,13 @@ private fun NodeTrackOverlay(
         }
     }
 
-    if (sortedPositions.size > 1) {
-        val points = remember(sortedPositions) { sortedPositions.map { it.toLatLng() } }
+    if (runs.size > 1) {
+        val points = remember(runs) { runs.map { it.position.toLatLng() } }
         // A span without a segment count covers only the first segment.
         val spans =
             remember(trackColor, points.size) {
-                val gradient =
-                    StrokeStyle.gradientBuilder(trackColor.copy(alpha = OLDEST_TRACK_ALPHA).toArgb(), trackColor.toArgb())
-                        .build()
+                val oldest = trackColor.copy(alpha = OLDEST_TRACK_ALPHA).toArgb()
+                val gradient = StrokeStyle.gradientBuilder(oldest, trackColor.toArgb()).build()
                 listOf(StyleSpan(gradient, (points.size - 1).toDouble()))
             }
         Polyline(points = points, spans = spans, jointType = JointType.ROUND, width = 8f, zIndex = 0.6f)
