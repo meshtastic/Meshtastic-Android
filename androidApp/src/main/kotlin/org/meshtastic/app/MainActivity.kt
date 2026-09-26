@@ -60,6 +60,7 @@ import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
+import org.meshtastic.core.common.state.LaunchOptions
 import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.network.repository.UsbRepository
@@ -117,15 +118,21 @@ class MainActivity : AppCompatActivity() {
 
     private val usbRepository: UsbRepository by inject()
     private val mapLayersManager: MapLayersManager by inject()
+    private val launchOptions: LaunchOptions by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
 
-        if (BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_ONBOARDING, false)) {
+        // MainActivity is exported, so any app can send these extras; only the shell can start the debug alias.
+        val automationLaunch = BuildConfig.DEBUG && intent.component?.className == AUTOMATION_LAUNCHER
+        if (automationLaunch && intent.getBooleanExtra(EXTRA_SKIP_ONBOARDING, false)) {
+            launchOptions.skipOnboarding = true
             model.onAppIntroCompleted()
         }
+        launchOptions.skipDeepLinkConfirmation =
+            automationLaunch && intent.getBooleanExtra(EXTRA_SKIP_CONNECT_CONFIRM, false)
 
         enableEdgeToEdge()
 
@@ -166,7 +173,7 @@ class MainActivity : AppCompatActivity() {
                     // once we've decided whether to show the intro or the main screen.
                     ReportDrawnWhen { true }
 
-                    if (appIntroCompleted) {
+                    if (appIntroCompleted || launchOptions.skipOnboarding) {
                         MainScreen()
                     } else {
                         val introViewModel = koinViewModel<IntroViewModel>()
@@ -177,7 +184,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Listen for new intents (e.g. deep links, NFC) without overriding onNewIntent
-        addOnNewIntentListener { intent -> handleIntent(intent) }
+        addOnNewIntentListener { intent ->
+            // The switch covers the launch it came with; a link that arrives later still asks.
+            launchOptions.skipDeepLinkConfirmation = false
+            handleIntent(intent)
+        }
 
         handleIntent(intent)
     }
@@ -415,6 +426,10 @@ class MainActivity : AppCompatActivity() {
 
     private companion object {
         const val EXTRA_SKIP_ONBOARDING = "skip_onboarding"
+        const val EXTRA_SKIP_CONNECT_CONFIRM = "skip_connect_confirm"
+
+        /** The DUMP-guarded alias in the debug manifest. */
+        const val AUTOMATION_LAUNCHER = "org.meshtastic.app.AutomationLauncher"
     }
 }
 

@@ -87,8 +87,8 @@ manifest entry fails CI.
 | URI Path | Route | Notes |
 |----------|-------|-------|
 | `/connections` | `ConnectionsRoute.Connections(null)` | Connections screen |
-| `/connections?address={prefixedAddress}` | `ConnectionsRoute.Connections(address)` | Auto-connects to a node without manual selection — the address uses the app's internal transport-prefixed format: `t192.168.1.1:4403` (TCP), `xAA:BB:CC:DD:EE:FF` (BLE), `s/dev/ttyUSB0` (serial). Intended for scripts/AI tooling driving the app. |
-| `/connections?address=n` | `ConnectionsRoute.Connections("n")` | Disconnects the current node instead of connecting (`n` = the internal "no device selected" sentinel). |
+| `/connections?address={prefixedAddress}` | `ConnectionsRoute.Connections(address)` | Connects to a node once the user confirms the "Connect to this device?" dialog — the address uses the app's internal transport-prefixed format: `t192.168.1.1:4403` (TCP), `xAA:BB:CC:DD:EE:FF` (BLE), `s/dev/ttyUSB0` (serial). Intended for scripts/AI tooling driving the app; a debug build started through its shell-only `org.meshtastic.app.AutomationLauncher` alias with the `skip_connect_confirm` intent extra, or with the `--skip-connect-confirm` argument on desktop, applies the address it was launched with without the dialog; links that arrive later still ask. |
+| `/connections?address=n` | `ConnectionsRoute.Connections("n")` | Disconnects the current node instead of connecting (`n` = the internal "no device selected" sentinel), after the same confirmation. |
 | `/wifi-provision` | `WifiProvisionRoute.WifiProvision(null)` | Wi-Fi provisioning screen |
 | `/wifi-provision?address={mac}` | `WifiProvisionRoute.WifiProvision(mac)` | Provisioning targeting a specific node MAC |
 | `/settings` | `SettingsRoute.Settings(null)` | Settings root |

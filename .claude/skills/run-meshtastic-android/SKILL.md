@@ -123,11 +123,14 @@ python3 .claude/skills/run-meshtastic-android/driver_emulator.py -s emulator-555
   connect=t10.0.2.2:4404 wait_text=RPLY ss=/tmp/emu.png
 ```
 
-`connect` force-stops the app, relaunches `org.meshtastic.app.MainActivity` with the
-debug-only `skip_onboarding` extra and the `/connections?address=` deeplink
-(`t` = TCP, `x` = BLE, `s` = serial, `n` = disconnect — full path list in
-`docs/en/developer/navigation-and-deep-links.md`), then waits for the trust dialog
-newer builds pop and taps its **Connect** button. Success looks like the Connection
+`connect` force-stops the app, relaunches it through `org.meshtastic.app.AutomationLauncher`
+with the `skip_onboarding` and `skip_connect_confirm` extras and the
+`/connections?address=` deeplink (`t` = TCP, `x` = BLE, `s` = serial, `n` = disconnect —
+full path list in `docs/en/developer/navigation-and-deep-links.md`). That alias exists
+only in debug builds and only the shell may start it, and the extras do nothing on any
+other launch. With `skip_connect_confirm` the address is applied with no trust dialog; a
+build that predates the alias still pops it, and the driver taps its **Connect** button. Desktop
+takes the same switch as a `--skip-connect-confirm` argument in a non-release build. Success looks like the Connection
 screen showing `RPLY Replay Observer` with a **Disconnect** button, and
 `replay_status` reporting `connected:true`.
 

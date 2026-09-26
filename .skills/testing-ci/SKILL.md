@@ -84,14 +84,14 @@ Rendering is **host-deterministic** (layoutlib): a local `update` produces refer
 
 ## 3c) Fresh-install manual/agent testing: skip onboarding
 
-Debug builds accept an intent extra to skip the intro flow (`MainActivity.kt`, `BuildConfig.DEBUG`-gated — never reaches release/Play builds). Pair with `pm grant` (native Android, no app code) to pre-accept runtime permissions:
+Debug builds accept an intent extra to skip the intro flow, honoured only on a launch through the `AutomationLauncher` alias (`androidApp/src/debug/AndroidManifest.xml`), which requires `DUMP` so only the shell can start it. Release builds have no alias. Pair with `pm grant` (native Android, no app code) to pre-accept runtime permissions:
 
 ```bash
 adb shell pm grant <pkg> android.permission.BLUETOOTH_SCAN
 adb shell pm grant <pkg> android.permission.BLUETOOTH_CONNECT
 adb shell pm grant <pkg> android.permission.ACCESS_FINE_LOCATION
 adb shell pm grant <pkg> android.permission.POST_NOTIFICATIONS   # API 33+
-adb shell am start -n <pkg>/org.meshtastic.app.MainActivity --ez skip_onboarding true
+adb shell am start -n <pkg>/org.meshtastic.app.AutomationLauncher --ez skip_onboarding true
 ```
 
 Use this whenever driving the app from a fresh install/uninstall (screenshot tests, UI automation, agent-driven exploration) instead of clicking through the intro screens.
