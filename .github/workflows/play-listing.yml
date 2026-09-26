@@ -50,7 +50,9 @@ jobs:
           bundler-cache: true
 
       - name: Decode Play Store credentials
-        run: echo '${{ secrets.GOOGLE_PLAY_JSON_KEY }}' > fastlane/play-store-credentials.json
+        env:
+          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+        run: printf '%s\n' "$GOOGLE_PLAY_JSON_KEY" > fastlane/play-store-credentials.json
 
       - name: Upload listing
         env:

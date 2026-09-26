@@ -65,9 +65,14 @@ jobs:
 
       - name: Calculate tags
         id: calculate_tags
+        env:
+          BASE_VERSION: ${{ inputs.base_version }}
+          CHANNEL: ${{ inputs.channel }}
         run: |
-          BASE_VERSION="${{ inputs.base_version }}"
-          CHANNEL="${{ inputs.channel }}"
+          if [[ ! "$BASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::base_version '$BASE_VERSION' is not X.Y.Z (e.g., 2.8.3)."
+            exit 1
+          fi
 
           if [[ "$CHANNEL" == "internal" ]]; then
             # This is a new build, create a new internal tag
@@ -133,11 +138,19 @@ jobs:
       - name: Calculate version
         id: version
         env:
+          BASE_VERSION: ${{ inputs.base_version }}
           CHANNEL: ${{ inputs.channel }}
           TAG: ${{ steps.calculate_tags.outputs.tag_to_process }}
         run: |
           if [[ "$CHANNEL" == "internal" ]]; then REF=HEAD; else REF="$TAG"; fi
           git show "${REF}:config.properties" > "$RUNNER_TEMP/config.properties"
+
+          # The release highlights and the Play what's-new are looked up by VERSION_NAME_BASE.
+          CONFIG_BASE=$(sed -n 's/^VERSION_NAME_BASE=//p' "$RUNNER_TEMP/config.properties")
+          if [[ "$CONFIG_BASE" != "$BASE_VERSION" ]]; then
+            echo "::error::base_version is $BASE_VERSION but config.properties at $REF has VERSION_NAME_BASE=${CONFIG_BASE:-<unset>}."
+            exit 1
+          fi
 
           VERSION_NAME=$(echo "$TAG" | sed 's/-.*//' | sed 's/v//')
           VERSION_CODE_OFFSET=$(grep '^VERSION_CODE_OFFSET=' "$RUNNER_TEMP/config.properties" | cut -d'=' -f2 || true)

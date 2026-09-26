@@ -73,7 +73,9 @@ jobs:
           bundler-cache: true
 
       - name: Decode Play Store credentials
-        run: echo '${{ secrets.GOOGLE_PLAY_JSON_KEY }}' > fastlane/play-store-credentials.json
+        env:
+          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+        run: printf '%s\n' "$GOOGLE_PLAY_JSON_KEY" > fastlane/play-store-credentials.json
 
       # A re-dispatched promotion whose versionCode is already live on the
       # target track must no-op: every redundant `supply` commit creates a new
