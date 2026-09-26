@@ -25,7 +25,6 @@ import org.gradle.api.Project
  * distribution with four unusable copies. Upstream publishes no macos-x64 artifact, which matches our release matrix;
  * on an Intel Mac no runtime is added and the map degrades to its engine-unavailable state at runtime, rather than
  * failing every Gradle task at configuration time for a host that only builds the Android app.
- * Shared by `:desktopApp` and `:marketing-screenshots`, the two JVM modules that draw a MapLibre map.
  */
 fun Project.maplibreDesktopRuntime() {
     val osName = providers.systemProperty("os.name").get().lowercase()

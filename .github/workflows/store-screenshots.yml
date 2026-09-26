@@ -19,6 +19,13 @@ on:
         description: 'The ref to capture (the release tag)'
         required: true
         type: string
+      soft:
+        # A caller cannot mark a reusable workflow allowed-to-fail, and a failed job in
+        # release.yml deletes the internal tag. With soft, a failed capture fails nothing.
+        description: 'Let a failed capture pass without failing the calling run'
+        required: false
+        type: boolean
+        default: false
   workflow_dispatch:
   pull_request:
     branches: [ main ]
@@ -40,6 +47,7 @@ jobs:
     # Hosted x64 runners expose KVM; the emulator needs it.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    continue-on-error: ${{ inputs.soft == true }}
     strategy:
       fail-fast: false
       matrix:
@@ -132,6 +140,7 @@ jobs:
     name: Desktop
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    continue-on-error: ${{ inputs.soft == true }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

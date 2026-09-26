@@ -208,8 +208,8 @@ jobs:
           bash .workflow-ref/scripts/play-track-preflight.sh \
             fastlane/play-store-credentials.json "$PKG" "$TO_TRACK" "$VERSION_CODE" verify
 
-      # The listing is the tag's text for every locale plus the screenshots the
-      # internal cut rendered and attached to the release. Without the attachment
+      # The listing is the tag's text for every locale plus the google-flavor screenshots
+      # the internal cut captured and attached to the release. Without the attachment
       # the committed set goes up instead, and the checklist says so.
       # An absent asset (a tag cut before the render job existed) falls back to
       # the committed set. A present asset that fails to download is an error,
@@ -221,7 +221,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag_name }}
         run: |
-          ASSET=$(gh release view "$TAG" --json assets --jq '.assets[].name | select(startswith("store-listing-screenshots-"))' | head -1)
+          ASSET=$(gh release view "$TAG" --json assets --jq '.assets[].name | select(startswith("store-listing-screenshots-google-"))' | head -1)
           if [[ -z "$ASSET" ]]; then
             echo "::warning::No rendered screenshots attached to $TAG; the listing keeps the committed set."
             echo "found=false" >> "$GITHUB_OUTPUT"
@@ -460,11 +460,11 @@ jobs:
               -f description="Skipped — changelog-only PR"
           }
 
-      # F-Droid and IzzyOnDroid read fastlane/ straight from git, so the committed
-      # set follows what production shipped: the rendered screenshots come back from
-      # the release into a bot PR that merges itself. The Flathub metainfo reads the
-      # release assets directly and needs nothing here. Nothing to open when the
-      # files already match.
+      # F-Droid and IzzyOnDroid read fastlane/ straight from git, so the committed set
+      # follows what production shipped: the fdroid-flavor captures come back from the
+      # release into a bot PR that merges itself, with the desktop set beside them. The
+      # Flathub metainfo reads the release assets directly and needs nothing here.
+      # Nothing to open when the files already match.
       - name: Refresh the committed store screenshots
         id: shots_pr
         if: ${{ inputs.channel == 'production' }}
@@ -475,7 +475,7 @@ jobs:
           VERSION: ${{ inputs.base_version }}
           REPO: ${{ github.repository }}
         run: |
-          ASSET=$(gh release view "$TAG" --json assets --jq '.assets[].name | select(startswith("store-listing-screenshots-"))' | head -1)
+          ASSET=$(gh release view "$TAG" --json assets --jq '.assets[].name | select(startswith("store-listing-screenshots-fdroid-"))' | head -1)
           if [[ -z "$ASSET" ]]; then
             echo "::warning::No rendered screenshots attached to $TAG; the committed set stays."
             echo "refreshed=none" >> "$GITHUB_OUTPUT"
@@ -485,7 +485,7 @@ jobs:
           git fetch origin main
           BRANCH="automation/store-screenshots-v${VERSION}"
           git checkout -B "$BRANCH" origin/main
-          unzip -qo "$RUNNER_TEMP"/shots/store-listing-screenshots-*.zip -d fastlane/metadata/android/en-US/images
+          unzip -qo "$RUNNER_TEMP/shots/$ASSET" -d fastlane/metadata/android/en-US/images
           cp "$RUNNER_TEMP"/shots/meshtastic-desktop-*.png desktopApp/packaging/linux/screenshots/
           git add fastlane/metadata/android/en-US/images desktopApp/packaging/linux/screenshots
           if git diff --cached --quiet; then
