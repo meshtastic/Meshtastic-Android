@@ -177,8 +177,9 @@ jobs:
           CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
-      # Crowdin translates layout and nav_order along with the prose; docs-quality.yml
-      # fails the PR if they differ from docs/en, so a failure here must not stop the PR opening.
+      # Crowdin translates layout and nav_order along with the prose and carries over the English
+      # parent. This restores the first two from docs/en and drops parent; docs-quality.yml fails
+      # the PR on any left, so a failure here must not stop the PR opening.
       - name: Restore locale docs front matter
         continue-on-error: true
         run: python3 scripts/docs/sync-locale-front-matter.py

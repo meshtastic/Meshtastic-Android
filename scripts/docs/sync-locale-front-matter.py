@@ -9,12 +9,15 @@ structure the site reads rather than prose:
     nav_order  a number the theme sorts by.
 
 Each of these keys in docs/<locale>/<path>.md is set to what docs/en/<path>.md
-has, verbatim, including multi-line values and absence. Every other line is left
-as Crowdin wrote it.
+has, verbatim, including multi-line values and absence.
 
-parent is not restored: just-the-docs lists every page whose parent matches a
-page's title in that page's table of contents, nav_exclude or not, so an English
-parent would put the locale page into the English guide's contents.
+parent and grand_parent are removed from every locale page, with or without an
+English twin. A locale has no section pages of its own, and just-the-docs lists
+every page whose parent matches a page's title in that page's table of contents,
+nav_exclude or not, so a parent can only attach the locale page to an English
+section. The locale_page layout links each page to its English original instead.
+
+Every other line is left as Crowdin wrote it.
 
 A locale page with no front matter while its English page has one is reported
 but not rewritten: Crowdin rebuilds each translation from the English source's
@@ -23,8 +26,8 @@ structure on the next download.
 Usage: sync-locale-front-matter.py [--check] [<docs-dir>]
 
 With --check nothing is written and the exit status is non-zero when any locale
-page differs from English on these keys. Under GitHub Actions each finding is
-also an annotation on the file.
+page differs from English on layout or nav_order, or has a parent or grand_parent.
+Under GitHub Actions each finding is also an annotation on the file.
 """
 
 from __future__ import annotations
@@ -37,6 +40,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 STRUCTURAL_KEYS = ("layout", "nav_order")
+NAVIGATION_KEYS = ("parent", "grand_parent")
 LOCALE_DIR = re.compile(r"^[a-z]{2,3}(-r[A-Za-z]+)?$")
 TOP_LEVEL_KEY = re.compile(r"^([A-Za-z_][A-Za-z0-9_-]*)\s*:(\s|$)")
 IN_GITHUB_ACTIONS = os.environ.get("GITHUB_ACTIONS") == "true"
@@ -131,6 +135,14 @@ def sync(locale: FrontMatter, english: FrontMatter) -> list[tuple[str, str, str]
     return changes
 
 
+def strip(locale: FrontMatter) -> list[tuple[str, str]]:
+    """Removes NAVIGATION_KEYS from locale in place and returns (key, value) per removed key."""
+    removed = [(key, shown_value(locale.get(key))) for key in NAVIGATION_KEYS if locale.get(key) is not None]
+    if removed:
+        locale.entries = [(k, lines) for k, lines in locale.entries if k not in NAVIGATION_KEYS]
+    return removed
+
+
 def annotate(level: str, path: Path, line: int, message: str) -> None:
     if IN_GITHUB_ACTIONS:
         print(f"::{level} file={path},line={line}::{message}")
@@ -157,14 +169,12 @@ def main() -> int:
     for locale_root in locale_roots:
         for page in sorted(locale_root.rglob("*.md")):
             source = english_root / page.relative_to(locale_root)
-            if not source.is_file():
-                continue
-            english = FrontMatter.parse(source.read_bytes().decode("utf-8"))
-            if english is None:
-                continue
+            english = FrontMatter.parse(source.read_bytes().decode("utf-8")) if source.is_file() else None
             shown = page.relative_to(REPO_ROOT) if page.is_relative_to(REPO_ROOT) else page
             locale = FrontMatter.parse(page.read_bytes().decode("utf-8"))
             if locale is None:
+                if english is None:
+                    continue
                 missing = [key for key in STRUCTURAL_KEYS if english.get(key) is not None]
                 if args.check and missing:
                     drifted += 1
@@ -172,9 +182,10 @@ def main() -> int:
                 else:
                     annotate("warning", shown, 1, "no front matter, while its docs/en page has one")
                 continue
-            lines = {key: locale.line_of(key) for key in STRUCTURAL_KEYS}
-            changes = sync(locale, english)
-            if not changes:
+            lines = {key: locale.line_of(key) for key in STRUCTURAL_KEYS + NAVIGATION_KEYS}
+            changes = sync(locale, english) if english is not None else []
+            removed = strip(locale)
+            if not changes and not removed:
                 continue
             drifted += 1
             for key, have, want in changes:
@@ -182,12 +193,18 @@ def main() -> int:
                     annotate("error", shown, lines[key], f"{key} is '{have}', docs/en has '{want}'")
                 else:
                     print(f"{shown}: {key} '{have}' -> '{want}'")
+            for key, have in removed:
+                if args.check:
+                    annotate("error", shown, lines[key], f"{key} is '{have}'; locale pages have no {key}")
+                else:
+                    print(f"{shown}: {key} '{have}' removed")
             if not args.check:
                 page.write_bytes(locale.render().encode("utf-8"))
 
     if args.check and drifted:
         print(
-            f"{drifted} locale page(s) differ from docs/en on {', '.join(STRUCTURAL_KEYS)}. "
+            f"{drifted} locale page(s) have {' or '.join(STRUCTURAL_KEYS)} unlike docs/en, "
+            f"or have {' or '.join(NAVIGATION_KEYS)}. "
             "Fix with: python3 scripts/docs/sync-locale-front-matter.py",
             file=sys.stderr,
         )
