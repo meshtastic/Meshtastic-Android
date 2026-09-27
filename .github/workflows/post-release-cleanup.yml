@@ -102,8 +102,9 @@ jobs:
 
       # The docs site keeps a per-tag snapshot for every open/closed testing tag
       # in a version cycle (see docs-release.yml). Once vX.Y.Z ships, /vX.Y.Z/
-      # supersedes them all, so reap them to stop gh-pages growing without bound.
-      - name: Cleanup pre-release docs snapshots on gh-pages
+      # supersedes them all, so reap them. Production copies older than the
+      # release before vX.Y.Z go too, to keep gh-pages under the Pages size limit.
+      - name: Cleanup superseded docs on gh-pages
         run: |
           set -euo pipefail
           DRY_RUN=true
@@ -145,20 +146,41 @@ jobs:
               | awk -v base="$BASE_VERSION" "$AT_OR_BELOW" | sort
           )
 
-          if [ ${#stale[@]} -eq 0 ]; then
-            echo "No pre-release docs snapshots found."
+          # Production copies strictly below base_version, oldest first. The newest of them
+          # stays beside base_version; nothing above base_version is listed, so a backfill
+          # dispatch for an old version never deletes newer docs.
+          mapfile -t older < <(
+            find "$work" -maxdepth 1 -mindepth 1 -type d \
+              -regextype posix-extended \
+              -regex ".*/v[0-9]+\.[0-9]+\.[0-9]+" -printf '%f\n' \
+              | awk -v base="$BASE_VERSION" "$AT_OR_BELOW" \
+              | grep -vxF "v${BASE_VERSION}" | sort -V || true
+          )
+          culled=()
+          if [ ${#older[@]} -gt 1 ]; then
+            culled=("${older[@]:0:${#older[@]}-1}")
+          fi
+
+          if [ ${#stale[@]} -eq 0 ] && [ ${#culled[@]} -eq 0 ]; then
+            echo "No superseded docs found."
             exit 0
           fi
 
-          printf 'Pre-release docs snapshots to reap:\n'
-          printf '  %s\n' "${stale[@]}"
+          if [ ${#stale[@]} -gt 0 ]; then
+            printf 'Pre-release docs snapshots to reap:\n'
+            printf '  %s\n' "${stale[@]}"
+          fi
+          if [ ${#culled[@]} -gt 0 ]; then
+            printf 'Production docs older than %s to remove:\n' "${older[-1]}"
+            printf '  %s\n' "${culled[@]}"
+          fi
 
           if [ "$DRY_RUN" = true ]; then
             echo "DRY RUN: the directories above would be removed from gh-pages."
             exit 0
           fi
 
-          for d in "${stale[@]}"; do
+          for d in "${stale[@]}" "${culled[@]}"; do
             rm -rf "${work:?}/$d"
           done
 
@@ -174,9 +196,9 @@ jobs:
           fi
           git -c user.name='github-actions[bot]' \
               -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-              commit -q -m "docs: reap pre-release snapshots for ${BASE_VERSION}"
+              commit -q -m "docs: reap superseded docs for ${BASE_VERSION}"
           git push --quiet origin HEAD:gh-pages
-          echo "Removed ${#stale[@]} pre-release docs snapshot(s) from gh-pages."
+          echo "Removed ${#stale[@]} pre-release and ${#culled[@]} production docs directories from gh-pages."
 
       - name: Cleanup dangling pre-release tags
         env:

@@ -79,7 +79,7 @@ remains by hand.
     Each store workflow warns in its summary when its secrets are not set and it submitted nothing,
     and the promotion checklist already says so.
 4.  **Flathub** *(production only)*: merge the `update-flathub` PR in `flathub/org.meshtastic.MeshtasticDesktop` once Flathub's test build passes, or bump it by hand when `FLATHUB_TOKEN` is unset (see Flatpak below).
-5.  **Post-Release Cleanup** *(production only)*: `Docs Release` dispatches `post-release-cleanup.yml` with `confirm_deletion: true` once it has published `/vX.Y.Z/`, deleting the pre-releases, tags and docs snapshots at or below `X.Y.Z`. Check that run; a manual dispatch is the retry and defaults to a dry run.
+5.  **Post-Release Cleanup** *(production only)*: `Docs Release` dispatches `post-release-cleanup.yml` with `confirm_deletion: true` once it has published `/vX.Y.Z/`, deleting the pre-releases, tags and docs snapshots at or below `X.Y.Z` and every production docs copy older than the newest one below `X.Y.Z`. Check that run; a manual dispatch is the retry and defaults to a dry run.
 6.  **Next version line** *(production only)*: the `version-bump.yml` PR bumps `VERSION_NAME_BASE` and merges itself. Replace its placeholder `<description>` before the next internal cut.
 7.  **Merge:** If a `release/*` branch was used for stabilization (CI runs the same PR checks
     against PRs targeting `release/**` as it does for `main`), merge it back into `main` now
