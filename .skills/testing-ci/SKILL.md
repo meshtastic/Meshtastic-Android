@@ -100,7 +100,7 @@ Use this whenever driving the app from a fresh install/uninstall (screenshot tes
 
 CI is defined in `.github/workflows/reusable-check.yml` as parallel job groups. No job `needs:` another, so every one queues for a runner as soon as the run starts:
 
-1. **`lint-check`** runs `spotlessCheck`, `detekt` and Android lint for both flavors of `:androidApp` and `:core:barcode` in a single Gradle invocation (avoids 3x cold-start overhead). It checks out full history (`fetch-depth: 0`) because spotless ratchets against `origin/main`, and it has no outputs.
+1. **`lint-check`** runs `spotlessCheck`, `detekt` and Android lint for both flavors of `:androidApp` and `:core:barcode` in a single Gradle invocation (avoids 3x cold-start overhead), plus `:build-logic:convention:spotlessCheck` and `:build-logic:convention:detekt`, because the root tasks do not reach the included build. It checks out full history (`fetch-depth: 0`) because spotless ratchets against `origin/main`, and it has no outputs.
 2. **`test-shards`** is a 3-shard matrix that runs unit tests in parallel. Shard membership is a load-balancing detail, not a taxonomy: heavy modules are moved between shards to even out wall time, so read the matrix rather than inferring it:
    - `shard-core`: `allTests` for the remaining `core:*` KMP modules, plus `kmpSmokeCompile`.
    - `shard-feature`: `allTests` for `feature:*` KMP modules **plus `:core:service`**.

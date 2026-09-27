@@ -105,7 +105,8 @@ jobs:
           cache_configuration_cache: 'false'
 
       - name: Spotless, Detekt & Android Lint
-        run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true --continue
+        # The root spotlessCheck and detekt do not reach the included build-logic build.
+        run: ./gradlew spotlessCheck detekt :build-logic:convention:spotlessCheck :build-logic:convention:detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true --continue
 
   # ── Screenshot Test Validation ──────────────────────────────────────
   screenshot-check:
