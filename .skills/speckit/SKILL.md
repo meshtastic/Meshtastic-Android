@@ -120,7 +120,7 @@ Current constitution (v1.4.0) enforces 7 principles:
 3. **Compose Multiplatform UI** — CMP, not Android-only Compose
 4. **Privacy First** — No PII/location/key exposure
 5. **Design Standards Compliance** — Review against Meshtastic design standards; cross-platform features must reference an upstream spec from `meshtastic/design/features/`
-6. **Documentation Freshness** — User-facing changes update `docs/en/` (in-app browser, Jekyll, Docusaurus) with `last_updated` frontmatter; links, coverage, the DocBundleLoader registry, and locale `layout`/`nav_order` matching `docs/en/` are a blocking CI gate (`docs-quality.yml`) on PRs touching `docs/**/*.md`, freshness advisory
+6. **Documentation Freshness** — User-facing changes update `docs/en/` (in-app browser, Jekyll, Docusaurus) with `last_updated` frontmatter; links, coverage, the DocBundleLoader registry, and locale `layout`/`nav_order` matching `docs/en/` with no locale `parent` are a blocking CI gate (`docs-quality.yml`) on PRs touching `docs/**/*.md`, freshness advisory
 7. **Verify Before Push** — Local verification before any `git push`
 
 ## Extension Hooks
