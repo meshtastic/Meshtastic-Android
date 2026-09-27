@@ -1,6 +1,28 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 1.4.0 → 1.4.1
+Modified principles:
+  - VI. Documentation Freshness: the docs-quality.yml gate also runs on PRs that touch
+    any docs/**/*.md, locale pages included, and runs
+    scripts/docs/sync-locale-front-matter.py --check, which fails when a docs/<locale>/
+    page's layout or nav_order differs from docs/en. The local command list gains that
+    check. PATCH: the principle now describes the gate the workflow already runs.
+Added sections: none
+Removed sections: none
+Templates requiring updates:
+  - .specify/templates/plan-template.md ✅ no change (names no gate trigger)
+  - .specify/templates/checklist-template.md ✅ no change (CHK006 names no gate trigger)
+  - .specify/templates/spec-template.md ✅ no reference
+  - .specify/templates/tasks-template.md ✅ no reference
+Downstream references (Amendment Procedure step 3):
+  - .skills/speckit/SKILL.md ✅ updated (declared constitution version; its principle VI
+    summary already names the locale check)
+  - AGENTS.md ✅ no change (names no docs gate; principle count still 7)
+Follow-up TODOs: none
+
+SYNC IMPACT REPORT
+==================
 Version change: 1.3.7 → 1.4.0
 Modified principles:
   - V. Design Standards Compliance: the canonical reference is now the standards
@@ -198,15 +220,18 @@ Governance rules:
   from Crowdin (`crowdin.yml`) — never hand-edit a locale page; deleting an English page
   means deleting its locale copies in the same commit.
 
-Verification tooling — also enforced in CI: `.github/workflows/docs-quality.yml` runs the
-link check, the coverage check, a two-way `DocBundleLoader.kt` registry check, and the alias
-registration check as a **blocking** gate on PRs touching `docs/en/**` (freshness stays
-advisory). Run locally before pushing docs changes:
+Verification tooling, also enforced in CI: `.github/workflows/docs-quality.yml` runs the
+link check, the coverage check, a two-way `DocBundleLoader.kt` registry check, the alias
+registration check, and a locale front matter check (`layout` and `nav_order` in every
+`docs/<locale>/` page match `docs/en/`) as a **blocking** gate on PRs touching `docs/en/**`
+or any other `docs/**/*.md`, locale pages included (freshness stays advisory). Run locally
+before pushing docs changes:
 
 ```bash
 node scripts/check-doc-coverage.js    # every user-facing feature module has a page
 node scripts/validate-doc-links.js    # internal cross-references and image paths resolve
 node scripts/check-doc-aliases.js     # frontmatter aliases are registered in DocBundleLoader.kt
+python3 scripts/docs/sync-locale-front-matter.py --check  # locale layout/nav_order match docs/en; drop --check to restore
 node scripts/check-doc-freshness.js   # advisory: pages >180 days old, or missing last_updated
 ```
 <!-- Rationale: Documentation drift misleads users and increases support burden. Three distinct consumers means changes must be verified across all delivery channels. -->
@@ -290,4 +315,4 @@ summary derived from this constitution. The files `.github/copilot-instructions.
 Constitution Check confirming all seven principles were evaluated. Complexity violations
 require explicit justification in the Complexity Tracking table of the plan document.
 
-**Version**: 1.4.0 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-09-15
+**Version**: 1.4.1 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-09-26
