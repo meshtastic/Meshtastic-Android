@@ -1,6 +1,5 @@
 ---
 title: Settings — Modules & Admin
-parent: User Guide
 nav_order: 8
 last_updated: 2026-09-19
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.

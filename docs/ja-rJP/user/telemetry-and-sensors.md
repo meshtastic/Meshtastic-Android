@@ -1,6 +1,5 @@
 ---
 title: テレメトリとセンサー
-parent: User Guide
 nav_order: 9
 last_updated: 2026-09-18
 description: メッシュ上のセンサーデータ。対応する環境・大気質・電力センサーと、設定・表示のガイドを説明します。

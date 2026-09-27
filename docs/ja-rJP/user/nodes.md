@@ -1,6 +1,5 @@
 ---
 title: ノード
-parent: User Guide
 nav_order: 4
 last_updated: 2026-09-19
 description: メッシュノードの閲覧・絞り込み・並べ替え。詳細、信号品質、役割、クイック操作を確認できます。

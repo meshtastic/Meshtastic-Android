@@ -1,6 +1,5 @@
 ---
 title: はじめに
-parent: User Guide
 nav_order: 1
 last_updated: 2026-08-30
 description: 初回起動時のセットアップ：権限、オンボーディングの流れ、無線機を接続した後の次のステップ。

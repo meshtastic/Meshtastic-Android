@@ -1,6 +1,5 @@
 ---
 title: Sovellustoiminnot
-parent: Käyttöopas
 nav_order: 19
 last_updated: 2026-08-30
 description: Tuo mesh-ominaisuudet Android-järjestelmälle ja laitteessa toimiville tekoälyavustajille (esim. Gemini), jotta ne voivat suorittaa mesh-toimintoja ilman sovelluksen avaamista.

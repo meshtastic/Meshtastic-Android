@@ -1,6 +1,5 @@
 ---
 title: Püsivara värskendus
-parent: Kasutusjuhend
 nav_order: 13
 last_updated: 2026-09-06
 description: Raadio püsivara uuendamine sinihamba ​​või USB kaudu – OTA protsess, versioonikanalid, lennueelsed kontrollid ja taastamine.

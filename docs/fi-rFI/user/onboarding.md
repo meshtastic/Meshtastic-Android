@@ -1,6 +1,5 @@
 ---
 title: Aloittaminen
-parent: Käyttöopas
 nav_order: 1
 last_updated: 2026-08-30
 description: Ensimmäisen käynnistyksen määritys — käyttöoikeudet, käyttöönottoprosessi ja seuraavat vaiheet radion yhdistämisen jälkeen.

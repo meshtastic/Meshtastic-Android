@@ -1,6 +1,5 @@
 ---
 title: デバッグログ
-parent: ユーザーガイド
 nav_order: 22
 last_updated: 2026-08-30
 description: アプリのデバッグログをアプリ内で表示・エクスポートし、バグの診断に役立つよう GitHub の issue にキャプチャを添付できます。adb は不要です。

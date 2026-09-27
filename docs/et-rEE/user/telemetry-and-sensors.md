@@ -1,6 +1,5 @@
 ---
 title: Telemeetria & Sensorid
-parent: Kasutusjuhend
 nav_order: 9
 last_updated: 2026-09-18
 description: Kärgvõrgu andurite andmed — toetatud keskkonna-, õhukvaliteedi- ja võimsusandurid ning konfiguratsiooni- ja vaatamisjuhendid.

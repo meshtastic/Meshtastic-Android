@@ -1,6 +1,5 @@
 ---
 title: Съобщения & Канали
-parent: Ръководство за потребители
 nav_order: 3
 last_updated: 2026-09-14
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.

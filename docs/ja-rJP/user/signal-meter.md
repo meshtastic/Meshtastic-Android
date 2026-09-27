@@ -1,6 +1,5 @@
 ---
 title: Meshtastic の信号メーターの仕組み
-parent: User Guide
 nav_order: 15
 last_updated: 2026-09-09
 description: 信号メーターが、LoRa モデムプリセットに対する SNR から品質をどう評価するかを説明します。スペクトラム拡散、プリセット、バーが実際に意味するもの。

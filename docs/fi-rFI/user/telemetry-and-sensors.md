@@ -1,6 +1,5 @@
 ---
 title: Telemetria ja anturit
-parent: Käyttöopas
 nav_order: 9
 last_updated: 2026-09-18
 description: Anturitiedot verkossa — tuetut ympäristö-, ilmanlaatu- ja virta-anturit sekä määritys- ja katseluohjeet.

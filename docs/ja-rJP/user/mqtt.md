@@ -1,6 +1,5 @@
 ---
 title: MQTT
-parent: User Guide
 nav_order: 11
 last_updated: 2026-09-19
 description: メッシュをインターネットに橋渡しします。MQTT サーバーの設定、暗号化の各レイヤー、マップ報告について説明します。

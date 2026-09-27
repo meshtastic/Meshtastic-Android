@@ -1,6 +1,5 @@
 ---
 title: ヘルプとアプリ内ドキュメント
-parent: User Guide
 nav_order: 21
 last_updated: 2026-09-11
 description: このドキュメントをアプリ内で閲覧・検索し、オンデバイスの AI アシスタント Chirpy に Meshtastic について質問できます。

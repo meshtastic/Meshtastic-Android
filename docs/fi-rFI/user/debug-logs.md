@@ -1,6 +1,5 @@
 ---
 title: Virheenjäljityslokitiedot
-parent: Käyttöopas
 nav_order: 22
 last_updated: 2026-08-30
 description: Tarkastele ja vie sovelluksen omat virheenjäljityslokitiedot suoraan sovelluksesta ja liitä lokitiedot GitHub-vikaraporttiin ongelmien selvittämisen helpottamiseksi — adb:tä ei tarvita.

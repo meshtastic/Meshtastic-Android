@@ -1,6 +1,5 @@
 ---
 title: Yhteydet
-parent: Käyttöopas
 nav_order: 2
 last_updated: 2026-08-30
 description: Yhdistä puhelin tai työpöytä Meshtastic-radioon Bluetoothin, USB:n tai TCP/IP:n kautta.

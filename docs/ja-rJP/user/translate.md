@@ -1,6 +1,5 @@
 ---
 title: アプリを翻訳する
-parent: User Guide
 nav_order: 17
 last_updated: 2026-09-11
 description: アプリとそのドキュメントが Crowdin を通じてどう翻訳されるか、および翻訳に貢献するためのガイドラインを説明します。

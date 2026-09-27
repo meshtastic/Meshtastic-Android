@@ -1,6 +1,5 @@
 ---
 title: ファームウェア更新
-parent: User Guide
 nav_order: 13
 last_updated: 2026-09-06
 description: 無線機のファームウェアを Bluetooth または USB で更新します。OTA の手順、バージョンチャンネル、事前チェック、復旧について説明します。

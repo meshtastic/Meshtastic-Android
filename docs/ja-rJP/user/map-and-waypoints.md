@@ -1,6 +1,5 @@
 ---
 title: マップとウェイポイント
-parent: User Guide
 nav_order: 6
 last_updated: 2026-09-11
 description: マップ上でノードの位置を確認し、ウェイポイントの作成・共有、マップレイヤーとサイトプランナーの管理、位置共有とプライバシーの制御を行います。

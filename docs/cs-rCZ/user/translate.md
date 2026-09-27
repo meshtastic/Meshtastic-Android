@@ -1,6 +1,5 @@
 ---
 title: Překlad aplikace
-parent: Uživatelská příručka
 nav_order: 17
 last_updated: 2026-09-11
 description: Jak se aplikace a její dokumentace překládají pomocí Crowdin a jak přispívat k překladům.

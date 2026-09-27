@@ -1,6 +1,5 @@
 ---
 title: ローカルメッシュ探索
-parent: User Guide
 nav_order: 12
 last_updated: 2026-09-19
 description: メッシュネットワークを探索します。ローカルメッシュ探索スキャナー、ルート追跡の経路、隣接ノードのマップ、ノード探索ツールを説明します。

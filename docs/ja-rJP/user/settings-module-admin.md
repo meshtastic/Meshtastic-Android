@@ -1,6 +1,5 @@
 ---
 title: 設定：モジュールと管理
-parent: User Guide
 nav_order: 8
 last_updated: 2026-09-19
 description: オプションの機能モジュール（MQTT、テレメトリ、定型メッセージ、TAK など）を設定し、デバイスの管理を行います。

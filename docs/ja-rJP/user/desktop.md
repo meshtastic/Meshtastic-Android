@@ -1,6 +1,5 @@
 ---
 title: デスクトップアプリ
-parent: User Guide
 nav_order: 14
 last_updated: 2026-09-11
 description: Linux、macOS、Windows で Meshtastic デスクトップアプリをインストールして使う方法。接続、機能の対応状況、キーボードショートカットを説明します。
