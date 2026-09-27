@@ -7,14 +7,15 @@ never disagree with what is published.
 
 Channel layout on gh-pages:
     /                     production release docs (owns the root)
-    /vX.Y.Z/              permanent per-release snapshot
+    /vX.Y.Z/              per-release snapshot (current and previous release)
     /vX.Y.Z-open.N/       per-tag open-testing snapshot
     /vX.Y.Z-closed.N/     per-tag closed-testing snapshot
     /main/                snapshot of the main branch
     /api/                 Dokka reference (unversioned)
 
 Prerelease snapshots accumulate during a version cycle and are reaped by
-post-release-cleanup.yml once the production vX.Y.Z tag ships.
+post-release-cleanup.yml once the production vX.Y.Z tag ships. The same
+cleanup removes every production snapshot older than the one before vX.Y.Z.
 
 Usage: regenerate-versions.py <site-dir>
 """

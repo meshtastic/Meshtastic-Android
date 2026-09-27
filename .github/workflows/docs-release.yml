@@ -7,8 +7,8 @@ name: Docs Release
 # trigger covers a tag pushed by hand, and a manual run against a tag ref
 # (re)publishes that version without cutting a new tag.
 #
-# Production tags (vX.Y.Z) own the site root and get a permanent /vX.Y.Z/ copy,
-# plus a refreshed Dokka reference at /api/.
+# Production tags (vX.Y.Z) own the site root and get a /vX.Y.Z/ copy, plus a
+# refreshed Dokka reference at /api/.
 #
 # Open- and closed-testing tags (vX.Y.Z-open.N / vX.Y.Z-closed.N) publish a
 # per-tag snapshot at /vX.Y.Z-open.N/ only. They deliberately do NOT touch the
@@ -16,7 +16,8 @@ name: Docs Release
 # unversioned channel that docs-deploy.yml rebuilds from main every day.
 #
 # These per-tag prerelease directories accumulate during a version cycle and are
-# reaped by post-release-cleanup.yml, which a production publish dispatches.
+# reaped by post-release-cleanup.yml, which a production publish dispatches. That
+# cleanup also removes every production copy older than the newest one below /vX.Y.Z/.
 #
 # The /main/ snapshot is owned by docs-deploy.yml and is left untouched here.
 
