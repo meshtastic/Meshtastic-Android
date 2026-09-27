@@ -17,6 +17,7 @@
 package org.meshtastic.app.ai.appfunctions
 
 import android.content.Context
+import android.os.Build
 import androidx.appfunctions.AppFunctionException
 import androidx.appfunctions.AppFunctionManager
 import androidx.appfunctions.metadata.AppFunctionName
@@ -49,7 +50,8 @@ class AppFunctionStateSync(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     init {
-        observeAndSync()
+        // Only the API 36 platform service is declared, so below it nothing of ours is ever indexed.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) observeAndSync()
     }
 
     private fun observeAndSync() {
@@ -101,11 +103,14 @@ class AppFunctionStateSync(
                     } else {
                         AppFunctionManager.APP_FUNCTION_STATE_DISABLED
                     }
+                // Until the system indexes a function (first launch, or just after an update) writing it throws
+                // IllegalArgumentException; the read-back drives the retry.
                 try {
                     manager.setAppFunctionEnabled(functionId, state)
                 } catch (e: AppFunctionException) {
-                    // Usually "not indexed yet" on first launch; the read-back drives the retry.
                     Logger.d(e) { "AppFunction $functionId not writable yet" }
+                } catch (e: IllegalArgumentException) {
+                    Logger.d(e) { "AppFunction $functionId not indexed yet" }
                 }
             }
             if (attempt < MAX_SYNC_ATTEMPTS - 1) delay(RETRY_DELAY_MS)

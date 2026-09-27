@@ -65,6 +65,9 @@
             android:permission="android.permission.BIND_APP_FUNCTION_SERVICE"
             tools:targetApi="36">
             <property
+                android:name="android.app.appfunctions"
+                android:value="meshtastic_app_function_service-v1.xml" />
+            <property
                 android:name="android.app.appfunctions.schema"
                 android:value="app_functions_schema.xsd" />
             <property
