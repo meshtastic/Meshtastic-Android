@@ -2,7 +2,7 @@
 #
 # PostToolUse hook (Edit|Write|MultiEdit) for Meshtastic-Android.
 #
-# Front-runs three of this repo's own CI/governance gates locally, so the
+# Front-runs four of this repo's own CI/governance gates locally, so the
 # failure surfaces at edit time instead of in CI. Dispatches by edited path:
 #
 #   - base strings.xml      -> run scripts/sort-strings.py (keeps the file sorted
@@ -11,12 +11,17 @@
 #   - fastlane/metadata/**  -> run scripts/check-store-metadata.py and BLOCK on
 #                              store-rule violations (the pull-request.yml
 #                              check-metadata job is blocking; F-Droid #4262)
-#   - settings.gradle.kts   -> remind about the pull-request.yml paths-filter drift
-#                              guard for NEW top-level modules (#5735)
+#   - settings.gradle.kts   -> remind about the pull-request.yml paths-filter and
+#                              ALL_MODULES_FULL drift guards for NEW top-level modules
+#   - commonMain/commonTest -> BLOCK on java.*/android.* imports in .kt files (the
+#                              KMP boundary, otherwise first caught by the iOS compile
+#                              in kmpSmokeCompile for main sources or allTests for tests)
+#
+# Kotlin edits outside tests and previews also get warn-only Compose-pitfall notes.
 #
 # FAILS OPEN: any tooling/parse error allows the edit to stand (exit 0). Notes are
-# surfaced to Claude via PostToolUse additionalContext; only the store metadata
-# check blocks (exit 2), because that one is a hard CI gate.
+# surfaced to Claude via PostToolUse additionalContext; only the store metadata and
+# KMP-boundary checks block (exit 2), because each front-runs a failing CI job.
 
 input=$(cat)
 
@@ -41,8 +46,7 @@ emit_context() {
 
 case "$file_path" in
   *core/resources/src/commonMain/composeResources/values/strings.xml)
-    out=$( (cd "$repo_root" && python3 scripts/sort-strings.py) 2>&1 )
-    if [ $? -eq 0 ]; then
+    if out=$( (cd "$repo_root" && python3 scripts/sort-strings.py) 2>&1 ); then
       emit_context "Auto-ran scripts/sort-strings.py: base strings.xml re-sorted and .skills/compose-ui/strings-index.txt regenerated. Line positions changed — re-read the file before any further edits to it."
     else
       emit_context "Tried to auto-run scripts/sort-strings.py after your strings.xml edit but it failed (likely malformed XML in what was just written — please check):
