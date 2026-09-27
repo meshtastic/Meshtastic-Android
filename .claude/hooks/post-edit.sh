@@ -14,7 +14,8 @@
 #   - settings.gradle.kts   -> remind about the pull-request.yml paths-filter and
 #                              ALL_MODULES_FULL drift guards for NEW top-level modules
 #   - commonMain/commonTest -> BLOCK on java.*/android.* imports in .kt files (the
-#                              KMP boundary, otherwise first caught by kmpSmokeCompile)
+#                              KMP boundary, otherwise first caught by the iOS compile
+#                              in kmpSmokeCompile for main sources or allTests for tests)
 #
 # Kotlin edits outside tests and previews also get warn-only Compose-pitfall notes.
 #
