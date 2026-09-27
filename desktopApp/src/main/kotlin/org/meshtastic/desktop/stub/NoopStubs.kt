@@ -31,7 +31,6 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
-import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.Location
@@ -45,9 +44,6 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.TransportDisconnectReason
-import org.meshtastic.mqtt.MqttException
-import org.meshtastic.proto.MqttClientProxyMessage
-import org.meshtastic.mqtt.ConnectionState as MqttConnectionState
 import org.meshtastic.proto.Position as ProtoPosition
 
 /**
@@ -170,22 +166,6 @@ class NoopLocationRepository : LocationRepository {
     override val receivingLocationUpdates = MutableStateFlow(false)
 
     override fun getLocations(): Flow<Location> = emptyFlow()
-}
-
-// endregion
-
-// region Network Stubs (MQTT — not yet available on Desktop)
-
-class NoopMQTTRepository : MQTTRepository {
-    override fun disconnect() {}
-
-    override val proxyMessageFlow: Flow<MqttClientProxyMessage> = emptyFlow()
-
-    override fun publish(topic: String, data: ByteArray, retained: Boolean) {}
-
-    override val connectionState = MutableStateFlow<MqttConnectionState>(MqttConnectionState.Disconnected.Idle)
-
-    override val subscriptionRefusal = MutableStateFlow<MqttException.SubscriptionRefused?>(null)
 }
 
 // endregion
