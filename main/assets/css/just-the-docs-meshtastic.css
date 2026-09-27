@@ -398,7 +398,7 @@ button,
 [type=button],
 [type=reset],
 [type=submit] {
-  appearance: button;
+  appearance: auto;
 }
 
 /**
@@ -497,7 +497,7 @@ textarea {
  * 2. Change font properties to `inherit` in Safari.
  */
 ::-webkit-file-upload-button {
-  appearance: button; /* 1 */
+  appearance: auto; /* 1 */
   font: inherit; /* 2 */
 }
 
@@ -788,6 +788,7 @@ blockquote {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
   color: #2C2D3C;
+  outline-offset: -1px;
   padding-right: 1rem;
   padding-left: 1rem;
 }
@@ -818,6 +819,7 @@ blockquote {
   height: 100%;
   padding: 1rem;
   align-items: center;
+  outline-offset: -1px;
 }
 
 @media (min-width: 50rem) {
@@ -1137,6 +1139,7 @@ blockquote {
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
   line-height: 2.5rem;
+  outline-offset: -1px;
   padding-right: 3rem;
   padding-left: 1rem;
 }
@@ -1168,6 +1171,7 @@ blockquote {
   height: 3rem;
   padding: 0.75rem;
   color: #2D8F52;
+  outline-offset: -1px;
 }
 @media (min-width: 50rem) {
   .nav-list .nav-list-item .nav-list-expander {
@@ -1681,8 +1685,7 @@ h6,
   }
 }
 .search-input:focus {
-  outline: 2px solid #2D8F52;
-  outline-offset: -2px;
+  outline-offset: -1px;
 }
 .search-input:focus + .search-label .search-icon {
   color: #2D8F52;
@@ -1759,6 +1762,7 @@ h6,
 .search-result {
   display: block;
   padding: 0.25rem 0.75rem;
+  outline-offset: -1px;
 }
 .search-result:hover, .search-result.active {
   background-color: #E0E1EB;
@@ -1781,7 +1785,7 @@ h6,
 .search-result-doc {
   display: flex;
   align-items: center;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .search-result-doc.search-result-doc-parent {
   opacity: 0.5;
@@ -1817,7 +1821,7 @@ h6,
 
 .search-result-section {
   margin-left: 1.5rem;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .search-result-rel-url {
@@ -1844,7 +1848,7 @@ h6,
   padding-left: 1rem;
   margin-left: 0.5rem;
   color: #555668;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
   border-left: 1px solid;
   border-left-color: #D5D6E0;
 }
@@ -2457,7 +2461,7 @@ pre.highlight {
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border-width: 0;
 }
@@ -7255,6 +7259,9 @@ pre.highlight {
     width: 100%;
     height: auto;
     border-right: 0 !important;
+    /* Disable display: flex and position: fixed from non-print styles */
+    position: static;
+    display: block;
   }
   .site-header {
     border-bottom: 1px solid #D5D6E0;
@@ -7271,7 +7278,7 @@ pre.highlight {
   }
   .main {
     max-width: none;
-    margin-left: 0;
+    margin-left: 0 !important; /* Necessary to override .side-bar + .main specificity */
   }
 }
 a.skip-to-main {
