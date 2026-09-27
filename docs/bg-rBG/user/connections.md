@@ -1,6 +1,5 @@
 ---
 title: Връзки
-parent: Ръководство за потребители
 nav_order: 2
 last_updated: 2026-08-30
 description: Свържете телефона или настолния си компютър с Meshtastic радио чрез Bluetooth, USB или TCP/IP.

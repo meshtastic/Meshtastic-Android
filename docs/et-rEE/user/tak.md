@@ -1,6 +1,5 @@
 ---
 title: TAK integratsioon
-parent: Kasutusjuhend
 nav_order: 10
 last_updated: 2026-09-11
 description: Koostöö ATAKi ja WinTAKiga — CoT asukoha jagamine, TAK rollid ja pluginate seadistamine.

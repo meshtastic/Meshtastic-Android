@@ -1,6 +1,5 @@
 ---
 title: メッセージとチャンネル
-parent: User Guide
 nav_order: 3
 last_updated: 2026-09-14
 description: メッセージの送受信、チャンネルの管理、暗号化の設定、会話の検索、クイックチャット・リアクション・メッセージ操作の使い方を説明します。

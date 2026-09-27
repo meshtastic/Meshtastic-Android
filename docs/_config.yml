@@ -95,6 +95,12 @@ defaults:
       locale: fi-rFI
       nav_exclude: true
   - scope:
+      path: "fr-rCA"
+    values:
+      layout: locale_page
+      locale: fr-rCA
+      nav_exclude: true
+  - scope:
       path: "fr-rFR"
     values:
       layout: locale_page

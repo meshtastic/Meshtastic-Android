@@ -1,6 +1,5 @@
 ---
 title: Laiteohjelmiston päivitykset
-parent: Käyttöopas
 nav_order: 13
 last_updated: 2026-09-06
 description: Päivitä radiosi laiteohjelmisto bluetoothin tai USB:n kautta — OTA-päivitys, versiokanavat, tarkistukset ennen päivitystä ja palautus.

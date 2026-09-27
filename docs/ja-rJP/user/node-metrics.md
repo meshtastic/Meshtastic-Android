@@ -1,6 +1,5 @@
 ---
 title: ノードメトリクス
-parent: User Guide
 nav_order: 5
 last_updated: 2026-09-09
 description: 各メッシュノードのテレメトリダッシュボード。デバイスの状態、環境センサー、大気質、信号品質、電力、ルート追跡、位置履歴を表示します。

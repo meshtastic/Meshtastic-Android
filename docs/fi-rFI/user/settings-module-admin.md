@@ -1,6 +1,5 @@
 ---
 title: Asetukset — Moduulit ja ylläpito
-parent: Käyttöopas
 nav_order: 8
 last_updated: 2026-09-19
 description: Määritä valinnaiset ominaisuusmoduulit (MQTT, telemetria, valmiit viestit, TAK ja muut) sekä suorita laitteen ylläpitotoimia.

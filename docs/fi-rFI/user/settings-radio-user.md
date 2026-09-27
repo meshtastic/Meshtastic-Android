@@ -1,6 +1,5 @@
 ---
 title: Asetukset — Radio ja käyttäjä
-parent: Käyttöopas
 nav_order: 7
 last_updated: 2026-09-19
 description: Configure your node hardware, LoRa presets, user profile, position sharing, power management, and security.

@@ -1,6 +1,5 @@
 ---
 title: Units, Measurement & Locale
-parent: User Guide
 nav_order: 16
 last_updated: 2026-08-30
 description: How the app formats temperature, distance, speed, and other measurements based on your device locale.

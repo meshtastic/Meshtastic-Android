@@ -1,6 +1,5 @@
 ---
 title: Настольное приложение
-parent: Руководство пользователя
 nav_order: 14
 last_updated: 2026-09-11
 description: Установка и использование приложения Meshtastic Desktop на Linux, macOS и Windows — подключения, функционал и сочетания клавиш.

@@ -1,6 +1,5 @@
 ---
 title: Help & In-App Docs
-parent: Uživatelská příručka
 nav_order: 21
 last_updated: 2026-09-11
 description: Browse this documentation inside the app, search it, and ask Chirpy — the on-device AI assistant — questions about Meshtastic.

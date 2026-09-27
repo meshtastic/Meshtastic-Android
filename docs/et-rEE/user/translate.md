@@ -1,6 +1,5 @@
 ---
 title: Tõlgi rakendus
-parent: Kasutusjuhend
 nav_order: 17
 last_updated: 2026-09-11
 description: Kuidas rakendust ja selle dokumentatsiooni Crowdini kaudu tõlgitakse ja tõlgete panustamise juhised.

@@ -1,6 +1,5 @@
 ---
 title: Firmwareaktualisierungen
-parent: User Guide
 nav_order: 13
 last_updated: 2026-09-06
 description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.

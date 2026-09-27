@@ -1,6 +1,5 @@
 ---
 title: Ühikud, mõõtühikud ja lokaat
-parent: Kasutusjuhend
 nav_order: 16
 last_updated: 2026-08-30
 description: Kuidas rakendus vormindab temperatuuri, vahemaad, kiirust ja muid mõõtmisi vastavalt seadme lokaadile.

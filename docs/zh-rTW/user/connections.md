@@ -1,6 +1,5 @@
 ---
 title: 連線
-parent: 使用者指南
 nav_order: 2
 last_updated: 2026-08-30
 description: 透過藍牙、USB 或 TCP/IP 將您的手機或電腦連接至 Meshtastic 無線電裝置。

@@ -1,6 +1,5 @@
 ---
 title: Соединения
-parent: Руководство пользователя
 nav_order: 2
 last_updated: 2026-08-30
 description: Подключи свой телефон или компьютер к устройству Meshtastic через Bluetooth, USB или TCP/IP.

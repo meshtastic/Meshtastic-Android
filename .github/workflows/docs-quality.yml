@@ -106,7 +106,8 @@ jobs:
         run: node scripts/check-doc-aliases.js .
 
       - name: Check locale front matter
-        # layout and nav_order in every docs/<locale>/ page must match docs/en.
+        # layout and nav_order in every docs/<locale>/ page must match docs/en, and no locale
+        # page may have a parent or grand_parent, which would list it in an English section.
         run: python3 scripts/docs/sync-locale-front-matter.py --check
 
       - name: Check doc freshness

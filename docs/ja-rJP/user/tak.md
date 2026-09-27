@@ -1,6 +1,5 @@
 ---
 title: TAK 連携
-parent: User Guide
 nav_order: 10
 last_updated: 2026-09-11
 description: ATAK および WinTAK と相互運用します。CoT による位置共有、TAK の役割、プラグインの設定を説明します。

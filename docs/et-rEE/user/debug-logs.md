@@ -1,6 +1,5 @@
 ---
 title: Arendaja logid
-parent: Kasutaja juhis
 nav_order: 22
 last_updated: 2026-08-30
 description: Vaata ja ekspordi rakenduse arendajalogi rakenduse seest ning lisa GitHubi probleemile jäädvustus vigade diagnoosimiseks – adb-d pole vaja.

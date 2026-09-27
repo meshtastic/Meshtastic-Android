@@ -1,6 +1,5 @@
 ---
 title: コネクション
-parent: User Guide
 nav_order: 2
 last_updated: 2026-08-30
 description: スマートフォンやデスクトップを、Bluetooth・USB・TCP/IP で Meshtastic 無線機に接続します。

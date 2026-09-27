@@ -1,6 +1,5 @@
 ---
 title: アプリ機能
-parent: User Guide
 nav_order: 19
 last_updated: 2026-08-30
 description: メッシュの機能を Android システムやオンデバイスの AI アシスタント（例：Gemini）に公開し、アプリを開かずにメッシュのワークフローを実行できるようにします。

@@ -1,6 +1,5 @@
 ---
 title: Verbindungen
-parent: Benutzerhandbuch
 nav_order: 2
 last_updated: 2026-08-30
 description: Verbinden Sie Ihr Telefon oder Ihren Desktop mit einem Meshtastic Funkgerät über Bluetooth, USB oder TCP/IP.

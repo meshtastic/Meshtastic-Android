@@ -1,6 +1,5 @@
 ---
 title: Widget na domovské obrazovce
-parent: Uživatelská příručka
 nav_order: 20
 last_updated: 2026-08-30
 description: Přidejte widget Meshtastic na domovskou obrazovku a mějte přehled o místních statistikách připojeného rádia bez nutnosti otevírat aplikaci.

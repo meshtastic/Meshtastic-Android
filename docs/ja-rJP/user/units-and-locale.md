@@ -1,6 +1,5 @@
 ---
 title: 単位・計測・ロケール
-parent: User Guide
 nav_order: 16
 last_updated: 2026-08-30
 description: アプリが、デバイスのロケールに基づいて温度・距離・速度などの計測値をどう表示するかを説明します。
