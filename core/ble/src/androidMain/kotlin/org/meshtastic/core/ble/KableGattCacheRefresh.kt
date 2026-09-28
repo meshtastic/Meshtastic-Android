@@ -17,6 +17,7 @@
 package org.meshtastic.core.ble
 
 import android.bluetooth.BluetoothGatt
+import android.os.Build
 import co.touchlab.kermit.Logger
 import com.juul.kable.Peripheral
 import kotlinx.coroutines.flow.StateFlow
@@ -30,22 +31,35 @@ internal actual fun Peripheral.refreshGattCache(): Boolean {
         try {
             extractBluetoothGatt()
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.w(e) { "refreshGattCache: BluetoothGatt extraction failed (${this.javaClass.name})" }
-            null
+            logRefreshFailure("gatt-unreachable peripheral=${javaClass.name}", e)
+            return false
         }
             ?: run {
-                Logger.w { "refreshGattCache: BluetoothGatt unreachable via Kable internals (${this.javaClass.name})" }
+                logRefreshFailure("gatt-unreachable peripheral=${javaClass.name}")
                 return false
             }
     return try {
         val refreshMethod = gatt.javaClass.getDeclaredMethod("refresh").apply { isAccessible = true }
-        val result = refreshMethod.invoke(gatt) as? Boolean ?: false
-        Logger.i { "refreshGattCache: refresh() returned $result" }
-        result
+        val refreshed = refreshMethod.invoke(gatt) as? Boolean ?: false
+        Logger.i {
+            "$REFRESH_LOG_LABEL outcome=${if (refreshed) "refreshed" else "refused"} sdk=${Build.VERSION.SDK_INT}"
+        }
+        refreshed
+    } catch (e: NoSuchMethodException) {
+        // The hidden-API blocklist hides the method rather than throwing on access, so this is how a block shows up.
+        logRefreshFailure("hidden-api-blocked", e)
+        false
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-        Logger.w(e) { "refreshGattCache: refresh() invocation failed" }
+        logRefreshFailure("invoke-failed", e)
         false
     }
+}
+
+/** A stable label, so the field logs show when refresh() stops working and on which API level. */
+private const val REFRESH_LOG_LABEL = "gatt-cache-refresh"
+
+private fun logRefreshFailure(outcome: String, cause: Throwable? = null) {
+    Logger.w(cause) { "$REFRESH_LOG_LABEL outcome=$outcome sdk=${Build.VERSION.SDK_INT}" }
 }
 
 /**

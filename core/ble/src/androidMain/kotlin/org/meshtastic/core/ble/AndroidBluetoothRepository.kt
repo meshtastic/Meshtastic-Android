@@ -38,7 +38,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.common.hasBluetoothLe
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.util.anonymize
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -127,27 +126,6 @@ class AndroidBluetoothRepository(
             if (!bonded) {
                 throw Exception("Timed out waiting for bonding to complete")
             }
-        } finally {
-            updateBluetoothState()
-        }
-    }
-
-    @Suppress("TooGenericExceptionCaught", "SwallowedException", "ReturnCount")
-    @SuppressLint("MissingPermission")
-    override suspend fun removeBond(address: String): Boolean {
-        val remoteDevice = bluetoothAdapter?.getRemoteDevice(address)
-        if (remoteDevice == null || remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_NONE) {
-            return false
-        }
-        return try {
-            // removeBond() is a public-but-hidden BluetoothDevice API (no SDK stub); reflection is the standard access
-            // path used across the Android BLE/DFU ecosystem (incl. Nordic's DFU library).
-            val removed = remoteDevice.javaClass.getMethod("removeBond").invoke(remoteDevice) as? Boolean ?: false
-            Logger.i { "removeBond(${address.anonymize()}) -> $removed" }
-            removed
-        } catch (e: Exception) {
-            Logger.w(e) { "removeBond(${address.anonymize()}) reflection failed" }
-            false
         } finally {
             updateBluetoothState()
         }

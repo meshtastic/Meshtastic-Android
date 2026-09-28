@@ -21,6 +21,7 @@ import android.app.Application
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.os.Build
+import android.os.StrictMode
 import androidx.annotation.RequiresApi
 import androidx.collection.intSetOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -95,6 +96,7 @@ open class MeshUtilApplication :
 
     override fun onCreate() {
         super.onCreate()
+        if (BuildConfig.DEBUG) enableDebugVmPolicy()
         ContextServices.app = this
         configureFlavorApplication(BuildConfig.APPLICATION_ID)
 
@@ -254,4 +256,12 @@ open class MeshUtilApplication :
      */
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(KoinWorkerFactory()).build()
+}
+
+/** Logs hidden-API reflection, such as the GATT cache refresh, and implicit URI permission grants. */
+private fun enableDebugVmPolicy() {
+    val policy = StrictMode.VmPolicy.Builder()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) policy.detectNonSdkApiUsage()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) policy.detectImplicitUriPermissionGrant()
+    StrictMode.setVmPolicy(policy.penaltyLog().build())
 }
