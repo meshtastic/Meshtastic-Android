@@ -155,7 +155,9 @@ class DiscoverySummaryViewModel(
 
             // Load cached per-preset AI summaries
             val cachedPresetSummaries =
-                results.filter { !it.aiSummary.isNullOrBlank() }.associate { it.id to it.aiSummary!! }
+                results
+                    .mapNotNull { result -> result.aiSummary?.takeUnless { it.isBlank() }?.let { result.id to it } }
+                    .toMap()
             _presetAiSummaries.value = cachedPresetSummaries
 
             val session = discoveryRepository.getSession(sessionId)

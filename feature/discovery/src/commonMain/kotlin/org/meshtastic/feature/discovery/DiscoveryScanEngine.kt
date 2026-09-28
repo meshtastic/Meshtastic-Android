@@ -858,9 +858,11 @@ class DiscoveryScanEngine(
         userLat: Double,
         userLon: Double,
     ): DiscoveredNodeEntity {
+        val lat = latitude
+        val lon = longitude
         val distance =
-            if (hasValidCoordinates(latitude, longitude) && hasValidCoordinates(userLat, userLon)) {
-                latLongToMeter(userLat, userLon, latitude!!, longitude!!)
+            if (lat != null && lon != null && hasValidCoordinates(lat, lon) && hasValidCoordinates(userLat, userLon)) {
+                latLongToMeter(userLat, userLon, lat, lon)
             } else {
                 null
             }

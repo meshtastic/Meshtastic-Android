@@ -375,9 +375,7 @@ class FirmwareUpdateViewModel(
                     Logger.e(e) { "Error checking for updates" }
                     val unknownError = UiText.Resource(Res.string.firmware_update_unknown_error)
                     _state.value =
-                        FirmwareUpdateState.Error(
-                            if (e.message != null) UiText.DynamicString(e.message!!) else unknownError,
-                        )
+                        FirmwareUpdateState.Error(e.message?.let { UiText.DynamicString(it) } ?: unknownError)
                 }
         }
     }

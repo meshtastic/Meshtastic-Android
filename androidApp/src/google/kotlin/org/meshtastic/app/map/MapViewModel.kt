@@ -152,8 +152,7 @@ class MapViewModel(
             if (id != null) {
                 viewModelScope.launch {
                     val wpMap = waypoints.first { it.containsKey(id) }
-                    wpMap[id]?.let { packet ->
-                        val waypoint = packet.waypoint!!
+                    wpMap[id]?.waypoint?.let { waypoint ->
                         val latLng =
                             LatLng(
                                 (waypoint.latitude_i ?: 0) / WAYPOINT_COORD_SCALE,
@@ -703,8 +702,7 @@ class MapViewModel(
         selectedWaypointId.value?.let { wpId ->
             viewModelScope.launch {
                 val wpMap = waypoints.first { it.containsKey(wpId) }
-                wpMap[wpId]?.let { packet ->
-                    val waypoint = packet.waypoint!!
+                wpMap[wpId]?.waypoint?.let { waypoint ->
                     val latLng =
                         LatLng(
                             (waypoint.latitude_i ?: 0) / WAYPOINT_COORD_SCALE,

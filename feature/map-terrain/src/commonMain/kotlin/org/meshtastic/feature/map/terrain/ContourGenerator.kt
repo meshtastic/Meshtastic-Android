@@ -118,10 +118,10 @@ object ContourGenerator {
             // this differs from the ordinary case, which only ever has one.
             ALL_EDGES_CROSSING -> {
                 val centerAverage = (tl + tr + br + bl) / CORNER_COUNT
-                if (centerAverage >= level) {
-                    listOf(Segment(topPoint!!, leftPoint!!), Segment(bottomPoint!!, rightPoint!!))
-                } else {
-                    listOf(Segment(topPoint!!, rightPoint!!), Segment(leftPoint!!, bottomPoint!!))
+                when {
+                    topPoint == null || rightPoint == null || bottomPoint == null || leftPoint == null -> emptyList()
+                    centerAverage >= level -> listOf(Segment(topPoint, leftPoint), Segment(bottomPoint, rightPoint))
+                    else -> listOf(Segment(topPoint, rightPoint), Segment(leftPoint, bottomPoint))
                 }
             }
 

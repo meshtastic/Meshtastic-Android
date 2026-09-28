@@ -274,7 +274,7 @@ fun EnvironmentMetricsChart(
                     lineModel {
                         series(
                             x = pressureData.map { it.time },
-                            y = pressureData.map { Environment.BAROMETRIC_PRESSURE.getValue(it)!! },
+                            y = pressureData.mapNotNull { Environment.BAROMETRIC_PRESSURE.getValue(it) },
                         )
                     }
                 }
@@ -285,7 +285,7 @@ fun EnvironmentMetricsChart(
                         lineModel {
                             series(
                                 x = metricData.map { it.time },
-                                y = metricData.map { chartValue(metric, it, isImperial)!! },
+                                y = metricData.mapNotNull { chartValue(metric, it, isImperial) },
                             )
                         }
                     }
