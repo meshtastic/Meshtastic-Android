@@ -6,7 +6,7 @@ description: Koin Annotations dependency injection and JetBrains Navigation 3 in
 # Skill: DI and Navigation 3 Architecture
 
 ## Description
-This skill covers dependency injection (Koin Annotations 4.2.x) and JetBrains Navigation 3 (1.1.x) architecture, constraints, and anti-patterns within the Meshtastic-Android KMP codebase.
+This skill covers dependency injection (Koin Annotations 4.2.x) and Navigation 3 1.2 (the JetBrains `navigation3-ui` mirror over AndroidX `navigation3-runtime`) architecture, constraints, and anti-patterns within the Meshtastic-Android KMP codebase.
 
 ## Dependency Injection (Koin)
 
@@ -46,13 +46,14 @@ startKoin<AndroidKoinApp> {
 1. **Types:** Use Navigation 3 types consistently (`NavKey`, `NavBackStack`, `EntryProviderScope`).
 2. **Typed Routes:** Keep route definitions in `core:navigation/src/commonMain/.../Routes.kt` as `@Serializable sealed interface` hierarchies. Don't use ad-hoc strings.
 3. **Graph Assembly:** Define feature navigation graphs as extension functions on `EntryProviderScope<NavKey>` in `commonMain` (e.g., `fun EntryProviderScope<NavKey>.settingsGraph(backStack)`).
-4. **Host Integration:** Use `MeshtasticNavDisplay` (from `core:ui/commonMain`) as the Navigation 3 host. Do not configure decorators manually inside feature modules.
-5. **Back Handlers:** Use `NavigationBackHandler` from `androidx.navigationevent:navigationevent-compose` for back gestures in multiplatform code. Do not use Android's `BackHandler`.
-6. **Deep Links:** Use `DeepLinkRouter.route()` in `core:navigation` to synthesize typed backstacks from RESTful paths.
+4. **Host Integration:** Use `MeshtasticNavDisplay` (from `core:ui/commonMain`) as the Navigation 3 host. It owns the entry decorators; do not create them in app hosts or feature modules.
+5. **Scenes:** `MeshtasticNavDisplay` renders `ListDetailSceneStrategy` scenes (`listPane()`, `detailPane()`, `extraPane()` entry metadata) and falls back to a single pane. It registers no dialog or supporting-pane strategy, so that metadata has no effect.
+6. **Back Handlers:** Use `NavigationBackHandler` from `androidx.navigationevent:navigationevent-compose` for back gestures in multiplatform code. Do not use Android's `BackHandler`.
+7. **Deep Links:** Use `DeepLinkRouter.route()` in `core:navigation` to synthesize typed backstacks from RESTful paths.
 
 ### Anti-Patterns
 - **Single Backstack for Multiple Tabs:** Do **not** use a single `NavBackStack` list for multiple tabs. Use `MultiBackstack` (from `core:navigation`).
-- **Decorator Reuse Across Tabs:** Do **not** reuse the same `NavEntryDecorator` instances across different backstacks. When rendering an active tab in `MeshtasticNavDisplay`, you **must** supply a fresh set of decorators (using `remember(backStack) { ... }`) bound to the active backstack instance to prevent permanent `ViewModelStore` destruction.
+- **Decorator Reuse Across Tabs:** Do **not** decorate several back stacks with one `NavEntryDecorator` set. Navigation 3 pops every entry missing from the stack it is given, so a shared saveable-state or ViewModel-store decorator clears the tab you just left. The `MultiBackstack` overload of `MeshtasticNavDisplay` decorates every tab's stack with that tab's own pair through `rememberDecoratedNavEntries` and passes only the active tab's entries to `NavDisplay`, as in the Navigation 3 multiple back stacks recipe. Its `entryProvider` must therefore resolve every tab's keys, not only the active tab's.
 - **Custom Backstack Mutation:** Do **not** mutate back navigation with custom stacks disconnected from the app backstack. Mutate `NavBackStack<NavKey>` directly with `add(...)` and `removeLastOrNull()`.
 
 ## Reference Anchors
