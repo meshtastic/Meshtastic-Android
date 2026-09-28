@@ -159,6 +159,17 @@ class MeshNotificationManagerImplRoutingTest {
     }
 
     @Test
+    fun `a warning still building when the battery recovers is never posted`() = runWithRenderScope { scope ->
+        val manager = createManager(scope)
+        val node = Node(num = 4)
+        manager.beforeLowBatteryPost = { manager.cancelLowBatteryNotification(node) }
+
+        manager.showLowBatteryNotification(node, isRemote = false)
+
+        assertTrue(activeByTag("low_battery").isEmpty())
+    }
+
+    @Test
     fun `radio notices post on their own channel and clear by identity`() = runWithRenderScope { scope ->
         val manager = createManager(scope)
         val notice = ClientNotification.Builder().also { wb -> wb.message = "Generic warning" }.build()
