@@ -30,7 +30,8 @@ import kotlin.test.assertTrue
  * address onto *every* line the BLE library emits, plus further sites in the DFU transports and WiFi provisioning.
  *
  * Scoped to the BLE-adjacent modules so matching on the `address` suffix stays low-noise. That scope includes the
- * transport modules, so TCP hosts are anonymised the same way.
+ * transport modules, so TCP hosts go through `anonymizePublicHost()`, which keeps a host on the user's own network
+ * readable.
  */
 class BleAddressLoggingTest {
 
