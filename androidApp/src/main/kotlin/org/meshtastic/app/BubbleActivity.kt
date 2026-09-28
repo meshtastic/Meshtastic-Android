@@ -17,11 +17,15 @@
 package org.meshtastic.app
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,6 +63,8 @@ class BubbleActivity : AppCompatActivity() {
         }
         messageViewModel.setContactKey(contactKey)
 
+        enableEdgeToEdge()
+
         setContent {
             val theme by model.theme.collectAsStateWithLifecycle()
             val dark =
@@ -67,6 +73,12 @@ class BubbleActivity : AppCompatActivity() {
                     AppCompatDelegate.MODE_NIGHT_NO -> false
                     else -> isSystemInDarkTheme()
                 }
+            SideEffect {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
+                    navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
+                )
+            }
             AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
                 MessageScreen(
                     contactKey = contactKey,
