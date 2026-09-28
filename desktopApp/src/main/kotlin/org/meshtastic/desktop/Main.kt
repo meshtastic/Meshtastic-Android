@@ -180,7 +180,8 @@ fun main(args: Array<String>) {
 
         DeepLinkHandler(args, uiViewModel, remember { koinApp.koin.get<LaunchOptions>() })
         MeshServiceLifecycle()
-        MeshLogCleanupSchedule()
+        // Desktop has no WorkManager, so the hourly mesh log cleanup lives as long as the application composition.
+        LaunchedEffect(Unit) { withContext(ioDispatcher) { koinApp.koin.get<MeshLogCleanup>().runHourly() } }
         ThemeAndLocaleProvider(uiViewModel)
     }
 
@@ -243,13 +244,6 @@ private fun MeshServiceLifecycle() {
         meshServiceController.start()
         onDispose { meshServiceController.stop() }
     }
-}
-
-/** Desktop has no WorkManager, so the hourly mesh log cleanup lives as long as the application composition. */
-@Composable
-private fun MeshLogCleanupSchedule() {
-    val meshLogCleanup = koinInject<MeshLogCleanup>()
-    LaunchedEffect(meshLogCleanup) { withContext(ioDispatcher) { meshLogCleanup.runHourly() } }
 }
 
 // ----- Theme, locale, and application shell -----
