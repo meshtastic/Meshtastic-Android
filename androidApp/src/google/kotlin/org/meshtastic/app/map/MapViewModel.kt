@@ -443,8 +443,7 @@ class MapViewModel(
         }
     }
 
-    private fun isValidTileUrlTemplate(urlTemplate: String): Boolean =
-        urlTemplate.isValidTileUrlTemplate(requireHttps = false)
+    private fun isValidTileUrlTemplate(urlTemplate: String): Boolean = urlTemplate.isValidTileUrlTemplate()
 
     /** What to restore once the network returns from an auto-switch; null when nothing has been auto-switched. */
     private data class OfflineAutoSwitchState(val rasterBasemapId: String?, val googleMapType: MapType)
@@ -870,7 +869,7 @@ internal fun List<CustomTileProviderConfig>.resolvePersistedCustomTileSelection(
 }
 
 internal fun CustomTileProviderConfig.hasValidGoogleTileSource(): Boolean =
-    isLocal || urlTemplate.isValidTileUrlTemplate(requireHttps = false)
+    isLocal || urlTemplate.isValidTileUrlTemplate()
 
 private fun GoogleCameraPosition.toCameraPosition() = CameraPosition(LatLng(targetLat, targetLng), zoom, tilt, bearing)
 

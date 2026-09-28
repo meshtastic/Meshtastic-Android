@@ -47,7 +47,7 @@ internal fun CustomTileProviderConfig.toRasterBasemap(): RasterBasemap? {
     return when {
         archive != null -> RasterBasemap.Local(id = id, uri = archive)
 
-        urlTemplate.isValidTileUrlTemplate(requireHttps = false) ->
+        urlTemplate.isValidTileUrlTemplate() ->
             RasterBasemap.Remote(id = id, spec = RasterTileSpec(tiles = listOf(urlTemplate)))
 
         else -> null
