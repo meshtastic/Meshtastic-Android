@@ -48,13 +48,13 @@ fun Node.toSharedContact(isOwnContact: Boolean = false): SharedContact = SharedC
  */
 @Throws(MalformedMeshtasticUrlException::class)
 fun CommonUri.toSharedContact(): SharedContact {
-    checkSharedContactUrl()
-    val data = fragment!!.substringBefore('?')
+    val data = sharedContactFragment().substringBefore('?')
     return decodeSharedContactData(data)
 }
 
+/** The fragment of a shared-contact URL, after checking the host and path. */
 @Throws(MalformedMeshtasticUrlException::class)
-private fun CommonUri.checkSharedContactUrl() {
+private fun CommonUri.sharedContactFragment(): String {
     val h = host?.lowercase() ?: ""
     val isCorrectHost = h == MESHTASTIC_HOST || h == "www.$MESHTASTIC_HOST"
     val segments = pathSegments
@@ -66,6 +66,7 @@ private fun CommonUri.checkSharedContactUrl() {
             "Not a valid Meshtastic URL: host=$h, segmentCount=${segments.size}, hasFragment=${!frag.isNullOrBlank()}",
         )
     }
+    return frag
 }
 
 @Suppress("ThrowsCount")

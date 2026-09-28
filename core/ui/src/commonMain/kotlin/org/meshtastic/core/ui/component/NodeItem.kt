@@ -124,13 +124,7 @@ fun NodeItem(
             FontStyle.Normal
         }
 
-    val unmessageable =
-        remember(thatNode) {
-            when {
-                thatNode.user.is_unmessagable != null -> thatNode.user.is_unmessagable!!
-                else -> thatNode.user.role.isUnmessageableRole()
-            }
-        }
+    val unmessageable = remember(thatNode) { thatNode.user.is_unmessagable ?: thatNode.user.role.isUnmessageableRole() }
 
     // Resolved out here, not inside the remember: stringResource is composable, and the description is built in a
     // plain lambda.

@@ -27,14 +27,15 @@ import org.meshtastic.proto.Waypoint
  * `packet` row (keyed on the random MeshPacket transmission id, not the semantic waypoint id). Consumers must normalise
  * — latest transmission wins, expired waypoints dropped — or they will see duplicate/stale geofences and keep alerting
  * on waypoints the user can no longer see. Both the map UI and the geofence engine go through here so they cannot
- * drift. Rows are ordered oldest-first, so `associateBy` keeps the newest copy per id.
+ * drift. Rows are ordered oldest-first, so `toMap` keeps the newest copy per id.
  */
-fun List<DataPacket>.activeWaypointPackets(nowSeconds: Long): Map<Int, DataPacket> = filter { it.waypoint != null }
-    .associateBy { it.waypoint!!.id }
-    .filterValues {
-        val expire = it.waypoint?.expire ?: 0
-        expire == 0 || expire.toLong() > nowSeconds
-    }
+fun List<DataPacket>.activeWaypointPackets(nowSeconds: Long): Map<Int, DataPacket> =
+    mapNotNull { packet -> packet.waypoint?.let { it.id to packet } }
+        .toMap()
+        .filterValues {
+            val expire = it.waypoint?.expire ?: 0
+            expire == 0 || expire.toLong() > nowSeconds
+        }
 
 /**
  * The geofences whose crossings THIS device should raise notifications for: waypoints we created ([isFromLocal]) plus

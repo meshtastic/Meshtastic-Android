@@ -76,7 +76,7 @@ internal class SerialConnectionImpl(
 
     override fun connect() {
         // We shouldn't be able to get this far without a USB subsystem so explode if that isn't true
-        val usbManager = usbManagerLazy.value!!
+        val usbManager = checkNotNull(usbManagerLazy.value) { "No USB subsystem" }
 
         val usbDeviceConnection = usbManager.openDevice(device.device)
         if (usbDeviceConnection == null) {

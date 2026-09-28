@@ -44,17 +44,17 @@ fun CommonUri.toChannelSet(): ChannelSet {
         h.equals(MESHTASTIC_HOST, ignoreCase = true) || h.equals("www.$MESHTASTIC_HOST", ignoreCase = true)
     val segments = pathSegments
     val isCorrectPath = segments.any { it.equals("e", ignoreCase = true) }
-    val hasFragment = !fragment.isNullOrBlank()
+    val frag = fragment
 
-    if (!hasFragment || !isCorrectHost || !isCorrectPath) {
+    if (frag.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
         throw MalformedMeshtasticUrlException(
-            "Not a valid Meshtastic URL: host=$h, segmentCount=${segments.size}, hasFragment=$hasFragment",
+            "Not a valid Meshtastic URL: host=$h, segmentCount=${segments.size}, hasFragment=${!frag.isNullOrBlank()}",
         )
     }
 
     // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
     // This gracefully handles those cases until the newer version are generally available/used.
-    val fragmentBase64 = fragment!!.substringBefore('?').replace('-', '+').replace('_', '/')
+    val fragmentBase64 = frag.substringBefore('?').replace('-', '+').replace('_', '/')
     val fragmentBytes =
         fragmentBase64.decodeBase64() ?: throw MalformedMeshtasticUrlException("Invalid Base64 in URL fragment")
     val url =
@@ -63,7 +63,7 @@ fun CommonUri.toChannelSet(): ChannelSet {
         } catch (e: Exception) {
             throw MalformedMeshtasticUrlException("Failed to decode channel set: ${e::class.simpleName}", e)
         }
-    val shouldAdd = fragment?.substringAfter('?', "")?.addParameter() ?: getBooleanQueryParameter("add", false)
+    val shouldAdd = frag.substringAfter('?', "").addParameter() ?: getBooleanQueryParameter("add", false)
 
     return if (shouldAdd) url.newBuilder().also { wb -> wb.lora_config = null }.build() else url
 }

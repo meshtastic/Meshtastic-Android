@@ -392,7 +392,8 @@ class MainActivity : AppCompatActivity() {
                 addNextIntentWithParentStack(startActivityIntent)
                 getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
             }
-        return resultPendingIntent!!
+        // Null only under FLAG_NO_CREATE, which is not passed.
+        return checkNotNull(resultPendingIntent) { "TaskStackBuilder returned no PendingIntent" }
     }
 
     private fun showConnectionsPageIfNoDeviceSelected() {

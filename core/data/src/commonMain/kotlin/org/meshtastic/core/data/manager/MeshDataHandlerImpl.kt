@@ -589,30 +589,30 @@ class MeshDataHandlerImpl(
 
     private suspend fun updateNotification(contactKey: String, dataPacket: DataPacket, isSilent: Boolean) {
         when (dataPacket.dataType) {
-            PortNum.TEXT_MESSAGE_APP.value -> {
-                val message = dataPacket.text!!
-                val isBroadcast = dataPacket.destination is NodeAddress.Broadcast
-                val channelName = if (isBroadcast) effectiveChannelName(dataPacket.channel) else null
-                serviceNotifications.updateMessageNotification(
-                    contactKey,
-                    getSenderName(dataPacket),
-                    message,
-                    isBroadcast,
-                    channelName,
-                    isSilent,
-                )
-            }
+            PortNum.TEXT_MESSAGE_APP.value ->
+                dataPacket.text?.let { message ->
+                    val isBroadcast = dataPacket.destination is NodeAddress.Broadcast
+                    val channelName = if (isBroadcast) effectiveChannelName(dataPacket.channel) else null
+                    serviceNotifications.updateMessageNotification(
+                        contactKey,
+                        getSenderName(dataPacket),
+                        message,
+                        isBroadcast,
+                        channelName,
+                        isSilent,
+                    )
+                }
 
-            PortNum.WAYPOINT_APP.value -> {
-                val waypoint = dataPacket.waypoint!!
-                serviceNotifications.updateWaypointNotification(
-                    contactKey,
-                    getSenderName(dataPacket),
-                    waypointMessageFormatter(waypoint.name),
-                    waypoint.id,
-                    isSilent,
-                )
-            }
+            PortNum.WAYPOINT_APP.value ->
+                dataPacket.waypoint?.let { waypoint ->
+                    serviceNotifications.updateWaypointNotification(
+                        contactKey,
+                        getSenderName(dataPacket),
+                        waypointMessageFormatter(waypoint.name),
+                        waypoint.id,
+                        isSilent,
+                    )
+                }
 
             else -> return
         }

@@ -146,17 +146,8 @@ class MqttManagerImpl(
         val topic = message.topic
         Logger.d { "[mqttClientProxyMessage] $topic" }
         val retained = message.retained == true
-        when {
-            message.text != null -> {
-                mqttRepository.publish(topic, message.text!!.encodeToByteArray(), retained)
-            }
-
-            message.data_ != null -> {
-                mqttRepository.publish(topic, message.data_!!.toByteArray(), retained)
-            }
-
-            else -> {}
-        }
+        val payload = message.text?.encodeToByteArray() ?: message.data_?.toByteArray()
+        if (payload != null) mqttRepository.publish(topic, payload, retained)
     }
 
     private fun ConnectionState.toAppState(): MqttConnectionState = when (this) {

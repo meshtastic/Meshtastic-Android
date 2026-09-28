@@ -98,10 +98,10 @@ constructor(
                     val rxSnr = rxSnrOrNull
 
                     val dist =
-                        if (senderPos == null || rxPos == null) {
+                        if (senderPosition == null || rxPosition == null || senderPos == null || rxPos == null) {
                             ""
                         } else {
-                            positionToMeter(Position(rxPosition!!), Position(senderPosition!!)).roundToInt().toString()
+                            positionToMeter(Position(rxPosition), Position(senderPosition)).roundToInt().toString()
                         }
 
                     val hopLimit = proto.hop_limit
