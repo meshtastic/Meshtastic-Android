@@ -40,8 +40,9 @@ import org.meshtastic.core.repository.usecase.SendMessageUseCase
  * Runs a conversation notification's reply, mark-as-read and thumbs-up actions, which open no UI.
  *
  * A Service rather than a receiver because Android Auto's notification-messaging contract has these actions handled by
- * a Service; the platform allowlists the app to start one from a notification action. Every action finishes by
- * re-posting or cancelling the conversation, which is the only feedback the phone, a watch or a car gets.
+ * a Service; the platform allowlists the app to start one from a notification action. A successful action re-posts or
+ * cancels the conversation, which is the only feedback the phone, a watch or a car gets. A failed reply cancels it so
+ * the reply field never hangs; a failed thumbs-up has nothing pending and leaves the conversation in the tray.
  */
 class ConversationActionService :
     Service(),

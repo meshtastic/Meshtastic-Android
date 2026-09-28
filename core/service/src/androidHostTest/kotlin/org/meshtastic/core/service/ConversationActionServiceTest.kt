@@ -147,4 +147,18 @@ class ConversationActionServiceTest {
         verifySuspend { radioController.sendReaction("👍", 42, contactKey) }
         verifySuspend { notifications.refreshConversationAfterReply(contactKey) }
     }
+
+    @Test
+    fun `a failed thumbs-up leaves the conversation in the tray`() {
+        everySuspend { radioController.sendReaction(any(), any(), any()) } throws RuntimeException("radio down")
+
+        run(
+            intent(ConversationActionService.ACTION_REACT)
+                .putExtra(ConversationActionService.EXTRA_REPLY_ID, 42)
+                .putExtra(ConversationActionService.EXTRA_EMOJI, "👍"),
+        )
+
+        verifySuspend(VerifyMode.exactly(0)) { notifications.cancelMessageNotification(any()) }
+        verifySuspend(VerifyMode.exactly(0)) { notifications.refreshConversationAfterReply(any()) }
+    }
 }
