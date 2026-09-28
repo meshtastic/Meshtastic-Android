@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.UiDataStore
 import org.meshtastic.core.repository.MeshBeaconPrefs
@@ -46,15 +47,13 @@ class MeshBeaconPrefsImpl(private val dataStore: UiDataStore, dispatchers: Corou
             .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     // Single conflated writer: rapid add()/dismiss() calls each publish the full latest list here, and one collector
-    // serializes the DataStore writes (latest-wins). Avoids launch-per-call races that could persist a stale snapshot.
-    // runCatching keeps a best-effort write failure (e.g. disk I/O) from escaping as an uncaught coroutine exception —
-    // the next add/dismiss retries, and on restart we hydrate from the last successful write.
+    // serializes the DataStore writes (latest-wins). A failed write is dropped; the next add/dismiss retries it.
     private val pendingWrite = MutableStateFlow<List<String>?>(null)
 
     init {
         scope.launch {
             pendingWrite.filterNotNull().collectLatest { records ->
-                runCatching { dataStore.edit { it[KEY_STORED_BEACONS] = records.joinToString(RECORD_DELIMITER) } }
+                safeCatching { dataStore.edit { it[KEY_STORED_BEACONS] = records.joinToString(RECORD_DELIMITER) } }
             }
         }
     }
