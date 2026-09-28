@@ -1101,12 +1101,13 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             // Build a fresh instance directly (not through getOrPut) before touching the cache,
             // so a failed or cancelled build leaves the existing cache entry and _currentDb consistent.
             val reopened = withContext(dispatchers.io) { buildDatabase(expectedDbName) }
+            if (!isPublishableReplacement(expectedDbName, reopened)) {
+                return@withManagerOperation ReopenResult.WriteLockHeld
+            }
+            // After the probe's suspension, so a shutdown that began during it closes the replacement instead.
             if (lifecycleState != LifecycleState.OPEN) {
                 closeUnpublishedDatabase(expectedDbName, reopened)
                 return@withManagerOperation ReopenResult.NotReplaced
-            }
-            if (!isPublishableReplacement(expectedDbName, reopened)) {
-                return@withManagerOperation ReopenResult.WriteLockHeld
             }
             dbCache[expectedDbName] = reopened
             if (expectedDbName == DatabaseConstants.DEFAULT_DB_NAME) {
