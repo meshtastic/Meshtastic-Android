@@ -197,6 +197,9 @@ secrets {
     propertiesFileName = "secrets.properties"
 }
 
+// AppSearch without dynamic-schema support indexes only the v1 XML named by the `android.app.appfunctions` property.
+ksp { arg("appfunctions:generateV1Xml", "true") }
+
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
         variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
