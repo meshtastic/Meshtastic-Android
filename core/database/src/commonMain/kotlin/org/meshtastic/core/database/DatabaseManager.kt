@@ -23,6 +23,10 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import androidx.room3.executeSQL
+import androidx.room3.immediateTransaction
+import androidx.room3.useWriterConnection
+import androidx.sqlite.SQLiteException
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
@@ -133,6 +137,15 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         BOUNDED_OPERATION,
         WEDGED_OPERATION,
         FLOW_OBSERVER,
+    }
+
+    private sealed interface ReopenResult {
+        data class Replaced(val database: MeshtasticDatabase) : ReopenResult
+
+        /** Another connection holds the database file's write lock, so the pool is busy rather than wedged. */
+        data object WriteLockHeld : ReopenResult
+
+        data object NotReplaced : ReopenResult
     }
 
     @Volatile private var lifecycleState = LifecycleState.OPEN
@@ -1002,7 +1015,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * directly, so every publication is visible to app-wide collectors on the same program step — but there is no
      * deterministic handoff point where every collector has stopped using the previous instance.
      *
-     * Returns the reopened DB, or null if another coroutine switched databases or shutdown has started.
+     * Returns the reopened DB, or null if another coroutine switched databases, shutdown has started, or another
+     * connection holds the database's write lock.
      */
     private suspend fun reopenFlowDatabaseIfStillCurrent(expectedDb: MeshtasticDatabase): MeshtasticDatabase? {
         val expectedDbName =
@@ -1010,7 +1024,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 if (lifecycleState != LifecycleState.OPEN || _currentDb.value !== expectedDb) return null
                 currentDbName
             }
-        return reopenActiveDatabaseIfStillCurrent(expectedDb, expectedDbName, ReopenOrigin.FLOW_OBSERVER)
+        val result = reopenActiveDatabaseIfStillCurrent(expectedDb, expectedDbName, ReopenOrigin.FLOW_OBSERVER)
+        return (result as? ReopenResult.Replaced)?.database
     }
 
     /** Per-window budget for [origin], or null when [origin] needs no budget of its own. */
@@ -1063,11 +1078,13 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         expectedDb: MeshtasticDatabase,
         expectedDbName: String,
         origin: ReopenOrigin,
-    ): MeshtasticDatabase? = withManagerOperation {
+    ): ReopenResult = withManagerOperation {
         mutex.withLock {
-            if (lifecycleState != LifecycleState.OPEN) return@withManagerOperation null
-            if (_currentDb.value !== expectedDb || currentDbName != expectedDbName) return@withManagerOperation null
-            if (hasReachedRecoveryLimit(origin)) return@withManagerOperation null
+            if (lifecycleState != LifecycleState.OPEN) return@withManagerOperation ReopenResult.NotReplaced
+            if (_currentDb.value !== expectedDb || currentDbName != expectedDbName) {
+                return@withManagerOperation ReopenResult.NotReplaced
+            }
+            if (hasReachedRecoveryLimit(origin)) return@withManagerOperation ReopenResult.NotReplaced
 
             val registered =
                 dbCache[expectedDbName]
@@ -1078,19 +1095,18 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     }
             if (registered !== expectedDb) {
                 Logger.w { "DB recovery: active registration changed before reopen; skipping active DB reopen" }
-                return@withManagerOperation null
+                return@withManagerOperation ReopenResult.NotReplaced
             }
 
             // Build a fresh instance directly (not through getOrPut) before touching the cache,
             // so a failed or cancelled build leaves the existing cache entry and _currentDb consistent.
             val reopened = withContext(dispatchers.io) { buildDatabase(expectedDbName) }
             if (lifecycleState != LifecycleState.OPEN) {
-                runCatching { closeDatabase(reopened) }
-                    .onFailure {
-                        detachedDatabases.add(NamedDatabase(expectedDbName, reopened))
-                        Logger.w(it) { "Failed to close database built during shutdown; retained for shutdown retry" }
-                    }
-                return@withManagerOperation null
+                closeUnpublishedDatabase(expectedDbName, reopened)
+                return@withManagerOperation ReopenResult.NotReplaced
+            }
+            if (!isPublishableReplacement(expectedDbName, reopened)) {
+                return@withManagerOperation ReopenResult.WriteLockHeld
             }
             dbCache[expectedDbName] = reopened
             if (expectedDbName == DatabaseConstants.DEFAULT_DB_NAME) {
@@ -1119,8 +1135,67 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             // `currentDb.value` (see PacketRepositoryImpl), so no counter here can show a pool is unreachable.
             // [POOL_RECOVERY_WINDOW_MS] bounds how fast replacements can be created instead.
 
-            reopened
+            ReopenResult.Replaced(reopened)
         }
+    }
+
+    /**
+     * Decides whether an unpublished [replacement] may be published, closing it if not.
+     *
+     * A replacement shares its file, and so its write lock, with every older pool. While another connection holds that
+     * lock the replacement cannot write either, and Room syncs its invalidation triggers under `BEGIN IMMEDIATE` on
+     * first use, where SQLITE_BUSY escapes uncaught. An abandoned block that holds the lock is still writing, so its
+     * pool is slow rather than wedged and stays published.
+     */
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun isPublishableReplacement(dbName: String, replacement: MeshtasticDatabase): Boolean {
+        val lockHeld =
+            try {
+                isWriteLockHeldElsewhere(replacement)
+            } catch (probeFailure: Throwable) {
+                closeUnpublishedDatabase(dbName, replacement)
+                throw probeFailure
+            }
+        if (lockHeld) {
+            closeUnpublishedDatabase(dbName, replacement)
+            Logger.w { "DB recovery: another connection holds the database write lock; keeping the active pool" }
+        }
+        return !lockHeld
+    }
+
+    /**
+     * Reports whether another connection holds [database]'s write lock, asked on [database]'s own connection without
+     * waiting for it. In-memory test databases override this: they never share a file, so nothing else can hold it.
+     */
+    protected open suspend fun isWriteLockHeldElsewhere(database: MeshtasticDatabase): Boolean =
+        database.useWriterConnection { connection ->
+            val busyTimeoutMs =
+                connection.usePrepared("PRAGMA busy_timeout") { statement ->
+                    statement.step()
+                    statement.getLong(0)
+                }
+            connection.executeSQL("PRAGMA busy_timeout = 0")
+            val held =
+                try {
+                    connection.immediateTransaction {}
+                    false
+                } catch (busy: SQLiteException) {
+                    if (!isDbLockedException(busy)) throw busy
+                    true
+                }
+            // Restored only for a pool about to be published: a held verdict closes it, and at zero Room's post-use
+            // refresh fails fast instead of holding up that close for the whole busy timeout.
+            if (!held) connection.executeSQL("PRAGMA busy_timeout = $busyTimeoutMs")
+            held
+        }
+
+    /** Closes a pool that was never published, retaining it for shutdown if the close fails. Caller holds [mutex]. */
+    private fun closeUnpublishedDatabase(dbName: String, database: MeshtasticDatabase) {
+        runCatching { closeDatabase(database) }
+            .onFailure {
+                detachedDatabases.add(NamedDatabase(dbName, database))
+                Logger.w(it) { "Failed to close an unpublished database; retained for shutdown retry" }
+            }
     }
 
     /** Test-only visibility for detached-pool retention. */
@@ -1148,7 +1223,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * section is never torn apart mid-write. A block that never returns (Room 3.x logs and retries connection-pool
      * acquisition instead of throwing, so a leaked permit hangs forever) is abandoned rather than cancelled: the caller
      * fails with [DatabaseOperationTimeoutException] and the active pool is reopened, so later calls are admitted
-     * against the replacement pool and its fresh lane instead of queueing behind the wedge.
+     * against the replacement pool and its fresh lane instead of queueing behind the wedge. A block still holding the
+     * database's write lock is slow rather than wedged, so its pool is kept and later calls wait for the lock.
      *
      * Long-lived Flow/Paging reads must stay out of `withDb`; see [observeCurrentDb] and [withReadDb].
      */
@@ -1235,7 +1311,9 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * A started block is not cancellable by design, so it keeps its lane and writer registration until it returns — a
      * merge drain or shutdown drain that waits on it still resolves on its own bound and logs. Reopening the active
      * pool is what unwedges the app: the wedged instance moves to the detached set (protected from eviction, reclaimed
-     * by [close]) and later callers admit against the replacement pool and its fresh lane.
+     * by [close]) and later callers admit against the replacement pool and its fresh lane. When another connection
+     * still holds the write lock the pool is kept and not quarantined: it is working, and a replacement could not
+     * write.
      */
     @Suppress("TooGenericExceptionCaught", "ThrowsCount")
     private suspend fun abandonWedgedDbBlock(
@@ -1262,15 +1340,21 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 throw recoveryCancel
             } catch (recoveryFailure: Exception) {
                 Logger.w(recoveryFailure) { "withDb: failed to reopen active DB after abandoning a wedged callback" }
-                null
+                ReopenResult.NotReplaced
             }
-        if (reopened == null) quarantineWedgedPoolIfStillPublished(admission.database)
+        if (reopened == ReopenResult.NotReplaced) quarantineWedgedPoolIfStillPublished(admission.database)
         Logger.w {
-            if (reopened != null) {
-                "withDb callback exceeded ${timeoutMillis}ms; abandoned it and reopened the active DB so later " +
-                    "calls run on a fresh connection pool"
-            } else {
-                "withDb callback exceeded ${timeoutMillis}ms; abandoned it but the active DB was not reopened"
+            when (reopened) {
+                is ReopenResult.Replaced ->
+                    "withDb callback exceeded ${timeoutMillis}ms; abandoned it and reopened the active DB so later " +
+                        "calls run on a fresh connection pool"
+
+                ReopenResult.WriteLockHeld ->
+                    "withDb callback exceeded ${timeoutMillis}ms; abandoned it and kept the active DB because " +
+                        "another connection still holds its write lock"
+
+                ReopenResult.NotReplaced ->
+                    "withDb callback exceeded ${timeoutMillis}ms; abandoned it but the active DB was not reopened"
             }
         }
         throw DatabaseOperationTimeoutException(
@@ -1538,7 +1622,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         if (currentDb === db && isDbPoolAcquireTimeoutException(e)) {
             val reopened =
                 try {
-                    reopenActiveDatabaseIfStillCurrent(db, active, ReopenOrigin.BOUNDED_OPERATION)
+                    val result = reopenActiveDatabaseIfStillCurrent(db, active, ReopenOrigin.BOUNDED_OPERATION)
+                    (result as? ReopenResult.Replaced)?.database
                 } catch (recoveryCancel: CancellationException) {
                     throw recoveryCancel
                 } catch (recoveryFailure: Exception) {
@@ -1595,6 +1680,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         private const val ROOM_POOL_ACQUIRE_TIMEOUT_PHRASE = "timed out attempting to acquire"
         private const val ROOM_READER_CONNECTION_PHRASE = "reader connection"
         private const val ROOM_WRITER_CONNECTION_PHRASE = "writer connection"
+        private const val SQLITE_BUSY_PHRASE = "database is locked"
 
         /**
          * Room KMP currently exposes pool-acquire timeouts as exception message text instead of a stable common typed
@@ -1615,8 +1701,11 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 .any { throwable ->
                     val msg = throwable.message?.lowercase() ?: return@any false
                     val hasDbContext = DB_TERMS.any { it in msg }
-                    ("closed" in msg && hasDbContext) || "database is locked" in msg || "sqlite_busy" in msg
+                    ("closed" in msg && hasDbContext) || SQLITE_BUSY_PHRASE in msg || "sqlite_busy" in msg
                 }
+
+        private fun isDbLockedException(e: Throwable): Boolean =
+            e.message?.contains(SQLITE_BUSY_PHRASE, ignoreCase = true) == true
     }
 
     /**
