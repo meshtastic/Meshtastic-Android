@@ -34,7 +34,8 @@ android {
 
     // The app declares a `marketplace` flavor dimension (google / fdroid). A test module must
     // match it. We pin to `google` — the variant the vast majority of users run (and the one with
-    // Maps). f-droid can reuse the same profile; wire a second flavor here if it ever diverges.
+    // Maps). :androidApp merges the profile into src/main, so f-droid ships the same one; wire a
+    // second flavor here if its startup path ever diverges.
     flavorDimensions += "marketplace"
     productFlavors { create("google") { dimension = "marketplace" } }
 }

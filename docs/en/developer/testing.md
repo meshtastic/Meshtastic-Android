@@ -97,16 +97,16 @@ adb pull /data/local/tmp/store-screenshots/fdroid/. fastlane/metadata/android/en
 
 ### Baseline Profile / startup performance
 
-The `:baselineprofile` module (#5735) generates a [Baseline Profile](https://developer.android.com/topic/performance/baselineprofiles/overview) for `:androidApp`, AOT-compiling the hot startup paths so ART doesn't pay the JIT cost on first launch. It targets the `google` flavor (the variant most users run).
+The `:baselineprofile` module (#5735) generates a [Baseline Profile](https://developer.android.com/topic/performance/baselineprofiles/overview) for `:androidApp`, AOT-compiling the hot startup paths so ART doesn't pay the JIT cost on first launch. It profiles the `google` flavor (the variant most users run), and both flavors ship the result.
 
 The Macrobenchmark generator (`BaselineProfileGenerator`) and the before/after benchmark (`StartupBenchmark`) live in `baselineprofile/src/main/kotlin/org/meshtastic/baselineprofile/`. Both run on a device/emulator:
 
 ```shell
-./gradlew :androidApp:generateGoogleReleaseBaselineProfile   # Generate the profile (commit the output)
+./gradlew :androidApp:generateBaselineProfile                # Generate the profile (commit the output)
 ./gradlew :androidApp:benchmarkGoogleReleaseBaselineProfile  # Quantify the cold-start win
 ```
 
-The generated profile is merged into `androidApp/src/googleRelease/generated/baselineProfiles/` and packaged into release builds via `androidx.profileinstaller`.
+The generated profile is merged into `androidApp/src/main/generated/baselineProfiles/` (`mergeIntoMain` in `androidApp/build.gradle.kts`), so the fdroid and google release builds both package it via `androidx.profileinstaller`.
 
 > ℹ️ **Note:** The journey covers cold start only (launch → first frame), because CI has no paired node. Post-connection screens (node list, map, message thread) aren't yet AOT-compiled.
 

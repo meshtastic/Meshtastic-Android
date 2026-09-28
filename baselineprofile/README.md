@@ -7,11 +7,12 @@ JIT cost on first launch. Targets the **google** flavor (the variant most users 
 ## Generate the profile (run on a device/emulator)
 
 ```bash
-./gradlew :androidApp:generateGoogleReleaseBaselineProfile
+./gradlew :androidApp:generateBaselineProfile
 ```
 
-Output is merged into `androidApp/src/googleRelease/generated/baselineProfiles/baseline-prof.txt`.
-**Commit that file** — release builds package it via `androidx.profileinstaller`.
+Output is merged into `androidApp/src/main/generated/baselineProfiles/baseline-prof.txt` (`mergeIntoMain`
+in `androidApp/build.gradle.kts`). **Commit that file** — release builds of both flavors package it via
+`androidx.profileinstaller`.
 
 ## Quantify the win
 
@@ -28,5 +29,5 @@ Compare `startupCompilationNone` vs `startupCompilationBaselineProfiles` in the 
   connected device is wired into the harness — a more representative journey yields a better profile.
 - For hermetic CI generation, swap `useConnectedDevices = true` in `build.gradle.kts` for a
   [Gradle Managed Device](https://developer.android.com/topic/performance/baselineprofiles/measure-baselineprofile#gradle-managed).
-- f-droid currently inherits no profile (only `google` is produced). Add a second flavor here if
-  the f-droid startup path ever diverges enough to matter.
+- Only `google` is produced, and f-droid ships that same profile from `src/main`. Add a second flavor
+  here if the f-droid startup path ever diverges enough to matter.
