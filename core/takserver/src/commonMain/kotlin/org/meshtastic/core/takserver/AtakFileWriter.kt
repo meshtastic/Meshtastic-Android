@@ -17,14 +17,14 @@
 package org.meshtastic.core.takserver
 
 /**
- * Writes data package files to ATAK's auto-import directory.
+ * Saves data package files where the user can import them into ATAK.
  *
- * On Android, the actual implementation writes to `/sdcard/atak/tools/datapackage/` which ATAK monitors for new zip
- * files. On other platforms this is a no-op.
+ * On Android the package goes to the shared Downloads folder (the app's own external Downloads folder below API 29),
+ * without any storage permission. On other platforms this is a no-op.
  */
 internal expect object AtakFileWriter {
     /**
-     * Write a data package zip to ATAK's monitored import directory.
+     * Save a data package zip, replacing an earlier one with the same name.
      *
      * @return true if the file was written successfully, false otherwise.
      */
