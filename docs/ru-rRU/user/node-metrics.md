@@ -19,15 +19,15 @@ aliases:
 1. Перейдите в раздел **Ноды**.
 2. Нажмите на ноду, которую хотите просмотреть.
 3. Scroll to the **Telemetry** section and find the category you want — **Signal Quality**, **Device Metrics**, **Environment Metrics**, **Air-Quality Metrics**, **Power Metrics**, **Position**, and the rest.
-4. Tap the refresh button on a row to ask the node for a fresh reading. The chart button beside it opens that category's history, and appears once the node has reported that kind of telemetry.
+4. Нажми кнопку обновления в строке, чтобы получить от ноды свежие данные. Кнопка с графиком рядом с ним открывает историю по этой категории и появляется после того, как узел отправит данные такого рода.
 
 ![Сведения о ноде — локальное устройство](../../assets/screenshots/nodes_detail_local.png)
 
-The **Position** row expands to show location data for nodes that share GPS:
+Строка **Позиция** расширяется, чтобы отобразить данные о местоположении нод, использующих GPS.
 
 ![Встроенное содержимое о местоположении](../../assets/screenshots/nodes_position.png)
 
-> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Метрики обновляются с интервалами, настроенными в параметрах телеметрии каждой ноды.
+> ℹ️ **Примечание.** Метрики доступны только после получения данных от удаленной ноды. Метрики обновляются с интервалами, настроенными в параметрах телеметрии каждой ноды.
 
 ## Интервал передачи
 
@@ -37,13 +37,13 @@ The **Position** row expands to show location data for nodes that share GPS:
 | -------------- | -------------------------------------------------------- |
 | Уровень заряда | Текущий процент заряда батареи                           |
 | Напряжение     | Показания напряжения батареи                             |
-| ChUtil         | Percentage of local airtime in use                       |
+| ChUtil         | Процент использованного местного эфирного времени        |
 | AirUtil        | Percentage of the last hour this node spent transmitting |
 | Аптайм         | Время с момента последней перезагрузки                   |
 
 Device Metrics has no cards on the node detail screen. Use the chart button on its row to open the Device Metrics screen, where battery level, voltage, ChUtil, and AirUtil are plotted over time and every reading — uptime included — is listed with its timestamp underneath. Pick a time frame at the top of the screen, and use the save icon in the app bar to export the visible history as CSV.
 
-> 💡 **Tip:** Where a category does show cards — Environment, Air Quality, and Power — touch & hold a card to copy its value to the clipboard. On a chart screen, pinch to zoom the time axis.
+> 💡 **Tip:** Where a category does show cards — Environment, Air Quality, and Power — touch & hold a card to copy its value to the clipboard. На экране с диаграммой для масштабирования оси времени используй жест «щипок».
 
 ## Метрики окружения
 
@@ -113,7 +113,7 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 ### Оценка качества сигнала
 
-Качество сигнала оценивается по **SNR относительно минимального уровня демодуляции активного пресета LoRa-модема**, а не по фиксированным порогам — конкретное значение SNR означает разное на разных пресетах (например, −15 дБ нормально для LongSlow, но неприемлемо для ShortFast). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. Otherwise, RSSI is display-only. In the table, _limit_ is the preset's SNR limit.
+Качество сигнала оценивается по **SNR относительно минимального уровня демодуляции активного пресета LoRa-модема**, а не по фиксированным порогам — конкретное значение SNR означает разное на разных пресетах (например, −15 дБ нормально для LongSlow, но неприемлемо для ShortFast). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. В противном случае RSSI отображается только на экране. In the table, _limit_ is the preset's SNR limit.
 
 | Качество    | Критерии                         |
 | ----------- | -------------------------------- |

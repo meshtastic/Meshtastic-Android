@@ -268,6 +268,11 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Отправлять позицию на основной канал по тройному нажатию кнопки.</string>
     <string name="config_device_tzdef_summary">Часовой пояс дат на экране и журнале устройства.</string>
     <string name="config_device_use_phone_tz">Использовать часовой пояс телефона</string>
+    <string name="config_lora_coding_rate_fraction">4/%1$d</string>
+    <string name="config_lora_coding_rate_override">Переопределение скорости кодирования</string>
+    <string name="config_lora_coding_rate_override_max_summary">В этом пресете уже используется максимальная скорость кодирования.</string>
+    <string name="config_lora_coding_rate_override_summary">Добавляет коррекцию ошибок поверх пресета. Более высокая скорость кодирования увеличивает длительность передачи каждого пакета и расходует больше рабочего цикла и ресурсов канала.</string>
+    <string name="config_lora_coding_rate_preset_default">Пресет по умолчанию (%1$s)</string>
     <string name="config_lora_modem_preset_licensed_summary">Пресеты этого региона предназначены только для лицензированных операторов (любительское радио). Включи «Лицензированный радиолюбитель (Ham)» в настройках пользователя, чтобы выбрать их.</string>
     <string name="config_lora_modem_preset_summary">Доступные пресеты модема, по умолчанию - Long Fast.</string>
     <string name="config_lora_region_summary">Регион, в котором вы будете использовать ваше радио.</string>
@@ -1150,8 +1155,6 @@
     <string name="mqtt_probe_tcp_failure">Не удается подключиться к брокеру (TCP)</string>
     <string name="mqtt_probe_timeout">Тайм-аут после %1$d мс</string>
     <string name="mqtt_probe_tls_failure">Ошибка TLS-рукопожатия: %1$s</string>
-    <string name="mqtt_proxy_local">MQTT-прокси на этом телефоне</string>
-    <string name="mqtt_proxy_local_summary">Этот телефон передаёт MQTT-трафик для подключённого устройства. Выключите, чтобы сразу прекратить передачу, не изменяя настройки MQTT устройства — полезно, когда трафик MQTT перегружает соединение. Включите обратно, чтобы продолжить передачу.</string>
     <string name="mqtt_status_connected">Подключено</string>
     <string name="mqtt_status_connecting">Подключение…</string>
     <string name="mqtt_status_disconnected">Отключено</string>
@@ -1785,7 +1788,6 @@
     <string name="time">Время</string>
     <string name="timeout">Время ожидания истекло</string>
     <string name="timestamp">Отметка времени</string>
-    <string name="tls_enabled_public_broker_summary">Когда этот телефон ретранслирует MQTT, он всегда подключается к mqtt.meshtastic.org через TLS. Эта настройка применяется, когда радио достигает брокера через собственный Wi-Fi или Ethernet.</string>
     <string name="toggle_my_position">Переключить мою позицию</string>
     <string name="trace_route">Трассировка маршрута</string>
     <!-- TRACEROUTE -->

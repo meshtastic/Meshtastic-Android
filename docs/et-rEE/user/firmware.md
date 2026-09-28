@@ -75,6 +75,8 @@ Both a USB erase and a bootloader upgrade write two files in turn, so you are as
 
 Rakendus loeb valitud kettalt faili `INFO_UF2.TXT`, et veenduda, kas see on tõepoolest seadme uuendusketas ja enne millegi kirjutamist plaat tuvastada.
 
+For a bootloader upgrade, the app also reads the installed bootloader version from `INFO_UF2.TXT` and shows it next to the latest release before writing anything. The running firmware doesn't report its bootloader, so the installed version appears only once the device has restarted into update mode, never on the firmware screen while connected. If the two match, the bootloader is left as it is and the app moves straight on to reinstalling the firmware. Otherwise choose **Upgrade bootloader** to write it, or **Skip** to reinstall the firmware without changing it.
+
 On nRF52 the app must already know which Bluetooth stack your device uses before it starts, because it can't read the bootloader until the device has rebooted. If it can't confirm the stack, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
 
 Once the drive is readable, how an nRF52 device is erased depends on its bootloader:

@@ -951,8 +951,6 @@
     <string name="mqtt_probe_tcp_failure">Impossibile raggiungere il broker (TCP)</string>
     <string name="mqtt_probe_timeout">Timeout dopo %1$d ms</string>
     <string name="mqtt_probe_tls_failure">Handshake TLS non riuscito: %1$s</string>
-    <string name="mqtt_proxy_local">Proxy MQTT su questo telefono</string>
-    <string name="mqtt_proxy_local_summary">Questo telefono inoltra il traffico MQTT per il dispositivo connesso. Disattivalo per interrompere subito l'inoltro senza cambiare le impostazioni MQTT del dispositivo — utile quando il traffico MQTT satura la connessione. Riattivalo per riprendere l'inoltro.</string>
     <string name="mqtt_status_connected">Connesso</string>
     <string name="mqtt_status_connecting">Connessione…</string>
     <string name="mqtt_status_disconnected">Disconnesso</string>

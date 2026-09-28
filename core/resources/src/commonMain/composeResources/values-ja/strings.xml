@@ -947,8 +947,6 @@
     <string name="mqtt_probe_tcp_failure">サーバーに到達できません（TCP）</string>
     <string name="mqtt_probe_timeout">%1$d ms 後にタイムアウトしました</string>
     <string name="mqtt_probe_tls_failure">TLS ハンドシェイクに失敗しました：%1$s</string>
-    <string name="mqtt_proxy_local">このスマートフォンの MQTT プロキシ</string>
-    <string name="mqtt_proxy_local_summary">このスマートフォンが、接続中のデバイスの MQTT トラフィックを中継します。オフにすると、デバイスの MQTT 設定を変更せずに中継をすぐに停止できます。MQTT トラフィックが接続を圧迫している場合に便利です。再びオンにすると中継を再開します。</string>
     <string name="mqtt_status_connected">接続済</string>
     <string name="mqtt_status_connecting">接続しています…</string>
     <string name="mqtt_status_disconnected">切断</string>

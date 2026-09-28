@@ -35,19 +35,19 @@ Every module lives under **Settings → Module configuration**.
 
 Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
-| Setting                       | Опис                                                                                                                                                                                    |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MQTT увімкнений               | Toggle MQTT bridge                                                                                                                                                                      |
-| Адреса                        | MQTT broker address                                                                                                                                                                     |
-| Ім'я користувача              | Authentication username                                                                                                                                                                 |
-| Пароль                        | Authentication password                                                                                                                                                                 |
-| Шифрування увімкнено          | Encrypt MQTT payloads                                                                                                                                                                   |
-| Вивід JSON увімкнено          | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
-| TLS увімкнений                | Use secure connection                                                                                                                                                                   |
-| Кореневий чат                 | Base MQTT topic path                                                                                                                                                                    |
-| Проксі для клієнта увімкнуто  | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
-| MQTT проксі на цьому телефоні | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt)                                             |
-| Відображення на мапі          | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
+| Setting                      | Опис                                                                                                                                                                                    |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MQTT увімкнений              | Toggle MQTT bridge                                                                                                                                                                      |
+| Адреса                       | MQTT broker address                                                                                                                                                                     |
+| Ім'я користувача             | Authentication username                                                                                                                                                                 |
+| Пароль                       | Authentication password                                                                                                                                                                 |
+| Шифрування увімкнено         | Encrypt MQTT payloads                                                                                                                                                                   |
+| Вивід JSON увімкнено         | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
+| TLS увімкнений               | Use secure connection                                                                                                                                                                   |
+| Кореневий чат                | Base MQTT topic path                                                                                                                                                                    |
+| Проксі для клієнта увімкнуто | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
+| MQTT proxy in this app       | The app-side half of **Proxy to client enabled**: whether this app acts as that relay. See [MQTT](mqtt)                                                 |
+| Відображення на мапі         | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
 
 Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen

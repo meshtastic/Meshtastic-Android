@@ -35,19 +35,19 @@ Every module lives under **Settings → Module configuration**.
 
 Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
-| Sätted                           | Kirjeldus                                                                                                                                                                               |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MQTT lubatud                     | Lükka MQTT sild sisse                                                                                                                                                                   |
-| Aadress                          | MQTT vahendaja aadress                                                                                                                                                                  |
-| Kasutajatunnus                   | Authentication username                                                                                                                                                                 |
-| Parool                           | Authentication password                                                                                                                                                                 |
-| Krüpteerimine lubatud            | Krüpteeri MQTT kasutus                                                                                                                                                                  |
-| JSON väljund lubatud             | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
-| TLS lubatud                      | Use secure connection                                                                                                                                                                   |
-| Juurteema                        | Baas MQTT teema teekond                                                                                                                                                                 |
-| Kliendi proksi lubatud           | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
-| Selle telefoni MQTT puhverserver | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt)                                             |
-| Kaardi raport                    | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
+| Sätted                 | Kirjeldus                                                                                                                                                                               |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MQTT lubatud           | Lükka MQTT sild sisse                                                                                                                                                                   |
+| Aadress                | MQTT vahendaja aadress                                                                                                                                                                  |
+| Kasutajatunnus         | Authentication username                                                                                                                                                                 |
+| Parool                 | Authentication password                                                                                                                                                                 |
+| Krüpteerimine lubatud  | Krüpteeri MQTT kasutus                                                                                                                                                                  |
+| JSON väljund lubatud   | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
+| TLS lubatud            | Use secure connection                                                                                                                                                                   |
+| Juurteema              | Baas MQTT teema teekond                                                                                                                                                                 |
+| Kliendi proksi lubatud | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
+| MQTT proxy in this app | The app-side half of **Proxy to client enabled**: whether this app acts as that relay. See [MQTT](mqtt)                                                 |
+| Kaardi raport          | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
 
 Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen

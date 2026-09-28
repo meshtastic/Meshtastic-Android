@@ -723,7 +723,6 @@
     <string name="mqtt_probe_other_failure">Връзката е неуспешна</string>
     <string name="mqtt_probe_success">Достъпен. Брокерът е приел идентификационните данни.</string>
     <string name="mqtt_probe_success_with_info">Достъпен (%1$s)</string>
-    <string name="mqtt_proxy_local">MQTT прокси на този телефон</string>
     <string name="mqtt_status_connected">Свързано</string>
     <string name="mqtt_status_connecting">Свързване…</string>
     <string name="mqtt_status_disconnected">Прекъсната връзка</string>

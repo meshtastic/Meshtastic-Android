@@ -35,19 +35,19 @@ Every module lives under **Settings → Module configuration**.
 
 インターネット接続のために、メッシュのメッセージを MQTT サーバーとの間で橋渡しします。 This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
-| 設定項目                 | 説明                                                                                                                                                                                      |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MQTTを有効化             | MQTT ブリッジを切り替え                                                                                                                                                                          |
-| アドレス                 | MQTT サーバーのアドレス                                                                                                                                                                          |
-| ユーザー名                | 認証用のユーザー名                                                                                                                                                                               |
-| パスワード                | 認証用のパスワード                                                                                                                                                                               |
-| 暗号化の有効化              | MQTT ペイロードを暗号化                                                                                                                                                                          |
-| JSON出力の有効化           | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
-| TLS の有効化             | セキュアな接続を使用                                                                                                                                                                              |
-| ルート トピック             | MQTT のベーストピックパス                                                                                                                                                                         |
-| クライアントへのプロキシの有効化     | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
-| このスマートフォンの MQTT プロキシ | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt)                                             |
-| マップレポート              | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
+| 設定項目                   | 説明                                                                                                                                                                                      |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MQTTを有効化               | MQTT ブリッジを切り替え                                                                                                                                                                          |
+| アドレス                   | MQTT サーバーのアドレス                                                                                                                                                                          |
+| ユーザー名                  | 認証用のユーザー名                                                                                                                                                                               |
+| パスワード                  | 認証用のパスワード                                                                                                                                                                               |
+| 暗号化の有効化                | MQTT ペイロードを暗号化                                                                                                                                                                          |
+| JSON出力の有効化             | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
+| TLS の有効化               | セキュアな接続を使用                                                                                                                                                                              |
+| ルート トピック               | MQTT のベーストピックパス                                                                                                                                                                         |
+| クライアントへのプロキシの有効化       | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
+| MQTT proxy in this app | The app-side half of **Proxy to client enabled**: whether this app acts as that relay. See [MQTT](mqtt)                                                 |
+| マップレポート                | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
 
 Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
