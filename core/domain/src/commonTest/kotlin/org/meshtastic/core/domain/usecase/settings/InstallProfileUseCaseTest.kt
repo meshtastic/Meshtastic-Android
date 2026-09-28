@@ -87,7 +87,7 @@ class InstallProfileUseCaseTest {
     }
 
     @Test
-    fun `invoke installs all sections of a full profile`() = runTest {
+    fun `invoke opens an edit session for a populated profile`() = runTest {
         val profile =
             DeviceProfile.Builder()
                 .also { wb ->

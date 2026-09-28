@@ -31,9 +31,22 @@ import kotlin.test.assertEquals
 
 /**
  * Walks Wire's generated fields, so a module config section the proto grows fails here by name until profile install
- * writes it. JVM-only because it reads `@WireField`.
+ * writes it or [notInstalled] names it. JVM-only because it reads `@WireField`.
  */
 class InstallProfileModuleConfigCoverageTest {
+
+    private val notInstalled =
+        mapOf(
+            "traffic_management" to
+                "no settings screen, and a node built without the module exports its position dedup switched off",
+        )
+
+    @Test
+    fun `every section named as not installed is still a LocalModuleConfig section`() {
+        val stale = notInstalled.keys - localModuleConfigSections().map { it.name }.toSet()
+
+        assertEquals(emptySet(), stale, "these sections left LocalModuleConfig, so drop them from notInstalled")
+    }
 
     @Test
     fun `every LocalModuleConfig section has a ModuleConfig variant of the same name and type`() {
@@ -45,7 +58,7 @@ class InstallProfileModuleConfigCoverageTest {
     }
 
     @Test
-    fun `installing a profile writes every module config section it carries`() = runTest {
+    fun `profile install writes every section except those named as not installed`() = runTest {
         val radioController = FakeRadioController()
         val sections = localModuleConfigSections()
         val moduleConfig =
@@ -64,13 +77,15 @@ class InstallProfileModuleConfigCoverageTest {
         )
 
         val written = radioController.allModuleConfigs.associate { it.onlyVariant() }
+        val installed = sections.filter { it.name !in notInstalled }
         assertEquals(
             emptyList(),
-            sections.map { it.name } - written.keys,
+            installed.map { it.name } - written.keys,
             "profile install never writes these module config sections",
         )
+        assertEquals(emptySet(), notInstalled.keys intersect written.keys, "profile install writes these after all")
         assertEquals(radioController.allModuleConfigs.size, written.size, "a section was written more than once")
-        sections.forEach { assertEquals(it.get(moduleConfig), written[it.name], "${it.name} was written changed") }
+        installed.forEach { assertEquals(it.get(moduleConfig), written[it.name], "${it.name} was written changed") }
     }
 
     private fun ModuleConfig.onlyVariant(): Pair<String, Any> =

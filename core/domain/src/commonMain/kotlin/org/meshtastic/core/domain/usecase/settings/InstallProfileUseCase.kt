@@ -177,9 +177,8 @@ constructor(
         }
         lmc.paxcounter?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.paxcounter = it }.build()) }
         lmc.statusmessage?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.statusmessage = it }.build()) }
-        lmc.traffic_management?.let {
-            setModuleConfig(ModuleConfig.Builder().also { wb -> wb.traffic_management = it }.build())
-        }
+        // traffic_management is not installed: it has no settings screen, and a node built without the module exports
+        // position_min_interval_secs = 0, which would silently turn off this node's default-on position dedup.
         lmc.tak?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.tak = it }.build()) }
         lmc.mesh_beacon?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.mesh_beacon = it }.build()) }
     }
