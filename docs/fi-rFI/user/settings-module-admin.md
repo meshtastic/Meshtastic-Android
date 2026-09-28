@@ -45,8 +45,8 @@ Yhdistää verkon viestejä MQTT-välityspalvelimeen ja sieltä takaisin interne
 | JSON ulostulo käytössä                            | Julkaise ja vastaanota MQTT-viestejä JSON-muodossa. Merkitty protobuf-rakenteessa vanhentuneeksi, mutta tämä on edelleen ainoa asetus tähän toimintaan, ja laiteohjelmisto käyttää sitä yhä |
 | TLS käytössä                                      | Käytä suojattua yhteyttä                                                                                                                                                                                    |
 | Palvelimen osoite (root topic) | MQTT:n perusaihepolku                                                                                                                                                                       |
-| Välityspalvelin käytössä                          | Anna yhdistetyn puhelimen välittää radion MQTT-liikenne sen sijaan, että radio muodostaisi itse yhteyden välityspalvelimeen                                                                                 |
-| MQTT-välityspalvelin tällä puhelimella            | Yllä olevan **Välitys asiakkaalle käytössä** -asetuksen puhelinpään osuus: käyttääkö tämä puhelin kyseistä välitystä. Katso [MQTT](mqtt)                                    |
+| Välityspalvelin käytössä                          | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                         |
+| MQTT proxy in this app                            | The app-side half of **Proxy to client enabled**: whether this app acts as that relay. Katso [MQTT](mqtt)                                                                   |
 | Karttaraportointi                                 | Publish position to the public map — see the Map reporting group that follows                                                                                                                               |
 
 Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data

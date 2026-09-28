@@ -1096,8 +1096,6 @@
     <string name="mqtt_probe_tcp_failure">Yhteyttä välityspalvelimeen ei saada (TCP)</string>
     <string name="mqtt_probe_timeout">Aikakatkaistu %1$d ms jälkeen</string>
     <string name="mqtt_probe_tls_failure">TLS-yhteyden muodostaminen epäonnistui: %1$s</string>
-    <string name="mqtt_proxy_local">MQTT-välityspalvelin tällä puhelimella</string>
-    <string name="mqtt_proxy_local_summary">Tämä puhelin välittää MQTT-liikennettä yhdistetyn radion puolesta. Poista asetus käytöstä katkaistaksesi välityksen välittömästi muuttamatta radion MQTT-asetuksia. Hyödyllinen tilanteissa, joissa MQTT-liikenne kuormittaa yhteyttä liikaa. Ota asetus uudelleen käyttöön jatkaaksesi välitystä.</string>
     <string name="mqtt_status_connected">Yhdistetty</string>
     <string name="mqtt_status_connecting">Yhdistetään…</string>
     <string name="mqtt_status_disconnected">Ei yhdistetty</string>

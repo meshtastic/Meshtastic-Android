@@ -35,19 +35,19 @@ Every module lives under **Settings → Module configuration**.
 
 Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
-| Einstellung                 | Beschreibung                                                                                                                                                                            |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MQTT aktiviert              | Toggle MQTT bridge                                                                                                                                                                      |
-| Adresse                     | MQTT broker address                                                                                                                                                                     |
-| Benutzername                | Authentication username                                                                                                                                                                 |
-| Passwort                    | Authentication password                                                                                                                                                                 |
-| Verschlüsselung aktiviert   | Encrypt MQTT payloads                                                                                                                                                                   |
-| JSON-Ausgabe aktiviert      | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
-| TLS aktiviert               | Use secure connection                                                                                                                                                                   |
-| Hauptthema                  | Base MQTT topic path                                                                                                                                                                    |
-| Proxy zu Client aktiviert   | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
-| MQTT Proxy auf diesem Handy | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt)                                             |
-| Kartenberichte              | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
+| Einstellung               | Beschreibung                                                                                                                                                                            |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MQTT aktiviert            | Toggle MQTT bridge                                                                                                                                                                      |
+| Adresse                   | MQTT broker address                                                                                                                                                                     |
+| Benutzername              | Authentication username                                                                                                                                                                 |
+| Passwort                  | Authentication password                                                                                                                                                                 |
+| Verschlüsselung aktiviert | Encrypt MQTT payloads                                                                                                                                                                   |
+| JSON-Ausgabe aktiviert    | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
+| TLS aktiviert             | Use secure connection                                                                                                                                                                   |
+| Hauptthema                | Base MQTT topic path                                                                                                                                                                    |
+| Proxy zu Client aktiviert | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
+| MQTT proxy in this app    | The app-side half of **Proxy to client enabled**: whether this app acts as that relay. See [MQTT](mqtt)                                                 |
+| Kartenberichte            | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
 
 Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen

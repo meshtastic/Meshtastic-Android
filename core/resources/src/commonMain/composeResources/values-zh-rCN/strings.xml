@@ -962,8 +962,6 @@
     <string name="mqtt_probe_tcp_failure">无法通过 (TCP) 协议连接到代理服务器</string>
     <string name="mqtt_probe_timeout">等待超时 %1$d 毫秒</string>
     <string name="mqtt_probe_tls_failure">TLS 握手失败: %1$s</string>
-    <string name="mqtt_proxy_local">在此手机上开启 MQTT 代理</string>
-    <string name="mqtt_proxy_local_summary">此手机正在为已连接的设备中继 MQTT 流量。关闭此开关可立即切断中继，且不会更改设备本身的 MQTT 设置——当 MQTT 流量过大导致连接不堪重负时，此功能非常有用。重新打开即可恢复中继。</string>
     <string name="mqtt_status_connected">已连接</string>
     <string name="mqtt_status_connecting">正在连接…</string>
     <string name="mqtt_status_disconnected">已断开连接</string>

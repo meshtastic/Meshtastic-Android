@@ -45,8 +45,8 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | Saída JSON ativada         | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
 | TLS ativado                | Use secure connection                                                                                                                                                                   |
 | Tópico principal           | Base MQTT topic path                                                                                                                                                                    |
-| Proxy para cliente ativado | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
-| MQTT proxy on this phone   | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt)                                             |
+| Proxy para cliente ativado | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
+| MQTT proxy in this app     | The app-side half of **Proxy to client enabled**: whether this app acts as that relay. See [MQTT](mqtt)                                                 |
 | Relatório de mapa          | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
 
 Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
