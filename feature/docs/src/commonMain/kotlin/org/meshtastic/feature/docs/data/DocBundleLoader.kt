@@ -33,6 +33,7 @@ import org.meshtastic.core.resources.doc_keywords_messages
 import org.meshtastic.core.resources.doc_keywords_mqtt
 import org.meshtastic.core.resources.doc_keywords_node_metrics
 import org.meshtastic.core.resources.doc_keywords_nodes
+import org.meshtastic.core.resources.doc_keywords_notifications
 import org.meshtastic.core.resources.doc_keywords_onboarding
 import org.meshtastic.core.resources.doc_keywords_settings_module
 import org.meshtastic.core.resources.doc_keywords_settings_radio
@@ -54,6 +55,7 @@ import org.meshtastic.core.resources.doc_title_messages
 import org.meshtastic.core.resources.doc_title_mqtt
 import org.meshtastic.core.resources.doc_title_node_metrics
 import org.meshtastic.core.resources.doc_title_nodes
+import org.meshtastic.core.resources.doc_title_notifications
 import org.meshtastic.core.resources.doc_title_onboarding
 import org.meshtastic.core.resources.doc_title_settings_module
 import org.meshtastic.core.resources.doc_title_settings_radio
@@ -422,6 +424,16 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("translate", "crowdin", "localization", "language", "i18n", "contribute"),
                 3700,
                 "translate",
+            ),
+            UserPageDef(
+                "notifications",
+                CoreRes.string.doc_title_notifications,
+                CoreRes.string.doc_keywords_notifications,
+                "en/user/notifications.html",
+                18,
+                listOf("notifications", "notification-channels", "wear-os", "smartwatch"),
+                3600,
+                "notifications",
             ),
             UserPageDef(
                 "app-functions",

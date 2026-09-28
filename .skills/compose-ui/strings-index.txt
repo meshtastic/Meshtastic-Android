@@ -474,6 +474,7 @@ doc_keywords_messages
 doc_keywords_mqtt
 doc_keywords_node_metrics
 doc_keywords_nodes
+doc_keywords_notifications
 doc_keywords_onboarding
 doc_keywords_settings_module
 doc_keywords_settings_radio
@@ -502,6 +503,7 @@ doc_title_messages
 doc_title_mqtt
 doc_title_node_metrics
 doc_title_nodes
+doc_title_notifications
 doc_title_onboarding
 doc_title_settings_module
 doc_title_settings_radio
