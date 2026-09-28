@@ -211,13 +211,13 @@ open class RadioConfigViewModel(
     val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
     fun toggleAnalyticsAllowed() {
-        analyticsPrefs.setAnalyticsAllowed(!analyticsPrefs.analyticsAllowed.value)
+        analyticsPrefs.toggleAnalyticsAllowed()
     }
 
     val homoglyphEncodingEnabledFlow = homoglyphEncodingPrefs.homoglyphEncodingEnabled
 
     fun toggleHomoglyphCharactersEncodingEnabled() {
-        homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(!homoglyphEncodingPrefs.homoglyphEncodingEnabled.value)
+        homoglyphEncodingPrefs.toggleHomoglyphEncodingEnabled()
     }
 
     /** MQTT proxy connection state for the settings UI. */

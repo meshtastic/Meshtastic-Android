@@ -43,6 +43,10 @@ class FakeAnalyticsPrefs : AnalyticsPrefs {
         analyticsAllowed.value = allowed
     }
 
+    override fun toggleAnalyticsAllowed() {
+        analyticsAllowed.update { !it }
+    }
+
     override val installId = MutableStateFlow("fake-install-id")
 }
 
@@ -51,6 +55,10 @@ class FakeHomoglyphPrefs : HomoglyphPrefs {
 
     override fun setHomoglyphEncodingEnabled(enabled: Boolean) {
         homoglyphEncodingEnabled.value = enabled
+    }
+
+    override fun toggleHomoglyphEncodingEnabled() {
+        homoglyphEncodingEnabled.update { !it }
     }
 }
 
@@ -131,6 +139,10 @@ class FakeUiPrefs : UiPrefs {
 
     override fun setShowQuickChat(show: Boolean) {
         showQuickChat.value = show
+    }
+
+    override fun toggleShowQuickChat() {
+        showQuickChat.update { !it }
     }
 
     override val showFullMessageTimestamps = MutableStateFlow(false)

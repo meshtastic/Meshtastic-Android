@@ -27,6 +27,9 @@ interface AnalyticsPrefs {
 
     fun setAnalyticsAllowed(allowed: Boolean)
 
+    /** Flips the stored value, not [analyticsAllowed]'s snapshot, which lags a pending write. */
+    fun toggleAnalyticsAllowed()
+
     val installId: StateFlow<String>
 }
 
@@ -35,6 +38,9 @@ interface HomoglyphPrefs {
     val homoglyphEncodingEnabled: StateFlow<Boolean>
 
     fun setHomoglyphEncodingEnabled(enabled: Boolean)
+
+    /** Flips the stored value, not [homoglyphEncodingEnabled]'s snapshot, which lags a pending write. */
+    fun toggleHomoglyphEncodingEnabled()
 }
 
 /** Reactive interface for message filtering preferences. */
@@ -125,6 +131,9 @@ interface UiPrefs {
     val showQuickChat: StateFlow<Boolean>
 
     fun setShowQuickChat(show: Boolean)
+
+    /** Flips the stored value, not [showQuickChat]'s snapshot, which lags a pending write. */
+    fun toggleShowQuickChat()
 
     /** Whether conversation message headers and actions always show both the date and time. */
     val showFullMessageTimestamps: StateFlow<Boolean>

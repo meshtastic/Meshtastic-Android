@@ -42,6 +42,10 @@ class HomoglyphPrefsImpl(private val dataStore: HomoglyphEncodingDataStore, disp
         scope.launch { dataStore.edit { prefs -> prefs[KEY_ENABLED_PREF] = enabled } }
     }
 
+    override fun toggleHomoglyphEncodingEnabled() {
+        scope.launch { dataStore.edit { prefs -> prefs[KEY_ENABLED_PREF] = !(prefs[KEY_ENABLED_PREF] ?: false) } }
+    }
+
     companion object {
         const val KEY_ENABLED = "enabled"
         val KEY_ENABLED_PREF = booleanPreferencesKey(KEY_ENABLED)

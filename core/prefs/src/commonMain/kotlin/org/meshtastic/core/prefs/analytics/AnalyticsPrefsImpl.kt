@@ -50,6 +50,14 @@ class AnalyticsPrefsImpl(
         scope.launch { analyticsDataStore.edit { prefs -> prefs[KEY_ANALYTICS_ALLOWED_PREF] = allowed } }
     }
 
+    override fun toggleAnalyticsAllowed() {
+        scope.launch {
+            analyticsDataStore.edit { prefs ->
+                prefs[KEY_ANALYTICS_ALLOWED_PREF] = !(prefs[KEY_ANALYTICS_ALLOWED_PREF] ?: true)
+            }
+        }
+    }
+
     override val installId: StateFlow<String> =
         appDataStore.data.map { it[KEY_INSTALL_ID_PREF] ?: "" }.stateIn(scope, SharingStarted.Eagerly, "")
 

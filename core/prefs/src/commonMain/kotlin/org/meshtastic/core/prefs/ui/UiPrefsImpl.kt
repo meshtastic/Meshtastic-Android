@@ -110,6 +110,10 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = show } }
     }
 
+    override fun toggleShowQuickChat() {
+        scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = !(it[KEY_SHOW_QUICK_CHAT_PREF] ?: false) } }
+    }
+
     override val showFullMessageTimestamps: StateFlow<Boolean> =
         dataStore.data
             .map { it[KEY_SHOW_FULL_MESSAGE_TIMESTAMPS] ?: false }

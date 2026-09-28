@@ -26,6 +26,7 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CompletableDeferred
@@ -642,23 +643,23 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `toggleAnalyticsAllowed calls prefs`() {
-        every { analyticsPrefs.analyticsAllowed } returns MutableStateFlow(true)
-        every { analyticsPrefs.setAnalyticsAllowed(false) } returns Unit
+    fun `toggleAnalyticsAllowed flips inside the prefs store`() {
+        every { analyticsPrefs.toggleAnalyticsAllowed() } returns Unit
 
         viewModel.toggleAnalyticsAllowed()
 
-        verify { analyticsPrefs.setAnalyticsAllowed(false) }
+        verify { analyticsPrefs.toggleAnalyticsAllowed() }
+        verify(VerifyMode.not) { analyticsPrefs.setAnalyticsAllowed(any()) }
     }
 
     @Test
-    fun `toggleHomoglyphCharactersEncodingEnabled calls prefs`() {
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(true)
-        every { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) } returns Unit
+    fun `toggleHomoglyphCharactersEncodingEnabled flips inside the prefs store`() {
+        every { homoglyphEncodingPrefs.toggleHomoglyphEncodingEnabled() } returns Unit
 
         viewModel.toggleHomoglyphCharactersEncodingEnabled()
 
-        verify { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) }
+        verify { homoglyphEncodingPrefs.toggleHomoglyphEncodingEnabled() }
+        verify(VerifyMode.not) { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(any()) }
     }
 
     @Test
