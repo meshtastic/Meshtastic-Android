@@ -56,6 +56,7 @@ startKoin<AndroidKoinApp> {
 - **Single Backstack for Multiple Tabs:** Do **not** use a single `NavBackStack` list for multiple tabs. Use `MultiBackstack` (from `core:navigation`).
 - **Decorator Reuse Across Tabs:** Do **not** decorate several back stacks with one `NavEntryDecorator` set. Navigation 3 pops every entry missing from the stack it is given, so a shared saveable-state or ViewModel-store decorator clears the tab you just left. The `MultiBackstack` overload of `MeshtasticNavDisplay` gives every tab's stack its own saveable-state and ViewModel-store decorators through `rememberDecoratedNavEntries`, following the per-stack decorators of the Navigation 3 multiple back stacks recipe, and passes only the active tab's entries to `NavDisplay`. Its `entryProvider` must therefore resolve every tab's keys, not only the active tab's.
 - **Custom Backstack Mutation:** Do **not** mutate back navigation with custom stacks disconnected from the app backstack. Mutate `NavBackStack<NavKey>` directly with `add(...)` and `removeLastOrNull()`.
+- **Inline Entries in Nav Tests:** Do **not** write a test's entries inline in a composable host. `entryProvider` and `entry<K>` are `inline`, so inline entries become remembered lambdas the compiler updates in place and a stale back-stack capture passes unseen. Declare them in a plain `EntryProviderScope<NavKey>` extension, as feature graphs do.
 
 ## Reference Anchors
 - **App Startup / Koin Bootstrap:** `androidApp/src/main/kotlin/org/meshtastic/app/MeshUtilApplication.kt`
