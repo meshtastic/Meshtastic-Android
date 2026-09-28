@@ -124,16 +124,14 @@ class SerialRadioTransport(
                         super.close()
                     },
                     teardown = {
-                        Logger.d { "[${address.anonymize()}] Closing serial transport" }
+                        Logger.d { "[$address] Closing serial transport" }
                         closeConnectionAndAwaitConnect(waitForStopped = true)
                     },
                 )
         } finally {
             cleanupScope.cancel()
         }
-        if (!completed) {
-            Logger.w { "[${address.anonymize()}] Serial teardown did not complete within its lifecycle bounds" }
-        }
+        if (!completed) Logger.w { "[$address] Serial teardown did not complete within its lifecycle bounds" }
     }
 
     override fun onDeviceDisconnect(
@@ -196,9 +194,7 @@ class SerialRadioTransport(
                 claimed.token.connectCompletion.awaitForClose("connection attempt")
             }
         if (!completed) {
-            Logger.w {
-                "[${address.anonymize()}] Serial connection teardown did not complete within its lifecycle bounds"
-            }
+            Logger.w { "[$address] Serial connection teardown did not complete within its lifecycle bounds" }
         }
     }
 
@@ -209,9 +205,7 @@ class SerialRadioTransport(
                 await()
                 true
             } == true
-        if (!completed) {
-            Logger.w { "[${address.anonymize()}] Serial close timed out after $timeout while waiting for $phase" }
-        }
+        if (!completed) Logger.w { "[$address] Serial close timed out after $timeout while waiting for $phase" }
     }
 
     private fun disconnectConnection(
@@ -253,12 +247,11 @@ class SerialRadioTransport(
 
     override fun connect() {
         when {
-            lifecycle.isClosed -> Logger.d { "[${address.anonymize()}] Ignoring start after serial transport close" }
+            lifecycle.isClosed -> Logger.d { "[$address] Ignoring start after serial transport close" }
 
             deferConnectUntilCleanup() -> Unit
 
-            hasActiveConnection() ->
-                Logger.d { "[${address.anonymize()}] Ignoring start while serial generation is active" }
+            hasActiveConnection() -> Logger.d { "[$address] Ignoring start while serial generation is active" }
 
             else -> {
                 val devices = serialDevices.value
@@ -266,7 +259,7 @@ class SerialRadioTransport(
                 // Generation ownership still binds all callbacks to this transport instance after the device is chosen.
                 val device = resolveSerialDevice(devices, address)
                 if (device == null) {
-                    Logger.e { "[${address.anonymize()}] Serial device not found at selected address" }
+                    Logger.e { "[$address] Serial device not found at selected address" }
                 } else {
                     openConnection(device)
                 }
@@ -307,7 +300,7 @@ class SerialRadioTransport(
     private fun openConnection(device: UsbSerialDriver) {
         val startupLease = lifecycle.tryAcquire()
         if (startupLease == null) {
-            Logger.d { "[${address.anonymize()}] Ignoring serial open after transport close" }
+            Logger.d { "[$address] Ignoring serial open after transport close" }
             return
         }
         try {
@@ -320,14 +313,12 @@ class SerialRadioTransport(
     @Suppress("TooGenericExceptionCaught")
     private fun openAdmittedConnection(device: UsbSerialDriver) {
         val stats = ConnectionStats(connectStartedAt = nowMillis)
-        Logger.i { "[${address.anonymize()}] Opening serial device: $device" }
+        Logger.i { "[$address] Opening serial device: $device" }
 
         val connectionToken = ConnectionToken()
         val connection = createSerialConnection(device, createConnectionListener(device, connectionToken, stats))
         if (!publishConnection(connectionToken, connection)) {
-            Logger.d {
-                "[${address.anonymize()}] Serial generation is active or still tearing down; closing unused connection"
-            }
+            Logger.d { "[$address] Serial generation is active or still tearing down; closing unused connection" }
             connection.close(waitForStopped = false)
             return
         }
@@ -338,7 +329,7 @@ class SerialRadioTransport(
             disconnectConnection(connectionToken, waitForStopped = false, isPermanent = false, errorMessage = e.message)
             throw e
         } catch (e: Exception) {
-            Logger.w(e) { "[${address.anonymize()}] Serial connect failed" }
+            Logger.w(e) { "[$address] Serial connect failed" }
             disconnectConnection(
                 connectionToken = connectionToken,
                 waitForStopped = false,
@@ -381,7 +372,7 @@ class SerialRadioTransport(
         try {
             stats.connectedAt = nowMillis
             val connectionTime = stats.connectedAt - stats.connectStartedAt
-            Logger.i { "[${address.anonymize()}] Serial device connected in ${connectionTime}ms" }
+            Logger.i { "[$address] Serial device connected in ${connectionTime}ms" }
             wakeFailure = sendWakeBytes(operation.connection)
             if (wakeFailure == null) {
                 val readyToPublish =
@@ -419,7 +410,7 @@ class SerialRadioTransport(
     }
 
     private fun handleWakeFailure(connectionToken: ConnectionToken, failure: Exception) {
-        Logger.w(failure) { "[${address.anonymize()}] Serial wake failed; ending connection generation" }
+        Logger.w(failure) { "[$address] Serial wake failed; ending connection generation" }
         disconnectConnection(connectionToken, waitForStopped = false, isPermanent = false)
     }
 
@@ -429,7 +420,7 @@ class SerialRadioTransport(
             stats.packetsReceived++
             stats.bytesReceived += bytes.size
             Logger.d {
-                "[${address.anonymize()}] Serial received packet #${stats.packetsReceived} - " +
+                "[$address] Serial received packet #${stats.packetsReceived} - " +
                     "${bytes.size} byte(s) (Total RX: ${stats.bytesReceived} bytes)"
             }
             bytes.forEach(::readChar)
@@ -448,11 +439,9 @@ class SerialRadioTransport(
         if (!disconnectConnection(connectionToken, waitForStopped = false, isPermanent = false)) return
 
         val uptime = if (stats.connectedAt > 0) nowMillis - stats.connectedAt else 0
-        thrown?.let { error ->
-            Logger.w(error) { "[${address.anonymize()}] Serial error after ${uptime}ms: ${error.message}" }
-        }
+        thrown?.let { error -> Logger.w(error) { "[$address] Serial error after ${uptime}ms: ${error.message}" } }
         Logger.w {
-            "[${address.anonymize()}] Serial device disconnected - Device: $device, Uptime: ${uptime}ms, " +
+            "[$address] Serial device disconnected - Device: $device, Uptime: ${uptime}ms, " +
                 "Packets RX: ${stats.packetsReceived} (${stats.bytesReceived} bytes)"
         }
     }
@@ -536,11 +525,11 @@ class SerialRadioTransport(
             transportLease?.let { token?.let { active -> admitConnectionOperation(active, requireReady = false) } }
         if (transportLease == null || operation == null) {
             transportLease?.release()
-            Logger.w { "[${address.anonymize()}] Serial connection not available, cannot send ${p.size} bytes" }
+            Logger.w { "[$address] Serial connection not available, cannot send ${p.size} bytes" }
             return
         }
         try {
-            Logger.d { "[${address.anonymize()}] Serial queueing ${p.size} bytes" }
+            Logger.d { "[$address] Serial queueing ${p.size} bytes" }
             operation.connection.sendBytes(p)
         } finally {
             operation.lease.release()

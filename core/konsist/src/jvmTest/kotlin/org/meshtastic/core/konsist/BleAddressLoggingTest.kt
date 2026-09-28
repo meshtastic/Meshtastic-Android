@@ -30,7 +30,7 @@ import kotlin.test.assertTrue
  * address onto *every* line the BLE library emits, plus further sites in the DFU transports and WiFi provisioning.
  *
  * Scoped to the BLE-adjacent modules so matching on the `address` suffix stays low-noise. That scope includes the
- * transport modules, so TCP hosts and serial paths are anonymised the same way.
+ * transport modules, so TCP hosts are anonymised the same way.
  */
 class BleAddressLoggingTest {
 
@@ -52,6 +52,12 @@ class BleAddressLoggingTest {
      */
     private val identityUseAllowlist = listOf("DeviceListEntry.kt")
 
+    /**
+     * Files whose `address` names hardware, not a person. The Android serial transport's address is the USB
+     * vendor-product pair (`usbSerialStableKey()`), which identifies the chip model.
+     */
+    private val notPersonalAddressFiles = listOf("SerialRadioTransport.kt")
+
     /** Interpolation of anything ending in `address`, e.g. `${device.address}` or `$address`. */
     private val interpolatedAddress = Regex("""\$\{?[A-Za-z0-9_.]*[aA]ddress}?""")
 
@@ -66,6 +72,7 @@ class BleAddressLoggingTest {
         .filterNot { it.isNestedAgentWorktree() }
         .filter { file -> scannedPathFragments.any { it in file.scanPath } }
         .filterNot { file -> identityUseAllowlist.any { file.scanPath.endsWith(it) } }
+        .filterNot { file -> notPersonalAddressFiles.any { file.scanPath.endsWith(it) } }
 
     @Test
     fun `the scan actually reaches the BLE sources`() {
