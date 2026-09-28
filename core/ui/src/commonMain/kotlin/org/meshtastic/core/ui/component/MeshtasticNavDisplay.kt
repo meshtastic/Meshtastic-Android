@@ -31,7 +31,6 @@ import androidx.compose.material3.adaptive.layout.PaneExpansionState
 import androidx.compose.material3.adaptive.layout.ThreePaneScaffoldScope
 import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
-import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -46,7 +45,6 @@ import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
 import co.touchlab.kermit.Logger
@@ -158,21 +156,18 @@ private fun MeshtasticNavDisplayHost(
             paneExpansionState = rememberPaneExpansionState(),
             paneExpansionDragHandle = { state -> PaneExpansionDragHandle(state) },
         )
-    val supportingPaneSceneStrategy =
-        rememberSupportingPaneSceneStrategy<NavKey>(
-            paneExpansionState = rememberPaneExpansionState(),
-            paneExpansionDragHandle = { state -> PaneExpansionDragHandle(state) },
-        )
 
     // Fades are alpha, not movement, so they follow the theme's effects spec rather than a spatial one.
     val fadeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
+    // No screen declares shared elements; NavDisplay itself uses this scope to animate an entry that moves between
+    // scenes, such as a detail going from a single pane to the list-detail split on resize.
     SharedTransitionLayout {
         NavDisplay(
             entries = entries,
             onBack = onBack,
-            // NavDisplay falls back to SinglePaneSceneStrategy automatically when none of these compute a Scene.
-            sceneStrategies = listOf(DialogSceneStrategy(), listDetailSceneStrategy, supportingPaneSceneStrategy),
+            // NavDisplay falls back to SinglePaneSceneStrategy automatically when this computes no Scene.
+            sceneStrategies = listOf(listDetailSceneStrategy),
             sharedTransitionScope = this@SharedTransitionLayout,
             transitionSpec = meshtasticTransitionSpec(fadeSpec),
             popTransitionSpec = meshtasticTransitionSpec(fadeSpec),
@@ -182,7 +177,7 @@ private fun MeshtasticNavDisplayHost(
     }
 }
 
-/** Drag handle shared by the list-detail and supporting-pane scene strategies, with a 48.dp touch-target floor. */
+/** Drag handle for the list-detail scene strategy, with a 48.dp touch-target floor. */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 private fun ThreePaneScaffoldScope.PaneExpansionDragHandle(state: PaneExpansionState) {

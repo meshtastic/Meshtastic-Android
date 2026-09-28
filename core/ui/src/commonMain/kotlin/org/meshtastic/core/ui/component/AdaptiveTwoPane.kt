@@ -60,8 +60,8 @@ import org.meshtastic.core.ui.theme.AppTheme
  * ([MeshtasticNavDisplay]) use, so both surfaces flip to two panes at the same breakpoint.
  *
  * When split, the panes are hosted in a [SupportingPaneScaffold] so the divider is a draggable [VerticalDragHandle],
- * giving parity with the list-detail / supporting-pane scenes elsewhere in the app. Both slots keep their [ColumnScope]
- * receiver, so callers are unchanged.
+ * giving parity with the list-detail scenes elsewhere in the app. Both slots keep their [ColumnScope] receiver, so
+ * callers are unchanged.
  *
  * The scaffold reports its incoming max height as its own size, so a height-unbounded host (a LazyColumn item, a
  * scrollable column) would make it echo Constraints.Infinity and crash; a plain [Row] split is used there instead.
