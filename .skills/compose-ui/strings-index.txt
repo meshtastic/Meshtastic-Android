@@ -2126,6 +2126,7 @@ schema_lora_bandwidth
 schema_lora_channel_num
 schema_lora_channel_num_description
 schema_lora_coding_rate
+schema_lora_coding_rate_description
 schema_lora_config_ok_to_mqtt
 schema_lora_hop_limit
 schema_lora_hop_limit_description
