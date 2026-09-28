@@ -23,6 +23,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.service.notification.StatusBarNotification
+import androidx.core.app.NotificationCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.CoroutineScope
@@ -80,6 +81,38 @@ class MeshNotificationManagerImplRoutingTest {
     @After
     fun tearDown() {
         systemNotificationManager.cancelAll()
+    }
+
+    /**
+     * Android Auto treats a MessagingStyle notification as a conversation it can read aloud and answer, and requires
+     * reply and mark-as-read on it. Only conversations carry those, so nothing else may be MessagingStyle.
+     */
+    @Test
+    fun `nothing but a conversation looks like one to Android Auto`() = runWithRenderScope { scope ->
+        val manager = createManager(scope)
+        manager.updateWaypointNotification("0^all", "Hawk Ridge", "Camp", waypointId = 42)
+        manager.showAlertNotification("0!abcd1234", "Hawk Ridge", "Fire at camp")
+        manager.showMeshBeaconNotification(
+            MeshBeaconOffer(fromNodeNum = 7, beacon = MeshBeacon.Builder().also { wb -> wb.message = "Join" }.build()),
+        )
+        manager.showNewNodeSeenNotification(Node(num = 101), "New node seen: N101")
+        manager.showLowBatteryNotification(Node(num = 2), isRemote = true)
+        manager.showClientNotification(
+            ClientNotification.Builder().also { wb -> wb.message = "Duplicate key" }.build(),
+            "Radio notice",
+            MeshNotification.Type.Warning,
+        )
+        manager.showFirmwareUpdateNotice(FirmwareUpdateDestination.AndroidUpdate)
+        manager.showReconnectBlockedNotification("Meshtastic can't reconnect", "Bluetooth is off")
+
+        val posted = systemNotificationManager.activeNotifications
+        assertEquals(8, posted.size)
+        posted.forEach { sbn ->
+            assertNull(
+                NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(sbn.notification),
+                "${sbn.tag} must not be MessagingStyle",
+            )
+        }
     }
 
     @Test

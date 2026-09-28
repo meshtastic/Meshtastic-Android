@@ -38,17 +38,21 @@ import org.koin.dsl.module
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
-class ReplyReceiverTest {
+class ConversationActionServiceTest {
 
     private val sendMessageUseCase: SendMessageUseCase = mock(MockMode.autofill)
-    private val notificationManager: MeshNotificationManager = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
+    private val radioController: RadioController = mock(MockMode.autofill)
+    private val notifications: MeshNotificationManager = mock(MockMode.autofill)
+    private val contactKey = "0!12345678"
 
     @Before
     fun setUp() {
@@ -56,9 +60,10 @@ class ReplyReceiverTest {
             modules(
                 module {
                     single { sendMessageUseCase }
-                    single { notificationManager }
                     single { packetRepository }
-                    // Unconfined so the receiver's launched coroutine completes before onReceive returns
+                    single { radioController }
+                    single { notifications }
+                    // Unconfined so each action completes inside startCommand.
                     single {
                         CoroutineDispatchers(
                             io = Dispatchers.Unconfined,
@@ -76,11 +81,20 @@ class ReplyReceiverTest {
         stopKoin()
     }
 
-    private fun replyIntent(contactKey: String, text: String): Intent {
-        val intent = Intent(ReplyReceiver.REPLY_ACTION).putExtra(ReplyReceiver.CONTACT_KEY, contactKey)
-        val results = Bundle().apply { putCharSequence(ReplyReceiver.KEY_TEXT_REPLY, text) }
+    private fun run(intent: Intent) {
+        Robolectric.buildService(ConversationActionService::class.java, intent).create().startCommand(0, 1)
+    }
+
+    private fun intent(action: String) =
+        Intent(ApplicationProvider.getApplicationContext(), ConversationActionService::class.java)
+            .setAction(action)
+            .putExtra(ConversationActionService.EXTRA_CONTACT_KEY, contactKey)
+
+    private fun replyIntent(text: String): Intent {
+        val intent = intent(ConversationActionService.ACTION_REPLY)
+        val results = Bundle().apply { putCharSequence(ConversationActionService.KEY_TEXT_REPLY, text) }
         RemoteInput.addResultsToIntent(
-            arrayOf(RemoteInput.Builder(ReplyReceiver.KEY_TEXT_REPLY).build()),
+            arrayOf(RemoteInput.Builder(ConversationActionService.KEY_TEXT_REPLY).build()),
             intent,
             results,
         )
@@ -88,33 +102,49 @@ class ReplyReceiverTest {
     }
 
     @Test
-    fun `reply goes through SendMessageUseCase, marks read, and refreshes the notification in place`() {
-        val contactKey = "0!12345678"
-
-        ReplyReceiver().onReceive(ApplicationProvider.getApplicationContext(), replyIntent(contactKey, "hello back"))
+    fun `a reply is sent, marks the conversation read and refreshes it in place`() {
+        run(replyIntent("hello back"))
 
         verifySuspend { sendMessageUseCase.invoke("hello back", contactKey, null) }
         verifySuspend { packetRepository.clearUnreadCount(contactKey, any()) }
-        // The conversation is re-posted with the sent reply (MessagingStyle confirmation flow), not dismissed.
-        verifySuspend { notificationManager.refreshConversationAfterReply(contactKey) }
-        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.cancelMessageNotification(any()) }
+        verifySuspend { notifications.refreshConversationAfterReply(contactKey) }
+        verifySuspend(VerifyMode.exactly(0)) { notifications.cancelMessageNotification(any()) }
     }
 
     @Test
-    fun `notification is cancelled even when the send fails`() {
-        val contactKey = "0!12345678"
+    fun `a failed reply still dismisses so the reply spinner resolves`() {
         everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } throws RuntimeException("radio down")
 
-        ReplyReceiver().onReceive(ApplicationProvider.getApplicationContext(), replyIntent(contactKey, "hi"))
+        run(replyIntent("hi"))
 
-        verifySuspend(mode = VerifyMode.exactly(0)) { packetRepository.clearUnreadCount(any(), any()) }
-        verifySuspend { notificationManager.cancelMessageNotification(contactKey) }
+        verifySuspend(VerifyMode.exactly(0)) { packetRepository.clearUnreadCount(any(), any()) }
+        verifySuspend { notifications.cancelMessageNotification(contactKey) }
     }
 
     @Test
-    fun `missing RemoteInput results does not send`() {
-        ReplyReceiver().onReceive(ApplicationProvider.getApplicationContext(), Intent(ReplyReceiver.REPLY_ACTION))
+    fun `a reply without text sends nothing`() {
+        run(intent(ConversationActionService.ACTION_REPLY))
 
-        verifySuspend(mode = VerifyMode.exactly(0)) { sendMessageUseCase.invoke(any(), any(), any()) }
+        verifySuspend(VerifyMode.exactly(0)) { sendMessageUseCase.invoke(any(), any(), any()) }
+    }
+
+    @Test
+    fun `mark as read clears the unread count and dismisses the conversation`() {
+        run(intent(ConversationActionService.ACTION_MARK_AS_READ))
+
+        verifySuspend { packetRepository.clearUnreadCount(contactKey, any()) }
+        verifySuspend { notifications.cancelMessageNotification(contactKey) }
+    }
+
+    @Test
+    fun `a thumbs-up is sent and shown in the conversation`() {
+        run(
+            intent(ConversationActionService.ACTION_REACT)
+                .putExtra(ConversationActionService.EXTRA_REPLY_ID, 42)
+                .putExtra(ConversationActionService.EXTRA_EMOJI, "👍"),
+        )
+
+        verifySuspend { radioController.sendReaction("👍", 42, contactKey) }
+        verifySuspend { notifications.refreshConversationAfterReply(contactKey) }
     }
 }

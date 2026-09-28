@@ -1824,6 +1824,34 @@ class MeshDataHandlerTest {
         }
     }
 
+    @Test
+    fun `a message on the unnamed primary channel is titled by its modem preset`() = testScope.runTest {
+        arrangeUnmutedBroadcast()
+        every { radioConfigRepository.channelSetFlow } returns
+            MutableStateFlow(
+                ChannelSet.Builder()
+                    .also { wb ->
+                        wb.settings = listOf(ChannelSettings.Builder().build())
+                        wb.lora_config =
+                            Config.LoRaConfig.Builder()
+                                .also { wb ->
+                                    wb.use_preset = true
+                                    wb.modem_preset = ModemPreset.LONG_FAST
+                                }
+                                .build()
+                    }
+                    .build(),
+            )
+
+        handler.handleReceivedData(mentionPacket(), 123)
+        advanceUntilIdle()
+
+        // A group conversation's title is read aloud in the car; an unnamed primary must not be read as "".
+        verifySuspend {
+            serviceNotifications.updateMessageNotification(any(), any(), any(), true, "LongFast", any())
+        }
+    }
+
     // --- Waypoint persisted-owner enforcement ---
     //
     // A locked waypoint (locked_to != 0) may only be modified by the node it is locked to. The inbound-payload check
