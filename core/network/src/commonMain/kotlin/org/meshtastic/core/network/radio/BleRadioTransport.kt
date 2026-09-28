@@ -394,7 +394,7 @@ class BleRadioTransport(
         // skip the Connected gate — return a retryable failure so BleReconnectPolicy handles it.
         session.failureCause.value?.let { failure ->
             Logger.w(failure) {
-                "[${address.anonymize()}] Session failed during profile setup — returning failed outcome"
+                "[${address.anonymize()}] Session failed during profile setup; returning failed outcome"
             }
             return BleReconnectPolicy.Outcome.Failed(failure)
         }
@@ -419,7 +419,7 @@ class BleRadioTransport(
         if (connectedReached == null) {
             val failure = session.failureCause.value ?: RuntimeException("Timed out waiting for Connected state gate")
             Logger.w(failure) {
-                "[${address.anonymize()}] Session failed before Connected gate — returning failed outcome"
+                "[${address.anonymize()}] Session failed before Connected gate; returning failed outcome"
             }
             // Force cleanup only for this exact profile generation. If another path already retired it, await that
             // generation's cleanup instead of issuing a second disconnect that could race later lifecycle work.
@@ -630,7 +630,7 @@ class BleRadioTransport(
                             ?: RuntimeException("Timed out waiting for FROMNUM subscription readiness")
                     Logger.w(cause) {
                         val reason = if (!subscriptionReady) "timed out" else "failed"
-                        "[${address.anonymize()}] Subscription wait $reason — aborting setup"
+                        "[${address.anonymize()}] Subscription wait $reason; aborting setup"
                     }
                     throw cause
                 }
@@ -673,7 +673,7 @@ class BleRadioTransport(
                     }
                 if (!published) {
                     Logger.w {
-                        "[${address.anonymize()}] Session failed or transport closed during setup — skipping onConnect"
+                        "[${address.anonymize()}] Session failed or transport closed during setup; skipping onConnect"
                     }
                 }
             }
@@ -905,7 +905,7 @@ class BleRadioTransport(
             val (isPermanent, msg) = throwable.toDisconnectReason()
             callback.onDisconnect(isPermanent, errorMessage = if (isPermanent) msg else null)
         }
-        Logger.w(throwable) { "[${address.anonymize()}] Session failure — forcing cleanup for reconnect" }
+        Logger.w(throwable) { "[${address.anonymize()}] Session failure; forcing cleanup for reconnect" }
         scheduleSessionCleanup(retired, disconnectGatt = true, phase = "session failure")
     }
 

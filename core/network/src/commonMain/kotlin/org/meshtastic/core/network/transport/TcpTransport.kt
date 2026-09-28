@@ -248,7 +248,7 @@ class TcpTransport(
             } else if (hadData) {
                 val backoffSec = backoff / MILLIS_PER_SECOND
                 Logger.d {
-                    "$logTag: [${address.anonymizePublicHost()}] Short session (${sessionUptime}ms) — " +
+                    "$logTag: [${address.anonymizePublicHost()}] Short session (${sessionUptime}ms); " +
                         "keeping backoff at ${backoffSec}s"
                 }
             }
