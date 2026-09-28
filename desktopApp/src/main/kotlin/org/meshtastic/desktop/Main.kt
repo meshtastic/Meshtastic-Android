@@ -65,6 +65,7 @@ import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.decodeToSvgPainter
 import org.jetbrains.compose.resources.getString
@@ -80,6 +81,7 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.state.LaunchOptions
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.navigation.MultiBackstack
@@ -95,6 +97,7 @@ import org.meshtastic.core.resources.desktop_tray_tooltip
 import org.meshtastic.core.resources.desktop_update_available_message
 import org.meshtastic.core.resources.desktop_update_available_title
 import org.meshtastic.core.resources.desktop_update_download
+import org.meshtastic.core.service.MeshLogCleanup
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
@@ -177,6 +180,7 @@ fun main(args: Array<String>) {
 
         DeepLinkHandler(args, uiViewModel, remember { koinApp.koin.get<LaunchOptions>() })
         MeshServiceLifecycle()
+        MeshLogCleanupSchedule()
         ThemeAndLocaleProvider(uiViewModel)
     }
 
@@ -239,6 +243,13 @@ private fun MeshServiceLifecycle() {
         meshServiceController.start()
         onDispose { meshServiceController.stop() }
     }
+}
+
+/** Desktop has no WorkManager, so the hourly mesh log cleanup lives as long as the application composition. */
+@Composable
+private fun MeshLogCleanupSchedule() {
+    val meshLogCleanup = koinInject<MeshLogCleanup>()
+    LaunchedEffect(meshLogCleanup) { withContext(ioDispatcher) { meshLogCleanup.runHourly() } }
 }
 
 // ----- Theme, locale, and application shell -----
