@@ -94,6 +94,13 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsEsp32Ota = atLeast(V2_7_18)
 
     /**
+     * Whether a `coding_rate` above the modem preset's own raises it while `use_preset` is on. Supported since firmware
+     * v2.7.18 (meshtastic/firmware#9155); older firmware uses the preset's rate whatever is stored. `coding_rate` is
+     * far older than that, so its schema gates cannot answer this.
+     */
+    val supportsCodingRateOverride = atLeast(V2_7_18)
+
+    /**
      * Support for the LoRa region→preset compatibility map. Supported since firmware v2.8.0. Older firmware never sends
      * the map, so the UI keeps the preset list unconstrained (preset *availability* is [supportsPreset]).
      */

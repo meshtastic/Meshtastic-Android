@@ -35,6 +35,12 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun supportsCodingRateOverride_requires_V2_7_18() {
+        assertFalse(caps("2.7.17").supportsCodingRateOverride)
+        assertTrue(caps("2.7.18").supportsCodingRateOverride)
+    }
+
+    @Test
     fun canRequestNeighborInfo_is_currently_disabled() {
         assertFalse(caps("2.7.14").canRequestNeighborInfo)
         assertFalse(caps("3.0.0").canRequestNeighborInfo)

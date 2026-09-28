@@ -16,10 +16,12 @@
  */
 package org.meshtastic.core.model
 
+import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class ChannelOptionTest {
 
@@ -67,4 +69,59 @@ class ChannelOptionTest {
             "Each ChannelOption must map to a unique ModemPreset.",
         )
     }
+
+    @Test
+    fun a_preset_offers_only_the_coding_rates_above_its_own() {
+        assertEquals(6..8, ChannelOption.LONG_FAST.codingRateOverrides)
+        assertEquals(7..8, ChannelOption.NARROW_FAST.codingRateOverrides)
+        assertTrue(ChannelOption.LONG_SLOW.codingRateOverrides.isEmpty())
+    }
+
+    @Test
+    fun a_stored_coding_rate_the_preset_already_meets_is_the_preset_default() {
+        assertEquals(0, ChannelOption.LONG_FAST.codingRateOverride(5))
+        assertEquals(0, ChannelOption.LONG_FAST.codingRateOverride(0))
+        assertEquals(0, ChannelOption.LONG_FAST.codingRateOverride(9))
+        assertEquals(0, ChannelOption.NARROW_FAST.codingRateOverride(6))
+        assertEquals(0, ChannelOption.LONG_SLOW.codingRateOverride(8))
+        assertEquals(7, ChannelOption.LONG_FAST.codingRateOverride(7))
+    }
+
+    @Test
+    fun the_effective_coding_rate_is_the_override_or_else_the_preset() {
+        assertEquals(7, ChannelOption.LONG_FAST.effectiveCodingRate(7))
+        assertEquals(5, ChannelOption.LONG_FAST.effectiveCodingRate(0))
+        assertEquals(6, ChannelOption.NARROW_FAST.effectiveCodingRate(5))
+    }
+
+    @Test
+    fun normalizing_keeps_an_override_that_still_raises_the_new_preset() {
+        assertEquals(7, presetConfig(ModemPreset.MEDIUM_FAST, codingRate = 7).normalizeCodingRateOverride().coding_rate)
+    }
+
+    @Test
+    fun normalizing_resets_an_override_the_preset_already_meets() {
+        assertEquals(0, presetConfig(ModemPreset.LONG_SLOW, codingRate = 7).normalizeCodingRateOverride().coding_rate)
+        assertEquals(0, presetConfig(ModemPreset.LONG_FAST, codingRate = 5).normalizeCodingRateOverride().coding_rate)
+    }
+
+    @Test
+    fun normalizing_leaves_a_manual_config_alone() {
+        val manual =
+            LoRaConfig.Builder()
+                .also { wb ->
+                    wb.use_preset = false
+                    wb.coding_rate = 5
+                }
+                .build()
+        assertEquals(manual, manual.normalizeCodingRateOverride())
+    }
+
+    private fun presetConfig(preset: ModemPreset, codingRate: Int) = LoRaConfig.Builder()
+        .also { wb ->
+            wb.use_preset = true
+            wb.modem_preset = preset
+            wb.coding_rate = codingRate
+        }
+        .build()
 }

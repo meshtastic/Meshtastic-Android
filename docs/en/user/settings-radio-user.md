@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-09-19
+last_updated: 2026-09-28
 description: Configure your node hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - settings
@@ -83,6 +83,7 @@ On **Settings → LoRa**.
 | Transmit Power (dBm) | Transmission power; 0 = max allowed for region | 0 (region max) |
 | Frequency Override | Overrides the computed operating frequency outright (MHz). It doesn't offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated) |
 | Use Preset | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset | On |
+| Coding Rate Override | Preset mode only, firmware 2.7.18 or newer: raises the preset's coding rate for more error correction while keeping its bandwidth and spread factor. Only rates above the preset's own are offered, and a preset already at 4/8 has none. Nodes on the same preset still hear each other, but every packet takes longer on air and uses more of the duty cycle. Switching to a preset that already meets the override resets it to the preset default | Preset default |
 | Spread Factor | Manual mode only: 5–12. Higher spreads further but slower. On SX127x (RF95) radios the firmware doesn't accept 5 or 6 and uses 11 instead | From preset |
 | Coding Rate | Manual mode only: 5–8. More redundancy costs airtime | From preset |
 | Bandwidth | Manual mode only: the channel bandwidth in kHz, typed in directly. On the 2.4 GHz region the app offers a list of the bandwidths your node supports instead, and a stored value that isn't on that list shows as *Unsupported* and blocks saving until you pick a supported one | From preset |

@@ -264,6 +264,11 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Send a position on the primary channel when the user button is triple clicked.</string>
     <string name="config_device_tzdef_summary">Time zone for dates on the device screen and log.</string>
     <string name="config_device_use_phone_tz">Use phone time zone</string>
+    <string name="config_lora_coding_rate_fraction">4/%1$d</string>
+    <string name="config_lora_coding_rate_override">Coding Rate Override</string>
+    <string name="config_lora_coding_rate_override_max_summary">This preset already uses the highest coding rate.</string>
+    <string name="config_lora_coding_rate_override_summary">Adds error correction on top of the preset. A higher coding rate makes every packet longer on air and uses more of the duty cycle and channel utilization budget.</string>
+    <string name="config_lora_coding_rate_preset_default">Preset default (%1$s)</string>
     <string name="config_lora_modem_preset_licensed_summary">This region's presets are for licensed (amateur radio) operators only. Enable Licensed amateur radio (Ham) in User Config to select them.</string>
     <string name="config_lora_modem_preset_summary">Available modem presets, default is Long Fast.</string>
     <string name="config_lora_region_summary">The region where you will be using your radios.</string>
