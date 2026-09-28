@@ -148,7 +148,8 @@
 |-----------|--------|---------------|
 | `commonMain` | [New files / Modified files] | All business logic and UI |
 | `androidMain` | [None / Platform integration only] | [Justification if needed] |
-| `jvmMain` | [None / Shared JVM code] | [Justification if needed] |
+| `jvmMain` | [None / Desktop-only JVM code] | [Justification if needed] |
+| `jvmAndroidMain` | [None / JVM code shared by Android and Desktop] | [Justification if needed] |
 
 ## Design Standards Compliance
 

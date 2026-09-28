@@ -1,6 +1,29 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 1.4.1 → 1.4.2
+Modified principles:
+  - I. Kotlin Multiplatform Core: the list of source sets that may hold actual declarations
+    gains `jvmAndroidMain`, the source set Android and Desktop share through
+    meshtastic.kmp.jvm.android. Twelve actuals already live there and JVM-only APIs such as
+    java.util.zip cannot move to commonMain. The principle is unchanged: commonMain still
+    holds the business logic and still takes no java.* or android.* imports. PATCH: the
+    text now matches the source sets the modules use.
+Added sections: none
+Removed sections: none
+Templates requiring updates:
+  - .specify/templates/spec-template.md ✅ updated (source-set table: jvmMain is Desktop-only,
+    jvmAndroidMain row added)
+  - .specify/templates/plan-template.md ✅ no change (names no source set)
+  - .specify/templates/checklist-template.md ✅ no change (names no source set)
+  - .specify/templates/tasks-template.md ✅ no reference
+Downstream references (Amendment Procedure step 3):
+  - .skills/speckit/SKILL.md ✅ updated (declared constitution version)
+  - AGENTS.md ✅ no change (names no actual-declaration source sets; principle count still 7)
+Follow-up TODOs: none
+
+SYNC IMPACT REPORT
+==================
 Version change: 1.4.0 → 1.4.1
 Modified principles:
   - VI. Documentation Freshness: the docs-quality.yml gate also runs on PRs that touch
@@ -126,8 +149,10 @@ MUST be used in place of JVM/Android-specific APIs:
 - MUST use Okio (not `java.io`), Ktor (not `java.net`/OkHttp in common), Mutex/atomicfu
   (not `java.util.concurrent`), Room KMP, DataStore KMP, and Koin 4.2+.
 - MUST NOT import `java.*` or `android.*` in any `commonMain` module.
-- Platform-specific implementations belong in `androidMain`/`jvmMain` actual
-  declarations only (there is no `desktopMain` source set; Desktop is the `jvm` target).
+- Platform-specific implementations belong in `androidMain`, `jvmMain` or `jvmAndroidMain`
+  actual declarations only (there is no `desktopMain` source set; Desktop is the `jvm`
+  target). `jvmAndroidMain`, enabled by `meshtastic.kmp.jvm.android`, holds the JVM APIs
+  Android and Desktop share, such as `java.util.zip`, which `commonMain` cannot use.
 <!-- Rationale: Multi-platform parity (Android, Desktop, iOS). Framework bleed in commonMain breaks compilability on non-Android targets. -->
 
 ### II. Zero Lint Tolerance
@@ -315,4 +340,4 @@ summary derived from this constitution. The files `.github/copilot-instructions.
 Constitution Check confirming all seven principles were evaluated. Complexity violations
 require explicit justification in the Complexity Tracking table of the plan document.
 
-**Version**: 1.4.1 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-09-26
+**Version**: 1.4.2 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-09-28
