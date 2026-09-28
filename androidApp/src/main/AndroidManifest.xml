@@ -343,9 +343,10 @@
                     android:path="com.geeksville.mesh" /> -->
             </intent-filter>
         </receiver>
-        <receiver android:name="org.meshtastic.core.service.ReplyReceiver" android:exported="false" />
-        <receiver android:name="org.meshtastic.core.service.MarkAsReadReceiver" android:exported="false" />
-        <receiver android:name="org.meshtastic.core.service.ReactionReceiver" android:exported="false" />
+        <!-- Reply, mark-as-read and thumbs-up from a conversation notification, including from Android Auto -->
+        <service
+            android:name="org.meshtastic.core.service.ConversationActionService"
+            android:exported="false" />
 
         <receiver
             android:name="org.meshtastic.feature.widget.LocalStatsWidgetReceiver"

@@ -27,6 +27,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.MessageStatus
@@ -562,6 +563,16 @@ class MeshDataHandlerImpl(
         }
     }
 
+    /**
+     * The name a channel conversation is titled and read aloud by, as the rest of the app shows it: an unnamed primary
+     * is its modem preset ("LongFast"), never an empty title.
+     */
+    private suspend fun effectiveChannelName(index: Int): String? {
+        val channelSet = radioConfigRepository.channelSetFlow.first()
+        val lora = channelSet.lora_config ?: Channel.default.loraConfig
+        return channelSet.settings.getOrNull(index)?.let { Channel(it, lora).name }
+    }
+
     /** Test seam over the waypoint notification text; compose-resources cannot load in the plain-JVM tests. */
     internal var waypointMessageFormatter: suspend (String) -> String = { waypointName ->
         getStringSuspend(Res.string.waypoint_received, waypointName)
@@ -581,12 +592,7 @@ class MeshDataHandlerImpl(
             PortNum.TEXT_MESSAGE_APP.value -> {
                 val message = dataPacket.text!!
                 val isBroadcast = dataPacket.destination is NodeAddress.Broadcast
-                val channelName =
-                    if (isBroadcast) {
-                        radioConfigRepository.channelSetFlow.first().settings.getOrNull(dataPacket.channel)?.name
-                    } else {
-                        null
-                    }
+                val channelName = if (isBroadcast) effectiveChannelName(dataPacket.channel) else null
                 serviceNotifications.updateMessageNotification(
                     contactKey,
                     getSenderName(dataPacket),
@@ -673,16 +679,7 @@ class MeshDataHandlerImpl(
 
                     if (!muted && announcement != MessageAnnouncement.Suppress) {
                         val isBroadcast = originalPacket.destination is NodeAddress.Broadcast
-                        val channelName =
-                            if (isBroadcast) {
-                                radioConfigRepository.channelSetFlow
-                                    .first()
-                                    .settings
-                                    .getOrNull(originalPacket.channel)
-                                    ?.name
-                            } else {
-                                null
-                            }
+                        val channelName = if (isBroadcast) effectiveChannelName(originalPacket.channel) else null
                         serviceNotifications.updateReactionNotification(
                             contactKey,
                             getSenderName(dataPacket),

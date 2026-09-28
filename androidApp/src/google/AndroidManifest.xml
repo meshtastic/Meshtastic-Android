@@ -30,6 +30,14 @@
             android:resource="@xml/app_metadata" />
 
         <!--
+          Android Auto messaging through notifications only. Adding <uses name="template" /> or any androidx.car.app
+          service is a different, Closed-track-only program; Play rejects those on Open and Production.
+        -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
+        <!--
           Register as an "Open in / Send to Meshtastic" target for GeoJSON/KML map files (e.g. the Meshtastic Site
           Planner's "Send to App" share). Google flavor only — it's the flavor that renders map overlays. Merged into
           the MainActivity declared in the base manifest. application/json is broad, but the map importer validates the

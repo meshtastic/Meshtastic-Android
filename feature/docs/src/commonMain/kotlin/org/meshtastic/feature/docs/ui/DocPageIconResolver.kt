@@ -34,6 +34,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Message
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Notes
+import org.meshtastic.core.ui.icon.Notifications
 import org.meshtastic.core.ui.icon.PersonSearch
 import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.core.ui.icon.Rssi
@@ -81,6 +82,8 @@ internal fun DocPage.resolveIcon(): ImageVector = when (iconId) {
     "units-locale" -> MeshtasticIcons.Language
 
     "translate" -> MeshtasticIcons.Language
+
+    "notifications" -> MeshtasticIcons.Notifications
 
     "app-functions" -> MeshtasticIcons.Api
 

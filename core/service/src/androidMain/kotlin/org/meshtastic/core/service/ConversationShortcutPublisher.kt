@@ -168,14 +168,14 @@ class ConversationShortcutPublisher(
 
     private fun buildDmShortcut(dm: Conversation.Dm, rank: Int): ShortcutInfoCompat? {
         val node = nodeRepository.nodeDBbyNum.value.values.find { it.user.id == dm.userId }
-        // shortLabel is the compact 4-char short name; longLabel the full node name. Fall back to a localized generic
-        // name when node metadata is missing: the raw contactKey is a user-traceable identifier and must stay confined
-        // to internal ids and deep-link metadata (privacy-first convention).
+        // Android Auto and the shade title a conversation by its shortLabel, so both labels carry the full node name
+        // and the short name goes on the avatar. Fall back to a localized generic name when node metadata is missing:
+        // the raw contactKey is a user-traceable identifier and must stay confined to internal ids and deep-link
+        // metadata (privacy-first convention).
         val shortName = node?.user?.short_name?.takeIf { it.isNotBlank() }
         val longName = node?.user?.long_name?.takeIf { it.isNotBlank() }
         val fallbackName by lazy { getString(Res.string.unknown_username) }
-        val shortLabel = shortName ?: longName ?: fallbackName
-        val longLabel = longName ?: shortName ?: fallbackName
+        val label = longName ?: shortName ?: fallbackName
 
         // A node-colored pill avatar showing the short name identifies the person and matches the in-app node chip.
         // Set it on the shortcut itself (not just the Person) so launchers/Android Auto render it instead of a generic
@@ -183,11 +183,11 @@ class ConversationShortcutPublisher(
         val icon =
             node?.let {
                 val (foregroundColor, backgroundColor) = nodeColorsFromNum(it.num)
-                PersonIconFactory.createLabel(shortLabel, backgroundColor, foregroundColor, rounded = false)
+                PersonIconFactory.createLabel(shortName ?: label, backgroundColor, foregroundColor, rounded = false)
             }
         val person =
             Person.Builder()
-                .setName(longLabel)
+                .setName(label)
                 .setKey(dm.contactKey)
                 // Favorite nodes feed the system's conversation-priority ranking.
                 .setImportant(node?.isFavorite == true)
@@ -195,8 +195,8 @@ class ConversationShortcutPublisher(
                 .build()
 
         return ShortcutInfoCompat.Builder(context, dm.contactKey)
-            .setShortLabel(shortLabel)
-            .setLongLabel(longLabel)
+            .setShortLabel(label)
+            .setLongLabel(label)
             .setRank(rank)
             .setLocusId(LocusIdCompat(dm.contactKey))
             .setPerson(person)

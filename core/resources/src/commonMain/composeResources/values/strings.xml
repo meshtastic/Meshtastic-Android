@@ -504,6 +504,7 @@
     <string name="doc_keywords_mqtt">mqtt,broker,internet,bridge,uplink,downlink</string>
     <string name="doc_keywords_node_metrics">metrics,telemetry,signal,snr,rssi,battery,traceroute</string>
     <string name="doc_keywords_nodes">node,mesh,list,role,status,favorite,filter</string>
+    <string name="doc_keywords_notifications">notification,alert,sound,mute,reply,watch,wear os</string>
     <string name="doc_keywords_onboarding">setup,welcome,permissions,first-launch</string>
     <string name="doc_keywords_settings_module">module,serial,telemetry,canned,store-forward,administration</string>
     <string name="doc_keywords_settings_radio">settings,radio,lora,region,modem,device,power,security</string>
@@ -532,6 +533,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_node_metrics">Node Metrics</string>
     <string name="doc_title_nodes">Nodes</string>
+    <string name="doc_title_notifications">Notifications</string>
     <string name="doc_title_onboarding">Getting Started</string>
     <string name="doc_title_settings_module">Settings — Modules &amp; Admin</string>
     <string name="doc_title_settings_radio">Settings — Radio &amp; User</string>

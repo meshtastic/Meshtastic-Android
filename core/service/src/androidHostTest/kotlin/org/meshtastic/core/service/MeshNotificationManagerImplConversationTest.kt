@@ -18,7 +18,10 @@ package org.meshtastic.core.service
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import androidx.core.app.NotificationCompat
+import androidx.core.app.RemoteInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.mokkery.MockMode
@@ -50,6 +53,7 @@ import org.meshtastic.core.testing.runUntilSettled
 import org.meshtastic.core.testing.runWithRenderScope
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.User
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -252,8 +256,78 @@ class MeshNotificationManagerImplConversationTest {
         val reply = actions.single { it.semanticAction == Notification.Action.SEMANTIC_ACTION_REPLY }
         assertTrue(reply.allowGeneratedReplies, "Smart Reply suggestions on a watch need generated replies allowed")
         val thumbsUp = actions.single { it.semanticAction == Notification.Action.SEMANTIC_ACTION_THUMBS_UP }
-        assertEquals(false, thumbsUp.extras.getBoolean("android.support.action.showsUserInterface", true))
+        assertEquals(false, thumbsUp.extras.getBoolean(SHOWS_USER_INTERFACE, true))
         assertTrue(actions.any { it.semanticAction == Notification.Action.SEMANTIC_ACTION_MARK_AS_READ })
+    }
+
+    /**
+     * The contract Android Auto checks before it shows a conversation in the car: a MessagingStyle naming the device
+     * user, a reply action with exactly one RemoteInput whose mutable PendingIntent reaches a Service without opening
+     * UI, and a mark-as-read action that opens no UI either.
+     */
+    @Test
+    fun `a direct message meets Android Auto's messaging contract`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
+        mockHistory(message("hello", read = false, receivedTime = 1_000))
+
+        manager.updateMessageNotification("0!abcd1234", "Hawk Ridge", "hello", isBroadcast = false, channelName = null)
+        advanceUntilIdle()
+
+        val posted = activeByTag("message").single().notification
+        assertEquals(Notification.CATEGORY_MESSAGE, posted.category)
+        val style = assertNotNull(NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(posted))
+        assertNotNull(style.user.name, "the device user is named, and read aloud in the car")
+        assertNull(style.conversationTitle, "a one-to-one chat has no title; a title marks a group")
+        assertEquals(false, style.isGroupConversation)
+        assertEquals("Hawk Ridge", style.messages.single().person?.name?.toString())
+
+        val actions = posted.actions.orEmpty()
+        val reply = actions.single { it.semanticAction == Notification.Action.SEMANTIC_ACTION_REPLY }
+        val markAsRead = actions.single { it.semanticAction == Notification.Action.SEMANTIC_ACTION_MARK_AS_READ }
+        listOf(reply, markAsRead).forEach { action ->
+            assertEquals(false, action.extras.getBoolean(SHOWS_USER_INTERFACE, true))
+            val pendingIntent = shadowOf(action.actionIntent)
+            assertTrue(pendingIntent.isService, "Android Auto has these actions handled by a Service")
+            assertEquals(ConversationActionService::class.java.name, pendingIntent.savedIntent.component?.className)
+        }
+        assertEquals(1, reply.remoteInputs?.size)
+        assertTrue(shadowOf(reply.actionIntent).flags and PendingIntent.FLAG_MUTABLE != 0, "Auto fills the reply in")
+        assertTrue(shadowOf(markAsRead.actionIntent).flags and PendingIntent.FLAG_IMMUTABLE != 0)
+        assertTrue(reply.actionIntent != markAsRead.actionIntent)
+
+        // Fire the reply the way the car does: the RemoteInput text filled into the mutable PendingIntent.
+        val fillIn = android.content.Intent()
+        val results =
+            android.os.Bundle().apply { putCharSequence(reply.remoteInputs!!.single().resultKey, "on my way") }
+        android.app.RemoteInput.addResultsToIntent(reply.remoteInputs, fillIn, results)
+        reply.actionIntent.send(context, 0, fillIn)
+        val started = assertNotNull(shadowOf(context as android.app.Application).nextStartedService)
+        assertEquals(ConversationActionService.ACTION_REPLY, started.action)
+        assertEquals("0!abcd1234", started.getStringExtra(ConversationActionService.EXTRA_CONTACT_KEY))
+        assertEquals(
+            "on my way",
+            RemoteInput.getResultsFromIntent(started)
+                ?.getCharSequence(ConversationActionService.KEY_TEXT_REPLY)
+                ?.toString(),
+        )
+    }
+
+    @Test
+    fun `a channel message is a titled group conversation`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
+        mockHistory(message("hello", read = false, receivedTime = 1_000))
+
+        manager.updateMessageNotification("0^all", "Hawk Ridge", "hello", isBroadcast = true, channelName = "LongFast")
+        advanceUntilIdle()
+
+        val style =
+            assertNotNull(
+                NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(
+                    activeByTag("message").single().notification,
+                ),
+            )
+        assertEquals("LongFast", style.conversationTitle?.toString())
+        assertEquals(true, style.isGroupConversation)
     }
 
     @Test
@@ -311,13 +385,12 @@ class MeshNotificationManagerImplConversationTest {
 
             val summary = activeByTag("message_summary").single().notification
             assertEquals(Notification.GROUP_ALERT_CHILDREN, summary.groupAlertBehavior)
-            // The summary line is rebuilt from the child's real MessagingStyle, so it carries the actual sender.
-            val summaryLatest =
-                androidx.core.app.NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(summary)
-                    ?.messages
-                    ?.lastOrNull()
-            assertEquals("hello", summaryLatest?.text?.toString())
-            assertEquals("Hawk Ridge", summaryLatest?.person?.name?.toString())
+            // The summary line is rebuilt from the child's real MessagingStyle, so it carries the actual sender, but
+            // the
+            // summary itself is not a conversation Android Auto could try to answer.
+            assertNull(NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(summary))
+            val lines = summary.extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES)?.map { it.toString() }
+            assertEquals(listOf("Hawk Ridge: hello"), lines)
 
             manager.cancelMessageNotification("0^all")
 
@@ -378,3 +451,6 @@ class MeshNotificationManagerImplConversationTest {
         assertEquals("Hawk Ridge", shortcut.shortLabel)
     }
 }
+
+/** NotificationCompat stores an action's showsUserInterface flag in its extras under this key. */
+private const val SHOWS_USER_INTERFACE = "android.support.action.showsUserInterface"

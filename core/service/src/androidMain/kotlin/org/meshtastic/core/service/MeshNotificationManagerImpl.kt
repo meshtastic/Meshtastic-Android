@@ -102,9 +102,6 @@ import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.you
-import org.meshtastic.core.service.MarkAsReadReceiver.Companion.MARK_AS_READ_ACTION
-import org.meshtastic.core.service.ReactionReceiver.Companion.REACT_ACTION
-import org.meshtastic.core.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
@@ -173,6 +170,7 @@ class MeshNotificationManagerImpl(
         private const val RECONNECT_BLOCKED_ID = 1
         private val CHANNEL_LABEL_TIMEOUT = 2.seconds
         private const val MAIN_ACTIVITY_CLASS = "org.meshtastic.app.MainActivity"
+        private const val THUMBS_UP = "👍"
     }
 
     private data class ServiceNotificationSnapshot(
@@ -549,48 +547,37 @@ class MeshNotificationManagerImpl(
             return
         }
 
-        val ourNode = nodeRepository.value.ourNodeInfo.value
-        val meName = ourNode?.user?.long_name ?: getStringSuspend(Res.string.you)
-        val me =
-            Person.Builder()
-                .setName(meName)
-                .setKey(ourNode?.user?.id ?: NodeAddress.ID_LOCAL)
-                .apply {
-                    ourNode?.let {
-                        setIcon(cachedPersonIcon(it.user.id, it.user.short_name, it.colors.second, it.colors.first))
-                    }
-                }
-                .build()
-
-        val messagingStyle =
-            NotificationCompat.MessagingStyle(me)
-                .setGroupConversation(true)
-                .setConversationTitle(getStringSuspend(Res.string.meshtastic_app_name))
-
-        activeNotifications.forEach { sbn ->
-            // Prefer the child's real MessagingStyle: its latest message carries the actual sender (Person, icon) and
-            // timestamp, so the summary line reads "Hawk Ridge: …" rather than the conversation title.
-            val latest =
-                NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(sbn.notification)
-                    ?.messages
-                    ?.lastOrNull()
-            if (latest?.text != null) {
-                val senderPerson = latest.person ?: Person.Builder().setName(getStringSuspend(Res.string.you)).build()
-                messagingStyle.addMessage(latest.text, latest.timestamp, senderPerson)
-            } else {
-                // Fallback for children without an extractable style: rebuild a generic line from the extras.
-                val senderTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
-                val messageText = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
-                if (senderTitle != null && messageText != null) {
-                    messagingStyle.addMessage(messageText, sbn.postTime, Person.Builder().setName(senderTitle).build())
+        // InboxStyle, not MessagingStyle: the summary has no reply or mark-as-read actions, and Android Auto takes a
+        // MessagingStyle notification for a conversation it can answer.
+        val you = getStringSuspend(Res.string.you)
+        val lines =
+            activeNotifications.mapNotNull { sbn ->
+                // Prefer the child's real MessagingStyle: its latest message carries the actual sender, so the line
+                // reads "Hawk Ridge: …" rather than the conversation title.
+                val latest =
+                    NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(sbn.notification)
+                        ?.messages
+                        ?.lastOrNull()
+                val sender = latest?.person?.name ?: latest?.let { you }
+                val text = latest?.text
+                if (sender != null && text != null) {
+                    "$sender: $text"
+                } else {
+                    val senderTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                    val messageText = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
+                    if (senderTitle != null && messageText != null) "$senderTitle: $messageText" else null
                 }
             }
-        }
+        val appName = getStringSuspend(Res.string.meshtastic_app_name)
+        val inboxStyle = NotificationCompat.InboxStyle().setBigContentTitle(appName)
+        lines.forEach { inboxStyle.addLine(it) }
 
         val summaryNotification =
             commonBuilder(NotificationChannelSpec.DirectMessages)
                 .setSmallIcon(drawable.meshtastic_ic_notification)
-                .setStyle(messagingStyle)
+                .setContentTitle(appName)
+                .setContentText(lines.lastOrNull())
+                .setStyle(inboxStyle)
                 .setGroup(GROUP_KEY_MESSAGES)
                 .setGroupSummary(true)
                 // Only the child conversation notifications alert; without this the summary (posted on a HIGH channel)
@@ -908,8 +895,9 @@ class MeshNotificationManagerImpl(
             }
         }
         val lastMessage = history.last()
-        // The bubble wears the other party's avatar, not ours — a bubble is recognised by who is in it.
-        val bubbleNode = lastMessage.node
+        // The bubble wears the other party's avatar, not ours — a bubble is recognised by who is in it. After a reply
+        // the newest message is our own, so look back for the newest one someone else sent.
+        val bubbleNode = history.lastOrNull { !it.fromLocal }?.node ?: lastMessage.node
         val bubbleIcon =
             cachedBubblePersonIcon(
                 bubbleNode.user.id,
@@ -933,6 +921,19 @@ class MeshNotificationManagerImpl(
                     .build(),
             )
             .setBubbleMetadata(createBubbleMetadata(contactKey, bubbleIcon))
+            .apply {
+                // Android Auto shows the large icon as the conversation image; a channel keeps the car's default.
+                if (!isBroadcast) {
+                    val avatar =
+                        cachedPersonIcon(
+                            bubbleNode.user.id,
+                            bubbleNode.user.short_name,
+                            bubbleNode.colors.second,
+                            bubbleNode.colors.first,
+                        )
+                    setLargeIcon(avatar.toIcon(context))
+                }
+            }
             .setAutoCancel(true)
             .setStyle(style)
             .setGroup(GROUP_KEY_MESSAGES)
@@ -941,14 +942,7 @@ class MeshNotificationManagerImpl(
             .setShowWhen(true)
             .addAction(createReplyAction(contactKey))
             .addAction(createMarkAsReadAction(contactKey))
-            .addAction(
-                createReactionAction(
-                    contactKey = contactKey,
-                    packetId = lastMessage.packetId,
-                    toId = lastMessage.node.user.id,
-                    channelIndex = lastMessage.node.channel,
-                ),
-            )
+            .addAction(createReactionAction(contactKey = contactKey, packetId = lastMessage.packetId))
 
         return builder.build()
     }
@@ -959,17 +953,17 @@ class MeshNotificationManagerImpl(
         waypointId: Int,
         isSilent: Boolean,
     ): Notification {
-        val person = Person.Builder().setName(name).build()
-        val style = NotificationCompat.MessagingStyle(person).addMessage(message, nowMillis, person)
-
+        // Not MessagingStyle: only a conversation that can be replied to may look like one to Android Auto.
         val builder =
             commonBuilder(
                 NotificationChannelSpec.Waypoints,
                 createDeepLinkIntent("map?waypointId=$waypointId", waypointId),
             )
-                .setCategory(Notification.CATEGORY_MESSAGE)
+                .setCategory(Notification.CATEGORY_STATUS)
                 .setAutoCancel(true)
-                .setStyle(style)
+                .setContentTitle(name)
+                .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                 .setWhen(nowMillis)
                 .setShowWhen(true)
@@ -981,16 +975,14 @@ class MeshNotificationManagerImpl(
         return builder.build()
     }
 
-    private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {
-        val person = Person.Builder().setName(name).build()
-        val style = NotificationCompat.MessagingStyle(person).addMessage(alert, nowMillis, person)
-
-        return commonBuilder(NotificationChannelSpec.Alerts, createOpenMessageIntent(contactKey))
+    private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification =
+        commonBuilder(NotificationChannelSpec.Alerts, createOpenMessageIntent(contactKey))
             .setCategory(Notification.CATEGORY_ALARM)
             .setAutoCancel(true)
-            .setStyle(style)
+            .setContentTitle(name)
+            .setContentText(alert)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(alert))
             .build()
-    }
 
     private fun createNewNodeSeenNotification(title: String, node: Node): Notification {
         val message = node.user.long_name
@@ -1088,20 +1080,30 @@ class MeshNotificationManagerImpl(
             .build()
     }
 
+    /**
+     * An explicit intent for [ConversationActionService]. The conversation rides in the data URI, which takes part in
+     * PendingIntent identity, so two conversations never share one even if their request codes collide.
+     */
+    private fun conversationActionIntent(action: String, contactKey: String, packetId: Int? = null): Intent {
+        val data =
+            "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri().buildUpon().apply {
+                packetId?.let { appendQueryParameter("packet", it.toString()) }
+            }
+        return Intent(action, data.build(), context, ConversationActionService::class.java)
+            .putExtra(ConversationActionService.EXTRA_CONTACT_KEY, contactKey)
+    }
+
     private suspend fun createReplyAction(contactKey: String): NotificationCompat.Action {
         val replyLabel = getStringSuspend(Res.string.reply)
-        val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(replyLabel).build()
+        val remoteInput = RemoteInput.Builder(ConversationActionService.KEY_TEXT_REPLY).setLabel(replyLabel).build()
 
-        val replyIntent =
-            Intent(context, ReplyReceiver::class.java).apply {
-                action = ReplyReceiver.REPLY_ACTION
-                putExtra(ReplyReceiver.CONTACT_KEY, contactKey)
-            }
+        // Mutable so Android Auto and Wear can fill in the RemoteInput text; the intent is explicit, which a mutable
+        // PendingIntent must be.
         val replyPendingIntent =
-            PendingIntent.getBroadcast(
+            PendingIntent.getService(
                 context,
                 contactKey.hashCode(),
-                replyIntent,
+                conversationActionIntent(ConversationActionService.ACTION_REPLY, contactKey),
                 PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
 
@@ -1117,16 +1119,11 @@ class MeshNotificationManagerImpl(
 
     private suspend fun createMarkAsReadAction(contactKey: String): NotificationCompat.Action {
         val label = getStringSuspend(Res.string.mark_as_read)
-        val intent =
-            Intent(context, MarkAsReadReceiver::class.java).apply {
-                action = MARK_AS_READ_ACTION
-                putExtra(MarkAsReadReceiver.CONTACT_KEY, contactKey)
-            }
         val pendingIntent =
-            PendingIntent.getBroadcast(
+            PendingIntent.getService(
                 context,
                 contactKey.hashCode(),
-                intent,
+                conversationActionIntent(ConversationActionService.ACTION_MARK_AS_READ, contactKey),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
@@ -1137,24 +1134,14 @@ class MeshNotificationManagerImpl(
             .build()
     }
 
-    private fun createReactionAction(
-        contactKey: String,
-        packetId: Int,
-        toId: String,
-        channelIndex: Int,
-    ): NotificationCompat.Action {
-        val label = "👍"
+    private fun createReactionAction(contactKey: String, packetId: Int): NotificationCompat.Action {
+        val label = THUMBS_UP
         val intent =
-            Intent(context, ReactionReceiver::class.java).apply {
-                action = REACT_ACTION
-                putExtra(ReactionReceiver.EXTRA_CONTACT_KEY, contactKey)
-                putExtra(ReactionReceiver.EXTRA_REPLY_ID, packetId)
-                putExtra(ReactionReceiver.EXTRA_TO_ID, toId)
-                putExtra(ReactionReceiver.EXTRA_CHANNEL_INDEX, channelIndex)
-                putExtra(ReactionReceiver.EXTRA_EMOJI, "👍")
-            }
+            conversationActionIntent(ConversationActionService.ACTION_REACT, contactKey, packetId)
+                .putExtra(ConversationActionService.EXTRA_REPLY_ID, packetId)
+                .putExtra(ConversationActionService.EXTRA_EMOJI, THUMBS_UP)
         val pendingIntent =
-            PendingIntent.getBroadcast(
+            PendingIntent.getService(
                 context,
                 packetId,
                 intent,
