@@ -186,7 +186,8 @@ class DiscoveryScanEngine(
         var neighborType: String = "direct",
         var latitude: Double? = null,
         var longitude: Double? = null,
-        var snr: Float = 0f,
+        /** Null until a packet reports one, so an absent reading stays distinct from a valid 0 dB. */
+        var snr: Float? = null,
         /** Null until a packet reports one, so an absent reading stays distinct from a valid 0 dBm. */
         var rssi: Int? = null,
         var hopCount: Int = 0,
@@ -732,7 +733,7 @@ class DiscoveryScanEngine(
             val node =
                 collectedNodes.getOrPut(neighborNum) { CollectedNodeData(nodeNum = neighborNum, neighborType = "mesh") }
             // Only mark as mesh if not already seen directly
-            if (node.snr == 0f && node.rssi == null) {
+            if (node.snr == null && node.rssi == null) {
                 node.neighborType = "mesh"
             }
         }

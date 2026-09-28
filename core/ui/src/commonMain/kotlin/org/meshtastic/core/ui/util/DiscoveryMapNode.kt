@@ -32,7 +32,8 @@ data class DiscoveryMapNode(
     val shortName: String?,
     val longName: String?,
     val neighborType: DiscoveryNeighborType,
-    val snr: Float = 0f,
+    /** Null when no packet from this node reported an snr. */
+    val snr: Float? = null,
     /** Null when no packet from this node reported an rssi. */
     val rssi: Int? = null,
     val messageCount: Int = 0,

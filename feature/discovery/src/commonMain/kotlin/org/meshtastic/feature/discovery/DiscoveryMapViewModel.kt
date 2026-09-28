@@ -64,8 +64,8 @@ class DiscoveryMapViewModel(@InjectedParam private val sessionId: Long, private 
                 } else {
                     nodesByPreset[filter].orEmpty()
                 }
-            // Deduplicate by nodeNum — keep the entry with strongest signal
-            raw.groupBy { it.nodeNum }.values.map { dupes -> dupes.maxByOrNull { it.snr } ?: dupes.first() }
+            // Dedup by nodeNum, keeping the strongest SNR; a sighting without one loses to any reading.
+            raw.groupBy { it.nodeNum }.values.map { dupes -> dupes.maxWith(compareBy(nullsFirst()) { it.snr }) }
         }
             .stateInWhileSubscribed(initialValue = emptyList())
 

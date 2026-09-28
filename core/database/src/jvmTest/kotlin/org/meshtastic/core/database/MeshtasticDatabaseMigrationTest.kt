@@ -428,6 +428,86 @@ class MeshtasticDatabaseMigrationTest {
     }
 
     /**
+     * 59→60 adds `contact_settings.display_name` and `channel_set.last_reconciled`. Per-conversation state and the
+     * stored channel set come through untouched. `display_name` arrives empty, which is what every live conversation
+     * holds, and `last_reconciled` arrives NULL, so the first reconcile captures the current set and moves nothing.
+     */
+    @Test
+    fun displayNameAndReconcileBaselineAddedWithoutDisturbingConversationsOrChannels() = runTest {
+        helper.createDatabase(DISPLAY_NAME_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO contact_settings (contact_key, muteUntil, last_read_message_uuid, " +
+                    "last_read_message_timestamp, filtering_disabled, draft, pinned) " +
+                    "VALUES ('0^all', 9999, 7, 5000, 1, 'half typed', 1)",
+            )
+            connection.execSQL("INSERT INTO contact_settings (contact_key, muteUntil) VALUES ('0!abcdef01', 0)")
+            connection.execSQL("INSERT INTO channel_set (id, channel_set) VALUES (0, x'$STORED_CHANNEL_SET_HEX')")
+        }
+
+        helper.runMigrationsAndValidate(DISPLAY_NAME_TO_VERSION, emptyList()).use { connection ->
+            val live = "FROM contact_settings WHERE contact_key = '0^all'"
+            assertEquals(
+                listOf("0!abcdef01", "0^all"),
+                queryColumn(connection, "SELECT contact_key FROM contact_settings ORDER BY contact_key"),
+            )
+            assertEquals(listOf("9999"), queryColumn(connection, "SELECT muteUntil $live"))
+            assertEquals(listOf("7"), queryColumn(connection, "SELECT last_read_message_uuid $live"))
+            assertEquals(listOf("half typed"), queryColumn(connection, "SELECT draft $live"))
+            assertEquals(listOf("1"), queryColumn(connection, "SELECT pinned $live"))
+            assertEquals(
+                listOf("", ""),
+                queryColumn(connection, "SELECT display_name FROM contact_settings ORDER BY contact_key"),
+            )
+            assertEquals(listOf("0"), queryColumn(connection, "SELECT id FROM channel_set"))
+            assertEquals(
+                listOf(STORED_CHANNEL_SET_HEX),
+                queryColumn(connection, "SELECT hex(channel_set) FROM channel_set"),
+            )
+            assertEquals(listOf(null), queryColumn(connection, "SELECT last_reconciled FROM channel_set"))
+        }
+    }
+
+    /**
+     * 60→61 adds `nodes.soil_water_metrics`. Existing nodes keep their data, and the new column arrives as an empty
+     * blob, never NULL: it decodes to an empty `Telemetry`, the same as a node that has never sent soil readings.
+     */
+    @Test
+    fun soilWaterColumnAddedAsEmptyBlobWithoutDisturbingNodes() = runTest {
+        helper.createDatabase(SOIL_WATER_FROM_VERSION).use { connection ->
+            // Every NOT NULL column without a default in schema 60; the BLOBs are empty protos.
+            val columns =
+                "num, user, position, latitude, longitude, snr, rssi, last_heard, device_metrics, channel, " +
+                    "via_mqtt, hops_away, is_favorite, environment_metrics, power_metrics, paxcounter"
+            connection.execSQL(
+                "INSERT INTO nodes ($columns, long_name, notes) VALUES " +
+                    "(42, x'', x'', 0.0, 0.0, -6.25, -90, 1000, x'', 0, 0, 1, 1, x'', x'', x'', " +
+                    "'Minnie Mouse', 'keep me')",
+            )
+            connection.execSQL(
+                "INSERT INTO nodes ($columns, long_name) VALUES " +
+                    "(43, x'', x'', 0.0, 0.0, 0.0, 0, 2000, x'', 0, 0, 2, 0, x'', x'', x'', 'Mickey')",
+            )
+        }
+
+        helper.runMigrationsAndValidate(SOIL_WATER_TO_VERSION, emptyList()).use { connection ->
+            assertEquals(listOf("42", "43"), queryColumn(connection, "SELECT num FROM nodes ORDER BY num"))
+            assertEquals(listOf("Minnie Mouse"), queryColumn(connection, "SELECT long_name FROM nodes WHERE num = 42"))
+            assertEquals(listOf("keep me"), queryColumn(connection, "SELECT notes FROM nodes WHERE num = 42"))
+            assertEquals(listOf("-6.25"), queryColumn(connection, "SELECT snr FROM nodes WHERE num = 42"))
+            assertEquals(listOf("-90"), queryColumn(connection, "SELECT rssi FROM nodes WHERE num = 42"))
+            assertEquals(listOf("1", "0"), queryColumn(connection, "SELECT is_favorite FROM nodes ORDER BY num"))
+            assertEquals(
+                listOf("blob", "blob"),
+                queryColumn(connection, "SELECT typeof(soil_water_metrics) FROM nodes ORDER BY num"),
+            )
+            assertEquals(
+                listOf("0", "0"),
+                queryColumn(connection, "SELECT length(soil_water_metrics) FROM nodes ORDER BY num"),
+            )
+        }
+    }
+
+    /**
      * 61→62 adds `device_hardware.is_maker`. [migrateAll] only proves the resulting schema validates from an empty
      * database; this proves a cached registry row survives the addition with the fields the support badge and the
      * firmware flow read, and that the new column arrives as 0 - an absent flag means "not maker", never NULL.
@@ -512,6 +592,46 @@ class MeshtasticDatabaseMigrationTest {
         }
     }
 
+    /**
+     * 63→64 makes `discovered_node.snr` nullable, which Room implements by recreating the table. Every row survives
+     * with its values and its parent link, a stored 0 dB stays 0 because it may be a real reading, and NULL becomes
+     * storable for a node no packet reported an snr for.
+     */
+    @Test
+    fun discoveredNodeSnrGoesNullableWithoutLosingRows() = runTest {
+        helper.createDatabase(DISCOVERED_SNR_NULLABLE_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO discovery_session (id, timestamp, presets_scanned, home_preset) " +
+                    "VALUES (1, 3000, 'LONG_FAST', 'LONG_FAST')",
+            )
+            connection.execSQL(
+                "INSERT INTO discovery_preset_result (id, session_id, preset_name) VALUES (1, 1, 'LONG_FAST')",
+            )
+            connection.execSQL(
+                "INSERT INTO discovered_node (id, preset_result_id, node_num, neighbor_type, snr, rssi) " +
+                    "VALUES (1, 1, 99, 'mesh', 0.0, NULL)",
+            )
+            connection.execSQL(
+                "INSERT INTO discovered_node (id, preset_result_id, node_num, long_name, neighbor_type, snr, rssi, " +
+                    "message_count) VALUES (2, 1, 100, 'Relay', 'direct', -7.5, -80, 3)",
+            )
+        }
+
+        helper.runMigrationsAndValidate(DISCOVERED_SNR_NULLABLE_TO_VERSION, emptyList()).use { connection ->
+            val byId = "FROM discovered_node ORDER BY id"
+            assertEquals(listOf("1", "2"), queryColumn(connection, "SELECT id $byId"))
+            assertEquals(listOf("99", "100"), queryColumn(connection, "SELECT node_num $byId"))
+            assertEquals(listOf("1", "1"), queryColumn(connection, "SELECT preset_result_id $byId"))
+            assertEquals(listOf("0.0", "-7.5"), queryColumn(connection, "SELECT snr $byId"))
+            assertEquals(listOf(null, "-80"), queryColumn(connection, "SELECT rssi $byId"))
+            assertEquals(listOf("mesh", "direct"), queryColumn(connection, "SELECT neighbor_type $byId"))
+            assertEquals(listOf(null, "Relay"), queryColumn(connection, "SELECT long_name $byId"))
+            assertEquals(listOf("0", "3"), queryColumn(connection, "SELECT message_count $byId"))
+            connection.execSQL("UPDATE discovered_node SET snr = NULL WHERE id = 1")
+            assertEquals(listOf(null), queryColumn(connection, "SELECT snr FROM discovered_node WHERE id = 1"))
+        }
+    }
+
     private fun queryColumn(connection: SQLiteConnection, sql: String): List<String?> =
         connection.prepare(sql).use { statement ->
             buildList {
@@ -542,11 +662,18 @@ class MeshtasticDatabaseMigrationTest {
         const val HEARD_ON_LORA_TO_VERSION = 58
         const val KEY_MATCH_FROM_VERSION = 58
         const val KEY_MATCH_TO_VERSION = 59
+        const val DISPLAY_NAME_FROM_VERSION = 59
+        const val DISPLAY_NAME_TO_VERSION = 60
+        const val SOIL_WATER_FROM_VERSION = 60
+        const val SOIL_WATER_TO_VERSION = 61
         const val IS_MAKER_FROM_VERSION = 61
         const val IS_MAKER_TO_VERSION = 62
         const val REACTION_AUTH_FROM_VERSION = 62
         const val REACTION_AUTH_TO_VERSION = 63
+        const val DISCOVERED_SNR_NULLABLE_FROM_VERSION = 63
+        const val DISCOVERED_SNR_NULLABLE_TO_VERSION = 64
         const val PUBLIC_KEY_BYTES = 32
+        const val STORED_CHANNEL_SET_HEX = "0A0612044D657368"
 
         /** Room's runtime FTS content-sync triggers, verbatim from the generated MeshtasticDatabase_Impl. */
         val FTS_SYNC_TRIGGERS =

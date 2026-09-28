@@ -222,6 +222,27 @@ class DiscoveryPacketCollectionTest {
         val meshNode = nodes.find { it.nodeNum == 5555L }
         assertTrue(meshNode != null, "Neighbor-info-only node should be persisted")
         assertEquals("mesh", meshNode.neighborType, "Neighbor-info-only node should have 'mesh' type")
+        assertNull(meshNode.snr, "A node never heard directly has no SNR, not 0 dB")
+    }
+
+    @Test
+    fun neighborInfoDoesNotDemoteDirectNodeHeardAtZeroDb() = runTest {
+        val engine = createEngine(this)
+        nodeRepository.setMyNodeInfo(createMyNodeInfo())
+        engine.startScan(testPresets, dwellDurationSeconds = 60)
+        awaitDwell(engine)
+
+        engine.onPacketReceived(
+            positionPacket(from = 6667, latI = 377749000, lonI = -1224194000, snr = 0f, rssi = null),
+            dataPacket(from = 6667),
+        )
+        engine.onPacketReceived(neighborInfoPacket(from = 8888, neighborNodeIds = listOf(6667)), dataPacket(8888))
+
+        engine.stopScan()
+
+        val directNode = discoveryDao.discoveredNodes.values.single { it.nodeNum == 6667L }
+        assertEquals("direct", directNode.neighborType, "A 0 dB reading is a direct sighting")
+        assertEquals(0f, directNode.snr)
     }
 
     @Test
@@ -290,7 +311,7 @@ class DiscoveryPacketCollectionTest {
         deviceId = "test-device",
     )
 
-    private fun positionPacket(from: Int, latI: Int, lonI: Int, snr: Float = 5.5f, rssi: Int = -70): MeshPacket {
+    private fun positionPacket(from: Int, latI: Int, lonI: Int, snr: Float = 5.5f, rssi: Int? = -70): MeshPacket {
         val posPayload =
             Position.ADAPTER.encode(
                 Position.Builder()

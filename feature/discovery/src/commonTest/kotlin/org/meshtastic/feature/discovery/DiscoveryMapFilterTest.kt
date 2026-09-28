@@ -19,13 +19,19 @@
 package org.meshtastic.feature.discovery
 
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.database.entity.DiscoverySessionStatus
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -38,6 +44,16 @@ import kotlin.test.assertTrue
  * These are logic-level tests that validate the ViewModel's state flows without rendering UI.
  */
 class DiscoveryMapFilterTest {
+
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
 
     // region Preset filter selection
 
@@ -132,12 +148,51 @@ class DiscoveryMapFilterTest {
 
     // endregion
 
+    // region All-presets dedup
+
+    @Test
+    fun allPresetsDedupKeepsMeasuredSnrOverUnheardSighting() = runTest {
+        val dao = SharedInMemoryDiscoveryDao()
+        val sessionId = dao.insertSession(testSession())
+        val unheardPreset =
+            dao.insertPresetResult(DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "LONG_FAST"))
+        val measuredPreset =
+            dao.insertPresetResult(DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "SHORT_FAST"))
+        // The same node, named by NeighborInfo alone on one preset and heard at -10 dB on the other.
+        dao.insertDiscoveredNode(DiscoveredNodeEntity(presetResultId = unheardPreset, nodeNum = 7L))
+        dao.insertDiscoveredNode(DiscoveredNodeEntity(presetResultId = measuredPreset, nodeNum = 7L, snr = -10f))
+
+        val nodes = mapViewModel(sessionId, dao).filteredNodes.first { it.isNotEmpty() }
+
+        assertEquals(listOf(measuredPreset), nodes.map { it.presetResultId })
+        assertEquals(-10f, nodes.single().snr)
+    }
+
+    @Test
+    fun allPresetsDedupKeepsZeroDbReadingOverNegativeReading() = runTest {
+        val dao = SharedInMemoryDiscoveryDao()
+        val sessionId = dao.insertSession(testSession())
+        val zeroPreset =
+            dao.insertPresetResult(DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "LONG_FAST"))
+        val negativePreset =
+            dao.insertPresetResult(DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "SHORT_FAST"))
+        dao.insertDiscoveredNode(DiscoveredNodeEntity(presetResultId = negativePreset, nodeNum = 7L, snr = -10f))
+        dao.insertDiscoveredNode(DiscoveredNodeEntity(presetResultId = zeroPreset, nodeNum = 7L, snr = 0f))
+
+        val nodes = mapViewModel(sessionId, dao).filteredNodes.first { it.isNotEmpty() }
+
+        assertEquals(listOf(zeroPreset), nodes.map { it.presetResultId })
+        assertEquals(0f, nodes.single().snr)
+    }
+
+    // endregion
+
     // region Helpers
 
-    private fun createViewModel(): DiscoveryMapViewModel {
-        val dao = SharedInMemoryDiscoveryDao()
-        return DiscoveryMapViewModel(sessionId = 1L, discoveryDao = dao)
-    }
+    private fun createViewModel(): DiscoveryMapViewModel = mapViewModel(sessionId = 1L, SharedInMemoryDiscoveryDao())
+
+    private fun mapViewModel(sessionId: Long, dao: SharedInMemoryDiscoveryDao) =
+        DiscoveryMapViewModel(sessionId = sessionId, discoveryDao = dao)
 
     private fun testSession() = DiscoverySessionEntity(
         timestamp = 1_000_000L,

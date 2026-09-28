@@ -59,7 +59,7 @@ class DiscoveryRankingEngineTest {
     private fun node(
         presetResultId: Long = 1,
         nodeNum: Long = 1,
-        snr: Float = 0f,
+        snr: Float? = null,
         rssi: Int? = 0,
         distanceFromUser: Double? = null,
     ) = DiscoveredNodeEntity(
@@ -369,11 +369,11 @@ class DiscoveryRankingEngineTest {
     }
 
     @Test
-    fun noNodesProducesZeroMediansAndDistance() {
+    fun noNodesProducesNoMediansAndZeroDistance() {
         val p = preset(uniqueNodes = 3, numPacketsRx = 20)
         val result = engine.rank(listOf(input(p, emptyList())))
 
-        assertEquals(0f, result[0].scoreBreakdown.medianSnr)
+        assertNull(result[0].scoreBreakdown.medianSnr, "no nodes means no snr median, not 0 dB")
         assertNull(result[0].scoreBreakdown.medianRssi, "no nodes means no rssi median, not 0 dBm")
         assertEquals(0.0, result[0].scoreBreakdown.bestKnownDistance)
     }
@@ -390,6 +390,51 @@ class DiscoveryRankingEngineTest {
 
         assertEquals("measured", result[0].presetResult.presetName, "an absent rssi median must not win on 0 dBm")
         assertNull(result[1].scoreBreakdown.medianRssi)
+    }
+
+    @Test
+    fun unheardNodesDoNotPullTheSnrMedianTowardZero() {
+        val pA = preset(id = 1, name = "mostlyUnheard", uniqueNodes = 3, numPacketsRx = 50)
+        val pB = preset(id = 2, name = "measured", uniqueNodes = 3, numPacketsRx = 50)
+        // A heard one node at -10 dB and learned two more only from NeighborInfo, which reports no SNR for them.
+        val nodesA =
+            listOf(
+                node(presetResultId = 1, nodeNum = 1, snr = -10f),
+                node(presetResultId = 1, nodeNum = 2),
+                node(presetResultId = 1, nodeNum = 3),
+            )
+        val nodesB = listOf(node(presetResultId = 2, nodeNum = 4, snr = -5f))
+
+        val result = engine.rank(listOf(input(pA, nodesA), input(pB, nodesB)))
+
+        assertEquals("measured", result[0].presetResult.presetName)
+        assertEquals(-10f, result[1].scoreBreakdown.medianSnr)
+    }
+
+    @Test
+    fun presetWithNoSnrReadingsRanksAfterMeasuredPreset() {
+        val pA = preset(id = 1, name = "unheard", uniqueNodes = 2, numPacketsRx = 50)
+        val pB = preset(id = 2, name = "measured", uniqueNodes = 2, numPacketsRx = 50)
+        val nodesA = List(2) { node(presetResultId = 1, nodeNum = it + 1L) }
+        val nodesB = List(2) { node(presetResultId = 2, nodeNum = it + 3L, snr = -15f) }
+
+        val result = engine.rank(listOf(input(pA, nodesA), input(pB, nodesB)))
+
+        assertEquals("measured", result[0].presetResult.presetName, "an absent snr median must not win on 0 dB")
+        assertNull(result[1].scoreBreakdown.medianSnr)
+    }
+
+    @Test
+    fun zeroDbSnrReadingsRankAsMeasured() {
+        val pA = preset(id = 1, name = "zeroDb", uniqueNodes = 2, numPacketsRx = 50)
+        val pB = preset(id = 2, name = "negative", uniqueNodes = 2, numPacketsRx = 50)
+        val nodesA = List(2) { node(presetResultId = 1, nodeNum = it + 1L, snr = 0f) }
+        val nodesB = List(2) { node(presetResultId = 2, nodeNum = it + 3L, snr = -5f) }
+
+        val result = engine.rank(listOf(input(pB, nodesB), input(pA, nodesA)))
+
+        assertEquals("zeroDb", result[0].presetResult.presetName)
+        assertEquals(0f, result[0].scoreBreakdown.medianSnr)
     }
 
     @Test
