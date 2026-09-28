@@ -58,7 +58,6 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_update_available
 import org.meshtastic.core.resources.firmware_update_notification_android
-import org.meshtastic.core.resources.firmware_update_notification_flasher
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
@@ -296,22 +295,13 @@ class ConnectionsViewModel(
             }
             .filterNotNull()
             .onEach { notice ->
+                // The tap always lands on the in-app Firmware Updates screen, whatever the notice's destination.
                 val message =
-                    when (notice.destination) {
-                        org.meshtastic.core.model.FirmwareUpdateDestination.AndroidUpdate ->
-                            getStringSuspend(
-                                Res.string.firmware_update_notification_android,
-                                notice.currentVersion,
-                                notice.stableVersion,
-                            )
-
-                        org.meshtastic.core.model.FirmwareUpdateDestination.MeshtasticFlasher ->
-                            getStringSuspend(
-                                Res.string.firmware_update_notification_flasher,
-                                notice.currentVersion,
-                                notice.stableVersion,
-                            )
-                    }
+                    getStringSuspend(
+                        Res.string.firmware_update_notification_android,
+                        notice.currentVersion,
+                        notice.stableVersion,
+                    )
                 if (
                     notificationManager.dispatch(
                         Notification(
@@ -320,15 +310,7 @@ class ConnectionsViewModel(
                             message = message,
                             type = Notification.Type.Info,
                             category = Notification.Category.NodeEvent,
-                            deepLinkUri =
-                            if (
-                                notice.destination ==
-                                org.meshtastic.core.model.FirmwareUpdateDestination.AndroidUpdate
-                            ) {
-                                "meshtastic:///firmware/update"
-                            } else {
-                                "https://flasher.meshtastic.org"
-                            },
+                            deepLinkUri = "meshtastic://meshtastic/firmware/update",
                         ),
                     )
                 ) {

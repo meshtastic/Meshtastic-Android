@@ -61,7 +61,7 @@ class FakeMeshNotificationManager : MeshNotificationManager {
 
     override fun showNewNodeSeenNotification(node: Node) {}
 
-    override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {}
+    override suspend fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {}
 
     override fun showClientNotification(clientNotification: ClientNotification) {}
 

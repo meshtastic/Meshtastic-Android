@@ -133,11 +133,19 @@ class AndroidNotificationManagerTest {
     fun `dispatch routes all categories to canonical channels`() = runTest {
         val manager = AndroidNotificationManager(context)
 
-        assertDispatchesToChannel(manager, Notification.Category.Message, NotificationChannels.MESSAGES)
-        assertDispatchesToChannel(manager, Notification.Category.NodeEvent, NotificationChannels.NEW_NODES)
-        assertDispatchesToChannel(manager, Notification.Category.Battery, NotificationChannels.LOW_BATTERY)
-        assertDispatchesToChannel(manager, Notification.Category.Alert, NotificationChannels.ALERTS)
-        assertDispatchesToChannel(manager, Notification.Category.Service, NotificationChannels.SERVICE)
+        Notification.Category.entries.forEach { category ->
+            val expectedChannel =
+                when (category) {
+                    Notification.Category.Message -> NotificationChannels.MESSAGES
+                    Notification.Category.NodeEvent -> NotificationChannels.NEW_NODES
+                    Notification.Category.Battery -> NotificationChannels.LOW_BATTERY
+                    Notification.Category.Alert -> NotificationChannels.ALERTS
+                    Notification.Category.Service -> NotificationChannels.SERVICE
+                    Notification.Category.MeshBeacon -> NotificationChannels.MESH_BEACON
+                    Notification.Category.Client -> NotificationChannels.CLIENT
+                }
+            assertDispatchesToChannel(manager, category, expectedChannel)
+        }
     }
 
     @Test
@@ -212,7 +220,7 @@ class AndroidNotificationManagerTest {
             Notification(
                 title = "Client notification",
                 message = clientNotification.message,
-                category = Notification.Category.Alert,
+                category = Notification.Category.Client,
                 id = id,
             ),
         )
@@ -275,7 +283,7 @@ class AndroidNotificationManagerTest {
                 Notification(
                     title = "Client notification",
                     message = advisory.message,
-                    category = Notification.Category.Alert,
+                    category = Notification.Category.Client,
                     id = advisory.notificationId(),
                 ),
                 advisory,
@@ -315,7 +323,7 @@ class AndroidNotificationManagerTest {
                 Notification(
                     title = "Client notification",
                     message = cn.message,
-                    category = Notification.Category.Alert,
+                    category = Notification.Category.Client,
                     id = cn.notificationId(),
                 ),
                 cn,
@@ -340,7 +348,7 @@ class AndroidNotificationManagerTest {
             Notification(
                 title = "Client notification",
                 message = clientNotification.message,
-                category = Notification.Category.Alert,
+                category = Notification.Category.Client,
                 id = clientNotification.notificationId(),
             ),
             clientNotification,

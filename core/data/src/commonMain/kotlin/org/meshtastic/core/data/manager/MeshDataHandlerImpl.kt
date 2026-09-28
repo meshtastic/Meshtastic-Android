@@ -554,13 +554,10 @@ class MeshDataHandlerImpl(
             // conversation on screen — only mute silences it.
             dataPacket.dataType == PortNum.ALERT_APP.value ->
                 if (!muted) {
-                    notificationManager.dispatch(
-                        Notification(
-                            title = getSenderName(dataPacket),
-                            message = dataPacket.alert ?: getStringSuspend(Res.string.critical_alert),
-                            category = Notification.Category.Alert,
-                            contactKey = contactKey,
-                        ),
+                    serviceNotifications.showAlertNotification(
+                        contactKey,
+                        getSenderName(dataPacket),
+                        dataPacket.alert ?: getStringSuspend(Res.string.critical_alert),
                     )
                 }
 
@@ -609,15 +606,13 @@ class MeshDataHandlerImpl(
             }
 
             PortNum.WAYPOINT_APP.value -> {
-                val message = getStringSuspend(Res.string.waypoint_received, dataPacket.waypoint!!.name)
-                notificationManager.dispatch(
-                    Notification(
-                        title = getSenderName(dataPacket),
-                        message = message,
-                        category = Notification.Category.Message,
-                        contactKey = contactKey,
-                        isSilent = isSilent,
-                    ),
+                val waypoint = dataPacket.waypoint!!
+                serviceNotifications.updateWaypointNotification(
+                    contactKey,
+                    getSenderName(dataPacket),
+                    getStringSuspend(Res.string.waypoint_received, waypoint.name),
+                    waypoint.id,
+                    isSilent,
                 )
             }
 

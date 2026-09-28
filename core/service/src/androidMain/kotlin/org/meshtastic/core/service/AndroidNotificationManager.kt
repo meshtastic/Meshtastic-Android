@@ -33,6 +33,7 @@ import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.meshtastic_alerts_notifications
 import org.meshtastic.core.resources.meshtastic_low_battery_notifications
@@ -80,6 +81,7 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
                     ),
                     createChannel(Notification.Category.Battery, Res.string.meshtastic_low_battery_notifications),
                     createChannel(Notification.Category.Alert, Res.string.meshtastic_alerts_notifications),
+                    createChannel(Notification.Category.Client, Res.string.client_notification),
                     createChannel(Notification.Category.Service, Res.string.meshtastic_service_notifications),
                 )
             notificationManager.createNotificationChannels(channels)
@@ -123,6 +125,9 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
 
         Notification.Category.Alert ->
             ChannelConfig(id = NotificationChannels.ALERTS, importance = SystemNotificationManager.IMPORTANCE_HIGH)
+
+        Notification.Category.Client ->
+            ChannelConfig(id = NotificationChannels.CLIENT, importance = SystemNotificationManager.IMPORTANCE_HIGH)
 
         Notification.Category.Service ->
             ChannelConfig(id = NotificationChannels.SERVICE, importance = SystemNotificationManager.IMPORTANCE_MIN)

@@ -367,7 +367,36 @@ class ConnectionsViewModelTest {
         assertEquals(setOf(notice.notificationKey), uiPrefs.firmwareUpdateNotificationKeys.value)
         assertEquals("Firmware update available", dispatchedNotifications.single().title)
         assertEquals(Notification.Type.Info, dispatchedNotifications.single().type)
-        assertEquals("meshtastic:///firmware/update", dispatchedNotifications.single().deepLinkUri)
+        assertEquals("meshtastic://meshtastic/firmware/update", dispatchedNotifications.single().deepLinkUri)
+    }
+
+    @Test
+    fun `firmware notice for flasher-only hardware still opens in-app firmware updates`() = runTest {
+        val target = "tbeam"
+        deviceHardwareRepository.setHardware(
+            hwModel = HardwareModel.TBEAM.value,
+            target = target,
+            device = DeviceHardware(architecture = "esp32", platformioTarget = target),
+        )
+        nodeRepository.setMyId("!local")
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
+        nodeRepository.setOurNode(
+            org.meshtastic.core.model.Node(
+                num = 1,
+                user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+            ),
+        )
+        // ESP32 over serial is not updatable in-app, so the notice's destination is the flasher.
+        radioPrefs.setDevAddr("s:connected")
+        firmwareReleaseRepository.setManifestTargets("v2.8.0", setOf(target))
+        firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0"))
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+
+        advanceUntilIdle()
+
+        val notice = assertNotNull(viewModel.firmwareUpdateNotice.value)
+        assertEquals(FirmwareUpdateDestination.MeshtasticFlasher, notice.destination)
+        assertEquals("meshtastic://meshtastic/firmware/update", dispatchedNotifications.single().deepLinkUri)
     }
 
     @Test

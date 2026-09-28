@@ -39,6 +39,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -66,6 +67,9 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
 import org.meshtastic.core.repository.TracerouteHandler
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.waypoint_received
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -1985,6 +1989,73 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         verifySuspend { packetRepository.insert(any(), 123, any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `received waypoint notifies on the waypoint path`() = testScope.runTest {
+        // CMP loads a string on its own Default scope the first time; warm it so the post lands in virtual time.
+        safeCatchingAll { getString(Res.string.waypoint_received, "") }
+        every { packetRepository.getWaypoints() } returns flowOf(emptyList())
+        every { nodeManager.getNodeById(any()) } returns
+            Node(num = 999, user = User.Builder().also { wb -> wb.long_name = "Hawk Ridge" }.build())
+        val packet =
+            waypointPacket(
+                txId = 506,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.name = "Camp"
+                        wb.expire = Int.MAX_VALUE
+                    }
+                    .build(),
+            )
+        stubWaypointPersistDependencies(506)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { serviceNotifications.updateWaypointNotification(any(), "Hawk Ridge", any(), 42, false) }
+        verifySuspend(exactly(0)) { notificationManager.dispatch(any()) }
+    }
+
+    @Test
+    fun `critical alert notifies on the alert path with its conversation`() = testScope.runTest {
+        val payload = "Fire at camp".encodeToByteArray().toByteString()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 507
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.ALERT_APP
+                                wb.payload = payload
+                            }
+                            .build()
+                }
+                .build()
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                id = 507,
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = payload,
+                dataType = PortNum.ALERT_APP.value,
+            )
+        everySuspend { packetRepository.findPacketsWithId(507) } returns emptyList()
+        everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
+        every { messageFilter.shouldFilter(any(), any()) } returns false
+        every { nodeManager.getNodeById("!remote") } returns
+            Node(num = 456, user = User.Builder().also { wb -> wb.long_name = "Remote User" }.build())
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verify { serviceNotifications.showAlertNotification("0^all", "Remote User", "Fire at camp") }
+        verifySuspend(exactly(0)) { notificationManager.dispatch(any()) }
     }
 
     @Test

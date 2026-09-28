@@ -48,5 +48,8 @@ data class Notification(
 
         /** Advisory Mesh Beacon invitations from other meshes — low-importance, its own channel. */
         MeshBeacon,
+
+        /** Firmware-originated ClientNotifications; kept off [Alert], which is reserved for critical alerts. */
+        Client,
     }
 }

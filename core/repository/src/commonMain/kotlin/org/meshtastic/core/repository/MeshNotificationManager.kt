@@ -67,7 +67,7 @@ interface MeshNotificationManager {
 
     fun showNewNodeSeenNotification(node: Node)
 
-    fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean)
+    suspend fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean)
 
     fun showClientNotification(clientNotification: ClientNotification)
 

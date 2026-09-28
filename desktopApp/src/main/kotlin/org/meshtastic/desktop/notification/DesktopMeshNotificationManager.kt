@@ -28,6 +28,7 @@ import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.desktop_notification_title
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.low_battery_message
 import org.meshtastic.core.resources.low_battery_title
 import org.meshtastic.core.resources.new_node_seen
@@ -146,15 +147,16 @@ class DesktopMeshNotificationManager(
         }
     }
 
-    override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {
-        dispatchAsync {
+    override suspend fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {
+        notificationManager.dispatch(
             Notification(
-                title = getString(Res.string.low_battery_title, node.user.short_name),
-                message = getString(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
+                title = getStringSuspend(Res.string.low_battery_title, node.user.short_name),
+                message =
+                getStringSuspend(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
                 category = Notification.Category.Battery,
                 id = node.num,
-            )
-        }
+            ),
+        )
     }
 
     override fun showClientNotification(clientNotification: ClientNotification) {

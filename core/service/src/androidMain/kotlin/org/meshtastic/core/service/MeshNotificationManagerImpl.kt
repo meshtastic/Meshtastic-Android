@@ -670,7 +670,7 @@ class MeshNotificationManagerImpl(
         notificationManager.notify(TAG_NEW_NODE, node.num, notification)
     }
 
-    override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {
+    override suspend fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {
         val notification = createLowBatteryNotification(node, isRemote)
         notificationManager.notify(TAG_LOW_BATTERY, node.num, notification)
     }
@@ -905,7 +905,6 @@ class MeshNotificationManagerImpl(
                 .setCategory(Notification.CATEGORY_MESSAGE)
                 .setAutoCancel(true)
                 .setStyle(style)
-                .setGroup(GROUP_KEY_MESSAGES)
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                 .setWhen(nowMillis)
                 .setShowWhen(true)
@@ -944,15 +943,16 @@ class MeshNotificationManagerImpl(
         return builder.build()
     }
 
-    private fun createLowBatteryNotification(node: Node, isRemote: Boolean): Notification {
+    private suspend fun createLowBatteryNotification(node: Node, isRemote: Boolean): Notification {
         val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
-        val title = getString(Res.string.low_battery_title, node.user.short_name)
+        val title = getStringSuspend(Res.string.low_battery_title, node.user.short_name)
         val batteryLevel = node.deviceMetrics.battery_level ?: 0
-        val message = getString(Res.string.low_battery_message, node.user.long_name, batteryLevel)
+        val message = getStringSuspend(Res.string.low_battery_message, node.user.long_name, batteryLevel)
 
+        // Not ongoing: an ongoing notification never bridges to a watch, and recovery cancels this one anyway.
         return commonBuilder(type, createOpenNodeDetailIntent(node.num))
             .setCategory(Notification.CATEGORY_STATUS)
-            .setOngoing(true)
+            .setAutoCancel(true)
             .setOnlyAlertOnce(true)
             .setProgress(MAX_BATTERY_LEVEL, batteryLevel, false)
             .setContentTitle(title)

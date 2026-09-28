@@ -27,16 +27,11 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.TelemetryPacketHandler
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.getStringSuspend
-import org.meshtastic.core.resources.low_battery_message
-import org.meshtastic.core.resources.low_battery_title
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Telemetry
 import kotlin.time.Duration.Companion.milliseconds
@@ -49,7 +44,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class TelemetryPacketHandlerImpl(
     private val nodeManager: NodeManager,
     private val connectionManager: Lazy<MeshConnectionManager>,
-    private val notificationManager: NotificationManager,
+    private val serviceNotifications: MeshNotificationManager,
     private val radioInterfaceService: RadioInterfaceService,
     private val scope: ServiceScope,
 ) : TelemetryPacketHandler {
@@ -103,24 +98,13 @@ class TelemetryPacketHandlerImpl(
         ) {
             radioInterfaceService.launchSessionWork(scope, session) {
                 if (shouldBatteryNotificationShow(fromNum, telemetry, myNodeNum)) {
-                    notificationManager.dispatch(
-                        Notification(
-                            title = getStringSuspend(Res.string.low_battery_title, updatedNode.user.short_name),
-                            message =
-                            getStringSuspend(
-                                Res.string.low_battery_message,
-                                updatedNode.user.long_name,
-                                updatedNode.deviceMetrics.battery_level ?: 0,
-                            ),
-                            category = Notification.Category.Battery,
-                        ),
-                    )
+                    serviceNotifications.showOrUpdateLowBatteryNotification(updatedNode, isRemote)
                 }
             }
         } else {
             radioInterfaceService.launchSessionWork(scope, session) {
                 batteryMutex.withLock { notifiedNodes.remove(fromNum) }
-                notificationManager.cancel(updatedNode.num)
+                serviceNotifications.cancelLowBatteryNotification(updatedNode)
             }
         }
     }

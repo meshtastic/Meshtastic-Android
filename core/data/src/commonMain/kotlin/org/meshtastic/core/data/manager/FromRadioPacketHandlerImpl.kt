@@ -217,7 +217,7 @@ class FromRadioPacketHandlerImpl(
                 title = title,
                 type = type,
                 message = cn.message,
-                category = Notification.Category.Alert,
+                category = Notification.Category.Client,
                 id = cn.notificationId(),
             ),
             cn,

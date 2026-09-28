@@ -201,7 +201,9 @@ class LinuxNotificationSender(
             when (notification.category) {
                 Notification.Category.Message -> "im.received"
                 Notification.Category.Battery -> "device.warning"
-                Notification.Category.Alert -> "device.error"
+                Notification.Category.Alert,
+                Notification.Category.Client,
+                -> "device.error"
                 Notification.Category.NodeEvent -> "network"
                 Notification.Category.MeshBeacon -> "network"
                 Notification.Category.Service -> "device"
