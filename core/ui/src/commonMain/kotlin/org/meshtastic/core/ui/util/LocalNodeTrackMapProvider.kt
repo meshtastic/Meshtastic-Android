@@ -32,6 +32,8 @@ import org.meshtastic.proto.Position
  *   non-null, the map should visually highlight the corresponding marker and center the camera on it.
  * - [onPositionSelected]: callback invoked when a position marker is tapped on the map, passing the `Position.time` so
  *   the host can synchronize the card list.
+ * - [showAttribution]: whether the credit opens with the map or stays collapsed behind its own button. The embedded
+ *   instance collapses it; a full-screen one does not.
  *
  * On Desktop/JVM targets where native maps are not yet available, it falls back to a [PlaceholderScreen].
  */
@@ -44,7 +46,8 @@ val LocalNodeTrackMapProvider =
             modifier: Modifier,
             selectedPositionTime: Int?,
             onPositionSelected: ((Int) -> Unit)?,
+            showAttribution: Boolean,
         ) -> Unit,
         > {
-        { _, _, _, _, _ -> PlaceholderScreen("Position Track Map") }
+        { _, _, _, _, _, _ -> PlaceholderScreen("Position Track Map") }
     }

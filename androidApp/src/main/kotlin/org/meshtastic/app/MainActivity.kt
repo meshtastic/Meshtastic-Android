@@ -259,13 +259,14 @@ class MainActivity : AppCompatActivity() {
             LocalSitePlannerAvailable provides true,
             LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
             LocalNodeTrackMapProvider provides
-                { destNum, positions, modifier, selectedPositionTime, onPositionSelected ->
+                { destNum, positions, modifier, selectedPositionTime, onPositionSelected, showAttribution ->
                     org.meshtastic.app.map.node.NodeTrackMap(
                         destNum,
                         positions,
                         modifier,
                         selectedPositionTime,
                         onPositionSelected,
+                        showAttribution,
                     )
                 },
             LocalTracerouteMapOverlayInsetsProvider provides getTracerouteMapOverlayInsets(),

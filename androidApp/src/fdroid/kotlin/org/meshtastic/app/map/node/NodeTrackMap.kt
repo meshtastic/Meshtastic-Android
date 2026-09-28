@@ -35,11 +35,13 @@ fun NodeTrackMap(
     modifier: Modifier = Modifier,
     selectedPositionTime: Int? = null,
     onPositionSelect: ((Int) -> Unit)? = null,
+    showAttribution: Boolean = true,
 ) = MapLibreNodeTrackMap(
     destNum = destNum,
     positions = positions,
     modifier = modifier,
     selectedPositionTime = selectedPositionTime,
     onPositionSelect = onPositionSelect,
+    showAttribution = showAttribution,
     customBasemaps = { androidCustomRasterBasemaps() },
 )
