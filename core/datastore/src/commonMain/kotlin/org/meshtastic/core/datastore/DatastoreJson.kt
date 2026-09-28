@@ -20,9 +20,9 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 
 /**
- * Json for the JSON strings this module stores. Without debug info its exceptions do not quote the stored value, which
- * holds user data such as device addresses. Not injected from Koin: Json is sealed, so Mokkery could no longer mock a
- * data source that takes one.
+ * Json for the JSON strings this module stores, which hold user data such as device addresses. Exceptions omit the JSON
+ * input, though a message can still quote one token, so callers log only the exception type. Not injected from Koin:
+ * Json is sealed, so Mokkery could no longer mock a data source that takes one.
  */
 @OptIn(ExperimentalSerializationApi::class)
 internal val DatastoreJson = Json { exceptionsWithDebugInfo = false }
