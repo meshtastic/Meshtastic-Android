@@ -106,7 +106,8 @@ jobs:
 
       - name: Spotless, Detekt & Android Lint
         # The root spotlessCheck and detekt do not reach the included build-logic build.
-        run: ./gradlew spotlessCheck detekt :build-logic:convention:spotlessCheck :build-logic:convention:detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true --continue
+        # detektTypeResolved runs the rules that need a classpath, which plain detekt skips.
+        run: ./gradlew spotlessCheck detekt detektTypeResolved :build-logic:convention:spotlessCheck :build-logic:convention:detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true --continue
 
   # ── Screenshot Test Validation ──────────────────────────────────────
   screenshot-check:
