@@ -24,8 +24,8 @@ import org.meshtastic.core.database.entity.DiscoverySessionEntity
 
 /**
  * A switch-aware [DiscoveryDao] that resolves the active database on every call instead of pinning the one that was
- * current at injection time. This is what Koin hands to `feature:discovery` consumers (ViewModels and the scan engine),
- * which hold their DAO for their whole lifetime:
+ * current at injection time. This is what Koin hands to `DiscoveryRepositoryImpl`, which the discovery ViewModels read
+ * through, and to the scan engine and its coordinators; all of them hold it for their whole lifetime:
  * - Flow methods re-latch through [DatabaseProvider.observeCurrentDb], so an open discovery screen follows a device/DB
  *   switch and recovers from a wedged active Room pool.
  * - Suspend methods go through [DatabaseProvider.withDb], so writes register with the cross-transport merge drain

@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.data.repository.DiscoveryRepositoryImpl
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
@@ -192,7 +193,7 @@ class DiscoveryMapFilterTest {
     private fun createViewModel(): DiscoveryMapViewModel = mapViewModel(sessionId = 1L, SharedInMemoryDiscoveryDao())
 
     private fun mapViewModel(sessionId: Long, dao: SharedInMemoryDiscoveryDao) =
-        DiscoveryMapViewModel(sessionId = sessionId, discoveryDao = dao)
+        DiscoveryMapViewModel(sessionId = sessionId, discoveryRepository = DiscoveryRepositoryImpl(dao))
 
     private fun testSession() = DiscoverySessionEntity(
         timestamp = 1_000_000L,

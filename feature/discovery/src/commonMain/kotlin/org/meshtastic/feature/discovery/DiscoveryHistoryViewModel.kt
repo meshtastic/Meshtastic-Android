@@ -19,18 +19,18 @@ package org.meshtastic.feature.discovery
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.repository.DiscoveryRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 
 @KoinViewModel
-class DiscoveryHistoryViewModel(private val discoveryDao: DiscoveryDao) : ViewModel() {
+class DiscoveryHistoryViewModel(private val discoveryRepository: DiscoveryRepository) : ViewModel() {
 
     val sessions: StateFlow<List<DiscoverySessionEntity>> =
-        discoveryDao.getAllSessions().stateInWhileSubscribed(initialValue = emptyList())
+        discoveryRepository.getAllSessions().stateInWhileSubscribed(initialValue = emptyList())
 
     fun deleteSession(sessionId: Long) {
-        safeLaunch(tag = "deleteSession") { discoveryDao.deleteSession(sessionId) }
+        safeLaunch(tag = "deleteSession") { discoveryRepository.deleteSession(sessionId) }
     }
 }

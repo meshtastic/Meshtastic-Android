@@ -23,19 +23,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.repository.DiscoveryRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 
 @KoinViewModel
-class DiscoveryMapViewModel(@InjectedParam private val sessionId: Long, private val discoveryDao: DiscoveryDao) :
-    ViewModel() {
+class DiscoveryMapViewModel(
+    @InjectedParam private val sessionId: Long,
+    private val discoveryRepository: DiscoveryRepository,
+) : ViewModel() {
 
     val session: StateFlow<DiscoverySessionEntity?> =
-        discoveryDao.getSessionFlow(sessionId).stateInWhileSubscribed(initialValue = null)
+        discoveryRepository.getSessionFlow(sessionId).stateInWhileSubscribed(initialValue = null)
 
     /** All preset results for this session. Used for filter chip UI. */
     private val presetResultsState = MutableStateFlow<List<DiscoveryPresetResultEntity>>(emptyList())
@@ -98,13 +100,9 @@ class DiscoveryMapViewModel(@InjectedParam private val sessionId: Long, private 
 
     private fun loadAllNodes() {
         safeLaunch(tag = "loadAllNodes") {
-            val results = discoveryDao.getPresetResults(sessionId)
+            val results = discoveryRepository.getPresetResults(sessionId)
             presetResultsState.value = results
-            val nodesMap = mutableMapOf<Long, List<DiscoveredNodeEntity>>()
-            for (result in results) {
-                nodesMap[result.id] = discoveryDao.getDiscoveredNodes(result.id)
-            }
-            nodesByPresetState.value = nodesMap
+            nodesByPresetState.value = discoveryRepository.getNodesByPresetResult(results.map { it.id })
         }
     }
 
