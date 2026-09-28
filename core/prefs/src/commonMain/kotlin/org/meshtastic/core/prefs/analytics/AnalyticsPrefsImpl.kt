@@ -41,10 +41,12 @@ class AnalyticsPrefsImpl(
 ) : AnalyticsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
+    // Consent is not granted until the stored choice has been read, so a decision made before then never sees
+    // ALLOWED_BY_DEFAULT in place of an opt-out.
     override val analyticsAllowed: StateFlow<Boolean> =
         analyticsDataStore.data
             .map { it[KEY_ANALYTICS_ALLOWED_PREF] ?: ALLOWED_BY_DEFAULT }
-            .stateIn(scope, SharingStarted.Eagerly, ALLOWED_BY_DEFAULT)
+            .stateIn(scope, SharingStarted.Eagerly, ALLOWED_BEFORE_LOAD)
 
     override fun toggleAnalyticsAllowed() {
         scope.launch {
@@ -69,6 +71,7 @@ class AnalyticsPrefsImpl(
 
     companion object {
         private const val ALLOWED_BY_DEFAULT = true
+        private const val ALLOWED_BEFORE_LOAD = false
         const val KEY_ANALYTICS_ALLOWED = "allowed"
         const val KEY_INSTALL_ID = "appPrefs_install_id"
 
