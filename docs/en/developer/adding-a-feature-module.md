@@ -2,7 +2,7 @@
 title: Adding a Feature Module
 parent: Developer Guide
 nav_order: 3
-last_updated: 2026-08-29
+last_updated: 2026-09-28
 description: Step-by-step guide for creating a new KMP feature module — module directory, build script, DI, routes, navigation entries, and the checklist.
 aliases:
   - new-module
@@ -146,6 +146,9 @@ Every feature module should have:
 - [ ] Module directory created
 - [ ] `build.gradle.kts` with correct plugins and dependencies
 - [ ] Added to `settings.gradle.kts`
+- [ ] Added to `ALL_MODULES_FULL` in `build-logic/convention/src/main/kotlin/RootConventionPlugin.kt`; `python3 scripts/check-module-list.py` fails when it differs from the `settings.gradle.kts` includes, and a module missing from it is absent from Dokka and Kover aggregation and `kmpSmokeCompile`
+- [ ] Added to a test shard in `.github/workflows/reusable-check.yml` (`shard-feature` for a feature module): its `:feature:my-feature:allTests` task in `tasks` and its `koverXmlReport` in `kover`; `python3 scripts/check-test-shards.py` fails for a module with no test task in any shard
+- [ ] If the module is user-facing, a page under `docs/en/user/` and a `MODULE_TO_DOCS` entry for it in `scripts/check-doc-coverage.js`; the check fails when a listed module's page is missing, and a module with no entry needs no page
 - [ ] DI module created with `@ComponentScan`
 - [ ] DI module registered in app and desktop roots
 - [ ] Routes added to `Routes.kt`

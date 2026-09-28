@@ -31,11 +31,11 @@ want real Google Maps tiles (`MAPS_API_KEY=…`). `local.properties` is not read
 ```bash
 ./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests
 ```
-Both `test` and `allTests` are required: `allTests` covers KMP modules (where the bare `test` task is ambiguous and silently skips), `test` covers pure-Android/JVM modules. Add `kmpSmokeCompile` when touching a KMP module. After adding string resources, run `python3 scripts/sort-strings.py`. Change-type matrix and CI architecture: `.skills/testing-ci/SKILL.md`.
+Both `test` and `allTests` are required: `allTests` runs each KMP module's `jvmTest` and Android host tests (a KMP module has no `test` task, and naming `:core:data:test` fails as ambiguous), `test` covers pure-Android/JVM modules and skips KMP ones. Add `kmpSmokeCompile` when touching a KMP module. After adding string resources, run `python3 scripts/sort-strings.py`. Change-type matrix and CI architecture: `.skills/testing-ci/SKILL.md`.
 
 **Single test:**
 ```bash
 ./gradlew :feature:messaging:allTests                              # one KMP module
 ./gradlew :androidApp:testFdroidDebugUnitTest                      # one Android/JVM module
-./gradlew :core:data:allTests --tests "*PacketHandlerTest*"        # filter to one class/method
+./gradlew :core:data:jvmTest --tests "*PacketHandlerTest*"         # filter to one class/method (allTests takes no --tests)
 ```
