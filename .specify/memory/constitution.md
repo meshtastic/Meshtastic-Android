@@ -5,8 +5,9 @@ Version change: 1.4.1 → 1.4.2
 Modified principles:
   - I. Kotlin Multiplatform Core: the list of source sets that may hold actual declarations
     gains `jvmAndroidMain`, the source set Android and Desktop share through
-    meshtastic.kmp.jvm.android. Twelve actuals already live there and JVM-only APIs such as
-    java.util.zip cannot move to commonMain. The principle is unchanged: commonMain still
+    meshtastic.kmp.jvm.android, and the iOS source sets `iosMain` and `nativeMain`. Actuals
+    already live in all three, and JVM-only APIs such as java.util.zip cannot move to
+    commonMain. The principle is unchanged: commonMain still
     holds the business logic and still takes no java.* or android.* imports. PATCH: the
     text now matches the source sets the modules use.
 Added sections: none
@@ -149,10 +150,11 @@ MUST be used in place of JVM/Android-specific APIs:
 - MUST use Okio (not `java.io`), Ktor (not `java.net`/OkHttp in common), Mutex/atomicfu
   (not `java.util.concurrent`), Room KMP, DataStore KMP, and Koin 4.2+.
 - MUST NOT import `java.*` or `android.*` in any `commonMain` module.
-- Platform-specific implementations belong in `androidMain`, `jvmMain` or `jvmAndroidMain`
-  actual declarations only (there is no `desktopMain` source set; Desktop is the `jvm`
-  target). `jvmAndroidMain`, enabled by `meshtastic.kmp.jvm.android`, holds the JVM APIs
-  Android and Desktop share, such as `java.util.zip`, which `commonMain` cannot use.
+- Platform-specific implementations belong in platform source sets as actual declarations
+  only: `androidMain`, `jvmMain`, `jvmAndroidMain`, and `iosMain` or `nativeMain` (there is
+  no `desktopMain` source set; Desktop is the `jvm` target). `jvmAndroidMain`, enabled by
+  `meshtastic.kmp.jvm.android`, holds the JVM APIs Android and Desktop share, such as
+  `java.util.zip`, which `commonMain` cannot use.
 <!-- Rationale: Multi-platform parity (Android, Desktop, iOS). Framework bleed in commonMain breaks compilability on non-Android targets. -->
 
 ### II. Zero Lint Tolerance
