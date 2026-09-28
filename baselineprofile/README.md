@@ -11,7 +11,7 @@ JIT cost on first launch. Targets the **google** flavor (the variant most users 
 ```
 
 Output is merged into `androidApp/src/main/generated/baselineProfiles/baseline-prof.txt` (`mergeIntoMain`
-in `androidApp/build.gradle.kts`). **Commit that file** — release builds of both flavors package it via
+in `androidApp/build.gradle.kts`). **Commit that file**: release builds of both flavors package it via
 `androidx.profileinstaller`.
 
 ## Quantify the win
