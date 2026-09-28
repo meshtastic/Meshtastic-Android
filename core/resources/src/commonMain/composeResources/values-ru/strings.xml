@@ -1338,6 +1338,7 @@
     <string name="packet_authenticity_balanced">Сбалансировано — предпочтительно аутентифицировать</string>
     <string name="packet_authenticity_balanced_summary">Рекомендуется. Отклонять неподписанные попытки понижения от нод, которые, как известно, подписывают.</string>
     <string name="packet_authenticity_compatible">Совместимо — принять не подписано</string>
+    <string name="packet_authenticity_compatible_summary">Для максимальной совместимости принимать трафик без цифровой подписи. Пакет все равно будет отброшен, если подпись неверна и ее возможно проверить.</string>
     <string name="packet_authenticity_level">Уровень защиты</string>
     <string name="packet_authenticity_strict">Строгий — требуется аутентификация</string>
     <string name="packet_authenticity_strict_confirm">Включить строгий</string>
