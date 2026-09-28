@@ -31,8 +31,18 @@ class LinkColorTest {
     }
 
     @Test
+    fun linkMeetsAaTextContrastOnTheLightDialogBackground() {
+        assertAaText(lightColorScheme(surface = surfaceLight).link, surfaceContainerHighLight)
+    }
+
+    @Test
     fun linkMeetsAaTextContrastOnTheDarkSurface() {
         assertAaText(darkColorScheme(surface = surfaceDark).link, surfaceDark)
+    }
+
+    @Test
+    fun linkMeetsAaTextContrastOnTheDarkDialogBackground() {
+        assertAaText(darkColorScheme(surface = surfaceDark).link, surfaceContainerHighDark)
     }
 
     private fun assertAaText(link: Color, surface: Color) {
