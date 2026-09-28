@@ -387,6 +387,14 @@
             tools:node="remove" />
 
         <!--
+            The JetBrains ui-tooling facade AAR declares this exported activity but ships no class for it, so any
+            launch crashes the app on instantiation. Android Studio previews use androidx.compose.ui.tooling's own.
+        -->
+        <activity
+            android:name="org.jetbrains.androidx.compose.ui.tooling.PreviewActivity"
+            tools:node="remove" />
+
+        <!--
             ATAK plugin-discovery marker. The action is what ATAK looks for, so the filter stays exported; it now
             resolves to a real no-op activity because the name used to be com.atakmap.app.component, a class not
             present in this APK, so anything that launched it crashed the app on instantiation.

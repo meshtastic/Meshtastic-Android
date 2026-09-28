@@ -70,8 +70,6 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime.compose)
         }
 
-        getByName("jvmAndroidMain") { dependencies { implementation(libs.compose.multiplatform.ui.tooling) } }
-
         androidMain.dependencies { implementation(libs.androidx.activity.compose) }
 
         commonTest.dependencies {
