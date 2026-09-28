@@ -18,6 +18,10 @@
 
 package org.meshtastic.feature.wifiprovision.domain
 
+import co.touchlab.kermit.LogWriter
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
+import co.touchlab.kermit.platformLogWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -29,8 +33,10 @@ import org.meshtastic.core.testing.FakeBleScanner
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_COMMANDER_UUID
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -42,6 +48,25 @@ import kotlin.test.assertTrue
 class NymeaWifiServiceTest {
 
     private val address = "AA:BB:CC:DD:EE:FF"
+
+    @AfterTest
+    fun tearDown() {
+        Logger.setLogWriters(platformLogWriter())
+        Logger.setMinSeverity(Severity.Verbose)
+    }
+
+    private class CapturingLogWriter : LogWriter() {
+        val messages = mutableListOf<String>()
+
+        override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+            messages += message
+        }
+    }
+
+    private fun captureLogs(): CapturingLogWriter = CapturingLogWriter().also {
+        Logger.setLogWriters(it)
+        Logger.setMinSeverity(Severity.Verbose)
+    }
 
     private fun createService(
         scanner: FakeBleScanner = FakeBleScanner(),
@@ -291,6 +316,23 @@ class NymeaWifiServiceTest {
                 .joinToString("")
 
         assertTrue(writes.contains("\"c\":2"), "Should send CMD_CONNECT_HIDDEN (2)")
+    }
+
+    @Test
+    fun `provision never logs the WiFi credentials or the device response payload`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+        val logs = captureLogs()
+
+        emitResponse(connection, """{"c":1,"r":0,"p":{"i":"10.77.88.99"}}""")
+        val result = service.provision("SecretHomeNet", "hunter2-wifi-pass")
+
+        assertIs<ProvisionResult.Success>(result)
+        assertTrue(logs.messages.any { "command=1" in it }, "Command send should still be logged: ${logs.messages}")
+        for (secret in listOf("hunter2-wifi-pass", "SecretHomeNet", "10.77.88.99")) {
+            assertFalse(logs.messages.any { secret in it }, "'$secret' leaked into logs: ${logs.messages}")
+        }
     }
 
     @Test
