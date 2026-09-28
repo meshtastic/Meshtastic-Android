@@ -159,6 +159,23 @@ abstract class CommonUsbPassWriterTest {
     }
 
     @Test
+    fun `reviewing a bootloader upgrade reads the drive and writes nothing`() = runTest {
+        val h = harness(sketchInfo)
+
+        val review = h.writer.review(treeUri)
+
+        assertEquals(BootloaderReview.Ready(BootloaderVersions("0.4.3", "0.9.2-OTAFIX2.3-BP1.5")), review)
+        assertTrue(h.written.isEmpty(), "no image is fetched until the user confirms")
+    }
+
+    @Test
+    fun `reviewing refuses a drive that is not a bootloader volume`() = runTest {
+        val h = harness("Model: Something\r\n")
+
+        assertEquals(BootloaderReview.Refused(UsbMaintenanceRefusal.NotABootloaderVolume), h.writer.review(treeUri))
+    }
+
+    @Test
     fun `a bootloader self-update never has its cdc port opened`() = runTest {
         val h = harness(sketchInfo)
         val pass =

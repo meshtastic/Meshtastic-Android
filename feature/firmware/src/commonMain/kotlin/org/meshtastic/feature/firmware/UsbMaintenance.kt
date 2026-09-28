@@ -148,12 +148,27 @@ internal fun usbMaintenanceRefusalMessage(reason: UsbMaintenanceRefusal): UiText
  * @property eraseRefusal Non-null when erase is shown but cannot run; the reason is displayed and the action disabled.
  * @property showBootloaderUpgrade Whether a bootloader-upgrade action is offered. Absent (not refused) when no image is
  *   mapped for the board — an unmapped board is a coverage gap, not a safety decision the user can act on.
+ * @property latestBootloader The OTAFIX release the upgrade installs, shown next to the action. The installed version
+ *   is unknowable here: only the mounted drive reports it.
  */
 data class UsbMaintenanceGate(
     val show: Boolean = false,
     val eraseRefusal: UsbMaintenanceRefusal? = null,
     val showBootloaderUpgrade: Boolean = false,
+    val latestBootloader: String? = null,
 )
+
+/**
+ * The bootloader a mounted drive reports next to the one the upgrade would install.
+ *
+ * @property installed From the drive's `INFO_UF2.TXT`, or `null` when it reports none.
+ * @property available [MaintenanceUf2Manifest.otafixReleaseTag].
+ */
+data class BootloaderVersions(val installed: String?, val available: String) {
+    /** Exact match only: bench and vendor builds carry tags with no order to trust, so anything else just differs. */
+    val isCurrent: Boolean
+        get() = installed != null && installed == available
+}
 
 /**
  * Decides which maintenance actions are available for [hardware] on [updateMethod].
@@ -188,12 +203,14 @@ internal fun usbMaintenanceGate(
             else -> UsbMaintenanceRefusal.MaintenanceDataUnavailable
         }
 
+    // nRF-only: RP2040 boards run no Adafruit bootloader, so OTAFIX does not apply. This is a visibility hint only
+    // — which image gets written is decided later from the Board-ID the drive reports.
+    val showBootloaderUpgrade = hardware.isNrf52Arc && otafixSupportsTarget(manifest, hardware.effectiveTarget)
     return UsbMaintenanceGate(
         show = true,
         eraseRefusal = eraseRefusal,
-        // nRF-only: RP2040 boards run no Adafruit bootloader, so OTAFIX does not apply. This is a visibility hint only
-        // — which image gets written is decided later from the Board-ID the drive reports.
-        showBootloaderUpgrade = hardware.isNrf52Arc && otafixSupportsTarget(manifest, hardware.effectiveTarget),
+        showBootloaderUpgrade = showBootloaderUpgrade,
+        latestBootloader = manifest.otafixReleaseTag.takeIf { showBootloaderUpgrade && it.isNotBlank() },
     )
 }
 
@@ -206,11 +223,14 @@ internal fun usbMaintenanceGate(
  * @property factoryEraseFamily The UF2 family ID the bootloader will consume as a factory-erase command (its
  *   `Factory-Erase:` line), when it advertises one. `null` on every bootloader shipped before OTAFIX PR #41 — those
  *   silently ignore the file, so `null` means "use the SoftDevice-specific sketch", never "refuse".
+ * @property bootloaderVersion The installed bootloader's version, from the `UF2 Bootloader` line. The running firmware
+ *   cannot report it, so this drive is the only place the app learns it.
  */
 internal data class MaintenanceVolume(
     val boardId: String,
     val softDevice: SoftDeviceVariant?,
     val factoryEraseFamily: Long? = null,
+    val bootloaderVersion: String? = null,
 )
 
 /** Outcome of vetting a user-picked volume before anything is written to it. */
@@ -243,9 +263,31 @@ internal suspend fun inspectMaintenanceVolume(treeUri: CommonUri, fileHandler: F
             boardId = boardId,
             softDevice = parseUf2SoftDevice(info),
             factoryEraseFamily = parseUf2FactoryEraseFamily(info),
+            bootloaderVersion = parseUf2BootloaderVersion(info),
         ),
     )
 }
+
+/** What the drive says before a bootloader upgrade is written, or why the upgrade cannot run on it. */
+internal sealed interface BootloaderReview {
+    data class Ready(val versions: BootloaderVersions) : BootloaderReview
+
+    data class Refused(val reason: UsbMaintenanceRefusal) : BootloaderReview
+}
+
+/**
+ * Compares the bootloader [volume] reports against [manifest]'s release, once the drive has been read and before
+ * anything is downloaded or written.
+ *
+ * Refuses an unrecognized Board-ID here, with the same outcome [chooseMaintenanceImage] would reach at write time, so
+ * the user is never shown an upgrade that cannot run.
+ */
+internal fun reviewBootloader(manifest: MaintenanceUf2Manifest, volume: MaintenanceVolume): BootloaderReview =
+    if (otafixUf2ForBoardId(manifest, volume.boardId) == null) {
+        BootloaderReview.Refused(UsbMaintenanceRefusal.UnknownBoardId)
+    } else {
+        BootloaderReview.Ready(BootloaderVersions(volume.bootloaderVersion, manifest.otafixReleaseTag))
+    }
 
 /** Which image to write, or why not. */
 internal sealed interface MaintenanceImageChoice {

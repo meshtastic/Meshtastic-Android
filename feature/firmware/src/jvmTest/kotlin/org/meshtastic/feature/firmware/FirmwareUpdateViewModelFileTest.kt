@@ -35,6 +35,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -51,6 +52,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.EraseImageEntry
 import org.meshtastic.core.model.MaintenanceUf2EraseSet
 import org.meshtastic.core.model.MaintenanceUf2Manifest
+import org.meshtastic.core.model.OtafixAssetEntry
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -1028,6 +1030,101 @@ class FirmwareUpdateViewModelFileTest {
         // grant — otherwise auto-recovery dies on SecurityException and a healthy update reads as a failure.
         advanceUntilIdle()
         verifySuspend { usbManager.ensureSerialPermission(any()) }
+    }
+
+    /** Starts a bootloader upgrade on a RAK4631 whose drive reports [installed], and picks that drive once. */
+    private suspend fun TestScope.reviewBootloaderOn(installed: String) {
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any(), any()) } returns
+            Result.success(nrfHardware(SoftDeviceVariant.S140_6_1_1))
+        everySuspend { maintenanceUf2Repository.getSnapshot() } returns
+            testMaintenanceUf2Manifest.copy(
+                otafixReleaseTag = "0.9.2-OTAFIX2.5",
+                otafixBase = "https://example.invalid/otafix",
+                otafixByBoardId =
+                mapOf("WisBlock-RAK4631-Board" to OtafixAssetEntry("wiscore_rak4631_board", "0".repeat(64))),
+                otafixSupportedTargets = listOf("rak4631"),
+            )
+        everySuspend { firmwareRetriever.retrieveUsbFirmware(any(), any(), any()) } returns
+            FirmwareArtifact(uri = CommonUri.parse("file:///tmp/firmware.uf2"), fileName = "firmware.uf2")
+        everySuspend { firmwareRetriever.retrieveMaintenanceUf2(any(), any()) } returns
+            FirmwareArtifact(uri = CommonUri.parse("file:///tmp/bootloader.uf2"), fileName = "bootloader.uf2")
+        everySuspend { fileHandler.isRemovableDestination(any()) } returns true
+        everySuspend { fileHandler.readSiblingText(any(), any()) } returns
+            "UF2 Bootloader $installed lib/nrfx (v3.14.0)\r\nBoard-ID: WisBlock-RAK4631-Board\r\n" +
+            "SoftDevice: S140 6.1.1\r\n"
+        everySuspend { fileHandler.createDocumentInTree(any(), any(), any()) } returns
+            CommonUri.parse("content://tree/1234-5678%3A/document/bootloader.uf2")
+        everySuspend { fileHandler.copyToUri(any(), any()) } returns 1024L
+        every { usbManager.deviceDetachFlow() } returns flowOf(Unit)
+        everySuspend { usbManager.serialPortKeys() } returns emptySet()
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        assertEquals(
+            "0.9.2-OTAFIX2.5",
+            assertIs<FirmwareUpdateState.Ready>(viewModel.state.value).maintenance.latestBootloader,
+        )
+        viewModel.startBootloaderUpgrade()
+        runUntilSettled { viewModel.state.value is FirmwareUpdateState.AwaitingFileSave }
+        assertEquals(
+            UsbFileSaveStep.BootloaderUpgrade,
+            assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value).step,
+        )
+
+        viewModel.writeMaintenancePass(CommonUri.parse("content://tree/1234-5678%3A"))
+        runUntilSettled { viewModel.state.value is FirmwareUpdateState.ReviewingBootloader }
+    }
+
+    @Test
+    fun `an up to date bootloader is left alone and the sequence moves on to the firmware`() = runTest {
+        reviewBootloaderOn(installed = "0.9.2-OTAFIX2.5")
+
+        val review = assertIs<FirmwareUpdateState.ReviewingBootloader>(viewModel.state.value)
+        assertTrue(review.versions.isCurrent)
+
+        viewModel.skipBootloaderUpgrade()
+        runUntilSettled {
+            (viewModel.state.value as? FirmwareUpdateState.AwaitingFileSave)?.step == UsbFileSaveStep.Firmware
+        }
+
+        verifySuspend(mode = VerifyMode.not) { firmwareRetriever.retrieveMaintenanceUf2(any(), any()) }
+        verifySuspend(mode = VerifyMode.not) { fileHandler.createDocumentInTree(any(), any(), any()) }
+        assertTrue(
+            radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance),
+            "the device is still in update mode, so the sequence keeps the radio until the firmware is back",
+        )
+    }
+
+    @Test
+    fun `a different bootloader is written only once the user confirms`() = runTest {
+        reviewBootloaderOn(installed = "0.9.2-OTAFIX2.3-BP1.5")
+
+        val review = assertIs<FirmwareUpdateState.ReviewingBootloader>(viewModel.state.value)
+        assertEquals("0.9.2-OTAFIX2.3-BP1.5", review.versions.installed)
+        assertFalse(review.versions.isCurrent)
+        verifySuspend(mode = VerifyMode.not) { firmwareRetriever.retrieveMaintenanceUf2(any(), any()) }
+
+        viewModel.confirmBootloaderUpgrade()
+        runUntilSettled {
+            (viewModel.state.value as? FirmwareUpdateState.AwaitingFileSave)?.step == UsbFileSaveStep.Firmware
+        }
+
+        verifySuspend(mode = exactly(1)) { firmwareRetriever.retrieveMaintenanceUf2(any(), any()) }
+        verifySuspend { fileHandler.createDocumentInTree(any(), "bootloader.uf2", any()) }
+    }
+
+    @Test
+    fun `cancelling at the bootloader review releases the maintenance lock`() = runTest {
+        reviewBootloaderOn(installed = "0.9.2-OTAFIX2.5")
+
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        assertFalse(radioOperationLock.activeOperations.contains(RadioOperation.FirmwareMaintenance))
+        viewModel.confirmBootloaderUpgrade()
+        advanceUntilIdle()
+        verifySuspend(mode = VerifyMode.not) { firmwareRetriever.retrieveMaintenanceUf2(any(), any()) }
     }
 
     @Test

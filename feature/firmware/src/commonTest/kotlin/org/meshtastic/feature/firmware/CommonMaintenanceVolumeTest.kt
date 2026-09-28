@@ -191,6 +191,7 @@ abstract class CommonMaintenanceVolumeTest {
         val accepted = assertIs<VolumeInspection.Accepted>(result)
         assertEquals("WisBlock-RAK4631-Board", accepted.volume.boardId)
         assertEquals(SoftDeviceVariant.S140_6_1_1, accepted.volume.softDevice)
+        assertEquals("0.4.3", accepted.volume.bootloaderVersion)
     }
 
     @Test

@@ -187,6 +187,9 @@ class FirmwareUpdateViewModel(
      */
     private var maintenanceWriteJob: Job? = null
 
+    /** The drive read for [FirmwareUpdateState.ReviewingBootloader], written to if the user confirms the upgrade. */
+    private var reviewedVolume: CommonUri? = null
+
     /**
      * True once an erase or bootloader image has been written, which is the point the device stops having a working
      * application. From then on failures re-offer the pass instead of surfacing a dead end.
@@ -262,6 +265,7 @@ class FirmwareUpdateViewModel(
     private fun endMaintenanceSequence() {
         maintenanceWriteJob = null
         pendingUsbPasses = emptyList()
+        reviewedVolume = null
         destructiveWriteDone = false
         maintenanceHardware = null
         releaseMaintenanceLease()
@@ -689,6 +693,55 @@ class FirmwareUpdateViewModel(
         if (pass.step != currentState.step) return
         val hardware = maintenanceHardware ?: return
 
+        if (pass.step == UsbFileSaveStep.BootloaderUpgrade) {
+            reviewBootloaderPass(pass, treeUri)
+        } else {
+            launchPassWrite(pass, treeUri, hardware)
+        }
+    }
+
+    /** Writes the reviewed bootloader upgrade to the drive the review read. */
+    @Suppress("ReturnCount") // preconditions guarding a destructive write
+    fun confirmBootloaderUpgrade() {
+        if (_state.value !is FirmwareUpdateState.ReviewingBootloader) return
+        val pass = pendingUsbPasses.firstOrNull()?.takeIf { it.step == UsbFileSaveStep.BootloaderUpgrade } ?: return
+        val treeUri = reviewedVolume ?: return
+        val hardware = maintenanceHardware ?: return
+        reviewedVolume = null
+        launchPassWrite(pass, treeUri, hardware)
+    }
+
+    /** Moves on to reinstalling the firmware without writing the bootloader, so nothing destructive has happened. */
+    fun skipBootloaderUpgrade() {
+        if (_state.value !is FirmwareUpdateState.ReviewingBootloader) return
+        val pass = pendingUsbPasses.firstOrNull()?.takeIf { it.step == UsbFileSaveStep.BootloaderUpgrade } ?: return
+        reviewedVolume = null
+        viewModelScope.launch { advancePastPass(pass, written = false) }
+    }
+
+    private fun reviewBootloaderPass(pass: UsbFileSavePass, treeUri: CommonUri) {
+        maintenanceWriteJob =
+            viewModelScope.launch {
+                try {
+                    when (val review = usbPassWriter(portsBefore = emptySet()).review(treeUri)) {
+                        is BootloaderReview.Refused -> reofferOrFail(pass, usbMaintenanceRefusalMessage(review.reason))
+
+                        is BootloaderReview.Ready -> {
+                            reviewedVolume = treeUri
+                            _state.value = FirmwareUpdateState.ReviewingBootloader(review.versions)
+                        }
+                    }
+                } catch (e: CancellationException) {
+                    endMaintenanceSequence()
+                    throw e
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    Logger.w(e) { "Reading the bootloader drive failed" }
+                    reofferOrFail(pass, UiText.Resource(Res.string.firmware_update_failed))
+                }
+            }
+    }
+
+    private fun launchPassWrite(pass: UsbFileSavePass, treeUri: CommonUri, hardware: DeviceHardware) {
         maintenanceWriteJob =
             viewModelScope.launch {
                 try {
@@ -728,8 +781,8 @@ class FirmwareUpdateViewModel(
             reofferOrFail(pass, UiText.Resource(Res.string.firmware_maintenance_cdc_unblock_failed))
     }
 
-    private suspend fun advancePastPass(pass: UsbFileSavePass) {
-        if (pass.step.isDestructive) destructiveWriteDone = true
+    private suspend fun advancePastPass(pass: UsbFileSavePass, written: Boolean = true) {
+        if (written && pass.step.isDestructive) destructiveWriteDone = true
         pendingUsbPasses = pendingUsbPasses.drop(1)
 
         val next = pendingUsbPasses.firstOrNull()

@@ -92,7 +92,43 @@ internal fun UsbMaintenanceCardPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.padding(24.dp)) {
-                UsbMaintenanceCard(deviceName = "RAK4631", onBootloaderUpgrade = {})
+                UsbMaintenanceCard(
+                    deviceName = "RAK4631",
+                    latestBootloader = "0.9.2-OTAFIX2.5",
+                    onBootloaderUpgrade = {},
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+internal fun BootloaderReviewPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                BootloaderReviewState(
+                    versions = BootloaderVersions(installed = "0.9.2-OTAFIX2.3-BP1.5", available = "0.9.2-OTAFIX2.5"),
+                    onUpgrade = {},
+                    onSkip = {},
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+internal fun BootloaderUpToDatePreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                BootloaderReviewState(
+                    versions = BootloaderVersions(installed = "0.9.2-OTAFIX2.5", available = "0.9.2-OTAFIX2.5"),
+                    onUpgrade = {},
+                    onSkip = {},
+                )
             }
         }
     }
