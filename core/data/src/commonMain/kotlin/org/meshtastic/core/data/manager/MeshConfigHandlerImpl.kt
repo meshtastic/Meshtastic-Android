@@ -172,7 +172,7 @@ class MeshConfigHandlerImpl(
 }
 
 /** Returns a short summary of which Config variant is set. */
-private fun Config.summarize(): String = when {
+internal fun Config.summarize(): String = when {
     device != null -> "device"
     position != null -> "position"
     power != null -> "power"
@@ -181,6 +181,8 @@ private fun Config.summarize(): String = when {
     lora != null -> "lora"
     bluetooth != null -> "bluetooth"
     security != null -> "security"
+    sessionkey != null -> "sessionkey"
+    device_ui != null -> "device_ui"
     else -> "unknown"
 }
 
