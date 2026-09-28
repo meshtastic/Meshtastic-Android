@@ -47,6 +47,13 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun supportsBeaconTargetFrequencySlot_is_currently_disabled() {
+        assertFalse(caps("2.8.0").supportsBeaconTargetFrequencySlot)
+        assertFalse(caps("3.0.0").supportsBeaconTargetFrequencySlot)
+        assertTrue(Capabilities("2.8.0", forceEnableAll = true).supportsBeaconTargetFrequencySlot)
+    }
+
+    @Test
     fun supportsLockdown_requires_V2_8_0() {
         assertFalse(caps("2.7.21").supportsLockdown)
         assertTrue(caps("2.8.0").supportsLockdown)
@@ -210,6 +217,7 @@ class CapabilitiesTest {
         assertFalse(c.supportsStatusMessage)
         assertFalse(c.supportsTakConfig)
         assertFalse(c.supportsEsp32Ota)
+        assertFalse(c.supportsBeaconTargetFrequencySlot)
     }
 
     @Test

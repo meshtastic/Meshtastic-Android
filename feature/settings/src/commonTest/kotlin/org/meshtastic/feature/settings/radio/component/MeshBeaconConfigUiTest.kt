@@ -40,6 +40,7 @@ import org.meshtastic.core.resources.mesh_beacon_no_channels
 import org.meshtastic.core.resources.mesh_beacon_region_required
 import org.meshtastic.core.resources.mesh_beacon_target
 import org.meshtastic.core.resources.mesh_beacon_target_default
+import org.meshtastic.core.resources.mesh_beacon_target_frequency_slot
 import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.component.DropDownItem
@@ -420,6 +421,7 @@ class MeshBeaconConfigUiTest {
                     enabled = true,
                     channelItems = listOf(DropDownItem(0, "Primary")),
                     currentPreset = ModemPreset.LONG_FAST,
+                    region = RegionCode.US,
                     presetConstraint = presetConstraint,
                     presetsGated = false,
                     capabilities = Capabilities(firmwareVersion = null),
@@ -446,6 +448,7 @@ class MeshBeaconConfigUiTest {
                     enabled = true,
                     channelItems = listOf(DropDownItem(0, "Primary")),
                     currentPreset = ModemPreset.LONG_FAST,
+                    region = RegionCode.US,
                     presetConstraint = presetConstraint,
                     presetsGated = false,
                     capabilities = Capabilities(firmwareVersion = null),
@@ -488,6 +491,7 @@ class MeshBeaconConfigUiTest {
                     enabled = true,
                     channelItems = listOf(DropDownItem(0, "Primary")),
                     currentPreset = ModemPreset.LONG_FAST,
+                    region = RegionCode.US,
                     presetConstraint = presetConstraint,
                     presetsGated = false,
                     capabilities = Capabilities(firmwareVersion = null),
@@ -532,6 +536,7 @@ class MeshBeaconConfigUiTest {
                     enabled = true,
                     channelItems = listOf(DropDownItem(0, "Primary")),
                     currentPreset = ModemPreset.LONG_FAST,
+                    region = RegionCode.US,
                     presetConstraint = presetConstraint,
                     presetsGated = false,
                     capabilities = Capabilities(firmwareVersion = null),
@@ -549,5 +554,74 @@ class MeshBeaconConfigUiTest {
             assertEquals(0, targetsState.value.single().channel_index)
         }
         onNodeWithText(getString(Res.string.mesh_beacon_target_default)).assertIsDisplayed()
+    }
+
+    @Test
+    fun broadcastTargetRow_slotGateClosed_showsNoSlotPicker() = runComposeUiTest {
+        val presetConstraint =
+            RegionPresetConstraint(presets = listOf(ModemPreset.LONG_FAST), ModemPreset.LONG_FAST, false)
+
+        setContent {
+            AppTheme {
+                BroadcastTargetsCard(
+                    targets = seedBeaconTargets(emptyList()),
+                    enabled = true,
+                    channelItems = listOf(DropDownItem(0, "Primary")),
+                    currentPreset = ModemPreset.LONG_FAST,
+                    region = RegionCode.US,
+                    presetConstraint = presetConstraint,
+                    presetsGated = false,
+                    capabilities = Capabilities(firmwareVersion = "2.8.0"),
+                    onChange = {},
+                )
+            }
+        }
+
+        onAllNodesWithText(getString(Res.string.mesh_beacon_target_frequency_slot)).assertCountEquals(0)
+    }
+
+    @Test
+    fun broadcastTargetRow_slotGateOpen_pickingASlotPinsTheTarget() = runComposeUiTest {
+        val presetConstraint =
+            RegionPresetConstraint(presets = listOf(ModemPreset.LONG_FAST), ModemPreset.LONG_FAST, false)
+        lateinit var targetsState: MutableState<List<MeshBeaconConfig.BroadcastTarget>>
+
+        setContent {
+            AppTheme {
+                // A concrete channel and preset, so the slot picker is the only row control showing "Default".
+                targetsState = remember {
+                    mutableStateOf(
+                        listOf(
+                            MeshBeaconConfig.BroadcastTarget.Builder()
+                                .also { wb ->
+                                    wb.channel_index = 0
+                                    wb.preset = ModemPreset.LONG_FAST
+                                }
+                                .build(),
+                        ),
+                    )
+                }
+                BroadcastTargetsCard(
+                    targets = targetsState.value,
+                    enabled = true,
+                    channelItems = listOf(DropDownItem(0, "Primary")),
+                    currentPreset = ModemPreset.LONG_FAST,
+                    region = RegionCode.US,
+                    presetConstraint = presetConstraint,
+                    presetsGated = false,
+                    capabilities = Capabilities(firmwareVersion = "9.9.9"),
+                    onChange = { targetsState.value = it },
+                )
+            }
+        }
+
+        onNodeWithText(getString(Res.string.mesh_beacon_target_frequency_slot)).assertIsDisplayed()
+        onNodeWithText(getString(Res.string.mesh_beacon_target_default)).performClick()
+        onNodeWithText("3").performClick()
+
+        runOnIdle {
+            assertEquals(3, targetsState.value.single().frequency_slot)
+            assertEquals(ModemPreset.LONG_FAST, targetsState.value.single().preset)
+        }
     }
 }
