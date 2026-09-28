@@ -593,13 +593,21 @@ class MeshtasticDatabaseMigrationTest {
     }
 
     /**
-     * 63→64 makes `discovered_node.snr` nullable, which Room implements by recreating the table. Every row survives
-     * with its values and its parent link, a stored 0 dB stays 0 because it may be a real reading, and NULL becomes
-     * storable for a node no packet reported an snr for.
+     * 63→64 makes `discovered_node.snr` nullable, which Room implements by recreating the table, and indexes
+     * `log.received_date`. Every discovered node survives with its values and its parent link, a stored 0 dB stays 0
+     * because it may be a real reading, and NULL becomes storable for a node no packet reported an snr for. Every log
+     * row survives, and the retention delete by `received_date` is served by the new index instead of a table scan.
      */
     @Test
-    fun discoveredNodeSnrGoesNullableWithoutLosingRows() = runTest {
-        helper.createDatabase(DISCOVERED_SNR_NULLABLE_FROM_VERSION).use { connection ->
+    fun discoveredNodeSnrGoesNullableAndLogGainsDateIndexWithoutLosingRows() = runTest {
+        helper.createDatabase(SCHEMA_64_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO log (uuid, type, received_date, message, from_num, port_num) " +
+                    "VALUES ('log-a', 'Packet', 1000, 'first', 42, 3)",
+            )
+            connection.execSQL(
+                "INSERT INTO log (uuid, type, received_date, message) VALUES ('log-b', 'LogRecord', 2000, 'second')",
+            )
             connection.execSQL(
                 "INSERT INTO discovery_session (id, timestamp, presets_scanned, home_preset) " +
                     "VALUES (1, 3000, 'LONG_FAST', 'LONG_FAST')",
@@ -617,7 +625,24 @@ class MeshtasticDatabaseMigrationTest {
             )
         }
 
-        helper.runMigrationsAndValidate(DISCOVERED_SNR_NULLABLE_TO_VERSION, emptyList()).use { connection ->
+        helper.runMigrationsAndValidate(SCHEMA_64_TO_VERSION, emptyList()).use { connection ->
+            val logs = "FROM log ORDER BY received_date"
+            assertEquals(listOf("log-a", "log-b"), queryColumn(connection, "SELECT uuid $logs"))
+            assertEquals(listOf("Packet", "LogRecord"), queryColumn(connection, "SELECT type $logs"))
+            assertEquals(listOf("1000", "2000"), queryColumn(connection, "SELECT received_date $logs"))
+            assertEquals(listOf("first", "second"), queryColumn(connection, "SELECT message $logs"))
+            assertEquals(listOf("42", "0"), queryColumn(connection, "SELECT from_num $logs"))
+            assertEquals(listOf("3", "0"), queryColumn(connection, "SELECT port_num $logs"))
+            assertTrue(
+                "index_log_received_date" in queryColumn(connection, "SELECT name FROM pragma_index_list('log')"),
+            )
+            assertEquals(
+                listOf("received_date"),
+                queryColumn(connection, "SELECT name FROM pragma_index_info('index_log_received_date')"),
+            )
+            val deletePlan = queryPlan(connection, "DELETE FROM log WHERE received_date < 1500")
+            assertTrue(deletePlan.any { "index_log_received_date" in it }, deletePlan.toString())
+
             val byId = "FROM discovered_node ORDER BY id"
             assertEquals(listOf("1", "2"), queryColumn(connection, "SELECT id $byId"))
             assertEquals(listOf("99", "100"), queryColumn(connection, "SELECT node_num $byId"))
@@ -631,6 +656,16 @@ class MeshtasticDatabaseMigrationTest {
             assertEquals(listOf(null), queryColumn(connection, "SELECT snr FROM discovered_node WHERE id = 1"))
         }
     }
+
+    /** The `detail` column of `EXPLAIN QUERY PLAN` for [sql], one entry per plan step. */
+    private fun queryPlan(connection: SQLiteConnection, sql: String): List<String> =
+        connection.prepare("EXPLAIN QUERY PLAN $sql").use { statement ->
+            buildList {
+                while (statement.step()) {
+                    add(statement.getText(QUERY_PLAN_DETAIL_COLUMN))
+                }
+            }
+        }
 
     private fun queryColumn(connection: SQLiteConnection, sql: String): List<String?> =
         connection.prepare(sql).use { statement ->
@@ -670,8 +705,9 @@ class MeshtasticDatabaseMigrationTest {
         const val IS_MAKER_TO_VERSION = 62
         const val REACTION_AUTH_FROM_VERSION = 62
         const val REACTION_AUTH_TO_VERSION = 63
-        const val DISCOVERED_SNR_NULLABLE_FROM_VERSION = 63
-        const val DISCOVERED_SNR_NULLABLE_TO_VERSION = 64
+        const val SCHEMA_64_FROM_VERSION = 63
+        const val SCHEMA_64_TO_VERSION = 64
+        const val QUERY_PLAN_DETAIL_COLUMN = 3
         const val PUBLIC_KEY_BYTES = 32
         const val STORED_CHANNEL_SET_HEX = "0A0612044D657368"
 

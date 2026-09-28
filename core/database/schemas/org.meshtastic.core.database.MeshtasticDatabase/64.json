@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 64,
-    "identityHash": "6b9ed5221e27f0d6aba9cf2723428f9c",
+    "identityHash": "bfee7bae8629a7b53c153ee1f2cb07dd",
     "entities": [
       {
         "tableName": "my_node",
@@ -726,6 +726,15 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_log_port_num` ON `${TABLE_NAME}` (`port_num`)"
+          },
+          {
+            "name": "index_log_received_date",
+            "unique": false,
+            "columnNames": [
+              "received_date"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_log_received_date` ON `${TABLE_NAME}` (`received_date`)"
           }
         ]
       },
@@ -1865,7 +1874,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6b9ed5221e27f0d6aba9cf2723428f9c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bfee7bae8629a7b53c153ee1f2cb07dd')"
     ]
   }
 }
