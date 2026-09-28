@@ -113,12 +113,12 @@ object SemanticColors {
 }
 
 /**
- * The Link colour: Blue 700 on a light surface and Blue 400 on a dark one, since no single blue reaches 4.5:1 on both.
- * The standards' light value, Blue 600, reaches it only on white, and this app's light surfaces and containers are
- * tinted. Follows the active scheme's surface rather than the system, so a theme picked in the app is respected.
+ * The Link colour: Blue 800 on a light surface and Blue 300 on a dark one, the tones nearest the standards' Blue 600
+ * and Blue 400 that hold 4.5:1 on every surface a link sits on here, node-tinted message cards included. Follows the
+ * active scheme's surface rather than the system, so a theme picked in the app is respected.
  */
 val ColorScheme.link: Color
-    get() = if (surface.luminance() < DARK_SURFACE_LUMINANCE) BluePalette.B400 else BluePalette.B700
+    get() = if (surface.luminance() < DARK_SURFACE_LUMINANCE) BluePalette.B300 else BluePalette.B800
 
 /** Midpoint luminance separating a light surface from a dark one; both static schemes sit near the extremes. */
 private const val DARK_SURFACE_LUMINANCE = 0.5f

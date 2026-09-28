@@ -19,6 +19,8 @@ package org.meshtastic.core.ui.theme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import org.meshtastic.core.ui.component.NODE_TINT_NORMAL
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -43,6 +45,23 @@ class LinkColorTest {
     @Test
     fun linkMeetsAaTextContrastOnTheDarkDialogBackground() {
         assertAaText(darkColorScheme(surface = surfaceDark).link, surfaceContainerHighDark)
+    }
+
+    @Test
+    fun linkMeetsAaTextContrastOnEveryNodeTintedCardInBothThemes() {
+        // A message card is the Card container washed toward the sender's node colour, which can be any RGB.
+        val nodeColors =
+            (0..255 step 17).flatMap { r ->
+                (0..255 step 17).flatMap { g -> (0..255 step 17).map { b -> Color(r, g, b) } }
+            }
+        val themes =
+            listOf(
+                lightColorScheme(surface = surfaceLight).link to surfaceContainerHighestLight,
+                darkColorScheme(surface = surfaceDark).link to surfaceContainerHighestDark,
+            )
+        themes.forEach { (link, card) ->
+            nodeColors.forEach { node -> assertAaText(link, lerp(card, node, NODE_TINT_NORMAL)) }
+        }
     }
 
     private fun assertAaText(link: Color, surface: Color) {
