@@ -39,8 +39,8 @@ Delegate heavy Gradle to the `gradle-runner` subagent; **git-diff-verify after**
 Single-module fast loops:
 
 ```bash
-./gradlew :core:ui:allTests --tests "*InlineMarkdown*"
-./gradlew :feature:messaging:allTests --tests "*MessageFormatting*"
+./gradlew :core:ui:jvmTest --tests "*InlineMarkdown*"
+./gradlew :feature:messaging:jvmTest --tests "*MessageFormatting*"
 ```
 
 ### Live verification (mandatory — /verify skill)
