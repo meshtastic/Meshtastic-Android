@@ -284,11 +284,10 @@ class MessageViewModelTest {
     }
 
     @Test
-    fun testToggleShowQuickChatFlipsInsideThePrefsStore() {
+    fun testToggleShowQuickChatDelegatesToThePrefsToggle() {
         viewModel.toggleShowQuickChat()
 
         verify { uiPrefs.toggleShowQuickChat() }
-        verify(VerifyMode.not) { uiPrefs.setShowQuickChat(any()) }
     }
 
     @Test

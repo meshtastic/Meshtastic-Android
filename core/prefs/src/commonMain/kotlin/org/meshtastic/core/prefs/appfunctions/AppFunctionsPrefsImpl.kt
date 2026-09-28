@@ -33,7 +33,6 @@ import org.meshtastic.core.repository.AppFunctionsPrefs
 import org.meshtastic.core.repository.AppFunctionsSetting
 
 @Single
-@Suppress("TooManyFunctions")
 class AppFunctionsPrefsImpl(private val dataStore: AppDataStore, dispatchers: CoroutineDispatchers) :
     AppFunctionsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -49,26 +48,6 @@ class AppFunctionsPrefsImpl(private val dataStore: AppDataStore, dispatchers: Co
     override val getRecentMessagesEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_RECENT_MESSAGES)
     override val getUnreadSummaryEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_UNREAD_SUMMARY)
 
-    override fun setMasterEnabled(enabled: Boolean) = set(KEY_MASTER, enabled)
-
-    override fun setSendMessageEnabled(enabled: Boolean) = set(KEY_SEND_MESSAGE, enabled)
-
-    override fun setGetMeshStatusEnabled(enabled: Boolean) = set(KEY_GET_MESH_STATUS, enabled)
-
-    override fun setGetNodeListEnabled(enabled: Boolean) = set(KEY_GET_NODE_LIST, enabled)
-
-    override fun setGetChannelInfoEnabled(enabled: Boolean) = set(KEY_GET_CHANNEL_INFO, enabled)
-
-    override fun setGetDeviceStatusEnabled(enabled: Boolean) = set(KEY_GET_DEVICE_STATUS, enabled)
-
-    override fun setGetNodeDetailsEnabled(enabled: Boolean) = set(KEY_GET_NODE_DETAILS, enabled)
-
-    override fun setGetMeshMetricsEnabled(enabled: Boolean) = set(KEY_GET_MESH_METRICS, enabled)
-
-    override fun setGetRecentMessagesEnabled(enabled: Boolean) = set(KEY_GET_RECENT_MESSAGES, enabled)
-
-    override fun setGetUnreadSummaryEnabled(enabled: Boolean) = set(KEY_GET_UNREAD_SUMMARY, enabled)
-
     override fun toggle(setting: AppFunctionsSetting) {
         val key = setting.key
         scope.launch { dataStore.edit { prefs -> prefs[key] = !(prefs[key] ?: ENABLED_BY_DEFAULT) } }
@@ -76,10 +55,6 @@ class AppFunctionsPrefsImpl(private val dataStore: AppDataStore, dispatchers: Co
 
     private fun booleanPref(key: Preferences.Key<Boolean>): StateFlow<Boolean> =
         dataStore.data.map { it[key] ?: ENABLED_BY_DEFAULT }.stateIn(scope, SharingStarted.Eagerly, ENABLED_BY_DEFAULT)
-
-    private fun set(key: Preferences.Key<Boolean>, value: Boolean) {
-        scope.launch { dataStore.edit { prefs -> prefs[key] = value } }
-    }
 
     companion object {
         private const val ENABLED_BY_DEFAULT = true

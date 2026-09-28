@@ -26,7 +26,6 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
-import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CompletableDeferred
@@ -643,23 +642,21 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `toggleAnalyticsAllowed flips inside the prefs store`() {
+    fun `toggleAnalyticsAllowed delegates to the prefs toggle`() {
         every { analyticsPrefs.toggleAnalyticsAllowed() } returns Unit
 
         viewModel.toggleAnalyticsAllowed()
 
         verify { analyticsPrefs.toggleAnalyticsAllowed() }
-        verify(VerifyMode.not) { analyticsPrefs.setAnalyticsAllowed(any()) }
     }
 
     @Test
-    fun `toggleHomoglyphCharactersEncodingEnabled flips inside the prefs store`() {
+    fun `toggleHomoglyphCharactersEncodingEnabled delegates to the prefs toggle`() {
         every { homoglyphEncodingPrefs.toggleHomoglyphEncodingEnabled() } returns Unit
 
         viewModel.toggleHomoglyphCharactersEncodingEnabled()
 
         verify { homoglyphEncodingPrefs.toggleHomoglyphEncodingEnabled() }
-        verify(VerifyMode.not) { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(any()) }
     }
 
     @Test

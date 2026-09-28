@@ -104,14 +104,16 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
     }
 
     override val showQuickChat: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_SHOW_QUICK_CHAT_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
-
-    override fun setShowQuickChat(show: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = show } }
-    }
+        dataStore.data
+            .map { it[KEY_SHOW_QUICK_CHAT_PREF] ?: SHOW_QUICK_CHAT_BY_DEFAULT }
+            .stateIn(scope, SharingStarted.Eagerly, SHOW_QUICK_CHAT_BY_DEFAULT)
 
     override fun toggleShowQuickChat() {
-        scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = !(it[KEY_SHOW_QUICK_CHAT_PREF] ?: false) } }
+        scope.launch {
+            dataStore.edit {
+                it[KEY_SHOW_QUICK_CHAT_PREF] = !(it[KEY_SHOW_QUICK_CHAT_PREF] ?: SHOW_QUICK_CHAT_BY_DEFAULT)
+            }
+        }
     }
 
     override val showFullMessageTimestamps: StateFlow<Boolean> =
@@ -336,6 +338,7 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         val KEY_SHOW_NETWORK_TRANSPORT = booleanPreferencesKey("show-network-transport")
         val KEY_SHOW_USB_TRANSPORT = booleanPreferencesKey("show-usb-transport")
         private const val MAX_FIRMWARE_UPDATE_NOTIFICATION_KEYS = 100
+        private const val SHOW_QUICK_CHAT_BY_DEFAULT = false
 
         private fun parseDeviceType(name: String): DeviceType? = DeviceType.entries.firstOrNull { it.name == name }
 

@@ -43,17 +43,13 @@ class AnalyticsPrefsImpl(
 
     override val analyticsAllowed: StateFlow<Boolean> =
         analyticsDataStore.data
-            .map { it[KEY_ANALYTICS_ALLOWED_PREF] ?: true }
-            .stateIn(scope, SharingStarted.Eagerly, true)
-
-    override fun setAnalyticsAllowed(allowed: Boolean) {
-        scope.launch { analyticsDataStore.edit { prefs -> prefs[KEY_ANALYTICS_ALLOWED_PREF] = allowed } }
-    }
+            .map { it[KEY_ANALYTICS_ALLOWED_PREF] ?: ALLOWED_BY_DEFAULT }
+            .stateIn(scope, SharingStarted.Eagerly, ALLOWED_BY_DEFAULT)
 
     override fun toggleAnalyticsAllowed() {
         scope.launch {
             analyticsDataStore.edit { prefs ->
-                prefs[KEY_ANALYTICS_ALLOWED_PREF] = !(prefs[KEY_ANALYTICS_ALLOWED_PREF] ?: true)
+                prefs[KEY_ANALYTICS_ALLOWED_PREF] = !(prefs[KEY_ANALYTICS_ALLOWED_PREF] ?: ALLOWED_BY_DEFAULT)
             }
         }
     }
@@ -72,6 +68,7 @@ class AnalyticsPrefsImpl(
     }
 
     companion object {
+        private const val ALLOWED_BY_DEFAULT = true
         const val KEY_ANALYTICS_ALLOWED = "allowed"
         const val KEY_INSTALL_ID = "appPrefs_install_id"
 

@@ -25,8 +25,6 @@ import org.meshtastic.core.model.InterfaceId
 interface AnalyticsPrefs {
     val analyticsAllowed: StateFlow<Boolean>
 
-    fun setAnalyticsAllowed(allowed: Boolean)
-
     /** Flips the stored value, not [analyticsAllowed]'s snapshot, which lags a pending write. */
     fun toggleAnalyticsAllowed()
 
@@ -36,8 +34,6 @@ interface AnalyticsPrefs {
 /** Reactive interface for homoglyph encoding preferences. */
 interface HomoglyphPrefs {
     val homoglyphEncodingEnabled: StateFlow<Boolean>
-
-    fun setHomoglyphEncodingEnabled(enabled: Boolean)
 
     /** Flips the stored value, not [homoglyphEncodingEnabled]'s snapshot, which lags a pending write. */
     fun toggleHomoglyphEncodingEnabled()
@@ -129,8 +125,6 @@ interface UiPrefs {
     fun setHasShownNotPairedWarning(shown: Boolean)
 
     val showQuickChat: StateFlow<Boolean>
-
-    fun setShowQuickChat(show: Boolean)
 
     /** Flips the stored value, not [showQuickChat]'s snapshot, which lags a pending write. */
     fun toggleShowQuickChat()
@@ -418,48 +412,19 @@ enum class AppFunctionsSetting {
 
 /** Reactive interface for App Functions (system AI integration) preferences. */
 interface AppFunctionsPrefs {
-    /** Flips [setting]'s stored value, not its flow's snapshot, which lags a pending write. */
-    fun toggle(setting: AppFunctionsSetting)
-
     val masterEnabled: StateFlow<Boolean>
-
-    fun setMasterEnabled(enabled: Boolean)
-
     val sendMessageEnabled: StateFlow<Boolean>
-
-    fun setSendMessageEnabled(enabled: Boolean)
-
     val getMeshStatusEnabled: StateFlow<Boolean>
-
-    fun setGetMeshStatusEnabled(enabled: Boolean)
-
     val getNodeListEnabled: StateFlow<Boolean>
-
-    fun setGetNodeListEnabled(enabled: Boolean)
-
     val getChannelInfoEnabled: StateFlow<Boolean>
-
-    fun setGetChannelInfoEnabled(enabled: Boolean)
-
     val getDeviceStatusEnabled: StateFlow<Boolean>
-
-    fun setGetDeviceStatusEnabled(enabled: Boolean)
-
     val getNodeDetailsEnabled: StateFlow<Boolean>
-
-    fun setGetNodeDetailsEnabled(enabled: Boolean)
-
     val getMeshMetricsEnabled: StateFlow<Boolean>
-
-    fun setGetMeshMetricsEnabled(enabled: Boolean)
-
     val getRecentMessagesEnabled: StateFlow<Boolean>
-
-    fun setGetRecentMessagesEnabled(enabled: Boolean)
-
     val getUnreadSummaryEnabled: StateFlow<Boolean>
 
-    fun setGetUnreadSummaryEnabled(enabled: Boolean)
+    /** Flips [setting]'s stored value, not its flow's snapshot, which lags a pending write. */
+    fun toggle(setting: AppFunctionsSetting)
 }
 
 /** Consolidated interface for all application preferences. */
