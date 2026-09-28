@@ -33,6 +33,7 @@ import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.model.constraintFor
+import org.meshtastic.core.model.normalizeCodingRateOverride
 import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.presetForRegionChange
 import org.meshtastic.core.resources.Res
@@ -41,6 +42,11 @@ import org.meshtastic.core.resources.bandwidth_default
 import org.meshtastic.core.resources.bandwidth_option_khz
 import org.meshtastic.core.resources.bandwidth_unsupported
 import org.meshtastic.core.resources.bandwidth_unsupported_summary
+import org.meshtastic.core.resources.config_lora_coding_rate_fraction
+import org.meshtastic.core.resources.config_lora_coding_rate_override
+import org.meshtastic.core.resources.config_lora_coding_rate_override_max_summary
+import org.meshtastic.core.resources.config_lora_coding_rate_override_summary
+import org.meshtastic.core.resources.config_lora_coding_rate_preset_default
 import org.meshtastic.core.resources.config_lora_modem_preset_licensed_summary
 import org.meshtastic.core.resources.config_lora_modem_preset_summary
 import org.meshtastic.core.resources.config_lora_region_summary
@@ -145,6 +151,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     }
 
     val formState = rememberConfigState(initialValue = loraConfig)
+    val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
 
     val primaryChannel = remember(formState.value) { Channel(primarySettings, formState.value) }
     val focusManager = LocalFocusManager.current
@@ -166,7 +173,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config.Builder().also { wb -> wb.lora = it }.build()
+            val config = Config.Builder().also { wb -> wb.lora = it.withCodingRateOverrideFor(capabilities) }.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -176,8 +183,6 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 // instance, so the locally-cached map (from our own handshake) is reused for remote admin too. Gated
                 // on the *target* node's firmware capability (metadata is per-target): pre-2.8 nodes don't get the
                 // map or the new TINY presets, which also keeps older remotes unconstrained.
-                val capabilities =
-                    remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
                 val regionPresetMap = if (capabilities.supportsLoraRegionPresetMap) state.loraRegionPresetMap else null
                 val presetConstraint =
                     remember(regionPresetMap, formState.value.region) {
@@ -214,6 +219,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                                     wb.modem_preset = preset
                                 }
                                 .build()
+                                .withCodingRateOverrideFor(capabilities)
                     },
                 )
                 HorizontalDivider()
@@ -249,9 +255,22 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         items = presetItems,
                         selectedItem = formState.value.modem_preset,
                         onItemSelected = {
-                            formState.value = formState.value.newBuilder().also { wb -> wb.modem_preset = it }.build()
+                            formState.value =
+                                formState.value
+                                    .newBuilder()
+                                    .also { wb -> wb.modem_preset = it }
+                                    .build()
+                                    .withCodingRateOverrideFor(capabilities)
                         },
                     )
+                    if (capabilities.supportsCodingRateOverride) {
+                        HorizontalDivider()
+                        CodingRateOverridePreference(
+                            config = formState.value,
+                            enabled = state.connected,
+                            onConfigChange = { formState.value = it },
+                        )
+                    }
                 } else {
                     ManualModemSettings(
                         config = formState.value,
@@ -399,6 +418,46 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             }
         }
     }
+}
+
+private fun Config.LoRaConfig.withCodingRateOverrideFor(capabilities: Capabilities): Config.LoRaConfig =
+    if (capabilities.supportsCodingRateOverride) normalizeCodingRateOverride() else this
+
+/**
+ * Raises the preset's coding rate without leaving the preset (design#161). Only rates above the preset's own are
+ * offered, since firmware ignores anything lower, and "Preset default" is written as 0.
+ */
+@Composable
+private fun CodingRateOverridePreference(
+    config: Config.LoRaConfig,
+    enabled: Boolean,
+    onConfigChange: (Config.LoRaConfig) -> Unit,
+) {
+    val preset = ChannelOption.from(config.modem_preset) ?: return
+    val atMax = preset.codingRateOverrides.isEmpty()
+    val presetDefault =
+        stringResource(
+            Res.string.config_lora_coding_rate_preset_default,
+            stringResource(Res.string.config_lora_coding_rate_fraction, preset.codingRate),
+        )
+    val items =
+        listOf(DropDownItem(value = 0, label = presetDefault)) +
+            preset.codingRateOverrides.map { rate ->
+                DropDownItem(value = rate, label = stringResource(Res.string.config_lora_coding_rate_fraction, rate))
+            }
+    DropDownPreference(
+        title = stringResource(Res.string.config_lora_coding_rate_override),
+        summary =
+        if (atMax) {
+            stringResource(Res.string.config_lora_coding_rate_override_max_summary)
+        } else {
+            stringResource(Res.string.config_lora_coding_rate_override_summary)
+        },
+        enabled = enabled && !atMax,
+        items = items,
+        selectedItem = preset.codingRateOverride(config.coding_rate),
+        onItemSelected = { onConfigChange(config.newBuilder().also { wb -> wb.coding_rate = it }.build()) },
+    )
 }
 
 @Composable
