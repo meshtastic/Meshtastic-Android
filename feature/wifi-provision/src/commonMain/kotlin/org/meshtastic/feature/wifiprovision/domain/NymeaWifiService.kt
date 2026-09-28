@@ -226,10 +226,11 @@ class NymeaWifiService(
 
     /**
      * Encode [json] into ≤20-byte packets and write each one WITH_RESPONSE to the commander characteristic. Only the
-     * [command] code is logged: a Connect payload carries the WiFi password.
+     * [command] code is logged: a Connect payload carries the WiFi password, and even its length gives away the SSID
+     * and password lengths.
      */
     private suspend fun sendCommand(command: Int, json: String) {
-        Logger.d { "$TAG: → command=$command (${json.length} chars)" }
+        Logger.d { "$TAG: → command=$command" }
         val packets = NymeaPacketCodec.encode(json)
         bleConnection.profile(WIRELESS_SERVICE_UUID) { service ->
             for (packet in packets) {

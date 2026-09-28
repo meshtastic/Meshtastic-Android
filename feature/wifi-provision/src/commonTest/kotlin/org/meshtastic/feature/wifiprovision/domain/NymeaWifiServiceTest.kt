@@ -329,7 +329,10 @@ class NymeaWifiServiceTest {
         val result = service.provision("SecretHomeNet", "hunter2-wifi-pass")
 
         assertIs<ProvisionResult.Success>(result)
-        assertTrue(logs.messages.any { "command=1" in it }, "Command send should still be logged: ${logs.messages}")
+        assertTrue(
+            logs.messages.any { it.endsWith("command=1") },
+            "Command send should be logged with nothing after the code: ${logs.messages}",
+        )
         for (secret in listOf("hunter2-wifi-pass", "SecretHomeNet", "10.77.88.99")) {
             assertFalse(logs.messages.any { secret in it }, "'$secret' leaked into logs: ${logs.messages}")
         }
