@@ -127,7 +127,7 @@ class ConversationShortcutPublisherTest {
     }
 
     @Test
-    fun `dm shortcuts carry node labels and the empty primary resolves to its preset name`() = runTest {
+    fun `dm shortcuts are titled by the node long name and the empty primary by its preset name`() = runTest {
         every { packetRepository.getContacts() } returns
             flowOf(mapOf("0!00000007" to contact(from = "!00000007", time = 1_000)))
 
@@ -135,7 +135,7 @@ class ConversationShortcutPublisherTest {
         advanceUntilIdle()
 
         val byId = shortcutManager.dynamicShortcuts.associateBy { it.id }
-        assertEquals("HAWK", byId.getValue("0!00000007").shortLabel)
+        assertEquals("Hawk Ridge", byId.getValue("0!00000007").shortLabel)
         assertEquals("Hawk Ridge", byId.getValue("0!00000007").longLabel)
         assertEquals("LongFast", byId.getValue("0^all").shortLabel)
         assertEquals("Beta", byId.getValue("1^all").shortLabel)
