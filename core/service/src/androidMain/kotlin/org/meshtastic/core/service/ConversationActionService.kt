@@ -34,6 +34,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 
 /**
@@ -113,7 +114,11 @@ class ConversationActionService :
         }
         try {
             // Send first so the reply is never lost to a notification failure.
-            sendMessageUseCase(message, contactKey)
+            if (sendMessageUseCase(message, contactKey) == SendMessageOutcome.Refused) {
+                Logger.w(tag = TAG) { "Reply refused: the conversation is retired" }
+                safeCatching { serviceNotifications.cancelMessageNotification(contactKey) }
+                return
+            }
             // Replying reads the conversation; Android Auto keys dismissal off read state, not just cancel().
             packetRepository.clearUnreadCount(contactKey, nowMillis)
             // Re-post with the reply appended so the RemoteInput spinner resolves with visible feedback; fall back

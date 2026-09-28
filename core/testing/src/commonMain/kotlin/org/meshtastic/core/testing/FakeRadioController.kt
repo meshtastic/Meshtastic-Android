@@ -164,6 +164,12 @@ class FakeRadioController :
 
     /** Failure thrown by [requestNeighborInfo], when set. */
     var requestNeighborInfoFailure: Exception? = null
+
+    /** Failure thrown by [setFavorite], when set. */
+    var setFavoriteFailure: Exception? = null
+
+    /** Failure thrown by [sendSharedContact], when set. */
+    var sendSharedContactFailure: Exception? = null
     val neighborInfoRequests = mutableListOf<Pair<Int, Int>>()
 
     /**
@@ -222,6 +228,8 @@ class FakeRadioController :
             rejectLocalConfigWritesRemaining = 0
             rejectLocalChannelWritesRemaining = 0
             requestNeighborInfoFailure = null
+            setFavoriteFailure = null
+            sendSharedContactFailure = null
             neighborInfoRequests.clear()
             failChannelWriteAfter = null
             lastSetDeviceAddress = null
@@ -248,10 +256,12 @@ class FakeRadioController :
     }
 
     override suspend fun setFavorite(nodeNum: Int, favorite: Boolean) {
+        setFavoriteFailure?.let { throw it }
         if (favorite) favoritedNodes.add(nodeNum) else favoritedNodes.remove(nodeNum)
     }
 
     override suspend fun sendSharedContact(nodeNum: Int): Boolean {
+        sendSharedContactFailure?.let { throw it }
         sentSharedContacts.add(nodeNum)
         return true
     }

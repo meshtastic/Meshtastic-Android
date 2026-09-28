@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.ai
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
 import org.koin.core.annotation.Single
@@ -25,9 +26,9 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.proto.Constants
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
@@ -90,15 +91,22 @@ class AiFunctionProviderImpl(
 
             // Send via existing use case and capture the generated messageId
             try {
-                val messageId = sendMessageUseCase.invoke(text, key)
+                when (val outcome = sendMessageUseCase.invoke(text, key)) {
+                    is SendMessageOutcome.Queued ->
+                        SendMessageResult.Success(
+                            messageId = outcome.packetId,
+                            channel = contactKey.channelName,
+                            timestamp = clock.now().toEpochMilliseconds(),
+                        )
 
-                SendMessageResult.Success(
-                    messageId = messageId,
-                    channel = contactKey.channelName,
-                    timestamp = clock.now().toEpochMilliseconds(),
-                )
+                    SendMessageOutcome.Refused ->
+                        SendMessageResult.InvalidArgument(
+                            "That conversation is retired: its channel is no longer on the radio.",
+                        )
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
-                if (ex is CancellationException) throw ex
                 SendMessageResult.InvalidArgument("Failed to send message: ${ex.message}")
             }
         }
