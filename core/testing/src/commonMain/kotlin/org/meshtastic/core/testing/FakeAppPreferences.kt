@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.update
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.AppFunctionsPrefs
+import org.meshtastic.core.repository.AppFunctionsSetting
 import org.meshtastic.core.repository.AppPreferences
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.FilterPrefs
@@ -417,6 +418,23 @@ class FakeAppFunctionsPrefs : AppFunctionsPrefs {
 
     override fun setGetUnreadSummaryEnabled(enabled: Boolean) {
         getUnreadSummaryEnabled.value = enabled
+    }
+
+    override fun toggle(setting: AppFunctionsSetting) {
+        val flow =
+            when (setting) {
+                AppFunctionsSetting.MASTER -> masterEnabled
+                AppFunctionsSetting.SEND_MESSAGE -> sendMessageEnabled
+                AppFunctionsSetting.GET_MESH_STATUS -> getMeshStatusEnabled
+                AppFunctionsSetting.GET_NODE_LIST -> getNodeListEnabled
+                AppFunctionsSetting.GET_CHANNEL_INFO -> getChannelInfoEnabled
+                AppFunctionsSetting.GET_DEVICE_STATUS -> getDeviceStatusEnabled
+                AppFunctionsSetting.GET_NODE_DETAILS -> getNodeDetailsEnabled
+                AppFunctionsSetting.GET_MESH_METRICS -> getMeshMetricsEnabled
+                AppFunctionsSetting.GET_RECENT_MESSAGES -> getRecentMessagesEnabled
+                AppFunctionsSetting.GET_UNREAD_SUMMARY -> getUnreadSummaryEnabled
+            }
+        flow.update { !it }
     }
 }
 

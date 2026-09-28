@@ -20,6 +20,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
@@ -30,12 +31,15 @@ import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefsImpl
+import org.meshtastic.core.prefs.appfunctions.AppFunctionsPrefsImpl
 import org.meshtastic.core.prefs.di.asAnalyticsDataStore
 import org.meshtastic.core.prefs.di.asAppDataStore
 import org.meshtastic.core.prefs.di.asHomoglyphEncodingDataStore
 import org.meshtastic.core.prefs.di.asUiDataStore
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefsImpl
 import org.meshtastic.core.prefs.ui.UiPrefsImpl
+import org.meshtastic.core.repository.AppFunctionsPrefs
+import org.meshtastic.core.repository.AppFunctionsSetting
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -134,5 +138,46 @@ class PrefsToggleTest {
         advanceUntilIdle()
 
         assertEquals(false, dataStore.data.first()[HomoglyphPrefsImpl.KEY_ENABLED_PREF])
+    }
+
+    @Test
+    fun `an app functions toggle turns only its own setting off`() = testScope.runTest {
+        AppFunctionsSetting.entries.forEach { setting ->
+            val prefs = AppFunctionsPrefsImpl(store("appfn-${setting.name}").asAppDataStore(), dispatchers)
+
+            prefs.toggle(setting)
+            advanceUntilIdle()
+
+            AppFunctionsSetting.entries.forEach { other ->
+                assertEquals(other != setting, prefs.enabled(other).value, "toggled $setting then read $other")
+            }
+        }
+    }
+
+    @Test
+    fun `two rapid app functions toggles both flip and land back on enabled`() = testScope.runTest {
+        AppFunctionsSetting.entries.forEach { setting ->
+            val dataStore = store("appfn-${setting.name}")
+            val prefs = AppFunctionsPrefsImpl(dataStore.asAppDataStore(), dispatchers)
+
+            prefs.toggle(setting)
+            prefs.toggle(setting)
+            advanceUntilIdle()
+
+            assertEquals(listOf<Any>(true), dataStore.data.first().asMap().values.toList(), setting.name)
+        }
+    }
+
+    private fun AppFunctionsPrefs.enabled(setting: AppFunctionsSetting): StateFlow<Boolean> = when (setting) {
+        AppFunctionsSetting.MASTER -> masterEnabled
+        AppFunctionsSetting.SEND_MESSAGE -> sendMessageEnabled
+        AppFunctionsSetting.GET_MESH_STATUS -> getMeshStatusEnabled
+        AppFunctionsSetting.GET_NODE_LIST -> getNodeListEnabled
+        AppFunctionsSetting.GET_CHANNEL_INFO -> getChannelInfoEnabled
+        AppFunctionsSetting.GET_DEVICE_STATUS -> getDeviceStatusEnabled
+        AppFunctionsSetting.GET_NODE_DETAILS -> getNodeDetailsEnabled
+        AppFunctionsSetting.GET_MESH_METRICS -> getMeshMetricsEnabled
+        AppFunctionsSetting.GET_RECENT_MESSAGES -> getRecentMessagesEnabled
+        AppFunctionsSetting.GET_UNREAD_SUMMARY -> getUnreadSummaryEnabled
     }
 }

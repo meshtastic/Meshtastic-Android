@@ -30,6 +30,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.AppDataStore
 import org.meshtastic.core.repository.AppFunctionsPrefs
+import org.meshtastic.core.repository.AppFunctionsSetting
 
 @Single
 @Suppress("TooManyFunctions")
@@ -37,16 +38,16 @@ class AppFunctionsPrefsImpl(private val dataStore: AppDataStore, dispatchers: Co
     AppFunctionsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
-    override val masterEnabled: StateFlow<Boolean> = booleanPref(KEY_MASTER, true)
-    override val sendMessageEnabled: StateFlow<Boolean> = booleanPref(KEY_SEND_MESSAGE, true)
-    override val getMeshStatusEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_MESH_STATUS, true)
-    override val getNodeListEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_NODE_LIST, true)
-    override val getChannelInfoEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_CHANNEL_INFO, true)
-    override val getDeviceStatusEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_DEVICE_STATUS, true)
-    override val getNodeDetailsEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_NODE_DETAILS, true)
-    override val getMeshMetricsEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_MESH_METRICS, true)
-    override val getRecentMessagesEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_RECENT_MESSAGES, true)
-    override val getUnreadSummaryEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_UNREAD_SUMMARY, true)
+    override val masterEnabled: StateFlow<Boolean> = booleanPref(KEY_MASTER)
+    override val sendMessageEnabled: StateFlow<Boolean> = booleanPref(KEY_SEND_MESSAGE)
+    override val getMeshStatusEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_MESH_STATUS)
+    override val getNodeListEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_NODE_LIST)
+    override val getChannelInfoEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_CHANNEL_INFO)
+    override val getDeviceStatusEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_DEVICE_STATUS)
+    override val getNodeDetailsEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_NODE_DETAILS)
+    override val getMeshMetricsEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_MESH_METRICS)
+    override val getRecentMessagesEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_RECENT_MESSAGES)
+    override val getUnreadSummaryEnabled: StateFlow<Boolean> = booleanPref(KEY_GET_UNREAD_SUMMARY)
 
     override fun setMasterEnabled(enabled: Boolean) = set(KEY_MASTER, enabled)
 
@@ -68,14 +69,21 @@ class AppFunctionsPrefsImpl(private val dataStore: AppDataStore, dispatchers: Co
 
     override fun setGetUnreadSummaryEnabled(enabled: Boolean) = set(KEY_GET_UNREAD_SUMMARY, enabled)
 
-    private fun booleanPref(key: Preferences.Key<Boolean>, default: Boolean): StateFlow<Boolean> =
-        dataStore.data.map { it[key] ?: default }.stateIn(scope, SharingStarted.Eagerly, default)
+    override fun toggle(setting: AppFunctionsSetting) {
+        val key = setting.key
+        scope.launch { dataStore.edit { prefs -> prefs[key] = !(prefs[key] ?: ENABLED_BY_DEFAULT) } }
+    }
+
+    private fun booleanPref(key: Preferences.Key<Boolean>): StateFlow<Boolean> =
+        dataStore.data.map { it[key] ?: ENABLED_BY_DEFAULT }.stateIn(scope, SharingStarted.Eagerly, ENABLED_BY_DEFAULT)
 
     private fun set(key: Preferences.Key<Boolean>, value: Boolean) {
         scope.launch { dataStore.edit { prefs -> prefs[key] = value } }
     }
 
     companion object {
+        private const val ENABLED_BY_DEFAULT = true
+
         private val KEY_MASTER = booleanPreferencesKey("appfn_master_enabled")
         private val KEY_SEND_MESSAGE = booleanPreferencesKey("appfn_send_message")
         private val KEY_GET_MESH_STATUS = booleanPreferencesKey("appfn_get_mesh_status")
@@ -86,5 +94,20 @@ class AppFunctionsPrefsImpl(private val dataStore: AppDataStore, dispatchers: Co
         private val KEY_GET_MESH_METRICS = booleanPreferencesKey("appfn_get_mesh_metrics")
         private val KEY_GET_RECENT_MESSAGES = booleanPreferencesKey("appfn_get_recent_messages")
         private val KEY_GET_UNREAD_SUMMARY = booleanPreferencesKey("appfn_get_unread_summary")
+
+        private val AppFunctionsSetting.key: Preferences.Key<Boolean>
+            get() =
+                when (this) {
+                    AppFunctionsSetting.MASTER -> KEY_MASTER
+                    AppFunctionsSetting.SEND_MESSAGE -> KEY_SEND_MESSAGE
+                    AppFunctionsSetting.GET_MESH_STATUS -> KEY_GET_MESH_STATUS
+                    AppFunctionsSetting.GET_NODE_LIST -> KEY_GET_NODE_LIST
+                    AppFunctionsSetting.GET_CHANNEL_INFO -> KEY_GET_CHANNEL_INFO
+                    AppFunctionsSetting.GET_DEVICE_STATUS -> KEY_GET_DEVICE_STATUS
+                    AppFunctionsSetting.GET_NODE_DETAILS -> KEY_GET_NODE_DETAILS
+                    AppFunctionsSetting.GET_MESH_METRICS -> KEY_GET_MESH_METRICS
+                    AppFunctionsSetting.GET_RECENT_MESSAGES -> KEY_GET_RECENT_MESSAGES
+                    AppFunctionsSetting.GET_UNREAD_SUMMARY -> KEY_GET_UNREAD_SUMMARY
+                }
     }
 }

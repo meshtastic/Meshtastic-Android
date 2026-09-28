@@ -402,8 +402,25 @@ interface TakPrefs {
     fun setTakServerChannel(index: Int)
 }
 
+/** One App Functions switch: the master toggle or a single function's. */
+enum class AppFunctionsSetting {
+    MASTER,
+    SEND_MESSAGE,
+    GET_MESH_STATUS,
+    GET_NODE_LIST,
+    GET_CHANNEL_INFO,
+    GET_DEVICE_STATUS,
+    GET_NODE_DETAILS,
+    GET_MESH_METRICS,
+    GET_RECENT_MESSAGES,
+    GET_UNREAD_SUMMARY,
+}
+
 /** Reactive interface for App Functions (system AI integration) preferences. */
 interface AppFunctionsPrefs {
+    /** Flips [setting]'s stored value, not its flow's snapshot, which lags a pending write. */
+    fun toggle(setting: AppFunctionsSetting)
+
     val masterEnabled: StateFlow<Boolean>
 
     fun setMasterEnabled(enabled: Boolean)
