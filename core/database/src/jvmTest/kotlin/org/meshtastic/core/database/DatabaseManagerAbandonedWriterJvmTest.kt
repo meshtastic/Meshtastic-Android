@@ -160,11 +160,24 @@ class DatabaseManagerAbandonedWriterJvmTest {
 
         val replacement = manager.currentDb.value
         assertTrue(replacement !== original, "a block that holds no lock must still be replaced")
+        assertEquals(
+            ROOM_MIN_BUSY_TIMEOUT_MS,
+            busyTimeoutOf(replacement),
+            "the probe must hand the published replacement back with its busy timeout, not zero",
+        )
         manager.withDb { it.nodeInfoDao().setMyNodeInfo(myNode(firmwareVersion = "after")) }
         assertEquals("after", replacement.nodeInfoDao().getMyNodeInfo().first()?.firmwareVersion)
 
         releaseBlock.complete(Unit)
         awaitWritersDrained()
+    }
+
+    /** Reads the busy timeout of [database]'s single connection, the one the write-lock probe ran on. */
+    private suspend fun busyTimeoutOf(database: MeshtasticDatabase): Long = database.useWriterConnection { connection ->
+        connection.usePrepared("PRAGMA busy_timeout") { statement ->
+            statement.step()
+            statement.getLong(0)
+        }
     }
 
     private suspend fun awaitWritersDrained() =
