@@ -16,8 +16,11 @@
  */
 package org.meshtastic.app.ai.appfunctions
 
+import org.w3c.dom.Document
 import org.w3c.dom.Element
+import org.w3c.dom.NodeList
 import java.io.File
+import java.io.InputStream
 import java.util.Properties
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.test.Test
@@ -34,22 +37,34 @@ class AppFunctionServiceManifestTest {
 
     @Test
     fun `v1 index names an asset listing every synced function`() {
-        assertIndexListsSyncedFunctions("android.app.appfunctions")
+        assertIndexListsSyncedFunctions("android.app.appfunctions", idTag = "function_id")
     }
 
     @Test
     fun `v2 index names an asset listing every synced function`() {
-        assertIndexListsSyncedFunctions("android.app.appfunctions.v2")
+        assertIndexListsSyncedFunctions("android.app.appfunctions.v2", idTag = "id")
     }
 
-    private fun assertIndexListsSyncedFunctions(property: String) {
+    /** Only the direct [idTag] child of each `<appfunction>` is the id AppSearch indexes; v2 repeats it deeper down. */
+    private fun assertIndexListsSyncedFunctions(property: String, idTag: String) {
         val assetName = assertNotNull(serviceProperties()[property], "$SERVICE declares no $property property")
-        val stream = javaClass.classLoader?.getResourceAsStream("assets/$assetName")
-        val xml =
-            assertNotNull(stream, "$property names $assetName, which is not packaged").use { input ->
-                input.bufferedReader().readText()
-            }
-        SYNCED_FUNCTION_IDS.forEach { id -> assertTrue(id in xml, "$assetName is missing $id") }
+        val stream =
+            assertNotNull(
+                javaClass.classLoader?.getResourceAsStream("assets/$assetName"),
+                "$property names $assetName, which is not packaged",
+            )
+        val indexedIds =
+            stream
+                .use(::parseXml)
+                .getElementsByTagName("appfunction")
+                .elements()
+                .mapNotNull { function ->
+                    function.childNodes.elements().firstOrNull { it.tagName == idTag }?.textContent?.trim()
+                }
+                .toSet()
+        SYNCED_FUNCTION_IDS.forEach { id ->
+            assertTrue(id in indexedIds, "$assetName has no <$idTag>$id</$idTag> entry")
+        }
     }
 
     private fun serviceProperties(): Map<String, String> {
@@ -58,21 +73,20 @@ class AppFunctionServiceManifestTest {
             "$TEST_CONFIG is not on the classpath"
         }
             .use(config::load)
-        val manifest =
-            DocumentBuilderFactory.newInstance()
-                .apply { isNamespaceAware = true }
-                .newDocumentBuilder()
-                .parse(File(config.getProperty("android_merged_manifest")))
-        val services = manifest.getElementsByTagName("service")
+        val manifest = File(config.getProperty("android_merged_manifest")).inputStream().use(::parseXml)
         val service =
-            (0 until services.length)
-                .map { services.item(it) as Element }
-                .single { it.getAttributeNS(ANDROID_NS, "name") == SERVICE }
-        val properties = service.getElementsByTagName("property")
-        return (0 until properties.length)
-            .map { properties.item(it) as Element }
-            .associate { it.getAttributeNS(ANDROID_NS, "name") to it.getAttributeNS(ANDROID_NS, "value") }
+            manifest.getElementsByTagName("service").elements().single {
+                it.getAttributeNS(ANDROID_NS, "name") == SERVICE
+            }
+        return service.getElementsByTagName("property").elements().associate {
+            it.getAttributeNS(ANDROID_NS, "name") to it.getAttributeNS(ANDROID_NS, "value")
+        }
     }
+
+    private fun parseXml(input: InputStream): Document =
+        DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }.newDocumentBuilder().parse(input)
+
+    private fun NodeList.elements(): List<Element> = (0 until length).map(::item).filterIsInstance<Element>()
 
     private companion object {
         const val TEST_CONFIG = "com/android/tools/test_config.properties"
