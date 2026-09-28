@@ -39,8 +39,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.boot_reconnect_blocked_message
 import org.meshtastic.core.resources.boot_reconnect_blocked_title

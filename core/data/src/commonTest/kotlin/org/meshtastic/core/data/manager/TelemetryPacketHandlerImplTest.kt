@@ -382,7 +382,12 @@ class TelemetryPacketHandlerImplTest {
                 }
                 .build()
 
-        handler.handleTelemetry(makeTelemetryPacket(myNodeNum, noLevel), makeDataPacket(myNodeNum), myNodeNum, radioSession)
+        handler.handleTelemetry(
+            makeTelemetryPacket(myNodeNum, noLevel),
+            makeDataPacket(myNodeNum),
+            myNodeNum,
+            radioSession,
+        )
         advanceUntilIdle()
 
         verifySuspend(VerifyMode.not) { serviceNotifications.showLowBatteryNotification(any(), any()) }

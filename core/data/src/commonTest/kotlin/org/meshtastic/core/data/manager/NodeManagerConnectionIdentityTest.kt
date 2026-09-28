@@ -29,8 +29,8 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.repository.ConnectionIdentity
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import kotlin.test.BeforeTest
 import kotlin.test.Test

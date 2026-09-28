@@ -2868,7 +2868,8 @@ class NodeManagerImplTest {
         nodeManager.applyTrustedIdentityMigrations(listOf(oldNum))
         advanceUntilIdle()
         val replayDispatches = mutableListOf<Node>()
-        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(replayDispatches), any()) } returns Unit
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(replayDispatches), any()) } returns
+            Unit
         // Now replay: the canonical number (crc32(key)) has NOT appeared yet
         nodeManager.handleReceivedUser(oldNum, userWithKey(key, "Replay", "RP"), manuallyVerified = false)
         advanceUntilIdle()
@@ -2891,7 +2892,9 @@ class NodeManagerImplTest {
         advanceUntilIdle()
 
         assertNull(nodeManager.nodeDBbyNodeNum[num])
-        verifySuspend(mode = VerifyMode.exactly(0)) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) {
+            serviceNotifications.showNewNodeSeenNotification(any(), any())
+        }
     }
 
     @Test
@@ -2968,7 +2971,8 @@ class NodeManagerImplTest {
         advanceUntilIdle()
         // Early replay of old number User packet — should be suppressed
         val dispatchedBefore = mutableListOf<Node>()
-        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatchedBefore), any()) } returns Unit
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatchedBefore), any()) } returns
+            Unit
         nodeManager.handleReceivedUser(oldNum, userWithKey(key, "Replay", "RP"), manuallyVerified = false)
         advanceUntilIdle()
         // The old number should NOT be in nodeDB
@@ -3240,7 +3244,9 @@ class NodeManagerImplTest {
 
             // Same-key replay still suppressed after the repeated migration.
             val suppressedDispatches = mutableListOf<Node>()
-            everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(suppressedDispatches), any()) } returns Unit
+            everySuspend {
+                serviceNotifications.showNewNodeSeenNotification(capture(suppressedDispatches), any())
+            } returns Unit
             nodeManager.handleReceivedUser(num, userWithKey(oldKey, "Replay", "RP"), manuallyVerified = false)
             advanceUntilIdle()
             assertNull(
@@ -3252,7 +3258,8 @@ class NodeManagerImplTest {
             // Distinct valid unrepresented key is still accepted as a legitimate reuse, clearing retirement + hint and
             // emitting exactly one replacement notification.
             val reuseDispatches = mutableListOf<Node>()
-            everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(reuseDispatches), any()) } returns Unit
+            everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(reuseDispatches), any()) } returns
+                Unit
             nodeManager.handleReceivedUser(num, userWithKey(reuseKey, "Replacement", "NP"), manuallyVerified = false)
             advanceUntilIdle()
 

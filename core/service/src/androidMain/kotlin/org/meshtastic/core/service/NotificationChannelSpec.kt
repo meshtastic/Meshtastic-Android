@@ -29,7 +29,6 @@ import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.resources.R.raw
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.device
-import org.meshtastic.core.resources.messages
 import org.meshtastic.core.resources.meshtastic_alerts_notifications
 import org.meshtastic.core.resources.meshtastic_alerts_notifications_description
 import org.meshtastic.core.resources.meshtastic_broadcast_notifications
@@ -52,6 +51,7 @@ import org.meshtastic.core.resources.meshtastic_service_notifications
 import org.meshtastic.core.resources.meshtastic_service_notifications_description
 import org.meshtastic.core.resources.meshtastic_waypoints_notifications
 import org.meshtastic.core.resources.meshtastic_waypoints_notifications_description
+import org.meshtastic.core.resources.messages
 import org.meshtastic.core.resources.notification_group_mesh
 
 /** Meshtastic brand accent (Green 500, see .skills/design-standards): the small-icon tint and the LED colour. */
@@ -59,8 +59,8 @@ internal val NOTIFICATION_COLOR = 0xFF67EA94.toInt()
 
 /**
  * Every notification channel the app owns. The platform lets an app change a channel's name, description and (once)
- * group after creation; importance, sound, vibration and lights are fixed the first time the channel is created, so
- * an importance here must never drop below what an earlier release created for the same id.
+ * group after creation; importance, sound, vibration and lights are fixed the first time the channel is created, so an
+ * importance here must never drop below what an earlier release created for the same id.
  */
 internal enum class NotificationChannelSpec(
     val id: String,
@@ -191,10 +191,8 @@ internal enum class NotificationChannelSpec(
     private companion object {
         val defaultSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        fun soundAttributes(usage: Int): AudioAttributes = AudioAttributes.Builder()
-            .setUsage(usage)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
+        fun soundAttributes(usage: Int): AudioAttributes =
+            AudioAttributes.Builder().setUsage(usage).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()
     }
 }
 

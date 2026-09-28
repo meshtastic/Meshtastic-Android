@@ -681,7 +681,9 @@ class MeshDataHandlerTest {
 
         // Still stored, so it can reappear in the invitations list if the user later deletes the channel.
         assertEquals(1, meshBeaconRepository.offers.value.size)
-        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) { serviceNotifications.showMeshBeaconNotification(any()) }
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) {
+            serviceNotifications.showMeshBeaconNotification(any())
+        }
     }
 
     @Test
@@ -717,7 +719,9 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
 
-        verifySuspend { serviceNotifications.showMeshBeaconNotification(meshBeaconRepository.offers.value.single()) }
+        verifySuspend {
+            serviceNotifications.showMeshBeaconNotification(meshBeaconRepository.offers.value.single())
+        }
     }
 
     // --- Store-and-Forward handling ---
@@ -2045,7 +2049,13 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         verifySuspend {
-            serviceNotifications.updateWaypointNotification(any(), "Hawk Ridge", "Waypoint received: Camp", 42, false)
+            serviceNotifications.updateWaypointNotification(
+                any(),
+                "Hawk Ridge",
+                "Waypoint received: Camp",
+                42,
+                false,
+            )
         }
     }
 

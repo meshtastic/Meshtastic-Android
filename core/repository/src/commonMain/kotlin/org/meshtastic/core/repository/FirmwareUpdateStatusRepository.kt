@@ -24,7 +24,9 @@ import org.meshtastic.core.resources.UiText
 
 data class FirmwareUpdateStatus(val isOtaUpdateActive: Boolean = false, val isAwaitingOtaStatus: Boolean = false)
 
-/** What a running firmware update is doing, for surfaces outside the firmware screen. [percent] is null when unknown. */
+/**
+ * What a running firmware update is doing, for surfaces outside the firmware screen. [percent] is null when unknown.
+ */
 data class FirmwareUpdateProgress(val message: UiText, val percent: Int?)
 
 class FirmwareUpdateStatusRepository {

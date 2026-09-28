@@ -216,7 +216,8 @@ class FirmwareUpdateViewModel(
         // One observer of every state write, so the foreground-service notification can follow a flash the user has
         // backgrounded without any write site having to remember to publish.
         viewModelScope.launch {
-            _state.map { it.toUpdateProgress() }
+            _state
+                .map { it.toUpdateProgress() }
                 .distinctUntilChanged()
                 .collect(firmwareUpdateStatusRepository::publishProgress)
         }

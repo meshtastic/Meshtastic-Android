@@ -95,8 +95,11 @@ class MeshNotificationManagerImplTest {
             NotificationChannels.LEGACY_CATEGORY_IDS.forEach { legacyId ->
                 assertNull(systemNotificationManager.getNotificationChannel(legacyId))
             }
-            // The foreground-service notification is posted right after initChannels returns.
-            assertNotNull(systemNotificationManager.getNotificationChannel(NotificationChannels.SERVICE))
+            // The foreground-service notification is posted right after initChannels returns, and the platform (not
+            // Robolectric) rejects a channel whose group does not exist yet.
+            val service = assertNotNull(systemNotificationManager.getNotificationChannel(NotificationChannels.SERVICE))
+            assertEquals(NotificationChannelGroupSpec.Device.id, service.group)
+            assertNotNull(systemNotificationManager.getNotificationChannelGroup(NotificationChannelGroupSpec.Device.id))
         }
 
     /**
@@ -114,24 +117,34 @@ class MeshNotificationManagerImplTest {
                 when (spec) {
                     NotificationChannelSpec.Service ->
                         NotificationManager.IMPORTANCE_LOW to NotificationChannelGroupSpec.Device
+
                     NotificationChannelSpec.DirectMessages ->
                         NotificationManager.IMPORTANCE_HIGH to NotificationChannelGroupSpec.Messages
+
                     NotificationChannelSpec.Broadcasts ->
                         NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Messages
+
                     NotificationChannelSpec.Waypoints ->
                         NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Messages
+
                     NotificationChannelSpec.Alerts ->
                         NotificationManager.IMPORTANCE_HIGH to NotificationChannelGroupSpec.Messages
+
                     NotificationChannelSpec.NewNodes ->
                         NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Mesh
+
                     NotificationChannelSpec.MeshBeacon ->
                         NotificationManager.IMPORTANCE_LOW to NotificationChannelGroupSpec.Mesh
+
                     NotificationChannelSpec.LowBatteryRemote ->
                         NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Mesh
+
                     NotificationChannelSpec.LowBattery ->
                         NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Device
+
                     NotificationChannelSpec.Client ->
                         NotificationManager.IMPORTANCE_HIGH to NotificationChannelGroupSpec.Device
+
                     NotificationChannelSpec.DeviceStatus ->
                         NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Device
                 }
@@ -223,7 +236,8 @@ class MeshNotificationManagerImplTest {
 
             firmwareUpdateStatusRepository.publishProgress(null)
             runUntilSettled {
-                activeServiceNotification()?.notification?.let { !NotificationCompat.isRequestPromotedOngoing(it) } == true
+                activeServiceNotification()?.notification?.let { !NotificationCompat.isRequestPromotedOngoing(it) } ==
+                    true
             }
             assertEquals(getString(Res.string.disconnected), serviceTitle())
         }

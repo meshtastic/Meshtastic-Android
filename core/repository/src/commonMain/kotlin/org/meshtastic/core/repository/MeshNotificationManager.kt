@@ -81,8 +81,14 @@ interface MeshNotificationManager {
 
     fun cancelLowBatteryNotification(node: Node)
 
-    /** [title] and [severity] come from the notification's kind, which shared code classifies once for every platform. */
-    suspend fun showClientNotification(clientNotification: ClientNotification, title: String, severity: Notification.Type)
+    /**
+     * [title] and [severity] come from the notification's kind, which shared code classifies once for every platform.
+     */
+    suspend fun showClientNotification(
+        clientNotification: ClientNotification,
+        title: String,
+        severity: Notification.Type,
+    )
 
     fun clearClientNotification(clientNotification: ClientNotification)
 

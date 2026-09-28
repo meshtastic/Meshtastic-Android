@@ -75,7 +75,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 category = Notification.Category.Message,
                 isSilent = isSilent,
                 id = contactKey.hashCode(),
-            ),
+            )
         )
     }
 
@@ -87,12 +87,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         isSilent: Boolean,
     ) {
         notificationManager.dispatch(
-            Notification(
-                title = name,
-                message = message,
-                category = Notification.Category.Message,
-                isSilent = isSilent,
-            ),
+            Notification(title = name, message = message, category = Notification.Category.Message, isSilent = isSilent)
         )
     }
 
@@ -105,18 +100,13 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         isSilent: Boolean,
     ) {
         notificationManager.dispatch(
-            Notification(
-                title = name,
-                message = emoji,
-                category = Notification.Category.Message,
-                isSilent = isSilent,
-            ),
+            Notification(title = name, message = emoji, category = Notification.Category.Message, isSilent = isSilent)
         )
     }
 
     override suspend fun showAlertNotification(contactKey: String, name: String, alert: String) {
         notificationManager.dispatch(
-            Notification(title = name, message = alert, category = Notification.Category.Alert),
+            Notification(title = name, message = alert, category = Notification.Category.Alert)
         )
     }
 
@@ -126,7 +116,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 title = getStringSuspend(Res.string.mesh_beacon_notification_title),
                 message = offer.message.ifBlank { getStringSuspend(Res.string.mesh_beacon_notification_body) },
                 category = Notification.Category.MeshBeacon,
-            ),
+            )
         )
     }
 
@@ -137,7 +127,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 message = node.user.long_name,
                 category = Notification.Category.NodeEvent,
                 id = node.num,
-            ),
+            )
         )
     }
 
@@ -152,7 +142,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 message = getStringSuspend(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
                 category = Notification.Category.Battery,
                 id = node.num,
-            ),
+            )
         )
     }
 
@@ -176,7 +166,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
                 type = severity,
                 category = Notification.Category.Client,
                 id = clientNotification.notificationId(),
-            ),
+            )
         )
     }
 
@@ -189,14 +179,14 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
             Notification(
                 title = getStringSuspend(Res.string.firmware_update_available),
                 message =
-                getStringSuspend(
-                    Res.string.firmware_update_notification_android,
-                    notice.currentVersion,
-                    notice.stableVersion,
-                ),
+                    getStringSuspend(
+                        Res.string.firmware_update_notification_android,
+                        notice.currentVersion,
+                        notice.stableVersion,
+                    ),
                 category = Notification.Category.Service,
                 id = notice.notificationKey.hashCode(),
-            ),
+            )
         )
 
     // The reconnect-blocked notice is about an Android runtime permission; desktop never raises it.

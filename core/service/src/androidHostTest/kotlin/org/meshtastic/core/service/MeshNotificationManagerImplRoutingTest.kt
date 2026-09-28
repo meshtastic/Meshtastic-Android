@@ -104,7 +104,8 @@ class MeshNotificationManagerImplRoutingTest {
 
     @Test
     fun `a mesh invitation posts on its own channel and opens discovery`() = runWithRenderScope { scope ->
-        val offer = MeshBeaconOffer(fromNodeNum = 7, beacon = MeshBeacon.Builder().also { wb -> wb.message = "Join" }.build())
+        val offer =
+            MeshBeaconOffer(fromNodeNum = 7, beacon = MeshBeacon.Builder().also { wb -> wb.message = "Join" }.build())
 
         createManager(scope).showMeshBeaconNotification(offer)
 
@@ -204,9 +205,13 @@ class MeshNotificationManagerImplRoutingTest {
                     .newBuilder()
                     .also { wb -> wb.key_verification_number_request = KeyVerificationNumberRequest.Builder().build() }
                     .build(),
-                advisory.newBuilder().also { wb -> wb.key_verification_final = KeyVerificationFinal.Builder().build() }
+                advisory
+                    .newBuilder()
+                    .also { wb -> wb.key_verification_final = KeyVerificationFinal.Builder().build() }
                     .build(),
-                advisory.newBuilder().also { wb -> wb.duplicated_public_key = DuplicatedPublicKey.Builder().build() }
+                advisory
+                    .newBuilder()
+                    .also { wb -> wb.duplicated_public_key = DuplicatedPublicKey.Builder().build() }
                     .build(),
                 advisory.newBuilder().also { wb -> wb.low_entropy_key = LowEntropyKey.Builder().build() }.build(),
                 advisory.newBuilder().also { wb -> wb.message = "Rebooting to WiFi OTA" }.build(),

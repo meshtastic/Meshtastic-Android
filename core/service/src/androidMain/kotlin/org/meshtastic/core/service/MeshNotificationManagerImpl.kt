@@ -224,6 +224,10 @@ class MeshNotificationManagerImpl(
     /** Creates the service channel under the app label if it is missing; [ensureChannels] later gives it its name. */
     private fun ensureServiceChannel() {
         if (notificationManager.getNotificationChannel(NotificationChannelSpec.Service.id) != null) return
+        // The platform throws for a channel whose group does not exist yet, and this runs before ensureChannels.
+        notificationManager.createNotificationChannelGroup(
+            NotificationChannelSpec.Service.group.toGroup(applicationLabel),
+        )
         notificationManager.createNotificationChannel(
             NotificationChannelSpec.Service.toChannel(context, name = applicationLabel, description = ""),
         )
@@ -246,8 +250,8 @@ class MeshNotificationManagerImpl(
 
     /**
      * Creates every channel group and channel, once per process. Re-creating an existing channel only refreshes its
-     * name, description and (if it had none) group, so this also carries a locale change and the grouping onto
-     * installs whose channels predate them.
+     * name, description and (if it had none) group, so this also carries a locale change and the grouping onto installs
+     * whose channels predate them.
      *
      * Label loading is bounded: a boot broadcast posts through here with seconds to live, and a channel under the app
      * label beats no notification. Such a pass does not count as done, so the next post puts the real labels on.
@@ -663,7 +667,11 @@ class MeshNotificationManagerImpl(
         ensureChannels()
         if (!canPost(NotificationChannelSpec.DeviceStatus)) return false
         val message =
-            getStringSuspend(Res.string.firmware_update_notification_android, notice.currentVersion, notice.stableVersion)
+            getStringSuspend(
+                Res.string.firmware_update_notification_android,
+                notice.currentVersion,
+                notice.stableVersion,
+            )
         val id = notice.notificationKey.hashCode()
         val notification =
             commonBuilder(NotificationChannelSpec.DeviceStatus, createDeepLinkIntent("firmware/update", id))
@@ -681,7 +689,10 @@ class MeshNotificationManagerImpl(
         ensureChannels()
         if (!canPost(NotificationChannelSpec.DeviceStatus)) return false
         val notification =
-            commonBuilder(NotificationChannelSpec.DeviceStatus, createDeepLinkIntent("connections", RECONNECT_BLOCKED_ID))
+            commonBuilder(
+                NotificationChannelSpec.DeviceStatus,
+                createDeepLinkIntent("connections", RECONNECT_BLOCKED_ID),
+            )
                 .setCategory(Notification.CATEGORY_ERROR)
                 .setAutoCancel(true)
                 .setContentTitle(title)
@@ -762,8 +773,8 @@ class MeshNotificationManagerImpl(
 
     /**
      * A flash is a start-to-end journey the user may background, so the service notification asks to be promoted to a
-     * Live Update while one runs. The platform grants it only on a channel above MIN and with POST_PROMOTED_NOTIFICATIONS;
-     * elsewhere this is an ordinary ongoing progress notification.
+     * Live Update while one runs. The platform grants it only on a channel above MIN and with
+     * POST_PROMOTED_NOTIFICATIONS; elsewhere this is an ordinary ongoing progress notification.
      */
     private fun createFirmwareProgressNotification(title: String, text: String, percent: Int?): Notification {
         val style = NotificationCompat.ProgressStyle().setProgressIndeterminate(percent == null)
@@ -929,7 +940,10 @@ class MeshNotificationManagerImpl(
         val style = NotificationCompat.MessagingStyle(person).addMessage(message, nowMillis, person)
 
         val builder =
-            commonBuilder(NotificationChannelSpec.Waypoints, createDeepLinkIntent("map?waypointId=$waypointId", waypointId))
+            commonBuilder(
+                NotificationChannelSpec.Waypoints,
+                createDeepLinkIntent("map?waypointId=$waypointId", waypointId),
+            )
                 .setCategory(Notification.CATEGORY_MESSAGE)
                 .setAutoCancel(true)
                 .setStyle(style)

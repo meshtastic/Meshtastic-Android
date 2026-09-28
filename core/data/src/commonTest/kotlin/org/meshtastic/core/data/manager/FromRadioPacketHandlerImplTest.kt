@@ -30,8 +30,8 @@ import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
-import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
