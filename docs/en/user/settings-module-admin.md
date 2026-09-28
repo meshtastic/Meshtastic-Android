@@ -292,8 +292,9 @@ Remotely configure nodes that share your admin key:
 ### Backup & Restore
 
 **Settings → Backup & Restore** writes the connected node's whole configuration to a file with
-**Export configuration**, and reads a saved file back in with **Import configuration**. Export
-before a factory reset, or to copy one node's setup onto another. The section is shown for your
+**Export configuration**, and reads a saved file back in with **Import configuration**.
+Traffic Management settings are exported but not applied on import. Export before a factory
+reset, or to copy one node's setup onto another. The section is shown for your
 own node only, not over remote admin.
 
 ### Advanced
