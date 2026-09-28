@@ -19,6 +19,7 @@
 package org.meshtastic.core.takserver
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -232,7 +233,7 @@ class TakMeshTestRunner(private val takMeshIntegration: TAKMeshIntegration) {
                     TakTestResult(name, xml.length, 0, false, outcome.reason, protocol)
                 }
             }
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+        } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Logger.w(e) { "TAK Test: $name send failed: ${e.message}" }

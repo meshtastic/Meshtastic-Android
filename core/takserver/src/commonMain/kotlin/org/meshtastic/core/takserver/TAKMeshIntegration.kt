@@ -20,6 +20,7 @@ package org.meshtastic.core.takserver
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -304,7 +305,7 @@ class TAKMeshIntegration(
             commandSender.sendData(dataPacket)
             Logger.d { "Sent V2 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
             TakSendOutcome.Sent(wirePayload.size)
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+        } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             // Something other than size — radio not connected, queue full, etc.
@@ -355,7 +356,7 @@ class TAKMeshIntegration(
             commandSender.sendData(dataPacket)
             Logger.d { "Sent V1 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
             TakSendOutcome.Sent(wirePayload.size)
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+        } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Logger.e(e) {

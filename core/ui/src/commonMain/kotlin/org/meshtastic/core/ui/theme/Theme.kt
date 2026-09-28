@@ -30,7 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import co.touchlab.kermit.Logger
-import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.CancellationException
 
 private val lightScheme =
     lightColorScheme(
