@@ -1164,10 +1164,13 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     }
 
     /**
-     * Reports whether another connection holds [database]'s write lock, asked on [database]'s own connection without
-     * waiting for it. In-memory test databases override this: they never share a file, so nothing else can hold it.
+     * Reports whether another connection holds [database]'s write lock, asked on [database]'s own connection. The
+     * transaction itself does not wait, but opening that connection can: Room raises the busy timeout to at least 3s
+     * before its first statement, and under a rollback journal an EXCLUSIVE holder blocks that open too. A locked open
+     * is the same verdict. In-memory test databases override this: they never share a file, so nothing else can hold
+     * it.
      */
-    protected open suspend fun isWriteLockHeldElsewhere(database: MeshtasticDatabase): Boolean =
+    protected open suspend fun isWriteLockHeldElsewhere(database: MeshtasticDatabase): Boolean = try {
         database.useWriterConnection { connection ->
             val busyTimeoutMs =
                 connection.usePrepared("PRAGMA busy_timeout") { statement ->
@@ -1175,19 +1178,16 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     statement.getLong(0)
                 }
             connection.executeSQL("PRAGMA busy_timeout = 0")
-            val held =
-                try {
-                    connection.immediateTransaction {}
-                    false
-                } catch (busy: SQLiteException) {
-                    if (!isDbLockedException(busy)) throw busy
-                    true
-                }
-            // Restored only for a pool about to be published: a held verdict closes it, and at zero Room's post-use
+            connection.immediateTransaction {}
+            // Restored only once the lock proved free: a held verdict closes this pool, and at zero Room's post-use
             // refresh fails fast instead of holding up that close for the whole busy timeout.
-            if (!held) connection.executeSQL("PRAGMA busy_timeout = $busyTimeoutMs")
-            held
+            connection.executeSQL("PRAGMA busy_timeout = $busyTimeoutMs")
         }
+        false
+    } catch (busy: SQLiteException) {
+        if (!isDbLockedException(busy)) throw busy
+        true
+    }
 
     /** Closes a pool that was never published, retaining it for shutdown if the close fails. Caller holds [mutex]. */
     private fun closeUnpublishedDatabase(dbName: String, database: MeshtasticDatabase) {

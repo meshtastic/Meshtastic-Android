@@ -18,6 +18,8 @@ package org.meshtastic.core.database
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room3.Room
+import androidx.room3.RoomDatabase
+import androidx.room3.exclusiveTransaction
 import androidx.room3.immediateTransaction
 import androidx.room3.useWriterConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
@@ -172,6 +174,47 @@ class DatabaseManagerAbandonedWriterJvmTest {
         awaitWritersDrained()
     }
 
+    /**
+     * Under a rollback journal a writer can hold EXCLUSIVE, which blocks readers as well, so the replacement's own open
+     * fails on the lock before the probe's transaction runs. That is the same verdict: the pool is busy, not wedged.
+     */
+    @Test
+    fun abandonedBlockHoldingAnExclusiveLockKeepsThePoolAdmittingWrites() = runBlocking {
+        manager.journalMode = RoomDatabase.JournalMode.TRUNCATE
+        manager.switchActiveDatabase("addrA")
+        manager.withDb { it.nodeInfoDao().setMyNodeInfo(myNode(firmwareVersion = "seed")) }
+        val original = manager.currentDb.value
+        val lockHeld = CompletableDeferred<Unit>()
+        val releaseLock = CompletableDeferred<Unit>()
+
+        manager.withDbTimeoutMillisForTest = SHORT_WITH_DB_TIMEOUT_MS
+        val abandoned = async {
+            runCatching {
+                manager.withDb { db ->
+                    db.useWriterConnection { connection ->
+                        connection.exclusiveTransaction {
+                            lockHeld.complete(Unit)
+                            releaseLock.await()
+                        }
+                    }
+                }
+            }
+        }
+        lockHeld.await()
+        assertIs<DatabaseOperationTimeoutException>(abandoned.await().exceptionOrNull())
+        manager.withDbTimeoutMillisForTest = DatabaseManager.WITH_DB_TIMEOUT_MS
+
+        val write = async {
+            runCatching { manager.withDb { it.nodeInfoDao().setMyNodeInfo(myNode(firmwareVersion = "after")) } }
+        }
+        releaseLock.complete(Unit)
+
+        assertNull(write.await().exceptionOrNull(), "a busy pool must not be quarantined")
+        assertTrue(manager.currentDb.value === original, "a busy pool stays published")
+        assertEquals("after", manager.currentDb.value.nodeInfoDao().getMyNodeInfo().first()?.firmwareVersion)
+        awaitWritersDrained()
+    }
+
     /** Reads the busy timeout of [database]'s single connection, the one the write-lock probe ran on. */
     private suspend fun busyTimeoutOf(database: MeshtasticDatabase): Long = database.useWriterConnection { connection ->
         connection.usePrepared("PRAGMA busy_timeout") { statement ->
@@ -193,13 +236,20 @@ class DatabaseManagerAbandonedWriterJvmTest {
         override val withDbTimeoutMillis: Long
             get() = withDbTimeoutMillisForTest
 
-        override fun buildDatabase(dbName: String): MeshtasticDatabase = Room.databaseBuilder<MeshtasticDatabase>(
-            name = (dir / "$dbName.db").toString(),
-            factory = { MeshtasticDatabaseConstructor.initialize() },
-        )
-            .configureCommon()
-            .setDriver(BusyTimeoutSQLiteDriver(BundledSQLiteDriver(), ROOM_MIN_BUSY_TIMEOUT_MS))
-            .build()
+        /** Room's own default when null. */
+        var journalMode: RoomDatabase.JournalMode? = null
+
+        override fun buildDatabase(dbName: String): MeshtasticDatabase {
+            val builder =
+                Room.databaseBuilder<MeshtasticDatabase>(
+                    name = (dir / "$dbName.db").toString(),
+                    factory = { MeshtasticDatabaseConstructor.initialize() },
+                )
+                    .configureCommon()
+                    .setDriver(BusyTimeoutSQLiteDriver(BundledSQLiteDriver(), ROOM_MIN_BUSY_TIMEOUT_MS))
+            journalMode?.let { builder.setJournalMode(it) }
+            return builder.build()
+        }
 
         /** No-op: eviction, legacy cleanup and backfill would read the platform data directory. */
         override fun schedulePostSwitchMaintenance(dbName: String, db: MeshtasticDatabase) = Unit
