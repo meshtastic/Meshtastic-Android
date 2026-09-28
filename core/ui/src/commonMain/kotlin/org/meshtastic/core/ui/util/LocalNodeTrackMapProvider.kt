@@ -24,8 +24,8 @@ import org.meshtastic.proto.Position
 
 /**
  * Provides an embeddable position-track map composable that renders a polyline with markers for the given [positions].
- * Unlike [LocalNodeMapScreenProvider], this does **not** include a Scaffold or AppBar — it is designed to be embedded
- * inside another screen layout (e.g. the position-log adaptive layout).
+ * It has no Scaffold or AppBar, so it can be embedded inside another screen layout (e.g. the position-log adaptive
+ * layout).
  *
  * Supports optional synchronized selection:
  * - [selectedPositionTime]: the `Position.time` of the currently selected position (or `null` for no selection). When
