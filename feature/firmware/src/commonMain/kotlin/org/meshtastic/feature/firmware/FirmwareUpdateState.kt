@@ -18,7 +18,11 @@ package org.meshtastic.feature.firmware
 
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.repository.FirmwareUpdateProgress
+import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_update_verifying
+import kotlin.math.roundToInt
 
 /**
  * Represents the progress of a long-running firmware update task.
@@ -117,6 +121,35 @@ sealed interface FirmwareUpdateState {
      */
     data class ReviewingBootloader(val versions: BootloaderVersions) : FirmwareUpdateState
 }
+
+/**
+ * The part of this state the foreground-service notification shows, or null when nothing is transferring. Determinate
+ * exactly where the screen draws a determinate bar: downloading and writing, not the processing and verifying waits.
+ */
+internal fun FirmwareUpdateState.toUpdateProgress(): FirmwareUpdateProgress? = when (this) {
+    is FirmwareUpdateState.Downloading -> FirmwareUpdateProgress(progressState.message, progressState.percent())
+
+    is FirmwareUpdateState.Updating -> FirmwareUpdateProgress(progressState.message, progressState.percent())
+
+    is FirmwareUpdateState.Processing -> FirmwareUpdateProgress(progressState.message, percent = null)
+
+    FirmwareUpdateState.Verifying ->
+        FirmwareUpdateProgress(UiText.Resource(Res.string.firmware_update_verifying), percent = null)
+
+    FirmwareUpdateState.Idle,
+    FirmwareUpdateState.Checking,
+    is FirmwareUpdateState.Ready,
+    FirmwareUpdateState.VerificationFailed,
+    is FirmwareUpdateState.Error,
+    is FirmwareUpdateState.Success,
+    is FirmwareUpdateState.AwaitingFileSave,
+    is FirmwareUpdateState.ReviewingBootloader,
+    -> null
+}
+
+private const val PERCENT = 100
+
+private fun ProgressState.percent(): Int = (progress * PERCENT).roundToInt().coerceIn(0, PERCENT)
 
 private val FORMAT_ARG_REGEX = Regex(":?\\s*%1\\\$d%?")
 

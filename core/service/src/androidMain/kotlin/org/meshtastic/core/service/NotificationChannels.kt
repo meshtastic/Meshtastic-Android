@@ -27,6 +27,7 @@ object NotificationChannels {
     const val LOW_BATTERY = "low_battery"
     const val LOW_BATTERY_REMOTE = "low_battery_remote"
     const val CLIENT = "client_notifications"
+    const val DEVICE_STATUS = "device_status"
 
     // Legacy enum-name channel IDs introduced by alpha channel routing.
     val LEGACY_CATEGORY_IDS = listOf("Message", "NodeEvent", "Battery", "Alert", "Service")

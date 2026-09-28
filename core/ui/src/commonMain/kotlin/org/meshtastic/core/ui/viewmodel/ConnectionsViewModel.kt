@@ -46,19 +46,14 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.firmware_update_available
-import org.meshtastic.core.resources.firmware_update_notification_android
-import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 
@@ -106,7 +101,7 @@ class ConnectionsViewModel(
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val radioPrefs: RadioPrefs,
-    private val notificationManager: NotificationManager,
+    private val serviceNotifications: MeshNotificationManager,
 ) : ViewModel() {
 
     private val scheduledFirmwareUpdateNotificationKeys = mutableSetOf<String>()
@@ -295,25 +290,7 @@ class ConnectionsViewModel(
             }
             .filterNotNull()
             .onEach { notice ->
-                // The tap always lands on the in-app Firmware Updates screen, whatever the notice's destination.
-                val message =
-                    getStringSuspend(
-                        Res.string.firmware_update_notification_android,
-                        notice.currentVersion,
-                        notice.stableVersion,
-                    )
-                if (
-                    notificationManager.dispatch(
-                        Notification(
-                            id = notice.notificationKey.hashCode(),
-                            title = getStringSuspend(Res.string.firmware_update_available),
-                            message = message,
-                            type = Notification.Type.Info,
-                            category = Notification.Category.NodeEvent,
-                            deepLinkUri = "meshtastic://meshtastic/firmware/update",
-                        ),
-                    )
-                ) {
+                if (serviceNotifications.showFirmwareUpdateNotification(notice)) {
                     scheduledFirmwareUpdateNotificationKeys += notice.notificationKey
                     uiPrefs.recordFirmwareUpdateNotificationKey(notice.notificationKey)
                 }

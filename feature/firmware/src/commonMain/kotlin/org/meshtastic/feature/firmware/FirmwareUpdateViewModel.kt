@@ -30,9 +30,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -59,6 +61,7 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
@@ -136,6 +139,7 @@ class FirmwareUpdateViewModel(
     private val analytics: PlatformAnalytics,
     private val nodeRestartTracker: NodeRestartTracker,
     private val bluetoothRepository: BluetoothRepository,
+    private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
 ) : ViewModel() {
 
     /** The USB maintenance sequence's hold on the radio. Spans several passes, so it cannot use `withOperation`. */
@@ -209,6 +213,13 @@ class FirmwareUpdateViewModel(
             tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
             checkForUpdates()
         }
+        // One observer of every state write, so the foreground-service notification can follow a flash the user has
+        // backgrounded without any write site having to remember to publish.
+        viewModelScope.launch {
+            _state.map { it.toUpdateProgress() }
+                .distinctUntilChanged()
+                .collect(firmwareUpdateStatusRepository::publishProgress)
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -221,6 +232,7 @@ class FirmwareUpdateViewModel(
         // leaked lock would permanently suppress the radio transport's auto-reconnect for the rest of the app
         // session — see startUsbMaintenance/advancePastPass. A no-op if no sequence was in flight.
         releaseMaintenanceLease()
+        firmwareUpdateStatusRepository.publishProgress(null)
         // viewModelScope is already cancelled when onCleared() runs, so launch cleanup on the
         // application-wide scope (SupervisorJob + ioDispatcher). ATOMIC start + NonCancellable
         // context keeps cleanup running even if something tries to cancel it mid-flight.

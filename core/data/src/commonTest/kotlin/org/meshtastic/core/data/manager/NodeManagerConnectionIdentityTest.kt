@@ -30,7 +30,7 @@ import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -49,7 +49,7 @@ import kotlin.test.assertTrue
 class NodeManagerConnectionIdentityTest {
 
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
-    private val notificationManager: NotificationManager = mock(MockMode.autofill)
+    private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val testScope = TestScope()
 
@@ -59,7 +59,7 @@ class NodeManagerConnectionIdentityTest {
     fun setUp() {
         everySuspend { nodeRepository.getNodeDbSnapshot() } returns emptyMap()
         nodeManager =
-            NodeManagerImpl(nodeRepository, notificationManager, radioInterfaceService, testScope.asServiceScope())
+            NodeManagerImpl(nodeRepository, serviceNotifications, radioInterfaceService, testScope.asServiceScope())
     }
 
     @Test

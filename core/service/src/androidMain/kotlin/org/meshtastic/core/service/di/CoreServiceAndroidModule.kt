@@ -32,7 +32,7 @@ import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.QueryController
@@ -74,7 +74,7 @@ class CoreServiceAndroidModule {
         meshPrefs: MeshPrefs,
         uiPrefs: UiPrefs,
         databaseManager: DatabaseManager,
-        notificationManager: NotificationManager,
+        serviceNotifications: MeshNotificationManager,
         messageProcessor: Lazy<MeshMessageProcessor>,
         radioConfigRepository: RadioConfigRepository,
         scope: ServiceScope,
@@ -91,7 +91,7 @@ class CoreServiceAndroidModule {
         meshPrefs = meshPrefs,
         uiPrefs = uiPrefs,
         databaseManager = databaseManager,
-        notificationManager = notificationManager,
+        serviceNotifications = serviceNotifications,
         messageProcessor = messageProcessor,
         radioConfigRepository = radioConfigRepository,
         scope = scope,

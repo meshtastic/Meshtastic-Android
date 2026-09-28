@@ -40,8 +40,8 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshPrefs
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.testing.FakeMeshNotificationManager
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
@@ -101,10 +101,8 @@ class BootCompleteReceiverTest {
         advanceUntilIdle()
 
         assertTrue(shadowOf(application).allStartedServices.isEmpty(), "must not start a service that cannot connect")
-        assertEquals(1, recordingNotifications.dispatched.size)
-        assertEquals(Notification.Type.Warning, recordingNotifications.dispatched.single().type)
-        assertTrue(recordingNotifications.dispatched.single().deepLinkUri?.contains("connections") == true)
-        assertTrue(recordingNotifications.dispatched.single().message.contains("Bluetooth"))
+        val (_, message) = recordingNotifications.reconnectBlocked.single()
+        assertTrue(message.contains("Bluetooth"))
     }
 
     @Test
@@ -120,7 +118,7 @@ class BootCompleteReceiverTest {
         advanceUntilIdle()
 
         assertEquals(1, shadowOf(application).allStartedServices.size)
-        assertTrue(recordingNotifications.dispatched.isEmpty())
+        assertTrue(recordingNotifications.reconnectBlocked.isEmpty())
     }
 
     @Test
@@ -205,7 +203,7 @@ class BootCompleteReceiverTest {
             modules(
                 module {
                     single { meshPrefs }
-                    single<NotificationManager> { recordingNotifications }
+                    single<MeshNotificationManager> { recordingNotifications }
                     single {
                         CoroutineDispatchers(io = ioDispatcher, main = defaultDispatcher, default = defaultDispatcher)
                     }
@@ -215,20 +213,7 @@ class BootCompleteReceiverTest {
     }
 
     /** Captures what the receiver tried to tell the user when it declined to start the service. */
-    private val recordingNotifications = RecordingNotificationManager()
-
-    private class RecordingNotificationManager : NotificationManager {
-        val dispatched = mutableListOf<Notification>()
-
-        override suspend fun dispatch(notification: Notification): Boolean {
-            dispatched += notification
-            return true
-        }
-
-        override fun cancel(id: Int) = Unit
-
-        override fun cancelAll() = Unit
-    }
+    private val recordingNotifications = FakeMeshNotificationManager()
 
     /**
      * Grants BLUETOOTH_CONNECT unless told otherwise. Robolectric denies runtime permissions by default, and a boot

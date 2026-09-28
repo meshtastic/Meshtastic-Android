@@ -41,6 +41,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -132,6 +133,7 @@ class FirmwareUpdateIntegrationTest {
         analytics,
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
         FakeBluetoothRepository(),
+        FirmwareUpdateStatusRepository(),
     )
 
     @Test

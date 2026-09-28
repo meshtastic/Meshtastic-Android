@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.firmware
 
+import org.meshtastic.core.repository.FirmwareUpdateProgress
 import org.meshtastic.core.resources.UiText
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -57,5 +58,26 @@ class FirmwareUpdateStateTest {
     @Test
     fun `stripFormatArgs handles empty string`() {
         assertEquals("", "".stripFormatArgs())
+    }
+
+    @Test
+    fun `writing and downloading report a percent the notification can show`() {
+        val message = UiText.DynamicString("Writing")
+
+        assertEquals(
+            FirmwareUpdateProgress(message, percent = 42),
+            FirmwareUpdateState.Updating(ProgressState(message, 0.42f)).toUpdateProgress(),
+        )
+        assertEquals(100, FirmwareUpdateState.Downloading(ProgressState(message, 1.3f)).toUpdateProgress()?.percent)
+    }
+
+    @Test
+    fun `waits report no percent and states the user acts on report nothing`() {
+        val message = UiText.DynamicString("Waiting for reboot")
+
+        assertEquals(null, FirmwareUpdateState.Processing(ProgressState(message, 0.9f)).toUpdateProgress()?.percent)
+        assertEquals(null, FirmwareUpdateState.Verifying.toUpdateProgress()?.percent)
+        assertEquals(null, FirmwareUpdateState.AwaitingFileSave(uf2Artifact = null, fileName = null).toUpdateProgress())
+        assertEquals(null, FirmwareUpdateState.Idle.toUpdateProgress())
     }
 }

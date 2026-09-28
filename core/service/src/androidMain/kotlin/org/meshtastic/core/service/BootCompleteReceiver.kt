@@ -40,8 +40,7 @@ import org.koin.core.component.inject
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshPrefs
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.boot_reconnect_blocked_message
 import org.meshtastic.core.resources.boot_reconnect_blocked_title
@@ -54,7 +53,7 @@ class BootCompleteReceiver :
 
     private val meshPrefs: MeshPrefs by inject()
     private val dispatchers: CoroutineDispatchers by inject()
-    private val notificationManager: NotificationManager by inject()
+    private val serviceNotifications: MeshNotificationManager by inject()
     private val scope by lazy { CoroutineScope(SupervisorJob() + dispatchers.default) }
 
     @Suppress("TooGenericExceptionCaught")
@@ -121,8 +120,8 @@ class BootCompleteReceiver :
      * Posts the one thing the user can act on: a notification naming the missing permission and opening the Connections
      * screen, where the recovery card now lives.
      *
-     * Best-effort by design. If POST_NOTIFICATIONS is also denied the dispatch simply returns false — there is no
-     * surface left to reach an absent user through, and failing loudly here would help nobody.
+     * Best-effort by design. If POST_NOTIFICATIONS is also denied the post simply returns false — there is no surface
+     * left to reach an absent user through, and failing loudly here would help nobody.
      */
     private suspend fun notifyBluetoothPermissionMissing() {
         // Untranslated fallbacks rather than no notification, and a hard bound on the wait. A boot broadcast runs
@@ -133,16 +132,7 @@ class BootCompleteReceiver :
 
         @Suppress("TooGenericExceptionCaught")
         try {
-            notificationManager.dispatch(
-                Notification(
-                    title = title,
-                    message = message,
-                    type = Notification.Type.Warning,
-                    category = Notification.Category.Service,
-                    id = BLE_PERMISSION_NOTIFICATION_ID,
-                    deepLinkUri = CONNECTIONS_DEEP_LINK,
-                ),
-            )
+            serviceNotifications.showReconnectBlockedNotification(title, message)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -160,11 +150,6 @@ class BootCompleteReceiver :
 
         /** A broadcast has seconds, not indefinite time; fall back to untranslated text rather than stall. */
         const val STRING_RESOLVE_TIMEOUT_MILLIS = 2_000L
-
-        /** Stable id so a second boot replaces the notice rather than stacking another copy. */
-        const val BLE_PERMISSION_NOTIFICATION_ID = 0x81E9
-
-        const val CONNECTIONS_DEEP_LINK = "meshtastic://meshtastic/connections"
 
         const val UNTRANSLATED_BLOCKED_TITLE = "Meshtastic can't reconnect"
         const val UNTRANSLATED_BLOCKED_MESSAGE =

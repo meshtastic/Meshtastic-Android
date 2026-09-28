@@ -56,6 +56,7 @@ import org.meshtastic.core.model.OtafixAssetEntry
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -184,6 +185,7 @@ class FirmwareUpdateViewModelFileTest {
         analytics,
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
         FakeBluetoothRepository(),
+        FirmwareUpdateStatusRepository(),
     )
 
     private fun firmwareUri(fileName: String): CommonUri = CommonUri.parse("file:///downloads/$fileName")

@@ -92,13 +92,16 @@ class TelemetryPacketHandlerImpl(
         val updatedNode = nodeManager.nodeDBbyNodeNum[fromNum] ?: return
         if (fromNum != myNodeNum && !updatedNode.isFavorite) return
 
-        if (
-            (metrics.voltage ?: 0f) > BATTERY_PERCENT_UNSUPPORTED &&
-            (metrics.battery_level ?: 0) <= BATTERY_PERCENT_LOW_THRESHOLD
-        ) {
+        // A reading without a level says nothing about the battery, so it neither warns nor clears.
+        val batteryLevel = metrics.battery_level ?: return
+        val hasBattery = (metrics.voltage ?: 0f) > 0f
+        if (hasBattery && batteryLevel <= BATTERY_PERCENT_LOW_THRESHOLD) {
             radioInterfaceService.launchSessionWork(scope, session) {
-                if (shouldBatteryNotificationShow(fromNum, telemetry, myNodeNum)) {
-                    serviceNotifications.showOrUpdateLowBatteryNotification(updatedNode, isRemote)
+                val firstLowReading = batteryMutex.withLock { notifiedNodes.add(fromNum) }
+                if (firstLowReading) {
+                    serviceNotifications.showLowBatteryNotification(updatedNode, isRemote)
+                } else {
+                    serviceNotifications.updateLowBatteryNotification(updatedNode, isRemote)
                 }
             }
         } else {
@@ -109,17 +112,7 @@ class TelemetryPacketHandlerImpl(
         }
     }
 
-    @Suppress("UnusedParameter")
-    private suspend fun shouldBatteryNotificationShow(fromNum: Int, t: Telemetry, myNodeNum: Int): Boolean {
-        batteryMutex.withLock {
-            if (fromNum in notifiedNodes) return false
-            notifiedNodes.add(fromNum)
-        }
-        return true
-    }
-
     companion object {
-        private const val BATTERY_PERCENT_UNSUPPORTED = 0.0
         private const val BATTERY_PERCENT_LOW_THRESHOLD = 20
     }
 }

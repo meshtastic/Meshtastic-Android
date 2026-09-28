@@ -1076,15 +1076,28 @@
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Alert notifications</string>
+    <string name="meshtastic_alerts_notifications_description">Critical alerts sent by nodes on the mesh.</string>
     <string name="meshtastic_app_name">Meshtastic</string>
     <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
+    <string name="meshtastic_broadcast_notifications_description">Messages sent to your channels.</string>
+    <string name="meshtastic_client_notifications">Radio notifications</string>
+    <string name="meshtastic_client_notifications_description">Notices from your radio, such as key verification requests and security warnings.</string>
+    <string name="meshtastic_device_status_notifications">Update and connection notifications</string>
+    <string name="meshtastic_device_status_notifications_description">Firmware updates for your radio, and problems reconnecting to it.</string>
     <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
+    <string name="meshtastic_low_battery_notifications_description">Your radio's battery is running low.</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Low battery notifications (favorite nodes)</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications_description">A favorite node's battery is running low.</string>
     <string name="meshtastic_mesh_beacon_notifications">Mesh invitation notifications</string>
+    <string name="meshtastic_mesh_beacon_notifications_description">Invitations to join a nearby mesh.</string>
     <string name="meshtastic_messages_notifications">Direct message notifications</string>
+    <string name="meshtastic_messages_notifications_description">Messages sent directly to you.</string>
     <string name="meshtastic_new_nodes_notifications">New node notifications</string>
+    <string name="meshtastic_new_nodes_notifications_description">Nodes heard for the first time.</string>
     <string name="meshtastic_service_notifications">Service notifications</string>
+    <string name="meshtastic_service_notifications_description">Shows the connection to your radio while Meshtastic runs in the background.</string>
     <string name="meshtastic_waypoints_notifications">Waypoint notifications</string>
+    <string name="meshtastic_waypoints_notifications_description">Waypoints shared on the mesh, and geofence crossings.</string>
     <!-- MESSAGE -->
     <string name="message">Message</string>
     <string name="message_delivery_status">Message delivery status</string>
@@ -1303,10 +1316,13 @@
     <string name="not_now">Not now</string>
     <string name="note">Note</string>
     <string name="notes">Notes</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Mesh</string>
     <string name="notification_permission_blocked_notice">Notifications are turned off and Android will not ask again. Turn them on in app settings to hear about new messages and alerts.</string>
     <string name="notification_permission_denied_notice">Without notifications, Meshtastic cannot alert you to new messages, new nodes, or a low battery while the app is in the background.</string>
     <string name="notification_permission_rationale">Notifications are how Meshtastic reaches you when the app is not open: new messages, newly discovered nodes, and a radio running low on battery. Nothing else changes if you decline.</string>
     <string name="notification_permissions_description">Meshtastic uses notifications to keep you updated on new messages and other important events. You can update your notification permissions at any time from settings.</string>
+    <string name="notification_reaction_to">%1$s to “%2$s”</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Notifications for channel and direct messages.</string>
     <string name="notifications_for_low_battery_alerts">Notifications for low battery alerts for the connected device.</string>

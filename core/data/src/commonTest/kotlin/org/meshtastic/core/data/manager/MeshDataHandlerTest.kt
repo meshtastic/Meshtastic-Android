@@ -39,7 +39,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
-import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -55,7 +54,6 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -67,9 +65,6 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
 import org.meshtastic.core.repository.TracerouteHandler
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.getString
-import org.meshtastic.core.resources.waypoint_received
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -100,7 +95,6 @@ class MeshDataHandlerTest {
     private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
-    private val notificationManager: NotificationManager = mock(MockMode.autofill)
     private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
     private val dataMapper: MeshDataMapper = mock(MockMode.autofill)
@@ -160,7 +154,6 @@ class MeshDataHandlerTest {
                 packetHandler = packetHandler,
                 serviceStateWriter = serviceRepository,
                 packetRepository = lazy { packetRepository },
-                notificationManager = notificationManager,
                 serviceNotifications = serviceNotifications,
                 analytics = analytics,
                 dataMapper = dataMapper,
@@ -688,7 +681,43 @@ class MeshDataHandlerTest {
 
         // Still stored, so it can reappear in the invitations list if the user later deletes the channel.
         assertEquals(1, meshBeaconRepository.offers.value.size)
-        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) { serviceNotifications.showMeshBeaconNotification(any()) }
+    }
+
+    @Test
+    fun `mesh beacon offering a channel the radio lacks notifies with the offer`() = testScope.runTest {
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
+        val beacon =
+            MeshBeacon.Builder()
+                .also { wb ->
+                    wb.message = "Join us"
+                    wb.offer_channel = ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build()
+                }
+                .build()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.MESH_BEACON_APP
+                                wb.payload = beacon.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                from = "!remote",
+                bytes = beacon.encode().toByteString(),
+                dataType = PortNum.MESH_BEACON_APP.value,
+            )
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { serviceNotifications.showMeshBeaconNotification(meshBeaconRepository.offers.value.single()) }
     }
 
     // --- Store-and-Forward handling ---
@@ -1993,8 +2022,7 @@ class MeshDataHandlerTest {
 
     @Test
     fun `received waypoint notifies on the waypoint path`() = testScope.runTest {
-        // CMP loads a string on its own Default scope the first time; warm it so the post lands in virtual time.
-        safeCatchingAll { getString(Res.string.waypoint_received, "") }
+        handler.waypointMessageFormatter = { name -> "Waypoint received: $name" }
         every { packetRepository.getWaypoints() } returns flowOf(emptyList())
         every { nodeManager.getNodeById(any()) } returns
             Node(num = 999, user = User.Builder().also { wb -> wb.long_name = "Hawk Ridge" }.build())
@@ -2016,8 +2044,9 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
 
-        verifySuspend { serviceNotifications.updateWaypointNotification(any(), "Hawk Ridge", any(), 42, false) }
-        verifySuspend(exactly(0)) { notificationManager.dispatch(any()) }
+        verifySuspend {
+            serviceNotifications.updateWaypointNotification(any(), "Hawk Ridge", "Waypoint received: Camp", 42, false)
+        }
     }
 
     @Test
@@ -2054,8 +2083,7 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
 
-        verify { serviceNotifications.showAlertNotification("0^all", "Remote User", "Fire at camp") }
-        verifySuspend(exactly(0)) { notificationManager.dispatch(any()) }
+        verifySuspend { serviceNotifications.showAlertNotification("0^all", "Remote User", "Fire at camp") }
     }
 
     @Test

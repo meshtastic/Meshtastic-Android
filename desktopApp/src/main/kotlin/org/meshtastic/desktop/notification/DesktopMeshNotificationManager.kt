@@ -16,51 +16,37 @@
  */
 package org.meshtastic.desktop.notification
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.FirmwareUpdateNotice
+import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.notificationId
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.desktop_notification_title
-import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.firmware_update_available
+import org.meshtastic.core.resources.firmware_update_notification_android
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.low_battery_message
 import org.meshtastic.core.resources.low_battery_title
-import org.meshtastic.core.resources.new_node_seen
+import org.meshtastic.core.resources.mesh_beacon_notification_body
+import org.meshtastic.core.resources.mesh_beacon_notification_title
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
 /**
- * Desktop implementation of [MeshNotificationManager].
+ * Desktop implementation of [MeshNotificationManager]: turns each mesh event into a [Notification] record and hands it
+ * to [NotificationManager], which gates it on the user's notification preferences and shows it through the OS.
  *
- * Converts mesh-layer notification events into domain [Notification] objects and dispatches them through
- * [NotificationManager], which ultimately surfaces them as Compose Desktop tray notifications.
- *
- * Android-only concepts (notification channels, foreground-service state updates) are intentionally no-ops.
+ * Android-only concepts (notification channels, the foreground-service notification, updating a posted notification in
+ * place) are no-ops here.
  *
  * Registered manually in `DesktopRuntimeModule` -- do **not** add `@Single` to avoid double-registration with the
  * `@ComponentScan("org.meshtastic.desktop")` in [DesktopDiModule][org.meshtastic.desktop.di.DesktopDiModule].
  */
 @Suppress("TooManyFunctions")
-class DesktopMeshNotificationManager(
-    private val notificationManager: NotificationManager,
-    // Bridges the non-suspend MeshNotificationManager entry points to the suspending NotificationManager.dispatch.
-    // Injectable so tests can substitute a TestScope / TestDispatcher.
-    @Suppress("InjectDispatcher") private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
-) : MeshNotificationManager {
-
-    /**
-     * Launches [build] on [scope] and dispatches the resulting [Notification], bridging the non-suspend entry points to
-     * the suspending [NotificationManager.dispatch]. [build] runs inside the coroutine so it may call suspend resource
-     * getters (e.g. [getString]).
-     */
-    private fun dispatchAsync(build: suspend () -> Notification) =
-        scope.launch { notificationManager.dispatch(build()) }
+class DesktopMeshNotificationManager(private val notificationManager: NotificationManager) : MeshNotificationManager {
 
     override fun clearNotifications() {
         notificationManager.cancelAll()
@@ -87,7 +73,6 @@ class DesktopMeshNotificationManager(
                 title = name,
                 message = message,
                 category = Notification.Category.Message,
-                contactKey = contactKey,
                 isSilent = isSilent,
                 id = contactKey.hashCode(),
             ),
@@ -106,7 +91,6 @@ class DesktopMeshNotificationManager(
                 title = name,
                 message = message,
                 category = Notification.Category.Message,
-                contactKey = contactKey,
                 isSilent = isSilent,
             ),
         )
@@ -125,60 +109,100 @@ class DesktopMeshNotificationManager(
                 title = name,
                 message = emoji,
                 category = Notification.Category.Message,
-                contactKey = contactKey,
                 isSilent = isSilent,
             ),
         )
     }
 
-    override fun showAlertNotification(contactKey: String, name: String, alert: String) {
-        dispatchAsync {
-            Notification(title = name, message = alert, category = Notification.Category.Alert, contactKey = contactKey)
-        }
+    override suspend fun showAlertNotification(contactKey: String, name: String, alert: String) {
+        notificationManager.dispatch(
+            Notification(title = name, message = alert, category = Notification.Category.Alert),
+        )
     }
 
-    override fun showNewNodeSeenNotification(node: Node) {
-        dispatchAsync {
+    override suspend fun showMeshBeaconNotification(offer: MeshBeaconOffer) {
+        notificationManager.dispatch(
             Notification(
-                title = getString(Res.string.new_node_seen, node.user.short_name),
+                title = getStringSuspend(Res.string.mesh_beacon_notification_title),
+                message = offer.message.ifBlank { getStringSuspend(Res.string.mesh_beacon_notification_body) },
+                category = Notification.Category.MeshBeacon,
+            ),
+        )
+    }
+
+    override suspend fun showNewNodeSeenNotification(node: Node, title: String) {
+        notificationManager.dispatch(
+            Notification(
+                title = title,
                 message = node.user.long_name,
                 category = Notification.Category.NodeEvent,
-            )
-        }
+                id = node.num,
+            ),
+        )
     }
 
-    override suspend fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {
+    override fun cancelNewNodeNotification(nodeNum: Int) {
+        notificationManager.cancel(nodeNum)
+    }
+
+    override suspend fun showLowBatteryNotification(node: Node, isRemote: Boolean) {
         notificationManager.dispatch(
             Notification(
                 title = getStringSuspend(Res.string.low_battery_title, node.user.short_name),
-                message =
-                getStringSuspend(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
+                message = getStringSuspend(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
                 category = Notification.Category.Battery,
                 id = node.num,
             ),
         )
     }
 
-    override fun showClientNotification(clientNotification: ClientNotification) {
-        dispatchAsync {
-            Notification(
-                title = getString(Res.string.desktop_notification_title),
-                message = clientNotification.message,
-                category = Notification.Category.Alert,
-                id = clientNotification.toString().hashCode(),
-            )
-        }
-    }
-
-    override suspend fun cancelMessageNotification(contactKey: String) {
-        notificationManager.cancel(contactKey.hashCode())
+    override suspend fun updateLowBatteryNotification(node: Node, isRemote: Boolean) {
+        // No-op: an OS notification cannot be refreshed in place, and re-posting would alert again.
     }
 
     override fun cancelLowBatteryNotification(node: Node) {
         notificationManager.cancel(node.num)
     }
 
-    override fun clearClientNotification(notification: ClientNotification) {
-        notificationManager.cancel(notification.toString().hashCode())
+    override suspend fun showClientNotification(
+        clientNotification: ClientNotification,
+        title: String,
+        severity: Notification.Type,
+    ) {
+        notificationManager.dispatch(
+            Notification(
+                title = title,
+                message = clientNotification.message,
+                type = severity,
+                category = Notification.Category.Client,
+                id = clientNotification.notificationId(),
+            ),
+        )
+    }
+
+    override fun clearClientNotification(clientNotification: ClientNotification) {
+        notificationManager.cancel(clientNotification.notificationId())
+    }
+
+    override suspend fun showFirmwareUpdateNotification(notice: FirmwareUpdateNotice): Boolean =
+        notificationManager.dispatch(
+            Notification(
+                title = getStringSuspend(Res.string.firmware_update_available),
+                message =
+                getStringSuspend(
+                    Res.string.firmware_update_notification_android,
+                    notice.currentVersion,
+                    notice.stableVersion,
+                ),
+                category = Notification.Category.Service,
+                id = notice.notificationKey.hashCode(),
+            ),
+        )
+
+    // The reconnect-blocked notice is about an Android runtime permission; desktop never raises it.
+    override suspend fun showReconnectBlockedNotification(title: String, message: String): Boolean = false
+
+    override suspend fun cancelMessageNotification(contactKey: String) {
+        notificationManager.cancel(contactKey.hashCode())
     }
 }

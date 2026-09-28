@@ -39,10 +39,9 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.core.repository.ConnectionIdentity
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.resources.Res
@@ -85,7 +84,7 @@ private val DEFAULT_NODE_NAME_REGEX = Regex("^Meshtastic [0-9a-fA-F]{4}$")
 @Single(binds = [NodeManager::class, NodeIdLookup::class])
 class NodeManagerImpl(
     private val nodeRepository: NodeRepository,
-    private val notificationManager: NotificationManager,
+    private val serviceNotifications: MeshNotificationManager,
     private val radioInterfaceService: RadioInterfaceService,
     private val scope: ServiceScope,
 ) : NodeManager {
@@ -564,7 +563,7 @@ class NodeManagerImpl(
         // Commit retirement first. A dispatch already in progress will fail its final state revalidation; one that
         // completed before the commit is removed by this cancellation. Side effects run once, outside the CAS loop.
         removedNums.forEach { num ->
-            notificationManager.cancel(num)
+            serviceNotifications.cancelNewNodeNotification(num)
             val keyDescription =
                 committedHints[num]?.let(::publicKeyLogFingerprint)
                     ?: if (num in committedPresentNums) "none" else "absent"
@@ -1213,15 +1212,7 @@ class NodeManagerImpl(
                     return@launchSessionWork
                 }
                 Logger.d { "[NodeIdentity] notification-dispatch num=${node.num}" }
-                notificationManager.dispatch(
-                    Notification(
-                        title = title,
-                        message = node.user.long_name,
-                        category = Notification.Category.NodeEvent,
-                        id = node.num,
-                        deepLinkUri = "meshtastic://meshtastic/nodes/${node.num}",
-                    ),
-                )
+                serviceNotifications.showNewNodeSeenNotification(node, title)
             }
         }
     }

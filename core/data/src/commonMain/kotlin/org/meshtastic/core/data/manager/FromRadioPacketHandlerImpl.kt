@@ -27,15 +27,14 @@ import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.XModemManager
-import org.meshtastic.core.repository.notificationId
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.duplicated_public_key_title
@@ -57,7 +56,7 @@ class FromRadioPacketHandlerImpl(
     private val xmodemManager: Lazy<XModemManager>,
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
-    private val notificationManager: NotificationManager,
+    private val serviceNotifications: MeshNotificationManager,
     private val lockdownCoordinator: LockdownCoordinator,
     private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
     private val radioInterfaceService: RadioInterfaceService,
@@ -156,7 +155,7 @@ class FromRadioPacketHandlerImpl(
     private fun handleClientNotification(cn: ClientNotification, session: RadioSessionContext) {
         val admitted =
             radioInterfaceService.runIfSessionActive(session) {
-                if (!notificationManager.suppressClientNotificationModal(cn)) {
+                if (!serviceNotifications.suppressClientNotificationModal(cn)) {
                     serviceStateWriter.setClientNotification(cn)
                 }
             }
@@ -212,15 +211,6 @@ class FromRadioPacketHandlerImpl(
                 else -> Pair(getStringSuspend(Res.string.client_notification), Notification.Type.Info)
             }
 
-        notificationManager.dispatchClientNotification(
-            Notification(
-                title = title,
-                type = type,
-                message = cn.message,
-                category = Notification.Category.Client,
-                id = cn.notificationId(),
-            ),
-            cn,
-        )
+        serviceNotifications.showClientNotification(cn, title, type)
     }
 }
