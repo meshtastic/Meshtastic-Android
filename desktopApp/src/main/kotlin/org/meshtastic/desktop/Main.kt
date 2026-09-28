@@ -52,7 +52,6 @@ import androidx.compose.ui.window.isTraySupported
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import co.touchlab.kermit.Logger
-import co.touchlab.kermit.platformLogWriter
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
@@ -77,7 +76,6 @@ import org.koin.plugin.module.dsl.startKoin
 import org.maplibre.compose.desktop.ProvideMapPresentationHost
 import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.state.LaunchOptions
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.desktopDataDir
@@ -160,8 +158,7 @@ fun main(args: Array<String>) {
     // No MapLibre.configure() call: the first map applies a default cache configuration process-wide.
     application(exitProcessOnExit = false) {
         val koinApp = remember {
-            // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
-            Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
+            installDesktopLogging(isDebug = DesktopBuildConfig.IS_DEBUG)
             Logger.i { "Meshtastic Desktop — Starting" }
             startKoin<DesktopKoinApp> {}
                 .also { app ->
