@@ -111,7 +111,7 @@ fun MeshtasticNavDisplay(
         modifier = modifier,
         analytics = analytics,
     ) {
-        rememberDecoratedNavEntries(it, decorators, entryProvider)
+        rememberDecoratedNavEntries(backStack, decorators, entryProvider)
     }
 }
 
@@ -129,7 +129,7 @@ private fun MeshtasticNavDisplayHost(
     onBack: () -> Unit,
     analytics: PlatformAnalytics?,
     modifier: Modifier = Modifier,
-    decorateEntries: @Composable (NavBackStack<NavKey>) -> List<NavEntry<NavKey>>,
+    decorateEntries: @Composable () -> List<NavEntry<NavKey>>,
 ) {
     // Root captured at first composition; a stale entry back handler can drain the stack mid-transition
     // and NavDisplay rejects an empty backstack (fatal in the field), so self-heal back to the root.
@@ -149,7 +149,7 @@ private fun MeshtasticNavDisplayHost(
         DisposableEffect(tracker) { onDispose { tracker.dispose() } }
     }
 
-    val entries = decorateEntries(backStack)
+    val entries = decorateEntries()
 
     val listDetailSceneStrategy =
         rememberListDetailSceneStrategy<NavKey>(
