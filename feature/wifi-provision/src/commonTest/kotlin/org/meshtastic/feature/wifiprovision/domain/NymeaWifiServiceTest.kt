@@ -18,14 +18,11 @@
 
 package org.meshtastic.feature.wifiprovision.domain
 
-import co.touchlab.kermit.LogWriter
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.Severity
-import co.touchlab.kermit.platformLogWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleWriteType
+import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
@@ -36,7 +33,6 @@ import org.meshtastic.feature.wifiprovision.model.ProvisionResult
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -51,21 +47,7 @@ class NymeaWifiServiceTest {
 
     @AfterTest
     fun tearDown() {
-        Logger.setLogWriters(platformLogWriter())
-        Logger.setMinSeverity(Severity.Verbose)
-    }
-
-    private class CapturingLogWriter : LogWriter() {
-        val messages = mutableListOf<String>()
-
-        override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
-            messages += message
-        }
-    }
-
-    private fun captureLogs(): CapturingLogWriter = CapturingLogWriter().also {
-        Logger.setLogWriters(it)
-        Logger.setMinSeverity(Severity.Verbose)
+        CapturingLogWriter.uninstall()
     }
 
     private fun createService(
@@ -323,19 +305,17 @@ class NymeaWifiServiceTest {
         val connection = FakeBleConnection()
         val (service, scanner) = createService(connection = connection)
         connectService(service, scanner)
-        val logs = captureLogs()
+        val logs = CapturingLogWriter.install()
 
         emitResponse(connection, """{"c":1,"r":0,"p":{"i":"10.77.88.99"}}""")
         val result = service.provision("SecretHomeNet", "hunter2-wifi-pass")
 
         assertIs<ProvisionResult.Success>(result)
         assertTrue(
-            logs.messages.any { it.endsWith("command=1") },
-            "Command send should be logged with nothing after the code: ${logs.messages}",
+            logs.messages().any { it.endsWith("command=1") },
+            "Command send should be logged with nothing after the code: ${logs.messages()}",
         )
-        for (secret in listOf("hunter2-wifi-pass", "SecretHomeNet", "10.77.88.99")) {
-            assertFalse(logs.messages.any { secret in it }, "'$secret' leaked into logs: ${logs.messages}")
-        }
+        logs.assertNotLogged("hunter2-wifi-pass", "SecretHomeNet", "10.77.88.99")
     }
 
     @Test
