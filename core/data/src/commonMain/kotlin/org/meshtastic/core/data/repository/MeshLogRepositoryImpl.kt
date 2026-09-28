@@ -246,7 +246,7 @@ open class MeshLogRepositoryImpl(
 
         /**
          * Rows per retention delete transaction. Each deleted row also dirties roughly one random page of the uuid
-         * primary-key index, and this size keeps one batch's WAL writes under SQLite's default 1000-page
+         * primary-key index, and this size is chosen to keep one batch's WAL writes under SQLite's default 1000-page
          * auto-checkpoint.
          */
         internal const val RETENTION_DELETE_BATCH_SIZE = 500
