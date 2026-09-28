@@ -54,6 +54,7 @@ import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeAppPreferences
+import org.meshtastic.core.testing.FakeApplicationCoroutineScope
 import org.meshtastic.core.testing.FakeDatabaseManager
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -105,7 +106,12 @@ class SettingsViewModelTest {
         every { isOtaCapableUseCase() } returns flowOf(true)
 
         val uiPrefs = appPreferences.ui
-        val setMeshLogSettingsUseCase = SetMeshLogSettingsUseCase(meshLogRepository, appPreferences.meshLog)
+        val setMeshLogSettingsUseCase =
+            SetMeshLogSettingsUseCase(
+                meshLogRepository,
+                appPreferences.meshLog,
+                FakeApplicationCoroutineScope(testDispatcher),
+            )
         val exportDataUseCase = ExportDataUseCase(nodeRepository, meshLogRepository)
         val exportNodeDatabaseUseCase = ExportNodeDatabaseUseCase(nodeRepository)
 

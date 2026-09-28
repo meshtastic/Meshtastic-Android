@@ -16,39 +16,57 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 
-/** Use case for managing mesh log settings. */
+/**
+ * Use case for managing mesh log settings.
+ *
+ * The deletes a settings change triggers run on [applicationScope], not the caller's scope: a retention prune deletes
+ * in batches and stops at cancellation, so closing the screen that asked for it must not cut the pass short.
+ */
 @Single
 open class SetMeshLogSettingsUseCase
 constructor(
     private val meshLogRepository: MeshLogRepository,
     private val meshLogPrefs: MeshLogPrefs,
+    private val applicationScope: ApplicationCoroutineScope,
 ) {
     /**
-     * Sets the retention period for mesh logs.
+     * Sets the retention period for mesh logs and prunes to it in the background.
      *
      * @param days The number of days to retain logs.
      */
-    suspend fun setRetentionDays(days: Int) {
+    fun setRetentionDays(days: Int) {
         val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
         meshLogPrefs.setRetentionDays(clamped)
-        meshLogRepository.deleteLogsOlderThan(clamped)
+        launchDeletion("prune to the new retention") { meshLogRepository.deleteLogsOlderThan(clamped) }
     }
 
     /**
-     * Enables or disables mesh logging.
+     * Enables or disables mesh logging, clearing or pruning the stored logs in the background.
      *
      * @param enabled True to enable logging, false to disable.
      */
-    suspend fun setLoggingEnabled(enabled: Boolean) {
+    fun setLoggingEnabled(enabled: Boolean) {
         meshLogPrefs.setLoggingEnabled(enabled)
         if (!enabled) {
-            meshLogRepository.deleteAll()
+            launchDeletion("clear the disabled log") { meshLogRepository.deleteAll() }
         } else {
-            meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays.value)
+            launchDeletion("prune to retention") {
+                meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays.value)
+            }
+        }
+    }
+
+    private fun launchDeletion(action: String, block: suspend () -> Unit) {
+        applicationScope.launch {
+            safeCatching { block() }.onFailure { Logger.e(it) { "Mesh log settings failed to $action" } }
         }
     }
 }

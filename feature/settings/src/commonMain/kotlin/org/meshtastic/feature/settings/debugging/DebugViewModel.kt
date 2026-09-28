@@ -37,6 +37,7 @@ import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowInstant
 import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.getTracerouteResponse
@@ -219,6 +220,7 @@ class DebugViewModel(
     private val meshLogRepository: MeshLogRepository,
     private val nodeRepository: NodeRepository,
     private val meshLogPrefs: MeshLogPrefs,
+    private val setMeshLogSettingsUseCase: SetMeshLogSettingsUseCase,
     private val alertManager: AlertManager,
     private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
 ) : ViewModel() {
@@ -271,22 +273,13 @@ class DebugViewModel(
     }
 
     fun setRetentionDays(days: Int) {
-        val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
-        meshLogPrefs.setRetentionDays(clamped)
-        _retentionDays.value = clamped
-        safeLaunch(tag = "setRetentionDays") { meshLogRepository.deleteLogsOlderThan(clamped) }
+        setMeshLogSettingsUseCase.setRetentionDays(days)
+        _retentionDays.value = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
     }
 
     fun setLoggingEnabled(enabled: Boolean) {
-        meshLogPrefs.setLoggingEnabled(enabled)
+        setMeshLogSettingsUseCase.setLoggingEnabled(enabled)
         _loggingEnabled.value = enabled
-        if (!enabled) {
-            safeLaunch(tag = "disableLogging") { meshLogRepository.deleteAll() }
-        } else {
-            safeLaunch(tag = "enableLogging") {
-                meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays.value)
-            }
-        }
     }
 
     suspend fun loadLogsForExport(): ImmutableList<UiMeshLog> = withContext(ioDispatcher) {
