@@ -44,6 +44,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.okay
+import org.meshtastic.core.ui.theme.link
 import org.meshtastic.core.ui.util.annotatedStringFromHtml
 
 /**
@@ -103,7 +104,7 @@ fun MeshtasticDialog(
                     SpanStyle(
                         textDecoration = TextDecoration.Underline,
                         fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.link,
                     ),
                 ),
             )

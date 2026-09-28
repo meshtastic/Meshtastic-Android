@@ -37,10 +37,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import org.meshtastic.core.model.MENTION_TOKEN_REGEX
-import org.meshtastic.core.ui.theme.HyperlinkBlue
+import org.meshtastic.core.ui.theme.link
 
-private val DefaultTextLinkStyles =
-    TextLinkStyles(style = SpanStyle(color = HyperlinkBlue, textDecoration = TextDecoration.Underline))
+@Composable
+private fun defaultTextLinkStyles(): TextLinkStyles {
+    val link = MaterialTheme.colorScheme.link
+    return remember(link) { TextLinkStyles(style = SpanStyle(color = link, textDecoration = TextDecoration.Underline)) }
+}
 
 private val WEB_URL_REGEX =
     Regex(
@@ -57,8 +60,6 @@ private val EMAIL_REGEX =
 
 private val PHONE_REGEX = Regex("""(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}""")
 
-private val MentionSpanStyle = SpanStyle(color = HyperlinkBlue, fontWeight = FontWeight.Bold)
-
 /**
  * A [Text] component that automatically detects and linkifies URLs, email addresses, and phone numbers.
  *
@@ -71,7 +72,7 @@ fun AutoLinkText(
     text: String,
     modifier: Modifier = Modifier,
     style: TextStyle = TextStyle.Default,
-    linkStyles: TextLinkStyles = DefaultTextLinkStyles,
+    linkStyles: TextLinkStyles = defaultTextLinkStyles(),
     color: Color = Color.Unspecified,
     textAlign: TextAlign? = null,
     mentionName: ((String) -> String?)? = null,
@@ -144,12 +145,14 @@ internal fun buildAnnotatedStringWithLinks(
         append(display)
 
         val usedIndices = mutableSetOf<Int>()
+        val mentionStyle =
+            TextLinkStyles(
+                SpanStyle(color = linkStyles.style?.color ?: Color.Unspecified, fontWeight = FontWeight.Bold),
+            )
 
         for ((range, id) in substitution.mentions) {
             addLink(
-                LinkAnnotation.Clickable(tag = "mention", styles = TextLinkStyles(MentionSpanStyle)) {
-                    onMentionClick(id)
-                },
+                LinkAnnotation.Clickable(tag = "mention", styles = mentionStyle) { onMentionClick(id) },
                 range.first,
                 range.last + 1,
             )
