@@ -22,6 +22,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -939,6 +940,7 @@ class SharedRadioInterfaceService(
             try {
                 withContext(NonCancellable) { newTransport.close() }
             } catch (closeFailure: Exception) {
+                if (closeFailure is CancellationException) currentCoroutineContext().ensureActive()
                 publicationFailure.addSuppressed(closeFailure)
             }
             throw publicationFailure

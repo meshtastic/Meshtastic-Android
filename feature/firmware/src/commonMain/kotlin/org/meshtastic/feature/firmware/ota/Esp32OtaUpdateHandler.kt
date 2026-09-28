@@ -20,6 +20,8 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -467,6 +469,7 @@ class Esp32OtaUpdateHandler(
         return connectedTransport ?: throw postConfirmConnectionFailed(rebootMode, attempts, null)
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // cancellation closes the attempt's transport, then is rethrown
     private suspend fun connectTransportAttempt(transport: UnifiedOtaProtocol, rebootMode: Int): Result<Unit> {
         val connectResult =
             try {
@@ -495,6 +498,7 @@ class Esp32OtaUpdateHandler(
             try {
                 transport.close()
             } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+                if (e is CancellationException) currentCoroutineContext().ensureActive()
                 Logger.w(e) { "ESP32 OTA: Failed to close failed transport attempt" }
             }
         }

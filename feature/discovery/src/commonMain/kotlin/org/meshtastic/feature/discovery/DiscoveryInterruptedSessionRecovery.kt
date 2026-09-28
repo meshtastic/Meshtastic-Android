@@ -62,6 +62,7 @@ internal class DiscoveryInterruptedSessionRecovery(
             }
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // the waiter's own cancellation is rethrown by ensureActive()
     private suspend fun restoreIfAny(onRestored: suspend (homePreset: String) -> Unit) {
         val address = meshPrefs.deviceAddress.value
         val session =

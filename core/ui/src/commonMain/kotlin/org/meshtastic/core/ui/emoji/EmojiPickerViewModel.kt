@@ -19,6 +19,7 @@ package org.meshtastic.core.ui.emoji
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -54,6 +55,8 @@ internal class EmojiPickerViewModel(
             } catch (e: MissingResourceException) {
                 Logger.e(tag = "EmojiPickerViewModel", throwable = e) { "Failed to load emoji data" }
                 _loadError.value = true
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: IllegalStateException) {
                 Logger.e(tag = "EmojiPickerViewModel", throwable = e) { "Failed to load emoji data" }
                 _loadError.value = true

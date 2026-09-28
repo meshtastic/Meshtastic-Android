@@ -19,6 +19,8 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -345,6 +347,7 @@ class RadioControllerImpl(
             block()
             true
         } catch (rollbackFailure: Exception) {
+            if (rollbackFailure is CancellationException) currentCoroutineContext().ensureActive()
             originalFailure.addSuppressed(rollbackFailure)
             Logger.w(rollbackFailure) { "Failed to roll back $description after device-switch failure" }
             false

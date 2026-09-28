@@ -68,6 +68,7 @@ internal fun finalStatusForPendingRestore(
     else -> default
 }
 
+@Suppress("SuspendFunSwallowedCancellation") // the waiter's own cancellation is rethrown by ensureActive()
 private suspend fun awaitRestoreResult(result: Deferred<Boolean>, timeout: kotlin.time.Duration): Boolean {
     val completed =
         withTimeoutOrNull(timeout) {

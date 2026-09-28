@@ -19,8 +19,11 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
@@ -296,6 +299,7 @@ internal class AdminControllerImpl(
 
     // ── Edit Settings (transactional) ───────────────────────────────────────
 
+    @Suppress("SuspendFunSwallowedCancellation") // a block's cancellation is held only until the commit, then rethrown
     override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
         val isLocalDestination = destNum == nodeManager.myNodeNum.value
         requireBeginBoundaryAccepted(destNum)
@@ -417,6 +421,7 @@ internal class AdminControllerImpl(
             try {
                 projection()
             } catch (e: Exception) {
+                if (e is CancellationException) currentCoroutineContext().ensureActive()
                 Logger.w(e) { "Local edit-settings projection failed after device commit" }
             }
         }

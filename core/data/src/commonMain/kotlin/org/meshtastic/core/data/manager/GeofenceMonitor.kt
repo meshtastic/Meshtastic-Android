@@ -17,7 +17,10 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -98,8 +101,10 @@ class GeofenceMonitor(
                         }
                     }
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                    // Isolate per-sample failures: an unexpected throw must not kill the sole consumer and silently
-                    // stop geofence tracking for the rest of the session.
+                    if (e is CancellationException) currentCoroutineContext().ensureActive()
+                    // Isolate per-sample failures: an unexpected throw, a stray CancellationException included, must
+                    // not kill the sole consumer and silently stop geofence tracking for the rest of the session.
+                    // Only this consumer's own cancellation ends the loop.
                     Logger.e(e) { "Geofence evaluation failed for node ${sample.nodeNum}; skipping sample" }
                 }
             }
@@ -189,6 +194,8 @@ class GeofenceMonitor(
                 message = body,
                 waypointId = waypoint.id,
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             // A string-resource or notification failure must not take down the evaluation worker.
             Logger.e(e) { "Failed to raise geofence crossing notification for waypoint ${waypoint.id}" }

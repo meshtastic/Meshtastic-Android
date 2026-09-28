@@ -335,7 +335,8 @@ internal constructor(
      * the bootloader's bytes-received count. The [streamOffset], [streamLastPrnOffset], and [streamLastPrnLatencyMs]
      * snapshots give the watcher's onDrop callback visible diagnostic values.
      */
-    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "LongMethod")
+    // Cancellations are logged with the stream offset for diagnosis, then rethrown.
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "LongMethod", "SuspendFunSwallowedCancellation")
     private suspend fun streamFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit) {
         // Packet size = negotiated ATT MTU − 3, word-aligned and capped at 244 (see computeStreamPacketSize). Falls
         // back to 20 bytes when the bootloader did not negotiate a larger MTU, which is the self-gating safety against
@@ -468,6 +469,7 @@ internal constructor(
      *
      * Parent cancellation is preserved: a [CancellationException] that escapes `withTimeoutOrNull` is propagated.
      */
+    @Suppress("SuspendFunSwallowedCancellation") // the cancellation is logged, then rethrown
     override suspend fun abort() {
         val write =
             try {

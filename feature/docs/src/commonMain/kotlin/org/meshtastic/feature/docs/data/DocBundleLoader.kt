@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.docs.data
 
+import kotlinx.coroutines.CancellationException
 import meshtasticandroid.feature.docs.generated.resources.Res
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -156,6 +157,8 @@ class DefaultDocBundleLoader : DocBundleLoader {
             try {
                 val bytes = Res.readBytes(localePath)
                 return stripFrontmatter(bytes.decodeToString())
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
                 continue
             }
@@ -176,6 +179,8 @@ class DefaultDocBundleLoader : DocBundleLoader {
             try {
                 Res.readBytes(localePath)
                 true
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
                 false
             }
@@ -206,6 +211,8 @@ class DefaultDocBundleLoader : DocBundleLoader {
             val bytes = Res.readBytes(resourcePath)
             val raw = bytes.decodeToString()
             stripFrontmatter(raw)
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) {
             "# ${page.title}\n\nContent not available. The documentation file could not be loaded."
         }

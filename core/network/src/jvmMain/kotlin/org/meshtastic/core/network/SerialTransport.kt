@@ -301,6 +301,8 @@ private constructor(
     }
 
     /** Attempts to open the serial port and starts the read loop. Returns true if successful, false otherwise. */
+    // Cancellation is inspected after runCatching: the port is closed, then the cancellation rethrown.
+    @Suppress("SuspendFunSwallowedCancellation")
     private suspend fun startConnection(): Boolean {
         if (portState.isClosing(lifecycle.isClosed)) return false
         var candidatePort: SerialPort? = null

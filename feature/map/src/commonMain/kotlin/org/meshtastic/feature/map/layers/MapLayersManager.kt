@@ -98,6 +98,8 @@ class MapLayersManager(
                 if (_mapLayers.value.isNotEmpty()) {
                     Logger.withTag(TAG).i("Loaded ${_mapLayers.value.size} persisted map layers.")
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 Logger.withTag(TAG).e(e) { "Error loading persisted map layers" }
                 _mapLayers.value = emptyList()

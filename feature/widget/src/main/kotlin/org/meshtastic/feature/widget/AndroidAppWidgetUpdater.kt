@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.updateAll
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -57,6 +58,8 @@ class AndroidAppWidgetUpdater(private val context: Context, stateProvider: Local
         @Suppress("TooGenericExceptionCaught")
         try {
             LocalStatsWidget().updateAll(context)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Logger.e(e) { "Failed to update widgets" }
         }

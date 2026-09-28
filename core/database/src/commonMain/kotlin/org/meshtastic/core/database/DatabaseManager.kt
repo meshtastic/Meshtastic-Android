@@ -429,6 +429,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                                 // build a replacement and abandon the cache/publication handoff halfway through.
                                 withContext(NonCancellable) { reopenFlowDatabaseIfStillCurrent(database) }
                             } catch (@Suppress("TooGenericExceptionCaught") recoveryFailure: Exception) {
+                                if (recoveryFailure is CancellationException) currentCoroutineContext().ensureActive()
                                 exception.addSuppressed(recoveryFailure)
                                 Logger.w(recoveryFailure) { "Failed to recover active DB after a Flow pool timeout" }
                                 throw exception
@@ -799,8 +800,9 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                                         it.remove(pendingSourceDbKey(transportAddress))
                                         it.remove(pendingDestinationDbKey(transportAddress))
                                     }
-                                } catch (cleanupFailure: Throwable) {
-                                    Logger.w(cleanupFailure) { "Failed to clear aborted pending database route" }
+                                } catch (failure: Throwable) {
+                                    if (failure is CancellationException) currentCoroutineContext().ensureActive()
+                                    Logger.w(failure) { "Failed to clear aborted pending database route" }
                                 }
                             }
                         }
@@ -926,6 +928,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     private suspend fun persistRetirementIntent(dbName: String) {
         try {
             datastore.edit { it[retiredDbNamesKey] = it[retiredDbNamesKey].orEmpty() + dbName }
+        } catch (cancellation: CancellationException) {
+            throw cancellation
         } catch (failure: Throwable) {
             Logger.w(failure) { "Failed to persist retirement for ${anonymizeDbName(dbName)}" }
         }
@@ -971,6 +975,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 if (remaining.isEmpty()) it.remove(retiredDbNamesKey) else it[retiredDbNamesKey] = remaining
             }
             Logger.i { "Physically retired merged DB ${anonymizeDbName(dbName)}" }
+        } catch (cancellation: CancellationException) {
+            throw cancellation
         } catch (failure: Throwable) {
             // The file deletion is idempotent. Retain the intent so a later process retries metadata cleanup.
             Logger.w(failure) { "Failed to clear retirement metadata for ${anonymizeDbName(dbName)}" }
@@ -1149,7 +1155,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * first use, where SQLITE_BUSY escapes uncaught. An abandoned block that holds the lock is still writing, so its
      * pool is slow rather than wedged and stays published.
      */
-    @Suppress("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation") // closes the replacement, then rethrows
     private suspend fun isPublishableReplacement(dbName: String, replacement: MeshtasticDatabase): Boolean {
         val lockHeld =
             try {

@@ -460,7 +460,8 @@ class PacketHandlerImpl(
             }
     }
 
-    @Suppress("TooGenericExceptionCaught")
+    // Cancellation settles the pending waiters under NonCancellable before it is rethrown.
+    @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
     private suspend fun processQueuedPacket(queuedPacket: QueuedPacket) {
         val (packet, pending, expectedConnectionVersion) = queuedPacket
         try {

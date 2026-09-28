@@ -33,6 +33,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -138,6 +139,8 @@ open class MeshUtilApplication :
                                     intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN),
                                 )
                         Logger.i { "setWidgetPreviews result: $result" }
+                    } catch (e: CancellationException) {
+                        throw e
                     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                         Logger.e(e) { "Failed to set widget preview" }
                     }

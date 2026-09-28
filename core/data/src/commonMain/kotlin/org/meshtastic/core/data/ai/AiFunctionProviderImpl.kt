@@ -147,8 +147,9 @@ class AiFunctionProviderImpl(
                     )
                 }
             GetNodeListResult.Success(nodes.sortedByDescending { it.lastHeard })
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetNodeListResult.Error("Failed to retrieve node list: ${ex.message}")
         }
     }
@@ -172,8 +173,9 @@ class AiFunctionProviderImpl(
                     )
                 }
             GetChannelInfoResult.Success(channels)
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetChannelInfoResult.Error("Failed to retrieve channel info: ${ex.message}")
         }
     }
@@ -195,8 +197,9 @@ class AiFunctionProviderImpl(
                     isActive = serviceRepository.connectionState.value == ConnectionState.Connected,
                 )
             GetDeviceStatusResult.Success(deviceStatus)
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetDeviceStatusResult.Error("Failed to retrieve device status: ${ex.message}")
         }
     }
@@ -249,8 +252,9 @@ class AiFunctionProviderImpl(
                     longitude = node.longitude.takeIf { hasValidPosition },
                 )
             GetNodeDetailsResult.Success(details)
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetNodeDetailsResult.Error("Failed to retrieve node details: ${ex.message}")
         }
     }
@@ -303,8 +307,9 @@ class AiFunctionProviderImpl(
                     channelUtilizationPercent = null, // Could compute from radioConfigRepository if needed
                 )
             GetMeshMetricsResult.Success(metrics)
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetMeshMetricsResult.Error("Failed to retrieve mesh metrics: ${ex.message}")
         }
     }
@@ -369,8 +374,9 @@ class AiFunctionProviderImpl(
                     }
 
                 GetRecentMessagesResult.Success(summaries)
+            } catch (e: CancellationException) {
+                throw e
             } catch (ex: Exception) {
-                if (ex is CancellationException) throw ex
                 GetRecentMessagesResult.Error("Failed to retrieve messages: ${ex.message}")
             }
         }
@@ -418,8 +424,9 @@ class AiFunctionProviderImpl(
                     contacts = contactUnreads.sortedByDescending { it.lastMessageTime },
                 ),
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetUnreadSummaryResult.Error("Failed to retrieve unread summary: ${ex.message}")
         }
     }

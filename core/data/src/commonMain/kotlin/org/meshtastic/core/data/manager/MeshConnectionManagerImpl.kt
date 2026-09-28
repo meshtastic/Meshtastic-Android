@@ -179,6 +179,8 @@ class MeshConnectionManagerImpl(
         scope.launch {
             try {
                 appWidgetUpdater.updateAll()
+            } catch (e: CancellationException) {
+                throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 Logger.e(e) { "Failed to kickstart LocalStatsWidget" }
             }
@@ -527,19 +529,15 @@ class MeshConnectionManagerImpl(
 
         sleepTimeout =
             scope.handledLaunch {
-                try {
-                    val localConfig = radioConfigRepository.localConfigFlow.first()
-                    val rawTimeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
-                    // Cap the timeout so routers or power-saving configs (ls_secs=3600) don't
-                    // leave the UI stuck in DeviceSleep for over an hour.
-                    val timeout = rawTimeout.coerceAtMost(MAX_SLEEP_TIMEOUT_SECONDS)
-                    Logger.d { "Waiting for sleeping device, timeout=$timeout secs (raw=$rawTimeout)" }
-                    delay(timeout.seconds)
-                    Logger.w { "Device timed out, setting disconnected" }
-                    onConnectionChanged(ConnectionState.Disconnected)
-                } catch (_: CancellationException) {
-                    Logger.d { "device sleep timeout cancelled" }
-                }
+                val localConfig = radioConfigRepository.localConfigFlow.first()
+                val rawTimeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
+                // Cap the timeout so routers or power-saving configs (ls_secs=3600) don't
+                // leave the UI stuck in DeviceSleep for over an hour.
+                val timeout = rawTimeout.coerceAtMost(MAX_SLEEP_TIMEOUT_SECONDS)
+                Logger.d { "Waiting for sleeping device, timeout=$timeout secs (raw=$rawTimeout)" }
+                delay(timeout.seconds)
+                Logger.w { "Device timed out, setting disconnected" }
+                onConnectionChanged(ConnectionState.Disconnected)
             }
     }
 

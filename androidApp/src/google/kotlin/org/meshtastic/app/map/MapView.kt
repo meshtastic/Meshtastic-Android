@@ -122,7 +122,9 @@ import com.google.maps.android.data.renderer.model.PolygonStyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
@@ -431,6 +433,7 @@ fun MapView(
                             try {
                                 cameraPositionState.animate(cameraUpdate)
                             } catch (e: IllegalStateException) {
+                                if (e is CancellationException) currentCoroutineContext().ensureActive()
                                 Logger.d { "Error animating camera to location: ${e.message}" }
                             }
                         }
@@ -604,6 +607,8 @@ fun MapView(
                 cameraPositionState.animate(cameraUpdate)
                 hasCentered = true
             } catch (e: IllegalStateException) {
+                if (e is CancellationException) currentCoroutineContext().ensureActive()
+                // Reached for a user gesture interrupting animate() too: that cancels the animation, not this effect.
                 Logger.d { "Error centering track map: ${e.message}" }
             }
         }
@@ -615,6 +620,7 @@ fun MapView(
             try {
                 cameraPositionState.animate(CameraUpdateFactory.newLatLng(selectedPos.toLatLng()))
             } catch (e: IllegalStateException) {
+                if (e is CancellationException) currentCoroutineContext().ensureActive()
                 Logger.d { "Error animating to selected position: ${e.message}" }
             }
         }
@@ -640,6 +646,7 @@ fun MapView(
                     cameraPositionState.animate(cameraUpdate)
                     hasCentered = true
                 } catch (e: IllegalStateException) {
+                    if (e is CancellationException) currentCoroutineContext().ensureActive()
                     Logger.d { "Error centering traceroute overlay: ${e.message}" }
                 }
             }
@@ -1124,6 +1131,7 @@ fun MapView(
                             cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(newCameraPosition))
                             Logger.d { "Oriented map to north" }
                         } catch (e: IllegalStateException) {
+                            if (e is CancellationException) currentCoroutineContext().ensureActive()
                             Logger.d { "Error orienting map to north: ${e.message}" }
                         }
                     }

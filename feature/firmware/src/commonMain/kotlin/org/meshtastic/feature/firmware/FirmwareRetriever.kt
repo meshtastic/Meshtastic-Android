@@ -17,6 +17,7 @@
 package org.meshtastic.feature.firmware
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
@@ -99,6 +100,8 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         val artifact =
             try {
                 fileHandler.downloadFile(asset.url, asset.fileName, onProgress)
+            } catch (e: CancellationException) {
+                throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 Logger.w(e) { "Maintenance image download failed: ${asset.fileName}" }
                 null
@@ -305,6 +308,8 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
                 fileHandler.downloadFile(directUrl, filename, onProgress)?.let {
                     return it
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 Logger.w(e) { "Direct download for $filename failed, falling back to release zip" }
             }
@@ -319,6 +324,8 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
                 val zipUrl = resolveZipUrl(release.zipUrl, hardware.architecture)
                 try {
                     fileHandler.downloadFile(zipUrl, "firmware_release.zip", onProgress)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.w(e) { "Release zip download failed for ${release.id}" }
                     null

@@ -23,6 +23,7 @@ import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.TranslateRemoteModel
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.meshtastic.feature.docs.translation.DocTranslationCache
 import org.meshtastic.feature.docs.translation.DocTranslationService
@@ -96,6 +97,8 @@ class MlKitDocTranslator(private val cache: DocTranslationCache) : DocTranslatio
             } finally {
                 translator.close()
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Logger.w(tag = "MlKitDocTranslator") { "Translation failed for $pageId to $targetLocale: ${e.message}" }
             TranslationResult.Unavailable

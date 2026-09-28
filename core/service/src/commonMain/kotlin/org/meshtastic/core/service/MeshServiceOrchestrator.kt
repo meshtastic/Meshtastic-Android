@@ -231,7 +231,7 @@ class MeshServiceOrchestrator(
         // coroutine is fire-and-forget; typical runtime is ~100-150ms which comfortably fits
         // inside Android's onDestroy() grace window.
         CoroutineScope(SupervisorJob() + dispatchers.default).launch {
-            runCatching { radioInterfaceService.disconnect() }
+            safeCatching { radioInterfaceService.disconnect() }
         }
         scopeRef.getAndSet(null)?.cancel()
     }

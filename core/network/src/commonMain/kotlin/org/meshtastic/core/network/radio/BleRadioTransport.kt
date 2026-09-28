@@ -577,7 +577,8 @@ class BleRadioTransport(
         if (firstWriter) callback.onDisconnect(isPermanent = false)
     }
 
-    @Suppress("LongMethod", "ThrowsCount")
+    // Cancellation runs GATT cleanup under NonCancellable, then is rethrown.
+    @Suppress("LongMethod", "ThrowsCount", "SuspendFunSwallowedCancellation")
     private suspend fun discoverServicesAndSetupCharacteristics(): BleSession {
         var setupSession: BleSession? = null
         try {

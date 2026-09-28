@@ -105,6 +105,8 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
 
             acceptJob = scope.launch(dispatchers.io) { acceptLoop() }
             Result.success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Logger.e(e) { "Failed to bind TAK Server to 127.0.0.1:$port" }
             running = false

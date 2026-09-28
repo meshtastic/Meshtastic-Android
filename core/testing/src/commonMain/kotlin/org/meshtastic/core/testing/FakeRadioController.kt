@@ -444,6 +444,7 @@ class FakeRadioController :
         return current === expected
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // mirrors production: the failure is held until the commit
     override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
         editSettingsDestinations.add(destNum)
         editSettingsCalled = true

@@ -25,6 +25,7 @@ import co.touchlab.kermit.Logger
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -131,6 +132,8 @@ class UsbRepository(
             port.rts = true
             delay(holdMillis)
             true
+        } catch (e: CancellationException) {
+            throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.w(e) { "DTR poke failed for ${driver.device.usbSerialStableKey()}" }
             false
