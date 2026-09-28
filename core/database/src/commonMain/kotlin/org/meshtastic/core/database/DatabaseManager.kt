@@ -1015,8 +1015,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * directly, so every publication is visible to app-wide collectors on the same program step — but there is no
      * deterministic handoff point where every collector has stopped using the previous instance.
      *
-     * Returns the reopened DB, or null if another coroutine switched databases, shutdown has started, or another
-     * connection holds the database's write lock.
+     * Returns the reopened DB, or null if another coroutine switched databases, shutdown has started, the recovery rate
+     * limit is reached, or another connection holds the database's write lock.
      */
     private suspend fun reopenFlowDatabaseIfStillCurrent(expectedDb: MeshtasticDatabase): MeshtasticDatabase? {
         val expectedDbName =
