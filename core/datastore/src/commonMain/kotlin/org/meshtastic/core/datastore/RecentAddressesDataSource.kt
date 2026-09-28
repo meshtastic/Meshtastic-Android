@@ -22,8 +22,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -33,10 +31,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 import org.meshtastic.core.datastore.model.RecentAddress
-
-// Not injected: Json is sealed, so Mokkery cannot build a class that takes one, and consumers mock this class.
-@OptIn(ExperimentalSerializationApi::class)
-private val RecentAddressesJson = Json { exceptionsWithDebugInfo = false }
 
 /**
  * The stored addresses and names are user data, so no log line here carries the stored value or an exception message,
@@ -53,7 +47,7 @@ open class RecentAddressesDataSource(private val dataStore: CorePreferencesDataS
             val jsonString = preferences[PreferencesKeys.RECENT_IP_ADDRESSES]
             if (jsonString != null) {
                 try {
-                    RecentAddressesJson.decodeFromString<List<RecentAddress>>(jsonString)
+                    DatastoreJson.decodeFromString<List<RecentAddress>>(jsonString)
                 } catch (e: IllegalArgumentException) {
                     // SerializationException is an IllegalArgumentException.
                     Logger.w { "Could not parse recent addresses (${e::class.simpleName}), trying legacy format" }
@@ -65,7 +59,7 @@ open class RecentAddressesDataSource(private val dataStore: CorePreferencesDataS
         }
 
     private fun parseLegacyRecentAddresses(jsonAddresses: String): List<RecentAddress> = try {
-        RecentAddressesJson.parseToJsonElement(jsonAddresses).jsonArray.mapNotNull(::parseLegacyRecentAddress)
+        DatastoreJson.parseToJsonElement(jsonAddresses).jsonArray.mapNotNull(::parseLegacyRecentAddress)
     } catch (e: IllegalArgumentException) {
         Logger.w { "Discarding unreadable recent addresses (${e::class.simpleName})" }
         emptyList()
@@ -101,7 +95,7 @@ open class RecentAddressesDataSource(private val dataStore: CorePreferencesDataS
 
     open suspend fun setRecentAddresses(addresses: List<RecentAddress>) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.RECENT_IP_ADDRESSES] = RecentAddressesJson.encodeToString(addresses)
+            preferences[PreferencesKeys.RECENT_IP_ADDRESSES] = DatastoreJson.encodeToString(addresses)
         }
     }
 

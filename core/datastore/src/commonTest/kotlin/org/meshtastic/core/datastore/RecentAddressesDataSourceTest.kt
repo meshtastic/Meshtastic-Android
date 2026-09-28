@@ -21,10 +21,6 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import co.touchlab.kermit.LogWriter
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.Severity
-import co.touchlab.kermit.platformLogWriter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -60,35 +56,17 @@ class RecentAddressesDataSourceTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         dataSource = RecentAddressesDataSource(dataStore.asCorePreferencesDataStore())
-        logs = CapturingLogWriter()
-        Logger.setLogWriters(logs)
-        Logger.setMinSeverity(Severity.Verbose)
+        logs = CapturingLogWriter.install()
     }
 
     @AfterTest
     fun tearDown() {
-        Logger.setLogWriters(platformLogWriter())
+        CapturingLogWriter.uninstall()
         FileSystem.SYSTEM.deleteRecursively(tmpDir)
-    }
-
-    private class CapturingLogWriter : LogWriter() {
-        val messages = mutableListOf<String>()
-
-        override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
-            messages += message
-            throwable?.message?.let { messages += it }
-        }
     }
 
     private suspend fun storeRaw(value: String) {
         dataStore.edit { it[stringPreferencesKey("recent-ip-addresses")] = value }
-    }
-
-    private fun assertNotLogged(vararg values: String) {
-        assertTrue(logs.messages.isNotEmpty(), "Expected the parse fallback to log a warning")
-        for (value in values) {
-            assertFalse(logs.messages.any { value in it }, "'$value' leaked into logs: ${logs.messages}")
-        }
     }
 
     // ---- recentAddresses flow ----
@@ -129,7 +107,7 @@ class RecentAddressesDataSourceTest {
         val result = dataSource.recentAddresses.first()
 
         assertTrue(result.isEmpty())
-        assertNotLogged("10.20.30.40", "CabinRadio")
+        logs.assertNotLogged("10.20.30.40", "CabinRadio")
     }
 
     // ---- add() LRU behaviour ----
@@ -254,7 +232,7 @@ class RecentAddressesDataSourceTest {
 
         dataSource.recentAddresses.first()
 
-        assertNotLogged("192.168.1.50", "10.0.0.2")
+        logs.assertNotLogged("192.168.1.50", "10.0.0.2")
     }
 
     @Test
@@ -294,6 +272,6 @@ class RecentAddressesDataSourceTest {
         assertEquals("10.0.0.1", result[0].address)
         assertEquals("Meshtastic", result[0].name)
         assertEquals("10.0.0.2", result[1].address)
-        assertNotLogged("10.0.0.1", "10.0.0.2", "BadEntryName", "10.9.9.9")
+        logs.assertNotLogged("10.0.0.1", "10.0.0.2", "BadEntryName", "10.9.9.9")
     }
 }

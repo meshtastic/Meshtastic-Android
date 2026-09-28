@@ -21,9 +21,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 
 @Single
@@ -37,13 +36,10 @@ open class BootloaderWarningDataSource(private val dataStore: CorePreferencesDat
         dataStore.data.map { preferences ->
             val jsonString = preferences[PreferencesKeys.DISMISSED_BOOTLOADER_ADDRESSES] ?: return@map emptySet()
 
-            runCatching { Json.decodeFromString<List<String>>(jsonString).toSet() }
+            // The stored value is a list of device addresses, so the log names only the exception type.
+            safeCatching { DatastoreJson.decodeFromString<List<String>>(jsonString).toSet() }
                 .onFailure { e ->
-                    if (e is IllegalArgumentException || e is SerializationException) {
-                        Logger.w(e) { "Failed to parse dismissed bootloader warning addresses, resetting preference" }
-                    } else {
-                        Logger.w(e) { "Unexpected error while parsing dismissed bootloader warning addresses" }
-                    }
+                    Logger.w { "Ignoring unreadable dismissed bootloader warning addresses (${e::class.simpleName})" }
                 }
                 .getOrDefault(emptySet())
         }
@@ -58,7 +54,7 @@ open class BootloaderWarningDataSource(private val dataStore: CorePreferencesDat
 
         val updated = (current + address).toList()
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.DISMISSED_BOOTLOADER_ADDRESSES] = Json.encodeToString(updated)
+            preferences[PreferencesKeys.DISMISSED_BOOTLOADER_ADDRESSES] = DatastoreJson.encodeToString(updated)
         }
     }
 }
