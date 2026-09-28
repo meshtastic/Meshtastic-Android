@@ -42,6 +42,8 @@
 
     <!-- API 33+ Notification runtime permissions -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- API 36.1+ lets a running firmware update show as a Live Update -->
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
 
     <!-- Permissions required for providing location (from phone GPS) to mesh -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

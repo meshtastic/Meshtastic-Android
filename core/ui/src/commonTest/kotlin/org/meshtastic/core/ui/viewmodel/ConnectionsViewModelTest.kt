@@ -31,7 +31,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
@@ -39,17 +38,11 @@ import org.meshtastic.core.model.FirmwareUpdateDestination
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRestartTracker
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.firmware_update_available
-import org.meshtastic.core.resources.firmware_update_notification_android
-import org.meshtastic.core.resources.firmware_update_notification_flasher
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.testing.FakeDeviceHardwareRepository
 import org.meshtastic.core.testing.FakeFirmwareReleaseRepository
+import org.meshtastic.core.testing.FakeMeshNotificationManager
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeServiceRepository
@@ -80,26 +73,13 @@ class ConnectionsViewModelTest {
     private val deviceHardwareRepository = FakeDeviceHardwareRepository()
     private val firmwareReleaseRepository = FakeFirmwareReleaseRepository()
     private val radioPrefs = FakeRadioPrefs()
-    private val dispatchedNotifications = mutableListOf<Notification>()
-    private var notificationsCanBeScheduled = true
-    private val notificationManager =
-        object : NotificationManager {
-            override suspend fun dispatch(notification: Notification): Boolean {
-                if (notificationsCanBeScheduled) dispatchedNotifications += notification
-                return notificationsCanBeScheduled
-            }
-
-            override fun cancel(id: Int) = Unit
-
-            override fun cancelAll() = Unit
-        }
+    private val serviceNotifications = FakeMeshNotificationManager()
+    private val postedNotices
+        get() = serviceNotifications.firmwareUpdateNotices
 
     @BeforeTest
     fun setUp() {
-        warmFirmwareNotificationStrings()
         Dispatchers.setMain(testDispatcher)
-        dispatchedNotifications.clear()
-        notificationsCanBeScheduled = true
 
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
         every { nodeManager.connectionIdentity } returns connectionIdentity
@@ -121,7 +101,7 @@ class ConnectionsViewModelTest {
         deviceHardwareRepository = deviceHardwareRepository,
         firmwareReleaseRepository = firmwareReleaseRepository,
         radioPrefs = radioPrefs,
-        notificationManager = notificationManager,
+        serviceNotifications = serviceNotifications,
     )
 
     @AfterTest
@@ -363,11 +343,37 @@ class ConnectionsViewModelTest {
         assertEquals("2.7.0", notice.currentVersion)
         assertEquals("2.8.0", notice.stableVersion)
         assertEquals(FirmwareUpdateDestination.AndroidUpdate, notice.destination)
-        assertEquals(1, dispatchedNotifications.size)
+        assertEquals(listOf(notice), postedNotices)
         assertEquals(setOf(notice.notificationKey), uiPrefs.firmwareUpdateNotificationKeys.value)
-        assertEquals("Firmware update available", dispatchedNotifications.single().title)
-        assertEquals(Notification.Type.Info, dispatchedNotifications.single().type)
-        assertEquals("meshtastic:///firmware/update", dispatchedNotifications.single().deepLinkUri)
+    }
+
+    @Test
+    fun `firmware notice for flasher-only hardware is still posted`() = runTest {
+        val target = "tbeam"
+        deviceHardwareRepository.setHardware(
+            hwModel = HardwareModel.TBEAM.value,
+            target = target,
+            device = DeviceHardware(architecture = "esp32", platformioTarget = target),
+        )
+        nodeRepository.setMyId("!local")
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
+        nodeRepository.setOurNode(
+            org.meshtastic.core.model.Node(
+                num = 1,
+                user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+            ),
+        )
+        // ESP32 over serial is not updatable in-app, so the notice's destination is the flasher.
+        radioPrefs.setDevAddr("s:connected")
+        firmwareReleaseRepository.setManifestTargets("v2.8.0", setOf(target))
+        firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0"))
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+
+        advanceUntilIdle()
+
+        val notice = assertNotNull(viewModel.firmwareUpdateNotice.value)
+        assertEquals(FirmwareUpdateDestination.MeshtasticFlasher, notice.destination)
+        assertEquals(listOf(notice), postedNotices)
     }
 
     @Test
@@ -400,7 +406,7 @@ class ConnectionsViewModelTest {
     fun `does not persist firmware notification dedupe when scheduling is unavailable`() = runTest {
         val hardwareModel = HardwareModel.TBEAM.value
         val target = "tbeam"
-        notificationsCanBeScheduled = false
+        serviceNotifications.acceptsFirmwareUpdate = false
         deviceHardwareRepository.setHardware(
             hwModel = hardwareModel,
             target = target,
@@ -422,7 +428,7 @@ class ConnectionsViewModelTest {
         advanceUntilIdle()
 
         assertNotNull(viewModel.firmwareUpdateNotice.value)
-        assertEquals(emptyList(), dispatchedNotifications)
+        assertEquals(emptyList(), postedNotices)
         assertEquals(emptySet(), uiPrefs.firmwareUpdateNotificationKeys.value)
     }
 
@@ -477,7 +483,7 @@ class ConnectionsViewModelTest {
         advanceUntilIdle()
 
         assertEquals(null, viewModel.firmwareUpdateNotice.value)
-        assertEquals(emptyList(), dispatchedNotifications)
+        assertEquals(emptyList(), postedNotices)
     }
 
     /**
@@ -491,19 +497,5 @@ class ConnectionsViewModelTest {
     @Test
     fun `RECONNECTING_PROGRESS_TEXT pins the cross-track literal value`() {
         assertEquals("Reconnecting\u2026", ServiceRepository.RECONNECTING_PROGRESS_TEXT)
-    }
-
-    /**
-     * From CMP 1.12 compose resources load each string once on a library-owned `Dispatchers.Default` scope, which
-     * `advanceUntilIdle` cannot drain, so the notification dispatch lands after the assertions. Pre-loading keeps the
-     * path inside virtual time on any CMP version; must run before `setMain`. Best-effort: a warm-up that cannot load
-     * (skiko's static initializer on the desktop test classpath) must leave the suite as it was, not fail every test.
-     */
-    private fun warmFirmwareNotificationStrings() {
-        safeCatchingAll {
-            getString(Res.string.firmware_update_available)
-            getString(Res.string.firmware_update_notification_android, "", "")
-            getString(Res.string.firmware_update_notification_flasher, "", "")
-        }
     }
 }

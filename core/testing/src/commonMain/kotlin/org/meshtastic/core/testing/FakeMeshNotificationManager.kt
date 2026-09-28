@@ -17,19 +17,42 @@
 package org.meshtastic.core.testing
 
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.FirmwareUpdateNotice
+import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.Notification
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
-/** A test double for [MeshNotificationManager] that provides a no-op implementation. */
-@Suppress("TooManyFunctions", "EmptyFunctionBlock")
+/** Records every notification posted or cancelled. The `accepts*` flags stand in for a platform that declines. */
+@Suppress("TooManyFunctions")
 class FakeMeshNotificationManager : MeshNotificationManager {
-    override fun clearNotifications() {}
+    data class ClientPost(val notification: ClientNotification, val title: String, val severity: Notification.Type)
 
-    override fun initChannels() {}
+    var acceptsFirmwareUpdate = true
+    var acceptsReconnectBlocked = true
 
-    override fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?) {}
+    val meshBeacons = mutableListOf<MeshBeaconOffer>()
+    val newNodes = mutableListOf<Node>()
+    val cancelledNewNodes = mutableListOf<Int>()
+    val lowBatteryShown = mutableListOf<Node>()
+    val lowBatteryUpdated = mutableListOf<Node>()
+    val lowBatteryCancelled = mutableListOf<Node>()
+    val clientPosts = mutableListOf<ClientPost>()
+    val clearedClientNotifications = mutableListOf<ClientNotification>()
+    val firmwareUpdateNotices = mutableListOf<FirmwareUpdateNotice>()
+    val reconnectBlocked = mutableListOf<Pair<String, String>>()
+    var clearCount = 0
+        private set
+
+    override fun clearNotifications() {
+        clearCount++
+    }
+
+    override fun initChannels() = Unit
+
+    override fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?) = Unit
 
     override suspend fun updateMessageNotification(
         contactKey: String,
@@ -38,7 +61,7 @@ class FakeMeshNotificationManager : MeshNotificationManager {
         isBroadcast: Boolean,
         channelName: String?,
         isSilent: Boolean,
-    ) {}
+    ) = Unit
 
     override suspend fun updateWaypointNotification(
         contactKey: String,
@@ -46,7 +69,7 @@ class FakeMeshNotificationManager : MeshNotificationManager {
         message: String,
         waypointId: Int,
         isSilent: Boolean,
-    ) {}
+    ) = Unit
 
     override suspend fun updateReactionNotification(
         contactKey: String,
@@ -55,19 +78,55 @@ class FakeMeshNotificationManager : MeshNotificationManager {
         isBroadcast: Boolean,
         channelName: String?,
         isSilent: Boolean,
-    ) {}
+    ) = Unit
 
-    override fun showAlertNotification(contactKey: String, name: String, alert: String) {}
+    override suspend fun showAlertNotification(contactKey: String, name: String, alert: String) = Unit
 
-    override fun showNewNodeSeenNotification(node: Node) {}
+    override suspend fun showMeshBeaconNotification(offer: MeshBeaconOffer) {
+        meshBeacons += offer
+    }
 
-    override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {}
+    override suspend fun showNewNodeSeenNotification(node: Node, title: String) {
+        newNodes += node
+    }
 
-    override fun showClientNotification(clientNotification: ClientNotification) {}
+    override fun cancelNewNodeNotification(nodeNum: Int) {
+        cancelledNewNodes += nodeNum
+    }
 
-    override suspend fun cancelMessageNotification(contactKey: String) {}
+    override suspend fun showLowBatteryNotification(node: Node, isRemote: Boolean) {
+        lowBatteryShown += node
+    }
 
-    override fun cancelLowBatteryNotification(node: Node) {}
+    override suspend fun updateLowBatteryNotification(node: Node, isRemote: Boolean) {
+        lowBatteryUpdated += node
+    }
 
-    override fun clearClientNotification(notification: ClientNotification) {}
+    override fun cancelLowBatteryNotification(node: Node) {
+        lowBatteryCancelled += node
+    }
+
+    override suspend fun showClientNotification(
+        clientNotification: ClientNotification,
+        title: String,
+        severity: Notification.Type,
+    ) {
+        clientPosts += ClientPost(clientNotification, title, severity)
+    }
+
+    override fun clearClientNotification(clientNotification: ClientNotification) {
+        clearedClientNotifications += clientNotification
+    }
+
+    override suspend fun showFirmwareUpdateNotification(notice: FirmwareUpdateNotice): Boolean {
+        if (acceptsFirmwareUpdate) firmwareUpdateNotices += notice
+        return acceptsFirmwareUpdate
+    }
+
+    override suspend fun showReconnectBlockedNotification(title: String, message: String): Boolean {
+        if (acceptsReconnectBlocked) reconnectBlocked += title to message
+        return acceptsReconnectBlocked
+    }
+
+    override suspend fun cancelMessageNotification(contactKey: String) = Unit
 }

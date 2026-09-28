@@ -41,12 +41,12 @@ import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.QueryController
@@ -109,7 +109,7 @@ class RadioControllerImpl(
     private val meshPrefs: MeshPrefs,
     uiPrefs: UiPrefs,
     private val databaseManager: DatabaseManager,
-    private val notificationManager: NotificationManager,
+    private val serviceNotifications: MeshNotificationManager,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
     radioConfigRepository: RadioConfigRepository,
     scope: CoroutineScope,
@@ -321,7 +321,7 @@ class RadioControllerImpl(
         messageProcessor.value.clearEarlyPackets()
         databaseManager.switchActiveDatabase(deviceAddr)
         nodeManager.clear()
-        notificationManager.cancelAll()
+        serviceNotifications.clearNotifications()
         nodeManager.loadCachedNodeDB()
         // Commit the persisted selection last. MeshPrefs writes asynchronously, so the transport's synchronous
         // selected-address snapshot remains the rollback authority for a rapid subsequent selection.
@@ -349,7 +349,7 @@ class RadioControllerImpl(
             attemptRollback("fail-closed connection-identity clear") { nodeManager.clearConnectionIdentity() }
             attemptRollback("fail-closed node-state clear") { nodeManager.clear() }
             attemptRollback("fail-closed early-packet clear") { messageProcessor.value.clearEarlyPackets() }
-            attemptRollback("fail-closed notification clear") { notificationManager.cancelAll() }
+            attemptRollback("fail-closed notification clear") { serviceNotifications.clearNotifications() }
             attemptRollback("fail-closed persisted selection") { meshPrefs.setDeviceAddress(null) }
             attemptRollback("fail-closed transport selection") {
                 check(radioInterfaceService.setDeviceAddress(null)) { "Transport rejected fail-closed deselection" }
@@ -362,7 +362,7 @@ class RadioControllerImpl(
             nodeManager.clearConnectionIdentity()
             nodeManager.clear()
             messageProcessor.value.clearEarlyPackets()
-            notificationManager.cancelAll()
+            serviceNotifications.clearNotifications()
             nodeManager.loadCachedNodeDB()
         }
         attemptRollback("transport selection") {

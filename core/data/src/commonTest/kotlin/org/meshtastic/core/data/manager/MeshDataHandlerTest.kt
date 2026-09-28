@@ -54,7 +54,6 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -96,7 +95,6 @@ class MeshDataHandlerTest {
     private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
-    private val notificationManager: NotificationManager = mock(MockMode.autofill)
     private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
     private val dataMapper: MeshDataMapper = mock(MockMode.autofill)
@@ -156,7 +154,6 @@ class MeshDataHandlerTest {
                 packetHandler = packetHandler,
                 serviceStateWriter = serviceRepository,
                 packetRepository = lazy { packetRepository },
-                notificationManager = notificationManager,
                 serviceNotifications = serviceNotifications,
                 analytics = analytics,
                 dataMapper = dataMapper,
@@ -684,7 +681,47 @@ class MeshDataHandlerTest {
 
         // Still stored, so it can reappear in the invitations list if the user later deletes the channel.
         assertEquals(1, meshBeaconRepository.offers.value.size)
-        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) {
+            serviceNotifications.showMeshBeaconNotification(any())
+        }
+    }
+
+    @Test
+    fun `mesh beacon offering a channel the radio lacks notifies with the offer`() = testScope.runTest {
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
+        val beacon =
+            MeshBeacon.Builder()
+                .also { wb ->
+                    wb.message = "Join us"
+                    wb.offer_channel = ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build()
+                }
+                .build()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.MESH_BEACON_APP
+                                wb.payload = beacon.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                from = "!remote",
+                bytes = beacon.encode().toByteString(),
+                dataType = PortNum.MESH_BEACON_APP.value,
+            )
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.showMeshBeaconNotification(meshBeaconRepository.offers.value.single())
+        }
     }
 
     // --- Store-and-Forward handling ---
@@ -1985,6 +2022,78 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         verifySuspend { packetRepository.insert(any(), 123, any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `received waypoint notifies on the waypoint path`() = testScope.runTest {
+        handler.waypointMessageFormatter = { name -> "Waypoint received: $name" }
+        every { packetRepository.getWaypoints() } returns flowOf(emptyList())
+        every { nodeManager.getNodeById(any()) } returns
+            Node(num = 999, user = User.Builder().also { wb -> wb.long_name = "Hawk Ridge" }.build())
+        val packet =
+            waypointPacket(
+                txId = 506,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.name = "Camp"
+                        wb.expire = Int.MAX_VALUE
+                    }
+                    .build(),
+            )
+        stubWaypointPersistDependencies(506)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.updateWaypointNotification(
+                any(),
+                "Hawk Ridge",
+                "Waypoint received: Camp",
+                42,
+                false,
+            )
+        }
+    }
+
+    @Test
+    fun `critical alert notifies on the alert path with its conversation`() = testScope.runTest {
+        val payload = "Fire at camp".encodeToByteArray().toByteString()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 507
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.ALERT_APP
+                                wb.payload = payload
+                            }
+                            .build()
+                }
+                .build()
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                id = 507,
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = payload,
+                dataType = PortNum.ALERT_APP.value,
+            )
+        everySuspend { packetRepository.findPacketsWithId(507) } returns emptyList()
+        everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
+        every { messageFilter.shouldFilter(any(), any()) } returns false
+        every { nodeManager.getNodeById("!remote") } returns
+            Node(num = 456, user = User.Builder().also { wb -> wb.long_name = "Remote User" }.build())
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { serviceNotifications.showAlertNotification("0^all", "Remote User", "Fire at camp") }
     }
 
     @Test

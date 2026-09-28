@@ -24,6 +24,8 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -35,8 +37,8 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
@@ -58,7 +60,7 @@ class TelemetryPacketHandlerImplTest {
 
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val connectionManager = mock<MeshConnectionManager>(MockMode.autofill)
-    private val notificationManager = mock<NotificationManager>(MockMode.autofill)
+    private val serviceNotifications = mock<MeshNotificationManager>(MockMode.autofill)
     private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
 
     private val testDispatcher = StandardTestDispatcher()
@@ -91,7 +93,7 @@ class TelemetryPacketHandlerImplTest {
             TelemetryPacketHandlerImpl(
                 nodeManager = nodeManager,
                 connectionManager = lazy { connectionManager },
-                notificationManager = notificationManager,
+                serviceNotifications = serviceNotifications,
                 radioInterfaceService = radioInterfaceService,
                 scope = testScope.asServiceScope(),
             )
@@ -337,6 +339,88 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum, radioSession)
         advanceUntilIdle()
 
-        // No dispatch call — battery is healthy
+        verifySuspend(VerifyMode.not) { serviceNotifications.showLowBatteryNotification(any(), any()) }
+        verify { serviceNotifications.cancelLowBatteryNotification(Node(num = myNodeNum)) }
     }
+
+    @Test
+    fun `low local battery posts on the local low-battery path`() = testScope.runTest {
+        handler.handleTelemetry(
+            makeTelemetryPacket(myNodeNum, lowBatteryTelemetry()),
+            makeDataPacket(myNodeNum),
+            myNodeNum,
+            radioSession,
+        )
+        advanceUntilIdle()
+
+        verifySuspend { serviceNotifications.showLowBatteryNotification(Node(num = myNodeNum), isRemote = false) }
+    }
+
+    @Test
+    fun `later low readings refresh the warning instead of alerting again`() = testScope.runTest {
+        repeat(2) {
+            handler.handleTelemetry(
+                makeTelemetryPacket(myNodeNum, lowBatteryTelemetry()),
+                makeDataPacket(myNodeNum),
+                myNodeNum,
+                radioSession,
+            )
+            advanceUntilIdle()
+        }
+
+        verifySuspend(VerifyMode.exactly(1)) { serviceNotifications.showLowBatteryNotification(any(), any()) }
+        verifySuspend(VerifyMode.exactly(1)) { serviceNotifications.updateLowBatteryNotification(any(), any()) }
+    }
+
+    @Test
+    fun `a reading with voltage but no battery level neither warns nor clears`() = testScope.runTest {
+        val noLevel =
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.voltage = 3.4f }.build()
+                }
+                .build()
+
+        handler.handleTelemetry(
+            makeTelemetryPacket(myNodeNum, noLevel),
+            makeDataPacket(myNodeNum),
+            myNodeNum,
+            radioSession,
+        )
+        advanceUntilIdle()
+
+        verifySuspend(VerifyMode.not) { serviceNotifications.showLowBatteryNotification(any(), any()) }
+        verify(VerifyMode.not) { serviceNotifications.cancelLowBatteryNotification(any()) }
+    }
+
+    @Test
+    fun `low battery on a remote favorite posts on the remote low-battery path`() = testScope.runTest {
+        val favorite = Node(num = remoteNodeNum, isFavorite = true)
+        every { nodeManager.nodeDBbyNodeNum } returns
+            mapOf(myNodeNum to Node(num = myNodeNum), remoteNodeNum to favorite)
+
+        handler.handleTelemetry(
+            makeTelemetryPacket(remoteNodeNum, lowBatteryTelemetry()),
+            makeDataPacket(remoteNodeNum),
+            myNodeNum,
+            radioSession,
+        )
+        advanceUntilIdle()
+
+        verifySuspend { serviceNotifications.showLowBatteryNotification(favorite, isRemote = true) }
+    }
+
+    private fun lowBatteryTelemetry() = Telemetry.Builder()
+        .also { wb ->
+            wb.time = 1700000000
+            wb.device_metrics =
+                DeviceMetrics.Builder()
+                    .also { wb ->
+                        wb.battery_level = 10
+                        wb.voltage = 3.4f
+                    }
+                    .build()
+        }
+        .build()
 }

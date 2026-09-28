@@ -43,9 +43,8 @@ import org.meshtastic.core.common.util.crc32
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.proto.DeviceMetadata
@@ -70,7 +69,7 @@ import org.meshtastic.proto.Position as ProtoPosition
 class NodeManagerImplTest {
 
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
-    private val notificationManager: NotificationManager = mock(MockMode.autofill)
+    private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val testScope = TestScope()
 
@@ -79,7 +78,7 @@ class NodeManagerImplTest {
     @BeforeTest
     fun setUp() {
         nodeManager =
-            NodeManagerImpl(nodeRepository, notificationManager, radioInterfaceService, testScope.asServiceScope())
+            NodeManagerImpl(nodeRepository, serviceNotifications, radioInterfaceService, testScope.asServiceScope())
         // Override the compose-resources formatter so notification dispatch is deterministic in the
         // plain-JVM test env (getStringSuspend does not resolve here). Tests that assert "no dispatch"
         // still hold: the override only changes the title, not whether dispatch fires.
@@ -1142,7 +1141,7 @@ class NodeManagerImplTest {
         assertNull(nodeManager.nodeDBbyNodeNum[retiredNum])
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
         verifySuspend(mode = VerifyMode.not) { nodeRepository.insertMetadata(any(), any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     @Test
@@ -1194,7 +1193,7 @@ class NodeManagerImplTest {
         assertNull(nodeManager.nodeDBbyNodeNum[retiredNum])
         assertEquals("Canonical", nodeManager.nodeDBbyNodeNum[canonicalNum]?.user?.long_name)
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     @Test
@@ -1228,7 +1227,7 @@ class NodeManagerImplTest {
         assertEquals(replacementKey, replacement.publicKey)
         assertEquals("Replacement", replacement.user.long_name)
         verifySuspend(mode = VerifyMode.exactly(1)) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.exactly(1)) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.exactly(1)) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     @Test
@@ -1266,7 +1265,7 @@ class NodeManagerImplTest {
 
         assertNull(nodeManager.nodeDBbyNodeNum[retiredNum])
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     @Test
@@ -1322,7 +1321,7 @@ class NodeManagerImplTest {
         assertEquals(validPk, canonical.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     // 2. Placeholder duplicate
@@ -1384,7 +1383,7 @@ class NodeManagerImplTest {
         assertEquals("Migrated", canonical.user.long_name)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     // 3. Different-key conflict
@@ -1420,7 +1419,7 @@ class NodeManagerImplTest {
         assertEquals("Other", otherNode.user.long_name)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     // 4. Multiple same-key matches
@@ -1454,7 +1453,7 @@ class NodeManagerImplTest {
         assertEquals("Incoming", nodeManager.nodeDBbyNodeNum[fromNum]?.user?.long_name)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     @Test
@@ -1484,7 +1483,7 @@ class NodeManagerImplTest {
         assertEquals(validPk, incoming.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     @Test
@@ -1540,7 +1539,7 @@ class NodeManagerImplTest {
         assertEquals(456, incoming.position.longitude_i)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     // 5. Local authoritative renumber
@@ -1573,7 +1572,7 @@ class NodeManagerImplTest {
         assertEquals(validPk, localNode.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.exactly(1)) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     // 6. New-node notification admission
@@ -1601,7 +1600,7 @@ class NodeManagerImplTest {
         assertNotNull(result)
         assertEquals("Replayed Node", result.user.long_name)
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     @Test
@@ -1631,7 +1630,7 @@ class NodeManagerImplTest {
 
         assertEquals("Retried Baseline Node", nodeManager.nodeDBbyNodeNum[replayedNodeNum]?.user?.long_name)
         assertEquals(1234, nodeManager.myNodeNum.value)
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
         assertEquals(2, reductionCount, "the forced CAS mismatch must execute the reducer twice")
     }
 
@@ -1651,8 +1650,10 @@ class NodeManagerImplTest {
                 .build()
         enableDbWrites()
 
-        val captured = mutableListOf<Notification>()
-        everySuspend { notificationManager.dispatch(capture(captured)) } returns true
+        val captured = mutableListOf<Node>()
+        val titles = mutableListOf<String>()
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(captured), capture(titles)) } returns
+            Unit
 
         nodeManager.handleReceivedUser(newNodeNum, newUser)
         testScope.advanceUntilIdle()
@@ -1663,13 +1664,11 @@ class NodeManagerImplTest {
         assertEquals(newPk, result.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.exactly(1)) { nodeRepository.upsert(any()) }
-        // Strengthen: capture the dispatched Notification and verify payload + routing fields, not just the call count.
+        // Strengthen: capture the posted node and title, not just the call count.
         assertEquals(1, captured.size)
-        val n = captured.first()
-        assertEquals(newNodeNum, n.id)
-        assertEquals("New Node", n.message)
-        assertEquals(Notification.Category.NodeEvent, n.category)
-        assertEquals("meshtastic://meshtastic/nodes/$newNodeNum", n.deepLinkUri)
+        assertEquals(newNodeNum, captured.single().num)
+        assertEquals("New Node", captured.single().user.long_name)
+        assertEquals("New node seen: NEW", titles.single())
     }
 
     // 7. Invalid / malformed keys (null, empty, ERROR) are treated as NoMatch
@@ -1852,7 +1851,7 @@ class NodeManagerImplTest {
         testScope.advanceUntilIdle()
 
         // No notification fired for any of the three outcomes.
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     // 11. byId consistency after stale removal — when stale and canonical share a user ID,
@@ -2443,17 +2442,7 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedUser(nodeNum, user)
         testScope.advanceUntilIdle()
 
-        verifySuspend {
-            notificationManager.dispatch(
-                Notification(
-                    title = "New node seen: TST",
-                    message = "Test User",
-                    category = Notification.Category.NodeEvent,
-                    id = nodeNum,
-                    deepLinkUri = "meshtastic://meshtastic/nodes/$nodeNum",
-                ),
-            )
-        }
+        verifySuspend { serviceNotifications.showNewNodeSeenNotification(any(), "New node seen: TST") }
     }
 
     // 22. Incoming at the canonical num reconciles in memory only and preserves its placeholder history.
@@ -2516,7 +2505,7 @@ class NodeManagerImplTest {
         assertEquals(4, canonical.channel)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     // 23. Incoming canonical absent from index entirely creates from packet, removes noncanonical, no notify.
@@ -2550,7 +2539,7 @@ class NodeManagerImplTest {
         assertEquals(canonicalKey, canonical.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     // 24. Neither num canonical preserves both with no side effects.
@@ -2590,7 +2579,7 @@ class NodeManagerImplTest {
         assertEquals("Bravo", bravo.user.long_name)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     // 25. Different established valid key at the canonical num is preserved as a conflict.
@@ -2630,7 +2619,7 @@ class NodeManagerImplTest {
         assertEquals(canonicalKey, atNoncanonical.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     // 26. Local classification and the node index share one atomic CAS state.
@@ -2666,7 +2655,7 @@ class NodeManagerImplTest {
         assertEquals(newLocalNum, nodeManager.myNodeNum.value)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.exactly(1)) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     @Test
@@ -2696,7 +2685,7 @@ class NodeManagerImplTest {
         assertNull(nodeManager.nodeDBbyNodeNum[num])
         assertFalse(nodeManager.isNodeDbReady.value)
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
-        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
     }
 
     @Test
@@ -2771,8 +2760,8 @@ class NodeManagerImplTest {
         advanceUntilIdle()
 
         // Assert
-        verify(VerifyMode.atLeast(1)) { notificationManager.cancel(num1) }
-        verify(VerifyMode.atLeast(1)) { notificationManager.cancel(num2) }
+        verify(VerifyMode.atLeast(1)) { serviceNotifications.cancelNewNodeNotification(num1) }
+        verify(VerifyMode.atLeast(1)) { serviceNotifications.cancelNewNodeNotification(num2) }
     }
 
     @Test
@@ -2782,7 +2771,7 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedUser(num, userWithKey(key, "Retiring", "RT"), manuallyVerified = false)
         advanceUntilIdle()
         var nodePresentAtCancellation: Boolean? = null
-        every { notificationManager.cancel(num) } calls
+        every { serviceNotifications.cancelNewNodeNotification(num) } calls
             {
                 nodePresentAtCancellation = num in nodeManager.nodeDBbyNodeNum
             }
@@ -2791,7 +2780,7 @@ class NodeManagerImplTest {
 
         assertEquals(false, nodePresentAtCancellation, "retirement must commit before cancellation side effects")
         assertNull(nodeManager.nodeDBbyNodeNum[num])
-        verify(VerifyMode.exactly(1)) { notificationManager.cancel(num) }
+        verify(VerifyMode.exactly(1)) { serviceNotifications.cancelNewNodeNotification(num) }
     }
 
     @Test
@@ -2801,8 +2790,8 @@ class NodeManagerImplTest {
         val key = ByteArray(32) { 0x03 }.toByteString()
         val titleStarted = CompletableDeferred<Unit>()
         val releaseTitle = CompletableDeferred<Unit>()
-        val dispatched = mutableListOf<Notification>()
-        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        val dispatched = mutableListOf<Node>()
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatched), any()) } returns Unit
         nodeManager.notificationTitleFormatter = { shortName ->
             titleStarted.complete(Unit)
             releaseTitle.await()
@@ -2815,7 +2804,7 @@ class NodeManagerImplTest {
         releaseTitle.complete(Unit)
         advanceUntilIdle()
 
-        assertTrue(dispatched.none { it.id == num && it.message == "NewNode" })
+        assertTrue(dispatched.none { it.num == num && it.user.long_name == "NewNode" })
     }
 
     @Test
@@ -2825,8 +2814,8 @@ class NodeManagerImplTest {
         val key = ByteArray(32) { 0x04 }.toByteString()
         val titleStarted = CompletableDeferred<Unit>()
         val releaseTitle = CompletableDeferred<Unit>()
-        val dispatched = mutableListOf<Notification>()
-        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        val dispatched = mutableListOf<Node>()
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatched), any()) } returns Unit
         nodeManager.notificationTitleFormatter = { shortName ->
             titleStarted.complete(Unit)
             releaseTitle.await()
@@ -2839,7 +2828,7 @@ class NodeManagerImplTest {
         releaseTitle.complete(Unit)
         advanceUntilIdle()
 
-        assertTrue(dispatched.none { it.id == num && it.message == "NewNode" })
+        assertTrue(dispatched.none { it.num == num && it.user.long_name == "NewNode" })
     }
 
     @Test
@@ -2850,8 +2839,8 @@ class NodeManagerImplTest {
         val key2 = ByteArray(32) { 0x06 }.toByteString()
         val titleStarted = CompletableDeferred<Unit>()
         val releaseTitle = CompletableDeferred<Unit>()
-        val dispatched = mutableListOf<Notification>()
-        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        val dispatched = mutableListOf<Node>()
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatched), any()) } returns Unit
         nodeManager.notificationTitleFormatter = { shortName ->
             titleStarted.complete(Unit)
             releaseTitle.await()
@@ -2866,7 +2855,7 @@ class NodeManagerImplTest {
 
         val node = nodeManager.nodeDBbyNodeNum[num]
         assertEquals("Other", node?.user?.long_name)
-        assertTrue(dispatched.none { it.message == "First" }, "notification for 'First' must be suppressed")
+        assertTrue(dispatched.none { it.user.long_name == "First" }, "notification for 'First' must be suppressed")
     }
 
     @Test
@@ -2878,14 +2867,15 @@ class NodeManagerImplTest {
         advanceUntilIdle()
         nodeManager.applyTrustedIdentityMigrations(listOf(oldNum))
         advanceUntilIdle()
-        val replayDispatches = mutableListOf<Notification>()
-        everySuspend { notificationManager.dispatch(capture(replayDispatches)) } returns true
+        val replayDispatches = mutableListOf<Node>()
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(replayDispatches), any()) } returns
+            Unit
         // Now replay: the canonical number (crc32(key)) has NOT appeared yet
         nodeManager.handleReceivedUser(oldNum, userWithKey(key, "Replay", "RP"), manuallyVerified = false)
         advanceUntilIdle()
         // The replayed node should NOT appear in nodeDBbyNodeNum at oldNum
         assertNull(nodeManager.nodeDBbyNodeNum[oldNum])
-        assertTrue(replayDispatches.none { it.id == oldNum })
+        assertTrue(replayDispatches.none { it.num == oldNum })
     }
 
     @Test
@@ -2902,7 +2892,9 @@ class NodeManagerImplTest {
         advanceUntilIdle()
 
         assertNull(nodeManager.nodeDBbyNodeNum[num])
-        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) {
+            serviceNotifications.showNewNodeSeenNotification(any(), any())
+        }
     }
 
     @Test
@@ -2917,8 +2909,8 @@ class NodeManagerImplTest {
         advanceUntilIdle()
         // Capture dispatches to verify the reuse notification specifically,
         // not the initial sighting from the setup above.
-        val dispatched = mutableListOf<Notification>()
-        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        val dispatched = mutableListOf<Node>()
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatched), any()) } returns Unit
         nodeManager.setNodeDbReady(true)
         // Replay with different key — should be allowed as legitimate reuse
         nodeManager.handleReceivedUser(num, userWithKey(newKey, "New", "NW"), manuallyVerified = false)
@@ -2928,7 +2920,7 @@ class NodeManagerImplTest {
         assertEquals("New", newNode.user.long_name)
         assertEquals(
             1,
-            dispatched.count { it.id == num && it.message == "New" },
+            dispatched.count { it.num == num && it.user.long_name == "New" },
             "exactly one notification for the reuse at $num",
         )
     }
@@ -2978,15 +2970,16 @@ class NodeManagerImplTest {
         nodeManager.applyTrustedIdentityMigrations(listOf(oldNum))
         advanceUntilIdle()
         // Early replay of old number User packet — should be suppressed
-        val dispatchedBefore = mutableListOf<Notification>()
-        everySuspend { notificationManager.dispatch(capture(dispatchedBefore)) } returns true
+        val dispatchedBefore = mutableListOf<Node>()
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatchedBefore), any()) } returns
+            Unit
         nodeManager.handleReceivedUser(oldNum, userWithKey(key, "Replay", "RP"), manuallyVerified = false)
         advanceUntilIdle()
         // The old number should NOT be in nodeDB
         assertNull(nodeManager.nodeDBbyNodeNum[oldNum])
         // No notification should have been dispatched for the old number replay
         // (the notification dispatch was captured; check none is for oldNum)
-        val oldNumNotifications = dispatchedBefore.filter { it.id == oldNum }
+        val oldNumNotifications = dispatchedBefore.filter { it.num == oldNum }
         assertTrue(oldNumNotifications.isEmpty(), "No notification should be dispatched for retired oldNum")
     }
 
@@ -2996,11 +2989,11 @@ class NodeManagerImplTest {
         val num = 9000000000.toInt()
         val key = ByteArray(32) { 0x0b }.toByteString()
         nodeManager.setMyNodeNum(1230588578)
-        val dispatched = mutableListOf<Notification>()
-        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        val dispatched = mutableListOf<Node>()
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatched), any()) } returns Unit
         nodeManager.handleReceivedUser(num, userWithKey(key, "Genuine Remote", "GR"), manuallyVerified = false)
         advanceUntilIdle()
-        val numNotifications = dispatched.filter { it.id == num }
+        val numNotifications = dispatched.filter { it.num == num }
         assertEquals(1, numNotifications.size, "Exactly one notification for genuine new node")
     }
 
@@ -3129,13 +3122,13 @@ class NodeManagerImplTest {
         )
 
         // Stale same-key replay still suppressed, no notification dispatched for the retired old number.
-        val dispatched = mutableListOf<Notification>()
-        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        val dispatched = mutableListOf<Node>()
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatched), any()) } returns Unit
         nodeManager.handleReceivedUser(num, userWithKey(validPk, "Replay", "RP"), manuallyVerified = false)
         advanceUntilIdle()
 
         assertNull(nodeManager.nodeDBbyNodeNum[num])
-        assertTrue(dispatched.none { it.id == num }, "no notification for retired-number replay")
+        assertTrue(dispatched.none { it.num == num }, "no notification for retired-number replay")
     }
 
     @Test
@@ -3250,20 +3243,23 @@ class NodeManagerImplTest {
             advanceUntilIdle()
 
             // Same-key replay still suppressed after the repeated migration.
-            val suppressedDispatches = mutableListOf<Notification>()
-            everySuspend { notificationManager.dispatch(capture(suppressedDispatches)) } returns true
+            val suppressedDispatches = mutableListOf<Node>()
+            everySuspend {
+                serviceNotifications.showNewNodeSeenNotification(capture(suppressedDispatches), any())
+            } returns Unit
             nodeManager.handleReceivedUser(num, userWithKey(oldKey, "Replay", "RP"), manuallyVerified = false)
             advanceUntilIdle()
             assertNull(
                 nodeManager.nodeDBbyNodeNum[num],
                 "same-key replay after repeated migration must stay suppressed",
             )
-            assertTrue(suppressedDispatches.none { it.id == num })
+            assertTrue(suppressedDispatches.none { it.num == num })
 
             // Distinct valid unrepresented key is still accepted as a legitimate reuse, clearing retirement + hint and
             // emitting exactly one replacement notification.
-            val reuseDispatches = mutableListOf<Notification>()
-            everySuspend { notificationManager.dispatch(capture(reuseDispatches)) } returns true
+            val reuseDispatches = mutableListOf<Node>()
+            everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(reuseDispatches), any()) } returns
+                Unit
             nodeManager.handleReceivedUser(num, userWithKey(reuseKey, "Replacement", "NP"), manuallyVerified = false)
             advanceUntilIdle()
 
@@ -3271,6 +3267,6 @@ class NodeManagerImplTest {
             assertNotNull(reused)
             assertEquals("Replacement", reused.user.long_name)
             assertEquals(reuseKey, reused.publicKey)
-            assertEquals(1, reuseDispatches.count { it.id == num && it.message == "Replacement" })
+            assertEquals(1, reuseDispatches.count { it.num == num && it.user.long_name == "Replacement" })
         }
 }

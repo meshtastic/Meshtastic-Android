@@ -25,7 +25,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioController
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -40,6 +42,7 @@ class ReactionReceiver :
     KoinComponent {
 
     private val radioController: RadioController by inject()
+    private val meshServiceNotifications: MeshNotificationManager by inject()
 
     private val dispatchers: CoroutineDispatchers by inject()
 
@@ -53,16 +56,20 @@ class ReactionReceiver :
         val reaction = intent.getStringExtra(EXTRA_EMOJI) ?: intent.getStringExtra(EXTRA_REACTION) ?: return
         val replyId = intent.getIntExtra(EXTRA_REPLY_ID, intent.getIntExtra(EXTRA_PACKET_ID, 0))
 
-        val pendingResult = goAsync()
+        val pendingResult: PendingResult? = goAsync()
         scope.launch {
             try {
                 radioController.sendReaction(reaction, replyId, contactKey)
+                // The action opens no UI, so re-posting the conversation with the reaction is the only feedback the
+                // shade or a watch gets that the tap worked.
+                safeCatching { meshServiceNotifications.refreshConversationAfterReply(contactKey) }
+                    .onFailure { Logger.e(it) { "Refresh after reaction failed" } }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Logger.e(e) { "Error sending reaction" }
             } finally {
-                pendingResult.finish()
+                pendingResult?.finish()
             }
         }
     }

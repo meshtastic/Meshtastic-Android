@@ -42,6 +42,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -116,6 +117,7 @@ class MeshNotificationManagerImplConversationTest {
         },
         radioConfigRepository = lazy { radioConfigRepository },
         radioOperationLock = RadioOperationLock(),
+        firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository(),
         scope = scope.asServiceScope(),
     )
 
@@ -239,6 +241,22 @@ class MeshNotificationManagerImplConversationTest {
     }
 
     @Test
+    fun `conversation actions work from a watch without opening the phone`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
+        mockHistory(message("hello", read = false, receivedTime = 1_000))
+
+        manager.updateMessageNotification("0^all", "Hawk Ridge", "hello", isBroadcast = true, channelName = "LongFast")
+        advanceUntilIdle()
+
+        val actions = activeByTag("message").single().notification.actions.orEmpty()
+        val reply = actions.single { it.semanticAction == Notification.Action.SEMANTIC_ACTION_REPLY }
+        assertTrue(reply.allowGeneratedReplies, "Smart Reply suggestions on a watch need generated replies allowed")
+        val thumbsUp = actions.single { it.semanticAction == Notification.Action.SEMANTIC_ACTION_THUMBS_UP }
+        assertEquals(false, thumbsUp.extras.getBoolean("android.support.action.showsUserInterface", true))
+        assertTrue(actions.any { it.semanticAction == Notification.Action.SEMANTIC_ACTION_MARK_AS_READ })
+    }
+
+    @Test
     @Config(sdk = [29])
     fun `conversation notifications post on Android 10`() = runWithRenderScope { scope ->
         val manager = createManager(scope).also { it.initChannels() }
@@ -313,7 +331,7 @@ class MeshNotificationManagerImplConversationTest {
             val manager = createManager(scope).also { it.initChannels() }
             // SERVICE_NOTIFY_ID is 101; a node whose num is also 101 used to overwrite the foreground notification.
             manager.updateServiceStateNotification(ConnectionState.Connected, telemetry = null)
-            manager.showOrUpdateLowBatteryNotification(Node(num = 101), isRemote = false)
+            manager.showLowBatteryNotification(Node(num = 101), isRemote = false)
             runUntilSettled {
                 systemNotificationManager.activeNotifications.any { it.id == 101 && it.tag == null } &&
                     activeByTag("low_battery").any { it.id == 101 }

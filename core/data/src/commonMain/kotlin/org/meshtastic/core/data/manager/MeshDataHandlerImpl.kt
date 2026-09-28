@@ -57,8 +57,6 @@ import org.meshtastic.core.repository.MessageAnnouncement
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -73,8 +71,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.critical_alert
 import org.meshtastic.core.resources.error_duty_cycle
 import org.meshtastic.core.resources.getStringSuspend
-import org.meshtastic.core.resources.mesh_beacon_notification_body
-import org.meshtastic.core.resources.mesh_beacon_notification_title
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.waypoint_received
 import org.meshtastic.proto.MeshBeacon
@@ -103,7 +99,6 @@ class MeshDataHandlerImpl(
     private val packetHandler: PacketHandler,
     private val serviceStateWriter: ServiceStateWriter,
     private val packetRepository: Lazy<PacketRepository>,
-    private val notificationManager: NotificationManager,
     private val serviceNotifications: MeshNotificationManager,
     private val analytics: PlatformAnalytics,
     private val dataMapper: MeshDataMapper,
@@ -260,15 +255,7 @@ class MeshDataHandlerImpl(
                 // does not warrant a notification.
                 val channelSet = radioConfigRepository.channelSetFlow.first()
                 if (beacon.isAlreadyJoined(channelSet.lora_config, channelSet.settings)) return@launchSessionWork
-                notificationManager.dispatch(
-                    Notification(
-                        title = getStringSuspend(Res.string.mesh_beacon_notification_title),
-                        message = offer.message.ifBlank { getStringSuspend(Res.string.mesh_beacon_notification_body) },
-                        category = Notification.Category.MeshBeacon,
-                        // Literal URI avoids a core:navigation module dep (see NodeManagerImpl).
-                        deepLinkUri = "meshtastic://meshtastic/discovery",
-                    ),
-                )
+                serviceNotifications.showMeshBeaconNotification(offer)
             }
         }
     }
@@ -554,13 +541,10 @@ class MeshDataHandlerImpl(
             // conversation on screen — only mute silences it.
             dataPacket.dataType == PortNum.ALERT_APP.value ->
                 if (!muted) {
-                    notificationManager.dispatch(
-                        Notification(
-                            title = getSenderName(dataPacket),
-                            message = dataPacket.alert ?: getStringSuspend(Res.string.critical_alert),
-                            category = Notification.Category.Alert,
-                            contactKey = contactKey,
-                        ),
+                    serviceNotifications.showAlertNotification(
+                        contactKey,
+                        getSenderName(dataPacket),
+                        dataPacket.alert ?: getStringSuspend(Res.string.critical_alert),
                     )
                 }
 
@@ -576,6 +560,11 @@ class MeshDataHandlerImpl(
                     MessageAnnouncement.Alert -> updateNotification(contactKey, dataPacket, isSilent = false)
                 }
         }
+    }
+
+    /** Test seam over the waypoint notification text; compose-resources cannot load in the plain-JVM tests. */
+    internal var waypointMessageFormatter: suspend (String) -> String = { waypointName ->
+        getStringSuspend(Res.string.waypoint_received, waypointName)
     }
 
     private suspend fun getSenderName(packet: DataPacket): String {
@@ -609,15 +598,13 @@ class MeshDataHandlerImpl(
             }
 
             PortNum.WAYPOINT_APP.value -> {
-                val message = getStringSuspend(Res.string.waypoint_received, dataPacket.waypoint!!.name)
-                notificationManager.dispatch(
-                    Notification(
-                        title = getSenderName(dataPacket),
-                        message = message,
-                        category = Notification.Category.Message,
-                        contactKey = contactKey,
-                        isSilent = isSilent,
-                    ),
+                val waypoint = dataPacket.waypoint!!
+                serviceNotifications.updateWaypointNotification(
+                    contactKey,
+                    getSenderName(dataPacket),
+                    waypointMessageFormatter(waypoint.name),
+                    waypoint.id,
+                    isSilent,
                 )
             }
 

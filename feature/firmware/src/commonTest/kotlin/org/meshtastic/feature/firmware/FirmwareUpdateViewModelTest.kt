@@ -26,6 +26,7 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +50,8 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareUpdateProgress
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -68,6 +71,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 /**
@@ -162,7 +166,10 @@ class FirmwareUpdateViewModelTest {
         analytics,
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
         bluetoothRepository,
+        firmwareUpdateStatusRepository,
     )
+
+    private val firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
 
     @Test
     fun `initialization checks for updates and transitions to Ready`() = runTest {
@@ -266,6 +273,30 @@ class FirmwareUpdateViewModelTest {
                 state is FirmwareUpdateState.VerificationFailed,
             "Final state was $state",
         )
+    }
+
+    @Test
+    fun `a running flash publishes its progress for the service notification`() = runTest {
+        advanceUntilIdle()
+        val transferring = CompletableDeferred<Unit>()
+        val message = UiText.DynamicString("Writing firmware")
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Updating(ProgressState(message = message, progress = 0.42f)))
+                transferring.await()
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+
+        assertEquals(FirmwareUpdateProgress(message, percent = 42), firmwareUpdateStatusRepository.progress.value)
+
+        transferring.complete(Unit)
+        advanceUntilIdle()
+        assertNotEquals(42, firmwareUpdateStatusRepository.progress.value?.percent)
     }
 
     @Test
