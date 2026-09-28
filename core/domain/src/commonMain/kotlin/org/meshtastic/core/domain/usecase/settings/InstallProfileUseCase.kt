@@ -177,7 +177,11 @@ constructor(
         }
         lmc.paxcounter?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.paxcounter = it }.build()) }
         lmc.statusmessage?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.statusmessage = it }.build()) }
+        lmc.traffic_management?.let {
+            setModuleConfig(ModuleConfig.Builder().also { wb -> wb.traffic_management = it }.build())
+        }
         lmc.tak?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.tak = it }.build()) }
+        lmc.mesh_beacon?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.mesh_beacon = it }.build()) }
     }
 
     private suspend fun AdminEditScope.installChannelsAndLora(

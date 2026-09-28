@@ -85,6 +85,9 @@ class ModuleConfigDataSource(private val moduleConfigStore: CoreModuleConfigData
             config.statusmessage != null ->
                 current.newBuilder().also { wb -> wb.statusmessage = config.statusmessage }.build()
 
+            config.traffic_management != null ->
+                current.newBuilder().also { wb -> wb.traffic_management = config.traffic_management }.build()
+
             config.tak != null -> current.newBuilder().also { wb -> wb.tak = config.tak }.build()
 
             config.mesh_beacon != null ->
