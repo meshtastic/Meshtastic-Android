@@ -35,13 +35,16 @@ import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSce
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.Scene
@@ -55,7 +58,10 @@ import org.meshtastic.core.repository.PlatformAnalytics
  * Shared [NavDisplay] wrapper that configures the standard Meshtastic entry decorators, scene strategies, and
  * transition animations for all platform hosts.
  *
- * This version supports multiple backstacks by accepting a [MultiBackstack] state holder.
+ * This version supports multiple backstacks by accepting a [MultiBackstack] state holder. Every tab's stack is
+ * decorated with that tab's own saveable-state and ViewModel-store decorators and only the active tab's entries reach
+ * [NavDisplay], so showing another tab clears nothing while an entry removed from any stack is still cleared.
+ * [entryProvider] must resolve the keys of every tab, not only the active one.
  */
 @Composable
 fun MeshtasticNavDisplay(
@@ -64,19 +70,28 @@ fun MeshtasticNavDisplay(
     modifier: Modifier = Modifier,
     analytics: PlatformAnalytics? = null,
 ) {
-    val backStack = multiBackstack.activeBackStack
-    MeshtasticNavDisplay(
-        backStack = backStack,
+    val activeTab = multiBackstack.currentTabRoute
+    MeshtasticNavDisplayHost(
+        backStack = multiBackstack.activeBackStack,
         onBack = { multiBackstack.goBack() },
-        entryProvider = entryProvider,
         modifier = modifier,
         analytics = analytics,
-    )
+    ) {
+        val entriesByTab =
+            multiBackstack.backStacks.mapValues { (tab, stack) ->
+                key(tab) {
+                    val keys = stack.toList()
+                    val isActive = tab == activeTab
+                    // Host providers close over the active stack, so a tab's entries are rebuilt when it activates.
+                    val entries = remember(keys, isActive) { keys.map(entryProvider) }
+                    rememberDecoratedNavEntries(entries, rememberMeshtasticEntryDecorators())
+                }
+            }
+        entriesByTab.getValue(activeTab)
+    }
 }
 
 /** Shared [NavDisplay] wrapper for a single backstack. */
-@Suppress("LongMethod")
-@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun MeshtasticNavDisplay(
     backStack: NavBackStack<NavKey>,
@@ -84,6 +99,39 @@ fun MeshtasticNavDisplay(
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     analytics: PlatformAnalytics? = null,
+) {
+    val decorators = rememberMeshtasticEntryDecorators()
+    MeshtasticNavDisplayHost(
+        backStack = backStack,
+        onBack =
+        onBack
+            ?: {
+                if (backStack.size > 1) {
+                    backStack.removeLastOrNull()
+                }
+            },
+        modifier = modifier,
+        analytics = analytics,
+    ) {
+        rememberDecoratedNavEntries(it, decorators, entryProvider)
+    }
+}
+
+@Composable
+private fun rememberMeshtasticEntryDecorators(): List<NavEntryDecorator<NavKey>> {
+    val saveableDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
+    val vmStoreDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
+    return remember(saveableDecorator, vmStoreDecorator) { listOf(saveableDecorator, vmStoreDecorator) }
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
+@Composable
+private fun MeshtasticNavDisplayHost(
+    backStack: NavBackStack<NavKey>,
+    onBack: () -> Unit,
+    analytics: PlatformAnalytics?,
+    modifier: Modifier = Modifier,
+    decorateEntries: @Composable (NavBackStack<NavKey>) -> List<NavEntry<NavKey>>,
 ) {
     // Root captured at first composition; a stale entry back handler can drain the stack mid-transition
     // and NavDisplay rejects an empty backstack (fatal in the field), so self-heal back to the root.
@@ -103,6 +151,8 @@ fun MeshtasticNavDisplay(
         DisposableEffect(tracker) { onDispose { tracker.dispose() } }
     }
 
+    val entries = decorateEntries(backStack)
+
     val listDetailSceneStrategy =
         rememberListDetailSceneStrategy<NavKey>(
             paneExpansionState = rememberPaneExpansionState(),
@@ -114,27 +164,13 @@ fun MeshtasticNavDisplay(
             paneExpansionDragHandle = { state -> PaneExpansionDragHandle(state) },
         )
 
-    val saveableDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
-    val vmStoreDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
-
-    val activeDecorators =
-        remember(backStack, saveableDecorator, vmStoreDecorator) { listOf(saveableDecorator, vmStoreDecorator) }
-
     // Fades are alpha, not movement, so they follow the theme's effects spec rather than a spatial one.
     val fadeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
     SharedTransitionLayout {
         NavDisplay(
-            backStack = backStack,
-            entryProvider = entryProvider,
-            entryDecorators = activeDecorators,
-            onBack =
-            onBack
-                ?: {
-                    if (backStack.size > 1) {
-                        backStack.removeLastOrNull()
-                    }
-                },
+            entries = entries,
+            onBack = onBack,
             // NavDisplay falls back to SinglePaneSceneStrategy automatically when none of these compute a Scene.
             sceneStrategies = listOf(DialogSceneStrategy(), listDetailSceneStrategy, supportingPaneSceneStrategy),
             sharedTransitionScope = this@SharedTransitionLayout,
