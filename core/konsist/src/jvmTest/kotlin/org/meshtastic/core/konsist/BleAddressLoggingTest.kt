@@ -29,12 +29,22 @@ import kotlin.test.assertTrue
  * attempt anonymised the hand-written log statements in `core/ble` and missed the Kable `identifier`, which stamps the
  * address onto *every* line the BLE library emits, plus further sites in the DFU transports and WiFi provisioning.
  *
- * Scoped to the BLE-adjacent modules so matching on the `address` suffix stays low-noise.
+ * Scoped to the BLE-adjacent modules so matching on the `address` suffix stays low-noise. That scope includes the
+ * transport modules, so TCP hosts and serial paths are anonymised the same way.
  */
 class BleAddressLoggingTest {
 
     private val scannedPathFragments =
-        listOf("/core/ble/", "/feature/firmware/", "/feature/wifi-provision/", "/feature/connections/")
+        listOf(
+            "/core/ble/",
+            "/core/network/",
+            "/core/service/",
+            "/feature/firmware/",
+            "/feature/wifi-provision/",
+            "/feature/connections/",
+            "/androidApp/",
+            "/desktopApp/",
+        )
 
     /**
      * Files where an address is used as an identity rather than as diagnostic text — building the connection string or
@@ -62,10 +72,12 @@ class BleAddressLoggingTest {
         val paths = scannedFiles().map { it.scanPath }
 
         assertTrue(paths.isNotEmpty(), emptyScanMessage("BLE-scoped scan"))
-        assertTrue(
-            paths.any { it.endsWith("KableBleConnection.kt") },
-            "expected core/ble sources in scope; got ${paths.size} files, e.g. ${paths.take(3)}",
-        )
+        for (file in listOf("KableBleConnection.kt", "BleRadioTransport.kt", "SharedRadioInterfaceService.kt")) {
+            assertTrue(
+                paths.any { it.endsWith(file) },
+                "expected $file in scope; got ${paths.size} files, e.g. ${paths.take(3)}",
+            )
+        }
     }
 
     @Test
