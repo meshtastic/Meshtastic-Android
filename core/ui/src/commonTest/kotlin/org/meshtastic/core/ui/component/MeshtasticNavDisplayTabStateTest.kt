@@ -33,6 +33,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import org.meshtastic.core.navigation.ConnectionsRoute
@@ -58,7 +60,7 @@ class MeshtasticNavDisplayTabStateTest {
     @Test
     fun tabKeepsSavedStateAndViewModelsWhileAnotherTabIsShown() = runComposeUiTest {
         lateinit var multiBackstack: MultiBackstack
-        setContent { multiBackstack = TwoTabHost() }
+        setContent { multiBackstack = TabHost() }
 
         onNodeWithText("nodes saveable=0").performClick()
         onNodeWithText("nodes saveable=1").assertIsDisplayed()
@@ -81,7 +83,7 @@ class MeshtasticNavDisplayTabStateTest {
     @Test
     fun poppedEntryDropsItsSavedStateAndViewModel() = runComposeUiTest {
         lateinit var multiBackstack: MultiBackstack
-        setContent { multiBackstack = TwoTabHost() }
+        setContent { multiBackstack = TabHost() }
 
         runOnIdle { multiBackstack.activeBackStack.add(NodesRoute.NodeDetail(destNum = 1)) }
         waitForIdle()
@@ -100,9 +102,29 @@ class MeshtasticNavDisplayTabStateTest {
     }
 
     @Test
-    fun entryRemovedFromAHiddenTabDropsItsViewModel() = runComposeUiTest {
+    fun entryPoppedFromAHiddenTabDropsItsViewModel() = runComposeUiTest {
         lateinit var multiBackstack: MultiBackstack
-        setContent { multiBackstack = TwoTabHost() }
+        setContent { multiBackstack = TabHost() }
+
+        runOnIdle { multiBackstack.activeBackStack.add(NodesRoute.NodeDetail(destNum = 1)) }
+        waitForIdle()
+        val detailViewModel = probes.getValue("detail")
+
+        runOnIdle { multiBackstack.navigateTopLevel(MapRoute.Map()) }
+        waitForIdle()
+        assertFalse(detailViewModel.cleared, "leaving the tab cleared its ViewModel")
+
+        runOnIdle { multiBackstack.backStacks.getValue(NodesRoute.Nodes).removeLastOrNull() }
+        waitForIdle()
+        onNodeWithText("map tab").assertIsDisplayed()
+        assertTrue(detailViewModel.cleared, "an entry popped while its tab was hidden kept its ViewModel")
+    }
+
+    // handleDeepLink switches tab and replaces its stack before the next composition.
+    @Test
+    fun deepLinkIntoAHiddenTabDropsTheEntriesItReplaces() = runComposeUiTest {
+        lateinit var multiBackstack: MultiBackstack
+        setContent { multiBackstack = TabHost() }
 
         runOnIdle { multiBackstack.activeBackStack.add(NodesRoute.NodeDetail(destNum = 1)) }
         waitForIdle()
@@ -115,27 +137,74 @@ class MeshtasticNavDisplayTabStateTest {
         runOnIdle { multiBackstack.handleDeepLink(listOf(NodesRoute.Nodes)) }
         waitForIdle()
         onNodeWithText("nodes saveable=0").assertIsDisplayed()
-        assertTrue(detailViewModel.cleared, "an entry removed while its tab was hidden kept its ViewModel")
+        assertTrue(detailViewModel.cleared, "an entry the deep link replaced kept its ViewModel")
     }
 
+    @Test
+    fun reselectingTheActiveTabDropsTheEntriesAboveItsRoot() = runComposeUiTest {
+        lateinit var multiBackstack: MultiBackstack
+        setContent { multiBackstack = TabHost() }
+
+        onNodeWithText("nodes saveable=0").performClick()
+        val nodesViewModel = probes.getValue("nodes")
+        runOnIdle { multiBackstack.activeBackStack.add(NodesRoute.NodeDetail(destNum = 1)) }
+        waitForIdle()
+        onNodeWithText("detail saveable=0").performClick()
+        onNodeWithText("detail saveable=1").assertIsDisplayed()
+        val detailViewModel = probes.getValue("detail")
+
+        runOnIdle { multiBackstack.navigateTopLevel(NodesRoute.Nodes) }
+        waitForIdle()
+
+        onNodeWithText("nodes saveable=1").assertIsDisplayed()
+        assertFalse(nodesViewModel.cleared, "reselecting the tab cleared its root's ViewModel")
+        assertTrue(detailViewModel.cleared, "reselecting the tab kept the dropped entry's ViewModel")
+
+        runOnIdle { multiBackstack.activeBackStack.add(NodesRoute.NodeDetail(destNum = 1)) }
+        waitForIdle()
+        onNodeWithText("detail saveable=0").assertIsDisplayed()
+        assertNotSame(detailViewModel, probes.getValue("detail"))
+    }
+
+    @Test
+    fun entryNavigatesOnItsOwnTabsStack() = runComposeUiTest {
+        lateinit var multiBackstack: MultiBackstack
+        setContent { multiBackstack = TabHost() }
+
+        runOnIdle { multiBackstack.navigateTopLevel(MapRoute.Map()) }
+        waitForIdle()
+        onNodeWithText("map tab").performClick()
+        waitForIdle()
+
+        assertEquals(2, multiBackstack.backStacks.getValue(MapRoute.Map()).size)
+        assertEquals(1, multiBackstack.backStacks.getValue(NodesRoute.Nodes).size)
+    }
+
+    // Like the app hosts, the entry provider closes over the active tab's stack.
     @Composable
-    private fun TwoTabHost(): MultiBackstack {
+    private fun TabHost(): MultiBackstack {
         val multiBackstack = rememberMultiBackstack(NodesRoute.Nodes)
+        val backStack = multiBackstack.activeBackStack
         AppTheme {
             MeshtasticNavDisplay(
                 multiBackstack = multiBackstack,
-                entryProvider =
-                entryProvider<NavKey> {
-                    entry<NodesRoute.Nodes> { Probe(name = "nodes") }
-                    entry<NodesRoute.NodeDetail> { Probe(name = "detail") }
-                    entry<MapRoute.Map> { Text("map tab") }
-                    entry<ContactsRoute.Contacts> { Text("messages tab") }
-                    entry<SettingsRoute.Settings> { Text("settings tab") }
-                    entry<ConnectionsRoute.Connections> { Text("connections tab") }
-                },
+                entryProvider = entryProvider<NavKey> { tabGraph(backStack) },
             )
         }
         return multiBackstack
+    }
+
+    // A plain graph function, as the feature graphs are: entries declared inline in a composable become remembered
+    // composable lambdas that the compiler updates in place, which would hide a stale back stack capture.
+    private fun EntryProviderScope<NavKey>.tabGraph(backStack: NavBackStack<NavKey>) {
+        entry<NodesRoute.Nodes> { Probe(name = "nodes") }
+        entry<NodesRoute.NodeDetail> { Probe(name = "detail") }
+        entry<MapRoute.Map> {
+            Button(onClick = { backStack.add(NodesRoute.NodeDetail(destNum = 1)) }) { Text("map tab") }
+        }
+        entry<ContactsRoute.Contacts> { Text("messages tab") }
+        entry<SettingsRoute.Settings> { Text("settings tab") }
+        entry<ConnectionsRoute.Connections> { Text("connections tab") }
     }
 
     @Composable
