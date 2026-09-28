@@ -50,10 +50,11 @@ startKoin<AndroidKoinApp> {
 5. **Scenes:** `MeshtasticNavDisplay` renders `ListDetailSceneStrategy` scenes (`listPane()`, `detailPane()`, `extraPane()` entry metadata) and falls back to a single pane. It registers no dialog or supporting-pane strategy, so that metadata has no effect.
 6. **Back Handlers:** Use `NavigationBackHandler` from `androidx.navigationevent:navigationevent-compose` for back gestures in multiplatform code. Do not use Android's `BackHandler`.
 7. **Deep Links:** Use `DeepLinkRouter.route()` in `core:navigation` to synthesize typed backstacks from RESTful paths.
+8. **Tab Lifetime:** A hidden tab's entry ViewModels and saved state live until that entry is popped from its own stack; switching tabs does not clear them.
 
 ### Anti-Patterns
 - **Single Backstack for Multiple Tabs:** Do **not** use a single `NavBackStack` list for multiple tabs. Use `MultiBackstack` (from `core:navigation`).
-- **Decorator Reuse Across Tabs:** Do **not** decorate several back stacks with one `NavEntryDecorator` set. Navigation 3 pops every entry missing from the stack it is given, so a shared saveable-state or ViewModel-store decorator clears the tab you just left. The `MultiBackstack` overload of `MeshtasticNavDisplay` decorates every tab's stack with that tab's own pair through `rememberDecoratedNavEntries` and passes only the active tab's entries to `NavDisplay`, as in the Navigation 3 multiple back stacks recipe. Its `entryProvider` must therefore resolve every tab's keys, not only the active tab's.
+- **Decorator Reuse Across Tabs:** Do **not** decorate several back stacks with one `NavEntryDecorator` set. Navigation 3 pops every entry missing from the stack it is given, so a shared saveable-state or ViewModel-store decorator clears the tab you just left. The `MultiBackstack` overload of `MeshtasticNavDisplay` gives every tab's stack its own saveable-state and ViewModel-store decorators through `rememberDecoratedNavEntries`, following the per-stack decorators of the Navigation 3 multiple back stacks recipe, and passes only the active tab's entries to `NavDisplay`. Its `entryProvider` must therefore resolve every tab's keys, not only the active tab's.
 - **Custom Backstack Mutation:** Do **not** mutate back navigation with custom stacks disconnected from the app backstack. Mutate `NavBackStack<NavKey>` directly with `add(...)` and `removeLastOrNull()`.
 
 ## Reference Anchors
