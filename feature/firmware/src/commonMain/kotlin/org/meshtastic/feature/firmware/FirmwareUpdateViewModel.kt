@@ -985,7 +985,10 @@ class FirmwareUpdateViewModel(
             LocalFirmwareResolution.Invalid(reason = fallbackReason, fileName = fileName)
         } else {
             val extractingState =
-                FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_extracting)))
+                FirmwareUpdateState.Processing(
+                    ProgressState(UiText.Resource(Res.string.firmware_update_extracting)),
+                    beforeConfirmation = true,
+                )
             _state.value = extractingState
             try {
                 val extractedArtifact = extractLocalFirmwareArchive(uri, fileName, state, payloadExtension)

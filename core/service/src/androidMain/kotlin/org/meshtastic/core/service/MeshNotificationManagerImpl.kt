@@ -281,6 +281,7 @@ class MeshNotificationManagerImpl(
             notificationManager.getNotificationChannel(spec.id)?.importance != NotificationManager.IMPORTANCE_NONE
 
     private val serviceNotificationLock = Any()
+    private val lowBatteryLock = Any()
     private val applicationLabel: String by lazy {
         context.applicationInfo.loadLabel(context.packageManager).toString().ifBlank { context.packageName }
     }
@@ -627,12 +628,18 @@ class MeshNotificationManagerImpl(
 
     override suspend fun showLowBatteryNotification(node: Node, isRemote: Boolean) {
         ensureChannels()
-        notificationManager.notify(TAG_LOW_BATTERY, node.num, createLowBatteryNotification(node, isRemote))
+        val notification = createLowBatteryNotification(node, isRemote)
+        synchronized(lowBatteryLock) { notificationManager.notify(TAG_LOW_BATTERY, node.num, notification) }
     }
 
     override suspend fun updateLowBatteryNotification(node: Node, isRemote: Boolean) {
-        val showing = notificationManager.activeNotifications.any { it.tag == TAG_LOW_BATTERY && it.id == node.num }
-        if (showing) showLowBatteryNotification(node, isRemote)
+        ensureChannels()
+        val notification = createLowBatteryNotification(node, isRemote)
+        // Build first: a cancel that lands while the text resolves must win, so check and post under one lock.
+        synchronized(lowBatteryLock) {
+            val showing = notificationManager.activeNotifications.any { it.tag == TAG_LOW_BATTERY && it.id == node.num }
+            if (showing) notificationManager.notify(TAG_LOW_BATTERY, node.num, notification)
+        }
     }
 
     override suspend fun showClientNotification(
@@ -738,7 +745,8 @@ class MeshNotificationManagerImpl(
         showConversationNotification(contactKey, isBroadcast, channelName, conversationName, isSilent = true)
     }
 
-    override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(TAG_LOW_BATTERY, node.num)
+    override fun cancelLowBatteryNotification(node: Node) =
+        synchronized(lowBatteryLock) { notificationManager.cancel(TAG_LOW_BATTERY, node.num) }
 
     // endregion
 

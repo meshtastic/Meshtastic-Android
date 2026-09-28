@@ -101,6 +101,7 @@ class FirmwareUpdateViewModelFileTest {
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
     private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
     private val radioOperationLock = RadioOperationLock()
+    private val firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
 
     private lateinit var viewModel: FirmwareUpdateViewModel
@@ -185,7 +186,7 @@ class FirmwareUpdateViewModelFileTest {
         analytics,
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
         FakeBluetoothRepository(),
-        FirmwareUpdateStatusRepository(),
+        firmwareUpdateStatusRepository,
     )
 
     private fun firmwareUri(fileName: String): CommonUri = CommonUri.parse("file:///downloads/$fileName")
@@ -408,6 +409,7 @@ class FirmwareUpdateViewModelFileTest {
         val processing = assertIs<FirmwareUpdateState.Processing>(viewModel.state.value)
         val message = assertIs<UiText.Resource>(processing.progressState.message)
         assertEquals(Res.string.firmware_update_extracting, message.res)
+        assertNull(firmwareUpdateStatusRepository.progress.value, "checking a picked file is not a running update")
 
         allowExtraction.complete(Unit)
         advanceUntilIdle()

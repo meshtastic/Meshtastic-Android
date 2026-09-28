@@ -77,6 +77,10 @@ class FirmwareUpdateStateTest {
 
         assertEquals(null, FirmwareUpdateState.Processing(ProgressState(message, 0.9f)).toUpdateProgress()?.percent)
         assertEquals(null, FirmwareUpdateState.Verifying.toUpdateProgress()?.percent)
+        assertEquals(
+            null,
+            FirmwareUpdateState.Processing(ProgressState(message), beforeConfirmation = true).toUpdateProgress(),
+        )
         assertEquals(null, FirmwareUpdateState.AwaitingFileSave(uf2Artifact = null, fileName = null).toUpdateProgress())
         assertEquals(null, FirmwareUpdateState.Idle.toUpdateProgress())
     }

@@ -71,8 +71,14 @@ sealed interface FirmwareUpdateState {
     /** Firmware file is being downloaded from the release server. */
     data class Downloading(val progressState: ProgressState) : FirmwareUpdateState
 
-    /** Intermediate processing (e.g. extracting, preparing DFU). */
-    data class Processing(val progressState: ProgressState) : FirmwareUpdateState
+    /**
+     * Intermediate processing (e.g. extracting, preparing DFU).
+     *
+     * @property beforeConfirmation True while a picked local file is checked before the user has confirmed any update,
+     *   so nothing outside the screen reports it as a running update.
+     */
+    data class Processing(val progressState: ProgressState, val beforeConfirmation: Boolean = false) :
+        FirmwareUpdateState
 
     /** Firmware is actively being written to the device. */
     data class Updating(val progressState: ProgressState) : FirmwareUpdateState
@@ -131,7 +137,8 @@ internal fun FirmwareUpdateState.toUpdateProgress(): FirmwareUpdateProgress? = w
 
     is FirmwareUpdateState.Updating -> FirmwareUpdateProgress(progressState.message, progressState.percent())
 
-    is FirmwareUpdateState.Processing -> FirmwareUpdateProgress(progressState.message, percent = null)
+    is FirmwareUpdateState.Processing ->
+        if (beforeConfirmation) null else FirmwareUpdateProgress(progressState.message, percent = null)
 
     FirmwareUpdateState.Verifying ->
         FirmwareUpdateProgress(UiText.Resource(Res.string.firmware_update_verifying), percent = null)
