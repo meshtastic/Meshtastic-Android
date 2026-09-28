@@ -28,6 +28,7 @@ import org.meshtastic.proto.ModuleConfig
 import java.lang.reflect.Field
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Walks Wire's generated fields, so a module config section the proto grows fails here by name until profile install
@@ -91,13 +92,26 @@ class InstallProfileModuleConfigCoverageTest {
     private fun ModuleConfig.onlyVariant(): Pair<String, Any> =
         moduleConfigVariants().mapNotNull { field -> field.get(this)?.let { field.name to it } }.single()
 
-    private fun localModuleConfigSections(): List<Field> = LocalModuleConfig::class.java.declaredFields.filter {
-        it.isAnnotationPresent(WireField::class.java) && Message::class.java.isAssignableFrom(it.type)
-    }
+    private fun localModuleConfigSections(): List<Field> = LocalModuleConfig::class
+        .java
+        .declaredFields
+        .filter { it.isAnnotationPresent(WireField::class.java) && Message::class.java.isAssignableFrom(it.type) }
+        .also { sections ->
+            assertTrue(sections.isNotEmpty(), "found no @WireField message fields on LocalModuleConfig")
+            assertTrue(sections.any { it.name == "mesh_beacon" }, "mesh_beacon is not among the sections found")
+        }
 
-    private fun moduleConfigVariants(): List<Field> = ModuleConfig::class.java.declaredFields.filter {
-        it.getAnnotation(WireField::class.java)?.oneofName == "payload_variant"
-    }
+    private fun moduleConfigVariants(): List<Field> = ModuleConfig::class
+        .java
+        .declaredFields
+        .filter { it.getAnnotation(WireField::class.java)?.oneofName == "payload_variant" }
+        .also { variants ->
+            assertTrue(
+                variants.isNotEmpty(),
+                "found no @WireField fields in the ModuleConfig payload_variant oneof",
+            )
+            assertTrue(variants.any { it.name == "mesh_beacon" }, "mesh_beacon is not among the oneof fields found")
+        }
 
     private fun defaultOf(field: Field): Any? =
         (field.type.getField("ADAPTER").get(null) as ProtoAdapter<*>).decode(ByteArray(0))

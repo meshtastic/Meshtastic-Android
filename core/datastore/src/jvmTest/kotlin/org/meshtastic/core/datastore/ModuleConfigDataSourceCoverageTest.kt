@@ -26,6 +26,7 @@ import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /** Walks Wire's generated oneof, so a variant the proto grows fails here by name. JVM-only: reads `@WireField`. */
 class ModuleConfigDataSourceCoverageTest {
@@ -45,6 +46,8 @@ class ModuleConfigDataSourceCoverageTest {
             ModuleConfig::class.java.declaredFields.filter {
                 it.getAnnotation(WireField::class.java)?.oneofName == "payload_variant"
             }
+        assertTrue(variants.isNotEmpty(), "found no @WireField fields in the ModuleConfig payload_variant oneof")
+        assertTrue(variants.any { it.name == "mesh_beacon" }, "mesh_beacon is not among the oneof fields found")
 
         variants.forEach { field ->
             val value = (field.type.getField("ADAPTER").get(null) as ProtoAdapter<*>).decode(ByteArray(0))
