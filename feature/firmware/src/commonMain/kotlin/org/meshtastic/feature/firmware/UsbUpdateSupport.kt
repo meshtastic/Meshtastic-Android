@@ -255,6 +255,16 @@ internal class UsbPassWriter(
         return UsbPassResult.Written
     }
 
+    /**
+     * Reads [treeUri] for a bootloader upgrade and compares what it reports against the release. Writes nothing;
+     * [write] vets the volume again once the user confirms.
+     */
+    suspend fun review(treeUri: CommonUri): BootloaderReview =
+        when (val inspection = inspectMaintenanceVolume(treeUri, fileHandler)) {
+            is VolumeInspection.Rejected -> BootloaderReview.Refused(inspection.reason)
+            is VolumeInspection.Accepted -> reviewBootloader(maintenanceUf2Repository.getSnapshot(), inspection.volume)
+        }
+
     /** Either the image to write, or the result to return instead. */
     private sealed interface ImageResolution {
         /** @property requiresCdcUnblock Carried from [MaintenanceUf2.requiresCdcUnblock]; always false for firmware. */

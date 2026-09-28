@@ -23,6 +23,7 @@ import org.meshtastic.core.model.SoftDeviceVariant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -867,5 +868,97 @@ class UsbMaintenanceGateTest {
     fun `non-uf2 payloads yield no family id`() {
         assertNull(uf2FamilyId(ByteArray(UF2_BLOCK_BYTES)), "Zeroed bytes carry no UF2 magic")
         assertNull(uf2FamilyId(ByteArray(32)), "A short payload cannot hold a UF2 block")
+    }
+
+    // ── Installed bootloader version against the release ─────────────────────
+
+    /**
+     * The `INFO_UF2.TXT` text embedded in the released `update-wismesh_tag_bootloader-0.9.2-OTAFIX2.5_nosd.uf2`,
+     * extracted from its UF2 payload. The running bootloader appends its `SoftDevice:` line to this at boot.
+     */
+    private val wismeshTagOtafix25Info =
+        "UF2 Bootloader 0.9.2-OTAFIX2.5 lib/nrfx (v3.14.0) lib/tinyusb (0.21.0-435-g3898a1df4) " +
+            "lib/uf2 (heads/master)\r\n" +
+            "Model: WisMesh Tag\r\nBoard-ID: WisMesh-Tag\r\nDate: Sep  8 2026\r\n" +
+            "Factory-Erase: UF2 family 0x4D455348\r\n"
+
+    private fun volumeFrom(info: String) = MaintenanceVolume(
+        boardId = assertNotNull(parseUf2BoardId(info)),
+        softDevice = parseUf2SoftDevice(info),
+        bootloaderVersion = parseUf2BootloaderVersion(info),
+    )
+
+    @Test
+    fun `bootloader version is the first token of the uf2 bootloader line on every known vintage`() {
+        assertEquals("0.4.3", parseUf2BootloaderVersion(rak4631StockInfo))
+        assertEquals("0.9.2-OTAFIX2.2-BP1.3", parseUf2BootloaderVersion(rak4631OtafixInfo))
+        assertEquals("0.9.2-dirty", parseUf2BootloaderVersion(seeedL1Info), "stock Seeed builds carry git's suffix")
+        assertEquals("0.9.2-OTAFIX2.3-BP1.6", parseUf2BootloaderVersion(rakOtafixEraseInfo))
+        assertEquals("0.9.2-OTAFIX2.5", parseUf2BootloaderVersion(wismeshTagOtafix25Info))
+    }
+
+    @Test
+    fun `bootloader version falls back to the ver line and is null when neither line is present`() {
+        assertEquals("0.4.3", parseUf2BootloaderVersion("Board-ID: WisBlock-RAK4631-Board\r\nVer: 0.4.3\r\n"))
+        assertNull(parseUf2BootloaderVersion("Board-ID: WisBlock-RAK4631-Board\r\n"))
+        assertNull(parseUf2BootloaderVersion("UF2 Bootloader \r\nBoard-ID: X\r\n"), "an empty version is no version")
+        assertNull(parseUf2BootloaderVersion(""))
+    }
+
+    @Test
+    fun `the released bootloader reads as current against its own release tag`() {
+        val manifest = testManifest.copy(otafixReleaseTag = "0.9.2-OTAFIX2.5")
+
+        val review = assertIs<BootloaderReview.Ready>(reviewBootloader(manifest, volumeFrom(wismeshTagOtafix25Info)))
+
+        assertEquals(BootloaderVersions(installed = "0.9.2-OTAFIX2.5", available = "0.9.2-OTAFIX2.5"), review.versions)
+        assertTrue(review.versions.isCurrent)
+    }
+
+    @Test
+    fun `any other installed version reads as not current without claiming an order`() {
+        // testManifest is on BP1.5; BP1.6 is a bench build newer than it, and still only "different".
+        for (info in listOf(rak4631StockInfo, rak4631OtafixInfo, rakOtafixEraseInfo, wismeshTagOtafix25Info)) {
+            val review = assertIs<BootloaderReview.Ready>(reviewBootloader(testManifest, volumeFrom(info)))
+            assertFalse(review.versions.isCurrent, "installed ${review.versions.installed}")
+            assertEquals("0.9.2-OTAFIX2.3-BP1.5", review.versions.available)
+        }
+    }
+
+    @Test
+    fun `a drive reporting no version is never current`() {
+        val volume = MaintenanceVolume(boardId = "WisMesh-Tag", softDevice = null, bootloaderVersion = null)
+
+        val review = assertIs<BootloaderReview.Ready>(reviewBootloader(testManifest, volume))
+
+        assertNull(review.versions.installed)
+        assertFalse(BootloaderVersions(installed = null, available = "").isCurrent, "two unknowns are not a match")
+        assertFalse(review.versions.isCurrent)
+    }
+
+    @Test
+    fun `review refuses an unrecognized board id before anything is downloaded`() {
+        val volume = MaintenanceVolume(boardId = "SomeOtherBoard-v9", softDevice = null, bootloaderVersion = "0.9.2")
+
+        assertEquals(
+            BootloaderReview.Refused(UsbMaintenanceRefusal.UnknownBoardId),
+            reviewBootloader(testManifest, volume),
+        )
+    }
+
+    @Test
+    fun `the gate carries the latest bootloader only where the upgrade is offered`() {
+        val offered = maintenanceGate(testManifest, nrf(), FirmwareUpdateMethod.Usb, hasRelease = true)
+        assertEquals("0.9.2-OTAFIX2.3-BP1.5", offered.latestBootloader)
+
+        val unsupported = maintenanceGate(testManifest, nrf(target = "wio-sdk-wm1110"), FirmwareUpdateMethod.Usb, true)
+        assertFalse(unsupported.showBootloaderUpgrade)
+        assertNull(unsupported.latestBootloader)
+
+        assertNull(maintenanceGate(testManifest, rp2040(), FirmwareUpdateMethod.Usb, true).latestBootloader)
+        assertNull(
+            maintenanceGate(MaintenanceUf2Manifest(), nrf(), FirmwareUpdateMethod.Usb, true).latestBootloader,
+            "no manifest, no version to show",
+        )
     }
 }

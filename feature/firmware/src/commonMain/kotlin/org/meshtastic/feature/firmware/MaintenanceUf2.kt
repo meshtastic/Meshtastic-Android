@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions")
+
 package org.meshtastic.feature.firmware
 
 import org.meshtastic.core.model.DeviceHardware
@@ -186,6 +188,25 @@ internal fun parseUf2BoardId(infoUf2Text: String): String? = infoUf2Text
     ?.takeIf { it.isNotEmpty() }
 
 /**
+ * Extracts the installed bootloader version from the contents of a UF2 bootloader's `INFO_UF2.TXT`.
+ *
+ * `ghostfat.c` writes the bootloader's git tag as the first token after `UF2 Bootloader` (e.g. `0.9.2-OTAFIX2.5`),
+ * followed by submodule versions. The 0.4.x line also carries a `Ver:` line, read only when the first line is absent.
+ * Returns `null` when neither line yields a token.
+ */
+internal fun parseUf2BootloaderVersion(infoUf2Text: String): String? =
+    listOf(UF2_BOOTLOADER_PREFIX, UF2_VER_PREFIX).firstNotNullOfOrNull { prefix ->
+        infoUf2Text
+            .lineSequence()
+            .map { it.trim() }
+            .firstOrNull { it.startsWith(prefix, ignoreCase = true) }
+            ?.drop(prefix.length)
+            ?.trim()
+            ?.substringBefore(' ')
+            ?.takeIf { it.isNotEmpty() }
+    }
+
+/**
  * Extracts the installed SoftDevice from the contents of a UF2 bootloader's `INFO_UF2.TXT`.
  *
  * `uf2_init()` appends this line at boot from `SD_ID_GET(MBR_SIZE)`/`SD_VERSION_GET(MBR_SIZE)` — i.e. read out of the
@@ -287,6 +308,10 @@ internal fun resolveNrfEraseImage(
 
 /** The file every Adafruit-family UF2 bootloader exposes on its mass-storage volume. */
 internal const val INFO_UF2_FILE_NAME = "INFO_UF2.TXT"
+
+private const val UF2_BOOTLOADER_PREFIX = "UF2 Bootloader "
+
+private const val UF2_VER_PREFIX = "Ver:"
 
 private const val UF2_BOARD_ID_PREFIX = "Board-ID:"
 

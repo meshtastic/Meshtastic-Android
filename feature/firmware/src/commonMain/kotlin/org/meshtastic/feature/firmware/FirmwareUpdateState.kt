@@ -110,6 +110,12 @@ sealed interface FirmwareUpdateState {
         val step: UsbFileSaveStep = UsbFileSaveStep.Firmware,
         val retryMessage: UiText? = null,
     ) : FirmwareUpdateState
+
+    /**
+     * The device's update drive has been read for a bootloader upgrade and nothing has been written yet. The user
+     * either upgrades or skips straight to reinstalling the firmware, which is also what restarts the device.
+     */
+    data class ReviewingBootloader(val versions: BootloaderVersions) : FirmwareUpdateState
 }
 
 private val FORMAT_ARG_REGEX = Regex(":?\\s*%1\\\$d%?")
