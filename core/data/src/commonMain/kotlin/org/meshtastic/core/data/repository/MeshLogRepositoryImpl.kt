@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
@@ -225,17 +226,30 @@ open class MeshLogRepositoryImpl(
      * Prunes the log database based on the configured [retentionDays]. The sentinel values are resolved by
      * [MeshLogRetention], so "never delete" is a no-op and "1 hour" trims to the last hour rather than scaling the
      * sentinel by days.
+     *
+     * Each batch is its own [DatabaseProvider.withDb] call and write transaction, so writers queued on the database run
+     * between batches and cancellation stops the pass at a batch boundary.
      */
     override suspend fun deleteLogsOlderThan(retentionDays: Int) = withContext(dispatchers.io) {
         val window = MeshLogRetention.windowOrNull(retentionDays) ?: return@withContext
         val cutoffTime = nowMillis - window.inWholeMilliseconds
-        dbManager.withDb { it.meshLogDao().deleteOlderThan(cutoffTime) }
-        Unit
+        do {
+            val deleted =
+                dbManager.withDb { it.meshLogDao().deleteOlderThan(cutoffTime, RETENTION_DELETE_BATCH_SIZE) } ?: 0
+            yield()
+        } while (deleted == RETENTION_DELETE_BATCH_SIZE)
     }
 
     companion object {
         private const val MILLIS_PER_SEC = 1000L
         private const val TELEMETRY_SNAPSHOT_PAGE_SIZE = 512
+
+        /**
+         * Rows per retention delete transaction. Each deleted row also dirties roughly one random page of the uuid
+         * primary-key index, and this size keeps one batch's WAL writes under SQLite's default 1000-page
+         * auto-checkpoint.
+         */
+        internal const val RETENTION_DELETE_BATCH_SIZE = 500
     }
 }
 

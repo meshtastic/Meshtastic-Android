@@ -77,8 +77,18 @@ interface MeshLogDao {
     @Query("DELETE FROM log WHERE from_num = :fromNum AND port_num = :portNum")
     suspend fun deleteLogs(fromNum: Int, portNum: Int)
 
-    @Query("DELETE FROM log WHERE received_date < :cutoffTimestamp")
-    suspend fun deleteOlderThan(cutoffTimestamp: Long)
+    /**
+     * Deletes at most [limit] logs received before [cutoffTimestamp] and returns how many it removed. Callers repeat it
+     * until it removes fewer than [limit], so a retention pass never holds the write lock for the whole backlog.
+     */
+    @Query(
+        """
+        DELETE FROM log WHERE rowid IN (
+            SELECT rowid FROM log WHERE received_date < :cutoffTimestamp LIMIT :limit
+        )
+        """,
+    )
+    suspend fun deleteOlderThan(cutoffTimestamp: Long, limit: Int): Int
 
     /**
      * Suspend snapshot variant of [getLogsFrom] for one-shot reads (no Flow observer overhead). Used when a caller

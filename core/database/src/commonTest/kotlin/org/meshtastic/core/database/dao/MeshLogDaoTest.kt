@@ -148,6 +148,39 @@ class MeshLogDaoTest {
     }
 
     @Test
+    fun testDeleteOlderThanRemovesAtMostTheLimit() = runTest {
+        meshLogDao.insertIgnore(List(5) { logEntry("old-$it", time = 100L + it) })
+        meshLogDao.insert(logEntry("new", time = 1_000))
+
+        assertEquals(3, meshLogDao.deleteOlderThan(cutoffTimestamp = 500, limit = 3))
+
+        val remaining = meshLogDao.getAllLogsSnapshot().map { it.uuid }
+        assertEquals(2, remaining.count { it.startsWith("old-") })
+        assertTrue("new" in remaining)
+    }
+
+    @Test
+    fun testDeleteOlderThanDrainedInBatchesRemovesExactlyTheRowsBeforeTheCutoff() = runTest {
+        val cutoff = 10_000L
+        val limit = 4
+        val survivors = mutableSetOf<String>()
+        // Interleaved so insertion order does not line up with the cutoff.
+        repeat(limit * 2 + 1) {
+            meshLogDao.insert(logEntry("old-$it", time = cutoff - 1 - it))
+            meshLogDao.insert(logEntry("new-$it", time = cutoff + it))
+            survivors += "new-$it"
+        }
+
+        val deletedPerCall = mutableListOf<Int>()
+        do {
+            deletedPerCall += meshLogDao.deleteOlderThan(cutoff, limit)
+        } while (deletedPerCall.last() == limit)
+
+        assertEquals(listOf(limit, limit, 1), deletedPerCall)
+        assertEquals(survivors, meshLogDao.getAllLogsSnapshot().map { it.uuid }.toSet())
+    }
+
+    @Test
     fun testGetLogsSnapshotPageTraversesEqualTimestampsWithoutDuplicates() = runTest {
         meshLogDao.insert(logEntry("log-a", time = 300))
         meshLogDao.insert(logEntry("log-c", time = 200))
