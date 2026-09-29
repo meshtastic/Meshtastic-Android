@@ -19,6 +19,9 @@ package org.meshtastic.feature.docs.ai
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.chirpy_fallback_unavailable
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
 import org.meshtastic.feature.docs.model.AIDocAssistantResult
 import org.meshtastic.feature.docs.model.ModelReadiness
@@ -35,7 +38,7 @@ class KeywordFallbackAssistant(private val searchEngine: KeywordSearchEngine) : 
         val pages = searchEngine.selectForTokenBudget(question, maxChars = 20_000)
         return if (pages.isNotEmpty()) {
             AIDocAssistantResult.Fallback(
-                message = "AI assistant is not available on this platform. Here are pages that may help:",
+                message = getStringSuspend(Res.string.chirpy_fallback_unavailable),
                 suggestedPages = pages,
             )
         } else {

@@ -45,6 +45,15 @@ import com.mikepenz.markdown.compose.elements.MarkdownTableHeader
 import com.mikepenz.markdown.compose.elements.MarkdownTableRow
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.model.markdownDimens
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.doc_auto_translated
+import org.meshtastic.core.resources.doc_community_translated
+import org.meshtastic.core.resources.doc_no_content
+import org.meshtastic.core.resources.doc_page_not_found
+import org.meshtastic.core.resources.doc_page_not_found_detail
+import org.meshtastic.core.resources.documentation
+import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
@@ -81,7 +90,7 @@ fun DocsPageRouteScreen(
                 title = {
                     Column {
                         Text(
-                            text = content?.page?.title ?: "Documentation",
+                            text = content?.page?.title ?: stringResource(Res.string.documentation),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -89,8 +98,8 @@ fun DocsPageRouteScreen(
                             Text(
                                 text =
                                 when (translationSource) {
-                                    TranslationSource.ML_KIT -> "Auto-translated"
-                                    TranslationSource.BUNDLED -> "Community translated"
+                                    TranslationSource.ML_KIT -> stringResource(Res.string.doc_auto_translated)
+                                    TranslationSource.BUNDLED -> stringResource(Res.string.doc_community_translated)
                                 },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -100,7 +109,10 @@ fun DocsPageRouteScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = MeshtasticIcons.ArrowBack, contentDescription = "Navigate back")
+                        Icon(
+                            imageVector = MeshtasticIcons.ArrowBack,
+                            contentDescription = stringResource(Res.string.navigate_back),
+                        )
                     }
                 },
             )
@@ -130,9 +142,12 @@ fun DocsPageRouteScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text(text = "Page not found: $pageId", style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            text = "This page may have been moved or removed.",
+                            text = stringResource(Res.string.doc_page_not_found, pageId),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Text(
+                            text = stringResource(Res.string.doc_page_not_found_detail),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(top = 8.dp),
                         )
@@ -140,7 +155,7 @@ fun DocsPageRouteScreen(
                 }
 
                 else -> {
-                    val markdownText = content.markdown ?: "No content available."
+                    val markdownText = content.markdown ?: stringResource(Res.string.doc_no_content)
                     val platformUriHandler = LocalUriHandler.current
                     val docsUriHandler =
                         remember(platformUriHandler) {

@@ -22,6 +22,9 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
 import org.meshtastic.feature.docs.model.DocSection
@@ -96,7 +99,7 @@ class DocsPageRouteScreenTest {
                 onBack = { backCalled = true },
             )
         }
-        onNodeWithContentDescription("Navigate back").performClick()
+        onNodeWithContentDescription(getString(Res.string.navigate_back)).performClick()
         runOnIdle { assertTrue(backCalled) }
     }
 

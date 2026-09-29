@@ -20,6 +20,7 @@
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message from %1$s: %2$s</string>
     <string name="a11y_node_battery">battery %1$d%</string>
+    <string name="a11y_node_channel">Channel %1$d</string>
     <string name="a11y_node_distance_away">%1$s away</string>
     <string name="a11y_node_favorite">favorite</string>
     <string name="a11y_node_hops_away">%1$d hops away</string>
@@ -215,6 +216,7 @@
     <string name="chirpy_error_unknown">Oops! We hit some heavy packet loss or signal interference! 📡 Let's re-transmit that query and see if we can get through.</string>
     <string name="chirpy_error_unsupported_flavor">I'm operating on a limited frequency on this app flavor! 🔌 Try using a version with full AI Core integration.</string>
     <string name="chirpy_error_unsupported_platform">Oh no! My antenna can't seem to establish a connection on this platform. 📡 Please double-check your hardware compatibility!</string>
+    <string name="chirpy_fallback_unavailable">AI assistant is not available on this platform. Here are pages that may help:</string>
     <string name="chirpy_intro">Hey there! 📡 I'm Chirpy, your on-device Meshtastic assistant! I can help with setup, configuration, troubleshooting, and mesh networking tips. What can I help you with?</string>
     <string name="chirpy_ready">Ask Chirpy</string>
     <string name="chirpy_search_placeholder">Ask about Meshtastic…</string>
@@ -399,6 +401,7 @@
     <string name="direct_message">Direct Message</string>
     <string name="direct_message_key">Direct Message Key</string>
     <string name="direct_messages">Direct Messages</string>
+    <string name="disabled">Disabled</string>
     <string name="discard_changes">Discard</string>
     <string name="disconnect">Disconnect</string>
     <string name="disconnected">Disconnected</string>
@@ -489,7 +492,9 @@
     <string name="distance_measurements">Distance Measurements</string>
     <string name="distance_measurements_description">Display the distance between your phone and other Meshtastic nodes with positions.</string>
     <!-- DOC -->
+    <string name="doc_auto_translated">Auto-translated</string>
     <string name="doc_clear_search">Clear search</string>
+    <string name="doc_community_translated">Community translated</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
     <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
     <string name="doc_keywords_debug_logs">debug,logs,logcat,export,bug report,issue,troubleshooting,diagnostics</string>
@@ -514,8 +519,12 @@
     <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
     <string name="doc_keywords_widget">widget,home screen,local stats,glance,battery,utilization</string>
     <string name="doc_loading">Loading documentation…</string>
+    <string name="doc_no_content">No content available.</string>
     <string name="doc_no_documentation">No documentation available</string>
     <string name="doc_no_results">No results found</string>
+    <string name="doc_open_page">Open %1$s</string>
+    <string name="doc_page_not_found">Page not found: %1$s</string>
+    <string name="doc_page_not_found_detail">This page may have been moved or removed.</string>
     <string name="doc_search_placeholder">Search documentation…</string>
     <string name="doc_section_developer">Developer Guide</string>
     <string name="doc_section_user">User Guide</string>
@@ -604,6 +613,7 @@
     <string name="export_tak_data_package">Export TAK Data Package</string>
     <string name="external_notification">External Notification</string>
     <string name="external_notification_config">External Notification Config</string>
+    <string name="external_power_short">PWR</string>
     <string name="factory_reset">Factory reset</string>
     <string name="fair">Fair</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
@@ -967,6 +977,8 @@
     <string name="longitude">Longitude</string>
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_config_change_value">%1$s: %2$s -&gt; %3$s</string>
+    <string name="lora_config_changes">LoRa Configuration Changes:</string>
     <string name="low_battery">Low Battery</string>
     <string name="low_battery_message">Node %1$s has a low battery (%2$d%)</string>
     <string name="low_battery_title">Low battery: %1$s</string>

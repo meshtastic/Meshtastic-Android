@@ -139,10 +139,17 @@ private fun EmptyHistoryState(modifier: Modifier = Modifier) {
 @Composable
 private fun SessionListItem(session: DiscoverySessionEntity, onClick: () -> Unit, onDelete: () -> Unit) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val uniqueNodes = stringResource(Res.string.discovery_unique_nodes, session.totalUniqueNodes)
+    val status =
+        stringResource(
+            if (session.completionStatus == "complete") {
+                Res.string.discovery_scan_complete
+            } else {
+                Res.string.discovery_scan_incomplete
+            },
+        )
     val sessionDescription =
-        "${formatTimestamp(session.timestamp)}, ${session.presetsScanned}, " +
-            "${session.totalUniqueNodes} unique nodes, " +
-            if (session.completionStatus == "complete") "complete" else "incomplete"
+        listOf(formatTimestamp(session.timestamp), session.presetsScanned, uniqueNodes, status).joinToString(", ")
 
     Card(
         modifier =

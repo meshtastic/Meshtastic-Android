@@ -2,6 +2,7 @@
 a11y_label_value
 a11y_message_from
 a11y_node_battery
+a11y_node_channel
 a11y_node_distance_away
 a11y_node_favorite
 a11y_node_hops_away
@@ -191,6 +192,7 @@ chirpy_error_token_budget_exceeded
 chirpy_error_unknown
 chirpy_error_unsupported_flavor
 chirpy_error_unsupported_platform
+chirpy_fallback_unavailable
 chirpy_intro
 chirpy_ready
 chirpy_search_placeholder
@@ -369,6 +371,7 @@ dew_point
 direct_message
 direct_message_key
 direct_messages
+disabled
 discard_changes
 disconnect
 disconnected
@@ -459,7 +462,9 @@ distance_filters_description
 distance_measurements
 distance_measurements_description
 ### DOC ###
+doc_auto_translated
 doc_clear_search
+doc_community_translated
 doc_keywords_app_functions
 doc_keywords_connections
 doc_keywords_debug_logs
@@ -484,8 +489,12 @@ doc_keywords_translate
 doc_keywords_units
 doc_keywords_widget
 doc_loading
+doc_no_content
 doc_no_documentation
 doc_no_results
+doc_open_page
+doc_page_not_found
+doc_page_not_found_detail
 doc_search_placeholder
 doc_section_developer
 doc_section_user
@@ -574,6 +583,7 @@ export_node_db
 export_tak_data_package
 external_notification
 external_notification_config
+external_power_short
 factory_reset
 fair
 fallback_node_name
@@ -931,6 +941,8 @@ long_name
 longitude
 lora
 lora_config
+lora_config_change_value
+lora_config_changes
 low_battery
 low_battery_message
 low_battery_title

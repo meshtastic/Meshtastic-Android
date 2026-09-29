@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.external_power_short
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.icon.BatteryEmpty
 import org.meshtastic.core.ui.icon.BatteryUnknown
@@ -83,7 +84,7 @@ fun MaterialBatteryInfo(
             )
 
             Text(
-                text = "PWR",
+                text = stringResource(Res.string.external_power_short),
                 color = contentColor.copy(alpha = 0.95f),
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
             )

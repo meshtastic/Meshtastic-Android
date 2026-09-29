@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.m3.Markdown
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.chirpy_assistant_title
 import org.meshtastic.core.resources.chirpy_checking
 import org.meshtastic.core.resources.chirpy_downloading
@@ -78,6 +79,7 @@ import org.meshtastic.core.resources.chirpy_downloading_subtitle
 import org.meshtastic.core.resources.chirpy_search_placeholder
 import org.meshtastic.core.resources.chirpy_thinking
 import org.meshtastic.core.resources.img_chirpy
+import org.meshtastic.core.resources.send
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Send
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
@@ -178,7 +180,10 @@ private fun ChirpyChatSheet(
                 keyboardActions = KeyboardActions(onSend = { doSend() }),
                 trailingIcon = {
                     IconButton(onClick = ::doSend, enabled = canSend) {
-                        Icon(imageVector = MeshtasticIcons.Send, contentDescription = "Send")
+                        Icon(
+                            imageVector = MeshtasticIcons.Send,
+                            contentDescription = stringResource(CoreRes.string.send),
+                        )
                     }
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -325,7 +330,7 @@ private fun ChirpyChip(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "Chirpy",
+                text = stringResource(CoreRes.string.chirpy),
                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
