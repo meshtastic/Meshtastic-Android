@@ -38,6 +38,9 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.User
@@ -139,6 +142,18 @@ class ConversationShortcutPublisherTest {
         assertEquals("Hawk Ridge", byId.getValue("0!00000007").longLabel)
         assertEquals("LongFast", byId.getValue("0^all").shortLabel)
         assertEquals("Beta", byId.getValue("1^all").shortLabel)
+    }
+
+    @Test
+    fun `dm shortcut for a node missing from the node db is titled with the unknown-user name`() = runTest {
+        every { packetRepository.getContacts() } returns
+            flowOf(mapOf("0!000000fe" to contact(from = "!000000fe", time = 1_000)))
+
+        publisher.startObserving(this)
+        advanceUntilIdle()
+
+        val published = shortcutManager.dynamicShortcuts.first { it.id == "0!000000fe" }
+        assertEquals(getStringSuspend(Res.string.unknown_username), published.shortLabel)
     }
 
     @Test

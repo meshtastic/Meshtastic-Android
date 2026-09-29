@@ -22,10 +22,13 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getPluralString as composeGetPluralString
 import org.jetbrains.compose.resources.getString as composeGetString
 
-/** Retrieves a string from the [StringResource] in a blocking manner. Use primarily in non-composable code. */
+/**
+ * Retrieves a string from the [StringResource], blocking the calling thread on the resource loader. Only for callbacks
+ * that cannot suspend, such as a Glance `onCompositionError`; everything else uses [getStringSuspend].
+ */
 fun getString(stringResource: StringResource): String = runBlocking { composeGetString(stringResource) }
 
-/** Retrieves a formatted string from the [StringResource] in a blocking manner. */
+/** Retrieves a formatted string from the [StringResource], blocking. Same restriction as the overload above. */
 fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
     val resolvedArgs =
         formatArgs
