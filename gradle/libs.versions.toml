@@ -34,7 +34,7 @@ ktfmt = "0.61"
 kover = "0.9.10"
 mokkery = "3.5.0"
 junit5 = "6.1.3"
-junit-platform = "6.1.3" # aligned with junit5 — JUnit Platform uses 1.x scheme
+junit-platform = "6.1.3" # JUnit Platform shares the junit5 version since JUnit 6
 kotest = "6.2.5"
 konsist = "0.17.3"
 turbine = "1.2.1"
@@ -44,8 +44,7 @@ compose-screenshot = "0.0.1-alpha16"
 
 # Baseline Profiles / Macrobenchmark
 # `benchmark` drives both the androidx.benchmark macro lib AND the androidx.baselineprofile
-# Gradle plugin (same coordinates/version). Kept on the alpha track to stay compatible with
-# AGP 9.x (the stable 1.4.x line predates AGP 9 support).
+# Gradle plugin (same coordinates/version). The stable 1.4.x line predates AGP 9 support.
 benchmark = "1.5.0"
 profileinstaller = "1.4.1"
 androidx-uiautomator = "2.4.0"
@@ -113,7 +112,6 @@ meshtastic-protobufs = "2.8.0.123-gadda936-SNAPSHOT"
 # Gradle Plugins
 ccud = "2.8.0"
 develocity = "4.6.0"
-foojay-resolver = "1.0.0"
 
 
 [libraries]
@@ -381,7 +379,6 @@ dd-sdk-android = [
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
-android-test = { id = "com.android.test" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "compose-screenshot" }
 
@@ -410,9 +407,6 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 room = { id = "androidx.room3", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 
-develocity = { id = "com.gradle.develocity", version.ref = "develocity" }
-foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver", version.ref = "foojay-resolver" }
-
 # Meshtastic
 meshtastic-android-application = { id = "meshtastic.android.application" }
 meshtastic-android-application-compose = { id = "meshtastic.android.application.compose" }
@@ -424,6 +418,7 @@ meshtastic-android-room = { id = "meshtastic.android.room" }
 meshtastic-android-screenshot = { id = "meshtastic.android.screenshot" }
 # Vendored google/secrets-gradle-plugin (Isolated-Projects-safe) — see build-logic/convention.
 meshtastic-android-secrets = { id = "meshtastic.android.secrets" }
+meshtastic-android-test = { id = "meshtastic.android.test" }
 meshtastic-detekt = { id = "meshtastic.detekt" }
 meshtastic-docs = { id = "meshtastic.docs" }
 meshtastic-koin = { id = "meshtastic.koin" }
@@ -435,5 +430,4 @@ meshtastic-kmp-library = { id = "meshtastic.kmp.library" }
 meshtastic-kmp-library-compose = { id = "meshtastic.kmp.library.compose" }
 meshtastic-root = { id = "meshtastic.root" }
 meshtastic-spotless = { id = "meshtastic.spotless" }
-meshtastic-publishing = { id = "meshtastic.publishing" }
 meshtastic-aboutlibraries = { id = "meshtastic.aboutlibraries" }

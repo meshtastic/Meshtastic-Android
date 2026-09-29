@@ -19,6 +19,7 @@ package org.meshtastic.buildlogic
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import com.android.build.api.dsl.TestExtension
 import dev.mokkery.gradle.MokkeryGradleExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -46,7 +47,6 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
         compileSdk = compileSdkVersion
 
         defaultConfig.minSdk = minSdkVersion
-        defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         if (this is ApplicationExtension) {
             defaultConfig.targetSdk = targetSdkVersion
@@ -63,6 +63,19 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     }
 
     configureMokkery()
+    configureKotlin<KotlinAndroidProjectExtension>()
+}
+
+/** Configure SDK and JVM levels for `com.android.test` modules; each module keeps its own minSdk. */
+internal fun Project.configureKotlinAndroidTest(testExtension: TestExtension) {
+    testExtension.apply {
+        compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+        defaultConfig.targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
+
+        compileOptions.sourceCompatibility = JavaVersion.VERSION_21
+        compileOptions.targetCompatibility = JavaVersion.VERSION_21
+    }
+
     configureKotlin<KotlinAndroidProjectExtension>()
 }
 

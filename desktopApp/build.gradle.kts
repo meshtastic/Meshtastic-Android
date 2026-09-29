@@ -421,7 +421,6 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite.bundled)
-    implementation(libs.kotlinx.collections.immutable)
 
     implementation(libs.jna)
 

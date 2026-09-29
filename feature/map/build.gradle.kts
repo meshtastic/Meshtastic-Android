@@ -28,7 +28,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.kotlinx.collections.immutable)
             // KML import parses through the same xmlutil the app already resolves for CoT XML.
             implementation(libs.xmlutil.core)
             implementation(projects.core.data)

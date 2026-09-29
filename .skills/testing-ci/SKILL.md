@@ -133,11 +133,10 @@ The tiers are named here and the workflows carry the label versions.
 - `-Xmx4g` Gradle heap, `-Xmx6g` Kotlin daemon
 - VFS watching disabled, workers capped at 4
 - `org.gradle.isolated-projects=true` for better parallelism
-- Disables unused Android build features (`resvalues`, `shaders`)
 
 ### CI Conventions
 - **KMP Smoke Compile:** `./gradlew kmpSmokeCompile` is a lifecycle task (registered in `RootConventionPlugin`) that depends on `compileKotlinJvm` + `compileKotlinIosSimulatorArm64` for every KMP module in the hand-maintained `ALL_MODULES_FULL` list, plus `compileAndroidDeviceTest` for `:core:database` and `:core:model`. `scripts/check-module-list.py` fails the PR when that list drifts from `settings.gradle.kts`. CI runs it in `shard-core`.
-- **`maxParallelForks` CI logic:** `ProjectExtensions.kt` checks `project.findProperty("ci") == "true"` and uses full available processors in CI (4 forks on std runners) vs. half locally. All CI invocations pass `-Pci=true`.
+- **`maxParallelForks` CI logic:** `ProjectExtensions.kt` reads the `ci` Gradle property (`providers.gradleProperty("ci")`) and uses full available processors in CI (4 forks on std runners) vs. half locally. All CI invocations pass `-Pci=true`.
 - **Detekt report formats:** Detekt.kt checks `project.findProperty("ci") == "true"` and disables html, txt, md reports in CI; only xml + sarif are retained for GitHub annotations.
 - **Robolectric SDK caching:** The `gradle-setup` composite action caches `~/.m2/repository/org/robolectric` to prevent flaky `SocketException` on SDK downloads. Cache key is `robolectric-{os}-{arch}-{hash of gradle/libs.versions.toml}`, restoring from the `robolectric-{os}-{arch}-` prefix, so a catalog change that bumps Robolectric rolls the key without a hand edit.
 - **`mavenLocal()` gated:** Disabled by default to prevent CI cache poisoning. Pass `-PuseMavenLocal` for local JitPack testing.

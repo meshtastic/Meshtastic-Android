@@ -74,6 +74,8 @@ internal fun Project.configureTestOptions() {
             project.dependencies.add(name, launcher)
         }
 
+    val isCi = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
+
     tasks.withType<Test>().configureEach {
         // JUnit 5: activate JUnit Platform — but NOT for androidHostTest (Robolectric) tasks
         // in KMP modules.  Those tasks run JUnit 4 natively; applying useJUnitPlatform()
@@ -84,7 +86,6 @@ internal fun Project.configureTestOptions() {
         }
         // Parallelize unit tests at the Gradle fork level.
         // In CI, use all available processors; locally use half to keep the machine responsive.
-        val isCi = project.findProperty("ci") == "true"
         maxParallelForks =
             if (isCi) {
                 Runtime.getRuntime().availableProcessors().coerceAtLeast(1)

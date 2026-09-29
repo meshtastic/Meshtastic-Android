@@ -14,28 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.android.test)
+    alias(libs.plugins.meshtastic.android.test)
     alias(libs.plugins.androidx.baselineprofile)
 }
 
 android {
     namespace = "org.meshtastic.baselineprofile"
-    compileSdk = 37
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
 
     defaultConfig {
         // Macrobenchmark / BaselineProfileRule require API 28+ on the test (device) side.
         // The generated profile is still installed on the app's real minSdk (26) via profileinstaller.
         minSdk = 28
-        targetSdk = 37
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // App module whose startup we profile/benchmark.
@@ -47,8 +38,6 @@ android {
     flavorDimensions += "marketplace"
     productFlavors { create("google") { dimension = "marketplace" } }
 }
-
-kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_21) } }
 
 baselineProfile {
     // Generate on an attached device/emulator. For hermetic CI, replace with a Gradle Managed
