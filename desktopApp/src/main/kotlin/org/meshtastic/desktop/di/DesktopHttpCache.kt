@@ -23,10 +23,13 @@ import kotlinx.io.files.Path
 import org.meshtastic.core.database.desktopDataDir
 import java.io.File
 
-/** Size bound for the desktop HTTP cache, the same as the OkHttp cache behind Android's client. */
+/**
+ * What the desktop HTTP cache is trimmed to at launch. It is not enforced during a session, which only adds the handful
+ * of api.meshtastic.org JSON resources.
+ */
 internal const val HTTP_CACHE_MAX_BYTES = 10L * 1024L * 1024L
 
-/** The desktop HTTP cache directory, trimmed to [HTTP_CACHE_MAX_BYTES] and created if missing. */
+/** The desktop HTTP cache directory, trimmed to [HTTP_CACHE_MAX_BYTES] at launch and created if missing. */
 internal fun preparedHttpCacheDir(): File =
     File(desktopDataDir(), "http_cache").also { trimDirectoryToBudget(it, HTTP_CACHE_MAX_BYTES) }
 
@@ -41,7 +44,8 @@ internal fun HttpClient.withApiCache(cacheDir: File): HttpClient = config {
 
 /**
  * Keeps the most recently written files in [directory] that fit in [maxBytes] and deletes the rest. Ktor's file cache
- * storage has no size bound of its own, so the client trims it once before it starts using the directory.
+ * storage has no size bound of its own, and it serves stored responses from memory once loaded, so trimming happens
+ * once, before the client starts using the directory.
  */
 internal fun trimDirectoryToBudget(directory: File, maxBytes: Long) {
     directory.mkdirs()
