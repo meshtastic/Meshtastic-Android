@@ -67,6 +67,7 @@ import org.meshtastic.core.resources.compass_uncertainty_unknown
 import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.exchange_position
 import org.meshtastic.core.resources.last_position_update
+import org.meshtastic.core.ui.component.ElevationInfo
 import org.meshtastic.core.ui.icon.ErrorOutline
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
