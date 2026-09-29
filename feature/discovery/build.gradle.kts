@@ -43,5 +43,7 @@ kotlin {
 
             implementation(libs.meshtastic.protobufs)
         }
+
+        commonTest.dependencies { implementation(projects.core.data) }
     }
 }

@@ -68,5 +68,7 @@ kotlin {
                 implementation(libs.androidx.test.runner)
             }
         }
+
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }
