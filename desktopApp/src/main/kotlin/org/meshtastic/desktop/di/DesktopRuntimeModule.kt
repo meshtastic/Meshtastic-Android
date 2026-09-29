@@ -21,12 +21,15 @@ import io.ktor.client.engine.java.Java
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.cache.HttpCache
+import io.ktor.client.plugins.cache.storage.FileStorage
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -205,6 +208,9 @@ class DesktopRuntimeModule {
             config { followRedirects(java.net.http.HttpClient.Redirect.NORMAL) }
         }
         install(ContentNegotiation) { json(json) }
+        // Honours the API's max-age and ETags across restarts. Coil shares this client, so images are cached here
+        // too.
+        install(HttpCache) { publicStorage(FileStorage(Path(preparedHttpCacheDir().path))) }
         install(DefaultRequest) {
             url(HttpClientDefaults.API_BASE_URL)
             header(HttpHeaders.UserAgent, "Meshtastic-Desktop/${DesktopBuildConfig.VERSION_NAME}")
