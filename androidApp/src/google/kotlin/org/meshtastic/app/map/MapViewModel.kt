@@ -92,6 +92,7 @@ import org.meshtastic.feature.map.tiles.CustomTileProviderSaveResult
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.meshtastic.feature.map.tiles.RasterOverlaySource
 import org.meshtastic.feature.map.tiles.RasterTileSpec
+import org.meshtastic.feature.map.tiles.isCleartextPermitted
 import org.meshtastic.feature.map.tiles.isRefusedCleartextTileUrl
 import org.meshtastic.feature.map.tiles.isValidTileUrlTemplate
 import java.io.File
@@ -771,6 +772,7 @@ class MapViewModel(
             if (selection.customTileUrl != null) googleMapsPrefs.setSelectedCustomTileUrl(null)
         } else {
             _selectedRasterBasemapId.value = null
+            if (resolvedSelection.refusedCleartextSource) reportRefusedCleartextSource()
             if (resolvedSelection.canDiscardMissingSelection) {
                 if (selectedProviderId != null) mapTileProviderPrefs.setSelectedCustomTileProviderId(null)
                 if (selection.customTileUrl != null) googleMapsPrefs.setSelectedCustomTileUrl(null)
@@ -786,6 +788,14 @@ class MapViewModel(
                 _selectedGoogleMapType.value = MapType.NORMAL
                 googleMapsPrefs.setSelectedGoogleMapType(null)
             }
+        }
+    }
+
+    /** Waits for a collector: this runs from init, before the map collects, and the selection is cleared next. */
+    private fun reportRefusedCleartextSource() {
+        viewModelScope.launch {
+            _errorFlow.subscriptionCount.first { it > 0 }
+            _errorFlow.emit(getStringSuspend(Res.string.url_http_localhost_only))
         }
     }
 
@@ -859,24 +869,30 @@ internal fun List<CustomTileProviderConfig>.findLegacyCustomTileProvider(
 internal data class PersistedCustomTileSelection(
     val provider: CustomTileProviderConfig?,
     val canDiscardMissingSelection: Boolean,
+    val refusedCleartextSource: Boolean = false,
 )
 
 internal fun List<CustomTileProviderConfig>.resolvePersistedCustomTileSelection(
     selectedProviderId: String?,
     legacySource: String?,
     providerLoadSuccessful: Boolean,
+    cleartextPermitted: (host: String) -> Boolean = ::isCleartextPermitted,
 ): PersistedCustomTileSelection {
-    val provider =
+    val candidates =
         listOfNotNull(findSelectedCustomTileProvider(selectedProviderId), findLegacyCustomTileProvider(legacySource))
-            .firstOrNull { it.hasValidGoogleTileSource() }
+    val provider = candidates.firstOrNull { it.hasValidGoogleTileSource(cleartextPermitted) }
     return PersistedCustomTileSelection(
         provider = provider,
         canDiscardMissingSelection = provider == null && providerLoadSuccessful,
+        refusedCleartextSource =
+        provider == null &&
+            candidates.any { !it.isLocal && it.urlTemplate.isRefusedCleartextTileUrl(cleartextPermitted) },
     )
 }
 
-internal fun CustomTileProviderConfig.hasValidGoogleTileSource(): Boolean =
-    isLocal || urlTemplate.isValidTileUrlTemplate()
+internal fun CustomTileProviderConfig.hasValidGoogleTileSource(
+    cleartextPermitted: (host: String) -> Boolean = ::isCleartextPermitted,
+): Boolean = isLocal || urlTemplate.isValidTileUrlTemplate(cleartextPermitted)
 
 private fun GoogleCameraPosition.toCameraPosition() = CameraPosition(LatLng(targetLat, targetLng), zoom, tilt, bearing)
 

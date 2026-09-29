@@ -19,5 +19,5 @@ package org.meshtastic.feature.map.tiles
 import android.security.NetworkSecurityPolicy
 
 /** Answers from the app's network security config, the same check the HTTP stacks apply when they connect. */
-internal actual fun isCleartextPermitted(host: String): Boolean =
+actual fun isCleartextPermitted(host: String): Boolean =
     NetworkSecurityPolicy.getInstance().isCleartextTrafficPermitted(host)

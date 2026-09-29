@@ -20,4 +20,4 @@ package org.meshtastic.feature.map.tiles
  * Whether this platform will open a plain http connection to [host]. A URL validator that accepts http where this is
  * false saves a tile source or layer that can never load.
  */
-internal expect fun isCleartextPermitted(host: String): Boolean
+expect fun isCleartextPermitted(host: String): Boolean

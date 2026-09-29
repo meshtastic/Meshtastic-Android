@@ -16,4 +16,4 @@
  */
 package org.meshtastic.feature.map.tiles
 
-internal actual fun isCleartextPermitted(host: String): Boolean = true
+actual fun isCleartextPermitted(host: String): Boolean = true
