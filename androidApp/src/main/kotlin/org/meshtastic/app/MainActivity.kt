@@ -49,6 +49,7 @@ import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toKmpUri
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.koinInject
@@ -60,6 +61,7 @@ import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.common.state.LaunchOptions
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.network.repository.UsbRepository
@@ -116,6 +118,7 @@ class MainActivity : AppCompatActivity() {
     private val usbRepository: UsbRepository by inject()
     private val mapLayersManager: MapLayersManager by inject()
     private val launchOptions: LaunchOptions by inject()
+    private val dispatchers: CoroutineDispatchers by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -375,35 +378,39 @@ class MainActivity : AppCompatActivity() {
      *
      * Handed to the layer store directly rather than through a one-slot bus for the map to drain. The store is common
      * code now, so both flavours import a shared file; the bus only ever reached the Google map, which meant the same
-     * share silently did nothing on F-Droid. The read grant on [uri] lives as long as this activity, which is long
-     * enough for the store to copy the file in.
+     * share silently did nothing on F-Droid. The file is read here, in this activity's scope, because the read grant on
+     * [uri] lives only as long as the activity; the Map tab opens once the read succeeds.
      */
     private fun importMapFile(uri: Uri) {
         Logger.d { "Importing shared map file: $uri" }
-        val shared = contentResolver.sharedMapFile(uri)
-        val rejection = shared.rejection()
-        if (rejection != null) {
-            Logger.w { "Refusing shared map file: $rejection" }
-            lifecycleScope.launch {
-                when (rejection) {
-                    SharedMapFileRejection.NOT_CONTENT_URI -> showToast(Res.string.map_layer_open_failed)
+        lifecycleScope.launch {
+            when (val load = withContext(dispatchers.io) { contentResolver.loadSharedMapFile(uri) }) {
+                is SharedMapFileLoad.Refused -> {
+                    Logger.w { "Refusing shared map file: ${load.reason}" }
+                    when (load.reason) {
+                        SharedMapFileRejection.UNSUPPORTED_TYPE -> showToast(Res.string.map_layer_formats)
 
-                    SharedMapFileRejection.UNSUPPORTED_TYPE -> showToast(Res.string.map_layer_formats)
+                        SharedMapFileRejection.TOO_LARGE ->
+                            showToast(Res.string.map_layer_too_large, MAX_SHARED_MAP_FILE_MB)
 
-                    SharedMapFileRejection.TOO_LARGE ->
-                        showToast(Res.string.map_layer_too_large, MAX_SHARED_MAP_FILE_MB)
+                        SharedMapFileRejection.NOT_CONTENT_URI,
+                        SharedMapFileRejection.UNREADABLE,
+                        -> showToast(Res.string.map_layer_open_failed)
+                    }
+                }
+
+                is SharedMapFileLoad.Loaded -> {
+                    mapLayersManager.addMapLayer(
+                        PickedMapFile(
+                            displayName = load.file.displayName,
+                            extensionOrMime = load.file.extensionOrMime,
+                            read = { load.bytes },
+                        ),
+                    )
+                    handleMeshtasticUri("$DEEP_LINK_BASE_URI/map".toUri())
                 }
             }
-            return
         }
-        mapLayersManager.addMapLayer(
-            PickedMapFile(
-                displayName = shared.displayName,
-                extensionOrMime = shared.extensionOrMime,
-                read = { contentResolver.readSharedMapFile(uri) },
-            ),
-        )
-        handleMeshtasticUri("$DEEP_LINK_BASE_URI/map".toUri())
     }
 
     private fun createShareIntent(message: String): PendingIntent {

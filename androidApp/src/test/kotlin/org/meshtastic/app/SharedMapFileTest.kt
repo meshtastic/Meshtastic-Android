@@ -36,6 +36,8 @@ import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @RunWith(RobolectricTestRunner::class)
@@ -155,7 +157,7 @@ class SharedMapFileTest {
         provider.size = null
         provider.mimeType = "application/geo+json"
 
-        val shared = resolver.sharedMapFile(uri)
+        val shared = assertNotNull(resolver.sharedMapFile(uri))
 
         assertEquals("shared-layer", shared.displayName)
         assertNull(shared.size)
@@ -163,20 +165,13 @@ class SharedMapFileTest {
     }
 
     @Test
-    fun `a provider that refuses the query keeps its type and the last path segment`() {
+    fun `a provider that throws on the metadata query is refused unopened`() {
         val provider = registerProvider()
         provider.mimeType = "application/geo+json"
         provider.refuse = true
 
-        assertEquals(
-            SharedMapFile(
-                ContentResolver.SCHEME_CONTENT,
-                "shared-layer",
-                mimeType = "application/geo+json",
-                size = null,
-            ),
-            resolver.sharedMapFile(uri),
-        )
+        assertEquals(SharedMapFileLoad.Refused(SharedMapFileRejection.UNREADABLE), resolver.loadSharedMapFile(uri))
+        assertEquals(0, provider.opens)
     }
 
     @Test
@@ -190,23 +185,65 @@ class SharedMapFileTest {
     }
 
     @Test
-    fun `the provider's bytes are read up to the cap`() {
+    fun `a map file of unknown size is read whole up to the cap and refused past it`() {
         val provider = registerProvider()
+        provider.displayName = "layer.geojson"
         val bytes = """{"type":"FeatureCollection","features":[]}""".encodeToByteArray()
         provider.file = temp.newFile("layer.geojson").apply { writeBytes(bytes) }
 
-        assertContentEquals(bytes, resolver.readSharedMapFile(uri, maxBytes = bytes.size.toLong()))
-        assertNull(resolver.readSharedMapFile(uri, maxBytes = bytes.size - 1L))
+        val loaded = assertIs<SharedMapFileLoad.Loaded>(resolver.loadSharedMapFile(uri, maxBytes = bytes.size.toLong()))
+        assertContentEquals(bytes, loaded.bytes)
+        assertEquals("layer.geojson", loaded.file.displayName)
+        assertEquals(
+            SharedMapFileLoad.Refused(SharedMapFileRejection.TOO_LARGE),
+            resolver.loadSharedMapFile(uri, maxBytes = bytes.size - 1L),
+        )
     }
 
     @Test
-    fun `a provider that refuses the read yields nothing instead of throwing`() {
+    fun `a file the metadata refuses is never opened`() {
         val provider = registerProvider()
+        provider.file = temp.newFile("photo.jpg")
+
+        provider.displayName = "photo.jpg"
+        assertEquals(
+            SharedMapFileLoad.Refused(SharedMapFileRejection.UNSUPPORTED_TYPE),
+            resolver.loadSharedMapFile(uri),
+        )
+
+        provider.displayName = "route.kml"
+        provider.size = 101L
+        assertEquals(
+            SharedMapFileLoad.Refused(SharedMapFileRejection.TOO_LARGE),
+            resolver.loadSharedMapFile(uri, maxBytes = 100),
+        )
+
+        assertEquals(0, provider.opens)
+    }
+
+    @Test
+    fun `a provider that throws on open is refused instead of crashing`() {
+        val provider = registerProvider()
+        provider.displayName = "route.kml"
         listOf(SecurityException("no grant"), IllegalStateException("provider bug")).forEach { error ->
             provider.openError = error
 
-            assertNull(resolver.readSharedMapFile(uri), error.toString())
+            assertEquals(
+                SharedMapFileLoad.Refused(SharedMapFileRejection.UNREADABLE),
+                resolver.loadSharedMapFile(uri),
+                error.toString(),
+            )
         }
+    }
+
+    @Test
+    fun `a file uri is refused without being opened`() {
+        val fileUri = Uri.fromFile(temp.newFile("route.kml"))
+
+        assertEquals(
+            SharedMapFileLoad.Refused(SharedMapFileRejection.NOT_CONTENT_URI),
+            resolver.loadSharedMapFile(fileUri),
+        )
     }
 
     private val resolver: ContentResolver
@@ -224,6 +261,7 @@ class SharedMapFileTest {
         var file: File? = null
         var refuse = false
         var openError: RuntimeException? = null
+        var opens = 0
 
         override fun onCreate() = true
 
@@ -243,6 +281,7 @@ class SharedMapFileTest {
         override fun getType(uri: Uri): String? = mimeType
 
         override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor {
+            opens++
             openError?.let { throw it }
             return ParcelFileDescriptor.open(checkNotNull(file), ParcelFileDescriptor.MODE_READ_ONLY)
         }

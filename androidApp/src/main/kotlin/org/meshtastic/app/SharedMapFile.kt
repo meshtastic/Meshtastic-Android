@@ -53,6 +53,7 @@ internal enum class SharedMapFileRejection {
     NOT_CONTENT_URI,
     UNSUPPORTED_TYPE,
     TOO_LARGE,
+    UNREADABLE,
 }
 
 /** No bigger than the most the KMZ reader will inflate, so a larger file could never be read whole anyway. */
@@ -63,19 +64,42 @@ private val SHAREABLE_LAYER_TYPES = setOf(LayerType.KML, LayerType.GEOJSON)
 
 private const val TAG = "SharedMapFile"
 
-/** Metadata only; nothing is queried for a non-`content://` [uri], which [SharedMapFile.rejection] refuses anyway. */
-internal fun ContentResolver.sharedMapFile(uri: Uri): SharedMapFile {
+/** A shared map file read whole, or why it wasn't. */
+internal sealed interface SharedMapFileLoad {
+    class Loaded(val file: SharedMapFile, val bytes: ByteArray) : SharedMapFileLoad
+
+    data class Refused(val reason: SharedMapFileRejection) : SharedMapFileLoad
+}
+
+/**
+ * Checks [uri] and reads it at most once, never past [maxBytes]. Blocking provider IPC, so never on the main thread.
+ * Nothing is opened when the metadata alone refuses the file.
+ */
+internal fun ContentResolver.loadSharedMapFile(
+    uri: Uri,
+    maxBytes: Long = MAX_SHARED_MAP_FILE_BYTES,
+): SharedMapFileLoad {
+    val file = sharedMapFile(uri) ?: return SharedMapFileLoad.Refused(SharedMapFileRejection.UNREADABLE)
+    val refusal = file.rejection(maxBytes)
+    return if (refusal != null) SharedMapFileLoad.Refused(refusal) else readSharedMapFile(uri, file, maxBytes)
+}
+
+/**
+ * Metadata only, null if the provider throws. Nothing is queried for a non-`content://` [uri], which
+ * [SharedMapFile.rejection] refuses anyway.
+ */
+internal fun ContentResolver.sharedMapFile(uri: Uri): SharedMapFile? {
     val fallbackName = uri.lastPathSegment.orEmpty()
     if (uri.scheme != ContentResolver.SCHEME_CONTENT) return SharedMapFile(uri.scheme, fallbackName, null, null)
-    var mimeType: String? = null
-    var nameAndSize: Pair<String?, Long?>? = null
-    try {
-        mimeType = getType(uri)
-        nameAndSize = queryNameAndSize(uri)
+    return try {
+        val mimeType = getType(uri)
+        val nameAndSize = queryNameAndSize(uri)
+        SharedMapFile(uri.scheme, nameAndSize?.first ?: fallbackName, mimeType, nameAndSize?.second)
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        // Another app's provider: binder rethrows whatever it throws.
         Logger.withTag(TAG).w(e) { "Shared map file provider failed its metadata query" }
+        null
     }
-    return SharedMapFile(uri.scheme, nameAndSize?.first ?: fallbackName, mimeType, nameAndSize?.second)
 }
 
 private fun ContentResolver.queryNameAndSize(uri: Uri): Pair<String?, Long?>? =
@@ -88,16 +112,18 @@ private fun ContentResolver.queryNameAndSize(uri: Uri): Pair<String?, Long?>? =
         name to size
     }
 
-/**
- * The file's bytes, or null if the provider refuses the read or sends more than [maxBytes]. A reported size is only a
- * claim, so the cap holds here too.
- */
-internal fun ContentResolver.readSharedMapFile(uri: Uri, maxBytes: Long = MAX_SHARED_MAP_FILE_BYTES): ByteArray? = try {
-    openInputStream(uri)?.use { it.readAtMost(maxBytes) }
+/** A reported size is only a claim, so the cap holds on the stream too. */
+private fun ContentResolver.readSharedMapFile(uri: Uri, file: SharedMapFile, maxBytes: Long): SharedMapFileLoad = try {
+    val stream = openInputStream(uri)
+    val bytes = stream?.use { it.readAtMost(maxBytes) }
+    when {
+        stream == null -> SharedMapFileLoad.Refused(SharedMapFileRejection.UNREADABLE)
+        bytes == null -> SharedMapFileLoad.Refused(SharedMapFileRejection.TOO_LARGE)
+        else -> SharedMapFileLoad.Loaded(file, bytes)
+    }
 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-    // Another app's provider: binder rethrows whatever it throws here, and the layer store's scope has no handler.
     Logger.withTag(TAG).w(e) { "Could not read the shared map file" }
-    null
+    SharedMapFileLoad.Refused(SharedMapFileRejection.UNREADABLE)
 }
 
 /** Every byte of the stream, or null once it runs past [maxBytes]. */
