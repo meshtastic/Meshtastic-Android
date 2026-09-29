@@ -144,31 +144,7 @@ data class Packet(
     @ColumnInfo(name = "message_text", defaultValue = "") val messageText: String = "",
     @ColumnInfo(name = "translated_text") val translatedText: String? = null,
     @ColumnInfo(name = "show_translated", defaultValue = "0") val showTranslated: Boolean = false,
-) {
-    companion object {
-        const val RELAY_NODE_SUFFIX_MASK = 0xFF
-
-        fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
-            val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
-
-            val candidateRelayNodes =
-                nodes.filter {
-                    it.num != ourNodeNum &&
-                        it.lastHeard != 0 &&
-                        (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
-                }
-
-            val closestRelayNode =
-                if (candidateRelayNodes.size == 1) {
-                    candidateRelayNodes.first()
-                } else {
-                    candidateRelayNodes.minByOrNull { it.hopsAway }
-                }
-
-            return closestRelayNode
-        }
-    }
-}
+)
 
 @Suppress("ConstructorParameterNaming")
 @Entity(tableName = "contact_settings")
