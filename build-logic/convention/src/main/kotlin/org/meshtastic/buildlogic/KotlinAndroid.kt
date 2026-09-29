@@ -26,9 +26,11 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
@@ -220,9 +222,10 @@ internal fun Project.configureKotlinJvm() {
 private val SHARED_COMPILER_ARGS =
     listOf(
         "-Xexpect-actual-classes",
-        "-Xskip-prerelease-check",
         // No -Xbackend-threads: parallel codegen races and crashes release builds (KT-83578).
     )
+
+private const val SHARED_OPT_IN = "kotlinx.coroutines.ExperimentalCoroutinesApi"
 
 private const val JDK_VERSION = 25
 
@@ -233,14 +236,13 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
 
         if (this is KotlinMultiplatformExtension) {
             targets.configureEach {
-                val isJvmTarget = platformType.name == "jvm" || platformType.name == "androidJvm"
                 compilations.configureEach {
                     compileTaskProvider.configure {
                         compilerOptions {
-                            freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
+                            optIn.add(SHARED_OPT_IN)
                             freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
-                            if (isJvmTarget) {
-                                freeCompilerArgs.add("-jvm-default=no-compatibility")
+                            if (this is KotlinJvmCompilerOptions) {
+                                jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
                             }
                         }
                     }
@@ -259,9 +261,9 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
             // For non-KMP modules, configure compiler args here since they don't use targets.compilations.
             // KMP modules already set these via the targets block above — only jvmTarget/warnings needed here.
             if (T::class != KotlinMultiplatformExtension::class) {
-                freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
+                optIn.add(SHARED_OPT_IN)
                 freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
-                freeCompilerArgs.add("-jvm-default=no-compatibility")
+                jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
             }
         }
     }
