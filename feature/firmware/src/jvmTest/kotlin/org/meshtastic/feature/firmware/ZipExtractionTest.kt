@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FilterInputStream
+import java.io.IOException
 import java.io.InputStream
 import java.nio.file.Files
 import java.util.zip.ZipEntry
@@ -294,6 +295,29 @@ class ZipExtractionTest {
         assertFailsWith<IllegalArgumentException> {
             extractFirmwareEntry(ByteArrayInputStream(zip), tempDir(), "heltec-v3", ".bin", null, maxEntries = 10)
         }
+    }
+
+    @Test
+    fun `a refused archive leaves none of the matches written before the refusal`() {
+        val zip =
+            zipOf("firmware-heltec-v3-2.8.0.abc.bin" to ByteArray(8) { 1 }, *Array(20) { "entry$it" to ByteArray(4) })
+        val out = tempDir()
+
+        assertFailsWith<IllegalArgumentException> {
+            extractFirmwareEntry(ByteArrayInputStream(zip), out, "heltec-v3", ".bin", null, maxEntries = 10)
+        }
+        assertEquals(0, out.listFiles()?.size)
+    }
+
+    @Test
+    fun `a truncated archive leaves no partial firmware file`() {
+        val zip = zipOf("firmware-heltec-v3-2.8.0.abc.bin" to Random(seed = 7).nextBytes(64 * 1024))
+        val out = tempDir()
+
+        assertFailsWith<IOException> {
+            extractFirmwareEntry(ByteArrayInputStream(zip.copyOf(zip.size / 2)), out, "heltec-v3", ".bin", null)
+        }
+        assertEquals(0, out.listFiles()?.size)
     }
 
     @Test

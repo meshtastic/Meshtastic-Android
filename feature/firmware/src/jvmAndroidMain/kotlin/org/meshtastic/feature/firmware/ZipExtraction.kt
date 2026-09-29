@@ -147,8 +147,8 @@ internal fun extractZipEntriesBounded(
  *
  * Bounded by entry count and bytes written, not by archive size: a release archive runs past 200 MB and 250 entries,
  * while a single firmware image is a few MB and only matching entries are written. Throws [IllegalArgumentException]
- * when a bound is exceeded; the entry that crossed the write budget is deleted, while matches already written stay in
- * [outputDir].
+ * when a bound is exceeded and [java.io.IOException] on a corrupt archive; either way every file this call wrote is
+ * deleted first.
  */
 internal fun extractFirmwareEntry(
     input: InputStream,
@@ -163,7 +163,9 @@ internal fun extractFirmwareEntry(
     val matches = mutableListOf<Pair<String, File>>()
     var remaining = maxWrittenBytes
     var entriesSeen = 0
-    ZipInputStream(input).use { zip ->
+    var completed = false
+    val zip = ZipInputStream(input)
+    try {
         var entry = zip.nextEntry
         while (entry != null) {
             if (!entry.isDirectory) {
@@ -173,17 +175,21 @@ internal fun extractFirmwareEntry(
             if (isFirmwareEntryMatch(entry.name, entry.isDirectory, target, fileExtension, preferredFilename)) {
                 // Only the last path segment is kept, so an entry name cannot write outside outputDir.
                 val outFile = File(outputDir, File(entry.name.lowercase()).name)
-                val written = outFile.outputStream().use { copyAtMost(zip, it, remaining) }
-                if (written == null) {
-                    outFile.delete()
-                    throw IllegalArgumentException("Firmware entry expands past the $maxWrittenBytes-byte limit")
-                }
-                remaining -= written
-                if (preferredFilename != null) return outFile
                 matches += entry.name to outFile
+                remaining -=
+                    outFile.outputStream().use { copyAtMost(zip, it, remaining) }
+                        ?: throw IllegalArgumentException("Firmware entry expands past the $maxWrittenBytes-byte limit")
+                if (preferredFilename != null) {
+                    completed = true
+                    return outFile
+                }
             }
             entry = zip.nextEntry
         }
+        completed = true
+    } finally {
+        if (!completed) matches.forEach { (_, file) -> file.delete() }
+        zip.close()
     }
     return matches.minByOrNull { (name, _) -> name.length }?.second
 }
