@@ -14,13 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.common.util
+package org.meshtastic.core.repository
 
-/** Utility for checking build properties, such as emulator detection. */
-expect object BuildUtils {
-    /** Whether the app is currently running on an emulator. */
-    val isEmulator: Boolean
-
-    /** The SDK version of the current platform. On non-Android platforms, this returns 0. */
-    val sdkInt: Int
-}
+/**
+ * One location fix from the device. A reading the platform did not report is null, never zero: zero is a real altitude,
+ * speed and bearing.
+ */
+data class Location(
+    val latitude: Double,
+    val longitude: Double,
+    /** Height above the WGS84 ellipsoid. */
+    val altitudeMeters: Double? = null,
+    /** Height above mean sea level, where the platform could derive it. */
+    val mslAltitudeMeters: Double? = null,
+    val accuracyMeters: Float? = null,
+    val speedMetersPerSecond: Float? = null,
+    val bearingDegrees: Float? = null,
+    /** UTC epoch milliseconds. */
+    val timeMillis: Long,
+)

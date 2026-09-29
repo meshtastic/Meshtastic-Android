@@ -18,16 +18,13 @@ package org.meshtastic.feature.map.terrain
 
 /**
  * Fetches individual tiles from a remote PMTiles archive by range request — never the whole archive, just the bytes of
- * the tile asked for. Backed by `ch.poole.geo.pmtiles:Reader` (MIT-licensed), the same library the base offline layer
- * uses for Protomaps; here it's pointed at Mapterhorn's Terrarium elevation archives instead.
- *
- * A plain Java library, so its wrapper is duplicated between `androidMain` and `jvmMain` rather than living once in
- * `commonMain` — see this module's `build.gradle.kts` for why.
+ * the tile asked for. Here it's pointed at Mapterhorn's Terrarium elevation archives.
  */
-expect class TerrainTileFetcher(pmtilesUrl: String) : AutoCloseable {
+interface TerrainTileFetcher : AutoCloseable {
 
     /** Raw tile bytes (WebP, Terrarium-encoded) at [zoom]/[x]/[y] — google/osm XYZ convention — or `null` if absent. */
     fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray?
-
-    override fun close()
 }
+
+/** Opens the remote PMTiles archive at [pmtilesUrl]. */
+expect fun TerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher

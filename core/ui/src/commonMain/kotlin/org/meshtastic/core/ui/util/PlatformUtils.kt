@@ -25,9 +25,6 @@ import org.meshtastic.core.common.util.CommonUri
 /** Returns a function to open the platform's NFC settings. */
 @Composable expect fun rememberOpenNfcSettings(): () -> Unit
 
-/** Returns a function to show a toast message. */
-@Composable expect fun rememberShowToast(): suspend (String) -> Unit
-
 /** Returns a function to show a toast message from a string resource. */
 @Composable expect fun rememberShowToastResource(): suspend (StringResource) -> Unit
 
@@ -64,12 +61,6 @@ expect fun rememberSaveFileLauncher(
  * UF2 bootloader's `INFO_UF2.TXT` to confirm which board it is and that the volume really is a bootloader drive.
  */
 @Composable expect fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit
-
-/**
- * Returns a suspend function that reads up to [maxChars] characters of text from a [CommonUri]. Returns `null` if the
- * file is empty or cannot be read.
- */
-@Composable expect fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String?
 
 /** Keeps the screen awake while [enabled] is true. No-op on platforms that don't support it. */
 @Composable expect fun KeepScreenOn(enabled: Boolean)

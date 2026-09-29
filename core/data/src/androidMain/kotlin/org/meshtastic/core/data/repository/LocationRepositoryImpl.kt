@@ -39,6 +39,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.PlatformAnalytics
+import android.location.Location as AndroidLocation
 
 @Single
 class LocationRepositoryImpl(
@@ -76,7 +77,7 @@ class LocationRepositoryImpl(
                     Logger.e(e) { "addMslAltitudeToLocation() failed" }
                 }
             }
-            trySend(location)
+            trySend(location.toLocation())
         }
 
         val providerList = buildList {
@@ -124,3 +125,15 @@ class LocationRepositoryImpl(
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     override fun getLocations(): Flow<Location> = locationManager.value.requestLocationUpdates()
 }
+
+internal fun AndroidLocation.toLocation(): Location = Location(
+    latitude = latitude,
+    longitude = longitude,
+    altitudeMeters = if (hasAltitude()) altitude else null,
+    mslAltitudeMeters =
+    if (LocationCompat.hasMslAltitude(this)) LocationCompat.getMslAltitudeMeters(this) else null,
+    accuracyMeters = if (hasAccuracy()) accuracy else null,
+    speedMetersPerSecond = if (hasSpeed()) speed else null,
+    bearingDegrees = if (hasBearing()) bearing else null,
+    timeMillis = time,
+)

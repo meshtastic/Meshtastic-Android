@@ -24,16 +24,21 @@ import java.io.IOException
 import java.net.URI
 import java.util.zip.GZIPInputStream
 
-actual class TerrainTileFetcher actual constructor(pmtilesUrl: String) : AutoCloseable {
+actual fun TerrainTileFetcher(pmtilesUrl: String): TerrainTileFetcher = PmtilesTerrainTileFetcher(pmtilesUrl)
+
+/**
+ * Backed by `ch.poole.geo.pmtiles:Reader` (MIT-licensed), the same library the base offline layer uses for Protomaps.
+ */
+private class PmtilesTerrainTileFetcher(pmtilesUrl: String) : TerrainTileFetcher {
 
     private val reader: Reader = Reader(HttpUrlConnectionChannel(URI(pmtilesUrl).toURL()))
 
-    actual fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? {
+    override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? {
         val raw = reader.getTile(zoom, x, y) ?: return null
         return if (reader.tileCompression == Constants.COMPRESSION_GZIP) gunzip(raw) else raw
     }
 
-    actual override fun close() {
+    override fun close() {
         reader.close()
     }
 

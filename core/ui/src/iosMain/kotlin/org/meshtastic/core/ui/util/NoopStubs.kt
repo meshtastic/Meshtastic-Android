@@ -31,8 +31,6 @@ actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): A
 
 @Composable actual fun rememberOpenNfcSettings(): () -> Unit = {}
 
-@Composable actual fun rememberShowToast(): suspend (String) -> Unit = { _ -> }
-
 @Composable actual fun rememberShowToastResource(): suspend (StringResource) -> Unit = { _ -> }
 
 @Composable actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit = { _, _, _ -> }
@@ -50,8 +48,6 @@ actual fun rememberSaveFileLauncher(
 actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit = { _ -> }
 
 @Composable actual fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit = {}
-
-@Composable actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { _, _ -> null }
 
 @Composable
 actual fun KeepScreenOn(enabled: Boolean) {
