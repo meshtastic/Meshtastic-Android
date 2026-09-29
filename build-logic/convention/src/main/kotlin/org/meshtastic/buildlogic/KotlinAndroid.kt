@@ -113,13 +113,12 @@ internal fun Project.configureKotlinMultiplatform() {
         // Standard KMP targets for Meshtastic
         jvm()
 
-        // iOS targets for compile-only validation. Only register on hosts where
-        // Kotlin/Native can run — KSP attaches to every Kotlin target's compilation
-        // and crashes at configuration time on unsupported hosts (e.g. linux-aarch64)
-        // with "Could not create task ':…:kspKotlinIosArm64' > Unknown host target".
+        // iOS simulator target for compile-only validation; nothing here links a device
+        // framework, so there is no iosArm64. Only register on hosts where Kotlin/Native
+        // can run: KSP attaches to every Kotlin target's compilation and crashes at
+        // configuration time on unsupported hosts (e.g. linux-aarch64) with "Unknown host target".
         // Supported set: https://kotlinlang.org/docs/native-target-support.html
         if (supportsKotlinNative()) {
-            iosArm64()
             iosSimulatorArm64()
         }
 
@@ -144,14 +143,13 @@ internal fun Project.configureKotlinMultiplatform() {
     }
 
     // Disable iOS native test link & run tasks.
-    // iOS targets exist only for compile-time validation; linking test
+    // The iOS target exists only for compile-time validation; linking test
     // executables is extremely slow and causes `./gradlew test` to hang.
     tasks.configureEach {
         val taskName = name.lowercase()
-        if (taskName.contains("iosarm64") || taskName.contains("iossimulatorarm64")) {
+        if (taskName.contains("iossimulatorarm64")) {
             val isDisabledIosTask =
                 (taskName.startsWith("link") && taskName.contains("test")) ||
-                    taskName == "iosarm64test" ||
                     taskName == "iossimulatorarm64test" ||
                     taskName.endsWith("testbinaries")
             if (isDisabledIosTask) {
