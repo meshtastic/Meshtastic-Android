@@ -9,7 +9,7 @@ description: Build shared Compose Multiplatform UI in Meshtastic-Android - adapt
 Guidelines for building shared UI, adaptive layouts, and handling strings/resources in Meshtastic-Android. The codebase uses Material 3 Adaptive.
 
 ## 1. UI Components & Layouts
-- **Material 3 / Adaptive:** Use `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` to support Large (1200dp) and XL (1600dp) breakpoints. Investigate 3-pane "Power User" scenes using Navigation 3 Scenes and draggable dividers for desktopApp/tablets.
+- **Material 3 / Adaptive:** Use `currentWindowAdaptiveInfoV2()`, which includes the Large (1200dp) and XL (1600dp) width classes; `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` is deprecated in its favour. Investigate 3-pane "Power User" scenes using Navigation 3 Scenes and draggable dividers for desktopApp/tablets.
 - **Dialogs & Alerts:** Use centralized components like `AlertHost(alertManager)` from `core:ui/commonMain`. Do NOT trigger alerts inline or duplicate alert logic. Use `SharedDialogs(uiViewModel)` for general popups.
 - **Placeholders:** Use `PlaceholderScreen(name)` from `core:ui/commonMain` for unimplemented desktopApp/JVM features.
 - **Theme Picker:** Use `ThemePickerDialog` from `feature:settings/commonMain`.

@@ -73,7 +73,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **String Formatting:** CMP only supports `%N$s` and `%N$d`. Flag any float formats (`%N$.1f`) in Compose string resources; they must be pre-formatted using `NumberFormatter.format()` from `core:common`. Use `MetricFormatter` for metric-specific displays (temperature, voltage, current, percent, humidity, pressure, SNR, RSSI).
 - [ ] **Centralized Dialogs & Alerts:** Flag inline alert-rendering logic. Mandate the use of `AlertHost(alertManager)` or `SharedDialogs` from `core:ui/commonMain`.
 - [ ] **Placeholders:** Require `PlaceholderScreen(name)` from `core:ui/commonMain` for unimplemented desktopApp/JVM features. No inline placeholders in feature modules.
-- [ ] **Adaptive Layouts:** Verify use of `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` to support desktopApp/tablet breakpoints (≥ 1200dp).
+- [ ] **Adaptive Layouts:** Verify use of `currentWindowAdaptiveInfoV2()`, which includes the desktopApp/tablet Large and XL width classes (≥ 1200dp); `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` is deprecated in its favour.
 
 ### 3. Navigation & State
 - [ ] **Shared Navigation Graphs:** Feature navigation graphs must be defined as extension functions on `EntryProviderScope<NavKey>` in `commonMain` (e.g., `fun EntryProviderScope<NavKey>.settingsGraph(...)`). Flag any graphs defined in platform-specific source sets.
