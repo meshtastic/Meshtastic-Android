@@ -96,21 +96,20 @@ class NodeManagerImpl(
     private fun persistenceLane(nodeNum: Int): Mutex =
         nodePersistenceLanes[(nodeNum.toLong() and Int.MAX_VALUE.toLong()).toInt() % nodePersistenceLanes.size]
 
-    // A persist not yet in its lane writes the latest node once it gets there, so one per node is enough. Each holds a
-    // session lease that teardown drains, so a slow database must not collect one per packet.
-    private val pendingPersists = atomic(emptyMap<Int, Any>())
+    // A persist not yet in its lane writes the latest node once it gets there, so one per node and session is enough.
+    // Each holds a session lease that teardown drains, so a slow database must not collect one per packet.
+    private val pendingPersists = atomic(emptyMap<Pair<Int, RadioSessionContext?>, Any>())
 
     private fun schedulePersistence(nodeNum: Int, session: RadioSessionContext?) {
+        val key = nodeNum to session
         val token = Any()
         var claimed = false
         pendingPersists.update { pending ->
-            claimed = nodeNum !in pending
-            if (claimed) pending + (nodeNum to token) else pending
+            claimed = key !in pending
+            if (claimed) pending + (key to token) else pending
         }
         if (!claimed) return
-        val release = {
-            pendingPersists.update { pending -> if (pending[nodeNum] === token) pending - nodeNum else pending }
-        }
+        val release = { pendingPersists.update { pending -> if (pending[key] === token) pending - key else pending } }
         radioInterfaceService
             .launchSessionWork(scope, session) { persistLatestNode(nodeNum, onLaneEntered = release) }
             .invokeOnCompletion { release() }

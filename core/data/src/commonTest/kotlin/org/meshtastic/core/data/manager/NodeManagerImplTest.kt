@@ -324,6 +324,29 @@ class NodeManagerImplTest {
     }
 
     @Test
+    fun `an update from a newer session schedules its own write`() = testScope.runTest {
+        val nodeNum = 1234
+        val oldSession = RadioSessionContext(generation = 7L, address = "ble:same")
+        val newSession = RadioSessionContext(generation = 8L, address = "ble:same")
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        admitLeases(oldSession)
+        admitLeases(newSession)
+        val releaseFirstWrite = CompletableDeferred<Unit>()
+        var writes = 0
+        everySuspend { nodeRepository.upsert(any()) } calls { if (++writes == 1) releaseFirstWrite.await() }
+
+        nodeManager.updateNodeForSession(nodeNum, oldSession) { node -> node.copy(lastHeard = 1) }
+        nodeManager.updateNodeForSession(nodeNum, oldSession) { node -> node.copy(lastHeard = 2) }
+        nodeManager.updateNodeForSession(nodeNum, newSession) { node -> node.copy(lastHeard = 3) }
+        runCurrent()
+
+        verifySuspend(exactly(1)) { radioInterfaceService.runWithSessionLease(newSession, any()) }
+        releaseFirstWrite.complete(Unit)
+        advanceUntilIdle()
+    }
+
+    @Test
     fun `a persist rejected by a retired session does not block a later write`() = testScope.runTest {
         val nodeNum = 1234
         val oldSession = RadioSessionContext(generation = 7L, address = "ble:same")
