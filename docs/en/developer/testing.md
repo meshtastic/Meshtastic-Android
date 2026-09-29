@@ -151,10 +151,10 @@ feature/my-feature/src/
 ./gradlew :feature:docs:allTests
 
 # Code quality
-./gradlew spotlessCheck detekt
+./gradlew spotlessCheck detekt detektTypeResolved
 
 # Full verification
-./gradlew spotlessCheck detekt kmpSmokeCompile test allTests
+./gradlew spotlessCheck detekt detektTypeResolved kmpSmokeCompile test allTests
 ```
 
 ## CI integration

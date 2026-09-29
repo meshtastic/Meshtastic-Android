@@ -8,14 +8,14 @@ Requires JDK 25 and `ANDROID_HOME`. No secrets step: the secrets plugin reads
 `secrets.properties` and falls back to the tracked `secrets.defaults.properties`, so the
 `google` flavor builds without either. Add `secrets.properties` only for real Maps tiles.
 ```bash
-./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests   # full local verification (run before push)
+./gradlew spotlessApply spotlessCheck detekt detektTypeResolved assembleDebug test allTests   # full local verification (run before push)
 ./gradlew :core:data:allTests                                # single KMP module
 ./gradlew :androidApp:testFdroidDebugUnitTest                # single Android-only module
 ./gradlew kmpSmokeCompile                                    # cross-platform compile check, no tests
 ```
 > Both `test` AND `allTests` are needed — `allTests` covers KMP modules, `test` covers pure-Android modules.
 
-**KMP vs Android-only task naming** (wrong name silently skips tests or fails resolution): KMP modules (`core:*`, `feature:*`) use `:module:allTests` and `:module:compileKotlinJvm`; Android-only modules (`androidApp`, `desktopApp`, `core:barcode`) use `:module:testFdroidDebugUnitTest` (plain `:desktopApp:test` for the JVM-only desktop module). `:module:detekt` is the lifecycle task for both — never `detektMain`/`detektDebug`. Full matrix and pitfalls: `.skills/testing-ci/`.
+**KMP vs Android-only task naming** (wrong name silently skips tests or fails resolution): KMP modules (`core:*`, `feature:*`) use `:module:allTests` and `:module:compileKotlinJvm`; Android-only modules (`androidApp`, `desktopApp`, `core:barcode`) use `:module:testFdroidDebugUnitTest` (plain `:desktopApp:test` for the JVM-only desktop module). `:module:detekt` runs the rules that need no classpath and `:module:detektTypeResolved` the ones that do (both kinds of module); never call `detektMain`/`detektDebug` directly. Full matrix and pitfalls: `.skills/testing-ci/`.
 
 Architecture, flavors, conventions, branch naming, protos, coding rules: **see `AGENTS.md`**. Contextual `.github/instructions/` files enforce conventions scoped to specific source sets.
 

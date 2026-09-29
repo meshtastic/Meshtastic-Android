@@ -40,7 +40,7 @@ Thank you for your interest in contributing to Meshtastic-Android! We welcome co
 
 Meshtastic-Android uses [Detekt](https://detekt.dev/) for static code analysis and linting of Kotlin code.
 
-- Run `./gradlew detekt` before submitting your pull request to ensure your code passes all lint checks.
+- Run `./gradlew detekt detektTypeResolved` before submitting your pull request to ensure your code passes all lint checks. `detektTypeResolved` runs the rules that need the compile classpath, which plain `detekt` skips.
 - Fix any Detekt warnings or errors reported in your code.
 - Suppress individual warnings only as a last resort.
 - You can find Detekt configuration in the `config/detekt` directory. If you believe a rule should be changed or suppressed, discuss it in your PR.
