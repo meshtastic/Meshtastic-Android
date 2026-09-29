@@ -17,6 +17,7 @@
 package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import okio.BufferedSink
 import okio.BufferedSource
@@ -39,6 +40,8 @@ class JvmFileService(private val dispatchers: CoroutineDispatchers) : FileServic
                 file.parentFile?.mkdirs()
                 file.sink().buffer().use { sink -> block(sink) }
                 true
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.e(e) { "Failed to write to URI: $uri" }
                 false
@@ -51,6 +54,8 @@ class JvmFileService(private val dispatchers: CoroutineDispatchers) : FileServic
                 val file = uri.toFile()
                 file.source().buffer().use { source -> block(source) }
                 true
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.e(e) { "Failed to read from URI: $uri" }
                 false

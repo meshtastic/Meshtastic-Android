@@ -22,6 +22,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
@@ -60,6 +61,8 @@ abstract class BaseFirmwareFileHandler(private val client: HttpClient, protected
     override suspend fun checkUrlExists(url: String): Boolean = withContext(ioDispatcher) {
         try {
             client.head(url).status.isSuccess()
+        } catch (e: CancellationException) {
+            throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.w(e) { "Failed to check URL existence: $url" }
             false
@@ -70,6 +73,8 @@ abstract class BaseFirmwareFileHandler(private val client: HttpClient, protected
         try {
             val response = client.get(url)
             if (response.status.isSuccess()) response.bodyAsText() else null
+        } catch (e: CancellationException) {
+            throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.w(e) { "Failed to fetch text from: $url" }
             null
@@ -81,6 +86,8 @@ abstract class BaseFirmwareFileHandler(private val client: HttpClient, protected
             val response =
                 try {
                     client.get(url)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.w(e) { "Download failed for $url" }
                     return@withContext null
