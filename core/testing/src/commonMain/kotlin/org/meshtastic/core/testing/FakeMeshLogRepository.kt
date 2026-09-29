@@ -64,7 +64,9 @@ class FakeMeshLogRepository :
 
     override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> = logsFlow.map { it.take(maxItem) }
 
-    override fun readAllLogsInReceiveOrder(): Flow<MeshLog> = flow { logsFlow.value.forEach { emit(it) } }
+    override fun readAllLogsInReceiveOrder(): Flow<MeshLog> = flow {
+        logsFlow.value.sortedBy { it.received_date }.forEach { emit(it) }
+    }
 
     override fun getAllLogsUnbounded(): Flow<List<MeshLog>> = logsFlow
 
