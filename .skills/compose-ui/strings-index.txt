@@ -173,7 +173,6 @@ channel_7
 channel_8
 channel_features
 channel_invalid
-channel_label
 channel_name
 channel_url
 channel_utilization

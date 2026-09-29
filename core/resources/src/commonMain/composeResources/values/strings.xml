@@ -197,7 +197,6 @@
     <string name="channel_8">Channel 8</string>
     <string name="channel_features">Channel Features</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
-    <string name="channel_label">Channel</string>
     <string name="channel_name">Channel Name</string>
     <string name="channel_url">Channel URL</string>
     <string name="channel_utilization">ChUtil</string>
