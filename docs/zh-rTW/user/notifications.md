@@ -18,19 +18,19 @@ Meshtastic posts a notification when something on the mesh needs you while the a
 
 To see the categories, tap **App Notifications** in the **Information** section of **Settings**. It opens Android's notification settings for Meshtastic, where the categories sit in three groups.
 
-| Group    | Category                                                      | Posted for                                                                      | Tapping it opens                |
-| -------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
-| 訊息       | 私訊通知                                                          | A message sent directly to you                                                  | The conversation                |
-| 訊息       | Broadcast message notifications                               | A message on one of your channels                                               | The channel                     |
-| Messages | Waypoint notifications                                        | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages | Alert notifications                                           | A critical alert from a node                                                    | The conversation                |
-| Mesh     | New node notifications                                        | A node heard for the first time                                                 | The node's details              |
-| Mesh     | Mesh invitation notifications                                 | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
-| Mesh     | Low battery notifications (favorite nodes) | A favorite node's battery running low                                           | The node's details              |
-| Device   | Service notifications                                         | The connection to your node while the app runs in the background                | The app                         |
-| Device   | Low battery notifications                                     | Your node's battery running low                                                 | The node's details              |
-| Device   | Radio notifications                                           | Notices from your node, such as key verification requests and security warnings | The app                         |
-| Device   | Update and connection notifications                           | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
+| Group                          | Category                            | Posted for                                                                      | Tapping it opens                |
+| ------------------------------ | ----------------------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
+| 訊息                             | 私訊通知                                | A message sent directly to you                                                  | The conversation                |
+| 訊息                             | 廣播訊息通知                              | A message on one of your channels                                               | The channel                     |
+| 訊息                             | 航點通知                                | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
+| 訊息                             | 警告信息                                | A critical alert from a node                                                    | The conversation                |
+| 網狀網路 (Mesh) | 新節點通知                               | A node heard for the first time                                                 | The node's details              |
+| 網狀網路 (Mesh) | Mesh invitation notifications       | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
+| 網狀網路 (Mesh) | 低電量通知(收藏節點)      | A favorite node's battery running low                                           | The node's details              |
+| 裝置                             | 服務通知                                | The connection to your node while the app runs in the background                | The app                         |
+| 裝置                             | 低電量通知                               | Your node's battery running low                                                 | The node's details              |
+| 裝置                             | Radio notifications                 | Notices from your node, such as key verification requests and security warnings | The app                         |
+| 裝置                             | Update and connection notifications | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
 
 By default, direct messages, alerts and radio notices pop up on screen, mesh invitations and the service notification arrive without a sound, and the rest make a sound. Android keeps whatever you change on a category, and the app cannot change it back.
 
@@ -64,7 +64,7 @@ On Android 11 and newer, a message notification can also open as a floating bubb
 
 A Wear OS watch paired with your phone shows every Meshtastic notification except the service notification, which Android keeps on the phone because it never goes away. A message notification keeps its actions on the watch, and **Reply** there can offer suggested replies. The watch's own notification settings decide whether Meshtastic appears on it at all.
 
-## Related Topics
+## 相關主題
 
 - [Messages & Channels](messages-and-channels) — muting conversations and nodes, bubbles, and message states
 - [Getting Started](onboarding) — the notification and critical alert steps of setup

@@ -18,19 +18,19 @@ Meshtastic posts a notification when something on the mesh needs you while the a
 
 To see the categories, tap **App Notifications** in the **Information** section of **Settings**. It opens Android's notification settings for Meshtastic, where the categories sit in three groups.
 
-| Group  | Category                                                      | Posted for                                                                      | Tapping it opens                |
-| ------ | ------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
-| Správy | Direct message notifications                                  | A message sent directly to you                                                  | The conversation                |
-| Správy | Broadcast message notifications                               | A message on one of your channels                                               | The channel                     |
-| Správy | Waypoint notifications                                        | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Správy | Notifikácie upozornení                                        | A critical alert from a node                                                    | The conversation                |
-| Mesh   | Notifikácie nových uzlov                                      | A node heard for the first time                                                 | The node's details              |
-| Mesh   | Mesh invitation notifications                                 | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
-| Mesh   | Low battery notifications (favorite nodes) | A favorite node's battery running low                                           | The node's details              |
-| Device | Service notifications                                         | The connection to your node while the app runs in the background                | The app                         |
-| Device | Low battery notifications                                     | Your node's battery running low                                                 | The node's details              |
-| Device | Radio notifications                                           | Notices from your node, such as key verification requests and security warnings | The app                         |
-| Device | Update and connection notifications                           | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
+| Group      | Category                                                        | Posted for                                                                      | Tapping it opens                |
+| ---------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
+| Správy     | Direct message notifications                                    | A message sent directly to you                                                  | The conversation                |
+| Správy     | Broadcast message notifications                                 | A message on one of your channels                                               | The channel                     |
+| Správy     | Waypoint notifications                                          | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
+| Správy     | Notifikácie upozornení                                          | A critical alert from a node                                                    | The conversation                |
+| Mesh       | Notifikácie nových uzlov                                        | A node heard for the first time                                                 | The node's details              |
+| Mesh       | Mesh invitation notifications                                   | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
+| Mesh       | Upozornenia o slabej batérii (obľúbene uzle) | A favorite node's battery running low                                           | The node's details              |
+| Zariadenie | Notifikácie zo služby                                           | The connection to your node while the app runs in the background                | The app                         |
+| Zariadenie | Upozornenia o slabej batérii                                    | Your node's battery running low                                                 | The node's details              |
+| Zariadenie | Radio notifications                                             | Notices from your node, such as key verification requests and security warnings | The app                         |
+| Zariadenie | Update and connection notifications                             | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
 
 By default, direct messages, alerts and radio notices pop up on screen, mesh invitations and the service notification arrive without a sound, and the rest make a sound. Android keeps whatever you change on a category, and the app cannot change it back.
 

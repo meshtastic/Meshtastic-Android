@@ -27,10 +27,10 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Maillage | Notifikasyon nouvo nœud                                             | A node heard for the first time                                                 | The node's details              |
 | Maillage | Mesh invitation notifications                                       | An invitation to join a nearby mesh                                             | Découverte de maille locale     |
 | Maillage | Notifications de batterie faible (nœuds favoris) | A favorite node's battery running low                                           | The node's details              |
-| Appareil | Service notifications                                               | The connection to your node while the app runs in the background                | The app                         |
-| Device   | Low battery notifications                                           | Your node's battery running low                                                 | The node's details              |
-| Device   | Radio notifications                                                 | Notices from your node, such as key verification requests and security warnings | The app                         |
-| Device   | Update and connection notifications                                 | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
+| Appareil | Notifications de service                                            | The connection to your node while the app runs in the background                | The app                         |
+| Appareil | Notifications de batterie faible                                    | Your node's battery running low                                                 | The node's details              |
+| Appareil | Radio notifications                                                 | Notices from your node, such as key verification requests and security warnings | The app                         |
+| Appareil | Update and connection notifications                                 | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
 
 By default, direct messages, alerts and radio notices pop up on screen, mesh invitations and the service notification arrive without a sound, and the rest make a sound. Android keeps whatever you change on a category, and the app cannot change it back.
 
