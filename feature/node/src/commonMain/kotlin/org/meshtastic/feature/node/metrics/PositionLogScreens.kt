@@ -81,7 +81,9 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         },
         chartPart = { modifier, selectedX, _, onPointSelected ->
             val selectedTime = selectedX?.toInt()
-            trackMap(destNum, positions, modifier, selectedTime) { time -> onPointSelected(time.toDouble()) }
+            // Positional: trackMap is a function type, so it takes no named arguments. Collapsed credit, this being a
+            // strip inside a screen whose own map is a tab away.
+            trackMap(destNum, positions, modifier, selectedTime, { time -> onPointSelected(time.toDouble()) }, false)
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {

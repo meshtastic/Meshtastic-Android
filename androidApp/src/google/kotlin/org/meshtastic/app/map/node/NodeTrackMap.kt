@@ -41,6 +41,8 @@ fun NodeTrackMap(
     modifier: Modifier = Modifier,
     selectedPositionTime: Int? = null,
     onPositionSelect: ((Int) -> Unit)? = null,
+    // Accepted for the shared seam and ignored: Google Maps draws its own attribution, in MapView.
+    @Suppress("UNUSED_PARAMETER") showAttribution: Boolean = true,
 ) {
     val vm = koinViewModel<NodeMapViewModel>()
     vm.setDestNum(destNum)
