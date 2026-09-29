@@ -47,12 +47,11 @@ class KotlinTimeSourceTest {
 
     @Test
     fun `no source uses the kotlinx datetime Instant or Clock`() {
-        val offenders =
-            sourceFiles.flatMap { file ->
-                file.text.lines().withIndex().mapNotNull { (index, line) ->
-                    if (banned.containsMatchIn(line)) "${file.scanPath}:${index + 1}: ${line.trim()}" else null
-                }
+        val offenders = sourceFiles.flatMap { file ->
+            file.text.lines().withIndex().mapNotNull { (index, line) ->
+                if (banned.containsMatchIn(line)) "${file.scanPath}:${index + 1}: ${line.trim()}" else null
             }
+        }
 
         assertTrue(
             offenders.isEmpty(),

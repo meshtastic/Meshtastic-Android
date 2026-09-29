@@ -657,15 +657,14 @@ fun handleQuickChatAction(
     when (action.mode) {
         QuickChatAction.Mode.Append -> {
             if (!currentText.contains(action.message)) {
-                val newText =
-                    buildString {
-                        append(currentText)
-                        if (currentText.isNotEmpty() && !currentText.endsWith(' ')) {
-                            append(' ')
-                        }
-                        append(action.message)
+                val newText = buildString {
+                    append(currentText)
+                    if (currentText.isNotEmpty() && !currentText.endsWith(' ')) {
+                        append(' ')
                     }
-                        .limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
+                    append(action.message)
+                }
+                    .limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
                 onUpdateText(newText)
             }
         }

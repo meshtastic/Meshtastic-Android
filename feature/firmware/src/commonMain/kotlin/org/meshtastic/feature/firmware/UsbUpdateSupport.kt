@@ -221,10 +221,11 @@ internal class UsbPassWriter(
             return UsbPassResult.CopyFailed
         }
 
-        val copied =
-            safeCatching { fileHandler.copyToUri(artifact, destination) }
-                .onFailure { Logger.e(it) { "Copying $fileName to the UF2 volume failed" } }
-                .getOrNull()
+        val copied = safeCatching {
+            fileHandler.copyToUri(artifact, destination)
+        }
+            .onFailure { Logger.e(it) { "Copying $fileName to the UF2 volume failed" } }
+            .getOrNull()
         if (copied == null) return UsbPassResult.CopyFailed
 
         updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_flashing))))

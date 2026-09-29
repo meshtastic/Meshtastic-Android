@@ -46,15 +46,14 @@ class LocationMappingTest {
 
     @Test
     fun `zero readings the fix does carry stay zero`() {
-        val location =
-            fix {
-                altitude = 0.0
-                mslAltitudeMeters = 0.0
-                accuracy = 0f
-                speed = 0f
-                bearing = 0f
-            }
-                .toLocation()
+        val location = fix {
+            altitude = 0.0
+            mslAltitudeMeters = 0.0
+            accuracy = 0f
+            speed = 0f
+            bearing = 0f
+        }
+            .toLocation()
 
         assertEquals(
             Location(
@@ -73,15 +72,14 @@ class LocationMappingTest {
 
     @Test
     fun `reported readings carry through unchanged`() {
-        val location =
-            fix {
-                altitude = 1650.5
-                mslAltitudeMeters = 1633.25
-                accuracy = 4.5f
-                speed = 12.25f
-                bearing = 271.5f
-            }
-                .toLocation()
+        val location = fix {
+            altitude = 1650.5
+            mslAltitudeMeters = 1633.25
+            accuracy = 4.5f
+            speed = 12.25f
+            bearing = 271.5f
+        }
+            .toLocation()
 
         assertEquals(
             Location(

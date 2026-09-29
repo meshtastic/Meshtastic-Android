@@ -349,16 +349,15 @@ actual fun isWifiUnavailable(): Boolean {
 // until a callback-based rewrite is warranted.
 @Suppress("DEPRECATION")
 private fun ConnectivityManager.hasLocalNetwork(): Boolean {
-    val transports =
-        allNetworks.mapNotNull { network ->
-            getNetworkCapabilities(network)?.let { caps ->
-                NetworkTransportInfo(
-                    hasWifi = caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI),
-                    hasEthernet = caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET),
-                    hasVpn = caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN),
-                )
-            }
+    val transports = allNetworks.mapNotNull { network ->
+        getNetworkCapabilities(network)?.let { caps ->
+            NetworkTransportInfo(
+                hasWifi = caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI),
+                hasEthernet = caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET),
+                hasVpn = caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN),
+            )
         }
+    }
     return anyNetworkScanTransportAvailable(transports)
 }
 

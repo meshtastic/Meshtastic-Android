@@ -110,13 +110,12 @@ class ModuleBoundaryTest {
 
     @Test
     fun `no core module imports a feature`() {
-        val offenders =
-            coreFiles.flatMap { file ->
-                file.imports
-                    .map { it.name }
-                    .filter { it.startsWith("org.meshtastic.feature.") }
-                    .map { "${file.scanPath}: $it" }
-            }
+        val offenders = coreFiles.flatMap { file ->
+            file.imports
+                .map { it.name }
+                .filter { it.startsWith("org.meshtastic.feature.") }
+                .map { "${file.scanPath}: $it" }
+        }
 
         assertTrue(
             offenders.isEmpty(),
