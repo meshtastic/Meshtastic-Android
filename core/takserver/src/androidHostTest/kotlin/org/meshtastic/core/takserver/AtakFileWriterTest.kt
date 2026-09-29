@@ -38,6 +38,7 @@ import org.robolectric.annotation.Config
 import java.io.File
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
@@ -77,6 +78,17 @@ class AtakFileWriterTest {
     }
 
     @Test
+    @Config(sdk = [34])
+    fun `a failed save removes its pending row`() {
+        val mediaStore = Robolectric.setupContentProvider(FakeMediaStore::class.java, MediaStore.AUTHORITY)
+        mediaStore.failUpdatesWith = IllegalStateException("provider refused the update")
+
+        assertFalse(AtakFileWriter.writeToImportDir("route-1.zip", byteArrayOf(1, 2, 3)))
+
+        assertTrue(mediaStore.rows.isEmpty(), "pending rows left behind: ${mediaStore.rows.keys}")
+    }
+
+    @Test
     @Config(sdk = [28])
     fun `saves to the app external Downloads folder below API 29`() {
         assertTrue(AtakFileWriter.writeToImportDir("route/../1.zip", byteArrayOf(5)))
@@ -90,6 +102,7 @@ class AtakFileWriterTest {
         class Row(val values: ContentValues, val file: File)
 
         val rows = linkedMapOf<Long, Row>()
+        var failUpdatesWith: RuntimeException? = null
         private var nextId = 1L
 
         override fun onCreate(): Boolean = true
@@ -128,6 +141,7 @@ class AtakFileWriterTest {
             selection: String?,
             selectionArgs: Array<out String>?,
         ): Int {
+            failUpdatesWith?.let { throw it }
             val row = rows[ContentUris.parseId(uri)] ?: return 0
             row.values.putAll(values)
             return 1

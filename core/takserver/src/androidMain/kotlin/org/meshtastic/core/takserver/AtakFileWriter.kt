@@ -83,12 +83,14 @@ internal actual object AtakFileWriter {
                 put(MediaStore.Downloads.IS_PENDING, 1)
             }
         val inserted = resolver.insert(collection, pending) ?: throw IOException("MediaStore refused to create $name")
+        // A pending row left behind hides this name from the lookup above, so a retry would get a renamed copy.
+        var published = false
         try {
             resolver.writeBytes(inserted, "w", bytes)
             resolver.update(inserted, ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }, null, null)
-        } catch (e: IOException) {
-            resolver.delete(inserted, null, null)
-            throw e
+            published = true
+        } finally {
+            if (!published) resolver.delete(inserted, null, null)
         }
         return inserted
     }
