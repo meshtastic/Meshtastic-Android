@@ -17,17 +17,21 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">湿度</string>
     <string name="a11y_label_value">%1$s：%2$s</string>
     <string name="a11y_message_from">%1$s からのメッセージ：%2$s</string>
     <string name="a11y_node_distance_away">%1$s 先</string>
     <string name="a11y_node_favorite">お気に入り</string>
-    <string name="a11y_node_hops_away">%1$d ホップ先</string>
+    <plurals name="a11y_node_hops_count">
+        <item quantity="other">%1$d ホップ先</item>
+    </plurals>
     <string name="a11y_node_last_heard">最終受信 %1$s</string>
     <string name="a11y_node_offline">オフライン</string>
     <string name="a11y_node_online">オンライン</string>
     <string name="a11y_node_role">役割 %1$s</string>
     <string name="a11y_node_signal">信号 %1$s</string>
     <string name="a11y_nodes_at_hop">ホップ %1$d：%2$d ノード</string>
+    <string name="a11y_temperature">温度</string>
     <string name="about">概要</string>
     <string name="accept">同意</string>
     <string name="acknowledgements">謝辞</string>
@@ -168,7 +172,6 @@
     <string name="channel_8">チャンネル 8</string>
     <string name="channel_features">チャンネル機能</string>
     <string name="channel_invalid">このチャンネルURLは無効なため使用できません</string>
-    <string name="channel_label">チャンネル</string>
     <string name="channel_name">チャンネル名</string>
     <string name="channel_url">チャンネル URL</string>
     <string name="channel_utilization">ChUtil</string>
@@ -347,6 +350,7 @@
     <string name="direct_message">ダイレクトメッセージ</string>
     <string name="direct_message_key">ダイレクトメッセージの鍵</string>
     <string name="direct_messages">ダイレクトメッセージ</string>
+    <string name="disabled">無効</string>
     <string name="discard_changes">破棄</string>
     <string name="disconnect">切断</string>
     <string name="disconnected">切断</string>
@@ -423,7 +427,9 @@
     <string name="discovery_stop_scan">スキャン停止</string>
     <string name="discovery_summary_not_available">AI 分析は利用できません</string>
     <string name="discovery_time_remaining">残り %1$s</string>
-    <string name="discovery_unique_nodes">%1$d 個のユニークノード</string>
+    <plurals name="discovery_unique_nodes_count">
+        <item quantity="other">%1$d 個のユニークノード</item>
+    </plurals>
     <string name="discovery_view_map">マップを表示</string>
     <string name="disk_free_indexed">空きディスク %1$d</string>
     <string name="display">表示</string>
@@ -489,6 +495,7 @@
     <string name="downlink_feature_description">パブリックなインターネットゲートウェイからのメッセージが、ローカルメッシュに転送されます。ゼロホップポリシーにより、デフォルトの MQTT サーバーからのトラフィックはこのデバイスより先には伝播しません。</string>
     <string name="download">ダウンロード</string>
     <string name="duplicated_public_key_title">公開鍵の重複を検出</string>
+    <!-- DURATION -->
     <string name="dynamic">動的</string>
     <string name="easily_set_up_private_mesh_networks">遠隔地での安全で信頼性の高い通信のために、プライベートメッシュネットワークを簡単にセットアップできます。</string>
     <string name="edit">編集</string>

@@ -17,18 +17,20 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Влажность</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">От %1$s: %2$s</string>
     <string name="a11y_node_battery">заряд батареи %1$d</string>
+    <string name="a11y_node_channel">Канал %1$d</string>
     <string name="a11y_node_distance_away">%1$s отсюда</string>
     <string name="a11y_node_favorite">избранный</string>
-    <string name="a11y_node_hops_away">%1$d hops away</string>
     <string name="a11y_node_last_heard">последний раз услышан %1$s</string>
     <string name="a11y_node_offline">оффлайн</string>
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роль %1$s</string>
     <string name="a11y_node_signal">сигнал %1$s</string>
     <string name="a11y_nodes_at_hop">Хоп %1$d: %2$d нод</string>
+    <string name="a11y_temperature">Температура</string>
     <string name="about">О приложении</string>
     <string name="accept">Принять</string>
     <string name="acknowledgements">Благодарности</string>
@@ -201,7 +203,6 @@
     <string name="channel_8">Канал 8</string>
     <string name="channel_features">Особенности канала</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
-    <string name="channel_label">Канал</string>
     <string name="channel_name">Имя канала</string>
     <string name="channel_url">URL канала</string>
     <string name="channel_utilization">ChUtil</string>
@@ -404,6 +405,7 @@
     <string name="direct_message">Прямое сообщение</string>
     <string name="direct_message_key">Ключ прямого сообщения</string>
     <string name="direct_messages">Личные сообщения</string>
+    <string name="disabled">Включено</string>
     <string name="discard_changes">Отмена</string>
     <string name="disconnect">Отключиться</string>
     <string name="disconnected">Отключено</string>
@@ -481,7 +483,6 @@
     <string name="discovery_stop_scan">Остановить сканирование</string>
     <string name="discovery_summary_not_available">Анализ ИИ недоступен</string>
     <string name="discovery_time_remaining">Осталось %1$s</string>
-    <string name="discovery_unique_nodes">%1$d уникальных нод</string>
     <string name="discovery_view_map">Посмотреть карту</string>
     <string name="disk_free_indexed">Свободно на диске %1$d</string>
     <string name="display">Дисплей</string>
@@ -555,6 +556,7 @@
     <string name="download">Скачать</string>
     <string name="download_this_area">Загрузить этот регион</string>
     <string name="duplicated_public_key_title">Обнаружен дубликат открытого ключа</string>
+    <!-- DURATION -->
     <string name="dynamic">Динамический</string>
     <string name="easily_set_up_private_mesh_networks">Легко создать частные сети для защищённой и надежной связи в удаленных районах.</string>
     <string name="edit">Редактировать</string>

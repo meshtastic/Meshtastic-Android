@@ -1,7 +1,7 @@
 ---
 title: TAK integratsioon
 nav_order: 10
-last_updated: 2026-09-11
+last_updated: 2026-09-28
 description: Koostöö ATAKi ja WinTAKiga — CoT asukoha jagamine, TAK rollid ja pluginate seadistamine.
 aliases:
   - tak
@@ -104,6 +104,7 @@ Kui on seadistatud:
 - Vestlussõnumid võivad ühendada kärgvõrgu ja TAK võrke
 - Asukohavärskendused liiguvad Meshtasticu ja TAKi vahel kahesuunaliselt
 - TAK jälgimisseadme sõlmed levitavad PLId automaatselt – nende asukohad kuvatakse ATAK kaartidel ilma ATAK poolse konfita
+- Routes received from the mesh are also saved as a data package (`.zip`) in **Downloads**; import it in ATAK to add the route. On Android 9 and older the file goes to the app's own folder under `Android/data` instead
 
 > ℹ️ **Note:** TAK integration requires specific node roles. Standard client nodes don't automatically participate in TAK operations — though with **Mesh to CoT Converter** enabled they still appear on the ATAK map as contacts.
 

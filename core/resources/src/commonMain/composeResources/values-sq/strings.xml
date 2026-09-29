@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Lagështia</string>
+    <string name="a11y_temperature">Temperatura</string>
     <string name="about">Rreth</string>
     <string name="accept">Prano</string>
     <!-- ACTION -->
@@ -44,7 +46,6 @@
     <string name="ch_util_definition">Përdorimi për kanalin aktual, duke përfshirë TX të formuar mirë, RX dhe RX të dëmtuar (në gjuhën e thjeshtë: zhurmë).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Ky URL kanal është i pavlefshëm dhe nuk mund të përdoret</string>
-    <string name="channel_label">Kanal</string>
     <string name="channel_name">Emri i kanalit radio</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Zgjidh temën</string>
@@ -83,6 +84,7 @@
     <!-- DISTANCE -->
     <string name="distance">Distanca</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Redakto</string>
     <string name="eight_hours">8 Orë</string>
     <!-- EMOJI -->

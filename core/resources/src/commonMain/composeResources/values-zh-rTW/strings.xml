@@ -17,16 +17,20 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">濕度</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">來自 %1$s 的訊息：%2$s</string>
     <string name="a11y_node_distance_away">距離 %1$s</string>
     <string name="a11y_node_favorite">最愛</string>
-    <string name="a11y_node_hops_away">距離 %1$d 跳</string>
+    <plurals name="a11y_node_hops_count">
+        <item quantity="other">距離 %1$d 跳</item>
+    </plurals>
     <string name="a11y_node_last_heard">最後收到 %1$s</string>
     <string name="a11y_node_offline">離線</string>
     <string name="a11y_node_online">線上</string>
     <string name="a11y_node_role">角色 %1$s</string>
     <string name="a11y_node_signal">訊號 %1$s</string>
+    <string name="a11y_temperature">溫度</string>
     <string name="about">關於</string>
     <string name="accept">接受</string>
     <string name="acknowledgements">致謝</string>
@@ -127,7 +131,6 @@
     <string name="channel_8">頻道 8</string>
     <string name="channel_features">頻道功能</string>
     <string name="channel_invalid">此頻道 URL 無效，無法使用</string>
-    <string name="channel_label">頻道</string>
     <string name="channel_name">頻道名稱</string>
     <string name="channel_url">頻道網址</string>
     <string name="channel_utilization">頻道利用率</string>
@@ -287,6 +290,7 @@
     <string name="direct_message">直通訊息</string>
     <string name="direct_message_key">私訊金鑰</string>
     <string name="direct_messages">私訊</string>
+    <string name="disabled">已停用</string>
     <string name="discard_changes">放棄變更</string>
     <string name="disconnect">中斷連線</string>
     <string name="disconnected">已中斷連線</string>
@@ -353,6 +357,7 @@
     <string name="downlink_feature_description">網際網路閘道的訊息會轉發到本地網狀網路，但因為採用零跳躍政策，來自預設 MQTT 伺服器的流量只會到達本裝置，不會再轉發給其他節點。</string>
     <string name="download">下載</string>
     <string name="duplicated_public_key_title">偵測到重複的公鑰</string>
+    <!-- DURATION -->
     <string name="dynamic">動態</string>
     <string name="easily_set_up_private_mesh_networks">輕鬆設定私有網狀網絡，以實現偏遠地區安全可靠的通訊。</string>
     <string name="edit">編輯</string>

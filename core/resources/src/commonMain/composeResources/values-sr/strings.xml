@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Влажност</string>
+    <string name="a11y_temperature">Температура</string>
     <string name="about">O nama</string>
     <string name="accept">Prihvati</string>
     <!-- ACTION -->
@@ -75,7 +77,6 @@
     <string name="channel_7">Канал 7</string>
     <string name="channel_8">Канал 8</string>
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti.</string>
-    <string name="channel_label">Kanal</string>
     <string name="channel_name">Naziv kanala</string>
     <string name="channel_url">Линк канала</string>
     <string name="channels">Канали</string>
@@ -129,6 +130,7 @@
     <string name="device_sleeping">Uređaj je u stanju spavanja</string>
     <string name="direct_message">Директне поруке</string>
     <string name="direct_messages">Директне поруке</string>
+    <string name="disabled">Онемогућено</string>
     <string name="disconnect">Прекините везу</string>
     <string name="disconnected">Raskačeno</string>
     <!-- DISCOVERY -->
@@ -143,6 +145,7 @@
     <string name="doc_title_firmware">Ажурирања фирмвера</string>
     <string name="doc_title_nodes">Чворови</string>
     <string name="documentation">Документација</string>
+    <!-- DURATION -->
     <string name="edit">Измени</string>
     <string name="eight_hours">8 Сати</string>
     <!-- EMOJI -->

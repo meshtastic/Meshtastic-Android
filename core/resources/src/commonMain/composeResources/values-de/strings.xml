@@ -17,17 +17,18 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Luftfeuchtigkeit</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Nachricht von %1$s: %2$s</string>
     <string name="a11y_node_distance_away">%1$s Abwesend</string>
     <string name="a11y_node_favorite">Favorit</string>
-    <string name="a11y_node_hops_away">%1$d Sprünge entfernt</string>
     <string name="a11y_node_last_heard">Zuletzt gehört %1$s</string>
     <string name="a11y_node_offline">Offline</string>
     <string name="a11y_node_online">Online</string>
     <string name="a11y_node_role">Rolle %1$s</string>
     <string name="a11y_node_signal">Signal %1$s</string>
     <string name="a11y_nodes_at_hop">Hop %1$d: %2$d Knoten</string>
+    <string name="a11y_temperature">Temperatur</string>
     <string name="about">Über</string>
     <string name="accept">Akzeptieren</string>
     <string name="acknowledgements">Danksagungen</string>
@@ -167,7 +168,6 @@
     <string name="channel_8">Kanal 8</string>
     <string name="channel_features">Kanalfunktionen</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
-    <string name="channel_label">Kanal</string>
     <string name="channel_name">Kanalname</string>
     <string name="channel_url">Kanal URL</string>
     <string name="channel_utilization">Kanalauslastung</string>
@@ -344,6 +344,7 @@
     <string name="direct_message">Direktnachricht</string>
     <string name="direct_message_key">Schlüssel für direkte Nachrichten</string>
     <string name="direct_messages">Direktnachrichten</string>
+    <string name="disabled">Deaktiviert</string>
     <string name="discard_changes">Verwerfen</string>
     <string name="disconnect">Verbindung trennen</string>
     <string name="disconnected">Verbindung getrennt</string>
@@ -400,7 +401,6 @@
     <string name="discovery_stop_scan">Scan stoppen</string>
     <string name="discovery_summary_not_available">KI Analyse nicht verfügbar</string>
     <string name="discovery_time_remaining">%1$s übrig</string>
-    <string name="discovery_unique_nodes">%1$d einzigartige Knoten</string>
     <string name="discovery_view_map">Karte anschauen</string>
     <string name="disk_free_indexed">Laufwerkspeicher frei %1$d</string>
     <string name="display">Display</string>
@@ -459,6 +459,7 @@
     <string name="downlink_feature_description">Nachrichten von einem öffentlichen Internet Gateway werden an das lokale Mesh weitergeleitet. Aufgrund der Nullsprungrichtlinie wird der Datenverkehr vom MQTT Standardserver nicht über dieses Gerät hinaus weitergeleitet.</string>
     <string name="download">Herunterladen</string>
     <string name="duplicated_public_key_title">Doppelter öffentlicher Schlüssel erkannt</string>
+    <!-- DURATION -->
     <string name="dynamic">Dynamisch</string>
     <string name="easily_set_up_private_mesh_networks">Leicht einzurichtende, private Netznetze für sichere und zuverlässige Kommunikation in entlegenen Gebieten.</string>
     <string name="edit">Bearbeiten</string>

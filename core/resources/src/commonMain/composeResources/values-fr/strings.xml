@@ -17,18 +17,19 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Humidité</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message de %1$s: %2$s</string>
     <string name="a11y_node_battery">batterie : %1$d%</string>
     <string name="a11y_node_distance_away">À %1$s</string>
     <string name="a11y_node_favorite">favori</string>
-    <string name="a11y_node_hops_away">À %1$d sauts</string>
     <string name="a11y_node_last_heard">dernier entendu %1$s</string>
     <string name="a11y_node_offline">hors-ligne</string>
     <string name="a11y_node_online">en ligne</string>
     <string name="a11y_node_role">rôle %1$s</string>
     <string name="a11y_node_signal">signal %1$s</string>
     <string name="a11y_nodes_at_hop">Saut %1$d : %2$d nœuds</string>
+    <string name="a11y_temperature">Température</string>
     <string name="about">A propros</string>
     <string name="accept">Accepter</string>
     <string name="acknowledgements">Remerciements</string>
@@ -182,7 +183,6 @@
     <string name="channel_8">Canal 8</string>
     <string name="channel_features">Fonctionnalités du canal</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
-    <string name="channel_label">Canal</string>
     <string name="channel_name">Nom du canal</string>
     <string name="channel_url">URL du canal</string>
     <string name="channel_utilization">UtilCanal</string>
@@ -368,6 +368,7 @@
     <string name="direct_message">Message direct</string>
     <string name="direct_message_key">Clé de message direct</string>
     <string name="direct_messages">Messages directs</string>
+    <string name="disabled">Désactivé</string>
     <string name="discard_changes">Ignorer</string>
     <string name="disconnect">Déconnecter</string>
     <string name="disconnected">Déconnecté</string>
@@ -465,6 +466,7 @@
     <string name="downlink_feature_description">Les messages provenant d'une passerelle Internet publique sont transmis au maillage local. En raison de la politique zéro saut, le trafic du serveur MQTT par défaut ne se propagera pas plus loin que cet appareil.</string>
     <string name="download">Télécharger</string>
     <string name="duplicated_public_key_title">Clé publique dupliquée détectée</string>
+    <!-- DURATION -->
     <string name="dynamic">Dynamique</string>
     <string name="easily_set_up_private_mesh_networks">Installez facilement des réseaux de maillage privé pour une communication sûre et fiable dans les régions éloignées.</string>
     <string name="edit">Modifier</string>

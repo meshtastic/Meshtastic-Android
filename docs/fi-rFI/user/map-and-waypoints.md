@@ -1,7 +1,7 @@
 ---
 title: Kartta ja reittipisteet
 nav_order: 6
-last_updated: 2026-09-11
+last_updated: 2026-09-28
 description: Näytä radioiden sijainnit kartalla, luo ja jaa reittipisteitä, hallitse karttatasoja ja Site Planneria sekä säädä sijainnin jakamista ja tietosuoja-asetuksia.
 aliases:
   - kartta
@@ -101,7 +101,7 @@ Koska reittipisteet (ja niiden aluerajaukset) lähetetään koko mesh-verkkoon, 
 
 ## Karttatasot
 
-Napauta kartan tasokuvaketta avataksesi **Hallitse karttatasoja**. Tuo omia peitekuvia `.kml`-, `.kmz`- tai GeoJSON-muodossa, mukaan lukien KMZ-maanpeitekuvat (georeferoidut kuvat, kuten viedyt topografiset tai ilmakuvat), jotka sijoitetaan kartalle niiden määritettyjen rajojen mukaisesti. Lisää sellainen valitsemalla tiedosto **Lisää taso** -toiminnolla, avaamalla tiedosto Meshtasticissa tai jakamalla se sovellukseen toisesta sovelluksesta. **Add Network Layer** instead takes a name and an `http://` or `https://` URL pointing at a KML or GeoJSON file; that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
+Napauta kartan tasokuvaketta avataksesi **Hallitse karttatasoja**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format, including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Lisää sellainen valitsemalla tiedosto **Lisää taso** -toiminnolla, avaamalla tiedosto Meshtasticissa tai jakamalla se sovellukseen toisesta sovelluksesta. **Add Network Layer** instead takes a name and an `https://` URL pointing at a KML or GeoJSON file (`http://` also works on Desktop, but on Android only for `localhost`); that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
 
 Tuodut karttatasot näkyvät luettelossa, jossa voit näyttää tai piilottaa ne sekä poistaa ne. Each layer — imported or built-in overlay — carries its own opacity slider while it is switched on, so an overlay can be faded back rather than only switched off. Tämä toimii Google Play -versiossa, F-Droid-versiossa ja **Desktopissa**, joissa käytetään samaa karttatasojen tallennusta ja tiedostonvalitsinta.
 
@@ -157,6 +157,8 @@ Tile Sources** at the foot of the base map picker and paste a URL template using
 ```text
 https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
 ```
+
+On **Android** the template must use `https://`; plain `http://` works only for `localhost`.
 
 Karttatiilet tallennetaan välimuistiin levylle, joten kartan siirtäminen ei lataa juuri katsottua aluetta uudelleen.
 

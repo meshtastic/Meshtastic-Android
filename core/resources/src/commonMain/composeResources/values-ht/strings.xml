@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Imidite</string>
+    <string name="a11y_temperature">Tanperati</string>
     <string name="about">Sou</string>
     <string name="accept">Aksepte</string>
     <!-- ACTION -->
@@ -44,7 +46,6 @@
     <string name="ch_util_definition">Itilizasyon pou kanal aktyèl la, ki enkli TX, RX byen fòme ak RX mal fòme (sa yo rele bri).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Kanal URL sa a pa valab e yo pa kapab itilize li</string>
-    <string name="channel_label">kanal</string>
     <string name="channel_name">Non kanal</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Chwazi tèm</string>
@@ -78,6 +79,7 @@
     <!-- DISTANCE -->
     <string name="distance">Distans</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Modifye</string>
     <string name="eight_hours">8 Èdtan</string>
     <!-- EMOJI -->

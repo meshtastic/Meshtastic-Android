@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Páratartalom</string>
+    <string name="a11y_temperature">Hőmérséklet</string>
     <string name="about">A programról</string>
     <string name="accept">Elfogadni</string>
     <string name="acknowledgements">Visszaigazolások (ACK-ek)</string>
@@ -93,7 +95,6 @@
     <string name="channel_8">8. csatorna</string>
     <string name="channel_features">Csatorna funkciók</string>
     <string name="channel_invalid">Ez a csatorna URL érvénytelen, ezért nem használható.</string>
-    <string name="channel_label">Csatorna</string>
     <string name="channel_name">Csatorna neve</string>
     <string name="channels">Csatornák</string>
     <!-- CHIRPY -->
@@ -217,6 +218,7 @@
     <string name="doc_title_nodes">Csomópontok</string>
     <string name="downlink_feature_description">A nyilvános internetes átjáróból érkező üzenetek továbbításra kerülnek a helyi mesh hálózatra. A zéró-ugrási szabály miatt az alapértelmezett MQTT szerver forgalma nem terjed tovább ennél az eszköznél.</string>
     <string name="download">Letöltés</string>
+    <!-- DURATION -->
     <string name="dynamic">Dinamikus</string>
     <string name="easily_set_up_private_mesh_networks">Egyszerűen állíts be privát mesh hálózatokat a biztonságos és megbízható kommunikáció érdekében távoli területeken.</string>
     <string name="edit">Szerkesztés</string>

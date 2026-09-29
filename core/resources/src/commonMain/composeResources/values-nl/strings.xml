@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Vochtigheid</string>
+    <string name="a11y_temperature">Temperatuur</string>
     <string name="about">Over</string>
     <string name="accept">Accepteer</string>
     <!-- ACTION -->
@@ -66,7 +68,6 @@
     <string name="channel_7">Kanaal 7</string>
     <string name="channel_8">Kanaal 8</string>
     <string name="channel_invalid">Deze Kanaal URL is ongeldig en kan niet worden gebruikt</string>
-    <string name="channel_label">Kanaal</string>
     <string name="channel_name">Kanaalnaam</string>
     <string name="channels">Kanalen</string>
     <!-- CHIRPY -->
@@ -119,6 +120,7 @@
     <string name="distance">Afstand</string>
     <!-- DOC -->
     <string name="doc_title_mqtt">MQTT</string>
+    <!-- DURATION -->
     <string name="dynamic">Dynamisch</string>
     <string name="edit">Wijzig</string>
     <string name="eight_hours">8 Uur</string>

@@ -37,7 +37,6 @@
     <string name="cant_change_no_radio">No s'ha pogut canviar el canal perquè la ràdio no està configurada correctament. Si us plau torna-ho a provar.</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">La URL d'aquest canal és invàlida i no es pot fer servir</string>
-    <string name="channel_label">Canal</string>
     <string name="channel_name">Nom del canal</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Escollir tema</string>
@@ -71,6 +70,7 @@
     <!-- DISTANCE -->
     <string name="distance">Distància</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Hores</string>
     <!-- EMOJI -->

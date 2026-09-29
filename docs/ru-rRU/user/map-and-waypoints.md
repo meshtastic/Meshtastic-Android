@@ -1,7 +1,7 @@
 ---
 title: Карта и путевые точки
 nav_order: 6
-last_updated: 2026-09-11
+last_updated: 2026-09-28
 description: Просматривайте расположение нод на карте, создавайте и делитесь путевыми точками, управляйте слоями карты и планировщиком участков, а также контролируйте передачу геоданных и приватность.
 aliases:
   - map
@@ -101,7 +101,7 @@ Waypoints always broadcast to the whole mesh on the primary channel. Unlike a me
 
 ## Слои карты
 
-Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. **Add Network Layer** instead takes a name and an `http://` or `https://` URL pointing at a KML or GeoJSON file; that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
+Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format, including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. **Add Network Layer** instead takes a name and an `https://` URL pointing at a KML or GeoJSON file (`http://` also works on Desktop, but on Android only for `localhost`); that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
 
 Импортированные слои отображаются в списке с переключателем для показа/скрытия каждого и возможностью удалить слой. Each layer — imported or built-in overlay — carries its own opacity slider while it is switched on, so an overlay can be faded back rather than only switched off. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
 
@@ -159,6 +159,8 @@ Tile Sources** at the foot of the base map picker and paste a URL template using
 ```text
 https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
 ```
+
+On **Android** the template must use `https://`; plain `http://` works only for `localhost`.
 
 Tiles are cached on disk, so panning does not re-download what you were just looking at.
 

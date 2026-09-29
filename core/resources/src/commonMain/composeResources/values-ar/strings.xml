@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">الرطوبة</string>
+    <string name="a11y_temperature">الحرارة</string>
     <string name="about">حول</string>
     <string name="accept">قبول</string>
     <!-- ACTION -->
@@ -49,7 +51,6 @@
     <string name="channel_6">القناة 6</string>
     <string name="channel_7">القناة 7</string>
     <string name="channel_8">القناة 8</string>
-    <string name="channel_label">عربي</string>
     <string name="channel_name">اسم القناة</string>
     <string name="channels">القنوات</string>
     <!-- CHIRPY -->
@@ -81,6 +82,7 @@
     <string name="distance">المسافة</string>
     <!-- DOC -->
     <string name="doc_title_mqtt">MQTT</string>
+    <!-- DURATION -->
     <string name="edit">تعديل</string>
     <string name="eight_hours">8 ساعات</string>
     <!-- EMOJI -->

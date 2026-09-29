@@ -37,7 +37,6 @@
     <string name="cant_change_no_radio">Non se puido cambiar de canle, porque a radio aínda non está conectada. Por favor inténteo de novo.</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">A ligazón desta canle non é válida e non pode usarse</string>
-    <string name="channel_label">Canle</string>
     <string name="channel_name">Nome de canle</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Escoller tema</string>
@@ -73,6 +72,7 @@
     <!-- DISTANCE -->
     <string name="distance">Distancia</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>
     <!-- EMOJI -->

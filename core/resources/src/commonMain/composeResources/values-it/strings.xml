@@ -17,17 +17,18 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Umidità</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Messaggio da %1$s: %2$s</string>
     <string name="a11y_node_distance_away">distante %1$s</string>
     <string name="a11y_node_favorite">preferito</string>
-    <string name="a11y_node_hops_away">%1$d hop di distanza</string>
     <string name="a11y_node_last_heard">sentito l'ultima volta %1$s</string>
     <string name="a11y_node_offline">offline</string>
     <string name="a11y_node_online">online</string>
     <string name="a11y_node_role">ruolo %1$s</string>
     <string name="a11y_node_signal">segnale %1$s</string>
     <string name="a11y_nodes_at_hop">%1$d hop: %2$d nodi</string>
+    <string name="a11y_temperature">Temperatura</string>
     <string name="about">Informazioni</string>
     <string name="accept">Accetta</string>
     <string name="acknowledgements">Ringraziamenti</string>
@@ -168,7 +169,6 @@
     <string name="channel_8">Canale 8</string>
     <string name="channel_features">Caratteristiche del canale</string>
     <string name="channel_invalid">L'URL di questo Canale non è valida e non può essere usata</string>
-    <string name="channel_label">Canale</string>
     <string name="channel_name">Nome del canale</string>
     <string name="channel_url">URL Canale</string>
     <string name="channel_utilization">ChUtil</string>
@@ -429,7 +429,6 @@
     <string name="discovery_stop_scan">Interrompi Scansione</string>
     <string name="discovery_summary_not_available">Analisi AI non disponibile</string>
     <string name="discovery_time_remaining">%1$s rimanenti</string>
-    <string name="discovery_unique_nodes">%1$d nodi unici</string>
     <string name="discovery_view_map">Visualizza mappa</string>
     <string name="disk_free_indexed">Disco libero %1$d</string>
     <string name="display">Schermo</string>
@@ -494,6 +493,7 @@
     <string name="downlink_feature_description">I messaggi provenienti da un gateway Internet pubblico vengono inoltrati alla rete mesh locale. A causa della politica zero-hop, il traffico proveniente dal server MQTT predefinito non si propagherà oltre questo dispositivo.</string>
     <string name="download">Scarica</string>
     <string name="duplicated_public_key_title">Rilevata chiave pubblica duplicata</string>
+    <!-- DURATION -->
     <string name="dynamic">Dinamico</string>
     <string name="easily_set_up_private_mesh_networks">Crea reti mesh private in modo semplice per connessioni sicure e affidabili in zone remote.</string>
     <string name="edit">Modifica</string>

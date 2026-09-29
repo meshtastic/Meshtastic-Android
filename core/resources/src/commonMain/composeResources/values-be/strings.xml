@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Вільготнасць</string>
+    <string name="a11y_temperature">Тэмпература</string>
     <string name="about">О нас</string>
     <string name="accept">Прыняць</string>
     <!-- ACTION -->
@@ -47,7 +49,6 @@
     <string name="channel_6">Канал 6</string>
     <string name="channel_7">Канал 7</string>
     <string name="channel_8">Канал 8</string>
-    <string name="channel_label">Канал</string>
     <string name="channel_name">Назва канала</string>
     <string name="channels">Каналы</string>
     <!-- CHIRPY -->
@@ -96,6 +97,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_onboarding">Начало работы</string>
     <string name="download">Сцягнуць</string>
+    <!-- DURATION -->
     <string name="edit">Змяніць</string>
     <string name="eight_hours">8 Гадзін</string>
     <!-- EMOJI -->

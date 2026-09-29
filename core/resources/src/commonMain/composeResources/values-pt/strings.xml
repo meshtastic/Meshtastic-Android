@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Humidade</string>
+    <string name="a11y_temperature">Temperatura</string>
     <string name="about">Sobre</string>
     <string name="accept">Aceitar</string>
     <!-- ACTION -->
@@ -75,7 +77,6 @@
     <string name="channel_7">Canal 7</string>
     <string name="channel_8">Canal 8</string>
     <string name="channel_invalid">O Link Deste Canal é inválido e não pode ser usado</string>
-    <string name="channel_label">Canal</string>
     <string name="channel_name">Nome do Canal</string>
     <string name="channels">Canal</string>
     <!-- CHIRPY -->
@@ -135,6 +136,7 @@
     <string name="doc_title_connections">Ligações</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Nodes</string>
+    <!-- DURATION -->
     <string name="dynamic">Dinâmico</string>
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>

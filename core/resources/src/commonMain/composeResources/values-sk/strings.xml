@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Vlhkosť</string>
+    <string name="a11y_temperature">Teplota</string>
     <string name="about">O aplikácii</string>
     <string name="accept">Prijať</string>
     <!-- ACTION -->
@@ -67,7 +69,6 @@
     <string name="channel_7">Kanál 7</string>
     <string name="channel_8">Kanál 8</string>
     <string name="channel_invalid">URL adresa tohoto kanála nie je platná a nedá sa použiť</string>
-    <string name="channel_label">Kanál</string>
     <string name="channel_name">Názov kanála</string>
     <string name="channels">Kanále</string>
     <!-- CHIRPY -->
@@ -133,6 +134,7 @@
     <!-- DOC -->
     <string name="doc_clear_search">Vymazať vyhľadávanie</string>
     <string name="doc_title_mqtt">MQTT</string>
+    <!-- DURATION -->
     <string name="edit">Upraviť</string>
     <string name="eight_hours">8 Hodín</string>
     <!-- EMOJI -->
