@@ -49,6 +49,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
+import org.meshtastic.core.model.fixOrNull
 import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.model.util.GeoConstants
 import org.meshtastic.core.model.util.TELEMETRY_CHANNEL_COUNT
@@ -615,9 +616,11 @@ internal fun positionCsvRow(pos: org.meshtastic.proto.Position): String {
  */
 internal fun buildGpx(positions: List<org.meshtastic.proto.Position>, trackName: String): String {
     val trkpts = buildString {
-        for (pos in positions) {
-            val lat = NumberFormatter.formatInvariant((pos.latitude_i ?: 0) * GeoConstants.DEG_D, COORDINATE_DECIMALS)
-            val lon = NumberFormatter.formatInvariant((pos.longitude_i ?: 0) * GeoConstants.DEG_D, COORDINATE_DECIMALS)
+        // Track points are joined in file order, so oldest first, as the track map draws them.
+        for (pos in positions.sortedBy { it.time }) {
+            val (latI, lonI) = pos.fixOrNull() ?: continue
+            val lat = NumberFormatter.formatInvariant(latI * GeoConstants.DEG_D, COORDINATE_DECIMALS)
+            val lon = NumberFormatter.formatInvariant(lonI * GeoConstants.DEG_D, COORDINATE_DECIMALS)
             append("    <trkpt lat=\"$lat\" lon=\"$lon\">")
             pos.altitude?.let { append("<ele>$it</ele>") }
             if (pos.time > 0) append("<time>${Instant.fromEpochSeconds(pos.time.toLong())}</time>")

@@ -150,6 +150,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.toGeofence
+import org.meshtastic.core.model.hasFix
 import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
@@ -517,12 +518,14 @@ fun MapView(
     val mapColorScheme = if (dark) ComposeMapColorScheme.DARK else ComposeMapColorScheme.LIGHT
 
     // --- Mode-specific data ---
-    // Node track: apply time filter
+    // Node track: apply time filter, and drop reports with no fix so toLatLng never draws them at 0,0
     val sortedTrackPositions =
         if (mode is GoogleMapMode.NodeTrack) {
             val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
             remember(mode.positions, lastHeardTrackFilter) {
-                mode.positions.filter { lastHeardTrackFilter.includes(it.time, nowSeconds) }.sortedBy { it.time }
+                mode.positions
+                    .filter { it.hasFix() && lastHeardTrackFilter.includes(it.time, nowSeconds) }
+                    .sortedBy { it.time }
             }
         } else {
             emptyList()

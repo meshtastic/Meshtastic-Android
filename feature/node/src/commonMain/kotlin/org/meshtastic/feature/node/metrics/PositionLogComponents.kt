@@ -36,6 +36,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.model.fixOrNull
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
@@ -61,8 +62,7 @@ import org.meshtastic.proto.Position
 @Suppress("LongMethod")
 fun PositionCard(position: Position, displayUnits: MeasurementSystem, isSelected: Boolean, onClick: () -> Unit) {
     val time = position.time.toLong() * MS_PER_SEC
-    val latitude = formatString("%.5f", (position.latitude_i ?: 0) * DEG_D)
-    val longitude = formatString("%.5f", (position.longitude_i ?: 0) * DEG_D)
+    val fix = position.fixOrNull()
 
     SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
@@ -84,13 +84,20 @@ fun PositionCard(position: Position, displayUnits: MeasurementSystem, isSelected
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    MetricValueRow(color = GraphColors.Blue, text = "${stringResource(Res.string.latitude)}: $latitude")
-                    Spacer(Modifier.width(12.dp))
-                    MetricValueRow(
-                        color = GraphColors.Green,
-                        text = "${stringResource(Res.string.longitude)}: $longitude",
-                    )
+                if (fix != null) {
+                    val (latitudeI, longitudeI) = fix
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        MetricValueRow(
+                            color = GraphColors.Blue,
+                            text = "${stringResource(Res.string.latitude)}: ${formatString("%.5f", latitudeI * DEG_D)}",
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        MetricValueRow(
+                            color = GraphColors.Green,
+                            text =
+                            "${stringResource(Res.string.longitude)}: ${formatString("%.5f", longitudeI * DEG_D)}",
+                        )
+                    }
                 }
                 Text(
                     text = "${stringResource(Res.string.sats)}: ${position.sats_in_view}",
