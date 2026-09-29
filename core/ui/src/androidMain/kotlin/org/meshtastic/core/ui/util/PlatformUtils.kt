@@ -435,9 +435,8 @@ actual fun rememberLocationPermissionState(): PermissionUiState = rememberRuntim
 
 @Composable
 actual fun rememberPreciseLocationPermissionState(): PermissionUiState = rememberRuntimePermissionState(
-    // Android 12+ ignores a fine request that does not also ask for coarse. Fine leads so the rationale and
-    // requested
-    // tracking follow the permission that decides the grant.
+    // Android 12+ ignores a fine request that does not also ask for coarse. Fine leads so the rationale and the
+    // requested flag follow the permission that decides the grant.
     permissions =
     arrayOf(
         android.Manifest.permission.ACCESS_FINE_LOCATION,
