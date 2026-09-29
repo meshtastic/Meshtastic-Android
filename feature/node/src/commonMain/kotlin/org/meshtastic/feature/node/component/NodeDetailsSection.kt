@@ -112,7 +112,6 @@ import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.proto.MeshPacket.TransportMechanism
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
 fun NodeDetailsSection(
@@ -376,7 +375,7 @@ private fun SecurityRow(node: Node, isLocal: Boolean) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalEncodingApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod", "MagicNumber")
 @Composable
 private fun PublicKeyItem(publicKeyBytes: ByteArray) {

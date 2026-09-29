@@ -17,12 +17,11 @@
 package org.meshtastic.core.network.transport
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
-import kotlin.concurrent.atomics.AtomicInt
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 /**
  * Shared heartbeat sender for Meshtastic radio transports.
@@ -57,8 +56,7 @@ private constructor(
         rejectionLogger: (HeartbeatRejectionLogLevel, String) -> Unit,
     ) : this(sendToRadio, afterHeartbeat, logTag, HeartbeatRejectionLogSink(rejectionLogger))
 
-    @OptIn(ExperimentalAtomicApi::class)
-    private val nonce = AtomicInt(FIRST_NONCE)
+    private val nonce = atomic(FIRST_NONCE)
     private val nonceMutex = Mutex()
 
     private val rejectionLogPolicy = HeartbeatRejectionLogPolicy()
@@ -75,11 +73,10 @@ private constructor(
      *
      * @return `true` when the transport accepted the heartbeat handoff.
      */
-    @OptIn(ExperimentalAtomicApi::class)
     suspend fun sendHeartbeat(): Boolean {
         val (accepted, rejectionLogLevel) =
             nonceMutex.withLock {
-                val n = nonce.load()
+                val n = nonce.value
                 Logger.v { "[$logTag] Sending ToRadio heartbeat (nonce=$n)" }
                 val admitted =
                     sendToRadio(
@@ -88,7 +85,7 @@ private constructor(
                             .build()
                             .encode(),
                     )
-                if (admitted) nonce.fetchAndAdd(1)
+                if (admitted) nonce.incrementAndGet()
                 admitted to rejectionLogPolicy.record(admitted)
             }
         if (rejectionLogLevel != null) {

@@ -21,7 +21,7 @@ import com.sun.jna.Function
 import com.sun.jna.NativeLibrary
 import com.sun.jna.Pointer
 import org.meshtastic.core.repository.Notification
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 /**
  * Sends notifications through macOS UserNotifications (`UNUserNotificationCenter`) via JNA + Objective-C runtime. This
@@ -202,7 +202,7 @@ private class JnaMacNotificationBridge : MacNotificationBridge {
             msg(
                 requestClass,
                 selector("requestWithIdentifier:content:trigger:"),
-                nsString(UUID.randomUUID().toString()) ?: return false,
+                nsString(Uuid.random().toString()) ?: return false,
                 content,
                 Pointer.NULL,
             ) ?: return false

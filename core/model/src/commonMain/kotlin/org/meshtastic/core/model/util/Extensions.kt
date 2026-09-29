@@ -70,9 +70,6 @@ fun Any.toPIIString() = if (!isDebug) {
     this.toOneLineString()
 }
 
-@Suppress("MagicNumber")
-fun ByteArray.toHexString() = joinToString("") { it.toUByte().toString(16).padStart(2, '0') }
-
 /** Returns true if this packet arrived via a LoRa transport mechanism. */
 fun MeshPacket.isLora(): Boolean = transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA ||
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT1 ||

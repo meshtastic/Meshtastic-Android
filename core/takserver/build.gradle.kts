@@ -45,6 +45,7 @@ kotlin {
             // are no native zstd-jni/xpp3 deps to re-add per target.
 
             implementation(libs.okio)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.xmlutil.core)
             implementation(libs.xmlutil.serialization)

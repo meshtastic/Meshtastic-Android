@@ -17,6 +17,7 @@
 package org.meshtastic.core.takserver
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -30,8 +31,6 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.TakPrefs
 import kotlin.concurrent.Volatile
-import kotlin.concurrent.atomics.AtomicBoolean
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.Instant
 
 /**
@@ -43,14 +42,13 @@ import kotlin.time.Instant
  * Opt-in via [TakPrefs.isMeshToCotEnabled] and additionally gated on the TAK server running, because the owning
  * [TAKMeshIntegration] is itself only started while the server is enabled.
  */
-@OptIn(ExperimentalAtomicApi::class)
 class MeshToCotBroadcaster(
     private val takServerManager: TAKServerManager,
     private val nodeRepository: NodeRepository,
     private val takPrefs: TakPrefs,
     private val dispatchers: CoroutineDispatchers,
 ) {
-    private val isRunning = AtomicBoolean(false)
+    private val isRunning = atomic(false)
 
     @Volatile private var job: Job? = null
 
@@ -62,7 +60,7 @@ class MeshToCotBroadcaster(
     fun start(scope: CoroutineScope) {
         // CAS, not a job-null check: two concurrent start() calls must not both launch, and a
         // dead job left by a cancelled scope must not block every future start().
-        if (!isRunning.compareAndSet(expectedValue = false, newValue = true)) return
+        if (!isRunning.compareAndSet(expect = false, update = true)) return
         job =
             scope.launch(dispatchers.default) {
                 try {
@@ -74,13 +72,13 @@ class MeshToCotBroadcaster(
                 } finally {
                     // Owning scope cancelled without stop(): release the guard so a later start()
                     // on a fresh scope isn't refused forever.
-                    isRunning.store(false)
+                    isRunning.value = false
                 }
             }
     }
 
     fun stop() {
-        if (!isRunning.compareAndSet(expectedValue = true, newValue = false)) return
+        if (!isRunning.compareAndSet(expect = true, update = false)) return
         // lastSent is deliberately NOT cleared here: cancel() doesn't join, so a still-finishing
         // publish() on another thread may hold sentMutex, and clearing unsynchronized would race
         // it. runEnabled() drops the state on the next enable instead.
