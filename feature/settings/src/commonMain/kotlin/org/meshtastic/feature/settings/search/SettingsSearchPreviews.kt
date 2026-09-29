@@ -38,6 +38,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 @Composable
 private fun hopResults(): List<ResolvedSettingsEntry> = listOf(
     ResolvedSettingsEntry(
+        id = "hop_limit",
         title = stringResource(Res.string.schema_lora_hop_limit),
         description = stringResource(Res.string.schema_lora_hop_limit_description),
         screenTitle = stringResource(Res.string.lora),
@@ -45,6 +46,7 @@ private fun hopResults(): List<ResolvedSettingsEntry> = listOf(
     ),
     // A field the schema labels but does not explain, which is the commonest shape in the index.
     ResolvedSettingsEntry(
+        id = "rebroadcast_mode",
         title = stringResource(Res.string.schema_device_rebroadcast_mode),
         description = null,
         screenTitle = stringResource(Res.string.device),
@@ -52,6 +54,7 @@ private fun hopResults(): List<ResolvedSettingsEntry> = listOf(
     ),
     // An app-level entry, with no schema behind it at all.
     ResolvedSettingsEntry(
+        id = "node_layout",
         title = stringResource(Res.string.node_layout_section_title),
         description = null,
         screenTitle = stringResource(Res.string.app_settings),

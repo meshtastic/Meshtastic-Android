@@ -18,6 +18,7 @@ package org.meshtastic.core.ui.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.util.TimeConstants
@@ -25,7 +26,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_node_battery
 import org.meshtastic.core.resources.a11y_node_distance_away
 import org.meshtastic.core.resources.a11y_node_favorite
-import org.meshtastic.core.resources.a11y_node_hops_away
+import org.meshtastic.core.resources.a11y_node_hops_count
 import org.meshtastic.core.resources.a11y_node_last_heard
 import org.meshtastic.core.resources.a11y_node_offline
 import org.meshtastic.core.resources.a11y_node_online
@@ -56,15 +57,15 @@ internal data class NodeDescriptionStrings(
     val incomplete: String,
 )
 
-/** Resolves [NodeDescriptionStrings] from Compose string resources. */
+/** Resolves [NodeDescriptionStrings] from Compose string resources, with the hop count's plural for [hopsAway]. */
 @Composable
-internal fun rememberNodeDescriptionStrings(): NodeDescriptionStrings = NodeDescriptionStrings(
+internal fun rememberNodeDescriptionStrings(hopsAway: Int): NodeDescriptionStrings = NodeDescriptionStrings(
     online = stringResource(Res.string.a11y_node_online),
     offline = stringResource(Res.string.a11y_node_offline),
     favorite = stringResource(Res.string.a11y_node_favorite),
     lastHeard = stringResource(Res.string.a11y_node_last_heard, "%s"),
     role = stringResource(Res.string.a11y_node_role, "%s"),
-    hopsAway = stringResource(Res.string.a11y_node_hops_away, 0),
+    hopsAway = pluralStringResource(Res.plurals.a11y_node_hops_count, hopsAway, hopsAway),
     battery = stringResource(Res.string.a11y_node_battery, 0),
     distanceAway = stringResource(Res.string.a11y_node_distance_away, "%s"),
     signal = stringResource(Res.string.a11y_node_signal, "%s"),
@@ -116,7 +117,7 @@ internal fun buildNodeDescription(
     append(strings.role.replace("%s", role))
     if (hopsAway > 0) {
         append(", ")
-        append(strings.hopsAway.replace("0", hopsAway.toString()))
+        append(strings.hopsAway)
     }
     batteryLevel?.let {
         if (it in 1..MAX_BATTERY_PERCENT) {

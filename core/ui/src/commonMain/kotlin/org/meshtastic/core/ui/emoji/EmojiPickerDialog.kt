@@ -62,11 +62,11 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -84,6 +84,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -150,12 +151,12 @@ fun EmojiPickerDialog(
     onConfirm: (String) -> Unit,
 ) {
     val viewModel: EmojiPickerViewModel = koinViewModel()
-    val isLoaded by viewModel.isLoaded.collectAsState()
-    val loadError by viewModel.loadError.collectAsState()
+    val isLoaded by viewModel.isLoaded.collectAsStateWithLifecycle()
+    val loadError by viewModel.loadError.collectAsStateWithLifecycle()
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var debouncedQuery by remember { mutableStateOf("") }
     var selectedCategoryIndex by rememberSaveable { mutableStateOf(0) }
-    val preferredSkinToneIndex by viewModel.preferredSkinToneIndex.collectAsState()
+    val preferredSkinToneIndex by viewModel.preferredSkinToneIndex.collectAsStateWithLifecycle()
 
     // Debounce search input to avoid per-keystroke filtering of 1870 emojis
     LaunchedEffect(searchQuery) {
@@ -415,7 +416,9 @@ private fun EmojiGrid(
     }
 
     // Sync tab selection with scroll position
-    LaunchedEffect(gridState, searchQuery) {
+    val currentSelectedCategoryIndex by rememberUpdatedState(selectedCategoryIndex)
+    val currentOnCategoryChanged by rememberUpdatedState(onCategoryChanged)
+    LaunchedEffect(gridState, searchQuery, gridItems, tabOffset) {
         if (searchQuery.isNotBlank()) return@LaunchedEffect
         snapshotFlow { gridState.firstVisibleItemIndex }
             .collect { firstVisible ->
@@ -428,10 +431,10 @@ private fun EmojiGrid(
                                 0
                             } else {
                                 val catIdx = item.key.removePrefix(CATEGORY_HEADER_KEY_PREFIX).toIntOrNull()
-                                if (catIdx != null) catIdx + tabOffset else selectedCategoryIndex
+                                if (catIdx != null) catIdx + tabOffset else currentSelectedCategoryIndex
                             }
-                        if (newIndex != selectedCategoryIndex) {
-                            onCategoryChanged(newIndex)
+                        if (newIndex != currentSelectedCategoryIndex) {
+                            currentOnCategoryChanged(newIndex)
                         }
                         break
                     }

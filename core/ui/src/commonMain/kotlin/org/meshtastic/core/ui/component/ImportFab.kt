@@ -55,6 +55,7 @@ import org.meshtastic.core.ui.icon.Nfc
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.QrCode2
 import org.meshtastic.core.ui.icon.QrCodeScanner
+import org.meshtastic.core.ui.share.SharedContactImportDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
@@ -98,8 +99,9 @@ fun MeshtasticImportFAB(
     var isNfcScanning by rememberSaveable { mutableStateOf(false) }
     var showNfcDisabledDialog by rememberSaveable { mutableStateOf(false) }
 
-    val barcodeScanner =
-        LocalBarcodeScannerProvider.current { contents -> normalizeImportContents(contents)?.let(onImport) }
+    val barcodeScanner = LocalBarcodeScannerProvider.current { contents ->
+        normalizeImportContents(contents)?.let(onImport)
+    }
     val nfcScanner = LocalNfcScannerProvider.current
     val isNfcSupported = LocalNfcScannerSupported.current
     val isBarcodeSupported = LocalBarcodeScannerSupported.current

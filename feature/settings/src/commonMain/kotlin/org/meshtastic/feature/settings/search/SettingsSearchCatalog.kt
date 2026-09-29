@@ -49,7 +49,11 @@ data class SettingsSearchEntry(
     val screenTitle: StringResource,
     /** True for settings that belong to this phone rather than to a radio, which a remote session must not offer. */
     val isAppLocal: Boolean = false,
-)
+) {
+    /** The title's resource name plus the destination. Unique across the catalog, which the results list keys on. */
+    val id: String
+        get() = "${title.key}@$route"
+}
 
 /**
  * The searchable surface of Settings.
@@ -127,9 +131,10 @@ object SettingsSearchCatalog {
         ConfigRoute.entries.map {
             it.title to it.route
         } + ModuleRoute.entries.map { it.title to it.route }
-        ).map { (title, route) ->
-        SettingsSearchEntry(title = title, description = null, route = route, screenTitle = title)
-    }
+        )
+        .map { (title, route) ->
+            SettingsSearchEntry(title = title, description = null, route = route, screenTitle = title)
+        }
 
     /** App-level settings, which have no schema behind them and so are listed by hand. */
     private val appSettings: List<Pair<StringResource, Route>> =

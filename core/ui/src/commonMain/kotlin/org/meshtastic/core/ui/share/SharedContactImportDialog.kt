@@ -53,7 +53,7 @@ import org.meshtastic.proto.User
 
 /** A dialog for importing a shared contact that was scanned from a QR code. */
 @Composable
-fun SharedContactDialog(
+fun SharedContactImportDialog(
     sharedContact: SharedContact,
     onDismiss: () -> Unit,
     viewModel: SharedContactViewModel = koinViewModel(),
@@ -62,7 +62,7 @@ fun SharedContactDialog(
 
     val node = unfilteredNodes.find { it.num == sharedContact.node_num }
 
-    SharedContactDialogContent(
+    SharedContactImportDialogContent(
         sharedContact = sharedContact,
         node = node,
         onDismiss = onDismiss,
@@ -74,11 +74,11 @@ fun SharedContactDialog(
 }
 
 /**
- * Stateless content of [SharedContactDialog]. [node] is the matching node already in the local database, or null when
- * the contact is unknown.
+ * Stateless content of [SharedContactImportDialog]. [node] is the matching node already in the local database, or null
+ * when the contact is unknown.
  */
 @Composable
-fun SharedContactDialogContent(
+fun SharedContactImportDialogContent(
     sharedContact: SharedContact,
     node: Node?,
     onDismiss: () -> Unit,
@@ -140,7 +140,7 @@ private val PREVIEW_PUBLIC_KEY = ByteArray(32) { 0x2B.toByte() }.toByteString()
 fun PreviewSharedContactImportAlert() {
     AppTheme {
         Box(modifier = Modifier.fillMaxSize()) {
-            SharedContactDialogContent(
+            SharedContactImportDialogContent(
                 sharedContact =
                 SharedContact.Builder()
                     .also { wb ->

@@ -50,6 +50,11 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.doc_loading
 import org.meshtastic.core.resources.doc_no_documentation
 import org.meshtastic.core.resources.doc_no_results
+import org.meshtastic.core.resources.doc_open_page
+import org.meshtastic.core.resources.doc_section_developer
+import org.meshtastic.core.resources.doc_section_user
+import org.meshtastic.core.resources.help_and_documentation
+import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
@@ -85,10 +90,13 @@ fun DocsBrowserScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Help & Documentation") },
+                title = { Text(stringResource(Res.string.help_and_documentation)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = MeshtasticIcons.ArrowBack, contentDescription = "Navigate back")
+                        Icon(
+                            imageVector = MeshtasticIcons.ArrowBack,
+                            contentDescription = stringResource(Res.string.navigate_back),
+                        )
                     }
                 },
             )
@@ -196,7 +204,7 @@ private fun DocsTocList(pages: List<DocPage>, onSelectPage: (String) -> Unit, mo
         if (userGuidePages.isNotEmpty()) {
             item {
                 Text(
-                    text = "User Guide",
+                    text = stringResource(Res.string.doc_section_user),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).semantics { heading() },
                 )
@@ -208,7 +216,7 @@ private fun DocsTocList(pages: List<DocPage>, onSelectPage: (String) -> Unit, mo
             item {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 Text(
-                    text = "Developer Guide",
+                    text = stringResource(Res.string.doc_section_developer),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).semantics { heading() },
                 )
@@ -220,6 +228,7 @@ private fun DocsTocList(pages: List<DocPage>, onSelectPage: (String) -> Unit, mo
 
 @Composable
 private fun DocPageListItem(page: DocPage, onSelectPage: (String) -> Unit, modifier: Modifier = Modifier) {
+    val openPageLabel = stringResource(Res.string.doc_open_page, page.title)
     ListItem(
         leadingContent = {
             Icon(
@@ -229,6 +238,6 @@ private fun DocPageListItem(page: DocPage, onSelectPage: (String) -> Unit, modif
             )
         },
         headlineContent = { Text(page.title) },
-        modifier = modifier.clickable { onSelectPage(page.id) }.semantics { contentDescription = "Open ${page.title}" },
+        modifier = modifier.clickable { onSelectPage(page.id) }.semantics { contentDescription = openPageLabel },
     )
 }

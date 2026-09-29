@@ -16,8 +16,8 @@
  */
 package org.meshtastic.desktop.map
 
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
@@ -32,7 +32,7 @@ import org.meshtastic.feature.map.maplibre.layers.rememberRenderableLayers
 internal fun desktopMapViewProvider(): MapLibreMapViewProvider = MapLibreMapViewProvider(
     customLayers = {
         val layersManager: MapLayersManager = koinInject()
-        val importedLayers by layersManager.mapLayers.collectAsState()
+        val importedLayers by layersManager.mapLayers.collectAsStateWithLifecycle()
         rememberRenderableLayers(layersManager, importedLayers.filter { it.isVisible })
     },
     sitePlanner = { session -> DesktopSitePlannerSlot(session) },

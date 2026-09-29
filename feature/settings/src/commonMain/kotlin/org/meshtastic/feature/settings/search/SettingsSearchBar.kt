@@ -98,10 +98,10 @@ internal fun SettingsSearchResults(
             )
         }
     } else {
-        // No item key: two entries can legitimately share a title and a destination (six controls are called
-        // "Enabled"), and a duplicate key crashes the list.
+        // Keyed on the resource name, not the text: two entries can share a title and a destination (six controls are
+        // called "Enabled"), and a duplicate key crashes the list.
         LazyColumn(modifier = modifier.fillMaxSize()) {
-            items(results) { entry ->
+            items(results, key = { it.id }) { entry ->
                 SettingsSearchResult(entry = entry, onClick = { onSelect(entry.route) })
                 HorizontalDivider()
             }

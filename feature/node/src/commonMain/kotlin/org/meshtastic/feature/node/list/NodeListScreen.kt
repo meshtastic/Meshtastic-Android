@@ -57,7 +57,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.Flow
@@ -82,12 +81,13 @@ import org.meshtastic.core.resources.nodes_unheard_banner_one
 import org.meshtastic.core.resources.nodes_unheard_keep
 import org.meshtastic.core.resources.nodes_unheard_remove
 import org.meshtastic.core.resources.set_up_connection
+import org.meshtastic.core.ui.component.EmptyState
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.component.ShareContactDialog
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.BarChart
 import org.meshtastic.core.ui.icon.Info
@@ -195,7 +195,7 @@ fun NodeListScreen(
 
     var showShareContact by remember { mutableStateOf(false) }
     if (showShareContact) {
-        SharedContactDialog(contact = ourNode, onDismiss = { showShareContact = false }, isOwnContact = true)
+        ShareContactDialog(contact = ourNode, onDismiss = { showShareContact = false }, isOwnContact = true)
     }
 
     // One row renderer, used by the list itself and by the search bar's expanded results, so the two can never drift.
@@ -440,36 +440,18 @@ private fun NodeListEmptyState(
                 stringResource(Res.string.nodes_empty_disconnected_hint),
             )
         }
-    Column(
-        modifier = modifier.padding(horizontal = 32.dp, vertical = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = hint,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        if (!isConnected) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onNavigateToConnections) { Text(stringResource(Res.string.set_up_connection)) }
-        }
-    }
+    EmptyState(
+        icon = icon,
+        title = title,
+        supportingText = hint,
+        modifier = modifier,
+        action =
+        if (isConnected) {
+            null
+        } else {
+            { Button(onClick = onNavigateToConnections) { Text(stringResource(Res.string.set_up_connection)) } }
+        },
+    )
 }
 
 /**

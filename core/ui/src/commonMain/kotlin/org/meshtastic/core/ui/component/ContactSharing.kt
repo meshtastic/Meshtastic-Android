@@ -26,7 +26,6 @@ import org.meshtastic.core.model.util.toSharedContact
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.share_contact
 import org.meshtastic.core.resources.share_contact_subject
-import org.meshtastic.proto.SharedContact
 
 /**
  * Displays a dialog with the contact's information as a QR code and URI.
@@ -39,7 +38,7 @@ import org.meshtastic.proto.SharedContact
  * @param onDismiss Callback invoked when the dialog is dismissed.
  */
 @Composable
-fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit, isOwnContact: Boolean = false) {
+fun ShareContactDialog(contact: Node?, onDismiss: () -> Unit, isOwnContact: Boolean = false) {
     if (contact == null) return
     val contactToShare = contact.toSharedContact(isOwnContact)
     val uriString = contactToShare.getSharedContactUrl().toString()
@@ -50,15 +49,4 @@ fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit, isOwnContact: Boo
         subtitle = contact.user.long_name,
         shareSubject = stringResource(Res.string.share_contact_subject),
     )
-}
-
-/**
- * Displays a dialog for importing a shared contact.
- *
- * @param sharedContact The [SharedContact] to import.
- * @param onDismiss Callback invoked when the dialog is dismissed.
- */
-@Composable
-fun SharedContactImportDialog(sharedContact: SharedContact, onDismiss: () -> Unit) {
-    org.meshtastic.core.ui.share.SharedContactDialog(sharedContact = sharedContact, onDismiss = onDismiss)
 }

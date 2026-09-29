@@ -17,13 +17,13 @@
 package org.meshtastic.feature.docs.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
@@ -96,7 +96,7 @@ class ComposeResourceImageTransformer : ImageTransformer {
     override fun intrinsicSize(painter: Painter): Size {
         var size by remember(painter) { mutableStateOf(painter.intrinsicSize) }
         if (painter is AsyncImagePainter) {
-            val painterState = painter.state.collectAsState()
+            val painterState = painter.state.collectAsStateWithLifecycle()
             painterState.value.painter?.intrinsicSize?.also { size = it }
         }
         return size

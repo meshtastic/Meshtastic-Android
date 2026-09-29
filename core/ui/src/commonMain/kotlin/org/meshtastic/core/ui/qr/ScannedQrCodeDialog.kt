@@ -49,17 +49,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.accept
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.add_channels_description
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.disabled
+import org.meshtastic.core.resources.enabled
+import org.meshtastic.core.resources.lora_config_change_value
+import org.meshtastic.core.resources.lora_config_changes
 import org.meshtastic.core.resources.new_channel_rcvd
 import org.meshtastic.core.resources.replace
 import org.meshtastic.core.resources.replace_channels_and_settings_description
+import org.meshtastic.core.resources.schema_lora_hop_limit
+import org.meshtastic.core.resources.schema_lora_modem_preset
+import org.meshtastic.core.resources.schema_lora_region
+import org.meshtastic.core.resources.schema_lora_use_preset
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.getChannelPreviewForAdd
@@ -181,26 +192,26 @@ fun ScannedQrCodeDialog(
             if (shouldReplace && incoming.lora_config != null) {
                 val current = channels.lora_config
                 val new = incoming.lora_config
-                val changes = mutableListOf<String>()
-
-                if (current?.hop_limit != new?.hop_limit) {
-                    changes.add("Hop Limit: ${current?.hop_limit} -> ${new?.hop_limit}")
+                buildList {
+                    if (current?.hop_limit != new?.hop_limit) {
+                        add(LoraConfigChange(Res.string.schema_lora_hop_limit, current?.hop_limit, new?.hop_limit))
+                    }
+                    if (current?.region != new?.region) {
+                        add(LoraConfigChange(Res.string.schema_lora_region, current?.region, new?.region))
+                    }
+                    if (current?.modem_preset != new?.modem_preset) {
+                        add(
+                            LoraConfigChange(
+                                Res.string.schema_lora_modem_preset,
+                                current?.modem_preset,
+                                new?.modem_preset,
+                            ),
+                        )
+                    }
+                    if (current?.use_preset != new?.use_preset) {
+                        add(LoraConfigChange(Res.string.schema_lora_use_preset, current?.use_preset, new?.use_preset))
+                    }
                 }
-                if (current?.region != new?.region) {
-                    val currentRegionDesc = current?.region?.name ?: "Unknown"
-                    val newRegionDesc = new?.region?.name ?: "Unknown"
-                    changes.add("Region: $currentRegionDesc -> $newRegionDesc")
-                }
-                if (current?.modem_preset != new?.modem_preset) {
-                    val currentPresetDesc = current?.modem_preset?.name ?: "Unknown"
-                    val newPresetDesc = new?.modem_preset?.name ?: "Unknown"
-                    changes.add("Modem Preset: $currentPresetDesc -> $newPresetDesc")
-                }
-                if (current?.use_preset != new?.use_preset) {
-                    changes.add("Use Preset: ${current?.use_preset} -> ${new?.use_preset}")
-                }
-
-                changes
             } else {
                 emptyList()
             }
@@ -269,13 +280,20 @@ fun ScannedQrCodeDialog(
                 if (shouldReplace && loraChanges.isNotEmpty()) {
                     item {
                         Text(
-                            text = "LoRa Configuration Changes:",
+                            text = stringResource(Res.string.lora_config_changes),
                             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                             style = MaterialTheme.typography.titleMedium,
                         )
                         loraChanges.forEach { change ->
+                            val line =
+                                stringResource(
+                                    Res.string.lora_config_change_value,
+                                    stringResource(change.label),
+                                    loraConfigValueText(change.from),
+                                    loraConfigValueText(change.to),
+                                )
                             Text(
-                                text = "• $change",
+                                text = "• $line",
                                 modifier = Modifier.padding(start = 16.dp, bottom = 4.dp),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
@@ -353,6 +371,16 @@ fun ScannedQrCodeDialog(
             }
         }
     }
+}
+
+private data class LoraConfigChange(val label: StringResource, val from: Any?, val to: Any?)
+
+@Composable
+private fun loraConfigValueText(value: Any?): String = when (value) {
+    null -> stringResource(Res.string.unknown)
+    is Boolean -> stringResource(if (value) Res.string.enabled else Res.string.disabled)
+    is Enum<*> -> value.schemaLabelRes()?.let { stringResource(it) } ?: value.name
+    else -> value.toString()
 }
 
 @PreviewLightDark

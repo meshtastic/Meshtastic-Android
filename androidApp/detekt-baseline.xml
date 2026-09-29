@@ -10,8 +10,6 @@
     <ID>CyclomaticComplexMethod:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$override fun answerStream: kotlinx.coroutines.flow.Flow&lt;AIDocAssistantResult></ID>
     <ID>CyclomaticComplexMethod:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$private fun buildContext: ContextResult</ID>
     <ID>CyclomaticComplexMethod:TracerouteOsmMap.kt:@Composable fun TracerouteOsmMap</ID>
-    <ID>LambdaParameterInRestartableEffect:LocationHandler.kt:onPermissionResult: (Boolean) -> Unit</ID>
-    <ID>LambdaParameterInRestartableEffect:TracerouteOsmMap.kt:onMappableCountChange: (shown: Int, total: Int) -> Unit</ID>
     <ID>LongMethod:DiscoveryGoogleMap.kt:@OptIn(MapsComposeExperimentalApi::class) @Composable fun DiscoveryGoogleMap</ID>
     <ID>LongMethod:DiscoveryOsmMap.kt:@Composable fun DiscoveryOsmMap</ID>
     <ID>LongMethod:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$override fun answerStream: kotlinx.coroutines.flow.Flow&lt;AIDocAssistantResult></ID>

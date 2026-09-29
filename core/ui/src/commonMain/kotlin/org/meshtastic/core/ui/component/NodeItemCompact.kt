@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.MeasurementSystem
@@ -59,11 +60,16 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.a11y_humidity
+import org.meshtastic.core.resources.a11y_node_channel
+import org.meshtastic.core.resources.a11y_node_hops_count
+import org.meshtastic.core.resources.a11y_temperature
 import org.meshtastic.core.resources.distance
 import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.node_incomplete
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
+import org.meshtastic.core.resources.pressure
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.icon.Channel
 import org.meshtastic.core.ui.icon.Counter0
@@ -144,7 +150,7 @@ fun NodeItemCompact(
     // Resolved out here, not inside the remember: stringResource is composable, and the description is built in a
     // plain lambda.
     val roleLabel = stringResource(thatNode.user.role.label)
-    val a11yStrings = rememberNodeDescriptionStrings()
+    val a11yStrings = rememberNodeDescriptionStrings(hopsAway = thatNode.hopsAway)
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
         remember(thatNode, distance, lastHeardIsRelative, a11yStrings, modemPreset) {
@@ -425,7 +431,12 @@ private fun CompactFooterRow(
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.HopCount,
-                        contentDescription = "${thatNode.hopsAway} hops",
+                        contentDescription =
+                        pluralStringResource(
+                            Res.plurals.a11y_node_hops_count,
+                            thatNode.hopsAway,
+                            thatNode.hopsAway,
+                        ),
                         contentColor = tertiaryColor,
                         text = thatNode.hopsAway.toString(),
                     )
@@ -435,7 +446,7 @@ private fun CompactFooterRow(
                 add {
                     Icon(
                         imageVector = channelIcon(thatNode.channel),
-                        contentDescription = "Channel ${thatNode.channel}",
+                        contentDescription = stringResource(Res.string.a11y_node_channel, thatNode.channel),
                         modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
                         tint = tertiaryColor,
                     )
@@ -469,7 +480,7 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.Temperature,
-                        contentDescription = "Temperature",
+                        contentDescription = stringResource(Res.string.a11y_temperature),
                         contentColor = contentColor,
                         text = temp,
                     )
@@ -479,7 +490,7 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.Humidity,
-                        contentDescription = "Humidity",
+                        contentDescription = stringResource(Res.string.a11y_humidity),
                         contentColor = contentColor,
                         text = MetricFormatter.humidity(env.relative_humidity ?: 0f),
                     )
@@ -489,7 +500,7 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.Pressure,
-                        contentDescription = "Pressure",
+                        contentDescription = stringResource(Res.string.pressure),
                         contentColor = contentColor,
                         text = MetricFormatter.pressure(env.barometric_pressure ?: 0f),
                     )

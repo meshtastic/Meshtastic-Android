@@ -12,6 +12,7 @@ Guidelines for building shared UI, adaptive layouts, and handling strings/resour
 - **Material 3 / Adaptive:** Use `currentWindowAdaptiveInfoV2()`, which includes the Large (1200dp) and XL (1600dp) width classes; `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` is deprecated in its favour. Investigate 3-pane "Power User" scenes using Navigation 3 Scenes and draggable dividers for desktopApp/tablets.
 - **Dialogs & Alerts:** Use centralized components like `AlertHost(alertManager)` from `core:ui/commonMain`. Do NOT trigger alerts inline or duplicate alert logic. Use `SharedDialogs(uiViewModel)` for general popups.
 - **Placeholders:** Use `PlaceholderScreen(name)` from `core:ui/commonMain` for unimplemented desktopApp/JVM features.
+- **Empty states:** Use `EmptyState(icon, title, supportingText, action)` from `core:ui/commonMain` for an empty list or pane rather than a hand-built icon-and-text column.
 - **Theme Picker:** Use `ThemePickerDialog` from `feature:settings/commonMain`.
 - **Platform Implementations:** Inject platform-specific behavior (e.g., Map providers) via `CompositionLocal` from the `androidApp` or `desktopApp` shells. Do not tightly couple Google Maps dependencies to `commonMain`; the MapLibre surfaces live in `:feature:map-maplibre`, not in a `core` module.
 

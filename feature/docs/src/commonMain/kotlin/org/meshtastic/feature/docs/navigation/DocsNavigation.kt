@@ -20,11 +20,11 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -91,7 +91,7 @@ private fun rememberChirpyState(
     val aiAssistant = koinInject<AIDocAssistant>()
     val holder = koinInject<ChirpySessionHolder>()
 
-    val modelReadiness by aiAssistant.modelStatus.collectAsState()
+    val modelReadiness by aiAssistant.modelStatus.collectAsStateWithLifecycle()
     var isSupported by remember { mutableStateOf(false) }
 
     // Trigger initial availability check and model download.
@@ -140,12 +140,6 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>, chirpy: ChirpyUiStat
     var isLoading by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        val bundle = bundleLoader.load()
-        pages = bundle.pages.sortedWith(compareBy({ it.section.toString() }, { it.navOrder }))
-        isLoading = false
-    }
-
     LaunchedEffect(searchQuery) {
         if (searchQuery.isBlank()) {
             val bundle = bundleLoader.load()
@@ -154,6 +148,7 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>, chirpy: ChirpyUiStat
             val results = searchEngine.search(searchQuery)
             pages = results.map { it.page }
         }
+        isLoading = false
     }
 
     val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)

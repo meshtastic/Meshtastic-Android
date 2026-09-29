@@ -24,6 +24,7 @@ import kotlin.test.assertTrue
 class SettingsSearchMatcherTest {
 
     private fun entry(title: String, description: String? = null, screen: String = "LoRa") = ResolvedSettingsEntry(
+        id = title,
         title = title,
         description = description,
         screenTitle = screen,

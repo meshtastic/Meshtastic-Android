@@ -183,7 +183,7 @@ fun WifiProvisionScreen(
         }
 
     LaunchedEffect(uiState.error) { errorMessage?.let { snackbarHostState.showSnackbar(it) } }
-    LaunchedEffect(Unit) { viewModel.connectToDevice(address) }
+    LaunchedEffect(viewModel, address) { viewModel.connectToDevice(address) }
 
     Scaffold(
         topBar = {

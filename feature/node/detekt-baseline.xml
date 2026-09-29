@@ -30,7 +30,6 @@
     <ID>LambdaParameterEventTrailing:PowerMetrics.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>LambdaParameterEventTrailing:SignalMetrics.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>LambdaParameterEventTrailing:TracerouteChart.kt:onPointSelected: (Double) -> Unit</ID>
-    <ID>LambdaParameterInRestartableEffect:NodeDetailScreens.kt:onNavigate: (Route) -> Unit = {}</ID>
     <ID>MagicNumber:CompassViewModel.kt:CompassViewModel$180.0</ID>
     <ID>ModifierMissing:BaseMetricChart.kt:@Composable @Suppress("LongMethod") fun &lt;T> BaseMetricScreen</ID>
     <ID>ModifierMissing:CommonCharts.kt:@Composable fun LegendIndicator</ID>
