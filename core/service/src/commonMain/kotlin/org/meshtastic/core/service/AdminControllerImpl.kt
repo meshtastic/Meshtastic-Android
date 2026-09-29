@@ -19,11 +19,8 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
@@ -416,12 +413,12 @@ internal class AdminControllerImpl(
             projections.forEach { projection -> applyProjection(projection) }
         }
 
-        @Suppress("TooGenericExceptionCaught")
+        // Only called under applyStagedProjections' NonCancellable, so no cancellation of its own reaches the catch.
+        @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
         private suspend fun applyProjection(projection: suspend () -> Unit) {
             try {
                 projection()
             } catch (e: Exception) {
-                if (e is CancellationException) currentCoroutineContext().ensureActive()
                 Logger.w(e) { "Local edit-settings projection failed after device commit" }
             }
         }

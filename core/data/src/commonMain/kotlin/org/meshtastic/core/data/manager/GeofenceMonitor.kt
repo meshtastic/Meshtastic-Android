@@ -102,9 +102,8 @@ class GeofenceMonitor(
                     }
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     if (e is CancellationException) currentCoroutineContext().ensureActive()
-                    // Isolate per-sample failures: an unexpected throw, a stray CancellationException included, must
-                    // not kill the sole consumer and silently stop geofence tracking for the rest of the session.
-                    // Only this consumer's own cancellation ends the loop.
+                    // Any per-sample failure, a stray CancellationException included, is logged and skipped; only
+                    // this consumer's own cancellation ends geofence tracking.
                     Logger.e(e) { "Geofence evaluation failed for node ${sample.nodeNum}; skipping sample" }
                 }
             }

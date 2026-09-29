@@ -19,8 +19,6 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -341,13 +339,13 @@ class RadioControllerImpl(
         meshPrefs.setDeviceAddress(deviceAddr)
     }
 
-    @Suppress("TooGenericExceptionCaught")
+    // Only called under NonCancellable, so no cancellation of its own reaches attemptRollback's catch.
+    @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
     private suspend fun rollbackDeviceSwitch(previousAddress: String?, originalFailure: Exception) {
         suspend fun attemptRollback(description: String, block: suspend () -> Unit): Boolean = try {
             block()
             true
         } catch (rollbackFailure: Exception) {
-            if (rollbackFailure is CancellationException) currentCoroutineContext().ensureActive()
             originalFailure.addSuppressed(rollbackFailure)
             Logger.w(rollbackFailure) { "Failed to roll back $description after device-switch failure" }
             false

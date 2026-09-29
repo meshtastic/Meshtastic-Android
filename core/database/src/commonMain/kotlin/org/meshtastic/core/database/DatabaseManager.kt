@@ -793,6 +793,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                             }
                         }
 
+                        // Runs under NonCancellable, so no cancellation of this coroutine can reach the catch.
+                        @Suppress("SuspendFunSwallowedCancellation")
                         suspend fun clearPendingRouteBestEffort() {
                             withContext(NonCancellable) {
                                 try {
@@ -800,9 +802,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                                         it.remove(pendingSourceDbKey(transportAddress))
                                         it.remove(pendingDestinationDbKey(transportAddress))
                                     }
-                                } catch (failure: Throwable) {
-                                    if (failure is CancellationException) currentCoroutineContext().ensureActive()
-                                    Logger.w(failure) { "Failed to clear aborted pending database route" }
+                                } catch (cleanupFailure: Throwable) {
+                                    Logger.w(cleanupFailure) { "Failed to clear aborted pending database route" }
                                 }
                             }
                         }
