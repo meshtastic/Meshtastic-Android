@@ -100,7 +100,7 @@ jobs:
       - name: Spotless, Detekt & Android Lint
         # The root spotlessCheck and detekt do not reach the included build-logic build.
         # detektTypeResolved runs the rules that need a classpath, which plain detekt skips.
-        run: ./gradlew spotlessCheck detekt detektTypeResolved :build-logic:convention:spotlessCheck :build-logic:convention:detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true --continue
+        run: ./gradlew spotlessCheck detekt detektTypeResolved :build-logic:convention:spotlessCheck :build-logic:convention:detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --continue
 
   # ── Screenshot Test Validation ──────────────────────────────────────
   screenshot-check:
@@ -131,7 +131,7 @@ jobs:
       - name: Screenshot Test Validation
         # -Dorg.gradle.isolated-projects=false: AGP's screenshot plugin iterates BuildServicesRegistry at
         # execution time, which Isolated Projects forbids (fatal since Gradle 9.7).
-        run: ./gradlew :screenshot-tests:validateDebugScreenshotTest -Pci=true -Dorg.gradle.isolated-projects=false
+        run: ./gradlew :screenshot-tests:validateDebugScreenshotTest -Pci=true -Pkotlin.daemon.useFallbackStrategy=false -Dorg.gradle.isolated-projects=false
 
       - name: Upload screenshot diff report
         if: failure()
@@ -309,7 +309,7 @@ jobs:
           # CCUD tags every shard with the same `CI job=test-shards`, which is the largest
           # single CI cost bucket and therefore the one worth splitting. Shard identity is
           # otherwise only recoverable by parsing the requested task list.
-          ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true --continue \
+          ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --continue \
             "-Dscan.value.CI shard=${{ matrix.shard.name }}"
 
       # A test fork that dies in native code (exit 134) names no test, and the JVM's crash report is the
@@ -549,7 +549,7 @@ jobs:
         # via allprojects{}, which Isolated Projects forbids (fatal since Gradle 9.7). The property form is
         # used everywhere instead of --no-isolated-projects: that flag only exists on 9.7+, so the property
         # survives a pin-back below 9.7 without editing this line.
-        run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true --parallel --configuration-cache -Dorg.gradle.isolated-projects=false --continue
+        run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --parallel --configuration-cache -Dorg.gradle.isolated-projects=false --continue
 
       # A dependency published for only some of our ABIs builds and installs cleanly and then
       # crashes with UnsatisfiedLinkError on the others (#7001). Compare the splits here, where
@@ -631,8 +631,9 @@ jobs:
         # --no-configuration-cache while IP is still on. Flags, not -D properties —
         # -Dorg.gradle.isolated-projects=false is inert on windows-latest. --no-isolated-projects
         # needs Gradle 9.7+, so a pin-back below 9.7 has to revert this line with it.
+        # The daemon flag is quoted because PowerShell splits an unquoted -P argument at its first dot.
         run: >
-          ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true
+          ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true "-Pkotlin.daemon.useFallbackStrategy=false"
           ${{ runner.os == 'Windows' && '--no-isolated-projects --no-configuration-cache' || '' }}
 
       # CMP's TargetFormat.AppImage is jpackage's "app-image" — an unpacked directory, not
