@@ -521,6 +521,12 @@ downlink_feature_description
 download
 download_this_area
 duplicated_public_key_title
+### DURATION ###
+duration_ago
+duration_days_short
+duration_hours_short
+duration_minutes_short
+duration_seconds_short
 dynamic
 easily_set_up_private_mesh_networks
 edit

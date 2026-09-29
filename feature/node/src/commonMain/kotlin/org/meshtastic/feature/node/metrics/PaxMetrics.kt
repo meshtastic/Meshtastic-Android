@@ -52,9 +52,9 @@ import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
-import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ble_devices
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.no_pax_metrics_logs
 import org.meshtastic.core.resources.pax
 import org.meshtastic.core.resources.pax_ble_format
@@ -279,7 +279,7 @@ fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, isSelected: Boolean, onClic
                 }
 
                 Text(
-                    text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
+                    text = stringResource(Res.string.uptime) + ": " + formatDuration(pax.uptime.toLong()),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                 )

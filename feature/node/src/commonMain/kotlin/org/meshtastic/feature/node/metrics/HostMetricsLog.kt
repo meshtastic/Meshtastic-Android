@@ -55,9 +55,9 @@ import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
-import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.disk_free_indexed
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.free_memory
 import org.meshtastic.core.resources.host_metrics_log
 import org.meshtastic.core.resources.load_indexed
@@ -161,7 +161,7 @@ private fun HostMetricsCardContent(time: String, hostMetrics: org.meshtastic.pro
         Spacer(modifier = Modifier.height(8.dp))
 
         hostMetrics?.uptime_seconds?.let {
-            LogLine(label = stringResource(Res.string.uptime), value = formatUptime(it))
+            LogLine(label = stringResource(Res.string.uptime), value = formatDuration(it.toLong()))
         }
         hostMetrics?.freemem_bytes?.let {
             LogLine(label = stringResource(Res.string.free_memory), value = formatBytes(it))

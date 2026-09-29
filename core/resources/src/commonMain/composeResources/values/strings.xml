@@ -551,6 +551,12 @@
     <string name="download">Download</string>
     <string name="download_this_area">Download this area</string>
     <string name="duplicated_public_key_title">Duplicate Public Key Detected</string>
+    <!-- DURATION -->
+    <string name="duration_ago">%1$s ago</string>
+    <string name="duration_days_short">%1$dd</string>
+    <string name="duration_hours_short">%1$dh</string>
+    <string name="duration_minutes_short">%1$dm</string>
+    <string name="duration_seconds_short">%1$ds</string>
     <string name="dynamic">Dynamic</string>
     <string name="easily_set_up_private_mesh_networks">Easily set up private mesh networks for secure and reliable communication in remote areas.</string>
     <string name="edit">Edit</string>

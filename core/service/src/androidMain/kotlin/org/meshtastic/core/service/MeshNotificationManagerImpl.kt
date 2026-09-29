@@ -56,7 +56,6 @@ import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.noiseFloorOrNull
-import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.repository.FirmwareUpdateProgress
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
@@ -77,6 +76,7 @@ import org.meshtastic.core.resources.discovery_scan_in_progress
 import org.meshtastic.core.resources.firmware_update_available
 import org.meshtastic.core.resources.firmware_update_in_progress
 import org.meshtastic.core.resources.firmware_update_notification_android
+import org.meshtastic.core.resources.formatDurationSuspend
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_battery
@@ -1184,7 +1184,8 @@ class MeshNotificationManagerImpl(
             }
         }
         parts.add(BULLET + getStringSuspend(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
-        parts.add(BULLET + getStringSuspend(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
+        val uptime = formatDurationSuspend(uptime_seconds.toLong())
+        parts.add(BULLET + getStringSuspend(Res.string.local_stats_uptime, uptime))
         parts.add(
             BULLET +
                 getStringSuspend(
@@ -1235,7 +1236,9 @@ class MeshNotificationManagerImpl(
     private suspend fun DeviceMetrics.formatToStringSuspend(): String {
         val parts = mutableListOf<String>()
         battery_level?.let { parts.add(BULLET + getStringSuspend(Res.string.local_stats_battery, it)) }
-        uptime_seconds?.let { parts.add(BULLET + getStringSuspend(Res.string.local_stats_uptime, formatUptime(it))) }
+        uptime_seconds?.let {
+            parts.add(BULLET + getStringSuspend(Res.string.local_stats_uptime, formatDurationSuspend(it.toLong())))
+        }
         if (channel_utilization != null || air_util_tx != null) {
             parts.add(
                 BULLET +

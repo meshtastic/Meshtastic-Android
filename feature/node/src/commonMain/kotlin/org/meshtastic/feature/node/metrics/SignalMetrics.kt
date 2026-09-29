@@ -58,12 +58,12 @@ import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
-import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.busy_noise_floor
 import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_nodes
 import org.meshtastic.core.resources.local_stats_noise
@@ -547,7 +547,11 @@ private fun LocalStatsCard(telemetry: Telemetry, isSelected: Boolean, onClick: (
                     style = MaterialTheme.typography.labelLarge,
                 )
                 Text(
-                    text = stringResource(Res.string.local_stats_uptime, formatUptime(localStats?.uptime_seconds ?: 0)),
+                    text =
+                    stringResource(
+                        Res.string.local_stats_uptime,
+                        formatDuration((localStats?.uptime_seconds ?: 0).toLong()),
+                    ),
                     style = MaterialTheme.typography.labelLarge,
                 )
             }

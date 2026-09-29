@@ -36,10 +36,10 @@ import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowInstant
-import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toReadableString
@@ -363,7 +363,7 @@ class DebugViewModel(
         val placeholder = "___RELAY_NODE___"
 
         if (relayNode != 0) {
-            Packet.getRelayNode(relayNode, nodeList, myNodeNum)?.let { node ->
+            Node.getRelayNode(relayNode, nodeList, myNodeNum)?.let { node ->
                 val relayId = node.user.id
                 val relayName = node.user.long_name
                 // Wire's toString prints `relay_node=245`; rows stored before the Wire
@@ -412,12 +412,10 @@ class DebugViewModel(
         if (!regex.containsMatchIn(this)) return false
         regex.findAll(this).toList().asReversed().forEach {
             val idx = it.range.last + 1
-            insert(idx, " (${nodeId.toHex(8)})")
+            insert(idx, " (${NodeAddress.numToDefaultId(nodeId)})")
         }
         return true
     }
-
-    private fun Int.toHex(length: Int): String = "!${this.toUInt().toString(16).padStart(length, '0')}"
 
     fun requestDeleteAllLogs() {
         alertManager.showAlert(
@@ -441,7 +439,7 @@ class DebugViewModel(
     val presetFilters: List<String>
         get() = buildList {
             // Our address if available
-            nodeRepository.myNodeInfo.value?.myNodeNum?.let { add(it.toHex(8)) }
+            nodeRepository.myNodeInfo.value?.myNodeNum?.let { add(NodeAddress.numToDefaultId(it)) }
             // broadcast
             add("!ffffffff")
             // decoded
@@ -534,7 +532,7 @@ class DebugViewModel(
     private fun formatNodeWithShortName(nodeNum: Int): String {
         val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
         val shortName = user?.short_name?.takeIf { it.isNotEmpty() } ?: ""
-        val nodeId = nodeNum.toHex(8)
+        val nodeId = NodeAddress.numToDefaultId(nodeNum)
         return if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
     }
 

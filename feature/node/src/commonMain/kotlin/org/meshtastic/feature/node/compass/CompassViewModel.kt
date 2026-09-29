@@ -47,8 +47,6 @@ import kotlin.math.sqrt
 private const val ALIGNMENT_TOLERANCE_DEGREES = 5f
 private const val FULL_CIRCLE_DEGREES = 360f
 private const val BEARING_FORMAT = "%.0f°"
-private const val SECONDS_PER_HOUR = 3600
-private const val SECONDS_PER_MINUTE = 60
 private const val HUNDRED = 100f
 private const val MILLIMETERS_PER_METER = 1000f
 
@@ -125,7 +123,7 @@ class CompassViewModel(
         val distanceText = distanceMeters?.toDistanceString(current.displayUnits)
         val bearingText = bearingDegrees?.let { formatString(BEARING_FORMAT, it) }
         val isAligned = isAligned(trueHeading, bearingDegrees)
-        val lastUpdateText = targetPositionTimeSec?.let { formatElapsed(it) }
+        val lastUpdateAgeSeconds = targetPositionTimeSec?.let { maxOf(0, nowSeconds - it) }
         val angularErrorDeg = calculateAngularError(positionalAccuracyMeters, distanceMeters)
         val errorRadiusText =
             positionalAccuracyMeters?.toInt()?.let { "± ${it.toDistanceString(current.displayUnits)}" }
@@ -137,7 +135,7 @@ class CompassViewModel(
             bearingText = bearingText,
             warnings = warnings,
             isAligned = isAligned,
-            lastUpdateText = lastUpdateText,
+            lastUpdateAgeSeconds = lastUpdateAgeSeconds,
             errorRadiusText = errorRadiusText,
             angularErrorDeg = angularErrorDeg,
         )
@@ -195,16 +193,6 @@ class CompassViewModel(
         val baseHeading = heading ?: return null
         val declination = magneticFieldProvider.getDeclination(loc.latitude, loc.longitude, loc.altitude, nowMillis)
         return (baseHeading + declination + FULL_CIRCLE_DEGREES) % FULL_CIRCLE_DEGREES
-    }
-
-    private fun formatElapsed(timestampSec: Long): String {
-        val nowSec = nowSeconds
-        val diff = maxOf(0, nowSec - timestampSec)
-        val hours = diff / SECONDS_PER_HOUR
-        val minutes = (diff % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE
-        val seconds = diff % SECONDS_PER_MINUTE
-        // Show a short elapsed string to match iOS behavior and avoid locale/format churn
-        return "${hours}h ${minutes}m ${seconds}s ago"
     }
 
     @Suppress("ReturnCount")
