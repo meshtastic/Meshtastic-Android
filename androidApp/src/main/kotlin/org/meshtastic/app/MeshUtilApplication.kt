@@ -93,6 +93,13 @@ open class MeshUtilApplication :
     protected val applicationScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Default + applicationScopeExceptionHandler)
 
+    /**
+     * False when this device can't load the bundled SQLite that every database open goes through. Koin is then never
+     * started, and MainActivity shows only [UnsupportedDeviceScreen].
+     */
+    var isSupportedDevice: Boolean = true
+        private set
+
     /** Supplies Coil's process-wide loader without retaining an Activity in its singleton factory. */
     override fun newImageLoader(context: Context): ImageLoader = get<ImageLoader>()
 
@@ -102,6 +109,12 @@ open class MeshUtilApplication :
         ContextServices.app = this
         configureFlavorApplication(BuildConfig.APPLICATION_ID)
 
+        isSupportedDevice = bundledSqliteLoads(::loadBundledSqlite)
+        if (!isSupportedDevice) {
+            disableAppEntryPoints()
+            return
+        }
+
         startKoin<AndroidKoinApp> {
             androidContext(this@MeshUtilApplication)
             workManagerFactory()
@@ -110,13 +123,18 @@ open class MeshUtilApplication :
         startBackgroundInit()
     }
 
+    /** Open so a test can stand in for the device's linker; the host JVM has no `libsqliteJni.so` to load by name. */
+    protected open fun loadBundledSqlite() = System.loadLibrary(BUNDLED_SQLITE_LIBRARY)
+
     /**
-     * Launches the best-effort init that does not have to finish before the first Activity: log cleanup, the
-     * previous-exit report, the widget preview, the active database, and discovery-scan recovery. Open so a test can
-     * boot the real Application without any of it — chiefly the database, whose connection is what makes an
-     * un-terminated Application unsafe.
+     * Launches the best-effort init that does not have to finish before the first Activity: re-enabling entry points a
+     * failed SQLite load disabled, log cleanup, the previous-exit report, the widget preview, the active database, and
+     * discovery-scan recovery. Open so a test can boot the real Application without any of it — chiefly the database,
+     * whose connection is what makes an un-terminated Application unsafe.
      */
     protected open fun startBackgroundInit() {
+        applicationScope.launch { restoreAppEntryPoints() }
+
         // Schedule periodic MeshLog cleanup. Off-main: WorkManager uses on-demand init here
         // (the startup provider is removed), so getInstance() opens WorkManager's Room DB.
         applicationScope.launch { scheduleMeshLogCleanup() }
@@ -198,6 +216,7 @@ open class MeshUtilApplication :
     override fun onTerminate() {
         // cancel() not cancelAndJoin(): joining under runBlocking on the main thread can deadlock.
         cancelBackgroundInit()
+        if (!isSupportedDevice) return super.onTerminate()
         try {
             runBlocking { get<DatabaseManager>().close() }
         } finally {

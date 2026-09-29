@@ -120,10 +120,19 @@ class MainActivity : AppCompatActivity() {
     private val launchOptions: LaunchOptions by inject()
     private val dispatchers: CoroutineDispatchers by inject()
 
+    /** Koin never started when this is false, so nothing that injects may run. */
+    private val isSupportedDevice: Boolean
+        get() = (application as? MeshUtilApplication)?.isSupportedDevice != false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
+
+        if (!isSupportedDevice) {
+            setContent { UnsupportedDeviceScreen() }
+            return
+        }
 
         // MainActivity is exported, so any app can send these extras; only the shell can start the debug alias.
         val automationLaunch = BuildConfig.DEBUG && intent.component?.className == AUTOMATION_LAUNCHER
@@ -195,11 +204,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        if (!isSupportedDevice) return
         MeshService.startService(this, ServiceStartTrigger.UserInterface)
     }
 
     override fun onResume() {
         super.onResume()
+        if (!isSupportedDevice) return
         // Belt-and-suspenders for the Android 12+ attach-intent quirk: if the activity is
         // resumed while a USB device is already attached (e.g. process restart, returning
         // from another app), the manifest-declared attach intent may have already fired

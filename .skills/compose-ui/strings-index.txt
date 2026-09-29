@@ -1862,6 +1862,7 @@ unmute_selected
 unpin_selected
 unrecognized
 unset
+unsupported_device
 update_status
 updated
 uplink_enabled

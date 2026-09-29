@@ -25,6 +25,7 @@ class GoogleMeshUtilApplication : MeshUtilApplication() {
 
     override fun onCreate() {
         super.onCreate()
+        if (!isSupportedDevice) return
         // Start the AppFunctions enabled-state sync. Resolved here (after startKoin has bound
         // androidContext) rather than via createdAtStart so that Koin graphs built outside a
         // running app — verification tests, previews — stay lazily constructible.
