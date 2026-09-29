@@ -124,13 +124,7 @@ fun NodeItem(
             FontStyle.Normal
         }
 
-    val unmessageable =
-        remember(thatNode) {
-            when {
-                thatNode.user.is_unmessagable != null -> thatNode.user.is_unmessagable!!
-                else -> thatNode.user.role.isUnmessageableRole()
-            }
-        }
+    val unmessageable = remember(thatNode) { thatNode.user.is_unmessagable ?: thatNode.user.role.isUnmessageableRole() }
 
     // Resolved out here, not inside the remember: stringResource is composable, and the description is built in a
     // plain lambda.
@@ -284,7 +278,8 @@ private fun NodeBatteryPositionRow(
     }
 }
 
-@Suppress("CyclomaticComplexMethod", "LongMethod")
+// signalChip is assigned once while the list is built, in the same composition that reads it.
+@Suppress("CyclomaticComplexMethod", "LongMethod", "VarsWithoutStateBacking")
 @Composable
 private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Color) {
     // The signal pill bundles SNR + RSSI + quality into one row. It's wider than a 1/3 grid cell, so it renders on
@@ -355,7 +350,6 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
 }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@Composable
 private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: Color): List<@Composable () -> Unit> {
     val items = mutableListOf<@Composable () -> Unit>()
     val env = node.environmentMetrics

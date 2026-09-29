@@ -79,6 +79,7 @@ data class LocalStatsWidgetUiState(
 
 @Single
 class LocalStatsWidgetStateProvider(nodeRepository: NodeRepository, connectionStateProvider: ConnectionStateProvider) {
+    @Suppress("InjectDispatcher") // feature:widget does not depend on core:di, where CoroutineDispatchers lives
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)

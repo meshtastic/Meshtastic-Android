@@ -132,7 +132,7 @@ block rather than assuming a plugin does or does not exist.
 ./gradlew test allTests
 
 # Code quality
-./gradlew spotlessCheck detekt
+./gradlew spotlessCheck detekt detektTypeResolved
 
 # Android build
 ./gradlew assembleGoogleDebug assembleFdroidDebug

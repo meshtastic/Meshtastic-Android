@@ -2,6 +2,9 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>AbstractClassCanBeInterface:MessageScreenComponents.kt:MessageMenuAction$MessageMenuAction</ID>
+    <ID>AbstractClassCanBeInterface:MessageTranslationService.kt:DownloadResult$DownloadResult</ID>
+    <ID>AbstractClassCanBeInterface:MessageTranslationService.kt:TranslationResult$TranslationResult</ID>
     <ID>ComposableParamOrder:MessageActions.kt:@Composable internal fun MessageActions</ID>
     <ID>ComposableParamOrder:MessageItem.kt:@OptIn(ExperimentalMaterial3Api::class) @Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun MessageItem</ID>
     <ID>ComposableParamOrder:MessageListPaged.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable private fun MessageListPagedContent</ID>
@@ -13,6 +16,7 @@
     <ID>LambdaParameterEventTrailing:Message.kt:onSendMessage: () -> Unit</ID>
     <ID>LambdaParameterEventTrailing:MessageScreenComponents.kt:onClick: (QuickChatAction) -> Unit</ID>
     <ID>LambdaParameterEventTrailing:QuickChat.kt:onNavigateUp: () -> Unit</ID>
+    <ID>LongParameterList:Contacts.kt:private fun LazyListScope.contactSection</ID>
     <ID>ModifierMissing:Contacts.kt:@Suppress("LongMethod", "CyclomaticComplexMethod", "LongParameterList") @Composable fun ContactsScreen</ID>
     <ID>ModifierMissing:DeliveryInfoDialog.kt:@Composable fun DeliveryInfo</ID>
     <ID>ModifierMissing:Message.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @OptIn(ExperimentalFoundationApi::class) @Composable fun MessageScreen</ID>
@@ -23,6 +27,8 @@
     <ID>ModifierMissing:MessageScreenComponents.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun MessageTopBar</ID>
     <ID>ModifierMissing:Share.kt:@Composable fun ShareScreen</ID>
     <ID>ModifierNotUsedAtRoot:QuickChat.kt:modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
+    <ID>NoNameShadowing:Message.kt:message</ID>
+    <ID>NoNameShadowing:Reaction.kt:reactions</ID>
     <ID>ParameterNaming:Contacts.kt:onDeleteSelected: () -> Unit</ID>
     <ID>ParameterNaming:Contacts.kt:onMuteSelected: () -> Unit</ID>
     <ID>ParameterNaming:MessageScreenComponents.kt:onToggleFilteringDisabled: () -> Unit</ID>
@@ -35,5 +41,12 @@
     <ID>PreviewPublic:QuickChatPreviews.kt:@PreviewLightDark @Composable fun EditQuickChatDialogPreview</ID>
     <ID>PreviewPublic:QuickChatPreviews.kt:@PreviewLightDark @Composable fun QuickChatItemPreview</ID>
     <ID>PreviewPublic:ReactionPreviews.kt:@PreviewLightDark @Composable fun ReactionItemPreview</ID>
+    <ID>UnnecessaryLaunchedEffect:Message.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:MessageListPaged.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:QuickChat.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:Share.kt:LaunchedEffect</ID>
+    <ID>UnusedPrivateProperty:MessageViewModel.kt:MessageViewModel$private val connectionStateProvider: ConnectionStateProvider</ID>
+    <ID>UnusedPrivateProperty:MessageViewModel.kt:MessageViewModel$private val homoglyphEncodingPrefs: HomoglyphPrefs</ID>
+    <ID>UseOrEmpty:Reaction.kt:groupedEmojis[it] ?: emptyList()</ID>
   </CurrentIssues>
 </SmellBaseline>

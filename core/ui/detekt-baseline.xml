@@ -12,7 +12,6 @@
     <ID>ComposableParamOrder:MainAppBar.kt:@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class) @Composable fun MainAppBar</ID>
     <ID>ComposableParamOrder:MaterialBatteryInfo.kt:@Suppress("MagicNumber", "LongMethod") @Composable fun MaterialBatteryInfo</ID>
     <ID>ComposableParamOrder:NodeChip.kt:@Composable fun NodeChip</ID>
-    <ID>ComposableParamOrder:NodeKeyStatusIcon.kt:@Composable fun NodeKeyStatusIcon</ID>
     <ID>ComposableParamOrder:SignalInfo.kt:@Composable fun SignalInfo</ID>
     <ID>ComposableParamOrder:SwitchPreference.kt:@Composable fun SwitchPreference</ID>
     <ID>CompositionLocalAllowlist:LocalAnalyticsIntroProvider.kt:val LocalAnalyticsIntroProvider = compositionLocalOf&lt;@Composable () -> Unit> { {} }</ID>
@@ -29,6 +28,7 @@
     <ID>CompositionLocalAllowlist:MapViewProvider.kt:val LocalMapViewProvider = compositionLocalOf&lt;MapViewProvider?> { null }</ID>
     <ID>FunctionTypeModifierSpacing:Theme.kt:@Composable()</ID>
     <ID>LambdaParameterInRestartableEffect:PlatformUtils.kt:check: () -> Boolean</ID>
+    <ID>LongParameterList:ConnectionsViewModel.kt:ConnectionsViewModel</ID>
     <ID>MagicNumber:EditIPv4Preference.kt:0xff</ID>
     <ID>MagicNumber:EditIPv4Preference.kt:16</ID>
     <ID>MagicNumber:EditIPv4Preference.kt:24</ID>
@@ -37,6 +37,8 @@
     <ID>MagicNumber:EditListPreference.kt:67890</ID>
     <ID>MagicNumber:LazyColumnDragAndDropDemo.kt:50</ID>
     <ID>MatchingDeclarationName:LocalTracerouteMapOverlayInsetsProvider.kt:TracerouteMapOverlayInsets</ID>
+    <ID>MissingNonRestartableComposable:AlertDialogs.kt:@Composable fun MeshtasticResourceDialog</ID>
+    <ID>MissingNonRestartableComposable:AlertDialogs.kt:@Composable fun MeshtasticTextDialog</ID>
     <ID>ModifierMissing:ChannelItem.kt:@Composable fun ChannelItem</ID>
     <ID>ModifierMissing:ChannelSelection.kt:@Composable fun ChannelSelection</ID>
     <ID>ModifierMissing:IndoorAirQuality.kt:@Suppress("LongMethod", "UnusedPrivateProperty") @Composable fun IndoorAirQuality</ID>
@@ -54,6 +56,10 @@
     <ID>ModifierReused:TextDividerPreference.kt:Row(modifier = modifier.fillMaxWidth().padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically) { Text( text = title, style = MaterialTheme.typography.bodyLarge, color = if (!enabled) { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) } else { Color.Unspecified }, ) if (trailingIcon != null) { Icon(trailingIcon, "trailingIcon", modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End)) } }</ID>
     <ID>MultipleEmitters:PreferenceCategory.kt:@Composable fun PreferenceCategory</ID>
     <ID>MutableStateAutoboxing:EmojiPickerDialog.kt:mutableStateOf(0)</ID>
+    <ID>NoNameShadowing:PositionPrecisionPreference.kt:enabled</ID>
+    <ID>NoNameShadowing:ScannedQrCodeDialog.kt:wb</ID>
+    <ID>NoNameShadowing:SharedContactImportDialog.kt:wb</ID>
+    <ID>NoNameShadowing:SwitchPreference.kt:loading</ID>
     <ID>ParameterNaming:BitwisePreference.kt:onItemSelected: (Int) -> Unit</ID>
     <ID>ParameterNaming:ChannelSelection.kt:onSelected: (Boolean) -> Unit</ID>
     <ID>ParameterNaming:DropDownPreference.kt:onItemSelected: (T) -> Unit</ID>
@@ -114,6 +120,18 @@
     <ID>PreviewPublic:TextDividerPreference.kt:@Preview(showBackground = true) @Composable fun TextDividerPreferencePreview</ID>
     <ID>PreviewPublic:TitledCard.kt:@PreviewLightDark @Composable fun TitledCardPreview</ID>
     <ID>TooManyFunctions:NoopStubs.kt:org.meshtastic.core.ui.util.NoopStubs.kt</ID>
+    <ID>UnnecessaryLaunchedEffect:EditBase64Preference.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:FirmwareVersionCheck.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:MeshtasticNavDisplay.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:MeshtasticSearchBar.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:TracerouteAlertHandler.kt:LaunchedEffect</ID>
+    <ID>UnusedPrivateProperty:ConnectionsViewModel.kt:ConnectionsViewModel$private val deviceHardwareRepository: DeviceHardwareRepository</ID>
+    <ID>UnusedPrivateProperty:ConnectionsViewModel.kt:ConnectionsViewModel$private val firmwareReleaseRepository: FirmwareReleaseRepository</ID>
+    <ID>UnusedPrivateProperty:ConnectionsViewModel.kt:ConnectionsViewModel$private val radioPrefs: RadioPrefs</ID>
+    <ID>UnusedPrivateProperty:UIViewModel.kt:UIViewModel$private val eventFirmwareRepository: EventFirmwareRepository</ID>
+    <ID>UseOrEmpty:AlertDialogs.kt:title ?: titleRes?.let { stringResource(it) } ?: ""</ID>
+    <ID>UseOrEmpty:ConnectionsViewModel.kt:ConnectionsViewModel$firmwareReleaseRepository.getManifestTargets(it.stableRelease) ?: emptySet()</ID>
+    <ID>UseOrEmpty:DropDownPreference.kt:currentItem?.label ?: ""</ID>
     <ID>ViewModelForwarding:MeshtasticAppShell.kt:MeshtasticCommonAppSetup( uiViewModel = uiViewModel, onNavigateToTracerouteMap = { destNum, requestId, logUuid -> multiBackstack.handleDeepLink( listOf( NodesRoute.Nodes, NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid), ), ) }, )</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:FirmwareVersionCheck(viewModel = uiViewModel)</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:SharedDialogs(uiViewModel = uiViewModel)</ID>

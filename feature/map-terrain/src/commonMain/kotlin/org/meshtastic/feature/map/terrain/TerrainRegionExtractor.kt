@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.terrain
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -55,6 +56,7 @@ class TerrainRegionExtractor(
         fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray?
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // cancellation deletes the partial region, then is rethrown
     fun download(bounds: GeoBounds, maxZoom: Int): Flow<TerrainDownloadState> = flow {
         val globalZoomRange = globalTerrainZooms(maxZoom)
         val regionalZoomRange = regionalTerrainZooms(bounds, maxZoom)
@@ -89,6 +91,10 @@ class TerrainRegionExtractor(
                 regional =
                     fetchInto(regionalUrl, TerrainSource.REGIONAL, regionalTiles, global.processed, total) { emit(it) }
             }
+        } catch (e: CancellationException) {
+            // A cancelled download leaves no partial region behind, and nothing may be emitted after cancellation.
+            store.deleteAll()
+            throw e
         } catch (_: Exception) {
             store.deleteAll()
             emit(TerrainDownloadState.Failed(TerrainDownloadFailure.IO_ERROR))

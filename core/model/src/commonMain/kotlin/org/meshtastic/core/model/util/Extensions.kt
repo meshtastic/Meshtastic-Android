@@ -110,7 +110,7 @@ fun MeshPacket.isDirectSignal(): Boolean =
  */
 fun Telemetry.hasValidEnvironmentMetrics(): Boolean {
     val metrics = this.environment_metrics ?: return false
-    val hasClimate = metrics.relative_humidity != null && metrics.temperature != null && !metrics.temperature!!.isNaN()
+    val hasClimate = metrics.relative_humidity != null && metrics.temperature?.isNaN() == false
     val hasLightning = metrics.lightning_strike_count_1h != null || metrics.lightning_distance_km?.isNaN() == false
     return hasClimate || hasLightning
 }

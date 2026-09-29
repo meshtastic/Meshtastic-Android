@@ -16,12 +16,17 @@
  */
 package org.meshtastic.buildlogic
 
+import com.android.build.api.variant.AndroidComponentsExtension
 import dev.detekt.gradle.Detekt
 import dev.detekt.gradle.extensions.DetektExtension
 import dev.detekt.gradle.extensions.FailOnSeverity
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import java.io.File
 
 internal fun Project.configureDetekt(extension: DetektExtension) = extension.apply {
     toolVersion.set(libs.version("detekt"))
@@ -60,31 +65,74 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
         ),
     )
 
+    // Type-resolved tasks take their sources from the compilation, which includes generated code under build/.
+    val buildDirPrefix = layout.buildDirectory.get().asFile.absolutePath + File.separator
     tasks.withType<Detekt>().configureEach {
         val isCi = project.findProperty("ci") == "true"
+        // One baseline per module for every task: detekt would otherwise prefer a detekt-baseline-<compilation>.xml.
+        if (baselineFile.exists()) baseline.set(baselineFile)
+        exclude { it.file.absolutePath.startsWith(buildDirPrefix) }
+        // Named per task: plain and type-resolved tasks run in the same build and must not share report files.
+        val reportName = name
         reports {
             checkstyle {
                 required.set(true)
-                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.xml"))
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/$reportName.xml"))
             }
             sarif {
                 required.set(true)
-                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.sarif"))
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/$reportName.sarif"))
             }
             // In CI, only generate checkstyle and sarif (needed for GitHub reporting).
             // Skip html and markdown to save processing time.
             html {
                 required.set(!isCi)
-                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.html"))
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/$reportName.html"))
             }
             markdown {
                 required.set(!isCi)
-                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.md"))
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/$reportName.md"))
             }
         }
     }
+    registerTypeResolvedDetekt()
     dependencies {
         "detektPlugins"(libs.library("detekt-formatting"))
         "detektPlugins"(libs.library("detekt-compose"))
+    }
+}
+
+/**
+ * Registers `detektTypeResolved`, which runs detekt with the production classpath of each JVM and Android debug
+ * compilation. Plain `detekt` has no classpath, so every rule that needs type resolution is skipped there.
+ */
+private fun Project.registerTypeResolvedDetekt() {
+    val typeResolved =
+        tasks.register("detektTypeResolved") {
+            group = "verification"
+            description = "Runs detekt with type resolution on the production JVM and Android debug compilations"
+        }
+
+    fun include(suffix: String) {
+        val taskName = "detekt${suffix.replaceFirstChar { char -> char.uppercase() }}"
+        // Filters by name only, so the rest of the project's tasks stay unrealized.
+        typeResolved.configure { dependsOn(tasks.named { name -> name == taskName }) }
+    }
+
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        extensions
+            .getByType<KotlinMultiplatformExtension>()
+            .targets
+            .matching { target ->
+                target.platformType == KotlinPlatformType.jvm || target.platformType == KotlinPlatformType.androidJvm
+            }
+            .configureEach { include("main${name.replaceFirstChar { char -> char.uppercase() }}") }
+    }
+    plugins.withId("org.jetbrains.kotlin.jvm") { include("main") }
+    listOf("com.android.application", "com.android.library").forEach { pluginId ->
+        plugins.withId(pluginId) {
+            val components = extensions.getByType(AndroidComponentsExtension::class.java)
+            components.onVariants(components.selector().withBuildType("debug")) { variant -> include(variant.name) }
+        }
     }
 }

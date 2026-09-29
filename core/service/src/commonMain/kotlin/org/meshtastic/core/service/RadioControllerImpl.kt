@@ -339,7 +339,8 @@ class RadioControllerImpl(
         meshPrefs.setDeviceAddress(deviceAddr)
     }
 
-    @Suppress("TooGenericExceptionCaught")
+    // Only called under NonCancellable, so no cancellation of its own reaches attemptRollback's catch.
+    @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
     private suspend fun rollbackDeviceSwitch(previousAddress: String?, originalFailure: Exception) {
         suspend fun attemptRollback(description: String, block: suspend () -> Unit): Boolean = try {
             block()

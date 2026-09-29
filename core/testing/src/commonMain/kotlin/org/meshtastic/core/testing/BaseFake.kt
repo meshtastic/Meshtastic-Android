@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Base class for fakes that provides common utilities for state management and reset capabilities. */
+@Suppress("AbstractClassCanBeConcreteClass") // only ever extended, never a fake of its own
 abstract class BaseFake {
     private val resetActions = mutableListOf<() -> Unit>()
 

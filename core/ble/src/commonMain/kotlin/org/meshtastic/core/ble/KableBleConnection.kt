@@ -262,7 +262,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         _deviceFlow.emit(null)
     }
 
-    @Suppress("ThrowsCount")
+    // The caller's own cancellation is rethrown by ensureActive(); only a dead connection scope becomes
+    // NotConnectedException.
+    @Suppress("ThrowsCount", "SuspendFunSwallowedCancellation")
     override suspend fun <T> profile(
         serviceUuid: Uuid,
         timeout: Duration,
@@ -320,7 +322,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
      * Kable requires `close()` to release broadcast receivers on Android (Kable issue #359). Separate try/catch blocks
      * ensure `close()` always runs even if `disconnect()` throws.
      */
-    @Suppress("TooGenericExceptionCaught")
+    // Teardown under NonCancellable: close() must run whatever disconnect() throws, cancellation included.
+    @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
     private suspend fun safeClosePeripheral(tag: String) {
         try {
             peripheral?.disconnect()

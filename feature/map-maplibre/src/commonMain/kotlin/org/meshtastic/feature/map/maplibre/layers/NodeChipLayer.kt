@@ -152,6 +152,7 @@ private fun chipSortKey(): Expression<FloatValue> = switch(
  *
  * Shared by the node maps and the discovery map, which draws differently coloured chips for the same reason.
  */
+@Suppress("SpreadOperator") // switch() only takes its cases as varargs
 @Composable
 internal fun MapChipLayer(
     id: String,
@@ -277,7 +278,8 @@ private class ChipPainter(
         } else if (layout != null) {
             drawText(
                 textLayoutResult = layout,
-                topLeft = Offset(
+                topLeft =
+                Offset(
                     x = (size.width - layout.size.width) / 2f,
                     y = (size.height - layout.size.height) / 2f,
                 ),

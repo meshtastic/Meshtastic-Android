@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>AbstractClassCanBeInterface:ProcessRadioResponseUseCase.kt:RadioResponseResult$RadioResponseResult</ID>
+    <ID>NoNameShadowing:ExportDataUseCase.kt:ExportDataUseCase${ it != 0 }</ID>
+    <ID>UseOrEmpty:ExportDataUseCase.kt:ExportDataUseCase$nodes[proto.from]?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:ExportDataUseCase.kt:ExportDataUseCase$proto.relay_node.takeIf { it != 0 }?.let { it.toByte().toHexString() } ?: ""</ID>
+  </CurrentIssues>
+</SmellBaseline>

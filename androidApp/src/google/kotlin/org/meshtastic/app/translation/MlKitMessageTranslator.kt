@@ -25,11 +25,11 @@ import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.TranslateRemoteModel
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.meshtastic.feature.messaging.translation.DownloadResult
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.feature.messaging.translation.TranslationResult
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 
 /**

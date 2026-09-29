@@ -20,6 +20,7 @@ package org.meshtastic.core.takserver
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -304,7 +305,7 @@ class TAKMeshIntegration(
             commandSender.sendData(dataPacket)
             Logger.d { "Sent V2 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
             TakSendOutcome.Sent(wirePayload.size)
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+        } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             // Something other than size — radio not connected, queue full, etc.
@@ -355,7 +356,7 @@ class TAKMeshIntegration(
             commandSender.sendData(dataPacket)
             Logger.d { "Sent V1 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
             TakSendOutcome.Sent(wirePayload.size)
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+        } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Logger.e(e) {
@@ -379,7 +380,7 @@ class TAKMeshIntegration(
 
     // ── Receive: mesh → TAK client ──────────────────────────────────────────
 
-    private suspend fun handleMeshPacket(packet: MeshPacket) {
+    private fun handleMeshPacket(packet: MeshPacket) {
         val payload = packet.decoded?.payload ?: return
 
         when (packet.decoded?.portnum) {
@@ -389,7 +390,7 @@ class TAKMeshIntegration(
         }
     }
 
-    private suspend fun handleV2Packet(wirePayload: ByteArray) {
+    private fun handleV2Packet(wirePayload: ByteArray) {
         try {
             // Decompress to CoT XML via the SDK's CotXmlBuilder, which handles
             // ALL typed payloads (DrawnShape, Marker, Route, etc.) and preserves
@@ -440,7 +441,7 @@ class TAKMeshIntegration(
      * Packets flagged `is_compressed` are skipped only when the local radio is 2.7.x — that firmware, and only that
      * firmware, also delivers a decompressed copy. See the inline comment for the details.
      */
-    private suspend fun handleV1Packet(payload: okio.ByteString) {
+    private fun handleV1Packet(payload: okio.ByteString) {
         try {
             val takPacket = TAKPacket.ADAPTER.decode(payload)
             // A *local* 2.7.x radio unishox2-decompresses inbound port 72 traffic into a copy and sends that to the

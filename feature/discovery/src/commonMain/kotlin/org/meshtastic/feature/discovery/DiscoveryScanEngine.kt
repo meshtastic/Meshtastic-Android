@@ -371,29 +371,28 @@ class DiscoveryScanEngine(
 
     /** Stops the active scan and restores the home preset. */
     suspend fun stopScan() {
-        val request =
-            mutex.withLock {
-                if (!isActive) {
-                    null
-                } else if (_scanState.value is DiscoveryScanState.Analysis) {
-                    Logger.i { "DiscoveryScanEngine: ignoring stop after terminal analysis has started" }
-                    null
-                } else {
-                    if (_scanState.value !is DiscoveryScanState.Cancelling) {
-                        Logger.i { "DiscoveryScanEngine: stopping scan" }
-                        _scanState.value = DiscoveryScanState.Cancelling
-                    }
-                    // Freeze the scan generation before snapshotting its restore plan.
-                    // No later target shift may race this terminal request.
-                    cancelScanInternal()
-                    terminalRequestLocked(
-                        pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_STOPPED,
-                        outcome = DiscoveryScanState.CompletionOutcome.Cancelled,
-                        awaitRestore = false,
-                        generateAi = false,
-                    )
+        val request = mutex.withLock {
+            if (!isActive) {
+                null
+            } else if (_scanState.value is DiscoveryScanState.Analysis) {
+                Logger.i { "DiscoveryScanEngine: ignoring stop after terminal analysis has started" }
+                null
+            } else {
+                if (_scanState.value !is DiscoveryScanState.Cancelling) {
+                    Logger.i { "DiscoveryScanEngine: stopping scan" }
+                    _scanState.value = DiscoveryScanState.Cancelling
                 }
+                // Freeze the scan generation before snapshotting its restore plan.
+                // No later target shift may race this terminal request.
+                cancelScanInternal()
+                terminalRequestLocked(
+                    pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_STOPPED,
+                    outcome = DiscoveryScanState.CompletionOutcome.Cancelled,
+                    awaitRestore = false,
+                    generateAi = false,
+                )
             }
+        }
         if (request != null) {
             terminalCoordinator.complete(request = request, beforeFinalize = ::persistCurrentDwellResults)
         }
@@ -475,21 +474,20 @@ class DiscoveryScanEngine(
         for (target in targets) {
             if (!isActive) return
 
-            val shouldShift =
-                mutex.withLock {
-                    if (!canAdvanceScanLocked()) {
-                        false
-                    } else {
-                        currentPresetName = target.label
-                        totalDwellSeconds = dwellDurationSeconds
-                        currentDwellPersisted = false
-                        collectedNodes.clear()
-                        deviceMetricsLog.clear()
-                        lastLocalStats = null
-                        _scanState.value = DiscoveryScanState.Shifting(target.label)
-                        true
-                    }
+            val shouldShift = mutex.withLock {
+                if (!canAdvanceScanLocked()) {
+                    false
+                } else {
+                    currentPresetName = target.label
+                    totalDwellSeconds = dwellDurationSeconds
+                    currentDwellPersisted = false
+                    collectedNodes.clear()
+                    deviceMetricsLog.clear()
+                    lastLocalStats = null
+                    _scanState.value = DiscoveryScanState.Shifting(target.label)
+                    true
                 }
+            }
             if (!shouldShift) return
 
             // Shift to the new target (preset, plus a custom primary channel for beacon-channel targets)
@@ -525,17 +523,16 @@ class DiscoveryScanEngine(
         }
 
         // Elect normal completion under the same mutex used by stopScan so a late stop cannot replace its outcome.
-        val request =
-            mutex.withLock {
-                collectorRegistry.collector = null
-                _scanState.value = DiscoveryScanState.Analysis
-                terminalRequestLocked(
-                    pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_COMPLETE,
-                    outcome = DiscoveryScanState.CompletionOutcome.Success,
-                    awaitRestore = true,
-                    generateAi = true,
-                )
-            }
+        val request = mutex.withLock {
+            collectorRegistry.collector = null
+            _scanState.value = DiscoveryScanState.Analysis
+            terminalRequestLocked(
+                pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_COMPLETE,
+                outcome = DiscoveryScanState.CompletionOutcome.Success,
+                awaitRestore = true,
+                generateAi = true,
+            )
+        }
         // complete() cancels scanScope before terminal cleanup finishes. This scan coroutine ends inside the call;
         // follow-up work belongs in terminal-coordinator callbacks, not after this invocation.
         terminalCoordinator.complete(request = request, generateAi = ::generateAiSummaries)
@@ -543,20 +540,19 @@ class DiscoveryScanEngine(
 
     /** Common cleanup path when a scan step fails mid-loop. */
     private suspend fun pauseAndAbort(persistPartialDwell: Boolean = false) {
-        val request =
-            mutex.withLock {
-                if (_scanState.value is DiscoveryScanState.Cancelling) {
-                    null
-                } else {
-                    _scanState.value = DiscoveryScanState.Analysis
-                    terminalRequestLocked(
-                        pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_FAILED,
-                        outcome = DiscoveryScanState.CompletionOutcome.Failed,
-                        awaitRestore = false,
-                        generateAi = false,
-                    )
-                }
+        val request = mutex.withLock {
+            if (_scanState.value is DiscoveryScanState.Cancelling) {
+                null
+            } else {
+                _scanState.value = DiscoveryScanState.Analysis
+                terminalRequestLocked(
+                    pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_FAILED,
+                    outcome = DiscoveryScanState.CompletionOutcome.Failed,
+                    awaitRestore = false,
+                    generateAi = false,
+                )
             }
+        }
         if (request == null) return
         if (persistPartialDwell) {
             terminalCoordinator.complete(request = request, beforeFinalize = ::persistCurrentDwellResults)
@@ -858,9 +854,11 @@ class DiscoveryScanEngine(
         userLat: Double,
         userLon: Double,
     ): DiscoveredNodeEntity {
+        val lat = latitude
+        val lon = longitude
         val distance =
-            if (hasValidCoordinates(latitude, longitude) && hasValidCoordinates(userLat, userLon)) {
-                latLongToMeter(userLat, userLon, latitude!!, longitude!!)
+            if (lat != null && lon != null && hasValidCoordinates(lat, lon) && hasValidCoordinates(userLat, userLon)) {
+                latLongToMeter(userLat, userLon, lat, lon)
             } else {
                 null
             }

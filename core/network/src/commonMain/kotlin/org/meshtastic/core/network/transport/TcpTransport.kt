@@ -200,7 +200,8 @@ class TcpTransport(
 
     // region Connection lifecycle
 
-    @Suppress("NestedBlockDepth")
+    // Cancellation tears the socket down before it is rethrown to end the loop.
+    @Suppress("NestedBlockDepth", "SuspendFunSwallowedCancellation")
     private suspend fun connectWithRetry(address: String) {
         var retryCount = 1
         var backoff = MIN_BACKOFF_MILLIS

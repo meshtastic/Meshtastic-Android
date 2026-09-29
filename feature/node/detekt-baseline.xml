@@ -2,17 +2,14 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>AbstractClassCanBeInterface:NodeMenuAction.kt:NodeMenuAction$NodeMenuAction</ID>
     <ID>ComposableParamOrder:BaseMetricChart.kt:@Composable @Suppress("LongMethod") fun &lt;T> BaseMetricScreen</ID>
     <ID>ComposableParamOrder:DeviceMetrics.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable private fun DeviceMetricsChart</ID>
-    <ID>ComposableParamOrder:ElevationInfo.kt:@Composable fun ElevationInfo</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun EnvironmentMetricsChart</ID>
     <ID>ComposableParamOrder:HostMetricsChart.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable internal fun HostMetricsChart</ID>
     <ID>ComposableParamOrder:HostMetricsLog.kt:@Composable fun LogLine</ID>
-    <ID>ComposableParamOrder:LastHeardInfo.kt:@Composable fun LastHeardInfo</ID>
     <ID>ComposableParamOrder:NeighborInfoLog.kt:@OptIn(ExperimentalFoundationApi::class) @Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun NeighborInfoLogScreen</ID>
     <ID>ComposableParamOrder:NodeDetailScreens.kt:@Composable fun NodeDetailScreen</ID>
-    <ID>ComposableParamOrder:NodeFilterTextField.kt:@Suppress("LongParameterList") @Composable fun NodeFilterTextField</ID>
-    <ID>ComposableParamOrder:NodeItem.kt:@Composable @Suppress("LongMethod") fun NodeItem</ID>
     <ID>ComposableParamOrder:PaxMetrics.kt:@Suppress("LongMethod") @Composable private fun PaxMetricsChart</ID>
     <ID>ComposableParamOrder:PowerMetrics.kt:@Suppress("LongMethod") @Composable private fun PowerMetricsChart</ID>
     <ID>ComposableParamOrder:SignalMetrics.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable private fun SignalMetricsChart</ID>
@@ -25,11 +22,11 @@
     <ID>LambdaParameterEventTrailing:EnvironmentCharts.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>LambdaParameterEventTrailing:HostMetricsChart.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>LambdaParameterEventTrailing:NeighborInfoLog.kt:onNavigateUp: () -> Unit</ID>
-    <ID>LambdaParameterEventTrailing:NodeFilterTextField.kt:onToggleExcludeMqtt: () -> Unit</ID>
     <ID>LambdaParameterEventTrailing:PaxMetrics.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>LambdaParameterEventTrailing:PowerMetrics.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>LambdaParameterEventTrailing:SignalMetrics.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>LambdaParameterEventTrailing:TracerouteChart.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>LongParameterList:CommonGetNodeDetailsUseCase.kt:CommonGetNodeDetailsUseCase</ID>
     <ID>MagicNumber:CompassViewModel.kt:CompassViewModel$180.0</ID>
     <ID>ModifierMissing:BaseMetricChart.kt:@Composable @Suppress("LongMethod") fun &lt;T> BaseMetricScreen</ID>
     <ID>ModifierMissing:CommonCharts.kt:@Composable fun LegendIndicator</ID>
@@ -54,11 +51,19 @@
     <ID>MultipleEmitters:TracerouteLog.kt:@Composable private fun TracerouteCardMetrics</ID>
     <ID>MutableStateAutoboxing:CooldownOutlinedIconButton.kt:mutableStateOf(0f)</ID>
     <ID>MutableStateAutoboxing:TracerouteMapScreen.kt:mutableStateOf(0)</ID>
+    <ID>NoNameShadowing:AirQualityMetrics.kt:modifier</ID>
+    <ID>NoNameShadowing:AirQualityMetrics.kt:wb</ID>
+    <ID>NoNameShadowing:BaseMetricChart.kt:modifier</ID>
+    <ID>NoNameShadowing:DeviceMetrics.kt:wb</ID>
+    <ID>NoNameShadowing:EnvironmentMetricsState.kt:EnvironmentMetricsState${ !it.isNaN() &amp;&amp; it != 0.0f }</ID>
+    <ID>NoNameShadowing:EnvironmentMetricsState.kt:EnvironmentMetricsState${ !it.isNaN() &amp;&amp; it &gt; 0f }</ID>
+    <ID>NoNameShadowing:EnvironmentMetricsState.kt:EnvironmentMetricsState${ !it.isNaN() }</ID>
+    <ID>NoNameShadowing:EnvironmentMetricsState.kt:EnvironmentMetricsState${ it != Int.MIN_VALUE }</ID>
+    <ID>NoNameShadowing:TelemetricActionsSection.kt:node</ID>
     <ID>ParameterNaming:BaseMetricChart.kt:onPointSelected: ((Double) -> Unit)? = null</ID>
     <ID>ParameterNaming:DeviceMetrics.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>ParameterNaming:EnvironmentCharts.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>ParameterNaming:HostMetricsChart.kt:onPointSelected: (Double) -> Unit</ID>
-    <ID>ParameterNaming:NodeFilterTextField.kt:onToggleShowIgnored: () -> Unit</ID>
     <ID>ParameterNaming:PaxMetrics.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>ParameterNaming:PowerMetrics.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>ParameterNaming:SignalMetrics.kt:onPointSelected: (Double) -> Unit</ID>
@@ -83,6 +88,38 @@
     <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompletePreview</ID>
     <ID>TooGenericExceptionCaught:MetricsViewModel.kt:MetricsViewModel$e: Exception</ID>
     <ID>TooGenericExceptionCaught:NodeManagementActions.kt:NodeManagementActions$ex: Exception</ID>
+    <ID>UnnecessaryLaunchedEffect:CompassBottomSheet.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:NodeDetailScreens.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:NodeListScreen.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:TracerouteMapScreen.kt:LaunchedEffect</ID>
+    <ID>UnusedPrivateProperty:MetricsViewModel.kt:MetricsViewModel$private val getNodeDetailsUseCase: GetNodeDetailsUseCase</ID>
+    <ID>UnusedPrivateProperty:NodeDetailViewModel.kt:NodeDetailViewModel$private val getNodeDetailsUseCase: GetNodeDetailsUseCase</ID>
+    <ID>UnusedPrivateProperty:NodeDetailViewModel.kt:NodeDetailViewModel$private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase</ID>
+    <ID>UnusedPrivateProperty:NodeDetailViewModel.kt:NodeDetailViewModel$private val savedStateHandle: SavedStateHandle</ID>
+    <ID>UnusedPrivateProperty:NodeListViewModel.kt:NodeListViewModel$private val connectionStateProvider: ConnectionStateProvider</ID>
+    <ID>UnusedPrivateProperty:NodeListViewModel.kt:NodeListViewModel$private val getFilteredNodesUseCase: GetFilteredNodesUseCase</ID>
+    <ID>UnusedPrivateProperty:NodeListViewModel.kt:NodeListViewModel$private val nodeRepository: NodeRepository</ID>
+    <ID>UnusedPrivateProperty:NodeListViewModel.kt:NodeListViewModel$private val radioInterfaceService: RadioInterfaceService</ID>
+    <ID>UseOrEmpty:AirQualityMetrics.kt:metricLabels[metric] ?: ""</ID>
+    <ID>UseOrEmpty:AirQualityMetrics.kt:state.node?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:ChartStyling.kt:ChartStyling$label ?: ""</ID>
+    <ID>UseOrEmpty:CommonGetNodeDetailsUseCase.kt:CommonGetNodeDetailsUseCase$hw?.platformioTarget ?.takeIf { it.isNotBlank() } ?.let { deviceLinkRepository.getLinksForTarget(it) } ?: emptyList()</ID>
+    <ID>UseOrEmpty:DeviceMetrics.kt:state.node?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:EnvironmentCharts.kt:colorToLabel[color] ?: ""</ID>
+    <ID>UseOrEmpty:EnvironmentCharts.kt:colorToUnit[color] ?: ""</ID>
+    <ID>UseOrEmpty:EnvironmentCharts.kt:metric?.let { unitSuffix(it, isFahrenheit, isImperial) } ?: ""</ID>
+    <ID>UseOrEmpty:EnvironmentCharts.kt:otherMetrics.map { unitSuffix(it, isFahrenheit, isImperial) }.distinct().singleOrNull() ?: ""</ID>
+    <ID>UseOrEmpty:EnvironmentCharts.kt:otherMetricsData[metric] ?: emptyList()</ID>
+    <ID>UseOrEmpty:EnvironmentMetrics.kt:state.node?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:HostMetricsLog.kt:state.node?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:LinkedCoordinatesItem.kt:node.validPosition?.altitude?.let { altitude -&gt; val suffix = stringResource(Res.string.elevation_suffix) " • ${altitude.toElevationString(displayUnits)} $suffix" } ?: ""</ID>
+    <ID>UseOrEmpty:MetricsViewModel.kt:MetricsViewModel$state.value.node?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:NeighborInfoLog.kt:state.node?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:PaxMetrics.kt:state.node?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:PositionLogScreens.kt:state.node?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:PowerMetrics.kt:state.node?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:SignalMetrics.kt:state.node?.user?.long_name ?: ""</ID>
+    <ID>UseOrEmpty:TracerouteLog.kt:state.node?.user?.long_name ?: ""</ID>
     <ID>ViewModelForwarding:NodeDetailScreens.kt:NodeDetailScaffold( modifier = modifier, uiState = uiState, viewModel = viewModel, navigateToMessages = navigateToMessages, onNavigate = onNavigate, onNavigateUp = onNavigateUp, compassViewModel = compassViewModel, )</ID>
   </CurrentIssues>
 </SmellBaseline>

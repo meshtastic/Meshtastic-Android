@@ -17,11 +17,13 @@
 package org.meshtastic.app.map.discovery
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.ui.Modifier
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 
 /** Flavor-unified entry point for the discovery map. Google Maps implementation. */
 @Composable
+@NonRestartableComposable
 fun DiscoveryMap(
     userLatitude: Double,
     userLongitude: Double,

@@ -45,6 +45,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.testing.FakeFilterPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -130,7 +131,7 @@ class MessageViewModelResendTest {
         everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } calls
             {
                 calls += "send"
-                1
+                SendMessageOutcome.Queued(1)
             }
 
         viewModel.resendMessage(uuid = 42L, text = "Hello", contactKey = LIVE_CONTACT)

@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
-
 package org.meshtastic.feature.wifiprovision
 
 import kotlinx.coroutines.Dispatchers
@@ -66,7 +64,8 @@ class WifiProvisionViewModelTest {
             WifiProvisionViewModel(
                 bleScanner = scanner,
                 bleConnectionFactory = FakeBleConnectionFactory(connection),
-                dispatchers = CoroutineDispatchers(
+                dispatchers =
+                CoroutineDispatchers(
                     io = testDispatcher,
                     main = testDispatcher,
                     default = testDispatcher,

@@ -24,7 +24,6 @@ import kotlin.test.assertEquals
 class DisconnectReasonTest {
 
     @Test
-    @Suppress("MagicNumber")
     fun `PlatformSpecific toString includes status code`() {
         val reason = DisconnectReason.PlatformSpecific(133)
         val str = reason.toString()

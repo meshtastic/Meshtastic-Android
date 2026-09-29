@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>AbstractClassCanBeInterface:DocTranslationService.kt:DownloadResult$DownloadResult</ID>
+    <ID>AbstractClassCanBeInterface:DocTranslationService.kt:TranslationResult$TranslationResult</ID>
+    <ID>AbstractClassCanBeInterface:MarkdownTranslationSegmenter.kt:MarkdownTranslationSegmenter.Segment$Segment</ID>
+    <ID>LongParameterList:DocsNavigation.kt:ChirpyUiState</ID>
+    <ID>UnnecessaryLaunchedEffect:DocsNavigation.kt:LaunchedEffect</ID>
+    <ID>UnusedPrivateProperty:ChirpyAssistantSheet.kt:private val AVATAR_SIZE = 24.dp</ID>
+    <ID>UseOrEmpty:DocsNavigation.kt:loaded.markdown ?: ""</ID>
+  </CurrentIssues>
+</SmellBaseline>

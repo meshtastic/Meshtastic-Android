@@ -27,7 +27,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 - **Memory Persistence:** Add a new entry to the TOP of `.agent_memory/session_context.md` at the end of every session or major task. Keep it capped at ~5 entries — move anything older to `session_context.archive.md`.
 - **Bootstrap First:** Run the mandatory bootstrap steps in `.skills/project-overview/SKILL.md` before any build.
 - **Plan Before Execution:** Use `.agent_plans/` (git-ignored) for complex refactors.
-- **Baseline Verification:** Always run: `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests`
+- **Baseline Verification:** Always run: `./gradlew spotlessApply spotlessCheck detekt detektTypeResolved assembleDebug test allTests`
 </process_essentials>
 
 <rules>

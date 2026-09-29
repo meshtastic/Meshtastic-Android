@@ -375,9 +375,7 @@ class FirmwareUpdateViewModel(
                     Logger.e(e) { "Error checking for updates" }
                     val unknownError = UiText.Resource(Res.string.firmware_update_unknown_error)
                     _state.value =
-                        FirmwareUpdateState.Error(
-                            if (e.message != null) UiText.DynamicString(e.message!!) else unknownError,
-                        )
+                        FirmwareUpdateState.Error(e.message?.let { UiText.DynamicString(it) } ?: unknownError)
                 }
         }
     }
@@ -483,6 +481,7 @@ class FirmwareUpdateViewModel(
         }
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // cancellation resets the UI state, then is rethrown
     private fun startNormalUpdate(currentState: FirmwareUpdateState.Ready, release: FirmwareRelease) {
         originalDeviceAddress = radioPrefs.devAddr.value
 
@@ -568,6 +567,7 @@ class FirmwareUpdateViewModel(
      * Re-flash a device stranded in bootloader mode. Routes straight to BLE DFU (the device is disconnected, so the
      * connection-type dispatch can't run) and reuses the same verify/cleanup tail as a normal update.
      */
+    @Suppress("SuspendFunSwallowedCancellation") // cancellation resets the UI state, then is rethrown
     private fun startRecoveryUpdate(currentState: FirmwareUpdateState.Ready, release: FirmwareRelease) {
         originalDeviceAddress = pendingRecovery?.fullAddress
         updateJob?.cancel()
@@ -730,6 +730,7 @@ class FirmwareUpdateViewModel(
         viewModelScope.launch { advancePastPass(pass, written = false) }
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // cancellation hands the device back, then is rethrown
     private fun reviewBootloaderPass(pass: UsbFileSavePass, treeUri: CommonUri) {
         maintenanceWriteJob = viewModelScope.launch {
             try {
@@ -751,6 +752,7 @@ class FirmwareUpdateViewModel(
         }
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // cancellation hands the device back, then is rethrown
     private fun launchPassWrite(pass: UsbFileSavePass, treeUri: CommonUri, hardware: DeviceHardware) {
         maintenanceWriteJob = viewModelScope.launch {
             try {
@@ -1318,7 +1320,7 @@ class FirmwareUpdateViewModel(
         }
     }
 
-    private suspend fun checkBatteryLevel(): Boolean {
+    private fun checkBatteryLevel(): Boolean {
         val node = nodeRepository.ourNodeInfo.value ?: return true
         val level = node.batteryLevel ?: 1
         val isBatteryLow = level in 1..MIN_BATTERY_LEVEL

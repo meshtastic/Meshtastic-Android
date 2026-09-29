@@ -48,6 +48,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.testing.FakeFilterPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -312,7 +313,7 @@ class MessageViewModelTest {
 
     @Test
     fun testSendMessage() = runTest {
-        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns 1
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.Queued(1)
 
         viewModel.sendMessage("Hello", "0!12345678", null)
 

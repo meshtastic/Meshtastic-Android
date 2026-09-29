@@ -30,8 +30,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.FileSystem
 import okio.IOException
@@ -151,17 +149,16 @@ class OfflineTerrainRepository(private val fileSystem: FileSystem, private val b
     fun startDownload(bounds: GeoBounds, maxZoom: Int) {
         if (downloadJob?.isActive == true) return
         _downloadState.value = null
-        downloadJob =
-            scope.launch {
-                try {
-                    download(bounds, maxZoom).collect { state -> _downloadState.value = state }
-                } catch (e: IOException) {
-                    // download() reports the extractor's and manifest's own failures as states; this is the
-                    // pre-extraction disk work (clearing the previous region), which otherwise leaves the state stuck.
-                    Logger.withTag(LOG_TAG).w(e) { "Offline terrain download failed before extraction" }
-                    _downloadState.value = TerrainDownloadState.Failed(TerrainDownloadFailure.IO_ERROR)
-                }
+        downloadJob = scope.launch {
+            try {
+                download(bounds, maxZoom).collect { state -> _downloadState.value = state }
+            } catch (e: IOException) {
+                // download() reports the extractor's and manifest's own failures as states; this is the
+                // pre-extraction disk work (clearing the previous region), which otherwise leaves the state stuck.
+                Logger.withTag(LOG_TAG).w(e) { "Offline terrain download failed before extraction" }
+                _downloadState.value = TerrainDownloadState.Failed(TerrainDownloadFailure.IO_ERROR)
             }
+        }
     }
 
     /** Deletes the current region's tiles and manifest, leaving nothing downloaded. A no-op if there is none. */

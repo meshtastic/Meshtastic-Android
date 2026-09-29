@@ -2,7 +2,20 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>AbstractClassCanBeInterface:TAKModels.kt:TAKConnectionEvent$TAKConnectionEvent</ID>
     <ID>LongMethod:ZipArchiver.kt:ZipArchiver$actual fun createZip: ByteArray</ID>
+    <ID>NoNameShadowing:TAKPacketV2Conversion.kt:TAKPacketV2Conversion$wb</ID>
+    <ID>NoNameShadowing:TakV2Compressor.kt:TakV2Compressor$wb</ID>
     <ID>ReturnCount:TAKServerJvm.kt:TAKServerJvm$override suspend fun start: Result&lt;Unit></ID>
+    <ID>UnusedPrivateProperty:AtakFileWriter.kt:AtakFileWriter$private const val ZIP_MIME_TYPE = "application/zip"</ID>
+    <ID>UnusedPrivateProperty:AtakFileWriter.kt:AtakFileWriter$private val DOWNLOADS_RELATIVE_PATH = "${Environment.DIRECTORY_DOWNLOADS}/"</ID>
+    <ID>UnusedPrivateProperty:AtakFileWriter.kt:AtakFileWriter$private val UNSAFE_FILE_NAME_CHARS = Regex("[^a-zA-Z0-9._-]")</ID>
+    <ID>UnusedPrivateProperty:TAKClientConnection.kt:TAKClientConnection$private val scope: CoroutineScope</ID>
+    <ID>UseOrEmpty:CoTXml.kt:chat.senderCallsign?.xmlEscaped() ?: ""</ID>
+    <ID>UseOrEmpty:CoTXmlParser.kt:CoTXmlParser$detail.remarks?.value ?: ""</ID>
+    <ID>UseOrEmpty:TAKPacketConversion.kt:TAKPacketConversion$it.endpoint ?: ""</ID>
+    <ID>UseOrEmpty:TAKPacketV2Conversion.kt:TAKPacketV2Conversion$contact?.endpoint ?: ""</ID>
+    <ID>UseOrEmpty:TakV2Compressor.kt:TakV2Compressor$data.cotTypeStr ?: ""</ID>
+    <ID>UseOrEmpty:TakV2Compressor.kt:TakV2Compressor$packet.marti?.dest_callsign?.toList() ?: emptyList()</ID>
   </CurrentIssues>
 </SmellBaseline>

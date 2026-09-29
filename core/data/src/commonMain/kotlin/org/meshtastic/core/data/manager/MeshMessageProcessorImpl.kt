@@ -112,19 +112,20 @@ class MeshMessageProcessorImpl(
             return
         }
         val bytes = frame.payload.toByteArray()
-        val proto =
-            safeCatching { FromRadio.ADAPTER.decode(bytes) }
-                .getOrElse { primaryException ->
-                    safeCatching {
-                        FromRadio.Builder().also { wb -> wb.log_record = LogRecord.ADAPTER.decode(bytes) }.build()
-                    }
-                        .getOrElse {
-                            Logger.e(primaryException) {
-                                "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
-                            }
-                            return
-                        }
+        val proto = safeCatching {
+            FromRadio.ADAPTER.decode(bytes)
+        }
+            .getOrElse { primaryException ->
+                safeCatching {
+                    FromRadio.Builder().also { wb -> wb.log_record = LogRecord.ADAPTER.decode(bytes) }.build()
                 }
+                    .getOrElse {
+                        Logger.e(primaryException) {
+                            "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
+                        }
+                        return
+                    }
+            }
         processFromRadio(proto, myNodeNum, frame.session)
     }
 
@@ -155,6 +156,11 @@ class MeshMessageProcessorImpl(
     }
 
     private fun logVariant(proto: FromRadio, session: RadioSessionContext) {
+        val myInfo = proto.my_info
+        val nodeInfo = proto.node_info
+        val config = proto.config
+        val moduleConfig = proto.moduleConfig
+        val channel = proto.channel
         val (type, message) =
             when {
                 proto.log_record != null -> "LogRecord" to proto.log_record.toString()
@@ -162,11 +168,11 @@ class MeshMessageProcessorImpl(
                 proto.xmodemPacket != null -> "XmodemPacket" to proto.xmodemPacket.toString()
                 proto.deviceuiConfig != null -> "DeviceUIConfig" to proto.deviceuiConfig.toString()
                 proto.fileInfo != null -> "FileInfo" to proto.fileInfo.toString()
-                proto.my_info != null -> "MyInfo" to proto.my_info!!.toOneLineString()
-                proto.node_info != null -> "NodeInfo" to proto.node_info!!.toPIIString()
-                proto.config != null -> "Config" to proto.config!!.toOneLineString()
-                proto.moduleConfig != null -> "ModuleConfig" to proto.moduleConfig!!.toOneLineString()
-                proto.channel != null -> "Channel" to proto.channel!!.toOneLineString()
+                myInfo != null -> "MyInfo" to myInfo.toOneLineString()
+                nodeInfo != null -> "NodeInfo" to nodeInfo.toPIIString()
+                config != null -> "Config" to config.toOneLineString()
+                moduleConfig != null -> "ModuleConfig" to moduleConfig.toOneLineString()
+                channel != null -> "Channel" to channel.toOneLineString()
                 proto.clientNotification != null -> "ClientNotification" to proto.clientNotification.toString()
                 else -> return
             }
@@ -362,7 +368,9 @@ class MeshMessageProcessorImpl(
         channel: Int = 0,
         operation: String,
         transform: (Node) -> Node,
-    ): Boolean = safeCatching { nodeManager.updateNodeAndPersist(nodeNum, channel, transform) }
+    ): Boolean = safeCatching {
+        nodeManager.updateNodeAndPersist(nodeNum, channel, transform)
+    }
         .onFailure { Logger.e(it) { "Failed $operation; packet processing continued" } }
         .isSuccess
 

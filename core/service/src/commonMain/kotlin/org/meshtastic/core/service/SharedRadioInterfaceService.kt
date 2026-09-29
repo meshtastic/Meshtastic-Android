@@ -22,6 +22,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -939,6 +940,7 @@ class SharedRadioInterfaceService(
             try {
                 withContext(NonCancellable) { newTransport.close() }
             } catch (closeFailure: Exception) {
+                if (closeFailure is CancellationException) currentCoroutineContext().ensureActive()
                 publicationFailure.addSuppressed(closeFailure)
             }
             throw publicationFailure
@@ -1011,14 +1013,13 @@ class SharedRadioInterfaceService(
     private fun startHeartbeat() {
         heartbeatJob?.cancel()
         lastDataReceivedMillis = now()
-        heartbeatJob =
-            serviceScope.launch {
-                while (true) {
-                    delay(HEARTBEAT_INTERVAL_MILLIS)
-                    keepAlive()
-                    checkLiveness()
-                }
+        heartbeatJob = serviceScope.launch {
+            while (true) {
+                delay(HEARTBEAT_INTERVAL_MILLIS)
+                keepAlive()
+                checkLiveness()
             }
+        }
     }
 
     /**
@@ -1143,10 +1144,11 @@ class SharedRadioInterfaceService(
 
     private fun sendThroughAdmittedTransport(admission: TransportSendAdmission.Admitted, bytes: ByteArray): Boolean =
         try {
-            val sent =
-                safeCatching { admission.transport.handleSendToRadio(bytes) }
-                    .onFailure { Logger.w(it) { "trySendToRadio: active transport rejected ${bytes.size} bytes" } }
-                    .getOrDefault(false)
+            val sent = safeCatching {
+                admission.transport.handleSendToRadio(bytes)
+            }
+                .onFailure { Logger.w(it) { "trySendToRadio: active transport rejected ${bytes.size} bytes" } }
+                .getOrDefault(false)
             if (sent) {
                 safeCatching { _meshActivity.tryEmit(MeshActivity.Send) }
                     .onFailure { Logger.w(it) { "trySendToRadio: failed to publish mesh activity" } }

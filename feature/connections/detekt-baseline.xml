@@ -13,5 +13,9 @@
     <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun TransportSelectorNoBluetoothPreview</ID>
     <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun TransportSelectorNoUsbPreview</ID>
     <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun TransportSelectorPreview</ID>
+    <ID>UnnecessaryLaunchedEffect:ConnectionsNavigation.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:ConnectionsScreen.kt:LaunchedEffect</ID>
+    <ID>UnusedPrivateProperty:ScannerViewModel.kt:ScannerViewModel$private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase</ID>
+    <ID>UnusedPrivateProperty:ScannerViewModel.kt:ScannerViewModel$private val networkRepository: NetworkRepository</ID>
   </CurrentIssues>
 </SmellBaseline>

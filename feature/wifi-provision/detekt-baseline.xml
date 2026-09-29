@@ -11,5 +11,6 @@
     <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun NetworkRowPreview</ID>
     <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun ProvisionStatusCardSuccessPreview</ID>
     <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun ScanningBlePreview</ID>
+    <ID>UnnecessaryLaunchedEffect:WifiProvisionScreen.kt:LaunchedEffect</ID>
   </CurrentIssues>
 </SmellBaseline>

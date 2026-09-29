@@ -34,7 +34,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -144,7 +146,8 @@ class SecureDfuTransport(
                     }
                 } catch (_: TimeoutCancellationException) {
                     Logger.d { "DFU: No buttonless indication received (device may have already disconnected)" }
-                } catch (_: Exception) {
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    if (e is CancellationException) currentCoroutineContext().ensureActive()
                     Logger.d { "DFU: Buttonless indication wait interrupted (device disconnecting)" }
                 }
             },

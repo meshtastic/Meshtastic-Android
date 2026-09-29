@@ -20,7 +20,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** Tests for [formatBytes] — the pure function that formats byte counts into human-readable strings. */
-@Suppress("MagicNumber")
 class FormatBytesTest {
 
     @Test

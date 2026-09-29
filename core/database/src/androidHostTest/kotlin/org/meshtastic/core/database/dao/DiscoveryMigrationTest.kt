@@ -44,7 +44,6 @@ import kotlin.test.assertTrue
  */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
-@Suppress("MagicNumber")
 class DiscoveryMigrationTest {
     private lateinit var database: MeshtasticDatabase
     private lateinit var discoveryDao: DiscoveryDao

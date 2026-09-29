@@ -131,7 +131,9 @@ fun SettingsScreen(
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportProfile(uri.toKmpUri(), deviceProfile!!) }
+                val profile = deviceProfile
+                val uri = it.data?.data
+                if (uri != null && profile != null) viewModel.exportProfile(uri.toKmpUri(), profile)
             }
         }
 

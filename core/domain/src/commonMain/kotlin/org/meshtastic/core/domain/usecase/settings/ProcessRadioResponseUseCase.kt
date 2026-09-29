@@ -112,30 +112,14 @@ open class ProcessRadioResponseUseCase {
         return processAdminMessage(parsed)
     }
 
-    private fun processAdminMessage(parsed: AdminMessage): RadioResponseResult = when {
-        parsed.get_device_metadata_response != null ->
-            RadioResponseResult.Metadata(parsed.get_device_metadata_response!!)
-
-        parsed.get_channel_response != null -> RadioResponseResult.ChannelResponse(parsed.get_channel_response!!)
-
-        parsed.get_owner_response != null -> RadioResponseResult.Owner(parsed.get_owner_response!!)
-
-        parsed.get_config_response != null -> RadioResponseResult.ConfigResponse(parsed.get_config_response!!)
-
-        parsed.get_module_config_response != null ->
-            RadioResponseResult.ModuleConfigResponse(parsed.get_module_config_response!!)
-
-        parsed.get_canned_message_module_messages_response != null ->
-            RadioResponseResult.CannedMessages(parsed.get_canned_message_module_messages_response!!)
-
-        parsed.get_ringtone_response != null -> RadioResponseResult.Ringtone(parsed.get_ringtone_response!!)
-
-        parsed.get_device_connection_status_response != null ->
-            RadioResponseResult.ConnectionStatus(parsed.get_device_connection_status_response!!)
-
-        else -> {
-            Logger.d { "No custom processing needed for $parsed" }
-            RadioResponseResult.Success
-        }
-    }
+    private fun processAdminMessage(parsed: AdminMessage): RadioResponseResult =
+        parsed.get_device_metadata_response?.let(RadioResponseResult::Metadata)
+            ?: parsed.get_channel_response?.let(RadioResponseResult::ChannelResponse)
+            ?: parsed.get_owner_response?.let(RadioResponseResult::Owner)
+            ?: parsed.get_config_response?.let(RadioResponseResult::ConfigResponse)
+            ?: parsed.get_module_config_response?.let(RadioResponseResult::ModuleConfigResponse)
+            ?: parsed.get_canned_message_module_messages_response?.let(RadioResponseResult::CannedMessages)
+            ?: parsed.get_ringtone_response?.let(RadioResponseResult::Ringtone)
+            ?: parsed.get_device_connection_status_response?.let(RadioResponseResult::ConnectionStatus)
+            ?: RadioResponseResult.Success.also { Logger.d { "No custom processing needed for $parsed" } }
 }

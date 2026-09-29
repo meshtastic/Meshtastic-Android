@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +38,7 @@ internal const val COOL_DOWN_TIME_MS = 30000L
 internal const val REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS = 180000L // 3 minutes
 
 @Composable
+@NonRestartableComposable
 fun CooldownIconButton(
     onClick: () -> Unit,
     cooldownTimestamp: Long?,
@@ -53,6 +55,7 @@ fun CooldownIconButton(
 )
 
 @Composable
+@NonRestartableComposable
 fun CooldownOutlinedIconButton(
     onClick: () -> Unit,
     cooldownTimestamp: Long?,

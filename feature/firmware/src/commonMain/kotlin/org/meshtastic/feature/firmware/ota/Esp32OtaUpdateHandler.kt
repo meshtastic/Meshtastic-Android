@@ -467,6 +467,7 @@ class Esp32OtaUpdateHandler(
         return connectedTransport ?: throw postConfirmConnectionFailed(rebootMode, attempts, null)
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // cancellation closes the attempt's transport, then is rethrown
     private suspend fun connectTransportAttempt(transport: UnifiedOtaProtocol, rebootMode: Int): Result<Unit> {
         val connectResult =
             try {
@@ -490,6 +491,7 @@ class Esp32OtaUpdateHandler(
         return Result.failure(error)
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // the close runs under NonCancellable, so no cancellation reaches it
     private suspend fun closeFailedTransport(transport: UnifiedOtaProtocol) {
         withContext(NonCancellable) {
             try {

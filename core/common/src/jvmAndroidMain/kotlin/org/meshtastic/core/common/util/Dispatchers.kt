@@ -19,4 +19,5 @@ package org.meshtastic.core.common.util
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
+@Suppress("InjectDispatcher") // the one place the IO dispatcher is named; everything else takes this
 actual val ioDispatcher: CoroutineDispatcher = Dispatchers.IO

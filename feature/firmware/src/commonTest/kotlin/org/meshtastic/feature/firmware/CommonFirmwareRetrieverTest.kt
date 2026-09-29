@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
-
 package org.meshtastic.feature.firmware
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
@@ -26,6 +25,7 @@ import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.feature.firmware.ota.FirmwareHashUtil
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -245,6 +245,27 @@ abstract class CommonFirmwareRetrieverTest {
         val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
 
         assertNull(result, "A failed zip download must resolve to null, not propagate")
+    }
+
+    @Test
+    fun `cancelling the release zip download propagates instead of resolving to null`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        handler.zipDownloadException = CancellationException("update cancelled")
+
+        assertFailsWith<CancellationException> { retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {} }
+    }
+
+    @Test
+    fun `cancelling a direct download does not fall back to the release zip`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        // The first direct download tried (the -update.bin fallback) is the one cancelled.
+        handler.existingUrls.add("$RELEASE_BASE_URL/2.7.17/firmware-heltec-v3-2.7.17-update.bin")
+        handler.directDownloadException = CancellationException("update cancelled")
+
+        assertFailsWith<CancellationException> { retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {} }
+        assertTrue(handler.downloadedUrls.none { it.endsWith(".zip") }, "zip fallback ran: ${handler.downloadedUrls}")
     }
 
     @Test
@@ -695,6 +716,9 @@ abstract class CommonFirmwareRetrieverTest {
         /** When set, [downloadFile] throws this for the "firmware_release.zip" download instead of returning. */
         var zipDownloadException: Exception? = null
 
+        /** When set, [downloadFile] throws this for every direct (non-zip) download instead of returning. */
+        var directDownloadException: Exception? = null
+
         /** Result returned by [extractFirmwareFromZip]. */
         var zipExtractionResult: FirmwareArtifact? = null
 
@@ -733,6 +757,7 @@ abstract class CommonFirmwareRetrieverTest {
             }
 
             // Direct download: only succeed if the URL was registered as existing
+            directDownloadException?.let { throw it }
             return if (url in existingUrls) {
                 FirmwareArtifact(
                     uri = CommonUri.parse("file:///tmp/$fileName"),

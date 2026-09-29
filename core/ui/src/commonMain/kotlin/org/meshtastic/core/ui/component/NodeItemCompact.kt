@@ -131,13 +131,7 @@ fun NodeItemCompact(
             thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
         }
     val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
-    val unmessageable =
-        remember(thatNode) {
-            when {
-                thatNode.user.is_unmessagable != null -> thatNode.user.is_unmessagable!!
-                else -> thatNode.user.role.isUnmessageableRole()
-            }
-        }
+    val unmessageable = remember(thatNode) { thatNode.user.is_unmessagable ?: thatNode.user.role.isUnmessageableRole() }
 
     val contentColor = MaterialTheme.colorScheme.onSurface
     val nodeColor =

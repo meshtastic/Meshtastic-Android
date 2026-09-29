@@ -157,7 +157,7 @@ class AndroidGetDiscoveredDevicesUseCase(
             }
             .sortedBy { it.name }
 
-    private suspend fun matchNodesByName(entries: List<DeviceListEntry>, db: Map<Int, Node>): List<DeviceListEntry> =
+    private fun matchNodesByName(entries: List<DeviceListEntry>, db: Map<Int, Node>): List<DeviceListEntry> =
         entries.map { entry ->
             entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, db, databaseManager))
         }

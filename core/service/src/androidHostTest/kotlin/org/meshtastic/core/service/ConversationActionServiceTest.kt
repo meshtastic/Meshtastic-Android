@@ -21,6 +21,7 @@ import android.os.Bundle
 import androidx.core.app.RemoteInput
 import androidx.test.core.app.ApplicationProvider
 import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
@@ -39,6 +40,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -103,12 +105,25 @@ class ConversationActionServiceTest {
 
     @Test
     fun `a reply is sent, marks the conversation read and refreshes it in place`() {
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.Queued(1)
+
         run(replyIntent("hello back"))
 
         verifySuspend { sendMessageUseCase.invoke("hello back", contactKey, null) }
         verifySuspend { packetRepository.clearUnreadCount(contactKey, any()) }
         verifySuspend { notifications.refreshConversationAfterReply(contactKey) }
         verifySuspend(VerifyMode.exactly(0)) { notifications.cancelMessageNotification(any()) }
+    }
+
+    @Test
+    fun `a refused reply dismisses without marking read or showing it as sent`() {
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.Refused
+
+        run(replyIntent("hi"))
+
+        verifySuspend(VerifyMode.exactly(0)) { packetRepository.clearUnreadCount(any(), any()) }
+        verifySuspend(VerifyMode.exactly(0)) { notifications.refreshConversationAfterReply(any()) }
+        verifySuspend { notifications.cancelMessageNotification(contactKey) }
     }
 
     @Test

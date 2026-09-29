@@ -158,14 +158,18 @@ internal fun TracerouteMetricsChart(
             modelProducer.runTransaction {
                 if (forwardData.isNotEmpty()) {
                     lineModel {
-                        series(x = forwardData.map { it.timeSeconds }, y = forwardData.map { it.forwardHops!! })
+                        series(x = forwardData.map { it.timeSeconds }, y = forwardData.mapNotNull { it.forwardHops })
                     }
                 }
                 if (returnData.isNotEmpty()) {
-                    lineModel { series(x = returnData.map { it.timeSeconds }, y = returnData.map { it.returnHops!! }) }
+                    lineModel {
+                        series(x = returnData.map { it.timeSeconds }, y = returnData.mapNotNull { it.returnHops })
+                    }
                 }
                 if (rttData.isNotEmpty()) {
-                    lineModel { series(x = rttData.map { it.timeSeconds }, y = rttData.map { it.roundTripSeconds!! }) }
+                    lineModel {
+                        series(x = rttData.map { it.timeSeconds }, y = rttData.mapNotNull { it.roundTripSeconds })
+                    }
                 }
             }
         }

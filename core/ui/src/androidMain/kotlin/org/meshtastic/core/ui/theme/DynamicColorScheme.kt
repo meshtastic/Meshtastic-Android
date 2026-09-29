@@ -23,10 +23,12 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
+@Suppress("MissingReadOnlyComposable") // kept in step with the plain @Composable expect and the other actuals
 @Composable
-actual fun dynamicColorScheme(darkTheme: Boolean): ColorScheme? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    val context = LocalContext.current
-    if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-} else {
-    null
-}
+actual fun dynamicColorScheme(darkTheme: Boolean): ColorScheme? =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val context = LocalContext.current
+        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    } else {
+        null
+    }

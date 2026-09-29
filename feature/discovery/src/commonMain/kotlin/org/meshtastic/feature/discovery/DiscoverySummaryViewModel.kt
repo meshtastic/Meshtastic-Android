@@ -123,13 +123,12 @@ class DiscoverySummaryViewModel(
             _algorithmicSummary.value = summaryGenerator.generateSessionSummary(currentSession, results)
 
             // Recompute rankings
-            val rankingInputs =
-                results.map { result ->
-                    PresetRankingInput(
-                        presetResult = result,
-                        discoveredNodes = _nodesByPreset.value[result.id].orEmpty(),
-                    )
-                }
+            val rankingInputs = results.map { result ->
+                PresetRankingInput(
+                    presetResult = result,
+                    discoveredNodes = _nodesByPreset.value[result.id].orEmpty(),
+                )
+            }
             _rankings.value = rankingEngine.rank(rankingInputs)
 
             // Regenerate AI
@@ -147,15 +146,16 @@ class DiscoverySummaryViewModel(
             _nodesByPreset.value = nodesMap
 
             // Compute deterministic rankings
-            val rankingInputs =
-                results.map { result ->
-                    PresetRankingInput(presetResult = result, discoveredNodes = nodesMap[result.id].orEmpty())
-                }
+            val rankingInputs = results.map { result ->
+                PresetRankingInput(presetResult = result, discoveredNodes = nodesMap[result.id].orEmpty())
+            }
             _rankings.value = rankingEngine.rank(rankingInputs)
 
             // Load cached per-preset AI summaries
             val cachedPresetSummaries =
-                results.filter { !it.aiSummary.isNullOrBlank() }.associate { it.id to it.aiSummary!! }
+                results
+                    .mapNotNull { result -> result.aiSummary?.takeUnless { it.isBlank() }?.let { result.id to it } }
+                    .toMap()
             _presetAiSummaries.value = cachedPresetSummaries
 
             val session = discoveryRepository.getSession(sessionId)

@@ -16,10 +16,10 @@
  */
 package org.meshtastic.feature.settings.component
 
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,16 +43,15 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
-private val EXPORT_TIMESTAMP_FORMAT =
-    LocalDateTime.Format {
-        year()
-        monthNumber()
-        day()
-        char('_')
-        hour()
-        minute()
-        second()
-    }
+private val EXPORT_TIMESTAMP_FORMAT = LocalDateTime.Format {
+    year()
+    monthNumber()
+    day()
+    char('_')
+    hour()
+    minute()
+    second()
+}
 
 /** Section for settings related to data persistence and exports. */
 @Composable

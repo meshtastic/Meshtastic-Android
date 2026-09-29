@@ -52,12 +52,17 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
     private val codec =
         StreamFrameCodec(onPacketReceived = { callback.handleFromRadio(it) }, logTag = "StreamTransport")
     private val sendQueue = Channel<FramedSend>(capacity = MAX_PENDING_SENDS)
+
+    // A send's failure is inspected below: the worker's own cancellation is rethrown, a stray one only logged.
+    @Suppress("SuspendFunSwallowedCancellation")
     private val sendWorker =
         scope
             .handledLaunch {
                 for (send in sendQueue) {
-                    val failure =
-                        runCatching { codec.frameAndSend(send.payload, send.writer, send.flusher) }.exceptionOrNull()
+                    val failure = runCatching {
+                        codec.frameAndSend(send.payload, send.writer, send.flusher)
+                    }
+                        .exceptionOrNull()
                     try {
                         when (failure) {
                             null -> Unit

@@ -667,16 +667,19 @@ internal fun liveInlineMarkdownStyleRanges(source: String): List<LiveStyleSpan> 
         codeMatches.any { codeMatch -> match.range.first in codeMatch.range || match.range.last in codeMatch.range }
     }
     return buildList {
-        LIVE_BOLD.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
-            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Bold))
-        }
-        LIVE_ITALIC.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
-            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Italic))
-        }
-        LIVE_STRIKE.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
-            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Strikethrough))
-        }
-        codeMatches.forEach { add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Code)) }
+        LIVE_BOLD.findAll(source)
+            .filterNot(isBlockedByCodeSpan)
+            .mapNotNull { it.groups[1] }
+            .forEach { add(LiveStyleSpan(it.range, InlineStyle.Bold)) }
+        LIVE_ITALIC.findAll(source)
+            .filterNot(isBlockedByCodeSpan)
+            .mapNotNull { it.groups[1] }
+            .forEach { add(LiveStyleSpan(it.range, InlineStyle.Italic)) }
+        LIVE_STRIKE.findAll(source)
+            .filterNot(isBlockedByCodeSpan)
+            .mapNotNull { it.groups[1] }
+            .forEach { add(LiveStyleSpan(it.range, InlineStyle.Strikethrough)) }
+        codeMatches.mapNotNull { it.groups[1] }.forEach { add(LiveStyleSpan(it.range, InlineStyle.Code)) }
     }
         .sortedWith(compareBy<LiveStyleSpan>({ it.range.first }, { it.range.last }, { it.style.ordinal }))
 }

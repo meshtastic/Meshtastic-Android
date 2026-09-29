@@ -17,6 +17,7 @@
 package org.meshtastic.feature.firmware.ota
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -393,6 +394,7 @@ class BleOtaTransport(
                 packetsSent++
             }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            if (e is CancellationException) currentCoroutineContext().ensureActive()
             throw OtaProtocolException.TransferFailed("Failed to write data at offset $offset", e)
         }
         return packetsSent

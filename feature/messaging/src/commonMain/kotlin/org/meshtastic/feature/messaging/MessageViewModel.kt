@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filterNotNull
@@ -165,12 +164,11 @@ class MessageViewModel(
         _draftMessage.value = text
         val contactKey = draftContactKey ?: return
         pendingDraftPersistence?.cancel()
-        pendingDraftPersistence =
-            viewModelScope.launch {
-                delay(DRAFT_PERSISTENCE_DELAY_MS)
-                savedStateHandle[draftKey(contactKey)] = text
-                withContext(ioDispatcher) { packetRepository.setDraft(contactKey, text) }
-            }
+        pendingDraftPersistence = viewModelScope.launch {
+            delay(DRAFT_PERSISTENCE_DELAY_MS)
+            savedStateHandle[draftKey(contactKey)] = text
+            withContext(ioDispatcher) { packetRepository.setDraft(contactKey, text) }
+        }
     }
 
     fun clearDraftMessage() {
@@ -422,9 +420,10 @@ class MessageViewModel(
     // region ── Translation ──
 
     /** Whether on-device translation into the current locale is possible (always false on F-Droid/desktop). */
-    val translationAvailable: StateFlow<Boolean> =
-        flow { emit(messageTranslationService.isLanguageAvailable(currentLocaleCode())) }
-            .stateInWhileSubscribed(initialValue = false)
+    val translationAvailable: StateFlow<Boolean> = flow {
+        emit(messageTranslationService.isLanguageAvailable(currentLocaleCode()))
+    }
+        .stateInWhileSubscribed(initialValue = false)
 
     private val _translationDialogState = MutableStateFlow<TranslationDialogState>(TranslationDialogState.Hidden)
     val translationDialogState: StateFlow<TranslationDialogState> = _translationDialogState.asStateFlow()

@@ -23,6 +23,7 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.meshtastic.core.common.util.safeCatching
 
 /**
  * Checks GitHub Releases for a newer published desktop build.
@@ -36,7 +37,7 @@ class UpdateChecker(private val httpClient: HttpClient) {
     data class UpdateInfo(val versionName: String, val releaseUrl: String)
 
     /** Returns the latest published release when it is newer than [currentVersionName], null otherwise. */
-    suspend fun check(currentVersionName: String): UpdateInfo? = runCatching {
+    suspend fun check(currentVersionName: String): UpdateInfo? = safeCatching {
         val release = Json.parseToJsonElement(httpClient.get(LATEST_RELEASE_URL).bodyAsText()).jsonObject
         val tag = release["tag_name"]?.jsonPrimitive?.content
         if (tag != null && isNewer(latest = tag, current = currentVersionName)) {

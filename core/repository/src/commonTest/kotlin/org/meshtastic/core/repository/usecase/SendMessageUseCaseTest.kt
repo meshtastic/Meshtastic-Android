@@ -17,14 +17,20 @@
 package org.meshtastic.core.repository.usecase
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.model.ContactKey
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MessageQueue
@@ -39,6 +45,8 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 
 class SendMessageUseCaseTest {
 
@@ -110,6 +118,91 @@ class SendMessageUseCaseTest {
         useCase("persisted identity", "0${NodeAddress.ID_BROADCAST}", null)
 
         verifySuspend { messageQueue.enqueue(persistedId) }
+    }
+
+    @Test
+    fun `a queued message reports the packet id it was saved under`() = runTest {
+        var savedPacket: DataPacket? = null
+        everySuspend { packetRepository.savePacket(any(), any(), any(), any(), any(), any()) } calls
+            { call ->
+                savedPacket = call.arg<DataPacket>(2)
+                PersistedPacketId(myNodeNum = 1, uuid = 10L)
+            }
+
+        val outcome = useCase("Hello", "0${NodeAddress.ID_BROADCAST}", null)
+
+        val queued = assertIs<SendMessageOutcome.Queued>(outcome)
+        queued.packetId shouldBe savedPacket?.id
+    }
+
+    @Test
+    fun `a retired conversation is refused and nothing is saved or queued`() = runTest {
+        nodeRepository.setOurNode(Node(num = 1))
+
+        val outcome = useCase("Hello", ContactKey.retiredBroadcast("token").value, null)
+
+        outcome shouldBe SendMessageOutcome.Refused
+        verifySuspend(VerifyMode.exactly(0)) { packetRepository.savePacket(any(), any(), any(), any(), any(), any()) }
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    @Test
+    fun `cancellation while sharing the contact propagates and nothing is queued`() = runTest {
+        setUpDirectMessage(firmwareVersion = "2.7.12")
+        radioController.sendSharedContactFailure = CancellationException("scope closed")
+
+        assertFailsWith<CancellationException> { useCase("Direct message", "!dest", null) }
+
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    @Test
+    fun `cancellation while favoriting propagates and nothing is queued`() = runTest {
+        setUpDirectMessage(firmwareVersion = "2.0.0")
+        radioController.setFavoriteFailure = CancellationException("scope closed")
+
+        assertFailsWith<CancellationException> { useCase("Direct message", "!dest", null) }
+
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    @Test
+    fun `a failed contact share still queues the message`() = runTest {
+        setUpDirectMessage(firmwareVersion = "2.7.12")
+        radioController.sendSharedContactFailure = RuntimeException("radio down")
+
+        val outcome = useCase("Direct message", "!dest", null)
+
+        assertIs<SendMessageOutcome.Queued>(outcome)
+        verifySuspend { messageQueue.enqueue(any()) }
+    }
+
+    @Test
+    fun `cancellation while saving propagates`() = runTest {
+        everySuspend { packetRepository.savePacket(any(), any(), any(), any(), any(), any()) } throws
+            CancellationException("scope closed")
+
+        assertFailsWith<CancellationException> { useCase("Hello", "0${NodeAddress.ID_BROADCAST}", null) }
+
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    private suspend fun setUpDirectMessage(firmwareVersion: String) {
+        nodeRepository.setOurNode(
+            Node(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!local"
+                        wb.role = Config.DeviceConfig.Role.CLIENT
+                    }
+                    .build(),
+                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = firmwareVersion }.build(),
+            ),
+        )
+        nodeRepository.upsert(Node(num = 12345, user = User.Builder().also { wb -> wb.id = "!dest" }.build()))
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
     }
 
     @Test

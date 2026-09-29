@@ -42,6 +42,8 @@ class DesktopMessageQueue(
 ) : MessageQueue {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.io)
 
+    // A failed or cancelled send rolls its claim back (NonCancellable in the repository); cancellation is rethrown.
+    @Suppress("SuspendFunSwallowedCancellation")
     override suspend fun enqueue(persistedId: PersistedPacketId) {
         scope.launch {
             if (persistedId.uuid <= 0L) return@launch

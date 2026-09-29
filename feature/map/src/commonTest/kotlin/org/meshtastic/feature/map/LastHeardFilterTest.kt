@@ -19,7 +19,6 @@ package org.meshtastic.feature.map
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress("MagicNumber")
 class LastHeardFilterTest {
 
     @Test

@@ -38,7 +38,7 @@ A step-by-step workflow for implementing a new feature in the Meshtastic-Android
 ### 6. Verify Locally
 - Run the baseline checks (see `testing-ci` skill):
   ```bash
-  ./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests
+  ./gradlew spotlessApply spotlessCheck detekt detektTypeResolved assembleDebug test allTests
   ```
 - Add `kmpSmokeCompile` to the command when the feature touches a KMP module (most features do) so cross-target compile failures surface before merge.
 - If the feature adds a new reflection-heavy dependency, add keep rules to **both** `androidApp/proguard-rules.pro` and `desktopApp/proguard-rules.pro`, then verify release builds:

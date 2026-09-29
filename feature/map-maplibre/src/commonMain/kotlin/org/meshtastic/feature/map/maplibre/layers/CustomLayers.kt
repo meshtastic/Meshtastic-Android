@@ -86,6 +86,7 @@ internal fun CustomLayers(layers: List<CustomLayer>, opacity: Map<String, Float>
 }
 
 /** One imported overlay: a source, and the three layers that between them can draw anything in it. */
+@Suppress("SpreadOperator") // switch() only takes its cases as varargs
 @Composable
 private fun ImportedLayer(layer: CustomLayer, opacity: Float) {
     val source = rememberGeoJsonSource(data = GeoJsonData.Uri(layer.uri))

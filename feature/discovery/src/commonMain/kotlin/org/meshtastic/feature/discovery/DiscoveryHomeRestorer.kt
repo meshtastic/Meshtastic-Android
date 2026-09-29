@@ -68,6 +68,7 @@ internal fun finalStatusForPendingRestore(
     else -> default
 }
 
+@Suppress("SuspendFunSwallowedCancellation") // the waiter's own cancellation is rethrown by ensureActive()
 private suspend fun awaitRestoreResult(result: Deferred<Boolean>, timeout: kotlin.time.Duration): Boolean {
     val completed =
         withTimeoutOrNull(timeout) {
@@ -179,29 +180,28 @@ internal class DiscoveryHomeRestorer(
     suspend fun schedule(plan: DiscoveryHomeRestorePlan): Deferred<Boolean> {
         var superseded: PendingRestore? = null
         var created = false
-        val pending =
-            pendingMutex.withLock {
-                val existing = pendingRestore
-                if (
-                    existing != null &&
-                    !existing.result.isCompleted &&
-                    existing.plan.sessionId == plan.sessionId &&
-                    existing.plan.deviceAddress == plan.deviceAddress
-                ) {
-                    existing
-                } else {
-                    superseded = existing?.takeUnless { it.result.isCompleted }
-                    val state = RestoreState(plan.finalStatus)
-                    val result =
-                        applicationScope.async(start = CoroutineStart.LAZY) {
-                            restoreUntilComplete(plan, state).also { state.completedSuccessfully.value = it }
-                        }
-                    PendingRestore(plan, result, state).also {
-                        publishPendingRestore(it)
-                        created = true
+        val pending = pendingMutex.withLock {
+            val existing = pendingRestore
+            if (
+                existing != null &&
+                !existing.result.isCompleted &&
+                existing.plan.sessionId == plan.sessionId &&
+                existing.plan.deviceAddress == plan.deviceAddress
+            ) {
+                existing
+            } else {
+                superseded = existing?.takeUnless { it.result.isCompleted }
+                val state = RestoreState(plan.finalStatus)
+                val result =
+                    applicationScope.async(start = CoroutineStart.LAZY) {
+                        restoreUntilComplete(plan, state).also { state.completedSuccessfully.value = it }
                     }
+                PendingRestore(plan, result, state).also {
+                    publishPendingRestore(it)
+                    created = true
                 }
             }
+        }
         superseded?.result?.cancel()
         if (created) {
             pending.result.invokeOnCompletion { cause ->
@@ -222,24 +222,22 @@ internal class DiscoveryHomeRestorer(
                 current.state.finalStatus = finalStatus
                 current
             } ?: return
-        val correction =
-            persistenceMutex.withLock {
-                val shouldCorrect =
-                    pendingMutex.withLock {
-                        pendingRestore === pending &&
-                            pending.state.finalStatus == finalStatus &&
-                            pending.state.persistedFinalStatus?.let { it != finalStatus } == true
-                    }
-                if (!shouldCorrect) return@withLock null
-
-                val result = safeCatching { discoveryDao.updateSessionCompletionStatus(sessionId, finalStatus) }
-                if (result.getOrNull() == 1) {
-                    pendingMutex.withLock {
-                        if (pendingRestore === pending) pending.state.persistedFinalStatus = finalStatus
-                    }
-                }
-                result
+        val correction = persistenceMutex.withLock {
+            val shouldCorrect = pendingMutex.withLock {
+                pendingRestore === pending &&
+                    pending.state.finalStatus == finalStatus &&
+                    pending.state.persistedFinalStatus?.let { it != finalStatus } == true
             }
+            if (!shouldCorrect) return@withLock null
+
+            val result = safeCatching { discoveryDao.updateSessionCompletionStatus(sessionId, finalStatus) }
+            if (result.getOrNull() == 1) {
+                pendingMutex.withLock {
+                    if (pendingRestore === pending) pending.state.persistedFinalStatus = finalStatus
+                }
+            }
+            result
+        }
         val correctionFailure = correction?.exceptionOrNull()
         when {
             correctionFailure != null ->
@@ -407,17 +405,16 @@ internal class DiscoveryHomeRestorer(
     }
 
     private suspend fun finalizeRecoveredSessionBestEffort(sessionId: Long, state: RestoreState) {
-        val result =
-            persistenceMutex.withLock {
-                val finalStatus = pendingMutex.withLock { state.finalStatus }
-                val persistence = safeCatching {
-                    discoveryDao.updateRecoverableSessionCompletionStatus(sessionId, finalStatus)
-                }
-                if (persistence.getOrNull() == 1) {
-                    pendingMutex.withLock { state.persistedFinalStatus = finalStatus }
-                }
-                persistence
+        val result = persistenceMutex.withLock {
+            val finalStatus = pendingMutex.withLock { state.finalStatus }
+            val persistence = safeCatching {
+                discoveryDao.updateRecoverableSessionCompletionStatus(sessionId, finalStatus)
             }
+            if (persistence.getOrNull() == 1) {
+                pendingMutex.withLock { state.persistedFinalStatus = finalStatus }
+            }
+            persistence
+        }
         val failure = result.exceptionOrNull()
         if (failure != null) {
             Logger.e(failure) {
@@ -441,15 +438,14 @@ internal class DiscoveryHomeRestorer(
     }
 
     private suspend fun markUnrestorableBestEffort(sessionId: Long): Boolean {
-        val result =
-            persistenceMutex.withLock {
-                safeCatching {
-                    discoveryDao.updateRecoverableSessionCompletionStatus(
-                        sessionId,
-                        DiscoverySessionStatus.UNRESTORABLE,
-                    )
-                }
+        val result = persistenceMutex.withLock {
+            safeCatching {
+                discoveryDao.updateRecoverableSessionCompletionStatus(
+                    sessionId,
+                    DiscoverySessionStatus.UNRESTORABLE,
+                )
             }
+        }
         val failure = result.exceptionOrNull()
         return when {
             failure != null -> {
