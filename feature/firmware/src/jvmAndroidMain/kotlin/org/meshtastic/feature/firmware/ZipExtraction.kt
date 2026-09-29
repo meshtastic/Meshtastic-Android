@@ -37,6 +37,12 @@ internal const val MAX_FIRMWARE_ZIP_BYTES = 128L * 1024 * 1024
  */
 internal const val MAX_FIRMWARE_UNCOMPRESSED_BYTES = 96L * 1024 * 1024
 
+/**
+ * Ceiling on bytes [extractFirmwareEntry] writes to disk across the entries it keeps. A single firmware image is a few
+ * MB, so this only needs to stop an entry that inflates without end.
+ */
+internal const val MAX_FIRMWARE_EXTRACTED_BYTES = 96L * 1024 * 1024
+
 /** Ceiling on entry count. A release archive holds a few hundred at most. */
 internal const val MAX_FIRMWARE_ZIP_ENTRIES = 4096
 
@@ -141,7 +147,8 @@ internal fun extractZipEntriesBounded(
  *
  * Bounded by entry count and bytes written, not by archive size: a release archive runs past 200 MB and 250 entries,
  * while a single firmware image is a few MB and only matching entries are written. Throws [IllegalArgumentException]
- * when a bound is exceeded, leaving no partial file behind.
+ * when a bound is exceeded; the entry that crossed the write budget is deleted, while matches already written stay in
+ * [outputDir].
  */
 internal fun extractFirmwareEntry(
     input: InputStream,
@@ -150,7 +157,7 @@ internal fun extractFirmwareEntry(
     fileExtension: String,
     preferredFilename: String?,
     maxEntries: Int = MAX_FIRMWARE_ZIP_ENTRIES,
-    maxWrittenBytes: Long = MAX_FIRMWARE_UNCOMPRESSED_BYTES,
+    maxWrittenBytes: Long = MAX_FIRMWARE_EXTRACTED_BYTES,
 ): File? {
     outputDir.mkdirs()
     val matches = mutableListOf<Pair<String, File>>()

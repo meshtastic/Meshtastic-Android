@@ -70,8 +70,7 @@ class JvmFirmwareFileHandler(client: HttpClient) :
     /**
      * Fully expands [artifact] into memory, keyed by entry name.
      *
-     * Shares [extractZipEntriesBounded] with the Android handler so the two cannot drift — they previously carried
-     * independent copies of this loop, and only one of them got bounded.
+     * Shares [extractZipEntriesBounded] with the Android handler, so both apply the same bounds.
      */
     override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
         withContext(ioDispatcher) {
