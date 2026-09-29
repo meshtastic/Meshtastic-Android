@@ -2,7 +2,7 @@
 title: Testing
 parent: Developer Guide
 nav_order: 7
-last_updated: 2026-09-28
+last_updated: 2026-09-29
 description: Testing strategy for the Meshtastic KMP project — test categories, screenshot pipeline, baseline profiles, and CI integration.
 aliases:
   - tests
@@ -34,7 +34,8 @@ Shared tests written once and run on the JVM and, in modules that declare `withH
 Android-specific tests that run on the JVM. In pure-Android/JVM modules (such as `androidApp`) `test` runs them; in KMP modules `allTests` runs them through `testAndroidHostTest`:
 
 ```shell
-./gradlew test
+./gradlew test       # pure Android/JVM modules
+./gradlew allTests   # KMP modules
 ```
 
 - ViewModel tests
