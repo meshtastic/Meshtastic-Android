@@ -22,28 +22,24 @@ import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.StoredSecurityKeys
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.security.KeyStore
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import javax.crypto.spec.GCMParameterSpec
 
 /**
- * File-backed encrypted key-backup store for JVM/Desktop, mirroring [LockdownPassphraseStoreImpl]'s desktop
- * counterpart. Uses a PKCS12 KeyStore to hold an AES-256 master key and AES-256-GCM to encrypt each node's key backup,
- * stored as individual `.enc` files under `$MESHTASTIC_DATA_DIR/security_keys/`.
+ * File-backed encrypted key-backup store for JVM/Desktop, mirroring [LockdownPassphraseStoreImpl]. Each node's key
+ * backup is an AES-256-GCM `.enc` file under `$MESHTASTIC_DATA_DIR/security_keys/`; see [DesktopKeystoreCipher] for the
+ * key handling.
  */
 @Single(binds = [SecurityKeyBackupStore::class])
 @Suppress("TooGenericExceptionCaught")
-class SecurityKeyBackupStoreImpl : SecurityKeyBackupStore {
+class SecurityKeyBackupStoreImpl(dataDir: File = File(desktopDataDir())) : SecurityKeyBackupStore {
 
-    private val storeDir: File by lazy { File(desktopDataDir(), STORE_DIR).also { it.mkdirs() } }
+    private val storeDir: File by lazy { File(dataDir, STORE_DIR).also { it.mkdirs() } }
+
+    private val cipher by lazy { DesktopKeystoreCipher(storeDir, KEY_ALIAS, KEYSTORE_PASSWORD) }
 
     private val masterKey: SecretKey? by lazy {
         try {
-            loadOrCreateMasterKey()
+            cipher.loadOrCreateMasterKey()
         } catch (e: Exception) {
             Logger.e(e) { "SecurityKeyBackup: Failed to initialize desktop keystore" }
             null
@@ -56,7 +52,7 @@ class SecurityKeyBackupStoreImpl : SecurityKeyBackupStore {
         val file = entryFile(nodeNum)
         if (!file.exists()) return null
         return try {
-            val plaintext = decrypt(key, file.readBytes())
+            val plaintext = cipher.decrypt(key, file.readBytes())
             deserialize(plaintext)
         } catch (e: Exception) {
             Logger.e(e) { "SecurityKeyBackup: Failed to read key backup for node" }
@@ -67,7 +63,7 @@ class SecurityKeyBackupStoreImpl : SecurityKeyBackupStore {
     override fun save(nodeNum: Int, publicKeyBase64: String, privateKeyBase64: String, timestamp: Long) {
         val key = masterKey ?: error("SecurityKeyBackup: Cannot save keys - keystore unavailable")
         val plaintext = "$timestamp\n$publicKeyBase64\n$privateKeyBase64".encodeToByteArray()
-        entryFile(nodeNum).writeBytes(encrypt(key, plaintext))
+        entryFile(nodeNum).writeBytes(cipher.encrypt(key, plaintext))
     }
 
     override fun delete(nodeNum: Int) {
@@ -90,65 +86,12 @@ class SecurityKeyBackupStoreImpl : SecurityKeyBackupStore {
         return StoredSecurityKeys(publicKeyBase64 = parts[1], privateKeyBase64 = parts[2], timestamp = timestamp)
     }
 
-    // region Encryption
-
-    private fun encrypt(key: SecretKey, plaintext: ByteArray): ByteArray {
-        val cipher = Cipher.getInstance(AES_GCM_TRANSFORM)
-        cipher.init(Cipher.ENCRYPT_MODE, key)
-        val iv = cipher.iv
-        val ciphertext = cipher.doFinal(plaintext)
-        // Format: [1 byte IV length][IV][ciphertext]
-        return byteArrayOf(iv.size.toByte()) + iv + ciphertext
-    }
-
-    private fun decrypt(key: SecretKey, data: ByteArray): ByteArray {
-        val ivLength = data[0].toInt() and BYTE_MASK
-        val iv = data.copyOfRange(1, 1 + ivLength)
-        val ciphertext = data.copyOfRange(1 + ivLength, data.size)
-        val cipher = Cipher.getInstance(AES_GCM_TRANSFORM)
-        cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(GCM_TAG_BITS, iv))
-        return cipher.doFinal(ciphertext)
-    }
-
-    // endregion
-
-    // region KeyStore
-
-    private fun loadOrCreateMasterKey(): SecretKey {
-        val ksFile = File(storeDir, KEYSTORE_FILE)
-        val ks = KeyStore.getInstance(KEYSTORE_TYPE)
-        val protection = KeyStore.PasswordProtection(KEYSTORE_PASSWORD)
-        if (ksFile.exists()) {
-            FileInputStream(ksFile).use { ks.load(it, KEYSTORE_PASSWORD) }
-            val entry = ks.getEntry(KEY_ALIAS, protection)
-            // Fail loudly rather than regenerate: overwriting the master key would orphan every existing .enc backup.
-            check(entry is KeyStore.SecretKeyEntry) { "Keystore exists but master key $KEY_ALIAS is missing/invalid" }
-            return entry.secretKey
-        }
-        val keyGen = KeyGenerator.getInstance(AES_ALGORITHM)
-        keyGen.init(AES_KEY_BITS)
-        val secretKey = keyGen.generateKey()
-        ks.load(null, KEYSTORE_PASSWORD)
-        ks.setEntry(KEY_ALIAS, KeyStore.SecretKeyEntry(secretKey), protection)
-        FileOutputStream(ksFile).use { ks.store(it, KEYSTORE_PASSWORD) }
-        return secretKey
-    }
-
-    // endregion
-
     private companion object {
         private const val STORE_DIR = "security_keys"
-        private const val KEYSTORE_FILE = "keystore.p12"
-        private const val KEYSTORE_TYPE = "PKCS12"
         private const val KEY_ALIAS = "security_key_backup_master"
 
         // Intentional: mirrors LockdownPassphraseStoreImpl's documented desktop threat model.
         private val KEYSTORE_PASSWORD = "meshtastic-security-keys".toCharArray()
-        private const val AES_ALGORITHM = "AES"
-        private const val AES_GCM_TRANSFORM = "AES/GCM/NoPadding"
-        private const val AES_KEY_BITS = 256
-        private const val GCM_TAG_BITS = 128
-        private const val BYTE_MASK = 0xFF
         private const val SERIALIZED_LINE_COUNT = 3
     }
 }

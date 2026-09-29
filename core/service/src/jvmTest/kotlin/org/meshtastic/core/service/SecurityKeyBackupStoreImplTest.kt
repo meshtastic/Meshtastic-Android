@@ -26,12 +26,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
-class LockdownPassphraseStoreImplTest {
+class SecurityKeyBackupStoreImplTest {
     private lateinit var dataDir: File
 
     @BeforeTest
     fun setUp() {
-        dataDir = Files.createTempDirectory("lockdown-passphrase-store-test").toFile()
+        dataDir = Files.createTempDirectory("security-key-backup-store-test").toFile()
     }
 
     @AfterTest
@@ -40,34 +40,34 @@ class LockdownPassphraseStoreImplTest {
     }
 
     @Test
-    fun `save get and clear passphrase round trips on jvm`() {
-        val store = LockdownPassphraseStoreImpl(dataDir)
+    fun `save get and delete round trips on jvm`() {
+        val store = SecurityKeyBackupStoreImpl(dataDir)
 
-        store.savePassphrase(deviceAddress = "AA:BB:CC:DD", passphrase = "secret", boots = 10, hours = 24)
+        store.save(nodeNum = 42, publicKeyBase64 = "pub", privateKeyBase64 = "priv", timestamp = 1_700_000_000L)
 
-        val stored = store.getPassphrase("AA:BB:CC:DD")
-        assertEquals("secret", stored?.passphrase)
-        assertEquals(10, stored?.boots)
-        assertEquals(24, stored?.hours)
+        val stored = store.get(42)
+        assertEquals("pub", stored?.publicKeyBase64)
+        assertEquals("priv", stored?.privateKeyBase64)
+        assertEquals(1_700_000_000L, stored?.timestamp)
 
-        store.clearPassphrase("AA:BB:CC:DD")
+        store.delete(42)
 
-        assertNull(store.getPassphrase("AA:BB:CC:DD"))
+        assertNull(store.get(42))
     }
 
     @Test
     fun `a keystore missing its master key is never overwritten`() {
-        LockdownPassphraseStoreImpl(dataDir).savePassphrase("AA:BB:CC:DD", "secret", boots = 10, hours = 24)
-        val storeDir = File(dataDir, "lockdown")
-        removeKeystoreEntry(storeDir, alias = "lockdown_master", password = "meshtastic-lockdown")
+        SecurityKeyBackupStoreImpl(dataDir).save(42, "pub", "priv", timestamp = 1L)
+        val storeDir = File(dataDir, "security_keys")
+        removeKeystoreEntry(storeDir, alias = "security_key_backup_master", password = "meshtastic-security-keys")
         val keystoreBefore = File(storeDir, "keystore.p12").readBytes()
-        val entryBefore = File(storeDir, "AA_BB_CC_DD.enc").readBytes()
+        val entryBefore = File(storeDir, "42.enc").readBytes()
 
-        val reopened = LockdownPassphraseStoreImpl(dataDir)
+        val reopened = SecurityKeyBackupStoreImpl(dataDir)
 
-        assertNull(reopened.getPassphrase("AA:BB:CC:DD"))
-        assertFailsWith<IllegalStateException> { reopened.savePassphrase("EE:FF", "other", boots = 1, hours = 1) }
+        assertNull(reopened.get(42))
+        assertFailsWith<IllegalStateException> { reopened.save(7, "pub7", "priv7", timestamp = 2L) }
         assertContentEquals(keystoreBefore, File(storeDir, "keystore.p12").readBytes())
-        assertContentEquals(entryBefore, File(storeDir, "AA_BB_CC_DD.enc").readBytes())
+        assertContentEquals(entryBefore, File(storeDir, "42.enc").readBytes())
     }
 }
