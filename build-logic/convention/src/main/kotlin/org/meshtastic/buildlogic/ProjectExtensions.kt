@@ -30,10 +30,12 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugin.use.PluginDependency
 import java.io.FileInputStream
+import java.time.Duration
 import java.util.Properties
 
 private const val MAX_TEST_RETRIES = 2
 private const val MAX_TEST_FAILURES = 10
+private const val TEST_TASK_TIMEOUT_MINUTES = 15L
 
 val Project.libs
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
@@ -108,6 +110,13 @@ internal fun Project.configureTestOptions() {
         // Locale-specific behaviour is asserted by tests that set the locale themselves.
         systemProperty("user.language", "en")
         systemProperty("user.country", "US")
+
+        // A hung test fails by name instead of running into the CI job timeout. SEPARATE_THREAD lets the timeout
+        // fire even when the stuck code never checks for interruption.
+        systemProperty("junit.jupiter.execution.timeout.default", "5 m")
+        systemProperty("junit.jupiter.execution.timeout.thread.mode.default", "SEPARATE_THREAD")
+        // Backstop for JUnit 4 host tests, which Jupiter's timeout does not reach, and for a wedged test JVM.
+        timeout.set(Duration.ofMinutes(TEST_TASK_TIMEOUT_MINUTES))
 
         // JUnit Jupiter parallel execution within each Gradle fork.
         // Classes run sequentially ("same_thread") because 19+ ViewModel test classes use
