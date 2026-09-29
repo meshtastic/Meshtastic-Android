@@ -34,9 +34,7 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.network)
-            implementation(projects.core.prefs)
             implementation(libs.meshtastic.protobufs)
-            implementation(projects.core.takserver)
 
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.androidx.paging.common)

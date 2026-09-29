@@ -27,14 +27,12 @@ kotlin {
         commonMain.dependencies {
             api(projects.core.repository)
             implementation(projects.core.common)
-            implementation(projects.core.data)
             implementation(projects.core.database)
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(projects.core.network)
             implementation(projects.core.ble)
-            implementation(projects.core.prefs)
             implementation(projects.core.resources)
             implementation(libs.meshtastic.protobufs)
             implementation(projects.core.takserver)
@@ -55,6 +53,7 @@ kotlin {
 
         getByName("androidHostTest") {
             dependencies {
+                implementation(projects.core.prefs)
                 implementation(libs.androidx.datastore.preferences)
                 implementation(libs.androidx.work.testing)
             }

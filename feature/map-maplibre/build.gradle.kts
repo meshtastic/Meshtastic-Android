@@ -37,14 +37,9 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
-            implementation(projects.core.data)
-            implementation(projects.core.di)
             implementation(projects.core.model)
-            implementation(projects.core.navigation)
-            implementation(projects.core.prefs)
             implementation(projects.core.repository)
             implementation(projects.core.resources)
-            implementation(projects.core.service)
             implementation(projects.core.ui)
             implementation(projects.feature.map)
             // Offline terrain math (elevation decode, contour generation, zoom-banded intervals) and storage

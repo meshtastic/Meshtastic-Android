@@ -28,8 +28,6 @@ kotlin {
         }
         withHostTest { isIncludeAndroidResources = true }
     }
-
-    sourceSets { commonMain.dependencies { implementation(projects.core.common) } }
 }
 
 compose.resources {

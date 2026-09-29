@@ -30,17 +30,14 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.ble)
             implementation(projects.core.common)
-            implementation(projects.core.data)
             implementation(projects.core.database)
             implementation(projects.core.datastore)
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(projects.core.network)
-            implementation(projects.core.prefs)
             implementation(projects.core.repository)
             implementation(libs.meshtastic.protobufs)
-            implementation(projects.core.service)
             implementation(projects.core.resources)
             implementation(projects.core.ui)
 

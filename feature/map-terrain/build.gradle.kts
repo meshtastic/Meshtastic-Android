@@ -36,7 +36,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.common)
             implementation(libs.kotlinx.coroutines.core)
             // Local terrain-tile storage is a plain file hierarchy, not SQLite: unlike the base offline layer's
             // Google-only archive (which can assume Android's SQLite), this module's storage must also work on
