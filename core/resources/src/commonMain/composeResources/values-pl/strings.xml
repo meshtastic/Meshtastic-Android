@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Wilgotność</string>
+    <string name="a11y_temperature">Temperatura</string>
     <string name="about">O aplikacji</string>
     <string name="accept">Akceptuj</string>
     <string name="acknowledgements">Potwierdzenia</string>
@@ -81,7 +83,6 @@
     <string name="channel_7">Kanał 7</string>
     <string name="channel_8">Kanał 8</string>
     <string name="channel_invalid">Ten adres URL kanału jest nieprawidłowy i nie można go użyć</string>
-    <string name="channel_label">Kanał</string>
     <string name="channel_name">Nazwa Kanału</string>
     <string name="channels">Kanały</string>
     <!-- CHIRPY -->
@@ -188,6 +189,7 @@
     <string name="dew_point">Punkt rosy</string>
     <string name="direct_message">Bezpośrednia wiadomość</string>
     <string name="direct_messages">Bezpośrednie Wiadomości</string>
+    <string name="disabled">Wyłączony</string>
     <string name="discard_changes">Odrzuć</string>
     <string name="disconnect">Rozłącz</string>
     <string name="disconnected">Rozłączono</string>
@@ -207,6 +209,7 @@
     <string name="doc_title_nodes">Węzły</string>
     <string name="done">Wykonano</string>
     <string name="download">Pobierz</string>
+    <!-- DURATION -->
     <string name="edit">Edytuj</string>
     <string name="eight_hours">8 Godzin</string>
     <!-- EMOJI -->

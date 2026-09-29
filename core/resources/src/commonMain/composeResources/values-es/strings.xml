@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Humedad</string>
+    <string name="a11y_temperature">Temperatura:</string>
     <string name="about">Acerca de</string>
     <string name="accept">Aceptar</string>
     <string name="acknowledgements">Agradecimientos</string>
@@ -91,7 +93,6 @@
     <string name="channel_8">Canal 8</string>
     <string name="channel_features">Características del canal</string>
     <string name="channel_invalid">La URL de este canal no es válida y no puede utilizarse</string>
-    <string name="channel_label">Canal</string>
     <string name="channel_name">Nombre del canal</string>
     <string name="channels">Canales</string>
     <!-- CHIRPY -->
@@ -215,6 +216,7 @@
     <string name="doc_title_onboarding">Primeros Pasos</string>
     <string name="done">Hecho</string>
     <string name="download">Descarga</string>
+    <!-- DURATION -->
     <string name="dynamic">Dinámico</string>
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>

@@ -17,17 +17,21 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">湿度</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">来自 %1$s: %2$s 的消息</string>
     <string name="a11y_node_distance_away">%1$s 离开</string>
     <string name="a11y_node_favorite">收藏</string>
-    <string name="a11y_node_hops_away">%1$d 跳数</string>
+    <plurals name="a11y_node_hops_count">
+        <item quantity="other">%1$d 跳数</item>
+    </plurals>
     <string name="a11y_node_last_heard">最后通信时间 %1$s</string>
     <string name="a11y_node_offline">离线</string>
     <string name="a11y_node_online">在线</string>
     <string name="a11y_node_role">角色 %1$s</string>
     <string name="a11y_node_signal">信号 %1$s</string>
     <string name="a11y_nodes_at_hop">跳数 %1$d: %2$d 节点</string>
+    <string name="a11y_temperature">温度</string>
     <string name="about">关于</string>
     <string name="accept">接受</string>
     <string name="acknowledgements">开源</string>
@@ -168,7 +172,6 @@
     <string name="channel_8">频道 8</string>
     <string name="channel_features">频道特征</string>
     <string name="channel_invalid">此频道 URL 无效，无法使用</string>
-    <string name="channel_label">频道</string>
     <string name="channel_name">频道名称</string>
     <string name="channel_url">频道URL</string>
     <string name="channel_utilization">ChUtil</string>
@@ -353,6 +356,7 @@
     <string name="direct_message">私信</string>
     <string name="direct_message_key">私信密钥</string>
     <string name="direct_messages">私聊</string>
+    <string name="disabled">禁用</string>
     <string name="discard_changes">忽略</string>
     <string name="disconnect">断开</string>
     <string name="disconnected">已断开连接</string>
@@ -429,7 +433,9 @@
     <string name="discovery_stop_scan">停止扫描</string>
     <string name="discovery_summary_not_available">AI 分析不可用</string>
     <string name="discovery_time_remaining">%1$s 剩余时间</string>
-    <string name="discovery_unique_nodes">%1$d 独立节点</string>
+    <plurals name="discovery_unique_nodes_count">
+        <item quantity="other">%1$d 独立节点</item>
+    </plurals>
     <string name="discovery_view_map">查看地图</string>
     <string name="disk_free_indexed">存储空间剩余 %1$d</string>
     <string name="display">显示</string>
@@ -495,6 +501,7 @@
     <string name="downlink_feature_description">来自公共互联网网关的消息会被转发到本地 mesh 网络。由于采用零跳策略，来自默认 MQTT 服务器的流量不会传播到该设备之外。</string>
     <string name="download">下载</string>
     <string name="duplicated_public_key_title">检测到重复公钥</string>
+    <!-- DURATION -->
     <string name="dynamic">动态</string>
     <string name="easily_set_up_private_mesh_networks">轻松建立私人网格网络，以便在偏远地区进行安全和可靠的通信。</string>
     <string name="edit">编辑</string>

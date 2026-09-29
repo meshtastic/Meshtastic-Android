@@ -1,7 +1,7 @@
 ---
 title: TAK-integraatio
 nav_order: 10
-last_updated: 2026-09-11
+last_updated: 2026-09-28
 description: ATAK:n ja WinTAK:n yhteentoimivuus — CoT-sijaintijako, TAK-roolit ja lisäosien käyttöönotto.
 aliases:
   - tak
@@ -97,6 +97,7 @@ Kun asetukset on määritetty:
 - Viestit voivat välittyä mesh-verkon ja TAK-verkon välillä
 - Sijaintipäivitykset kulkevat kaksisuuntaisesti Meshtasticin ja TAK-järjestelmän välillä
 - TAK Tracker -radiot lähettävät PLI-sijaintia automaattisesti — niiden sijainti näkyy ATAK-kartoilla ilman erillistä ATAK-asetusta
+- Routes received from the mesh are also saved as a data package (`.zip`) in **Downloads**; import it in ATAK to add the route. On Android 9 and older the file goes to the app's own folder under `Android/data` instead
 
 > ℹ️ **Huomautus:** TAK-integraatio edellyttää tiettyjä radiorooleja. Tavalliset Client-roolin radiot eivät osallistu automaattisesti TAK-toimintoihin — mutta kun **Mesh to CoT Converter** on käytössä, ne näkyvät silti ATAK-kartalla yhteystietoina.
 

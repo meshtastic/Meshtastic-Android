@@ -17,17 +17,18 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Umidade</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Mensagem de %1$s %2$s</string>
     <string name="a11y_node_distance_away">%1$s de distância</string>
     <string name="a11y_node_favorite">favorito</string>
-    <string name="a11y_node_hops_away">A %1$d salto de distância</string>
     <string name="a11y_node_last_heard">Visto pela última vez há %1$s</string>
     <string name="a11y_node_offline">desconectado</string>
     <string name="a11y_node_online">conectado</string>
     <string name="a11y_node_role">função %1$s</string>
     <string name="a11y_node_signal">sinal %1$s</string>
     <string name="a11y_nodes_at_hop">Saltar %1$d a %2$d nós</string>
+    <string name="a11y_temperature">Temperatura</string>
     <string name="about">Sobre</string>
     <string name="accept">Aceitar</string>
     <string name="acknowledgements">Agradecimentos</string>
@@ -114,7 +115,6 @@
     <string name="channel_7">Canal 7</string>
     <string name="channel_8">Canal 8</string>
     <string name="channel_invalid">Este link de canal é inválido e não pode ser usado</string>
-    <string name="channel_label">Canal</string>
     <string name="channel_name">Nome do canal</string>
     <string name="channels">Canais</string>
     <!-- CHIRPY -->
@@ -217,6 +217,7 @@
     <string name="doc_title_nodes">Nós</string>
     <string name="done">Concluído</string>
     <string name="download">Baixar</string>
+    <!-- DURATION -->
     <string name="dynamic">Dinâmico</string>
     <string name="easily_set_up_private_mesh_networks">Configure facilmente redes de malha privada para uma comunicação segura e confiável em áreas remotas.</string>
     <string name="edit">Editar</string>

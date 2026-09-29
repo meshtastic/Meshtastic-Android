@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Laige</string>
+    <string name="a11y_temperature">Teocht</string>
     <string name="about">Maidir le</string>
     <string name="accept">Glac</string>
     <!-- ACTION -->
@@ -44,7 +46,6 @@
     <string name="ch_util_definition">Úsáid na cainéil reatha, lena n-áirítear TX ceartaithe, RX agus RX mícheart (anáilís ar na fuaimeanna).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Tá an URL Cainéil seo neamhdhleathach agus ní féidir é a úsáid</string>
-    <string name="channel_label">Cainéal</string>
     <string name="channel_name">Ainm Cainéal</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Roghnaigh téama</string>
@@ -81,6 +82,7 @@
     <!-- DISTANCE -->
     <string name="distance">Sáth</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Cuir in eagar</string>
     <string name="eight_hours">8 Uair an chloig</string>
     <!-- EMOJI -->

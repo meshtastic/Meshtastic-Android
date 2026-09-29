@@ -17,18 +17,20 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Kosteus</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Viesti käyttäjältä %1$s: %2$s</string>
     <string name="a11y_node_battery">akku %1$d %</string>
+    <string name="a11y_node_channel">Kanava %1$d</string>
     <string name="a11y_node_distance_away">%1$s pois</string>
     <string name="a11y_node_favorite">suosikki</string>
-    <string name="a11y_node_hops_away">%1$d hypyn päässä</string>
     <string name="a11y_node_last_heard">viimeksi kuultu %1$s</string>
     <string name="a11y_node_offline">offline-tilassa</string>
     <string name="a11y_node_online">online-tilassa</string>
     <string name="a11y_node_role">rooli %1$s</string>
     <string name="a11y_node_signal">signaali %1$s</string>
     <string name="a11y_nodes_at_hop">Hyppy %1$d: %2$d radiota</string>
+    <string name="a11y_temperature">Lämpötila</string>
     <string name="about">Tietoja</string>
     <string name="accept">Hyväksy</string>
     <string name="acknowledgements">Kiitokset</string>
@@ -193,7 +195,6 @@
     <string name="channel_8">Kanava 8</string>
     <string name="channel_features">Kanavan ominaisuudet</string>
     <string name="channel_invalid">Kanavan URL-osoite on virheellinen, eikä sitä voida käyttää</string>
-    <string name="channel_label">Kanava</string>
     <string name="channel_name">Kanavan nimi</string>
     <string name="channel_url">Kanavan URL-osoite</string>
     <string name="channel_utilization">Kanavan käyttöaste</string>
@@ -387,6 +388,7 @@
     <string name="direct_message">Yksityisviesti</string>
     <string name="direct_message_key">Suoran viestin avain</string>
     <string name="direct_messages">Yksityisviestit</string>
+    <string name="disabled">Ei käytössä</string>
     <string name="discard_changes">Hylkää</string>
     <string name="disconnect">Katkaise yhteys</string>
     <string name="disconnected">Ei yhdistetty</string>
@@ -463,7 +465,6 @@
     <string name="discovery_stop_scan">Pysäytä skannaus</string>
     <string name="discovery_summary_not_available">Tekoälyanalyysi ei ole saatavilla</string>
     <string name="discovery_time_remaining">%1$s jäljellä</string>
-    <string name="discovery_unique_nodes">%1$d yksilöllistä radiota</string>
     <string name="discovery_view_map">Näytä kartta</string>
     <string name="disk_free_indexed">Vapaa levytila %1$d</string>
     <string name="display">Näyttö</string>
@@ -532,6 +533,7 @@
     <string name="download">Lataa</string>
     <string name="download_this_area">Lataa tämä alue</string>
     <string name="duplicated_public_key_title">Päällekkäinen julkinen avain havaittu</string>
+    <!-- DURATION -->
     <string name="dynamic">Dynaaminen</string>
     <string name="easily_set_up_private_mesh_networks">Luo vaivattomasti yksityisiä meshtastic verkkoja turvalliseen ja luotettavaan viestintään kaukana asutuista paikoista.</string>
     <string name="edit">Muokkaa</string>

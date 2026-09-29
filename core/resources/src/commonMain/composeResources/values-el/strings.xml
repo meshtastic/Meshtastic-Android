@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Υγρασία</string>
+    <string name="a11y_temperature">Θερμοκρασία</string>
     <string name="about">Σχετικά</string>
     <string name="accept">Αποδοχή</string>
     <!-- ACTION -->
@@ -51,7 +53,6 @@
     <string name="channel_7">Κανάλι 7</string>
     <string name="channel_8">Κανάλι 8</string>
     <string name="channel_invalid">Αυτό το κανάλι URL δεν είναι ορθό και δεν μπορεί να χρησιμοποιηθεί</string>
-    <string name="channel_label">Κανάλι</string>
     <string name="channel_name">Όνομα Καναλιού</string>
     <string name="channels">Κανάλια</string>
     <!-- CHIRPY -->
@@ -90,6 +91,7 @@
     <string name="distance">Απόσταση</string>
     <!-- DOC -->
     <string name="doc_title_mqtt">MQTT</string>
+    <!-- DURATION -->
     <string name="edit">Επεξεργασία</string>
     <string name="eight_hours">8 Ώρες</string>
     <!-- EMOJI -->

@@ -1,7 +1,7 @@
 ---
 title: Интеграция TAK
 nav_order: 10
-last_updated: 2026-09-11
+last_updated: 2026-09-28
 description: Взаимодействие с ATAK и WinTAK — передача данных CoT о местоположении, роли TAK и настройка плагина.
 aliases:
   - tak
@@ -104,6 +104,7 @@ Meshtastic поддерживает два формата передачи да�
 - Сообщения чата могут передаваться между mesh-сетью и сетями TAK
 - Обновления местоположения передаются двунаправленно между Meshtastic и TAK
 - Ноды TAK Tracker автоматически передают PLI — их координаты отображаются на картах ATAK без какой-либо настройки на стороне ATAK
+- Routes received from the mesh are also saved as a data package (`.zip`) in **Downloads**; import it in ATAK to add the route. On Android 9 and older the file goes to the app's own folder under `Android/data` instead
 
 > ℹ️ **Note:** TAK integration requires specific node roles. Standard client nodes don't automatically participate in TAK operations — though with **Mesh to CoT Converter** enabled they still appear on the ATAK map as contacts.
 

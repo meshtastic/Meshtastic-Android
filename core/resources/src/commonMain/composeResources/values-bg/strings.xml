@@ -17,15 +17,18 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Влажност</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Съобщение от %1$s: %2$s</string>
     <string name="a11y_node_battery">батерия %1$d%</string>
+    <string name="a11y_node_channel">Канал %1$d</string>
     <string name="a11y_node_favorite">любим</string>
     <string name="a11y_node_last_heard">последно чут %1$s</string>
     <string name="a11y_node_offline">офлайн</string>
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роля %1$s</string>
     <string name="a11y_node_signal">сигнал %1$s</string>
+    <string name="a11y_temperature">Температура</string>
     <string name="about">Относно</string>
     <string name="accept">Приеми</string>
     <string name="acknowledgements">Благодарности</string>
@@ -144,7 +147,6 @@
     <string name="channel_7">Канал 7</string>
     <string name="channel_8">Канал 8</string>
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
-    <string name="channel_label">Канал</string>
     <string name="channel_name">Име на канал</string>
     <string name="channel_utilization">Изпол. на канала</string>
     <string name="channels">Канали</string>
@@ -321,7 +323,6 @@
     <string name="discovery_stat_total_unique_nodes">Общо уникални възли</string>
     <string name="discovery_stat_unique_nodes">Уникални възли</string>
     <string name="discovery_time_remaining">Остават %1$s</string>
-    <string name="discovery_unique_nodes">%1$d уникални възела</string>
     <string name="discovery_view_map">Вижте картата</string>
     <string name="disk_free_indexed">Свободен диск %1$d</string>
     <string name="display">Дисплей</string>
@@ -361,6 +362,7 @@
     <string name="downlink_feature_description">Съобщенията от шлюза към публичния интернет се препращат към локалната mesh мрежа. Поради политиката за нулев отскок, трафикът от MQTT сървъра по подразбиране няма да се разпространява по-далеч от това устройство.</string>
     <string name="download">Изтегляне</string>
     <string name="duplicated_public_key_title">Открит е дублиран публичен ключ</string>
+    <!-- DURATION -->
     <string name="dynamic">Динамична</string>
     <string name="easily_set_up_private_mesh_networks">Настройте лесно частни mesh мрежи за сигурна и надеждна комуникация в отдалечени райони.</string>
     <string name="edit">Редактирай</string>

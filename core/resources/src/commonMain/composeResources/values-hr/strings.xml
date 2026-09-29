@@ -40,7 +40,6 @@
     <string name="cant_change_no_radio">Nije moguće promijeniti kanal jer radio još nije povezan. Molim pokušajte ponovno.</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti</string>
-    <string name="channel_label">Kanal</string>
     <string name="channel_name">Naziv kanala</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Odaberi temu</string>
@@ -77,6 +76,7 @@
     <!-- DISTANCE -->
     <string name="distance">Udaljenost</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Uredi</string>
     <string name="eight_hours">8 Sati</string>
     <!-- EMOJI -->

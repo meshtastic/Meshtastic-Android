@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Vlaga</string>
+    <string name="a11y_temperature">Temperatura</string>
     <string name="about">O programu</string>
     <string name="accept">Sprejmi</string>
     <!-- ACTION -->
@@ -45,7 +47,6 @@
     <string name="ch_util_definition">Uporaba za trenutni kanal, vključno z dobro oblikovanimi TX, RX in napačno oblikovanim RX (šum).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Neveljaven kanal</string>
-    <string name="channel_label">Kanal</string>
     <string name="channel_name">Ime kanala</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Izberi temo</string>
@@ -83,6 +84,7 @@
     <!-- DISTANCE -->
     <string name="distance">Razdalja</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Uredi</string>
     <string name="eight_hours">8 Ur</string>
     <!-- EMOJI -->

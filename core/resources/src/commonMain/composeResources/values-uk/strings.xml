@@ -17,14 +17,15 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Вологість</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Повідомлення від %1$s: %2$s</string>
     <string name="a11y_node_distance_away">%1$s від вас</string>
-    <string name="a11y_node_hops_away">%1$d стрибків</string>
     <string name="a11y_node_offline">офлайн</string>
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роль %1$s</string>
     <string name="a11y_node_signal">сигнал %1$s</string>
+    <string name="a11y_temperature">Температура</string>
     <string name="about">Про</string>
     <string name="accept">Прийняти</string>
     <string name="acknowledgements">Подяки</string>
@@ -122,7 +123,6 @@
     <string name="channel_8">Канал 8</string>
     <string name="channel_features">Характеристики каналу</string>
     <string name="channel_invalid">URL-адреса цього каналу недійсна та не може бути використана</string>
-    <string name="channel_label">Канал</string>
     <string name="channel_name">Ім'я каналу</string>
     <string name="channel_url">URL каналу</string>
     <string name="channel_utilization">Завантаженість каналу</string>
@@ -284,7 +284,6 @@
     <string name="discovery_stat_status">Статус</string>
     <string name="discovery_stop_scan">Зупинити сканування</string>
     <string name="discovery_time_remaining">%1$s залишилось</string>
-    <string name="discovery_unique_nodes">%1$d унікальних вузлів</string>
     <string name="discovery_view_map">Переглянути мапу</string>
     <string name="disk_free_indexed">Вільне місце %1$d</string>
     <string name="display">Дисплей</string>
@@ -318,6 +317,7 @@
     <string name="done">Готово</string>
     <string name="download">Завантажити</string>
     <string name="duplicated_public_key_title">Виявлено дублікат публічного ключа</string>
+    <!-- DURATION -->
     <string name="dynamic">Динамічна</string>
     <string name="easily_set_up_private_mesh_networks">Легко налаштовуйте приватні mesh-мережі для безпечного та надійного зв'язку у віддалених районах.</string>
     <string name="edit">Редагувати</string>

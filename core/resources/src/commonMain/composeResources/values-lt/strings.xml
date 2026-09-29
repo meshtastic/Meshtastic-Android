@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Drėgmė</string>
+    <string name="a11y_temperature">Temperatūra</string>
     <string name="about">Apie</string>
     <string name="accept">Priimti</string>
     <!-- ACTION -->
@@ -45,7 +47,6 @@
     <string name="ch_util_definition">Dabartinio kanalo panaudojimas, įskaitant gerai suformuotą TX (siuntimas), RX (gavimas) ir netinkamai suformuotą RX (arba - triukšmas).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Šio kanalo URL yra neteisingas ir negali būti naudojamas</string>
-    <string name="channel_label">Kanalas</string>
     <string name="channel_name">Kanalo pavadinimas</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Pasirinkite Aplinką</string>
@@ -82,6 +83,7 @@
     <!-- DISTANCE -->
     <string name="distance">Atstumas</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Redaguoti</string>
     <string name="eight_hours">8 Valandos</string>
     <!-- EMOJI -->

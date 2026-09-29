@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Nem</string>
+    <string name="a11y_temperature">Sıcaklık</string>
     <string name="about">Hakkında</string>
     <string name="accept">Kabul et</string>
     <!-- ACTION -->
@@ -79,7 +81,6 @@
     <string name="channel_7">Kanal 7</string>
     <string name="channel_8">Kanal 8</string>
     <string name="channel_invalid">Bu Kanal URL' si geçersiz ve kullanılamaz</string>
-    <string name="channel_label">Kanal</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="channels">Kanallar</string>
     <!-- CHIRPY -->
@@ -154,6 +155,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Nodelar</string>
     <string name="download">İndir</string>
+    <!-- DURATION -->
     <string name="dynamic">Dinamik</string>
     <string name="edit">Düzenle</string>
     <string name="eight_hours">8 Saat</string>

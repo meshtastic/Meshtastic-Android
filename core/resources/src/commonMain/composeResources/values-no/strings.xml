@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Luftfuktighet</string>
+    <string name="a11y_temperature">Temperatur</string>
     <string name="about">Om</string>
     <string name="accept">Godta</string>
     <!-- ACTION -->
@@ -45,7 +47,6 @@
     <string name="ch_util_definition">Utnyttelse for denne kanalen, inkludert godt formet TX, RX og feilformet RX (aka støy).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Denne kanall URL er ugyldig og kan ikke benyttes</string>
-    <string name="channel_label">Kanal</string>
     <string name="channel_name">Kanal Navn</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Velg tema</string>
@@ -81,6 +82,7 @@
     <!-- DISTANCE -->
     <string name="distance">Distanse</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Rediger</string>
     <string name="eight_hours">8 Timer</string>
     <!-- EMOJI -->
