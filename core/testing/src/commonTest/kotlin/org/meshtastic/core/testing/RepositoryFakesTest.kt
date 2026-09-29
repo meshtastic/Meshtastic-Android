@@ -21,13 +21,13 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.model.ConnectionEpochs
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.QuickChatAction
 import org.meshtastic.core.repository.EditSettingsTransactionException
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException

@@ -17,8 +17,8 @@
 package org.meshtastic.feature.firmware
 
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 
 /** Common interface for all firmware update handlers (BLE DFU, ESP32 OTA, USB). */
 interface FirmwareUpdateHandler {

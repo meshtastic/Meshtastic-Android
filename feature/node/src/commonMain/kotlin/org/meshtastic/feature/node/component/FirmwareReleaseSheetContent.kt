@@ -34,7 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.m3.Markdown
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.download
 import org.meshtastic.core.resources.firmware_version

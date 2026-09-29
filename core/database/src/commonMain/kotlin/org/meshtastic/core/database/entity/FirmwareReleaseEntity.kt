@@ -22,6 +22,8 @@ import androidx.room3.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.FirmwareRelease
+import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.model.NetworkFirmwareRelease
 
 @Serializable
@@ -56,25 +58,4 @@ fun FirmwareReleaseEntity.asExternalModel() = FirmwareRelease(
     releaseType = releaseType,
 )
 
-data class FirmwareRelease(
-    val id: String = "",
-    val pageUrl: String = "",
-    val releaseNotes: String = "",
-    val title: String = "",
-    val zipUrl: String = "",
-    val lastUpdated: Long = nowMillis,
-    val releaseType: FirmwareReleaseType = FirmwareReleaseType.STABLE,
-)
-
 fun FirmwareReleaseEntity.asDeviceVersion(): DeviceVersion = DeviceVersion(id.substringBeforeLast(".").replace("v", ""))
-
-fun FirmwareRelease.asDeviceVersion(): DeviceVersion = DeviceVersion(id.substringBeforeLast(".").replace("v", ""))
-
-enum class FirmwareReleaseType {
-    STABLE,
-    ALPHA,
-
-    /** Nightly preview from the nightly host's root; gated behind the modules unlock. */
-    NIGHTLY,
-    LOCAL,
-}

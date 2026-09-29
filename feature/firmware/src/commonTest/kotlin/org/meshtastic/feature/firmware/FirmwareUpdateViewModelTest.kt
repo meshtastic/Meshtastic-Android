@@ -40,13 +40,13 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
+import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository

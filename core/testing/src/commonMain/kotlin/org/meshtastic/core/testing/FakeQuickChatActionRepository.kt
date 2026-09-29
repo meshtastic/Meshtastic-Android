@@ -17,7 +17,7 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.Flow
-import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.model.QuickChatAction
 import org.meshtastic.core.repository.QuickChatActionRepository
 
 /**

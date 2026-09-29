@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.firmware
 
-import org.meshtastic.core.database.entity.FirmwareReleaseType
+import org.meshtastic.core.model.FirmwareReleaseType
 
 data class FirmwareUpdateActions(
     val onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,

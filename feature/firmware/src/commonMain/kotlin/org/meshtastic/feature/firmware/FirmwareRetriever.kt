@@ -20,9 +20,9 @@ import co.touchlab.kermit.Logger
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
-import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
+import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.feature.firmware.ota.FirmwareHashUtil
 

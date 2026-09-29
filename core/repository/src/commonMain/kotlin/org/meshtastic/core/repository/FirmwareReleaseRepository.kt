@@ -17,7 +17,7 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.Flow
-import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.model.FirmwareRelease
 
 interface FirmwareReleaseRepository {
     /** A flow that provides the latest STABLE firmware release. */

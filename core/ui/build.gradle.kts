@@ -33,7 +33,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
-            implementation(projects.core.database)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(libs.meshtastic.protobufs)

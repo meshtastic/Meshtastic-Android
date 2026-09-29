@@ -14,28 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.messaging
+package org.meshtastic.core.model
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.PreviewLightDark
-import org.meshtastic.core.model.QuickChatAction
-import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.common.util.nowMillis
 
-@PreviewLightDark
-@Composable
-fun QuickChatItemPreview() {
-    AppTheme { QuickChatItem(action = QuickChatAction(name = "TST", message = "Test", position = 0)) }
-}
+data class FirmwareRelease(
+    val id: String = "",
+    val pageUrl: String = "",
+    val releaseNotes: String = "",
+    val title: String = "",
+    val zipUrl: String = "",
+    val lastUpdated: Long = nowMillis,
+    val releaseType: FirmwareReleaseType = FirmwareReleaseType.STABLE,
+)
 
-@PreviewLightDark
-@Composable
-fun EditQuickChatDialogPreview() {
-    AppTheme {
-        EditQuickChatDialog(
-            action = QuickChatAction(name = "TST", message = "Test", position = 0),
-            onSave = {},
-            onDelete = {},
-            onDismiss = {},
-        )
-    }
+fun FirmwareRelease.asDeviceVersion(): DeviceVersion = DeviceVersion(id.substringBeforeLast(".").replace("v", ""))
+
+enum class FirmwareReleaseType {
+    STABLE,
+    ALPHA,
+
+    /** Nightly preview from the nightly host's root; gated behind the modules unlock. */
+    NIGHTLY,
+    LOCAL,
 }

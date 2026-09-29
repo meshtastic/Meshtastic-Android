@@ -14,28 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.messaging
+package org.meshtastic.core.model
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.PreviewLightDark
-import org.meshtastic.core.model.QuickChatAction
-import org.meshtastic.core.ui.theme.AppTheme
-
-@PreviewLightDark
-@Composable
-fun QuickChatItemPreview() {
-    AppTheme { QuickChatItem(action = QuickChatAction(name = "TST", message = "Test", position = 0)) }
-}
-
-@PreviewLightDark
-@Composable
-fun EditQuickChatDialogPreview() {
-    AppTheme {
-        EditQuickChatDialog(
-            action = QuickChatAction(name = "TST", message = "Test", position = 0),
-            onSave = {},
-            onDelete = {},
-            onDismiss = {},
-        )
+data class QuickChatAction(
+    val uuid: Long = 0L,
+    val name: String = "",
+    val message: String = "",
+    val mode: Mode = Mode.Instant,
+    val position: Int,
+) {
+    enum class Mode {
+        Append,
+        Instant,
     }
 }

@@ -85,9 +85,9 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
+import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.back

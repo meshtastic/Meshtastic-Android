@@ -28,7 +28,6 @@ kotlin {
             api(projects.core.model)
             api(libs.meshtastic.protobufs)
             implementation(projects.core.common)
-            implementation(projects.core.database)
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.atomicfu)

@@ -20,8 +20,8 @@ package org.meshtastic.feature.firmware
 
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
