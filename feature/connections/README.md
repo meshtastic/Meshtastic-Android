@@ -39,7 +39,6 @@ src/
 │   │       ├── CurrentlyConnectedInfo.kt
 │   │       ├── DeviceList.kt / DeviceListItem.kt / DeviceSectionHeader.kt
 │   │       ├── DisconnectButton.kt
-│   │       ├── EmptyStateContent.kt
 │   │       └── TransportSelector.kt
 │   └── di/
 │       └── FeatureConnectionsModule.kt

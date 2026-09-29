@@ -18,7 +18,6 @@ package org.meshtastic.feature.discovery.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -65,6 +64,7 @@ import org.meshtastic.core.resources.discovery_history
 import org.meshtastic.core.resources.discovery_scan_complete
 import org.meshtastic.core.resources.discovery_scan_incomplete
 import org.meshtastic.core.resources.discovery_unique_nodes
+import org.meshtastic.core.ui.component.EmptyState
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.CheckCircle
 import org.meshtastic.core.ui.icon.Delete
@@ -118,22 +118,11 @@ fun DiscoveryHistoryScreen(
 
 @Composable
 private fun EmptyHistoryState(modifier: Modifier = Modifier) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = MeshtasticIcons.History,
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = stringResource(Res.string.discovery_empty_history),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
+    EmptyState(
+        icon = MeshtasticIcons.History,
+        title = stringResource(Res.string.discovery_empty_history),
+        modifier = modifier,
+    )
 }
 
 @Composable

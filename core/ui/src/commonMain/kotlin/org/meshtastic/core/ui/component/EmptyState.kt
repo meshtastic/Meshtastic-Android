@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.connections.ui.components
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -31,33 +32,48 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
+/**
+ * Centered empty state: a muted icon, a title saying what is empty, an optional line saying what happens next, and an
+ * optional action. Text uses `onSurface` and `onSurfaceVariant`, which meet 4.5:1 on every surface; `outline` does not.
+ */
 @Composable
-fun EmptyStateContent(
-    text: String,
-    imageVector: ImageVector,
+fun EmptyState(
+    icon: ImageVector,
+    title: String,
     modifier: Modifier = Modifier,
+    supportingText: String? = null,
     action: (@Composable () -> Unit)? = null,
 ) {
     Column(
-        modifier = modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+        modifier = modifier.padding(horizontal = 32.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
         Icon(
-            imageVector = imageVector,
+            imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.outlineVariant,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = text,
-            modifier = Modifier.padding(top = 16.dp),
-            style = MaterialTheme.typography.bodyLarge,
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.outline,
         )
+        if (supportingText != null) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = supportingText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
         if (action != null) {
-            Column(modifier = Modifier.padding(top = 24.dp)) { action() }
+            Spacer(modifier = Modifier.height(16.dp))
+            action()
         }
     }
 }
