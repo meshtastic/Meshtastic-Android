@@ -131,9 +131,10 @@ object SettingsSearchCatalog {
         ConfigRoute.entries.map {
             it.title to it.route
         } + ModuleRoute.entries.map { it.title to it.route }
-        ).map { (title, route) ->
-        SettingsSearchEntry(title = title, description = null, route = route, screenTitle = title)
-    }
+        )
+        .map { (title, route) ->
+            SettingsSearchEntry(title = title, description = null, route = route, screenTitle = title)
+        }
 
     /** App-level settings, which have no schema behind them and so are listed by hand. */
     private val appSettings: List<Pair<StringResource, Route>> =

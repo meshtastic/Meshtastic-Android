@@ -99,8 +99,9 @@ fun MeshtasticImportFAB(
     var isNfcScanning by rememberSaveable { mutableStateOf(false) }
     var showNfcDisabledDialog by rememberSaveable { mutableStateOf(false) }
 
-    val barcodeScanner =
-        LocalBarcodeScannerProvider.current { contents -> normalizeImportContents(contents)?.let(onImport) }
+    val barcodeScanner = LocalBarcodeScannerProvider.current { contents ->
+        normalizeImportContents(contents)?.let(onImport)
+    }
     val nfcScanner = LocalNfcScannerProvider.current
     val isNfcSupported = LocalNfcScannerSupported.current
     val isBarcodeSupported = LocalBarcodeScannerSupported.current

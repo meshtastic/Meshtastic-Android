@@ -178,11 +178,10 @@ class ConversationShortcutPublisher(
         // A node-colored pill avatar showing the short name identifies the person and matches the in-app node chip.
         // Set it on the shortcut itself (not just the Person) so launchers/Android Auto render it instead of a generic
         // head silhouette.
-        val icon =
-            node?.let {
-                val (foregroundColor, backgroundColor) = nodeColorsFromNum(it.num)
-                PersonIconFactory.createLabel(shortName ?: label, backgroundColor, foregroundColor, rounded = false)
-            }
+        val icon = node?.let {
+            val (foregroundColor, backgroundColor) = nodeColorsFromNum(it.num)
+            PersonIconFactory.createLabel(shortName ?: label, backgroundColor, foregroundColor, rounded = false)
+        }
         val person =
             Person.Builder()
                 .setName(label)
