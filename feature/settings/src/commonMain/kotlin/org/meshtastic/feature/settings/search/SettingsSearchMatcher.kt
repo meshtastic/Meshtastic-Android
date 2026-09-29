@@ -20,6 +20,8 @@ import org.meshtastic.core.navigation.Route
 
 /** A catalog entry with its text resolved in the user's language, which is what the matcher reads. */
 data class ResolvedSettingsEntry(
+    /** [SettingsSearchEntry.id] of the entry this was resolved from. */
+    val id: String,
     val title: String,
     val description: String?,
     val screenTitle: String,

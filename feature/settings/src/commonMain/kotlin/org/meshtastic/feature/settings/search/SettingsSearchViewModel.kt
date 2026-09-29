@@ -59,6 +59,7 @@ class SettingsSearchViewModel : ViewModel() {
             resolved.value =
                 SettingsSearchCatalog.entries().map { entry ->
                     ResolvedSettingsEntry(
+                        id = entry.id,
                         title = getStringSuspend(entry.title),
                         description = entry.description?.let { getStringSuspend(it) },
                         screenTitle = getStringSuspend(entry.screenTitle),

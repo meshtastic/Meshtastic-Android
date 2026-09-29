@@ -88,6 +88,14 @@ class SettingsSearchCatalogTest {
     }
 
     @Test
+    fun everyEntryHasADistinctId() {
+        val duplicates =
+            SettingsSearchCatalog.entries().groupingBy { it.id }.eachCount().filterValues { it > 1 }.keys.sorted()
+
+        assertEquals(emptyList(), duplicates, "the results list keys on the id, and a duplicate key crashes it")
+    }
+
+    @Test
     fun everyConfigurationScreenIsReachableFromSearch() {
         val routes = SettingsSearchCatalog.entries().map { it.route }.toSet()
         val missing = (ConfigRoute.entries.map { it.route } + ModuleRoute.entries.map { it.route }) - routes
