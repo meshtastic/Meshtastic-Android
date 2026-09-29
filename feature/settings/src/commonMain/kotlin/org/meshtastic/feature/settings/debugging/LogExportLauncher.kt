@@ -14,12 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.discovery.export
+package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.runtime.Composable
-import co.touchlab.kermit.Logger
+import androidx.compose.runtime.remember
+import org.meshtastic.core.ui.util.rememberFileExporter
 
+/** Remembers a launcher that writes [contentProvider]'s text to a user-chosen file. */
 @Composable
-actual fun rememberExportSaver(): ExportSaverLauncher = ExportSaverLauncher { result ->
-    Logger.w { "Export save not yet implemented on iOS: ${result.fileName}" }
+fun rememberLogExporter(contentProvider: suspend () -> String): (fileName: String) -> Unit {
+    val export = rememberFileExporter { contentProvider().encodeToByteArray() }
+    return remember(export) { { fileName -> export(fileName, "text/plain") } }
 }

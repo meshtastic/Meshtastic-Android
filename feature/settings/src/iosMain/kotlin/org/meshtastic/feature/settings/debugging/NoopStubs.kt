@@ -16,8 +16,4 @@
  */
 package org.meshtastic.feature.settings.debugging
 
-import androidx.compose.runtime.Composable
-
-@Composable actual fun rememberLogExporter(contentProvider: suspend () -> String): (fileName: String) -> Unit = { _ -> }
-
 actual fun captureAppLogcat(): String = ""
