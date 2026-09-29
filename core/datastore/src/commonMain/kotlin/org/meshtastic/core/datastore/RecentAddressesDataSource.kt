@@ -27,7 +27,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 import org.meshtastic.core.datastore.model.RecentAddress
@@ -67,8 +66,8 @@ open class RecentAddressesDataSource(private val dataStore: CorePreferencesDataS
 
     private fun parseLegacyRecentAddress(item: kotlinx.serialization.json.JsonElement): RecentAddress? = when (item) {
         is JsonObject -> {
-            val address = item["address"]?.jsonPrimitive?.contentOrNull
-            val name = item["name"]?.jsonPrimitive?.contentOrNull
+            val address = (item["address"] as? JsonPrimitive)?.contentOrNull
+            val name = (item["name"] as? JsonPrimitive)?.contentOrNull
             if (address != null && name != null) {
                 RecentAddress(address = address, name = name)
             } else {

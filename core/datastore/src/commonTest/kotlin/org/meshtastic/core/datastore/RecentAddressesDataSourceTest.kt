@@ -254,6 +254,18 @@ class RecentAddressesDataSourceTest {
     }
 
     @Test
+    fun `legacy JsonObject with non-primitive fields is skipped and keeps the other entries`() = testScope.runTest {
+        storeRaw(
+            """[{"address":{},"name":"BadA"},{"address":"9.9.9.9","name":["BadB"]},""" +
+                """{"address":"1.2.3.4","name":"Good"}]""",
+        )
+        val result = dataSource.recentAddresses.first()
+
+        assertEquals(listOf(RecentAddress("1.2.3.4", "Good")), result)
+        logs.assertNotLogged("BadA", "9.9.9.9", "BadB", "1.2.3.4", "Good")
+    }
+
+    @Test
     fun `legacy nested JsonArray entries are skipped`() = testScope.runTest {
         storeRaw("""[["nested","array"],{"address":"1.2.3.4","name":"Good"}]""")
         val result = dataSource.recentAddresses.first()
