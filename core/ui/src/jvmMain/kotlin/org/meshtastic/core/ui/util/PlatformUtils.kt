@@ -174,6 +174,9 @@ actual fun rememberOpenAppSettings(): () -> Unit = { Logger.w { "App settings no
 /** JVM — Desktop does not gate location behind a runtime permission. */
 @Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
 
+/** JVM — Desktop does not gate location precision behind a runtime permission. */
+@Composable actual fun rememberPreciseLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
+
 /** JVM — Desktop does not gate Bluetooth behind a runtime permission. */
 @Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedPermissionUiState()
 

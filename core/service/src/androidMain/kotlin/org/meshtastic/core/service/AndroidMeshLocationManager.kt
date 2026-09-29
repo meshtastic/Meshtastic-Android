@@ -45,7 +45,9 @@ class AndroidMeshLocationManager(private val context: Application, private val l
         this.sendPositionFn = sendPositionFn
         if (locationFlow?.isActive == true) return
 
-        if (context.hasLocationPermission()) {
+        // Firmware stores this fix as the node's own position and rebroadcasts it at the channel's precision, which
+        // it stamps over any precision_bits sent here, so an approximate fix would go out claiming accuracy it lacks.
+        if (context.hasLocationPermission(precise = true)) {
             locationFlow =
                 locationRepository
                     .getLocations()

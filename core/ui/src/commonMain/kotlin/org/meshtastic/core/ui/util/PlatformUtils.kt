@@ -125,6 +125,12 @@ expect val bleScanRequiresLocationServices: Boolean
 @Composable expect fun rememberLocationPermissionState(): PermissionUiState
 
 /**
+ * Like [rememberLocationPermissionState], but granted only with precise location. Use it where an approximate fix would
+ * be wrong rather than merely less useful, such as sharing the phone's position to the mesh.
+ */
+@Composable expect fun rememberPreciseLocationPermissionState(): PermissionUiState
+
+/**
  * Returns the reactive [PermissionUiState] for the Bluetooth scan/connect permissions. On pre-Android-12 devices BLE
  * scanning is gated by the location permission, so the returned state delegates to [rememberLocationPermissionState].
  */

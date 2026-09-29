@@ -156,7 +156,7 @@ class MeshService : Service() {
         // while-in-use restricted there) upgrades to connectedDevice|location the next time the user opens the app.
         val foregroundServiceType =
             ForegroundStartPolicy.foregroundServiceType(
-                hasLocationPermission = hasLocationPermission(),
+                hasLocationPermission = hasLocationPermission(precise = true),
                 appInForeground = isAppInForeground(),
             )
 

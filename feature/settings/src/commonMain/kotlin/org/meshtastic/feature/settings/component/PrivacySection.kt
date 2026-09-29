@@ -40,7 +40,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.PermissionGateAction
 import org.meshtastic.core.ui.util.isGpsDisabled
 import org.meshtastic.core.ui.util.permissionGateAction
-import org.meshtastic.core.ui.util.rememberLocationPermissionState
+import org.meshtastic.core.ui.util.rememberPreciseLocationPermissionState
 import org.meshtastic.core.ui.util.rememberShowToastResource
 
 /** Section managing privacy settings like analytics and location sharing. */
@@ -57,7 +57,8 @@ internal fun ColumnScope.PrivacySettingsContent(
     stopProvideLocation: () -> Unit,
 ) {
     val showToast = rememberShowToastResource()
-    val locationPermission = rememberLocationPermissionState()
+    // Mesh sharing needs precise location: the service drops an approximate-only grant, so this toggle asks for fine.
+    val locationPermission = rememberPreciseLocationPermissionState()
     val isGpsOff = isGpsDisabled()
 
     // Captured through rememberUpdatedState: the effect below restarts on every status change, and reading the

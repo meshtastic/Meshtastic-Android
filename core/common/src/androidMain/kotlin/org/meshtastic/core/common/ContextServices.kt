@@ -91,8 +91,14 @@ fun Context.hasLocalNetworkPermission(): Boolean = Build.VERSION.SDK_INT < LOCAL
     ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_LOCAL_NETWORK) ==
     PackageManager.PERMISSION_GRANTED
 
-/** @return true if the user already has location permission (ACCESS_FINE_LOCATION). */
-fun Context.hasLocationPermission(): Boolean {
-    val perms = listOf(Manifest.permission.ACCESS_FINE_LOCATION)
-    return perms.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }
+/**
+ * @param precise true to require ACCESS_FINE_LOCATION. An approximate-only grant (ACCESS_COARSE_LOCATION) satisfies
+ *   `precise = false` alone.
+ * @return true if the user has granted location at the requested precision.
+ */
+fun Context.hasLocationPermission(precise: Boolean): Boolean {
+    fun granted(permission: String) =
+        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+    return granted(Manifest.permission.ACCESS_FINE_LOCATION) ||
+        (!precise && granted(Manifest.permission.ACCESS_COARSE_LOCATION))
 }

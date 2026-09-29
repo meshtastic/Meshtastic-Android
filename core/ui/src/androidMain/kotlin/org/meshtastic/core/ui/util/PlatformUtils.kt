@@ -434,6 +434,19 @@ actual fun rememberLocationPermissionState(): PermissionUiState = rememberRuntim
 )
 
 @Composable
+actual fun rememberPreciseLocationPermissionState(): PermissionUiState = rememberRuntimePermissionState(
+    // Android 12+ ignores a fine request that does not also ask for coarse. Fine leads so the rationale and
+    // requested
+    // tracking follow the permission that decides the grant.
+    permissions =
+    arrayOf(
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+    ),
+    requireAll = true,
+)
+
+@Composable
 actual fun rememberBluetoothPermissionState(): PermissionUiState {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
         // Pre-Android 12 has no runtime Bluetooth permission — the platform gates BLE scanning on fine location
