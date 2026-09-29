@@ -71,6 +71,7 @@ import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalTestApi::class)
 class TracerouteMapRouteTest {
@@ -90,17 +91,25 @@ class TracerouteMapRouteTest {
     @Test
     fun tracerouteMapRouteRendersTheMapScreenAroundTheHostMap() = runComposeUiTest {
         val route = NodeDetailRoute.TracerouteMap(destNum = NODE_NUM, requestId = REQUEST_ID)
+        var factoryDestNum: Int? = null
         val koinApp = koinApplication {
-            modules(module { viewModel { params -> createMetricsViewModel(destNum = params.get()) } })
+            modules(
+                module {
+                    viewModel { params ->
+                        createMetricsViewModel(destNum = params.get<Int>().also { factoryDestNum = it })
+                    }
+                },
+            )
         }
         val viewModelStoreOwner = TestViewModelStoreOwner()
+        val lifecycleOwner = ResumedLifecycleOwner()
         try {
             setContent {
                 val backStack = remember { NavBackStack<NavKey>().apply { add(route) } }
                 KoinIsolatedContext(context = koinApp) {
                     CompositionLocalProvider(
                         LocalViewModelStoreOwner provides viewModelStoreOwner,
-                        LocalLifecycleOwner provides ResumedLifecycleOwner(),
+                        LocalLifecycleOwner provides lifecycleOwner,
                         LocalTracerouteMapProvider provides
                             { _, _, onMappableCountChanged, modifier ->
                                 LaunchedEffect(Unit) { onMappableCountChanged(SHOWN_NODES, TOTAL_NODES) }
@@ -121,6 +130,7 @@ class TracerouteMapRouteTest {
             onNodeWithText(FAKE_MAP).assertExists()
             onNodeWithText(NODE_NAME).assertExists()
             onNodeWithText(getString(Res.string.traceroute_showing_nodes, SHOWN_NODES, TOTAL_NODES)).assertExists()
+            assertEquals(NODE_NUM, factoryDestNum)
         } finally {
             viewModelStoreOwner.viewModelStore.clear()
             koinApp.close()
