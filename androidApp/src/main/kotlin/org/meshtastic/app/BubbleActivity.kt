@@ -25,8 +25,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.recalculateWindowInsets
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -80,17 +85,20 @@ class BubbleActivity : AppCompatActivity() {
                 )
             }
             AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
-                MessageScreen(
-                    contactKey = contactKey,
-                    message = "",
-                    viewModel = messageViewModel,
-                    navigateToNodeDetails = { nodeNum -> openInApp("nodes/$nodeNum") },
-                    // Quick chat and message filters have no deep link of their own, so the full app opens on this
-                    // conversation — the screen those menu items live on.
-                    navigateToQuickChatOptions = { openInApp("messages/$contactKey") },
-                    navigateToFilterSettings = { openInApp("messages/$contactKey") },
-                    onNavigateBack = { finish() },
-                )
+                // Edge to edge, only this padding keeps the composer clear of the keyboard and the navigation bar.
+                Box(Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding()) {
+                    MessageScreen(
+                        contactKey = contactKey,
+                        message = "",
+                        viewModel = messageViewModel,
+                        navigateToNodeDetails = { nodeNum -> openInApp("nodes/$nodeNum") },
+                        // Quick chat and message filters have no deep link of their own, so the full app opens on
+                        // this conversation, the screen those menu items live on.
+                        navigateToQuickChatOptions = { openInApp("messages/$contactKey") },
+                        navigateToFilterSettings = { openInApp("messages/$contactKey") },
+                        onNavigateBack = { finish() },
+                    )
+                }
             }
         }
     }
