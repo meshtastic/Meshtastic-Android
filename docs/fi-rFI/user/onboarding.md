@@ -1,7 +1,7 @@
 ---
 title: Aloittaminen
 nav_order: 1
-last_updated: 2026-08-30
+last_updated: 2026-09-28
 description: Ensimmäisen käynnistyksen määritys — käyttöoikeudet, käyttöönottoprosessi ja seuraavat vaiheet radion yhdistämisen jälkeen.
 aliases:
   - ensimmäinen käynnistys
@@ -53,6 +53,8 @@ Meshtastic käyttää sijaintiasi myös seuraaviin tarkoituksiin:
 - Sijaintisi näyttäminen mesh-kartalla
 - Etäisyyksien laskeminen muihin radioihin
 - GPS-koordinaattiesi jakaminen muiden verkon jäsenten kanssa (jos käytössä)
+
+On Android 12 and newer, choose **Precise** to share your position with the mesh: an approximate grant still shows you on the map, but position sharing needs precise location.
 
 Myönnä **Sovelluksen käytön aikana**. Sovellus ei pyydä taustasijaintia — sen manifestissa ei ole ACCESS_BACKGROUND_LOCATION-oikeutta — joten Android ei tarjoa **Aina**-vaihtoehtoa, ja sijaintipäivitykset tapahtuvat sovelluksen ollessa etualalla tai sen suorittaessa taustapalvelua.
 

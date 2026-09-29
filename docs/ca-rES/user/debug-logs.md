@@ -1,7 +1,7 @@
 ---
 title: Debug Logs
 nav_order: 22
-last_updated: 2026-08-30
+last_updated: 2026-09-28
 description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
 aliases:
   - debug-logs
@@ -47,7 +47,7 @@ Attach that file to your GitHub issue.
 
 ## Desktop
 
-The desktop app has no system logcat, so the **App logs** tab shows the app's own captured log output instead. Search, filtering, and export work the same way.
+The desktop app has no system logcat, so the **App logs** tab shows the app's own captured log output instead. Search, filtering, and export work the same way. Release builds capture Info, Warn, and Error lines; Verbose and Debug lines appear only in development builds.
 
 ## Related Topics
 
