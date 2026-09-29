@@ -246,6 +246,26 @@ class DiscoveryPacketCollectionTest {
     }
 
     @Test
+    fun directPacketUpgradesANodeFirstNamedByNeighborInfo() = runTest {
+        val engine = createEngine(this)
+        nodeRepository.setMyNodeInfo(createMyNodeInfo())
+        engine.startScan(testPresets, dwellDurationSeconds = 60)
+        awaitDwell(engine)
+
+        engine.onPacketReceived(neighborInfoPacket(from = 8888, neighborNodeIds = listOf(6668)), dataPacket(8888))
+        engine.onPacketReceived(
+            positionPacket(from = 6668, latI = 377749000, lonI = -1224194000, snr = -4f, rssi = -90),
+            dataPacket(from = 6668),
+        )
+
+        engine.stopScan()
+
+        val node = discoveryDao.discoveredNodes.values.single { it.nodeNum == 6668L }
+        assertEquals("direct", node.neighborType, "Hearing the node itself makes it a direct sighting")
+        assertEquals(-4f, node.snr)
+    }
+
+    @Test
     fun neighborInfoDoesNotOverrideDirectType() = runTest {
         val engine = createEngine(this)
         nodeRepository.setMyNodeInfo(createMyNodeInfo())
