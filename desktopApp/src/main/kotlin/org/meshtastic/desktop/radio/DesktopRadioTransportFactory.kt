@@ -24,6 +24,7 @@ import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.SerialTransport
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
 import org.meshtastic.core.network.radio.MockRadioTransport
@@ -83,6 +84,6 @@ class DesktopRadioTransportFactory(
             )
         }
 
-        else -> error("Unsupported transport for address: $address")
+        else -> error("Unsupported transport for address: ${address.anonymize()}")
     }
 }

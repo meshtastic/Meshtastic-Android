@@ -16,10 +16,10 @@
  */
 package org.meshtastic.core.model.util
 
-import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import co.touchlab.kermit.loggerConfigInit
+import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.proto.Position
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,15 +27,7 @@ import kotlin.test.assertNull
 
 class WireExtensionsTest {
 
-    private class CapturingWriter : LogWriter() {
-        val severities = mutableListOf<Severity>()
-
-        override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
-            severities += severity
-        }
-    }
-
-    private val writer = CapturingWriter()
+    private val writer = CapturingLogWriter()
     private val logger = Logger(loggerConfigInit(writer), tag = "Test")
 
     // Garbage bytes that are not a valid encoding of any message: decoding must fail, not merely
@@ -47,7 +39,7 @@ class WireExtensionsTest {
         val result = Position.ADAPTER.decodeOrNull(garbage, logger)
 
         assertNull(result)
-        assertEquals(listOf(Severity.Warn), writer.severities)
+        assertEquals(listOf(Severity.Warn), writer.entries.map { it.severity })
     }
 
     @Test
@@ -55,7 +47,7 @@ class WireExtensionsTest {
         val result = Position.ADAPTER.decodeOrNull(bytes = garbage, logger = logger)
 
         assertNull(result)
-        assertEquals(listOf(Severity.Warn), writer.severities)
+        assertEquals(listOf(Severity.Warn), writer.entries.map { it.severity })
     }
 
     @Test
@@ -63,7 +55,7 @@ class WireExtensionsTest {
         val result = Position.ADAPTER.decodeOrNull(garbage)
 
         assertNull(result)
-        assertEquals(emptyList(), writer.severities)
+        assertEquals(emptyList(), writer.entries.map { it.severity })
     }
 
     @Test
@@ -71,6 +63,6 @@ class WireExtensionsTest {
         val result = Position.ADAPTER.decodeOrNull(bytes = null as ByteArray?, logger = logger)
 
         assertNull(result)
-        assertEquals(emptyList(), writer.severities)
+        assertEquals(emptyList(), writer.entries.map { it.severity })
     }
 }

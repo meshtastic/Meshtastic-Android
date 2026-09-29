@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleWriteType
+import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
@@ -29,6 +30,7 @@ import org.meshtastic.core.testing.FakeBleScanner
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_COMMANDER_UUID
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -42,6 +44,11 @@ import kotlin.test.assertTrue
 class NymeaWifiServiceTest {
 
     private val address = "AA:BB:CC:DD:EE:FF"
+
+    @AfterTest
+    fun tearDown() {
+        CapturingLogWriter.uninstall()
+    }
 
     private fun createService(
         scanner: FakeBleScanner = FakeBleScanner(),
@@ -291,6 +298,24 @@ class NymeaWifiServiceTest {
                 .joinToString("")
 
         assertTrue(writes.contains("\"c\":2"), "Should send CMD_CONNECT_HIDDEN (2)")
+    }
+
+    @Test
+    fun `provision never logs the WiFi credentials or the device response payload`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+        val logs = CapturingLogWriter.install()
+
+        emitResponse(connection, """{"c":1,"r":0,"p":{"i":"10.77.88.99"}}""")
+        val result = service.provision("SecretHomeNet", "hunter2-wifi-pass")
+
+        assertIs<ProvisionResult.Success>(result)
+        assertTrue(
+            logs.messages().any { it.endsWith("command=1") },
+            "Command send should be logged with nothing after the code: ${logs.messages()}",
+        )
+        logs.assertNotLogged("hunter2-wifi-pass", "SecretHomeNet", "10.77.88.99")
     }
 
     @Test

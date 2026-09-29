@@ -55,8 +55,8 @@ actual fun rememberShowToastResource(): suspend (StringResource) -> Unit = { _ -
 
 /** JVM stub — map opening is not available on Desktop. */
 @Composable
-actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit = { lat, lon, label ->
-    Logger.i { "Open map: $lat, $lon ($label)" }
+actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit = { _, _, _ ->
+    Logger.i { "Open map requested; not available on Desktop" }
 }
 
 /** JVM stub — URL opening via Desktop browse API. */

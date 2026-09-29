@@ -21,9 +21,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 
@@ -42,20 +41,19 @@ open class FirmwareRecoveryDataSource(private val dataStore: CorePreferencesData
     open val pending: Flow<PendingFirmwareRecovery?> =
         dataStore.data.map { preferences ->
             val jsonString = preferences[PreferencesKeys.PENDING_RECOVERY] ?: return@map null
-            runCatching { Json.decodeFromString<PendingFirmwareRecovery>(jsonString) }
+            // The stored record holds the device address and name, so the log names only the exception type.
+            safeCatching { DatastoreJson.decodeFromString<PendingFirmwareRecovery>(jsonString) }
                 .onFailure { e ->
-                    if (e is IllegalArgumentException || e is SerializationException) {
-                        Logger.w(e) { "Failed to parse pending firmware recovery, clearing preference" }
-                    } else {
-                        Logger.w(e) { "Unexpected error parsing pending firmware recovery" }
-                    }
+                    Logger.w { "Ignoring unreadable pending firmware recovery (${e::class.simpleName})" }
                 }
                 .getOrNull()
         }
 
     /** Records [recovery] as the outstanding interrupted update, replacing any previous record. */
     open suspend fun set(recovery: PendingFirmwareRecovery) {
-        dataStore.edit { preferences -> preferences[PreferencesKeys.PENDING_RECOVERY] = Json.encodeToString(recovery) }
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.PENDING_RECOVERY] = DatastoreJson.encodeToString(recovery)
+        }
     }
 
     /** Clears the outstanding recovery record (update finished, or the device returned on its own). */

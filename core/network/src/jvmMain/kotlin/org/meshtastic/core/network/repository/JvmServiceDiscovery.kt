@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import java.io.IOException
 import java.net.InetAddress
@@ -38,7 +39,8 @@ class JvmServiceDiscovery(private val dispatchers: CoroutineDispatchers) : Servi
             trySend(emptyList()) // Emit initial empty list so downstream combine() is not blocked
 
             val bindAddress = findLanAddress() ?: InetAddress.getLocalHost()
-            Logger.i { "JmDNS binding to ${bindAddress.hostAddress}" }
+            val interfaceName = safeCatching { NetworkInterface.getByInetAddress(bindAddress)?.name }.getOrNull()
+            Logger.i { "JmDNS binding to interface ${interfaceName ?: "unknown"}" }
 
             val jmdns =
                 try {
