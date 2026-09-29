@@ -131,7 +131,7 @@ class MeshMessageProcessorImpl(
 
     private suspend fun processFromRadio(proto: FromRadio, myNodeNum: Int?, session: RadioSessionContext) {
         val admitted =
-            radioInterfaceService.runWhileSessionActive(session) {
+            radioInterfaceService.runWhileSessionActive(session, "FromRadio ${proto.variantLabel()}") {
                 safeCatching {
                     // Audit log every incoming variant without allowing delayed work to cross a session boundary.
                     logVariant(proto, session)
@@ -259,7 +259,10 @@ class MeshMessageProcessorImpl(
 
     private suspend fun processBufferedPacket(buffered: BufferedMeshPacket, myNodeNum: Int): Boolean {
         val admitted =
-            radioInterfaceService.runWhileSessionActive(buffered.session) {
+            radioInterfaceService.runWhileSessionActive(
+                buffered.session,
+                "buffered packet ${buffered.packet.portLabel()}",
+            ) {
                 safeCatching { processReceivedMeshPacket(buffered.packet, myNodeNum, buffered.session) }
                     .onFailure {
                         Logger.e(it) { "Dropped a buffered early packet after a handler error; replay continued" }
@@ -288,20 +291,18 @@ class MeshMessageProcessorImpl(
 
         launchSessionBound(session, "mesh-packet emission") { serviceStateWriter.emitMeshPacket(packet) }
 
+        // The in-memory update is synchronous; the database write runs on its own session lease so this handler,
+        // which holds the whole inbound pipeline, never waits on the database writer gate.
         val from = packet.from
         if (from == myNodeNum) {
-            persistNodeUpdate(
-                myNodeNum,
-                channel = packet.channel,
-                operation = "local sender-node packet update",
-            ) { node ->
+            nodeManager.updateNodeForSession(myNodeNum, session, channel = packet.channel) { node ->
                 applySenderPacketUpdate(node, packet, decoded).copy(lastHeard = nowSeconds.toInt())
             }
         } else {
-            persistNodeUpdate(myNodeNum, operation = "local-node packet refresh") { node: Node ->
+            nodeManager.updateNodeForSession(myNodeNum, session) { node: Node ->
                 node.copy(lastHeard = nowSeconds.toInt())
             }
-            persistNodeUpdate(from, channel = packet.channel, operation = "sender-node packet update") { node ->
+            nodeManager.updateNodeForSession(from, session, channel = packet.channel) { node ->
                 applySenderPacketUpdate(node, packet, decoded)
             }
         }
@@ -373,6 +374,31 @@ class MeshMessageProcessorImpl(
     }
         .onFailure { Logger.e(it) { "Failed $operation; packet processing continued" } }
         .isSuccess
+
+    /** Names the variant for diagnostics from field names and the port only, never payload values. */
+    private fun FromRadio.variantLabel(): String = packet?.let { "packet ${it.portLabel()}" }
+        ?: when {
+            my_info != null -> "my_info"
+            node_info != null -> "node_info"
+            config != null -> "config"
+            moduleConfig != null -> "moduleConfig"
+            channel != null -> "channel"
+            config_complete_id != null -> "config_complete_id"
+            metadata != null -> "metadata"
+            deviceuiConfig != null -> "deviceuiConfig"
+            fileInfo != null -> "fileInfo"
+            region_presets != null -> "region_presets"
+            queueStatus != null -> "queueStatus"
+            log_record != null -> "log_record"
+            mqttClientProxyMessage != null -> "mqttClientProxyMessage"
+            xmodemPacket != null -> "xmodemPacket"
+            lockdown_status != null -> "lockdown_status"
+            clientNotification != null -> "clientNotification"
+            rebooted != null -> "rebooted"
+            else -> "other"
+        }
+
+    private fun MeshPacket.portLabel(): String = decoded?.portnum?.name ?: "encrypted"
 
     private fun insertMeshLog(log: MeshLog, session: RadioSessionContext): Job =
         launchSessionBound(session, "mesh-log insert") { meshLogRepository.value.insert(log) }

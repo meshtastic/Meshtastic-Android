@@ -114,8 +114,11 @@ class MeshConfigFlowManagerImpl(
     private fun runForSession(session: RadioSessionContext, block: () -> Unit): Boolean =
         radioInterfaceService.runIfSessionActive(session, block)
 
-    private suspend fun runWhileForSession(session: RadioSessionContext, block: suspend () -> Unit): Boolean =
-        radioInterfaceService.runWhileSessionActive(session, block)
+    private suspend fun runWhileForSession(
+        session: RadioSessionContext,
+        label: String,
+        block: suspend () -> Unit,
+    ): Boolean = radioInterfaceService.runWhileSessionActive(session, label, block)
 
     private fun isActiveSession(session: RadioSessionContext): Boolean = radioInterfaceService.isSessionActive(session)
 
@@ -220,7 +223,8 @@ class MeshConfigFlowManagerImpl(
 
         scope.handledLaunch {
             delay(wantConfigDelay)
-            val heartbeatSent = runWhileForSession(session) { heartbeatSender.sendHeartbeat("inter-stage") }
+            val heartbeatSent =
+                runWhileForSession(session, "inter-stage heartbeat") { heartbeatSender.sendHeartbeat("inter-stage") }
             if (!heartbeatSent) return@handledLaunch
             delay(wantConfigDelay)
             runForSession(session) {
@@ -261,7 +265,7 @@ class MeshConfigFlowManagerImpl(
     private suspend fun finishNodeInfoInstall(state: HandshakeState.ReceivingNodeInfo) {
         val session = state.session
         try {
-            val admitted = runWhileForSession(session) { installAndPublishNodeDatabase(state) }
+            val admitted = runWhileForSession(session, "NodeDB install") { installAndPublishNodeDatabase(state) }
             if (!admitted) Logger.d { "Discarding stale post-handshake install and publication" }
         } catch (e: CancellationException) {
             throw e
@@ -361,7 +365,7 @@ class MeshConfigFlowManagerImpl(
         // Queue on the serialized session-operation lane before returning to the FIFO frame consumer. Without
         // UNDISPATCHED, a later config frame can queue its persistence first and then be erased by this reset.
         scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
-            runWhileForSession(session) {
+            runWhileForSession(session, "handshake config reset") {
                 if (handshakeGeneration.value != gen) return@runWhileForSession
                 radioConfigRepository.clearChannelSet()
                 if (handshakeGeneration.value != gen) return@runWhileForSession
@@ -405,7 +409,7 @@ class MeshConfigFlowManagerImpl(
             }
         metadataNodeNum?.let { nodeNum ->
             scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
-                runWhileForSession(session) { nodeRepository.insertMetadata(nodeNum, metadata) }
+                runWhileForSession(session, "metadata persist") { nodeRepository.insertMetadata(nodeNum, metadata) }
             }
         }
         if (!admitted) Logger.d { "Discarding metadata from stale transport session" }
@@ -454,7 +458,7 @@ class MeshConfigFlowManagerImpl(
             }
         if (admitted) {
             scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
-                runWhileForSession(session) { radioConfigRepository.addFileInfo(info) }
+                runWhileForSession(session, "fileInfo persist") { radioConfigRepository.addFileInfo(info) }
             }
         }
         if (!admitted) Logger.d { "Discarding FileInfo from stale transport session" }
