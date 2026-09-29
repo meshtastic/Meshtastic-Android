@@ -232,7 +232,6 @@ class MeshConfigFlowManagerImpl(
     }
 
     private fun handleNodeInfoComplete(state: HandshakeState.ReceivingNodeInfo) {
-        val session = state.session
         Logger.i { "NodeInfo complete (Stage 2)" }
 
         val info = state.myNodeInfo

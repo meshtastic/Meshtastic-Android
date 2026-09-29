@@ -30,7 +30,7 @@ class FakePacketRepository {
     private val _packetsFlow = MutableStateFlow<List<DataPacket>>(emptyList())
     val packetsFlow: Flow<List<DataPacket>> = _packetsFlow
 
-    suspend fun sendPacket(packet: DataPacket) {
+    fun sendPacket(packet: DataPacket) {
         sentPackets.add(packet)
         _packetsFlow.value = sentPackets.toList()
     }
@@ -55,19 +55,19 @@ class FakeContactRepository {
     private val _contactsFlow = MutableStateFlow<List<Contact>>(emptyList())
     val contactsFlow: Flow<List<Contact>> = _contactsFlow
 
-    suspend fun addContact(contact: Contact) {
+    fun addContact(contact: Contact) {
         contacts[contact.userId] = contact
         _contactsFlow.value = contacts.values.toList()
     }
 
-    suspend fun removeContact(userId: String) {
+    fun removeContact(userId: String) {
         contacts.remove(userId)
         _contactsFlow.value = contacts.values.toList()
     }
 
-    suspend fun getContact(userId: String): Contact? = contacts[userId]
+    fun getContact(userId: String): Contact? = contacts[userId]
 
-    suspend fun updateContactLastMessage(userId: String, time: Long) {
+    fun updateContactLastMessage(userId: String, time: Long) {
         contacts[userId]?.let { existing ->
             contacts[userId] = existing.copy(lastMessageTime = time)
             _contactsFlow.value = contacts.values.toList()

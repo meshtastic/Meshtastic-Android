@@ -26,6 +26,7 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
@@ -270,6 +271,7 @@ private fun FirmwareVersionItems(
 }
 
 @Composable
+@ReadOnlyComposable
 private fun DeviceVersion.determineFirmwareStatusColor(
     latestStable: FirmwareRelease,
     latestAlpha: FirmwareRelease,

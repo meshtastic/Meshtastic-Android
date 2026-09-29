@@ -532,11 +532,13 @@ open class RadioConfigViewModel(
                     } catch (e: CancellationException) {
                         abortManualChannelBatch(batchRequestIds)
                         throw e
-                    } catch (e: Throwable) {
+                    } catch (e: Exception) {
                         abortManualChannelBatch(batchRequestIds)
-                        if (e !is Exception) throw e
                         Logger.w(e) { "Manual channel update failed after enqueue" }
                         e.message?.let(::sendError) ?: sendError(Res.string.unknown_error)
+                    } catch (e: Throwable) {
+                        abortManualChannelBatch(batchRequestIds)
+                        throw e
                     }
                 }
             } finally {

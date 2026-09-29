@@ -180,7 +180,7 @@ internal class DfuFallbackCoordinator(private val detection: BootloaderDetection
                 }
             }
         }
-        throw IllegalStateException("DFU fallback exhausted with non-empty protocol list (detection=$detection)")
+        error("DFU fallback exhausted with non-empty protocol list (detection=$detection)")
     }
 
     /**

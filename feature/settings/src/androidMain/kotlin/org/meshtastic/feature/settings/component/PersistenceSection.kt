@@ -16,10 +16,10 @@
  */
 package org.meshtastic.feature.settings.component
 
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview

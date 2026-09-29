@@ -181,6 +181,7 @@ class FakeBleConnection :
         onDisconnect?.invoke()
     }
 
+    @Suppress("InjectDispatcher") // test double: Unconfined delivers notifications synchronously, see below
     override suspend fun <T> profile(
         serviceUuid: Uuid,
         timeout: Duration,

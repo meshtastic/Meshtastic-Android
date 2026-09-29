@@ -351,8 +351,7 @@ interface PacketDao {
      */
     @Transaction
     suspend fun applyOutgoingReactionQueueStatus(packetId: Int, status: MessageStatus): ReactionEntity? {
-        val match =
-            findReactionsWithId(packetId).filter { it.status != MessageStatus.RECEIVED }.singleOrNull() ?: return null
+        val match = findReactionsWithId(packetId).singleOrNull { it.status != MessageStatus.RECEIVED } ?: return null
         if (shouldApplyOutgoingQueueStatus(match.status, status)) update(match.copy(status = status))
         return match
     }

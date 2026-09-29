@@ -89,6 +89,7 @@ open class MeshUtilApplication :
         Logger.e(throwable) { "Background application init failed in $context" }
     }
 
+    @Suppress("InjectDispatcher") // built with the Application, before Koin can inject anything
     protected val applicationScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Default + applicationScopeExceptionHandler)
 

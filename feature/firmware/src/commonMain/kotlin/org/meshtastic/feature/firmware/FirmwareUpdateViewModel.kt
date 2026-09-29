@@ -1320,7 +1320,7 @@ class FirmwareUpdateViewModel(
         }
     }
 
-    private suspend fun checkBatteryLevel(): Boolean {
+    private fun checkBatteryLevel(): Boolean {
         val node = nodeRepository.ourNodeInfo.value ?: return true
         val level = node.batteryLevel ?: 1
         val isBatteryLow = level in 1..MIN_BATTERY_LEVEL

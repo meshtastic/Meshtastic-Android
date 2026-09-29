@@ -121,7 +121,6 @@ import com.google.maps.android.data.renderer.model.PointStyle
 import com.google.maps.android.data.renderer.model.PolygonStyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -145,6 +144,8 @@ import org.meshtastic.app.map.offline.terrain.ContourOverlay
 import org.meshtastic.app.map.offline.terrain.HillshadeTileProvider
 import org.meshtastic.app.map.tiles.RasterBasemap
 import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.common.util.NumberFormatter
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
@@ -320,6 +321,7 @@ private const val TRACK_POINT_SIZE_DP = 24f
 private const val SELECTED_TRACK_POINT_SIZE_DP = 32f
 private const val TRACK_POINT_OUTER_FRACTION = 10f / 24f
 private const val TRACK_POINT_RING_FRACTION = 4f / 24f
+private const val COORDINATE_DECIMALS = 5
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class)
@@ -1550,11 +1552,11 @@ private fun PositionInfoWindowContent(position: Position, displayUnits: Measurem
         Column(modifier = Modifier.padding(8.dp)) {
             PositionRow(
                 label = stringResource(Res.string.latitude),
-                value = "%.5f".format((position.latitude_i ?: 0) * DEG_D),
+                value = NumberFormatter.format((position.latitude_i ?: 0) * DEG_D, COORDINATE_DECIMALS),
             )
             PositionRow(
                 label = stringResource(Res.string.longitude),
-                value = "%.5f".format((position.longitude_i ?: 0) * DEG_D),
+                value = NumberFormatter.format((position.longitude_i ?: 0) * DEG_D, COORDINATE_DECIMALS),
             )
             PositionRow(label = stringResource(Res.string.sats), value = position.sats_in_view.toString())
             PositionRow(
@@ -1564,7 +1566,7 @@ private fun PositionInfoWindowContent(position: Position, displayUnits: Measurem
             PositionRow(label = stringResource(Res.string.speed), value = speedFromPosition(position, displayUnits))
             PositionRow(
                 label = stringResource(Res.string.heading),
-                value = "%.0f°".format((position.ground_track ?: 0) * HEADING_DEG),
+                value = "${NumberFormatter.format((position.ground_track ?: 0) * HEADING_DEG, 0)}°",
             )
             PositionRow(label = stringResource(Res.string.timestamp), value = position.formatPositionTime())
         }
@@ -1679,7 +1681,7 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, opacity: Float, mapViewMode
         val layer =
             try {
                 val dataLayer =
-                    withContext(Dispatchers.IO) {
+                    withContext(ioDispatcher) {
                         // Buffered because the KMZ sniff marks and resets the stream before the parser reads it.
                         BufferedInputStream(ByteArrayInputStream(bytes)).use { stream ->
                             parseMapLayer(layerItem.layerType, stream)

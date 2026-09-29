@@ -24,6 +24,7 @@ import android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.RingtoneManager
+import android.net.Uri
 import androidx.core.net.toUri
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.resources.R.raw
@@ -189,7 +190,7 @@ internal enum class NotificationChannelSpec(
         }
 
     private companion object {
-        val defaultSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val defaultSound: Uri? = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         fun soundAttributes(usage: Int): AudioAttributes =
             AudioAttributes.Builder().setUsage(usage).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()

@@ -19,6 +19,7 @@ package org.meshtastic.feature.messaging.navigation
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
@@ -94,6 +95,7 @@ fun EntryProviderScope<NavKey>.contactsGraph(
 }
 
 @Composable
+@NonRestartableComposable
 fun ContactsEntryContent(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,

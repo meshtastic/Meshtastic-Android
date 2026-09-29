@@ -133,8 +133,6 @@ private suspend fun scanLayerIcons(uri: String): Set<String> = withContext(ioDis
 
 private fun MapLayerItem.conversionKey(): String = "$id@$refreshToken"
 
-private fun CustomLayer.conversionKey(): String = "$id@$refreshToken"
-
 /** What one KML conversion produced: the GeoJSON file's URI and the draped images. */
 internal data class ConvertedKml(
     val geoJsonUri: String,
@@ -167,7 +165,7 @@ private suspend fun convertKmlLayer(manager: MapLayersManager, layer: MapLayerIt
                 val geoJson = fs.read(target) { readUtf8() }
                 return@safeCatching ConvertedKml(
                     geoJsonUri = "$FILE_URI_PREFIX$target",
-                    groundOverlays = cachedOverlays.orEmpty(),
+                    groundOverlays = cachedOverlays,
                     icons = trustedGeoJsonIconUrls(geoJson),
                 )
             }

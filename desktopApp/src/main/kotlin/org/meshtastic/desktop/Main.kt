@@ -176,9 +176,7 @@ fun main(args: Array<String>) {
                 }
         }
         LaunchedEffect(Unit) { publishExitApplication(::exitApplication) }
-        val systemLocale = remember { Locale.getDefault() }
         val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
-        val httpClient = remember { koinApp.koin.get<HttpClient>() }
 
         DeepLinkHandler(args, uiViewModel, remember { koinApp.koin.get<LaunchOptions>() })
         MeshServiceLifecycle()

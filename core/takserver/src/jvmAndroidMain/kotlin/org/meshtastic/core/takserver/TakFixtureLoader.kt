@@ -20,6 +20,6 @@ package org.meshtastic.core.takserver
 internal actual fun loadTakFixtureXml(name: String): String {
     val stream =
         object {}::class.java.classLoader?.getResourceAsStream("tak_test_fixtures/$name")
-            ?: throw IllegalStateException("Fixture not found: tak_test_fixtures/$name")
+            ?: error("Fixture not found: tak_test_fixtures/$name")
     return stream.bufferedReader().readText()
 }

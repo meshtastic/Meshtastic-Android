@@ -67,6 +67,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_utilization
@@ -221,14 +222,14 @@ class LocalStatsWidget :
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
                     StatRow(
                         label = stringResource(Res.string.channel_utilization),
-                        value = "%.1f%%".format(state.channelUtilization),
+                        value = MetricFormatter.percent(state.channelUtilization),
                         progress = state.channelUtilizationProgress,
                         isSmall = isSmall,
                         modifier = GlanceModifier.defaultWeight().padding(end = 4.dp),
                     )
                     StatRow(
                         label = stringResource(Res.string.air_utilization),
-                        value = "%.1f%%".format(state.airUtilization),
+                        value = MetricFormatter.percent(state.airUtilization),
                         progress = state.airUtilizationProgress,
                         isSmall = isSmall,
                         modifier = GlanceModifier.defaultWeight().padding(start = 4.dp),

@@ -159,7 +159,6 @@ fun BasicListItem(
     }
 }
 
-@Composable
 fun ImageVector?.icon(tint: Color = Color.Unspecified): @Composable (() -> Unit)? = this?.let {
     {
         val resolvedTint = if (tint == Color.Unspecified) LocalContentColor.current else tint

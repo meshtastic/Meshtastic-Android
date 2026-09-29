@@ -25,6 +25,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 @Module
 class CoreDiModule {
     @Single
+    @Suppress("InjectDispatcher") // the injection point itself
     fun provideCoroutineDispatchers(): CoroutineDispatchers =
         CoroutineDispatchers(io = ioDispatcher, main = Dispatchers.Main, default = Dispatchers.Default)
 }

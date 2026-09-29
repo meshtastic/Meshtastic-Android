@@ -25,6 +25,7 @@ import java.time.format.FormatStyle
 import java.util.Locale
 import kotlin.math.abs
 
+@Suppress("ImplicitDefaultLocale") // every formatter goes through localized(), which binds the locale explicitly
 actual object DateFormatter {
     private val zoneId: ZoneId = ZoneId.systemDefault()
     private val shortTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)

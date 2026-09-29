@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
-import kotlinx.serialization.encodeToString
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState

@@ -146,7 +146,7 @@ fun CurrentlyConnectedInfo(
     }
 }
 
-@Suppress("MagicNumber", "UnusedPrivateMember")
+@Suppress("MagicNumber", "UnusedPrivateFunction")
 @Composable
 private fun CurrentlyConnectedInfoPreview() {
     AppTheme {

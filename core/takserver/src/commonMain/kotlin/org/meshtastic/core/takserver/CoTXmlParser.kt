@@ -43,8 +43,7 @@ class CoTXmlParser(private val xml: String) {
         val event = xmlParser.decodeFromString(CoTEventXml.serializer(), xml)
         Result.success(buildCoTMessage(event))
     } catch (e: IllegalArgumentException) {
-        Result.failure(e)
-    } catch (e: kotlinx.serialization.SerializationException) {
+        // Also covers SerializationException, which extends it.
         Result.failure(e)
     } catch (e: nl.adaptivity.xmlutil.XmlException) {
         Result.failure(e)

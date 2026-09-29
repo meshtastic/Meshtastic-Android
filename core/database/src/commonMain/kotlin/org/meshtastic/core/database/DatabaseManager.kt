@@ -38,7 +38,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -1492,10 +1491,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     pendingGate.await()
                     true
                 }
-            if (released == null) {
-                throw IllegalStateException(
-                    "Timed out waiting ${WRITER_GATE_TIMEOUT_MS}ms for database writer admission gate",
-                )
+            checkNotNull(released) {
+                "Timed out waiting ${WRITER_GATE_TIMEOUT_MS}ms for database writer admission gate"
             }
         }
     }
@@ -1983,7 +1980,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 val operationsDrained =
                     operationsDrain?.let { drain ->
                         val completedBeforeTimeout =
-                            withContext(Dispatchers.Default) {
+                            withContext(dispatchers.default) {
                                 withTimeoutOrNull(WRITER_DRAIN_TIMEOUT_MS) {
                                     drain.await()
                                     true

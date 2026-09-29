@@ -380,7 +380,7 @@ class TAKMeshIntegration(
 
     // ── Receive: mesh → TAK client ──────────────────────────────────────────
 
-    private suspend fun handleMeshPacket(packet: MeshPacket) {
+    private fun handleMeshPacket(packet: MeshPacket) {
         val payload = packet.decoded?.payload ?: return
 
         when (packet.decoded?.portnum) {
@@ -390,7 +390,7 @@ class TAKMeshIntegration(
         }
     }
 
-    private suspend fun handleV2Packet(wirePayload: ByteArray) {
+    private fun handleV2Packet(wirePayload: ByteArray) {
         try {
             // Decompress to CoT XML via the SDK's CotXmlBuilder, which handles
             // ALL typed payloads (DrawnShape, Marker, Route, etc.) and preserves
@@ -441,7 +441,7 @@ class TAKMeshIntegration(
      * Packets flagged `is_compressed` are skipped only when the local radio is 2.7.x — that firmware, and only that
      * firmware, also delivers a decompressed copy. See the inline comment for the details.
      */
-    private suspend fun handleV1Packet(payload: okio.ByteString) {
+    private fun handleV1Packet(payload: okio.ByteString) {
         try {
             val takPacket = TAKPacket.ADAPTER.decode(payload)
             // A *local* 2.7.x radio unishox2-decompresses inbound port 72 traffic into a copy and sends that to the
