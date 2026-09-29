@@ -600,8 +600,8 @@ open class MetricsViewModel(
  * `null` or 0. A CSV column is parsed, not read, so numbers are formatted invariantly.
  */
 internal fun positionCsvRow(pos: org.meshtastic.proto.Position): String {
-    val lat = (pos.latitude_i ?: 0) * GeoConstants.DEG_D
-    val lon = (pos.longitude_i ?: 0) * GeoConstants.DEG_D
+    val lat = pos.latitude_i?.let { it * GeoConstants.DEG_D }?.toString().orEmpty()
+    val lon = pos.longitude_i?.let { it * GeoConstants.DEG_D }?.toString().orEmpty()
     val altitude = pos.altitude?.toString().orEmpty()
     val speed = pos.ground_speed?.toString().orEmpty()
     val heading =

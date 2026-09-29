@@ -23,11 +23,17 @@ import kotlin.test.assertFalse
 
 class PositionCsvRowTest {
 
-    private fun row(altitude: Int?, speed: Int?, track: Int?) = positionCsvRow(
+    private fun row(
+        altitude: Int?,
+        speed: Int?,
+        track: Int?,
+        latitude: Int? = 525_200_000,
+        longitude: Int? = 134_050_000,
+    ) = positionCsvRow(
         Position.Builder()
             .also { wb ->
-                wb.latitude_i = 525_200_000
-                wb.longitude_i = 134_050_000
+                wb.latitude_i = latitude
+                wb.longitude_i = longitude
                 wb.sats_in_view = 5
                 wb.altitude = altitude
                 wb.ground_speed = speed
@@ -36,8 +42,13 @@ class PositionCsvRowTest {
             .build(),
     )
 
+    private fun String.cells() = removeSurrounding("\"").split("\",\"")
+
     /** Altitude, satellites, speed and heading, the cells after latitude and longitude. */
-    private fun String.trailingCells() = removeSurrounding("\"").split("\",\"").drop(2)
+    private fun String.trailingCells() = cells().drop(2)
+
+    /** Latitude and longitude. */
+    private fun String.coordinateCells() = cells().take(2)
 
     @Test
     fun `fields the position did not report are empty cells`() {
@@ -50,5 +61,19 @@ class PositionCsvRowTest {
     @Test
     fun `zero readings are written as zero`() {
         assertEquals(listOf("0", "5", "0", "0.00"), row(altitude = 0, speed = 0, track = 0).trailingCells())
+    }
+
+    @Test
+    fun `coordinates the position did not report are empty cells`() {
+        val line = row(altitude = 0, speed = 0, track = 0, latitude = null, longitude = null)
+
+        assertEquals(listOf("", ""), line.coordinateCells())
+    }
+
+    @Test
+    fun `zero coordinates are written as zero`() {
+        val line = row(altitude = 0, speed = 0, track = 0, latitude = 0, longitude = 0)
+
+        assertEquals(listOf("0.0", "0.0"), line.coordinateCells())
     }
 }
