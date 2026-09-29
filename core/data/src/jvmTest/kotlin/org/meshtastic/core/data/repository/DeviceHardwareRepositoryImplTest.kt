@@ -25,8 +25,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import okio.Buffer
-import okio.Source
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
@@ -34,16 +32,9 @@ import org.meshtastic.core.data.datasource.decode
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.DeviceLink
-import org.meshtastic.core.model.EventFirmwareResponse
-import org.meshtastic.core.model.FirmwareReleaseManifest
-import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.NetworkDeviceHardware
-import org.meshtastic.core.model.NetworkDeviceLinksResponse
-import org.meshtastic.core.model.NetworkFirmwareNightly
-import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
-import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.repository.BootloaderOtaQuirksRepository
 import org.meshtastic.core.repository.DeviceLinkRepository
 import org.meshtastic.core.testing.FakeDatabaseProvider
@@ -57,43 +48,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class DeviceHardwareRepositoryImplTest {
-    private class FakeApiService(var response: List<NetworkDeviceHardware>) : ApiService {
-        var hardwareCalls = 0
-        var responseGate: CompletableDeferred<Unit>? = null
-
-        override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> {
-            hardwareCalls += 1
-            responseGate?.await()
-            return response
-        }
-
-        override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = error("unused")
-
-        override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
-
-        override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest = error("unused")
-
-        override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? = error("unused")
-
-        override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
-
-        override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
-
-        override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest = error("unused")
-    }
-
-    private class FakeBundledAssetReader(var hardware: List<NetworkDeviceHardware>, private val json: Json) :
-        BundledAssetReader {
-        /** Raw `device_bootloader_ota_quirks.json` body, or null to model the asset being absent entirely. */
-        var quirksJson: String? = null
-
-        override fun open(name: String): Source? = when (name) {
-            "device_hardware.json" -> Buffer().write(json.encodeToString(hardware).encodeToByteArray())
-            "device_bootloader_ota_quirks.json" -> quirksJson?.let { Buffer().write(it.encodeToByteArray()) }
-            else -> null
-        }
-    }
-
     private class FakeDeviceLinkRepository : DeviceLinkRepository {
         var reconcileCalls = 0
         var reconcileFailure: Throwable? = null
@@ -115,7 +69,7 @@ class DeviceHardwareRepositoryImplTest {
      * Mirrors the pre-migration `loadQuirksAsset()` behavior exactly: reads straight from the same bundled-asset fake
      * the hardware-catalog seed uses, fails open to an empty response on an absent or malformed asset. Real caching and
      * network-refresh behavior is covered separately in BootloaderOtaQuirksRepositoryImplTest; this fake exists so
-     * these tests can keep driving SoftDevice/quirk resolution through [FakeBundledAssetReader.quirksJson] unchanged.
+     * these tests can drive SoftDevice/quirk resolution through the bundled quirks asset alone.
      */
     private class FakeBootloaderOtaQuirksRepository(
         private val assetReader: BundledAssetReader,
@@ -163,12 +117,19 @@ class DeviceHardwareRepositoryImplTest {
     private lateinit var assetReader: FakeBundledAssetReader
     private lateinit var repository: DeviceHardwareRepositoryImpl
 
+    /** An asset reader serving [hardware] as the bundled catalog and, when given, [quirks] as the raw quirks asset. */
+    private fun bundledAssets(hardware: List<NetworkDeviceHardware>, quirks: String? = null) =
+        FakeBundledAssetReader().apply {
+            put("device_hardware.json", hardware, json)
+            quirks?.let { put("device_bootloader_ota_quirks.json", it) }
+        }
+
     @BeforeTest
     fun setup() {
         databaseProvider = FakeDatabaseProvider()
-        api = FakeApiService(listOf(knownHardware))
+        api = FakeApiService(deviceHardware = { listOf(knownHardware) })
         links = FakeDeviceLinkRepository()
-        assetReader = FakeBundledAssetReader(listOf(knownHardware), json)
+        assetReader = bundledAssets(listOf(knownHardware))
         repository =
             DeviceHardwareRepositoryImpl(
                 remoteDataSource = DeviceHardwareRemoteDataSource(api, dispatchers),
@@ -187,15 +148,19 @@ class DeviceHardwareRepositoryImplTest {
     fun repeatedMissingModelUsesOneSuccessfulCatalogRefresh() = runBlocking {
         // Sequential lookups can hit cache after the first fetch and never share a flight; prove single-flight
         // sharing by suspending the fake API response and overlapping the two lookups.
-        api.responseGate = CompletableDeferred()
+        val gate = CompletableDeferred<Unit>()
+        api.deviceHardware = {
+            gate.await()
+            listOf(knownHardware)
+        }
         coroutineScope {
             val first = async { repository.getDeviceHardwareByModel(hwModel = 37) }
             val second = async { repository.getDeviceHardwareByModel(hwModel = 37) }
-            api.responseGate!!.complete(Unit)
+            gate.complete(Unit)
             awaitAll(first, second)
         }
 
-        assertEquals(1, api.hardwareCalls, "concurrent callers must share one fetch")
+        assertEquals(1, api.deviceHardwareCalls, "concurrent callers must share one fetch")
         assertEquals(1, links.reconcileCalls, "concurrent callers must share one reconcile")
     }
 
@@ -210,7 +175,7 @@ class DeviceHardwareRepositoryImplTest {
         links.reconcileFailure = null
         assertNull(repository.getDeviceHardwareByModel(hwModel = 37).getOrThrow())
 
-        assertEquals(1, api.hardwareCalls, "catalog success must gate further hardware fetches")
+        assertEquals(1, api.deviceHardwareCalls, "catalog success must gate further hardware fetches")
         assertEquals(1, links.reconcileCalls, "retry outside TTL must not retry reconcile either")
     }
 
@@ -219,23 +184,23 @@ class DeviceHardwareRepositoryImplTest {
         repository.getDeviceHardwareByModel(hwModel = 37).getOrThrow()
         repository.getDeviceHardwareByModel(hwModel = 37, forceRefresh = true).getOrThrow()
 
-        assertEquals(2, api.hardwareCalls)
+        assertEquals(2, api.deviceHardwareCalls)
         assertEquals(2, links.reconcileCalls)
     }
 
     @Test
     fun emptyForcedRefreshPreservesPreviouslyCachedRemoteCatalog() = runBlocking {
-        api.response = listOf(remoteOnlyHardware)
+        api.deviceHardware = { listOf(remoteOnlyHardware) }
         val initial = repository.getDeviceHardwareByModel(hwModel = remoteOnlyHardware.hwModel).getOrThrow()
         assertEquals(remoteOnlyHardware.displayName, initial?.displayName)
         assertNull(repository.getDeviceHardwareByModel(hwModel = knownHardware.hwModel).getOrThrow())
 
-        api.response = emptyList()
+        api.deviceHardware = { emptyList() }
         val afterEmptyRefresh =
             repository.getDeviceHardwareByModel(hwModel = remoteOnlyHardware.hwModel, forceRefresh = true).getOrThrow()
 
         assertEquals(remoteOnlyHardware.displayName, afterEmptyRefresh?.displayName)
-        assertEquals(2, api.hardwareCalls)
+        assertEquals(2, api.deviceHardwareCalls)
         assertEquals(2, links.reconcileCalls)
     }
 
@@ -266,8 +231,8 @@ class DeviceHardwareRepositoryImplTest {
 
     /** Rebuilds the repository around an nRF fixture so SoftDevice resolution can be exercised. */
     private fun nrfRepository(quirks: String?): DeviceHardwareRepositoryImpl {
-        api = FakeApiService(listOf(nrfHardware))
-        assetReader = FakeBundledAssetReader(listOf(nrfHardware), json).apply { quirksJson = quirks }
+        api = FakeApiService(deviceHardware = { listOf(nrfHardware) })
+        assetReader = bundledAssets(listOf(nrfHardware), quirks)
         return DeviceHardwareRepositoryImpl(
             remoteDataSource = DeviceHardwareRemoteDataSource(api, dispatchers),
             localDataSource = DeviceHardwareLocalDataSource(databaseProvider),
