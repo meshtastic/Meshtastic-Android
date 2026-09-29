@@ -129,7 +129,38 @@ jobs:
             echo "PREOF"
           } >> "$GITHUB_OUTPUT"
 
+      # GitHub refuses a push to the head branch of a queued PR (GH006), so a queued PR is left to land.
+      # Same check as scheduled-updates.yml, keyed on this workflow's branch.
+      - name: Check whether the scheduled PR is in the merge queue
+        id: merge_queue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          query=$(cat <<'GQL'
+          query($owner: String!, $name: String!) {
+            repository(owner: $owner, name: $name) {
+              pullRequests(headRefName: "scheduled-baseline", baseRefName: "main", states: OPEN, first: 50) {
+                nodes { number isCrossRepository isInMergeQueue }
+              }
+            }
+          }
+          GQL
+          )
+          if ! queued=$(gh api graphql -f query="$query" -f owner="$GITHUB_REPOSITORY_OWNER" -f name="${GITHUB_REPOSITORY#*/}" \
+            --jq '.data.repository.pullRequests.nodes[] | select(.isInMergeQueue and (.isCrossRepository | not)) | .number'); then
+            echo "::warning::Could not read the merge queue state of the scheduled PR; updating it anyway."
+            queued=""
+          fi
+          if [ -n "$queued" ]; then
+            echo "::notice::#$queued is in the merge queue; leaving its branch alone until it lands."
+            echo "in_queue=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "in_queue=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create Pull Request if changes occurred
+        id: pr
+        if: steps.merge_queue.outputs.in_queue != 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
@@ -153,6 +184,26 @@ jobs:
             **/README.md
           labels: |
             automation
+
+      # "Merge when ready", as in scheduled-updates.yml: the queue sets the merge method, a fresh push can
+      # clear an earlier request, and an already-mergeable PR is refused the request so it merges directly.
+      - name: Enable auto-merge
+        if: ${{ steps.merge_queue.outputs.in_queue != 'true' && (steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated') }}
+        env:
+          GH_TOKEN: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.pull-request-number }}
+        run: |
+          PR_ID=$(gh pr view "$PR_NUMBER" --json id --jq .id)
+          QUERY=$(cat <<'GQL'
+          mutation($id: ID!) {
+            enablePullRequestAutoMerge(input: { pullRequestId: $id }) {
+              pullRequest { number autoMergeRequest { enabledAt } }
+            }
+          }
+          GQL
+          )
+          gh api graphql -f query="$QUERY" -F id="$PR_ID" \
+            || gh pr merge "$PR_NUMBER"
 
       # Runs after the PR so graph updates still land, but turns the run red: a silently-green
       # baseline job let a path mismatch discard a freshly generated profile every night for weeks.
