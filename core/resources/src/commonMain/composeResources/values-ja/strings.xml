@@ -474,6 +474,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_node_metrics">ノードメトリクス</string>
     <string name="doc_title_nodes">ノード</string>
+    <string name="doc_title_notifications">通知</string>
     <string name="doc_title_onboarding">はじめに</string>
     <string name="doc_title_settings_module">設定：モジュールと管理</string>
     <string name="doc_title_settings_radio">設定：無線とユーザー</string>
@@ -1063,6 +1064,8 @@
     <string name="not_connected">接続されていません</string>
     <string name="note">メモ</string>
     <string name="notes">メモ</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">メッシュ</string>
     <string name="notification_permissions_description">Meshtastic は、新着メッセージやその他の重要なイベントをお知らせするために通知を使用します。通知の権限は、設定からいつでも更新できます。</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">チャンネルメッセージとダイレクトメッセージの通知。</string>

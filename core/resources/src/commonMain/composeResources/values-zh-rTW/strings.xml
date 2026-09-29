@@ -339,6 +339,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_node_metrics">節點指標</string>
     <string name="doc_title_nodes">節點</string>
+    <string name="doc_title_notifications">通知</string>
     <string name="doc_title_onboarding"># 入門指南</string>
     <string name="doc_title_settings_module">設定 — 模組 &amp; 管理</string>
     <string name="doc_title_settings_radio">設定 — 無線電 &amp; 使用者</string>
@@ -781,6 +782,8 @@
     <string name="not_connected">未連線</string>
     <string name="note">注意</string>
     <string name="notes">備註</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">網狀網路 (Mesh)</string>
     <string name="notification_permissions_description">Meshtastic 使用通知功能讓您隨時了解新訊息和其他重要事件。您可以隨時在設定中更新通知權限。</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">頻道訊息與私訊通知。</string>

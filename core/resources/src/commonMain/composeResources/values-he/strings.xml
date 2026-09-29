@@ -152,6 +152,7 @@
     <!-- NODES -->
     <string name="none">לא מחובר (כבוי)</string>
     <string name="not_connected">לא מחובר</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">אישור</string>

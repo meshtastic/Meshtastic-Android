@@ -445,6 +445,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_node_metrics">Knoten Kenndaten</string>
     <string name="doc_title_nodes">Knoten</string>
+    <string name="doc_title_notifications">Benachrichtigungen</string>
     <string name="doc_title_onboarding">Erste Schritte</string>
     <string name="doc_title_settings_module">Einstellungen — Module &amp; Administration</string>
     <string name="doc_title_settings_radio">Einstellungen — Radio &amp; Benutzer</string>
@@ -973,6 +974,8 @@
     <string name="not_connected">Nicht verbunden</string>
     <string name="note">Anmerkung</string>
     <string name="notes">Knoten</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Netz</string>
     <string name="notification_permissions_description">Meshtastic nutzt Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Benachrichtigungen für Kanal und Direktnachrichten.</string>

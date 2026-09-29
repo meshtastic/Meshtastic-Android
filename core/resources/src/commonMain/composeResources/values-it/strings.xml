@@ -1067,6 +1067,8 @@
     <string name="not_connected">Non connesso</string>
     <string name="note">Note</string>
     <string name="notes">Note</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Mesh</string>
     <string name="notification_permissions_description">Meshtastic utilizza le notifiche per tenerti aggiornato su nuovi messaggi e altri eventi importanti. È possibile aggiornare i permessi di notifica in qualsiasi momento dalle impostazioni.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Notifiche per i canali e i messaggi diretti.</string>

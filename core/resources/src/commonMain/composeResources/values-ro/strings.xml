@@ -638,6 +638,7 @@
     <string name="not_connected">Neconectat</string>
     <string name="note">Notiță</string>
     <string name="notes">Notițe</string>
+    <!-- NOTIFICATION -->
     <string name="notification_permissions_description">Meshtastic folosește notificări pentru a te ține la curent cu mesaje noi și alte evenimente importante. Puteți actualiza permisiunile de notificare în orice moment din setări.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Notificări pentru canal și mesaje directe.</string>

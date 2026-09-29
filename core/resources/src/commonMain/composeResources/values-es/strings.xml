@@ -482,6 +482,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="none_quality">Ninguna</string>
     <string name="not_connected">No está conectado</string>
     <string name="notes">Notas</string>
+    <!-- NOTIFICATION -->
     <string name="notification_permissions_description">Meshtastic utiliza las notificaciones para mantenerte actualizado sobre nuevos mensajes y otros eventos importantes. Puedes actualizar tus permisos de notificación en cualquier momento desde la configuración.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_newly_discovered_nodes">Notificaciones para nodos recién descubiertos.</string>

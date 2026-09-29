@@ -430,6 +430,7 @@
     <string name="none">Nenhum (desabilitado)</string>
     <string name="none_quality">Nenhum</string>
     <string name="not_connected">Não conectado</string>
+    <!-- NOTIFICATION -->
     <string name="notification_permissions_description">Meshtastic usa notificações para mantê-lo atualizado sobre novas mensagens e outros eventos importantes. Você pode atualizar suas permissões de notificação a qualquer momento nas configurações.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Notificações para canais e mensagens diretas.</string>

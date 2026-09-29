@@ -758,6 +758,8 @@
     <string name="not_connected">Ej ansluten</string>
     <string name="note">Anteckning</string>
     <string name="notes">Anteckningar</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Meshnätverk</string>
     <string name="notification_permissions_description">Meshtastic använder aviseringar för att hålla dig uppdaterad om nya meddelanden och andra viktiga händelser. Du kan uppdatera dina aviseringsbehörigheter när som helst från inställningar.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Aviseringar för kanal och direktmeddelanden.</string>

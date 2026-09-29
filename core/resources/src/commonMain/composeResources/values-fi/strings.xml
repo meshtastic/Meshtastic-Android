@@ -514,6 +514,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_node_metrics">Radion mittaustiedot</string>
     <string name="doc_title_nodes">Laitteet</string>
+    <string name="doc_title_notifications">Ilmoitukset</string>
     <string name="doc_title_onboarding">Aloittaminen</string>
     <string name="doc_title_settings_module">Asetukset — moduulit &amp; ylläpito</string>
     <string name="doc_title_settings_radio">Asetukset — radio &amp; käyttäjä</string>
@@ -1219,6 +1220,8 @@
     <string name="not_now">Ei nyt</string>
     <string name="note">Merkintä</string>
     <string name="notes">Viestit</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Verkko</string>
     <string name="notification_permission_blocked_notice">Ilmoitukset on poistettu käytöstä, eikä Android enää pyydä käyttöoikeutta. Ota se käyttöön sovelluksen asetuksissa, jotta saat tiedon uusista viesteistä ja ilmoituksista.</string>
     <string name="notification_permission_denied_notice">Ilman ilmoituksia Meshtastic ei voi ilmoittaa uusista viesteistä, uusista radioista tai akun alhaisesta varaustasosta, kun sovellus on taustalla.</string>
     <string name="notification_permission_rationale">Ilmoitusten avulla Meshtastic voi tavoittaa sinut, kun sovellus ei ole avoinna: uusista viesteistä, uusista löydetyistä radioista ja radion alhaisesta varaustasosta. Jos et myönnä käyttöoikeutta, mikään muu ei muutu.</string>

@@ -330,6 +330,8 @@
     <string name="none">Hiçbiri (kapat)</string>
     <string name="none_quality">Yok</string>
     <string name="not_connected">Bağlı değil</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Amatör Telsiz</string>
     <string name="notification_permissions_description">Meshtastic, yeni mesajlar ve diğer önemli etkinlikler hakkında sizi bilgilendirmek için bildirimleri kullanır. Bildirim izinlerinizi istediğiniz zaman ayarlardan güncelleyebilirsiniz.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_on_alert_bell_receipt">Uyarı/çan alındığında bildirimler</string>

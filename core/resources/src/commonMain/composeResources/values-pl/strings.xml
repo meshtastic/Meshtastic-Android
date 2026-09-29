@@ -473,6 +473,7 @@
     <string name="none_quality">brak</string>
     <string name="not_connected">Nie połączono</string>
     <string name="notes">Notatki</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <string name="notifications_on_message_receipt">Powiadomienia o otrzymaniu wiadomości</string>
     <string name="now">Teraz</string>

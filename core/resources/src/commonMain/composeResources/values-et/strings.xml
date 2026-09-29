@@ -503,6 +503,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_node_metrics">Sõlme mõõdikud</string>
     <string name="doc_title_nodes">Sõlmed</string>
+    <string name="doc_title_notifications">Märguanded</string>
     <string name="doc_title_onboarding">Alustamine</string>
     <string name="doc_title_settings_module">Sätted — Moodulid &amp; Administraator</string>
     <string name="doc_title_settings_radio">Sätted — Raadio &amp; Kasutaja</string>
@@ -1188,6 +1189,8 @@
     <string name="not_now">Mitte praegu</string>
     <string name="note">Märkus</string>
     <string name="notes">Sõnumid</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Kärgvõrk</string>
     <string name="notification_permissions_description">Meshtastic kasutab märguandeid, et hoida teid kursis uute sõnumite ja muude oluliste sündmustega. Saate oma märguannete õigusi igal ajal seadetes muuta.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Kanali märguanded ja otsesõnumid.</string>

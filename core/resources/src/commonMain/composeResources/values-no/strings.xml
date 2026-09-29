@@ -183,6 +183,7 @@
     <string name="none">Ingen (slå av)</string>
     <string name="none_quality">Ingen</string>
     <string name="not_connected">Ikke tilkoblet</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Ok</string>
