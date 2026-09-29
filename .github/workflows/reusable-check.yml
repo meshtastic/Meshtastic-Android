@@ -631,8 +631,9 @@ jobs:
         # --no-configuration-cache while IP is still on. Flags, not -D properties —
         # -Dorg.gradle.isolated-projects=false is inert on windows-latest. --no-isolated-projects
         # needs Gradle 9.7+, so a pin-back below 9.7 has to revert this line with it.
+        # The daemon flag is quoted because PowerShell splits an unquoted -P argument at its first dot.
         run: >
-          ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true -Pkotlin.daemon.useFallbackStrategy=false
+          ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true "-Pkotlin.daemon.useFallbackStrategy=false"
           ${{ runner.os == 'Windows' && '--no-isolated-projects --no-configuration-cache' || '' }}
 
       # CMP's TargetFormat.AppImage is jpackage's "app-image" — an unpacked directory, not
