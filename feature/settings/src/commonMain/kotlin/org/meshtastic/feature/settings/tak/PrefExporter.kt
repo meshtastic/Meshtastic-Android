@@ -28,6 +28,6 @@ import org.meshtastic.core.ui.util.rememberFileExporter
  */
 @Composable
 fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit {
-    val export = rememberFileExporter(dataPackageProvider)
+    val export = rememberFileExporter(content = dataPackageProvider)
     return remember(export) { { fileName -> export(fileName, "application/zip") } }
 }

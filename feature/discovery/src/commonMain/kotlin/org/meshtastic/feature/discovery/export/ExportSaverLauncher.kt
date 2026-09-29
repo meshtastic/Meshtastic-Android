@@ -27,7 +27,7 @@ import org.meshtastic.core.ui.util.rememberFileExporter
 @Composable
 fun rememberExportSaver(): ExportSaverLauncher {
     var pending by remember { mutableStateOf<ExportResult.Success?>(null) }
-    val export = rememberFileExporter { pending?.content ?: ByteArray(0) }
+    val export = rememberFileExporter(content = { pending?.content })
     return remember(export) {
         ExportSaverLauncher { result ->
             pending = result

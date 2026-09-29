@@ -20,19 +20,42 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
+import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.repository.FileService
 
 /**
  * Returns a launcher that asks the user where to save a file, then writes the bytes [content] produces there through
- * [FileService]. [content] runs only after a destination is chosen, inside the write, so a failure producing it is
- * logged by [FileService] like any write failure.
+ * [FileService] and reports whether the export landed to [onResult]. [content] runs only after a destination is chosen;
+ * returning null means there is nothing to export.
  */
 @Composable
-fun rememberFileExporter(content: suspend () -> ByteArray): (fileName: String, mimeType: String) -> Unit {
+fun rememberFileExporter(
+    content: suspend () -> ByteArray?,
+    onResult: suspend (exported: Boolean) -> Unit = {},
+): (fileName: String, mimeType: String) -> Unit {
     val fileService: FileService = koinInject()
     val scope = rememberCoroutineScope()
     val currentContent by rememberUpdatedState(content)
-    return rememberSaveFileLauncher { uri -> scope.launch { fileService.write(uri) { it.write(currentContent()) } } }
+    val currentOnResult by rememberUpdatedState(onResult)
+    return rememberSaveFileLauncher { uri ->
+        scope.launch { currentOnResult(writeExport(fileService, uri, currentContent)) }
+    }
+}
+
+/**
+ * Writes the bytes [content] produces to [uri]. Returns false without writing when [content] returns null or throws,
+ * and false when [FileService] reports the write failed.
+ */
+internal suspend fun writeExport(fileService: FileService, uri: CommonUri, content: suspend () -> ByteArray?): Boolean {
+    val bytes =
+        safeCatching { withContext(ioDispatcher) { content() } }
+            .onFailure { e -> Logger.e(e) { "Could not produce the export" } }
+            .getOrNull() ?: return false
+    return fileService.write(uri) { it.write(bytes) }
 }
