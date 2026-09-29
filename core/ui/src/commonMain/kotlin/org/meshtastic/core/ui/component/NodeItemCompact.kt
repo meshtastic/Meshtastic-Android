@@ -432,7 +432,11 @@ private fun CompactFooterRow(
                     IconInfo(
                         icon = MeshtasticIcons.HopCount,
                         contentDescription =
-                        pluralStringResource(Res.plurals.a11y_node_hops_count, thatNode.hopsAway, thatNode.hopsAway),
+                        pluralStringResource(
+                            Res.plurals.a11y_node_hops_count,
+                            thatNode.hopsAway,
+                            thatNode.hopsAway,
+                        ),
                         contentColor = tertiaryColor,
                         text = thatNode.hopsAway.toString(),
                     )
