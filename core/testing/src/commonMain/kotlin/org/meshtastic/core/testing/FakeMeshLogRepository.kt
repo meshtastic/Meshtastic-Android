@@ -18,6 +18,7 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.MeshLog
@@ -63,12 +64,13 @@ class FakeMeshLogRepository :
 
     override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> = logsFlow.map { it.take(maxItem) }
 
-    override fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>> = logsFlow.map { it.take(maxItem) }
+    override fun readAllLogsInReceiveOrder(): Flow<MeshLog> = flow { logsFlow.value.forEach { emit(it) } }
 
     override fun getAllLogsUnbounded(): Flow<List<MeshLog>> = logsFlow
 
-    override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> =
-        logsFlow.map { it.filter { log -> log.fromNum == nodeNum && log.portNum == portNum } }
+    override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> = logsFlow.map {
+        it.filter { log -> log.fromNum == nodeNum && log.portNum == portNum }
+    }
 
     override fun getMeshPacketsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshPacket>> = MutableStateFlow(emptyList())
 

@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
@@ -71,10 +72,22 @@ open class MeshLogRepositoryImpl(
         .map { list -> list.map { it.asExternalModel() } }
         .flowOn(dispatchers.io)
 
-    /** Retrieves all [MeshLog]s in the database in the order they were received. */
-    override fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>> = dbManager
-        .observeCurrentDb { it.meshLogDao().getAllLogsInReceiveOrder(maxItem) }
-        .map { list -> list.map { it.asExternalModel() } }
+    /** Pages through one database under a single read lease, so the logs all come from the same device. */
+    override fun readAllLogsInReceiveOrder(): Flow<MeshLog> = channelFlow {
+        dbManager.withReadDb { db ->
+            val dao = db.meshLogDao()
+            var afterReceivedDate = Long.MIN_VALUE
+            var afterRowId = Long.MIN_VALUE
+            do {
+                val page = dao.getLogsInReceiveOrderAfter(afterReceivedDate, afterRowId, RECEIVE_ORDER_PAGE_SIZE)
+                page.forEach { send(it.log.asExternalModel()) }
+                page.lastOrNull()?.let { last ->
+                    afterReceivedDate = last.log.received_date
+                    afterRowId = last.rowId
+                }
+            } while (page.size == RECEIVE_ORDER_PAGE_SIZE)
+        }
+    }
         .flowOn(dispatchers.io)
 
     /** Retrieves all [MeshLog]s in the database without any limit. */
@@ -250,6 +263,8 @@ open class MeshLogRepositoryImpl(
          * auto-checkpoint.
          */
         internal const val RETENTION_DELETE_BATCH_SIZE = 500
+
+        internal const val RECEIVE_ORDER_PAGE_SIZE = 500
     }
 }
 
