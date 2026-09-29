@@ -27,10 +27,13 @@ import android.os.Environment
 import android.os.ParcelFileDescriptor
 import android.provider.BaseColumns
 import android.provider.MediaStore
+import co.touchlab.kermit.Severity
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.common.ContextServices
+import org.meshtastic.core.testing.CapturingLogWriter
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -45,10 +48,17 @@ import kotlin.test.assertTrue
 class AtakFileWriterTest {
 
     private val app: Application = RuntimeEnvironment.getApplication()
+    private lateinit var logs: CapturingLogWriter
 
     @Before
     fun setUp() {
         ContextServices.app = app
+        logs = CapturingLogWriter.install()
+    }
+
+    @After
+    fun tearDown() {
+        CapturingLogWriter.uninstall()
     }
 
     @Test
@@ -86,6 +96,41 @@ class AtakFileWriterTest {
         assertFalse(AtakFileWriter.writeToImportDir("route-1.zip", byteArrayOf(1, 2, 3)))
 
         assertTrue(mediaStore.rows.isEmpty(), "pending rows left behind: ${mediaStore.rows.keys}")
+    }
+
+    @Test
+    @Config(sdk = [34])
+    fun `a failed save is logged as an error without the file name`() {
+        val mediaStore = Robolectric.setupContentProvider(FakeMediaStore::class.java, MediaStore.AUTHORITY)
+        mediaStore.failUpdatesWith = IllegalStateException("provider refused the update")
+
+        assertFalse(AtakFileWriter.writeToImportDir("route-1.zip", byteArrayOf(1, 2, 3)))
+
+        assertEquals(1, logs.messages(Severity.Error).size, "error logs: ${logs.messages(Severity.Error)}")
+        logs.assertNotLogged("route-1")
+    }
+
+    @Test
+    @Config(sdk = [28])
+    fun `a failed save below API 29 logs neither the file name nor its path`() {
+        val dir = checkNotNull(app.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS))
+        // A directory in the file's place makes the write fail with an error that names the full path.
+        check(File(dir, "route-1.zip").mkdirs())
+
+        assertFalse(AtakFileWriter.writeToImportDir("route-1.zip", byteArrayOf(5)))
+
+        assertEquals(1, logs.messages(Severity.Error).size, "error logs: ${logs.messages(Severity.Error)}")
+        logs.assertNotLogged("route-1", dir.absolutePath)
+    }
+
+    @Test
+    @Config(sdk = [34])
+    fun `a successful save logs no error`() {
+        Robolectric.setupContentProvider(FakeMediaStore::class.java, MediaStore.AUTHORITY)
+
+        assertTrue(AtakFileWriter.writeToImportDir("route-1.zip", byteArrayOf(1, 2, 3)))
+
+        assertEquals(emptyList(), logs.messages(Severity.Error))
     }
 
     @Test
