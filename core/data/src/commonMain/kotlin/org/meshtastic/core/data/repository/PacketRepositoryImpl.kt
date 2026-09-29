@@ -195,15 +195,19 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         limit: Int?,
         includeFiltered: Boolean,
         getNode: suspend (String?) -> Node,
-    ): Flow<List<Message>> = dbManager.observeCurrentDb { db ->
-        val dao = db.packetDao()
-        val packetsFlow =
-            when {
-                limit != null -> dao.getMessagesFrom(contact, limit)
-                !includeFiltered -> dao.getMessagesFrom(contact, includeFiltered = false)
-                else -> dao.getMessagesFrom(contact)
-            }
-        packetsFlow.mapLatest { packets ->
+    ): Flow<List<Message>> = dbManager
+        .observeCurrentDb { db ->
+            val dao = db.packetDao()
+            val packetsFlow =
+                when {
+                    limit != null -> dao.getMessagesFrom(contact, limit)
+                    !includeFiltered -> dao.getMessagesFrom(contact, includeFiltered = false)
+                    else -> dao.getMessagesFrom(contact)
+                }
+            // The latch carries raw rows only; decoration below stays outside its first-emission watchdog.
+            packetsFlow.map { packets -> dao to packets }
+        }
+        .mapLatest { (dao, packets) ->
             val cachedGetNode = memoize(getNode)
             val replyIds = packets.mapNotNull { it.packet.data.replyId?.takeIf { id -> id != 0 } }.distinct()
             // Reply parents come from the same database as the emission they decorate, even mid-switch.
@@ -215,7 +219,6 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
                 if (originalMessage != null) message.copy(originalMessage = originalMessage) else message
             }
         }
-    }
 
     override fun getMessagesFromPaged(contact: String, getNode: suspend (String?) -> Node): Flow<PagingData<Message>> =
         Pager(
