@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_node_battery
 import org.meshtastic.core.resources.a11y_node_distance_away
@@ -36,7 +37,6 @@ import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 
-private const val MILLIS_PER_SECOND = 1000L
 private const val MAX_BATTERY_PERCENT = 100
 
 /** Pre-resolved localized strings for TalkBack node descriptions. */
@@ -107,7 +107,7 @@ internal fun buildNodeDescription(
             if (lastHeardIsRelative) {
                 formatAgo(lastHeard, strings.unknown, strings.now)
             } else {
-                DateFormatter.formatDateTime(lastHeard.toLong() * MILLIS_PER_SECOND)
+                DateFormatter.formatDateTime(lastHeard.toLong() * TimeConstants.MS_PER_SEC)
             }
         append(", ")
         append(strings.lastHeard.replace("%s", timeText))

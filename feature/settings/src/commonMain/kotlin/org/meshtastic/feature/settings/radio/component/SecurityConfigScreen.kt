@@ -35,6 +35,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.model.util.platformRandomBytes
 import org.meshtastic.core.resources.Res
@@ -225,7 +226,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                             passphrase = passphrase,
                             boots = boots,
                             hours = hours,
-                            maxSessionSeconds = sessionMinutes * SECONDS_PER_MINUTE,
+                            maxSessionSeconds = sessionMinutes * TimeConstants.SECONDS_PER_MINUTE,
                         )
                     },
                     onDisable = { passphrase ->
@@ -359,5 +360,3 @@ fun PrivateKeyRegenerateDialog(
 
 /** X25519 private key length in bytes. */
 private const val PRIVATE_KEY_SIZE = 32
-
-private const val SECONDS_PER_MINUTE = 60

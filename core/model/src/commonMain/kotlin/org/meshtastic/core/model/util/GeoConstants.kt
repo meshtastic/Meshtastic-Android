@@ -23,7 +23,4 @@ object GeoConstants {
 
     /** Multiplier to convert protobuf integer heading values (1e-5 degree units) to decimal degrees. */
     const val HEADING_DEG = 1e-5
-
-    /** Mean radius of the Earth in meters, for haversine calculations. */
-    const val EARTH_RADIUS_METERS = 6_371_000.0
 }

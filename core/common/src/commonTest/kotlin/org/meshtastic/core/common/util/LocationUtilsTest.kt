@@ -40,6 +40,13 @@ class LocationUtilsTest {
     }
 
     @Test
+    fun `distance uses the mean earth radius`() {
+        // One degree of arc on a 6,371 km sphere, and London to Paris on the same sphere.
+        assertEquals(111_194.93, latLongToMeter(0.0, 0.0, 0.0, 1.0), absoluteTolerance = 0.01)
+        assertEquals(343_556.06, latLongToMeter(51.5074, -0.1278, 48.8566, 2.3522), absoluteTolerance = 0.01)
+    }
+
+    @Test
     fun testBearing() {
         // North
         assertEquals(0.0, bearing(0.0, 0.0, 1.0, 0.0), 0.1)

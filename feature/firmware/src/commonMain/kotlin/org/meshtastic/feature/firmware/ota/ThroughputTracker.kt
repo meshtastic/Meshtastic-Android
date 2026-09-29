@@ -16,9 +16,8 @@
  */
 package org.meshtastic.feature.firmware.ota
 
+import org.meshtastic.core.model.util.TimeConstants
 import kotlin.time.TimeSource
-
-private const val MILLIS_PER_SECOND = 1000L
 
 /**
  * Sliding window throughput tracker to calculate current transfer speed in bytes per second. Adapted from kmp-ble's
@@ -52,6 +51,6 @@ class ThroughputTracker(private val windowSize: Int = 10, private val timeSource
         if (durationMs <= 0) return 0
 
         val deltaBytes = byteCounts[newestIdx] - byteCounts[oldestIdx]
-        return (deltaBytes * MILLIS_PER_SECOND) / durationMs
+        return (deltaBytes * TimeConstants.MS_PER_SEC) / durationMs
     }
 }

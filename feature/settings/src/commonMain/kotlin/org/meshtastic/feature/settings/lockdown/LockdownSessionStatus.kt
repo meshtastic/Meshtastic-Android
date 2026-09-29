@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.service.LockdownTokenInfo
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.lockdown_session_boots_remaining
 import org.meshtastic.core.resources.lockdown_session_expires
@@ -50,7 +51,7 @@ fun LockdownSessionStatus(tokenInfo: LockdownTokenInfo?, modifier: Modifier = Mo
                 text =
                 stringResource(
                     Res.string.lockdown_session_expires,
-                    DateFormatter.formatDateTime(tokenInfo.expiryEpoch * MILLIS_PER_SECOND),
+                    DateFormatter.formatDateTime(tokenInfo.expiryEpoch * TimeConstants.MS_PER_SEC),
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -67,4 +68,3 @@ fun LockdownSessionStatus(tokenInfo: LockdownTokenInfo?, modifier: Modifier = Mo
 
 private const val PADDING_DP = 8
 private const val PADDING_VERTICAL_DP = 4
-private const val MILLIS_PER_SECOND = 1000L

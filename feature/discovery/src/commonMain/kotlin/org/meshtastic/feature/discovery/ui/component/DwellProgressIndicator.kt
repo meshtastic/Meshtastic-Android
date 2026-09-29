@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.discovery_dwell_progress
 import org.meshtastic.core.resources.discovery_stat_dwelling_on
@@ -39,7 +40,6 @@ import org.meshtastic.core.resources.discovery_time_remaining
 
 @Suppress("MagicNumber")
 private val CONTENT_PADDING = 8.dp
-private const val SECONDS_PER_MINUTE = 60L
 
 /** Displays dwell progress for a single preset with a countdown timer and linear progress bar. */
 @Composable
@@ -55,8 +55,8 @@ fun DwellProgressIndicator(
         } else {
             0f
         }
-    val minutes = remainingSeconds / SECONDS_PER_MINUTE
-    val seconds = remainingSeconds % SECONDS_PER_MINUTE
+    val minutes = remainingSeconds / TimeConstants.SECONDS_PER_MINUTE
+    val seconds = remainingSeconds % TimeConstants.SECONDS_PER_MINUTE
     val timeText = "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
     val progressDescription = stringResource(Res.string.discovery_dwell_progress, presetName, timeText)
 
