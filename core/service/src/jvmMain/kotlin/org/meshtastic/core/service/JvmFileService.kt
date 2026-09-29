@@ -28,14 +28,14 @@ import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FileService
 import java.io.File
+import java.net.URI
 
 @Single
 class JvmFileService(private val dispatchers: CoroutineDispatchers) : FileService {
     override suspend fun write(uri: CommonUri, block: suspend (BufferedSink) -> Unit): Boolean =
         withContext(dispatchers.io) {
             try {
-                // Treat URI string as a local file path
-                val file = File(uri.toString())
+                val file = uri.toFile()
                 file.parentFile?.mkdirs()
                 file.sink().buffer().use { sink -> block(sink) }
                 true
@@ -48,7 +48,7 @@ class JvmFileService(private val dispatchers: CoroutineDispatchers) : FileServic
     override suspend fun read(uri: CommonUri, block: suspend (BufferedSource) -> Unit): Boolean =
         withContext(dispatchers.io) {
             try {
-                val file = File(uri.toString())
+                val file = uri.toFile()
                 file.source().buffer().use { source -> block(source) }
                 true
             } catch (e: Exception) {
@@ -56,4 +56,11 @@ class JvmFileService(private val dispatchers: CoroutineDispatchers) : FileServic
                 false
             }
         }
+
+    /** The desktop file pickers hand back `file:` URIs; anything else is taken as a plain path. */
+    private fun CommonUri.toFile(): File {
+        val text = toString()
+        val parsed = runCatching { URI(text) }.getOrNull()
+        return if (parsed?.scheme == "file") File(parsed) else File(text)
+    }
 }
