@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -68,6 +69,8 @@ class AndroidBluetoothRepository(
 
     private val deviceCache = mutableMapOf<String, MeshtasticBleDevice>()
 
+    private val bondEvents = BondEventReceiver(context, processLifecycle.coroutineScope + dispatchers.default)
+
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) { updateBluetoothState() }
     }
@@ -95,6 +98,7 @@ class AndroidBluetoothRepository(
     @SuppressLint("MissingPermission")
     override suspend fun bond(device: BleDevice) {
         val macAddress = device.address
+        bondEvents.watch(macAddress)
         val remoteDevice =
             bluetoothAdapter?.getRemoteDevice(macAddress) ?: throw Exception("Bluetooth adapter unavailable")
 
@@ -327,10 +331,13 @@ class AndroidBluetoothRepository(
     }
 
     @SuppressLint("MissingPermission")
-    override fun isBonded(address: String): Boolean = try {
-        bluetoothAdapter?.bondedDevices?.any { it.address.equals(address, ignoreCase = true) } ?: false
-    } catch (e: SecurityException) {
-        Logger.w(e) { "SecurityException checking bonded devices. Missing BLUETOOTH_CONNECT?" }
-        false
+    override fun isBonded(address: String): Boolean {
+        bondEvents.watch(address)
+        return try {
+            bluetoothAdapter?.bondedDevices?.any { it.address.equals(address, ignoreCase = true) } ?: false
+        } catch (e: SecurityException) {
+            Logger.w(e) { "SecurityException checking bonded devices. Missing BLUETOOTH_CONNECT?" }
+            false
+        }
     }
 }
