@@ -881,6 +881,8 @@ location_permission_blocked_notice
 location_permission_blocked_toast
 location_permission_denied_notice
 location_permission_rationale
+location_precise_blocked_toast
+location_precise_rationale
 location_sharing
 ### LOCKDOWN ###
 lockdown_backoff
@@ -1361,6 +1363,7 @@ permission_missing_pre31
 permission_nearby_devices_summary
 permission_notifications_summary
 permission_state_allowed
+permission_state_approximate_only
 permission_state_blocked
 permission_state_denied
 permission_state_not_applicable

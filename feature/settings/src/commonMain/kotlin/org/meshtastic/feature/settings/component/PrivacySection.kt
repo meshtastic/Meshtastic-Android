@@ -29,8 +29,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.analytics_okay
 import org.meshtastic.core.resources.location_disabled
 import org.meshtastic.core.resources.location_permission
-import org.meshtastic.core.resources.location_permission_blocked_toast
-import org.meshtastic.core.resources.location_permission_rationale
+import org.meshtastic.core.resources.location_precise_blocked_toast
+import org.meshtastic.core.resources.location_precise_rationale
 import org.meshtastic.core.resources.provide_location_to_mesh
 import org.meshtastic.core.ui.component.PermissionRationaleDialog
 import org.meshtastic.core.ui.component.SwitchListItem
@@ -73,7 +73,7 @@ internal fun ColumnScope.PrivacySettingsContent(
     if (showLocationRationale) {
         PermissionRationaleDialog(
             titleRes = Res.string.location_permission,
-            rationaleRes = Res.string.location_permission_rationale,
+            rationaleRes = Res.string.location_precise_rationale,
             icon = MeshtasticIcons.LocationOn,
             onConfirm = {
                 showLocationRationale = false
@@ -107,7 +107,7 @@ internal fun ColumnScope.PrivacySettingsContent(
             // put it back until it can be.
             PermissionGateAction.OPEN_SETTINGS -> {
                 currentToggleLocation(false)
-                currentShowToast(Res.string.location_permission_blocked_toast)
+                currentShowToast(Res.string.location_precise_blocked_toast)
                 locationPermission.openAppSettings()
             }
         }

@@ -911,6 +911,8 @@
     <string name="location_permission_blocked_toast">Location permission is off. Turn it on in app settings to share your position.</string>
     <string name="location_permission_denied_notice">Without location access, the map will not show where you are and Meshtastic cannot share your position with the mesh. Everything else keeps working, and you can turn it on later.</string>
     <string name="location_permission_rationale">Meshtastic uses your location to place you on the map, measure distance to nodes, and — only if you turn it on — share your position with the mesh. Declining leaves everything else working.</string>
+    <string name="location_precise_blocked_toast">Precise location is off. Turn on Use precise location in app settings to share your position.</string>
+    <string name="location_precise_rationale">Sharing your position with the mesh needs precise location, so other nodes see where you are rather than a rough area. When Android asks, choose Precise. The map and everything else keep working with approximate location.</string>
     <string name="location_sharing">Location Sharing</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Try again in %1$d seconds.</string>
@@ -1397,6 +1399,7 @@
     <string name="permission_nearby_devices_summary">Find and connect to your radio over Bluetooth</string>
     <string name="permission_notifications_summary">Alert you to messages, new nodes and low battery</string>
     <string name="permission_state_allowed">Allowed</string>
+    <string name="permission_state_approximate_only">Approximate only. Sharing your position with the mesh needs precise location.</string>
     <string name="permission_state_blocked">Blocked — tap to open system settings</string>
     <string name="permission_state_denied">Denied — tap to allow</string>
     <string name="permission_state_not_applicable">Not required on this version of Android</string>

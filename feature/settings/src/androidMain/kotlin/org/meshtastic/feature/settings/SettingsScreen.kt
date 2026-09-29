@@ -269,16 +269,17 @@ fun SettingsScreen(
 
             // App-local settings are only relevant when configuring the local node
             if (state.isLocal) {
+                val provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value
                 // Ahead of the app settings block: onboarding runs once, so this is the only place a user who skipped
                 // or declined a permission can find their way back to it.
-                PermissionsSettingsContent()
+                PermissionsSettingsContent(needsPreciseLocation = provideLocation)
 
                 ExpressiveSection(title = stringResource(Res.string.app_settings)) {
                     PrivacySettingsContent(
                         analyticsAvailable = appFunctionsAvailable,
                         analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
                         onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
-                        provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
+                        provideLocation = provideLocation,
                         onToggleLocation = { settingsViewModel.setProvideLocation(it) },
                         homoglyphEnabled =
                         viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
