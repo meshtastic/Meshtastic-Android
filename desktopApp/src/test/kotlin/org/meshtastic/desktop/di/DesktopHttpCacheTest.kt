@@ -16,11 +16,16 @@
  */
 package org.meshtastic.desktop.di
 
+import io.ktor.client.plugins.cache.HttpCache
+import io.ktor.client.plugins.pluginOrNull
+import kotlinx.serialization.json.Json
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class DesktopHttpCacheTest {
@@ -56,6 +61,19 @@ class DesktopHttpCacheTest {
         trimDirectoryToBudget(dir, maxBytes = 1_000)
 
         assertEquals(setOf("a", "b"), dir.list().orEmpty().toSet())
+    }
+
+    @Test
+    fun `only the api client caches responses`() {
+        val shared = DesktopRuntimeModule().httpClient(Json)
+        val api = shared.withApiCache(File(dir, "http_cache"))
+        try {
+            assertNull(shared.pluginOrNull(HttpCache), "the shared client also carries firmware and images")
+            assertNotNull(api.pluginOrNull(HttpCache))
+        } finally {
+            api.close()
+            shared.close()
+        }
     }
 
     @Test
