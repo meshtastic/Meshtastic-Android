@@ -38,6 +38,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -1979,8 +1980,11 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 // while CLOSING, and a timed-out attempt leaves ownership intact so a later close() can retry.
                 val operationsDrained =
                     operationsDrain?.let { drain ->
+                        // The drain timeout measures real time; on an injected test dispatcher it would expire at
+                        // once.
+                        @Suppress("InjectDispatcher")
                         val completedBeforeTimeout =
-                            withContext(dispatchers.default) {
+                            withContext(Dispatchers.Default) {
                                 withTimeoutOrNull(WRITER_DRAIN_TIMEOUT_MS) {
                                     drain.await()
                                     true
