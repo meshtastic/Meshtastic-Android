@@ -19,6 +19,7 @@ package org.meshtastic.core.database.entity
 import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
+import org.meshtastic.core.model.QuickChatAction as QuickChatActionModel
 
 @Entity(tableName = "quick_chat")
 data class QuickChatAction(
@@ -33,3 +34,27 @@ data class QuickChatAction(
         Instant,
     }
 }
+
+fun QuickChatAction.asExternalModel() = QuickChatActionModel(
+    uuid = uuid,
+    name = name,
+    message = message,
+    mode =
+    when (mode) {
+        QuickChatAction.Mode.Append -> QuickChatActionModel.Mode.Append
+        QuickChatAction.Mode.Instant -> QuickChatActionModel.Mode.Instant
+    },
+    position = position,
+)
+
+fun QuickChatActionModel.asEntity() = QuickChatAction(
+    uuid = uuid,
+    name = name,
+    message = message,
+    mode =
+    when (mode) {
+        QuickChatActionModel.Mode.Append -> QuickChatAction.Mode.Append
+        QuickChatActionModel.Mode.Instant -> QuickChatAction.Mode.Instant
+    },
+    position = position,
+)

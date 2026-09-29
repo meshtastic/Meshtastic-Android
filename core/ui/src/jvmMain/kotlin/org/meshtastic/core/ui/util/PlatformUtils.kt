@@ -23,10 +23,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalClipboard
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.ioDispatcher
 import java.awt.Desktop
 import java.awt.FileDialog
 import java.awt.Frame
@@ -109,29 +107,6 @@ actual fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Uni
         onTreeUriSelect(CommonUri.parse(chooser.selectedFile.toURI().toString()))
     } else {
         onTreeUriSelect(null)
-    }
-}
-
-/** JVM — Reads text from a file URI. */
-@Composable
-actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { uri, maxChars ->
-    withContext(ioDispatcher) {
-        @Suppress("TooGenericExceptionCaught")
-        try {
-            val file = File(URI(uri.toString()))
-            if (file.exists()) {
-                file.bufferedReader().use { reader ->
-                    val buffer = CharArray(maxChars)
-                    val read = reader.read(buffer)
-                    if (read > 0) String(buffer, 0, read) else null
-                }
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            Logger.e(e) { "Failed to read text from URI: $uri" }
-            null
-        }
     }
 }
 

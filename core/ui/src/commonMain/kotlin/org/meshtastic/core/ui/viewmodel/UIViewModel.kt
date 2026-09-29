@@ -42,12 +42,12 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.TracerouteMapAvailability
+import org.meshtastic.core.model.asDeviceVersion
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri

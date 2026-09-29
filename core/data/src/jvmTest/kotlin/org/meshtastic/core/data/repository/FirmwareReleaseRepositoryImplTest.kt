@@ -30,11 +30,12 @@ import okio.Source
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.FirmwareReleaseLocalDataSource
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
-import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareResponse
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.FirmwareReleaseManifest
+import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.model.FirmwareTarget
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.NetworkDeviceHardware
@@ -169,8 +170,7 @@ class FirmwareReleaseRepositoryImplTest {
 
     @Test
     fun `manifest board targets are fetched once and cached by release URL`() = runBlocking {
-        val release =
-            org.meshtastic.core.database.entity.FirmwareRelease(id = "v2.8.0", zipUrl = "https://example.com/manifest")
+        val release = FirmwareRelease(id = "v2.8.0", zipUrl = "https://example.com/manifest")
         api.manifest =
             FirmwareReleaseManifest(
                 version = "2.8.0",

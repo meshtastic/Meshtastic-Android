@@ -33,11 +33,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.model.asDeviceVersion
 import org.meshtastic.core.repository.EventFirmwareRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration

@@ -33,10 +33,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.FirmwareUpdateNoticePolicy
 import org.meshtastic.core.model.FirmwareUpdateTransport

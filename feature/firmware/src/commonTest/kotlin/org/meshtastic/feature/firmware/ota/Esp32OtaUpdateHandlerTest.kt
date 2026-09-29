@@ -26,9 +26,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController

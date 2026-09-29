@@ -17,9 +17,9 @@
 package org.meshtastic.feature.node.model
 
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.DeviceLink
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.rxTimeOrNull

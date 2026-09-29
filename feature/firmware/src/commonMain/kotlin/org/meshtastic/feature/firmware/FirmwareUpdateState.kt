@@ -16,8 +16,8 @@
  */
 package org.meshtastic.feature.firmware
 
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.repository.FirmwareUpdateProgress
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText

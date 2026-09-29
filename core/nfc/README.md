@@ -1,12 +1,12 @@
 # `:core:nfc`
 
 ## Overview
-The `:core:nfc` module provides Near Field Communication (NFC) capabilities for the application. It is a KMP module with Android NFC hardware implementation isolated to `androidMain`. The shared NFC contract is provided via `LocalNfcScannerProvider` in `core:ui`.
+The `:core:nfc` module provides Near Field Communication (NFC) capabilities for the application. It is an Android library, since NFC hardware APIs are Android-specific. The shared NFC contract is provided via `LocalNfcScannerProvider` in `core:ui`.
 
 ## Key Components
 
-### 1. `NfcScannerEffect` (androidMain)
-A Composable side-effect that manages Android NFC adapter state and listens for NDEF tags. Located in `androidMain` since NFC hardware APIs are Android-specific.
+### 1. `NfcScannerEffect`
+A Composable side-effect that manages Android NFC adapter state and listens for NDEF tags.
 
 ### 2. `LocalNfcScannerProvider` (core:ui/commonMain)
 The shared capability contract for NFC scanning, injected via `CompositionLocalProvider` from the app layer.
@@ -17,7 +17,7 @@ The shared capability contract for NFC scanning, injected via `CompositionLocalP
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:nfc[nfc]:::kmp-library-compose
+  :core:nfc[nfc]:::android-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

@@ -14,19 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.meshtastic.kmp.library.compose)
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.android.library.compose)
 }
 
-kotlin {
-    sourceSets {
-        commonMain.dependencies { implementation(libs.kermit) }
+configure<LibraryExtension> { namespace = "org.meshtastic.core.nfc" }
 
-        androidMain.dependencies {
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.compose.multiplatform.ui)
-        }
-    }
+dependencies {
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.compose.multiplatform.ui)
+    implementation(libs.kermit)
 }

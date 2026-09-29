@@ -28,9 +28,9 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.TemperatureUnit
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.DeviceLink
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node

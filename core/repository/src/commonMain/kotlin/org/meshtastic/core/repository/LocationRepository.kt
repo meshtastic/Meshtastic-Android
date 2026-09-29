@@ -19,9 +19,6 @@ package org.meshtastic.core.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-/** Platform-independent location object for KMP. */
-expect class Location
-
 interface LocationRepository {
     /** Status of whether the app is actively subscribed to location changes. */
     val receivingLocationUpdates: StateFlow<Boolean>

@@ -51,8 +51,6 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Composable actual fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit = {}
 
-@Composable actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { _, _ -> null }
-
 @Composable
 actual fun KeepScreenOn(enabled: Boolean) {
     // No-op iOS stub.

@@ -18,11 +18,14 @@ package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
-import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.database.entity.asEntity
+import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.QuickChatAction
 import org.meshtastic.core.repository.QuickChatActionRepository
 
 @Single
@@ -30,12 +33,14 @@ class QuickChatActionRepositoryImpl(
     private val dbManager: DatabaseProvider,
     private val dispatchers: CoroutineDispatchers,
 ) : QuickChatActionRepository {
-    override fun getAllActions(): Flow<List<QuickChatAction>> =
-        dbManager.observeCurrentDb { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
+    override fun getAllActions(): Flow<List<QuickChatAction>> = dbManager
+        .observeCurrentDb { it.quickChatActionDao().getAll() }
+        .map { actions -> actions.map { it.asExternalModel() } }
+        .flowOn(dispatchers.io)
 
     // Writes go through withDb so they register with the cross-transport merge drain barrier (see DatabaseProvider).
     override suspend fun upsert(action: QuickChatAction) {
-        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().upsert(action) } }
+        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().upsert(action.asEntity()) } }
     }
 
     override suspend fun deleteAll() {
@@ -43,7 +48,7 @@ class QuickChatActionRepositoryImpl(
     }
 
     override suspend fun delete(action: QuickChatAction) {
-        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().delete(action) } }
+        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().delete(action.asEntity()) } }
     }
 
     override suspend fun setItemPosition(uuid: Long, newPos: Int) {

@@ -16,6 +16,7 @@
  */
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
@@ -30,17 +31,12 @@ kotlin {
         commonMain.dependencies {
             // KML import parses through the same xmlutil the app already resolves for CoT XML.
             implementation(libs.xmlutil.core)
-            implementation(projects.core.data)
-            implementation(projects.core.database)
-            implementation(projects.core.datastore)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
             // NetworkRepository backs the offline-basemap auto-fallback (see OfflineFallback.kt).
             implementation(projects.core.network)
-            implementation(projects.core.prefs)
             implementation(projects.core.repository)
             implementation(libs.meshtastic.protobufs)
-            implementation(projects.core.service)
             implementation(projects.core.resources)
             implementation(projects.core.ui)
             implementation(projects.core.di)

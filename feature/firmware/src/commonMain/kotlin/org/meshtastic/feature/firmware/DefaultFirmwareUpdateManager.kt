@@ -20,8 +20,8 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial

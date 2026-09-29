@@ -18,7 +18,7 @@ package org.meshtastic.feature.messaging
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.model.QuickChatAction
 import org.meshtastic.core.ui.theme.AppTheme
 
 @PreviewLightDark

@@ -21,8 +21,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
@@ -221,10 +221,11 @@ internal class UsbPassWriter(
             return UsbPassResult.CopyFailed
         }
 
-        val copied =
-            safeCatching { fileHandler.copyToUri(artifact, destination) }
-                .onFailure { Logger.e(it) { "Copying $fileName to the UF2 volume failed" } }
-                .getOrNull()
+        val copied = safeCatching {
+            fileHandler.copyToUri(artifact, destination)
+        }
+            .onFailure { Logger.e(it) { "Copying $fileName to the UF2 volume failed" } }
+            .getOrNull()
         if (copied == null) return UsbPassResult.CopyFailed
 
         updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_flashing))))

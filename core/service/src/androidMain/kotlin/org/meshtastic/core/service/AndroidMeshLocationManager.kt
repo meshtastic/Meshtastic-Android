@@ -18,7 +18,6 @@ package org.meshtastic.core.service
 
 import android.annotation.SuppressLint
 import android.app.Application
-import androidx.core.location.LocationCompat
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -54,16 +53,11 @@ class AndroidMeshLocationManager(private val context: Application, private val l
                             phonePosition(
                                 latitude = location.latitude,
                                 longitude = location.longitude,
-                                timeMillis = location.time,
-                                mslAltitudeMeters =
-                                if (LocationCompat.hasMslAltitude(location)) {
-                                    LocationCompat.getMslAltitudeMeters(location)
-                                } else {
-                                    null
-                                },
-                                haeAltitudeMeters = location.altitude.takeIf { location.hasAltitude() },
-                                speedMetersPerSecond = location.speed.takeIf { location.hasSpeed() },
-                                bearingDegrees = location.bearing.takeIf { location.hasBearing() },
+                                timeMillis = location.timeMillis,
+                                mslAltitudeMeters = location.mslAltitudeMeters,
+                                haeAltitudeMeters = location.altitudeMeters,
+                                speedMetersPerSecond = location.speedMetersPerSecond,
+                                bearingDegrees = location.bearingDegrees,
                             ),
                         )
                     }

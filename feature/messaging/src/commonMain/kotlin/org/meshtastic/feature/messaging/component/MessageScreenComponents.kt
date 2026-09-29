@@ -69,10 +69,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.QuickChatAction
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alert_bell_text
 import org.meshtastic.core.resources.cancel
@@ -657,15 +657,14 @@ fun handleQuickChatAction(
     when (action.mode) {
         QuickChatAction.Mode.Append -> {
             if (!currentText.contains(action.message)) {
-                val newText =
-                    buildString {
-                        append(currentText)
-                        if (currentText.isNotEmpty() && !currentText.endsWith(' ')) {
-                            append(' ')
-                        }
-                        append(action.message)
+                val newText = buildString {
+                    append(currentText)
+                    if (currentText.isNotEmpty() && !currentText.endsWith(' ')) {
+                        append(' ')
                     }
-                        .limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
+                    append(action.message)
+                }
+                    .limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
                 onUpdateText(newText)
             }
         }

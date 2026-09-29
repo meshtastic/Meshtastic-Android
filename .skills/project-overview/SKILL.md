@@ -10,7 +10,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 
 - **Build System:** Gradle (Kotlin DSL). JDK 25 REQUIRED. Target SDK: API 37. Min SDK: API 26.
 - **Flavors:** `fdroid` (OSS only) · `google` (Maps + DataDog analytics)
-- **Android-only Modules:** `core:barcode` (CameraX), `feature:widget` (Glance home-screen widget), and `baselineprofile` (Macrobenchmark). Shared contracts are abstracted into `core:ui/commonMain`.
+- **Android-only Modules:** `core:barcode` (CameraX), `core:nfc` (NFC hardware), `feature:widget` (Glance home-screen widget), and `baselineprofile` (Macrobenchmark). Shared contracts are abstracted into `core:ui/commonMain`.
 
 ## Codebase Map
 
@@ -35,7 +35,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `core:takserver` | Meshtastic ↔ TAK (ATAK/iTAK) bridge — local CoT server and CoT ⇄ mesh conversion. |
 | `core:prefs` | KMP preferences layer built on DataStore abstractions. |
 | `core:barcode` | Barcode scanning (Android-only). |
-| `core:nfc` | Android-only NFC hardware implementation (`androidMain`). The shared NFC abstractions are the `LocalNfc*Provider` composition locals in `core:ui`. |
+| `core:nfc` | Android-only NFC hardware implementation (an Android library, not KMP). The shared NFC abstractions are the `LocalNfc*Provider` composition locals in `core:ui`. |
 | `core/ble/` | Bluetooth Low Energy stack using Kable. |
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules. |
