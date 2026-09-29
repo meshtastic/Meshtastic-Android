@@ -16,14 +16,20 @@
  */
 package org.meshtastic.feature.wifiprovision
 
+import androidx.lifecycle.ViewModelStore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.ble.BleConnection
+import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.testing.FakeApplicationCoroutineScope
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
@@ -60,18 +66,15 @@ class WifiProvisionViewModelTest {
         Dispatchers.setMain(testDispatcher)
         scanner = FakeBleScanner()
         connection = FakeBleConnection()
-        viewModel =
-            WifiProvisionViewModel(
-                bleScanner = scanner,
-                bleConnectionFactory = FakeBleConnectionFactory(connection),
-                dispatchers =
-                CoroutineDispatchers(
-                    io = testDispatcher,
-                    main = testDispatcher,
-                    default = testDispatcher,
-                ),
-            )
+        viewModel = createViewModel(FakeBleConnectionFactory(connection))
     }
+
+    private fun createViewModel(connectionFactory: BleConnectionFactory) = WifiProvisionViewModel(
+        bleScanner = scanner,
+        bleConnectionFactory = connectionFactory,
+        dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher),
+        applicationScope = FakeApplicationCoroutineScope(testDispatcher),
+    )
 
     @AfterTest
     fun tearDown() {
@@ -323,8 +326,70 @@ class WifiProvisionViewModelTest {
     }
 
     // -----------------------------------------------------------------------
+    // Connection ownership
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun `reconnecting closes the previous BLE connection`() = runTest {
+        val factory = RecordingBleConnectionFactory()
+        val viewModel = createViewModel(factory)
+        scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
+
+        viewModel.connectToDevice()
+        advanceUntilIdle()
+        viewModel.connectToDevice()
+        advanceUntilIdle()
+
+        assertEquals(2, factory.created.size)
+        assertEquals(1, factory.created[0].disconnectCalls)
+        assertEquals(0, factory.created[1].disconnectCalls)
+        assertEquals(Phase.DeviceFound, viewModel.uiState.value.phase)
+    }
+
+    @Test
+    fun `reconnecting cancels a connect that is still scanning`() = runTest {
+        val factory = RecordingBleConnectionFactory()
+        val viewModel = createViewModel(factory)
+
+        viewModel.connectToDevice()
+        runCurrent()
+        viewModel.connectToDevice()
+        runCurrent()
+        scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
+        advanceUntilIdle()
+
+        assertEquals(0, factory.created[0].connectAndAwaitCalls)
+        assertEquals(1, factory.created[1].connectAndAwaitCalls)
+        assertEquals(Phase.DeviceFound, viewModel.uiState.value.phase)
+    }
+
+    @Test
+    fun `clearing the ViewModel closes the current BLE connection`() = runTest {
+        val factory = RecordingBleConnectionFactory()
+        val viewModel = createViewModel(factory)
+        scanner.emitDevice(FakeBleDevice("AA:BB:CC:DD:EE:FF"))
+        viewModel.connectToDevice()
+        advanceUntilIdle()
+
+        val store = ViewModelStore()
+        store.put("wifiProvisionViewModel", viewModel)
+        store.clear()
+        advanceUntilIdle()
+
+        assertEquals(1, factory.created.single().disconnectCalls)
+    }
+
+    // -----------------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------------
+
+    /** Hands out a fresh [FakeBleConnection] per [create], so each service's connection can be checked on its own. */
+    private class RecordingBleConnectionFactory : BleConnectionFactory {
+        val created = mutableListOf<FakeBleConnection>()
+
+        override fun create(scope: CoroutineScope, tag: String): BleConnection =
+            FakeBleConnection().also { created += it }
+    }
 
     /**
      * Emit a complete nymea JSON response on the Commander Response characteristic. Uses newline-terminated encoding
