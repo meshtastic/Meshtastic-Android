@@ -18,6 +18,8 @@ Run in a single invocation for routine changes to ensure code formatting, analys
 
 `detekt` alone has no classpath, so it skips every rule that needs type resolution (`UnsafeCallOnNullableType`, `SuspendFunSwallowedCancellation`, `UnsafeCast` and the rest). `detektTypeResolved` runs those against each module's production JVM and Android debug compilations; it shares the module's `detekt-baseline.xml`.
 
+Regenerating that baseline needs care, because detekt's baseline tasks rewrite `CurrentIssues` from their own run and keep only `ManuallySuppressedIssues`. A plain `detektBaseline` therefore drops every type-resolved ID, and `detektBaselineMain<Target>` or `detektBaseline<Variant>` writes `detekt-baseline-<compilation>.xml`, which no check reads. After a plain `detektBaseline`, run the type-resolved baseline tasks for that module (`detektBaselineMainJvm`, `detektBaselineMainAndroid`, `detektBaselineFdroidDebug` and so on), copy the IDs you mean to keep from the generated files into `detekt-baseline.xml`, delete the generated files, and confirm with `detekt detektTypeResolved`. `detektBaselineMainJvm` and `detektBaselineMainAndroid` both write `detekt-baseline-main.xml`, so run and copy them one at a time.
+
 > **Why no `clean`?** Incremental builds are safe and significantly faster. Only use `clean` when debugging stale cache issues.
 
 > **Why `test allTests` and not just `test`:**
