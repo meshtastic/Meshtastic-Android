@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
@@ -35,6 +36,7 @@ import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.util.TELEMETRY_CHANNEL_COUNT
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.adcVoltage
 import org.meshtastic.core.model.util.oneWireTemperature
 import org.meshtastic.core.model.util.withAdcVoltage
@@ -71,10 +73,22 @@ open class MeshLogRepositoryImpl(
         .map { list -> list.map { it.asExternalModel() } }
         .flowOn(dispatchers.io)
 
-    /** Retrieves all [MeshLog]s in the database in the order they were received. */
-    override fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>> = dbManager
-        .observeCurrentDb { it.meshLogDao().getAllLogsInReceiveOrder(maxItem) }
-        .map { list -> list.map { it.asExternalModel() } }
+    /** Pages through one database under a single read lease, so the logs all come from the same device. */
+    override fun readAllLogsInReceiveOrder(): Flow<MeshLog> = channelFlow {
+        dbManager.withReadDb { db ->
+            val dao = db.meshLogDao()
+            var afterReceivedDate = Long.MIN_VALUE
+            var afterRowId = Long.MIN_VALUE
+            do {
+                val page = dao.getLogsInReceiveOrderAfter(afterReceivedDate, afterRowId, RECEIVE_ORDER_PAGE_SIZE)
+                page.forEach { send(it.log.asExternalModel()) }
+                page.lastOrNull()?.let { last ->
+                    afterReceivedDate = last.log.received_date
+                    afterRowId = last.rowId
+                }
+            } while (page.size == RECEIVE_ORDER_PAGE_SIZE)
+        }
+    }
         .flowOn(dispatchers.io)
 
     /** Retrieves all [MeshLog]s in the database without any limit. */
@@ -132,7 +146,7 @@ open class MeshLogRepositoryImpl(
         telemetry
             .newBuilder()
             .also { wb ->
-                wb.time = (log.received_date / MILLIS_PER_SEC).toInt()
+                wb.time = (log.received_date / TimeConstants.MS_PER_SEC).toInt()
                 wb.environment_metrics = telemetry.environment_metrics?.withSentinelsForAbsentReadings()
             }
             .build()
@@ -241,7 +255,6 @@ open class MeshLogRepositoryImpl(
     }
 
     companion object {
-        private const val MILLIS_PER_SEC = 1000L
         private const val TELEMETRY_SNAPSHOT_PAGE_SIZE = 512
 
         /**
@@ -250,6 +263,8 @@ open class MeshLogRepositoryImpl(
          * auto-checkpoint.
          */
         internal const val RETENTION_DELETE_BATCH_SIZE = 500
+
+        internal const val RECEIVE_ORDER_PAGE_SIZE = 500
     }
 }
 

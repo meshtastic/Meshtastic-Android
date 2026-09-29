@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import okio.BufferedSink
@@ -59,7 +58,7 @@ constructor(
             "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance(m)\",\"hop limit\",\"hop start\",\"relay node\",\"payload\"\n",
         )
 
-        meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
+        meshLogRepository.readAllLogsInReceiveOrder().collect { packet ->
             packet.nodeInfo?.let { nodeInfo ->
                 positionToPos.invoke(nodeInfo.position)?.let { nodePositions[nodeInfo.num] = nodeInfo.position }
             }

@@ -36,8 +36,11 @@ interface MeshLogRepository {
     /** Retrieves all [MeshLog]s in the database, up to [maxItem]. */
     fun getAllLogs(maxItem: Int = DEFAULT_MAX_LOGS): Flow<List<MeshLog>>
 
-    /** Retrieves all [MeshLog]s in the database in the order they were received. */
-    fun getAllLogsInReceiveOrder(maxItem: Int = DEFAULT_MAX_LOGS): Flow<List<MeshLog>>
+    /**
+     * Emits every [MeshLog] once, oldest first, then completes. The logs are read a page at a time rather than held in
+     * memory together.
+     */
+    fun readAllLogsInReceiveOrder(): Flow<MeshLog>
 
     /** Retrieves all [MeshLog]s in the database without any limit. */
     fun getAllLogsUnbounded(): Flow<List<MeshLog>>

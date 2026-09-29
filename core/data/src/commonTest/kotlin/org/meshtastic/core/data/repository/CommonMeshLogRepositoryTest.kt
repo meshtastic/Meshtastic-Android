@@ -25,6 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -337,6 +338,28 @@ abstract class CommonMeshLogRepositoryTest {
     /** Retention is measured against the real clock, so these rows are stamped relative to it. */
     private fun retentionLog(uuid: String, receivedDate: Long) =
         MeshLog(uuid = uuid, message_type = "TEXT", received_date = receivedDate, raw_message = "")
+
+    @Test
+    fun `readAllLogsInReceiveOrder returns every log across pages oldest first and ties in insertion order`() =
+        runTest(testDispatcher) {
+            val count = MeshLogRepositoryImpl.RECEIVE_ORDER_PAGE_SIZE * 5 / 2
+            // Seven logs share most received dates, so tie groups straddle both page boundaries, and uuids run
+            // against insertion order so ordering ties by uuid would reverse every group.
+            val logs =
+                List(count) { i ->
+                    MeshLog(
+                        uuid = (count - i).toString().padStart(5, '0'),
+                        message_type = "TEXT",
+                        received_date = (i % 179).toLong(),
+                        raw_message = "",
+                    )
+                }
+            dbProvider.currentDb.value.meshLogDao().insertIgnore(logs.map { it.asEntity() })
+
+            val read = repository.readAllLogsInReceiveOrder().toList()
+
+            assertEquals(logs.sortedBy { it.received_date }.map { it.uuid }, read.map { it.uuid })
+        }
 
     @Test
     fun `parseTelemetryLog lifts legacy one-wire list onto per-channel fields`() = runTest(testDispatcher) {
