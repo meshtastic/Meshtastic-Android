@@ -25,13 +25,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_antenna
 import org.meshtastic.core.resources.node_sort_last_heard
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatAgo
-
-private const val MILLIS_PER_SECOND = 1000L
 
 @Composable
 fun LastHeardInfo(
@@ -45,7 +44,7 @@ fun LastHeardInfo(
         if (relative) {
             formatAgo(lastHeard)
         } else {
-            DateFormatter.formatDateTime(lastHeard.toLong() * MILLIS_PER_SECOND)
+            DateFormatter.formatDateTime(lastHeard.toLong() * TimeConstants.MS_PER_SEC)
         }
     IconInfo(
         modifier = modifier,

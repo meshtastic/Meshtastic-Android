@@ -19,61 +19,21 @@ package org.meshtastic.core.data.repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import okio.Buffer
-import okio.Source
 import org.meshtastic.core.data.datasource.BootloaderOtaQuirksLocalDataSource
-import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.BootloaderOtaQuirksResponse
-import org.meshtastic.core.model.EventFirmwareResponse
-import org.meshtastic.core.model.FirmwareReleaseManifest
-import org.meshtastic.core.model.MaintenanceUf2Manifest
-import org.meshtastic.core.model.NetworkDeviceHardware
-import org.meshtastic.core.model.NetworkDeviceLinksResponse
-import org.meshtastic.core.model.NetworkFirmwareNightly
-import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.SoftDeviceVariantEntry
 import org.meshtastic.core.network.BootloaderOtaQuirksRemoteDataSource
-import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+private const val QUIRKS_ASSET = "device_bootloader_ota_quirks.json"
+
 class BootloaderOtaQuirksRepositoryImplTest {
-
-    /** Only [getBootloaderOtaQuirks] is exercised; the other endpoints are never called by this repository. */
-    private class FakeApiService(var response: BootloaderOtaQuirksResponse) : ApiService {
-        override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = error("unused")
-
-        override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = error("unused")
-
-        override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
-
-        override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest = error("unused")
-
-        override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? = error("unused")
-
-        override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
-
-        override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = response
-
-        override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest = error("unused")
-    }
-
-    /**
-     * Serves only `device_bootloader_ota_quirks.json`, or nothing when [seed] is null (models the asset being absent).
-     */
-    private class FakeBundledAssetReader(var seed: BootloaderOtaQuirksResponse?, private val json: Json) :
-        BundledAssetReader {
-        override fun open(name: String): Source? {
-            if (name != "device_bootloader_ota_quirks.json") return null
-            val current = seed ?: return null
-            return Buffer().write(json.encodeToString(current).encodeToByteArray())
-        }
-    }
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -98,8 +58,8 @@ class BootloaderOtaQuirksRepositoryImplTest {
     fun setup() {
         dbProvider = FakeDatabaseProvider()
         local = BootloaderOtaQuirksLocalDataSource(dbProvider, dispatchers)
-        api = FakeApiService(BootloaderOtaQuirksResponse())
-        seed = FakeBundledAssetReader(null, json)
+        api = FakeApiService(bootloaderOtaQuirks = { BootloaderOtaQuirksResponse() })
+        seed = FakeBundledAssetReader()
         repository =
             BootloaderOtaQuirksRepositoryImpl(
                 remoteDataSource = BootloaderOtaQuirksRemoteDataSource(api, dispatchers),
@@ -114,11 +74,14 @@ class BootloaderOtaQuirksRepositoryImplTest {
 
     @Test
     fun getSnapshotSeedsFromBundledJsonWhenCacheIsEmpty() = runBlocking {
-        seed.seed =
+        seed.put(
+            QUIRKS_ASSET,
             BootloaderOtaQuirksResponse(
                 devices = listOf(quirk(hwModel = 9)),
                 softDeviceVariants = listOf(variant(hwModel = 9, target = "rak4631", softDevice = "6.1.1")),
-            )
+            ),
+            json,
+        )
 
         val snapshot = repository.getSnapshot()
 
@@ -128,12 +91,16 @@ class BootloaderOtaQuirksRepositoryImplTest {
 
     @Test
     fun getSnapshotSeedsOnlyWhenCacheIsEmpty() = runBlocking {
-        seed.seed = BootloaderOtaQuirksResponse(devices = listOf(quirk(hwModel = 9)))
+        seed.put(QUIRKS_ASSET, BootloaderOtaQuirksResponse(devices = listOf(quirk(hwModel = 9))), json)
         repository.getSnapshot()
         assertEquals(1, local.count())
 
         // A changed bundled asset must NOT re-seed once the cache is populated.
-        seed.seed = BootloaderOtaQuirksResponse(devices = listOf(quirk(hwModel = 9), quirk(hwModel = 18)))
+        seed.put(
+            QUIRKS_ASSET,
+            BootloaderOtaQuirksResponse(devices = listOf(quirk(hwModel = 9), quirk(hwModel = 18))),
+            json,
+        )
         val snapshot = repository.getSnapshot()
 
         assertEquals(1, local.count())
@@ -149,8 +116,9 @@ class BootloaderOtaQuirksRepositoryImplTest {
 
     @Test
     fun reconcileUpdatesCacheFromTheNetwork() = runBlocking {
-        api.response =
+        api.bootloaderOtaQuirks = {
             BootloaderOtaQuirksResponse(softDeviceVariants = listOf(variant(hwModel = 9, target = "rak4631", "7.3.0")))
+        }
         repository.reconcile()
 
         val snapshot = repository.getSnapshot()
@@ -160,11 +128,11 @@ class BootloaderOtaQuirksRepositoryImplTest {
 
     @Test
     fun emptyNetworkResponseLeavesCacheUntouched() = runBlocking {
-        api.response = BootloaderOtaQuirksResponse(devices = listOf(quirk(hwModel = 9)))
+        api.bootloaderOtaQuirks = { BootloaderOtaQuirksResponse(devices = listOf(quirk(hwModel = 9))) }
         repository.reconcile()
         assertEquals(1, local.count())
 
-        api.response = BootloaderOtaQuirksResponse()
+        api.bootloaderOtaQuirks = { BootloaderOtaQuirksResponse() }
         repository.reconcile()
 
         assertEquals(1, local.count())

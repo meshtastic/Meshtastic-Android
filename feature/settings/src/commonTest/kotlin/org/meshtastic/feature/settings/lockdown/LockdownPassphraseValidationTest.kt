@@ -14,12 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.discovery.export
+package org.meshtastic.feature.settings.lockdown
 
-import androidx.compose.runtime.Composable
-import co.touchlab.kermit.Logger
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-@Composable
-actual fun rememberExportSaver(): ExportSaverLauncher = ExportSaverLauncher { result ->
-    Logger.w { "Export save not yet implemented on iOS: ${result.fileName}" }
+class LockdownPassphraseValidationTest {
+
+    @Test
+    fun `an empty passphrase is rejected`() {
+        assertFalse(isValidLockdownPassphrase(""))
+    }
+
+    @Test
+    fun `the firmware limit is counted in bytes not characters`() {
+        assertTrue(isValidLockdownPassphrase("a".repeat(64)))
+        assertFalse(isValidLockdownPassphrase("a".repeat(65)))
+        // Two bytes each in UTF-8: 32 fit, 33 do not.
+        assertTrue(isValidLockdownPassphrase("é".repeat(32)))
+        assertFalse(isValidLockdownPassphrase("é".repeat(33)))
+    }
 }

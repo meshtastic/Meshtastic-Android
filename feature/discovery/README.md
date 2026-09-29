@@ -40,7 +40,7 @@ Multiplatform export path in `export/`:
 
 - `DiscoveryExporter` — interface: `export(DiscoveryExportData): ExportResult` (success = bytes + MIME type + filename).
 - `DiscoveryReportFormatter` — shared formatting of session/preset report lines and filenames.
-- `rememberExportSaver()` / `ExportSaverLauncher` — `expect`/`actual` file-save seam per platform (`ExportSaver.android.kt` → SAF document picker, `ExportSaver.jvm.kt` → file dialog, `ExportSaver.ios.kt`).
+- `rememberExportSaver()` / `ExportSaverLauncher` save an `ExportResult.Success` to a user-picked file through `core:ui`'s `rememberFileExporter`.
 - `PdfDiscoveryExporter` (androidMain) renders a PDF report; `TextDiscoveryExporter` (jvmMain) renders plain text.
 
 ## Mesh Beacon Invitations

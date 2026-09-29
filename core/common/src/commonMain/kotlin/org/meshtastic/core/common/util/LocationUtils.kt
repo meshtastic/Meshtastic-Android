@@ -39,7 +39,8 @@ object GPSFormat {
     }
 }
 
-private const val EARTH_RADIUS_METERS = 6371e3
+/** Mean radius of the Earth in meters, the sphere every distance here is measured on. */
+const val EARTH_RADIUS_METERS = 6_371_000.0
 
 @Suppress("MagicNumber")
 private fun Double.toRadians(): Double = this * PI / 180.0

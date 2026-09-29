@@ -19,22 +19,11 @@ package org.meshtastic.core.data.repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import okio.Buffer
-import okio.Source
-import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceLinkLocalDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.BootloaderOtaQuirksResponse
-import org.meshtastic.core.model.EventFirmwareResponse
-import org.meshtastic.core.model.FirmwareReleaseManifest
-import org.meshtastic.core.model.MaintenanceUf2Manifest
-import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLink
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
-import org.meshtastic.core.model.NetworkFirmwareNightly
-import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.DeviceLinksRemoteDataSource
-import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -43,35 +32,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DeviceLinkRepositoryImplTest {
-
-    /** Only [getDeviceLinks] is exercised; the other endpoints are never called by the link repository. */
-    private class FakeApiService(var response: NetworkDeviceLinksResponse) : ApiService {
-        override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = error("unused")
-
-        override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = response
-
-        override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
-
-        override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest = error("unused")
-
-        override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? = error("unused")
-
-        override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
-
-        override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
-
-        override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest = error("unused")
-    }
-
-    /** Serves only `device_links.json`, serializing the current [links] so the repo seeds via the real decode path. */
-    private class FakeBundledAssetReader(var links: List<NetworkDeviceLink>, private val json: Json) :
-        BundledAssetReader {
-        override fun open(name: String): Source? {
-            if (name != "device_links.json") return null
-            val bytes = json.encodeToString(NetworkDeviceLinksResponse(links = links)).encodeToByteArray()
-            return Buffer().write(bytes)
-        }
-    }
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -103,12 +63,21 @@ class DeviceLinkRepositoryImplTest {
         regions = regions,
     )
 
+    /** Seeds `device_links.json` through the real decode path. */
+    private fun seedLinks(links: List<NetworkDeviceLink>) =
+        seed.put("device_links.json", NetworkDeviceLinksResponse(links = links), json)
+
+    private fun serveLinks(vararg links: NetworkDeviceLink) {
+        api.deviceLinks = { NetworkDeviceLinksResponse(links = links.toList()) }
+    }
+
     @BeforeTest
     fun setup() {
         dbProvider = FakeDatabaseProvider()
         local = DeviceLinkLocalDataSource(dbProvider)
-        api = FakeApiService(NetworkDeviceLinksResponse())
-        seed = FakeBundledAssetReader(emptyList(), json)
+        api = FakeApiService(deviceLinks = { NetworkDeviceLinksResponse() })
+        seed = FakeBundledAssetReader()
+        seedLinks(emptyList())
         repository =
             DeviceLinkRepositoryImpl(
                 remoteDataSource = DeviceLinksRemoteDataSource(api, dispatchers),
@@ -123,8 +92,8 @@ class DeviceLinkRepositoryImplTest {
 
     @Test
     fun seedsFromBundledJsonWhenEmptyAndDropsInternalLinks() = runBlocking {
-        seed.links =
-            listOf(link("rak4631", targets = listOf("rak4631")), link("github", type = NetworkDeviceLink.TYPE_INTERNAL))
+        val vendor = link("rak4631", targets = listOf("rak4631"))
+        seedLinks(listOf(vendor, link("github", type = NetworkDeviceLink.TYPE_INTERNAL)))
         repository.ensureImported()
 
         assertEquals(setOf("rak4631"), local.getAll().map { it.shortCode }.toSet())
@@ -132,38 +101,35 @@ class DeviceLinkRepositoryImplTest {
 
     @Test
     fun ensureImportedSeedsOnlyWhenEmpty() = runBlocking {
-        seed.links = listOf(link("rak4631", targets = listOf("rak4631")))
+        val first = listOf(link("rak4631", targets = listOf("rak4631")))
+        seedLinks(first)
         repository.ensureImported()
         assertEquals(1, local.count())
 
         // A larger snapshot must NOT re-seed once the table is populated.
-        seed.links = seed.links + link("heltec-v3", targets = listOf("heltec-v3"))
+        seedLinks(first + link("heltec-v3", targets = listOf("heltec-v3")))
         repository.ensureImported()
         assertEquals(1, local.count())
     }
 
     @Test
     fun getLinksForTargetFiltersByTargetAndRegionVendorFirst() = runBlocking {
-        api.response =
-            NetworkDeviceLinksResponse(
-                links =
-                listOf(
-                    link(
-                        "rokland-rak4631",
-                        type = NetworkDeviceLink.TYPE_MARKETPLACE,
-                        targets = listOf("rak4631"),
-                        regions = listOf("US"),
-                    ),
-                    link("rak4631", targets = listOf("rak4631")),
-                    link("heltec-v3", targets = listOf("heltec-v3")),
-                    link(
-                        "de-only",
-                        type = NetworkDeviceLink.TYPE_MARKETPLACE,
-                        targets = listOf("rak4631"),
-                        regions = listOf("DE"),
-                    ),
-                ),
-            )
+        serveLinks(
+            link(
+                "rokland-rak4631",
+                type = NetworkDeviceLink.TYPE_MARKETPLACE,
+                targets = listOf("rak4631"),
+                regions = listOf("US"),
+            ),
+            link("rak4631", targets = listOf("rak4631")),
+            link("heltec-v3", targets = listOf("heltec-v3")),
+            link(
+                "de-only",
+                type = NetworkDeviceLink.TYPE_MARKETPLACE,
+                targets = listOf("rak4631"),
+                regions = listOf("DE"),
+            ),
+        )
         repository.reconcile()
 
         val links = repository.getLinksForTarget("rak4631", regionCode = "US")
@@ -175,11 +141,7 @@ class DeviceLinkRepositoryImplTest {
 
     @Test
     fun worldwideLinksShowRegardlessOfRegion() = runBlocking {
-        api.response =
-            NetworkDeviceLinksResponse(
-                links =
-                listOf(link("ww", type = NetworkDeviceLink.TYPE_MARKETPLACE, targets = listOf("t"), regions = null)),
-            )
+        serveLinks(link("ww", type = NetworkDeviceLink.TYPE_MARKETPLACE, targets = listOf("t"), regions = null))
         repository.reconcile()
 
         assertEquals(listOf("ww"), repository.getLinksForTarget("t", regionCode = "ZZ").map { it.shortCode })
@@ -187,25 +149,22 @@ class DeviceLinkRepositoryImplTest {
 
     @Test
     fun reconcilePrunesShortCodesNoLongerInCatalog() = runBlocking {
-        api.response =
-            NetworkDeviceLinksResponse(
-                links = listOf(link("a", targets = listOf("t")), link("b", targets = listOf("t"))),
-            )
+        serveLinks(link("a", targets = listOf("t")), link("b", targets = listOf("t")))
         repository.reconcile()
         assertEquals(2, local.count())
 
-        api.response = NetworkDeviceLinksResponse(links = listOf(link("a", targets = listOf("t"))))
+        serveLinks(link("a", targets = listOf("t")))
         repository.reconcile()
         assertEquals(setOf("a"), local.getAll().map { it.shortCode }.toSet())
     }
 
     @Test
     fun emptyResponseLeavesCacheUntouched() = runBlocking {
-        api.response = NetworkDeviceLinksResponse(links = listOf(link("a", targets = listOf("t"))))
+        serveLinks(link("a", targets = listOf("t")))
         repository.reconcile()
         assertEquals(1, local.count())
 
-        api.response = NetworkDeviceLinksResponse(links = emptyList())
+        serveLinks()
         repository.reconcile()
         assertEquals(1, local.count())
     }

@@ -14,15 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map
+package org.meshtastic.feature.map
 
-import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -31,12 +28,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import okio.Path.Companion.toOkioPath
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -46,67 +37,44 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.feature.map.layers.MapLayersManager
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
-import kotlin.io.path.createTempDirectory
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import java.nio.file.Path as NioPath
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34], application = android.app.Application::class)
-class MapViewModelSitePlannerRequestTest {
+class BaseMapViewModelSitePlannerTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private val nodeRepository = FakeNodeRepository()
-    private val packetRepository = mock<PacketRepository>(MockMode.autofill)
-    private val networkRepository = mock<NetworkRepository>(MockMode.autofill)
-    private val mapPrefs = FakeMapPrefs()
+    private val packetRepository: PacketRepository = mock()
+    private val networkRepository: NetworkRepository = mock()
     private val firstNode = Node(num = 11)
     private val secondNode = Node(num = 22)
-    private lateinit var httpClient: HttpClient
-    private lateinit var layersDir: NioPath
-    private lateinit var mapLayersManager: MapLayersManager
-    private lateinit var viewModel: MapViewModel
+    private lateinit var viewModel: BaseMapViewModel
 
-    @Before
+    @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { packetRepository.getWaypoints() } returns flowOf(emptyList())
         every { networkRepository.networkAvailable } returns flowOf(true)
-        httpClient = HttpClient()
-        layersDir = createTempDirectory("map-layers")
-        mapLayersManager =
-            MapLayersManager(
-                dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher),
-                httpClient = httpClient,
-                mapPrefs = mapPrefs,
-                // The real location reads a global application context this test never installs.
-                layersDir = layersDir.toOkioPath(),
-            )
-
         nodeRepository.setNodes(listOf(firstNode, secondNode))
         viewModel =
-            MapViewModel(
-                mapPrefs = mapPrefs,
-                packetRepository = packetRepository,
+            BaseMapViewModel(
+                mapPrefs = FakeMapPrefs(),
                 nodeRepository = nodeRepository,
+                packetRepository = packetRepository,
                 radioController = FakeRadioController(),
                 radioConfigRepository = FakeRadioConfigRepository(),
                 notificationPrefs = FakeNotificationPrefs(),
-                mapLayersManager = mapLayersManager,
-                savedStateHandle = SavedStateHandle(),
                 localeUnitsProvider = FakeLocaleUnitsProvider(),
                 networkRepository = networkRepository,
             )
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
-        httpClient.close()
-        layersDir.toFile().deleteRecursively()
         Dispatchers.resetMain()
     }
 

@@ -18,41 +18,18 @@ package org.meshtastic.core.service
 
 import android.app.Application
 import android.content.SharedPreferences
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
-import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.StoredSecurityKeys
 
 /**
- * Encrypted per-node storage for security key backups.
- *
- * Uses EncryptedSharedPreferences backed by an AES-256-GCM MasterKey (hardware keystore when available), mirroring
+ * Encrypted per-node storage for security key backups, in [openEncryptedPreferences] like
  * [LockdownPassphraseStoreImpl]. Keyed by node number, matching iOS's per-node Keychain entries.
  */
 @Single(binds = [SecurityKeyBackupStore::class])
 class SecurityKeyBackupStoreImpl(app: Application) : SecurityKeyBackupStore {
 
-    // androidx.security.crypto (MasterKey / EncryptedSharedPreferences) is deprecated by Google with no
-    // drop-in AndroidX replacement yet. Migrating encrypted storage is a separate, security-sensitive
-    // effort; suppress until a stable replacement (e.g. Tink) is adopted.
-    @Suppress("TooGenericExceptionCaught", "DEPRECATION")
-    private val prefs: SharedPreferences? by lazy {
-        try {
-            val masterKey = MasterKey.Builder(app).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
-            EncryptedSharedPreferences.create(
-                app,
-                PREFS_FILE_NAME,
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-            )
-        } catch (e: Exception) {
-            Logger.e(e) { "Failed to initialize encrypted security key backup store" }
-            null
-        }
-    }
+    private val prefs: SharedPreferences? by lazy { openEncryptedPreferences(app, PREFS_FILE_NAME) }
 
     @Suppress("ReturnCount")
     override fun get(nodeNum: Int): StoredSecurityKeys? {

@@ -17,14 +17,24 @@
 package org.meshtastic.feature.discovery.export
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import org.meshtastic.core.ui.util.rememberFileExporter
 
-/**
- * Returns a launcher that saves [ExportResult.Success] content to the platform's file system.
- *
- * On Android this opens a SAF document-picker (ACTION_CREATE_DOCUMENT). On Desktop this writes to a user-chosen file
- * via a file dialog.
- */
-@Composable expect fun rememberExportSaver(): ExportSaverLauncher
+/** Returns a launcher that saves [ExportResult.Success] content to a file the user picks. */
+@Composable
+fun rememberExportSaver(): ExportSaverLauncher {
+    var pending by remember { mutableStateOf<ExportResult.Success?>(null) }
+    val export = rememberFileExporter(content = { pending?.content })
+    return remember(export) {
+        ExportSaverLauncher { result ->
+            pending = result
+            export(result.fileName, result.mimeType)
+        }
+    }
+}
 
 /** Platform-agnostic handle for triggering a file-save from export data. */
 fun interface ExportSaverLauncher {

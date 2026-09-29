@@ -27,5 +27,7 @@ object TimeConstants {
     val TWO_DAYS = 2.days
 
     const val HOURS_PER_DAY = 24
+    const val SECONDS_PER_MINUTE = 60
+    const val SECONDS_PER_HOUR = 3600
     const val MS_PER_SEC = 1000L
 }

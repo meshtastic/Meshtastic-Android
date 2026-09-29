@@ -117,7 +117,8 @@ interface FirmwareFileHandler {
      * @param hardware Used to match the correct binary inside the zip.
      * @param fileExtension The extension to filter for (e.g. ".bin", ".uf2").
      * @param preferredFilename Optional exact filename to prefer within the zip.
-     * @return The extracted [FirmwareArtifact], or `null` if no matching file was found.
+     * @return The extracted [FirmwareArtifact], or `null` if no file matched or the archive is corrupt or over the
+     *   extraction limits.
      */
     suspend fun extractFirmware(
         uri: CommonUri,
@@ -133,7 +134,8 @@ interface FirmwareFileHandler {
      * @param hardware Used to match the correct binary inside the zip.
      * @param fileExtension The extension to filter for (e.g. ".bin", ".uf2").
      * @param preferredFilename Optional exact filename to prefer within the zip.
-     * @return The extracted [FirmwareArtifact], or `null` if no matching file was found.
+     * @return The extracted [FirmwareArtifact], or `null` if no file matched or the archive is corrupt or over the
+     *   extraction limits.
      */
     suspend fun extractFirmwareFromZip(
         zipFile: FirmwareArtifact,
@@ -151,14 +153,16 @@ interface FirmwareFileHandler {
 
 /**
  * Check whether [filename] is a valid firmware binary for [target] with the expected [fileExtension]. Excludes
- * non-firmware binaries that share the same extension (e.g. `littlefs-*`, `bleota*`).
+ * non-firmware binaries that share the same extension (e.g. `littlefs-*`, `bleota*`), wherever they sit in a zip's
+ * directories.
  */
 @Suppress("ComplexCondition") // excluded-binary + target/extension guards collapsed to one early-out
 internal fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean {
+    val baseName = filename.substringAfterLast('/')
     if (
-        filename.startsWith("littlefs-") ||
-        filename.startsWith("bleota") ||
-        filename.startsWith("mt-") ||
+        baseName.startsWith("littlefs-") ||
+        baseName.startsWith("bleota") ||
+        baseName.startsWith("mt-") ||
         filename.contains(".factory.") ||
         target.isBlank() ||
         !filename.endsWith(fileExtension)

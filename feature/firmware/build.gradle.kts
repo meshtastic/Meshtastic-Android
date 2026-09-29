@@ -57,6 +57,9 @@ kotlin {
 
         // performUsbUpdate resolves compose-resources strings, whose desktop implementation needs
         // the skiko-awt runtime to read the system theme.
-        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
+        jvmTest.dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation(libs.ktor.client.mock)
+        }
     }
 }

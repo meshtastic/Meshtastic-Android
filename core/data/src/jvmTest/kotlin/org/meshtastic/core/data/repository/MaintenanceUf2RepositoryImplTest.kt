@@ -19,24 +19,13 @@ package org.meshtastic.core.data.repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import okio.Buffer
-import okio.Source
-import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.MaintenanceUf2LocalDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EraseImageEntry
-import org.meshtastic.core.model.EventFirmwareResponse
-import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.MaintenanceUf2EraseSet
 import org.meshtastic.core.model.MaintenanceUf2Manifest
-import org.meshtastic.core.model.NetworkDeviceHardware
-import org.meshtastic.core.model.NetworkDeviceLinksResponse
-import org.meshtastic.core.model.NetworkFirmwareNightly
-import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.OtafixAssetEntry
 import org.meshtastic.core.network.MaintenanceUf2RemoteDataSource
-import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -44,35 +33,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MaintenanceUf2RepositoryImplTest {
-
-    /** Only [getMaintenanceUf2Manifest] is exercised; the other endpoints are never called by this repository. */
-    private class FakeApiService(var response: MaintenanceUf2Manifest) : ApiService {
-        override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = error("unused")
-
-        override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = error("unused")
-
-        override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
-
-        override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest = error("unused")
-
-        override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? = error("unused")
-
-        override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
-
-        override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
-
-        override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest = response
-    }
-
-    /** Serves only `maintenance_uf2.json`, or nothing when [seed] is null (models the asset being absent). */
-    private class FakeBundledAssetReader(var seed: MaintenanceUf2Manifest?, private val json: Json) :
-        BundledAssetReader {
-        override fun open(name: String): Source? {
-            if (name != "maintenance_uf2.json") return null
-            val current = seed ?: return null
-            return Buffer().write(json.encodeToString(current).encodeToByteArray())
-        }
-    }
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -108,12 +68,18 @@ class MaintenanceUf2RepositoryImplTest {
         ),
     )
 
+    private fun seedManifest(manifest: MaintenanceUf2Manifest) = seed.put("maintenance_uf2.json", manifest, json)
+
+    private fun serveManifest(manifest: MaintenanceUf2Manifest) {
+        api.maintenanceUf2Manifest = { manifest }
+    }
+
     @BeforeTest
     fun setup() {
         dbProvider = FakeDatabaseProvider()
         local = MaintenanceUf2LocalDataSource(dbProvider, dispatchers)
-        api = FakeApiService(MaintenanceUf2Manifest())
-        seed = FakeBundledAssetReader(null, json)
+        api = FakeApiService(maintenanceUf2Manifest = { MaintenanceUf2Manifest() })
+        seed = FakeBundledAssetReader()
         repository =
             MaintenanceUf2RepositoryImpl(
                 remoteDataSource = MaintenanceUf2RemoteDataSource(api, dispatchers),
@@ -127,7 +93,7 @@ class MaintenanceUf2RepositoryImplTest {
 
     @Test
     fun getSnapshotSeedsFromBundledJsonWhenCacheIsEmpty() = runBlocking {
-        seed.seed = manifestWithBoard("HT-n5262")
+        seedManifest(manifestWithBoard("HT-n5262"))
 
         val snapshot = repository.getSnapshot()
 
@@ -136,18 +102,19 @@ class MaintenanceUf2RepositoryImplTest {
 
     @Test
     fun getSnapshotSeedsOnlyWhenCacheIsEmpty() = runBlocking {
-        seed.seed = manifestWithBoard("HT-n5262")
+        seedManifest(manifestWithBoard("HT-n5262"))
         repository.getSnapshot()
         assertEquals(1, local.count())
 
         // A changed bundled asset must NOT re-seed once the cache is populated.
-        seed.seed =
+        seedManifest(
             manifestWithBoard("HT-n5262").let {
                 it.copy(
                     otafixByBoardId =
                     it.otafixByBoardId + ("OTHER-ID" to OtafixAssetEntry("other_board", "3".repeat(64))),
                 )
-            }
+            },
+        )
         val snapshot = repository.getSnapshot()
 
         assertEquals(1, local.count())
@@ -163,7 +130,7 @@ class MaintenanceUf2RepositoryImplTest {
 
     @Test
     fun reconcileUpdatesCacheFromTheNetwork() = runBlocking {
-        api.response = manifestWithErase("7.3.0")
+        serveManifest(manifestWithErase("7.3.0"))
         repository.reconcile()
 
         val snapshot = repository.getSnapshot()
@@ -179,8 +146,9 @@ class MaintenanceUf2RepositoryImplTest {
     @Test
     fun aManifestWithoutTheBootloaderEraseEntryStillDecodes() = runBlocking {
         // Every manifest published before the entry existed, and every cache row written from one.
-        api.response =
-            manifestWithErase("7.3.0").copy(erase = manifestWithErase("7.3.0").erase?.copy(nrf52Bootloader = null))
+        serveManifest(
+            manifestWithErase("7.3.0").copy(erase = manifestWithErase("7.3.0").erase?.copy(nrf52Bootloader = null)),
+        )
         repository.reconcile()
 
         assertEquals(null, repository.getSnapshot().erase?.nrf52Bootloader)
@@ -188,11 +156,11 @@ class MaintenanceUf2RepositoryImplTest {
 
     @Test
     fun emptyNetworkResponseLeavesCacheUntouched() = runBlocking {
-        api.response = manifestWithBoard("HT-n5262")
+        serveManifest(manifestWithBoard("HT-n5262"))
         repository.reconcile()
         assertEquals(1, local.count())
 
-        api.response = MaintenanceUf2Manifest()
+        serveManifest(MaintenanceUf2Manifest())
         repository.reconcile()
 
         assertEquals(1, local.count())

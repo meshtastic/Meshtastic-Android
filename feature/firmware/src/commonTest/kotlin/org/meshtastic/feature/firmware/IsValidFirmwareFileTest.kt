@@ -70,6 +70,13 @@ class IsValidFirmwareFileTest {
     }
 
     @Test
+    fun `rejects littlefs and bleota images inside a release zip directory`() {
+        assertFalse(isValidFirmwareFile("esp32s3/littlefs-heltec-v3-2.8.0.abc.bin", "heltec-v3", ".bin"))
+        assertFalse(isValidFirmwareFile("esp32s3/bleota-heltec-v3-2.8.0.abc.bin", "heltec-v3", ".bin"))
+        assertTrue(isValidFirmwareFile("esp32s3/firmware-heltec-v3-2.8.0.abc.bin", "heltec-v3", ".bin"))
+    }
+
+    @Test
     fun `rejects bleota prefix`() {
         assertFalse(isValidFirmwareFile("bleota-heltec-v3-2.7.17.bin", "heltec-v3", ".bin"))
     }

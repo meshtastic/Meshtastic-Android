@@ -42,6 +42,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -176,8 +177,8 @@ class RadioControllerImplTest {
             serviceNotifications = serviceNotifications,
             messageProcessor = lazy { messageProcessor },
             radioConfigRepository = radioConfigRepository,
-            scope = scope,
-            onDeviceAddressChanged = onDeviceAddressChanged,
+            scope = scope.asServiceScope(),
+            deviceAddressChangeHook = { onDeviceAddressChanged?.invoke() },
         )
     }
 

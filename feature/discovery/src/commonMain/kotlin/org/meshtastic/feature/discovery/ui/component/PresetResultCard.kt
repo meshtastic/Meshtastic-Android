@@ -46,8 +46,9 @@ import org.meshtastic.core.resources.discovery_stat_mesh
 import org.meshtastic.core.resources.discovery_stat_messages
 import org.meshtastic.core.resources.discovery_stat_sensor_pkts
 import org.meshtastic.core.resources.discovery_stat_unique_nodes
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.feature.discovery.ui.StatRow
-import org.meshtastic.feature.discovery.ui.formatDuration
+import kotlin.time.DurationUnit
 
 @Composable
 fun PresetResultCard(
@@ -111,7 +112,7 @@ private fun PresetHeader(result: DiscoveryPresetResultEntity, rank: Int?, isTied
             }
         }
         Text(
-            text = formatDuration(result.dwellDurationSeconds),
+            text = formatDuration(result.dwellDurationSeconds, smallest = DurationUnit.MINUTES),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -52,9 +52,9 @@ import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
-import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ble_devices
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.no_pax_metrics_logs
 import org.meshtastic.core.resources.pax
 import org.meshtastic.core.resources.pax_ble_format
@@ -66,9 +66,6 @@ import org.meshtastic.core.resources.pax_wifi_format
 import org.meshtastic.core.resources.pax_wifi_marker
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.wifi_devices
-import org.meshtastic.core.ui.component.IconInfo
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.PeopleCount
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
@@ -250,21 +247,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
 }
 
 @Composable
-fun PaxcountInfo(
-    pax: String,
-    modifier: Modifier = Modifier,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
-) {
-    IconInfo(
-        modifier = modifier,
-        icon = MeshtasticIcons.PeopleCount,
-        contentDescription = stringResource(Res.string.pax_metrics_log),
-        text = pax,
-        contentColor = contentColor,
-    )
-}
-
-@Composable
 fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, isSelected: Boolean, onClick: () -> Unit) {
     SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
@@ -297,7 +279,7 @@ fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, isSelected: Boolean, onClic
                 }
 
                 Text(
-                    text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
+                    text = stringResource(Res.string.uptime) + ": " + formatDuration(pax.uptime.toLong()),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                 )

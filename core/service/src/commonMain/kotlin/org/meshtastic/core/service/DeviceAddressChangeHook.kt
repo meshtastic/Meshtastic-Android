@@ -14,12 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.tak
+package org.meshtastic.core.service
 
-import androidx.compose.runtime.Composable
-
-@Composable
-actual fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit =
-    { _ ->
-        // No-op on iOS for now
-    }
+/** Platform work to run after [RadioControllerImpl] commits a new device address. */
+fun interface DeviceAddressChangeHook {
+    fun onDeviceAddressChanged()
+}

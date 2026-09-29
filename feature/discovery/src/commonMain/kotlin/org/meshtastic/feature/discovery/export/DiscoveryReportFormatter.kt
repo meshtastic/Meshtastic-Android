@@ -17,24 +17,31 @@
 package org.meshtastic.feature.discovery.export
 
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.DurationUnitLabels
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
+import org.meshtastic.core.common.util.formatDuration
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.feature.discovery.ui.formatDuration
 import kotlin.math.roundToInt
+import kotlin.time.DurationUnit
 
 internal object DiscoveryReportFormatter {
+
+    // The report's labels are English, so its durations are too.
+    private fun reportDuration(totalSeconds: Long): String =
+        formatDuration(totalSeconds, DurationUnitLabels.English, smallest = DurationUnit.MINUTES)
 
     fun formatSessionDate(session: DiscoverySessionEntity): String = DateFormatter.formatDateTime(session.timestamp)
 
     fun formatSessionOverviewLines(session: DiscoverySessionEntity): List<Pair<String, String>> = listOf(
         "Date" to formatSessionDate(session),
         "Total unique nodes" to session.totalUniqueNodes.toString(),
-        "Total dwell time" to formatDuration(session.totalDwellSeconds),
+        "Total dwell time" to reportDuration(session.totalDwellSeconds),
         "Status" to session.completionStatus.replaceFirstChar { it.uppercase() },
         "Channel utilization" to "${NumberFormatter.format(session.avgChannelUtilization, 1)}%",
         "Total messages" to session.totalMessages.toString(),
@@ -45,7 +52,7 @@ internal object DiscoveryReportFormatter {
         add("Unique nodes" to result.uniqueNodes.toString())
         add("Direct neighbors" to result.directNeighborCount.toString())
         add("Mesh neighbors" to result.meshNeighborCount.toString())
-        add("Dwell time" to formatDuration(result.dwellDurationSeconds))
+        add("Dwell time" to reportDuration(result.dwellDurationSeconds))
         add("Channel utilization" to "${NumberFormatter.format(result.avgChannelUtilization, 1)}%")
         add("Airtime rate" to "${NumberFormatter.format(result.avgAirtimeRate, 1)}%")
         add("Packet success" to "${NumberFormatter.format(result.packetSuccessRate, 1)}%")
@@ -59,7 +66,7 @@ internal object DiscoveryReportFormatter {
     }
 
     fun formatNodeLine(node: DiscoveredNodeEntity, measurementSystem: MeasurementSystem): String = buildString {
-        append(node.longName ?: node.shortName ?: "!${node.nodeNum.toString(radix = 16)}")
+        append(node.longName ?: node.shortName ?: NodeAddress.numToDefaultId(node.nodeNum.toInt()))
         append(" | ${node.neighborType}")
         append(" | SNR: ${MetricFormatter.snr(node.snr)}")
         append(" | RSSI: ${MetricFormatter.rssi(node.rssi)}")

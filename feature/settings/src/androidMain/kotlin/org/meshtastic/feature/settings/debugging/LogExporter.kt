@@ -16,62 +16,8 @@
  */
 package org.meshtastic.feature.settings.debugging
 
-import android.content.Context
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.meshtastic.core.common.util.ioDispatcher
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.debug_export_failed
-import org.meshtastic.core.resources.debug_logs_exported
-import org.meshtastic.core.ui.util.showToast
-import java.io.OutputStreamWriter
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
-
-@Composable
-actual fun rememberLogExporter(contentProvider: suspend () -> String): (fileName: String) -> Unit {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val exportLogsLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { createdUri ->
-            if (createdUri != null) {
-                scope.launch { exportTextToUri(context, createdUri, contentProvider()) }
-            }
-        }
-    return { fileName -> exportLogsLauncher.launch(fileName) }
-}
-
-private suspend fun exportTextToUri(context: Context, targetUri: Uri, content: String) = withContext(ioDispatcher) {
-    try {
-        if (content.isBlank()) {
-            withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, "No logs to export") }
-            Logger.w { "Log export aborted: no content" }
-            return@withContext
-        }
-        val stream = context.contentResolver.openOutputStream(targetUri)
-        if (stream == null) {
-            Logger.w { "Log export aborted: could not open output stream for $targetUri" }
-            withContext(Dispatchers.Main) {
-                context.showToast(Res.string.debug_export_failed, "Could not open file")
-            }
-            return@withContext
-        }
-        stream.use { os -> OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer -> writer.write(content) } }
-        Logger.i { "Logs exported successfully to $targetUri" }
-        withContext(Dispatchers.Main) { context.showToast(Res.string.debug_logs_exported) }
-    } catch (e: java.io.IOException) {
-        Logger.e(e) { "Failed to export logs to URI: $targetUri" }
-        withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
-    }
-}
 
 /**
  * Dumps this app's own logcat, filtered to our process id via `--pid` (API 24+, minSdk is 26). Without READ_LOGS the OS

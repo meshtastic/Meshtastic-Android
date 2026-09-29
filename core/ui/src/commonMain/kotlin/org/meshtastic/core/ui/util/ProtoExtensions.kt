@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.channelIdentity
 import org.meshtastic.core.model.util.isChannelPlaceholder
 import org.meshtastic.core.model.util.toChannelReplacementPlan
@@ -39,18 +40,16 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
 import kotlin.time.Duration.Companion.days
 
-private const val SECONDS_TO_MILLIS = 1000L
-
 @Composable
 fun Position.formatPositionTime(): String {
     val currentTime = nowMillis
     val sixMonthsAgo = currentTime - 180.days.inWholeMilliseconds
-    val isOlderThanSixMonths = time * SECONDS_TO_MILLIS < sixMonthsAgo
+    val isOlderThanSixMonths = time * TimeConstants.MS_PER_SEC < sixMonthsAgo
     val timeText =
         if (isOlderThanSixMonths) {
             stringResource(Res.string.unknown_age)
         } else {
-            DateFormatter.formatDateTime(time * SECONDS_TO_MILLIS)
+            DateFormatter.formatDateTime(time * TimeConstants.MS_PER_SEC)
         }
     return timeText
 }
