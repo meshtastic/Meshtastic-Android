@@ -78,3 +78,16 @@ data class Position(
     override fun toString(): String =
         "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=$time)"
 }
+
+/**
+ * The raw `latitude_i` and `longitude_i`, or null when either is absent or both are exactly 0. A 0 stand-in for a
+ * missing axis, or a 0,0 report, puts the node on the equator or the prime meridian where it never was.
+ */
+fun org.meshtastic.proto.Position.fixOrNull(): Pair<Int, Int>? {
+    val latI = latitude_i
+    val lonI = longitude_i
+    return if (latI == null || lonI == null || (latI == 0 && lonI == 0)) null else latI to lonI
+}
+
+/** Whether this report places the node on a map; see [fixOrNull]. */
+fun org.meshtastic.proto.Position.hasFix(): Boolean = fixOrNull() != null
