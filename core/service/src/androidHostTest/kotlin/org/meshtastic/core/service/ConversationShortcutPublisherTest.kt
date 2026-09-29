@@ -148,12 +148,15 @@ class ConversationShortcutPublisherTest {
     fun `dm shortcut for a node missing from the node db is titled with the unknown-user name`() = runTest {
         every { packetRepository.getContacts() } returns
             flowOf(mapOf("0!000000fe" to contact(from = "!000000fe", time = 1_000)))
+        // Resolved first so the resources cache is loaded; a cold load runs on Dispatchers.Default, which
+        // advanceUntilIdle does not wait for.
+        val expected = getStringSuspend(Res.string.unknown_username)
 
         publisher.startObserving(this)
         advanceUntilIdle()
 
         val published = shortcutManager.dynamicShortcuts.first { it.id == "0!000000fe" }
-        assertEquals(getStringSuspend(Res.string.unknown_username), published.shortLabel)
+        assertEquals(expected, published.shortLabel)
     }
 
     @Test
