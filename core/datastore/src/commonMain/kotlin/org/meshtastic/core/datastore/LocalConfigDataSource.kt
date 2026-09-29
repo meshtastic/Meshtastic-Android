@@ -19,7 +19,6 @@ package org.meshtastic.core.datastore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import okio.IOException
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.di.CoreLocalConfigDataStore
 import org.meshtastic.proto.Config
@@ -31,7 +30,7 @@ class LocalConfigDataSource(private val localConfigStore: CoreLocalConfigDataSto
     val localConfigFlow: Flow<LocalConfig> =
         localConfigStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data
-            if (exception is IOException) {
+            if (exception.isDataStoreReadFailure()) {
                 Logger.e { "Error reading LocalConfig settings: ${exception.message}" }
                 emit(LocalConfig.Builder().build())
             } else {
