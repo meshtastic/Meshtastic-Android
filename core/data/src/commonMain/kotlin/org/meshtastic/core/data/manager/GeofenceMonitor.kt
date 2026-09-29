@@ -96,7 +96,7 @@ class GeofenceMonitor(
                     if (sample.session == null) {
                         evaluate(sample.nodeNum, sample.lat, sample.lon)
                     } else {
-                        radioInterfaceService.runWhileSessionActive(sample.session) {
+                        radioInterfaceService.runWhileSessionActive(sample.session, "geofence evaluation") {
                             evaluate(sample.nodeNum, sample.lat, sample.lon)
                         }
                     }

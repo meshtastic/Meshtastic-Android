@@ -274,24 +274,27 @@ class SharedRadioInterfaceService(
         }
     }
 
-    override suspend fun runWhileSessionActive(session: RadioSessionContext, block: suspend () -> Unit): Boolean =
-        sessionOperationMutex.withLock {
-            runWithSessionLease(session) {
-                // Bound the handler: it holds sessionOperationMutex (the whole inbound pipeline) and an admitted
-                // lease (which teardown's drain awaits), so an indefinite suspension here is a total wedge, not a
-                // slow packet. Cancelling the block releases both. Only OUR timeout is swallowed — ensureActive()
-                // rethrows if the surrounding scope was cancelled concurrently.
-                try {
-                    withTimeout(SESSION_HANDLER_TIMEOUT_MILLIS) { block() }
-                } catch (timeout: TimeoutCancellationException) {
-                    currentCoroutineContext().ensureActive()
-                    Logger.e(timeout) {
-                        "Session handler exceeded ${SESSION_HANDLER_TIMEOUT_MILLIS}ms and was cancelled; " +
-                            "dropping its packet to keep the receive pipeline alive"
-                    }
+    override suspend fun runWhileSessionActive(
+        session: RadioSessionContext,
+        label: String,
+        block: suspend () -> Unit,
+    ): Boolean = sessionOperationMutex.withLock {
+        runWithSessionLease(session) {
+            // Bound the handler: it holds sessionOperationMutex (the whole inbound pipeline) and an admitted
+            // lease (which teardown's drain awaits), so an indefinite suspension here is a total wedge, not a
+            // slow packet. Cancelling the block releases both. Only OUR timeout is swallowed — ensureActive()
+            // rethrows if the surrounding scope was cancelled concurrently.
+            try {
+                withTimeout(SESSION_HANDLER_TIMEOUT_MILLIS) { block() }
+            } catch (timeout: TimeoutCancellationException) {
+                currentCoroutineContext().ensureActive()
+                Logger.e(timeout) {
+                    "Session handler exceeded ${SESSION_HANDLER_TIMEOUT_MILLIS}ms and was cancelled; " +
+                        "dropping its packet to keep the receive pipeline alive (handler=$label)"
                 }
             }
         }
+    }
 
     private fun releaseSessionOperation(admittedSession: RadioTransportSession) {
         val drainWaiter =

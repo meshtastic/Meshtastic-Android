@@ -140,12 +140,12 @@ class MeshConfigFlowManagerImplTest {
                     false
                 }
             }
-        everySuspend { radioInterfaceService.runWhileSessionActive(any(), any()) } calls
+        everySuspend { radioInterfaceService.runWhileSessionActive(any(), any(), any()) } calls
             {
                 val session = it.args[0] as RadioSessionContext
 
                 @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend () -> Unit)
+                val block = it.args[2] as (suspend () -> Unit)
                 if (activeSessionFlow.value == session) {
                     block()
                     true
@@ -303,10 +303,10 @@ class MeshConfigFlowManagerImplTest {
     @Test
     fun `config reset holds the session lane until every clear completes`() = testScope.runTest {
         val sessionLane = Mutex()
-        everySuspend { radioInterfaceService.runWhileSessionActive(activeSession, any()) } calls
+        everySuspend { radioInterfaceService.runWhileSessionActive(activeSession, any(), any()) } calls
             {
                 @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend () -> Unit)
+                val block = it.args[2] as (suspend () -> Unit)
                 sessionLane.withLock { block() }
                 true
             }
@@ -333,7 +333,7 @@ class MeshConfigFlowManagerImplTest {
 
         val laterPersistenceStarted = CompletableDeferred<Unit>()
         val laterPersistence = launch {
-            radioInterfaceService.runWhileSessionActive(activeSession) {
+            radioInterfaceService.runWhileSessionActive(activeSession, "later persistence") {
                 assertEquals(
                     setOf("config", "module", "device-ui", "manifest", "lora-presets"),
                     completedClears,
@@ -848,9 +848,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleMyInfo applies the event node-event default for event firmware`() = testScope.runTest {
-        handleMyInfo(
-            protoMyNodeInfo.newBuilder().also { wb -> wb.firmware_edition = FirmwareEdition.DEFCON }.build(),
-        )
+        handleMyInfo(protoMyNodeInfo.newBuilder().also { wb -> wb.firmware_edition = FirmwareEdition.DEFCON }.build())
         advanceUntilIdle()
 
         verify { notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true) }

@@ -20,6 +20,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import co.touchlab.kermit.Severity
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
@@ -57,6 +58,7 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeRadioTransport
@@ -555,13 +557,13 @@ class SharedRadioInterfaceServiceLivenessTest {
             val independentStarted = CompletableDeferred<Unit>()
 
             val first = launch {
-                service.runWhileSessionActive(session) {
+                service.runWhileSessionActive(session, "first") {
                     firstStarted.complete(Unit)
                     releaseFirst.await()
                 }
             }
             firstStarted.await()
-            val second = launch { service.runWhileSessionActive(session) { secondStarted.complete(Unit) } }
+            val second = launch { service.runWhileSessionActive(session, "second") { secondStarted.complete(Unit) } }
             val independent = launch { service.runWithSessionLease(session) { independentStarted.complete(Unit) } }
             try {
                 testDispatcher.scheduler.runCurrent()
@@ -619,7 +621,7 @@ class SharedRadioInterfaceServiceLivenessTest {
                 )
                 assertFalse(service.isSessionActive(session), "teardown must reject new work immediately")
                 assertFalse(
-                    service.runWhileSessionActive(session) { error("late operation must not run") },
+                    service.runWhileSessionActive(session, "late") { error("late operation must not run") },
                     "work queued after admission closes must be rejected",
                 )
                 disconnectJob.cancel()
@@ -1166,8 +1168,9 @@ class SharedRadioInterfaceServiceLivenessTest {
         val neverReleased = CompletableDeferred<Unit>()
         var wedgeRanToCompletion = false
 
+        val logs = CapturingLogWriter.install()
         val wedged = launch {
-            service.runWhileSessionActive(session) {
+            service.runWhileSessionActive(session, "FromRadio packet TEXT_MESSAGE_APP") {
                 wedgeStarted.complete(Unit)
                 neverReleased.await() // simulates a handler stuck on an unbounded suspension
                 wedgeRanToCompletion = true
@@ -1175,7 +1178,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
         wedgeStarted.await()
         val nextStarted = CompletableDeferred<Unit>()
-        val next = launch { service.runWhileSessionActive(session) { nextStarted.complete(Unit) } }
+        val next = launch { service.runWhileSessionActive(session, "next") { nextStarted.complete(Unit) } }
         try {
             testDispatcher.scheduler.runCurrent()
             assertFalse(nextStarted.isCompleted, "ordered work is serialized behind the wedged handler")
@@ -1187,7 +1190,14 @@ class SharedRadioInterfaceServiceLivenessTest {
 
             assertFalse(wedgeRanToCompletion, "the wedged handler must have been cancelled, not completed")
             assertTrue(nextStarted.isCompleted, "the handler timeout must release the pipeline for queued work")
+            val timeoutLines = logs.messages(Severity.Error).filter { "Session handler exceeded" in it }
+            assertEquals(1, timeoutLines.size, "one timeout line: $timeoutLines")
+            assertTrue(
+                "(handler=FromRadio packet TEXT_MESSAGE_APP)" in timeoutLines.single(),
+                "the timeout line must name the stuck handler: $timeoutLines",
+            )
         } finally {
+            CapturingLogWriter.uninstall()
             neverReleased.complete(Unit)
             wedged.cancel()
             next.cancel()
@@ -1210,7 +1220,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         val neverReleased = CompletableDeferred<Unit>()
 
         val wedged = launch {
-            service.runWhileSessionActive(session) {
+            service.runWhileSessionActive(session, "wedged") {
                 wedgeStarted.complete(Unit)
                 neverReleased.await()
             }

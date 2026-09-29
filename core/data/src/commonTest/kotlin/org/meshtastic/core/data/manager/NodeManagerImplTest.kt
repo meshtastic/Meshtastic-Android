@@ -47,6 +47,7 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
@@ -271,6 +272,98 @@ class NodeManagerImplTest {
 
         assertEquals(listOf(1, 2), persisted.map(Node::lastHeard))
         assertEquals(2, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+    }
+
+    private fun admitLeases(session: RadioSessionContext) {
+        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
+                block(
+                    object : RadioSessionLease {
+                        override val session: RadioSessionContext = session
+
+                        override fun isCurrent(): Boolean = true
+                    },
+                )
+                true
+            }
+    }
+
+    @Test
+    fun `session-bound persistence writes the newest state and coalesces queued updates`() = testScope.runTest {
+        val nodeNum = 1234
+        val session = RadioSessionContext(generation = 7L, address = "ble:same")
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        admitLeases(session)
+        val firstWriteStarted = CompletableDeferred<Unit>()
+        val releaseFirstWrite = CompletableDeferred<Unit>()
+        val persisted = mutableListOf<Node>()
+        everySuspend { nodeRepository.upsert(any()) } calls
+            {
+                if (!firstWriteStarted.isCompleted) {
+                    firstWriteStarted.complete(Unit)
+                    releaseFirstWrite.await()
+                }
+                persisted += it.arg<Node>(0)
+            }
+
+        nodeManager.updateNodeForSession(nodeNum, session) { node -> node.copy(lastHeard = 1) }
+        assertTrue(firstWriteStarted.isCompleted, "the first write is in flight")
+        nodeManager.updateNodeForSession(nodeNum, session) { node -> node.copy(lastHeard = 2) }
+        nodeManager.updateNodeForSession(nodeNum, session) { node -> node.copy(lastHeard = 3) }
+        runCurrent()
+        assertTrue(persisted.isEmpty(), "later writes must queue behind the first on the node's lane")
+
+        releaseFirstWrite.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(listOf(1, 3), persisted.map(Node::lastHeard))
+        assertEquals(3, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+    }
+
+    @Test
+    fun `an update from a newer session schedules its own write`() = testScope.runTest {
+        val nodeNum = 1234
+        val oldSession = RadioSessionContext(generation = 7L, address = "ble:same")
+        val newSession = RadioSessionContext(generation = 8L, address = "ble:same")
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        admitLeases(oldSession)
+        admitLeases(newSession)
+        val releaseFirstWrite = CompletableDeferred<Unit>()
+        var writes = 0
+        everySuspend { nodeRepository.upsert(any()) } calls { if (++writes == 1) releaseFirstWrite.await() }
+
+        nodeManager.updateNodeForSession(nodeNum, oldSession) { node -> node.copy(lastHeard = 1) }
+        nodeManager.updateNodeForSession(nodeNum, oldSession) { node -> node.copy(lastHeard = 2) }
+        nodeManager.updateNodeForSession(nodeNum, newSession) { node -> node.copy(lastHeard = 3) }
+        runCurrent()
+
+        verifySuspend(exactly(1)) { radioInterfaceService.runWithSessionLease(newSession, any()) }
+        releaseFirstWrite.complete(Unit)
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `a persist rejected by a retired session does not block a later write`() = testScope.runTest {
+        val nodeNum = 1234
+        val oldSession = RadioSessionContext(generation = 7L, address = "ble:same")
+        val newSession = RadioSessionContext(generation = 8L, address = "ble:same")
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        everySuspend { radioInterfaceService.runWithSessionLease(oldSession, any()) } returns false
+        admitLeases(newSession)
+        val persisted = mutableListOf<Node>()
+        everySuspend { nodeRepository.upsert(any()) } calls { persisted += it.arg<Node>(0) }
+
+        nodeManager.updateNodeForSession(nodeNum, oldSession) { node -> node.copy(lastHeard = 1) }
+        runCurrent()
+        nodeManager.updateNodeForSession(nodeNum, newSession) { node -> node.copy(lastHeard = 2) }
+        runCurrent()
+
+        assertEquals(listOf(2), persisted.map(Node::lastHeard))
     }
 
     @Test
@@ -2868,8 +2961,7 @@ class NodeManagerImplTest {
         nodeManager.applyTrustedIdentityMigrations(listOf(oldNum))
         advanceUntilIdle()
         val replayDispatches = mutableListOf<Node>()
-        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(replayDispatches), any()) } returns
-            Unit
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(replayDispatches), any()) } returns Unit
         // Now replay: the canonical number (crc32(key)) has NOT appeared yet
         nodeManager.handleReceivedUser(oldNum, userWithKey(key, "Replay", "RP"), manuallyVerified = false)
         advanceUntilIdle()
@@ -2971,8 +3063,7 @@ class NodeManagerImplTest {
         advanceUntilIdle()
         // Early replay of old number User packet — should be suppressed
         val dispatchedBefore = mutableListOf<Node>()
-        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatchedBefore), any()) } returns
-            Unit
+        everySuspend { serviceNotifications.showNewNodeSeenNotification(capture(dispatchedBefore), any()) } returns Unit
         nodeManager.handleReceivedUser(oldNum, userWithKey(key, "Replay", "RP"), manuallyVerified = false)
         advanceUntilIdle()
         // The old number should NOT be in nodeDB
