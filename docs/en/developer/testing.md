@@ -31,7 +31,7 @@ Shared tests written once and run on the JVM and, in modules that declare `withH
 
 ### Android host tests
 
-Android-specific tests that run on the JVM. In pure-Android/JVM modules (such as `androidApp`) `test` runs them; in KMP modules `allTests` runs them through `testAndroidHostTest`:
+Android-specific tests that run on the JVM. In pure-Android/JVM modules (such as `androidApp`) `test` runs them; in KMP modules that declare `withHostTest {}`, `allTests` runs them through `testAndroidHostTest`:
 
 ```shell
 ./gradlew test       # pure Android/JVM modules

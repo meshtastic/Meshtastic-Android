@@ -147,7 +147,7 @@ Every feature module should have:
 - [ ] `build.gradle.kts` with correct plugins and dependencies
 - [ ] Added to `settings.gradle.kts`
 - [ ] Added to `ALL_MODULES_FULL` in `build-logic/convention/src/main/kotlin/RootConventionPlugin.kt`; `python3 scripts/check-module-list.py` fails when a non-exempt module is missing from it, when an entry is absent from the `settings.gradle.kts` includes, or when an exempt module is re-added, and a non-exempt module missing from it is absent from Dokka and Kover aggregation and `kmpSmokeCompile`
-- [ ] Added to a test shard in `.github/workflows/reusable-check.yml` (`shard-feature` for a feature module): its `:feature:my-feature:allTests` task in `tasks` and its `koverXmlReport` in `kover`; `python3 scripts/check-test-shards.py` fails for a module with no test task in any shard
+- [ ] Added to a test shard in `.github/workflows/reusable-check.yml` (`shard-feature` for a feature module): its `:feature:my-feature:allTests` task in `tasks` and its `koverXmlReport` in `kover`; `python3 scripts/check-test-shards.py` fails for a module with no test task in any shard, unless the module is listed in the script's `COVERED_ELSEWHERE` or `NO_TESTS_YET` sets
 - [ ] If the module is user-facing, a page under `docs/en/user/` and a `MODULE_TO_DOCS` entry for it in `scripts/check-doc-coverage.js`; the check fails when a listed module's page is missing, and a module with no entry needs no page
 - [ ] DI module created with `@ComponentScan`
 - [ ] DI module registered in app and desktop roots
