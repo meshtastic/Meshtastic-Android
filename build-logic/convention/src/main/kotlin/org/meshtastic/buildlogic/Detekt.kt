@@ -18,6 +18,7 @@ package org.meshtastic.buildlogic
 
 import com.android.build.api.variant.AndroidComponentsExtension
 import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.DetektCreateBaselineTask
 import dev.detekt.gradle.extensions.DetektExtension
 import dev.detekt.gradle.extensions.FailOnSeverity
 import org.gradle.api.Project
@@ -136,13 +137,20 @@ private fun Project.registerTypeResolvedDetekt() {
  */
 private fun Project.addJavacClassesToDetektClasspath(variantName: String) {
     val suffix = variantName.replaceFirstChar { char -> char.uppercase() }
+    fun variantClasspath() = listOf(
+        tasks.named<KotlinJvmCompile>("compile${suffix}Kotlin").map { task -> task.libraries },
+        tasks.named<JavaCompile>("compile${suffix}JavaWithJavac").flatMap { task -> task.destinationDirectory },
+    )
     tasks
         .withType<Detekt>()
         .named { name -> name == "detekt$suffix" }
         .configureEach {
-            classpath.setFrom(
-                tasks.named<KotlinJvmCompile>("compile${suffix}Kotlin").map { task -> task.libraries },
-                tasks.named<JavaCompile>("compile${suffix}JavaWithJavac").flatMap { task -> task.destinationDirectory },
-            )
+            classpath.setFrom(variantClasspath())
+        }
+    tasks
+        .withType<DetektCreateBaselineTask>()
+        .named { name -> name == "detektBaseline$suffix" }
+        .configureEach {
+            classpath.setFrom(variantClasspath())
         }
 }
