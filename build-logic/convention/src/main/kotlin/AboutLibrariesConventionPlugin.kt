@@ -46,11 +46,12 @@ class AboutLibrariesConventionPlugin : Plugin<Project> {
 
                 collect {
                     configPath.set(licenseConfigDir)
-                    fetchRemoteLicense.set(isReleaseBuild && ghToken.isPresent)
-                    fetchRemoteFunding.set(isReleaseBuild && ghToken.isPresent)
-                    if (ghToken.isPresent) {
-                        gitHubApiToken.set(ghToken.get())
-                    }
+                    // Wired as providers, never read here: CI issues a new token per step, and a token read at
+                    // configuration time becomes a configuration cache input that no later step can reuse.
+                    val fetchRemote = ghToken.map { isReleaseBuild }.orElse(false)
+                    fetchRemoteLicense.set(fetchRemote)
+                    fetchRemoteFunding.set(fetchRemote)
+                    gitHubApiToken.set(ghToken)
                 }
                 export {
                     excludeFields.set(listOf("generated"))
