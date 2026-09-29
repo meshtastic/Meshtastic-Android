@@ -62,10 +62,8 @@ import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.resources.preferences_language
-import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.FilterList
@@ -81,6 +79,7 @@ import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.PermissionsSettingsContent
 import org.meshtastic.feature.settings.component.PersistenceSettingsContent
 import org.meshtastic.feature.settings.component.PrivacySettingsContent
+import org.meshtastic.feature.settings.component.RadioAdminAppBar
 import org.meshtastic.feature.settings.component.ThemePickerDialog
 import org.meshtastic.feature.settings.component.UnitsOption
 import org.meshtastic.feature.settings.component.UnitsPickerDialog
@@ -207,21 +206,16 @@ fun SettingsScreen(
         topBar = {
             // Show back arrow when remotely administering (caller supplies onBack and we're not on the local node).
             val showBack = onBack != null && !state.isLocal
-            MainAppBar(
+            RadioAdminAppBar(
                 title = stringResource(Res.string.bottom_nav_settings),
-                subtitle =
-                if (state.isLocal) {
-                    ourNode?.user?.long_name
-                } else {
-                    val remoteName = destNode?.user?.long_name ?: ""
-                    stringResource(Res.string.remotely_administrating, remoteName)
-                },
+                isLocal = state.isLocal,
+                destNode = destNode,
+                onNavigateUp = { onBack?.invoke() },
+                localSubtitle = ourNode?.user?.long_name,
                 ourNode = ourNode,
+                onClickChip = { node -> onClickNodeChip(node.num) },
                 showNodeChip = ourNode != null && isConnected && state.isLocal,
                 canNavigateUp = showBack,
-                onNavigateUp = { onBack?.invoke() },
-                actions = {},
-                onClickChip = { node -> onClickNodeChip(node.num) },
             )
         },
     ) { paddingValues ->

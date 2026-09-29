@@ -16,19 +16,11 @@
  */
 package org.meshtastic.feature.settings.lockdown
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,9 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.service.LockdownState
@@ -48,23 +37,12 @@ import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.resources.lockdown_backoff
-import org.meshtastic.core.resources.lockdown_boots_remaining
-import org.meshtastic.core.resources.lockdown_confirm_passphrase
 import org.meshtastic.core.resources.lockdown_enter_passphrase
-import org.meshtastic.core.resources.lockdown_hide_passphrase
-import org.meshtastic.core.resources.lockdown_hours_until_expiry
 import org.meshtastic.core.resources.lockdown_incorrect_passphrase
 import org.meshtastic.core.resources.lockdown_lock_reason
 import org.meshtastic.core.resources.lockdown_passphrase
-import org.meshtastic.core.resources.lockdown_passphrases_do_not_match
-import org.meshtastic.core.resources.lockdown_session_minutes
-import org.meshtastic.core.resources.lockdown_session_minutes_help
 import org.meshtastic.core.resources.lockdown_set_passphrase
-import org.meshtastic.core.resources.lockdown_show_passphrase
 import org.meshtastic.core.resources.lockdown_submit
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Visibility
-import org.meshtastic.core.ui.icon.VisibilityOff
 
 /**
  * Non-dismissable lockdown authentication dialog.
@@ -103,9 +81,8 @@ fun LockdownDialog(
     val title =
         stringResource(if (isProvisioning) Res.string.lockdown_set_passphrase else Res.string.lockdown_enter_passphrase)
     val inBackoff = lockdownState is LockdownState.UnlockBackoff
-    val passphraseValid = passphrase.isNotEmpty() && passphrase.encodeToByteArray().size <= MAX_PASSPHRASE_LEN
     val confirmValid = !isProvisioning || passphrase == confirmPassphrase
-    val isValid = passphraseValid && confirmValid && !inBackoff
+    val isValid = isValidLockdownPassphrase(passphrase) && confirmValid && !inBackoff
 
     AlertDialog(
         onDismissRequest = {}, // Non-dismissable
@@ -139,89 +116,30 @@ fun LockdownDialog(
                     else -> {}
                 }
 
-                OutlinedTextField(
+                LockdownPassphraseField(
                     value = passphrase,
-                    onValueChange = { if (it.encodeToByteArray().size <= MAX_PASSPHRASE_LEN) passphrase = it },
-                    label = { Text(stringResource(Res.string.lockdown_passphrase)) },
-                    singleLine = true,
-                    visualTransformation =
-                    if (passwordVisible) {
-                        VisualTransformation.None
-                    } else {
-                        PasswordVisualTransformation()
-                    },
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector =
-                                if (passwordVisible) {
-                                    MeshtasticIcons.VisibilityOff
-                                } else {
-                                    MeshtasticIcons.Visibility
-                                },
-                                contentDescription =
-                                stringResource(
-                                    if (passwordVisible) {
-                                        Res.string.lockdown_hide_passphrase
-                                    } else {
-                                        Res.string.lockdown_show_passphrase
-                                    },
-                                ),
-                            )
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
+                    onValueChange = { passphrase = it },
+                    label = stringResource(Res.string.lockdown_passphrase),
+                    passwordVisible = passwordVisible,
+                    onToggleVisibility = { passwordVisible = !passwordVisible },
                 )
 
                 if (isProvisioning) {
                     Spacer(modifier = Modifier.height(SPACING_DP.dp))
-                    OutlinedTextField(
+                    LockdownConfirmPassphraseField(
                         value = confirmPassphrase,
-                        onValueChange = {
-                            if (it.encodeToByteArray().size <= MAX_PASSPHRASE_LEN) confirmPassphrase = it
-                        },
-                        label = { Text(stringResource(Res.string.lockdown_confirm_passphrase)) },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        isError = confirmPassphrase.isNotEmpty() && passphrase != confirmPassphrase,
-                        supportingText =
-                        if (confirmPassphrase.isNotEmpty() && passphrase != confirmPassphrase) {
-                            { Text(stringResource(Res.string.lockdown_passphrases_do_not_match)) }
-                        } else {
-                            null
-                        },
-                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = { confirmPassphrase = it },
+                        matches = passphrase == confirmPassphrase,
                     )
                 }
                 Spacer(modifier = Modifier.height(SPACING_DP.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    OutlinedTextField(
-                        value = boots.toString(),
-                        onValueChange = { str -> str.toIntOrNull()?.let { boots = it.coerceIn(1, MAX_BYTE_VALUE) } },
-                        label = { Text(stringResource(Res.string.lockdown_boots_remaining)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                    )
-                    Spacer(modifier = Modifier.width(SPACING_DP.dp))
-                    OutlinedTextField(
-                        value = hours.toString(),
-                        onValueChange = { str -> str.toIntOrNull()?.let { hours = it.coerceAtLeast(0) } },
-                        label = { Text(stringResource(Res.string.lockdown_hours_until_expiry)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                Spacer(modifier = Modifier.height(SPACING_DP.dp))
-                OutlinedTextField(
-                    value = sessionMinutes.toString(),
-                    onValueChange = { str -> str.toIntOrNull()?.let { sessionMinutes = it.coerceAtLeast(0) } },
-                    label = { Text(stringResource(Res.string.lockdown_session_minutes)) },
-                    supportingText = { Text(stringResource(Res.string.lockdown_session_minutes_help)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
+                LockdownLimitsFields(
+                    boots = boots,
+                    onBootsChange = { boots = it },
+                    hours = hours,
+                    onHoursChange = { hours = it },
+                    sessionMinutes = sessionMinutes,
+                    onSessionMinutesChange = { sessionMinutes = it },
                 )
             }
         },
@@ -234,7 +152,4 @@ fun LockdownDialog(
     )
 }
 
-// Firmware maximum: AdminMessage.lockdown_auth.passphrase is limited to 64 bytes.
-private const val MAX_PASSPHRASE_LEN = 64
-private const val MAX_BYTE_VALUE = 255
 private const val SPACING_DP = 8

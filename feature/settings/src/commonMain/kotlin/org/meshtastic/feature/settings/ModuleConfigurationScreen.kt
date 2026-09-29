@@ -33,10 +33,9 @@ import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.module_settings
-import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.settings.component.ExpressiveSection
+import org.meshtastic.feature.settings.component.RadioAdminAppBar
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
@@ -62,21 +61,11 @@ fun ModuleConfigurationScreen(
 
     Scaffold(
         topBar = {
-            MainAppBar(
+            RadioAdminAppBar(
                 title = stringResource(Res.string.module_settings),
-                subtitle =
-                if (state.isLocal) {
-                    destNode?.user?.long_name
-                } else {
-                    val remoteName = destNode?.user?.long_name ?: ""
-                    stringResource(Res.string.remotely_administrating, remoteName)
-                },
-                ourNode = null,
-                showNodeChip = false,
-                canNavigateUp = true,
+                isLocal = state.isLocal,
+                destNode = destNode,
                 onNavigateUp = onBack,
-                actions = {},
-                onClickChip = {},
             )
         },
     ) { paddingValues ->

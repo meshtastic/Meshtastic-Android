@@ -44,10 +44,9 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.preserve_favorites
-import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.settings.component.ExpressiveSection
+import org.meshtastic.feature.settings.component.RadioAdminAppBar
 import org.meshtastic.feature.settings.radio.AdminRoute
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -66,21 +65,11 @@ fun AdministrationScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
-                MainAppBar(
+                RadioAdminAppBar(
                     title = stringResource(Res.string.administration),
-                    subtitle =
-                    if (state.isLocal) {
-                        destNode?.user?.long_name
-                    } else {
-                        val remoteName = destNode?.user?.long_name ?: ""
-                        stringResource(Res.string.remotely_administrating, remoteName)
-                    },
-                    ourNode = null,
-                    showNodeChip = false,
-                    canNavigateUp = true,
+                    isLocal = state.isLocal,
+                    destNode = destNode,
                     onNavigateUp = onBack,
-                    actions = {},
-                    onClickChip = {},
                 )
             },
         ) { paddingValues ->
