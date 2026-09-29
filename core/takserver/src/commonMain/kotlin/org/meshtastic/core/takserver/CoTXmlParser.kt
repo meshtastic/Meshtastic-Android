@@ -35,6 +35,9 @@ private val xmlParser =
         defaultPolicy { ignoreUnknownChildren() }
     }
 
+/** Fractional seconds, stripped for a second parse attempt of a CoT timestamp ISO 8601 parsing rejected. */
+internal val FRACTIONAL_SECONDS = Regex("""\.\d+""")
+
 class CoTXmlParser(private val xml: String) {
     fun parse(): Result<CoTMessage> = try {
         val event = xmlParser.decodeFromString(CoTEventXml.serializer(), xml)
@@ -136,16 +139,8 @@ class CoTXmlParser(private val xml: String) {
     private fun parseDate(dateString: String?): Instant {
         if (dateString.isNullOrEmpty()) return Clock.System.now()
 
-        return try {
-            Instant.parse(dateString)
-        } catch (ignored: IllegalArgumentException) {
-            try {
-                val cleaned = dateString.replace(Regex("""\.\d+"""), "").replace("Z", "+00:00")
-                Instant.parse(cleaned)
-            } catch (ignoredInner: IllegalArgumentException) {
-                Logger.w { "Unparseable CoT date '$dateString', falling back to now()" }
-                Clock.System.now()
-            }
-        }
+        return Instant.parseOrNull(dateString)
+            ?: Instant.parseOrNull(dateString.replace(FRACTIONAL_SECONDS, "").replace("Z", "+00:00"))
+            ?: Clock.System.now().also { Logger.w { "Unparseable CoT date '$dateString', falling back to now()" } }
     }
 }

@@ -489,17 +489,10 @@ class TAKMeshIntegration(
             val staleInTag = STALE_ATTR_RE.find(eventTag) ?: return xml
             val staleStr = staleInTag.groupValues[1]
             val staleInstant =
-                try {
-                    kotlin.time.Instant.parse(staleStr)
-                } catch (_: IllegalArgumentException) {
+                kotlin.time.Instant.parseOrNull(staleStr)
                     // Handle edge-case formats like missing "Z"
-                    try {
-                        val cleaned = staleStr.replace(Regex("""\.\d+"""), "").replace("Z", "+00:00")
-                        kotlin.time.Instant.parse(cleaned)
-                    } catch (_: IllegalArgumentException) {
-                        return xml
-                    }
-                }
+                    ?: kotlin.time.Instant.parseOrNull(staleStr.replace(FRACTIONAL_SECONDS, "").replace("Z", "+00:00"))
+                    ?: return xml
 
             val now = Clock.System.now()
             val remaining = staleInstant - now
