@@ -21,11 +21,11 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
-import org.meshtastic.core.ui.share.SharedContactDialog
+import org.meshtastic.core.ui.share.SharedContactImportDialog
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
 /**
- * Shared composable that conditionally renders [SharedContactDialog] and [ScannedQrCodeDialog] when the device is
+ * Shared composable that conditionally renders [SharedContactImportDialog] and [ScannedQrCodeDialog] when the device is
  * connected and requests are pending.
  *
  * This eliminates identical boilerplate from Android `MainScreen` and Desktop `DesktopMainScreen`.
@@ -38,7 +38,7 @@ fun SharedDialogs(uiViewModel: UIViewModel) {
 
     if (connectionState == ConnectionState.Connected) {
         sharedContactRequested?.let {
-            SharedContactDialog(sharedContact = it, onDismiss = { uiViewModel.clearSharedContactRequested() })
+            SharedContactImportDialog(sharedContact = it, onDismiss = { uiViewModel.clearSharedContactRequested() })
         }
 
         requestChannelSet?.let { newChannelSet ->

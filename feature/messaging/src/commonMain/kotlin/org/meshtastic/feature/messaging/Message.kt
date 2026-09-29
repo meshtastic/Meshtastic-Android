@@ -104,7 +104,7 @@ import org.meshtastic.core.resources.send
 import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown_channel
 import org.meshtastic.core.ui.component.InlineStyle
-import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.component.ShareContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -395,7 +395,7 @@ fun MessageScreen(
         onDismiss = viewModel::dismissTranslationDialog,
     )
 
-    sharedContact?.let { contact -> SharedContactDialog(contact = contact, onDismiss = { sharedContact = null }) }
+    sharedContact?.let { contact -> ShareContactDialog(contact = contact, onDismiss = { sharedContact = null }) }
 
     val originalMessage by
         remember(replyingToPacketId, pagedMessages.itemCount) {

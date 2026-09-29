@@ -87,7 +87,7 @@ import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.component.ShareContactDialog
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.BarChart
 import org.meshtastic.core.ui.icon.Info
@@ -195,7 +195,7 @@ fun NodeListScreen(
 
     var showShareContact by remember { mutableStateOf(false) }
     if (showShareContact) {
-        SharedContactDialog(contact = ourNode, onDismiss = { showShareContact = false }, isOwnContact = true)
+        ShareContactDialog(contact = ourNode, onDismiss = { showShareContact = false }, isOwnContact = true)
     }
 
     // One row renderer, used by the list itself and by the search bar's expanded results, so the two can never drift.
