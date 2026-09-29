@@ -18,7 +18,6 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -30,7 +29,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.model.ConnectionEpochs
 import org.meshtastic.core.model.ConnectionLifecycle
 import org.meshtastic.core.model.ConnectionState
@@ -96,6 +97,16 @@ internal suspend fun restoreLocalConfigurationIfOwned(
  * surfacing, packet-id generation, location provisioning, and device-address switching.
  */
 @Suppress("LongParameterList")
+@Single(
+    binds =
+    [
+        RadioController::class,
+        AdminController::class,
+        MessagingController::class,
+        NodeController::class,
+        QueryController::class,
+    ],
+)
 class RadioControllerImpl(
     private val serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
@@ -112,8 +123,8 @@ class RadioControllerImpl(
     private val serviceNotifications: MeshNotificationManager,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
     radioConfigRepository: RadioConfigRepository,
-    scope: CoroutineScope,
-    private val onDeviceAddressChanged: (() -> Unit)? = null,
+    scope: ServiceScope,
+    private val deviceAddressChangeHook: DeviceAddressChangeHook,
 ) : RadioController,
     AdminController by AdminControllerImpl(
         commandSender = commandSender,
@@ -303,7 +314,7 @@ class RadioControllerImpl(
             }
         }
         // Keep callbacks outside the transition mutex so observers cannot deadlock by scheduling another selection.
-        onDeviceAddressChanged?.invoke()
+        deviceAddressChangeHook.onDeviceAddressChanged()
     }
 
     override fun requestGattCacheInvalidationOnNextConnect() {

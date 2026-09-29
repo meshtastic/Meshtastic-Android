@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service.di
+package org.meshtastic.core.service
 
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 
-@Module
-@ComponentScan("org.meshtastic.core.service")
-class CoreServiceAndroidModule
+/** Desktop runs the service in-process, so a new address needs nothing started. */
+@Single
+class NoopDeviceAddressChangeHook : DeviceAddressChangeHook {
+    override fun onDeviceAddressChanged() = Unit
+}

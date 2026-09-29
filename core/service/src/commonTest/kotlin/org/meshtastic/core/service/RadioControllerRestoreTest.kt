@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshDataHandler
@@ -102,7 +103,8 @@ class RadioControllerRestoreTest {
                 serviceNotifications = serviceNotifications,
                 messageProcessor = lazy { messageProcessor },
                 radioConfigRepository = radioConfigRepository,
-                scope = scope,
+                scope = scope.asServiceScope(),
+                deviceAddressChangeHook = {},
             )
         }
     }

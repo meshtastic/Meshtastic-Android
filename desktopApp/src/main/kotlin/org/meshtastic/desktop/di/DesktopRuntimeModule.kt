@@ -33,8 +33,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
-import org.meshtastic.core.common.database.DatabaseManager
-import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.HttpClientDefaults
@@ -42,34 +40,18 @@ import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
-import org.meshtastic.core.repository.AdminController
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionStateProvider
-import org.meshtastic.core.repository.MeshDataHandler
-import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
-import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.MessageQueue
-import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NeighborInfoResponseProvider
-import org.meshtastic.core.repository.NodeController
-import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.PlatformAnalytics
-import org.meshtastic.core.repository.QueryController
-import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TracerouteResponseProvider
-import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.core.service.RadioControllerImpl
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.desktop.DesktopNotificationManager
@@ -113,53 +95,6 @@ class DesktopRuntimeModule {
         scanner = scanner,
         bluetoothRepository = bluetoothRepository,
         connectionFactory = connectionFactory,
-    )
-
-    @Suppress("LongParameterList")
-    @Single(
-        binds =
-        [
-            RadioController::class,
-            AdminController::class,
-            MessagingController::class,
-            NodeController::class,
-            QueryController::class,
-        ],
-    )
-    fun radioController(
-        serviceRepository: ServiceRepository,
-        nodeRepository: NodeRepository,
-        commandSender: CommandSender,
-        nodeManager: NodeManager,
-        radioInterfaceService: RadioInterfaceService,
-        locationManager: MeshLocationManager,
-        packetRepository: Lazy<PacketRepository>,
-        dataHandler: Lazy<MeshDataHandler>,
-        analytics: PlatformAnalytics,
-        meshPrefs: MeshPrefs,
-        uiPrefs: UiPrefs,
-        databaseManager: DatabaseManager,
-        serviceNotifications: MeshNotificationManager,
-        messageProcessor: Lazy<MeshMessageProcessor>,
-        radioConfigRepository: RadioConfigRepository,
-        scope: ServiceScope,
-    ): RadioController = RadioControllerImpl(
-        serviceRepository = serviceRepository,
-        nodeRepository = nodeRepository,
-        commandSender = commandSender,
-        nodeManager = nodeManager,
-        radioInterfaceService = radioInterfaceService,
-        locationManager = locationManager,
-        packetRepository = packetRepository,
-        dataHandler = dataHandler,
-        analytics = analytics,
-        meshPrefs = meshPrefs,
-        uiPrefs = uiPrefs,
-        databaseManager = databaseManager,
-        serviceNotifications = serviceNotifications,
-        messageProcessor = messageProcessor,
-        radioConfigRepository = radioConfigRepository,
-        scope = scope,
     )
 
     /**

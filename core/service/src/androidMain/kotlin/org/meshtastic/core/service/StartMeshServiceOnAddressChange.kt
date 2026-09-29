@@ -14,11 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service.di
+package org.meshtastic.core.service
 
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Module
+import android.content.Context
+import org.koin.core.annotation.Single
 
-@Module
-@ComponentScan("org.meshtastic.core.service")
-class CoreServiceAndroidModule
+/** Starts [MeshService] for a newly selected device, since the foreground service owns the connection on Android. */
+@Single
+class StartMeshServiceOnAddressChange(private val context: Context) : DeviceAddressChangeHook {
+    override fun onDeviceAddressChanged() {
+        MeshService.startService(context, ServiceStartTrigger.DeviceAddressChanged)
+    }
+}
