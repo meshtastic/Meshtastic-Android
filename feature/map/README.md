@@ -23,7 +23,7 @@ All providers are injected via `CompositionLocal` — in `MainActivity.kt` on An
 ### Shared ViewModels (in `commonMain`)
 
 - **`BaseMapViewModel`** — Core contract for all map state management, node markers, camera positions, and traceroute node selection logic (`TracerouteNodeSelection`, `tracerouteNodeSelection()`).
-- **`NodeMapViewModel`** — Shared logic for per-node map views (track display, position history).
+- **`NodeMapViewModel`**: resolves a node number to its `Node` for the Google flavor's embedded node-track map.
 
 ### Shared Logic (in `commonMain`)
 

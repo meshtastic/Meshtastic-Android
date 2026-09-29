@@ -53,7 +53,6 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
 import org.meshtastic.app.map.getMapViewProvider
 import org.meshtastic.app.node.component.InlineMap
@@ -92,12 +91,10 @@ import org.meshtastic.core.ui.util.LocalNfcEmulatorProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcWriterProvider
-import org.meshtastic.core.ui.util.LocalNodeMapScreenProvider
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
-import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
 import org.meshtastic.core.ui.util.accentColorOrNull
 import org.meshtastic.core.ui.util.brandHighlightOrNull
 import org.meshtastic.core.ui.util.brandPalette
@@ -109,9 +106,6 @@ import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.layers.toPickedMapFile
-import org.meshtastic.feature.map.node.NodeMapViewModel
-import org.meshtastic.feature.node.metrics.MetricsViewModel
-import org.meshtastic.feature.node.metrics.TracerouteMapScreen
 
 class MainActivity : AppCompatActivity() {
     private val model: UIViewModel by viewModel()
@@ -282,24 +276,6 @@ class MainActivity : AppCompatActivity() {
             LocalDiscoveryMapProvider provides
                 { userLat, userLon, nodes, modifier ->
                     org.meshtastic.app.map.discovery.DiscoveryMap(userLat, userLon, nodes, modifier)
-                },
-            LocalNodeMapScreenProvider provides
-                { destNum, onNavigateUp ->
-                    val vm = koinViewModel<NodeMapViewModel>()
-                    vm.setDestNum(destNum)
-                    org.meshtastic.app.map.node.NodeMapScreen(vm, onNavigateUp = onNavigateUp)
-                },
-            LocalTracerouteMapScreenProvider provides
-                { destNum, requestId, logUuid, onNavigateUp ->
-                    val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(destNum) }
-                    metricsViewModel.setNodeId(destNum)
-
-                    TracerouteMapScreen(
-                        metricsViewModel = metricsViewModel,
-                        requestId = requestId,
-                        logUuid = logUuid,
-                        onNavigateUp = onNavigateUp,
-                    )
                 },
             LocalMapMainScreenProvider provides
                 { onClickNodeChip, navigateToNodeDetails, waypointId, sitePlannerNodeNum ->
