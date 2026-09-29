@@ -1,7 +1,7 @@
 ---
 title: Arendaja logid
 nav_order: 22
-last_updated: 2026-08-30
+last_updated: 2026-09-28
 description: Vaata ja ekspordi rakenduse arendajalogi rakenduse seest ning lisa GitHubi probleemile jäädvustus vigade diagnoosimiseks – adb-d pole vaja.
 aliases:
   - arendaja-logid
@@ -47,7 +47,7 @@ Attach that file to your GitHub issue.
 
 ## Töölaud
 
-Töölauarakendusel puudub süsteemi logcat, seega kuvatakse vahekaardil **Rakenduse logid** rakenduse enda jäädvustatud logide väljundit. Otsimine, filtreerimine ja eksportimine toimivad samamoodi.
+Töölauarakendusel puudub süsteemi logcat, seega kuvatakse vahekaardil **Rakenduse logid** rakenduse enda jäädvustatud logide väljundit. Otsimine, filtreerimine ja eksportimine toimivad samamoodi. Release builds capture Info, Warn, and Error lines; Verbose and Debug lines appear only in development builds.
 
 ## Seotud teemad
 

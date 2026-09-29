@@ -328,6 +328,7 @@ appears only when your own node is selected. It is grouped rather than flat:
 
 - **Allow analytics and crash reporting** — opt in or out of diagnostics.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
+  It needs precise location: with approximate location allowed, turning it on asks for precise.
 - **Homoglyph encoding** — how look-alike characters in names are handled.
 
 **Appearance**

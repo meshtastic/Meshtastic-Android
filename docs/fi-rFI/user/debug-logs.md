@@ -1,7 +1,7 @@
 ---
 title: Virheenjäljityslokitiedot
 nav_order: 22
-last_updated: 2026-08-30
+last_updated: 2026-09-28
 description: Tarkastele ja vie sovelluksen omat virheenjäljityslokitiedot suoraan sovelluksesta ja liitä lokitiedot GitHub-vikaraporttiin ongelmien selvittämisen helpottamiseksi — adb:tä ei tarvita.
 aliases:
   - debug-lokitiedot
@@ -47,7 +47,7 @@ Liitä tämä tiedosto GitHub-vikaraporttiisi.
 
 ## Työpöytä
 
-Työpöytäsovelluksessa ei ole järjestelmän logcat-lokitietoa, joten **Sovelluslokit**-välilehti näyttää sen sijaan sovelluksen itse keräämät lokit. Haku, suodatus ja vienti toimivat samalla tavalla.
+Työpöytäsovelluksessa ei ole järjestelmän logcat-lokitietoa, joten **Sovelluslokit**-välilehti näyttää sen sijaan sovelluksen itse keräämät lokit. Haku, suodatus ja vienti toimivat samalla tavalla. Release builds capture Info, Warn, and Error lines; Verbose and Debug lines appear only in development builds.
 
 ## Aiheeseen liittyvät aiheet
 

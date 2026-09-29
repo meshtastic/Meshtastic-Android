@@ -508,6 +508,7 @@
     <string name="doc_keywords_mqtt">mqtt,broker,internet,bridge,uplink,downlink</string>
     <string name="doc_keywords_node_metrics">metrics,telemetry,signal,snr,rssi,battery,traceroute</string>
     <string name="doc_keywords_nodes">node,mesh,list,role,status,favorite,filter</string>
+    <string name="doc_keywords_notifications">notification,alert,sound,mute,reply,watch,wear os</string>
     <string name="doc_keywords_onboarding">setup,welcome,permissions,first-launch</string>
     <string name="doc_keywords_settings_module">module,serial,telemetry,canned,store-forward,administration</string>
     <string name="doc_keywords_settings_radio">settings,radio,lora,region,modem,device,power,security</string>
@@ -630,6 +631,11 @@
     <string name="firmware_edition">Версия прошивки</string>
     <string name="firmware_event_ended_banner">%1$s завершен. Вернитесь к стандартной Meshtastic прошивке, чтобы восстановить нормальные функции.</string>
     <string name="firmware_event_ended_button">Обновление прошивки</string>
+    <string name="firmware_maintenance_bootloader_available">Последнее: %1$s</string>
+    <string name="firmware_maintenance_bootloader_installed">Установлено: %1$s</string>
+    <string name="firmware_maintenance_bootloader_latest_hint">Последняя версия: %1$s. Установленная версия отображается после перезагрузки устройства в режиме обновления.</string>
+    <string name="firmware_maintenance_bootloader_up_to_date">Загрузчик обновлён</string>
+    <string name="firmware_maintenance_bootloader_up_to_date_hint">Обновлять нечего. Далее переустанавливается прошивка, что приведёт к перезагрузке устройства.</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Файл стирания был скопирован, но устройство не начало стирание. Пока ничего не изменилось. Отключи устройство, дважды нажми кнопку сброса и повтори попытку.</string>
     <string name="firmware_maintenance_copy_failed">Не удалось скопировать файл на диск устройства. Убедите, что диск всё ещё подключён, и повтори попытку.</string>
     <string name="firmware_maintenance_data_unavailable">Список образов для стирания сейчас недоступен. Проверь подключение и повтори попытку или используй веб-флешер на flasher.meshtastic.org.</string>
@@ -1074,8 +1080,11 @@
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Служебные уведомления</string>
+    <string name="meshtastic_alerts_notifications_description">Критические оповещения, отправляемые нодами в сеть.</string>
     <string name="meshtastic_app_name">Meshtastic</string>
     <string name="meshtastic_broadcast_notifications">Уведомления о сообщениях в общем чате</string>
+    <string name="meshtastic_broadcast_notifications_description">Сообщения, отправляемые в ваши каналы.</string>
+    <string name="meshtastic_client_notifications">Уведомления по радио</string>
     <string name="meshtastic_low_battery_notifications">Уведомление о низком уровне заряда</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Уведомления о низком заряде батареи (избранные ноды)</string>
     <string name="meshtastic_mesh_beacon_notifications">Уведомления о приглашениях в сеть</string>

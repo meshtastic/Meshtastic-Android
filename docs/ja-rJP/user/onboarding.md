@@ -1,7 +1,7 @@
 ---
 title: はじめに
 nav_order: 1
-last_updated: 2026-08-30
+last_updated: 2026-09-28
 description: 初回起動時のセットアップ：権限、オンボーディングの流れ、無線機を接続した後の次のステップ。
 aliases:
   - 初回起動
@@ -53,6 +53,8 @@ Meshtastic は、次の目的でも位置情報を使用します：
 - メッシュマップ上に自分の位置を表示する
 - 他のノードまでの距離を計算する
 - 他のメッシュメンバーと GPS 座標を共有する（有効な場合）
+
+On Android 12 and newer, choose **Precise** to share your position with the mesh: an approximate grant still shows you on the map, but position sharing needs precise location.
 
 Grant **"While using the app"**. The app does not request background location — `ACCESS_BACKGROUND_LOCATION` is not in its manifest — so Android will not offer an "Always" option, and position updates happen while the app is in the foreground or running its foreground service.
 

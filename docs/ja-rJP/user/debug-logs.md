@@ -1,7 +1,7 @@
 ---
 title: デバッグログ
 nav_order: 22
-last_updated: 2026-08-30
+last_updated: 2026-09-28
 description: アプリのデバッグログをアプリ内で表示・エクスポートし、バグの診断に役立つよう GitHub の issue にキャプチャを添付できます。adb は不要です。
 aliases:
   - debug-logs
@@ -47,7 +47,7 @@ The **App logs** tab shows the most recent log lines from **this app only** — 
 
 ## デスクトップ
 
-デスクトップアプリにはシステムの logcat がないため、「**アプリログ**」タブは代わりに、アプリ自身がキャプチャしたログ出力を表示します。検索、絞り込み、エクスポートは同じように機能します。
+デスクトップアプリにはシステムの logcat がないため、「**アプリログ**」タブは代わりに、アプリ自身がキャプチャしたログ出力を表示します。検索、絞り込み、エクスポートは同じように機能します。 Release builds capture Info, Warn, and Error lines; Verbose and Debug lines appear only in development builds.
 
 ## 関連トピック
 
