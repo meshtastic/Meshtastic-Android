@@ -72,6 +72,9 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.url_http_localhost_only
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.layers.LayerOpacityStore
@@ -89,6 +92,7 @@ import org.meshtastic.feature.map.tiles.CustomTileProviderSaveResult
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.meshtastic.feature.map.tiles.RasterOverlaySource
 import org.meshtastic.feature.map.tiles.RasterTileSpec
+import org.meshtastic.feature.map.tiles.isRefusedCleartextTileUrl
 import org.meshtastic.feature.map.tiles.isValidTileUrlTemplate
 import java.io.File
 import java.io.FileOutputStream
@@ -345,6 +349,9 @@ class MapViewModel(
         if (config != null) {
             if (!config.isLocal && !isValidTileUrlTemplate(config.urlTemplate)) {
                 Logger.withTag("MapViewModel").w("Attempted to select an invalid custom tile URL template")
+                if (config.urlTemplate.isRefusedCleartextTileUrl()) {
+                    viewModelScope.launch { _errorFlow.emit(getStringSuspend(Res.string.url_http_localhost_only)) }
+                }
                 clearCurrentTileProvider()
                 _selectedRasterBasemapId.value = null
                 _selectedGoogleMapType.value = MapType.NORMAL

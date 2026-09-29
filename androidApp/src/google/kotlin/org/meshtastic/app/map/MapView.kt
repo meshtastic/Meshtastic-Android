@@ -124,6 +124,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -186,6 +187,7 @@ import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.MapBounds
 import org.meshtastic.feature.map.MapNodePolicy
@@ -329,6 +331,9 @@ fun MapView(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
+
+    // Collected here, not in a sheet: basemap selection and network layers report errors while no sheet is open.
+    LaunchedEffect(mapViewModel) { mapViewModel.errorFlow.collectLatest { context.showToast(it) } }
 
     // --- Location permissions ---
     val locationPermission = rememberLocationPermissionState()
