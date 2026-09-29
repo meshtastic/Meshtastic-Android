@@ -33,10 +33,8 @@ data class TileIndex(val zoom: Int, val x: Int, val y: Int)
 data class LonLat(val longitude: Double, val latitude: Double)
 
 /**
- * Standard XYZ/slippy-map Web Mercator tile math, self-contained here (rather than reused from either flavor's own copy
- * — `feature/map-maplibre`'s `TileEstimate.kt` and the Google flavor's `WebMercatorTileMath` in the sibling
- * `feat/map-google-pmtiles-offline` branch) so this module has no dependency in either direction on flavor-specific
- * code — this module is a shared math library, not a consumer of one flavor's app code.
+ * Standard XYZ/slippy-map Web Mercator tile math. Depends on no map stack, so the terrain extractor and the Google
+ * flavor's offline maps share it.
  */
 object TerrainTileMath {
 
@@ -111,10 +109,14 @@ object TerrainTileMath {
      *
      * Standard inverse spherical Web Mercator — the mirror of [tileAt]'s own `asinh(tan(...))` forward transform.
      */
-    fun lonLatAt(tile: TileIndex, localX: Float, localY: Float): LonLat {
-        val n = 2.0.pow(tile.zoom)
-        val x = (tile.x + localX) / n
-        val y = (tile.y + localY) / n
+    fun lonLatAt(tile: TileIndex, localX: Float, localY: Float): LonLat =
+        lonLatAt(tile.zoom, (tile.x + localX).toDouble(), (tile.y + localY).toDouble())
+
+    /** [lonLatAt] for a point given in fractional tile units at [zoom], e.g. `x = 3.25` is a quarter into column 3. */
+    fun lonLatAt(zoom: Int, tileX: Double, tileY: Double): LonLat {
+        val n = 2.0.pow(zoom)
+        val x = tileX / n
+        val y = tileY / n
         val longitude = x * FULL_TURN_DEGREES - FULL_TURN_DEGREES / 2
         val latitudeRadians = atan(sinh(PI * (1.0 - 2.0 * y)))
         val latitude = latitudeRadians * HALF_TURN_DEGREES / PI
