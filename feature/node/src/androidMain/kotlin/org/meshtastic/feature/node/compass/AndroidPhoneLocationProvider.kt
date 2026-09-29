@@ -16,13 +16,11 @@
  */
 package org.meshtastic.feature.node.compass
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
-import androidx.core.content.ContextCompat
 import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
@@ -31,6 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.di.CoroutineDispatchers
 
 @Single
@@ -46,7 +45,8 @@ class AndroidPhoneLocationProvider(private val context: Context, private val dis
             return@callbackFlow
         }
 
-        if (!hasLocationPermission()) {
+        // A compass bearing is useful on an approximate fix, so the coarse-only grant is enough here.
+        if (!context.hasLocationPermission(precise = false)) {
             trySend(PhoneLocationState(permissionGranted = false, providerEnabled = false))
             close()
             return@callbackFlow
@@ -122,12 +122,6 @@ class AndroidPhoneLocationProvider(private val context: Context, private val dis
         awaitClose { LocationManagerCompat.removeUpdates(locationManager, listener) }
     }
         .flowOn(dispatchers.io)
-
-    private fun hasLocationPermission(): Boolean =
-        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-            android.content.pm.PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-            android.content.pm.PackageManager.PERMISSION_GRANTED
 
     private fun Location.toPhoneLocation() =
         PhoneLocation(latitude = latitude, longitude = longitude, altitude = altitude, timeMillis = time)

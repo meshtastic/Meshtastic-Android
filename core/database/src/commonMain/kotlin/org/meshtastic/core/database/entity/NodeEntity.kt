@@ -41,73 +41,42 @@ data class NodeWithRelations(
     @Relation(entity = MetadataEntity::class, parentColumns = ["num"], entityColumns = ["num"])
     val metadata: MetadataEntity?,
 ) {
-    // Direct construction avoids the previous `node.toModel().copy(metadata = …, manuallyVerified = …)` pattern,
-    // which allocated the Node twice per DB row (once from toModel, once from copy). Hot path on every DB emission.
-    fun toModel() = Node(
-        num = node.num,
-        user = node.user,
-        position = node.position,
-        snr = node.snr,
-        rssi = node.rssi,
-        lastHeard = node.lastHeard,
-        deviceMetrics = node.deviceMetrics ?: org.meshtastic.proto.DeviceMetrics.Builder().build(),
-        channel = node.channel,
-        viaMqtt = node.viaMqtt,
-        hopsAway = node.hopsAway,
-        isFavorite = node.isFavorite,
-        isIgnored = node.isIgnored,
-        isMuted = node.isMuted,
-        environmentMetrics = node.environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics.Builder().build(),
-        powerMetrics = node.powerMetrics ?: org.meshtastic.proto.PowerMetrics.Builder().build(),
-        airQualityMetrics = node.airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics.Builder().build(),
-        soilWaterMetrics = node.soilWaterMetrics ?: org.meshtastic.proto.SoilWaterMetrics.Builder().build(),
-        paxcounter = node.paxcounter,
-        publicKey = node.publicKey ?: node.user.public_key,
-        notes = node.notes,
-        powerChannelLabels = node.powerChannelLabels,
-        nodeStatus = node.nodeStatus,
-        lastTransport = node.lastTransport,
-        metadata = metadata?.proto,
-        manuallyVerified = node.manuallyVerified,
-        signsPackets = node.signsPackets,
-        heardOnCurrentLora = node.heardOnCurrentLora,
-        keyMatch = node.keyMatch,
-        newPublicKey = node.newPublicKey,
-    )
-
-    fun toEntity() = with(node) {
-        NodeEntity(
-            num = num,
-            user = user,
-            position = position,
-            snr = snr,
-            rssi = rssi,
-            lastHeard = lastHeard,
-            deviceTelemetry = deviceTelemetry,
-            channel = channel,
-            viaMqtt = viaMqtt,
-            hopsAway = hopsAway,
-            isFavorite = isFavorite,
-            isIgnored = isIgnored,
-            isMuted = isMuted,
-            environmentTelemetry = environmentTelemetry,
-            powerTelemetry = powerTelemetry,
-            airQualityTelemetry = airQualityTelemetry,
-            soilWaterTelemetry = soilWaterTelemetry,
-            paxcounter = paxcounter,
-            publicKey = publicKey ?: user.public_key,
-            notes = notes,
-            powerChannelLabels = powerChannelLabels,
-            manuallyVerified = manuallyVerified,
-            nodeStatus = nodeStatus,
-            lastTransport = lastTransport,
-            signsPackets = signsPackets,
-            heardOnCurrentLora = heardOnCurrentLora,
-            keyMatch = keyMatch,
-            newPublicKey = newPublicKey,
-        )
-    }
+    fun toModel() = node.toModel(metadata?.proto)
 }
+
+/** The one [Node] to [NodeEntity] mapping. [Node.metadata] lives in [MetadataEntity], so it is not carried here. */
+fun Node.toEntity() = NodeEntity(
+    num = num,
+    user = user,
+    position = position,
+    latitude = latitude,
+    longitude = longitude,
+    snr = snr,
+    rssi = rssi,
+    lastHeard = lastHeard,
+    deviceTelemetry = Telemetry.Builder().also { wb -> wb.device_metrics = deviceMetrics }.build(),
+    channel = channel,
+    viaMqtt = viaMqtt,
+    hopsAway = hopsAway,
+    isFavorite = isFavorite,
+    isIgnored = isIgnored,
+    isMuted = isMuted,
+    environmentTelemetry = Telemetry.Builder().also { wb -> wb.environment_metrics = environmentMetrics }.build(),
+    powerTelemetry = Telemetry.Builder().also { wb -> wb.power_metrics = powerMetrics }.build(),
+    airQualityTelemetry = Telemetry.Builder().also { wb -> wb.air_quality_metrics = airQualityMetrics }.build(),
+    soilWaterTelemetry = Telemetry.Builder().also { wb -> wb.soil_water_metrics = soilWaterMetrics }.build(),
+    paxcounter = paxcounter,
+    publicKey = publicKey,
+    notes = notes,
+    powerChannelLabels = powerChannelLabels,
+    manuallyVerified = manuallyVerified,
+    nodeStatus = nodeStatus,
+    lastTransport = lastTransport,
+    signsPackets = signsPackets,
+    heardOnCurrentLora = heardOnCurrentLora,
+    keyMatch = keyMatch,
+    newPublicKey = newPublicKey,
+)
 
 @Entity(tableName = "metadata", indices = [Index(value = ["num"])])
 data class MetadataEntity(
@@ -239,8 +208,10 @@ data class NodeEntity(
         fun currentTime() = nowSeconds.toInt()
     }
 
-    fun toModel() = Node(
+    /** The one [NodeEntity] to [Node] mapping. [metadata] comes from the node's [MetadataEntity] row, when joined. */
+    fun toModel(metadata: DeviceMetadata? = null) = Node(
         num = num,
+        metadata = metadata,
         user = user,
         position = position,
         snr = snr,
@@ -261,6 +232,7 @@ data class NodeEntity(
         publicKey = publicKey ?: user.public_key,
         notes = notes,
         powerChannelLabels = powerChannelLabels,
+        manuallyVerified = manuallyVerified,
         nodeStatus = nodeStatus,
         lastTransport = lastTransport,
         signsPackets = signsPackets,

@@ -83,6 +83,8 @@ actual fun SetScreenBrightness(brightness: Float) {
 
 @Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
 
+@Composable actual fun rememberPreciseLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
+
 @Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedPermissionUiState()
 
 @Composable actual fun rememberNotificationPermissionState(): PermissionUiState = grantedPermissionUiState()

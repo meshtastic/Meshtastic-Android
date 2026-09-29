@@ -291,7 +291,8 @@ class TelemetryPacketHandlerImplTest {
 
         handler.handleTelemetry(packet, dataPacket, myNodeNum, radioSession)
         advanceUntilIdle()
-        // No crash
+
+        verify(VerifyMode.not) { nodeManager.updateNodeForSession(any(), any(), any(), any()) }
     }
 
     @Test

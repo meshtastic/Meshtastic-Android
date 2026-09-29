@@ -90,7 +90,8 @@ internal data class MessageListHandlers(
     val onSendReaction: (String, Int) -> Unit,
     val onClickChip: (Node) -> Unit,
     val onDeleteMessages: (List<Long>) -> Unit,
-    val onSendMessage: (String, String) -> Unit,
+    /** Replaces a failed message with a fresh send of its text; the action decides whether sending is allowed. */
+    val onResendMessage: (Message) -> Unit,
     val onReply: (Message?) -> Unit,
     val onTranslate: (Message) -> Unit = {},
     val onToggleTranslation: (Message) -> Unit = {},
@@ -148,12 +149,7 @@ internal fun MessageListPaged(
             isDirectMessage = isDirectMessageConversation,
             resendOption = message.isStatusRetryable(isDirectMessageConversation) && state.canSend,
             onResend = {
-                // Resend deletes the old row and sends a fresh one. Never take the first half without the second:
-                // on an archived conversation the send is refused, which would leave the message simply gone.
-                if (state.canSend) {
-                    handlers.onDeleteMessages(listOf(message.uuid))
-                    handlers.onSendMessage(message.text, state.contactKey)
-                }
+                handlers.onResendMessage(message)
                 showStatusDialog = null
             },
             onDismiss = { showStatusDialog = null },

@@ -20,6 +20,8 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.FakeRadioController.AdminRequest
+import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
@@ -27,6 +29,8 @@ import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class RadioConfigUseCaseTest {
 
@@ -36,7 +40,16 @@ class RadioConfigUseCaseTest {
     @BeforeTest
     fun setUp() {
         radioController = FakeRadioController()
+        radioController.nextPacketId = PACKET_ID
         useCase = RadioConfigUseCase(radioController)
+    }
+
+    /** Asserts [call] sent exactly [expected] and, for requests that carry one, returned the same packet ID. */
+    private suspend fun assertSends(expected: AdminRequest, call: suspend () -> Int?) {
+        val returned = call()
+
+        assertEquals(listOf(expected), radioController.adminRequests)
+        if (expected.packetId != null) assertEquals(expected.packetId, returned)
     }
 
     @Test
@@ -59,77 +72,138 @@ class RadioConfigUseCaseTest {
     }
 
     @Test
-    fun `setOwner calls radioController`() = runTest {
+    fun `setOwner sends the user to the node`() = runTest {
         val user = User.Builder().also { wb -> wb.long_name = "New Name" }.build()
-        useCase.setOwner(1234, user)
-        // Verify call implicitly or by adding tracking to FakeRadioController if needed.
-        // FakeRadioController already has getPacketId returning 1.
+
+        assertSends(AdminRequest("setOwner", DEST, user, PACKET_ID)) { useCase.setOwner(DEST, user) }
     }
 
     @Test
-    fun `setHamMode calls radioController and returns packetId`() = runTest {
-        val packetId =
-            useCase.setHamMode(
-                1234,
-                HamParameters.Builder()
-                    .also { wb ->
-                        wb.call_sign = "KK7ABC"
-                        wb.short_name = "KK7A"
-                    }
-                    .build(),
-            )
-        assertEquals(1, packetId)
+    fun `setHamMode sends the ham parameters to the node`() = runTest {
+        val ham =
+            HamParameters.Builder()
+                .also { wb ->
+                    wb.call_sign = "KK7ABC"
+                    wb.short_name = "KK7A"
+                }
+                .build()
+
+        assertSends(AdminRequest("setHamMode", DEST, ham, PACKET_ID)) { useCase.setHamMode(DEST, ham) }
     }
 
     @Test
-    fun `getOwner calls radioController`() = runTest {
-        val packetId = useCase.getOwner(1234)
-        assertEquals(1, packetId)
+    fun `getOwner requests the owner`() = runTest {
+        assertSends(AdminRequest("getOwner", DEST, null, PACKET_ID)) { useCase.getOwner(DEST) }
     }
 
     @Test
-    fun `setConfig calls radioController`() = runTest {
+    fun `setConfig sends the config to the node`() = runTest {
         val config =
             Config.Builder()
                 .also { wb -> wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build() }
                 .build()
-        useCase.setConfig(1234, config)
+
+        assertSends(AdminRequest("setConfig", DEST, config, PACKET_ID)) { useCase.setConfig(DEST, config) }
     }
 
     @Test
-    fun `setModuleConfig calls radioController`() = runTest {
+    fun `setModuleConfig sends the module config to the node`() = runTest {
         val config =
             ModuleConfig.Builder()
                 .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
                 .build()
-        useCase.setModuleConfig(1234, config)
+
+        assertSends(AdminRequest("setModuleConfig", DEST, config, PACKET_ID)) { useCase.setModuleConfig(DEST, config) }
     }
 
     @Test
-    fun `setFixedPosition calls radioController`() = runTest {
+    fun `setFixedPosition sends the position unchanged`() = runTest {
         val position = Position(1.0, 2.0, 3)
-        useCase.setFixedPosition(1234, position)
+
+        assertSends(AdminRequest("setFixedPosition", DEST, position, null)) {
+            useCase.setFixedPosition(DEST, position)
+            null
+        }
     }
 
     @Test
-    fun `removeFixedPosition calls radioController with zero position`() = runTest { useCase.removeFixedPosition(1234) }
+    fun `removeFixedPosition sends the removal sentinel`() = runTest {
+        useCase.removeFixedPosition(DEST)
 
-    @Test fun `setRingtone calls radioController`() = runTest { useCase.setRingtone(1234, "ringtone.mp3") }
-
-    @Test fun `setCannedMessages calls radioController`() = runTest { useCase.setCannedMessages(1234, "messages") }
-
-    @Test fun `getConfig calls radioController`() = runTest { useCase.getConfig(1234, 1) }
-
-    @Test fun `getModuleConfig calls radioController`() = runTest { useCase.getModuleConfig(1234, 1) }
-
-    @Test fun `getChannel calls radioController`() = runTest { useCase.getChannel(1234, 1) }
-
-    @Test
-    fun `setRemoteChannel calls radioController`() = runTest {
-        useCase.setRemoteChannel(1234, org.meshtastic.proto.Channel.Builder().build())
+        val request = radioController.adminRequests.single()
+        assertEquals(AdminRequest("setFixedPosition", DEST, request.payload, null), request)
+        assertTrue(assertIs<Position>(request.payload).isFixedPositionRemoval())
     }
 
-    @Test fun `getRingtone calls radioController`() = runTest { useCase.getRingtone(1234) }
+    @Test
+    fun `setRingtone sends the ringtone`() = runTest {
+        assertSends(AdminRequest("setRingtone", DEST, "ringtone.mp3", null)) {
+            useCase.setRingtone(DEST, "ringtone.mp3")
+            null
+        }
+    }
 
-    @Test fun `getCannedMessages calls radioController`() = runTest { useCase.getCannedMessages(1234) }
+    @Test
+    fun `setCannedMessages sends the messages`() = runTest {
+        assertSends(AdminRequest("setCannedMessages", DEST, "messages", null)) {
+            useCase.setCannedMessages(DEST, "messages")
+            null
+        }
+    }
+
+    @Test
+    fun `getConfig requests the config type`() = runTest {
+        assertSends(AdminRequest("getConfig", DEST, 1, PACKET_ID)) { useCase.getConfig(DEST, 1) }
+    }
+
+    @Test
+    fun `getModuleConfig requests the module config type`() = runTest {
+        assertSends(AdminRequest("getModuleConfig", DEST, 1, PACKET_ID)) { useCase.getModuleConfig(DEST, 1) }
+    }
+
+    @Test
+    fun `getChannel requests the channel index`() = runTest {
+        assertSends(AdminRequest("getChannel", DEST, 1, PACKET_ID)) { useCase.getChannel(DEST, 1) }
+    }
+
+    @Test
+    fun `setRemoteChannel sends the channel to the node`() = runTest {
+        val channel = Channel.Builder().also { wb -> wb.index = 2 }.build()
+
+        assertSends(AdminRequest("setRemoteChannel", DEST, channel, PACKET_ID)) {
+            useCase.setRemoteChannel(DEST, channel)
+        }
+    }
+
+    @Test
+    fun `getRingtone requests the ringtone`() = runTest {
+        assertSends(AdminRequest("getRingtone", DEST, null, PACKET_ID)) { useCase.getRingtone(DEST) }
+    }
+
+    @Test
+    fun `getCannedMessages requests the canned messages`() = runTest {
+        assertSends(AdminRequest("getCannedMessages", DEST, null, PACKET_ID)) { useCase.getCannedMessages(DEST) }
+    }
+
+    @Test
+    fun `getDeviceConnectionStatus requests the connection status`() = runTest {
+        assertSends(AdminRequest("getDeviceConnectionStatus", DEST, null, PACKET_ID)) {
+            useCase.getDeviceConnectionStatus(DEST)
+        }
+    }
+
+    @Test
+    fun `onRequestId receives the packet id the request carries`() = runTest {
+        var registered: Int? = null
+
+        useCase.getOwner(DEST) { registered = it }
+
+        assertEquals(PACKET_ID, registered)
+        assertEquals(PACKET_ID, radioController.adminRequests.single().packetId)
+    }
+
+    private companion object {
+        const val DEST = 1234
+        const val PACKET_ID = 4242
+    }
 }

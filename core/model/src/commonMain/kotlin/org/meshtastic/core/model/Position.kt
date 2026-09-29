@@ -24,7 +24,8 @@ import org.meshtastic.core.model.util.anonymize
 data class Position(
     val latitude: Double,
     val longitude: Double,
-    val altitude: Int,
+    /** Metres above mean sea level, or null when the fix reported none. 0 is sea level, not absence. */
+    val altitude: Int?,
     val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
     val satellitesInView: Int = 0,
     val groundSpeed: Int = 0,
@@ -51,7 +52,7 @@ data class Position(
     ) : this(
         degD(position.latitude_i ?: 0),
         degD(position.longitude_i ?: 0),
-        position.altitude ?: 0,
+        position.altitude,
         if (position.time != 0) position.time else defaultTime,
         position.sats_in_view,
         position.ground_speed ?: 0,
@@ -66,7 +67,7 @@ data class Position(
     fun bearing(o: Position) = bearing(latitude, longitude, o.latitude, o.longitude)
 
     /** Returns whether this position represents the protocol sentinel for removing a fixed position. */
-    fun isFixedPositionRemoval(): Boolean = latitude == 0.0 && longitude == 0.0 && altitude == 0
+    fun isFixedPositionRemoval(): Boolean = latitude == 0.0 && longitude == 0.0 && (altitude == null || altitude == 0)
 
     @Suppress("MagicNumber")
     fun isValid(): Boolean = latitude != 0.0 &&

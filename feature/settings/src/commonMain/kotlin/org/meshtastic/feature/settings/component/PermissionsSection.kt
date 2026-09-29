@@ -38,6 +38,7 @@ import org.meshtastic.core.resources.local_network_permission
 import org.meshtastic.core.resources.local_network_permission_rationale
 import org.meshtastic.core.resources.location_permission
 import org.meshtastic.core.resources.location_permission_rationale
+import org.meshtastic.core.resources.location_precise_rationale
 import org.meshtastic.core.resources.nearby_devices_permission
 import org.meshtastic.core.resources.notification_permission_rationale
 import org.meshtastic.core.resources.permission_camera_summary
@@ -47,6 +48,7 @@ import org.meshtastic.core.resources.permission_location_summary_pre31
 import org.meshtastic.core.resources.permission_nearby_devices_summary
 import org.meshtastic.core.resources.permission_notifications_summary
 import org.meshtastic.core.resources.permission_state_allowed
+import org.meshtastic.core.resources.permission_state_approximate_only
 import org.meshtastic.core.resources.permission_state_blocked
 import org.meshtastic.core.resources.permission_state_denied
 import org.meshtastic.core.resources.permission_state_not_applicable
@@ -78,6 +80,7 @@ import org.meshtastic.core.ui.util.rememberCameraPermissionState
 import org.meshtastic.core.ui.util.rememberLocalNetworkPermissionState
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.rememberNotificationPermissionState
+import org.meshtastic.core.ui.util.rememberPreciseLocationPermissionState
 
 /**
  * One permission the app can ask for, as the permissions list needs to render it.
@@ -85,6 +88,7 @@ import org.meshtastic.core.ui.util.rememberNotificationPermissionState
  * @param titleRes The permission's name as the system presents it, so the row and the system screen agree.
  * @param summaryRes What the app does with it, in the user's terms.
  * @param rationaleRes The educational text shown before a re-request.
+ * @param statusRes Replaces the state label derived from [state] when the grant needs a fuller explanation.
  */
 private data class PermissionRow(
     val titleRes: StringResource,
@@ -92,6 +96,7 @@ private data class PermissionRow(
     val rationaleRes: StringResource,
     val icon: ImageVector,
     val state: PermissionUiState,
+    val statusRes: StringResource? = null,
 )
 
 /**
@@ -107,9 +112,10 @@ private data class PermissionRow(
  * because reviewing and revoking is as legitimate as granting.
  */
 @Composable
-internal fun ColumnScope.PermissionsSettingsContent() {
+internal fun ColumnScope.PermissionsSettingsContent(needsPreciseLocation: Boolean = false) {
     val bluetooth = rememberBluetoothPermissionState()
     val location = rememberLocationPermissionState()
+    val preciseLocation = rememberPreciseLocationPermissionState()
     val notifications = rememberNotificationPermissionState()
     val camera = rememberCameraPermissionState()
     val localNetwork = rememberLocalNetworkPermissionState()
@@ -118,10 +124,14 @@ internal fun ColumnScope.PermissionsSettingsContent() {
     // that does not exist on that device.
     val bluetoothIsLocation = bleScanRequiresLocationServices
 
+    // An approximate grant serves the map but not mesh sharing, so while sharing is on the row stands for precise.
+    val locationApproximateOnly = needsPreciseLocation && location.isGranted && !preciseLocation.isGranted
+
     val rows =
         permissionRows(
             bluetooth = bluetooth,
-            location = location,
+            location = if (locationApproximateOnly) preciseLocation else location,
+            locationApproximateOnly = locationApproximateOnly,
             notifications = notifications,
             camera = camera,
             localNetwork = localNetwork,
@@ -197,12 +207,14 @@ internal fun ColumnScope.PermissionsSettingsContent() {
 private fun permissionRows(
     bluetooth: PermissionUiState,
     location: PermissionUiState,
+    locationApproximateOnly: Boolean,
     notifications: PermissionUiState,
     camera: PermissionUiState,
     localNetwork: PermissionUiState,
     bluetoothIsLocation: Boolean,
     bluetoothSupported: Boolean,
 ): List<PermissionRow> = buildList {
+    val locationStatusRes = Res.string.permission_state_approximate_only.takeIf { locationApproximateOnly }
     // Pre-Android-12 the Bluetooth gate *is* ACCESS_FINE_LOCATION. Two rows there would offer two controls for
     // one system grant and let them contradict each other on screen, so a single Location row stands for both.
     if (bluetoothIsLocation) {
@@ -213,6 +225,7 @@ private fun permissionRows(
                 rationaleRes = Res.string.bluetooth_permission_rationale_pre31,
                 icon = MeshtasticIcons.LocationOn,
                 state = location,
+                statusRes = locationStatusRes,
             ),
         )
     } else {
@@ -231,9 +244,15 @@ private fun permissionRows(
             PermissionRow(
                 titleRes = Res.string.location_permission,
                 summaryRes = Res.string.permission_location_summary,
-                rationaleRes = Res.string.location_permission_rationale,
+                rationaleRes =
+                if (locationApproximateOnly) {
+                    Res.string.location_precise_rationale
+                } else {
+                    Res.string.location_permission_rationale
+                },
                 icon = MeshtasticIcons.LocationOn,
                 state = location,
+                statusRes = locationStatusRes,
             ),
         )
     }
@@ -280,7 +299,7 @@ private fun PermissionListItem(row: PermissionRow, onShowRationale: () -> Unit) 
     val state = row.state
     val gated = state.isRuntimeGated
 
-    val statusRes = permissionStateLabel(state.status, gated)
+    val statusRes = row.statusRes ?: permissionStateLabel(state.status, gated)
 
     // Only a blocked permission is coloured. Denied is a choice the user made and is free to keep — colouring it red
     // would read as a scolding, which the permissions guidance explicitly warns against.

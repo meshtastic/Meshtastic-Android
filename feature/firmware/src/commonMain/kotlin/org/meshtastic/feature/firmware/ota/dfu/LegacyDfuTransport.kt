@@ -606,8 +606,8 @@ internal constructor(
                 if (response.requestOpcode != expectedOpcode) {
                     throw DfuException.TransferFailed(
                         "Legacy DFU response opcode mismatch: expected " +
-                            "0x${expectedOpcode.toUByte().toString(16).padStart(2, '0')}, " +
-                            "got 0x${response.requestOpcode.toUByte().toString(16).padStart(2, '0')}",
+                            "0x${expectedOpcode.toHexString()}, " +
+                            "got 0x${response.requestOpcode.toHexString()}",
                     )
                 }
 

@@ -21,7 +21,6 @@ import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
-import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
@@ -34,7 +33,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.meshtastic.core.model.DeviceMetrics as DomainDeviceMetrics
 import org.meshtastic.core.model.EnvironmentMetrics as DomainEnvironmentMetrics
 import org.meshtastic.core.model.Position as DomainPosition
 
@@ -219,52 +217,24 @@ class MeshDataMapperTest {
     }
 
     @Test
-    fun position_usesDefaultTimeAndZeroValuesForUnsetProtoFields() {
+    fun position_keepsSeaLevelAltitudeDistinctFromAbsent() {
+        val position = DomainPosition(Position.Builder().also { wb -> wb.altitude = 0 }.build(), defaultTime = 1)
+
+        assertEquals(0, position.altitude)
+    }
+
+    @Test
+    fun position_leavesAltitudeAbsentAndDefaultsOtherUnsetProtoFields() {
         val position = DomainPosition(Position.Builder().build(), defaultTime = 789)
 
         assertEquals(0.0, position.latitude)
         assertEquals(0.0, position.longitude)
-        assertEquals(0, position.altitude)
+        assertNull(position.altitude)
         assertEquals(789, position.time)
         assertEquals(0, position.satellitesInView)
         assertEquals(0, position.groundSpeed)
         assertEquals(0, position.groundTrack)
         assertEquals(0, position.precisionBits)
-    }
-
-    @Test
-    fun deviceMetrics_mapsProtoFields() {
-        val proto =
-            DeviceMetrics.Builder()
-                .also { wb ->
-                    wb.battery_level = 87
-                    wb.voltage = 4.12f
-                    wb.channel_utilization = 32.5f
-                    wb.air_util_tx = 7.75f
-                    wb.uptime_seconds = 3600
-                }
-                .build()
-
-        val metrics = DomainDeviceMetrics(proto, telemetryTime = 123)
-
-        assertEquals(123, metrics.time)
-        assertEquals(87, metrics.batteryLevel)
-        assertEquals(4.12f, metrics.voltage)
-        assertEquals(32.5f, metrics.channelUtilization)
-        assertEquals(7.75f, metrics.airUtilTx)
-        assertEquals(3600, metrics.uptimeSeconds)
-    }
-
-    @Test
-    fun deviceMetrics_defaultsUnsetFieldsToZero() {
-        val metrics = DomainDeviceMetrics(DeviceMetrics.Builder().build(), telemetryTime = 222)
-
-        assertEquals(222, metrics.time)
-        assertEquals(0, metrics.batteryLevel)
-        assertEquals(0f, metrics.voltage)
-        assertEquals(0f, metrics.channelUtilization)
-        assertEquals(0f, metrics.airUtilTx)
-        assertEquals(0, metrics.uptimeSeconds)
     }
 
     @Test

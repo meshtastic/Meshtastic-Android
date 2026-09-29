@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -43,6 +42,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
@@ -361,7 +361,7 @@ class MessageViewModel(
         if (contactKeyForPagedMessages.value != contactKey) {
             contactKeyForPagedMessages.value = contactKey
         }
-        return flow { emitAll(packetRepository.getMessagesFrom(contactKey, limit = limit, getNode = ::getNode)) }
+        return packetRepository.getMessagesFrom(contactKey, limit = limit, getNode = ::getNode)
     }
 
     fun toggleShowQuickChat() {
@@ -406,6 +406,18 @@ class MessageViewModel(
 
     fun deleteMessages(uuidList: List<Long>) =
         safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }
+
+    /**
+     * Replaces message [uuid] with a fresh send of [text]. The original row is deleted only after the new one is
+     * queued, so a refused or failed send leaves it in place rather than losing the message.
+     */
+    fun resendMessage(uuid: Long, text: String, contactKey: String) {
+        // A retired conversation has no channel to send on; refuse here, where the delete would otherwise follow.
+        if (ContactKey(contactKey).isRetired) return
+        safeLaunch(errorEvents = sendErrorEvents, tag = "resendMessage") {
+            packetRepository.replaceMessage(uuid) { sendMessageUseCase.invoke(text, contactKey, null) }
+        }
+    }
 
     // region ── Translation ──
 

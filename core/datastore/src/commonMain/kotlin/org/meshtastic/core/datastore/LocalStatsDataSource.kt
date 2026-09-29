@@ -19,7 +19,6 @@ package org.meshtastic.core.datastore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import okio.IOException
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.di.CoreLocalStatsDataStore
 import org.meshtastic.proto.LocalStats
@@ -38,7 +37,7 @@ interface LocalStatsDataSource {
 open class LocalStatsDataSourceImpl(private val localStatsStore: CoreLocalStatsDataStore) : LocalStatsDataSource {
     override val localStatsFlow: Flow<LocalStats> =
         localStatsStore.data.catch { exception ->
-            if (exception is IOException) {
+            if (exception.isDataStoreReadFailure()) {
                 Logger.e { "Error reading LocalStats: ${exception.message}" }
                 emit(LocalStats.Builder().build())
             } else {

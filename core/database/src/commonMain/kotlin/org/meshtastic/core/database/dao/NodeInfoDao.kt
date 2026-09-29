@@ -236,7 +236,7 @@ interface NodeInfoDao {
 
         val isPlaceholder = incomingNode.user.hw_model == HardwareModel.UNSET
         val hasExistingUser = existingNode.user.hw_model != HardwareModel.UNSET
-        val isDefaultName = incomingNode.user.long_name.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
+        val isDefaultName = incomingNode.user.long_name.matches(DEFAULT_NODE_NAME)
 
         if (hasExistingUser && isPlaceholder && isDefaultName) {
             return incomingNode.copy(
@@ -676,3 +676,6 @@ interface NodeInfoDao {
     @Query("SELECT * FROM nodes")
     suspend fun getAllNodesSnapshot(): List<NodeEntity>
 }
+
+/** The name firmware gives a node that has not set one, compiled once for the upsert path. */
+private val DEFAULT_NODE_NAME = Regex("^Meshtastic [0-9a-fA-F]{4}$")

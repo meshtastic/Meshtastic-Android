@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.MeshBeaconOffer
@@ -58,10 +59,13 @@ class MeshBeaconRepository(private val prefs: MeshBeaconPrefs, scope: CoroutineS
      * rather than on every periodic re-broadcast.
      */
     fun add(offer: MeshBeaconOffer): Boolean {
-        val isNew = _offers.value.none { it.key == offer.key }
-        _offers.update { current -> (listOf(offer) + current.filterNot { it.key == offer.key }).take(MAX_OFFERS) }
+        // Judged against the exact list this update replaced, so two concurrent adds of one key cannot both be new.
+        val previous =
+            _offers.getAndUpdate { current ->
+                (listOf(offer) + current.filterNot { it.key == offer.key }).take(MAX_OFFERS)
+            }
         persist()
-        return isNew
+        return previous.none { it.key == offer.key }
     }
 
     fun dismiss(key: String) {

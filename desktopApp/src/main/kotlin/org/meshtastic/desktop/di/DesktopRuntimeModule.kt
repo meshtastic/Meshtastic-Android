@@ -194,8 +194,9 @@ class DesktopRuntimeModule {
         dispatchers = dispatchers,
     )
 
-    /** Desktop uses the real `ApiService` implementation over the JVM `HttpClient` below — no flavor stub needed. */
-    @Single fun apiService(apiServiceImpl: ApiServiceImpl): ApiService = apiServiceImpl
+    /** The real `ApiService` over its own disk-cached copy of the shared client below; see [withApiCache]. */
+    @Single
+    fun apiService(httpClient: HttpClient): ApiService = ApiServiceImpl(httpClient.withApiCache(preparedHttpCacheDir()))
 
     /** Ktor [HttpClient] for JVM/Desktop — the equivalent of `CoreNetworkAndroidModule`'s OkHttp-backed client. */
     @Single

@@ -19,6 +19,7 @@
 package org.meshtastic.core.takserver
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -43,8 +44,6 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.TAKPacket
 import org.meshtastic.proto.Team
 import kotlin.concurrent.Volatile
-import kotlin.concurrent.atomics.AtomicBoolean
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
@@ -88,7 +87,6 @@ internal sealed interface TakSendOutcome {
  * regardless of the local radio's firmware version, so a v2-capable node can still relay legacy v1 packets received
  * from older nodes in mixed-firmware mesh deployments.
  */
-@OptIn(ExperimentalAtomicApi::class)
 @Suppress("TooManyFunctions")
 class TAKMeshIntegration(
     private val takServerManager: TAKServerManager,
@@ -99,7 +97,7 @@ class TAKMeshIntegration(
     private val meshToCotBroadcaster: MeshToCotBroadcaster,
     private val takPrefs: TakPrefs,
 ) {
-    private val isRunning = AtomicBoolean(false)
+    private val isRunning = atomic(false)
 
     // Immutable list reference replaced atomically in start()/stop(); never mutated in-place.
     // @Volatile only guarantees visibility of the reference itself — any in-place mutation
@@ -116,7 +114,7 @@ class TAKMeshIntegration(
     private val deliveryDedup = CotDeliveryDedup()
 
     fun start(scope: CoroutineScope) {
-        if (!isRunning.compareAndSet(expectedValue = false, newValue = true)) return
+        if (!isRunning.compareAndSet(expect = false, update = true)) return
 
         takServerManager.start(scope)
 
@@ -179,7 +177,7 @@ class TAKMeshIntegration(
     }
 
     fun stop() {
-        if (!isRunning.compareAndSet(expectedValue = true, newValue = false)) return
+        if (!isRunning.compareAndSet(expect = true, update = false)) return
         val toCancel = jobs
         jobs = emptyList()
         toCancel.forEach(Job::cancel)
@@ -491,17 +489,10 @@ class TAKMeshIntegration(
             val staleInTag = STALE_ATTR_RE.find(eventTag) ?: return xml
             val staleStr = staleInTag.groupValues[1]
             val staleInstant =
-                try {
-                    kotlin.time.Instant.parse(staleStr)
-                } catch (_: IllegalArgumentException) {
+                kotlin.time.Instant.parseOrNull(staleStr)
                     // Handle edge-case formats like missing "Z"
-                    try {
-                        val cleaned = staleStr.replace(Regex("""\.\d+"""), "").replace("Z", "+00:00")
-                        kotlin.time.Instant.parse(cleaned)
-                    } catch (_: IllegalArgumentException) {
-                        return xml
-                    }
-                }
+                    ?: kotlin.time.Instant.parseOrNull(staleStr.replace(FRACTIONAL_SECONDS, "").replace("Z", "+00:00"))
+                    ?: return xml
 
             val now = Clock.System.now()
             val remaining = staleInstant - now

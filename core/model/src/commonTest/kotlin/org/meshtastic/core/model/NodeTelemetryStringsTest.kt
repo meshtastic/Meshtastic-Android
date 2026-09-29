@@ -73,6 +73,16 @@ class NodeTelemetryStringsTest {
     }
 
     @Test
+    fun zero_iaq_is_reported() {
+        assertEquals(listOf("IAQ: 0"), telemetry(EnvironmentMetrics.Builder().also { wb -> wb.iaq = 0 }.build()))
+    }
+
+    @Test
+    fun measured_iaq_is_reported() {
+        assertEquals(listOf("IAQ: 57"), telemetry(EnvironmentMetrics.Builder().also { wb -> wb.iaq = 57 }.build()))
+    }
+
+    @Test
     fun soil_moisture_no_longer_requires_a_soil_temperature() {
         assertEquals(
             listOf("42%"),

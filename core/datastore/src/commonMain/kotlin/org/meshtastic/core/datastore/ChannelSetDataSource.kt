@@ -19,7 +19,6 @@ package org.meshtastic.core.datastore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import okio.IOException
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.di.CoreChannelSetDataStore
 import org.meshtastic.proto.Channel
@@ -33,7 +32,7 @@ class ChannelSetDataSource(private val channelSetStore: CoreChannelSetDataStore)
     val channelSetFlow: Flow<ChannelSet> =
         channelSetStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data
-            if (exception is IOException) {
+            if (exception.isDataStoreReadFailure()) {
                 Logger.e { "Error reading DeviceConfig settings: ${exception.message}" }
                 emit(ChannelSet.Builder().build())
             } else {

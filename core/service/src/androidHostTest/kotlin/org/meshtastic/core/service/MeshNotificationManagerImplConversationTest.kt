@@ -149,7 +149,7 @@ class MeshNotificationManagerImplConversationTest {
 
     /** Newest-first message history, mirroring the repository's ordering. */
     private fun mockHistory(vararg messages: Message) {
-        everySuspend { packetRepository.getMessagesFrom(any(), any(), any(), any()) } returns flowOf(messages.toList())
+        every { packetRepository.getMessagesFrom(any(), any(), any(), any()) } returns flowOf(messages.toList())
     }
 
     private fun message(text: String, read: Boolean, receivedTime: Long): Message = Message(

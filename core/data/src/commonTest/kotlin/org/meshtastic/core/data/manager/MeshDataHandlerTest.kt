@@ -220,7 +220,7 @@ class MeshDataHandlerTest {
     }
 
     @Test
-    fun `handleReceivedData does not broadcast for position from local node`() {
+    fun `position from the local node updates our own node`() {
         val myNodeNum = 123
         val position =
             Position.Builder()
@@ -254,30 +254,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, myNodeNum)
 
-        // Position from local node — no further action expected
-    }
-
-    @Test
-    fun `handleReceivedData broadcasts for remote packets`() {
-        val myNodeNum = 123
-        val remoteNum = 456
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = remoteNum
-                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.PRIVATE_APP }.build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = NodeAddress.numToDefaultId(remoteNum),
-                to = NodeAddress.ID_BROADCAST,
-                bytes = null,
-                dataType = PortNum.PRIVATE_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, myNodeNum)
+        verify { nodeManager.handleReceivedPosition(myNodeNum, myNodeNum, position, 1000L, session) }
     }
 
     @Test
@@ -974,36 +951,6 @@ class MeshDataHandlerTest {
         verifySuspend(exactly(0)) { packetRepository.findReactionsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
         verifySuspend(exactly(0)) { packetHandler.completeDispatchedResponse(any(), any()) }
-    }
-
-    @Test
-    fun `routing packet always broadcasts`() {
-        val routing = Routing.Builder().also { wb -> wb.error_reason = Routing.Error.NONE }.build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = 456
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.ROUTING_APP
-                                wb.payload = routing.encode().toByteString()
-                                wb.request_id = 99
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = routing.encode().toByteString(),
-                dataType = PortNum.ROUTING_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-        every { nodeManager.toNodeID(456) } returns "!remote"
-
-        handler.handleReceivedData(packet, 123)
     }
 
     // --- Telemetry handling ---

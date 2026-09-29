@@ -131,7 +131,7 @@ internal object DfuExtendedError {
         WRONG_SIGNATURE_TYPE -> "Wrong signature type"
         VERIFICATION_FAILED -> "Verification failed"
         INSUFFICIENT_SPACE -> "Insufficient space"
-        else -> "Unknown extended error 0x${code.toUByte().toString(16).padStart(2, '0')}"
+        else -> "Unknown extended error 0x${code.toHexString()}"
     }
 }
 
@@ -296,8 +296,8 @@ sealed class DfuException(message: String, cause: Throwable? = null) : Exception
     class ProtocolError(val opcode: Byte, val resultCode: Byte, val extendedError: Byte? = null) :
         DfuException(
             buildString {
-                append("DFU protocol error: opcode=0x${opcode.toUByte().toString(16).padStart(2, '0')} ")
-                append("result=0x${resultCode.toUByte().toString(16).padStart(2, '0')}")
+                append("DFU protocol error: opcode=0x${opcode.toHexString()} ")
+                append("result=0x${resultCode.toHexString()}")
                 if (extendedError != null) {
                     append(" ext=${DfuExtendedError.describe(extendedError)}")
                 }
@@ -306,10 +306,7 @@ sealed class DfuException(message: String, cause: Throwable? = null) : Exception
 
     /** CRC-32 of the transferred data does not match the device's computed checksum. */
     class ChecksumMismatch(expected: Int, actual: Int) :
-        DfuException(
-            "CRC-32 mismatch: expected 0x${expected.toUInt().toString(16).padStart(8, '0')} " +
-                "got 0x${actual.toUInt().toString(16).padStart(8, '0')}",
-        )
+        DfuException("CRC-32 mismatch: expected 0x${expected.toHexString()} got 0x${actual.toHexString()}")
 
     /** A DFU operation did not complete within the expected time window. */
     class Timeout(message: String) : DfuException(message)
