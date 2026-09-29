@@ -206,6 +206,13 @@ interface PacketRepository {
     /** Deletes messages by their database UUIDs. */
     suspend fun deleteMessages(uuidList: List<Long>)
 
+    /**
+     * Runs [send], then deletes message [uuid] from the database that was active when [send] started. Nothing is
+     * deleted if [send] throws or another database has become active meanwhile, since UUIDs are only unique within one
+     * database. Once [send] returns, cancelling the caller no longer stops the delete.
+     */
+    suspend fun replaceMessage(uuid: Long, send: suspend () -> Unit)
+
     /** Deletes all messages and settings for the given contacts. */
     suspend fun deleteContacts(contactList: List<String>)
 

@@ -455,6 +455,14 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         withContext(dispatchers.io) { dbManager.withDb { it.packetDao().deleteMessagesAtomic(uuidList) } }
     }
 
+    override suspend fun replaceMessage(uuid: Long, send: suspend () -> Unit) {
+        val original = dbManager.withReadDb { it }
+        send()
+        withContext(dispatchers.io + NonCancellable) {
+            dbManager.withDb { db -> if (db === original) db.packetDao().deleteMessagesAtomic(listOf(uuid)) }
+        }
+    }
+
     override suspend fun deleteContacts(contactList: List<String>) {
         withContext(dispatchers.io) { dbManager.withDb { it.packetDao().deleteContacts(contactList) } }
     }

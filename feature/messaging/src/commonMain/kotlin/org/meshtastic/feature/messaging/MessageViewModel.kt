@@ -24,7 +24,6 @@ import androidx.paging.cachedIn
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -416,9 +415,7 @@ class MessageViewModel(
         // A retired conversation has no channel to send on; refuse here, where the delete would otherwise follow.
         if (ContactKey(contactKey).isRetired) return
         safeLaunch(errorEvents = sendErrorEvents, tag = "resendMessage") {
-            sendMessageUseCase.invoke(text, contactKey, null)
-            // Once the new message is queued, leaving the screen must not strand the original beside it.
-            withContext(NonCancellable) { packetRepository.deleteMessages(listOf(uuid)) }
+            packetRepository.replaceMessage(uuid) { sendMessageUseCase.invoke(text, contactKey, null) }
         }
     }
 
