@@ -14,19 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.takserver
+package org.meshtastic.feature.map.tiles
 
 /**
- * Saves data package files where the user can import them into ATAK.
- *
- * On Android the package goes to the shared Downloads folder (the app's own external Downloads folder below API 29),
- * without any storage permission. On other platforms this is a no-op.
+ * Whether this platform will open a plain http connection to [host]. A URL validator that accepts http where this is
+ * false saves a tile source or layer that can never load.
  */
-internal expect object AtakFileWriter {
-    /**
-     * Save a data package zip, replacing an earlier one with the same name.
-     *
-     * @return true if the file was written successfully, false otherwise.
-     */
-    fun writeToImportDir(fileName: String, zipBytes: ByteArray): Boolean
-}
+expect fun isCleartextPermitted(host: String): Boolean

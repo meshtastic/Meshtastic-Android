@@ -410,7 +410,7 @@ class TAKMeshIntegration(
             }
             // Logger.d { "RAW CoT IN (mesh): $xml" }
             // Routes: ATAK ignores b-m-r CoT events over TCP streaming.
-            // Convert to a KML data package and write to ATAK's auto-import dir.
+            // Convert to a KML data package and save it to Downloads for import into ATAK.
             if (xml.contains("""type="b-m-r"""")) {
                 try {
                     val pkg = RouteDataPackageGenerator.generateDataPackage(xml)

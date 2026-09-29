@@ -366,6 +366,40 @@ class GoogleCustomTileSelectionTest {
 
         assertNull(resolved.provider)
         assertTrue(resolved.canDiscardMissingSelection)
+        assertFalse(resolved.refusedCleartextSource)
+    }
+
+    @Test
+    fun `a saved http source is dropped and reported only where the platform refuses plain http`() {
+        val http =
+            CustomTileProviderConfig(
+                id = "http",
+                name = "Http",
+                urlTemplate = "http://tiles.example.org/{z}/{x}/{y}.png",
+            )
+
+        val refused =
+            listOf(http)
+                .resolvePersistedCustomTileSelection(
+                    selectedProviderId = http.id,
+                    legacySource = null,
+                    providerLoadSuccessful = true,
+                    cleartextPermitted = { false },
+                )
+        val permitted =
+            listOf(http)
+                .resolvePersistedCustomTileSelection(
+                    selectedProviderId = http.id,
+                    legacySource = null,
+                    providerLoadSuccessful = true,
+                    cleartextPermitted = { true },
+                )
+
+        assertNull(refused.provider)
+        assertTrue(refused.canDiscardMissingSelection)
+        assertTrue(refused.refusedCleartextSource)
+        assertEquals(http, permitted.provider)
+        assertFalse(permitted.refusedCleartextSource)
     }
 
     @Test

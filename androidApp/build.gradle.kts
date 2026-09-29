@@ -198,6 +198,15 @@ secrets {
 // AppSearch without dynamic-schema support indexes only the v1 XML named by the `android.app.appfunctions` property.
 ksp { arg("appfunctions:generateV1Xml", "true") }
 
+// Merging into src/main is what ships the profile in fdroid too.
+baselineProfile { mergeIntoMain = true }
+
+// The producer only has the google flavor, so only googleRelease may depend on it: fdroidRelease would fail to resolve
+// it. The plugin creates this configuration per variant, after this script runs.
+configurations
+    .matching { it.name == "googleReleaseBaselineProfile" }
+    .configureEach { dependencies.add(projects.baselineprofile) }
+
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
         variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
@@ -347,8 +356,4 @@ dependencies {
     testImplementation(libs.androidx.glance.appwidget)
     // JVM variant provides the host-platform native library for BundledSQLiteDriver under Robolectric
     testRuntimeOnly(libs.androidx.sqlite.bundled.jvm)
-
-    // Producer of the baseline profile consumed by the release build. The androidx.baselineprofile
-    // plugin merges the generated rules into src/<variant>/generated/baselineProfiles at build time.
-    baselineProfile(projects.baselineprofile)
 }

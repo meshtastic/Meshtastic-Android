@@ -59,7 +59,9 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
     dependencies {
         "debugImplementation"(libs.library("compose-multiplatform-ui-tooling"))
         "implementation"(libs.library("compose-multiplatform-runtime"))
-        "runtimeOnly"(libs.library("androidx-compose-runtime-tracing"))
+        // Debug only: it registers a startup initializer and an exported receiver, and nothing profiles release builds
+        // with composition tracing.
+        "debugRuntimeOnly"(libs.library("androidx-compose-runtime-tracing"))
 
         "implementation"(libs.library("compose-multiplatform-resources"))
 

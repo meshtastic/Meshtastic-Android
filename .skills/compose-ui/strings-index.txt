@@ -1852,6 +1852,7 @@ uptime
 ### URL ###
 url
 url_cannot_be_empty
+url_http_localhost_only
 url_must_be_http
 url_must_contain_placeholders
 url_template

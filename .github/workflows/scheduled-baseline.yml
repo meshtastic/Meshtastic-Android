@@ -66,23 +66,22 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          # Writes androidApp/src/<variant>/generated/baselineProfiles/ via the androidx.baselineprofile plugin.
-          # The variant is googleRelease (flavor + buildType), NOT the bare `google` flavor dir.
+          # Writes androidApp/src/main/generated/baselineProfiles/ via the androidx.baselineprofile plugin:
+          # :androidApp sets mergeIntoMain, which is what makes the fdroid flavor ship the profile too.
           # --no-configuration-cache: the underlying connectedGoogleNonMinifiedReleaseAndroidTest task is not
           # config-cache serializable (SeparateTestModuleTestData / ResolutionBackedFileCollection), and the
           # project enables org.gradle.configuration-cache by default — same workaround used in reusable-check.yml.
           # -Dorg.gradle.isolated-projects=false must accompany it: Isolated Projects implies the configuration cache, and
           # Gradle 9.7+ hard-errors when the cache is disabled while Isolated Projects is on.
-          script: ./gradlew :androidApp:generateGoogleReleaseBaselineProfile -Pci=true -Dorg.gradle.isolated-projects=false --no-configuration-cache
+          script: ./gradlew :androidApp:generateBaselineProfile -Pci=true -Dorg.gradle.isolated-projects=false --no-configuration-cache
 
       - name: Detect baseline profile changes
         id: baseline
         run: |
           outcome="${{ steps.generate_baseline.outcome }}"
-          # Pin the variant the Gradle task above targets: googleRelease (flavor + buildType), NOT the
-          # bare `google` flavor dir. Searching for any baseline-prof.txt would happily validate another
-          # variant's file — or, once this profile is committed, the stale one already in the checkout.
-          profile_dir="androidApp/src/googleRelease/generated/baselineProfiles"
+          # Pin the directory mergeIntoMain writes. Searching for any baseline-prof.txt would happily
+          # validate a file from some other source set, or the stale one already in the checkout.
+          profile_dir="androidApp/src/main/generated/baselineProfiles"
           profile="$profile_dir/baseline-prof.txt"
           if [ "$outcome" != "success" ]; then
             echo "::error::Baseline profile generation failed (outcome: $outcome)."

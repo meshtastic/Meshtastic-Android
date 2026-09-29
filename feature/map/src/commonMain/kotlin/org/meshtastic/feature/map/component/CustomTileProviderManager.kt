@@ -55,6 +55,7 @@ import org.meshtastic.core.resources.no_custom_tile_sources_found
 import org.meshtastic.core.resources.provider_name_exists
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.url_cannot_be_empty
+import org.meshtastic.core.resources.url_http_localhost_only
 import org.meshtastic.core.resources.url_must_contain_placeholders
 import org.meshtastic.core.resources.url_template
 import org.meshtastic.core.resources.url_template_hint
@@ -63,6 +64,7 @@ import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.Edit
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
+import org.meshtastic.feature.map.tiles.isRefusedCleartextTileUrl
 import org.meshtastic.feature.map.tiles.isValidTileUrlTemplate
 
 @Suppress("LongMethod", "LongParameterList")
@@ -188,10 +190,11 @@ private fun AddEditCustomTileProviderDialog(
     val providerNameExistsError = stringResource(Res.string.provider_name_exists)
     val urlCannotBeEmptyError = stringResource(Res.string.url_cannot_be_empty)
     val urlMustContainPlaceholdersError = stringResource(Res.string.url_must_contain_placeholders)
+    val httpLocalhostOnlyError = stringResource(Res.string.url_http_localhost_only)
 
     fun validateAndSave() {
         nameError = validateName(name, providers, config?.id, emptyNameError, providerNameExistsError)
-        urlError = validateUrl(url, urlCannotBeEmptyError, urlMustContainPlaceholdersError)
+        urlError = validateUrl(url, urlCannotBeEmptyError, urlMustContainPlaceholdersError, httpLocalhostOnlyError)
         if (nameError == null && urlError == null) {
             onSave(
                 (config ?: CustomTileProviderConfig(name = name, urlTemplate = url))
@@ -252,8 +255,14 @@ private fun validateName(
     else -> null
 }
 
-private fun validateUrl(url: String, emptyUrlError: String, missingPlaceholdersError: String): String? = when {
+private fun validateUrl(
+    url: String,
+    emptyUrlError: String,
+    missingPlaceholdersError: String,
+    httpLocalhostOnlyError: String,
+): String? = when {
     url.isBlank() -> emptyUrlError
-    !url.isValidTileUrlTemplate(requireHttps = false) -> missingPlaceholdersError
+    url.isRefusedCleartextTileUrl() -> httpLocalhostOnlyError
+    !url.isValidTileUrlTemplate() -> missingPlaceholdersError
     else -> null
 }

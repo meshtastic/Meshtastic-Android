@@ -159,11 +159,6 @@
           the flagship test device.
         -->
 
-        <uses-library
-            android:name="org.apache.http.legacy"
-            android:required="false" />
-
-
         <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
@@ -384,6 +379,14 @@
         -->
         <activity
             android:name="androidx.glance.appwidget.action.ActionTrampolineActivity"
+            tools:node="remove" />
+
+        <!--
+            The JetBrains ui-tooling facade AAR declares this exported activity but ships no class for it, so any
+            launch crashes the app on instantiation. Android Studio previews use androidx.compose.ui.tooling's own.
+        -->
+        <activity
+            android:name="org.jetbrains.androidx.compose.ui.tooling.PreviewActivity"
             tools:node="remove" />
 
         <!--

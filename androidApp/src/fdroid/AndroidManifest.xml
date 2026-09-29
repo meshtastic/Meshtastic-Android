@@ -19,15 +19,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!--
-      Required for writing TAK route data packages to ATAK's auto-import directory.
-      Only declared for the F-Droid flavor — the Google Play flavor uses scoped
-      storage (SAF / app-scoped cache) so this permission is not needed there
-      and would violate Play policy.
-    -->
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage" />
-
     <application>
         <!--
           Register as an "Open in / Send to Meshtastic" target for GeoJSON/KML map files (e.g. the Meshtastic Site

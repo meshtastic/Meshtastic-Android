@@ -16,7 +16,7 @@ This feature upgrades the Meshtastic Android app's TAK (Team Awareness Kit) inte
 2. **Efficient wire encoding**: Use zstd dictionary compression and CoT detail stripping to fit rich CoT payloads within the LoRa MTU constraint (237 bytes raw, ~225 bytes usable after protobuf framing overhead)
 3. **Backward compatibility**: Auto-detect firmware version and gracefully fall back to legacy TAKPacket (v1) for radios running firmware < 2.8.0
 4. **Reliable TAK server operation**: Maintain a local TLS/mTLS TAK server that ATAK and iTAK clients can connect to, with wake lock protection against Android battery optimization
-5. **Route interoperability**: Bridge ATAK's route CoT limitation by generating KML data packages for auto-import into ATAK's monitored directory
+5. **Route interoperability**: Bridge ATAK's route CoT limitation by generating KML data packages saved to Downloads for the user to import into ATAK
 
 ## Non-Goals
 
@@ -136,7 +136,7 @@ A v2-capable node receives packets from both v1 (port 72) and v2 (port 78) mesh 
 | RouteDataPackageGenerator | `core/takserver/…/RouteDataPackageGenerator.kt` (commonMain) | Converts route CoT to ATAK-importable KML data packages |
 | CoTXmlParser | `core/takserver/…/CoTXmlParser.kt` (commonMain) | Streaming XML parser for inbound CoT from ATAK clients |
 | XmlUtils | `core/takserver/…/XmlUtils.kt` (commonMain) | XML escaping/sanitization utilities (5 special characters) |
-| AtakFileWriter | `core/takserver/…/AtakFileWriter.kt` (expect/actual) | Platform filesystem access: androidMain (SAF/private dirs), jvmMain (desktop filesystem), iosMain (stub) |
+| AtakFileWriter | `core/takserver/…/AtakFileWriter.kt` (expect/actual) | Saves route data packages: androidMain (Downloads via MediaStore from API 29, the app's external Downloads folder below it), jvmMain and iosMain (no-op) |
 | TAKConfigItemList | `feature/settings/…/TAKConfigItemList.kt` (commonMain) | Compose UI for TAK module configuration |
 | TakPermissionUtil | `feature/settings/…/TakPermissionUtil.kt` (expect/actual) | Platform-specific permission handling (Android, iOS, JVM) |
 | MeshService (wake lock) | `core/service/MeshService.kt` (androidMain) | Partial wake lock for reliable TAK server operation |
@@ -168,14 +168,14 @@ A v2-capable node receives packets from both v1 (port 72) and v2 (port 78) mesh 
 - **NFR-001**: Compressed TAKPacketV2 payloads MUST fit within the usable mesh payload (~225 bytes after protobuf framing within the 237-byte raw LoRa MTU) for single-packet transmission
 - **NFR-002**: TAK server connection MUST survive screen-off and Doze mode for at least 30 minutes without disconnection
 - **NFR-003**: CoT message round-trip (ATAK → mesh → remote ATAK) MUST complete within the mesh network's standard transmission latency (no added processing delay > 100ms)
-- **NFR-004**: Route data packages MUST be written to app-private or cache directories (no MANAGE_EXTERNAL_STORAGE required); ATAK integration relies on content sharing or documented import paths
+- **NFR-004**: Route data packages MUST be saved without any storage permission: to Downloads through MediaStore from API 29, and to the app's own external Downloads folder below it. The user imports them into ATAK by hand; the app writes nothing into ATAK's own directories
 
 ## Source-Set Impact
 
 | Source Set | Impact | Justification |
 |-----------|--------|---------------|
 | `commonMain` | All business logic: TAKMeshIntegration, conversions, models, parser, server manager, detail stripper, XML utils, config UI | All business logic and UI per Constitution §I, §III |
-| `androidMain` | MeshService wake lock, AtakFileWriter (Android filesystem/SAF), TakPermissionUtil (runtime permissions) | Platform-specific Android APIs |
+| `androidMain` | MeshService wake lock, AtakFileWriter (MediaStore Downloads), TakPermissionUtil (runtime permissions) | Platform-specific Android APIs |
 | `jvmAndroidMain` | TAKServerJvm TLS implementation, TakV2Compressor (zstd via TAKPacket-SDK), TakCertLoader, TakFixtureLoader | Shared JVM/Android TLS, compression, and I/O |
 | `jvmMain` | AtakFileWriter (desktop filesystem), TakPermissionUtil (no-op) | Desktop platform support for file operations |
 | `iosMain` | TAKServerIos, TakV2Compressor (stub — uncompressed TAK_TRACKER mode only), AtakFileWriter (stub), TakFixtureLoader | Platform stubs pending Swift SDK integration |
@@ -214,7 +214,7 @@ A v2-capable node receives packets from both v1 (port 72) and v2 (port 78) mesh 
 - ATAK clients support standard TAK Server protocol (TLS on port 8089, data package import)
 - Zstd dictionaries are pre-trained and bundled as binary resources (not trained at runtime)
 - The 237-byte raw LoRa MTU is a hard limit imposed by the radio hardware; usable payload is ~225 bytes after protobuf framing
-- Route data packages are written to app-private/cache directories (no broad filesystem permissions required)
+- Route data packages are saved to Downloads for manual import into ATAK (no storage permission required)
 - iOS implementation uses uncompressed TAK_TRACKER mode (flags=0xFF) pending platform-specific zstd library integration via Swift SDK interop
 - Desktop (JVM) has partial TAK support: filesystem operations via `jvmMain` AtakFileWriter, TLS server via `jvmAndroidMain`
 - Android 17+ (API 37) requires ACCESS_LOCAL_NETWORK permission for TAK server localhost binding
