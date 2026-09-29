@@ -83,6 +83,12 @@ abstract class BaseFirmwareFileHandler(private val client: HttpClient, protected
 
     override suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): FirmwareArtifact? =
         withContext(ioDispatcher) {
+            // fileName can come from a remote manifest, so it must name a file directly inside tempDir.
+            val targetFile = File(tempDir, fileName)
+            if (targetFile.canonicalFile.parentFile != tempDir.canonicalFile) {
+                Logger.w { "Refusing a download name outside the temp directory: $fileName" }
+                return@withContext null
+            }
             val response =
                 try {
                     client.get(url)
@@ -99,7 +105,6 @@ abstract class BaseFirmwareFileHandler(private val client: HttpClient, protected
             }
 
             if (!tempDir.exists()) tempDir.mkdirs()
-            val targetFile = File(tempDir, fileName)
             downloadResponseToFile(response, targetFile, onProgress)
             targetFile.toFirmwareArtifact()
         }

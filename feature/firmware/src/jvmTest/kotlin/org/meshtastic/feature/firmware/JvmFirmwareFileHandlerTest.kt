@@ -17,6 +17,8 @@
 package org.meshtastic.feature.firmware
 
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
@@ -26,10 +28,14 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class JvmFirmwareFileHandlerTest {
-    private val client = HttpClient()
+    private val engine = MockEngine { respond(ByteArray(4) { 1 }) }
+    private val client = HttpClient(engine)
     private val handler = JvmFirmwareFileHandler(client)
     private val hardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "heltec-v3")
 
@@ -60,5 +66,20 @@ class JvmFirmwareFileHandlerTest {
         val zip = overLimitZip()
 
         assertNull(handler.extractFirmware(CommonUri.parse(zip.toURI().toString()), hardware, ".bin"))
+    }
+
+    @Test
+    fun `a download name outside the temp directory is refused before any request`() = runTest {
+        assertNull(handler.downloadFile("https://example.invalid/firmware.bin", "../firmware-handler-test.bin") {})
+        assertTrue(engine.requestHistory.isEmpty())
+    }
+
+    @Test
+    fun `a plain download name is fetched into the temp directory`() = runTest {
+        val artifact = handler.downloadFile("https://example.invalid/firmware.bin", "firmware-handler-test.bin") {}
+
+        assertNotNull(artifact)
+        handler.deleteFile(artifact)
+        assertEquals(1, engine.requestHistory.size)
     }
 }
