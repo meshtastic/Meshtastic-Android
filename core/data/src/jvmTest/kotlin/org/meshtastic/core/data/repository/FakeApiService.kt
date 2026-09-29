@@ -43,13 +43,25 @@ internal class FakeApiService(
     var deviceHardwareCalls = 0
         private set
 
+    var deviceLinksCalls = 0
+        private set
+
     var firmwareReleasesCalls = 0
         private set
 
     var firmwareReleaseManifestCalls = 0
         private set
 
+    var nightlyFirmwareCalls = 0
+        private set
+
     var eventFirmwareCalls = 0
+        private set
+
+    var bootloaderOtaQuirksCalls = 0
+        private set
+
+    var maintenanceUf2ManifestCalls = 0
         private set
 
     override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> {
@@ -57,7 +69,10 @@ internal class FakeApiService(
         return deviceHardware()
     }
 
-    override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = deviceLinks()
+    override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse {
+        deviceLinksCalls++
+        return deviceLinks()
+    }
 
     override suspend fun getFirmwareReleases(): NetworkFirmwareReleases {
         firmwareReleasesCalls++
@@ -69,16 +84,25 @@ internal class FakeApiService(
         return firmwareReleaseManifest(manifestUrl)
     }
 
-    override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? = nightlyFirmware()
+    override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? {
+        nightlyFirmwareCalls++
+        return nightlyFirmware()
+    }
 
     override suspend fun getEventFirmware(): EventFirmwareResponse {
         eventFirmwareCalls++
         return eventFirmware()
     }
 
-    override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = bootloaderOtaQuirks()
+    override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse {
+        bootloaderOtaQuirksCalls++
+        return bootloaderOtaQuirks()
+    }
 
-    override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest = maintenanceUf2Manifest()
+    override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest {
+        maintenanceUf2ManifestCalls++
+        return maintenanceUf2Manifest()
+    }
 
     private companion object {
         fun unused(): Nothing = error("endpoint not configured for this test")
