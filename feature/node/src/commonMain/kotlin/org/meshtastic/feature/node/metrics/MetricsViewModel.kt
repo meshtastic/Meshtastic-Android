@@ -401,14 +401,8 @@ open class MetricsViewModel(
             header = "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"\n",
             rows = data,
             epochSeconds = { it.time.toLong() },
-        ) { pos ->
-            val lat = (pos.latitude_i ?: 0) * GeoConstants.DEG_D
-            val lon = (pos.longitude_i ?: 0) * GeoConstants.DEG_D
-            // Invariant: a CSV column is parsed, not read. A comma decimal here would shift every later field.
-            val heading =
-                NumberFormatter.formatInvariant((pos.ground_track ?: 0) * GeoConstants.HEADING_DEG, HEADING_DECIMALS)
-            "\"$lat\",\"$lon\",\"${pos.altitude}\",\"${pos.sats_in_view}\",\"${pos.ground_speed}\",\"$heading\""
-        }
+            rowMapper = ::positionCsvRow,
+        )
     }
 
     fun savePositionGpx(uri: CommonUri, data: List<org.meshtastic.proto.Position>, trackName: String) {
@@ -599,6 +593,20 @@ open class MetricsViewModel(
     }
 
     protected fun decodeBase64(base64: String): ByteArray = base64.decodeBase64()?.toByteArray() ?: ByteArray(0)
+}
+
+/**
+ * One position-log CSV row after the date and time columns. A field the position did not report is an empty cell, not
+ * `null` or 0. A CSV column is parsed, not read, so numbers are formatted invariantly.
+ */
+internal fun positionCsvRow(pos: org.meshtastic.proto.Position): String {
+    val lat = (pos.latitude_i ?: 0) * GeoConstants.DEG_D
+    val lon = (pos.longitude_i ?: 0) * GeoConstants.DEG_D
+    val altitude = pos.altitude?.toString().orEmpty()
+    val speed = pos.ground_speed?.toString().orEmpty()
+    val heading =
+        pos.ground_track?.let { NumberFormatter.formatInvariant(it * GeoConstants.HEADING_DEG, HEADING_DECIMALS) }
+    return "\"$lat\",\"$lon\",\"$altitude\",\"${pos.sats_in_view}\",\"$speed\",\"${heading.orEmpty()}\""
 }
 
 /**
