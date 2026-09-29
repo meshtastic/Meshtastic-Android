@@ -64,8 +64,8 @@ class MeshtasticDatabaseMigrationTest {
     @Test
     fun migrateAll() = runTest {
         helper.createDatabase(EARLIEST_SCHEMA_VERSION).close()
-        // Every bump through 52 is an @AutoMigration; 52→53 is the manual FTS-rebuild migration.
-        helper.runMigrationsAndValidate(latestSchemaVersion(), listOf(MeshtasticDatabase.MIGRATION_52_53)).close()
+        // Every bump is an @AutoMigration except the manual 52→53 (FTS rebuild) and 63→64 (no log table rebuild).
+        helper.runMigrationsAndValidate(latestSchemaVersion(), MANUAL_MIGRATIONS).close()
     }
 
     /**
@@ -593,20 +593,27 @@ class MeshtasticDatabaseMigrationTest {
     }
 
     /**
-     * 63→64 makes `discovered_node.snr` nullable, which Room implements by recreating the table, and indexes
-     * `log.received_date`. Every discovered node survives with its values and its parent link, a stored 0 dB stays 0
-     * because it may be a real reading, and NULL becomes storable for a node no packet reported an snr for. Every log
-     * row survives, and the retention delete by `received_date` is served by the new index instead of a table scan.
+     * [MeshtasticDatabase.MIGRATION_63_64] rebuilds only `discovered_node`, to make `snr` nullable, and adds the
+     * `log.received_date` index in place. Every discovered node survives with its values and its parent link, a stored
+     * 0 dB stays 0 because it may be a real reading, and NULL becomes storable. The `log` table is never copied: its
+     * rowids are unchanged and the `traceroute_node_position` row that cascades from it survives. The batched retention
+     * delete is served by the new index instead of a table scan.
      */
     @Test
-    fun discoveredNodeSnrGoesNullableAndLogGainsDateIndexWithoutLosingRows() = runTest {
+    fun discoveredNodeSnrGoesNullableAndLogGainsDateIndexWithoutRebuildingLog() = runTest {
         helper.createDatabase(SCHEMA_64_FROM_VERSION).use { connection ->
+            // Out-of-order rowids: a copy into a fresh table would renumber them.
             connection.execSQL(
-                "INSERT INTO log (uuid, type, received_date, message, from_num, port_num) " +
-                    "VALUES ('log-a', 'Packet', 1000, 'first', 42, 3)",
+                "INSERT INTO log (rowid, uuid, type, received_date, message, from_num, port_num) " +
+                    "VALUES (40, 'log-a', 'Packet', 1000, 'first', 42, 3)",
             )
             connection.execSQL(
-                "INSERT INTO log (uuid, type, received_date, message) VALUES ('log-b', 'LogRecord', 2000, 'second')",
+                "INSERT INTO log (rowid, uuid, type, received_date, message) " +
+                    "VALUES (7, 'log-b', 'LogRecord', 2000, 'second')",
+            )
+            connection.execSQL(
+                "INSERT INTO traceroute_node_position (log_uuid, request_id, node_num, position) " +
+                    "VALUES ('log-a', 5, 77, x'0801')",
             )
             connection.execSQL(
                 "INSERT INTO discovery_session (id, timestamp, presets_scanned, home_preset) " +
@@ -625,14 +632,21 @@ class MeshtasticDatabaseMigrationTest {
             )
         }
 
-        helper.runMigrationsAndValidate(SCHEMA_64_TO_VERSION, emptyList()).use { connection ->
+        helper.runMigrationsAndValidate(
+            SCHEMA_64_TO_VERSION,
+            listOf(MeshtasticDatabase.MIGRATION_63_64),
+        ).use { connection ->
             val logs = "FROM log ORDER BY received_date"
+            assertEquals(listOf("40", "7"), queryColumn(connection, "SELECT rowid $logs"))
             assertEquals(listOf("log-a", "log-b"), queryColumn(connection, "SELECT uuid $logs"))
             assertEquals(listOf("Packet", "LogRecord"), queryColumn(connection, "SELECT type $logs"))
             assertEquals(listOf("1000", "2000"), queryColumn(connection, "SELECT received_date $logs"))
             assertEquals(listOf("first", "second"), queryColumn(connection, "SELECT message $logs"))
             assertEquals(listOf("42", "0"), queryColumn(connection, "SELECT from_num $logs"))
             assertEquals(listOf("3", "0"), queryColumn(connection, "SELECT port_num $logs"))
+            val positions = "FROM traceroute_node_position WHERE log_uuid = 'log-a'"
+            assertEquals(listOf("77"), queryColumn(connection, "SELECT node_num $positions"))
+            assertEquals(listOf("0801"), queryColumn(connection, "SELECT hex(position) $positions"))
             assertTrue(
                 "index_log_received_date" in queryColumn(connection, "SELECT name FROM pragma_index_list('log')"),
             )
@@ -640,7 +654,11 @@ class MeshtasticDatabaseMigrationTest {
                 listOf("received_date"),
                 queryColumn(connection, "SELECT name FROM pragma_index_info('index_log_received_date')"),
             )
-            val deletePlan = queryPlan(connection, "DELETE FROM log WHERE received_date < 1500")
+            val deletePlan =
+                queryPlan(
+                    connection,
+                    "DELETE FROM log WHERE rowid IN (SELECT rowid FROM log WHERE received_date < 1500 LIMIT 100)",
+                )
             assertTrue(deletePlan.any { "index_log_received_date" in it }, deletePlan.toString())
 
             val byId = "FROM discovered_node ORDER BY id"
@@ -708,6 +726,9 @@ class MeshtasticDatabaseMigrationTest {
         const val SCHEMA_64_FROM_VERSION = 63
         const val SCHEMA_64_TO_VERSION = 64
         const val QUERY_PLAN_DETAIL_COLUMN = 3
+
+        /** Every hand-written migration, which a walk across 52→53 or 63→64 must be given. */
+        val MANUAL_MIGRATIONS = listOf(MeshtasticDatabase.MIGRATION_52_53, MeshtasticDatabase.MIGRATION_63_64)
         const val PUBLIC_KEY_BYTES = 32
         const val STORED_CHANNEL_SET_HEX = "0A0612044D657368"
 
