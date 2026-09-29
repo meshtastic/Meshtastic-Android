@@ -18,6 +18,7 @@ package org.meshtastic.app
 
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -69,6 +70,9 @@ class BubbleActivity : AppCompatActivity() {
         messageViewModel.setContactKey(contactKey)
 
         enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
 
         setContent {
             val theme by model.theme.collectAsStateWithLifecycle()
