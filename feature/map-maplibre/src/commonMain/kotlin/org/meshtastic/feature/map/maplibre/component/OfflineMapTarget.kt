@@ -29,7 +29,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -37,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -91,7 +91,7 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
     // the one every map here uses, so its packs are the ones the user sees on the map.
     val manager = DefaultMapRuntime.instance.offlineManager
     val scope = rememberCoroutineScope()
-    val packs by manager.packs.collectAsState()
+    val packs by manager.packs.collectAsStateWithLifecycle()
     // A pack definition now carries the pixel ratio it was downloaded at, so the tiles match this display.
     val pixelRatio = LocalDensity.current.density
 
@@ -165,7 +165,7 @@ private fun OfflinePackRow(
     onToggle: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val progress = pack.downloadProgress.collectAsState().value
+    val progress = pack.downloadProgress.collectAsStateWithLifecycle().value
     val bounds = (pack.definition as? OfflinePackDefinition.TilePyramid)?.bounds
 
     Row(

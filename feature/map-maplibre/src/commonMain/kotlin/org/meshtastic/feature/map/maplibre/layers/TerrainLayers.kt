@@ -18,11 +18,11 @@ package org.meshtastic.feature.map.maplibre.layers
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import org.maplibre.compose.expressions.dsl.asNumber
@@ -74,9 +74,9 @@ import org.meshtastic.feature.map.terrain.TerrainTileMath
 @Composable
 internal fun TerrainLayers(viewportBounds: BoundingBox?, zoom: Double, displayUnits: MeasurementSystem) {
     val repository = remember { OfflineTerrainRepository.default }
-    val region by repository.region.collectAsState()
+    val region by repository.region.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) { repository.refresh() }
+    LaunchedEffect(repository) { repository.refresh() }
 
     // Two early returns (detekt's ReturnCount limit), kept inline rather than in a helper function: a helper
     // returning a resolved nullable can't hand the compiler back a smart-cast on *this* function's own

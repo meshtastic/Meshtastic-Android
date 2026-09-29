@@ -18,7 +18,6 @@ package org.meshtastic.feature.map.maplibre.geojson
 
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonPrimitive
-import org.maplibre.spatialk.geojson.LineString
 import org.meshtastic.feature.map.terrain.ContourLine
 import org.meshtastic.feature.map.terrain.ContourPoint
 import org.meshtastic.feature.map.terrain.TerrainTileMath
@@ -38,7 +37,7 @@ class ContourFeaturesTest {
         val features = contourLinesToFeatures(tile, listOf(line), zoom = 12, metric = true)
 
         assertEquals(1, features.size)
-        assertEquals(2, (features.single().geometry as LineString).coordinates.size)
+        assertEquals(2, features.single().geometry.coordinates.size)
     }
 
     @Test
@@ -51,7 +50,7 @@ class ContourFeaturesTest {
     fun `tile-local points convert to the same lat lon TerrainTileMath's own inverse would produce`() {
         val line = ContourLine(elevationMeters = 100f, points = listOf(ContourPoint(0f, 0f), ContourPoint(1f, 1f)))
         val feature = contourLinesToFeatures(tile, listOf(line), zoom = 12, metric = true).single()
-        val positions = (feature.geometry as LineString).coordinates
+        val positions = feature.geometry.coordinates
 
         val expectedFirst = TerrainTileMath.lonLatAt(tile, 0f, 0f)
         assertEquals(expectedFirst.longitude, positions.first().longitude)

@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -232,7 +231,7 @@ private fun rememberMapScreenMapState(
         basemap = basemap,
         initialCameraPosition = restored.position ?: CameraPosition(),
         overlays = screen.overlays,
-        layerOpacity = koinInject<LayerOpacityStore>().opacity.collectAsState().value,
+        layerOpacity = koinInject<LayerOpacityStore>().opacity.collectAsStateWithLifecycle().value,
         customLayers = customLayers,
         onClusterMembers = { screen.clusterMembers = it },
         onWaypointClick = { screen.infoWaypointId = it },
