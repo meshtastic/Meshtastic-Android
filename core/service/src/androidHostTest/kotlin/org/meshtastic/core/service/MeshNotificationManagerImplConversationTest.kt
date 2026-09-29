@@ -20,8 +20,10 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.os.Parcelable
 import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
+import androidx.core.os.BundleCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.mokkery.MockMode
@@ -361,8 +363,10 @@ class MeshNotificationManagerImplConversationTest {
         advanceUntilIdle()
 
         val posted = activeByTag("message").single().notification
-        val alerting = posted.extras.getParcelableArray(Notification.EXTRA_MESSAGES)
-        val historic = posted.extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES)
+        val alerting =
+            BundleCompat.getParcelableArray(posted.extras, Notification.EXTRA_MESSAGES, Parcelable::class.java)
+        val historic =
+            BundleCompat.getParcelableArray(posted.extras, Notification.EXTRA_HISTORIC_MESSAGES, Parcelable::class.java)
         assertEquals(1, alerting?.size, "only the unread message should be presented as new content")
         assertEquals(2, historic?.size, "read context should be carried as historic messages")
         assertEquals("new unread", posted.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString())
@@ -429,7 +433,9 @@ class MeshNotificationManagerImplConversationTest {
             val posted = activeByTag("message").single().notification
             // Empty primary channel resolves to its modem-preset display name, matching the in-app conversation list.
             assertEquals("LongFast", posted.extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString())
-            assertNotNull(posted.extras.getParcelableArray(Notification.EXTRA_MESSAGES))
+            assertNotNull(
+                BundleCompat.getParcelableArray(posted.extras, Notification.EXTRA_MESSAGES, Parcelable::class.java),
+            )
         }
 
     @Test

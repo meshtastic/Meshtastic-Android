@@ -38,33 +38,34 @@ import kotlin.test.assertTrue
  */
 abstract class CommonUsbPassWriterTest {
 
+    private val manifestJson = Json { ignoreUnknownKeys = true }
+
     private val manifest =
-        Json { ignoreUnknownKeys = true }
-            .decodeFromString<MaintenanceUf2Manifest>(
-                """
-                {
-                  "manifestVersion": 1,
-                  "otafixReleaseTag": "0.9.2-OTAFIX2.3-BP1.5",
-                  "otafixBase": "https://example.invalid/otafix",
-                  "erase": {
-                    "nrf52": {
-                      "6.1.1": { "fileName": "nrf_erase2.uf2", "sha256": "00", "expectedFirstTargetAddress": 155648 }
-                    },
-                    "nrf52Bootloader": {
-                      "fileName": "meshtastic_factory_erase.uf2",
-                      "sha256": "00",
-                      "expectedFamilyId": 1296388936
-                    },
-                    "rp2040": { "fileName": "pico_erase.uf2", "sha256": "00" }
-                  },
-                  "otafixByBoardId": {
-                    "WisBlock-RAK4631-Board": { "otafixBoardSlug": "wiscore_rak4631_board", "sha256": "00" }
-                  },
-                  "otafixSupportedTargets": ["rak4631"]
-                }
-                """
-                    .trimIndent(),
-            )
+        manifestJson.decodeFromString<MaintenanceUf2Manifest>(
+            """
+            {
+              "manifestVersion": 1,
+              "otafixReleaseTag": "0.9.2-OTAFIX2.3-BP1.5",
+              "otafixBase": "https://example.invalid/otafix",
+              "erase": {
+                "nrf52": {
+                  "6.1.1": { "fileName": "nrf_erase2.uf2", "sha256": "00", "expectedFirstTargetAddress": 155648 }
+                },
+                "nrf52Bootloader": {
+                  "fileName": "meshtastic_factory_erase.uf2",
+                  "sha256": "00",
+                  "expectedFamilyId": 1296388936
+                },
+                "rp2040": { "fileName": "pico_erase.uf2", "sha256": "00" }
+              },
+              "otafixByBoardId": {
+                "WisBlock-RAK4631-Board": { "otafixBoardSlug": "wiscore_rak4631_board", "sha256": "00" }
+              },
+              "otafixSupportedTargets": ["rak4631"]
+            }
+            """
+                .trimIndent(),
+        )
 
     private val treeUri = CommonUri.parse("content://com.android.externalstorage.documents/tree/1234-5678%3A")
 

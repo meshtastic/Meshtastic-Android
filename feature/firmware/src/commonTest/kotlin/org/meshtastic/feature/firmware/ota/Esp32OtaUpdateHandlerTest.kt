@@ -374,7 +374,6 @@ class Esp32OtaUpdateHandlerTest {
             }
             assertTrue(events.none { it.startsWith("start:") || it.startsWith("stream:") })
             assertIs<FirmwareUpdateState.Error>(states.lastOrNull())
-            Unit
         }
     }
 
@@ -408,7 +407,6 @@ class Esp32OtaUpdateHandlerTest {
             }
             assertTrue(events.none { it.startsWith("start:") || it.startsWith("stream:") })
             assertIs<FirmwareUpdateState.Error>(states.lastOrNull())
-            Unit
         }
     }
 

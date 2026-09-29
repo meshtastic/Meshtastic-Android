@@ -607,7 +607,7 @@ internal fun effectiveCredentials(config: ModuleConfig.MQTTConfig?): Pair<String
     if (config?.address.isNullOrEmpty()) {
         DEFAULT_MQTT_USERNAME to DEFAULT_MQTT_PASSWORD
     } else {
-        config?.username to config?.password
+        config.username to config.password
     }
 
 fun effectiveTlsEnabled(address: String, tlsEnabled: Boolean): Boolean =

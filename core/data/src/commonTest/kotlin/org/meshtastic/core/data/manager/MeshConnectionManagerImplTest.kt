@@ -467,7 +467,6 @@ class MeshConnectionManagerImplTest {
                 admissionVersions += call.arg<Long>(1)
                 seedAttempts++
                 if (seedAttempts < 3) throw PacketQueueRejectedException("test passkey seed")
-                Unit
             }
         everySuspend { commandSender.requestTelemetryForConnection(any(), any(), any(), any()) } calls
             { call ->
@@ -476,14 +475,12 @@ class MeshConnectionManagerImplTest {
                 val attempts = telemetryAttempts.getOrElse(type) { 0 } + 1
                 telemetryAttempts[type] = attempts
                 if (attempts == 1) throw PacketQueueRejectedException("test telemetry request")
-                Unit
             }
         everySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any(), any()) } calls
             { call ->
                 admissionVersions += call.arg<Long>(4)
                 historyAttempts++
                 if (historyAttempts == 1) throw PacketQueueRejectedException("test history replay")
-                Unit
             }
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
         every { mqttManager.startProxy(any(), any()) } returns Unit

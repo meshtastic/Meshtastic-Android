@@ -126,6 +126,6 @@ class FakeBleServiceFailureInjectionTest {
 
         assertFalse(subscribed, "onSubscription must not run for never-subscribe characteristic")
         assertNotNull(received, "Notifications must still flow through the bare SharedFlow")
-        assertTrue(received!!.contentEquals(byteArrayOf(1, 2, 3)), "Notification payload must be exposed verbatim")
+        assertTrue(received.contentEquals(byteArrayOf(1, 2, 3)), "Notification payload must be exposed verbatim")
     }
 }

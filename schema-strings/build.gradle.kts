@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.meshtastic.buildlogic.kotlinWarningsAsErrors
 
 // Writes core/resources/.../values/schema_strings.xml: every label and description in the protobufs field-metadata
 // registry, keyed by schema path (`schema_lora_hop_limit`). A settings control that edits a schema field names that
@@ -31,7 +32,10 @@ kotlin {
         languageVersion.set(JavaLanguageVersion.of(25))
         vendor.set(JvmVendorSpec.JETBRAINS)
     }
-    compilerOptions { jvmTarget.set(JvmTarget.JVM_25) }
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_25)
+        allWarningsAsErrors.set(kotlinWarningsAsErrors)
+    }
 }
 
 dependencies {

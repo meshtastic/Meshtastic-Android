@@ -96,7 +96,7 @@ class TranslationCascadeTest {
         assertIs<TranslationResult.Success>(success)
         assertIs<TranslationResult.ModelDownloadRequired>(download)
         assertIs<TranslationResult.Unavailable>(unavailable)
-        assertEquals("es", (download as TranslationResult.ModelDownloadRequired).locale)
+        assertEquals("es", download.locale)
     }
 }
 

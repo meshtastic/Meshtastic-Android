@@ -23,6 +23,7 @@ import com.android.build.api.dsl.TestExtension
 import dev.mokkery.gradle.MokkeryGradleExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
@@ -35,6 +36,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /** Configure base Kotlin with Android options */
@@ -231,6 +233,13 @@ internal fun Project.configureKotlinJvm() {
     configureKotlin<KotlinJvmProjectExtension>()
 }
 
+/**
+ * `-PwarningsAsErrors=true` turns every Kotlin warning into an error. Modules that configure Kotlin outside these
+ * conventions (desktopApp, schema-strings) read it too.
+ */
+val Project.kotlinWarningsAsErrors: Provider<Boolean>
+    get() = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.orElse(false)
+
 /** Compiler args shared across all Kotlin targets (JVM, Android, iOS, etc.). */
 private val SHARED_COMPILER_ARGS =
     listOf(
@@ -264,15 +273,19 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
         }
     }
 
-    val warningsAsErrors = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.getOrElse(false)
+    val warningsAsErrors = kotlinWarningsAsErrors
+
+    // Every compilation, native and metadata included, so a gated build also fails on iosMain-only warnings.
+    tasks.withType<KotlinCompilationTask<*>>().configureEach {
+        compilerOptions.allWarningsAsErrors.set(warningsAsErrors)
+    }
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
-            allWarningsAsErrors.set(warningsAsErrors)
 
             // For non-KMP modules, configure compiler args here since they don't use targets.compilations.
-            // KMP modules already set these via the targets block above — only jvmTarget/warnings needed here.
+            // KMP modules already set these via the targets block above; only jvmTarget is needed here.
             if (T::class != KotlinMultiplatformExtension::class) {
                 optIn.add(SHARED_OPT_IN)
                 freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)

@@ -771,7 +771,7 @@ class DiscoveryScanEngineTest {
 
         val state = engine.scanState.value
         assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
-        assertEquals(DiscoveryScanState.CompletionOutcome.Success, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals(DiscoveryScanState.CompletionOutcome.Success, state.outcome)
         assertEquals(1, radioController.neighborInfoRequests.size)
         assertEquals("complete", discoveryDao.sessions.values.single().completionStatus)
     }
@@ -787,7 +787,7 @@ class DiscoveryScanEngineTest {
 
         val state = engine.scanState.value
         assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
-        assertEquals(DiscoveryScanState.CompletionOutcome.Success, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals(DiscoveryScanState.CompletionOutcome.Success, state.outcome)
         assertEquals(1, radioController.neighborInfoRequests.size)
         assertEquals("complete", discoveryDao.sessions.values.single().completionStatus)
     }
@@ -809,7 +809,7 @@ class DiscoveryScanEngineTest {
         // none of which happened before the fix, because cancelScanInternal() cancelled this coroutine first.
         val state = engine.scanState.value
         assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
-        assertEquals(DiscoveryScanState.CompletionOutcome.Failed, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals(DiscoveryScanState.CompletionOutcome.Failed, state.outcome)
         assertFalse(engine.isActive)
         assertNull(collectorRegistry.collector, "collector should be unregistered")
 
@@ -928,7 +928,7 @@ class DiscoveryScanEngineTest {
 
         val state = engine.scanState.value
         assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
-        assertEquals(DiscoveryScanState.CompletionOutcome.Success, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals(DiscoveryScanState.CompletionOutcome.Success, state.outcome)
         assertEquals(DiscoverySessionStatus.COMPLETE, discoveryDao.sessions.values.first().completionStatus)
     }
 
@@ -1002,7 +1002,7 @@ class DiscoveryScanEngineTest {
 
         val state = engine.scanState.value
         assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
-        assertEquals(DiscoveryScanState.CompletionOutcome.Failed, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals(DiscoveryScanState.CompletionOutcome.Failed, state.outcome)
         assertEquals(DiscoverySessionStatus.FAILED, discoveryDao.sessions.values.first().completionStatus)
         assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
         assertTrue(
@@ -1162,7 +1162,7 @@ class DiscoveryScanEngineTest {
 
         val state = engine.scanState.value
         assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
-        assertEquals(DiscoveryScanState.CompletionOutcome.Success, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals(DiscoveryScanState.CompletionOutcome.Success, state.outcome)
         assertEquals(DiscoverySessionStatus.COMPLETE, discoveryDao.sessions.values.first().completionStatus)
         assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
     }

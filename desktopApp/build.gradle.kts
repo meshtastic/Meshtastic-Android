@@ -23,6 +23,7 @@ import org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask
 import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.meshtastic.buildlogic.configureGraphTasks
+import org.meshtastic.buildlogic.kotlinWarningsAsErrors
 import org.meshtastic.buildlogic.maplibreDesktopRuntime
 import org.meshtastic.buildlogic.resolveVersionInfo
 import java.io.File
@@ -115,6 +116,7 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_25)
         jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
+        allWarningsAsErrors.set(kotlinWarningsAsErrors)
     }
 }
 

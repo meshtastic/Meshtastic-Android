@@ -65,7 +65,7 @@ class KmlGroundOverlayTest {
     }
 
     @Test
-    fun `an overlay-only document is not "nothing mappable"`() {
+    fun `an overlay-only document still counts as mappable`() {
         val result =
             KmlToGeoJson.convertDocument(
                 """
