@@ -16,6 +16,7 @@
  */
 package org.meshtastic.app.analytics
 
+import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.os.Build
@@ -198,6 +199,14 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
                 .setSessionSampleRate(sampleRate)
                 .build()
         Rum.enable(rumConfiguration)
+
+        val activityManager = application.getSystemService(ActivityManager::class.java)
+        heapLimitAttributes(
+            memoryClassMb = activityManager?.memoryClass,
+            largeMemoryClassMb = activityManager?.largeMemoryClass,
+            maxMemoryBytes = Runtime.getRuntime().maxMemory(),
+        )
+            .forEach { (key, value) -> GlobalRumMonitor.get().addAttribute(key, value) }
 
         val logsConfig = LogsConfiguration.Builder().build()
         Logs.enable(logsConfig)
