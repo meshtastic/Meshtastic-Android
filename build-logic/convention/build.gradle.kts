@@ -99,7 +99,6 @@ detekt {
     config.setFrom(repoConfigDir.file("detekt/detekt.yml").asFile)
     buildUponDefaultConfig = true
     allRules = false
-    baseline = file("detekt-baseline.xml")
     source.setFrom(files("src/main/java", "src/main/kotlin"))
 }
 
