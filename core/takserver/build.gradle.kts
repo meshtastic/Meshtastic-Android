@@ -26,6 +26,8 @@ kotlin {
     @Suppress("UnstableApiUsage")
     android { withHostTest { isIncludeAndroidResources = true } }
 
+    compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
+
     sourceSets {
         commonMain.dependencies {
             api(projects.core.repository)

@@ -23,9 +23,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Expect classes, objects and interfaces are Beta and need `-Xexpect-actual-classes`; a platform seam is otherwise an
- * interface bound through Koin or a CompositionLocal, or an `expect fun`. The allowlist is the current set, pinned
- * exactly: a new entry needs a reason neither of those serves, and a removed one comes off the list.
+ * Expect classes, objects and interfaces are Beta and need `-Xexpect-actual-classes`, which only the declaring modules'
+ * build files pass; a platform seam is otherwise an interface bound through Koin or a CompositionLocal, or an `expect
+ * fun`. The allowlist is the current set, pinned exactly: a new entry needs a reason neither of those serves, and a
+ * removed one comes off the list.
  */
 class ExpectDeclarationTest {
 
