@@ -96,6 +96,26 @@ class NodeManagerImpl(
     private fun persistenceLane(nodeNum: Int): Mutex =
         nodePersistenceLanes[(nodeNum.toLong() and Int.MAX_VALUE.toLong()).toInt() % nodePersistenceLanes.size]
 
+    // A persist not yet in its lane writes the latest node once it gets there, so one per node is enough. Each holds a
+    // session lease that teardown drains, so a slow database must not collect one per packet.
+    private val pendingPersists = atomic(emptyMap<Int, Any>())
+
+    private fun schedulePersistence(nodeNum: Int, session: RadioSessionContext?) {
+        val token = Any()
+        var claimed = false
+        pendingPersists.update { pending ->
+            claimed = nodeNum !in pending
+            if (claimed) pending + (nodeNum to token) else pending
+        }
+        if (!claimed) return
+        val release = {
+            pendingPersists.update { pending -> if (pending[nodeNum] === token) pending - nodeNum else pending }
+        }
+        radioInterfaceService
+            .launchSessionWork(scope, session) { persistLatestNode(nodeNum, onLaneEntered = release) }
+            .invokeOnCompletion { release() }
+    }
+
     /**
      * Resolves a validated public-key correlation hint from a stored [Node], preferring [Node.publicKey] and falling
      * back to [User.public_key] only when the primary field is not itself a valid hint.
@@ -543,10 +563,9 @@ class NodeManagerImpl(
             // a key from — its previously captured hint MUST be preserved so same-key replay stays suppressed and a
             // later genuinely different-keyed device can still claim the slot under the intended contract.
             committedPresentNums = removedNums.filterTo(mutableSetOf()) { it in state.index.byNum }
-            committedHints =
-                removedNums.associateWith { num ->
-                    state.index.byNum[num]?.let(::resolveNodePublicKeyHint) ?: state.retiredKeyHints[num]
-                }
+            committedHints = removedNums.associateWith { num ->
+                state.index.byNum[num]?.let(::resolveNodePublicKeyHint) ?: state.retiredKeyHints[num]
+            }
             state.copy(
                 index = removedNums.fold(state.index) { index, nodeNum -> index.remove(nodeNum) },
                 retiredNodeNums = state.retiredNodeNums.addingAll(removedNums),
@@ -616,9 +635,7 @@ class NodeManagerImpl(
         session: RadioSessionContext? = null,
         transform: (Node) -> Node,
     ): NodeStateChange? = updateNodeState(nodeNum, channel, transform).also { change ->
-        if (change != null && shouldPersist(change.next)) {
-            radioInterfaceService.launchSessionWork(scope, session) { persistLatestNode(nodeNum) }
-        }
+        if (change != null && shouldPersist(change.next)) schedulePersistence(nodeNum, session)
     }
 
     override fun updateNode(nodeNum: Int, channel: Int, transform: (Node) -> Node) {
@@ -640,10 +657,12 @@ class NodeManagerImpl(
     }
 
     /** Serializes persistence per node and reads the latest in-memory value inside that lane. */
-    private suspend fun persistLatestNode(nodeNum: Int) = persistenceLane(nodeNum).withLock {
-        val latest = nodeState.value.index.byNum[nodeNum] ?: return@withLock
-        if (shouldPersist(latest)) nodeRepository.upsert(latest)
-    }
+    private suspend fun persistLatestNode(nodeNum: Int, onLaneEntered: () -> Unit = {}) =
+        persistenceLane(nodeNum).withLock {
+            onLaneEntered()
+            val latest = nodeState.value.index.byNum[nodeNum] ?: return@withLock
+            if (shouldPersist(latest)) nodeRepository.upsert(latest)
+        }
 
     override fun handleReceivedUser(
         fromNum: Int,
@@ -791,14 +810,13 @@ class NodeManagerImpl(
         var next = node
         val user = info.user
         if (user != null && !shouldPreserveExistingUser(node.user, user)) {
-            var newUser =
-                user.let {
-                    if (it.is_licensed == true) {
-                        it.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build()
-                    } else {
-                        it
-                    }
+            var newUser = user.let {
+                if (it.is_licensed == true) {
+                    it.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build()
+                } else {
+                    it
                 }
+            }
             if (info.via_mqtt && !newUser.long_name.endsWith(" (MQTT)")) {
                 newUser = newUser.newBuilder().also { wb -> wb.long_name = "${newUser.long_name} (MQTT)" }.build()
             }
@@ -936,8 +954,9 @@ class NodeManagerImpl(
                 )
             }
             // Key is already represented elsewhere — stale replay, suppress.
-            val keyAlreadyRepresented =
-                resolvedKey.let { key -> before.candidateNumsByPublicKey[key].orEmpty().isNotEmpty() }
+            val keyAlreadyRepresented = resolvedKey.let { key ->
+                before.candidateNumsByPublicKey[key].orEmpty().isNotEmpty()
+            }
             if (keyAlreadyRepresented) {
                 return ReceivedUserTransition(
                     after = before,
@@ -1165,11 +1184,7 @@ class NodeManagerImpl(
 
     /** Applies ordinary same-number persistence and notification side effects once after the reducer CAS commits. */
     private fun applyReceivedUserEffects(transition: ReceivedUserTransition, session: RadioSessionContext?) {
-        transition.upsertNode?.let { node ->
-            if (shouldPersist(node)) {
-                radioInterfaceService.launchSessionWork(scope, session) { persistLatestNode(node.num) }
-            }
-        }
+        transition.upsertNode?.let { node -> if (shouldPersist(node)) schedulePersistence(node.num, session) }
         transition.notifyNode?.let { node ->
             radioInterfaceService.launchSessionWork(scope, session) {
                 // Resolve the display title before validation so the suspending compose-resources call does

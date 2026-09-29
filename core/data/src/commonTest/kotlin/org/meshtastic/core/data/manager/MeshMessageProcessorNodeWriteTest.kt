@@ -72,9 +72,12 @@ class MeshMessageProcessorNodeWriteTest {
         val writeStarted = CompletableDeferred<Unit>()
         val releaseWrites = CompletableDeferred<Unit>()
 
+        val upserts = mutableMapOf<Int, Int>()
+
         fun persisted(num: Int): Node? = delegate.nodeDBbyNum.value[num]
 
         override suspend fun upsert(node: Node) {
+            upserts[node.num] = (upserts[node.num] ?: 0) + 1
             writeStarted.complete(Unit)
             releaseWrites.await()
             delegate.upsert(node)
@@ -158,6 +161,20 @@ class MeshMessageProcessorNodeWriteTest {
         assertEquals(fixture.nodeManager.nodeDBbyNodeNum[SENDER], nodeRepository.persisted(SENDER))
         assertEquals(2, nodeRepository.persisted(SENDER)?.hopsAway)
         assertNotNull(nodeRepository.persisted(OTHER_SENDER))
+    }
+
+    @Test
+    fun `packets that arrive while the database is held queue at most two writes per node`() = testScope.runTest {
+        val fixture = Fixture(backgroundScope, nodeRepository, dataHandler)
+
+        repeat(5) { i -> launch { fixture.receive(packetFrom(SENDER, id = i + 1)) } }
+        runCurrent()
+        nodeRepository.releaseWrites.complete(Unit)
+        runCurrent()
+
+        assertTrue((nodeRepository.upserts[SENDER] ?: 0) <= 2, "sender writes: ${nodeRepository.upserts}")
+        assertTrue((nodeRepository.upserts[MY_NODE] ?: 0) <= 2, "local node writes: ${nodeRepository.upserts}")
+        assertEquals(fixture.nodeManager.nodeDBbyNodeNum[SENDER], nodeRepository.persisted(SENDER))
     }
 
     @Test

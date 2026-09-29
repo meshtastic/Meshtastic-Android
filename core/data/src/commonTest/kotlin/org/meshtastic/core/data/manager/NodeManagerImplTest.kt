@@ -274,12 +274,7 @@ class NodeManagerImplTest {
         assertEquals(2, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
     }
 
-    @Test
-    fun `session-bound persistence lands the newest state when an earlier write finishes late`() = testScope.runTest {
-        val nodeNum = 1234
-        val session = RadioSessionContext(generation = 7L, address = "ble:same")
-        nodeManager.setNodeDbReady(true)
-        nodeManager.setAllowNodeDbWrites(true)
+    private fun admitLeases(session: RadioSessionContext) {
         everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } calls
             {
                 @Suppress("UNCHECKED_CAST")
@@ -293,6 +288,15 @@ class NodeManagerImplTest {
                 )
                 true
             }
+    }
+
+    @Test
+    fun `session-bound persistence writes the newest state and coalesces queued updates`() = testScope.runTest {
+        val nodeNum = 1234
+        val session = RadioSessionContext(generation = 7L, address = "ble:same")
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        admitLeases(session)
         val firstWriteStarted = CompletableDeferred<Unit>()
         val releaseFirstWrite = CompletableDeferred<Unit>()
         val persisted = mutableListOf<Node>()
@@ -308,14 +312,35 @@ class NodeManagerImplTest {
         nodeManager.updateNodeForSession(nodeNum, session) { node -> node.copy(lastHeard = 1) }
         assertTrue(firstWriteStarted.isCompleted, "the first write is in flight")
         nodeManager.updateNodeForSession(nodeNum, session) { node -> node.copy(lastHeard = 2) }
+        nodeManager.updateNodeForSession(nodeNum, session) { node -> node.copy(lastHeard = 3) }
         runCurrent()
-        assertTrue(persisted.isEmpty(), "the second write must queue behind the first on the node's lane")
+        assertTrue(persisted.isEmpty(), "later writes must queue behind the first on the node's lane")
 
         releaseFirstWrite.complete(Unit)
         advanceUntilIdle()
 
-        assertEquals(listOf(1, 2), persisted.map(Node::lastHeard))
-        assertEquals(2, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+        assertEquals(listOf(1, 3), persisted.map(Node::lastHeard))
+        assertEquals(3, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+    }
+
+    @Test
+    fun `a persist rejected by a retired session does not block a later write`() = testScope.runTest {
+        val nodeNum = 1234
+        val oldSession = RadioSessionContext(generation = 7L, address = "ble:same")
+        val newSession = RadioSessionContext(generation = 8L, address = "ble:same")
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        everySuspend { radioInterfaceService.runWithSessionLease(oldSession, any()) } returns false
+        admitLeases(newSession)
+        val persisted = mutableListOf<Node>()
+        everySuspend { nodeRepository.upsert(any()) } calls { persisted += it.arg<Node>(0) }
+
+        nodeManager.updateNodeForSession(nodeNum, oldSession) { node -> node.copy(lastHeard = 1) }
+        runCurrent()
+        nodeManager.updateNodeForSession(nodeNum, newSession) { node -> node.copy(lastHeard = 2) }
+        runCurrent()
+
+        assertEquals(listOf(2), persisted.map(Node::lastHeard))
     }
 
     @Test
