@@ -730,6 +730,7 @@
     <string name="none_quality">Жоден</string>
     <string name="not_connected">Не підключено</string>
     <string name="notes">Нотатки</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Сповіщення для каналу та особистих повідомлень.</string>
     <string name="notifications_for_low_battery_alerts">Сповіщення про низький заряд акумулятора підключеного пристрою.</string>

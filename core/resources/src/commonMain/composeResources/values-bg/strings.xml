@@ -347,6 +347,7 @@
     <string name="doc_title_messages">Съобщения &amp; Канали</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Възли</string>
+    <string name="doc_title_notifications">Известия</string>
     <string name="doc_title_onboarding">Първи стъпки</string>
     <string name="doc_title_settings_module">Настройки — Модули &amp; Админ</string>
     <string name="doc_title_settings_radio">Настройки — Радио &amp; Потребител</string>
@@ -823,6 +824,8 @@
     <string name="not_connected">Няма връзка</string>
     <string name="note">Забележка</string>
     <string name="notes">Бележки</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Mesh</string>
     <string name="notification_permissions_description">Meshtastic използва известия, за да ви държи в течение за нови съобщения и други важни събития. Можете да актуализирате разрешенията си за известия по всяко време от настройките.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Известия за канал и директни съобщения.</string>

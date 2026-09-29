@@ -536,6 +536,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_node_metrics">Метрики ноды</string>
     <string name="doc_title_nodes">Ноды</string>
+    <string name="doc_title_notifications">Уведомления</string>
     <string name="doc_title_onboarding">Начало работы</string>
     <string name="doc_title_settings_module">Настройки - Модули и администрирование</string>
     <string name="doc_title_settings_radio">Настройки - Радио и пользователь</string>
@@ -1296,6 +1297,8 @@
     <string name="not_now">Не сейчас</string>
     <string name="note">Примечание</string>
     <string name="notes">Заметки</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Меш</string>
     <string name="notification_permission_blocked_notice">Уведомления отключены, и Android больше не будет спрашивать. Включи их в настройках приложения, чтобы получать оповещения о новых сообщениях и тревогах.</string>
     <string name="notification_permission_denied_notice">Без уведомлений Meshtastic не сможет оповещать тебя о новых сообщениях, новых нодах или низком заряде батареи, когда приложение работает в фоновом режиме.</string>
     <string name="notification_permission_rationale">Уведомления — это способ, которым Meshtastic связывается с тобой, когда приложение закрыто(в фоне): новые сообщения, обнаруженные ноды и низкий заряд батареи радио. Если ты откажешься, больше ничего не изменится.</string>

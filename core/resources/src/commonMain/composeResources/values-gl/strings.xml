@@ -160,6 +160,7 @@
     <string name="nodes_unheard_remove">Eliminar</string>
     <string name="none">Ningún (desactivado)</string>
     <string name="not_connected">Non conectado</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">OK</string>

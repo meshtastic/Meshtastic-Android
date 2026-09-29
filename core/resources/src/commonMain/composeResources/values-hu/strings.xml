@@ -469,6 +469,7 @@
     <string name="none_quality">Semmi</string>
     <string name="not_connected">Nincs kapcsolat</string>
     <string name="notes">Jegyzetek</string>
+    <!-- NOTIFICATION -->
     <string name="notification_permissions_description">A Meshtastic értesítésekkel tájékoztat az új üzenetekről és más fontos eseményekről. Az értesítési engedélyeket bármikor módosíthatod a beállításokban.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Értesítések a csatorna- és közvetlen üzenetekről.</string>

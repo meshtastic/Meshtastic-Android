@@ -1142,6 +1142,8 @@
     <string name="not_now">Teď ne</string>
     <string name="note">Poznámka</string>
     <string name="notes">Poznámka</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Mesh</string>
     <string name="notification_permission_blocked_notice">Oznámení jsou vypnutá a Android se už nezeptá. Zapněte je v nastavení aplikace, abyste dostávali upozornění na nové zprávy a další události.</string>
     <string name="notification_permission_denied_notice">Bez oznámení vás Meshtastic nemůže upozornit na nové zprávy, nové uzly ani nízký stav baterie, když aplikace běží na pozadí.</string>
     <string name="notification_permission_rationale">Oznámení vás upozorní, když aplikace Meshtastic není otevřená: na nové zprávy, nově nalezené uzly a nízký stav baterie rádia. Pokud je zamítnete, nic dalšího se nezmění.</string>

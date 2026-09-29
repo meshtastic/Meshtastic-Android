@@ -1078,6 +1078,8 @@
     <string name="not_connected">尚未联机</string>
     <string name="note">备注</string>
     <string name="notes">注</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">网状网络</string>
     <string name="notification_permissions_description">Meshtastic 使用通知来随时更新新消息和其他重要事件。您可以随时从设置中更新您的通知权限。</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">频道和直接消息通知。</string>

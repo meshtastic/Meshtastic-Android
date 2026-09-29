@@ -179,6 +179,7 @@
     <string name="nodes_unheard_remove">Διαγραφή</string>
     <string name="none">Κανένα (απενεργοποιημένο)</string>
     <string name="not_connected">Αποσυνδεδεμένο</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Εντάξει</string>

@@ -181,6 +181,7 @@
     <string name="none">Ní aon (diúscairt)</string>
     <string name="none_quality">Ní dhéanfaidh sé</string>
     <string name="not_connected">Ní ceangailte</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Ceadaigh</string>

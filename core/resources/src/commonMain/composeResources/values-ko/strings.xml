@@ -318,6 +318,7 @@
     <string name="none">없음 (연결해제)</string>
     <string name="none_quality">없음</string>
     <string name="not_connected">연결되지 않음</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <string name="notifications_on_alert_bell_receipt">경고/벨 수신 알림</string>
     <string name="notifications_on_message_receipt">메시지 수신 알림</string>

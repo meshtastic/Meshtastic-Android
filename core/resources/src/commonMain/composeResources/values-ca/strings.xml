@@ -166,6 +166,7 @@
     <string name="nodes_unheard_remove">Eliminar</string>
     <string name="none">Cap (desactivat)</string>
     <string name="not_connected">No connectat</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Acceptar</string>
