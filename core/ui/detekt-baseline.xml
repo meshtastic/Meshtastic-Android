@@ -33,9 +33,6 @@
     <ID>MagicNumber:EditIPv4Preference.kt:16</ID>
     <ID>MagicNumber:EditIPv4Preference.kt:24</ID>
     <ID>MagicNumber:EditIPv4Preference.kt:8</ID>
-    <ID>MagicNumber:EditListPreference.kt:12345</ID>
-    <ID>MagicNumber:EditListPreference.kt:67890</ID>
-    <ID>MagicNumber:LazyColumnDragAndDropDemo.kt:50</ID>
     <ID>MatchingDeclarationName:LocalTracerouteMapOverlayInsetsProvider.kt:TracerouteMapOverlayInsets</ID>
     <ID>MissingNonRestartableComposable:AlertDialogs.kt:@Composable fun MeshtasticResourceDialog</ID>
     <ID>MissingNonRestartableComposable:AlertDialogs.kt:@Composable fun MeshtasticTextDialog</ID>
