@@ -18,6 +18,7 @@ package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
+import org.meshtastic.core.database.DatabaseConstants.SQLITE_MAX_BIND_PARAMETERS
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
@@ -42,8 +43,14 @@ class DiscoveryRepositoryImpl(private val discoveryDao: DiscoveryDao) : Discover
     override suspend fun getPresetResults(sessionId: Long): List<DiscoveryPresetResultEntity> =
         discoveryDao.getPresetResults(sessionId)
 
-    override suspend fun getNodesByPresetResult(presetResultIds: List<Long>): Map<Long, List<DiscoveredNodeEntity>> =
-        presetResultIds.associateWith { discoveryDao.getDiscoveredNodes(it) }
+    override suspend fun getNodesByPresetResult(presetResultIds: List<Long>): Map<Long, List<DiscoveredNodeEntity>> {
+        val nodesByPresetResult =
+            presetResultIds
+                .chunked(SQLITE_MAX_BIND_PARAMETERS)
+                .flatMap { discoveryDao.getDiscoveredNodesForPresetResults(it) }
+                .groupBy { it.presetResultId }
+        return presetResultIds.associateWith { nodesByPresetResult[it].orEmpty() }
+    }
 
     override suspend fun updateSession(session: DiscoverySessionEntity) {
         discoveryDao.updateSession(session)

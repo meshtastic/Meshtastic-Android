@@ -422,6 +422,23 @@ abstract class CommonDiscoveryDaoTest {
     }
 
     @Test
+    fun getDiscoveredNodesForPresetResults_returnsOnlyTheListedPresetsInInsertOrder() = runTest {
+        createDb()
+        val sessionId = dao.insertSession(testSession())
+        val presetA = dao.insertPresetResult(testPresetResult(sessionId, presetName = "A"))
+        val presetB = dao.insertPresetResult(testPresetResult(sessionId, presetName = "B"))
+        val presetC = dao.insertPresetResult(testPresetResult(sessionId, presetName = "C"))
+        dao.insertDiscoveredNode(testNode(presetC, nodeNum = 30))
+        dao.insertDiscoveredNode(testNode(presetA, nodeNum = 10))
+        dao.insertDiscoveredNode(testNode(presetB, nodeNum = 20))
+        dao.insertDiscoveredNode(testNode(presetA, nodeNum = 11))
+
+        val nodes = dao.getDiscoveredNodesForPresetResults(listOf(presetA, presetC))
+
+        assertEquals(listOf(30L, 10L, 11L), nodes.map { it.nodeNum })
+    }
+
+    @Test
     fun getMaxDistance_returnsLargestDistance() = runTest {
         createDb()
         val sessionId = dao.insertSession(testSession())

@@ -150,6 +150,9 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
     override fun getDiscoveredNodesFlow(presetResultId: Long): Flow<List<DiscoveredNodeEntity>> =
         dbManager.observeCurrentDb { it.discoveryDao().getDiscoveredNodesFlow(presetResultId) }
 
+    override suspend fun getDiscoveredNodesForPresetResults(presetResultIds: List<Long>): List<DiscoveredNodeEntity> =
+        dbManager.withDb { it.discoveryDao().getDiscoveredNodesForPresetResults(presetResultIds) }.orEmpty()
+
     override suspend fun getUniqueNodeNums(sessionId: Long): List<Long> =
         dbManager.withDb { it.discoveryDao().getUniqueNodeNums(sessionId) }.orEmpty()
 

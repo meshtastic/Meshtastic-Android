@@ -221,6 +221,11 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
     override fun getDiscoveredNodesFlow(presetResultId: Long): Flow<List<DiscoveredNodeEntity>> =
         discoveredNodesFlow.map { nodes -> nodes.filter { it.presetResultId == presetResultId } }
 
+    override suspend fun getDiscoveredNodesForPresetResults(presetResultIds: List<Long>): List<DiscoveredNodeEntity> =
+        stateLock.withLock {
+            mutableDiscoveredNodes.values.filter { it.presetResultId in presetResultIds }.sortedBy { it.id }
+        }
+
     override suspend fun getUniqueNodeNums(sessionId: Long): List<Long> = stateLock.withLock {
         mutablePresetResults.values
             .filter { it.sessionId == sessionId }
