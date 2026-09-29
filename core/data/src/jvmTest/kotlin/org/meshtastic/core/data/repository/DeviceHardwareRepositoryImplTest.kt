@@ -19,11 +19,11 @@ package org.meshtastic.core.data.repository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.BundledAssetReader
@@ -46,6 +46,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 class DeviceHardwareRepositoryImplTest {
     private class FakeDeviceLinkRepository : DeviceLinkRepository {
@@ -146,18 +147,21 @@ class DeviceHardwareRepositoryImplTest {
 
     @Test
     fun repeatedMissingModelUsesOneSuccessfulCatalogRefresh() = runBlocking {
-        // Sequential lookups can hit cache after the first fetch and never share a flight; prove single-flight
-        // sharing by suspending the fake API response and overlapping the two lookups.
+        // The second lookup runs to completion while the first fetch is held open, so the success TTL cannot be
+        // what stops it from fetching again.
+        val fetchStarted = CompletableDeferred<Unit>()
         val gate = CompletableDeferred<Unit>()
         api.deviceHardware = {
+            fetchStarted.complete(Unit)
             gate.await()
             listOf(knownHardware)
         }
         coroutineScope {
             val first = async { repository.getDeviceHardwareByModel(hwModel = 37) }
-            val second = async { repository.getDeviceHardwareByModel(hwModel = 37) }
+            withTimeout(5.seconds) { fetchStarted.await() }
+            repository.getDeviceHardwareByModel(hwModel = 37)
             gate.complete(Unit)
-            awaitAll(first, second)
+            first.await()
         }
 
         assertEquals(1, api.deviceHardwareCalls, "concurrent callers must share one fetch")
