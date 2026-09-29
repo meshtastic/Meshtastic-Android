@@ -17,7 +17,6 @@
 package org.meshtastic.feature.map.maplibre.layers
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.produceState
@@ -27,6 +26,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
@@ -185,7 +185,7 @@ private fun rememberLayerIcons(urls: Set<String>): Map<String, Painter> {
         key(url) {
             val painter =
                 rememberAsyncImagePainter(ImageRequest.Builder(LocalPlatformContext.current).data(url).build())
-            val state by painter.state.collectAsState()
+            val state by painter.state.collectAsStateWithLifecycle()
             // The loaded painter, not the async wrapper around it: MapLibre rasterizes a painter outside the
             // composition driving it, where an AsyncImagePainter draws nothing.
             (state as? AsyncImagePainter.State.Success)?.let { loaded[url] = it.painter }

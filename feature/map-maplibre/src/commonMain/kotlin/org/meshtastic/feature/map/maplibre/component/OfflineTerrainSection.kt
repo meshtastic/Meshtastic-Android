@@ -30,13 +30,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.maplibre.spatialk.geojson.BoundingBox
@@ -59,13 +59,13 @@ import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.map.maplibre.terrain.OfflineTerrainRegion
 import org.meshtastic.feature.map.maplibre.terrain.OfflineTerrainRepository
-import org.meshtastic.feature.map.maplibre.terrain.estimateTerrainTiles
 import org.meshtastic.feature.map.maplibre.terrain.toBoundingBox
 import org.meshtastic.feature.map.maplibre.terrain.toGeoBounds
 import org.meshtastic.feature.map.terrain.GeoBounds
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.terrain.TerrainDownloadState
 import org.meshtastic.feature.map.terrain.TerrainRegionExtractor
+import org.meshtastic.feature.map.terrain.terrainTileCount
 
 /**
  * Offline terrain — hillshade and elevation contours for the viewport, downloaded as its own section of the layers
@@ -80,17 +80,17 @@ import org.meshtastic.feature.map.terrain.TerrainRegionExtractor
 internal fun OfflineTerrainSection(target: OfflineMapTarget, onShowRegion: (BoundingBox) -> Unit) {
     val repository = remember { OfflineTerrainRepository.default }
     val scope = rememberCoroutineScope()
-    val region by repository.region.collectAsState()
+    val region by repository.region.collectAsStateWithLifecycle()
     // Not a local composable state: startDownload runs on the repository's own scope (see its doc comment for
     // why), so the state it reports has to be read from there too, or progress would appear to vanish the moment
     // this composable leaves composition and reappear wrong on the next one.
-    val downloadState by repository.downloadState.collectAsState()
+    val downloadState by repository.downloadState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) { repository.refresh() }
+    LaunchedEffect(repository) { repository.refresh() }
 
     val bounds = target.bounds()
     val maxZoom = target.terrainMaxZoom()
-    val estimate = bounds?.let { estimateTerrainTiles(it.toGeoBounds(), maxZoom) } ?: 0L
+    val estimate = bounds?.let { terrainTileCount(it.toGeoBounds(), maxZoom) } ?: 0L
     val overLimit = estimate > TerrainRegionExtractor.MAX_TILES
     val isDownloading = downloadState is TerrainDownloadState.InProgress
 
@@ -224,8 +224,8 @@ private fun DownloadedTerrainRow(region: OfflineTerrainRegion, onShow: () -> Uni
  * The zoom levels a terrain download covers: the current level plus a couple deeper, mirroring [OfflineMapTarget]'s own
  * private `zoomRange` convention for the base map's offline packs.
  *
- * Bounded by [MapterhornEndpoints.REGIONAL_MAX_ZOOM] rather than MapLibre's own 0..20, since [estimateTerrainTiles] and
- * [TerrainRegionExtractor] never fetch anything deeper than that regardless of what is asked for.
+ * Bounded by [MapterhornEndpoints.REGIONAL_MAX_ZOOM] rather than MapLibre's own 0..20, since [terrainTileCount] and
+ * [TerrainRegionExtractor] never count or fetch anything deeper than that regardless of what is asked for.
  */
 private fun OfflineMapTarget.terrainMaxZoom(): Int {
     val current = zoom().toInt().coerceIn(0, MapterhornEndpoints.REGIONAL_MAX_ZOOM)

@@ -17,11 +17,8 @@
 package org.meshtastic.feature.map.maplibre
 
 import org.maplibre.spatialk.geojson.BoundingBox
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.floor
-import kotlin.math.ln
-import kotlin.math.tan
+import org.meshtastic.feature.map.maplibre.terrain.toGeoBounds
+import org.meshtastic.feature.map.terrain.TerrainTileMath
 
 /**
  * How many tiles cover [this] region between [minZoom] and [maxZoom] inclusive.
@@ -33,33 +30,6 @@ import kotlin.math.tan
  * Standard slippy-map arithmetic, so it matches what the renderer will actually request.
  */
 internal fun BoundingBox.tileCount(minZoom: Int, maxZoom: Int): Long {
-    if (maxZoom < minZoom) return 0L
-
-    return (minZoom..maxZoom).sumOf { zoom ->
-        val span = 1 shl zoom
-        val left = longitudeToTileX(west, span)
-        val right = longitudeToTileX(east, span)
-        // Tile rows run north to south, so the northern edge gives the lower index.
-        val top = latitudeToTileY(north, span)
-        val bottom = latitudeToTileY(south, span)
-
-        // A box straddling the antimeridian arrives with west > east: its columns wrap around the tile grid,
-        // and the direct difference would go negative.
-        val columns = if (right >= left) right - left + 1 else span - left + right + 1
-        columns.toLong() * (bottom - top + 1).toLong()
-    }
+    val bounds = toGeoBounds()
+    return (minZoom..maxZoom).sumOf { zoom -> TerrainTileMath.tileCountAt(zoom, bounds) }
 }
-
-private fun longitudeToTileX(longitude: Double, span: Int): Int =
-    floor((longitude + HALF_TURN) / FULL_TURN * span).toInt().coerceIn(0, span - 1)
-
-private fun latitudeToTileY(latitude: Double, span: Int): Int {
-    // Clamped to the Mercator limit: the projection runs to infinity at the poles.
-    val radians = latitude.coerceIn(-MERCATOR_LIMIT, MERCATOR_LIMIT) * PI / HALF_TURN
-    val projected = ln(tan(radians) + 1.0 / cos(radians)) / PI
-    return floor((1.0 - projected) / 2.0 * span).toInt().coerceIn(0, span - 1)
-}
-
-private const val HALF_TURN = 180.0
-private const val FULL_TURN = 360.0
-private const val MERCATOR_LIMIT = 85.05112878

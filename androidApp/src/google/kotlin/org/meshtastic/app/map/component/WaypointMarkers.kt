@@ -25,8 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.MapsComposeExperimentalApi
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.rememberComposeBitmapDescriptor
+import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.app.map.convertIntToEmoji
@@ -67,10 +66,6 @@ fun WaypointMarkers(
 
             val iconCodePoint = waypoint.icon.waypointIconOrDefault()
             val emojiText = convertIntToEmoji(iconCodePoint)
-            val icon =
-                rememberComposeBitmapDescriptor(iconCodePoint) {
-                    Text(text = emojiText, fontSize = 32.sp, modifier = Modifier.padding(2.dp))
-                }
 
             // Non-visual cue: the geofence is otherwise only an orange overlay, so surface it in the marker's
             // accessible snippet for screen-reader and color-challenged users.
@@ -88,12 +83,9 @@ fun WaypointMarkers(
             val cleanName = waypoint.name.replace('\n', ' ').replace('\b', ' ')
             val title = if (waypoint.isLocked) "${convertIntToEmoji(LOCK)} $cleanName" else cleanName
 
-            // rememberComposeBitmapDescriptor shares its applier with its content lambda, so the Text drawn into the
-            // icon makes this map-scope function infer as UI.
-            @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
-            Marker(
+            MarkerComposable(
+                iconCodePoint,
                 state = markerState,
-                icon = icon,
                 title = title,
                 snippet = snippet,
                 visible = true,
@@ -109,7 +101,9 @@ fun WaypointMarkers(
                         else -> onDeleteWaypointRequest(waypoint)
                     }
                 },
-            )
+            ) {
+                Text(text = emojiText, fontSize = 32.sp, modifier = Modifier.padding(2.dp))
+            }
         }
     }
 }

@@ -19,9 +19,9 @@ package org.meshtastic.feature.map.maplibre.component
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
@@ -58,7 +58,7 @@ internal fun rememberCacheUsage(packs: Set<OfflinePack>): CacheUsage {
                 }
             }
         }
-            .collectAsState(CacheUsage())
+            .collectAsStateWithLifecycle(CacheUsage())
     return usage
 }
 

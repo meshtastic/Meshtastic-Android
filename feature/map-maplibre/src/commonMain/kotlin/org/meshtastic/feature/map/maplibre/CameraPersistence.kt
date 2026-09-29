@@ -50,7 +50,7 @@ internal fun rememberRestoredCamera(): RestoredCamera? {
     val mapPrefs: MapPrefs = koinInject()
     var restored by remember { mutableStateOf<RestoredCamera?>(null) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(mapPrefs) {
         val saved = mapPrefs.awaitCameraPosition()
         restored =
             RestoredCamera(

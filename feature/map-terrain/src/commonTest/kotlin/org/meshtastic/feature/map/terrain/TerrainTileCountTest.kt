@@ -42,4 +42,14 @@ class TerrainTileCountTest {
         assertEquals(8_869_485L, globalOnly)
         assertEquals(globalOnly, terrainTileCount(continentalBox, maxZoom = MapterhornEndpoints.REGIONAL_MAX_ZOOM))
     }
+
+    @Test
+    fun `a negative maxZoom counts nothing`() {
+        assertEquals(0L, terrainTileCount(tinySeattleBox, maxZoom = -1))
+    }
+
+    @Test
+    fun `maxZoom 0 counts the one tile that covers the world`() {
+        assertEquals(1L, terrainTileCount(tinySeattleBox, maxZoom = 0))
+    }
 }

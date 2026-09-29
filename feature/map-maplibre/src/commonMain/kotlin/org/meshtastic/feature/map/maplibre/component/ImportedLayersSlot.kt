@@ -17,8 +17,8 @@
 package org.meshtastic.feature.map.maplibre.component
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.layers.LayerOpacityStore
@@ -35,8 +35,8 @@ import org.meshtastic.feature.map.layers.rememberMapLayerPicker
 fun ImportedLayersSlot() {
     val manager: MapLayersManager = koinInject()
     val opacityStore: LayerOpacityStore = koinInject()
-    val layers by manager.mapLayers.collectAsState()
-    val opacity by opacityStore.opacity.collectAsState()
+    val layers by manager.mapLayers.collectAsStateWithLifecycle()
+    val opacity by opacityStore.opacity.collectAsStateWithLifecycle()
     val picker = rememberMapLayerPicker(onPick = manager::addMapLayer)
 
     CustomMapLayersSheet(
