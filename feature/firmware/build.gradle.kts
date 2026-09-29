@@ -45,7 +45,6 @@ kotlin {
             implementation(projects.core.ui)
 
             implementation(libs.coil)
-            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.network)
             implementation(libs.markdown.renderer)

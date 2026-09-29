@@ -25,6 +25,7 @@ import okio.ByteString
  * device public key: `my_node_num = crc32(config.security.public_key)` (NodeDB::createNewIdentity). Lets the app
  * recognize a pubkey-derived ("canonical") node number when a node reappears under a new num after a firmware upgrade.
  */
+@OptIn(ExperimentalUnsignedTypes::class)
 object Crc32 {
     private const val POLYNOMIAL: UInt = 0xEDB88320u
     private const val INITIAL: UInt = 0xFFFFFFFFu

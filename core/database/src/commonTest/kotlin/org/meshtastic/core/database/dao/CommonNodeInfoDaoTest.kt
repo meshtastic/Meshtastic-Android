@@ -152,7 +152,7 @@ abstract class CommonNodeInfoDaoTest {
         assertEquals(trusted, stored?.publicKey)
         assertEquals(trusted, stored?.user?.public_key)
         assertFalse(stored?.keyMatch ?: true)
-        assertEquals(substitute, stored?.newPublicKey)
+        assertEquals(substitute, stored.newPublicKey)
     }
 
     @Test
@@ -207,7 +207,7 @@ abstract class CommonNodeInfoDaoTest {
         val stillFlagged = dao.getNodeByNum(1)?.node
         assertEquals(trusted, stillFlagged?.publicKey)
         assertFalse(stillFlagged?.keyMatch ?: true)
-        assertEquals(substitute, stillFlagged?.newPublicKey)
+        assertEquals(substitute, stillFlagged.newPublicKey)
     }
 
     @Test
@@ -262,7 +262,7 @@ abstract class CommonNodeInfoDaoTest {
         val stored = dao.getNodeByNum(own)?.node
         assertEquals(after, stored?.publicKey)
         assertTrue(stored?.keyMatch ?: false)
-        assertEquals(null, stored?.newPublicKey)
+        assertEquals(null, stored.newPublicKey)
     }
 
     @Test
@@ -299,7 +299,7 @@ abstract class CommonNodeInfoDaoTest {
         val remote = dao.getNodeByNum(1)?.node
         assertEquals(trusted, remote?.publicKey)
         assertTrue(remote?.keyMatch ?: false)
-        assertEquals(null, remote?.newPublicKey)
+        assertEquals(null, remote.newPublicKey)
 
         // Nor may the local link write it over the connected radio's real key. A key of its own, or the new-node
         // guard would read this upsert as node 1 claiming a second number and never insert it.
@@ -447,7 +447,7 @@ abstract class CommonNodeInfoDaoTest {
         val stored = dao.getNodeByNum(own)
         assertEquals(real, stored?.node?.publicKey)
         assertFalse(stored?.node?.keyMatch ?: true)
-        assertTrue(stored!!.toModel().mismatchKey)
+        assertTrue(stored.toModel().mismatchKey)
     }
 
     @Test

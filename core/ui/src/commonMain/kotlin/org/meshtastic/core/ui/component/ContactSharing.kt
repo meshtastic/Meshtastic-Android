@@ -47,7 +47,7 @@ fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit, isOwnContact: Boo
         title = stringResource(Res.string.share_contact),
         uriString = uriString,
         onDismiss = onDismiss,
-        subtitle = contact.user?.long_name,
+        subtitle = contact.user.long_name,
         shareSubject = stringResource(Res.string.share_contact_subject),
     )
 }

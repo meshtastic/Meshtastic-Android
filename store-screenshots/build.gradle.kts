@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // Captures the store-listing screenshots from the real debug app on a device or emulator:
 //   ./gradlew :store-screenshots:connectedGoogleDebugAndroidTest   (Play)
@@ -24,25 +23,15 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 //   adb pull /data/local/tmp/store-screenshots/<flavor>/. <dir>
 // .github/workflows/store-screenshots.yml does this for both flavors on one emulator.
 plugins {
-    alias(libs.plugins.android.test)
+    alias(libs.plugins.meshtastic.android.test)
     alias(libs.plugins.meshtastic.detekt)
     alias(libs.plugins.meshtastic.spotless)
 }
 
 android {
     namespace = "org.meshtastic.storescreenshots"
-    compileSdk = 37
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
-    defaultConfig {
-        minSdk = 28
-        targetSdk = 37
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
+    defaultConfig { minSdk = 28 }
 
     targetProjectPath = ":androidApp"
     // Its own process, so relaunching the app between form factors does not end the run.
@@ -67,8 +56,6 @@ android {
 tasks
     .named { it == "connectedFdroidDebugAndroidTest" }
     .configureEach { mustRunAfter("connectedGoogleDebugAndroidTest") }
-
-kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_21) } }
 
 dependencies {
     implementation(libs.androidx.test.ext.junit)

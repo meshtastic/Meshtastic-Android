@@ -37,6 +37,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -1263,6 +1264,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * only once it is about to invoke the callback — a call still waiting for its lane has performed no side effect and
      * is aborted at the cancellation check instead of running late.
      */
+    @OptIn(DelicateCoroutinesApi::class)
     private fun <T> launchDbBlock(
         admission: AdmittedDatabase,
         blockStarted: CompletableDeferred<Unit>,

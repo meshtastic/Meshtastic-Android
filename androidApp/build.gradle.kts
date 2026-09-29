@@ -124,8 +124,6 @@ configure<ApplicationExtension> {
             )
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") }
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // Disable ABI splits for bundle builds or when explicitly requested via Gradle property.

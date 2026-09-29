@@ -1125,7 +1125,7 @@ class RadioConfigViewModelTest {
             }
         every { processRadioResponseUseCase(any(), 123, any()) } calls
             {
-                val pendingRequestIds = it.args[2] as Set<Int>
+                val pendingRequestIds = it.arg<Set<Int>>(2)
                 if (42 in pendingRequestIds) RadioResponseResult.Owner(owner) else null
             }
 
@@ -1287,8 +1287,8 @@ class RadioConfigViewModelTest {
         // Channel A (index 1) completed before channel B (index 2) threw.
         assertEquals(listOf(1, 2), writtenIndexes)
         assertNotNull(interrupted)
-        assertEquals(1, interrupted!!.appliedWriteCount)
-        assertEquals("A", interrupted!!.appliedSettings[1].name)
+        assertEquals(1, interrupted.appliedWriteCount)
+        assertEquals("A", interrupted.appliedSettings[1].name)
     }
 
     @Test
@@ -1938,7 +1938,7 @@ class RadioConfigViewModelTest {
         var response: RadioResponseResult = RadioResponseResult.Error(maxRetransmit, Routing.Error.MAX_RETRANSMIT)
         every { processRadioResponseUseCase(any(), 456, any()) } calls
             {
-                val pendingRequestIds = it.args[2] as Set<Int>
+                val pendingRequestIds = it.arg<Set<Int>>(2)
                 if (42 in pendingRequestIds) response else null
             }
         nodeRepository.setNodes(listOf(localNode, remoteNode))

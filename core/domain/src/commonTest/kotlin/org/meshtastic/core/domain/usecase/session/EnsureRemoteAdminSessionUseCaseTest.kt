@@ -105,11 +105,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val sessionManager = stubSessionManager(refreshFlow = refresh)
         val controller = mock<RadioController>(MockMode.autofill)
         // Simulate the radio responding by emitting on the refresh flow when the metadata request fires.
-        everySuspend { controller.refreshMetadata(any()) } calls
-            {
-                refresh.tryEmit(destNum)
-                Unit
-            }
+        everySuspend { controller.refreshMetadata(any()) } calls { refresh.tryEmit(destNum) }
 
         val useCase =
             EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
@@ -167,11 +163,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val sessionManager = stubSessionManager(refreshFlow = refresh)
         val controller = mock<RadioController>(MockMode.autofill)
         var dispatches = 0
-        everySuspend { controller.refreshMetadata(any()) } calls
-            {
-                dispatches++
-                Unit
-            }
+        everySuspend { controller.refreshMetadata(any()) } calls { dispatches++ }
         val useCase =
             EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
 
@@ -195,11 +187,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val sessionManager = stubSessionManager(refreshFlow = refresh)
         val controller = mock<RadioController>(MockMode.autofill)
         var dispatches = 0
-        everySuspend { controller.refreshMetadata(any()) } calls
-            {
-                dispatches++
-                Unit
-            }
+        everySuspend { controller.refreshMetadata(any()) } calls { dispatches++ }
         val useCase =
             EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
 
@@ -224,11 +212,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val sessionManager = stubSessionManager(refreshFlow = refresh)
         val controller = mock<RadioController>(MockMode.autofill)
         var dispatches = 0
-        everySuspend { controller.refreshMetadata(any()) } calls
-            {
-                dispatches++
-                Unit
-            }
+        everySuspend { controller.refreshMetadata(any()) } calls { dispatches++ }
         val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
         val repository = mock<ServiceRepository>(MockMode.autofill)
         every { repository.connectionState } returns connectionState

@@ -88,6 +88,9 @@ fun WaypointMarkers(
             val cleanName = waypoint.name.replace('\n', ' ').replace('\b', ' ')
             val title = if (waypoint.isLocked) "${convertIntToEmoji(LOCK)} $cleanName" else cleanName
 
+            // rememberComposeBitmapDescriptor shares its applier with its content lambda, so the Text drawn into the
+            // icon makes this map-scope function infer as UI.
+            @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
             Marker(
                 state = markerState,
                 icon = icon,

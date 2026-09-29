@@ -22,6 +22,7 @@ plugins {
 }
 
 kotlin {
+    // No withHostTest: commonTest reaches android.net.Uri and Bundle, which the host-test stubs do not implement.
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)

@@ -24,6 +24,8 @@ plugins {
 }
 
 kotlin {
+    // No withHostTest: commonTest holds Compose UI tests, which NPE on the host-test stubs' null Build.FINGERPRINT.
+
     // Required for CMP files/ resources (emoji-data.json) to be packaged as Android assets.
     // Without this, Res.readBytes() throws MissingResourceException at runtime.
     android { androidResources.enable = true }

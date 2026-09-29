@@ -55,5 +55,4 @@ UI for port-37 Mesh Beacon join invitations (`ui/component/`):
 From `feature/discovery/build.gradle.kts` (`commonMain`):
 
 - `core:common`, `core:data`, `core:database`, `core:di`, `core:model`, `core:navigation`, `core:network`, `core:prefs`, `core:repository`, `core:resources`, `core:service`, `core:ui`
-- `kotlinx.collections.immutable`
 - `org.meshtastic:protobufs` (Maven artifact)

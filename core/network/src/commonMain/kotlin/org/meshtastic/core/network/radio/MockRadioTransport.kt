@@ -169,7 +169,7 @@ class MockRadioTransport(
             }
 
             data != null && data.portnum == PortNum.TEXT_MESSAGE_APP -> {
-                if (packet?.want_ack == true) sendFakeAck(pr)
+                if (packet.want_ack) sendFakeAck(pr)
                 sendSimulatedReply(packet)
             }
 

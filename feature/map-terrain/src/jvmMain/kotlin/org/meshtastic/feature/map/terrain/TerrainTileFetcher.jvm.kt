@@ -21,12 +21,12 @@ import ch.poole.geo.pmtiles.HttpUrlConnectionChannel
 import ch.poole.geo.pmtiles.Reader
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.net.URL
+import java.net.URI
 import java.util.zip.GZIPInputStream
 
 actual class TerrainTileFetcher actual constructor(pmtilesUrl: String) : AutoCloseable {
 
-    private val reader: Reader = Reader(HttpUrlConnectionChannel(URL(pmtilesUrl)))
+    private val reader: Reader = Reader(HttpUrlConnectionChannel(URI(pmtilesUrl).toURL()))
 
     actual fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? {
         val raw = reader.getTile(zoom, x, y) ?: return null

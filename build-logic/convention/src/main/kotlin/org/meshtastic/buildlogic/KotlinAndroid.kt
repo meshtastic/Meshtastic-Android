@@ -19,19 +19,24 @@ package org.meshtastic.buildlogic
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import com.android.build.api.dsl.TestExtension
 import dev.mokkery.gradle.MokkeryGradleExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /** Configure base Kotlin with Android options */
@@ -44,7 +49,6 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
         compileSdk = compileSdkVersion
 
         defaultConfig.minSdk = minSdkVersion
-        defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         if (this is ApplicationExtension) {
             defaultConfig.targetSdk = targetSdkVersion
@@ -61,6 +65,19 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     }
 
     configureMokkery()
+    configureKotlin<KotlinAndroidProjectExtension>()
+}
+
+/** Configure SDK and JVM levels for `com.android.test` modules; each module keeps its own minSdk. */
+internal fun Project.configureKotlinAndroidTest(testExtension: TestExtension) {
+    testExtension.apply {
+        compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+        defaultConfig.targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
+
+        compileOptions.sourceCompatibility = JavaVersion.VERSION_21
+        compileOptions.targetCompatibility = JavaVersion.VERSION_21
+    }
+
     configureKotlin<KotlinAndroidProjectExtension>()
 }
 
@@ -216,13 +233,21 @@ internal fun Project.configureKotlinJvm() {
     configureKotlin<KotlinJvmProjectExtension>()
 }
 
+/**
+ * `-PwarningsAsErrors=true` turns every Kotlin warning into an error. Modules that configure Kotlin outside these
+ * conventions (desktopApp, schema-strings) read it too.
+ */
+val Project.kotlinWarningsAsErrors: Provider<Boolean>
+    get() = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.orElse(false)
+
 /** Compiler args shared across all Kotlin targets (JVM, Android, iOS, etc.). */
 private val SHARED_COMPILER_ARGS =
     listOf(
         "-Xexpect-actual-classes",
-        "-Xskip-prerelease-check",
         // No -Xbackend-threads: parallel codegen races and crashes release builds (KT-83578).
     )
+
+private const val SHARED_OPT_IN = "kotlinx.coroutines.ExperimentalCoroutinesApi"
 
 private const val JDK_VERSION = 25
 
@@ -233,14 +258,13 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
 
         if (this is KotlinMultiplatformExtension) {
             targets.configureEach {
-                val isJvmTarget = platformType.name == "jvm" || platformType.name == "androidJvm"
                 compilations.configureEach {
                     compileTaskProvider.configure {
                         compilerOptions {
-                            freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
+                            optIn.add(SHARED_OPT_IN)
                             freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
-                            if (isJvmTarget) {
-                                freeCompilerArgs.add("-jvm-default=no-compatibility")
+                            if (this is KotlinJvmCompilerOptions) {
+                                jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
                             }
                         }
                     }
@@ -249,19 +273,23 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
         }
     }
 
-    val warningsAsErrors = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.getOrElse(false)
+    val warningsAsErrors = kotlinWarningsAsErrors
+
+    // Every compilation, native and metadata included, so a gated build also fails on iosMain-only warnings.
+    tasks.withType<KotlinCompilationTask<*>>().configureEach {
+        compilerOptions.allWarningsAsErrors.set(warningsAsErrors)
+    }
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
-            allWarningsAsErrors.set(warningsAsErrors)
 
             // For non-KMP modules, configure compiler args here since they don't use targets.compilations.
-            // KMP modules already set these via the targets block above — only jvmTarget/warnings needed here.
+            // KMP modules already set these via the targets block above; only jvmTarget is needed here.
             if (T::class != KotlinMultiplatformExtension::class) {
-                freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
+                optIn.add(SHARED_OPT_IN)
                 freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
-                freeCompilerArgs.add("-jvm-default=no-compatibility")
+                jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
             }
         }
     }

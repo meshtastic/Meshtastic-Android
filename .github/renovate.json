@@ -157,6 +157,32 @@
       "depNameTemplate": "gradle",
       "datasourceTemplate": "gradle-version",
       "versioningTemplate": "gradle"
+    },
+    {
+      "customType": "regex",
+      "description": "ktlint's version is a bare [versions] entry that only Spotless reads, so the gradle manager cannot tie it to an artifact.",
+      "managerFilePatterns": [
+        "/^gradle/libs\\.versions\\.toml$/"
+      ],
+      "matchStrings": [
+        "\\nktlint\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "com.pinterest.ktlint:ktlint-cli",
+      "datasourceTemplate": "maven",
+      "versioningTemplate": "maven"
+    },
+    {
+      "customType": "regex",
+      "description": "ktfmt's version is a bare [versions] entry that only Spotless reads, so the gradle manager cannot tie it to an artifact.",
+      "managerFilePatterns": [
+        "/^gradle/libs\\.versions\\.toml$/"
+      ],
+      "matchStrings": [
+        "\\nktfmt\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "com.facebook:ktfmt",
+      "datasourceTemplate": "maven",
+      "versioningTemplate": "maven"
     }
   ]
 }

@@ -23,6 +23,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
@@ -429,26 +430,28 @@ class LegacyDfuTransportTest {
          */
         var throwExceptionOnControlPointWrites: Boolean = false
 
-        override fun hasCharacteristic(c: BleCharacteristic) = delegate.hasCharacteristic(c)
+        override fun hasCharacteristic(characteristic: BleCharacteristic) = delegate.hasCharacteristic(characteristic)
 
-        override fun observe(c: BleCharacteristic): Flow<ByteArray> = delegate.observe(c)
+        override fun observe(characteristic: BleCharacteristic): Flow<ByteArray> = delegate.observe(characteristic)
 
-        override suspend fun read(c: BleCharacteristic): ByteArray = delegate.read(c)
+        override suspend fun read(characteristic: BleCharacteristic): ByteArray = delegate.read(characteristic)
 
-        override fun preferredWriteType(c: BleCharacteristic): BleWriteType = delegate.preferredWriteType(c)
+        override fun preferredWriteType(characteristic: BleCharacteristic): BleWriteType =
+            delegate.preferredWriteType(characteristic)
 
-        override suspend fun write(c: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
-            if (throwErrorOnControlPointWrites && c.uuid == LegacyDfuUuids.CONTROL_POINT) {
+        override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
+            val isControlPoint = characteristic.uuid == LegacyDfuUuids.CONTROL_POINT
+            if (throwErrorOnControlPointWrites && isControlPoint) {
                 throw AssertionError("Simulated assertion failure during control point write")
             }
-            if (throwExceptionOnControlPointWrites && c.uuid == LegacyDfuUuids.CONTROL_POINT) {
+            if (throwExceptionOnControlPointWrites && isControlPoint) {
                 throw RuntimeException("Simulated link failure during control point write")
             }
-            if (hangOnControlPointWrites && c.uuid == LegacyDfuUuids.CONTROL_POINT) {
+            if (hangOnControlPointWrites && isControlPoint) {
                 awaitCancellation()
             }
-            delegate.write(c, data, writeType)
-            val response = responder.onWrite(c.uuid, data) ?: return
+            delegate.write(characteristic, data, writeType)
+            val response = responder.onWrite(characteristic.uuid, data) ?: return
             response.forEach { delegate.emitNotification(LegacyDfuUuids.CONTROL_POINT, it) }
         }
     }
@@ -644,6 +647,7 @@ class LegacyDfuTransportTest {
      * where the write throws before the watcher processes the emission), while `bleConnection.connectionState.value`
      * still reads as Disconnected for the write-catch classification.
      */
+    @OptIn(ExperimentalForInheritanceCoroutinesApi::class)
     private class DisconnectEmissionsSuppressedStateFlow(private val delegate: StateFlow<BleConnectionState>) :
         StateFlow<BleConnectionState> {
         override val value: BleConnectionState
@@ -971,7 +975,7 @@ class LegacyDfuTransportTest {
         // parentJob stands in for the caller's scope; cancelling it must propagate through withTimeoutOrNull
         // (which only swallows its own TimeoutCancellationException, not parent cancellation) and out of abort.
         val parentJob = Job()
-        val abortDeferred = async(parentJob) { env.transport.abort() }
+        val abortDeferred = CoroutineScope(coroutineContext + parentJob).async { env.transport.abort() }
 
         // Let abort reach the hanging RESET write.
         runCurrent()

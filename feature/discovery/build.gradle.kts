@@ -45,7 +45,6 @@ kotlin {
             implementation(projects.core.service)
             implementation(projects.core.ui)
 
-            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.meshtastic.protobufs)
         }
     }

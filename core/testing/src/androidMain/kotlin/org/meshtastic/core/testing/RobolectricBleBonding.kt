@@ -20,6 +20,7 @@ import android.Manifest
 import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.content.Intent
 import android.os.Looper
 import org.robolectric.RuntimeEnvironment
@@ -49,12 +50,9 @@ object RobolectricBleBonding {
     private val application: Application
         get() = RuntimeEnvironment.getApplication()
 
-    /**
-     * The default adapter Robolectric exposes; production resolves the same one via
-     * [android.bluetooth.BluetoothManager].
-     */
-    private val adapter: BluetoothAdapter
-        get() = BluetoothAdapter.getDefaultAdapter()
+    /** The adapter Robolectric exposes through [BluetoothManager], the same one production resolves. */
+    val adapter: BluetoothAdapter
+        get() = application.getSystemService(BluetoothManager::class.java).adapter
 
     /** Grant the runtime permissions [ShadowBluetoothDevice.createBond] checks, so it returns instead of throwing. */
     fun grantBluetoothConnectPermission() {
