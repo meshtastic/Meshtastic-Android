@@ -389,6 +389,7 @@ discovery_dwell_progress
 discovery_dwell_time
 discovery_dwell_time_description
 discovery_empty_history
+discovery_empty_history_hint
 discovery_export_report
 discovery_history
 discovery_interrupted_scan_restored

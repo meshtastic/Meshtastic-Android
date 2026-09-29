@@ -422,6 +422,7 @@
     <string name="discovery_dwell_time">Dwell Time</string>
     <string name="discovery_dwell_time_description">Time to listen on each preset</string>
     <string name="discovery_empty_history">No discovery sessions yet</string>
+    <string name="discovery_empty_history_hint">Start a scan from Local Mesh Discovery to see its results here.</string>
     <string name="discovery_export_report">Export report</string>
     <string name="discovery_history">Discovery History</string>
     <string name="discovery_interrupted_scan_restored">Restored radio to home config (%1$s) after an interrupted discovery scan</string>

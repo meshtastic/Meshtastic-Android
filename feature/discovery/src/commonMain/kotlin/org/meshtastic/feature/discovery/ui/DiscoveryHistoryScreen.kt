@@ -61,6 +61,7 @@ import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.discovery_delete_session
 import org.meshtastic.core.resources.discovery_delete_session_confirm
 import org.meshtastic.core.resources.discovery_empty_history
+import org.meshtastic.core.resources.discovery_empty_history_hint
 import org.meshtastic.core.resources.discovery_history
 import org.meshtastic.core.resources.discovery_scan_complete
 import org.meshtastic.core.resources.discovery_scan_incomplete
@@ -122,6 +123,7 @@ private fun EmptyHistoryState(modifier: Modifier = Modifier) {
     EmptyState(
         icon = MeshtasticIcons.History,
         title = stringResource(Res.string.discovery_empty_history),
+        supportingText = stringResource(Res.string.discovery_empty_history_hint),
         modifier = modifier,
     )
 }
