@@ -19,6 +19,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--
+      Firebase Analytics merges these in, but ADID collection is off and nothing reads the advertising ID. Play's
+      advertising ID declaration must say "No" while they stay removed.
+    -->
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.ACCESS_ADSERVICES_AD_ID"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
+        tools:node="remove" />
+
     <application
         android:name="org.meshtastic.app.GoogleMeshUtilApplication"
         tools:replace="android:name">
