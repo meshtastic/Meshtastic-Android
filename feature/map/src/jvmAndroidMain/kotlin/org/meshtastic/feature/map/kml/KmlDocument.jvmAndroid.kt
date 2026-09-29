@@ -16,11 +16,6 @@
  */
 package org.meshtastic.feature.map.kml
 
-// Duplicated verbatim in androidMain and jvmMain rather than shared from a custom `jvmAndroid` source-set group:
-// the hierarchy-template group would not attach to the AGP-owned android target, and a hand-written dependsOn edge
-// disables the default template and silently drops iosMain. A few dozen lines twice is cheaper than either failure
-// mode.
-
 import co.touchlab.kermit.Logger
 import org.meshtastic.feature.map.layers.MAX_KMZ_INFLATED_BYTES
 import org.meshtastic.feature.map.layers.isKmzArchive

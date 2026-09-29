@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.model.util
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaZoneId
 import kotlinx.datetime.toLocalDateTime
@@ -33,14 +31,12 @@ import java.util.Locale
 import kotlin.math.abs
 
 /** Generates a POSIX time zone string from a [TimeZone]. */
-@RequiresApi(Build.VERSION_CODES.O)
 fun TimeZone.toPosixString(): String = this.toJavaZoneId().toPosixString()
 
 /**
  * Generates a POSIX time zone string from a [ZoneId]. Uses the specification found
  * [here](https://www.postgresql.org/docs/current/datetime-posix-timezone-specs.html).
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @Suppress("ReturnCount", "MagicNumber")
 fun ZoneId.toPosixString(): String {
     val rules = this.rules
@@ -78,7 +74,6 @@ fun ZoneId.toPosixString(): String {
 }
 
 /** Formats the time zone short name for a [ZonedDateTime]. */
-@RequiresApi(Build.VERSION_CODES.O)
 internal fun ZonedDateTime.timeZoneShortName(): String {
     val formatter = DateTimeFormatter.ofPattern("zzz", Locale.ENGLISH)
     val shortName = format(formatter)
@@ -89,7 +84,6 @@ internal fun ZonedDateTime.timeZoneShortName(): String {
 private fun formatAbbreviation(abbrev: String): String = if (abbrev.all { it.isLetter() }) abbrev else "<$abbrev>"
 
 /** Gets the abbreviation for a given zone and transition rule. */
-@RequiresApi(Build.VERSION_CODES.O)
 internal fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionRule): String {
     val year = nowInstant.toLocalDateTime(systemTimeZone).year
     val transition = rule.createTransition(year)
@@ -97,7 +91,6 @@ internal fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionR
 }
 
 /** Formats a [ZoneOffset] for use in a POSIX string. */
-@RequiresApi(Build.VERSION_CODES.O)
 @Suppress("MagicNumber")
 internal fun formatPosixOffset(offset: ZoneOffset): String {
     val offsetSeconds = -offset.totalSeconds
@@ -119,7 +112,6 @@ internal fun formatPosixOffset(offset: ZoneOffset): String {
 }
 
 /** Formats a [ZoneOffsetTransitionRule] for use in a POSIX string. */
-@RequiresApi(Build.VERSION_CODES.O)
 @Suppress("MagicNumber")
 internal fun formatTransitionRule(rule: ZoneOffsetTransitionRule): String {
     val month = rule.month.value
