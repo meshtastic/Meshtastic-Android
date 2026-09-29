@@ -12,7 +12,7 @@ Upgrades Meshtastic Android's TAK integration from legacy v1 (port 72, PLI + Geo
 
 **Language/Version**: Kotlin 2.3+ targeting JDK 21 (KMP multi-target)
 **Primary Dependencies**: TAKPacket-SDK v0.1.3 (zstd compression), xmlutil (CoT XML parsing), Ktor Network (TCP), zstd-jni 1.5.7-7, Okio (I/O), Koin 4.2+ (DI), Kermit (logging)
-**Storage**: App-private filesystem for route KML data packages; bundled .p12/.pem certificates for TLS
+**Storage**: Downloads (MediaStore) for route KML data packages; bundled .p12/.pem certificates for TLS
 **Testing**: `commonTest` (9 test classes, 65+ test methods), 40 XML fixture files in `jvmAndroidMain/resources/tak_test_fixtures/`
 **Target Platform**: Android (primary), JVM Desktop (secondary), iOS (stubs only)
 **Project Type**: Mobile app — KMP module (`core:takserver`) + UI integration (`feature:settings`)
@@ -26,7 +26,7 @@ Upgrades Meshtastic Android's TAK integration from legacy v1 (port 72, PLI + Geo
 
 - **I. Kotlin Multiplatform Core**: ✅ All business logic (TAKMeshIntegration, conversions, type mapper, CoT parser, detail stripper, server manager, models, DI module) resides in `commonMain`. Platform-specific code isolated to:
   - `jvmAndroidMain`: TAKServerJvm (JSSE TLS), TakV2Compressor (zstd-jni via SDK), TakCertLoader, TAKClientConnection
-  - `androidMain`: AtakFileWriter (SAF/private dirs), TakPermissionUtil (runtime permissions)
+  - `androidMain`: AtakFileWriter (MediaStore Downloads), TakPermissionUtil (runtime permissions)
   - `jvmMain`: AtakFileWriter (desktop filesystem), TakPermissionUtil (no-op)
   - `iosMain`: TAKServerIos (no-op), TakV2Compressor (uncompressed stub), AtakFileWriter (stub)
   
@@ -115,7 +115,7 @@ core/takserver/
     │   ├── tak_certs/                       # Bundled mTLS certificates
     │   └── tak_test_fixtures/               # 40 CoT XML fixtures
     ├── androidMain/kotlin/.../
-    │   └── AtakFileWriter.kt                # SAF/private directory writer
+    │   └── AtakFileWriter.kt                # MediaStore Downloads writer
     ├── jvmMain/kotlin/.../
     │   └── AtakFileWriter.kt                # Desktop filesystem writer
     └── iosMain/kotlin/.../
