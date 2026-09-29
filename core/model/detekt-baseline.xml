@@ -2,8 +2,16 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>AbstractClassCanBeInterface:MeshActivity.kt:MeshActivity$MeshActivity</ID>
+    <ID>AbstractClassCanBeInterface:MqttConnectionState.kt:MqttConnectionState$MqttConnectionState</ID>
+    <ID>AbstractClassCanBeInterface:MqttProbeStatus.kt:MqttProbeStatus$MqttProbeStatus</ID>
+    <ID>NoNameShadowing:ChannelSet.kt:wb</ID>
     <ID>PropertyName:DebugUtils.kt:/** * Whether the app is running in debug mode. * * This is a compile-time constant for the shared module. For runtime debug detection, use * [org.meshtastic.core.common.BuildConfigProvider.isDebug] from DI instead. */ @Suppress("ktlint:standard:property-naming", "TopLevelPropertyNaming") const val isDebug: Boolean = false</ID>
     <ID>SwallowedException:DataPacket.kt:DataPacket$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DataPacket.kt:DataPacket$e: Exception</ID>
+    <ID>UseOrEmpty:ChannelSet.kt:host ?: ""</ID>
+    <ID>UseOrEmpty:NetworkFirmwareRelease.kt:commit?.takeIf { it.isNotBlank() }?.let { "https://github.com/meshtastic/firmware/commit/$it" } ?: ""</ID>
+    <ID>UseOrEmpty:SharedContact.kt:host?.lowercase() ?: ""</ID>
+    <ID>UseOrEmpty:UriUtils.kt:uri.host ?: ""</ID>
   </CurrentIssues>
 </SmellBaseline>

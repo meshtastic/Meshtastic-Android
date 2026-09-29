@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>UseOrEmpty:NotificationPrefsImpl.kt:NotificationPrefsImpl.Companion$csv?.split(',')?.mapNotNull { it.toIntOrNull() }?.distinct() ?: emptyList()</ID>
+    <ID>UseOrEmpty:UiPrefsImpl.kt:UiPrefsImpl$preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS]?.split('|')?.filter(String::isNotBlank)?.toSet() ?: emptySet()</ID>
+  </CurrentIssues>
+</SmellBaseline>

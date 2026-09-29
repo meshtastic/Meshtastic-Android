@@ -47,6 +47,16 @@
     <ID>TooManyFunctions:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant : AIDocAssistant</ID>
     <ID>TooManyFunctions:MapView.kt:org.meshtastic.app.map.MapView.kt</ID>
     <ID>TooManyFunctions:MapViewModel.kt:MapViewModel : BaseMapViewModel</ID>
+    <ID>UnnecessaryLaunchedEffect:Main.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:MapView.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:TracerouteMap.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:WaypointMarkers.kt:LaunchedEffect</ID>
+    <ID>UseOrEmpty:MapView.kt:RenderedMapLayer$dataLayer.properties["groundOverlays"] as? List&lt;KmlGroundOverlay&gt; ?: emptyList()</ID>
+    <ID>UseOrEmpty:MapView.kt:RenderedMapLayer$dataLayer.properties["images"] as? Map&lt;String, Bitmap&gt; ?: emptyMap()</ID>
+    <ID>UseOrEmpty:MapView.kt:mode.overlay?.forwardRoute?.mapNotNull { nodeLookup[it]?.position?.toLatLng() } ?: emptyList()</ID>
+    <ID>UseOrEmpty:MapView.kt:mode.overlay?.returnRoute?.mapNotNull { nodeLookup[it]?.position?.toLatLng() } ?: emptyList()</ID>
+    <ID>UseOrEmpty:MapView.kt:tracerouteSelection?.nodesForMarkers ?: emptyList()</ID>
+    <ID>UseOrEmpty:MapViewModel.kt:MapViewModel$uri.path ?: ""</ID>
     <ID>UtilityClassWithPublicConstructor:CustomTileSource.kt:CustomTileSource</ID>
     <ID>ViewModelForwarding:MapView.kt:CustomTileProviderManagerSheet(mapViewModel = mapViewModel)</ID>
     <ID>ViewModelForwarding:MapView.kt:MainMapContent( nodeClusterItems = nodeClusterItems, mapFilterState = mapFilterState, navigateToNodeDetails = navigateToNodeDetails, displayableWaypoints = displayableWaypoints, myNodeNum = myNodeNum, onEditWaypointRequest = { editingWaypoint = it }, onDeleteWaypointRequest = { deletingWaypoint = it }, onShowGeofenceInfo = { geofenceInfoWaypoint = it }, selectedWaypointId = selectedWaypointId, mapLayers = mapLayers, layerOpacity = layerOpacity, mapViewModel = mapViewModel, cameraPositionState = cameraPositionState, coroutineScope = coroutineScope, onShowClusterItemsDialog = { showClusterItemsDialog = it }, )</ID>

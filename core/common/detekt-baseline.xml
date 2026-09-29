@@ -1,5 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues/>
+  <CurrentIssues>
+    <ID>UnusedPrivateProperty:JvmPlatformUtils.kt:DateFormatter$private val mediumTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)</ID>
+    <ID>UnusedPrivateProperty:JvmPlatformUtils.kt:DateFormatter$private val shortDateFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)</ID>
+    <ID>UnusedPrivateProperty:JvmPlatformUtils.kt:DateFormatter$private val shortDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM)</ID>
+    <ID>UnusedPrivateProperty:JvmPlatformUtils.kt:DateFormatter$private val shortTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)</ID>
+    <ID>UnusedPrivateProperty:JvmPlatformUtils.kt:DateFormatter$private val zoneId: ZoneId = ZoneId.systemDefault()</ID>
+  </CurrentIssues>
 </SmellBaseline>

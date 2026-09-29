@@ -76,6 +76,12 @@
     <ID>MultipleEmitters:PacketResponseStateDialog.kt:@Composable private fun SuccessContent</ID>
     <ID>MultipleEmitters:SecurityConfigScreen.android.kt:@Composable actual fun SecurityKeyBackupActions</ID>
     <ID>MutableStateAutoboxing:DesktopSettingsScreen.kt:mutableStateOf(0)</ID>
+    <ID>NoNameShadowing:Debug.kt:{ filterMode = it }</ID>
+    <ID>NoNameShadowing:DebugViewModel.kt:LogSearchManager${ SearchMatch(logIndex, it.range.first, it.range.last, "decodedPayload") }</ID>
+    <ID>NoNameShadowing:MeshBeaconConfigPolicy.kt:wb</ID>
+    <ID>NoNameShadowing:NetworkConfigItemList.kt:wb</ID>
+    <ID>NoNameShadowing:RadioConfigViewModel.kt:RadioConfigViewModel${ it.copy( isLocal = false, pioEnv = null, channelList = emptyList(), radioConfig = LocalConfig.Builder().build(), moduleConfig = LocalModuleConfig.Builder().build(), ) }</ID>
+    <ID>NoNameShadowing:UserConfigItemList.kt:wb</ID>
     <ID>ParameterNaming:ChannelConfigScreen.kt:onPositiveClicked: (List&lt;ChannelSettings>) -> Unit</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt:onCheckedChanged: (Boolean) -> Unit</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt:onDaysChanged: (Float) -> Unit</ID>
@@ -99,6 +105,24 @@
     <ID>ReturnCount:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
     <ID>TooGenericExceptionCaught:DebugViewModel.kt:DebugViewModel$e: Exception</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt:RadioConfigViewModel : ViewModel</ID>
+    <ID>UnnecessaryLaunchedEffect:ChannelConfigScreen.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:Debug.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:LicensedModeSetting.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:Logcat.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:PacketAuthenticitySetting.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:SettingsNavigation.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:SettingsSearchBar.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:TakPermissionUtil.kt:LaunchedEffect</ID>
+    <ID>UnusedPrivateProperty:DebugViewModel.kt:DebugViewModel$private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers</ID>
+    <ID>UnusedPrivateProperty:DebugViewModel.kt:DebugViewModel$private val meshLogPrefs: MeshLogPrefs</ID>
+    <ID>UnusedPrivateProperty:RadioConfigViewModel.kt:RadioConfigViewModel$private val locationRepository: LocationRepository</ID>
+    <ID>UnusedPrivateProperty:SettingsViewModel.kt:SettingsViewModel$private val isOtaCapableUseCase: IsOtaCapableUseCase</ID>
+    <ID>UnusedPrivateProperty:SettingsViewModel.kt:SettingsViewModel$private val meshLogPrefs: MeshLogPrefs</ID>
+    <ID>UnusedPrivateProperty:SettingsViewModel.kt:SettingsViewModel$private val nodeRepository: NodeRepository</ID>
+    <ID>UseOrEmpty:AboutLibrariesLoader.kt:SettingsRoute::class.java.getResource("/aboutlibraries.json")?.readText() ?: ""</ID>
+    <ID>UseOrEmpty:DebugViewModel.kt:DebugViewModel$user?.short_name?.takeIf { it.isNotEmpty() } ?: ""</ID>
+    <ID>UseOrEmpty:DebugViewModel.kt:LogSearchManager$log.decodedPayload?.let { regex.findAll(it).map { SearchMatch(logIndex, it.range.first, it.range.last, "decodedPayload") } } ?: emptySequence()</ID>
+    <ID>UseOrEmpty:SettingsScreen.kt:ourNode?.user?.short_name ?: ""</ID>
     <ID>ViewModelForwarding:AdministrationScreen.kt:AdminRouteItems(viewModel = viewModel, enabled = enabled, state = state, destNode = destNode)</ID>
     <ID>ViewModelForwarding:PositionConfigScreen.kt:DeviceLocationButton( viewModel = viewModel, enabled = state.connected, onLocationReceived = { locationInput = it }, )</ID>
     <ID>ViewModelForwarding:SecurityConfigScreen.kt:SecurityKeyBackupActions( viewModel = viewModel, enabled = state.connected, securityConfig = securityConfig, )</ID>

@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>NoNameShadowing:DiscoveryScanEngine.kt:DiscoveryScanEngine$wb</ID>
+    <ID>UnnecessaryLaunchedEffect:DiscoveryScanScreen.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:DiscoverySummaryScreen.kt:LaunchedEffect</ID>
+    <ID>UnusedPrivateProperty:DiscoveryScanEngine.kt:DiscoveryScanEngine$private val applicationScope: ApplicationCoroutineScope</ID>
+    <ID>UnusedPrivateProperty:DiscoveryViewModel.kt:DiscoveryViewModel$private val serviceRepository: ServiceRepository</ID>
+  </CurrentIssues>
+</SmellBaseline>

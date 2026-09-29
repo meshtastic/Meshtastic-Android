@@ -3,5 +3,13 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>ComposableParamOrder:MapScreen.kt:@Composable fun MapScreen</ID>
+    <ID>LongParameterList:BaseMapViewModel.kt:BaseMapViewModel</ID>
+    <ID>LongParameterList:SharedMapViewModel.kt:SharedMapViewModel</ID>
+    <ID>UnnecessaryLaunchedEffect:EditWaypointDialog.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:SitePlannerSheet.kt:LaunchedEffect</ID>
+    <ID>UnusedPrivateProperty:BaseMapViewModel.kt:BaseMapViewModel$private val radioConfigRepository: RadioConfigRepository</ID>
+    <ID>UseOrEmpty:BaseMapViewModel.kt:tracerouteOverlay?.relatedNodeNums ?: emptySet()</ID>
+    <ID>UseOrEmpty:CustomTileProviderManager.kt:config?.name ?: ""</ID>
+    <ID>UseOrEmpty:CustomTileProviderManager.kt:config?.urlTemplate ?: ""</ID>
   </CurrentIssues>
 </SmellBaseline>
