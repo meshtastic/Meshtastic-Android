@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.repository
 
+import androidx.core.location.LocationCompat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.repository.Location
@@ -95,5 +96,14 @@ class LocationMappingTest {
             ),
             location,
         )
+    }
+
+    @Test
+    @Config(sdk = [33])
+    fun `below API 34 the compat MSL altitude still carries through`() {
+        val fix = fix()
+        LocationCompat.setMslAltitudeMeters(fix, 1633.25)
+
+        assertEquals(1633.25, fix.toLocation().mslAltitudeMeters)
     }
 }
