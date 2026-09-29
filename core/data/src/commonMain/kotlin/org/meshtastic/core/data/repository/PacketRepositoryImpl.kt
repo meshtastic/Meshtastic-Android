@@ -77,10 +77,10 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         .map { pagingData -> pagingData.map { it.contact_key to it.data } }
 
     override suspend fun getMessageCount(contact: String): Int =
-        withContext(dispatchers.io) { dbManager.withReadDb { it.packetDao().getMessageCount(contact) } }
+        dbManager.withReadDb { it.packetDao().getMessageCount(contact) }
 
     override suspend fun getUnreadCount(contact: String): Int =
-        withContext(dispatchers.io) { dbManager.withReadDb { it.packetDao().getUnreadCount(contact) } }
+        dbManager.withReadDb { it.packetDao().getUnreadCount(contact) }
 
     override fun getUnreadCountFlow(contact: String): Flow<Int> =
         dbManager.observeCurrentDb { db -> db.packetDao().getUnreadCountFlow(contact) }
@@ -114,29 +114,27 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         }
     }
 
-    override suspend fun getQueuedPackets(): List<PersistedPacket> = withContext(dispatchers.io) {
-        dbManager
-            .withReadDb { it.packetDao().getAllPersistedPackets() }
+    override suspend fun getQueuedPackets(): List<PersistedPacket> = dbManager.withReadDb { db ->
+        db.packetDao()
+            .getAllPersistedPackets()
             .filter { it.data.status == MessageStatus.QUEUED }
             .map { PersistedPacket(id = PersistedPacketId(it.myNodeNum, it.uuid), packet = it.data) }
     }
 
-    override suspend fun getEnroutePackets(): List<PersistedPacket> = withContext(dispatchers.io) {
-        dbManager
-            .withReadDb { it.packetDao().getAllPersistedPackets() }
+    override suspend fun getEnroutePackets(): List<PersistedPacket> = dbManager.withReadDb { db ->
+        db.packetDao()
+            .getAllPersistedPackets()
             .filter { it.data.status == MessageStatus.ENROUTE }
             .map { PersistedPacket(id = PersistedPacketId(it.myNodeNum, it.uuid), packet = it.data) }
     }
 
-    override suspend fun getEnrouteReactions(): List<PersistedReaction> = withContext(dispatchers.io) {
-        dbManager
-            .withReadDb { it.packetDao().getReactionsByStatus(MessageStatus.ENROUTE) }
-            .map { entity ->
-                PersistedReaction(
-                    id = PersistedReactionId(entity.myNodeNum, entity.replyId, entity.userId, entity.emoji),
-                    reaction = entity.toReaction { null },
-                )
-            }
+    override suspend fun getEnrouteReactions(): List<PersistedReaction> = dbManager.withReadDb { db ->
+        db.packetDao().getReactionsByStatus(MessageStatus.ENROUTE).map { entity ->
+            PersistedReaction(
+                id = PersistedReactionId(entity.myNodeNum, entity.replyId, entity.userId, entity.emoji),
+                reaction = entity.toReaction { null },
+            )
+        }
     }
 
     // A null from withDb means no database was available, so nothing was timed out.
@@ -310,11 +308,9 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
                 ?.let { PersistedPacketId(it.myNodeNum, it.uuid) }
         }
 
-    override suspend fun resolveOutgoingPacket(packet: MeshPacket): PersistedPacket? = withContext(dispatchers.io) {
-        dbManager
-            .withReadDb { it.packetDao().resolveOutgoingPacket(packet) }
-            ?.let { stored -> PersistedPacket(PersistedPacketId(stored.myNodeNum, stored.uuid), stored.data) }
-    }
+    override suspend fun resolveOutgoingPacket(packet: MeshPacket): PersistedPacket? = dbManager
+        .withReadDb { it.packetDao().resolveOutgoingPacket(packet) }
+        ?.let { stored -> PersistedPacket(PersistedPacketId(stored.myNodeNum, stored.uuid), stored.data) }
 
     override suspend fun applyOutgoingQueueStatus(packet: MeshPacket, status: MessageStatus): PersistedPacket? =
         withContext(dispatchers.io + NonCancellable) {
@@ -348,23 +344,19 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     }
 
     override suspend fun getPacketById(id: Int): DataPacket? =
-        withContext(dispatchers.io) { dbManager.withReadDb { it.packetDao().getPacketById(id) }?.data }
+        dbManager.withReadDb { it.packetDao().getPacketById(id) }?.data
 
-    override suspend fun getPacketByPacketId(packetId: Int): DataPacket? = withContext(dispatchers.io) {
+    override suspend fun getPacketByPacketId(packetId: Int): DataPacket? =
         dbManager.withReadDb { it.packetDao().getPacketByPacketId(packetId) }?.packet?.data
-    }
 
-    override suspend fun getPacketByPacketIdIfUnique(packetId: Int): DataPacket? = withContext(dispatchers.io) {
+    override suspend fun getPacketByPacketIdIfUnique(packetId: Int): DataPacket? =
         dbManager.withReadDb { it.packetDao().findPacketsWithId(packetId) }.singleOrNull()?.data
-    }
 
-    override suspend fun getPacketByPersistedId(id: PersistedPacketId): DataPacket? = withContext(dispatchers.io) {
+    override suspend fun getPacketByPersistedId(id: PersistedPacketId): DataPacket? =
         dbManager.withReadDb { it.packetDao().getPacketByPersistedId(id.myNodeNum, id.uuid) }?.data
-    }
 
-    private suspend fun getReplyParent(packetId: Int, contactKey: String) = withContext(dispatchers.io) {
+    private suspend fun getReplyParent(packetId: Int, contactKey: String) =
         dbManager.withReadDb { it.packetDao().getPacketsByPacketIdAndContact(packetId, contactKey) }.singleOrNull()
-    }
 
     private suspend fun batchGetReplyParents(
         dao: PacketDao,
@@ -425,17 +417,14 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         withContext(dispatchers.io) { dbManager.withDb { it.packetDao().updateReactionByKey(reaction.toEntity(0)) } }
     }
 
-    override suspend fun getReactionByPacketId(packetId: Int): Reaction? = withContext(dispatchers.io) {
+    override suspend fun getReactionByPacketId(packetId: Int): Reaction? =
         dbManager.withReadDb { it.packetDao().getReactionByPacketId(packetId) }?.toReaction { null }
-    }
 
-    override suspend fun findPacketsWithId(packetId: Int): List<DataPacket> = withContext(dispatchers.io) {
+    override suspend fun findPacketsWithId(packetId: Int): List<DataPacket> =
         dbManager.withReadDb { it.packetDao().findPacketsWithId(packetId) }.map { it.data }
-    }
 
-    override suspend fun findReactionsWithId(packetId: Int): List<Reaction> = withContext(dispatchers.io) {
+    override suspend fun findReactionsWithId(packetId: Int): List<Reaction> =
         dbManager.withReadDb { it.packetDao().findReactionsWithId(packetId) }.toReaction { null }
-    }
 
     override suspend fun updateSFPPStatus(
         packetId: Int,
@@ -483,9 +472,8 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         .observeCurrentDb { db -> db.packetDao().getContactSettings() }
         .map { map -> map.mapValues { it.value.toShared() } }
 
-    override suspend fun getContactSettings(contact: String): ContactSettings = withContext(dispatchers.io) {
+    override suspend fun getContactSettings(contact: String): ContactSettings =
         dbManager.withReadDb { it.packetDao().getContactSettings(contact) }?.toShared() ?: ContactSettings(contact)
-    }
 
     override suspend fun setMuteUntil(contacts: List<String>, until: Long) {
         withContext(dispatchers.io) { dbManager.withDb { it.packetDao().setMuteUntil(contacts, until) } }
@@ -503,7 +491,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         dbManager.observeCurrentDb { db -> db.packetDao().getFilteredCountFlow(contactKey) }
 
     override suspend fun getFilteredCount(contactKey: String): Int =
-        withContext(dispatchers.io) { dbManager.withReadDb { it.packetDao().getFilteredCount(contactKey) } }
+        dbManager.withReadDb { it.packetDao().getFilteredCount(contactKey) }
 
     override suspend fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
         withContext(dispatchers.io) {
@@ -516,7 +504,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     }
 
     override suspend fun getDraft(contactKey: String): String =
-        withContext(dispatchers.io) { dbManager.withReadDb { it.packetDao().getDraft(contactKey) }.orEmpty() }
+        dbManager.withReadDb { it.packetDao().getDraft(contactKey) }.orEmpty()
 
     override suspend fun setPinned(contactKeys: List<String>, pinned: Boolean) {
         withContext(dispatchers.io) { dbManager.withDb { it.packetDao().setPinned(contactKeys, pinned) } }
