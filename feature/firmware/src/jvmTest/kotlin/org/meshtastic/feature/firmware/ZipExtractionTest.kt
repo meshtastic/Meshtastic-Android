@@ -18,14 +18,18 @@ package org.meshtastic.feature.firmware
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.FilterInputStream
 import java.io.InputStream
+import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.random.Random
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -210,6 +214,95 @@ class ZipExtractionTest {
         val entries = extractZipEntriesBounded(ByteArrayInputStream(zip), maxEntries = 100)
 
         assertEquals(setOf("same.bin"), entries.keys, "duplicates collapse to one key — that is the bug's premise")
+    }
+
+    // ---------- extractFirmwareEntry ----------
+
+    private fun tempDir(): File = Files.createTempDirectory("zip-extraction-test").toFile().apply { deleteOnExit() }
+
+    @Test
+    fun `the target firmware is written to the output directory`() {
+        val zip =
+            zipOf(
+                "esp32s3/firmware-heltec-v3-2.8.0.abc.bin" to ByteArray(32) { 7 },
+                "esp32s3/firmware-tbeam-s3-core-2.8.0.abc.bin" to ByteArray(16) { 1 },
+            )
+        val out = tempDir()
+
+        val file = extractFirmwareEntry(ByteArrayInputStream(zip), out, "heltec-v3", ".bin", preferredFilename = null)
+
+        assertEquals(File(out, "firmware-heltec-v3-2.8.0.abc.bin"), file)
+        assertContentEquals(ByteArray(32) { 7 }, file?.readBytes())
+    }
+
+    @Test
+    fun `the shortest matching entry name wins`() {
+        val zip =
+            zipOf(
+                "firmware-heltec-v3-2.8.0.abc-update.bin" to ByteArray(8) { 2 },
+                "firmware-heltec-v3-2.8.0.abc.bin" to ByteArray(8) { 1 },
+            )
+
+        val file = extractFirmwareEntry(ByteArrayInputStream(zip), tempDir(), "heltec-v3", ".bin", null)
+
+        assertEquals("firmware-heltec-v3-2.8.0.abc.bin", file?.name)
+    }
+
+    @Test
+    fun `a preferred filename is matched by name alone ignoring directory and case`() {
+        val zip = zipOf("nrf52840/Firmware-RAK4631-2.8.0.abc-ota.zip" to ByteArray(8) { 4 })
+
+        val file =
+            extractFirmwareEntry(
+                ByteArrayInputStream(zip),
+                tempDir(),
+                target = "",
+                fileExtension = ".zip",
+                preferredFilename = "firmware-rak4631-2.8.0.abc-ota.zip",
+            )
+
+        assertEquals("firmware-rak4631-2.8.0.abc-ota.zip", file?.name)
+    }
+
+    @Test
+    fun `no match returns null and writes nothing`() {
+        val zip = zipOf("firmware-tbeam-2.8.0.abc.bin" to ByteArray(8))
+        val out = tempDir()
+
+        assertNull(extractFirmwareEntry(ByteArrayInputStream(zip), out, "heltec-v3", ".bin", null))
+        assertEquals(0, out.listFiles()?.size)
+    }
+
+    @Test
+    fun `an entry past the write budget is refused without reading the rest and leaves no file`() {
+        val incompressible = Random(seed = 99).nextBytes(256 * 1024)
+        val zip = zipOf("firmware-heltec-v3-2.8.0.abc.bin" to incompressible)
+        val counting = CountingStream(ByteArrayInputStream(zip))
+        val out = tempDir()
+
+        assertFailsWith<IllegalArgumentException> {
+            extractFirmwareEntry(counting, out, "heltec-v3", ".bin", null, maxWrittenBytes = 4096)
+        }
+        assertTrue(counting.bytesRead < 64 * 1024, "read ${counting.bytesRead} of ${zip.size} bytes")
+        assertEquals(0, out.listFiles()?.size)
+    }
+
+    @Test
+    fun `extraction refuses too many entries`() {
+        val zip = zipOf(*Array(20) { "entry$it" to ByteArray(4) })
+
+        assertFailsWith<IllegalArgumentException> {
+            extractFirmwareEntry(ByteArrayInputStream(zip), tempDir(), "heltec-v3", ".bin", null, maxEntries = 10)
+        }
+    }
+
+    @Test
+    fun `entry matching excludes directories and non-firmware images`() {
+        assertTrue(isFirmwareEntryMatch("esp32/firmware-heltec-v3-2.8.0.bin", false, "heltec-v3", ".bin", null))
+        assertFalse(isFirmwareEntryMatch("esp32/firmware-heltec-v3-2.8.0.bin/", true, "heltec-v3", ".bin", null))
+        assertFalse(isFirmwareEntryMatch("littlefs-heltec-v3-2.8.0.bin", false, "heltec-v3", ".bin", null))
+        assertFalse(isFirmwareEntryMatch("firmware-heltec-v3-2.8.0.factory.bin", false, "heltec-v3", ".bin", null))
+        assertFalse(isFirmwareEntryMatch("x/firmware.uf2/", true, "", ".uf2", preferredFilename = "firmware.uf2"))
     }
 
     @Test

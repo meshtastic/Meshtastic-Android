@@ -17,8 +17,10 @@
 package org.meshtastic.feature.firmware
 
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.FilterInputStream
 import java.io.InputStream
+import java.io.OutputStream
 import java.util.zip.ZipInputStream
 
 /**
@@ -71,14 +73,22 @@ private class LimitedInputStream(delegate: InputStream, private val limit: Long)
  */
 internal fun readAtMost(input: InputStream, limit: Long): ByteArray? {
     val out = ByteArrayOutputStream()
+    return copyAtMost(input, out, limit)?.let { out.toByteArray() }
+}
+
+/**
+ * Copies at most [limit] bytes from [input] to [output], returning the count, or null once the source proves longer.
+ * Stops reading as soon as the limit is passed, so no more than `limit + `[COPY_BUFFER_SIZE] bytes are ever pulled.
+ */
+internal fun copyAtMost(input: InputStream, output: OutputStream, limit: Long): Long? {
     val buffer = ByteArray(COPY_BUFFER_SIZE)
     var total = 0L
     while (true) {
         val read = input.read(buffer)
-        if (read < 0) return out.toByteArray()
+        if (read < 0) return total
         total += read
         if (total > limit) return null
-        out.write(buffer, 0, read)
+        output.write(buffer, 0, read)
     }
 }
 
@@ -122,4 +132,71 @@ internal fun extractZipEntriesBounded(
         }
     }
     return entries
+}
+
+/**
+ * Streams the firmware image for [target] out of the zip in [input] into [outputDir] and returns the written file, or
+ * null when no entry matches. With [preferredFilename] the first entry of exactly that name wins; otherwise every match
+ * is written and the shortest entry name wins, the canonical image when a bundle carries variants.
+ *
+ * Bounded by entry count and bytes written, not by archive size: a release archive runs past 200 MB and 250 entries,
+ * while a single firmware image is a few MB and only matching entries are written. Throws [IllegalArgumentException]
+ * when a bound is exceeded, leaving no partial file behind.
+ */
+internal fun extractFirmwareEntry(
+    input: InputStream,
+    outputDir: File,
+    target: String,
+    fileExtension: String,
+    preferredFilename: String?,
+    maxEntries: Int = MAX_FIRMWARE_ZIP_ENTRIES,
+    maxWrittenBytes: Long = MAX_FIRMWARE_UNCOMPRESSED_BYTES,
+): File? {
+    outputDir.mkdirs()
+    val matches = mutableListOf<Pair<String, File>>()
+    var remaining = maxWrittenBytes
+    var entriesSeen = 0
+    ZipInputStream(input).use { zip ->
+        var entry = zip.nextEntry
+        while (entry != null) {
+            if (!entry.isDirectory) {
+                entriesSeen++
+                require(entriesSeen <= maxEntries) { "Firmware archive has more than $maxEntries entries" }
+            }
+            if (isFirmwareEntryMatch(entry.name, entry.isDirectory, target, fileExtension, preferredFilename)) {
+                // Only the last path segment is kept, so an entry name cannot write outside outputDir.
+                val outFile = File(outputDir, File(entry.name.lowercase()).name)
+                val written = outFile.outputStream().use { copyAtMost(zip, it, remaining) }
+                if (written == null) {
+                    outFile.delete()
+                    throw IllegalArgumentException("Firmware entry expands past the $maxWrittenBytes-byte limit")
+                }
+                remaining -= written
+                if (preferredFilename != null) return outFile
+                matches += entry.name to outFile
+            }
+            entry = zip.nextEntry
+        }
+    }
+    return matches.minByOrNull { (name, _) -> name.length }?.second
+}
+
+/**
+ * Whether zip entry [entryName] is the firmware to extract: exactly [preferredFilename] (ignoring its directory and
+ * case) when one is given, otherwise a firmware image for [target] with [fileExtension]. Directories never match.
+ */
+internal fun isFirmwareEntryMatch(
+    entryName: String,
+    isDirectory: Boolean,
+    target: String,
+    fileExtension: String,
+    preferredFilename: String?,
+): Boolean {
+    if (isDirectory) return false
+    val name = entryName.lowercase()
+    return if (preferredFilename != null) {
+        File(name).name == preferredFilename.lowercase()
+    } else {
+        isValidFirmwareFile(name, target.lowercase(), fileExtension)
+    }
 }
