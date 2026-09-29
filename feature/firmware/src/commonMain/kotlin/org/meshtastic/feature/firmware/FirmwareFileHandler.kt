@@ -117,7 +117,8 @@ interface FirmwareFileHandler {
      * @param hardware Used to match the correct binary inside the zip.
      * @param fileExtension The extension to filter for (e.g. ".bin", ".uf2").
      * @param preferredFilename Optional exact filename to prefer within the zip.
-     * @return The extracted [FirmwareArtifact], or `null` if no matching file was found.
+     * @return The extracted [FirmwareArtifact], or `null` if no file matched or the archive is corrupt or over the
+     *   extraction limits.
      */
     suspend fun extractFirmware(
         uri: CommonUri,
@@ -133,7 +134,8 @@ interface FirmwareFileHandler {
      * @param hardware Used to match the correct binary inside the zip.
      * @param fileExtension The extension to filter for (e.g. ".bin", ".uf2").
      * @param preferredFilename Optional exact filename to prefer within the zip.
-     * @return The extracted [FirmwareArtifact], or `null` if no matching file was found.
+     * @return The extracted [FirmwareArtifact], or `null` if no file matched or the archive is corrupt or over the
+     *   extraction limits.
      */
     suspend fun extractFirmwareFromZip(
         zipFile: FirmwareArtifact,

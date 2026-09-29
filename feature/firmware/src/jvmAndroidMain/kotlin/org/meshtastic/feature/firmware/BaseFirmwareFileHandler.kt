@@ -111,14 +111,10 @@ abstract class BaseFirmwareFileHandler(private val client: HttpClient, protected
         preferredFilename: String?,
     ): FirmwareArtifact? = withContext(ioDispatcher) {
         if (hardware.effectiveTarget.isEmpty() && preferredFilename == null) return@withContext null
-        try {
-            val input = openUri(uri) ?: return@withContext null
-            extractFirmwareEntry(input, tempDir, hardware.effectiveTarget, fileExtension, preferredFilename)
-                ?.toFirmwareArtifact()
-        } catch (e: IOException) {
-            Logger.w(e) { "Failed to extract firmware from URI" }
-            null
+        extractFirmwareEntryOrNull(tempDir, hardware.effectiveTarget, fileExtension, preferredFilename) {
+            openUri(uri)
         }
+            ?.toFirmwareArtifact()
     }
 
     override suspend fun extractFirmwareFromZip(
@@ -129,13 +125,9 @@ abstract class BaseFirmwareFileHandler(private val client: HttpClient, protected
     ): FirmwareArtifact? = withContext(ioDispatcher) {
         val localZipFile = zipFile.toLocalFileOrNull() ?: return@withContext null
         if (hardware.effectiveTarget.isEmpty() && preferredFilename == null) return@withContext null
-        extractFirmwareEntry(
-            localZipFile.inputStream(),
-            tempDir,
-            hardware.effectiveTarget,
-            fileExtension,
-            preferredFilename,
-        )
+        extractFirmwareEntryOrNull(tempDir, hardware.effectiveTarget, fileExtension, preferredFilename) {
+            localZipFile.inputStream()
+        }
             ?.toFirmwareArtifact()
     }
 
@@ -149,4 +141,21 @@ abstract class BaseFirmwareFileHandler(private val client: HttpClient, protected
         if (parsedUri.scheme == "file") File(parsedUri) else null
     }
         .getOrNull()
+}
+
+/** A corrupt archive or one past [extractFirmwareEntry]'s limits yields null, so retrieval moves to its fallbacks. */
+private fun extractFirmwareEntryOrNull(
+    outputDir: File,
+    target: String,
+    fileExtension: String,
+    preferredFilename: String?,
+    open: () -> InputStream?,
+): File? = try {
+    open()?.let { extractFirmwareEntry(it, outputDir, target, fileExtension, preferredFilename) }
+} catch (e: IOException) {
+    Logger.w(e) { "Failed to extract firmware" }
+    null
+} catch (e: IllegalArgumentException) {
+    Logger.w(e) { "Firmware archive refused" }
+    null
 }
