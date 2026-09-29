@@ -8,6 +8,16 @@ reviews:
   profile: chill
   high_level_summary: true
   poem: false
+  # Keep the walkthrough to the summary and the changed files. review_status stays on:
+  # tooling reads the paused, draft and rate-limited notices from it.
+  sequence_diagrams: false
+  related_prs: false
+  related_issues: false
+  suggested_labels: false
+  suggested_reviewers: false
+  estimate_code_review_effort: false
+  in_progress_fortune: false
+  enable_prompt_for_ai_agents: false
   # Don't burn reviews on WIP. This repo opens lots of draft PRs; review on "ready".
   # Skip Renovate dependency updates — CI gates dependencies; we review for substance, not every bump.
   auto_review:
@@ -323,6 +333,11 @@ reviews:
           Pre-existing defects carried into the new location are in scope — label them "pre-existing —
           good opportunity to fix during this refactor" so the author can decide on scope. Do not flag
           a move that the diff shows to be genuinely mechanical.
+
+chat:
+  # Answer only when tagged, so a plain reply on a thread does not draw a review of its own.
+  # Tag @coderabbitai on a decline whose reason should become a learning.
+  auto_reply: false
 
 knowledge_base:
   # Learnings are how a confirmed finding stops recurring on the next PR. Pin the
