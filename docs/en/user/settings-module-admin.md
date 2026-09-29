@@ -30,7 +30,7 @@ Module settings use a card-based layout with toggle switches, dropdowns, text fi
 
 Every module lives under **Settings → Module configuration**.
 
-> ⚠️ **Important:** Saving a module screen restarts the node — the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**. External Notification may still restart the node for some changes, while a Mesh Beacon change applies without a restart.
+> ⚠️ **Important:** Saving a module screen restarts the node: the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**. External Notification may still restart the node for some changes, while a Mesh Beacon change applies without a restart.
 
 ### MQTT module
 
