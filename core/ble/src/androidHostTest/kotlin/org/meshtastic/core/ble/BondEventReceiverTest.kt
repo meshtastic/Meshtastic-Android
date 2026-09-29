@@ -29,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Before
@@ -92,6 +93,17 @@ class BondEventReceiverTest {
             registration.intentFilter.actionsIterator().asSequence().toSet(),
         )
         assertEquals(Context.RECEIVER_EXPORTED, registration.flags and Context.RECEIVER_EXPORTED)
+    }
+
+    @Test
+    fun `is registered by the time watch returns on a dispatcher that has not run yet`() {
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        val pending = CoroutineScope(Job() + StandardTestDispatcher())
+
+        BondEventReceiver(app, pending).watch(radio)
+
+        assertEquals(1, bondReceivers().size)
+        pending.cancel()
     }
 
     @Test

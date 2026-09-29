@@ -28,6 +28,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
@@ -63,7 +64,8 @@ internal class BondEventReceiver(
     fun watch(address: String) {
         watched += address.uppercase()
         if (!registered.get() && hasConnectPermission() && registered.compareAndSet(false, true)) {
-            scope.launch { receiveUntilCancelled() }
+            // Undispatched so the receiver is registered before a bond() that follows can broadcast.
+            scope.launch(start = CoroutineStart.UNDISPATCHED) { receiveUntilCancelled() }
         }
     }
 
