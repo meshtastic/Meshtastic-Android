@@ -127,14 +127,14 @@ interface PacketRepository {
     ): PersistedPacketId
 
     /**
-     * Returns a reactive flow of messages for a conversation.
+     * Returns a reactive flow of messages for a conversation that follows the active database across device switches.
      *
      * @param contact The conversation identifier.
      * @param limit Optional maximum number of messages to return.
      * @param includeFiltered Whether to include messages that were marked as filtered.
      * @param getNode Callback to fetch node info for message sender attribution.
      */
-    suspend fun getMessagesFrom(
+    fun getMessagesFrom(
         contact: String,
         limit: Int? = null,
         includeFiltered: Boolean = true,

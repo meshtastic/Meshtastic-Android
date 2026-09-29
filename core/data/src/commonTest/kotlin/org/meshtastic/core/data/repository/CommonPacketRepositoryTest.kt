@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.repository
 
+import app.cash.turbine.test
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -405,6 +406,32 @@ abstract class CommonPacketRepositoryTest {
         assertEquals(2, pagedCandidates.size)
         assertNull(pagedCandidates.singleOrNull())
     }
+
+    @Test
+    fun `getMessagesFrom follows the active database across a device switch`() = runTest(testDispatcher) {
+        val contact = "0^all"
+        repository.savePacket(0, contact, textPacket(id = 1, text = "device A"), 1L)
+
+        repository.getMessagesFrom(contact, getNode = ::testNode).test {
+            assertEquals(listOf("device A"), awaitItem().map { it.text })
+
+            dbProvider.switchToNewDatabase()
+            assertEquals(emptyList(), awaitItem().map { it.text })
+
+            repository.savePacket(0, contact, textPacket(id = 2, text = "device B"), 2L)
+            assertEquals(listOf("device B"), awaitItem().map { it.text })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    private fun textPacket(id: Int, text: String) = DataPacket(
+        from = "!aaaa0001",
+        to = "^all",
+        bytes = text.encodeToByteArray().toByteString(),
+        dataType = PortNum.TEXT_MESSAGE_APP.value,
+        id = id,
+        status = MessageStatus.RECEIVED,
+    )
 
     private fun testNode(id: String?): Node =
         Node(num = 0, user = User.Builder().also { wb -> wb.id = id.orEmpty() }.build())
