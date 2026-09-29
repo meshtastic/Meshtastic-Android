@@ -29,6 +29,8 @@ import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class RadioConfigUseCaseTest {
 
@@ -126,11 +128,11 @@ class RadioConfigUseCaseTest {
 
     @Test
     fun `removeFixedPosition sends the removal sentinel`() = runTest {
-        assertSends(AdminRequest("setFixedPosition", DEST, Position(0.0, 0.0, 0), null)) {
-            useCase.removeFixedPosition(DEST)
-            null
-        }
-        assertEquals(true, radioController.fixedPositions.single().isFixedPositionRemoval())
+        useCase.removeFixedPosition(DEST)
+
+        val request = radioController.adminRequests.single()
+        assertEquals(AdminRequest("setFixedPosition", DEST, request.payload, null), request)
+        assertTrue(assertIs<Position>(request.payload).isFixedPositionRemoval())
     }
 
     @Test

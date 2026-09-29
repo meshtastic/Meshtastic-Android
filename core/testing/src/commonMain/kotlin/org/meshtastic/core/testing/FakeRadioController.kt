@@ -310,13 +310,13 @@ class FakeRadioController :
     }
 
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
-        recordConfigWrite(destNum, config, invokeStandaloneHook = true)
         recordAdminRequest("setConfig", destNum, config, packetId)
+        recordConfigWrite(destNum, config, invokeStandaloneHook = true)
     }
 
     override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
-        recordModuleConfigWrite(destNum, config, invokeStandaloneHook = true)
         recordAdminRequest("setModuleConfig", destNum, config, packetId)
+        recordModuleConfigWrite(destNum, config, invokeStandaloneHook = true)
     }
 
     private fun recordAdminRequest(kind: String, destNum: Int, payload: Any?, packetId: Int?) {
@@ -345,10 +345,10 @@ class FakeRadioController :
     }
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {
+        recordAdminRequest("setFixedPosition", destNum, position, packetId = null)
         onSetFixedPosition(destNum, position)
         fixedPositions.add(position)
         adminOperations.add("fixed-position")
-        recordAdminRequest("setFixedPosition", destNum, position, packetId = null)
     }
 
     override suspend fun setRingtone(destNum: Int, ringtone: String) {
