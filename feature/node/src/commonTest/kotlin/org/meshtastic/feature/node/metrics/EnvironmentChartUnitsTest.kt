@@ -23,7 +23,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-@Suppress("MagicNumber")
 class EnvironmentChartUnitsTest {
 
     private fun telemetry(env: EnvironmentMetrics) = Telemetry.Builder()

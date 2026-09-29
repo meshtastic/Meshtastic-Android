@@ -196,7 +196,7 @@ class DecodePaxFromLogTest {
  * This avoids needing to instantiate the full ViewModel with all its dependencies. The logic is identical to the
  * ViewModel method.
  */
-@Suppress("MagicNumber", "CyclomaticComplexMethod", "ReturnCount")
+@Suppress("CyclomaticComplexMethod", "ReturnCount")
 private fun decodePaxFromLogStandalone(log: MeshLog): ProtoPaxcount? {
     try {
         val packet = log.fromRadio.packet

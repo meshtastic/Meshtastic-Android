@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
-
 package org.meshtastic.feature.discovery
 
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity

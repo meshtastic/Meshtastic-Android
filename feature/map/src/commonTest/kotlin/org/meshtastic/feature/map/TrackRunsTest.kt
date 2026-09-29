@@ -22,7 +22,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@Suppress("MagicNumber")
 class TrackRunsTest {
 
     // One degree of latitude is about 111 km, so 1e-4 degrees is about 11 m.

@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
-
 package org.meshtastic.feature.discovery
 
 import kotlinx.coroutines.CompletableDeferred
@@ -268,7 +266,6 @@ class DiscoveryScanEngineTest {
      * (collection clearing). Call before sending packets to avoid a race where the scan loop's `collectedNodes.clear()`
      * wipes out test-injected data.
      */
-    @Suppress("MagicNumber")
     private suspend fun awaitScanLoopInit() {
         delay(100)
     }

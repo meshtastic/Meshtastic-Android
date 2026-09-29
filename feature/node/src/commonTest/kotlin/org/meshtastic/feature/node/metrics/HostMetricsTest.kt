@@ -23,7 +23,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@Suppress("MagicNumber")
 class HostMetricsTest {
 
     private fun telemetry(time: Int, hostMetrics: HostMetrics? = null) = Telemetry.Builder()

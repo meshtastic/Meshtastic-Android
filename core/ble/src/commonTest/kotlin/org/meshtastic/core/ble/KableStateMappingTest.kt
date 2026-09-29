@@ -134,7 +134,6 @@ class KableStateMappingTest {
     }
 
     @Test
-    @Suppress("MagicNumber")
     fun `Unknown status maps to PlatformSpecific with code`() {
         val result = State.Disconnected.Status.Unknown(status = 42).toDisconnectReason()
         assertIs<DisconnectReason.PlatformSpecific>(result)

@@ -55,7 +55,6 @@ import kotlin.random.Random
  * the full `MeshMessageProcessor` graph and is a separate integration harness. The [adversarialFromRadio] corpus here
  * is designed to feed that harness when it lands.
  */
-@Suppress("MagicNumber")
 object ReplayFuzz {
 
     /** Default seed sweep per invariant. Each seed is microseconds of work, so this stays well within CI budgets. */
