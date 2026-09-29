@@ -24,13 +24,12 @@ import androidx.sqlite.execSQL
  * Wraps a [SQLiteDriver] so every connection it opens waits up to [busyTimeoutMs] for a competing connection's lock
  * instead of failing immediately with SQLITE_BUSY ("Error code: 5, message: database is locked").
  *
- * Each database normally holds a single connection (see `configureCommon`), but [DatabaseManager]'s wedge recovery
- * deliberately abandons a stalled connection and opens a replacement pool against the same file (see
- * `abandonWedgedDbBlock`). Until the abandoned callback finishes, both connections are live — and the bundled driver's
- * default busy timeout is zero, so any write on the replacement fails the moment the abandoned connection holds the
- * write lock. In the field (2.8.1, build 29321949) that surfaced as a fatal uncaught SQLITE_BUSY from Room's own
- * invalidation-tracker housekeeping (`TriggerBasedInvalidationTracker.syncTriggers`), which the app cannot catch. A
- * busy timeout makes the replacement connection wait out the overlap instead.
+ * Each database normally holds a single connection (see `configureCommon`), but [DatabaseManager]'s wedge recovery can
+ * leave an abandoned callback's connection open beside a replacement pool on the same file (see
+ * `abandonWedgedDbBlock`). Recovery never publishes a replacement while another connection holds the write lock, so
+ * this timeout only covers overlaps that begin afterwards. Room raises any timeout below 3s on open, and runs its
+ * invalidation-tracker trigger sync (`TriggerBasedInvalidationTracker.syncTriggers`) under `BEGIN IMMEDIATE` with its
+ * SQLITE_BUSY uncaught, so a lock held past this timeout is fatal.
  */
 class BusyTimeoutSQLiteDriver(
     private val delegate: SQLiteDriver,
@@ -58,9 +57,9 @@ class BusyTimeoutSQLiteDriver(
 
     companion object {
         /**
-         * Long enough to ride out the typical abandoned-writer overlap (slow MeshLog cleanups and node-heavy packet
-         * transactions observed in the field run 1-30s), short enough that a truly stuck holder still surfaces as an
-         * error rather than an ANR-adjacent stall. Waiting happens on Room's I/O dispatcher, never the main thread.
+         * Long enough to ride out a short write on another connection, short enough that a truly stuck holder still
+         * surfaces as an error rather than an ANR-adjacent stall. Waiting happens on Room's I/O dispatcher, never the
+         * main thread.
          */
         const val DEFAULT_BUSY_TIMEOUT_MS = 10_000L
     }
