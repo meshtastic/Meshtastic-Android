@@ -2,7 +2,7 @@
 title: Testing
 parent: Developer Guide
 nav_order: 7
-last_updated: 2026-09-26
+last_updated: 2026-09-29
 description: Testing strategy for the Meshtastic KMP project — test categories, screenshot pipeline, baseline profiles, and CI integration.
 aliases:
   - tests
@@ -18,7 +18,7 @@ Testing strategy and practices for the Meshtastic KMP project.
 
 ### KMP unit tests (`commonTest`)
 
-Shared tests that run on all platforms:
+Shared tests written once and run on the JVM and, in modules that declare `withHostTest`, as Android host tests. `commonTest` also compiles for iOS, but iOS test execution is disabled, so no iOS test runs:
 
 ```shell
 ./gradlew allTests
@@ -31,10 +31,11 @@ Shared tests that run on all platforms:
 
 ### Android host tests
 
-Android-specific tests that run on JVM:
+Android-specific tests that run on the JVM. In pure-Android/JVM modules (such as `androidApp`) `test` runs them; in KMP modules that declare `withHostTest {}`, `allTests` runs them through `testAndroidHostTest`:
 
 ```shell
-./gradlew test
+./gradlew test       # pure Android/JVM modules
+./gradlew allTests   # KMP modules
 ```
 
 - ViewModel tests
@@ -126,7 +127,7 @@ feature/my-feature/src/
 
 ### DO
 
-- Write tests in `commonTest` when possible (runs everywhere)
+- Write tests in `commonTest` when possible (runs on the JVM, and as an Android host test where the module declares `withHostTest`)
 - Test business logic independently from UI
 - Use fakes/stubs instead of mocks where practical
 - Test edge cases: empty states, error states, boundary values
@@ -143,8 +144,8 @@ feature/my-feature/src/
 ## Running tests
 
 ```shell
-# All KMP tests
-./gradlew allTests
+# All tests: allTests covers KMP modules, test covers Android/JVM-only modules; run both
+./gradlew test allTests
 
 # Specific module
 ./gradlew :feature:docs:allTests

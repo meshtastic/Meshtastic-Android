@@ -11,7 +11,8 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 ## 1. Source-Set Boundaries
 - **`commonMain`:** All business logic, DB entities, API network logic, ViewModels, and UI rendering. NO `java.*` or `android.*` imports.
 - **`androidMain`:** Android framework integration (`Context`, system services, NFC hardware, BLE Android bindings).
-- **`jvmMain` / `jvmAndroidMain`:** Shared JVM code between Android and Desktop. Uses the `meshtastic.kmp.jvm.android` convention plugin to bridge `jvm` and `android` source sets without manual `dependsOn` hacks.
+- **`jvmMain`:** Desktop-only JVM code.
+- **`jvmAndroidMain`:** JVM code shared between Android and Desktop. Uses the `meshtastic.kmp.jvm.android` convention plugin to bridge `jvm` and `android` source sets without manual `dependsOn` hacks.
 - **`androidApp` / `desktopApp`:** Host shells. Responsible for Koin DI root wiring (`MainKoinModule`/`AppKoinModule`, `DesktopKoinModule`), host-level UI themes, and running the `MeshtasticNavDisplay`.
 
 ## 2. Bridging Strategies

@@ -2,7 +2,7 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-09-11
+last_updated: 2026-09-28
 description: How the Android and Desktop apps split into androidApp/desktopApp, feature modules, and core modules, and how radio control and navigation are layered across them.
 aliases:
   - layers
@@ -58,6 +58,7 @@ Each `feature/` module owns a vertical slice of functionality:
 | `feature:connections` | Bluetooth/USB/TCP connection management |
 | `feature:map` | Map display, waypoints — shared state, policy and the waypoint editor |
 | `feature:map-maplibre` | MapLibre map surfaces — used by the `fdroid` flavor and Desktop; the `google` flavor uses Google Maps instead. Tile-source definitions and the custom-source editor are in `feature:map`, so both renderers share them |
+| `feature:map-terrain` | Offline terrain: elevation decode, hillshade shading and contour lines, shared by both map flavors |
 | `feature:node` | Node list, node detail, metrics |
 | `feature:settings` | All configuration screens |
 | `feature:firmware` | Firmware update flow |
@@ -68,7 +69,7 @@ Each `feature/` module owns a vertical slice of functionality:
 
 Feature modules:
 - Use the `meshtastic.kmp.feature` convention plugin
-- Depend on `core` modules, never on other `feature` modules
+- Depend on `core` modules, not on other `feature` modules; the one exception is `feature:map-maplibre`, which builds on `feature:map` and `feature:map-terrain`
 - Own their navigation entries and DI registrations
 - Contain platform-specific implementations in `androidMain`/`jvmMain`/`iosMain`
 
@@ -107,13 +108,21 @@ Each module uses the standard KMP source set hierarchy:
 
 ```text
 src/
-├── commonMain/     ← Shared code (all platforms)
-├── commonTest/     ← Shared tests
-├── androidMain/    ← Android-specific
-├── jvmMain/        ← Desktop JVM-specific
-├── iosMain/        ← iOS-specific
-└── jvmTest/        ← Desktop test host
+├── commonMain/         ← Shared code (all platforms)
+├── commonTest/         ← Shared tests
+├── androidMain/        ← Android-specific
+├── jvmMain/            ← Desktop JVM-specific
+├── jvmAndroidMain/     ← Shared by Android and desktop JVM
+├── iosMain/            ← iOS-specific
+├── nativeMain/         ← Native-target code shared across iOS targets
+├── jvmTest/            ← Desktop test host
+├── androidHostTest/    ← Android host (JVM) unit tests
+└── androidDeviceTest/  ← Instrumented tests (core:database, core:model)
 ```
+
+`jvmAndroidMain` exists only in modules that apply `meshtastic.kmp.jvm.android`. `nativeMain`,
+`androidHostTest` (modules that call `withHostTest`) and `androidDeviceTest` exist only in the
+modules that need them.
 
 **Golden Rules:**
 - No `android.*` imports in `commonMain`

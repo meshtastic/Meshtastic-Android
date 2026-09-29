@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
  * the JVM (`java.*`) or Android (`android.*`) platform APIs — use the KMP equivalents (Okio, kotlinx-datetime,
  * atomicfu, Mutex, …) instead.
  *
- * Konsist scans every module's Kotlin source from disk, so this single test covers all 37 modules. It runs on the JVM
+ * Konsist scans every module's Kotlin source from disk, so this single test covers every module. It runs on the JVM
  * (Konsist is JVM-only) under the existing `allTests` baseline gate.
  */
 class CommonMainFrameworkBoundaryTest {
