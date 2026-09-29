@@ -1,4 +1,5 @@
 ### A11Y ###
+a11y_humidity
 a11y_label_value
 a11y_message_from
 a11y_node_battery
@@ -12,6 +13,7 @@ a11y_node_online
 a11y_node_role
 a11y_node_signal
 a11y_nodes_at_hop
+a11y_temperature
 about
 accept
 acknowledgements

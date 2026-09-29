@@ -59,16 +59,16 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.a11y_humidity
 import org.meshtastic.core.resources.a11y_node_channel
 import org.meshtastic.core.resources.a11y_node_hops_away
+import org.meshtastic.core.resources.a11y_temperature
 import org.meshtastic.core.resources.distance
-import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.node_incomplete
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.pressure
-import org.meshtastic.core.resources.temperature
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.icon.Channel
 import org.meshtastic.core.ui.icon.Counter0
@@ -474,7 +474,7 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.Temperature,
-                        contentDescription = stringResource(Res.string.temperature),
+                        contentDescription = stringResource(Res.string.a11y_temperature),
                         contentColor = contentColor,
                         text = temp,
                     )
@@ -484,7 +484,7 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.Humidity,
-                        contentDescription = stringResource(Res.string.humidity),
+                        contentDescription = stringResource(Res.string.a11y_humidity),
                         contentColor = contentColor,
                         text = MetricFormatter.humidity(env.relative_humidity ?: 0f),
                     )
