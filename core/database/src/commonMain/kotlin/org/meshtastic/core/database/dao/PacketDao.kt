@@ -1196,10 +1196,9 @@ private suspend fun PacketDao.applyLiveMoves(liveMoves: List<ChannelKeyChange>) 
         } else {
             getAllUserPacketsForMigration().filter { ContactKey(it.contact_key).channelOrNull in sourceIndices }
         }
-    val moveByIndex =
-        liveMoves.associate { change ->
-            (change.from as ConversationSlot.Live).index to (change.to as ConversationSlot.Live).index
-        }
+    val moveByIndex = liveMoves.associate { change ->
+        (change.from as ConversationSlot.Live).index to (change.to as ConversationSlot.Live).index
+    }
 
     // Settings are re-keyed the same way: read every affected row, then rewrite, so a swap cannot land a
     // conversation's mute or pin on the channel it traded places with.

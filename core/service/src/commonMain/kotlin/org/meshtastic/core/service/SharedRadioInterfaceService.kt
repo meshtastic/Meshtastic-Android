@@ -1013,14 +1013,13 @@ class SharedRadioInterfaceService(
     private fun startHeartbeat() {
         heartbeatJob?.cancel()
         lastDataReceivedMillis = now()
-        heartbeatJob =
-            serviceScope.launch {
-                while (true) {
-                    delay(HEARTBEAT_INTERVAL_MILLIS)
-                    keepAlive()
-                    checkLiveness()
-                }
+        heartbeatJob = serviceScope.launch {
+            while (true) {
+                delay(HEARTBEAT_INTERVAL_MILLIS)
+                keepAlive()
+                checkLiveness()
             }
+        }
     }
 
     /**
@@ -1145,10 +1144,11 @@ class SharedRadioInterfaceService(
 
     private fun sendThroughAdmittedTransport(admission: TransportSendAdmission.Admitted, bytes: ByteArray): Boolean =
         try {
-            val sent =
-                safeCatching { admission.transport.handleSendToRadio(bytes) }
-                    .onFailure { Logger.w(it) { "trySendToRadio: active transport rejected ${bytes.size} bytes" } }
-                    .getOrDefault(false)
+            val sent = safeCatching {
+                admission.transport.handleSendToRadio(bytes)
+            }
+                .onFailure { Logger.w(it) { "trySendToRadio: active transport rejected ${bytes.size} bytes" } }
+                .getOrDefault(false)
             if (sent) {
                 safeCatching { _meshActivity.tryEmit(MeshActivity.Send) }
                     .onFailure { Logger.w(it) { "trySendToRadio: failed to publish mesh activity" } }

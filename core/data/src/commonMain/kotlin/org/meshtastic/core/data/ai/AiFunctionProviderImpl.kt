@@ -361,17 +361,16 @@ class AiFunctionProviderImpl(
                     }
 
                 val channelSet = radioConfigRepository.channelSetFlow.first()
-                val summaries =
-                    messages.map { msg ->
-                        MessageSummary(
-                            senderName = msg.node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${msg.node.num}",
-                            text = msg.text,
-                            contactName = resolveContactDisplayName(msg, channelSet),
-                            receivedTime = msg.receivedTime,
-                            fromLocal = msg.fromLocal,
-                            read = msg.read,
-                        )
-                    }
+                val summaries = messages.map { msg ->
+                    MessageSummary(
+                        senderName = msg.node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${msg.node.num}",
+                        text = msg.text,
+                        contactName = resolveContactDisplayName(msg, channelSet),
+                        receivedTime = msg.receivedTime,
+                        fromLocal = msg.fromLocal,
+                        read = msg.read,
+                    )
+                }
 
                 GetRecentMessagesResult.Success(summaries)
             } catch (e: CancellationException) {
@@ -391,30 +390,29 @@ class AiFunctionProviderImpl(
 
             val nonMutedContacts = contacts.filter { (key, _) -> settings[key]?.isMuted != true }
 
-            val contactUnreads =
-                nonMutedContacts.mapNotNull { (contactKey, lastPacket) ->
-                    val unreadCount = packetRepository.getUnreadCount(contactKey)
-                    if (unreadCount <= 0) return@mapNotNull null
+            val contactUnreads = nonMutedContacts.mapNotNull { (contactKey, lastPacket) ->
+                val unreadCount = packetRepository.getUnreadCount(contactKey)
+                if (unreadCount <= 0) return@mapNotNull null
 
-                    val isBroadcast = lastPacket.to == NodeAddress.ID_BROADCAST
-                    val displayName =
-                        if (isBroadcast) {
-                            val channelIndex = contactKey.firstOrNull()?.digitToIntOrNull() ?: 0
-                            channelSet.settings.getOrNull(channelIndex)?.name?.ifBlank { "Channel $channelIndex" }
-                                ?: "Channel $channelIndex"
-                        } else {
-                            val userId = lastPacket.from ?: ""
-                            val node = nodeMap.values.find { it.user.id == userId }
-                            node?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Unknown"
-                        }
+                val isBroadcast = lastPacket.to == NodeAddress.ID_BROADCAST
+                val displayName =
+                    if (isBroadcast) {
+                        val channelIndex = contactKey.firstOrNull()?.digitToIntOrNull() ?: 0
+                        channelSet.settings.getOrNull(channelIndex)?.name?.ifBlank { "Channel $channelIndex" }
+                            ?: "Channel $channelIndex"
+                    } else {
+                        val userId = lastPacket.from ?: ""
+                        val node = nodeMap.values.find { it.user.id == userId }
+                        node?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Unknown"
+                    }
 
-                    ContactUnread(
-                        name = displayName,
-                        unreadCount = unreadCount,
-                        lastMessagePreview = lastPacket.text?.take(MESSAGE_PREVIEW_MAX_LENGTH),
-                        lastMessageTime = lastPacket.time.takeIf { it > 0 },
-                    )
-                }
+                ContactUnread(
+                    name = displayName,
+                    unreadCount = unreadCount,
+                    lastMessagePreview = lastPacket.text?.take(MESSAGE_PREVIEW_MAX_LENGTH),
+                    lastMessageTime = lastPacket.time.takeIf { it > 0 },
+                )
+            }
 
             val totalUnread = contactUnreads.sumOf { it.unreadCount }
 

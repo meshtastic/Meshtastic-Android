@@ -43,16 +43,15 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
-private val EXPORT_TIMESTAMP_FORMAT =
-    LocalDateTime.Format {
-        year()
-        monthNumber()
-        day()
-        char('_')
-        hour()
-        minute()
-        second()
-    }
+private val EXPORT_TIMESTAMP_FORMAT = LocalDateTime.Format {
+    year()
+    monthNumber()
+    day()
+    char('_')
+    hour()
+    minute()
+    second()
+}
 
 /** Section for settings related to data persistence and exports. */
 @Composable

@@ -166,12 +166,13 @@ internal constructor(
 
             // Best-effort DFU Version read — gate out unsupported old bootloaders (SDK ≤ 6).
             val versionChar = service.characteristic(LEGACY_DFU_VERSION_UUID)
-            val version =
-                safeCatching { service.read(versionChar) }
-                    .map { bytes ->
-                        if (bytes.size >= 2) (bytes[0].toInt() and 0xFF) or ((bytes[1].toInt() and 0xFF) shl 8) else -1
-                    }
-                    .getOrElse { -1 }
+            val version = safeCatching {
+                service.read(versionChar)
+            }
+                .map { bytes ->
+                    if (bytes.size >= 2) (bytes[0].toInt() and 0xFF) or ((bytes[1].toInt() and 0xFF) shl 8) else -1
+                }
+                .getOrElse { -1 }
             dfuVersion = version
             Logger.i { "Legacy DFU: DFU Version characteristic = $version (-1 ⇒ absent / unreadable)" }
             if (version in 1..MIN_SUPPORTED_DFU_VERSION - 1) {

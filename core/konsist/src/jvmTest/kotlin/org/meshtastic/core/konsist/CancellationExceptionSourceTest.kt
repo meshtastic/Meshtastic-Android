@@ -47,12 +47,11 @@ class CancellationExceptionSourceTest {
 
     @Test
     fun `no source names the stdlib CancellationException`() {
-        val offenders =
-            sourceFiles.flatMap { file ->
-                file.text.lines().withIndex().mapNotNull { (index, line) ->
-                    if (bannedName in line) "${file.scanPath}:${index + 1}: ${line.trim()}" else null
-                }
+        val offenders = sourceFiles.flatMap { file ->
+            file.text.lines().withIndex().mapNotNull { (index, line) ->
+                if (bannedName in line) "${file.scanPath}:${index + 1}: ${line.trim()}" else null
             }
+        }
 
         assertTrue(
             offenders.isEmpty(),

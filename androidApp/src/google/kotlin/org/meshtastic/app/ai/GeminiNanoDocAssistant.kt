@@ -396,12 +396,11 @@ class GeminiNanoDocAssistant(
         val paragraphs = plainText.split(Regex("\n{2,}")).map { it.trim() }.filter { it.length >= MIN_PARAGRAPH_LEN }
 
         // Score each paragraph by how many query terms it contains.
-        val scored =
-            paragraphs.map { paragraph ->
-                val lower = paragraph.lowercase()
-                val hits = queryTerms.count { term -> lower.contains(term) }
-                paragraph to hits
-            }
+        val scored = paragraphs.map { paragraph ->
+            val lower = paragraph.lowercase()
+            val hits = queryTerms.count { term -> lower.contains(term) }
+            paragraph to hits
+        }
 
         // Take paragraphs with hits first (sorted by hits desc), then fill with top paragraphs for context.
         val withHits = scored.filter { it.second > 0 }.sortedByDescending { it.second }

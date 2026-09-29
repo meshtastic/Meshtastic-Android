@@ -75,24 +75,23 @@ fun rememberRenderableLayers(manager: MapLayersManager, layers: List<MapLayerIte
     }
 
     // A KML layer is absent until its conversion finishes, and for good if the file held nothing mappable.
-    val renderable =
-        layers.mapNotNull { layer ->
-            when {
-                layer.layerType != LayerType.KML ->
-                    layer.uri?.let { CustomLayer(id = layer.id, uri = it, refreshToken = layer.refreshToken) }
+    val renderable = layers.mapNotNull { layer ->
+        when {
+            layer.layerType != LayerType.KML ->
+                layer.uri?.let { CustomLayer(id = layer.id, uri = it, refreshToken = layer.refreshToken) }
 
-                else ->
-                    converted[layer.conversionKey()]?.let { conversion ->
-                        CustomLayer(
-                            id = layer.id,
-                            uri = conversion.geoJsonUri,
-                            refreshToken = layer.refreshToken,
-                            icons = conversion.icons,
-                            groundOverlays = conversion.groundOverlays,
-                        )
-                    }
-            }
+            else ->
+                converted[layer.conversionKey()]?.let { conversion ->
+                    CustomLayer(
+                        id = layer.id,
+                        uri = conversion.geoJsonUri,
+                        refreshToken = layer.refreshToken,
+                        icons = conversion.icons,
+                        groundOverlays = conversion.groundOverlays,
+                    )
+                }
         }
+    }
 
     // The renderer has to know a layer's icons before it composes, and the only place they exist is the GeoJSON
     // itself. Reading the finished document rather than threading the set out of the KML converter means an imported

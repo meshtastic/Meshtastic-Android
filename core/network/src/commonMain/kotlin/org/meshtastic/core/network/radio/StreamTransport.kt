@@ -59,8 +59,10 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
         scope
             .handledLaunch {
                 for (send in sendQueue) {
-                    val failure =
-                        runCatching { codec.frameAndSend(send.payload, send.writer, send.flusher) }.exceptionOrNull()
+                    val failure = runCatching {
+                        codec.frameAndSend(send.payload, send.writer, send.flusher)
+                    }
+                        .exceptionOrNull()
                     try {
                         when (failure) {
                             null -> Unit

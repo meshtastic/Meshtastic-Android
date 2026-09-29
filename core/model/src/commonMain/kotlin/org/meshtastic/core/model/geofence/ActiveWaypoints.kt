@@ -29,13 +29,14 @@ import org.meshtastic.proto.Waypoint
  * on waypoints the user can no longer see. Both the map UI and the geofence engine go through here so they cannot
  * drift. Rows are ordered oldest-first, so `toMap` keeps the newest copy per id.
  */
-fun List<DataPacket>.activeWaypointPackets(nowSeconds: Long): Map<Int, DataPacket> =
-    mapNotNull { packet -> packet.waypoint?.let { it.id to packet } }
-        .toMap()
-        .filterValues {
-            val expire = it.waypoint?.expire ?: 0
-            expire == 0 || expire.toLong() > nowSeconds
-        }
+fun List<DataPacket>.activeWaypointPackets(nowSeconds: Long): Map<Int, DataPacket> = mapNotNull { packet ->
+    packet.waypoint?.let { it.id to packet }
+}
+    .toMap()
+    .filterValues {
+        val expire = it.waypoint?.expire ?: 0
+        expire == 0 || expire.toLong() > nowSeconds
+    }
 
 /**
  * The geofences whose crossings THIS device should raise notifications for: waypoints we created ([isFromLocal]) plus
@@ -43,7 +44,8 @@ fun List<DataPacket>.activeWaypointPackets(nowSeconds: Long): Map<Int, DataPacke
  * are mesh-broadcast — every receiver stores them, so without this gate everyone in range would alert on the creator's
  * crossings. Only waypoints that actually request crossing notifications ([notifiesOnCrossing]) survive.
  */
-fun Collection<DataPacket>.geofencesToMonitor(myNodeNum: Int?, optedInIds: Set<Int>): List<Waypoint> =
-    filter { it.isFromLocal(myNodeNum) || (it.waypoint?.id in optedInIds) }
-        .mapNotNull { it.waypoint }
-        .filter { it.notifiesOnCrossing }
+fun Collection<DataPacket>.geofencesToMonitor(myNodeNum: Int?, optedInIds: Set<Int>): List<Waypoint> = filter {
+    it.isFromLocal(myNodeNum) || (it.waypoint?.id in optedInIds)
+}
+    .mapNotNull { it.waypoint }
+    .filter { it.notifiesOnCrossing }

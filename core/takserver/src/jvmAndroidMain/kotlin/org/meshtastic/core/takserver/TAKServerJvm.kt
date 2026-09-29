@@ -232,13 +232,12 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
 
         // Guard the snapshot+clear with the same lock used by the coroutine accept/disconnect
         // paths to avoid concurrent modification or a stale connectionCount during shutdown.
-        val toClose =
-            connectionsLock.withLock {
-                val snapshot = connections.values.toList()
-                connections.clear()
-                _connectionCount.value = 0
-                snapshot
-            }
+        val toClose = connectionsLock.withLock {
+            val snapshot = connections.values.toList()
+            connections.clear()
+            _connectionCount.value = 0
+            snapshot
+        }
         toClose.forEach { it.close() }
 
         try {

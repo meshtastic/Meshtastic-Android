@@ -28,12 +28,11 @@ import kotlin.time.Instant
 // wire format we exchange with ATAK/TAK servers. Staying on the compat policy until that migration can
 // be validated against real TAK interop; suppress the soft-deprecation on the factory itself.
 @Suppress("DEPRECATION")
-private val xmlParser =
-    XML.compat {
-        // xmlutil 1.0.0 moved repairNamespaces from the policy builder to the top-level XML config.
-        repairNamespaces = false
-        defaultPolicy { ignoreUnknownChildren() }
-    }
+private val xmlParser = XML.compat {
+    // xmlutil 1.0.0 moved repairNamespaces from the policy builder to the top-level XML config.
+    repairNamespaces = false
+    defaultPolicy { ignoreUnknownChildren() }
+}
 
 /** Fractional seconds, stripped for a second parse attempt of a CoT timestamp ISO 8601 parsing rejected. */
 internal val FRACTIONAL_SECONDS = Regex("""\.\d+""")

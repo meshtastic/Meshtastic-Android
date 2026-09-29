@@ -314,13 +314,12 @@ class MeshConnectionManagerImpl(
         // power-saving state where the NimBLE callback context needs warming up. The 100ms
         // delay ensures the heartbeat BLE write is enqueued before the want_config_id
         // (sendToRadio is fire-and-forget through async coroutine launches).
-        preHandshakeJob =
-            scope.handledLaunch {
-                heartbeatSender.sendHeartbeat("pre-handshake")
-                delay(PRE_HANDSHAKE_SETTLE_MS)
-                Logger.i { "Starting mesh handshake (Stage 1)" }
-                startConfigOnly()
-            }
+        preHandshakeJob = scope.handledLaunch {
+            heartbeatSender.sendHeartbeat("pre-handshake")
+            delay(PRE_HANDSHAKE_SETTLE_MS)
+            Logger.i { "Starting mesh handshake (Stage 1)" }
+            startConfigOnly()
+        }
     }
 
     private fun armStageGuard(stage: Int, timeout: Duration) {
@@ -453,8 +452,10 @@ class MeshConnectionManagerImpl(
                 // safeCatchingAll swallows Skiko ExceptionInInitializerError on headless JVM tests
                 // where compose-resources can't load native libs. Production resolves the localized
                 // string normally; tests fall back to empty and setErrorMessage is still called.
-                val errorMessage =
-                    safeCatchingAll { getStringSuspend(Res.string.error_recovery_exhausted) }.getOrDefault("")
+                val errorMessage = safeCatchingAll {
+                    getStringSuspend(Res.string.error_recovery_exhausted)
+                }
+                    .getOrDefault("")
                 serviceRepository.setErrorMessage(errorMessage, Severity.Error)
                 return@handledLaunch
             }
@@ -527,18 +528,17 @@ class MeshConnectionManagerImpl(
             )
         }
 
-        sleepTimeout =
-            scope.handledLaunch {
-                val localConfig = radioConfigRepository.localConfigFlow.first()
-                val rawTimeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
-                // Cap the timeout so routers or power-saving configs (ls_secs=3600) don't
-                // leave the UI stuck in DeviceSleep for over an hour.
-                val timeout = rawTimeout.coerceAtMost(MAX_SLEEP_TIMEOUT_SECONDS)
-                Logger.d { "Waiting for sleeping device, timeout=$timeout secs (raw=$rawTimeout)" }
-                delay(timeout.seconds)
-                Logger.w { "Device timed out, setting disconnected" }
-                onConnectionChanged(ConnectionState.Disconnected)
-            }
+        sleepTimeout = scope.handledLaunch {
+            val localConfig = radioConfigRepository.localConfigFlow.first()
+            val rawTimeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
+            // Cap the timeout so routers or power-saving configs (ls_secs=3600) don't
+            // leave the UI stuck in DeviceSleep for over an hour.
+            val timeout = rawTimeout.coerceAtMost(MAX_SLEEP_TIMEOUT_SECONDS)
+            Logger.d { "Waiting for sleeping device, timeout=$timeout secs (raw=$rawTimeout)" }
+            delay(timeout.seconds)
+            Logger.w { "Device timed out, setting disconnected" }
+            onConnectionChanged(ConnectionState.Disconnected)
+        }
     }
 
     private fun handleDisconnected() {
@@ -638,56 +638,55 @@ class MeshConnectionManagerImpl(
             Logger.w { "Skipping post-handshake requests because the connected local-node state is unavailable" }
             return@withLock
         }
-        postHandshakeRequestsJob =
-            scope.handledLaunch {
-                // The requests are independent. One unexpected request failure must not cancel the others, and
-                // teardown serializes with this job publication through connectionMutex.
-                supervisorScope {
-                    launch {
-                        retryPostHandshakeRequest("Session-passkey seed", myNodeNum, connectedLifecycle.version) {
-                            commandSender.sendAdminForConnection(
-                                destNum = myNodeNum,
-                                expectedConnectionVersion = connectedLifecycle.version,
-                                wantResponse = true,
-                            ) {
-                                AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
-                            }
+        postHandshakeRequestsJob = scope.handledLaunch {
+            // The requests are independent. One unexpected request failure must not cancel the others, and
+            // teardown serializes with this job publication through connectionMutex.
+            supervisorScope {
+                launch {
+                    retryPostHandshakeRequest("Session-passkey seed", myNodeNum, connectedLifecycle.version) {
+                        commandSender.sendAdminForConnection(
+                            destNum = myNodeNum,
+                            expectedConnectionVersion = connectedLifecycle.version,
+                            wantResponse = true,
+                        ) {
+                            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
                         }
                     }
-                    listOf(TelemetryType.LOCAL_STATS, TelemetryType.DEVICE).forEach { type ->
-                        launch {
-                            retryPostHandshakeRequest(
-                                label = "$type telemetry request",
-                                myNodeNum = myNodeNum,
-                                connectedVersion = connectedLifecycle.version,
-                            ) {
-                                commandSender.requestTelemetryForConnection(
-                                    commandSender.generatePacketId(),
-                                    myNodeNum,
-                                    type.ordinal,
-                                    connectedLifecycle.version,
-                                )
-                            }
-                        }
-                    }
+                }
+                listOf(TelemetryType.LOCAL_STATS, TelemetryType.DEVICE).forEach { type ->
                     launch {
-                        val config = radioConfigRepository.moduleConfigFlow.first().store_forward ?: return@launch
                         retryPostHandshakeRequest(
-                            label = "History replay",
+                            label = "$type telemetry request",
                             myNodeNum = myNodeNum,
                             connectedVersion = connectedLifecycle.version,
                         ) {
-                            historyManager.requestHistoryReplay(
-                                trigger = "onNodeDbReady",
-                                myNodeNum = myNodeNum,
-                                storeForwardConfig = config,
-                                transport = "Unknown",
-                                expectedConnectionVersion = connectedLifecycle.version,
+                            commandSender.requestTelemetryForConnection(
+                                commandSender.generatePacketId(),
+                                myNodeNum,
+                                type.ordinal,
+                                connectedLifecycle.version,
                             )
                         }
                     }
                 }
+                launch {
+                    val config = radioConfigRepository.moduleConfigFlow.first().store_forward ?: return@launch
+                    retryPostHandshakeRequest(
+                        label = "History replay",
+                        myNodeNum = myNodeNum,
+                        connectedVersion = connectedLifecycle.version,
+                    ) {
+                        historyManager.requestHistoryReplay(
+                            trigger = "onNodeDbReady",
+                            myNodeNum = myNodeNum,
+                            storeForwardConfig = config,
+                            transport = "Unknown",
+                            expectedConnectionVersion = connectedLifecycle.version,
+                        )
+                    }
+                }
             }
+        }
     }
 
     private fun logLocationSendFailure(failure: Throwable, warning: String) {

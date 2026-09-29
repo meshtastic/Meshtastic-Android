@@ -164,12 +164,11 @@ class MessageViewModel(
         _draftMessage.value = text
         val contactKey = draftContactKey ?: return
         pendingDraftPersistence?.cancel()
-        pendingDraftPersistence =
-            viewModelScope.launch {
-                delay(DRAFT_PERSISTENCE_DELAY_MS)
-                savedStateHandle[draftKey(contactKey)] = text
-                withContext(ioDispatcher) { packetRepository.setDraft(contactKey, text) }
-            }
+        pendingDraftPersistence = viewModelScope.launch {
+            delay(DRAFT_PERSISTENCE_DELAY_MS)
+            savedStateHandle[draftKey(contactKey)] = text
+            withContext(ioDispatcher) { packetRepository.setDraft(contactKey, text) }
+        }
     }
 
     fun clearDraftMessage() {
@@ -421,9 +420,10 @@ class MessageViewModel(
     // region ── Translation ──
 
     /** Whether on-device translation into the current locale is possible (always false on F-Droid/desktop). */
-    val translationAvailable: StateFlow<Boolean> =
-        flow { emit(messageTranslationService.isLanguageAvailable(currentLocaleCode())) }
-            .stateInWhileSubscribed(initialValue = false)
+    val translationAvailable: StateFlow<Boolean> = flow {
+        emit(messageTranslationService.isLanguageAvailable(currentLocaleCode()))
+    }
+        .stateInWhileSubscribed(initialValue = false)
 
     private val _translationDialogState = MutableStateFlow<TranslationDialogState>(TranslationDialogState.Hidden)
     val translationDialogState: StateFlow<TranslationDialogState> = _translationDialogState.asStateFlow()

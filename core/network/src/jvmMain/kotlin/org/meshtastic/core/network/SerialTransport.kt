@@ -431,12 +431,11 @@ private constructor(
             // beginClose makes new sends reject synchronously. Stop the framed-send worker now so queued sends release
             // their lifecycle leases before the gate waits for admitted operations.
             super.close()
-            val completed =
-                lifecycle.close {
-                    val currentReadJob = portState.takeReadJob()
-                    runInterruptible(dispatchers.io) { portState.takePort()?.let { closeSerialPort(portName, it) } }
-                    currentReadJob?.cancelAndJoin()
-                }
+            val completed = lifecycle.close {
+                val currentReadJob = portState.takeReadJob()
+                runInterruptible(dispatchers.io) { portState.takePort()?.let { closeSerialPort(portName, it) } }
+                currentReadJob?.cancelAndJoin()
+            }
             if (!completed) Logger.w { "[$portName] JVM serial teardown did not complete within its lifecycle bounds" }
         }
     }

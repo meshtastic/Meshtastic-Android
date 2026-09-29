@@ -778,17 +778,16 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                         // clear a later association's gate.
                         suspend fun releaseWriterGate(canonicalDb: MeshtasticDatabase, canonicalName: String) {
                             withContext(NonCancellable) {
-                                val released =
-                                    writerTrackerMutex.withLock {
-                                        if (writerGate !== gate) {
-                                            false
-                                        } else {
-                                            writerGate = null
-                                            _currentDb.value = canonicalDb
-                                            currentDbName = canonicalName
-                                            true
-                                        }
+                                val released = writerTrackerMutex.withLock {
+                                    if (writerGate !== gate) {
+                                        false
+                                    } else {
+                                        writerGate = null
+                                        _currentDb.value = canonicalDb
+                                        currentDbName = canonicalName
+                                        true
                                     }
+                                }
                                 if (released) gate.complete(canonicalDb)
                             }
                         }
@@ -1027,11 +1026,10 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * limit is reached, or another connection holds the database's write lock.
      */
     private suspend fun reopenFlowDatabaseIfStillCurrent(expectedDb: MeshtasticDatabase): MeshtasticDatabase? {
-        val expectedDbName =
-            mutex.withLock {
-                if (lifecycleState != LifecycleState.OPEN || _currentDb.value !== expectedDb) return null
-                currentDbName
-            }
+        val expectedDbName = mutex.withLock {
+            if (lifecycleState != LifecycleState.OPEN || _currentDb.value !== expectedDb) return null
+            currentDbName
+        }
         val result = reopenActiveDatabaseIfStillCurrent(expectedDb, expectedDbName, ReopenOrigin.FLOW_OBSERVER)
         return (result as? ReopenResult.Replaced)?.database
     }
@@ -1298,14 +1296,13 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      */
     private suspend fun quarantineWedgedPoolIfStillPublished(database: MeshtasticDatabase) {
         if (lifecycleState != LifecycleState.OPEN) return
-        val quarantined =
-            writerTrackerMutex.withLock {
-                if (lifecycleState != LifecycleState.OPEN || _currentDb.value !== database) {
-                    false
-                } else {
-                    unrecoverablePools.put(database, recoveryNowMillis()) == null
-                }
+        val quarantined = writerTrackerMutex.withLock {
+            if (lifecycleState != LifecycleState.OPEN || _currentDb.value !== database) {
+                false
+            } else {
+                unrecoverablePools.put(database, recoveryNowMillis()) == null
             }
+        }
         if (quarantined) {
             Logger.w {
                 "Marked the active DB pool unrecoverable after wedge recovery was refused; database operations fail " +
@@ -1400,16 +1397,15 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
     /** Releases a bounded reader and retries an eviction that was deferred while the captured pool was in use. */
     private suspend fun endRead(database: MeshtasticDatabase) {
-        val retryEviction =
-            writerTrackerMutex.withLock {
-                val remaining = (activeReaders[database] ?: 1) - 1
-                if (remaining <= 0) {
-                    activeReaders.remove(database)
-                } else {
-                    activeReaders[database] = remaining
-                }
-                !hasActiveDatabaseAccessLocked(database) && deferredEvictions.remove(database)
+        val retryEviction = writerTrackerMutex.withLock {
+            val remaining = (activeReaders[database] ?: 1) - 1
+            if (remaining <= 0) {
+                activeReaders.remove(database)
+            } else {
+                activeReaders[database] = remaining
             }
+            !hasActiveDatabaseAccessLocked(database) && deferredEvictions.remove(database)
+        }
         if (retryEviction && lifecycleState == LifecycleState.OPEN) {
             launchManagerWork(dispatchers.io) { enforceCacheLimit() }
         }
@@ -1462,28 +1458,27 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     private suspend fun beginWrite(): AdmittedDatabase {
         while (true) {
             var admitted: AdmittedDatabase? = null
-            val gate =
-                writerTrackerMutex.withLock {
-                    checkOpen()
-                    val pendingGate = writerGate
-                    if (pendingGate == null) {
-                        val db = _currentDb.value
-                        if (isQuarantinedLocked(db)) {
-                            throw DatabaseOperationTimeoutException(
-                                "database pool is wedged and its replacement budget is spent; refusing to start " +
-                                    "another operation that cannot finish",
-                            )
-                        }
-                        activeWriters[db] = (activeWriters[db] ?: 0) + 1
-                        admitted =
-                            AdmittedDatabase(
-                                database = db,
-                                name = currentDbName,
-                                lane = poolLanes.getOrPut(db) { createPoolLane() },
-                            )
+            val gate = writerTrackerMutex.withLock {
+                checkOpen()
+                val pendingGate = writerGate
+                if (pendingGate == null) {
+                    val db = _currentDb.value
+                    if (isQuarantinedLocked(db)) {
+                        throw DatabaseOperationTimeoutException(
+                            "database pool is wedged and its replacement budget is spent; refusing to start " +
+                                "another operation that cannot finish",
+                        )
                     }
-                    pendingGate
+                    activeWriters[db] = (activeWriters[db] ?: 0) + 1
+                    admitted =
+                        AdmittedDatabase(
+                            database = db,
+                            name = currentDbName,
+                            lane = poolLanes.getOrPut(db) { createPoolLane() },
+                        )
                 }
+                pendingGate
+            }
             admitted?.let {
                 return it
             }
@@ -1501,19 +1496,18 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
     /** Deregisters a writer and releases any merge waiting for [db] to quiesce. Cancellation-safe (see call site). */
     private suspend fun endWrite(db: MeshtasticDatabase) {
-        val retryEviction =
-            writerTrackerMutex.withLock {
-                val remaining = (activeWriters[db] ?: 1) - 1
-                val drained = remaining <= 0
-                if (drained) {
-                    activeWriters.remove(db)
-                    drainWaiters.remove(db)?.forEach { it.complete(Unit) }
-                } else {
-                    activeWriters[db] = remaining
-                }
-                if (activeWriters.isEmpty()) shutdownWriterDrain?.complete(Unit)
-                !hasActiveDatabaseAccessLocked(db) && deferredEvictions.remove(db)
+        val retryEviction = writerTrackerMutex.withLock {
+            val remaining = (activeWriters[db] ?: 1) - 1
+            val drained = remaining <= 0
+            if (drained) {
+                activeWriters.remove(db)
+                drainWaiters.remove(db)?.forEach { it.complete(Unit) }
+            } else {
+                activeWriters[db] = remaining
             }
+            if (activeWriters.isEmpty()) shutdownWriterDrain?.complete(Unit)
+            !hasActiveDatabaseAccessLocked(db) && deferredEvictions.remove(db)
+        }
         if (retryEviction && lifecycleState == LifecycleState.OPEN) {
             launchManagerWork(dispatchers.io) { enforceCacheLimit() }
         }
@@ -1538,8 +1532,9 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * every association attempt has released its gate and drained its source — a non-zero pair after a quiescent period
      * indicates a leaked writer or waiter.
      */
-    internal suspend fun debugWriterCounts(): Pair<Int, Int> =
-        writerTrackerMutex.withLock { activeWriters.values.sum() to drainWaiters.values.sumOf { it.size } }
+    internal suspend fun debugWriterCounts(): Pair<Int, Int> = writerTrackerMutex.withLock {
+        activeWriters.values.sum() to drainWaiters.values.sumOf { it.size }
+    }
 
     internal suspend fun debugReaderCount(database: MeshtasticDatabase? = null): Int = writerTrackerMutex.withLock {
         if (database == null) activeReaders.values.sum() else activeReaders[database] ?: 0
@@ -1551,8 +1546,9 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     internal suspend fun debugWriterGateArmed(): Boolean = writerTrackerMutex.withLock { writerGate != null }
 
     /** Test-only visibility for cancellation-atomic pending-route recovery assertions. */
-    internal suspend fun debugIsLogicallyRetired(dbName: String): Boolean =
-        mutex.withLock { dbName in logicallyRetired }
+    internal suspend fun debugIsLogicallyRetired(dbName: String): Boolean = mutex.withLock {
+        dbName in logicallyRetired
+    }
 
     /** Test-only visibility for deterministic shutdown assertions. */
     internal fun debugAcceptingWrites(): Boolean = lifecycleState == LifecycleState.OPEN
@@ -1571,11 +1567,10 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      */
     @Suppress("ReturnCount")
     private suspend fun drainWriters(db: MeshtasticDatabase, dbName: String): Boolean {
-        val waiter =
-            writerTrackerMutex.withLock {
-                if ((activeWriters[db] ?: 0) == 0) return true
-                CompletableDeferred<Unit>().also { drainWaiters.getOrPut(db) { mutableListOf() }.add(it) }
-            }
+        val waiter = writerTrackerMutex.withLock {
+            if ((activeWriters[db] ?: 0) == 0) return true
+            CompletableDeferred<Unit>().also { drainWaiters.getOrPut(db) { mutableListOf() }.add(it) }
+        }
         try {
             val drained = withTimeoutOrNull(WRITER_DRAIN_TIMEOUT_MS) { waiter.await() }
             if (drained == null) {
@@ -1810,18 +1805,17 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     lastUsedMsByDb = usageSnapshot,
                     protectedDbNames = pendingRouteNames,
                 )
-            val evictableVictims =
-                writerTrackerMutex.withLock {
-                    victims.filter { name ->
-                        val cached = dbCache[name]
-                        if (cached != null && hasActiveDatabaseAccessLocked(cached)) {
-                            deferredEvictions.add(cached)
-                            false
-                        } else {
-                            true
-                        }
+            val evictableVictims = writerTrackerMutex.withLock {
+                victims.filter { name ->
+                    val cached = dbCache[name]
+                    if (cached != null && hasActiveDatabaseAccessLocked(cached)) {
+                        deferredEvictions.add(cached)
+                        false
+                    } else {
+                        true
                     }
                 }
+            }
 
             evictableVictims.forEach { name ->
                 try {
@@ -1929,33 +1923,32 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             var jobsDrain: CompletableDeferred<Unit>? = null
             var closedSuccessfully = false
 
-            val shouldClose =
-                writerTrackerMutex.withLock {
-                    when (lifecycleState) {
-                        LifecycleState.CLOSED -> false
+            val shouldClose = writerTrackerMutex.withLock {
+                when (lifecycleState) {
+                    LifecycleState.CLOSED -> false
 
-                        LifecycleState.OPEN,
-                        LifecycleState.CLOSING,
-                        -> {
-                            lifecycleState = LifecycleState.CLOSING
-                            operationsDrain =
-                                if (activeManagerOperations.isNotEmpty()) {
-                                    CompletableDeferred<Unit>().also { managerOperationDrain = it }
-                                } else {
-                                    managerOperationDrain = null
-                                    null
-                                }
-                            writerDrain =
-                                if (activeWriters.isNotEmpty()) {
-                                    CompletableDeferred<Unit>().also { shutdownWriterDrain = it }
-                                } else {
-                                    shutdownWriterDrain = null
-                                    null
-                                }
-                            true
-                        }
+                    LifecycleState.OPEN,
+                    LifecycleState.CLOSING,
+                    -> {
+                        lifecycleState = LifecycleState.CLOSING
+                        operationsDrain =
+                            if (activeManagerOperations.isNotEmpty()) {
+                                CompletableDeferred<Unit>().also { managerOperationDrain = it }
+                            } else {
+                                managerOperationDrain = null
+                                null
+                            }
+                        writerDrain =
+                            if (activeWriters.isNotEmpty()) {
+                                CompletableDeferred<Unit>().also { shutdownWriterDrain = it }
+                            } else {
+                                shutdownWriterDrain = null
+                                null
+                            }
+                        true
                     }
                 }
+            }
             if (!shouldClose) return@closeAttempt
 
             val managerJobs =
@@ -2022,37 +2015,36 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
                 // Snapshot ownership without transferring it yet. A failed pool close must leave every instance and
                 // retirement intent reachable by a later close() attempt.
-                val snapshot =
-                    mutex.withLock {
-                        val databases = mutableListOf<ShutdownDatabase>()
-                        fun addDistinct(dbName: String, database: MeshtasticDatabase?) {
-                            if (database == null) return
-                            val existing = databases.firstOrNull { it.database === database }
-                            if (existing == null) {
-                                databases.add(ShutdownDatabase(database, mutableSetOf(dbName)))
-                            } else {
-                                existing.dbNames.add(dbName)
-                            }
+                val snapshot = mutex.withLock {
+                    val databases = mutableListOf<ShutdownDatabase>()
+                    fun addDistinct(dbName: String, database: MeshtasticDatabase?) {
+                        if (database == null) return
+                        val existing = databases.firstOrNull { it.database === database }
+                        if (existing == null) {
+                            databases.add(ShutdownDatabase(database, mutableSetOf(dbName)))
+                        } else {
+                            existing.dbNames.add(dbName)
                         }
-
-                        dbCache.forEach { (dbName, database) -> addDistinct(dbName, database) }
-                        detachedDatabases.forEach { addDistinct(it.dbName, it.database) }
-                        synchronized(initializationLock) {
-                            addDistinct(DatabaseConstants.DEFAULT_DB_NAME, initializedDefaultDb)
-                            addDistinct(currentDbName, currentDbState?.value)
-                        }
-
-                        val persistedRetiredNames =
-                            try {
-                                datastore.data.first()[retiredDbNamesKey].orEmpty()
-                            } catch (failure: Throwable) {
-                                Logger.w(failure) {
-                                    "Failed to read persisted database retirements during shutdown"
-                                }
-                                emptySet()
-                            }
-                        ShutdownSnapshot(databases, (logicallyRetired + persistedRetiredNames).toList())
                     }
+
+                    dbCache.forEach { (dbName, database) -> addDistinct(dbName, database) }
+                    detachedDatabases.forEach { addDistinct(it.dbName, it.database) }
+                    synchronized(initializationLock) {
+                        addDistinct(DatabaseConstants.DEFAULT_DB_NAME, initializedDefaultDb)
+                        addDistinct(currentDbName, currentDbState?.value)
+                    }
+
+                    val persistedRetiredNames =
+                        try {
+                            datastore.data.first()[retiredDbNamesKey].orEmpty()
+                        } catch (failure: Throwable) {
+                            Logger.w(failure) {
+                                "Failed to read persisted database retirements during shutdown"
+                            }
+                            emptySet()
+                        }
+                    ShutdownSnapshot(databases, (logicallyRetired + persistedRetiredNames).toList())
+                }
 
                 // All tracked work has stopped. The remaining scope-owned collector does not touch Room; cancel it
                 // before closing pools, but keep ownership maps intact until every close succeeds.

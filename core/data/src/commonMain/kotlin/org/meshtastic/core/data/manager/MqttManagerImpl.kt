@@ -110,23 +110,21 @@ class MqttManagerImpl(
                         // safeCatchingAll swallows the Skiko ExceptionInInitializerError that
                         // compose-resources raises on headless JVM tests; production resolves the
                         // localized string and the error is still surfaced either way.
-                        val message =
-                            safeCatchingAll {
-                                when {
-                                    throwable is MqttException.ConnectionRejected &&
-                                        throwable.isCredentialRejection() ->
-                                        getStringSuspend(Res.string.mqtt_error_credentials_rejected)
+                        val message = safeCatchingAll {
+                            when {
+                                throwable is MqttException.ConnectionRejected && throwable.isCredentialRejection() ->
+                                    getStringSuspend(Res.string.mqtt_error_credentials_rejected)
 
-                                    throwable is MqttException.ConnectionRejected ->
-                                        getStringSuspend(Res.string.mqtt_error_rejected, throwable.detail())
+                                throwable is MqttException.ConnectionRejected ->
+                                    getStringSuspend(Res.string.mqtt_error_rejected, throwable.detail())
 
-                                    throwable is MqttException.ConnectionLost ->
-                                        getStringSuspend(Res.string.mqtt_error_connection_lost)
+                                throwable is MqttException.ConnectionLost ->
+                                    getStringSuspend(Res.string.mqtt_error_connection_lost)
 
-                                    else -> getStringSuspend(Res.string.mqtt_error_proxy_failed, throwable.detail())
-                                }
+                                else -> getStringSuspend(Res.string.mqtt_error_proxy_failed, throwable.detail())
                             }
-                                .getOrDefault("")
+                        }
+                            .getOrDefault("")
                         serviceStateWriter.setErrorMessage(text = message, severity = Severity.Warn)
                     }
                     .launchIn(scope)
@@ -194,14 +192,13 @@ class MqttManagerImpl(
     private fun ProbeResult.toAppStatus(): MqttProbeStatus = when (this) {
         is ProbeResult.Success -> {
             val info = serverInfo
-            val summary =
-                buildList {
-                    info.assignedClientIdentifier?.let { add("client=$it") }
-                    info.maximumQosOrdinal?.let { add("maxQoS=$it") }
-                    info.serverKeepAliveSeconds?.let { add("keepalive=${it}s") }
-                }
-                    .joinToString(", ")
-                    .ifEmpty { null }
+            val summary = buildList {
+                info.assignedClientIdentifier?.let { add("client=$it") }
+                info.maximumQosOrdinal?.let { add("maxQoS=$it") }
+                info.serverKeepAliveSeconds?.let { add("keepalive=${it}s") }
+            }
+                .joinToString(", ")
+                .ifEmpty { null }
             MqttProbeStatus.Success(serverInfo = summary)
         }
 

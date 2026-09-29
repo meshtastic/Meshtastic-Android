@@ -112,19 +112,20 @@ class MeshMessageProcessorImpl(
             return
         }
         val bytes = frame.payload.toByteArray()
-        val proto =
-            safeCatching { FromRadio.ADAPTER.decode(bytes) }
-                .getOrElse { primaryException ->
-                    safeCatching {
-                        FromRadio.Builder().also { wb -> wb.log_record = LogRecord.ADAPTER.decode(bytes) }.build()
-                    }
-                        .getOrElse {
-                            Logger.e(primaryException) {
-                                "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
-                            }
-                            return
-                        }
+        val proto = safeCatching {
+            FromRadio.ADAPTER.decode(bytes)
+        }
+            .getOrElse { primaryException ->
+                safeCatching {
+                    FromRadio.Builder().also { wb -> wb.log_record = LogRecord.ADAPTER.decode(bytes) }.build()
                 }
+                    .getOrElse {
+                        Logger.e(primaryException) {
+                            "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
+                        }
+                        return
+                    }
+            }
         processFromRadio(proto, myNodeNum, frame.session)
     }
 
@@ -367,7 +368,9 @@ class MeshMessageProcessorImpl(
         channel: Int = 0,
         operation: String,
         transform: (Node) -> Node,
-    ): Boolean = safeCatching { nodeManager.updateNodeAndPersist(nodeNum, channel, transform) }
+    ): Boolean = safeCatching {
+        nodeManager.updateNodeAndPersist(nodeNum, channel, transform)
+    }
         .onFailure { Logger.e(it) { "Failed $operation; packet processing continued" } }
         .isSuccess
 

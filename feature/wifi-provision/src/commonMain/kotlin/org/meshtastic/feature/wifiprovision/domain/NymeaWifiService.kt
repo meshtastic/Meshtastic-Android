@@ -249,8 +249,7 @@ class NymeaWifiService(
      */
     private suspend fun fetchConnectionIpAddress(): String? = safeCatching {
         sendCommand(CMD_GET_CONNECTION, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
-        val response =
-            NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = CONNECTION_INFO_TIMEOUT))
+        val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = CONNECTION_INFO_TIMEOUT))
         if (response.responseCode == RESPONSE_SUCCESS) {
             response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() }
         } else {

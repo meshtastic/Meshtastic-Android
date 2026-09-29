@@ -227,11 +227,10 @@ fun EnvironmentMetricsChart(
             }
 
         val colorToLabel = allLegendData.associate { it.color to legendLabel(it) }
-        val colorToUnit =
-            allLegendData.associate { legend ->
-                val metric = legend.metricKey as? Environment
-                legend.color to (metric?.let { unitSuffix(it, isFahrenheit, isImperial) } ?: "")
-            }
+        val colorToUnit = allLegendData.associate { legend ->
+            val metric = legend.metricKey as? Environment
+            legend.color to (metric?.let { unitSuffix(it, isFahrenheit, isImperial) } ?: "")
+        }
 
         val showPressure =
             shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && Environment.BAROMETRIC_PRESSURE !in hiddenMetrics

@@ -278,7 +278,8 @@ private class ChipPainter(
         } else if (layout != null) {
             drawText(
                 textLayoutResult = layout,
-                topLeft = Offset(
+                topLeft =
+                Offset(
                     x = (size.width - layout.size.width) / 2f,
                     y = (size.height - layout.size.height) / 2f,
                 ),

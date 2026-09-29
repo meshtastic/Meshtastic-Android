@@ -332,9 +332,7 @@ class PacketHandlerImpl(
                 }
             } else {
                 val lifecycle = connectionStateProvider.connectionLifecycle.value
-                if (
-                    lifecycle.state !is ConnectionState.Connected || lifecycle.version != expectedConnectionVersion
-                ) {
+                if (lifecycle.state !is ConnectionState.Connected || lifecycle.version != expectedConnectionVersion) {
                     return@responseLock QueueAdmission.TransportUnavailable
                 }
             }
@@ -369,8 +367,9 @@ class PacketHandlerImpl(
         }
         if (serviceStopped) {
             withContext(NonCancellable) {
-                val failedPacketIds =
-                    queueMutex.withLock { if (!deferred.isCompleted) stopAndDrainPacketQueueLocked() else emptyList() }
+                val failedPacketIds = queueMutex.withLock {
+                    if (!deferred.isCompleted) stopAndDrainPacketQueueLocked() else emptyList()
+                }
                 changeStatusesNow(failedPacketIds, MessageStatus.ERROR, PERSISTED_STATUS_SHUTDOWN_WAIT)
             }
         }
@@ -383,15 +382,14 @@ class PacketHandlerImpl(
         scope.handledLaunch {
             Logger.i { "Stopping packet queueJob" }
             withContext(NonCancellable) {
-                val failedPacketIds =
-                    queueMutex.withLock {
-                        queueStopped = true
-                        queueJob?.cancel()
-                        queueJob = null
-                        queueGeneration++
-                        queuedPackets.clear()
-                        completePendingResponses(AwaitedSendStatus.TRANSPORT_STOPPED)
-                    }
+                val failedPacketIds = queueMutex.withLock {
+                    queueStopped = true
+                    queueJob?.cancel()
+                    queueJob = null
+                    queueGeneration++
+                    queuedPackets.clear()
+                    completePendingResponses(AwaitedSendStatus.TRANSPORT_STOPPED)
+                }
                 changeStatusesNow(failedPacketIds, MessageStatus.ERROR, PERSISTED_STATUS_SHUTDOWN_WAIT)
             }
         }
@@ -505,24 +503,23 @@ class PacketHandlerImpl(
         // advances only under queueMutex: stopPacketQueue() drains every pending response, while
         // startPacketQueueLocked() advances it only after the previous queueJob is inactive. Therefore a stale
         // worker has already lost ownership to a path that drained or replaced it and must not clear its successor.
-        val failedPacketIds =
-            queueMutex.withLock {
-                if (generation != queueGeneration) return@withLock emptyList()
-                queueJob = null
-                when {
-                    queueStopped || !scope.isActive -> stopAndDrainPacketQueueLocked()
+        val failedPacketIds = queueMutex.withLock {
+            if (generation != queueGeneration) return@withLock emptyList()
+            queueJob = null
+            when {
+                queueStopped || !scope.isActive -> stopAndDrainPacketQueueLocked()
 
-                    connectionStateProvider.connectionState.value != ConnectionState.Connected ->
-                        stopAndDrainPacketQueueLocked()
+                connectionStateProvider.connectionState.value != ConnectionState.Connected ->
+                    stopAndDrainPacketQueueLocked()
 
-                    queuedPackets.isNotEmpty() -> {
-                        startPacketQueueLocked()
-                        emptyList()
-                    }
-
-                    else -> emptyList() // Strict routing waiters may remain after their QueueStatus completed.
+                queuedPackets.isNotEmpty() -> {
+                    startPacketQueueLocked()
+                    emptyList()
                 }
+
+                else -> emptyList() // Strict routing waiters may remain after their QueueStatus completed.
             }
+        }
         changeStatusesNow(failedPacketIds, MessageStatus.ERROR, PERSISTED_STATUS_SHUTDOWN_WAIT)
     }
 
@@ -563,23 +560,23 @@ class PacketHandlerImpl(
         timeoutMutex.withLock {
             sendAckTimeoutJobs.remove(target)?.cancel()
             sendAckTimeoutJobs.values.removeAll { it.isCompleted }
-            sendAckTimeoutJobs[target] =
-                scope.handledLaunch {
-                    delay(delayFor)
-                    // Conditional in the DAO transaction: an ACK/NAK landing while this timer waited must win.
-                    when (target) {
-                        is PersistedStatusTarget.DataPacket ->
-                            packetRepository.value.timeOutEnroutePacket(target.id, Routing.Error.TIMEOUT.value)
+            sendAckTimeoutJobs[target] = scope.handledLaunch {
+                delay(delayFor)
+                // Conditional in the DAO transaction: an ACK/NAK landing while this timer waited must win.
+                when (target) {
+                    is PersistedStatusTarget.DataPacket ->
+                        packetRepository.value.timeOutEnroutePacket(target.id, Routing.Error.TIMEOUT.value)
 
-                        is PersistedStatusTarget.Reaction ->
-                            packetRepository.value.timeOutEnrouteReaction(target.id, Routing.Error.TIMEOUT.value)
-                    }
+                    is PersistedStatusTarget.Reaction ->
+                        packetRepository.value.timeOutEnrouteReaction(target.id, Routing.Error.TIMEOUT.value)
                 }
+            }
         }
     }
 
-    private fun changeStatus(packet: MeshPacket, status: MessageStatus) =
-        scope.handledLaunch { changeStatusNow(packet, status) }
+    private fun changeStatus(packet: MeshPacket, status: MessageStatus) = scope.handledLaunch {
+        changeStatusNow(packet, status)
+    }
 
     private suspend fun changeStatusNow(
         packet: MeshPacket,
@@ -729,13 +726,12 @@ class PacketHandlerImpl(
 
     private suspend fun completePendingResponses(status: AwaitedSendStatus): List<PacketStatusTarget> =
         responseMutex.withLock {
-            val completedPackets =
-                queueResponse.mapNotNull { (_, pending) ->
-                    pending.completeAll(status)
-                    PacketStatusTarget(pending.packet, pending.persistence).takeIf {
-                        pending.terminalStatus != AwaitedSendStatus.ACCEPTED
-                    }
+            val completedPackets = queueResponse.mapNotNull { (_, pending) ->
+                pending.completeAll(status)
+                PacketStatusTarget(pending.packet, pending.persistence).takeIf {
+                    pending.terminalStatus != AwaitedSendStatus.ACCEPTED
                 }
+            }
             queueResponse.clear()
             completedPackets
         }

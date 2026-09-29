@@ -64,7 +64,8 @@ class WifiProvisionViewModelTest {
             WifiProvisionViewModel(
                 bleScanner = scanner,
                 bleConnectionFactory = FakeBleConnectionFactory(connection),
-                dispatchers = CoroutineDispatchers(
+                dispatchers =
+                CoroutineDispatchers(
                     io = testDispatcher,
                     main = testDispatcher,
                     default = testDispatcher,
