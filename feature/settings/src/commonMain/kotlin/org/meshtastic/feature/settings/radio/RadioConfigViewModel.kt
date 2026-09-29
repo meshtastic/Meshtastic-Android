@@ -599,37 +599,10 @@ open class RadioConfigViewModel(
         }
     }
 
-    @Suppress("CyclomaticComplexMethod")
     fun setModuleConfig(config: ModuleConfig) {
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setModuleConfig") {
-            _radioConfigState.update { state ->
-                state.copy(
-                    moduleConfig =
-                    state.moduleConfig
-                        .newBuilder()
-                        .also { wb ->
-                            wb.mqtt = config.mqtt ?: state.moduleConfig.mqtt
-                            wb.serial = config.serial ?: state.moduleConfig.serial
-                            wb.external_notification =
-                                config.external_notification ?: state.moduleConfig.external_notification
-                            wb.store_forward = config.store_forward ?: state.moduleConfig.store_forward
-                            wb.range_test = config.range_test ?: state.moduleConfig.range_test
-                            wb.telemetry = config.telemetry ?: state.moduleConfig.telemetry
-                            wb.canned_message = config.canned_message ?: state.moduleConfig.canned_message
-                            wb.audio = config.audio ?: state.moduleConfig.audio
-                            wb.remote_hardware = config.remote_hardware ?: state.moduleConfig.remote_hardware
-                            wb.neighbor_info = config.neighbor_info ?: state.moduleConfig.neighbor_info
-                            wb.ambient_lighting = config.ambient_lighting ?: state.moduleConfig.ambient_lighting
-                            wb.detection_sensor = config.detection_sensor ?: state.moduleConfig.detection_sensor
-                            wb.paxcounter = config.paxcounter ?: state.moduleConfig.paxcounter
-                            wb.statusmessage = config.statusmessage ?: state.moduleConfig.statusmessage
-                            wb.tak = config.tak ?: state.moduleConfig.tak
-                            wb.mesh_beacon = config.mesh_beacon ?: state.moduleConfig.mesh_beacon
-                        }
-                        .build(),
-                )
-            }
+            _radioConfigState.update { state -> state.copy(moduleConfig = state.moduleConfig.mergedWith(config)) }
             expectRestartIfLocal(config.saveRebootBehavior())
             radioConfigUseCase.setModuleConfig(destNum, config, onRequestId = ::registerWriteRequestId)
         }
@@ -1342,35 +1315,8 @@ open class RadioConfigViewModel(
             }
 
             is RadioResponseResult.ModuleConfigResponse -> {
-                val response = result.config
                 _radioConfigState.update { state ->
-                    state.copy(
-                        moduleConfig =
-                        state.moduleConfig
-                            .newBuilder()
-                            .also { wb ->
-                                wb.mqtt = response.mqtt ?: state.moduleConfig.mqtt
-                                wb.serial = response.serial ?: state.moduleConfig.serial
-                                wb.external_notification =
-                                    response.external_notification ?: state.moduleConfig.external_notification
-                                wb.store_forward = response.store_forward ?: state.moduleConfig.store_forward
-                                wb.range_test = response.range_test ?: state.moduleConfig.range_test
-                                wb.telemetry = response.telemetry ?: state.moduleConfig.telemetry
-                                wb.canned_message = response.canned_message ?: state.moduleConfig.canned_message
-                                wb.audio = response.audio ?: state.moduleConfig.audio
-                                wb.remote_hardware = response.remote_hardware ?: state.moduleConfig.remote_hardware
-                                wb.neighbor_info = response.neighbor_info ?: state.moduleConfig.neighbor_info
-                                wb.ambient_lighting =
-                                    response.ambient_lighting ?: state.moduleConfig.ambient_lighting
-                                wb.detection_sensor =
-                                    response.detection_sensor ?: state.moduleConfig.detection_sensor
-                                wb.paxcounter = response.paxcounter ?: state.moduleConfig.paxcounter
-                                wb.statusmessage = response.statusmessage ?: state.moduleConfig.statusmessage
-                                wb.tak = response.tak ?: state.moduleConfig.tak
-                                wb.mesh_beacon = response.mesh_beacon ?: state.moduleConfig.mesh_beacon
-                            }
-                            .build(),
-                    )
+                    state.copy(moduleConfig = state.moduleConfig.mergedWith(result.config))
                 }
                 if (!isLateRemoteRead) incrementCompleted()
             }
@@ -1536,6 +1482,8 @@ internal fun Config.saveRebootBehavior(): RebootBehavior = when {
     else -> RebootBehavior.MAY_RESTART
 }
 
-/** Firmware `AdminModule::handleSetModuleConfig` reboots for every module section except status message. */
+/**
+ * Firmware `AdminModule::handleSetModuleConfig` reboots for every module section except status message and Mesh Beacon.
+ */
 internal fun ModuleConfig.saveRebootBehavior(): RebootBehavior =
-    if (statusmessage != null) RebootBehavior.NEVER else RebootBehavior.ALWAYS
+    if (statusmessage != null || mesh_beacon != null) RebootBehavior.NEVER else RebootBehavior.ALWAYS

@@ -172,7 +172,7 @@ class MeshConfigHandlerImpl(
 }
 
 /** Returns a short summary of which Config variant is set. */
-private fun Config.summarize(): String = when {
+internal fun Config.summarize(): String = when {
     device != null -> "device"
     position != null -> "position"
     power != null -> "power"
@@ -181,12 +181,14 @@ private fun Config.summarize(): String = when {
     lora != null -> "lora"
     bluetooth != null -> "bluetooth"
     security != null -> "security"
+    sessionkey != null -> "sessionkey"
+    device_ui != null -> "device_ui"
     else -> "unknown"
 }
 
 /** Returns a short summary of which ModuleConfig variant is set. */
 @Suppress("CyclomaticComplexMethod")
-private fun ModuleConfig.summarize(): String = when {
+internal fun ModuleConfig.summarize(): String = when {
     mqtt != null -> "mqtt"
     serial != null -> "serial"
     external_notification != null -> "external_notification"
@@ -201,6 +203,8 @@ private fun ModuleConfig.summarize(): String = when {
     detection_sensor != null -> "detection_sensor"
     paxcounter != null -> "paxcounter"
     statusmessage != null -> "statusmessage"
+    traffic_management != null -> "traffic_management"
     tak != null -> "tak"
+    mesh_beacon != null -> "mesh_beacon"
     else -> "unknown"
 }

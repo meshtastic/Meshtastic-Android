@@ -2804,6 +2804,48 @@ class RadioConfigViewModelTest {
 
         assertFalse(nodeRestartTracker.restartExpected.value)
     }
+
+    @Test
+    fun `local module save that reboots opens the restart window`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+        runCurrent()
+        everySuspend { radioConfigUseCase.setModuleConfig(any(), any(), any()) } returns 42
+
+        nodeRestartTracker.onConnected()
+        viewModel.setModuleConfig(
+            ModuleConfig.Builder()
+                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build(),
+        )
+        runCurrent()
+
+        assertTrue(nodeRestartTracker.restartExpected.value)
+    }
+
+    @Test
+    fun `local Mesh Beacon save does not open the restart window`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+        runCurrent()
+        everySuspend { radioConfigUseCase.setModuleConfig(any(), any(), any()) } returns 42
+
+        nodeRestartTracker.onConnected()
+        viewModel.setModuleConfig(
+            ModuleConfig.Builder()
+                .also { wb ->
+                    wb.mesh_beacon = MeshBeaconConfig.Builder().also { wb -> wb.broadcast_message = "hi" }.build()
+                }
+                .build(),
+        )
+        runCurrent()
+
+        assertFalse(nodeRestartTracker.restartExpected.value)
+    }
 }
 
 /** Extracts the trailing `onRequestId` callback from a mocked request method's args. */
