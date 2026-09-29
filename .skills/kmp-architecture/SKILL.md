@@ -55,7 +55,7 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 - In `build-logic/convention`, prefer lazy Gradle configuration (`configureEach`, `withPlugin`, provider APIs). Avoid `afterEvaluate` in convention plugins unless there is no viable lazy alternative.
 
 ## 8. Onboarding a New Target (Desktop/iOS)
-1. Ensure all new logic compiles against the KMP core (`jvm()`, `iosArm64()`, etc.).
+1. Ensure all new logic compiles against the KMP core targets (`jvm()`, `iosSimulatorArm64()`).
 2. Do not use platform-specific constructs in `commonMain` or you break the iOS/Desktop builds.
 3. Test using `kmpSmokeCompile` to verify cross-platform compilation.
 4. For desktop wiring, copy the pattern in `desktopApp/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt` and use `NoopStubs.kt` to temporarily mock missing platform implementations.
