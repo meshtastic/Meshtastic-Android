@@ -190,7 +190,7 @@ class DiscoveryMigrationTest {
         assertNull(loaded.longitude)
         assertNull(loaded.distanceFromUser)
         assertEquals(0, loaded.hopCount)
-        assertEquals(0f, loaded.snr)
+        assertNull(loaded.snr)
         assertNull(loaded.rssi)
         assertEquals(0, loaded.messageCount)
         assertEquals(0, loaded.sensorPacketCount)

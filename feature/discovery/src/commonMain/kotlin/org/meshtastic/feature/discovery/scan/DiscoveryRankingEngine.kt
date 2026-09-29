@@ -34,8 +34,11 @@ data class RankingScoreBreakdown(
     val neighborDiversity: Int,
     /** Criterion 3: non-duplicate packet count (numPacketsRx - numRxDupe). */
     val nonDupePacketCount: Int,
-    /** Criterion 4a: median SNR across discovered nodes. */
-    val medianSnr: Float,
+    /**
+     * Criterion 4a: median SNR across discovered nodes. Null when no node reported one, so nodes learned only from
+     * NeighborInfo never drag the median toward 0 dB.
+     */
+    val medianSnr: Float?,
     /**
      * Criterion 4b: median RSSI across discovered nodes (tiebreak within criterion 4). Null when no node reported one —
      * 0 dBm would otherwise read as an excellent median and outrank real negative readings.
@@ -95,8 +98,8 @@ class DiscoveryRankingEngine {
         val pr = presetResult
         val nodes = discoveredNodes
 
-        val snrValues = nodes.map { it.snr }.sorted()
-        // Nodes that never reported an rssi are excluded rather than dragged toward 0 dBm.
+        // Nodes that never reported a reading are excluded rather than dragged toward 0 dB / 0 dBm.
+        val snrValues = nodes.mapNotNull { it.snr }.sorted()
         val rssiValues = nodes.mapNotNull { it.rssi }.sorted()
 
         return ScoredPreset(
@@ -106,7 +109,7 @@ class DiscoveryRankingEngine {
                 uniqueNodeCount = pr.uniqueNodes,
                 neighborDiversity = pr.directNeighborCount + pr.meshNeighborCount,
                 nonDupePacketCount = (pr.numPacketsRx - pr.numRxDupe).coerceAtLeast(0),
-                medianSnr = median(snrValues) { it },
+                medianSnr = medianFloat(snrValues),
                 medianRssi = medianInt(rssiValues),
                 bestKnownDistance = nodes.mapNotNull { it.distanceFromUser }.maxOrNull() ?: 0.0,
                 failurePenalty = pr.packetFailureRate,
@@ -162,12 +165,11 @@ class DiscoveryRankingEngine {
                 cmp = b.breakdown.nonDupePacketCount.compareTo(a.breakdown.nonDupePacketCount)
                 if (cmp != 0) return@Comparator cmp
 
-                // 4. Best median link quality: SNR first, then RSSI
-                cmp = b.breakdown.medianSnr.compareTo(a.breakdown.medianSnr)
+                // 4. Best median link quality: SNR first, then RSSI. Higher wins, but a preset where nobody reported
+                // a reading ranks after any measured preset rather than winning on a phantom 0 dB / 0 dBm.
+                cmp = compareDescendingMissingLast(a.breakdown.medianSnr, b.breakdown.medianSnr)
                 if (cmp != 0) return@Comparator cmp
-                // Higher rssi wins, but a preset where nobody reported one ranks after any measured preset rather
-                // than winning on a phantom 0 dBm.
-                cmp = compareByRssiDescendingMissingLast(a.breakdown.medianRssi, b.breakdown.medianRssi)
+                cmp = compareDescendingMissingLast(a.breakdown.medianRssi, b.breakdown.medianRssi)
                 if (cmp != 0) return@Comparator cmp
 
                 // 5. Greatest best-known distance
@@ -178,19 +180,19 @@ class DiscoveryRankingEngine {
                 a.breakdown.failurePenalty.compareTo(b.breakdown.failurePenalty)
             }
 
-        /** Compute the median of a sorted float-convertible list. Returns 0 for empty. */
-        internal fun <T> median(sorted: List<T>, toFloat: (T) -> Float): Float {
-            if (sorted.isEmpty()) return 0f
+        /** Compute the median of a sorted Float list. Returns null for empty: 0 is a real snr, not "no data". */
+        private fun medianFloat(sorted: List<Float>): Float? {
+            if (sorted.isEmpty()) return null
             val mid = sorted.size / 2
             return if (sorted.size % 2 == 0) {
-                (toFloat(sorted[mid - 1]) + toFloat(sorted[mid])) / 2f
+                (sorted[mid - 1] + sorted[mid]) / 2f
             } else {
-                toFloat(sorted[mid])
+                sorted[mid]
             }
         }
 
         /** Orders two medians best-first, with an absent median always losing to a measured one. */
-        private fun compareByRssiDescendingMissingLast(a: Int?, b: Int?): Int = when {
+        private fun <T : Comparable<T>> compareDescendingMissingLast(a: T?, b: T?): Int = when {
             a == b -> 0
             a == null -> 1
             b == null -> -1

@@ -186,7 +186,8 @@ class DiscoveryScanEngine(
         var neighborType: String = "direct",
         var latitude: Double? = null,
         var longitude: Double? = null,
-        var snr: Float = 0f,
+        /** Null until a packet reports one, so an absent reading stays distinct from a valid 0 dB. */
+        var snr: Float? = null,
         /** Null until a packet reports one, so an absent reading stays distinct from a valid 0 dBm. */
         var rssi: Int? = null,
         var hopCount: Int = 0,
@@ -428,6 +429,8 @@ class DiscoveryScanEngine(
 
         mutex.withLock {
             val node = collectedNodes.getOrPut(fromNum) { CollectedNodeData(nodeNum = fromNum) }
+            // Hearing the node itself is a direct sighting, even if NeighborInfo named it first.
+            node.neighborType = "direct"
             // Update signal info from the direct packet
             // Explicit presence: record a reported 0 dB/0 dBm, skip only a genuinely absent one.
             meshPacket.snrOrNull()?.let { node.snr = it }
@@ -729,12 +732,8 @@ class DiscoveryScanEngine(
         val ni = NeighborInfo.ADAPTER.decodeOrNull(payload, Logger) ?: return
         for (neighbor in ni.neighbors) {
             val neighborNum = neighbor.node_id.toLong()
-            val node =
-                collectedNodes.getOrPut(neighborNum) { CollectedNodeData(nodeNum = neighborNum, neighborType = "mesh") }
-            // Only mark as mesh if not already seen directly
-            if (node.snr == 0f && node.rssi == null) {
-                node.neighborType = "mesh"
-            }
+            // Only a node not yet heard is added as mesh; one already heard directly keeps its type.
+            collectedNodes.getOrPut(neighborNum) { CollectedNodeData(nodeNum = neighborNum, neighborType = "mesh") }
         }
     }
 

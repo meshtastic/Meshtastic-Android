@@ -43,7 +43,10 @@ import org.meshtastic.core.model.MeshLog as ExternalMeshLog
  * @property fromRadio The decoded [FromRadio] protobuf object.
  */
 @Suppress("EmptyCatchBlock", "SwallowedException", "ConstructorParameterNaming")
-@Entity(tableName = "log", indices = [Index(value = ["from_num"]), Index(value = ["port_num"])])
+@Entity(
+    tableName = "log",
+    indices = [Index(value = ["from_num"]), Index(value = ["port_num"]), Index(value = ["received_date"])],
+)
 data class MeshLog(
     @PrimaryKey val uuid: String,
     @ColumnInfo(name = "type") val message_type: String,

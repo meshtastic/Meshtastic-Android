@@ -63,8 +63,13 @@ class MeshtasticDatabaseTest {
     @Throws(IOException::class)
     fun migrateAll(): Unit = runBlocking {
         helper.createDatabase(EARLIEST_SCHEMA_VERSION).close()
-        // No manual migrations: every version bump is an @AutoMigration, so Room derives the full path itself.
-        helper.runMigrationsAndValidate(latestSchemaVersion(), emptyList()).close()
+        // Every bump is an @AutoMigration except 52→53 and 63→64, which are hand-written and must be passed in.
+        helper
+            .runMigrationsAndValidate(
+                latestSchemaVersion(),
+                listOf(MeshtasticDatabase.MIGRATION_52_53, MeshtasticDatabase.MIGRATION_63_64),
+            )
+            .close()
     }
 
     private fun latestSchemaVersion(): Int {

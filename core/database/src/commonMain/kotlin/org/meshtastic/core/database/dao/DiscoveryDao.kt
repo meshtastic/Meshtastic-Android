@@ -134,6 +134,10 @@ interface DiscoveryDao {
     @Query("SELECT * FROM discovered_node WHERE preset_result_id = :presetResultId")
     fun getDiscoveredNodesFlow(presetResultId: Long): Flow<List<DiscoveredNodeEntity>>
 
+    /** Nodes of every preset result in [presetResultIds]; callers keep the list under the bind-parameter limit. */
+    @Query("SELECT * FROM discovered_node WHERE preset_result_id IN (:presetResultIds) ORDER BY id")
+    suspend fun getDiscoveredNodesForPresetResults(presetResultIds: List<Long>): List<DiscoveredNodeEntity>
+
     @Query(
         """
         SELECT DISTINCT node_num FROM discovered_node dn

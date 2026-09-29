@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `:feature:discovery` module implements **Local Mesh Discovery**: the app cycles the connected radio through a queue of LoRa modem presets, dwells on each for a configured duration while collecting packets, then persists and ranks the results so the user can see which preset (or beacon-advertised custom channel) has the most active mesh nearby. Sessions are stored via `DiscoveryDao` and can be revisited, mapped, summarised (AI or algorithmic), and exported.
+The `:feature:discovery` module implements **Local Mesh Discovery**: the app cycles the connected radio through a queue of LoRa modem presets, dwells on each for a configured duration while collecting packets, then persists and ranks the results so the user can see which preset (or beacon-advertised custom channel) has the most active mesh nearby. `DiscoveryScanEngine`, `DiscoveryHomeRestorer`, `DiscoveryTerminalCoordinator` and `DiscoveryInterruptedSessionRecovery` write sessions through `DiscoveryDao` directly; the ViewModels read and edit them through `DiscoveryRepository` (`core:repository`), so they can be revisited, mapped, summarised (AI or algorithmic), and exported.
 
 **Targets:** Android · JVM (Desktop) · iOS (via `meshtastic.kmp.feature` convention plugin)
 
