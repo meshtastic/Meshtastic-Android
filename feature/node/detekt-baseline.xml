@@ -28,7 +28,6 @@
     <ID>LambdaParameterEventTrailing:TracerouteChart.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>LongParameterList:CommonGetNodeDetailsUseCase.kt:CommonGetNodeDetailsUseCase</ID>
     <ID>MagicNumber:CompassViewModel.kt:CompassViewModel$180.0</ID>
-    <ID>ModifierMissing:BaseMetricChart.kt:@Composable @Suppress("LongMethod") fun &lt;T> BaseMetricScreen</ID>
     <ID>ModifierMissing:CommonCharts.kt:@Composable fun LegendIndicator</ID>
     <ID>ModifierMissing:DeviceMetrics.kt:@Suppress("LongMethod") @Composable fun DeviceMetricsScreen</ID>
     <ID>ModifierMissing:EnvironmentMetrics.kt:@Composable fun EnvironmentMetricsScreen</ID>
@@ -40,7 +39,6 @@
     <ID>ModifierMissing:PositionLogComponents.kt:@Composable @Suppress("LongMethod") fun PositionCard</ID>
     <ID>ModifierMissing:PositionLogScreens.kt:@Composable fun PositionLogScreen</ID>
     <ID>ModifierMissing:PowerMetrics.kt:@Suppress("LongMethod") @Composable fun PowerMetricsScreen</ID>
-    <ID>ModifierMissing:SignalMetrics.kt:@Suppress("LongMethod") @Composable fun SignalMetricsScreen</ID>
     <ID>ModifierNotUsedAtRoot:NeighborInfoLog.kt:modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
     <ID>ModifierNotUsedAtRoot:TracerouteMapScreen.kt:modifier = modifier.fillMaxSize().padding(paddingValues)</ID>
     <ID>ModifierWithoutDefault:NodeDetailScreens.kt:modifier: Modifier</ID>
@@ -81,13 +79,7 @@
     <ID>PreviewPublic:NodeDetailPreviews.kt:@PreviewLightDark @Composable fun NodeDetailContentLoadingPreview</ID>
     <ID>PreviewPublic:NodeDetailPreviews.kt:@PreviewLightDark @Composable fun NodeDetailContentLocalPreview</ID>
     <ID>PreviewPublic:NodeDetailPreviews.kt:@PreviewLightDark @Composable fun NodeDetailContentRemotePreview</ID>
-    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompactActivePreview</ID>
-    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompactAllFieldsPreview</ID>
-    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompactMinimalPreview</ID>
-    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompleteActivePreview</ID>
-    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompletePreview</ID>
     <ID>TooGenericExceptionCaught:MetricsViewModel.kt:MetricsViewModel$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:NodeManagementActions.kt:NodeManagementActions$ex: Exception</ID>
     <ID>UnnecessaryLaunchedEffect:CompassBottomSheet.kt:LaunchedEffect</ID>
     <ID>UnnecessaryLaunchedEffect:NodeDetailScreens.kt:LaunchedEffect</ID>
     <ID>UnnecessaryLaunchedEffect:NodeListScreen.kt:LaunchedEffect</ID>
