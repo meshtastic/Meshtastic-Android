@@ -115,6 +115,18 @@ class FakeRadioController :
     /** Every local or admin owner write, preserving destination and call order together. */
     val ownerWrites = mutableListOf<OwnerWrite>()
 
+    /**
+     * One admin request as it reached the controller: which request, for which node, carrying what, under which packet
+     * ID. [packetId] is null for requests whose controller method takes none.
+     */
+    data class AdminRequest(val kind: String, val destNum: Int, val payload: Any?, val packetId: Int?)
+
+    /** Every admin get/set request in call order, including those with no dedicated list above. */
+    val adminRequests = mutableListOf<AdminRequest>()
+
+    /** The value [generatePacketId] returns. */
+    var nextPacketId: Int = 1
+
     /** Destination node for every edit transaction, in order. Local edits use the fake's sentinel value of zero. */
     val editSettingsDestinations = mutableListOf<Int>()
 
@@ -195,6 +207,8 @@ class FakeRadioController :
             fixedPositions.clear()
             moduleConfigWrites.clear()
             ownerWrites.clear()
+            adminRequests.clear()
+            nextPacketId = 1
             editSettingsDestinations.clear()
             adminOperations.clear()
             failEditSettingsBegin = false
@@ -288,16 +302,25 @@ class FakeRadioController :
         lastSetOwnerUser = user
         ownerWrites.add(OwnerWrite(destination = destNum.takeUnless { it == 0 }, user = user))
         adminOperations.add("owner")
+        recordAdminRequest("setOwner", destNum, user, packetId)
     }
 
-    override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {}
+    override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {
+        recordAdminRequest("setHamMode", destNum, hamParameters, packetId)
+    }
 
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
         recordConfigWrite(destNum, config, invokeStandaloneHook = true)
+        recordAdminRequest("setConfig", destNum, config, packetId)
     }
 
     override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
         recordModuleConfigWrite(destNum, config, invokeStandaloneHook = true)
+        recordAdminRequest("setModuleConfig", destNum, config, packetId)
+    }
+
+    private fun recordAdminRequest(kind: String, destNum: Int, payload: Any?, packetId: Int?) {
+        adminRequests.add(AdminRequest(kind, destNum, payload, packetId))
     }
 
     private suspend fun recordConfigWrite(destNum: Int, config: Config, invokeStandaloneHook: Boolean) {
@@ -318,33 +341,53 @@ class FakeRadioController :
         channelWrites.add(ChannelWrite(destination = destNum.takeUnless { it == 0 }, channel = channel))
         settingsOperations.add(SettingsOperation.SetChannel(channel))
         adminOperations.add("channel:${channel.index}")
+        recordAdminRequest("setRemoteChannel", destNum, channel, packetId)
     }
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {
         onSetFixedPosition(destNum, position)
         fixedPositions.add(position)
         adminOperations.add("fixed-position")
+        recordAdminRequest("setFixedPosition", destNum, position, packetId = null)
     }
 
-    override suspend fun setRingtone(destNum: Int, ringtone: String) {}
+    override suspend fun setRingtone(destNum: Int, ringtone: String) {
+        recordAdminRequest("setRingtone", destNum, ringtone, packetId = null)
+    }
 
-    override suspend fun setCannedMessages(destNum: Int, messages: String) {}
+    override suspend fun setCannedMessages(destNum: Int, messages: String) {
+        recordAdminRequest("setCannedMessages", destNum, messages, packetId = null)
+    }
 
     override suspend fun setTime(destNum: Int, packetId: Int) {}
 
-    override suspend fun getOwner(destNum: Int, packetId: Int) {}
+    override suspend fun getOwner(destNum: Int, packetId: Int) {
+        recordAdminRequest("getOwner", destNum, payload = null, packetId)
+    }
 
-    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {}
+    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
+        recordAdminRequest("getConfig", destNum, configType, packetId)
+    }
 
-    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {}
+    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {
+        recordAdminRequest("getModuleConfig", destNum, moduleConfigType, packetId)
+    }
 
-    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {}
+    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {
+        recordAdminRequest("getChannel", destNum, index, packetId)
+    }
 
-    override suspend fun getRingtone(destNum: Int, packetId: Int) {}
+    override suspend fun getRingtone(destNum: Int, packetId: Int) {
+        recordAdminRequest("getRingtone", destNum, payload = null, packetId)
+    }
 
-    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {}
+    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
+        recordAdminRequest("getCannedMessages", destNum, payload = null, packetId)
+    }
 
-    override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {}
+    override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {
+        recordAdminRequest("getDeviceConnectionStatus", destNum, payload = null, packetId)
+    }
 
     override suspend fun reboot(destNum: Int, packetId: Int) {}
 
@@ -437,7 +480,7 @@ class FakeRadioController :
 
     override suspend fun editLocalSettings(block: suspend AdminEditScope.() -> Unit) = editSettings(0, block)
 
-    override fun generatePacketId(): Int = 1
+    override fun generatePacketId(): Int = nextPacketId
 
     override fun startProvideLocation() {
         startProvideLocationCalled = true
