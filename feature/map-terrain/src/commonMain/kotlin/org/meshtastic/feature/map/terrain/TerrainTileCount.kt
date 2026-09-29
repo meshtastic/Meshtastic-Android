@@ -37,5 +37,6 @@ internal fun regionalTerrainZooms(bounds: GeoBounds, maxZoom: Int): IntRange? =
         null
     }
 
-private fun tileCount(bounds: GeoBounds, zooms: IntRange): Long =
-    zooms.sumOf { zoom -> TerrainTileMath.tileCountAt(zoom, bounds) }
+private fun tileCount(bounds: GeoBounds, zooms: IntRange): Long = zooms.sumOf { zoom ->
+    TerrainTileMath.tileCountAt(zoom, bounds)
+}

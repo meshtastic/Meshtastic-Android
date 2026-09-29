@@ -153,8 +153,9 @@ open class BaseMapViewModel(
 
     fun toggleShowWaypointsOnMap() = mapPrefs.updateMapFilters { it.copy(showWaypoints = !it.showWaypoints) }
 
-    fun toggleShowPrecisionCircleOnMap() =
-        mapPrefs.updateMapFilters { it.copy(showPrecisionCircle = !it.showPrecisionCircle) }
+    fun toggleShowPrecisionCircleOnMap() = mapPrefs.updateMapFilters {
+        it.copy(showPrecisionCircle = !it.showPrecisionCircle)
+    }
 
     fun toggleOnlyOnline() = mapPrefs.updateMapFilters { it.copy(onlyOnline = !it.onlyOnline) }
 
@@ -198,11 +199,13 @@ open class BaseMapViewModel(
 
     fun clearExcludedRoles() = mapPrefs.updateMapFilters { it.copy(excludedRoles = emptySet()) }
 
-    fun setLastHeardFilter(filter: LastHeardFilter) =
-        mapPrefs.updateMapFilters { it.copy(lastHeardSeconds = filter.seconds) }
+    fun setLastHeardFilter(filter: LastHeardFilter) = mapPrefs.updateMapFilters {
+        it.copy(lastHeardSeconds = filter.seconds)
+    }
 
-    fun setLastHeardTrackFilter(filter: LastHeardFilter) =
-        mapPrefs.updateMapFilters { it.copy(lastHeardTrackSeconds = filter.seconds) }
+    fun setLastHeardTrackFilter(filter: LastHeardFilter) = mapPrefs.updateMapFilters {
+        it.copy(lastHeardTrackSeconds = filter.seconds)
+    }
 
     open fun getUser(userId: String?) =
         nodeRepository.getUser(userId ?: org.meshtastic.core.model.NodeAddress.ID_BROADCAST)

@@ -256,8 +256,7 @@ class MeshNotificationManagerImpl(
      */
     internal suspend fun ensureChannels() = channelsMutex.withLock {
         if (channelsReady) return@withLock
-        val labels =
-            withTimeoutOrNull(CHANNEL_LABEL_TIMEOUT) { safeCatching { resolveChannelLabels() }.getOrNull() }
+        val labels = withTimeoutOrNull(CHANNEL_LABEL_TIMEOUT) { safeCatching { resolveChannelLabels() }.getOrNull() }
         val groups =
             NotificationChannelGroupSpec.entries.map { it.toGroup(labels?.groups?.get(it) ?: applicationLabel) }
         notificationManager.createNotificationChannelGroups(groups)
@@ -550,24 +549,23 @@ class MeshNotificationManagerImpl(
         // InboxStyle, not MessagingStyle: the summary has no reply or mark-as-read actions, and Android Auto takes a
         // MessagingStyle notification for a conversation it can answer.
         val you = getStringSuspend(Res.string.you)
-        val lines =
-            activeNotifications.mapNotNull { sbn ->
-                // Prefer the child's real MessagingStyle: its latest message carries the actual sender, so the line
-                // reads "Hawk Ridge: …" rather than the conversation title.
-                val latest =
-                    NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(sbn.notification)
-                        ?.messages
-                        ?.lastOrNull()
-                val sender = latest?.person?.name ?: latest?.let { you }
-                val text = latest?.text
-                if (sender != null && text != null) {
-                    "$sender: $text"
-                } else {
-                    val senderTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
-                    val messageText = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
-                    if (senderTitle != null && messageText != null) "$senderTitle: $messageText" else null
-                }
+        val lines = activeNotifications.mapNotNull { sbn ->
+            // Prefer the child's real MessagingStyle: its latest message carries the actual sender, so the line
+            // reads "Hawk Ridge: …" rather than the conversation title.
+            val latest =
+                NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(sbn.notification)
+                    ?.messages
+                    ?.lastOrNull()
+            val sender = latest?.person?.name ?: latest?.let { you }
+            val text = latest?.text
+            if (sender != null && text != null) {
+                "$sender: $text"
+            } else {
+                val senderTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                val messageText = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
+                if (senderTitle != null && messageText != null) "$senderTitle: $messageText" else null
             }
+        }
         val appName = getStringSuspend(Res.string.meshtastic_app_name)
         val inboxStyle = NotificationCompat.InboxStyle().setBigContentTitle(appName)
         lines.forEach { inboxStyle.addLine(it) }
