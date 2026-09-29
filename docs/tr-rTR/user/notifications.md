@@ -27,10 +27,10 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Amatör Telsiz | Yeni düğüm bildirimleri                                     | A node heard for the first time                                                 | The node's details              |
 | Amatör Telsiz | Mesh invitation notifications                               | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
 | Amatör Telsiz | Düşük pil bildirimleri (favori düğümler) | A favorite node's battery running low                                           | The node's details              |
-| Device        | Service notifications                                       | The connection to your node while the app runs in the background                | The app                         |
-| Device        | Low battery notifications                                   | Your node's battery running low                                                 | The node's details              |
-| Device        | Radio notifications                                         | Notices from your node, such as key verification requests and security warnings | The app                         |
-| Device        | Update and connection notifications                         | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
+| Cihaz         | Servis bildirimleri                                         | The connection to your node while the app runs in the background                | The app                         |
+| Cihaz         | Düşük pil bildirimleri                                      | Your node's battery running low                                                 | The node's details              |
+| Cihaz         | Radio notifications                                         | Notices from your node, such as key verification requests and security warnings | The app                         |
+| Cihaz         | Update and connection notifications                         | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
 
 By default, direct messages, alerts and radio notices pop up on screen, mesh invitations and the service notification arrive without a sound, and the rest make a sound. Android keeps whatever you change on a category, and the app cannot change it back.
 

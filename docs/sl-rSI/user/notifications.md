@@ -27,7 +27,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Mesh     | Obvestila novih vozlišč                                       | A node heard for the first time                                                 | The node's details              |
 | Mesh     | Mesh invitation notifications                                 | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
 | Mesh     | Low battery notifications (favorite nodes) | A favorite node's battery running low                                           | The node's details              |
-| Device   | Service notifications                                         | The connection to your node while the app runs in the background                | The app                         |
+| Device   | Obvestila storitve                                            | The connection to your node while the app runs in the background                | The app                         |
 | Device   | Low battery notifications                                     | Your node's battery running low                                                 | The node's details              |
 | Device   | Radio notifications                                           | Notices from your node, such as key verification requests and security warnings | The app                         |
 | Device   | Update and connection notifications                           | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
