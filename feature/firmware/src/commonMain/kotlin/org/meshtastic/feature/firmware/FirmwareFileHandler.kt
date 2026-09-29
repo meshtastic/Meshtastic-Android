@@ -151,14 +151,16 @@ interface FirmwareFileHandler {
 
 /**
  * Check whether [filename] is a valid firmware binary for [target] with the expected [fileExtension]. Excludes
- * non-firmware binaries that share the same extension (e.g. `littlefs-*`, `bleota*`).
+ * non-firmware binaries that share the same extension (e.g. `littlefs-*`, `bleota*`), wherever they sit in a zip's
+ * directories.
  */
 @Suppress("ComplexCondition") // excluded-binary + target/extension guards collapsed to one early-out
 internal fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean {
+    val baseName = filename.substringAfterLast('/')
     if (
-        filename.startsWith("littlefs-") ||
-        filename.startsWith("bleota") ||
-        filename.startsWith("mt-") ||
+        baseName.startsWith("littlefs-") ||
+        baseName.startsWith("bleota") ||
+        baseName.startsWith("mt-") ||
         filename.contains(".factory.") ||
         target.isBlank() ||
         !filename.endsWith(fileExtension)
