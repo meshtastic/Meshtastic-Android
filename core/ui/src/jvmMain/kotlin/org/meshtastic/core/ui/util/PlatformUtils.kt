@@ -45,6 +45,9 @@ actual fun rememberShareText(): (text: String, subject: String) -> Unit {
 actual fun rememberOpenNfcSettings(): () -> Unit = { Logger.w { "NFC settings not available on JVM/Desktop" } }
 
 /** JVM stub — toast messages are logged instead. */
+@Composable actual fun rememberShowToast(): suspend (String) -> Unit = { message -> Logger.i { "Toast: $message" } }
+
+/** JVM stub — toast messages are logged instead. */
 @Composable
 actual fun rememberShowToastResource(): suspend (StringResource) -> Unit = { _ -> Logger.i { "Toast (resource)" } }
 

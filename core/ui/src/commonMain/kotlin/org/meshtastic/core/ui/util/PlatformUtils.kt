@@ -25,6 +25,9 @@ import org.meshtastic.core.common.util.CommonUri
 /** Returns a function to open the platform's NFC settings. */
 @Composable expect fun rememberOpenNfcSettings(): () -> Unit
 
+/** Returns a function to show a toast message. */
+@Composable expect fun rememberShowToast(): suspend (String) -> Unit
+
 /** Returns a function to show a toast message from a string resource. */
 @Composable expect fun rememberShowToastResource(): suspend (StringResource) -> Unit
 

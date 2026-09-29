@@ -93,6 +93,12 @@ actual fun rememberOpenNfcSettings(): () -> Unit {
 }
 
 @Composable
+actual fun rememberShowToast(): suspend (String) -> Unit {
+    val context = LocalContext.current
+    return remember(context) { { text -> context.showToast(text) } }
+}
+
+@Composable
 actual fun rememberShowToastResource(): suspend (StringResource) -> Unit {
     val context = LocalContext.current
     return remember(context) { { stringResource -> context.showToast(getString(stringResource)) } }
