@@ -64,7 +64,7 @@ internal fun String.toCssColor(): Pair<String, String>? {
             ?.filterNotNull() ?: return null
     val opacity = bytes[ALPHA].toDouble() / MAX_CHANNEL
     // Rendered digit by digit rather than through a format string. This is JSON, not display text, and a
-    // locale-aware `%f` writes `"fill-opacity":0,498` on a comma-decimal device — invalid JSON, which makes
+    // locale-aware `%f` writes `"fill-opacity":0,498` on a comma-decimal device. That is invalid JSON, which makes
     // MapLibre reject the whole converted file so every KML import silently draws nothing. The previous
     // implementation pinned Locale.US to avoid that; building the text by hand cannot regress into it, and works
     // the same on every platform.
