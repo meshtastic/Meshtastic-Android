@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.AppFunctionsPrefs
+import org.meshtastic.core.repository.AppFunctionsSetting
 
 @KoinViewModel
 class AppFunctionsSettingsViewModel(private val prefs: AppFunctionsPrefs) : ViewModel() {
@@ -35,23 +36,5 @@ class AppFunctionsSettingsViewModel(private val prefs: AppFunctionsPrefs) : View
     val getRecentMessagesEnabled: StateFlow<Boolean> = prefs.getRecentMessagesEnabled
     val getUnreadSummaryEnabled: StateFlow<Boolean> = prefs.getUnreadSummaryEnabled
 
-    fun setMasterEnabled(enabled: Boolean) = prefs.setMasterEnabled(enabled)
-
-    fun setSendMessageEnabled(enabled: Boolean) = prefs.setSendMessageEnabled(enabled)
-
-    fun setGetMeshStatusEnabled(enabled: Boolean) = prefs.setGetMeshStatusEnabled(enabled)
-
-    fun setGetNodeListEnabled(enabled: Boolean) = prefs.setGetNodeListEnabled(enabled)
-
-    fun setGetChannelInfoEnabled(enabled: Boolean) = prefs.setGetChannelInfoEnabled(enabled)
-
-    fun setGetDeviceStatusEnabled(enabled: Boolean) = prefs.setGetDeviceStatusEnabled(enabled)
-
-    fun setGetNodeDetailsEnabled(enabled: Boolean) = prefs.setGetNodeDetailsEnabled(enabled)
-
-    fun setGetMeshMetricsEnabled(enabled: Boolean) = prefs.setGetMeshMetricsEnabled(enabled)
-
-    fun setGetRecentMessagesEnabled(enabled: Boolean) = prefs.setGetRecentMessagesEnabled(enabled)
-
-    fun setGetUnreadSummaryEnabled(enabled: Boolean) = prefs.setGetUnreadSummaryEnabled(enabled)
+    fun toggle(setting: AppFunctionsSetting) = prefs.toggle(setting)
 }

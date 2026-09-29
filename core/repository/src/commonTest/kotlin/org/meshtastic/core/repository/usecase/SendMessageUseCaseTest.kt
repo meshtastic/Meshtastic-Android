@@ -78,7 +78,7 @@ class SendMessageUseCaseTest {
         // Arrange
         val ourNode = Node(num = 1, user = User.Builder().also { wb -> wb.id = "!1234" }.build())
         nodeRepository.setOurNode(ourNode)
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act
         useCase("Hello broadcast", "0${NodeAddress.ID_BROADCAST}", null)
@@ -93,7 +93,7 @@ class SendMessageUseCaseTest {
         // Arrange
         val ourNode = Node(num = 1, user = User.Builder().also { wb -> wb.id = "!1234" }.build())
         nodeRepository.setOurNode(ourNode)
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act
         useCase("Hello", "0${NodeAddress.ID_BROADCAST}", null)
@@ -132,7 +132,7 @@ class SendMessageUseCaseTest {
         val destNode = Node(num = 12345, user = User.Builder().also { wb -> wb.id = "!dest" }.build())
         nodeRepository.upsert(destNode)
 
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act
         useCase("Direct message", "!dest", null)
@@ -162,7 +162,7 @@ class SendMessageUseCaseTest {
         val destNode = Node(num = 67890, user = User.Builder().also { wb -> wb.id = "!dest" }.build())
         nodeRepository.upsert(destNode)
 
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act
         useCase("Direct message", "!dest", null)
@@ -177,7 +177,7 @@ class SendMessageUseCaseTest {
         // Arrange
         val ourNode = Node(num = 1)
         nodeRepository.setOurNode(ourNode)
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(true)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = true
 
         val originalText = "\u0410pple" // Cyrillic A
 
@@ -208,7 +208,7 @@ class SendMessageUseCaseTest {
         val destNode = Node(num = 0x70fdde9b.toInt(), user = User.Builder().also { wb -> wb.id = "!70fdde9b" }.build())
         nodeRepository.upsert(destNode)
 
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act — PKI DM: channel 8 + node ID
         useCase("PKI direct message", "${NodeAddress.PKC_CHANNEL_INDEX}!70fdde9b", null)
@@ -239,7 +239,7 @@ class SendMessageUseCaseTest {
         val destNode = Node(num = 0x12345678, user = User.Builder().also { wb -> wb.id = "!12345678" }.build())
         nodeRepository.upsert(destNode)
 
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act — channel 1 DM (not PKI, not legacy)
         useCase("Channel DM", "1!12345678", null)
@@ -269,7 +269,7 @@ class SendMessageUseCaseTest {
         val destNode = Node(num = 0xABCDEF01.toInt(), user = User.Builder().also { wb -> wb.id = "!abcdef01" }.build())
         nodeRepository.upsert(destNode)
 
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act — PKI DM with firmware that doesn't support verified contacts
         useCase("Old PKI DM", "${NodeAddress.PKC_CHANNEL_INDEX}!abcdef01", null)

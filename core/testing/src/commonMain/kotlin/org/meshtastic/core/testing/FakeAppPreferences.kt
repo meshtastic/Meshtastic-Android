@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.update
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.AppFunctionsPrefs
+import org.meshtastic.core.repository.AppFunctionsSetting
 import org.meshtastic.core.repository.AppPreferences
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.FilterPrefs
@@ -39,8 +40,8 @@ import org.meshtastic.core.repository.UiPrefs
 class FakeAnalyticsPrefs : AnalyticsPrefs {
     override val analyticsAllowed = MutableStateFlow(true)
 
-    override fun setAnalyticsAllowed(allowed: Boolean) {
-        analyticsAllowed.value = allowed
+    override fun toggleAnalyticsAllowed() {
+        analyticsAllowed.update { !it }
     }
 
     override val installId = MutableStateFlow("fake-install-id")
@@ -49,8 +50,8 @@ class FakeAnalyticsPrefs : AnalyticsPrefs {
 class FakeHomoglyphPrefs : HomoglyphPrefs {
     override val homoglyphEncodingEnabled = MutableStateFlow(false)
 
-    override fun setHomoglyphEncodingEnabled(enabled: Boolean) {
-        homoglyphEncodingEnabled.value = enabled
+    override fun toggleHomoglyphEncodingEnabled() {
+        homoglyphEncodingEnabled.update { !it }
     }
 }
 
@@ -129,8 +130,8 @@ class FakeUiPrefs : UiPrefs {
 
     override val showQuickChat = MutableStateFlow(true)
 
-    override fun setShowQuickChat(show: Boolean) {
-        showQuickChat.value = show
+    override fun toggleShowQuickChat() {
+        showQuickChat.update { !it }
     }
 
     override val showFullMessageTimestamps = MutableStateFlow(false)
@@ -348,63 +349,31 @@ class FakeMeshPrefs : MeshPrefs {
 
 class FakeAppFunctionsPrefs : AppFunctionsPrefs {
     override val masterEnabled = MutableStateFlow(true)
-
-    override fun setMasterEnabled(enabled: Boolean) {
-        masterEnabled.value = enabled
-    }
-
     override val sendMessageEnabled = MutableStateFlow(true)
-
-    override fun setSendMessageEnabled(enabled: Boolean) {
-        sendMessageEnabled.value = enabled
-    }
-
     override val getMeshStatusEnabled = MutableStateFlow(true)
-
-    override fun setGetMeshStatusEnabled(enabled: Boolean) {
-        getMeshStatusEnabled.value = enabled
-    }
-
     override val getNodeListEnabled = MutableStateFlow(true)
-
-    override fun setGetNodeListEnabled(enabled: Boolean) {
-        getNodeListEnabled.value = enabled
-    }
-
     override val getChannelInfoEnabled = MutableStateFlow(true)
-
-    override fun setGetChannelInfoEnabled(enabled: Boolean) {
-        getChannelInfoEnabled.value = enabled
-    }
-
     override val getDeviceStatusEnabled = MutableStateFlow(true)
-
-    override fun setGetDeviceStatusEnabled(enabled: Boolean) {
-        getDeviceStatusEnabled.value = enabled
-    }
-
     override val getNodeDetailsEnabled = MutableStateFlow(true)
-
-    override fun setGetNodeDetailsEnabled(enabled: Boolean) {
-        getNodeDetailsEnabled.value = enabled
-    }
-
     override val getMeshMetricsEnabled = MutableStateFlow(true)
-
-    override fun setGetMeshMetricsEnabled(enabled: Boolean) {
-        getMeshMetricsEnabled.value = enabled
-    }
-
     override val getRecentMessagesEnabled = MutableStateFlow(true)
-
-    override fun setGetRecentMessagesEnabled(enabled: Boolean) {
-        getRecentMessagesEnabled.value = enabled
-    }
-
     override val getUnreadSummaryEnabled = MutableStateFlow(true)
 
-    override fun setGetUnreadSummaryEnabled(enabled: Boolean) {
-        getUnreadSummaryEnabled.value = enabled
+    override fun toggle(setting: AppFunctionsSetting) {
+        val flow =
+            when (setting) {
+                AppFunctionsSetting.MASTER -> masterEnabled
+                AppFunctionsSetting.SEND_MESSAGE -> sendMessageEnabled
+                AppFunctionsSetting.GET_MESH_STATUS -> getMeshStatusEnabled
+                AppFunctionsSetting.GET_NODE_LIST -> getNodeListEnabled
+                AppFunctionsSetting.GET_CHANNEL_INFO -> getChannelInfoEnabled
+                AppFunctionsSetting.GET_DEVICE_STATUS -> getDeviceStatusEnabled
+                AppFunctionsSetting.GET_NODE_DETAILS -> getNodeDetailsEnabled
+                AppFunctionsSetting.GET_MESH_METRICS -> getMeshMetricsEnabled
+                AppFunctionsSetting.GET_RECENT_MESSAGES -> getRecentMessagesEnabled
+                AppFunctionsSetting.GET_UNREAD_SUMMARY -> getUnreadSummaryEnabled
+            }
+        flow.update { !it }
     }
 }
 

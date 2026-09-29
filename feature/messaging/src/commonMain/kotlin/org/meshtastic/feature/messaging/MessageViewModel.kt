@@ -365,7 +365,7 @@ class MessageViewModel(
     }
 
     fun toggleShowQuickChat() {
-        uiPrefs.setShowQuickChat(!uiPrefs.showQuickChat.value)
+        uiPrefs.toggleShowQuickChat()
     }
 
     fun toggleShowFiltered() {

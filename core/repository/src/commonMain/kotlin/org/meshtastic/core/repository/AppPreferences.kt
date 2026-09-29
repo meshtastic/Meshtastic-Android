@@ -25,7 +25,8 @@ import org.meshtastic.core.model.InterfaceId
 interface AnalyticsPrefs {
     val analyticsAllowed: StateFlow<Boolean>
 
-    fun setAnalyticsAllowed(allowed: Boolean)
+    /** Flips the stored value, not [analyticsAllowed]'s snapshot, which lags a pending write. */
+    fun toggleAnalyticsAllowed()
 
     val installId: StateFlow<String>
 }
@@ -34,7 +35,8 @@ interface AnalyticsPrefs {
 interface HomoglyphPrefs {
     val homoglyphEncodingEnabled: StateFlow<Boolean>
 
-    fun setHomoglyphEncodingEnabled(enabled: Boolean)
+    /** Flips the stored value, not [homoglyphEncodingEnabled]'s snapshot, which lags a pending write. */
+    fun toggleHomoglyphEncodingEnabled()
 }
 
 /** Reactive interface for message filtering preferences. */
@@ -124,7 +126,8 @@ interface UiPrefs {
 
     val showQuickChat: StateFlow<Boolean>
 
-    fun setShowQuickChat(show: Boolean)
+    /** Flips the stored value, not [showQuickChat]'s snapshot, which lags a pending write. */
+    fun toggleShowQuickChat()
 
     /** Whether conversation message headers and actions always show both the date and time. */
     val showFullMessageTimestamps: StateFlow<Boolean>
@@ -393,47 +396,35 @@ interface TakPrefs {
     fun setTakServerChannel(index: Int)
 }
 
+/** One App Functions switch: the master toggle or a single function's. */
+enum class AppFunctionsSetting {
+    MASTER,
+    SEND_MESSAGE,
+    GET_MESH_STATUS,
+    GET_NODE_LIST,
+    GET_CHANNEL_INFO,
+    GET_DEVICE_STATUS,
+    GET_NODE_DETAILS,
+    GET_MESH_METRICS,
+    GET_RECENT_MESSAGES,
+    GET_UNREAD_SUMMARY,
+}
+
 /** Reactive interface for App Functions (system AI integration) preferences. */
 interface AppFunctionsPrefs {
     val masterEnabled: StateFlow<Boolean>
-
-    fun setMasterEnabled(enabled: Boolean)
-
     val sendMessageEnabled: StateFlow<Boolean>
-
-    fun setSendMessageEnabled(enabled: Boolean)
-
     val getMeshStatusEnabled: StateFlow<Boolean>
-
-    fun setGetMeshStatusEnabled(enabled: Boolean)
-
     val getNodeListEnabled: StateFlow<Boolean>
-
-    fun setGetNodeListEnabled(enabled: Boolean)
-
     val getChannelInfoEnabled: StateFlow<Boolean>
-
-    fun setGetChannelInfoEnabled(enabled: Boolean)
-
     val getDeviceStatusEnabled: StateFlow<Boolean>
-
-    fun setGetDeviceStatusEnabled(enabled: Boolean)
-
     val getNodeDetailsEnabled: StateFlow<Boolean>
-
-    fun setGetNodeDetailsEnabled(enabled: Boolean)
-
     val getMeshMetricsEnabled: StateFlow<Boolean>
-
-    fun setGetMeshMetricsEnabled(enabled: Boolean)
-
     val getRecentMessagesEnabled: StateFlow<Boolean>
-
-    fun setGetRecentMessagesEnabled(enabled: Boolean)
-
     val getUnreadSummaryEnabled: StateFlow<Boolean>
 
-    fun setGetUnreadSummaryEnabled(enabled: Boolean)
+    /** Flips [setting]'s stored value, not its flow's snapshot, which lags a pending write. */
+    fun toggle(setting: AppFunctionsSetting)
 }
 
 /** Consolidated interface for all application preferences. */

@@ -36,13 +36,18 @@ class HomoglyphPrefsImpl(private val dataStore: HomoglyphEncodingDataStore, disp
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val homoglyphEncodingEnabled: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_ENABLED_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
+        dataStore.data
+            .map { it[KEY_ENABLED_PREF] ?: ENABLED_BY_DEFAULT }
+            .stateIn(scope, SharingStarted.Eagerly, ENABLED_BY_DEFAULT)
 
-    override fun setHomoglyphEncodingEnabled(enabled: Boolean) {
-        scope.launch { dataStore.edit { prefs -> prefs[KEY_ENABLED_PREF] = enabled } }
+    override fun toggleHomoglyphEncodingEnabled() {
+        scope.launch {
+            dataStore.edit { prefs -> prefs[KEY_ENABLED_PREF] = !(prefs[KEY_ENABLED_PREF] ?: ENABLED_BY_DEFAULT) }
+        }
     }
 
     companion object {
+        private const val ENABLED_BY_DEFAULT = false
         const val KEY_ENABLED = "enabled"
         val KEY_ENABLED_PREF = booleanPreferencesKey(KEY_ENABLED)
     }

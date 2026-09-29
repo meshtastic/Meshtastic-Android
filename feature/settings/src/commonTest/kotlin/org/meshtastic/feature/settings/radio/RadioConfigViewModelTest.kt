@@ -642,23 +642,21 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `toggleAnalyticsAllowed calls prefs`() {
-        every { analyticsPrefs.analyticsAllowed } returns MutableStateFlow(true)
-        every { analyticsPrefs.setAnalyticsAllowed(false) } returns Unit
+    fun `toggleAnalyticsAllowed delegates to the prefs toggle`() {
+        every { analyticsPrefs.toggleAnalyticsAllowed() } returns Unit
 
         viewModel.toggleAnalyticsAllowed()
 
-        verify { analyticsPrefs.setAnalyticsAllowed(false) }
+        verify { analyticsPrefs.toggleAnalyticsAllowed() }
     }
 
     @Test
-    fun `toggleHomoglyphCharactersEncodingEnabled calls prefs`() {
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(true)
-        every { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) } returns Unit
+    fun `toggleHomoglyphCharactersEncodingEnabled delegates to the prefs toggle`() {
+        every { homoglyphEncodingPrefs.toggleHomoglyphEncodingEnabled() } returns Unit
 
         viewModel.toggleHomoglyphCharactersEncodingEnabled()
 
-        verify { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) }
+        verify { homoglyphEncodingPrefs.toggleHomoglyphEncodingEnabled() }
     }
 
     @Test
