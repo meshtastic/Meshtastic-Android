@@ -115,7 +115,8 @@ private fun Project.registerTypeResolvedDetekt() {
 
     fun include(suffix: String) {
         val taskName = "detekt${suffix.replaceFirstChar { char -> char.uppercase() }}"
-        typeResolved.configure { dependsOn(tasks.matching { task -> task.name == taskName }) }
+        // Filters by name only, so the rest of the project's tasks stay unrealized.
+        typeResolved.configure { dependsOn(tasks.named { name -> name == taskName }) }
     }
 
     plugins.withId("org.jetbrains.kotlin.multiplatform") {
