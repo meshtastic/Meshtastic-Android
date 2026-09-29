@@ -96,13 +96,6 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          # Disabled on Gradle 9.7.1: restoring an entry written by another runner crashes
-          # fingerprint deserialization (IsInIdeaSyncValueSource CNFE, settings-plugin
-          # classloader scope) and the job dies in ~10s before any test. A cross-machine
-          # restore is the only thing that triggers it, so it is 100% red in CI and not
-          # reproducible from a local store/reuse pair. Re-enable when that is fixed
-          # upstream; VERSION_CODE is still pinned above so entries would reuse.
-          cache_configuration_cache: 'false'
 
       - name: Spotless, Detekt & Android Lint
         # The root spotlessCheck and detekt do not reach the included build-logic build.
@@ -134,13 +127,6 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          # Disabled on Gradle 9.7.1: restoring an entry written by another runner crashes
-          # fingerprint deserialization (IsInIdeaSyncValueSource CNFE, settings-plugin
-          # classloader scope) and the job dies in ~10s before any test. A cross-machine
-          # restore is the only thing that triggers it, so it is 100% red in CI and not
-          # reproducible from a local store/reuse pair. Re-enable when that is fixed
-          # upstream; VERSION_CODE is still pinned above so entries would reuse.
-          cache_configuration_cache: 'false'
 
       - name: Screenshot Test Validation
         # -Dorg.gradle.isolated-projects=false: AGP's screenshot plugin iterates BuildServicesRegistry at
@@ -312,15 +298,6 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          # Disabled on Gradle 9.7.1: restoring an entry written by another runner crashes
-          # fingerprint deserialization (IsInIdeaSyncValueSource CNFE, settings-plugin
-          # classloader scope) and the job dies in ~10s before any test. A cross-machine
-          # restore is the only thing that triggers it, so it is 100% red in CI and not
-          # reproducible from a local store/reuse pair. Re-enable when that is fixed
-          # upstream; VERSION_CODE is still pinned above so entries would reuse.
-          cache_configuration_cache: 'false'
-          # Shards run different task graphs; kover flips the graph again.
-          cache_key_suffix: ${{ matrix.shard.name }}${{ inputs.run_coverage && '-kover' || '' }}
           cache_konan: 'true'
 
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
