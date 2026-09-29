@@ -61,7 +61,6 @@ import org.meshtastic.app.map.tiles.RasterTileProvider
 import org.meshtastic.app.map.tiles.toRasterBasemap
 import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.MapPrefs
@@ -141,19 +140,6 @@ class MapViewModel(
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
-
-    // Injected by the map provider because this SavedStateHandle is not the Navigation 3 entry's route state.
-    private val sitePlannerRequestState = SitePlannerRequestState(nodeRepository.nodeDBbyNum)
-    val sitePlannerRequest: StateFlow<Node?> =
-        sitePlannerRequestState.request.stateInWhileSubscribed(initialValue = null)
-
-    fun setSitePlannerNodeNum(nodeNum: Int?) {
-        sitePlannerRequestState.setNodeNum(nodeNum)
-    }
-
-    fun consumeSitePlannerRequest(nodeNum: Int) {
-        sitePlannerRequestState.consume(nodeNum)
-    }
 
     fun setWaypointId(id: Int?) {
         if (_selectedWaypointId.value != id) {

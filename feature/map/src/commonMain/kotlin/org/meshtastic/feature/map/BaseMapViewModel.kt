@@ -112,6 +112,21 @@ open class BaseMapViewModel(
             .map { nodes -> nodes.filterNot { node -> node.isIgnored } }
             .stateInWhileSubscribed(initialValue = emptyList())
 
+    // Set by the map provider because this SavedStateHandle is not the Navigation 3 entry's route state.
+    private val sitePlannerRequestState = SitePlannerRequestState(nodeRepository.nodeDBbyNum)
+
+    /** The node a Site Planner route asked the map to open, until the map consumes it. */
+    val sitePlannerRequest: StateFlow<Node?> =
+        sitePlannerRequestState.request.stateInWhileSubscribed(initialValue = null)
+
+    fun setSitePlannerNodeNum(nodeNum: Int?) {
+        sitePlannerRequestState.setNodeNum(nodeNum)
+    }
+
+    fun consumeSitePlannerRequest(nodeNum: Int) {
+        sitePlannerRequestState.consume(nodeNum)
+    }
+
     val waypoints: StateFlow<Map<Int, DataPacket>> =
         packetRepository
             .getWaypoints()
