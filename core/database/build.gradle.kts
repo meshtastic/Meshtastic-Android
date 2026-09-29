@@ -28,6 +28,8 @@ kotlin {
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }
 
+    compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)

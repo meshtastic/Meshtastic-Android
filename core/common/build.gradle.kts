@@ -24,6 +24,8 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
+    compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.atomicfu)
