@@ -201,22 +201,14 @@ class NymeaWifiService(
             }
     }
 
-    /** Disconnect and cancel the service scope. */
+    /** Disconnect, which releases the BLE peripheral, then cancel the service scope. */
     suspend fun close() {
-        bleConnection.disconnect()
-        reassembler.reset()
-        serviceScope.cancel()
-    }
-
-    /**
-     * Synchronous teardown — cancels the service scope (and its child BLE connection) without suspending.
-     *
-     * Use this from `ViewModel.onCleared()` where `viewModelScope` is already cancelled and launching a new coroutine
-     * is not possible.
-     */
-    fun cancel() {
-        reassembler.reset()
-        serviceScope.cancel()
+        try {
+            bleConnection.disconnect()
+        } finally {
+            reassembler.reset()
+            serviceScope.cancel()
+        }
     }
 
     // endregion
