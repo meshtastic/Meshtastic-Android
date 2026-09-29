@@ -59,6 +59,13 @@ class CustomTileProviderConfigTest {
     }
 
     @Test
+    fun `an unterminated IPv6 literal has no host`() {
+        assertFalse("http://[::1/{z}/{x}/{y}.png".isValidTileUrlTemplate(cleartextAllowed))
+        assertFalse("https://[::1/{z}/{x}/{y}.png".isValidTileUrlTemplate(cleartextAllowed))
+        assertFalse("http://[::1/{z}/{x}/{y}.png".isRefusedCleartextTileUrl(cleartextRefused))
+    }
+
+    @Test
     fun `a malformed http template is not reported as refused cleartext`() {
         // The form reports these as malformed instead, which is the fix the user actually needs.
         assertFalse("http://tiles.example.org/{z}/{x}.png".isRefusedCleartextTileUrl(cleartextRefused))

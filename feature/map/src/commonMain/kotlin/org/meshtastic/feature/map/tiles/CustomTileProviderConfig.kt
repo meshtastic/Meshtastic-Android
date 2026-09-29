@@ -81,18 +81,18 @@ private fun String.hasAcceptedScheme(cleartextPermitted: (host: String) -> Boole
 /** A host, no fragment, and no credentials — those would be persisted in the clear and sent with every tile. */
 private fun String.hasUsableAuthority(): Boolean {
     val authority = authority()
-    return '#' !in substringAfter(SCHEME_SEPARATOR) && '@' !in authority && authority.substringBefore(':').isNotBlank()
+    return '#' !in substringAfter(SCHEME_SEPARATOR) && '@' !in authority && host().isNotBlank()
 }
 
 private fun String.scheme(): String = substringBefore(SCHEME_SEPARATOR, missingDelimiterValue = "").lowercase()
 
 private fun String.authority(): String = substringAfter(SCHEME_SEPARATOR).substringBefore('/').substringBefore('?')
 
-/** The authority without its port; an IPv6 literal loses its brackets. */
+/** The authority without its port; an IPv6 literal loses its brackets, and an unterminated one has no host. */
 private fun String.host(): String {
     val authority = authority()
     return if (authority.startsWith('[')) {
-        authority.substringAfter('[').substringBefore(']')
+        if (']' !in authority) "" else authority.substringAfter('[').substringBefore(']')
     } else {
         authority.substringBefore(':')
     }
