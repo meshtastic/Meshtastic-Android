@@ -310,6 +310,48 @@ class ZipExtractionTest {
     }
 
     @Test
+    fun `a refused archive leaves an earlier extraction of the same name in place`() {
+        val out = tempDir()
+        val earlier = File(out, "firmware-heltec-v3-2.8.0.abc.bin").apply { writeBytes(ByteArray(8) { 9 }) }
+        val zip =
+            zipOf("firmware-heltec-v3-2.8.0.abc.bin" to ByteArray(8) { 1 }, *Array(20) { "entry$it" to ByteArray(4) })
+
+        assertFailsWith<IllegalArgumentException> {
+            extractFirmwareEntry(ByteArrayInputStream(zip), out, "heltec-v3", ".bin", null, maxEntries = 10)
+        }
+        assertContentEquals(ByteArray(8) { 9 }, earlier.readBytes())
+    }
+
+    @Test
+    fun `matches sharing a basename return the bytes of the chosen entry`() {
+        val zip =
+            zipOf(
+                "a/firmware-heltec-v3-2.8.0.abc.bin" to ByteArray(8) { 1 },
+                "longer/firmware-heltec-v3-2.8.0.abc.bin" to ByteArray(8) { 2 },
+            )
+
+        val file = extractFirmwareEntry(ByteArrayInputStream(zip), tempDir(), "heltec-v3", ".bin", null)
+
+        assertContentEquals(ByteArray(8) { 1 }, file?.readBytes())
+    }
+
+    @Test
+    fun `an unmatched entry that inflates past the skip budget is refused`() {
+        val zip = zipOf("readme.txt" to ByteArray(64 * 1024))
+
+        assertFailsWith<IllegalArgumentException> {
+            extractFirmwareEntry(
+                ByteArrayInputStream(zip),
+                tempDir(),
+                "heltec-v3",
+                ".bin",
+                null,
+                maxSkippedBytes = 4096,
+            )
+        }
+    }
+
+    @Test
     fun `a truncated archive leaves no partial firmware file`() {
         val zip = zipOf("firmware-heltec-v3-2.8.0.abc.bin" to Random(seed = 7).nextBytes(64 * 1024))
         val out = tempDir()
