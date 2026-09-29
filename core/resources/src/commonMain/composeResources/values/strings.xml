@@ -1022,6 +1022,8 @@
     <string name="map_filter_title">Filter map</string>
     <string name="map_layer_formats">Map layers support .kml, .kmz, or GeoJSON formats.</string>
     <string name="map_layer_opacity">Opacity: %1$d%</string>
+    <string name="map_layer_open_failed">Couldn't open that map file.</string>
+    <string name="map_layer_too_large">Map files over %1$d MB can't be imported.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Last heard: %2$s&lt;br&gt;Last position: %3$s&lt;br&gt;Battery: %4$s</string>
     <string name="map_offline_banner">Offline — showing cached map data</string>
     <string name="map_offline_download_failed_build">No offline map data available right now — try again later</string>
