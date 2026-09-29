@@ -18,6 +18,7 @@
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
+    // No withHostTest: commonTest holds Compose UI tests, which NPE on the host-test stubs' null Build.FINGERPRINT.
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
