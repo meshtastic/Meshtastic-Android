@@ -113,8 +113,9 @@ internal fun Project.configureTestOptions() {
 
         // A hung test fails by name instead of running into the CI job timeout. SEPARATE_THREAD lets the timeout
         // fire even when the stuck code never checks for interruption.
-        systemProperty("junit.jupiter.execution.timeout.default", "5 m")
+        systemProperty("junit.jupiter.execution.timeout.default", "2 m")
         systemProperty("junit.jupiter.execution.timeout.thread.mode.default", "SEPARATE_THREAD")
+        systemProperty("junit.jupiter.execution.timeout.mode", "disabled_on_debug")
         // Backstop for JUnit 4 host tests, which Jupiter's timeout does not reach, and for a wedged test JVM.
         timeout.set(Duration.ofMinutes(TEST_TASK_TIMEOUT_MINUTES))
 
