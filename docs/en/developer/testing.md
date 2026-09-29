@@ -102,8 +102,8 @@ The `:baselineprofile` module (#5735) generates a [Baseline Profile](https://dev
 The Macrobenchmark generator (`BaselineProfileGenerator`) and the before/after benchmark (`StartupBenchmark`) live in `baselineprofile/src/main/kotlin/org/meshtastic/baselineprofile/`. Both run on a device/emulator:
 
 ```shell
-./gradlew :androidApp:generateBaselineProfile                # Generate the profile (commit the output)
-./gradlew :androidApp:benchmarkGoogleReleaseBaselineProfile  # Quantify the cold-start win
+./gradlew :androidApp:generateBaselineProfile                          # Generate the profile (commit the output)
+./gradlew :baselineprofile:connectedGoogleBenchmarkReleaseAndroidTest  # Quantify the cold-start win
 ```
 
 The generated profile is merged into `androidApp/src/main/generated/baselineProfiles/` (`mergeIntoMain` in `androidApp/build.gradle.kts`), so the fdroid and google release builds both package it via `androidx.profileinstaller`.

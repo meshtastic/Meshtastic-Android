@@ -17,7 +17,7 @@ in `androidApp/build.gradle.kts`). **Commit that file**: release builds of both 
 ## Quantify the win
 
 ```bash
-./gradlew :androidApp:benchmarkGoogleReleaseBaselineProfile
+./gradlew :baselineprofile:connectedGoogleBenchmarkReleaseAndroidTest
 ```
 
 Compare `startupCompilationNone` vs `startupCompilationBaselineProfiles` in the output.
