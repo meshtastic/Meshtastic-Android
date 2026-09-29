@@ -68,6 +68,9 @@ import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.nfc.NfcWriterEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
+import org.meshtastic.core.resources.map_layer_formats
+import org.meshtastic.core.resources.map_layer_open_failed
+import org.meshtastic.core.resources.map_layer_too_large
 import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.service.ServiceStartTrigger
 import org.meshtastic.core.service.startService
@@ -105,7 +108,7 @@ import org.meshtastic.feature.intro.IntroViewModel
 import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.layers.MapLayersManager
-import org.meshtastic.feature.map.layers.toPickedMapFile
+import org.meshtastic.feature.map.layers.PickedMapFile
 
 class MainActivity : AppCompatActivity() {
     private val model: UIViewModel by viewModel()
@@ -377,7 +380,29 @@ class MainActivity : AppCompatActivity() {
      */
     private fun importMapFile(uri: Uri) {
         Logger.d { "Importing shared map file: $uri" }
-        mapLayersManager.addMapLayer(uri.toPickedMapFile(this))
+        val shared = contentResolver.sharedMapFile(uri)
+        val rejection = shared.rejection()
+        if (rejection != null) {
+            Logger.w { "Refusing shared map file: $rejection" }
+            lifecycleScope.launch {
+                when (rejection) {
+                    SharedMapFileRejection.NOT_CONTENT_URI -> showToast(Res.string.map_layer_open_failed)
+
+                    SharedMapFileRejection.UNSUPPORTED_TYPE -> showToast(Res.string.map_layer_formats)
+
+                    SharedMapFileRejection.TOO_LARGE ->
+                        showToast(Res.string.map_layer_too_large, MAX_SHARED_MAP_FILE_MB)
+                }
+            }
+            return
+        }
+        mapLayersManager.addMapLayer(
+            PickedMapFile(
+                displayName = shared.displayName,
+                extensionOrMime = shared.extensionOrMime,
+                read = { contentResolver.readSharedMapFile(uri) },
+            ),
+        )
         handleMeshtasticUri("$DEEP_LINK_BASE_URI/map".toUri())
     }
 
