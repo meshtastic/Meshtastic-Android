@@ -61,6 +61,33 @@ class CoTConversionTest {
     }
 
     @Test
+    fun positionWithoutAltitudeSendsTheCotUnknownHeight() {
+        val position =
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 377749000
+                    wb.longitude_i = -1224194000
+                }
+                .build()
+
+        assertEquals(TAK_UNKNOWN_POINT_VALUE, position.toCoTMessage(uid = "!12345678", callsign = "TestUser").hae)
+    }
+
+    @Test
+    fun seaLevelAltitudeStaysZero() {
+        val position =
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 377749000
+                    wb.longitude_i = -1224194000
+                    wb.altitude = 0
+                }
+                .build()
+
+        assertEquals(0.0, position.toCoTMessage(uid = "!12345678", callsign = "TestUser").hae)
+    }
+
+    @Test
     fun testUserToCoTMessage() {
         val user =
             User.Builder()

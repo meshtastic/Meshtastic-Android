@@ -611,7 +611,7 @@ internal fun buildGpx(positions: List<org.meshtastic.proto.Position>, trackName:
             val lat = NumberFormatter.formatInvariant((pos.latitude_i ?: 0) * GeoConstants.DEG_D, COORDINATE_DECIMALS)
             val lon = NumberFormatter.formatInvariant((pos.longitude_i ?: 0) * GeoConstants.DEG_D, COORDINATE_DECIMALS)
             append("    <trkpt lat=\"$lat\" lon=\"$lon\">")
-            if ((pos.altitude ?: 0) != 0) append("<ele>${pos.altitude}</ele>")
+            pos.altitude?.let { append("<ele>$it</ele>") }
             if (pos.time > 0) append("<time>${Instant.fromEpochSeconds(pos.time.toLong())}</time>")
             append("</trkpt>\n")
         }

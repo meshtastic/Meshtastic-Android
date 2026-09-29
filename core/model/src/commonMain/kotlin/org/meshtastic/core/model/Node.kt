@@ -210,7 +210,7 @@ data class Node(
         val soilMoisture = soil_moisture?.takeIf { it in soilMoistureRange }?.let { MetricFormatter.percent(it) }
         val voltage = this.voltage?.let { MetricFormatter.voltage(it) }
         val current = current?.let { MetricFormatter.current(it) }
-        val iaq = if ((iaq ?: 0) != 0) "IAQ: $iaq" else null
+        val iaq = iaq?.let { "IAQ: $it" }
 
         return listOfNotNull(
             paxcounter.getDisplayString(),

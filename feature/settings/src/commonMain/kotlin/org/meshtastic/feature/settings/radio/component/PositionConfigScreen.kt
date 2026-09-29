@@ -80,7 +80,7 @@ expect fun DeviceLocationButton(
 )
 
 private val PositionStateSaver =
-    listSaver<Position, Any>(
+    listSaver<Position, Any?>(
         save = {
             listOf(
                 it.latitude,
@@ -97,7 +97,7 @@ private val PositionStateSaver =
             Position(
                 latitude = it[0] as Double,
                 longitude = it[1] as Double,
-                altitude = it[2] as Int,
+                altitude = it[2] as Int?,
                 time = it[3] as Int,
                 satellitesInView = it[4] as Int,
                 groundSpeed = it[5] as Int,
@@ -116,7 +116,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         Position(
             latitude = node?.latitude ?: 0.0,
             longitude = node?.longitude ?: 0.0,
-            altitude = node?.position?.altitude ?: 0,
+            altitude = node?.position?.altitude,
             time = 1, // ignore time for fixed_position
         )
     val positionConfig = state.radioConfig.position ?: Config.PositionConfig.Builder().build()
@@ -297,7 +297,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(Res.string.altitude),
-                        value = locationInput.altitude,
+                        value = locationInput.altitude ?: 0,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         onValueChanged = { alt: Int -> locationInput = locationInput.copy(altitude = alt) },

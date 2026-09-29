@@ -30,7 +30,8 @@ fun org.meshtastic.proto.Position.toCoTMessage(
 ): CoTMessage {
     val lat = (latitude_i ?: 0).toDouble() / TAK_COORDINATE_SCALE
     val lon = (longitude_i ?: 0).toDouble() / TAK_COORDINATE_SCALE
-    val altitude = (altitude ?: 0).toDouble()
+    // CoT marks an unknown height with its sentinel; 0 would place the node at sea level.
+    val altitude = altitude?.toDouble() ?: TAK_UNKNOWN_POINT_VALUE
     val speed = (ground_speed ?: 0).toDouble()
     val course = (ground_track ?: 0).toDouble()
 
