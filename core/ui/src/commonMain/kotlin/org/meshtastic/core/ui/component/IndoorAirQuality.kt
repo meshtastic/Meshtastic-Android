@@ -53,7 +53,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_quality_icon
 import org.meshtastic.core.resources.close
-import org.meshtastic.core.resources.iaq
+import org.meshtastic.core.resources.iaq_value
 import org.meshtastic.core.resources.indoor_air_quality_iaq
 import org.meshtastic.core.resources.preview_dot
 import org.meshtastic.core.resources.preview_gauge
@@ -142,7 +142,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = "${stringResource(Res.string.iaq)} $iaq",
+                                text = stringResource(Res.string.iaq_value, iaq),
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                             )

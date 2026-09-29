@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.MeasurementSystem
@@ -61,7 +62,7 @@ import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_humidity
 import org.meshtastic.core.resources.a11y_node_channel
-import org.meshtastic.core.resources.a11y_node_hops_away
+import org.meshtastic.core.resources.a11y_node_hops_count
 import org.meshtastic.core.resources.a11y_temperature
 import org.meshtastic.core.resources.distance
 import org.meshtastic.core.resources.ic_memory
@@ -149,7 +150,7 @@ fun NodeItemCompact(
     // Resolved out here, not inside the remember: stringResource is composable, and the description is built in a
     // plain lambda.
     val roleLabel = stringResource(thatNode.user.role.label)
-    val a11yStrings = rememberNodeDescriptionStrings()
+    val a11yStrings = rememberNodeDescriptionStrings(hopsAway = thatNode.hopsAway)
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
         remember(thatNode, distance, lastHeardIsRelative, a11yStrings, modemPreset) {
@@ -430,7 +431,8 @@ private fun CompactFooterRow(
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.HopCount,
-                        contentDescription = stringResource(Res.string.a11y_node_hops_away, thatNode.hopsAway),
+                        contentDescription =
+                        pluralStringResource(Res.plurals.a11y_node_hops_count, thatNode.hopsAway, thatNode.hopsAway),
                         contentColor = tertiaryColor,
                         text = thatNode.hopsAway.toString(),
                     )

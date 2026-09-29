@@ -24,7 +24,10 @@
     <string name="a11y_node_channel">Channel %1$d</string>
     <string name="a11y_node_distance_away">%1$s away</string>
     <string name="a11y_node_favorite">favorite</string>
-    <string name="a11y_node_hops_away">%1$d hops away</string>
+    <plurals name="a11y_node_hops_count">
+        <item quantity="one">%1$d hop away</item>
+        <item quantity="other">%1$d hops away</item>
+    </plurals>
     <string name="a11y_node_last_heard">last heard %1$s</string>
     <string name="a11y_node_offline">offline</string>
     <string name="a11y_node_online">online</string>
@@ -481,7 +484,10 @@
     <string name="discovery_stop_scan">Stop Scan</string>
     <string name="discovery_summary_not_available">AI analysis not available</string>
     <string name="discovery_time_remaining">%1$s remaining</string>
-    <string name="discovery_unique_nodes">%1$d unique nodes</string>
+    <plurals name="discovery_unique_nodes_count">
+        <item quantity="one">%1$d unique node</item>
+        <item quantity="other">%1$d unique nodes</item>
+    </plurals>
     <string name="discovery_view_map">View map</string>
     <string name="disk_free_indexed">Disk Free %1$d</string>
     <string name="display">Display</string>
@@ -823,6 +829,7 @@
     <string name="i_know_what_i_m_doing">I know what I'm doing.</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
+    <string name="iaq_value">IAQ %1$d</string>
     <string name="icon_meanings">Icon Meanings</string>
     <string name="ignore">Ignore</string>
     <string name="ignore_add">Add '%1$s' to ignore list?</string>
@@ -979,7 +986,7 @@
     <string name="longitude">Longitude</string>
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
-    <string name="lora_config_change_value">%1$s: %2$s -&gt; %3$s</string>
+    <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
     <string name="lora_config_changes">LoRa Configuration Changes:</string>
     <string name="low_battery">Low Battery</string>
     <string name="low_battery_message">Node %1$s has a low battery (%2$d%)</string>

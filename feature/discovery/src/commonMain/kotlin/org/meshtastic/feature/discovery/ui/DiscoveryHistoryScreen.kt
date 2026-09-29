@@ -50,6 +50,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
@@ -63,7 +64,7 @@ import org.meshtastic.core.resources.discovery_empty_history
 import org.meshtastic.core.resources.discovery_history
 import org.meshtastic.core.resources.discovery_scan_complete
 import org.meshtastic.core.resources.discovery_scan_incomplete
-import org.meshtastic.core.resources.discovery_unique_nodes
+import org.meshtastic.core.resources.discovery_unique_nodes_count
 import org.meshtastic.core.ui.component.EmptyState
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.CheckCircle
@@ -128,7 +129,12 @@ private fun EmptyHistoryState(modifier: Modifier = Modifier) {
 @Composable
 private fun SessionListItem(session: DiscoverySessionEntity, onClick: () -> Unit, onDelete: () -> Unit) {
     var showDeleteDialog by remember { mutableStateOf(false) }
-    val uniqueNodes = stringResource(Res.string.discovery_unique_nodes, session.totalUniqueNodes)
+    val uniqueNodes =
+        pluralStringResource(
+            Res.plurals.discovery_unique_nodes_count,
+            session.totalUniqueNodes,
+            session.totalUniqueNodes,
+        )
     val status =
         stringResource(
             if (session.completionStatus == "complete") {
@@ -159,7 +165,7 @@ private fun SessionListItem(session: DiscoverySessionEntity, onClick: () -> Unit
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = stringResource(Res.string.discovery_unique_nodes, session.totalUniqueNodes),
+                    text = uniqueNodes,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

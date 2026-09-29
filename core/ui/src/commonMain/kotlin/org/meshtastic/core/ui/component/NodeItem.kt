@@ -135,7 +135,7 @@ fun NodeItem(
     // Resolved out here, not inside the remember: stringResource is composable, and the description is built in a
     // plain lambda.
     val roleLabel = stringResource(thatNode.user.role.label)
-    val a11yStrings = rememberNodeDescriptionStrings()
+    val a11yStrings = rememberNodeDescriptionStrings(hopsAway = thatNode.hopsAway)
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
         remember(thatNode, distance, a11yStrings, modemPreset, roleLabel) {
