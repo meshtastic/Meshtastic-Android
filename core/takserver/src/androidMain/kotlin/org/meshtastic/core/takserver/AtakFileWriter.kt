@@ -48,7 +48,8 @@ internal actual object AtakFileWriter {
             Logger.i { "Route data package written: $safeName (${zipBytes.size} bytes) to $location" }
             true
         } catch (e: Exception) {
-            Logger.w(e) { "Failed to save route data package $safeName" }
+            // No throwable: platform file errors carry the path, and the name comes from mesh data.
+            Logger.e { "Route data package was not saved: ${e::class.simpleName}" }
             false
         }
     }
