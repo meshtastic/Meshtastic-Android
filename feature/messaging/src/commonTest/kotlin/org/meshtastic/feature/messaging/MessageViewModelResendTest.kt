@@ -17,6 +17,7 @@
 package org.meshtastic.feature.messaging
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
@@ -27,6 +28,9 @@ import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -91,7 +95,12 @@ class MessageViewModelResendTest {
         every { packetRepository.getUnreadCountFlow(any<String>()) } returns MutableStateFlow(0)
         every { packetRepository.getFilteredCountFlow(any<String>()) } returns MutableStateFlow(0)
         every { quickChatActionRepository.getAllActions() } returns MutableStateFlow(emptyList())
-        everySuspend { packetRepository.deleteMessages(any()) } calls { calls += "delete" }
+        // The real repository switches dispatcher, so a cancelled caller never reaches the delete.
+        everySuspend { packetRepository.deleteMessages(any()) } calls
+            {
+                currentCoroutineContext().ensureActive()
+                calls += "delete"
+            }
 
         viewModel =
             MessageViewModel(
@@ -133,6 +142,21 @@ class MessageViewModelResendTest {
         assertEquals(listOf("send", "delete"), calls)
         verifySuspend { sendMessageUseCase.invoke("Hello", LIVE_CONTACT, null) }
         verifySuspend { packetRepository.deleteMessages(listOf(42L)) }
+    }
+
+    @Test
+    fun `leaving the screen once the send is queued still deletes the original`() = runTest {
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } calls
+            {
+                calls += "send"
+                viewModel.viewModelScope.cancel()
+                1
+            }
+
+        viewModel.resendMessage(uuid = 42L, text = "Hello", contactKey = LIVE_CONTACT)
+        advanceUntilIdle()
+
+        assertEquals(listOf("send", "delete"), calls)
     }
 
     @Test

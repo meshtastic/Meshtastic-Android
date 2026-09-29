@@ -24,6 +24,7 @@ import androidx.paging.cachedIn
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -416,7 +417,8 @@ class MessageViewModel(
         if (ContactKey(contactKey).isRetired) return
         safeLaunch(errorEvents = sendErrorEvents, tag = "resendMessage") {
             sendMessageUseCase.invoke(text, contactKey, null)
-            packetRepository.deleteMessages(listOf(uuid))
+            // Once the new message is queued, leaving the screen must not strand the original beside it.
+            withContext(NonCancellable) { packetRepository.deleteMessages(listOf(uuid)) }
         }
     }
 
