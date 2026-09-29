@@ -41,6 +41,11 @@ class KmpLibraryComposeConventionPlugin : Plugin<Project> {
                         }
                     }
             }
+            // Android Studio renders previews from this classpath. It is resolvable only, so ui-tooling reaches neither
+            // consumers nor the app, whose release manifest would otherwise export its PreviewActivity.
+            configurations
+                .matching { it.name == "androidRuntimeClasspath" }
+                .configureEach { dependencies.addLater(libs.library("compose-multiplatform-ui-tooling")) }
             configureComposeCompiler()
         }
     }
