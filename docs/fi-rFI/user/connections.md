@@ -1,7 +1,7 @@
 ---
 title: Yhteydet
 nav_order: 2
-last_updated: 2026-08-30
+last_updated: 2026-09-29
 description: Yhdistä puhelin tai työpöytä Meshtastic-radioon Bluetoothin, USB:n tai TCP/IP:n kautta.
 aliases:
   - bluetooth
@@ -43,7 +43,7 @@ Näytössä kerrotaan kaikki sovelluksen puolella olevat syyt, jotka estävät h
 | Kortti pyytää **Lähistön laitteet** -käyttöoikeutta                      | Käyttöoikeutta ei ole myönnetty. **Myönnä käyttöoikeus** pyytää sitä. Kun Android lakkaa kysymästä, painikkeeksi muuttuu **Avaa asetukset**. |
 | **Bluetooth on pois käytöstä**                                           | Bluetooth-sovitin on poistettu käytöstä – kortti avaa Bluetooth-asetukset.                                                                                                   |
 | **Bluetooth-laitteiden haku edellyttää myös sijaintipalvelujen käyttöä** | Vain Android 11:ssä ja vanhemmissa versioissa: käyttöoikeus on myönnetty, mutta järjestelmän sijaintipalvelut ovat pois käytöstä.            |
-| Ei korttia, tyhjä luettelo                                               | Mikään sovelluksen puolella ei estä hakua – radio on kantaman ulkopuolella, pois käytöstä tai jo yhdistetty toiseen laitteeseen.                                             |
+| No card, and **No Bluetooth devices seen** under the header              | Nothing on this side is blocking the scan. The radio is out of range, off, or already connected elsewhere.                                                   |
 
 The explanation lives in that card, not in the scan control: tapping **Scan for Bluetooth devices** after you have declined once asks Android again directly.
 
@@ -62,9 +62,13 @@ Yhteyttä muodostettaessa tilailmaisin näyttää nykyisen yhteyden tilan — na
 
 ![Yhdistämisen tila](../../assets/screenshots/connections_connecting.png)
 
-Jos laitteita ei löydy, sovellus näyttää tyhjän näkymän ohjeiden kanssa:
+With no radio chosen yet, the connection card reads **No device selected**. A pane with nothing to list says so under its header, with a hint:
 
-![Laitteita ei löytynyt](../../assets/screenshots/connections_empty_state.png)
+| Pane      | What it shows                                                                                                                                                                                                                                                                |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bluetooth | **No Bluetooth devices seen**, and "Ensure you're within range of the device." Start a scan from the header.                                                                                                                                 |
+| Verkko    | **No network devices seen**, and "Ensure you're connected to the same network as the device." Shown only while nothing has been discovered and **Recent Network Devices** is empty. **Add device manually…** stays below it. |
+| USB       | **No USB devices detected**, and "Connect a device with a USB data cable to use serial."                                                                                                                                                                     |
 
 ### Bluetoothin vianmääritys
 
