@@ -19,10 +19,7 @@
 // scan every module's source from disk and assert the repo's KMP boundary rules.
 // Konsist is JVM-only, so its tests live in jvmTest (it cannot go in commonTest).
 // Runs under the existing `allTests` baseline gate via :core:konsist:allTests.
-plugins {
-    alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.meshtastic.kmp.jvm.android)
-}
+plugins { alias(libs.plugins.meshtastic.kmp.library) }
 
 kotlin {
     android { withHostTest {} }

@@ -198,8 +198,8 @@ jobs:
   # guards them against drift (every module in settings.gradle.kts with test
   # sources must appear here or be explicitly exempted).
   #   shard-core:    remaining core:* KMP module tests (allTests), plus kmpSmokeCompile,
-  #                  which is the only iOS compile :core:di, :core:nfc and :core:resources
-  #                  get. It lived in lint-check until a cold build there blew the 30m budget.
+  #                  which is the only iOS compile :core:di and :core:resources get.
+  #                  It lived in lint-check until a cold build there blew the 30m budget.
   #   shard-feature: feature:* KMP module tests + :core:service
   #   shard-app:     Pure-Android/JVM tests (androidApp, desktopApp,
   #                  core:barcode, feature:widget)
