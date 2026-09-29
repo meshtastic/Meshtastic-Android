@@ -71,7 +71,8 @@ fun NodeDetailScreen(
 ) {
     SideEffect(nodeId) { viewModel.start(nodeId) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(viewModel) { viewModel.navigationEvents.collect { onNavigate(it) } }
+    val currentOnNavigate by rememberUpdatedState(onNavigate)
+    LaunchedEffect(viewModel) { viewModel.navigationEvents.collect { currentOnNavigate(it) } }
     NodeDetailScaffold(
         modifier = modifier,
         uiState = uiState,

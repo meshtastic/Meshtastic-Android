@@ -40,15 +40,17 @@ fun NfcScannerEffect(onResult: (String?) -> Unit, onNfcDisabled: (() -> Unit)? =
     val activity = context as? Activity ?: return
 
     val nfcAdapter = remember { NfcAdapter.getDefaultAdapter(context) }
+    val currentOnResult by rememberUpdatedState(onResult)
+    val currentOnNfcDisabled by rememberUpdatedState(onNfcDisabled)
 
     DisposableEffect(nfcAdapter) {
         if (nfcAdapter == null) {
             onDispose {}
         } else if (!nfcAdapter.isEnabled) {
-            onNfcDisabled?.invoke()
+            currentOnNfcDisabled?.invoke()
             onDispose {}
         } else {
-            val readerCallback = NfcAdapter.ReaderCallback { tag: Tag -> handleNfcTag(tag, onResult) }
+            val readerCallback = NfcAdapter.ReaderCallback { tag: Tag -> handleNfcTag(tag) { currentOnResult(it) } }
 
             val flags =
                 (

@@ -475,8 +475,8 @@ fun <R : Route> EntryProviderScope<NavKey>.configComposable(
         val viewModel = radioConfigViewModelProvider(null)
         // Remote settings need a blocking progress overlay from the first frame. Local settings already have their
         // connect-time repository snapshot, so their route refresh stays non-blocking and does not flash a 0% overlay.
-        remember { viewModel.ensureLoadingForRemote().let { true } }
-        LaunchedEffect(Unit) { viewModel.loadConfigRoute(routeInfo) }
+        remember(viewModel, routeInfo) { viewModel.ensureLoadingForRemote().let { true } }
+        LaunchedEffect(viewModel, routeInfo) { viewModel.loadConfigRoute(routeInfo) }
         content(viewModel)
     }
 }

@@ -12,11 +12,6 @@
     <ID>ComposableParamOrder:WarningDialog.kt:@Composable fun WarningDialog</ID>
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
     <ID>LambdaParameterEventTrailing:NodeActionButton.kt:onClick: () -> Unit</ID>
-    <ID>LambdaParameterInRestartableEffect:PacketResponseStateDialog.kt:onBack: () -> Unit = {}</ID>
-    <ID>LambdaParameterInRestartableEffect:PacketResponseStateDialog.kt:onDismiss: () -> Unit = {}</ID>
-    <ID>LambdaParameterInRestartableEffect:PrivacySection.kt:startProvideLocation: () -> Unit</ID>
-    <ID>LambdaParameterInRestartableEffect:PrivacySection.kt:stopProvideLocation: () -> Unit</ID>
-    <ID>LambdaParameterInRestartableEffect:TakPermissionUtil.kt:onPermissionResult: (Boolean) -> Unit</ID>
     <ID>LongMethod:AudioConfigItemList.kt:@Composable fun AudioConfigScreen</ID>
     <ID>LongMethod:DetectionSensorConfigItemList.kt:@Composable fun DetectionSensorConfigScreen</ID>
     <ID>LongMethod:LoRaConfigItemList.kt:@Composable fun LoRaConfigScreen</ID>

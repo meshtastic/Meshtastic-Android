@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -52,6 +53,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.isTraySupported
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
@@ -373,6 +375,7 @@ private fun WindowBoundsManager(
     windowState: WindowState,
     onReady: () -> Unit,
 ) {
+    val currentOnReady by rememberUpdatedState(onReady)
     LaunchedEffect(Unit) {
         val initialWidth = desktopPrefs.windowWidth.first()
         val initialHeight = desktopPrefs.windowHeight.first()
@@ -387,7 +390,7 @@ private fun WindowBoundsManager(
                 WindowPosition(Alignment.Center)
             }
 
-        onReady()
+        currentOnReady()
 
         snapshotFlow {
             val x = if (windowState.position.isSpecified) windowState.position.x.value else Float.NaN
@@ -432,7 +435,7 @@ private fun ApplicationScope.MeshtasticWindow(
         visible = visible,
         onPreviewKeyEvent = { event -> handleKeyboardShortcut(event, multiBackstack, ::exitApplication) },
     ) {
-        val eventEdition by uiViewModel.eventEdition.collectAsState()
+        val eventEdition by uiViewModel.eventEdition.collectAsStateWithLifecycle()
 
         CoilImageLoaderSetup()
         // Each window hands MapLibre its own GPU context; the map composites into Compose from there.
