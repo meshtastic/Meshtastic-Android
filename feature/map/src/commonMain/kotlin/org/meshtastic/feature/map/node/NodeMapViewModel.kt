@@ -19,31 +19,16 @@ package org.meshtastic.feature.map.node
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.toList
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.model.MeshLog
-import org.meshtastic.core.repository.MapPrefs
-import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.Position
 
 @KoinViewModel
-class NodeMapViewModel(
-    savedStateHandle: SavedStateHandle,
-    nodeRepository: NodeRepository,
-    meshLogRepository: MeshLogRepository,
-    private val mapPrefs: MapPrefs,
-) : ViewModel() {
+class NodeMapViewModel(savedStateHandle: SavedStateHandle, nodeRepository: NodeRepository) : ViewModel() {
     private val destNumFromRoute = savedStateHandle.get<Int>("destNum")
     private val manualDestNum = MutableStateFlow<Int?>(null)
 
@@ -59,28 +44,4 @@ class NodeMapViewModel(
             .flatMapLatest { destNum -> nodeRepository.nodeDBbyNum.mapLatest { it[destNum] } }
             .distinctUntilChanged()
             .stateInWhileSubscribed(initialValue = null)
-
-    private val ourNodeNumFlow = nodeRepository.myNodeInfo.map { it?.myNodeNum }.distinctUntilChanged()
-
-    val positionLogs: StateFlow<List<Position>> =
-        combine(ourNodeNumFlow, destNumFlow) { ourNodeNum, destNum ->
-            if (destNum == ourNodeNum) MeshLog.NODE_NUM_LOCAL else destNum
-        }
-            .distinctUntilChanged()
-            .flatMapLatest { logId ->
-                meshLogRepository.getMeshPacketsFrom(logId, PortNum.POSITION_APP.value).map { packets ->
-                    packets
-                        .mapNotNull { it.toPosition() }
-                        .asFlow()
-                        .distinctUntilChanged { old, new ->
-                            old.time == new.time ||
-                                (old.latitude_i == new.latitude_i && old.longitude_i == new.longitude_i)
-                        }
-                        .toList()
-                }
-            }
-            .stateInWhileSubscribed(initialValue = emptyList())
-
-    val mapStyleId: Int
-        get() = mapPrefs.mapStyle.value
 }
