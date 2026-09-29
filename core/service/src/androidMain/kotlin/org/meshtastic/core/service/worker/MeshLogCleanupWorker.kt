@@ -22,32 +22,18 @@ import androidx.work.WorkerParameters
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import org.koin.android.annotation.KoinWorker
-import org.meshtastic.core.repository.MeshLogPrefs
-import org.meshtastic.core.repository.MeshLogRepository
-import org.meshtastic.core.repository.MeshLogRetention
+import org.meshtastic.core.service.MeshLogCleanup
 
 @KoinWorker
 class MeshLogCleanupWorker(
     appContext: Context,
     workerParams: WorkerParameters,
-    private val meshLogRepository: MeshLogRepository,
-    private val meshLogPrefs: MeshLogPrefs,
+    private val meshLogCleanup: MeshLogCleanup,
 ) : CoroutineWorker(appContext, workerParams) {
 
     @Suppress("TooGenericExceptionCaught")
     override suspend fun doWork(): Result = try {
-        val policy = meshLogPrefs.awaitCleanupPolicy()
-        val retentionDays = policy.retentionDays
-        val retentionWindow = MeshLogRetention.windowOrNull(retentionDays)
-        if (!policy.loggingEnabled) {
-            logger.i { "Skipping cleanup because mesh log storage is disabled" }
-        } else if (retentionWindow == null) {
-            logger.i { "Skipping cleanup because retention is set to never delete" }
-        } else {
-            logger.d { "Cleaning logs older than $retentionWindow" }
-            meshLogRepository.deleteLogsOlderThan(retentionDays)
-            logger.i { "Successfully cleaned old MeshLog entries" }
-        }
+        meshLogCleanup.runOnce()
         Result.success()
     } catch (e: CancellationException) {
         throw e

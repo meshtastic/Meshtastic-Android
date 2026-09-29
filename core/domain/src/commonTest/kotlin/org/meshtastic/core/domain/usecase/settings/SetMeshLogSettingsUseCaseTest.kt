@@ -16,15 +16,25 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.MeshLogRetention
+import org.meshtastic.core.testing.FakeApplicationCoroutineScope
 import org.meshtastic.core.testing.FakeMeshLogPrefs
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -39,7 +49,42 @@ class SetMeshLogSettingsUseCaseTest {
     fun setUp() {
         meshLogRepository = FakeMeshLogRepository()
         meshLogPrefs = FakeMeshLogPrefs()
-        useCase = SetMeshLogSettingsUseCase(meshLogRepository, meshLogPrefs)
+        useCase =
+            SetMeshLogSettingsUseCase(
+                meshLogRepository,
+                meshLogPrefs,
+                FakeApplicationCoroutineScope(UnconfinedTestDispatcher()),
+            )
+    }
+
+    @Test
+    fun `setRetentionDays prune keeps running after the caller is cancelled`() = runTest {
+        val now = nowMillis
+        meshLogRepository.setLogs(
+            listOf(MeshLog("recent", "TEXT", now, ""), MeshLog("stale", "TEXT", now - 8.days.inWholeMilliseconds, "")),
+        )
+        val pruneStarted = CompletableDeferred<Unit>()
+        val releasePrune = CompletableDeferred<Unit>()
+        meshLogRepository.beforeDeleteLogsOlderThan = {
+            pruneStarted.complete(Unit)
+            releasePrune.await()
+        }
+        val appScopedUseCase =
+            SetMeshLogSettingsUseCase(
+                meshLogRepository,
+                meshLogPrefs,
+                FakeApplicationCoroutineScope(StandardTestDispatcher(testScheduler)),
+            )
+        val caller = CoroutineScope(Job() + StandardTestDispatcher(testScheduler))
+
+        caller.launch { appScopedUseCase.setRetentionDays(7) }
+        runCurrent()
+        assertTrue(pruneStarted.isCompleted, "the prune must be in flight when the caller goes away")
+        caller.cancel()
+        releasePrune.complete(Unit)
+        runCurrent()
+
+        assertEquals(listOf("recent"), meshLogRepository.currentLogs.map { it.uuid })
     }
 
     @Test

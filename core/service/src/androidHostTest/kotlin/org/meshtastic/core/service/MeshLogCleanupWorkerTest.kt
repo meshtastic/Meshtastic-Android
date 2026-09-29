@@ -152,7 +152,7 @@ class MeshLogCleanupWorkerTest {
                             workerClassName: String,
                             workerParameters: WorkerParameters,
                         ): ListenableWorker =
-                            MeshLogCleanupWorker(appContext, workerParameters, repository, meshLogPrefs)
+                            MeshLogCleanupWorker(appContext, workerParameters, MeshLogCleanup(repository, meshLogPrefs))
                     },
                 )
                 .build()

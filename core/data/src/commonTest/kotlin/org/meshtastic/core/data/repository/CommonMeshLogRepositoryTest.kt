@@ -20,13 +20,21 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
+import org.meshtastic.core.database.DatabaseProvider
+import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.util.TELEMETRY_CHANNEL_COUNT
@@ -275,6 +283,56 @@ abstract class CommonMeshLogRepositoryTest {
 
         assertEquals(setOf("within"), repository.getAllLogsUnbounded().first().map { it.uuid }.toSet())
     }
+
+    @Test
+    fun `deleteLogsOlderThan removes a backlog in separate bounded writes`() = runTest(testDispatcher) {
+        val now = realNowMillis
+        val batch = MeshLogRepositoryImpl.RETENTION_DELETE_BATCH_SIZE
+        val dao = dbProvider.currentDb.value.meshLogDao()
+        dao.insertIgnore(
+            List(batch * 2 + batch / 2) { retentionLog("stale-$it", now - 8.days.inWholeMilliseconds).asEntity() },
+        )
+        val recent = setOf("recent-0", "recent-1", "recent-2")
+        dao.insertIgnore(recent.map { retentionLog(it, now - 6.days.inWholeMilliseconds).asEntity() })
+        val rowsBeforeEachWrite = mutableListOf<Int>()
+        dbProvider.beforeWithDb = { rowsBeforeEachWrite += dao.getAllLogsSnapshot().size }
+
+        repository.deleteLogsOlderThan(7)
+
+        val deletedPerWrite = (rowsBeforeEachWrite + dao.getAllLogsSnapshot().size).zipWithNext { a, b -> a - b }
+        assertEquals(listOf(batch, batch, batch / 2), deletedPerWrite)
+        assertEquals(recent, repository.getAllLogsUnbounded().first().map { it.uuid }.toSet())
+    }
+
+    @Test
+    fun `deleteLogsOlderThan cancelled during a batch finishes that batch and starts no other`() =
+        runTest(testDispatcher) {
+            val now = realNowMillis
+            val batch = MeshLogRepositoryImpl.RETENTION_DELETE_BATCH_SIZE
+            val dao = dbProvider.currentDb.value.meshLogDao()
+            dao.insertIgnore(List(batch * 3) { retentionLog("stale-$it", now - 8.days.inWholeMilliseconds).asEntity() })
+            // As in DatabaseManager.withDb, a batch that has started finishes even when its caller is cancelled.
+            val startedBatchesFinish =
+                object : DatabaseProvider by dbProvider {
+                    override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? =
+                        withContext(NonCancellable) { dbProvider.withDb(block) }
+                }
+            val cancellable =
+                MeshLogRepositoryImpl(startedBatchesFinish, dispatchers, meshLogPrefs, nodeInfoReadDataSource)
+            var writes = 0
+            lateinit var pass: Job
+            dbProvider.beforeWithDb = {
+                writes++
+                pass.cancel()
+            }
+            pass = launch(start = CoroutineStart.LAZY) { cancellable.deleteLogsOlderThan(7) }
+
+            pass.join()
+
+            assertTrue(pass.isCancelled)
+            assertEquals(1, writes)
+            assertEquals(batch * 2, dao.getAllLogsSnapshot().size)
+        }
 
     /** Retention is measured against the real clock, so these rows are stamped relative to it. */
     private fun retentionLog(uuid: String, receivedDate: Long) =

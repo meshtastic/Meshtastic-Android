@@ -46,11 +46,19 @@ class FakeMeshLogRepository :
     var lastDeletedLocalStatsNodeNum: Int? = null
         private set
 
+    var deleteLogsOlderThanCalls = 0
+        private set
+
+    /** Runs at the start of every [deleteLogsOlderThan], so a test can hold a prune open or make it fail. */
+    var beforeDeleteLogsOlderThan: suspend () -> Unit = {}
+
     override fun reset() {
         super.reset()
         lastDeletedOlderThan = null
         deleteAllCalled = false
         lastDeletedLocalStatsNodeNum = null
+        deleteLogsOlderThanCalls = 0
+        beforeDeleteLogsOlderThan = {}
     }
 
     override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> = logsFlow.map { it.take(maxItem) }
@@ -97,6 +105,8 @@ class FakeMeshLogRepository :
     }
 
     override suspend fun deleteLogsOlderThan(retentionDays: Int) {
+        deleteLogsOlderThanCalls++
+        beforeDeleteLogsOlderThan()
         lastDeletedOlderThan = retentionDays
         val window = MeshLogRetention.windowOrNull(retentionDays) ?: return
         val cutoff = nowMillis - window.inWholeMilliseconds
