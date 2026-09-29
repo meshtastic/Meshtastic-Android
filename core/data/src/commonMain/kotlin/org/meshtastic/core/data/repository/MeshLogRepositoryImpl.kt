@@ -36,6 +36,7 @@ import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.util.TELEMETRY_CHANNEL_COUNT
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.adcVoltage
 import org.meshtastic.core.model.util.oneWireTemperature
 import org.meshtastic.core.model.util.withAdcVoltage
@@ -145,7 +146,7 @@ open class MeshLogRepositoryImpl(
         telemetry
             .newBuilder()
             .also { wb ->
-                wb.time = (log.received_date / MILLIS_PER_SEC).toInt()
+                wb.time = (log.received_date / TimeConstants.MS_PER_SEC).toInt()
                 wb.environment_metrics = telemetry.environment_metrics?.withSentinelsForAbsentReadings()
             }
             .build()
@@ -254,7 +255,6 @@ open class MeshLogRepositoryImpl(
     }
 
     companion object {
-        private const val MILLIS_PER_SEC = 1000L
         private const val TELEMETRY_SNAPSHOT_PAGE_SIZE = 512
 
         /**
