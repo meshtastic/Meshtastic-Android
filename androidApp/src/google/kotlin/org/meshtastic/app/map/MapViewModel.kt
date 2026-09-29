@@ -637,23 +637,22 @@ class MapViewModel(
 
         _terrainDownloadRegionId.value = regionId
         _terrainDownloadState.value = null
-        terrainDownloadJob =
-            viewModelScope.launch {
-                val store = terrainStoreForRegion(regionId)
-                val bounds =
-                    GeoBounds(
-                        south = region.southLat,
-                        west = region.westLon,
-                        north = region.northLat,
-                        east = region.eastLon,
-                    )
-                val maxZoom = TerrainDownloadPlanner.maxZoomFitting(bounds, TerrainRegionExtractor.MAX_TILES)
-                // flowOn: the extractor does blocking per-tile HTTP on its collector's dispatcher.
-                TerrainRegionExtractor(store).download(bounds, maxZoom).flowOn(dispatchers.io).collect { state ->
-                    _terrainDownloadState.value = state
-                    if (state is TerrainDownloadState.Complete) attachTerrain(region, state, store)
-                }
+        terrainDownloadJob = viewModelScope.launch {
+            val store = terrainStoreForRegion(regionId)
+            val bounds =
+                GeoBounds(
+                    south = region.southLat,
+                    west = region.westLon,
+                    north = region.northLat,
+                    east = region.eastLon,
+                )
+            val maxZoom = TerrainDownloadPlanner.maxZoomFitting(bounds, TerrainRegionExtractor.MAX_TILES)
+            // flowOn: the extractor does blocking per-tile HTTP on its collector's dispatcher.
+            TerrainRegionExtractor(store).download(bounds, maxZoom).flowOn(dispatchers.io).collect { state ->
+                _terrainDownloadState.value = state
+                if (state is TerrainDownloadState.Complete) attachTerrain(region, state, store)
             }
+        }
     }
 
     private suspend fun attachTerrain(

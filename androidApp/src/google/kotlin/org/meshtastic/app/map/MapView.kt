@@ -1632,20 +1632,19 @@ private fun offsetPolyline(
     val headingPoints = headingReferencePoints.takeIf { it.size >= 2 } ?: points
     if (points.size < 2 || headingPoints.size < 2 || offsetMeters == 0.0) return points
 
-    val headings =
-        headingPoints.mapIndexed { index, _ ->
-            when (index) {
-                0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
+    val headings = headingPoints.mapIndexed { index, _ ->
+        when (index) {
+            0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
 
-                headingPoints.lastIndex ->
-                    SphericalUtil.computeHeading(
-                        headingPoints[headingPoints.lastIndex - 1],
-                        headingPoints[headingPoints.lastIndex],
-                    )
+            headingPoints.lastIndex ->
+                SphericalUtil.computeHeading(
+                    headingPoints[headingPoints.lastIndex - 1],
+                    headingPoints[headingPoints.lastIndex],
+                )
 
-                else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
-            }
+            else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
         }
+    }
 
     return points.mapIndexed { index, point ->
         val heading = headings[index.coerceIn(0, headings.lastIndex)]
