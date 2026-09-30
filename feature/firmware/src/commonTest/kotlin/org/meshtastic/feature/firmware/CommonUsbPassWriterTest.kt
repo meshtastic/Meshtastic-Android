@@ -23,6 +23,9 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.MaintenanceUf2Repository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_update_transfer_percent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -109,7 +112,8 @@ abstract class CommonUsbPassWriterTest {
             UsbPassWriter(
                 fileHandler = WritableVolume(info),
                 maintenanceUf2Repository = FixedManifest(manifest),
-                retrieveMaintenanceUf2 = { asset, _ ->
+                retrieveMaintenanceUf2 = { asset, onProgress ->
+                    onProgress(0.5f)
                     written += asset.fileName
                     FirmwareArtifact(uri = CommonUri.parse("file:///tmp/${asset.fileName}"), fileName = asset.fileName)
                 },
@@ -134,6 +138,19 @@ abstract class CommonUsbPassWriterTest {
         assertEquals(UsbPassResult.Written, result)
         assertEquals(listOf("nrf_erase2.uf2"), h.written)
         assertEquals(1, h.unblockCalls.size, "The sketch blocks on while(!Serial) until DTR is asserted")
+    }
+
+    @Test
+    fun `the maintenance image download shows its percent`() = runTest {
+        val h = harness(sketchInfo)
+        val states = mutableListOf<FirmwareUpdateState>()
+
+        h.writer.write(erasePass, treeUri, rak) { states += it }
+
+        assertEquals(
+            listOf<UiText?>(UiText.Resource(Res.string.firmware_update_transfer_percent, 50)),
+            states.filterIsInstance<FirmwareUpdateState.Downloading>().map { it.progressState.details },
+        )
     }
 
     @Test
