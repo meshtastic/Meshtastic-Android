@@ -1534,6 +1534,8 @@
     <string name="range_test_config">Range Test Config</string>
     <string name="react">React</string>
     <string name="reboot">Reboot</string>
+    <string name="reboot_into_dfu">Reboot into DFU mode</string>
+    <string name="reboot_into_dfu_warning">The node stays in its bootloader and off the mesh until new firmware is flashed or it is reset.</string>
     <string name="recent_network_devices">Recent Network Devices</string>
     <string name="reconnecting">Reconnecting…</string>
     <string name="redacted" translatable="false">***[REDACTED]***</string>

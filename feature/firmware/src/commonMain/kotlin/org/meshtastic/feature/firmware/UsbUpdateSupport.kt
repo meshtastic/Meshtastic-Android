@@ -127,7 +127,10 @@ internal suspend fun performUsbMaintenance(
         }
 
     updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_rebooting))))
-    radioController.rebootToDfu(nodeRepository.myNodeInfo.value?.myNodeNum ?: 0)
+    radioController.rebootToDfu(
+        nodeRepository.myNodeInfo.value?.myNodeNum ?: 0,
+        radioController.generatePacketId(),
+    )
     delay(USB_REBOOT_DELAY)
 
     val passes =
@@ -363,7 +366,7 @@ internal suspend fun performUsbUpdate(
                 FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_rebooting))),
             )
             val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
-            radioController.rebootToDfu(myNodeNum)
+            radioController.rebootToDfu(myNodeNum, radioController.generatePacketId())
             delay(USB_REBOOT_DELAY)
 
             val sourceArtifact =
@@ -396,7 +399,7 @@ internal suspend fun performUsbUpdate(
                 val processingState = ProgressState(UiText.Resource(Res.string.firmware_update_rebooting))
                 updateState(FirmwareUpdateState.Processing(processingState))
                 val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
-                radioController.rebootToDfu(myNodeNum)
+                radioController.rebootToDfu(myNodeNum, radioController.generatePacketId())
                 delay(USB_REBOOT_DELAY)
 
                 val fileName = firmwareFile.fileName ?: "firmware.uf2"
