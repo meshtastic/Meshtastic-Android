@@ -59,7 +59,6 @@ import org.meshtastic.feature.firmware.ProgressState
 import org.meshtastic.feature.firmware.stripFormatArgs
 
 private const val RETRY_DELAY = 2000L
-private const val PERCENT_MAX = 100
 private const val REBOOT_MODE_BLE = 1
 private const val REBOOT_MODE_WIFI = 2
 
@@ -361,13 +360,12 @@ class Esp32OtaUpdateHandler(
 
         val firmwareFile =
             firmwareRetriever.retrieveEsp32Firmware(release, hardware) { progress ->
-                val percent = (progress * PERCENT_MAX).toInt()
                 updateState(
                     FirmwareUpdateState.Downloading(
                         ProgressState(
                             message = UiText.DynamicString(downloadingMsg),
                             progress = progress,
-                            details = UiText.DynamicString("$percent%"),
+                            details = formatTransferPercent(progress),
                         ),
                     ),
                 )

@@ -35,9 +35,9 @@ import org.meshtastic.core.resources.firmware_update_rebooting
 import org.meshtastic.core.resources.firmware_update_retrieval_failed
 import org.meshtastic.core.resources.firmware_update_usb_failed
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.feature.firmware.ota.formatTransferPercent
 
 private const val USB_REBOOT_DELAY = 5000L
-private const val PERCENT_MAX = 100
 
 /**
  * One leg of a multi-pass USB/UF2 sequence.
@@ -94,13 +94,12 @@ internal suspend fun performUsbMaintenance(
     val firmware =
         try {
             retrieveUsbFirmware(release, hardware) { progress ->
-                val percent = (progress * PERCENT_MAX).toInt()
                 updateState(
                     FirmwareUpdateState.Downloading(
                         ProgressState(
                             message = UiText.DynamicString(downloadingMsg),
                             progress = progress,
-                            details = UiText.DynamicString("$percent%"),
+                            details = formatTransferPercent(progress),
                         ),
                     ),
                 )
@@ -373,13 +372,12 @@ internal suspend fun performUsbUpdate(
         } else {
             val firmwareFile =
                 retrieveUsbFirmware(release, hardware) { progress ->
-                    val percent = (progress * PERCENT_MAX).toInt()
                     updateState(
                         FirmwareUpdateState.Downloading(
                             ProgressState(
                                 message = UiText.DynamicString(downloadingMsg),
                                 progress = progress,
-                                details = UiText.DynamicString("$percent%"),
+                                details = formatTransferPercent(progress),
                             ),
                         ),
                     )

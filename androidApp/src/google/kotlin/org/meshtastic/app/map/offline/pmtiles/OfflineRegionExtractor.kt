@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.nowSeconds
 import java.io.IOException
 import java.util.zip.GZIPInputStream
 import kotlin.uuid.Uuid
@@ -121,7 +122,7 @@ internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
                         maxZoom = zoomRange.last,
                         tileCount = tiles.size.toLong(),
                         byteSize = archiveFile.length(),
-                        createdAtEpochSeconds = System.currentTimeMillis() / MILLIS_PER_SECOND,
+                        createdAtEpochSeconds = nowSeconds,
                     )
                         .also { store.add(it) }
                 } catch (e: IOException) {
@@ -171,7 +172,6 @@ internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
         const val MAX_REGIONS = 10
         const val MAX_TOTAL_BYTES = 300L * 1024 * 1024
         private const val PROGRESS_STRIDE = 10
-        private const val MILLIS_PER_SECOND = 1_000L
 
         /** Both the Protomaps build and the MVT layers it packages (OpenStreetMap) require attribution. */
         const val ATTRIBUTION = "© OpenStreetMap contributors, © Protomaps"

@@ -26,6 +26,10 @@ import org.meshtastic.core.resources.firmware_update_transfer_progress
 
 private const val PERCENT_MAX = 100
 
+/** Formats download or transfer progress as a translated bare percentage, e.g. `"42%"` in English. */
+internal fun formatTransferPercent(progress: Float): UiText =
+    UiText.Resource(Res.string.firmware_update_transfer_percent, (progress * PERCENT_MAX).toInt())
+
 /**
  * Formats firmware-transfer progress as translated detail text, e.g. `"42% (12.60 kB/s, ETA: 5s)"` in English, with the
  * rate in decimal units.
@@ -34,8 +38,8 @@ private const val PERCENT_MAX = 100
  * parentheses. Shared by the ESP32 OTA and Nordic DFU update handlers, which differ only in how they obtain the inputs.
  */
 internal fun formatTransferProgress(progress: Float, totalBytes: Int, bytesPerSecond: Long): UiText {
+    if (bytesPerSecond <= 0L) return formatTransferPercent(progress)
     val percent = (progress * PERCENT_MAX).toInt()
-    if (bytesPerSecond <= 0L) return UiText.Resource(Res.string.firmware_update_transfer_percent, percent)
     val bytesSent = (progress * totalBytes).toLong()
     val etaSeconds = ((totalBytes - bytesSent).toFloat() / bytesPerSecond).toInt()
     return UiText.Resource(

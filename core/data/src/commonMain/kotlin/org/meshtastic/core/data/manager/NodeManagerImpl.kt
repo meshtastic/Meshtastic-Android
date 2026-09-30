@@ -650,8 +650,9 @@ class NodeManagerImpl(
         updateNodeAndSchedulePersistence(nodeNum, channel, session, transform)
     }
 
-    override suspend fun updateNodeAndPersist(nodeNum: Int, channel: Int, transform: (Node) -> Node) {
-        val result = updateNodeState(nodeNum, channel, transform)?.next ?: return
+    /** [transform] may run more than once under compare-and-set contention, so it must be side-effect free. */
+    private suspend fun updateNodeAndPersist(nodeNum: Int, transform: (Node) -> Node) {
+        val result = updateNodeState(nodeNum, channel = 0, transform)?.next ?: return
         if (shouldPersist(result)) persistLatestNode(nodeNum)
     }
 
