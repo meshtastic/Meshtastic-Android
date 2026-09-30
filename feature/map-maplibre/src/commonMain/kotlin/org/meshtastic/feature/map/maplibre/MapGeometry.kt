@@ -21,12 +21,9 @@ import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.MapBounds
 import org.meshtastic.feature.map.MapPoint
-import kotlin.math.PI
-import kotlin.math.cos
+import org.meshtastic.feature.map.terrain.TerrainTileMath
 import kotlin.math.floor
-import kotlin.math.ln
 import kotlin.math.pow
-import kotlin.math.tan
 
 /** [MapBounds.aroundNodes] as the box MapLibre wants. */
 fun nodesBoundingBox(nodes: List<Node>): BoundingBox? = MapBounds.aroundNodes(nodes)?.toBoundingBox()
@@ -133,18 +130,12 @@ private fun Pair<Double, Double>.cell(radiusPx: Int): Pair<Int, Int> =
 
 /** This node's position in Web Mercator pixels for a world [worldSize] pixels across. */
 private fun Node.worldPixel(worldSize: Double): Pair<Double, Double> {
-    val x = (longitude + HALF_TURN) / FULL_TURN * worldSize
-    val latitudeRadians = latitude * PI / STRAIGHT_ANGLE
-    val mercatorY = ln(tan(latitudeRadians) + 1.0 / cos(latitudeRadians))
-    val y = (1.0 - mercatorY / PI) / 2.0 * worldSize
-    return x to y
+    val (x, y) = TerrainTileMath.worldFraction(latitude, longitude)
+    return x * worldSize to y * worldSize
 }
 
 /** MapLibre's tile size in pixels, which is the space clustering measures its radius in. */
 private const val TILE_SIZE = 512.0
-private const val HALF_TURN = 180.0
-private const val FULL_TURN = 360.0
-private const val STRAIGHT_ANGLE = 180.0
 
 /**
  * The nodes inside [bounds], or all of them when there are none to compare against.

@@ -54,6 +54,27 @@ class TerrainTileMathTest {
     }
 
     @Test
+    fun `worldFraction is the inverse of lonLatAt and pins the poles to the edges`() {
+        assertEquals(0.5 to 0.5, TerrainTileMath.worldFraction(latitude = 0.0, longitude = 0.0))
+
+        val (x, y) = TerrainTileMath.worldFraction(latitude = 37.7749, longitude = -122.4194)
+        val back = TerrainTileMath.lonLatAt(zoom = 0, tileX = x, tileY = y)
+        assertEquals(-122.4194, back.longitude, absoluteTolerance = 1e-9)
+        assertEquals(37.7749, back.latitude, absoluteTolerance = 1e-9)
+
+        assertEquals(
+            0.0,
+            TerrainTileMath.worldFraction(latitude = 90.0, longitude = 0.0).second,
+            absoluteTolerance = 1e-9,
+        )
+        assertEquals(
+            1.0,
+            TerrainTileMath.worldFraction(latitude = -90.0, longitude = 0.0).second,
+            absoluteTolerance = 1e-9,
+        )
+    }
+
+    @Test
     fun `tilesAt covers a bbox's own corners inclusively`() {
         val bounds = GeoBounds(south = -1.0, west = -1.0, north = 1.0, east = 1.0)
         val tiles = TerrainTileMath.tilesAt(zoom = 2, bounds)

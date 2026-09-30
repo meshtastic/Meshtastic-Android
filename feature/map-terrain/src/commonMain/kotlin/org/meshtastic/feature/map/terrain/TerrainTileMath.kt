@@ -33,20 +33,27 @@ data class TileIndex(val zoom: Int, val x: Int, val y: Int)
 data class LonLat(val longitude: Double, val latitude: Double)
 
 /**
- * Standard XYZ/slippy-map Web Mercator tile math. Depends on no map stack, so the terrain extractor and the Google
- * flavor's offline maps share it.
+ * Standard XYZ/slippy-map Web Mercator tile math. Depends on no map stack, so the terrain extractor, the Google
+ * flavor's offline maps and MapLibre's node clustering share it.
  */
 object TerrainTileMath {
 
     private const val MAX_LATITUDE = 85.05112878
 
-    fun tileAt(zoom: Int, latitude: Double, longitude: Double): TileIndex {
-        val n = 2.0.pow(zoom)
+    /** Where a point falls on the Web Mercator world, from 0.0 at the northwest corner to 1.0 on each axis. */
+    fun worldFraction(latitude: Double, longitude: Double): Pair<Double, Double> {
         val clampedLat = latitude.coerceIn(-MAX_LATITUDE, MAX_LATITUDE)
         val latRad = clampedLat * PI / HALF_TURN_DEGREES
-        val x = (((longitude + FULL_TURN_DEGREES / 2) / FULL_TURN_DEGREES) * n).toInt().coerceIn(0, (n - 1).toInt())
-        val y = (((1.0 - asinh(tan(latRad)) / PI) / 2.0) * n).toInt().coerceIn(0, (n - 1).toInt())
-        return TileIndex(zoom, x, y)
+        val x = (longitude + FULL_TURN_DEGREES / 2) / FULL_TURN_DEGREES
+        val y = (1.0 - asinh(tan(latRad)) / PI) / 2.0
+        return x to y
+    }
+
+    fun tileAt(zoom: Int, latitude: Double, longitude: Double): TileIndex {
+        val n = 2.0.pow(zoom)
+        val max = (n - 1).toInt()
+        val (x, y) = worldFraction(latitude, longitude)
+        return TileIndex(zoom, (x * n).toInt().coerceIn(0, max), (y * n).toInt().coerceIn(0, max))
     }
 
     /** The largest valid tile-column/row index at [zoom] — `2^zoom - 1`, the same bound [tileAt] clamps into. */
