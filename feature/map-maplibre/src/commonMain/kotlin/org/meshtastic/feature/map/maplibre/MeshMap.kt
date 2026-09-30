@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -233,7 +234,8 @@ fun MeshMap(
 
     // The store-screenshot capture waits for this tag instead of a fixed delay.
     LaunchedEffect(mapState) {
-        mapState.events.filterIsInstance<MapEvent.Idle>().first()
+        // Idle can arrive before the first render session; only an idle after a drawn frame means tiles are on screen.
+        mapState.events.dropWhile { it !is MapEvent.FrameRendered }.filterIsInstance<MapEvent.Idle>().first()
         Logger.withTag("MapDrawn").d { "tiles drawn" }
     }
 

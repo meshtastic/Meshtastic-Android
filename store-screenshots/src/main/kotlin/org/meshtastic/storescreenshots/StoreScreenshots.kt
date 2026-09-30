@@ -155,12 +155,12 @@ class StoreScreenshots {
      * check after it still covers the camera settling on the mesh.
      */
     private fun UiAutomatorTestScope.openAndAwaitMapDrawn(shot: Shot) {
-        val drawnCount = { shell("logcat -d -s $MAP_DRAWN_TAG").lineSequence().count { MAP_DRAWN_MESSAGE in it } }
-        val before = drawnCount()
+        // A time boundary, not a line count: logcat is a ring buffer and older matches rotate out.
+        val since = System.currentTimeMillis().let { "%d.%03d".format(it / MILLIS_PER_SECOND, it % MILLIS_PER_SECOND) }
         open(shot.path)
         val deadline = SystemClock.uptimeMillis() + MAP_DRAWN_TIMEOUT_MS
         while (SystemClock.uptimeMillis() < deadline) {
-            if (drawnCount() > before) return
+            if (MAP_DRAWN_MESSAGE in shell("logcat -d -T $since -s $MAP_DRAWN_TAG")) return
             SystemClock.sleep(POLL_MS)
         }
         Log.w(TAG, "${shot.fileName} never logged $MAP_DRAWN_TAG; capturing after the timeout")
@@ -251,6 +251,7 @@ class StoreScreenshots {
         const val MAP_DRAWN_TAG = "MapDrawn"
         const val MAP_DRAWN_MESSAGE = "tiles drawn"
         const val MAP_DRAWN_TIMEOUT_MS = 45_000L
+        const val MILLIS_PER_SECOND = 1_000L
 
         const val CONNECT_ATTEMPTS = 3
         const val CONNECT_TIMEOUT_MS = 60_000L
