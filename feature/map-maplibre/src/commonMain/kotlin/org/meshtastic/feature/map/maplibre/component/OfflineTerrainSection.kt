@@ -40,9 +40,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.maplibre.spatialk.geojson.BoundingBox
+import org.meshtastic.core.common.util.formatByteSize
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
-import org.meshtastic.core.resources.map_cache_megabytes
 import org.meshtastic.core.resources.map_cache_size
 import org.meshtastic.core.resources.map_cache_tiles
 import org.meshtastic.core.resources.map_select_download_region
@@ -201,7 +201,7 @@ private fun DownloadedTerrainRow(region: OfflineTerrainRegion, onShow: () -> Uni
                 stringResource(
                     Res.string.offline_terrain_cache_detail,
                     stringResource(Res.string.map_cache_size),
-                    stringResource(Res.string.map_cache_megabytes, region.byteSize.megabytes()),
+                    formatByteSize(region.byteSize),
                     stringResource(Res.string.map_cache_tiles, region.tileCount.toInt()),
                 ),
                 style = MaterialTheme.typography.bodyMedium,

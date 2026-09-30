@@ -47,13 +47,12 @@ import org.maplibre.compose.offline.OfflineManager
 import org.maplibre.compose.offline.OfflinePack
 import org.maplibre.compose.offline.OfflinePackDefinition
 import org.maplibre.spatialk.geojson.BoundingBox
-import org.meshtastic.core.common.util.NumberFormatter
+import org.meshtastic.core.common.util.formatByteSize
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.map_cache_manager
-import org.meshtastic.core.resources.map_cache_megabytes
 import org.meshtastic.core.resources.map_cache_tiles
 import org.meshtastic.core.resources.map_download_status_complete
 import org.meshtastic.core.resources.map_download_status_downloading
@@ -267,7 +266,7 @@ private fun DownloadProgress.fraction(): Float = when (this) {
  * One line describing a pack's state, assembled from resources rather than written in English.
  *
  * `status.name` went straight into the UI before, so every locale read the library's own enum constants. The tile count
- * and byte size reuse the strings the cache figures above already use, which keeps one set of units to translate.
+ * and byte size render as the cache figures above render them.
  */
 @Composable
 private fun DownloadProgress.summary(): String = when (this) {
@@ -281,7 +280,7 @@ private fun DownloadProgress.summary(): String = when (this) {
                 },
             ),
             stringResource(Res.string.map_cache_tiles, completedTileCount.toInt()),
-            stringResource(Res.string.map_cache_megabytes, completedResourceBytes.megabytes()),
+            formatByteSize(completedResourceBytes),
         )
             .joinToString(SUMMARY_SEPARATOR)
 
@@ -293,21 +292,12 @@ private fun DownloadProgress.summary(): String = when (this) {
     DownloadProgress.Unknown -> EM_DASH
 }
 
-/**
- * Bytes as megabytes, to one decimal place.
- *
- * Decimal megabytes rather than mebibytes: this number sits next to a phone's own storage figures, and those are
- * decimal.
- */
-internal fun Long.megabytes(): String = NumberFormatter.format(this.toDouble() / BYTES_PER_MEGABYTE, 1)
-
 private fun Double.round(): String {
     // Rounded, not truncated, so a negative coordinate labels the same way as its positive twin.
     val scaled = (this * COORD_SCALE).roundToInt() / COORD_SCALE
     return scaled.toString()
 }
 
-private const val BYTES_PER_MEGABYTE = 1_000_000.0
 private const val PACK_ROW_TEXT_FRACTION = 0.8f
 private const val PACK_EXTRA_ZOOM_LEVELS = 2
 

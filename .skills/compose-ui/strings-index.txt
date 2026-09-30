@@ -957,9 +957,7 @@ manage_map_layers
 manual_position_request
 ### MAP ###
 map
-map_cache_info
 map_cache_manager
-map_cache_megabytes
 map_cache_size
 map_cache_tiles
 map_clear_tiles
