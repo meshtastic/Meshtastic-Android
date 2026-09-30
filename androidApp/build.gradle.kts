@@ -172,6 +172,9 @@ configure<ApplicationExtension> {
                 // what a real build carries comes from the plugin. See #6883.
                 manifestPlaceholders["MAPS_API_KEY"] = "dummy"
             }
+            if (name == "fdroid") {
+                proguardFile("proguard-rules-fdroid.pro")
+            }
         }
     }
 
@@ -210,18 +213,6 @@ configurations
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
         variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
-    }
-
-    onVariants(selector().withBuildType("release")) { variant ->
-        if (variant.flavorName == "google") {
-            val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
-            val minifyTaskName = "minify${variantNameCapped}WithR8"
-            val uploadTaskName = "uploadMapping$variantNameCapped"
-            // Use tasks.names to check existence without eagerly realizing tasks
-            if (tasks.names.contains(uploadTaskName) && tasks.names.contains(minifyTaskName)) {
-                tasks.named(minifyTaskName).configure { finalizedBy(uploadTaskName) }
-            }
-        }
     }
 }
 

@@ -28,6 +28,8 @@ on:
         required: true
       DATADOG_CLIENT_TOKEN:
         required: true
+      DATADOG_API_KEY:
+        required: false
       GOOGLE_MAPS_API_KEY:
         required: true
       GOOGLE_PLAY_JSON_KEY:
@@ -106,17 +108,25 @@ jobs:
             echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY"
           } >> ./secrets.properties
 
-      # Build only: publish-play uploads the bundle once every leg has built.
+      # Build only: publish-play uploads the bundle once every leg has built. The Datadog
+      # mapping upload runs in the same invocation so its build ID matches the bundle's.
       - name: Build the Google release
         env:
           VERSION_NAME: ${{ inputs.version_name }}
           VERSION_CODE: ${{ inputs.version_code }}
-        run: >
-          ./gradlew :androidApp:bundleGoogleRelease :androidApp:assembleGoogleRelease
-          -Pandroid.injected.version.name="$VERSION_NAME"
-          -Pandroid.injected.version.code="$VERSION_CODE"
-          -PaboutLibraries.release=true
-          -Pmeshtastic.disableAbiSplits=true
+          DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+        run: |
+          tasks=(:androidApp:bundleGoogleRelease :androidApp:assembleGoogleRelease)
+          if [ -n "$DD_API_KEY" ]; then
+            tasks+=(:androidApp:uploadMappingGoogleRelease)
+          else
+            echo "::warning::DATADOG_API_KEY is not set, so Datadog gets no R8 mapping for this release"
+          fi
+          ./gradlew "${tasks[@]}" \
+            -Pandroid.injected.version.name="$VERSION_NAME" \
+            -Pandroid.injected.version.code="$VERSION_CODE" \
+            -PaboutLibraries.release=true \
+            -Pmeshtastic.disableAbiSplits=true
 
       - name: List outputs
         run: ls -R androidApp/build/outputs/
@@ -135,6 +145,19 @@ jobs:
         with:
           name: google-apk
           path: androidApp/build/outputs/apk/google/release/*.apk
+          retention-days: 1
+
+      # github-release attaches it, so anyone can retrace a pasted google-flavor stack.
+      - name: Compress the R8 mapping
+        env:
+          VERSION_CODE: ${{ inputs.version_code }}
+        run: gzip -c androidApp/build/outputs/mapping/googleRelease/mapping.txt > "mapping-google-$VERSION_CODE.txt.gz"
+
+      - name: Upload the R8 mapping artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: google-mapping
+          path: mapping-google-*.txt.gz
           retention-days: 1
 
       - name: Attest Google AAB provenance
