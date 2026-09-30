@@ -48,6 +48,8 @@ import org.meshtastic.core.resources.meshtastic_messages_notifications
 import org.meshtastic.core.resources.meshtastic_messages_notifications_description
 import org.meshtastic.core.resources.meshtastic_new_nodes_notifications
 import org.meshtastic.core.resources.meshtastic_new_nodes_notifications_description
+import org.meshtastic.core.resources.meshtastic_reactions_notifications
+import org.meshtastic.core.resources.meshtastic_reactions_notifications_description
 import org.meshtastic.core.resources.meshtastic_service_notifications
 import org.meshtastic.core.resources.meshtastic_service_notifications_description
 import org.meshtastic.core.resources.meshtastic_waypoints_notifications
@@ -96,6 +98,13 @@ internal enum class NotificationChannelSpec(
         NotificationChannels.WAYPOINTS,
         Res.string.meshtastic_waypoints_notifications,
         Res.string.meshtastic_waypoints_notifications_description,
+        NotificationChannelGroupSpec.Messages,
+        NotificationManager.IMPORTANCE_DEFAULT,
+    ),
+    Reactions(
+        NotificationChannels.REACTIONS,
+        Res.string.meshtastic_reactions_notifications,
+        Res.string.meshtastic_reactions_notifications_description,
         NotificationChannelGroupSpec.Messages,
         NotificationManager.IMPORTANCE_DEFAULT,
     ),
@@ -178,6 +187,7 @@ internal enum class NotificationChannelSpec(
                 DirectMessages,
                 Broadcasts,
                 Waypoints,
+                Reactions,
                 NewNodes,
                 LowBattery,
                 DeviceStatus,

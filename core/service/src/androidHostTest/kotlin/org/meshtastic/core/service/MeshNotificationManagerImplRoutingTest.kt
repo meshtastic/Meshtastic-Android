@@ -126,6 +126,23 @@ class MeshNotificationManagerImplRoutingTest {
     }
 
     @Test
+    fun `a reaction posts on the reaction channel and is cleared with its conversation`() =
+        runWithRenderScope { scope ->
+            val manager = createManager(scope)
+
+            manager.updateReactionNotification("0!abcd1234", "Hawk Ridge", "👍", false, null, false)
+
+            val posted = activeByTag("reaction").single().notification
+            assertEquals(NotificationChannels.REACTIONS, posted.channelId)
+            assertEquals("👍", posted.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString())
+            assertNull(posted.group, "a reaction is not a conversation and must stay out of the messages summary")
+            assertEquals("meshtastic://meshtastic/messages/0!abcd1234", tapTarget(posted))
+
+            manager.cancelMessageNotification("0!abcd1234")
+            assertTrue(activeByTag("reaction").isEmpty())
+        }
+
+    @Test
     fun `a critical alert posts as an alarm that opens its conversation`() = runWithRenderScope { scope ->
         createManager(scope).showAlertNotification("0!abcd1234", "Hawk Ridge", "Fire at camp")
 

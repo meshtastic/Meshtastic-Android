@@ -160,6 +160,7 @@ class MeshNotificationManagerImpl(
         private const val BUBBLE_DESIRED_HEIGHT_DP = 600
         private const val TAG_MESSAGE_SUMMARY = "message_summary"
         private const val TAG_WAYPOINT = "waypoint"
+        private const val TAG_REACTION = "reaction"
         private const val TAG_ALERT = "alert"
         private const val TAG_NEW_NODE = "new_node"
         private const val TAG_LOW_BATTERY = "low_battery"
@@ -460,7 +461,16 @@ class MeshNotificationManagerImpl(
         channelName: String?,
         isSilent: Boolean,
     ) {
-        showConversationNotification(contactKey, isBroadcast, channelName, conversationName = name, isSilent = isSilent)
+        ensureChannels()
+        val builder =
+            commonBuilder(NotificationChannelSpec.Reactions, createOpenMessageIntent(contactKey))
+                .setContentTitle(name)
+                .setContentText(emoji)
+                .setCategory(Notification.CATEGORY_MESSAGE)
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .setAutoCancel(true)
+        if (isSilent) builder.setSilent(true)
+        notificationManager.notify(TAG_REACTION, contactKey.hashCode(), builder.build())
     }
 
     override suspend fun updateWaypointNotification(
@@ -711,6 +721,7 @@ class MeshNotificationManagerImpl(
     override suspend fun cancelMessageNotification(contactKey: String) {
         val id = contactKey.hashCode()
         notificationManager.cancel(TAG_MESSAGE, id)
+        notificationManager.cancel(TAG_REACTION, id)
         // Rebuild (or clear) the group summary so it doesn't keep showing the dismissed conversation in Android Auto.
         // Pass the id we just cancelled so a stale activeNotifications snapshot doesn't keep the summary alive.
         showGroupSummary(justCancelledId = id)
