@@ -184,9 +184,9 @@ fun ContactsScreen(
         }
     }
 
-    // Derived state for selected contacts and count
-    val selectedContacts =
-        remember(contacts, selectedContactKeys) { contacts.filter { it.contactKey in selectedContactKeys } }
+    // selectedContactKeys is mutated in place, so as a remember key it never changes; read it as state instead.
+    val selectedContacts by
+        remember(contacts) { derivedStateOf { contacts.filter { it.contactKey in selectedContactKeys } } }
     // Get message count directly from repository for selected contacts
     var selectedCount by remember { mutableIntStateOf(0) }
     LaunchedEffect(selectedContactKeys.size, selectedContactKeys.joinToString(",")) {
