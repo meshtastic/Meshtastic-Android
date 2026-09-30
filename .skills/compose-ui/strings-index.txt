@@ -1475,6 +1475,8 @@ range_test
 range_test_config
 react
 reboot
+reboot_into_dfu
+reboot_into_dfu_warning
 recent_network_devices
 reconnecting
 redacted

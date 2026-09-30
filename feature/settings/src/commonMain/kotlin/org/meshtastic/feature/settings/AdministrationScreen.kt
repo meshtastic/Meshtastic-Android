@@ -45,6 +45,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.preserve_favorites
+import org.meshtastic.core.resources.reboot_into_dfu_warning
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.RadioAdminAppBar
@@ -175,6 +176,7 @@ private fun AdminActionDialog(
             node = destNode,
             onDismiss = onDismiss,
             isShutdown = route == AdminRoute.SHUTDOWN,
+            warning = Res.string.reboot_into_dfu_warning.takeIf { route == AdminRoute.REBOOT_DFU },
             onConfirm = onConfirm,
         )
     } else {

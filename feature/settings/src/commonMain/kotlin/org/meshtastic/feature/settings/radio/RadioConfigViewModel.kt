@@ -258,6 +258,7 @@ open class RadioConfigViewModel(
     private val manualChannelBatchJobs = mutableSetOf<Job>()
     private var manualChannelBatchEnqueueing = false
     private val manualChannelBatchRequestIds = mutableSetOf<Int>()
+    private val dfuRequestIds = mutableSetOf<Int>()
 
     /**
      * Run a one-shot reachability/credentials probe against an MQTT broker. Cancels any in-flight probe before starting
@@ -668,7 +669,10 @@ open class RadioConfigViewModel(
             AdminRoute.REBOOT_DFU.name ->
                 safeLaunch(tag = "rebootToDfu") {
                     if (isLocal) nodeRestartTracker.expectRestart()
-                    adminActionsUseCase.rebootToDfu(destNum, onRequestId = ::registerRequestId)
+                    adminActionsUseCase.rebootToDfu(destNum) { packetId ->
+                        registerRequestId(packetId)
+                        dfuRequestIds.add(packetId)
+                    }
                     trackAdminAction()
                 }
 
@@ -1084,6 +1088,7 @@ open class RadioConfigViewModel(
                 if (requestIds.value.contains(packetId)) {
                     // Capture batch membership before removeRequestId drops the last id and empties the batch set.
                     val timedOutBatchRequest = packetId in manualChannelBatchRequestIds
+                    val timedOutDfuRequest = packetId in dfuRequestIds
                     val requestRoute = readRequestRoutes[packetId].orEmpty()
                     val deferredRemoteReadError = deferredRemoteReadErrors[packetId]
                     removeRequestId(packetId)
@@ -1094,12 +1099,12 @@ open class RadioConfigViewModel(
                         // A save that reboots the node races the reboot against its ACK; a timeout here during an
                         // expected restart means the reboot won — treat it as the restarting-success, not an error.
                         // A manual channel batch never reboots, so exclude it even inside a stale restart window.
-                        if (
+                        // nRF52 firmware jumps to its bootloader without acking, so a DFU request only fails loudly.
+                        val restartWon =
                             nodeRestartTracker.restartExpected.value &&
-                            !timedOutBatchRequest &&
-                            !manualChannelBatchInFlight() &&
-                            radioConfigState.value.route.isEmpty()
-                        ) {
+                                !timedOutBatchRequest &&
+                                !manualChannelBatchInFlight()
+                        if ((restartWon || timedOutDfuRequest) && radioConfigState.value.route.isEmpty()) {
                             setResponseStateSuccess()
                         } else {
                             deferredRemoteReadError?.let(::sendError) ?: sendError(Res.string.timeout)
@@ -1156,6 +1161,7 @@ open class RadioConfigViewModel(
         readRequestRoutes.remove(packetId)
         deferredRemoteReadErrors.remove(packetId)
         manualChannelBatchRequestIds.remove(packetId)
+        dfuRequestIds.remove(packetId)
         requestIds.update { it.withoutPacketId(packetId) }
     }
 
@@ -1167,6 +1173,7 @@ open class RadioConfigViewModel(
             removeLateRemoteRead(it)
         }
         manualChannelBatchRequestIds.removeAll(packetIds)
+        dfuRequestIds.removeAll(packetIds)
         requestIds.update { ids -> ids.withoutPacketIds(packetIds) }
     }
 

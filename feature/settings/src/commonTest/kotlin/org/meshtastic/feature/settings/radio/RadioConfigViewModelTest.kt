@@ -1343,6 +1343,36 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `an unacknowledged DFU request settles as success instead of a timeout error`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), any(), any()) } returns
+            RadioResponseResult.ConfigResponse(Config.Builder().build())
+
+        viewModel = createViewModel()
+
+        everySuspend { adminActionsUseCase.rebootToDfu(any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(42)
+                42
+            }
+
+        viewModel.setResponseStateLoading(AdminRoute.REBOOT_DFU)
+        packetFlow.emit(MeshPacket.Builder().build())
+        runCurrent()
+        verifySuspend { adminActionsUseCase.rebootToDfu(123, any()) }
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    @Test
     fun `canRebootToDfu is true only for nRF52 hardware`() = runTest {
         val node =
             Node(
