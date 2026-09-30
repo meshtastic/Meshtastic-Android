@@ -302,6 +302,7 @@ internal class UsbPassWriter(
                                     ProgressState(
                                         message = UiText.DynamicString(downloadingMsg),
                                         progress = progress,
+                                        details = formatTransferPercent(progress),
                                     ),
                                 ),
                             )
