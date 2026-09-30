@@ -255,8 +255,8 @@ internal class AdminControllerImpl(
         }
     }
 
-    override suspend fun rebootToDfu(nodeNum: Int) {
-        commandSender.sendAdmin(nodeNum) {
+    override suspend fun rebootToDfu(nodeNum: Int, packetId: Int) {
+        commandSender.sendAdmin(nodeNum, packetId) {
             AdminMessage.Builder().also { wb -> wb.enter_dfu_mode_request = true }.build()
         }
     }

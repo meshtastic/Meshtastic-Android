@@ -31,6 +31,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -108,30 +109,53 @@ private fun AdminRouteItems(
     state: RadioConfigState,
     destNode: Node?,
 ) {
-    AdminRoute.entries.forEach { route ->
-        var showDialog by remember { mutableStateOf(false) }
-        if (showDialog) {
-            AdminActionDialog(
-                route = route,
-                destNode = destNode,
-                enabled = enabled,
-                state = state,
-                onDismiss = { showDialog = false },
-                onConfirm = { viewModel.setResponseStateLoading(route) },
-                onPreserveFavoritesChange = { viewModel.setPreserveFavorites(it) },
-            )
+    AdminRoute.entries
+        .filter { it != AdminRoute.REBOOT_DFU || state.canRebootToDfu }
+        .forEach { route ->
+            key(route) {
+                AdminRouteItem(
+                    route = route,
+                    destNode = destNode,
+                    enabled = enabled,
+                    state = state,
+                    onConfirm = { viewModel.setResponseStateLoading(route) },
+                    onPreserveFavoritesChange = { viewModel.setPreserveFavorites(it) },
+                )
+            }
         }
+}
 
-        ListItem(
+@Composable
+private fun AdminRouteItem(
+    route: AdminRoute,
+    destNode: Node?,
+    enabled: Boolean,
+    state: RadioConfigState,
+    onConfirm: () -> Unit,
+    onPreserveFavoritesChange: (Boolean) -> Unit,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) {
+        AdminActionDialog(
+            route = route,
+            destNode = destNode,
             enabled = enabled,
-            text = stringResource(route.title),
-            leadingIcon = vectorResource(route.icon),
-            leadingIconTint = MaterialTheme.colorScheme.error,
-            textColor = MaterialTheme.colorScheme.error,
-            trailingIcon = null,
-        ) {
-            showDialog = true
-        }
+            state = state,
+            onDismiss = { showDialog = false },
+            onConfirm = onConfirm,
+            onPreserveFavoritesChange = onPreserveFavoritesChange,
+        )
+    }
+
+    ListItem(
+        enabled = enabled,
+        text = stringResource(route.title),
+        leadingIcon = vectorResource(route.icon),
+        leadingIconTint = MaterialTheme.colorScheme.error,
+        textColor = MaterialTheme.colorScheme.error,
+        trailingIcon = null,
+    ) {
+        showDialog = true
     }
 }
 
@@ -145,7 +169,7 @@ private fun AdminActionDialog(
     onConfirm: () -> Unit,
     onPreserveFavoritesChange: (Boolean) -> Unit,
 ) {
-    if (route == AdminRoute.SHUTDOWN || route == AdminRoute.REBOOT) {
+    if (route == AdminRoute.SHUTDOWN || route == AdminRoute.REBOOT || route == AdminRoute.REBOOT_DFU) {
         ShutdownConfirmationDialog(
             title = "${stringResource(route.title)}?",
             node = destNode,

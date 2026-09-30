@@ -67,6 +67,7 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.excludes
 import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.repository.AnalyticsPrefs
+import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
@@ -149,6 +150,7 @@ data class RadioConfigState(
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = true,
     val nodeDbResetPreserveFavorites: Boolean = false,
+    val canRebootToDfu: Boolean = false,
 )
 
 @KoinViewModel
@@ -158,6 +160,7 @@ open class RadioConfigViewModel(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
+    private val deviceHardwareRepository: DeviceHardwareRepository,
     private val locationRepository: LocationRepository,
     private val mapConsentPrefs: MapConsentPrefs,
     private val analyticsPrefs: AnalyticsPrefs,
@@ -325,6 +328,19 @@ open class RadioConfigViewModel(
                     state.copy(metadata = it?.metadata, localIsLicensed = it?.user?.is_licensed == true)
                 }
             }
+            .launchIn(viewModelScope)
+
+        _destNode
+            .map { it?.user?.hw_model?.value }
+            .distinctUntilChanged()
+            .flatMapLatest { hwModel ->
+                if (hwModel == null) {
+                    flowOf(false)
+                } else {
+                    deviceHardwareRepository.observeDeviceHardware(hwModel).map { it?.isNrf52Arc == true }
+                }
+            }
+            .onEach { canDfu -> _radioConfigState.update { it.copy(canRebootToDfu = canDfu) } }
             .launchIn(viewModelScope)
 
         radioConfigRepository.deviceProfileFlow.onEach { _currentDeviceProfile.value = it }.launchIn(viewModelScope)
@@ -646,6 +662,13 @@ open class RadioConfigViewModel(
                 safeLaunch(tag = "reboot") {
                     expectRestartIfLocal(RebootBehavior.ALWAYS)
                     adminActionsUseCase.reboot(destNum, onRequestId = ::registerRequestId)
+                    trackAdminAction()
+                }
+
+            AdminRoute.REBOOT_DFU.name ->
+                safeLaunch(tag = "rebootToDfu") {
+                    if (isLocal) nodeRestartTracker.expectRestart()
+                    adminActionsUseCase.rebootToDfu(destNum, onRequestId = ::registerRequestId)
                     trackAdminAction()
                 }
 

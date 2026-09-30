@@ -401,7 +401,7 @@ class FakeRadioController :
 
     override suspend fun reboot(destNum: Int, packetId: Int) {}
 
-    override suspend fun rebootToDfu(nodeNum: Int) {}
+    override suspend fun rebootToDfu(nodeNum: Int, packetId: Int) {}
 
     override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
         onRequestRebootOta(requestId, destNum, mode, hash)
