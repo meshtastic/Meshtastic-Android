@@ -706,7 +706,11 @@ fun MapView(
                 mapType = effectiveGoogleMapType,
                 isMyLocationEnabled = isLocationTrackingEnabled && locationPermission.isGranted,
             ),
-            onMapLoaded = { isMapLoaded = true },
+            onMapLoaded = {
+                isMapLoaded = true
+                // The store-screenshot capture waits for this tag instead of a fixed delay.
+                Logger.withTag("MapDrawn").d { "tiles drawn" }
+            },
             onMapClick = { latLng ->
                 if (isMainMode && boxAuthoringDraft != null) {
                     val first = boxAuthoringFirstCorner

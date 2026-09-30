@@ -31,8 +31,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.dropWhile
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -51,6 +54,7 @@ import org.maplibre.compose.location.updateCamera
 import org.maplibre.compose.map.CameraConstraints
 import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.map.LocalViewport
+import org.maplibre.compose.map.MapEvent
 import org.maplibre.compose.map.MapState
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.rememberMapState
@@ -227,6 +231,13 @@ fun MeshMap(
     // only: `rememberMapState` builds the native runtime itself, so a runtime that cannot come up at all has already
     // thrown by the time this is reached.
     if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
+
+    // The store-screenshot capture waits for this tag instead of a fixed delay.
+    LaunchedEffect(mapState) {
+        // Idle can arrive before the first render session; only an idle after a drawn frame means tiles are on screen.
+        mapState.events.dropWhile { it !is MapEvent.FrameRendered }.filterIsInstance<MapEvent.Idle>().first()
+        Logger.withTag("MapDrawn").d { "tiles drawn" }
+    }
 
     val zoomRange = basemap.zoomRange()
     MaplibreMap(
