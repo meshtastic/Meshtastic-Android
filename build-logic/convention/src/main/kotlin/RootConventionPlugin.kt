@@ -147,7 +147,7 @@ private val DOKKA_EXCLUDED_MODULES =
 private fun allModules(): List<String> = ALL_MODULES_FULL
 
 /**
- * Modules that apply the KMP plugin and should be compiled for JVM + iOS targets. Excludes pure-Android modules
- * (:androidApp, :core:barcode, :core:nfc, :feature:widget) and the desktop JVM-only module.
+ * Modules that apply the KMP plugin and should be compiled for JVM and `iosSimulatorArm64`. Excludes pure-Android
+ * modules (:androidApp, :core:barcode, :core:nfc, :feature:widget) and the desktop JVM-only module.
  */
 private fun kmpModules(): List<String> = allModules().filter { it !in ANDROID_ONLY_MODULES + ":desktopApp" }

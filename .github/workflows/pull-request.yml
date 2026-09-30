@@ -63,8 +63,10 @@ jobs:
             desktop:
               - 'desktopApp/**'
               - 'scripts/build-appimage.sh'
-              # Shared build machinery that shapes the packaged output.
+              # Shared build machinery that shapes the packaged output. config/ holds the
+              # ProGuard rules desktopApp's release jars read and the license texts it bundles.
               - 'build-logic/**'
+              - 'config/**'
               - 'gradle/wrapper/**'
               - 'gradle/libs.versions.toml'
               # Root inputs the packaging tasks actually read: config.properties supplies the
