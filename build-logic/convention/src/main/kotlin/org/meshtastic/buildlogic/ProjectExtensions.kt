@@ -65,12 +65,14 @@ val Project.configProperties: Properties
 
 /** Configure common test options like parallel execution and logging. */
 internal fun Project.configureTestOptions() {
-    // Gradle 9 requires junit-platform-launcher on every test runtime classpath when
-    // useJUnitPlatform() is active.  Add it lazily to all *UnitTestRuntimeClasspath and
-    // *TestRuntimeClasspath configurations so all Android and JVM test tasks get it
-    // without requiring per-module declarations.
+    // Only JUnit Platform test tasks need the launcher. Instrumented test APKs run under AndroidJUnitRunner, and a KMP
+    // device-test APK fails to dex and package the JUnit Platform jars.
     configurations
-        .matching { it.name.endsWith("UnitTestRuntimeClasspath") || it.name.endsWith("TestRuntimeClasspath") }
+        .matching {
+            it.name.endsWith("TestRuntimeClasspath") &&
+                !it.name.contains("DeviceTest") &&
+                !it.name.contains("AndroidTest")
+        }
         .configureEach {
             val launcher = libs.library("junit-platform-launcher")
             project.dependencies.add(name, launcher)
