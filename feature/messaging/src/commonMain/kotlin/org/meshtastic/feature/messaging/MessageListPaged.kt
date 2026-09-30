@@ -64,6 +64,7 @@ import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.core.ui.component.ListScrollbar
 import org.meshtastic.feature.messaging.component.DateSeparator
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.MessageStatusDialog
@@ -352,6 +353,7 @@ private fun MessageListPagedContent(
                 }
             }
         }
+        ListScrollbar(listState)
     }
 }
 
