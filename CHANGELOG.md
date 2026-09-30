@@ -8,7 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.3-internal.2)
+### Internal (v2.8.3-internal.3)
 Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2):
 
 #### 🏗️ Features
@@ -18,6 +18,10 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(firmware): show installed vs latest bootloader before an upgrade by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7409
 * feat(auto): notification messaging on Android Auto by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7417
 * feat(map-maplibre): start with collapsed attribution strip on seconda… by @Tha14 in https://github.com/meshtastic/Meshtastic-Android/pull/7424
+* perf(store-screenshots): wait for the map to draw instead of a fixed 45 seconds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7501
+* feat(desktop): add draggable scrollbars to node and message lists by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7506
+* feat(notifications): post reactions on their own channel by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7507
+* feat(admin): add Reboot into DFU mode admin action for nRF52 nodes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7504
 #### 🖥️ Desktop
 * fix(mqtt): remove noop mqtt to allow the mqtt proxy to work on the desktop builds by @Tha14 in https://github.com/meshtastic/Meshtastic-Android/pull/7400
 * fix(notifications): put every notification on its own channel and tap target by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7415
@@ -56,6 +60,7 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(firmware): show the percent while a maintenance UF2 downloads by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7485
 * fix(messaging): let a pinned conversation be unpinned by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7492
 * fix(app): restore the Apache HTTP legacy library for Google Maps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7499
+* fix(metrics): break power chart lines across gaps in readings by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7505
 #### 📝 Other Changes
 * refactor(data): page the log export, remove dedupe leftovers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7449
 * refactor(map): share the Web Mercator projection with node clustering by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7483
