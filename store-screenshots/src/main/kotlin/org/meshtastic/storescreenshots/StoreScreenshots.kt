@@ -132,7 +132,7 @@ class StoreScreenshots {
             open(Shot.Nodes.path)
             SystemClock.sleep(READ_WARM_UP_MS)
         }
-        open(shot.path)
+        if (shot.waitsForMapDrawn) openAndAwaitMapDrawn(shot) else open(shot.path)
         SystemClock.sleep(shot.minimumWaitMs)
         val stable =
             waitForStableInActiveWindow(
@@ -148,6 +148,22 @@ class StoreScreenshots {
         if (stable.isTimeout) Log.w(TAG, "$name never settled; capturing as is")
         val bitmap = requireNotNull(device.takeScreenshot()) { "no screenshot for $name" }
         save(bitmap, name)
+    }
+
+    /**
+     * Waits for the map to log that its tiles are drawn: Google Maps' onMapLoaded, MapLibre's first idle. The stability
+     * check after it still covers the camera settling on the mesh.
+     */
+    private fun UiAutomatorTestScope.openAndAwaitMapDrawn(shot: Shot) {
+        val drawnCount = { shell("logcat -d -s $MAP_DRAWN_TAG").lineSequence().count { MAP_DRAWN_MESSAGE in it } }
+        val before = drawnCount()
+        open(shot.path)
+        val deadline = SystemClock.uptimeMillis() + MAP_DRAWN_TIMEOUT_MS
+        while (SystemClock.uptimeMillis() < deadline) {
+            if (drawnCount() > before) return
+            SystemClock.sleep(POLL_MS)
+        }
+        Log.w(TAG, "${shot.fileName} never logged $MAP_DRAWN_TAG; capturing after the timeout")
     }
 
     /** Launches through the debug build's shell-only alias, the one launch the app honours the switches on. */
@@ -189,7 +205,7 @@ class StoreScreenshots {
         TenInch("tenInchScreenshots", 2560, 1440, 320),
     }
 
-    /** The five listing shots, named as fastlane lays them out. The map loads tiles for a while before it settles. */
+    /** The five listing shots, named as fastlane lays them out. The map waits for its tiles before it settles. */
     private enum class Shot(
         val fileName: String,
         val path: String,
@@ -197,11 +213,12 @@ class StoreScreenshots {
         val stableTimeoutMs: Long = 30_000,
         val stableIntervalMs: Long = 2_000,
         val readFirst: Boolean = false,
+        val waitsForMapDrawn: Boolean = false,
     ) {
         // The primary channel's contact key, raw: `am start` takes it literally and Uri.parse accepts the caret.
         Messages("1_messages", "messages/0^all", readFirst = true),
         Nodes("2_nodes", "nodes"),
-        Map("3_map", "map", minimumWaitMs = 45_000, stableTimeoutMs = 120_000, stableIntervalMs = 8_000),
+        Map("3_map", "map", stableTimeoutMs = 120_000, stableIntervalMs = 8_000, waitsForMapDrawn = true),
         NodeDetail("4_node_detail", "nodes/$RIDGE_TOP_NUM"),
         Channels("5_channels", "channels"),
     }
@@ -229,6 +246,11 @@ class StoreScreenshots {
         const val DEMO_BURSTS = 2
 
         const val READ_WARM_UP_MS = 3_000L
+
+        /** Logged by both flavors' maps (MapView.kt, MeshMap.kt) once the tiles are drawn. */
+        const val MAP_DRAWN_TAG = "MapDrawn"
+        const val MAP_DRAWN_MESSAGE = "tiles drawn"
+        const val MAP_DRAWN_TIMEOUT_MS = 45_000L
 
         const val CONNECT_ATTEMPTS = 3
         const val CONNECT_TIMEOUT_MS = 60_000L
