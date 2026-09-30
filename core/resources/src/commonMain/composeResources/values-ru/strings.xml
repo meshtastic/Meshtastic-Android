@@ -732,6 +732,7 @@
     <string name="firmware_update_taking_a_while">Это может занять минутку...</string>
     <string name="firmware_update_target">Целевое устройство: %1$s</string>
     <string name="firmware_update_title">Обновление прошивки</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
     <string name="firmware_update_unknown_error">Неизвестная ошибка</string>
     <string name="firmware_update_unknown_hardware">Неизвестная модель оборудования: %1$d</string>
     <string name="firmware_update_unknown_release">Неизвестная внешняя версия</string>
@@ -975,9 +976,7 @@
     <string name="manual_position_request">Требуется запрос позиции вручную</string>
     <!-- MAP -->
     <string name="map">Карта сети</string>
-    <string name="map_cache_info">Емкость кэша: %1$d MB\nИспользование кэша: %2$d MB</string>
     <string name="map_cache_manager">Менеджер кэша</string>
-    <string name="map_cache_megabytes">%1$s МБ</string>
     <string name="map_cache_size">Текущий размер кэша</string>
     <string name="map_cache_tiles">%1$d файла</string>
     <string name="map_clear_tiles">Очистить загруженные файлы</string>
@@ -1214,7 +1213,6 @@
     <string name="no_bluetooth_devices_seen">Bluetooth-устройства не обнаружены</string>
     <string name="no_custom_tile_sources_found">Источники пользовательских плиток не найдены.</string>
     <string name="no_device_selected">Устройство не выбрано</string>
-    <string name="no_devices_found">Устройства не найдены</string>
     <string name="no_files_manifested">Файлы не отобразились.</string>
     <string name="no_local_stats">Статистика недоступна</string>
     <string name="no_map_layers_loaded">Слои карты не загружены.</string>

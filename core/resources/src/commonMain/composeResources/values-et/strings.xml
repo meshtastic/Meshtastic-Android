@@ -685,6 +685,7 @@
     <string name="firmware_update_taking_a_while">See võib võtta minuti...</string>
     <string name="firmware_update_target">Sihtkoht: %1$s</string>
     <string name="firmware_update_title">Püsivara uuendus</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
     <string name="firmware_update_unknown_error">Tundmatu viga</string>
     <string name="firmware_update_unknown_hardware">Tundmatu riistvaramudel: %1$d</string>
     <string name="firmware_update_unknown_release">Tundmatu väljalase</string>
@@ -911,9 +912,7 @@
     <string name="manual_position_request">Vajalik käsitsi asukohapäring</string>
     <!-- MAP -->
     <string name="map">Kärgvõrgu kaart</string>
-    <string name="map_cache_info">Vahemälu maht: %1$d MB\nVahemälu kasutus: %2$d MB</string>
     <string name="map_cache_manager">Vahemälu haldamine</string>
-    <string name="map_cache_megabytes">%1$s MB</string>
     <string name="map_cache_size">Praegune vahemälu suurus</string>
     <string name="map_cache_tiles">%1$d paani</string>
     <string name="map_clear_tiles">Tühjenda allalaetud paanid</string>
@@ -1111,7 +1110,6 @@
     <string name="no_bluetooth_devices_seen">Sinihamba-seadmeid ei tuvastatud</string>
     <string name="no_custom_tile_sources_found">Kohandatud paanide allikaid ei leitud.</string>
     <string name="no_device_selected">Seadet pole valitud</string>
-    <string name="no_devices_found">Ühtegi seadet ei leitud</string>
     <string name="no_files_manifested">Faile ei avaldatud.</string>
     <string name="no_local_stats">Statistikat pole saadaval</string>
     <string name="no_map_layers_loaded">Kaardikihte pole laetud.</string>

@@ -832,7 +832,6 @@
     <string name="manual_position_request">手動での位置情報のリクエストが必要</string>
     <!-- MAP -->
     <string name="map">メッシュマップ</string>
-    <string name="map_cache_info">キャッシュ容量: %1$d MB\nキャッシュ使用量: %2$d MB</string>
     <string name="map_cache_manager">キャッシュの管理</string>
     <string name="map_cache_size">現在のキャッシュサイズ</string>
     <string name="map_cache_tiles">%1$d タイル</string>
@@ -995,7 +994,6 @@
     <string name="no_bluetooth_devices_seen">Bluetooth デバイスが見つかりません</string>
     <string name="no_custom_tile_sources_found">カスタムタイルソースが見つかりません。</string>
     <string name="no_device_selected">デバイスが選択されていません</string>
-    <string name="no_devices_found">デバイスが見つかりません</string>
     <string name="no_files_manifested">ファイルがありません。</string>
     <string name="no_local_stats">統計がありません</string>
     <string name="no_map_layers_loaded">マップレイヤーが読み込まれていません。</string>

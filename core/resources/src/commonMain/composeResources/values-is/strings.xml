@@ -96,7 +96,6 @@
     <string name="locked">Læst</string>
     <!-- LOG -->
     <!-- MAP -->
-    <string name="map_cache_info">Stærð skyndiminnis: %1$d MB\nNýtt skyndiminni: %2$d MB</string>
     <string name="map_cache_manager">Sýsla með skyndiminni</string>
     <string name="map_cache_size">Núverandi stærð skyndiminnis</string>
     <string name="map_cache_tiles">%1$d reitar</string>

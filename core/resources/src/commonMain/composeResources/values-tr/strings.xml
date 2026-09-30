@@ -244,7 +244,6 @@
     <string name="lux">Lüks</string>
     <string name="manual_position_request">Manuel konum isteği gerekli</string>
     <!-- MAP -->
-    <string name="map_cache_info">Önbellek Kapasitesi: %1$d MB\nÖnbellek Kullanımı: %2$d MB</string>
     <string name="map_cache_manager">Önbellek Yöneticisi</string>
     <string name="map_cache_size">Önbellek doluluğu</string>
     <string name="map_cache_tiles">%1$d harita parçası</string>

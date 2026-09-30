@@ -578,6 +578,7 @@
     <string name="firmware_update_taking_a_while">Dies könnte einige Minuten dauern...</string>
     <string name="firmware_update_target">Zielversion: %1$s</string>
     <string name="firmware_update_title">Firmware Aktualisierung</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
     <string name="firmware_update_unknown_error">Unbekannter Fehler</string>
     <string name="firmware_update_unknown_hardware">Unbekanntes Hardware Modell: %1$d</string>
     <string name="firmware_update_unknown_release">Unbekannte Version</string>
@@ -748,7 +749,6 @@
     <string name="manual_position_request">Manuelle Standortanfrage erforderlich</string>
     <!-- MAP -->
     <string name="map">Mesh Karte</string>
-    <string name="map_cache_info">Zwischenspeichergröße: %1$d MB\nZwischenspeicherverwendung: %2$d MB</string>
     <string name="map_cache_manager">Zwischenspeicher-Verwaltung</string>
     <string name="map_cache_size">Aktuelle Zwischenspeichergröße</string>
     <string name="map_cache_tiles">%1$d Kacheln</string>
@@ -900,7 +900,6 @@
     <string name="no_bluetooth_devices_seen">Keine Bluetoothgeräte gefunden</string>
     <string name="no_custom_tile_sources_found">Keine eigenen Kachelquellen gefunden.</string>
     <string name="no_device_selected">Kein Gerät ausgewählt</string>
-    <string name="no_devices_found">Keine Geräte gefunden</string>
     <string name="no_files_manifested">Keine Dateien vorhanden.</string>
     <string name="no_local_stats">Keine Statistiken verfügbar</string>
     <string name="no_map_layers_loaded">Keine Kartenebenen geladen.</string>

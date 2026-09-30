@@ -475,6 +475,7 @@
     <string name="firmware_update_taking_a_while">Това може да отнеме минута...</string>
     <string name="firmware_update_target">Цел: %1$s</string>
     <string name="firmware_update_title">Актуализация на фърмуера</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
     <string name="firmware_update_unknown_error">Неизвестна грешка</string>
     <string name="firmware_update_unknown_hardware">Неизвестен модел хардуер: %1$d</string>
     <string name="firmware_update_uploading">Качване на фърмуера...</string>
@@ -625,9 +626,7 @@
     <string name="manual_position_request">Изисква се ръчно заявяване на позиция</string>
     <!-- MAP -->
     <string name="map">Карта на Mesh</string>
-    <string name="map_cache_info">Капацитет: %1$d MB\nИзползвани: %2$d MB</string>
     <string name="map_cache_manager">Мениджър на кеш</string>
-    <string name="map_cache_megabytes">%1$s MB</string>
     <string name="map_cache_size">Текущ размер на свалените данни</string>
     <string name="map_cache_tiles">%1$d плочки</string>
     <string name="map_clear_tiles">Изчистване на свалените карти</string>
@@ -760,7 +759,6 @@
     <string name="no_bluetooth_devices_hint">Уверете се, че сте в обхвата на устройството.</string>
     <string name="no_bluetooth_devices_seen">Не се виждат Bluetooth устройства</string>
     <string name="no_device_selected">Няма избрано устройство</string>
-    <string name="no_devices_found">Няма намерени устройства</string>
     <string name="no_local_stats">Няма налична статистика</string>
     <string name="no_map_layers_loaded">Няма заредени слоеве на картата.</string>
     <string name="no_network_devices_found">Няма намерени мрежови устройства</string>

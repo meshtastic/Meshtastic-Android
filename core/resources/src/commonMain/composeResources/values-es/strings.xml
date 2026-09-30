@@ -358,7 +358,6 @@ Rango de Valores 0 - 500.</string>
     <string name="manual_position_request">Requerir solicitud manual de posición</string>
     <!-- MAP -->
     <string name="map">Mapa Mesh</string>
-    <string name="map_cache_info">Capacidad del caché: %1$d MB\nUso del caché: %2$d MB</string>
     <string name="map_cache_manager">Gestor de Caché</string>
     <string name="map_cache_size">Tamaño actual de Caché</string>
     <string name="map_cache_tiles">%1$d Fichas</string>

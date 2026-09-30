@@ -121,7 +121,6 @@
     <!-- LOG -->
     <string name="logs">Jounal</string>
     <!-- MAP -->
-    <string name="map_cache_info">Kapasite Kach: %1$d MB\nItilizasyon Kach: %2$d MB</string>
     <string name="map_cache_manager">Manadjè Kach</string>
     <string name="map_cache_size">Gwosè Kach aktyèl</string>
     <string name="map_cache_tiles">%1$d tèk</string>

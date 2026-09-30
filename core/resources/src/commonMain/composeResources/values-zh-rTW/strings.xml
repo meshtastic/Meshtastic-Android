@@ -457,6 +457,7 @@
     <string name="firmware_update_taking_a_while">處理中，請稍候⋯⋯</string>
     <string name="firmware_update_target">目標裝置：%1$s</string>
     <string name="firmware_update_title">韌體更新</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
     <string name="firmware_update_unknown_error">未知錯誤</string>
     <string name="firmware_update_unknown_hardware">未知的硬體型號: %1$d</string>
     <string name="firmware_update_unknown_release">無法識別的遠端版本</string>
@@ -597,7 +598,6 @@
     <string name="manual_position_request">需要手動定位位置</string>
     <!-- MAP -->
     <string name="map">Mesh 地圖</string>
-    <string name="map_cache_info">快取容量: %1$d MB\n快取使用: %2$d MB</string>
     <string name="map_cache_manager">快取管理</string>
     <string name="map_cache_size">目前快取大小</string>
     <string name="map_cache_tiles">%1$d 圖磚</string>
@@ -720,7 +720,6 @@
     <string name="no_bluetooth_devices_seen">未偵測到藍牙裝置</string>
     <string name="no_custom_tile_sources_found">沒有自定義圖專來源。</string>
     <string name="no_device_selected">未選擇裝置</string>
-    <string name="no_devices_found">找不到裝置</string>
     <string name="no_files_manifested">未發現任何檔案。</string>
     <string name="no_local_stats">沒有可用的統計資料</string>
     <string name="no_map_layers_loaded">未載入自訂圖層。</string>

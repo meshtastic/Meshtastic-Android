@@ -219,7 +219,6 @@
     <string name="lux">Lux</string>
     <string name="manual_position_request">Pedidos de posição obrigatoriamente manuais</string>
     <!-- MAP -->
-    <string name="map_cache_info">Capacidade do Cache: %1$d MB\nCache Utilizado: %2$d MB</string>
     <string name="map_cache_manager">Gerenciador de cache</string>
     <string name="map_cache_size">Tamanho atual do cache</string>
     <string name="map_cache_tiles">%1$d blocos</string>

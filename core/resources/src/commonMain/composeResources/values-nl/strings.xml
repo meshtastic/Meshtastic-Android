@@ -194,7 +194,6 @@
     <string name="lux">Lux</string>
     <string name="manual_position_request">Handmatige positieaanvraag vereist</string>
     <!-- MAP -->
-    <string name="map_cache_info">Cache capaciteit: %1$d MB\nCache gebruik: %2$d MB</string>
     <string name="map_cache_manager">Cachemanager</string>
     <string name="map_cache_size">Huidige cache grootte</string>
     <string name="map_cache_tiles">%1$d tegels</string>

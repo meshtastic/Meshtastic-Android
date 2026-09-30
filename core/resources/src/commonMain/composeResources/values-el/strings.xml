@@ -134,7 +134,6 @@
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <!-- MAP -->
-    <string name="map_cache_info">Χωρητικότητα προσωρινής μνήμης: %1$d MB\nΧρήση προσωρινής μνήμης: %2$d MB</string>
     <string name="map_cache_manager">Διαχείριση Προσωρινής Αποθήκευσης</string>
     <string name="map_cache_size">Μέγεθος τρέχουσας προσωρινής μνήμης</string>
     <string name="map_download_complete">Η λήψη ολοκληρώθηκε!</string>

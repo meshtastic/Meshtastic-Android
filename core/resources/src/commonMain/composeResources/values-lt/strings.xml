@@ -124,7 +124,6 @@
     <!-- LOG -->
     <string name="logs">Log`ai</string>
     <!-- MAP -->
-    <string name="map_cache_info">Talpyklos talpa: %1$d MB\nTalpyklos naudojimas: %2$d MB</string>
     <string name="map_cache_manager">Talpyklos valdymas</string>
     <string name="map_cache_size">Dabartinis talpyklos dydis</string>
     <string name="map_cache_tiles">%1$d plytelės</string>

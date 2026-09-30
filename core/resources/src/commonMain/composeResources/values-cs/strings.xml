@@ -861,7 +861,6 @@
     <string name="manual_position_request">Je vyžadován manuální požadavek na pozici</string>
     <!-- MAP -->
     <string name="map">Mapa sítě</string>
-    <string name="map_cache_info">Kapacita mezipaměti: %1$d MB\nvyužití mezipaměti: %2$d MB</string>
     <string name="map_cache_manager">Správce mezipaměti</string>
     <string name="map_cache_size">Aktuální velikost mezipaměti</string>
     <string name="map_cache_tiles">%1$d dlaždic</string>
@@ -1051,7 +1050,6 @@
     <string name="no_bluetooth_devices_hint">Ujistěte se, že jste v dosahu zařízení.</string>
     <string name="no_bluetooth_devices_seen">Nebyla nalezena žádná zařízení Bluetooth</string>
     <string name="no_device_selected">Není vybráno žádné zařízení</string>
-    <string name="no_devices_found">Zařízení nenalezena</string>
     <string name="no_local_stats">Žádné statistiky k dispozici</string>
     <string name="no_map_layers_loaded">Žádné vlastní vrstvy nenačteny.</string>
     <string name="no_network_devices_found">Nenalezena žádná síťová zařízení</string>

@@ -227,7 +227,6 @@
     <string name="lux">조도</string>
     <string name="manual_position_request">수동 위치 요청 필요함</string>
     <!-- MAP -->
-    <string name="map_cache_info">캐시 용량: %1$dMB\n캐시 사용량: %2$dMB</string>
     <string name="map_cache_manager">캐시 관리자</string>
     <string name="map_cache_size">현재 캐시 크기</string>
     <string name="map_cache_tiles">%1$d 타일</string>
