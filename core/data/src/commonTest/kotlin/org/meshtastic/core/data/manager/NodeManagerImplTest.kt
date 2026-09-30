@@ -3358,4 +3358,69 @@ class NodeManagerImplTest {
             assertEquals(reuseKey, reused.publicKey)
             assertEquals(1, reuseDispatches.count { it.num == num && it.user.long_name == "Replacement" })
         }
+
+    @Test
+    fun `a stalled normalization from a superseded session cannot clear the next session's unheard flags`() =
+        testScope.runTest {
+            val sessionA = RadioSessionContext(generation = 7L, address = "ble:same")
+            val sessionB = RadioSessionContext(generation = 8L, address = "ble:same")
+            val admissionGate = CompletableDeferred<Unit>()
+            val writeGate = CompletableDeferred<Unit>()
+            var sessionASuperseded = false
+            // The node database as the repository resolves it when the write finally runs: session B's rows.
+            val heardByNum = mutableMapOf<Int, Boolean>()
+            everySuspend { radioInterfaceService.runWithSessionLease(sessionA, any()) } calls
+                {
+                    admissionGate.await()
+                    if (sessionASuperseded) {
+                        false
+                    } else {
+                        @Suppress("UNCHECKED_CAST")
+                        val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
+                        block(
+                            object : RadioSessionLease {
+                                override val session: RadioSessionContext = sessionA
+
+                                override fun isCurrent(): Boolean = true
+                            },
+                        )
+                        true
+                    }
+                }
+            everySuspend { nodeRepository.markAllHeardOnCurrentLora() } calls
+                {
+                    writeGate.await()
+                    heardByNum.keys.toList().forEach { heardByNum[it] = true }
+                }
+
+            // Session A: firmware without the capability, so normalization is launched and stalls.
+            nodeManager.setFirmwareVersion("2.5.0", sessionA)
+            runCurrent()
+
+            // Session A is superseded by session B, which reports the capability and installs unheard nodes.
+            sessionASuperseded = true
+            nodeManager.setFirmwareVersion("9.9.9", sessionB)
+            val unheard = listOf(0x11, 0x22)
+            unheard.forEach { num ->
+                nodeManager.installNodeInfo(
+                    ProtoNodeInfo.Builder()
+                        .also { wb ->
+                            wb.num = num
+                            wb.heard_on_current_lora = false
+                        }
+                        .build(),
+                )
+                heardByNum[num] = false
+            }
+
+            // The stalled work completes.
+            admissionGate.complete(Unit)
+            writeGate.complete(Unit)
+            advanceUntilIdle()
+
+            unheard.forEach { num ->
+                assertEquals(false, heardByNum[num], "session B's node $num was marked heard by session A's write")
+            }
+            assertTrue(nodeManager.reportsHeardOnCurrentLora.value)
+        }
 }
