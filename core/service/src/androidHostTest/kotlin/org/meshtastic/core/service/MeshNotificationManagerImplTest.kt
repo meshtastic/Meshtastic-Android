@@ -127,6 +127,9 @@ class MeshNotificationManagerImplTest {
                     NotificationChannelSpec.Waypoints ->
                         NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Messages
 
+                    NotificationChannelSpec.Reactions ->
+                        NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Messages
+
                     NotificationChannelSpec.Alerts ->
                         NotificationManager.IMPORTANCE_HIGH to NotificationChannelGroupSpec.Messages
 

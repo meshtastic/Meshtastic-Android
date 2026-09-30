@@ -1127,6 +1127,8 @@
     <string name="meshtastic_messages_notifications_description">Messages sent directly to you.</string>
     <string name="meshtastic_new_nodes_notifications">New node notifications</string>
     <string name="meshtastic_new_nodes_notifications_description">Nodes heard for the first time.</string>
+    <string name="meshtastic_reactions_notifications">Reaction notifications</string>
+    <string name="meshtastic_reactions_notifications_description">Emoji reactions to messages.</string>
     <string name="meshtastic_service_notifications">Service notifications</string>
     <string name="meshtastic_service_notifications_description">Shows the connection to your radio while Meshtastic runs in the background.</string>
     <string name="meshtastic_waypoints_notifications">Waypoint notifications</string>
