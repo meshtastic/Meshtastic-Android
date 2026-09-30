@@ -8,7 +8,59 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-*No changes yet.*
+### Internal (v2.8.3-internal.1)
+Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2):
+
+#### 🏗️ Features
+* feat(network): a hidden showcase scenario for Demo Mode by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7377
+* feat(app): shell-only debug launch switches for onboarding and the trust dialog by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7375
+* feat(settings): raise the coding rate over a modem preset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7405
+* feat(firmware): show installed vs latest bootloader before an upgrade by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7409
+* feat(auto): notification messaging on Android Auto by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7417
+* feat(map-maplibre): start with collapsed attribution strip on seconda… by @Tha14 in https://github.com/meshtastic/Meshtastic-Android/pull/7424
+#### 🖥️ Desktop
+* fix(mqtt): remove noop mqtt to allow the mqtt proxy to work on the desktop builds by @Tha14 in https://github.com/meshtastic/Meshtastic-Android/pull/7400
+* fix(notifications): put every notification on its own channel and tap target by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7415
+* fix(database): delete old mesh logs in bounded batches by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7423
+* fix: keep WiFi credentials, addresses and coordinates out of app logs by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7419
+* fix: data correctness fixes from the Android audit by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7429
+* fix(node): show the real traceroute map on desktop by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7425
+* refactor: keep one copy of shared code across platforms by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7432
+* fix(ui): localize UI strings, fix stale effect captures, one EmptyState by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7430
+#### 🛠️ Fixes
+* fix(map): keep the node track map responsive on long tracks by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7373
+* fix(konsist): anchor the scanned-source inputs at the source roots by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7382
+* fix(map): frame the mesh clear of the map's own controls by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7385
+* fix(node): drop the filter bar's own background inside the list header by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7386
+* fix(appfunctions): index functions where AppSearch has no dynamic schema by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7402
+* fix(ui): split the link colour per mode by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7406
+* fix(settings): stop profile import dropping Mesh Beacon settings by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7416
+* fix(database): never publish a replacement pool while the write lock is held by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7418
+* fix(prefs): recover corrupt Android prefs files and make toggles atomic by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7420
+* fix(navigation): keep each tab's state across tab switches by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7421
+* fix(discovery): keep an unheard node's SNR distinct from 0 dB by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7422
+* fix(service): correct phone position units and omit missing readings by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7437
+* fix(wifi-provision): release the BLE peripheral on retry and on leaving by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7453
+* fix(map-maplibre): clear warnings and collect state with lifecycle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7460
+* fix(takserver): log a route export that failed to write by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7459
+* fix(node): leave positions without a fix out of the GPX track by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7457
+* fix(service): stop the inbound pipeline waiting on node writes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7464
+* fix(app): check a shared map file before importing it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7463
+* fix(ui): show byte sizes in decimal units, formatted for the locale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7469
+* fix(app): stop cleanly on devices the bundled SQLite can't run on by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7470
+* fix(service): keep the last-heard write off the inbound lock by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7474
+* fix(takserver): keep one route file across reinstalls by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7475
+* fix(ui): show transfer rates and file limits in decimal units by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7476
+* fix(ble): keep device addresses out of logs by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7478
+* fix(ble): export the bond wait receiver so bond broadcasts reach it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7484
+* fix(firmware): show the percent while a maintenance UF2 downloads by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7485
+* fix(messaging): let a pinned conversation be unpinned by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7492
+#### 📝 Other Changes
+* refactor(data): page the log export, remove dedupe leftovers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7449
+* refactor(map): share the Web Mercator projection with node clustering by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7483
+
+## New Contributors
+* @Tha14 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7400
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
