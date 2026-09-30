@@ -28,18 +28,13 @@ Provides a compass interface to show the relative direction and distance to othe
 graph TB
   :feature:node[node]:::kmp-feature
   :feature:node -.-> :core:common
-  :feature:node -.-> :core:data
-  :feature:node -.-> :core:database
-  :feature:node -.-> :core:datastore
   :feature:node -.-> :core:domain
   :feature:node -.-> :core:model
   :feature:node -.-> :core:navigation
   :feature:node -.-> :core:repository
   :feature:node -.-> :core:resources
-  :feature:node -.-> :core:service
   :feature:node -.-> :core:ui
   :feature:node -.-> :core:di
-  :feature:node -.-> :feature:map
   :feature:node -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

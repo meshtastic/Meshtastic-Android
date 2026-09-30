@@ -136,16 +136,11 @@ feature:connections
 graph TB
   :feature:connections[connections]:::kmp-feature
   :feature:connections -.-> :core:common
-  :feature:connections -.-> :core:data
-  :feature:connections -.-> :core:database
   :feature:connections -.-> :core:datastore
   :feature:connections -.-> :core:di
-  :feature:connections -.-> :core:domain
   :feature:connections -.-> :core:model
   :feature:connections -.-> :core:navigation
-  :feature:connections -.-> :core:prefs
   :feature:connections -.-> :core:resources
-  :feature:connections -.-> :core:service
   :feature:connections -.-> :core:ui
   :feature:connections -.-> :core:ble
   :feature:connections -.-> :core:network

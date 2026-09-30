@@ -28,14 +28,10 @@ Uses `HomoglyphCharacterStringTransformer` (from `:core:common`) to optionally r
 graph TB
   :feature:messaging[messaging]:::kmp-feature
   :feature:messaging -.-> :core:common
-  :feature:messaging -.-> :core:data
-  :feature:messaging -.-> :core:database
-  :feature:messaging -.-> :core:domain
   :feature:messaging -.-> :core:model
   :feature:messaging -.-> :core:navigation
-  :feature:messaging -.-> :core:prefs
+  :feature:messaging -.-> :core:repository
   :feature:messaging -.-> :core:resources
-  :feature:messaging -.-> :core:service
   :feature:messaging -.-> :core:ui
   :feature:messaging -.-> :core:testing
 

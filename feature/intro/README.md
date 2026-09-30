@@ -26,9 +26,6 @@ Dedicated screens for explaining and requesting specific permissions:
 graph TB
   :feature:intro[intro]:::kmp-feature
   :feature:intro -.-> :core:service
-  :feature:intro -.-> :core:common
-  :feature:intro -.-> :core:model
-  :feature:intro -.-> :core:repository
   :feature:intro -.-> :core:ui
   :feature:intro -.-> :core:resources
   :feature:intro -.-> :core:testing
