@@ -82,6 +82,7 @@ import org.meshtastic.core.resources.nodes_unheard_keep
 import org.meshtastic.core.resources.nodes_unheard_remove
 import org.meshtastic.core.resources.set_up_connection
 import org.meshtastic.core.ui.component.EmptyState
+import org.meshtastic.core.ui.component.ListScrollbar
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.NodeItem
@@ -410,6 +411,7 @@ fun NodeListScreen(
                 }
                 item { Spacer(modifier = Modifier.height(88.dp)) }
             }
+            ListScrollbar(listState)
         }
     }
 }
