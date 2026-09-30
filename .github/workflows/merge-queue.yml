@@ -95,14 +95,16 @@ jobs:
       upload_artifacts: false
     secrets: inherit
 
-  # Pure gate job: no checkout, no toolchain, just reads `needs` results. It is the required
-  # check, so it runs on a hosted Ubuntu label that shares the org's pool with the build jobs,
-  # not on ubuntu-slim's separate pool: an aggregator queued behind slim blocks a finished build.
+  # Gate job: no checkout, no toolchain, reads `needs` results and posts license/cla. It is the
+  # required check, so it runs on a hosted Ubuntu label that shares the org's pool with the build
+  # jobs, not on ubuntu-slim's separate pool: an aggregator queued behind slim blocks a finished build.
   check-workflow-status:
     name: Check Workflow Status
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
-    permissions: {}
+    permissions:
+      pull-requests: read
+      statuses: write
     needs:
       - check-changes
       - android-check
@@ -119,3 +121,30 @@ jobs:
             exit 1
           fi
           echo "All jobs passed successfully"
+
+      # license/cla is required on the group commit too, but cla-assistant.io only checks PRs and
+      # its placeholder for the group never arrives when its webhook drops, stalling the queue.
+      - name: Post license/cla for the merge group
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          HEAD_SHA: ${{ github.event.merge_group.head_sha }}
+        run: |
+          if [[ ! "$REF_NAME" =~ /pr-([0-9]+)- ]]; then
+            echo "::error::Could not parse PR from ref '$REF_NAME'"
+            exit 1
+          fi
+          pr="${BASH_REMATCH[1]}"
+          pr_sha=$(gh api "repos/$REPO/pulls/$pr" --jq '.head.sha')
+          cla=$(gh api "repos/$REPO/commits/$pr_sha/status" \
+            --jq '[.statuses[] | select(.context == "license/cla")][0].state // "missing"')
+          if [[ "$cla" != "success" ]]; then
+            echo "::error::license/cla is $cla on PR #$pr head $pr_sha"
+            exit 1
+          fi
+          gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+            -f state=success -f context=license/cla \
+            -f "target_url=https://cla-assistant.io/$REPO" \
+            -f "description=CLA signed on PR #$pr. CLA checks only happen on pull requests." \
+            --jq '"posted \(.context) \(.state) on \(.url)"'
