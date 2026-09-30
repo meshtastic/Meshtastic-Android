@@ -39,6 +39,15 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
+
+        <!--
+          Google Maps' Play services module loads into this app's classloader and, on older Play services, resolves
+          org.apache.http from it. Nothing here references it, but without this the map screen crashes.
+        -->
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
         <property
             android:name="android.app.appfunctions.app_metadata"
             android:resource="@xml/app_metadata" />
