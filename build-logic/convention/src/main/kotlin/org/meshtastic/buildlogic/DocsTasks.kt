@@ -22,13 +22,17 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.register
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 
 private const val DEFAULT_NAV_ORDER = 999
@@ -99,8 +103,11 @@ private data class IndexEntry(
     val charCount: Int,
 )
 
+@CacheableTask
 abstract class GenerateDocsBundleTask : DefaultTask() {
-    @get:InputDirectory abstract val sourceDir: DirectoryProperty
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val sourceDir: DirectoryProperty
 
     @get:OutputDirectory abstract val generatedOutputDir: DirectoryProperty
 
@@ -311,11 +318,15 @@ private fun generateCss(): String =
     """
         .trimMargin()
 
+@DisableCachingByDefault(because = "Checks the bundle and produces no output")
 abstract class ValidateDocsBundleTask : DefaultTask() {
-    @get:InputDirectory @get:Optional
+    @get:InputDirectory
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val bundleDir: DirectoryProperty
 
     @get:InputFile @get:Optional
+    @get:PathSensitive(PathSensitivity.NONE)
     abstract val schemaFile: RegularFileProperty
 
     @TaskAction
@@ -362,8 +373,11 @@ abstract class ValidateDocsBundleTask : DefaultTask() {
     }
 }
 
+@DisableCachingByDefault(because = "Copies files, which is no slower than restoring them from a cache")
 abstract class PublishDocsSiteTask : DefaultTask() {
-    @get:InputDirectory abstract val sourceDir: DirectoryProperty
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val sourceDir: DirectoryProperty
 
     @get:OutputDirectory abstract val siteOutputDir: DirectoryProperty
 
