@@ -2,7 +2,7 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-09-28
+last_updated: 2026-09-29
 description: How the Android and Desktop apps split into androidApp/desktopApp, feature modules, and core modules, and how radio control and navigation are layered across them.
 aliases:
   - layers
@@ -114,7 +114,7 @@ src/
 ├── jvmMain/            ← Desktop JVM-specific
 ├── jvmAndroidMain/     ← Shared by Android and desktop JVM
 ├── iosMain/            ← iOS-specific
-├── nativeMain/         ← Native-target code shared across iOS targets
+├── nativeMain/         ← Kotlin/Native code, built for the one iOS target (iosSimulatorArm64)
 ├── jvmTest/            ← Desktop test host
 ├── androidHostTest/    ← Android host (JVM) unit tests
 └── androidDeviceTest/  ← Instrumented tests (core:database, core:model)
