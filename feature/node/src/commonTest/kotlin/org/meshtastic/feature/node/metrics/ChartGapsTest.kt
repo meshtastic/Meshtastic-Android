@@ -48,6 +48,11 @@ class ChartGapsTest {
     }
 
     @Test
+    fun evenSpacingCountUsesTheTrueMedian() {
+        assertEquals(listOf(listOf(0, 60, 120, 720), listOf(2220)), split(0, 60, 120, 720, 2220))
+    }
+
+    @Test
     fun denseReadingsUseTheFiveMinuteFloor() {
         assertEquals(listOf(listOf(0, 30, 60, 360)), split(0, 30, 60, 360))
         assertEquals(listOf(listOf(0, 30, 60), listOf(361)), split(0, 30, 60, 361))

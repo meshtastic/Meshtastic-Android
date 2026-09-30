@@ -31,7 +31,9 @@ private val MIN_GAP_SECONDS = 5.minutes.inWholeSeconds
 internal fun <T> splitAtGaps(items: List<T>, timeSeconds: (T) -> Int): List<List<T>> {
     if (items.size < 2) return listOf(items).filter { it.isNotEmpty() }
     val deltas = items.zipWithNext { a, b -> (timeSeconds(b) - timeSeconds(a)).toLong() }
-    val median = deltas.sorted()[deltas.size / 2]
+    val sorted = deltas.sorted()
+    val mid = sorted.size / 2
+    val median = if (sorted.size % 2 == 0) (sorted[mid - 1] + sorted[mid]) / 2 else sorted[mid]
     val threshold = maxOf(median * GAP_MEDIAN_MULTIPLIER, MIN_GAP_SECONDS)
     val runs = mutableListOf(mutableListOf(items.first()))
     items.zipWithNext().forEachIndexed { index, (_, next) ->
