@@ -154,7 +154,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         // _deviceFlow.emit() is intentionally outside this block — making it
         // non-cancellable could hang teardown on a slow collector.
         withContext(NonCancellable) {
-            cleanUpPeripheral(device)
+            cleanUpPeripheral()
             peripheral = p
             ActiveBleConnection.active = ActiveConnection(p, device.address)
         }
@@ -312,8 +312,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
     override fun invalidateServiceCache(): Boolean = peripheral?.refreshGattCache() == true
 
     /** Ensures the previous peripheral's GATT resources are fully released. */
-    private suspend fun cleanUpPeripheral(device: BleDevice) {
-        withContext(NonCancellable) { safeClosePeripheral(device.address.anonymize()) }
+    private suspend fun cleanUpPeripheral() {
+        withContext(NonCancellable) { safeClosePeripheral("replace") }
     }
 
     /**
