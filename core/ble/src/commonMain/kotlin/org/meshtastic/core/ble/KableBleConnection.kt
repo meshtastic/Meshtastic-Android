@@ -154,7 +154,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         // _deviceFlow.emit() is intentionally outside this block — making it
         // non-cancellable could hang teardown on a slow collector.
         withContext(NonCancellable) {
-            cleanUpPeripheral(device.address)
+            cleanUpPeripheral(tag = device.address.anonymize())
             peripheral = p
             ActiveBleConnection.active = ActiveConnection(p, device.address)
         }
