@@ -205,7 +205,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         verify(mode = VerifyMode.exactly(0)) { fromRadioDispatcher.handleFromRadio(any(), any()) }
-        verifySuspend(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeAndPersist(any(), any(), any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeForSession(any(), any(), any(), any()) }
         verifySuspend(mode = VerifyMode.exactly(0)) { meshLogRepository.insert(any()) }
     }
 
@@ -222,7 +222,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         verify(mode = VerifyMode.exactly(0)) { fromRadioDispatcher.handleFromRadio(any(), any()) }
-        verifySuspend(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeAndPersist(any(), any(), any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeForSession(any(), any(), any(), any()) }
         verifySuspend(mode = VerifyMode.exactly(0)) { meshLogRepository.insert(any()) }
     }
 
@@ -351,7 +351,7 @@ class MeshMessageProcessorImplTest {
             processor.handleFromRadio(frame(fromRadio.encode(), replacementSession), myNodeNum)
             advanceUntilIdle()
 
-            verifySuspend(mode = VerifyMode.exactly(2)) { nodeManager.updateNodeAndPersist(myNodeNum, any(), any()) }
+            verify(mode = VerifyMode.exactly(2)) { nodeManager.updateNodeForSession(myNodeNum, any(), any(), any()) }
         }
 
     @Test

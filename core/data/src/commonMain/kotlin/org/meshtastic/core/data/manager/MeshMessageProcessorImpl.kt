@@ -70,9 +70,9 @@ class MeshMessageProcessorImpl(
 ) : MeshMessageProcessor {
 
     /**
-     * Epoch-millisecond timestamp of the last local-node `lastHeard` DB write. Used to throttle updates to at most once
-     * per [LOCAL_NODE_REFRESH_INTERVAL_MS] so that high-frequency FromRadio variants (log records, queue status) don't
-     * flood the DB.
+     * Epoch-millisecond timestamp of the last local-node `lastHeard` refresh. Used to throttle refreshes, and the
+     * database writes they schedule, to at most once per [LOCAL_NODE_REFRESH_INTERVAL_MS] so that high-frequency
+     * FromRadio variants (log records, queue status) don't flood the DB.
      */
     @Volatile private var lastLocalNodeRefreshMs = 0L
 
@@ -346,34 +346,19 @@ class MeshMessageProcessorImpl(
      * appear stale in the UI even though the connection is healthy.
      *
      * To avoid flooding the DB on high-frequency variants (log records arrive many times per second when debug logging
-     * is enabled), writes are throttled to at most once per [LOCAL_NODE_REFRESH_INTERVAL_MS].
+     * is enabled), refreshes are throttled to at most once per [LOCAL_NODE_REFRESH_INTERVAL_MS]. The write is scheduled
+     * on the node's session lease like the packet updates, so the handler never waits on the database.
      */
-    private suspend fun refreshLocalNodeLastHeard(session: RadioSessionContext) {
+    private fun refreshLocalNodeLastHeard(session: RadioSessionContext) {
         val now = nowMillis
         val sameGeneration = lastLocalNodeRefreshGeneration == session.generation
         if (sameGeneration && now - lastLocalNodeRefreshMs < LOCAL_NODE_REFRESH_INTERVAL_MS) return
 
         val myNum = nodeManager.myNodeNum.value ?: return
-        val persisted =
-            persistNodeUpdate(myNum, operation = "local-node link refresh") { node: Node ->
-                node.copy(lastHeard = nowSeconds.toInt())
-            }
-        if (persisted) {
-            lastLocalNodeRefreshGeneration = session.generation
-            lastLocalNodeRefreshMs = now
-        }
+        nodeManager.updateNodeForSession(myNum, session) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
+        lastLocalNodeRefreshGeneration = session.generation
+        lastLocalNodeRefreshMs = now
     }
-
-    private suspend fun persistNodeUpdate(
-        nodeNum: Int,
-        channel: Int = 0,
-        operation: String,
-        transform: (Node) -> Node,
-    ): Boolean = safeCatching {
-        nodeManager.updateNodeAndPersist(nodeNum, channel, transform)
-    }
-        .onFailure { Logger.e(it) { "Failed $operation; packet processing continued" } }
-        .isSuccess
 
     /** Names the variant for diagnostics from field names and the port only, never payload values. */
     private fun FromRadio.variantLabel(): String = packet?.let { "packet ${it.portLabel()}" }

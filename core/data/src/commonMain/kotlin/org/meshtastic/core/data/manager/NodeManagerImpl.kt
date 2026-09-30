@@ -38,6 +38,7 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.NodeIdLookup
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
@@ -373,7 +374,6 @@ class NodeManagerImpl(
 
     companion object {
         private const val NODE_PERSISTENCE_LANE_COUNT = 64
-        private const val TIME_MS_TO_S = 1000L
         private const val GENERATED_NODE_NAME_SUFFIX_LENGTH = 4
 
         /** `precision_bits` value used by firmware for an un-degraded (full 32-bit) coordinate. */
@@ -734,7 +734,7 @@ class NodeManagerImpl(
         }
 
         updateNodeAndSchedulePersistence(fromNum, channel = 0, session = session) { node ->
-            val rawPosTime = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt()
+            val rawPosTime = if (p.time != 0) p.time else (defaultTime / TimeConstants.MS_PER_SEC).toInt()
             val posTime = clampTimestampToNow(rawPosTime)
             val newLastHeard = maxOf(node.lastHeard, posTime)
 

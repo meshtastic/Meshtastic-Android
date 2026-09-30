@@ -49,6 +49,7 @@ import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.QueueStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -119,6 +120,12 @@ class MeshMessageProcessorNodeWriteTest {
 
         suspend fun receive(packet: MeshPacket) {
             val bytes = FromRadio.Builder().also { wb -> wb.packet = packet }.build().encode()
+            processor.handleFromRadio(ReceivedRadioFrame(bytes.toByteString(), session), MY_NODE)
+        }
+
+        suspend fun receiveQueueStatus() {
+            val status = QueueStatus.Builder().also { q -> q.free = 10 }.build()
+            val bytes = FromRadio.Builder().also { wb -> wb.queueStatus = status }.build().encode()
             processor.handleFromRadio(ReceivedRadioFrame(bytes.toByteString(), session), MY_NODE)
         }
     }
@@ -192,6 +199,29 @@ class MeshMessageProcessorNodeWriteTest {
         assertEquals(2, hopsAwaySeen)
         assertNull(nodeRepository.persisted(SENDER), "the write is still held")
         nodeRepository.releaseWrites.complete(Unit)
+    }
+
+    @Test
+    fun `a non-packet frame refreshes the local node without waiting on its database write`() = testScope.runTest {
+        val fixture = Fixture(backgroundScope, nodeRepository, dataHandler)
+        fixture.nodeManager.setMyNodeNum(MY_NODE)
+
+        val first = async { fixture.receiveQueueStatus() }
+        runCurrent()
+        assertTrue(nodeRepository.writeStarted.isCompleted, "the local-node write has started and is held")
+        assertTrue(first.isCompleted, "the handler must not wait for the local-node write")
+        assertTrue((fixture.nodeManager.nodeDBbyNodeNum[MY_NODE]?.lastHeard ?: 0) > 0, "memory is refreshed at once")
+        assertNull(nodeRepository.persisted(MY_NODE), "nothing is written while the database is held")
+
+        val second = async { fixture.receiveQueueStatus() }
+        runCurrent()
+        assertTrue(second.isCompleted, "the next frame must not queue behind the held write")
+
+        nodeRepository.releaseWrites.complete(Unit)
+        runCurrent()
+
+        assertEquals(fixture.nodeManager.nodeDBbyNodeNum[MY_NODE], nodeRepository.persisted(MY_NODE))
+        assertEquals(1, nodeRepository.upserts[MY_NODE], "a frame inside the refresh interval schedules no write")
     }
 
     @Test
