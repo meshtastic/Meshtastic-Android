@@ -61,5 +61,12 @@ class TransferProgressTextTest {
         assertEquals("50%", formatTransferProgress(progress = 0.5f, totalBytes = 1000, bytesPerSecond = 0).resolve())
     }
 
+    @Test
+    fun `download progress reads as the bare percentage`() = runTest {
+        Locale.setDefault(Locale.US)
+
+        assertEquals("25%", formatTransferPercent(progress = 0.25f).resolve())
+    }
+
     private fun sample() = formatTransferProgress(progress = 0.5f, totalBytes = 2_000_000, bytesPerSecond = 12_600)
 }

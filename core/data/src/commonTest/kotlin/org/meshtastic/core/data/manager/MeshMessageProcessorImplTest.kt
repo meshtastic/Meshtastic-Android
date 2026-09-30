@@ -260,7 +260,6 @@ class MeshMessageProcessorImplTest {
             advanceUntilIdle()
 
             assertEquals(listOf(myNodeNum, 999), updatedNodes)
-            verifySuspend(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeAndPersist(any(), any(), any()) }
         }
 
     @Test

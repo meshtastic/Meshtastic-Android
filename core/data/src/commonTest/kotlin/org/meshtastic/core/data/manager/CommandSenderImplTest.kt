@@ -451,6 +451,19 @@ class CommandSenderImplTest {
     }
 
     @Test
+    fun requestNeighborInfo_localNode_dummyReportsAnHourBroadcastIntervalInSeconds() = runTest {
+        every { neighborInfoHandler.lastNeighborInfo } returns null
+        val packets = mutableListOf<MeshPacket>()
+        everySuspend { packetHandler.sendToRadio(capture(packets)) } returns true
+
+        commandSender.requestNeighborInfo(requestId = 1, destNum = MY_NODE_NUM)
+
+        val sent = NeighborInfo.ADAPTER.decode(requireNotNull(packets.single().decoded).payload)
+        assertEquals(3600, sent.node_broadcast_interval_secs)
+        assertEquals(listOf(3600), sent.neighbors.map { it.node_broadcast_interval_secs })
+    }
+
+    @Test
     fun requestNeighborInfo_remoteNode_sendsRequest() = runTest {
         everySuspend { packetHandler.sendToRadio(any<MeshPacket>()) } returns true
 

@@ -66,7 +66,6 @@ import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
 import kotlin.math.absoluteValue
 import kotlin.random.Random
-import kotlin.time.Duration.Companion.hours
 import org.meshtastic.proto.Position as ProtoPosition
 
 @Suppress("TooManyFunctions", "CyclomaticComplexMethod", "LongParameterList")
@@ -435,7 +434,7 @@ class CommandSenderImpl(
                 val neighborInfoToSend =
                     neighborInfoHandler.lastNeighborInfo
                         ?: run {
-                            val oneHour = 1.hours.inWholeMinutes.toInt()
+                            val oneHour = TimeConstants.SECONDS_PER_HOUR
                             Logger.d { "No stored neighbor info from connected radio, sending dummy data" }
                             NeighborInfo.Builder()
                                 .also { wb ->

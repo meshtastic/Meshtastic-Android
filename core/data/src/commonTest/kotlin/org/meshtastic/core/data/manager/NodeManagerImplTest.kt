@@ -207,7 +207,7 @@ class NodeManagerImplTest {
     }
 
     @Test
-    fun `updateNodeAndPersist awaits the repository write`() = testScope.runTest {
+    fun `persisting a node update awaits the repository write`() = testScope.runTest {
         val nodeNum = 1234
         nodeManager.setNodeDbReady(true)
         nodeManager.setAllowNodeDbWrites(true)
@@ -219,14 +219,14 @@ class NodeManagerImplTest {
                 releaseWrite.await()
             }
 
-        val update = async { nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 42) } }
+        val update = async { nodeManager.updateNodeStatusAndPersist(nodeNum, "away") }
         writeStarted.await()
         assertFalse(update.isCompleted)
         releaseWrite.complete(Unit)
         update.await()
 
         verifySuspend { nodeRepository.upsert(any()) }
-        assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+        assertEquals("away", nodeManager.nodeDBbyNodeNum[nodeNum]?.nodeStatus)
     }
 
     @Test
@@ -254,12 +254,10 @@ class NodeManagerImplTest {
                 persisted += node
             }
 
-        val first = async { nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 1) } }
+        val first = async { nodeManager.updateNodeStatusAndPersist(nodeNum, "first") }
         firstWriteStarted.await()
         val second =
-            async(start = CoroutineStart.UNDISPATCHED) {
-                nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 2) }
-            }
+            async(start = CoroutineStart.UNDISPATCHED) { nodeManager.updateNodeStatusAndPersist(nodeNum, "second") }
         runCurrent()
         assertFalse(
             secondWriteStarted.isCompleted,
@@ -270,8 +268,8 @@ class NodeManagerImplTest {
         first.await()
         second.await()
 
-        assertEquals(listOf(1, 2), persisted.map(Node::lastHeard))
-        assertEquals(2, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+        assertEquals(listOf("first", "second"), persisted.map(Node::nodeStatus))
+        assertEquals("second", nodeManager.nodeDBbyNodeNum[nodeNum]?.nodeStatus)
     }
 
     private fun admitLeases(session: RadioSessionContext) {
@@ -387,10 +385,10 @@ class NodeManagerImplTest {
         nodeManager.setNodeDbReady(true)
         nodeManager.setAllowNodeDbWrites(false)
 
-        nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 42) }
+        nodeManager.updateNodeStatusAndPersist(nodeNum, "away")
 
         verifySuspend(exactly(0)) { nodeRepository.upsert(any()) }
-        assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+        assertEquals("away", nodeManager.nodeDBbyNodeNum[nodeNum]?.nodeStatus)
     }
 
     @Test

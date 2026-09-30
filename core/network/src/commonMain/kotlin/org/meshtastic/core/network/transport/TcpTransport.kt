@@ -40,6 +40,7 @@ import kotlinx.io.IOException
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.anonymizePublicHost
 import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
@@ -101,7 +102,6 @@ class TcpTransport(
         /** TCP connect timeout. A failed connect just feeds the reconnect/backoff loop, so it is not fatal. */
         const val CONNECT_TIMEOUT_MS = 30_000L
         private const val READ_BUFFER_SIZE = 1024
-        private const val MILLIS_PER_SECOND = 1_000L
 
         /**
          * Minimum session duration for backoff to reset. Sessions shorter than this that ended in peer-EOF are treated
@@ -247,14 +247,14 @@ class TcpTransport(
                 retryCount = 1
                 backoff = MIN_BACKOFF_MILLIS
             } else if (hadData) {
-                val backoffSec = backoff / MILLIS_PER_SECOND
+                val backoffSec = backoff / TimeConstants.MS_PER_SEC
                 Logger.d {
                     "$logTag: [${address.anonymizePublicHost()}] Short session (${sessionUptime}ms); " +
                         "keeping backoff at ${backoffSec}s"
                 }
             }
 
-            val delaySec = backoff / MILLIS_PER_SECOND
+            val delaySec = backoff / TimeConstants.MS_PER_SEC
             Logger.i { "$logTag: [${address.anonymizePublicHost()}] Reconnect #$retryCount in ${delaySec}s" }
             delay(backoff)
             retryCount++
