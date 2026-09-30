@@ -92,7 +92,7 @@ jobs:
         if: steps.setup-jbr.outcome == 'failure'
         run: echo "::warning::JBR setup-java failed; falling back to Foojay toolchain provisioning."
 
-      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
