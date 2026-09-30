@@ -53,7 +53,7 @@ class RootConventionPlugin : Plugin<Project> {
 
 /**
  * Registers a `kmpSmokeCompile` lifecycle task that depends on `compileKotlinJvm` and `compileKotlinIosSimulatorArm64`
- * tasks from all KMP modules using task path strings.
+ * tasks from all KMP modules, plus `assembleAndroidDeviceTest` for [DEVICE_TEST_MODULES], using task path strings.
  *
  * Non-KMP modules simply won't have these tasks, so the path-based dependencies will be silently ignored.
  */
@@ -61,7 +61,7 @@ private fun Project.registerKmpSmokeCompileTask() {
     val kmp = kmpModules()
     tasks.register("kmpSmokeCompile") {
         group = "verification"
-        description = "Compile all KMP modules for JVM and iOS Simulator ARM64 targets."
+        description = "Compile all KMP modules for JVM and iOS Simulator ARM64, and assemble the device-test APKs."
 
         kmp.forEach { path ->
             dependsOn("$path:compileKotlinJvm")

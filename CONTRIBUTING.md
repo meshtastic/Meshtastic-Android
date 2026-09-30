@@ -59,7 +59,7 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
 - Ensure all tests pass by running:
   - `./gradlew test` for unit and Robolectric tests (pure-Android modules)
   - `./gradlew allTests` for KMP module tests (`core:*`, `feature:*`) — neither `test` nor `allTests` alone is sufficient; both must pass.
-  - `./gradlew kmpSmokeCompile` when touching any KMP module — compiles the non-Android targets the unit tests don't cover
+  - `./gradlew kmpSmokeCompile` when touching any KMP module, to compile the non-Android targets the unit tests don't cover and assemble the device-test APKs
   - `./gradlew connectedAndroidTest` for instrumented tests
 - For UI components, write Robolectric Compose tests where possible for faster execution.
 - If your change is difficult to test, explain why in your pull request.
