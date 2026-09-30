@@ -115,7 +115,9 @@ class AndroidBluetoothRepository(
 
                     val filter =
                         android.content.IntentFilter(android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-                    ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+                    // The Bluetooth app sends this under its own uid, which a NOT_EXPORTED receiver refuses. It is a
+                    // protected broadcast, so exporting admits no other sender.
+                    ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
 
                     try {
                         val start = startOrObserveBond(remoteDevice, result)

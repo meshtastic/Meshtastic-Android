@@ -17,6 +17,7 @@
 package org.meshtastic.core.ble
 
 import android.bluetooth.BluetoothDevice
+import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -406,6 +407,30 @@ class AndroidBluetoothRepositoryBondTest {
 
         assertTrue(repo.isBonded(bondedMac))
         assertFalse(repo.isBonded(otherMac))
+    }
+
+    @Test
+    fun `every bond receiver is exported so the Bluetooth app can reach it`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:12"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac)
+        // The parked bond's wait receiver and the bond event log both listen while bond() waits.
+        val bondReceivers =
+            shadowOf(RuntimeEnvironment.getApplication()).registeredReceivers.filter {
+                it.intentFilter.hasAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+            }
+        assertEquals(2, bondReceivers.size)
+        assertTrue(bondReceivers.all { (it.flags and Context.RECEIVER_EXPORTED) == Context.RECEIVER_EXPORTED })
+
+        RobolectricBleBonding.sendBondStateChanged(
+            mac,
+            newState = BluetoothDevice.BOND_BONDED,
+            previousState = BluetoothDevice.BOND_BONDING,
+        )
+        assertNull(failure.await())
     }
 
     @Test
