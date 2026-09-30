@@ -28,6 +28,7 @@ import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MeshBeaconOffer
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.isAlreadyJoined
 import org.meshtastic.core.repository.DiscoveryPrefs
 import org.meshtastic.core.repository.DiscoveryRepository
@@ -223,7 +224,7 @@ class DiscoveryViewModel(
             if (targets.isEmpty()) return@safeLaunch
             scanEngine.startScanTargets(
                 targets = targets,
-                dwellDurationSeconds = dwellDurationMinutes.value.toLong() * SECONDS_PER_MINUTE,
+                dwellDurationSeconds = dwellDurationMinutes.value.toLong() * TimeConstants.SECONDS_PER_MINUTE,
             )
         }
     }
@@ -239,10 +240,6 @@ class DiscoveryViewModel(
     private fun restoreSelectedPresets(): Set<ChannelOption> = discoveryPrefs.selectedPresets.value
         .mapNotNull { name -> ChannelOption.entries.firstOrNull { it.name == name } }
         .toSet()
-
-    companion object {
-        private const val SECONDS_PER_MINUTE = 60L
-    }
 }
 
 /**

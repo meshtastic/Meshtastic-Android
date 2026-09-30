@@ -17,7 +17,6 @@
 package org.meshtastic.feature.connections.component
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,17 +29,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.no_devices_found
-import org.meshtastic.core.ui.component.EmptyState
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -99,21 +92,6 @@ fun ConnectingDeviceInfoPreview() {
             connectionProgress = "Discovering services...",
             onClickDisconnect = {},
         )
-    }
-}
-
-@PreviewLightDark
-@Composable
-fun EmptyStateContentPreview() {
-    // Bounded height so the docs reference is a tight crop of the empty-state block, not a full-screen frame.
-    AppTheme {
-        Surface(modifier = Modifier.fillMaxWidth().height(220.dp)) {
-            EmptyState(
-                icon = MeshtasticIcons.Search,
-                title = stringResource(Res.string.no_devices_found),
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
     }
 }
 

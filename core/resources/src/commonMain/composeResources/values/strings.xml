@@ -1255,7 +1255,6 @@
     <string name="no_bluetooth_devices_seen">No Bluetooth devices seen</string>
     <string name="no_custom_tile_sources_found">No custom tile sources found.</string>
     <string name="no_device_selected">No device selected</string>
-    <string name="no_devices_found">No devices found</string>
     <string name="no_files_manifested">No files manifested.</string>
     <string name="no_local_stats">No Stats Available</string>
     <string name="no_map_layers_loaded">No map layers loaded.</string>

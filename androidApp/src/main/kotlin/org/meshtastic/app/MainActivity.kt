@@ -199,7 +199,8 @@ class MainActivity : AppCompatActivity() {
             handleIntent(intent)
         }
 
-        handleIntent(intent)
+        // A recreated activity gets its launch intent back; acting on it again would re-import or re-open it.
+        if (savedInstanceState == null) handleIntent(intent)
     }
 
     override fun onStart() {

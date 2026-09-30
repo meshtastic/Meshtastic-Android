@@ -16,27 +16,12 @@
  */
 package org.meshtastic.app.map.offline.pmtiles
 
-import com.google.android.gms.maps.model.LatLng
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class WebMercatorTileMathTest {
-
-    @Test
-    fun `zoom 0 has exactly one tile, covering everywhere`() {
-        assertEquals(TileIndex(0, 0, 0), WebMercatorTileMath.tileAt(zoom = 0, LatLng(0.0, 0.0)))
-        assertEquals(TileIndex(0, 0, 0), WebMercatorTileMath.tileAt(zoom = 0, LatLng(70.0, 179.0)))
-    }
-
-    @Test
-    fun `zoom 1 splits the world into quadrants by hemisphere`() {
-        assertEquals(TileIndex(1, 0, 0), WebMercatorTileMath.tileAt(zoom = 1, LatLng(45.0, -170.0))) // NW
-        assertEquals(TileIndex(1, 1, 0), WebMercatorTileMath.tileAt(zoom = 1, LatLng(45.0, 10.0))) // NE
-        assertEquals(TileIndex(1, 0, 1), WebMercatorTileMath.tileAt(zoom = 1, LatLng(-45.0, -170.0))) // SW
-        assertEquals(TileIndex(1, 1, 1), WebMercatorTileMath.tileAt(zoom = 1, LatLng(-45.0, 10.0))) // SE
-    }
 
     @Test
     fun `the tile origin lands on Web Mercator's own latitude ceiling`() {

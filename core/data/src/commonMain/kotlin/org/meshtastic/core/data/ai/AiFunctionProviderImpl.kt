@@ -22,6 +22,7 @@ import kotlinx.coroutines.withTimeout
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -142,7 +143,7 @@ class AiFunctionProviderImpl(
                         id = NodeAddress.numToDefaultId(node.num),
                         name = node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
                         batteryLevel = node.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
-                        lastHeard = node.lastHeard.toLong() * MS_PER_SEC,
+                        lastHeard = node.lastHeard.toLong() * TimeConstants.MS_PER_SEC,
                         isOnline = node.isOnline,
                     )
                 }
@@ -245,7 +246,7 @@ class AiFunctionProviderImpl(
                     rssi = node.rssiOrNull,
                     hopsAway = node.hopsAway,
                     channel = node.channel,
-                    lastHeard = node.lastHeard.toLong() * MS_PER_SEC,
+                    lastHeard = node.lastHeard.toLong() * TimeConstants.MS_PER_SEC,
                     userRole = node.user.role.name,
                     isLicensed = node.user.is_licensed,
                     latitude = node.latitude.takeIf { hasValidPosition },
@@ -289,8 +290,11 @@ class AiFunctionProviderImpl(
 
             // Find most recent packet: max lastHeard across all nodes (convert seconds to ms)
             val mostRecentPacketTimeMs =
-                nodeMap.values.maxOfOrNull { it.lastHeard }?.takeIf { it > 0 }?.toLong()?.times(MS_PER_SEC)
-                    ?: clock.now().toEpochMilliseconds()
+                nodeMap.values
+                    .maxOfOrNull { it.lastHeard }
+                    ?.takeIf { it > 0 }
+                    ?.toLong()
+                    ?.times(TimeConstants.MS_PER_SEC) ?: clock.now().toEpochMilliseconds()
 
             // Get local device uptime from its DeviceMetrics (node #0 is typically the local device)
             val localNode = nodeMap.values.find { it.num == 0 } ?: nodeMap.values.firstOrNull()
@@ -520,7 +524,6 @@ class AiFunctionProviderImpl(
     companion object {
         private val OPERATION_TIMEOUT = 5.seconds
         private const val MAX_BATTERY_LEVEL = 100
-        private const val MS_PER_SEC = 1000L
         private const val HEALTH_SCORE_BASE = 50
         private const val HEALTH_SCORE_ONLINE_RATIO = 50
         private const val HEALTH_SCORE_DEGRADED = 10

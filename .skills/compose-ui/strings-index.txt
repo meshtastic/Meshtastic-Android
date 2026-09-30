@@ -1213,7 +1213,6 @@ no_bluetooth_devices_hint
 no_bluetooth_devices_seen
 no_custom_tile_sources_found
 no_device_selected
-no_devices_found
 no_files_manifested
 no_local_stats
 no_map_layers_loaded
