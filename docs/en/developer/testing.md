@@ -93,7 +93,7 @@ adb pull /data/local/tmp/store-screenshots/fdroid/. fastlane/metadata/android/en
 | `tenInchScreenshots/` | 2560×1440 @320 dpi | expanded: rail, list beside detail | `fastlane supply` |
 | `desktopApp/packaging/linux/screenshots/` | 1280×800 | expanded: rail, list beside detail | Flathub, through the release assets `metainfo.xml` names |
 
-`.github/workflows/store-screenshots.yml` runs both on hosted runners, with both Android flavors in one job on one emulator (google for the Play listing, fdroid for the committed tree), on every internal release, on demand, and on pull requests that touch the renderer or the showcase mesh. The release pipeline attaches the captures to the release, publishes the Play listing from them on production, and opens a self-merging PR that writes the fdroid and desktop sets back here (`RELEASE_PROCESS.md`).
+`.github/workflows/store-screenshots.yml` runs both on hosted runners, each Android flavor in its own job on its own emulator through `store-screenshots/capture-android.sh` (google for the Play listing, fdroid for the committed tree), on every internal release, on demand, and on pull requests that touch the renderer or the showcase mesh. The release pipeline attaches the captures to the release, publishes the Play listing from them on production, and opens a self-merging PR that writes the fdroid and desktop sets back here (`RELEASE_PROCESS.md`).
 
 ### Baseline Profile / startup performance
 

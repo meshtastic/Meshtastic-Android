@@ -21,7 +21,7 @@
 // PNGs are left on the device in /data/local/tmp/store-screenshots/<flavor>, laid out like fastlane's images/; pull
 // them with
 //   adb pull /data/local/tmp/store-screenshots/<flavor>/. <dir>
-// .github/workflows/store-screenshots.yml does this for both flavors on one emulator.
+// .github/workflows/store-screenshots.yml runs each flavor on its own emulator through capture-android.sh.
 plugins {
     alias(libs.plugins.meshtastic.android.test)
     alias(libs.plugins.meshtastic.detekt)
