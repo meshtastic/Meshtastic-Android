@@ -56,9 +56,11 @@ internal enum class SharedMapFileRejection {
     UNREADABLE,
 }
 
-/** No bigger than the most the KMZ reader will inflate, so a larger file could never be read whole anyway. */
-internal const val MAX_SHARED_MAP_FILE_BYTES: Long = MAX_KMZ_INFLATED_BYTES
-internal const val MAX_SHARED_MAP_FILE_MB = (MAX_SHARED_MAP_FILE_BYTES / (1024L * 1024L)).toInt()
+/** The limit the refusal names, in decimal megabytes: the cap is exactly this many million bytes. */
+internal const val MAX_SHARED_MAP_FILE_MB = 50
+
+/** At most [MAX_KMZ_INFLATED_BYTES], the most the KMZ reader will inflate: a larger file could never be read whole. */
+internal const val MAX_SHARED_MAP_FILE_BYTES: Long = MAX_SHARED_MAP_FILE_MB * 1_000_000L
 
 private val SHAREABLE_LAYER_TYPES = setOf(LayerType.KML, LayerType.GEOJSON)
 

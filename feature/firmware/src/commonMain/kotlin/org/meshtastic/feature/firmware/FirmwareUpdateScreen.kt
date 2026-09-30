@@ -1128,7 +1128,7 @@ private fun ProgressContent(
         if (details != null) {
             Spacer(Modifier.height(4.dp))
             Text(
-                text = details,
+                text = details.asString(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

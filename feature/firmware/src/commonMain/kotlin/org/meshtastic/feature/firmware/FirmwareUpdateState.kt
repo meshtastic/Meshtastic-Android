@@ -29,13 +29,13 @@ import kotlin.math.roundToInt
  *
  * @property message A high-level status message (e.g., "Downloading...").
  * @property progress A value between 0.0 and 1.0 representing completion percentage.
- * @property details Optional high-frequency detail text (e.g., "1.2 MiB/s, 45%").
+ * @property details Optional high-frequency detail text (e.g., "45% (12.60 kB/s, ETA: 5s)").
  * @property hint Optional persistent advisory shown alongside the progress (e.g. a slow-bootloader tip).
  */
 data class ProgressState(
     val message: UiText = UiText.DynamicString(""),
     val progress: Float = 0f,
-    val details: String? = null,
+    val details: UiText? = null,
     val hint: UiText? = null,
 )
 

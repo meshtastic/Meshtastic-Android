@@ -100,7 +100,7 @@ internal suspend fun performUsbMaintenance(
                         ProgressState(
                             message = UiText.DynamicString(downloadingMsg),
                             progress = progress,
-                            details = "$percent%",
+                            details = UiText.DynamicString("$percent%"),
                         ),
                     ),
                 )
@@ -379,7 +379,7 @@ internal suspend fun performUsbUpdate(
                             ProgressState(
                                 message = UiText.DynamicString(downloadingMsg),
                                 progress = progress,
-                                details = "$percent%",
+                                details = UiText.DynamicString("$percent%"),
                             ),
                         ),
                     )

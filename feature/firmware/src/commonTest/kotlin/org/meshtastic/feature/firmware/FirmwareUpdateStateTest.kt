@@ -34,10 +34,10 @@ class FirmwareUpdateStateTest {
 
     @Test
     fun `ProgressState can be instantiated with values`() {
-        val state = ProgressState(UiText.DynamicString("Downloading"), 0.5f, "1MB/s")
+        val state = ProgressState(UiText.DynamicString("Downloading"), 0.5f, UiText.DynamicString("1MB/s"))
         assertTrue(state.message is UiText.DynamicString)
         assertEquals(0.5f, state.progress)
-        assertEquals("1MB/s", state.details)
+        assertEquals(UiText.DynamicString("1MB/s"), state.details)
     }
 
     @Test

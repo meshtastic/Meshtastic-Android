@@ -837,7 +837,7 @@ class SecureDfuHandler(
                 val pct = (progress * PERCENT_MAX).toInt()
                 updateState(
                     FirmwareUpdateState.Downloading(
-                        ProgressState(UiText.DynamicString(downloadingMsg), progress, "$pct%"),
+                        ProgressState(UiText.DynamicString(downloadingMsg), progress, UiText.DynamicString("$pct%")),
                     ),
                 )
             }
