@@ -309,7 +309,9 @@ jobs:
           # CCUD tags every shard with the same `CI job=test-shards`, which is the largest
           # single CI cost bucket and therefore the one worth splitting. Shard identity is
           # otherwise only recoverable by parsing the requested task list.
-          ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --continue \
+          # -PwarningsAsErrors: together the shards compile every main and test source set, so a new Kotlin
+          # compiler warning fails here.
+          ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true -Pkotlin.daemon.useFallbackStrategy=false -PwarningsAsErrors=true --continue \
             "-Dscan.value.CI shard=${{ matrix.shard.name }}"
 
       # A test fork that dies in native code (exit 134) names no test, and the JVM's crash report is the
