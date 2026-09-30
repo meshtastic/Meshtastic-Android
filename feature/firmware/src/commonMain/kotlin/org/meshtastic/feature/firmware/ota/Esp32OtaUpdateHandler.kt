@@ -367,7 +367,7 @@ class Esp32OtaUpdateHandler(
                         ProgressState(
                             message = UiText.DynamicString(downloadingMsg),
                             progress = progress,
-                            details = "$percent%",
+                            details = UiText.DynamicString("$percent%"),
                         ),
                     ),
                 )

@@ -18,24 +18,32 @@ package org.meshtastic.feature.firmware.ota
 
 import kotlinx.coroutines.delay
 import org.meshtastic.core.ble.BleScanStartException
-import org.meshtastic.core.common.util.NumberFormatter
+import org.meshtastic.core.common.util.formatByteSize
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_update_transfer_percent
+import org.meshtastic.core.resources.firmware_update_transfer_progress
 
 private const val PERCENT_MAX = 100
-private const val KIB_DIVISOR = 1024f
 
 /**
- * Formats firmware-transfer progress as a human-readable detail string, e.g. `"42% (12.3 KiB/s, ETA: 5s)"`.
+ * Formats firmware-transfer progress as translated detail text, e.g. `"42% (12.60 kB/s, ETA: 5s)"` in English, with the
+ * rate in decimal units.
  *
  * When [bytesPerSecond] is non-positive (no throughput sample yet) only the percentage is returned — no empty
  * parentheses. Shared by the ESP32 OTA and Nordic DFU update handlers, which differ only in how they obtain the inputs.
  */
-internal fun formatTransferProgress(progress: Float, totalBytes: Int, bytesPerSecond: Long): String {
+internal fun formatTransferProgress(progress: Float, totalBytes: Int, bytesPerSecond: Long): UiText {
     val percent = (progress * PERCENT_MAX).toInt()
-    if (bytesPerSecond <= 0L) return "$percent%"
-    val kibPerSecond = bytesPerSecond.toFloat() / KIB_DIVISOR
+    if (bytesPerSecond <= 0L) return UiText.Resource(Res.string.firmware_update_transfer_percent, percent)
     val bytesSent = (progress * totalBytes).toLong()
     val etaSeconds = ((totalBytes - bytesSent).toFloat() / bytesPerSecond).toInt()
-    return "$percent% (${NumberFormatter.format(kibPerSecond, 1)} KiB/s, ETA: ${etaSeconds}s)"
+    return UiText.Resource(
+        Res.string.firmware_update_transfer_progress,
+        percent,
+        formatByteSize(bytesPerSecond),
+        etaSeconds,
+    )
 }
 
 /**

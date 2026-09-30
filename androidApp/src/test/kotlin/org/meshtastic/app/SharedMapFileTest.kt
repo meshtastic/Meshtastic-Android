@@ -29,6 +29,7 @@ import androidx.test.core.app.ApplicationProvider
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
+import org.meshtastic.feature.map.layers.MAX_KMZ_INFLATED_BYTES
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayInputStream
@@ -39,6 +40,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class SharedMapFileTest {
@@ -112,6 +114,20 @@ class SharedMapFileTest {
         assertEquals(SharedMapFileRejection.TOO_LARGE, shared("route.kml", size = 101).rejection(maxBytes = 100))
         assertNull(shared("route.kml", size = 100).rejection(maxBytes = 100))
         assertNull(shared("route.kml", size = 0).rejection(maxBytes = 100))
+    }
+
+    @Test
+    fun `the default cap is the named limit in decimal megabytes`() {
+        assertNull(shared("route.kml", size = MAX_SHARED_MAP_FILE_MB * 1_000_000L).rejection())
+        assertEquals(
+            SharedMapFileRejection.TOO_LARGE,
+            shared("route.kml", size = MAX_SHARED_MAP_FILE_MB * 1_000_000L + 1).rejection(),
+        )
+    }
+
+    @Test
+    fun `the default cap never exceeds what the KMZ reader will inflate`() {
+        assertTrue(MAX_SHARED_MAP_FILE_BYTES <= MAX_KMZ_INFLATED_BYTES)
     }
 
     @Test
