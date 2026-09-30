@@ -8,7 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.3-internal.1)
+### Internal (v2.8.3-internal.2)
 Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2):
 
 #### 🏗️ Features
@@ -55,6 +55,7 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(ble): export the bond wait receiver so bond broadcasts reach it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7484
 * fix(firmware): show the percent while a maintenance UF2 downloads by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7485
 * fix(messaging): let a pinned conversation be unpinned by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7492
+* fix(app): restore the Apache HTTP legacy library for Google Maps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7499
 #### 📝 Other Changes
 * refactor(data): page the log export, remove dedupe leftovers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7449
 * refactor(map): share the Web Mercator projection with node clustering by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7483
