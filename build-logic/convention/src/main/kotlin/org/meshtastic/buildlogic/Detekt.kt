@@ -18,14 +18,18 @@ package org.meshtastic.buildlogic
 
 import com.android.build.api.variant.AndroidComponentsExtension
 import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.DetektCreateBaselineTask
 import dev.detekt.gradle.extensions.DetektExtension
 import dev.detekt.gradle.extensions.FailOnSeverity
 import org.gradle.api.Project
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import java.io.File
 
 internal fun Project.configureDetekt(extension: DetektExtension) = extension.apply {
@@ -45,24 +49,13 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
         baseline.set(baselineFile)
     }
 
-    // Default sources. Every production source set that ships code must be listed explicitly — detekt silently
-    // skips anything not named here, which is how src/fdroid, src/google, src/iosMain, and src/jvmAndroidMain
-    // went unanalyzed for as long as only the main/common sets were listed. (Test source sets are deliberately
-    // not scanned, matching the original list.)
+    // Every source set under src/ (main, *Main, flavors, build types), so a new one is analysed without being
+    // listed here. Test source sets (test*, *Test*) are skipped.
     source.setFrom(
-        files(
-            "src/main/java",
-            "src/main/kotlin",
-            "src/commonMain/kotlin",
-            "src/androidMain/kotlin",
-            "src/jvmMain/kotlin",
-            "src/jvmAndroidMain/kotlin",
-            "src/iosMain/kotlin",
-            "src/fdroid/java",
-            "src/fdroid/kotlin",
-            "src/google/java",
-            "src/google/kotlin",
-        ),
+        fileTree("src") {
+            include("*/kotlin/**", "*/java/**")
+            exclude("test*/**", "*Test*/**")
+        },
     )
 
     // Type-resolved tasks take their sources from the compilation, which includes generated code under build/.
@@ -133,6 +126,31 @@ private fun Project.registerTypeResolvedDetekt() {
         plugins.withId(pluginId) {
             val components = extensions.getByType(AndroidComponentsExtension::class.java)
             components.onVariants(components.selector().withBuildType("debug")) { variant -> include(variant.name) }
+            components.onVariants { variant -> addJavacClassesToDetektClasspath(variant.name) }
         }
     }
+}
+
+/**
+ * Generated Java such as `BuildConfig` reaches the analysis only as javac's classes, which the plugin leaves off the
+ * classpath. Its classpath is a convention set after this action runs, so the whole value is set here instead.
+ */
+private fun Project.addJavacClassesToDetektClasspath(variantName: String) {
+    val suffix = variantName.replaceFirstChar { char -> char.uppercase() }
+    fun variantClasspath() = listOf(
+        tasks.named<KotlinJvmCompile>("compile${suffix}Kotlin").map { task -> task.libraries },
+        tasks.named<JavaCompile>("compile${suffix}JavaWithJavac").flatMap { task -> task.destinationDirectory },
+    )
+    tasks
+        .withType<Detekt>()
+        .named { name -> name == "detekt$suffix" }
+        .configureEach {
+            classpath.setFrom(variantClasspath())
+        }
+    tasks
+        .withType<DetektCreateBaselineTask>()
+        .named { name -> name == "detektBaseline$suffix" }
+        .configureEach {
+            classpath.setFrom(variantClasspath())
+        }
 }
