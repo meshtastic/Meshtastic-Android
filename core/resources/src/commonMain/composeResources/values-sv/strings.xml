@@ -442,6 +442,7 @@
     <string name="firmware_update_success">Uppdatering lyckades!</string>
     <string name="firmware_update_taking_a_while">Det här kan ta en stund...</string>
     <string name="firmware_update_title">Uppdatering av fast programvara</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
     <string name="firmware_update_unknown_error">Okänt fel</string>
     <string name="firmware_update_unknown_hardware">Okänd hårdvarumodell: %1$d</string>
     <string name="firmware_update_uploading">Laddar upp fast programvara...</string>
@@ -589,7 +590,6 @@
     <string name="manual_position_request">Manuell positionsbegäran krävs</string>
     <!-- MAP -->
     <string name="map">Mesh Map</string>
-    <string name="map_cache_info">Cache-kapacitet: %1$d MB\nCache-användning: %2$d MB</string>
     <string name="map_cache_manager">Cache-hanterare</string>
     <string name="map_cache_size">Aktuell cachestorlek</string>
     <string name="map_cache_tiles">%1$d kartdelar</string>
@@ -704,7 +704,6 @@
     <string name="no_bluetooth_devices_hint">Se till att du är inom räckhåll för enheten.</string>
     <string name="no_bluetooth_devices_seen">Inga bluetooth-enheter hittades</string>
     <string name="no_device_selected">Ingen enhet vald</string>
-    <string name="no_devices_found">Hittade inga enheter</string>
     <string name="no_local_stats">Ingen tillgänglig statistik</string>
     <string name="no_network_devices_hint">Säkerställ att du och din enhet är anslutna till samma nätverk.</string>
     <string name="no_usb_devices_found">Ingen USB-enhet hittades.</string>

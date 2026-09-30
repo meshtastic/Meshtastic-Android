@@ -356,7 +356,6 @@
     <string name="manage_map_layers">Zarządzaj warstwami map</string>
     <!-- MAP -->
     <string name="map">Mapa Sieci</string>
-    <string name="map_cache_info">Pojemność pamięci: %1$d MB\nUżycie pamięci: %2$d MB</string>
     <string name="map_cache_manager">Zarządzanie pamięcią podręczną</string>
     <string name="map_cache_size">Aktualny rozmiar pamięci podręcznej</string>
     <string name="map_cache_tiles">%1$d mapy</string>

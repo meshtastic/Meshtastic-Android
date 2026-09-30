@@ -624,6 +624,7 @@
     <string name="firmware_update_taking_a_while">Potrebbe volerci un minuto...</string>
     <string name="firmware_update_target">Target: %1$s</string>
     <string name="firmware_update_title">Aggiornamento Firmware</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
     <string name="firmware_update_unknown_error">Errore sconosciuto</string>
     <string name="firmware_update_unknown_hardware">Modello hardware sconosciuto: %1$d</string>
     <string name="firmware_update_unknown_release">Versione remota sconosciuta</string>
@@ -832,7 +833,6 @@
     <string name="manual_position_request">Richiesta posizione manuale mandatoria</string>
     <!-- MAP -->
     <string name="map">Mappa della Mesh</string>
-    <string name="map_cache_info">Capacità Cache: %1$d MB\nCache utilizzata: %2$d MB</string>
     <string name="map_cache_manager">Gestione della cache</string>
     <string name="map_cache_size">Dimensione Cache attuale</string>
     <string name="map_cache_tiles">%1$d riquadri della mappa</string>
@@ -991,7 +991,6 @@
     <string name="no_bluetooth_devices_seen">Nessun dispositivo Bluetooth rilevato</string>
     <string name="no_custom_tile_sources_found">Nessuna sorgente di tile personalizzata trovata.</string>
     <string name="no_device_selected">Nessun dispositivo selezionato</string>
-    <string name="no_devices_found">Nessun dispositivo trovato</string>
     <string name="no_files_manifested">Nessun file nel manifest.</string>
     <string name="no_local_stats">Statistiche Non Disponibili</string>
     <string name="no_map_layers_loaded">Nessun livello di mappa caricato.</string>

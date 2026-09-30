@@ -345,7 +345,6 @@
     <string name="manual_position_request">Kézi pozíciólekérés szükséges</string>
     <!-- MAP -->
     <string name="map">Mesh-térkép</string>
-    <string name="map_cache_info">Gyorsítótár kapacitása: %1$d MB\nGyorsítótár kihasználtsága: %2$d MB</string>
     <string name="map_cache_manager">Gyorsítótár kezelő</string>
     <string name="map_cache_size">Gyorsítótár mérete jelenleg</string>
     <string name="map_cache_tiles">%1$d csempe</string>

@@ -601,6 +601,7 @@
     <string name="firmware_update_taking_a_while">Ça peut prendre une minute...</string>
     <string name="firmware_update_target">Destination : %1$s</string>
     <string name="firmware_update_title">Mise à jour du firmware</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
     <string name="firmware_update_unknown_error">Une erreur inconnue s'est produite</string>
     <string name="firmware_update_unknown_hardware">Modèle de matériel inconnu : %1$d</string>
     <string name="firmware_update_unknown_release">Version distante inconnue</string>
@@ -781,7 +782,6 @@
     <string name="manual_position_request">Requête manuelle de position requise</string>
     <!-- MAP -->
     <string name="map">Carte de maillage</string>
-    <string name="map_cache_info">Capacité du cache : %1$d MB\nUtilisation du cache : %2$d MB</string>
     <string name="map_cache_manager">Gestionnaire du cache</string>
     <string name="map_cache_size">Taille actuelle du cache</string>
     <string name="map_cache_tiles">%1$d tuiles</string>
@@ -902,7 +902,6 @@
     <string name="no_bluetooth_devices_seen">Aucun périphérique Bluetooth détecté</string>
     <string name="no_custom_tile_sources_found">Aucune source de tuiles personnalisées trouvée.</string>
     <string name="no_device_selected">Aucun appareil sélectionné</string>
-    <string name="no_devices_found">Aucun appareil trouvé</string>
     <string name="no_files_manifested">Aucun fichier affiché.</string>
     <string name="no_local_stats">Pas de stats disponibles</string>
     <string name="no_map_layers_loaded">Aucun calque personnalisé chargé.</string>

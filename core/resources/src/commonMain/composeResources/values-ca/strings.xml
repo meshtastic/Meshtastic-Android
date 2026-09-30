@@ -105,7 +105,6 @@
     <string name="locked">Bloquejat</string>
     <!-- LOG -->
     <!-- MAP -->
-    <string name="map_cache_info">Mida total de la memòria cau: %1$d MB\nMemoria cau feta servir: %2$d MB</string>
     <string name="map_cache_manager">Director de la memòria cau</string>
     <string name="map_cache_size">Mida actual de la memòria cau</string>
     <string name="map_cache_tiles">%1$d tessel·les</string>

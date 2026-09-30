@@ -213,7 +213,6 @@
     <string name="low_battery_title">Slabá batéria: %1$s</string>
     <string name="lux">Lux</string>
     <!-- MAP -->
-    <string name="map_cache_info">Kapacita cache: %1$d MB\nVyužitie cache: %2$d MB</string>
     <string name="map_cache_manager">Cache Manager</string>
     <string name="map_cache_size">Aktuálna veľkosť cache</string>
     <string name="map_cache_tiles">%1$d dlaždíc</string>

@@ -356,6 +356,7 @@
     <string name="firmware_update_taking_a_while">Acest lucru ar putea dura un minut...</string>
     <string name="firmware_update_target">Target: %1$s</string>
     <string name="firmware_update_title">Actualizare firmware</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
     <string name="firmware_update_unknown_error">Eroare necunoscuta</string>
     <string name="firmware_update_unknown_hardware">Model hardware necunoscut: %1$d</string>
     <string name="firmware_update_unknown_release">Lansare la distanţă necunoscută</string>
@@ -493,7 +494,6 @@
     <string name="manual_position_request">Solicitarea de poziție manuală este necesară</string>
     <!-- MAP -->
     <string name="map">Harta retea</string>
-    <string name="map_cache_info">Capacitate cache: %1$d MB\nUtilizare cache: %2$d MB</string>
     <string name="map_cache_manager">Manager cache</string>
     <string name="map_cache_size">Dimensiunea actuală a cache-ului</string>
     <string name="map_cache_tiles">%1$d secțiuni</string>

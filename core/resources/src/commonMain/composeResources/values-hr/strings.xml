@@ -110,7 +110,6 @@
     <string name="locked">Zaključano</string>
     <!-- LOG -->
     <!-- MAP -->
-    <string name="map_cache_info">Kapacitet predmemorije: %1$d MB\nUpotreba predmemorije: %2$d MB</string>
     <string name="map_cache_manager">Upravitelj predmemorije</string>
     <string name="map_cache_size">Trenutna veličina predmemorije</string>
     <string name="map_cache_tiles">%1$d dijelova karte</string>

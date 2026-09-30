@@ -104,7 +104,6 @@
     <string name="locked">נעול</string>
     <!-- LOG -->
     <!-- MAP -->
-    <string name="map_cache_info">מקום אחסון מטמון: %1$dMB\nמטמון משומש: %2$dMB</string>
     <string name="map_cache_manager">ניהול מטמון</string>
     <string name="map_cache_size">גודל מטמון נוכחי</string>
     <string name="map_cache_tiles">%1$d אזורי מפה</string>

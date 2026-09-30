@@ -125,7 +125,6 @@
     <!-- LOG -->
     <string name="logs">Logger</string>
     <!-- MAP -->
-    <string name="map_cache_info">Cache Kapasitet: %1$d MB\nCache Bruker: %2$d MB</string>
     <string name="map_cache_manager">Mellomlagerbehandler</string>
     <string name="map_cache_size">Nåværende størrelse for mellomlager</string>
     <string name="map_cache_tiles">%1$d fliser</string>

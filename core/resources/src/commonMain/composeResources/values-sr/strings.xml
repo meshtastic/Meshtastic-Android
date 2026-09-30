@@ -219,7 +219,6 @@
     <string name="low_battery_title">Низак ниво батерије: %1$s</string>
     <!-- MAP -->
     <string name="map">Мапа меша</string>
-    <string name="map_cache_info">Капацитет кеш меморије: %1$d MB\n Употреба кеш меморије: %2$d MB</string>
     <string name="map_cache_manager">Меначер кеш меморије</string>
     <string name="map_cache_size">Тренутна величина кеш меморије</string>
     <string name="map_cache_tiles">%1$d плочице</string>

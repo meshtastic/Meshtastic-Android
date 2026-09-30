@@ -126,7 +126,6 @@
     <!-- LOG -->
     <string name="logs">Loget</string>
     <!-- MAP -->
-    <string name="map_cache_info">Kapasiteti i Cache: %1$d MB\nPërdorimi i Cache: %2$d MB</string>
     <string name="map_cache_manager">Menaxheri i Cache</string>
     <string name="map_cache_size">Madhësia e aktuale e cache</string>
     <string name="map_cache_tiles">%1$d pllaka</string>

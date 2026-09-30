@@ -553,7 +553,6 @@
     <string name="manual_position_request">Місцеположення лише за запитом</string>
     <!-- MAP -->
     <string name="map">Мапа мережі</string>
-    <string name="map_cache_info">Місткість кешу: %1$d МБ\nВикористання кешу: %2$d МБ</string>
     <string name="map_cache_manager">Керування кешем</string>
     <string name="map_cache_size">Поточний розмір кешу</string>
     <string name="map_cache_tiles">%1$d плиток</string>
@@ -672,7 +671,6 @@
     <string name="no_bluetooth_devices_hint">Переконайтеся, що ви перебуваєте в зоні дії пристрою.</string>
     <string name="no_bluetooth_devices_seen">Пристроїв Bluetooth не виявлено</string>
     <string name="no_device_selected">Не вибраний пристрій</string>
-    <string name="no_devices_found">Пристрої не знайдено</string>
     <string name="no_local_stats">Статистика відсутня</string>
     <string name="no_network_devices_found">Не знайдений мережевий пристрій</string>
     <string name="no_network_devices_hint">Переконайтеся, що ви підключені до тієї ж мережі, що й пристрій.</string>

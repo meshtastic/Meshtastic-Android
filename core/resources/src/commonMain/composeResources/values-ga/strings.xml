@@ -125,7 +125,6 @@
     <!-- LOG -->
     <string name="logs">Lógáil</string>
     <!-- MAP -->
-    <string name="map_cache_info">Cumas an Cásla: %1$d MB\nÚsáid an Cásla: %2$d MB</string>
     <string name="map_cache_manager">Bainisteoir Cásla</string>
     <string name="map_cache_size">Méid na Cásla Reatha</string>
     <string name="map_cache_tiles">%1$d tíleanna</string>

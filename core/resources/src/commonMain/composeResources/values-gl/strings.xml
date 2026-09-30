@@ -107,7 +107,6 @@
     <string name="locked">Bloqueado</string>
     <!-- LOG -->
     <!-- MAP -->
-    <string name="map_cache_info">Capacidade de Caché: %1$d MB\nUso de Caché: %2$d MB</string>
     <string name="map_cache_manager">Xestor de caché</string>
     <string name="map_cache_size">Tamaño de caché actual</string>
     <string name="map_cache_tiles">%1$d 'tiles'</string>
