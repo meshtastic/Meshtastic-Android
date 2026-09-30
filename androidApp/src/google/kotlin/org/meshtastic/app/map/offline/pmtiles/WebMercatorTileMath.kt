@@ -19,11 +19,8 @@ package org.meshtastic.app.map.offline.pmtiles
 import com.google.android.gms.maps.model.LatLng
 import org.meshtastic.feature.map.terrain.TerrainTileMath
 
-/** [TerrainTileMath] in Google Maps [LatLng] terms, for tile enumeration and MVT-local-coordinate placement. */
+/** [TerrainTileMath] in Google Maps [LatLng] terms, for MVT-local-coordinate placement. */
 internal object WebMercatorTileMath {
-
-    /** The tile (at [zoom]) containing [latLng] — the same indexing GoogleMap, MapLibre and PMTiles all share. */
-    fun tileAt(zoom: Int, latLng: LatLng): TileIndex = TerrainTileMath.tileAt(zoom, latLng.latitude, latLng.longitude)
 
     /** Places a feature's tile-local point (`0 until extent` on each axis) at its real-world [LatLng]. */
     fun tileLocalToLatLng(tile: TileIndex, extent: Int, local: TileCoord): LatLng =

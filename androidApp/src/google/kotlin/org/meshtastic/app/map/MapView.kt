@@ -155,6 +155,7 @@ import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.isValidCodePoint
 import org.meshtastic.core.model.util.kmhIn
 import org.meshtastic.core.model.util.metersIn
@@ -1266,21 +1267,19 @@ fun MapView(
     }
 }
 
-private const val SECONDS_PER_MINUTE = 60L
-private const val MILLIS_PER_SECOND = 1_000L
-
 @Composable
 private fun rememberRelativeTimeBucket(): Long {
     val buckets = remember { relativeTimeBuckets() }
-    return buckets.collectAsStateWithLifecycle(initialValue = nowSeconds / SECONDS_PER_MINUTE).value
+    return buckets.collectAsStateWithLifecycle(initialValue = nowSeconds / TimeConstants.SECONDS_PER_MINUTE).value
 }
 
 internal fun relativeTimeBuckets(now: () -> Long = { nowSeconds }): Flow<Long> = flow {
     while (true) {
         val currentSeconds = now()
-        emit(currentSeconds / SECONDS_PER_MINUTE)
-        val secondsUntilNextMinute = SECONDS_PER_MINUTE - currentSeconds.mod(SECONDS_PER_MINUTE)
-        delay(secondsUntilNextMinute * MILLIS_PER_SECOND)
+        emit(currentSeconds / TimeConstants.SECONDS_PER_MINUTE)
+        val secondsUntilNextMinute =
+            TimeConstants.SECONDS_PER_MINUTE - currentSeconds.mod(TimeConstants.SECONDS_PER_MINUTE)
+        delay(secondsUntilNextMinute * TimeConstants.MS_PER_SEC)
     }
 }
 
