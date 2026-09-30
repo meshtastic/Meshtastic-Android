@@ -22,6 +22,7 @@ import android.content.ContentUris
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
+import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.os.Environment
 import android.os.ParcelFileDescriptor
@@ -89,6 +90,38 @@ class AtakFileWriterTest {
 
     @Test
     @Config(sdk = [34])
+    fun `after a reinstall every update of a route replaces one new copy`() {
+        val mediaStore = Robolectric.setupContentProvider(FakeMediaStore::class.java, MediaStore.AUTHORITY)
+        assertTrue(AtakFileWriter.writeToImportDir("route-1.zip", byteArrayOf(1)))
+
+        mediaStore.reinstall()
+        assertTrue(AtakFileWriter.writeToImportDir("route-1.zip", byteArrayOf(2)))
+        assertTrue(AtakFileWriter.writeToImportDir("route-1.zip", byteArrayOf(3)))
+
+        val names = mediaStore.rows.values.map { it.values.getAsString(MediaStore.MediaColumns.DISPLAY_NAME) }
+        assertEquals(listOf("route-1.zip", "route-1 (1).zip"), names)
+        assertContentEquals(byteArrayOf(3), mediaStore.rows.values.last().file.readBytes())
+    }
+
+    @Test
+    @Config(sdk = [34])
+    fun `a route file saved without a marker is still replaced in place`() {
+        val mediaStore = Robolectric.setupContentProvider(FakeMediaStore::class.java, MediaStore.AUTHORITY)
+        app.contentResolver.insert(
+            MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+            ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, "route-1.zip")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/")
+            },
+        )
+
+        assertTrue(AtakFileWriter.writeToImportDir("route-1.zip", byteArrayOf(9)))
+
+        assertContentEquals(byteArrayOf(9), mediaStore.rows.values.single().file.readBytes())
+    }
+
+    @Test
+    @Config(sdk = [34])
     fun `a failed save removes its pending row`() {
         val mediaStore = Robolectric.setupContentProvider(FakeMediaStore::class.java, MediaStore.AUTHORITY)
         mediaStore.failUpdatesWith = IllegalStateException("provider refused the update")
@@ -142,13 +175,20 @@ class AtakFileWriterTest {
         assertContentEquals(byteArrayOf(5), File(dir, "route_.._1.zip").readBytes())
     }
 
-    /** Just enough of MediaStore for the writer: rows keyed by id, each backed by a real file. */
+    /**
+     * Just enough of MediaStore for the writer: rows keyed by id, each backed by a real file. Like MediaProvider, a
+     * query sees only published rows this install owns, and an insert renames a name already taken in its folder.
+     */
     class FakeMediaStore : ContentProvider() {
         class Row(val values: ContentValues, val file: File)
 
+        /** Every row in the collection, including ones an earlier install left behind. */
         val rows = linkedMapOf<Long, Row>()
         var failUpdatesWith: RuntimeException? = null
         private var nextId = 1L
+
+        /** An uninstall leaves the app's Downloads files in place but drops its ownership of them. */
+        fun reinstall() = rows.values.forEach { it.values.putNull(MediaStore.MediaColumns.OWNER_PACKAGE_NAME) }
 
         override fun onCreate(): Boolean = true
 
@@ -161,22 +201,38 @@ class AtakFileWriterTest {
             selectionArgs: Array<out String>?,
             sortOrder: String?,
         ): Cursor {
-            val (name, relativePath) = checkNotNull(selectionArgs)
-            val cursor = MatrixCursor(arrayOf(BaseColumns._ID))
-            rows
-                .filterValues {
-                    it.values.getAsString(MediaStore.MediaColumns.DISPLAY_NAME) == name &&
-                        it.values.getAsString(MediaStore.MediaColumns.RELATIVE_PATH) == relativePath
+            val visible = rows.filterValues {
+                it.isOwned() && it.values.getAsInteger(MediaStore.MediaColumns.IS_PENDING) != 1
+            }
+            // SQLite evaluates the writer's real selection against the visible rows.
+            SQLiteDatabase.create(null).use { db ->
+                db.execSQL("CREATE TABLE files (${BaseColumns._ID} INTEGER PRIMARY KEY, ${COLUMNS.joinToString()})")
+                visible.forEach { (id, row) ->
+                    db.insertOrThrow("files", null, ContentValues(row.values).apply { put(BaseColumns._ID, id) })
                 }
-                .keys
-                .forEach { cursor.addRow(arrayOf(it)) }
-            return cursor
+                db.query("files", projection, selection, selectionArgs, null, null, sortOrder).use { found ->
+                    val cursor = MatrixCursor(found.columnNames)
+                    while (found.moveToNext()) cursor.addRow(Array(found.columnCount) { found.getString(it) })
+                    return cursor
+                }
+            }
         }
 
         override fun insert(uri: Uri, values: ContentValues?): Uri {
             val id = nextId++
+            val row =
+                ContentValues(values).apply {
+                    put(
+                        MediaStore.MediaColumns.DISPLAY_NAME,
+                        uniqueName(
+                            getAsString(MediaStore.MediaColumns.DISPLAY_NAME),
+                            getAsString(MediaStore.MediaColumns.RELATIVE_PATH),
+                        ),
+                    )
+                    put(MediaStore.MediaColumns.OWNER_PACKAGE_NAME, checkNotNull(context).packageName)
+                }
             val file = File.createTempFile("media", ".bin", checkNotNull(context).cacheDir)
-            rows[id] = Row(ContentValues(values), file)
+            rows[id] = Row(row, file)
             return ContentUris.withAppendedId(uri, id)
         }
 
@@ -195,9 +251,38 @@ class AtakFileWriterTest {
         override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int =
             if (rows.remove(ContentUris.parseId(uri)) != null) 1 else 0
 
-        override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor = ParcelFileDescriptor.open(
-            rows.getValue(ContentUris.parseId(uri)).file,
-            ParcelFileDescriptor.parseMode(mode),
-        )
+        override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor {
+            val row = rows.getValue(ContentUris.parseId(uri))
+            if (!row.isOwned()) throw SecurityException("$uri is not owned by this app")
+            return ParcelFileDescriptor.open(row.file, ParcelFileDescriptor.parseMode(mode))
+        }
+
+        private fun Row.isOwned() =
+            values.getAsString(MediaStore.MediaColumns.OWNER_PACKAGE_NAME) == checkNotNull(context).packageName
+
+        private fun uniqueName(name: String, relativePath: String?): String {
+            val taken =
+                rows.values
+                    .filter { it.values.getAsString(MediaStore.MediaColumns.RELATIVE_PATH) == relativePath }
+                    .map { it.values.getAsString(MediaStore.MediaColumns.DISPLAY_NAME) }
+                    .toSet()
+            val stem = name.substringBeforeLast('.')
+            val extension = name.substring(stem.length)
+            return generateSequence(0) { it + 1 }
+                .map { if (it == 0) name else "$stem ($it)$extension" }
+                .first { it !in taken }
+        }
+
+        private companion object {
+            val COLUMNS =
+                listOf(
+                    MediaStore.MediaColumns.DISPLAY_NAME,
+                    MediaStore.MediaColumns.MIME_TYPE,
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    MediaStore.MediaColumns.IS_PENDING,
+                    MediaStore.MediaColumns.OWNER_PACKAGE_NAME,
+                    MediaStore.DownloadColumns.DOWNLOAD_URI,
+                )
+        }
     }
 }

@@ -54,18 +54,24 @@ internal actual object AtakFileWriter {
         }
     }
 
-    /** Route updates reuse the route's file name, so an existing row is overwritten rather than duplicated. */
+    /**
+     * Route updates overwrite the row this install saved, found by its [MediaStore.Downloads.DOWNLOAD_URI] marker
+     * because a reinstall orphans the old row and MediaProvider renames the new one. Rows saved before the marker match
+     * by name.
+     */
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun writeToSharedDownloads(context: Context, name: String, bytes: ByteArray): Uri {
         val resolver = context.contentResolver
         val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val marker = ROUTE_MARKER_PREFIX + name
         val existing =
             resolver
                 .query(
                     collection,
                     arrayOf(MediaStore.Downloads._ID),
-                    "${MediaStore.Downloads.DISPLAY_NAME} = ? AND ${MediaStore.Downloads.RELATIVE_PATH} = ?",
-                    arrayOf(name, DOWNLOADS_RELATIVE_PATH),
+                    "${MediaStore.Downloads.RELATIVE_PATH} = ? AND " +
+                        "(${MediaStore.Downloads.DOWNLOAD_URI} = ? OR ${MediaStore.Downloads.DISPLAY_NAME} = ?)",
+                    arrayOf(DOWNLOADS_RELATIVE_PATH, marker, name),
                     null,
                 )
                 ?.use { cursor ->
@@ -81,6 +87,7 @@ internal actual object AtakFileWriter {
                 put(MediaStore.Downloads.DISPLAY_NAME, name)
                 put(MediaStore.Downloads.MIME_TYPE, ZIP_MIME_TYPE)
                 put(MediaStore.Downloads.RELATIVE_PATH, DOWNLOADS_RELATIVE_PATH)
+                put(MediaStore.Downloads.DOWNLOAD_URI, marker)
                 put(MediaStore.Downloads.IS_PENDING, 1)
             }
         val inserted = resolver.insert(collection, pending) ?: throw IOException("MediaStore refused to create $name")
@@ -113,4 +120,5 @@ internal actual object AtakFileWriter {
     private val UNSAFE_FILE_NAME_CHARS = Regex("[^a-zA-Z0-9._-]")
     private val DOWNLOADS_RELATIVE_PATH = "${Environment.DIRECTORY_DOWNLOADS}/"
     private const val ZIP_MIME_TYPE = "application/zip"
+    private const val ROUTE_MARKER_PREFIX = "meshtastic://atak-route/"
 }

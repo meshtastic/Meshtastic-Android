@@ -24,7 +24,7 @@ package org.meshtastic.core.takserver
  */
 internal expect object AtakFileWriter {
     /**
-     * Save a data package zip, replacing an earlier one with the same name.
+     * Save a data package zip, replacing the one this install saved earlier under the same name.
      *
      * @return true if the file was written successfully, false otherwise.
      */
