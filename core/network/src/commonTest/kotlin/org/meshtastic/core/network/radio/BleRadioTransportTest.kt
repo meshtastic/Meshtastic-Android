@@ -44,6 +44,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
@@ -192,6 +193,29 @@ class BleRadioTransportTest {
             runCurrent()
         } finally {
             bleTransport.close()
+        }
+    }
+
+    @Test
+    fun `a retried BLE write failure logs the device address only in anonymized form`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+        val logs = CapturingLogWriter.install()
+        val bleTransport = bleTransportOn(this, FakeRadioInterfaceService())
+        bleTransport.start()
+
+        try {
+            advanceTimeBy(4_000L)
+            connection.service.writeException = RuntimeException("write rejected")
+            assertTrue(bleTransport.handleSendToRadio(byteArrayOf(1, 2, 3)))
+            advanceTimeBy(1_000L)
+
+            assertTrue(logs.messages().any { "BLE operation failed" in it }, "the write retry path must have logged")
+            logs.assertNotLogged(address)
+        } finally {
+            bleTransport.close()
+            CapturingLogWriter.uninstall()
         }
     }
 

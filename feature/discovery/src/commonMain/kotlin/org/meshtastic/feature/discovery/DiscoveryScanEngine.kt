@@ -52,6 +52,7 @@ import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.numChannels
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.repository.DiscoveryPacketCollector
@@ -773,8 +774,8 @@ class DiscoveryScanEngine(
             // A null return means this device's session row is not in the active database and the dwell is unwritable.
             if (discoveryDao.insertDwellIfSessionExists(result, discoveredNodeEntities(), deviceAddress) == null) {
                 Logger.w {
-                    "DiscoveryScanEngine: session $sessionId for $deviceAddress is not in the active database; " +
-                        "skipping dwell persistence"
+                    "DiscoveryScanEngine: session $sessionId for ${deviceAddress.anonymize()} is not in the active " +
+                        "database; skipping dwell persistence"
                 }
                 return@withLock
             }

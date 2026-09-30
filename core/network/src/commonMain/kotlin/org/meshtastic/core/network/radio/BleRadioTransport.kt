@@ -554,7 +554,7 @@ class BleRadioTransport(
     private suspend fun onConnected() {
         try {
             bleConnection.deviceFlow.first()?.let { device ->
-                val rssi = retryBleOperation(tag = address) { device.readRssi() }
+                val rssi = retryBleOperation(tag = address.anonymize()) { device.readRssi() }
                 Logger.d {
                     "[${address.anonymize()}] Connection confirmed. " +
                         "Initial RSSI: ${rssi?.let { "$it dBm" } ?: "unknown"}"
@@ -805,7 +805,7 @@ class BleRadioTransport(
 
     private suspend fun writePacket(session: BleSession, packet: ByteArray) {
         try {
-            retryBleOperation(tag = address, retryWhile = { activeSession.value === session }) {
+            retryBleOperation(tag = address.anonymize(), retryWhile = { activeSession.value === session }) {
                 session.profile.sendToRadio(packet)
             }
             val sent = packetsSent.incrementAndGet()
