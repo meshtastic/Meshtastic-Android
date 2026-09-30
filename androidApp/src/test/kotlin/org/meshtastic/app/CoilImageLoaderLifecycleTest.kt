@@ -68,4 +68,6 @@ internal class ImageLoaderOnlyApplication : MeshUtilApplication() {
     }
 
     override fun startBackgroundInit() = Unit
+
+    override fun loadBundledSqlite() = Unit
 }

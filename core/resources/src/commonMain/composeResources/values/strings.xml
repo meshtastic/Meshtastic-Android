@@ -1926,6 +1926,7 @@
     <string name="unpin_selected">Unpin</string>
     <string name="unrecognized">Unrecognized</string>
     <string name="unset">Unset - 0</string>
+    <string name="unsupported_device">This device isn't supported</string>
     <string name="update_status">Update status</string>
     <string name="updated">Updated</string>
     <string name="uplink_enabled">MQTT Uplink Enabled</string>
