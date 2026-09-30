@@ -27,16 +27,15 @@ The in-process `RadioController` composition root (Desktop, iOS, and single-proc
 ```mermaid
 graph TB
   :core:service[service]:::kmp-library
+  :core:service -.-> :core:prefs
   :core:service --> :core:repository
   :core:service -.-> :core:common
-  :core:service -.-> :core:data
   :core:service -.-> :core:database
   :core:service -.-> :core:di
   :core:service -.-> :core:model
   :core:service -.-> :core:navigation
   :core:service -.-> :core:network
   :core:service -.-> :core:ble
-  :core:service -.-> :core:prefs
   :core:service -.-> :core:resources
   :core:service -.-> :core:takserver
   :core:service -.-> :core:testing

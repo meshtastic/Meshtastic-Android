@@ -28,8 +28,6 @@ graph TB
   :core:data -.-> :core:di
   :core:data -.-> :core:model
   :core:data -.-> :core:network
-  :core:data -.-> :core:prefs
-  :core:data -.-> :core:takserver
   :core:data -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

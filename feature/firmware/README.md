@@ -138,16 +138,12 @@ graph TB
   :feature:firmware[firmware]:::kmp-feature
   :feature:firmware -.-> :core:ble
   :feature:firmware -.-> :core:common
-  :feature:firmware -.-> :core:data
-  :feature:firmware -.-> :core:database
   :feature:firmware -.-> :core:datastore
   :feature:firmware -.-> :core:di
   :feature:firmware -.-> :core:model
   :feature:firmware -.-> :core:navigation
   :feature:firmware -.-> :core:network
-  :feature:firmware -.-> :core:prefs
   :feature:firmware -.-> :core:repository
-  :feature:firmware -.-> :core:service
   :feature:firmware -.-> :core:resources
   :feature:firmware -.-> :core:ui
   :feature:firmware -.-> :core:testing
