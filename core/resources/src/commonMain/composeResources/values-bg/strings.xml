@@ -90,6 +90,8 @@
     <string name="aqi_good">Добър</string>
     <string name="aqi_hazardous">Опасно</string>
     <string name="aqi_value_with_severity">%1$d (%2$s)</string>
+    <string name="archived_channel">Архивиран канал</string>
+    <string name="archived_channel_read_only">Този канал вече не е настроен на вашето радио. Съобщенията в него се запазват тук, но не можете да изпращате съобщения или да реагирате.</string>
     <string name="are_you_sure">Сигурни ли сте?</string>
     <string name="are_you_sure_change_default">Сигурни ли сте, че искате да промените канала по подразбиране?</string>
     <string name="audio">Аудио</string>
@@ -107,6 +109,7 @@
     <string name="battery">Батерия</string>
     <string name="battery_ina_2xx_i2c_address">I2C адрес на батерията INA_2XX</string>
     <string name="ble_devices">Bluetooth устройства</string>
+    <string name="ble_scan_needs_location_services">За тази версия на Android сканирането чрез Bluetooth също изисква включени услуги за местоположение. Вашето местоположение не се използва.</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_available_devices">Налични Bluetooth устройства</string>
@@ -192,6 +195,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Изпраща позиция в основния канал, когато потребителският бутон бъде щракнат три пъти.</string>
     <string name="config_device_tzdef_summary">Часова зона за дати на екрана на устройството и в дневника.</string>
     <string name="config_device_use_phone_tz">Използване на часовата зона на телефона</string>
+    <string name="config_lora_coding_rate_fraction">4/%1$d</string>
     <string name="config_lora_modem_preset_summary">Налични предварително зададени настройки на модема, по подразбиране е Дълъг Бърз.</string>
     <string name="config_lora_region_summary">Регионът, където ще използвате радиостанциите си.</string>
     <string name="config_saved_restarting">Възелът се рестартира и ще бъде за кратко недостъпен.</string>
@@ -335,6 +339,9 @@
     <string name="doc_loading">Зареждане на документацията…</string>
     <string name="doc_no_documentation">Няма налична документация</string>
     <string name="doc_no_results">Няма намерени резултати</string>
+    <string name="doc_open_page">Отваряне на %1$s</string>
+    <string name="doc_page_not_found">Страницата не е намерена: %1$s</string>
+    <string name="doc_page_not_found_detail">Възможно е тази страница да е преместена или премахната.</string>
     <string name="doc_search_placeholder">Търсене в документацията…</string>
     <string name="doc_section_developer">Ръководство за разработчици</string>
     <string name="doc_section_user">Ръководство за потребители</string>
@@ -363,6 +370,7 @@
     <string name="download">Изтегляне</string>
     <string name="duplicated_public_key_title">Открит е дублиран публичен ключ</string>
     <!-- DURATION -->
+    <string name="duration_ago">Преди %1$s</string>
     <string name="dynamic">Динамична</string>
     <string name="easily_set_up_private_mesh_networks">Настройте лесно частни mesh мрежи за сигурна и надеждна комуникация в отдалечени райони.</string>
     <string name="edit">Редактирай</string>
@@ -376,6 +384,8 @@
     <string name="emoji_category_smileys_emotion">Усмивки &amp; емоции</string>
     <string name="emoji_category_symbols">Символи</string>
     <string name="emoji_category_travel_places">Пътуване &amp; места</string>
+    <string name="emoji_load_error">Неуспешно зареждане на емоджи</string>
+    <string name="emoji_no_results">Не са открити емоджита</string>
     <string name="emoji_recently_used">Наскоро използвани</string>
     <string name="enabled">Активиран</string>
     <string name="encryption_error">Несъответствие на публичния ключ</string>
@@ -418,6 +428,11 @@
     <string name="firmware_edition">Версия на фърмуера</string>
     <string name="firmware_event_ended_banner">%1$s приключи. Върнете се към стандартния фърмуер на Meshtastic, за да възстановите нормалните функции.</string>
     <string name="firmware_event_ended_button">Актуализиране на фърмуера</string>
+    <string name="firmware_maintenance_bootloader_available">Последен: %1$s</string>
+    <string name="firmware_maintenance_bootloader_installed">Инсталиран: %1$s</string>
+    <string name="firmware_maintenance_bootloader_latest_hint">Последна версия: %1$s. Инсталираната версия се показва, след като устройството се рестартира в режим на актуализация.</string>
+    <string name="firmware_maintenance_bootloader_up_to_date">Буутлоудърът е актуален</string>
+    <string name="firmware_maintenance_no_release">Първо изберете версия на фърмуера, за да може устройството да бъде преинсталирано след изтриване.</string>
     <string name="firmware_maintenance_unsupported_device">Това устройство не поддържа изтриване от приложението.</string>
     <string name="firmware_old">Фърмуерът на радиото е твърде стар, за да общува с това приложение. За повече информация относно това вижте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашето ръководство за инсталиране на фърмуер</a>.</string>
     <string name="firmware_recovery_button">Възобновяване на актуализацията на фърмуера</string>
@@ -457,6 +472,7 @@
     <string name="firmware_update_no_device">Няма свързано устройство</string>
     <string name="firmware_update_node_info_missing">Липсва информация за потребителя на възела.</string>
     <string name="firmware_update_not_found_in_release">Не е намерен фърмуер за %1$s в изданието.</string>
+    <string name="firmware_update_notification_android">%1$s е инсталиран. Налична е стабилна версия %2$s. Отворете Актуализации на фърмуера, когато сте готови.</string>
     <string name="firmware_update_open">Отваряне на актуализациите на фърмуера</string>
     <string name="firmware_update_ota_failed">OTA актуализацията не е успешна: %1$s</string>
     <string name="firmware_update_preparing_flash">Подготовка на устройството: изтриване на флаша. Това може да отнеме до минута...</string>
@@ -510,6 +526,7 @@
     <string name="good">Добър</string>
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO пин</string>
+    <string name="ham_long_name_summary">По избор. Добавя се към вашия опзнавателен знак, напр. KD2ABC//Attic Heltec</string>
     <string name="hardware">Хардуер</string>
     <string name="hardware_model">Модел на хардуера</string>
     <string name="help_and_documentation">Помощ &amp; Документация</string>
@@ -523,6 +540,7 @@
     <string name="i_know_what_i_m_doing">Знам какво правя.</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Качество на въздуха в помещенията) относителна скала за IAQ, стойностите са измерени с Bosch BME680. Диапазон на стойностите 0–500.</string>
+    <string name="iaq_value">IAQ %1$d</string>
     <string name="ignore">Игнорирай</string>
     <string name="ignore_add">Добави '%1$s' към списъка с игнорирани?</string>
     <string name="ignore_remove">Изтрий '%1$s' от списъка с игнорирани?</string>
@@ -618,8 +636,9 @@
     <string name="longitude">Географска дължина</string>
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
     <string name="low_battery">Изтощена батерия</string>
-    <string name="low_battery_message">Възела %1$s има слаба батерия (%2$d%)</string>
+    <string name="low_battery_message">%1$sВъзела %1$s има слаба батерия (%2$d%)</string>
     <string name="low_battery_title">Батерията е изтощена: %1$s</string>
     <string name="low_entropy_key_title">Открит е слаб ключ за криптиране</string>
     <string name="manage_map_layers">Управление на слоевете на картата</string>
@@ -635,16 +654,31 @@
     <string name="map_download_region">Сваляне на регион</string>
     <string name="map_download_status_complete">Пълно</string>
     <string name="map_download_status_downloading">Изтегляне</string>
+    <string name="map_engine_unavailable">На това устройство не е налична карта</string>
     <string name="map_filter">Филтър на картата\n</string>
     <string name="map_filter_all_roles">Всички</string>
     <string name="map_filter_display_title">Дисплей</string>
     <string name="map_filter_nodes_title">Възли</string>
+    <string name="map_filter_show_ignored">Показване на игнорираните възли</string>
     <string name="map_layer_formats">Слоевете на картата поддържат формати .kml, .kmz или GeoJSON.</string>
+    <string name="map_layer_opacity">Непрозрачност: %1$d%</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Последно чут: %2$s&lt;br&gt;Последна позиция: %3$s&lt;br&gt;Батерия: %4$s</string>
+    <string name="map_offline_download_failed_io">Изтеглянето е неуспешно – проверете връзката си и опитайте отново</string>
+    <string name="map_offline_download_failed_region_limit">Вече са изтеглени твърде много офлайн региони – първо изтрийте един</string>
+    <string name="map_offline_download_failed_storage">Изтеглените региони използват твърде много място за съхранение — първо изтрийте един</string>
+    <string name="map_offline_download_failed_tile_limit">Избраната област е твърде голяма — увеличете мащаба или изберете по-малък регион</string>
+    <string name="map_offline_download_terrain">Изтегляне на терен</string>
+    <string name="map_offline_downloading_progress">Изтегляне… %1$d / %2$d плочки</string>
     <string name="map_offline_manager">Управление извън линия</string>
     <string name="map_offline_region_label">%1$s, %2$s  %3$s</string>
     <string name="map_offline_show_on_map">Показване на картата</string>
     <string name="map_offline_terrain_contours">Контури</string>
+    <string name="map_offline_terrain_download_complete">Изтеглянето на терена е завършено</string>
+    <string name="map_offline_terrain_download_failed_io">Изтеглянето на терена е неуспешно – проверете връзката си и опитайте отново</string>
+    <string name="map_offline_terrain_download_failed_tile_limit">Избраната област е твърде голяма за терена — увеличете мащаба или изберете по-малък регион</string>
+    <string name="map_offline_terrain_downloading_progress">Изтегляне на терена… %1$d / %2$d плочки</string>
+    <string name="map_overlay_precipitation">Валежи</string>
+    <string name="map_overlay_weather_radar">Метеорологичен радар</string>
     <string name="map_purge_fail">Изчистването на SQL кеша е неуспешно, вижте logcat за подробности</string>
     <string name="map_purge_success">Свалените SQL данни бяха изчистени успешно за %1$s</string>
     <string name="map_reporting_consent_header">Съгласие за споделяне на некриптирани данни от възела чрез MQTT</string>
@@ -655,6 +689,7 @@
     <string name="map_subDescription">посока: %1$d° разстояние: %2$s</string>
     <string name="map_tile_download_estimate">Прогноза за изтегляне на картинки:</string>
     <string name="map_tile_download_estimate_detail">%1$s %2$s %3$s</string>
+    <string name="map_tile_limit_reached">Достигнат е лимитът за плочки (%1$d)</string>
     <string name="map_tile_source">Източник на карти</string>
     <string name="map_type_hybrid">Хибриден</string>
     <string name="map_type_normal">Нормален</string>
@@ -695,6 +730,10 @@
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
     <string name="message_device_managed">Това радио се управлява и може да бъде променяно само от отдалечен администратор.</string>
     <string name="message_input_label">Съобщение</string>
+    <string name="message_routing_error_admin_bad_session_key">Администраторската сесия е изтекла</string>
+    <string name="message_routing_error_admin_public_key_unauthorized">Администраторският ключ не е оторизиран</string>
+    <string name="message_routing_error_admin_public_key_unauthorized_detail">Отдалеченият възел не оторизира вашия администраторски ключ.</string>
+    <string name="message_routing_error_bad_request">Невалидна заявка</string>
     <string name="message_routing_error_max_retransmit">Неуспешно доставяне към mesh</string>
     <string name="message_routing_error_no_interface">Няма радио интерфейс</string>
     <string name="message_routing_error_pki_failed">Не можа да се изпрати криптирано съобщение</string>
@@ -725,6 +764,7 @@
     <string name="mqtt_probe_other_failure">Връзката е неуспешна</string>
     <string name="mqtt_probe_success">Достъпен. Брокерът е приел идентификационните данни.</string>
     <string name="mqtt_probe_success_with_info">Достъпен (%1$s)</string>
+    <string name="mqtt_probe_tls_failure">Неуспешно TLS ръкостискане: %1$s</string>
     <string name="mqtt_status_connected">Свързано</string>
     <string name="mqtt_status_connecting">Свързване…</string>
     <string name="mqtt_status_disconnected">Прекъсната връзка</string>
@@ -755,6 +795,7 @@
     <string name="new_nodes">Нови възли</string>
     <string name="next">Напред</string>
     <string name="nfc_disabled">NFC е деактивиран. Моля, активирайте го в системните настройки.</string>
+    <string name="nitrogen">Азот</string>
     <!-- NO -->
     <string name="no_bluetooth_devices_hint">Уверете се, че сте в обхвата на устройството.</string>
     <string name="no_bluetooth_devices_seen">Не се виждат Bluetooth устройства</string>
