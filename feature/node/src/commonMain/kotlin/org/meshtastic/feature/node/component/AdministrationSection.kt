@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.koinInject
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.FirmwareRelease
@@ -46,11 +47,14 @@ import org.meshtastic.core.resources.connect_radio_for_remote_admin
 import org.meshtastic.core.resources.establishing_session
 import org.meshtastic.core.resources.firmware
 import org.meshtastic.core.resources.firmware_edition
+import org.meshtastic.core.resources.ic_terminal
 import org.meshtastic.core.resources.installed_firmware_version
 import org.meshtastic.core.resources.latest_alpha_firmware
 import org.meshtastic.core.resources.latest_stable_firmware
 import org.meshtastic.core.resources.refresh_metadata
 import org.meshtastic.core.resources.remote_admin
+import org.meshtastic.core.resources.remote_shell_open
+import org.meshtastic.core.resources.remote_shell_open_description
 import org.meshtastic.core.resources.session_active
 import org.meshtastic.core.resources.session_refresh_required
 import org.meshtastic.core.ui.component.BasicListItem
@@ -95,6 +99,20 @@ fun AdministrationSection(
                         isEnsuringSession = isEnsuringSession,
                         onAction = onAction,
                     )
+
+                    // The node gates the shell on the same admin_key list as remote admin, so the row
+                    // establishes that session first, as the remote-admin row does.
+                    if (node.capabilities.supportsRemoteShell) {
+                        SectionDivider()
+
+                        ListItem(
+                            text = stringResource(Res.string.remote_shell_open),
+                            leadingIcon = vectorResource(Res.drawable.ic_terminal),
+                            supportingText = stringResource(Res.string.remote_shell_open_description),
+                            enabled = !isEnsuringSession,
+                            onClick = { onAction(NodeDetailAction.OpenRemoteShell(node.num)) },
+                        )
+                    }
 
                     SectionDivider()
 

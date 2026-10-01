@@ -42,7 +42,6 @@ import org.meshtastic.feature.node.component.DeviceLinksSection
 import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.component.NotesSection
-import org.meshtastic.feature.node.component.RemoteShellSection
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 /**
@@ -141,14 +140,6 @@ fun NodeDetailList(
                     onFirmwareSelect = onFirmwareSelect,
                     sessionStatus = uiState.sessionStatus,
                     isEnsuringSession = uiState.isEnsuringSession,
-                )
-            }
-            item {
-                RemoteShellSection(
-                    node = node,
-                    sessionStatus = uiState.sessionStatus,
-                    isEnsuringSession = uiState.isEnsuringSession,
-                    onAction = onAction,
                 )
             }
         }
