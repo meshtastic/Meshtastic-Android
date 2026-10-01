@@ -21,43 +21,57 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -67,41 +81,72 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.remote_shell
+import org.meshtastic.core.resources.remote_shell_command_hint
+import org.meshtastic.core.resources.remote_shell_last_contact
+import org.meshtastic.core.resources.remote_shell_menu_line_mode
+import org.meshtastic.core.resources.remote_shell_menu_paste
+import org.meshtastic.core.resources.remote_shell_menu_text_larger
+import org.meshtastic.core.resources.remote_shell_menu_text_smaller
+import org.meshtastic.core.resources.remote_shell_more_options
+import org.meshtastic.core.resources.remote_shell_reconnect
+import org.meshtastic.core.resources.remote_shell_send
+import org.meshtastic.core.resources.remote_shell_status_closed
+import org.meshtastic.core.resources.remote_shell_status_closing
+import org.meshtastic.core.resources.remote_shell_status_failed
+import org.meshtastic.core.resources.remote_shell_status_not_connected
+import org.meshtastic.core.resources.remote_shell_status_opening
+import org.meshtastic.core.resources.remote_shell_subtitle_round_trip
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.Add
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.More
+import org.meshtastic.core.ui.icon.Remove
+import org.meshtastic.core.ui.icon.Send
+import org.meshtastic.core.ui.util.plainText
+import org.meshtastic.feature.node.metrics.terminal.RemoteShellViewModel.InputMode
+import org.meshtastic.feature.node.metrics.terminal.RemoteShellViewModel.SessionState
+
+private val TERMINAL_PADDING = 8.dp
+private val BAR_PADDING = 4.dp
+private val CHIP_SPACING = 8.dp
+
+/** Let the composition settle before taking focus, or the request is dropped. */
+private const val FOCUS_REQUEST_DELAY_MS = 100L
+
+/** Inbound silence, with something of ours in flight, before the screen says the node has gone quiet. */
+private const val STALE_AFTER_MS = 4_000L
+private const val STALE_POLL_MS = 1_000L
+private const val MS_PER_SECOND = 1_000L
+private const val RECENT_HISTORY_CHIPS = 5
 
 /**
- * Terminal screen for the RemoteShell feature (portnum = 13).
+ * Terminal screen for a DMShell session.
  *
- * ### Input model
- * Input is **raw / streaming** — there is no visible text field. A zero-size [BasicTextField] holds keyboard focus and
- * is the sole entry point for both hardware key events and the Android soft keyboard.
- * - Each printable character is routed to [RemoteShellViewModel.typeKey].
- * - Enter / newline is routed to [RemoteShellViewModel.typeEnter] (immediate flush).
- * - Backspace is routed to [RemoteShellViewModel.typeBackspace].
- * - The ViewModel batches keystrokes and flushes over the mesh after a debounce or when the 64-byte buffer fills.
- *
- * Tapping the output area re-acquires keyboard focus when the soft keyboard is dismissed.
- *
- * Unflushed characters from [RemoteShellViewModel.pendingInput] are drawn after the last confirmed output line, dimmed,
- * so they read as local echo rather than transmitted bytes.
- *
- * @param viewModel [RemoteShellViewModel] for this destination node.
- * @param onNavigateUp Callback invoked when the user presses the navigation-up button.
+ * In character mode a zero-size field holds keyboard focus, so hardware keys and the soft keyboard both reach the
+ * session; what was sent shows underlined at the cursor until the node echoes it. In line mode a composer replaces it
+ * and each command goes out as one frame. The extra-keys rows serve both.
  */
+@Suppress("LongMethod")
 @Composable
 fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
-    val outputLines by viewModel.outputLines.collectAsStateWithLifecycle()
-    val pendingInput by viewModel.pendingInput.collectAsStateWithLifecycle()
+    val screen by viewModel.screen.collectAsStateWithLifecycle()
     val sessionState by viewModel.sessionState.collectAsStateWithLifecycle()
+    val health by viewModel.health.collectAsStateWithLifecycle()
+    val modifiers by viewModel.modifiers.collectAsStateWithLifecycle()
+    val inputMode by viewModel.inputMode.collectAsStateWithLifecycle()
+    val fontSize by viewModel.fontSizeSp.collectAsStateWithLifecycle()
+    val composer by viewModel.composer.collectAsStateWithLifecycle()
+    val history by viewModel.history.collectAsStateWithLifecycle()
 
     // The remote PTY wraps to whatever size we declare, so measure the viewport in monospace cells rather than
     // shipping a hardcoded 80x24. Opening waits for the measurement so OPEN carries the real size.
     var terminalSize by remember { mutableStateOf(IntSize.Zero) }
-    val (cols, rows) = rememberTerminalGrid(terminalSize)
-
+    val (cols, rows) = rememberTerminalGrid(terminalSize, fontSize)
     val grid by rememberUpdatedState(cols to rows)
     val measuredGrid = remember { snapshotFlow { grid }.filter { (c, r) -> c > 0 && r > 0 }.distinctUntilChanged() }
     LaunchedEffect(Unit) { measuredGrid.collect { (c, r) -> viewModel.resize(c, r) } }
@@ -114,227 +159,323 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
     }
 
     val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        // Let the composition settle before taking focus, or the request is dropped.
-        delay(FOCUS_REQUEST_DELAY_MS)
-        focusRequester.requestFocus()
+    LaunchedEffect(inputMode) {
+        if (inputMode == InputMode.CHARACTER) {
+            delay(FOCUS_REQUEST_DELAY_MS)
+            focusRequester.requestFocus()
+        }
     }
 
-    val listState = rememberLazyListState()
-    LaunchedEffect(outputLines.size, pendingInput) { listState.animateScrollToItem(outputLines.size) }
+    val haptics = LocalHapticFeedback.current
+    LaunchedEffect(Unit) { viewModel.bell.collect { haptics.performHapticFeedback(HapticFeedbackType.LongPress) } }
+
+    val roundTrip = health.roundTripMs
+    val subtitle =
+        if (roundTrip != null && sessionState == SessionState.OPEN) {
+            stringResource(
+                Res.string.remote_shell_subtitle_round_trip,
+                stringResource(Res.string.remote_shell),
+                roundTrip,
+            )
+        } else {
+            stringResource(Res.string.remote_shell)
+        }
 
     Scaffold(
         modifier = modifier,
         topBar = {
             MainAppBar(
                 title = viewModel.nodeLongName,
-                subtitle = stringResource(Res.string.remote_shell),
+                subtitle = subtitle,
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
-                actions = {},
+                actions = {
+                    ShellMenu(
+                        inputMode = inputMode,
+                        onToggleLineMode = {
+                            viewModel.setInputMode(
+                                if (inputMode == InputMode.LINE) InputMode.CHARACTER else InputMode.LINE,
+                            )
+                        },
+                        onPaste = viewModel::paste,
+                        onFontSize = viewModel::adjustFontSize,
+                    )
+                },
                 onClickChip = {},
             )
         },
     ) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).imePadding()) {
-            SessionStatusBar(state = sessionState, onReconnect = { viewModel.openSession() })
+            SessionStatusBar(state = sessionState, onReconnect = viewModel::openSession)
 
             Box(modifier = Modifier.weight(1f).fillMaxWidth().onSizeChanged { terminalSize = it }) {
-                SelectionContainer {
-                    LazyColumn(
-                        state = listState,
-                        modifier =
-                        Modifier.fillMaxSize().padding(TERMINAL_PADDING).clickable {
-                            focusRequester.requestFocus()
-                        },
-                    ) {
-                        // The caret belongs after the prompt, not under it, so the trailing line carries the pending
-                        // input.
-                        items(outputLines.dropLast(1)) { line -> TerminalLine(text = line) }
-                        item { TerminalLine(text = outputLines.lastOrNull().orEmpty() + pendingInput + CURSOR) }
-                    }
+                TerminalPane(
+                    screen = screen,
+                    fontSizeSp = fontSize,
+                    showCursor = inputMode == InputMode.CHARACTER,
+                    onTap = { if (inputMode == InputMode.CHARACTER) focusRequester.requestFocus() },
+                )
+                if (inputMode == InputMode.CHARACTER) {
+                    KeyboardSink(
+                        focusRequester = focusRequester,
+                        handler =
+                        TerminalKeyHandler(
+                            onChar = viewModel::typeKey,
+                            onEnter = viewModel::typeEnter,
+                            onBackspace = viewModel::typeBackspace,
+                            onKey = viewModel::sendKey,
+                            onChord = viewModel::typeChord,
+                        ),
+                    )
                 }
+                if (sessionState == SessionState.OPEN) {
+                    LastContactBanner(health, modifier = Modifier.align(Alignment.TopCenter))
+                }
+            }
 
-                KeyboardSink(
-                    focusRequester = focusRequester,
-                    onChar = { viewModel.dispatchTypedChar(it) },
-                    onEnter = viewModel::typeEnter,
-                    onBackspace = viewModel::typeBackspace,
-                    onTab = { viewModel.typeKey('\t') },
+            if (inputMode == InputMode.LINE) {
+                CommandComposer(
+                    composer = composer,
+                    history = history,
+                    actions =
+                    ComposerActions(
+                        onChange = viewModel::setComposer,
+                        onInsert = viewModel::insertCommand,
+                        onSubmit = viewModel::submitComposer,
+                        onRecall = viewModel::recallHistory,
+                    ),
                 )
             }
 
-            ControlKeyBar(onSend = { viewModel.typeControlSequence(it) })
+            ExtraKeysBar(
+                modifiers = modifiers,
+                onKey = { key ->
+                    when {
+                        inputMode == InputMode.LINE && key == TerminalKey.UP -> viewModel.recallHistory(older = true)
+                        inputMode == InputMode.LINE && key == TerminalKey.DOWN -> viewModel.recallHistory(older = false)
+                        else -> viewModel.sendKey(key)
+                    }
+                },
+                onChar = { c ->
+                    if (inputMode == InputMode.LINE && modifiers.isEmpty) {
+                        viewModel.setComposer(composer + c)
+                    } else {
+                        viewModel.typeKey(c)
+                    }
+                },
+                onToggleCtrl = viewModel::toggleCtrl,
+                onToggleAlt = viewModel::toggleAlt,
+            )
         }
+    }
+}
+
+@Composable
+private fun TerminalPane(screen: TerminalScreenState, fontSizeSp: Int, showCursor: Boolean, onTap: () -> Unit) {
+    val palette = TerminalPalette.from(MaterialTheme.colorScheme)
+    val listState = rememberLazyListState()
+
+    // Follow new output only while the reader is at the bottom; scrolling up to read must not be yanked back.
+    var follow by remember { mutableStateOf(true) }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress to listState.canScrollForward }
+            .collect { (scrolling, canScrollForward) -> if (scrolling) follow = !canScrollForward }
+    }
+    LaunchedEffect(screen) { if (follow && screen.lines.isNotEmpty()) listState.scrollToItem(screen.lines.lastIndex) }
+
+    val textStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = fontSizeSp.sp, color = palette.foreground)
+    SelectionContainer {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize().padding(TERMINAL_PADDING).clickable(onClick = onTap),
+        ) {
+            val last = screen.lines.lastIndex
+            itemsIndexed(screen.lines) { index, line ->
+                val text =
+                    if (index == last) {
+                        line.withCursor(screen.cursorColumn, screen.predicted, screen.unsent, showCursor, palette)
+                    } else {
+                        line.toAnnotatedString(palette)
+                    }
+                Text(text = text, style = textStyle, modifier = Modifier.fillMaxWidth())
+            }
+        }
+    }
+}
+
+/** What the line-mode composer can do, grouped so the composable takes state and one handler. */
+private class ComposerActions(
+    val onChange: (String) -> Unit,
+    val onInsert: (String) -> Unit,
+    val onSubmit: () -> Unit,
+    val onRecall: (older: Boolean) -> Unit,
+)
+
+@Composable
+private fun CommandComposer(composer: String, history: List<String>, actions: ComposerActions) {
+    val chips = remember(history) { (history.take(RECENT_HISTORY_CHIPS) + QUICK_COMMANDS).distinct() }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(CHIP_SPACING),
+            contentPadding = PaddingValues(horizontal = TERMINAL_PADDING),
+        ) {
+            items(chips) { command ->
+                AssistChip(
+                    onClick = { actions.onInsert(command) },
+                    label = { Text(command, fontFamily = FontFamily.Monospace, maxLines = 1) },
+                )
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = TERMINAL_PADDING),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedTextField(
+                value = composer,
+                onValueChange = actions.onChange,
+                modifier = Modifier.weight(1f).onPreviewKeyEvent { event -> composerKey(event, actions) },
+                placeholder = { Text(stringResource(Res.string.remote_shell_command_hint)) },
+                textStyle = TextStyle(fontFamily = FontFamily.Monospace),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Send),
+                keyboardActions = KeyboardActions(onSend = { actions.onSubmit() }),
+            )
+            IconButton(onClick = actions.onSubmit) {
+                Icon(MeshtasticIcons.Send, contentDescription = stringResource(Res.string.remote_shell_send))
+            }
+        }
+    }
+}
+
+/** Up and Down walk local history, Enter sends; everything else is ordinary text editing. */
+private fun composerKey(event: KeyEvent, actions: ComposerActions): Boolean {
+    val handled = event.type == KeyEventType.KeyDown && event.key in COMPOSER_KEYS
+    if (handled) {
+        when (event.key) {
+            Key.DirectionUp -> actions.onRecall(true)
+            Key.DirectionDown -> actions.onRecall(false)
+            else -> actions.onSubmit()
+        }
+    }
+    return handled
+}
+
+private val COMPOSER_KEYS = setOf(Key.DirectionUp, Key.DirectionDown, Key.Enter, Key.NumPadEnter)
+
+@Composable
+private fun ShellMenu(
+    inputMode: InputMode,
+    onToggleLineMode: () -> Unit,
+    onPaste: (String) -> Unit,
+    onFontSize: (deltaSp: Int) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(MeshtasticIcons.More, contentDescription = stringResource(Res.string.remote_shell_more_options))
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.remote_shell_menu_line_mode)) },
+                trailingIcon = { Checkbox(checked = inputMode == InputMode.LINE, onCheckedChange = null) },
+                onClick = {
+                    onToggleLineMode()
+                    expanded = false
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.remote_shell_menu_paste)) },
+                onClick = {
+                    expanded = false
+                    scope.launch { clipboard.getClipEntry()?.plainText()?.let(onPaste) }
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.remote_shell_menu_text_larger)) },
+                leadingIcon = { Icon(MeshtasticIcons.Add, contentDescription = null) },
+                onClick = { onFontSize(1) },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.remote_shell_menu_text_smaller)) },
+                leadingIcon = { Icon(MeshtasticIcons.Remove, contentDescription = null) },
+                onClick = { onFontSize(-1) },
+            )
+        }
+    }
+}
+
+/** Reports what the session is doing; without it a refused or stalled session is just a blank screen. */
+@Composable
+private fun SessionStatusBar(state: SessionState, onReconnect: () -> Unit) {
+    val label =
+        when (state) {
+            SessionState.OPEN -> return
+            SessionState.IDLE -> Res.string.remote_shell_status_not_connected
+            SessionState.OPENING -> Res.string.remote_shell_status_opening
+            SessionState.CLOSING -> Res.string.remote_shell_status_closing
+            SessionState.CLOSED -> Res.string.remote_shell_status_closed
+            SessionState.ERROR -> Res.string.remote_shell_status_failed
+        }
+    val reconnectable = state == SessionState.CLOSED || state == SessionState.ERROR || state == SessionState.IDLE
+    StatusRow(text = stringResource(label)) {
+        if (reconnectable) TextButton(onClick = onReconnect) { Text(stringResource(Res.string.remote_shell_reconnect)) }
     }
 }
 
 /**
- * Zero-size field that holds keyboard focus so both hardware keys and the soft keyboard reach the session.
- *
- * The value is state-backed and never cleared outright: Compose hands back the field's whole content, and a reset only
- * lands on the next recomposition, so a callback arriving first would re-deliver characters already sent. We track what
- * we consumed and forward the delta, mapping a shrinking field to backspaces.
+ * Mosh's "last contact" line, shown once a frame of ours has gone unacknowledged for [STALE_AFTER_MS], so a slow mesh
+ * reads as slow rather than broken. It overlays the terminal instead of taking a row: a banner that resized the
+ * viewport would resize the remote PTY every time it came and went.
  */
 @Composable
-private fun KeyboardSink(
-    focusRequester: FocusRequester,
-    onChar: (Char) -> Unit,
-    onEnter: () -> Unit,
-    onBackspace: () -> Unit,
-    onTab: () -> Unit,
-) {
-    var sinkText by remember { mutableStateOf("") }
-    BasicTextField(
-        value = sinkText,
-        onValueChange = { newText ->
-            val consumed = sinkText
-            if (newText.length < consumed.length) {
-                repeat(consumed.length - newText.length) { onBackspace() }
-            } else {
-                val fresh = if (newText.startsWith(consumed)) newText.substring(consumed.length) else newText
-                fresh.forEach(onChar)
-            }
-            sinkText = if (newText.length > SINK_TRIM_LENGTH) "" else newText
-        },
-        modifier =
-        Modifier.size(1.dp).focusRequester(focusRequester).onKeyEvent { event ->
-            if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
-            when (event.key) {
-                Key.Enter,
-                Key.NumPadEnter,
-                -> {
-                    onEnter()
-                    true
-                }
-
-                Key.Tab -> {
-                    onTab()
-                    true
-                }
-
-                Key.Backspace -> {
-                    onBackspace()
-                    true
-                }
-
-                else -> false
-            }
-        },
-        textStyle = TextStyle(color = Color.Transparent, fontSize = 1.sp),
-        cursorBrush = SolidColor(Color.Transparent),
-    )
-}
-
-/** Routes one typed character, keeping control bytes out of the stream the PTY sees as text. */
-private fun RemoteShellViewModel.dispatchTypedChar(char: Char) {
-    when {
-        char == '\n' || char == '\r' -> typeEnter()
-        char == '\b' -> typeBackspace()
-        char == '\t' -> typeKey('\t')
-        char.isISOControl() -> Unit
-        else -> typeKey(char)
-    }
-}
-
-/** Reports what the session is actually doing; without it a refused or stalled session is just a blank screen. */
-@Composable
-private fun SessionStatusBar(state: RemoteShellViewModel.SessionState, onReconnect: () -> Unit) {
-    if (state == RemoteShellViewModel.SessionState.OPEN) return
-    val label =
-        when (state) {
-            RemoteShellViewModel.SessionState.IDLE -> "Not connected"
-            RemoteShellViewModel.SessionState.OPENING -> "Opening session\u2026"
-            RemoteShellViewModel.SessionState.CLOSING -> "Closing\u2026"
-            RemoteShellViewModel.SessionState.CLOSED -> "Session closed"
-            RemoteShellViewModel.SessionState.ERROR -> "Session failed"
-            RemoteShellViewModel.SessionState.OPEN -> return
+private fun LastContactBanner(health: LinkHealth, modifier: Modifier = Modifier) {
+    var now by remember { mutableLongStateOf(nowMillis) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(STALE_POLL_MS)
+            now = nowMillis
         }
-    val reconnectable =
-        state == RemoteShellViewModel.SessionState.CLOSED ||
-            state == RemoteShellViewModel.SessionState.ERROR ||
-            state == RemoteShellViewModel.SessionState.IDLE
+    }
+    val waitingSince = health.waitingSinceMs ?: return
+    if (now - waitingSince < STALE_AFTER_MS) return
+    val silentSeconds = ((now - health.lastInboundMs) / MS_PER_SECOND).toInt()
+    StatusRow(text = stringResource(Res.string.remote_shell_last_contact, silentSeconds), modifier = modifier)
+}
+
+@Composable
+private fun StatusRow(text: String, modifier: Modifier = Modifier, trailing: @Composable () -> Unit = {}) {
     Row(
         modifier =
-        Modifier.fillMaxWidth()
+        modifier
+            .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = TERMINAL_PADDING, vertical = STATUS_BAR_PADDING),
+            .padding(horizontal = TERMINAL_PADDING, vertical = BAR_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = label,
+            text = text,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
-        if (reconnectable) {
-            TextButton(onClick = onReconnect) { Text(text = "Reconnect") }
-        }
+        trailing()
     }
 }
-
-/** Keys a soft keyboard has no room for and a shell cannot do without. */
-@Composable
-private fun ControlKeyBar(onSend: (String) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = TERMINAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(CONTROL_KEY_SPACING),
-    ) {
-        CONTROL_KEYS.forEach { (label, sequence) ->
-            TextButton(onClick = { onSend(sequence) }) { Text(text = label, fontFamily = FontFamily.Monospace) }
-        }
-    }
-}
-
-private val CONTROL_KEYS =
-    listOf(
-        "^C" to "\u0003",
-        "^D" to "\u0004",
-        "TAB" to "\t",
-        "ESC" to "\u001b",
-        "\u2191" to "\u001b[A",
-        "\u2193" to "\u001b[B",
-    )
 
 /** Viewport size in monospace cells, so the remote PTY can be told how wide to wrap. */
 @Composable
-private fun rememberTerminalGrid(size: IntSize): Pair<Int, Int> {
+private fun rememberTerminalGrid(size: IntSize, fontSizeSp: Int): Pair<Int, Int> {
     val textMeasurer = rememberTextMeasurer()
     val cell =
-        remember(textMeasurer) {
-            textMeasurer.measure("0", TextStyle(fontFamily = FontFamily.Monospace, fontSize = TERMINAL_FONT_SIZE)).size
+        remember(textMeasurer, fontSizeSp) {
+            textMeasurer.measure("0", TextStyle(fontFamily = FontFamily.Monospace, fontSize = fontSizeSp.sp)).size
         }
     if (cell.width <= 0 || cell.height <= 0) return 0 to 0
     return (size.width / cell.width) to (size.height / cell.height)
 }
-
-@Composable
-private fun TerminalLine(text: String, color: Color = MaterialTheme.colorScheme.onSurface) {
-    Text(
-        text = text,
-        color = color,
-        fontFamily = FontFamily.Monospace,
-        fontSize = TERMINAL_FONT_SIZE,
-        modifier = Modifier.fillMaxWidth(),
-    )
-}
-
-/** Reset the invisible sink past this length so it does not accumulate a whole session of keystrokes. */
-private const val SINK_TRIM_LENGTH = 256
-
-/** Block drawn after the pending input to mark the caret position. */
-private const val CURSOR = "█"
-
-private val TERMINAL_PADDING = 8.dp
-
-private val STATUS_BAR_PADDING = 4.dp
-
-private val CONTROL_KEY_SPACING = 4.dp
-
-private val TERMINAL_FONT_SIZE = 13.sp
-
-/** Delay before the initial focus request, in milliseconds. */
-@Suppress("MagicNumber")
-private const val FOCUS_REQUEST_DELAY_MS = 100L

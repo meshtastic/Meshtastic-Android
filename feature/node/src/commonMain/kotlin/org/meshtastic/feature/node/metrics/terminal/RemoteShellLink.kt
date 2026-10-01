@@ -62,6 +62,18 @@ internal sealed interface ShellEvent {
 
 internal class ShellStep(val send: List<RemoteShell>, val events: List<ShellEvent>)
 
+/** What the link knows about the path to the node, for the UI to show a slow link as slow rather than broken. */
+data class LinkHealth(
+    /** Smoothed time for a frame of ours to be acknowledged, or null before the first measurement. */
+    val roundTripMs: Long? = null,
+    /** Frames of ours the node has not acknowledged yet. */
+    val unacknowledged: Int = 0,
+    /** When anything last arrived from the node. */
+    val lastInboundMs: Long = 0L,
+    /** When the oldest unacknowledged frame of ours was last sent, or null when the node is level with us. */
+    val waitingSinceMs: Long? = null,
+)
+
 internal fun shellFrame(op: RemoteShell.OpCode, configure: (RemoteShell.Builder) -> Unit = {}): RemoteShell =
     RemoteShell.Builder()
         .also { wb ->
@@ -124,6 +136,15 @@ internal class RemoteShellLink(val sessionId: Int, private val inputWindowFrames
 
     private val out = mutableListOf<RemoteShell>()
     private val events = mutableListOf<ShellEvent>()
+
+    val health: LinkHealth
+        get() =
+            LinkHealth(
+                roundTripMs = ackLatencyMs?.toLong(),
+                unacknowledged = highestSentSeq() - peerAcked,
+                lastInboundMs = lastInboundMs,
+                waitingSinceMs = txHistory.firstOrNull { it.frame.seq == peerAcked + 1 }?.sentMs,
+            )
 
     // region --- Commands ---
 

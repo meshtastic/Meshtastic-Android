@@ -203,6 +203,18 @@ class RemoteShellLinkTest {
     }
 
     @Test
+    fun healthReportsHowLongTheOldestUnacknowledgedFrameHasWaited() {
+        val link = openedLink()
+        assertEquals(null, link.health.waitingSinceMs)
+        link.input("x".encodeUtf8(), 300)
+        assertEquals(300L, link.health.waitingSinceMs)
+        assertEquals(1, link.health.unacknowledged)
+        link.receive(server(OpCode.OUTPUT, seq = 2, ack = 2, payload = "x"), 450)
+        assertEquals(null, link.health.waitingSinceMs)
+        assertEquals(450L, link.health.lastInboundMs)
+    }
+
+    @Test
     fun framesForAnotherSessionAreIgnored() {
         val link = openedLink()
         val step = link.receive(server(OpCode.OUTPUT, seq = 2, payload = "x", session = SID + 1), 200)
