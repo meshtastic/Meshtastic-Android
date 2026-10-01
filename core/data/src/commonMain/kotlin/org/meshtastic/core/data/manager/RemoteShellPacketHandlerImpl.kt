@@ -28,11 +28,8 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.RemoteShell
 
 /**
- * Handles incoming [RemoteShell] packets (REMOTE_SHELL_APP portnum = 13).
- *
- * This is a scaffold implementation. The RemoteShell firmware feature is currently unreleased (gated to
- * [org.meshtastic.core.model.Capabilities.supportsRemoteShell]). When the firmware ships, this handler should be
- * expanded to manage PTY session state and relay I/O to the UI.
+ * Decodes incoming [RemoteShell] frames (REMOTE_SHELL_APP) and hands them on; session state lives with the terminal
+ * screen.
  */
 @Single
 class RemoteShellPacketHandlerImpl : RemoteShellHandler {

@@ -115,10 +115,9 @@ class NodeDetailViewModel(
 
     private val isEnsuringSession = MutableStateFlow(false)
 
-    private val sessionStatusFlow =
-        activeNodeId.flatMapLatest { nodeId ->
-            if (nodeId == null) flowOf(SessionStatus.NoSession) else observeRemoteAdminSessionStatus(nodeId)
-        }
+    private val sessionStatusFlow = activeNodeId.flatMapLatest { nodeId ->
+        if (nodeId == null) flowOf(SessionStatus.NoSession) else observeRemoteAdminSessionStatus(nodeId)
+    }
 
     /** One-shot navigation events from session-bearing actions (e.g. successful remote-admin opens). */
     private val _navigationEvents = Channel<Route>(capacity = Channel.BUFFERED)

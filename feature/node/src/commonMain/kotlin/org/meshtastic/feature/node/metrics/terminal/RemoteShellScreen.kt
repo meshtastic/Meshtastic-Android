@@ -41,7 +41,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -62,6 +64,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.remote_shell
@@ -97,12 +102,16 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
     var terminalSize by remember { mutableStateOf(IntSize.Zero) }
     val (cols, rows) = rememberTerminalGrid(terminalSize)
 
-    val measured = cols > 0 && rows > 0
-    LaunchedEffect(cols, rows) { if (measured) viewModel.resize(cols, rows) }
+    val grid by rememberUpdatedState(cols to rows)
+    val measuredGrid = remember { snapshotFlow { grid }.filter { (c, r) -> c > 0 && r > 0 }.distinctUntilChanged() }
+    LaunchedEffect(Unit) { measuredGrid.collect { (c, r) -> viewModel.resize(c, r) } }
 
-    // Keyed on whether we have a measurement, not on its value: the IME resizes the viewport, and reopening the
-    // session every time the keyboard moves would churn a session per keystroke burst.
-    LaunchedEffect(measured) { if (measured) viewModel.openSession() }
+    // Opens once, on the first measurement: the IME resizes the viewport, and reopening the session every time the
+    // keyboard moves would churn a session per keystroke burst.
+    LaunchedEffect(Unit) {
+        measuredGrid.first()
+        viewModel.openSession()
+    }
 
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {

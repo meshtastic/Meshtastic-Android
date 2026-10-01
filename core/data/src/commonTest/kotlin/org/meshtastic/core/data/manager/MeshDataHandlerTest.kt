@@ -832,8 +832,7 @@ class MeshDataHandlerTest {
     @Test
     fun `a genuine proof is still recorded after a forged ack has settled the packet`() = testScope.runTest {
         val updates = mutableListOf<DataPacket>()
-        val forged =
-            sentPacket(MeshPacket.AckProofStatus.ACK_PROOF_INVALID.value).copy(status = MessageStatus.RECEIVED)
+        val forged = sentPacket(MeshPacket.AckProofStatus.ACK_PROOF_INVALID.value).copy(status = MessageStatus.RECEIVED)
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(forged)
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
