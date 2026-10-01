@@ -62,6 +62,7 @@ import org.meshtastic.core.ui.util.createClipEntry
 internal fun SectionCard(
     title: StringResource,
     modifier: Modifier = Modifier,
+    titleTrailing: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     ElevatedCard(
@@ -70,16 +71,22 @@ internal fun SectionCard(
         shape = MaterialTheme.shapes.extraLarge,
     ) {
         Column(modifier = Modifier.padding(vertical = 16.dp)) {
-            Text(
-                text = stringResource(title),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                modifier =
-                Modifier.padding(horizontal = 20.dp, vertical = 8.dp).semantics {
-                    heading()
-                }, // Proper navigation for screen reader users
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    modifier =
+                    Modifier.weight(1f).padding(vertical = 8.dp).semantics {
+                        heading()
+                    }, // Proper navigation for screen reader users
+                )
+                titleTrailing?.invoke()
+            }
             content()
         }
     }

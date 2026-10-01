@@ -57,7 +57,6 @@ import org.meshtastic.core.resources.remote_shell_open
 import org.meshtastic.core.resources.remote_shell_open_description
 import org.meshtastic.core.resources.session_active
 import org.meshtastic.core.resources.session_refresh_required
-import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.icon.ForkLeft
 import org.meshtastic.core.ui.icon.Icecream
@@ -83,7 +82,15 @@ fun AdministrationSection(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        SectionCard(title = Res.string.administration) {
+        SectionCard(
+            title = Res.string.administration,
+            titleTrailing =
+            if (metricsState.isLocal) {
+                null
+            } else {
+                { SessionChip(node.num, sessionStatus, isEnsuringSession, onAction) }
+            },
+        ) {
             Column {
                 // Local nodes don't need a session — they short-circuit straight to the settings screen.
                 if (metricsState.isLocal) {
@@ -136,10 +143,9 @@ fun AdministrationSection(
 }
 
 /**
- * Single primary affordance for opening the remote-admin screen. Replaces the prior two-row, no-feedback flow that
- * required the user to know they had to tap "Metadata" first to populate `node.metadata` before "Remote Administration"
- * un-greyed out. The session passkey freshness — not the metadata insert — is the real gate (see
- * `firmware/src/modules/AdminModule.cpp:1460-1481`), and is now reflected via an [AssistChip] + inline progress.
+ * The session passkey freshness, not the metadata insert, is the real gate (see
+ * `firmware/src/modules/AdminModule.cpp:1460-1481`). Every row in the card that needs it shares one session, so its
+ * state sits in the card's title row as a [SessionChip], and this row shows inline progress while it is established.
  */
 @Composable
 private fun RemoteAdminListItem(
@@ -154,38 +160,13 @@ private fun RemoteAdminListItem(
             is SessionStatus.Active -> null
             is SessionStatus.Stale -> Res.string.session_refresh_required
         }
-    val chipLabelRes =
-        when (sessionStatus) {
-            SessionStatus.NoSession -> null
-            is SessionStatus.Active -> Res.string.session_active
-            is SessionStatus.Stale -> Res.string.session_refresh_required
-        }
 
     Column {
-        BasicListItem(
+        ListItem(
             text = stringResource(Res.string.remote_admin),
             leadingIcon = MeshtasticIcons.Settings,
             supportingText = supportingTextRes?.let { stringResource(it) },
             enabled = !isEnsuringSession,
-            trailingContent =
-            chipLabelRes?.let { res ->
-                {
-                    AssistChip(
-                        onClick = { onAction(NodeDetailAction.OpenRemoteAdmin(nodeNum)) },
-                        label = { androidx.compose.material3.Text(stringResource(res)) },
-                        enabled = !isEnsuringSession,
-                        colors =
-                        if (sessionStatus is SessionStatus.Active) {
-                            AssistChipDefaults.assistChipColors(
-                                labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            )
-                        } else {
-                            AssistChipDefaults.assistChipColors()
-                        },
-                    )
-                }
-            },
             onClick = { onAction(NodeDetailAction.OpenRemoteAdmin(nodeNum)) },
         )
         AnimatedVisibility(visible = isEnsuringSession) {
@@ -200,6 +181,36 @@ private fun RemoteAdminListItem(
             }
         }
     }
+}
+
+/** Nothing to show before a session exists; the remote-admin row's supporting text covers that case. */
+@Composable
+private fun SessionChip(
+    nodeNum: Int,
+    sessionStatus: SessionStatus,
+    isEnsuringSession: Boolean,
+    onAction: (NodeDetailAction) -> Unit,
+) {
+    val labelRes =
+        when (sessionStatus) {
+            SessionStatus.NoSession -> return
+            is SessionStatus.Active -> Res.string.session_active
+            is SessionStatus.Stale -> Res.string.session_refresh_required
+        }
+    AssistChip(
+        onClick = { onAction(NodeDetailAction.OpenRemoteAdmin(nodeNum)) },
+        label = { androidx.compose.material3.Text(stringResource(labelRes)) },
+        enabled = !isEnsuringSession,
+        colors =
+        if (sessionStatus is SessionStatus.Active) {
+            AssistChipDefaults.assistChipColors(
+                labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            )
+        } else {
+            AssistChipDefaults.assistChipColors()
+        },
+    )
 }
 
 @Composable
