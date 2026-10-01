@@ -37,5 +37,6 @@ kotlin {
             api(libs.kermit)
         }
         androidMain.dependencies { api(libs.androidx.core.ktx) }
+        jvmTest.dependencies { implementation(libs.lincheck) }
     }
 }
