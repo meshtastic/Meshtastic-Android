@@ -72,6 +72,17 @@ Run these when relevant to map, provider, or flavor-specific behavior:
 ./gradlew testFdroidDebug testGoogleDebug
 ```
 
+## 3a) Compose stability baselines
+
+Each Compose module commits a `stability/*.stability` file listing every composable's skippability and parameter stability. `./gradlew composeStabilityCheck` compares the current build against them and fails on any change, including a new or removed composable. After a deliberate change, regenerate the module's baseline and commit it:
+
+```bash
+./gradlew :feature:node:stabilityDump                 # KMP module
+./gradlew :androidApp:googleDebugStabilityDump        # Android module, one variant
+```
+
+A `STABLE → UNSTABLE` line usually means a parameter type gained a `var` or a mutable member; fix the type rather than re-dumping. The task list, and why `:feature:messaging` is not on it, is `STABILITY_CHECK_TASKS` in `RootConventionPlugin.kt`.
+
 ## 3b) Screenshot testing (two modules)
 
 Compose Preview Screenshot Testing (AGP/layoutlib) is split into two modules — keep the distinction:
@@ -114,7 +125,7 @@ CI is defined in `.github/workflows/reusable-check.yml` as parallel job groups. 
    The validation-only jobs (`lint-check`, `screenshot-check`, `test-shards`) pin `VERSION_CODE` to one constant so the versionCode-dependent tasks keep the same cache keys on every commit; `screenshot-check` and `test-shards` also clone shallow (`fetch-depth: 1`). `android-check` and `build-desktop` check out full blob-less history so the build derives the real versionCode.
 3. **`android-check`** builds the fdroid and google debug APKs and checks their native-library ABI parity (`scripts/verify-abi-parity.sh`). The merge queue skips it. On `main` it also generates and submits the dependency graph; no other ref submits one.
 4. **`build-desktop`** is a multi-OS matrix (macOS, Windows, and Linux x64 and arm64; the job's `matrix.os` carries the labels) running `:desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars`. It packages the debug build type, real installers the snapshot release can ship, and pulls in `proguardReleaseJars` only so a jmods-less packaging JDK fails here rather than at release time. On Linux it then wraps jpackage's `app-image` directory into a real AppImage via `scripts/build-appimage.sh`.
-5. **`screenshot-check`** — Runs `:screenshot-tests:validateDebugScreenshotTest` (the visual-regression gate) and uploads a diff report. Note: `:docs-screenshots` is intentionally NOT validated here (generate-only).
+5. **`screenshot-check`** — Runs `:screenshot-tests:validateDebugScreenshotTest` (the visual-regression gate) and uploads a diff report, then `composeStabilityCheck`. Note: `:docs-screenshots` is intentionally NOT validated here (generate-only).
 6. **`rb-check`** — Reproducible-build verification (`scripts/verify-rb.sh`). Runs **only** in the merge queue.
 7. **`verify-flatpak`** lives in its own workflow (`.github/workflows/verify-flatpak.yml`), **not** in `reusable-check.yml`, and is not called by it. Generates the Flatpak offline-build sources (`captureFlatpakSources`) and then builds the flatpak fully offline, on an x86_64 + aarch64 matrix of hosted Ubuntu runners. Since #6919 the sources are generated inside each arch's own offline build rather than committed. It is **not a required check** and never runs in the merge queue, so its triggers are scoped accordingly: a PR runs it only when it touches the flatpak tooling itself (`scripts/verify-flatpak/**`, the workflow), and a push to `main` runs it for those plus `gradle/wrapper/**`, because the offline manifest pins the Gradle distribution apart from the wrapper. The wider dependency surface it captures (`desktopApp/**`, `gradle/libs.versions.toml`, the root build scripts) is verified by the nightly cron.
 

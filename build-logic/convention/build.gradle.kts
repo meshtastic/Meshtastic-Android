@@ -45,6 +45,7 @@ dependencies {
     compileOnly(libs.android.tools.common)
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.compose.multiplatform.gradlePlugin)
+    compileOnly(libs.compose.stability.analyzer.gradlePlugin)
     compileOnly(libs.compose.screenshot.gradlePlugin)
     compileOnly(libs.datadog.gradlePlugin)
     compileOnly(libs.detekt.gradlePlugin)

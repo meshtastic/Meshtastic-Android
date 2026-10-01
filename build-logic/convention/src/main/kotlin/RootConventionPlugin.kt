@@ -47,9 +47,43 @@ class RootConventionPlugin : Plugin<Project> {
             // Register graph tasks on the root project itself
             configureGraphTasks()
             registerKmpSmokeCompileTask()
+            tasks.register("composeStabilityCheck") {
+                group = "verification"
+                description = "Check every Compose module's composable stability against its committed baseline."
+                dependsOn(STABILITY_CHECK_TASKS)
+            }
         }
     }
 }
+
+/**
+ * One stability check per Compose module, named explicitly because an Android module registers one per variant and
+ * checking all six of `:androidApp`'s at once exhausts the heap. A new Compose module is gated only once it is added
+ * here and its baseline is committed.
+ *
+ * `:feature:messaging` is missing: its check depends on `compileCommonMainKotlinMetadata`, which fails on
+ * `MatchGroup.range`, a property the common stdlib does not declare.
+ */
+private val STABILITY_CHECK_TASKS =
+    listOf(
+        ":androidApp:googleDebugStabilityCheck",
+        ":core:barcode:googleDebugStabilityCheck",
+        ":core:navigation:stabilityCheck",
+        ":core:nfc:debugStabilityCheck",
+        ":core:resources:stabilityCheck",
+        ":core:ui:stabilityCheck",
+        ":feature:connections:stabilityCheck",
+        ":feature:discovery:stabilityCheck",
+        ":feature:docs:stabilityCheck",
+        ":feature:firmware:stabilityCheck",
+        ":feature:intro:stabilityCheck",
+        ":feature:map:stabilityCheck",
+        ":feature:map-maplibre:stabilityCheck",
+        ":feature:node:stabilityCheck",
+        ":feature:settings:stabilityCheck",
+        ":feature:widget:debugStabilityCheck",
+        ":feature:wifi-provision:stabilityCheck",
+    )
 
 /**
  * Registers a `kmpSmokeCompile` lifecycle task that depends on `compileKotlinJvm` and `compileKotlinIosSimulatorArm64`

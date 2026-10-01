@@ -91,6 +91,8 @@ jserialcomm = "2.11.4"
 coil = "3.6.3"
 datadog-gradle = "1.31.0"
 dd-sdk-android = "3.14.1"
+# Must match `kotlin` exactly; the analyzer extends compiler internals.
+compose-stability-analyzer = "0.15.0"
 detekt = "2.0.0-alpha.6"
 dokka = "2.2.0"
 devtools-ksp = "2.3.12"
@@ -333,6 +335,7 @@ android-tools-common = { module = "com.android.tools:common", version = "32.4.1"
 androidx-room-gradlePlugin = { module = "androidx.room3:room3-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
+compose-stability-analyzer-gradlePlugin = { module = "com.github.skydoves:compose-stability-gradle", version.ref = "compose-stability-analyzer" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version.ref = "datadog-gradle" }
 compose-screenshot-gradlePlugin = { module = "com.android.compose.screenshot:screenshot-test-gradle-plugin", version.ref = "compose-screenshot" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.6.7" }
@@ -385,6 +388,7 @@ compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "com
 # Jetbrains
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+compose-stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version.ref = "compose-stability-analyzer" }
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

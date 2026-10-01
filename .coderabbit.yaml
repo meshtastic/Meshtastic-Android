@@ -51,6 +51,8 @@ reviews:
     - "!**/firmware_releases.json"
     - "!**/emoji-data.json"
     - "!**/flatpak-sources.json"
+    # Compose stability baselines, written by stabilityDump.
+    - "!**/stability/*.stability"
     # Crowdin-managed translations — owned upstream, not hand-edited here.
     - "!**/values-*/strings.xml"
     # Spec Kit scaffolding — vendored tooling, not hand-maintained here.

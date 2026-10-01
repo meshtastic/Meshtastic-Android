@@ -3,6 +3,7 @@
 # visible in diffs and code review.
 **/composeResources/**/values-*/*.xml linguist-generated=true
 .skills/compose-ui/strings-index.txt linguist-generated=true
+**/stability/*.stability linguist-generated=true
 
 # Ensure assets are treated as binary
 *.png binary

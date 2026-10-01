@@ -133,6 +133,10 @@ jobs:
         # execution time, which Isolated Projects forbids (fatal since Gradle 9.7).
         run: ./gradlew :screenshot-tests:validateDebugScreenshotTest -Pci=true -Pkotlin.daemon.useFallbackStrategy=false -Dorg.gradle.isolated-projects=false
 
+      - name: Compose Stability Check
+        if: ${{ !cancelled() }}
+        run: ./gradlew composeStabilityCheck -Pci=true -Pkotlin.daemon.useFallbackStrategy=false
+
       - name: Upload screenshot diff report
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
