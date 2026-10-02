@@ -27,6 +27,7 @@ internal object JvmIntroPermissions : IntroPermissions {
     override val location: PermissionUiState = granted
     override val notification: PermissionUiState = granted
     override val bluetoothRequiresLocation: Boolean = false
+    override val bluetoothSupported: Boolean = true
 }
 
 /** JVM/Desktop stub: settings navigation is a no-op. */

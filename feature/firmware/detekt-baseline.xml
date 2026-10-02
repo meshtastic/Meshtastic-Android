@@ -2,12 +2,13 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>Kdoc:LegacyDfuTransport.kt:LegacyDfuTransport$/** * Stream [firmware] to the Packet characteristic, awaiting a [LegacyDfuResponse.PacketReceipt] every * [PRN_INTERVAL_PACKETS] packets and verifying the bytes-received count. * * Watches the connection state in parallel with the write loop; if the link drops mid-stream we cancel the write * coroutine and surface a [DfuException.ConnectionFailed] immediately rather than waiting indefinitely for a write * that will never complete. */</ID>
-    <ID>ModifierMissing:FirmwareUpdateScreen.kt:@Composable internal fun CheckingState</ID>
-    <ID>ModifierMissing:FirmwareUpdateScreen.kt:@Composable internal fun DisclaimerDialog</ID>
-    <ID>ModifierMissing:FirmwareUpdateScreen.kt:@Composable internal fun ErrorState</ID>
-    <ID>ModifierMissing:FirmwareUpdateScreen.kt:@Composable internal fun SuccessState</ID>
-    <ID>ModifierMissing:FirmwareUpdateScreen.kt:@Composable internal fun VerifyingState</ID>
+    <ID>AbstractClassCanBeInterface:LegacyDfuProtocol.kt:LegacyDfuResponse$LegacyDfuResponse</ID>
+    <ID>AbstractClassCanBeInterface:SecureDfuHandler.kt:BootloaderDetection$BootloaderDetection</ID>
+    <ID>AbstractClassCanBeInterface:SecureDfuHandler.kt:DfuUploadResult$DfuUploadResult</ID>
+    <ID>AbstractClassCanBeInterface:SecureDfuProtocol.kt:DfuResponse$DfuResponse</ID>
+    <ID>AbstractClassCanBeInterface:UnifiedOtaProtocol.kt:OtaCommand$OtaCommand</ID>
+    <ID>AbstractClassCanBeInterface:UnifiedOtaProtocol.kt:OtaHandshakeStatus$OtaHandshakeStatus</ID>
+    <ID>AbstractClassCanBeInterface:UnifiedOtaProtocol.kt:OtaResponse$OtaResponse</ID>
     <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable @Suppress("LongMethod") private fun ReadyState</ID>
     <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable internal fun CheckingState</ID>
     <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable internal fun ErrorState</ID>
@@ -20,5 +21,9 @@
     <ID>PreviewPublic:FirmwarePreviews.kt:@PreviewLightDark @Composable fun SuccessStatePreview</ID>
     <ID>PreviewPublic:FirmwarePreviews.kt:@PreviewLightDark @Composable fun VerifyingStatePreview</ID>
     <ID>TooGenericExceptionCaught:FirmwareUpdateViewModel.kt:FirmwareUpdateViewModel$e: Exception</ID>
+    <ID>UnnecessaryLaunchedEffect:FirmwareUpdateScreen.kt:LaunchedEffect</ID>
+    <ID>UnusedPrivateProperty:ThroughputTracker.kt:ThroughputTracker$private val timeSource: TimeSource = TimeSource.Monotonic</ID>
+    <ID>UseOrEmpty:Esp32OtaUpdateHandler.kt:Esp32OtaUpdateHandler$e.message ?: ""</ID>
+    <ID>UseOrEmpty:SecureDfuHandler.kt:SecureDfuHandler$e.message ?: ""</ID>
   </CurrentIssues>
 </SmellBaseline>

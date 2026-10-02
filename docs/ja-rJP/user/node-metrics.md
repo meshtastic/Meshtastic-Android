@@ -1,8 +1,7 @@
 ---
 title: ノードメトリクス
-parent: User Guide
 nav_order: 5
-last_updated: 2026-09-09
+last_updated: 2026-09-28
 description: 各メッシュノードのテレメトリダッシュボード。デバイスの状態、環境センサー、大気質、信号品質、電力、ルート追跡、位置履歴を表示します。
 aliases:
   - metrics
@@ -64,11 +63,11 @@ BME680 の \*\*IAQ（室内空気質）\*\*指数は、ガス抵抗から算出�
 
 ![「非常に良い」から「危険なほど汚染」までの IAQ 指数スケール](../../assets/screenshots/node-metrics_iaq_scale.png)
 
-> 💡 **ヒント：** 環境メトリクスには、リモートノードに接続されたセンサーが必要です。 すべてのノードが環境データを報告するわけではありません。 対応センサーの一覧については、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
+> 💡 **ヒント：** 環境メトリクスには、リモートノードに接続されたセンサーが必要です。すべてのノードが環境データを報告するわけではありません。対応センサーの一覧については、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
 
 ## 大気質メトリクス
 
-大気質は、粒子状物質センサーや CO₂ センサーを搭載したノード向けの専用メトリクスビューです。 これは、環境メトリクスに記載されている **BME680 の IAQ の測定値とは別のもの**です。IAQ はガス抵抗から算出される単一の指数であるのに対し、大気質ビューはその基となる粒子状物質と CO₂ の測定値をグラフ化します。
+大気質は、粒子状物質センサーや CO₂ センサーを搭載したノード向けの専用メトリクスビューです。これは、環境メトリクスに記載されている **BME680 の IAQ の測定値とは別のもの**です。IAQ はガス抵抗から算出される単一の指数であるのに対し、大気質ビューはその基となる粒子状物質と CO₂ の測定値をグラフ化します。
 
 | メトリクス                 | 単位      | 説明                                                                                                                                                                                   |
 | --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -92,14 +91,14 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 ![CO₂ の深刻度が色分けされた大気質の測定値](../../assets/screenshots/node-metrics_air_quality.png)
 
-大気質のログ／メトリクスボタンは、**ノードが大気質のテレメトリを報告したときにのみ**、ノードの詳細画面に表示されます。 大気質ビューでは、次のことができます：
+大気質のログ／メトリクスボタンは、**ノードが大気質のテレメトリを報告したときにのみ**、ノードの詳細画面に表示されます。大気質ビューでは、次のことができます：
 
 - グラフの**期間**を選択します。
 - **メトリクスチップ**で絞り込みます。データがあるメトリクスのみが表示されます。
 - 最新の大気質テレメトリを**更新／要求**します。
 - 表計算ソフトで分析できるよう、**CSV にエクスポート**します。
 
-> 💡 **ヒント：** 大気質メトリクスには、リモートノードに対応する大気質センサーが必要です。 対応ハードウェアについては、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
+> 💡 **ヒント：** 大気質メトリクスには、リモートノードに対応する大気質センサーが必要です。対応ハードウェアについては、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
 
 ## 信号品質
 
@@ -125,7 +124,7 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 詳しい説明は、[信号メーターを理解する](signal-meter) を参照してください。
 
-接続中の無線機のローカル統計も、利用可能な場合は信号品質に表示されます。 これらのログには、ノイズフロア、トラフィックカウンター、中継カウンター、オンラインノード数、無線機の連続稼働時間が含まれます。 ノイズフロアのグラフでは、混雑した RF 環境を見分けやすいよう、-85 dBm に破線の基準線が引かれます。
+接続中の無線機のローカル統計も、利用可能な場合は信号品質に表示されます。これらのログには、ノイズフロア、トラフィックカウンター、中継カウンター、オンラインノード数、無線機の連続稼働時間が含まれます。ノイズフロアのグラフでは、混雑した RF 環境を見分けやすいよう、-85 dBm に破線の基準線が引かれます。
 
 - **Request** — ask the connected radio for a fresh Local Stats telemetry report
 - **Clear** — remove Local Stats logs for that node
@@ -152,7 +151,7 @@ The node detail screen shows cards for channels 1 to 3. Use the chart button on 
 
 ### ルート追跡の結果の見方
 
-A traceroute is a round trip, so each saved result carries a hop count in each direction — **Forward Hops** and **Return Hops** — and the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. On Android that view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
+A traceroute is a round trip, so each saved result carries a hop count in each direction, **Forward Hops** and **Return Hops**, plus the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. That view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
 
 A result marked **No Response** means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
 

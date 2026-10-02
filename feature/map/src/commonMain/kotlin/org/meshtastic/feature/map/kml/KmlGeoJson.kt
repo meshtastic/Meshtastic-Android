@@ -56,18 +56,19 @@ internal fun KmlGeometry.toFeature(placemark: Placemark, style: KmlStyle?): Stri
  */
 internal fun String.toCssColor(): Pair<String, String>? {
     val bytes =
-        removePrefix("#").takeIf { it.length == KML_COLOR_LENGTH }?.chunked(BYTE_CHARS)?.map { it.toIntOrNull(HEX) }
-    return if (bytes == null || bytes.any { it == null }) {
-        null
-    } else {
-        val opacity = bytes[ALPHA]!!.toDouble() / MAX_CHANNEL
-        // Rendered digit by digit rather than through a format string. This is JSON, not display text, and a
-        // locale-aware `%f` writes `"fill-opacity":0,498` on a comma-decimal device — invalid JSON, which makes
-        // MapLibre reject the whole converted file so every KML import silently draws nothing. The previous
-        // implementation pinned Locale.US to avoid that; building the text by hand cannot regress into it, and works
-        // the same on every platform.
-        "#${bytes[RED]!!.hexByte()}${bytes[GREEN]!!.hexByte()}${bytes[BLUE]!!.hexByte()}" to opacity.toFixed()
-    }
+        removePrefix("#")
+            .takeIf { it.length == KML_COLOR_LENGTH }
+            ?.chunked(BYTE_CHARS)
+            ?.map { it.toIntOrNull(HEX) }
+            ?.takeIf { parsed -> parsed.none { it == null } }
+            ?.filterNotNull() ?: return null
+    val opacity = bytes[ALPHA].toDouble() / MAX_CHANNEL
+    // Rendered digit by digit rather than through a format string. This is JSON, not display text, and a
+    // locale-aware `%f` writes `"fill-opacity":0,498` on a comma-decimal device. That is invalid JSON, which makes
+    // MapLibre reject the whole converted file so every KML import silently draws nothing. The previous
+    // implementation pinned Locale.US to avoid that; building the text by hand cannot regress into it, and works
+    // the same on every platform.
+    return "#${bytes[RED].hexByte()}${bytes[GREEN].hexByte()}${bytes[BLUE].hexByte()}" to opacity.toFixed()
 }
 
 /** Minimal JSON string escaping — KML descriptions routinely carry quotes, newlines and CDATA-wrapped HTML. */

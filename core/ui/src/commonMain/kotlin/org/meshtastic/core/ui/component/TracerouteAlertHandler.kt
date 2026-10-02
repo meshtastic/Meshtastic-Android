@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,6 +59,7 @@ fun TracerouteAlertHandler(
     var dismissedTracerouteRequestId by remember { mutableStateOf<Int?>(null) }
     val colorScheme = MaterialTheme.colorScheme
     val scope = rememberCoroutineScope()
+    val currentOnNavigateToMap by rememberUpdatedState(onNavigateToMap)
 
     LaunchedEffect(traceRouteResponse, dismissedTracerouteRequestId) {
         val response = traceRouteResponse
@@ -89,7 +91,7 @@ fun TracerouteAlertHandler(
                     val errorRes = availability.toMessageRes()
                     if (errorRes == null) {
                         dismissedTracerouteRequestId = response.requestId
-                        onNavigateToMap(response.destinationNodeNum, response.requestId, response.logUuid)
+                        currentOnNavigateToMap(response.destinationNodeNum, response.requestId, response.logUuid)
                     } else {
                         uiViewModel.clearTracerouteResponse()
                         // Post the error alert after the current alert is dismissed to avoid

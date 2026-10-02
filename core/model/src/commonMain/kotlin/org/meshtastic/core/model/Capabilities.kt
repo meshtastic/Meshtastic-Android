@@ -17,6 +17,11 @@
 package org.meshtastic.core.model
 
 import org.meshtastic.core.model.util.isDebug
+import org.meshtastic.proto.FieldMetadata
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.mesh_beacon
+import org.meshtastic.proto.statusmessage
+import org.meshtastic.proto.tak
 
 /**
  * Defines the capabilities and feature support based on the device firmware version.
@@ -31,6 +36,22 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
 
     private fun atLeast(min: DeviceVersion): Boolean = forceEnableAll || (version != null && version >= min)
 
+    /**
+     * Whether a config field is worth offering on this firmware, from the version gates its schema declares. Below
+     * `since_firmware` the node ignores the field. At or above `deprecated_since` it is shown only while [isSet], so a
+     * value the node still holds stays visible instead of being silently kept.
+     */
+    fun offers(field: FieldMetadata, isSet: Boolean = false): Boolean {
+        val arrived = field.since_firmware?.let(::gate)?.let(::atLeast) ?: true
+        val retired =
+            field.deprecated_since?.let(::gate)?.let { !forceEnableAll && version != null && version >= it } ?: false
+        return arrived && (!retired || isSet)
+    }
+
+    // The schema declares these; an unparseable one must fail here rather than silently pass every gate.
+    private fun gate(declared: String): DeviceVersion =
+        DeviceVersion(declared).also { require(it.isValid) { "Unparseable firmware version in schema: $declared" } }
+
     /** Ability to mute notifications from specific nodes via admin messages. */
     val canMuteNode = atLeast(V2_7_18)
 
@@ -40,29 +61,24 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Ability to send verified shared contacts. Supported since firmware v2.7.12. */
     val canSendVerifiedContacts = atLeast(V2_7_12)
 
-    /** Ability to toggle device telemetry globally via module config. Supported since firmware v2.7.12. */
-    val canToggleTelemetryEnabled = atLeast(V2_7_12)
-
     /** Ability to toggle the 'is_unmessageable' flag in user config. Supported since firmware v2.6.9. */
     val canToggleUnmessageable = atLeast(V2_6_9)
 
     /** Support for sharing contact information via QR codes. Supported since firmware v2.6.8. */
     val supportsQrCodeSharing = atLeast(V2_6_8)
 
-    /** Support for Status Message module. Supported since firmware v2.8.0. */
-    val supportsStatusMessage = atLeast(V2_8_0)
+    /** Support for the Status Message module, from the `since_firmware` its `ModuleConfig` field declares. */
+    val supportsStatusMessage = offers(ModuleConfig.statusmessage)
 
     /**
-     * Support for TAK (ATAK) module configuration. Gated to firmware v2.8.0.
+     * Support for TAK (ATAK) module configuration, from the `since_firmware` its `ModuleConfig` field declares.
      *
-     * The v2.7.19 gate this replaces was set on protobuf availability rather than firmware support: v2.7.x
-     * `AdminModule::handleSetModuleConfig()` has no case for the `tak` submessage, so the node ACKs the write and
-     * reboots without storing anything, and `NodeDB::saveToDisk()` never sets `has_tak`. The editor therefore appeared
-     * to save and always read back as unspecified (Meshtastic-Android#6430).
-     *
-     * The firmware write, persist and remote-admin read paths land in meshtastic/firmware#11216, labelled for 2.8.
+     * The schema says 2.8.0 because that is where the firmware gained the write, persist and remote-admin read paths
+     * (meshtastic/firmware#11216). Before it, v2.7.x `AdminModule::handleSetModuleConfig()` had no case for the `tak`
+     * submessage: the node ACKed the write and rebooted without storing anything, so the editor appeared to save and
+     * always read back as unspecified (Meshtastic-Android#6430).
      */
-    val supportsTakConfig = atLeast(V2_8_0)
+    val supportsTakConfig = offers(ModuleConfig.tak)
 
     /**
      * Support for the v2 TAK port (ATAK_PLUGIN_V2 = 78) with TAKPacketV2 + zstd dictionary compression. Supported since
@@ -78,6 +94,13 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsEsp32Ota = atLeast(V2_7_18)
 
     /**
+     * Whether a `coding_rate` above the modem preset's own raises it while `use_preset` is on. Supported since firmware
+     * v2.7.18 (meshtastic/firmware#9155); older firmware uses the preset's rate whatever is stored. `coding_rate` is
+     * far older than that, so its schema gates cannot answer this.
+     */
+    val supportsCodingRateOverride = atLeast(V2_7_18)
+
+    /**
      * Support for the LoRa region→preset compatibility map. Supported since firmware v2.8.0. Older firmware never sends
      * the map, so the UI keeps the preset list unconstrained (preset *availability* is [supportsPreset]).
      */
@@ -91,11 +114,11 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsLockdown = atLeast(V2_8_0)
 
     /**
-     * Support for the Mesh Beacon module (`ModuleConfig.MeshBeaconConfig` broadcast/listen). The proto is upstream but
-     * the firmware module traces to a community fork; gate the config editor to 2.8.0+ so older radios don't show a
-     * config they'd silently ignore.
+     * Support for the Mesh Beacon module (`ModuleConfig.MeshBeaconConfig` broadcast/listen), from the `since_firmware`
+     * its `ModuleConfig` field declares. The proto is upstream but the firmware module traces to a community fork, so
+     * an older radio would silently ignore the config the editor writes.
      */
-    val supportsMeshBeacon = atLeast(V2_8_0)
+    val supportsMeshBeacon = offers(ModuleConfig.mesh_beacon)
 
     /**
      * Whether the node reports [NodeInfo.heard_on_current_lora] - whether it has heard each node over RF on the LoRa

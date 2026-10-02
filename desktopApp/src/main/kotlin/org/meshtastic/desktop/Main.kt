@@ -17,6 +17,7 @@
 package org.meshtastic.desktop
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -51,8 +53,8 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.isTraySupported
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
-import co.touchlab.kermit.platformLogWriter
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
@@ -65,6 +67,7 @@ import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.decodeToSvgPainter
 import org.jetbrains.compose.resources.getString
@@ -77,9 +80,11 @@ import org.koin.plugin.module.dsl.startKoin
 import org.maplibre.compose.desktop.ProvideMapPresentationHost
 import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.common.log.InMemoryLogBuffer
+import org.meshtastic.core.common.state.LaunchOptions
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.desktopDataDir
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
@@ -93,6 +98,7 @@ import org.meshtastic.core.resources.desktop_tray_tooltip
 import org.meshtastic.core.resources.desktop_update_available_message
 import org.meshtastic.core.resources.desktop_update_available_title
 import org.meshtastic.core.resources.desktop_update_download
+import org.meshtastic.core.service.MeshLogCleanup
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
@@ -102,7 +108,9 @@ import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
+import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
+import org.meshtastic.core.ui.util.TracerouteMapOverlayInsets
 import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
@@ -125,6 +133,9 @@ import coil3.util.Logger as CoilLogger
 /** Meshtastic Desktop — the first non-Android target for the shared KMP module graph. */
 private const val MEMORY_CACHE_MAX_BYTES = 64L * 1024L * 1024L // 64 MiB
 private const val DISK_CACHE_MAX_BYTES = 32L * 1024L * 1024L // 32 MiB
+
+/** Debug builds only: apply a `connections` deep link from the command line without the trust dialog. */
+private const val SKIP_CONNECT_CONFIRM_ARG = "--skip-connect-confirm"
 
 /**
  * Loads an SVG from JVM classpath resources and returns a [Painter].
@@ -155,18 +166,22 @@ fun main(args: Array<String>) {
     // No MapLibre.configure() call: the first map applies a default cache configuration process-wide.
     application(exitProcessOnExit = false) {
         val koinApp = remember {
-            // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
-            Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
+            installDesktopLogging(isDebug = DesktopBuildConfig.IS_DEBUG)
             Logger.i { "Meshtastic Desktop — Starting" }
             startKoin<DesktopKoinApp> {}
+                .also { app ->
+                    if (DesktopBuildConfig.IS_DEBUG && SKIP_CONNECT_CONFIRM_ARG in args) {
+                        app.koin.get<LaunchOptions>().skipDeepLinkConfirmation = true
+                    }
+                }
         }
         LaunchedEffect(Unit) { publishExitApplication(::exitApplication) }
-        val systemLocale = remember { Locale.getDefault() }
         val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
-        val httpClient = remember { koinApp.koin.get<HttpClient>() }
 
-        DeepLinkHandler(args, uiViewModel)
+        DeepLinkHandler(args, uiViewModel, remember { koinApp.koin.get<LaunchOptions>() })
         MeshServiceLifecycle()
+        // Desktop has no WorkManager, so the hourly mesh log cleanup lives as long as the application composition.
+        LaunchedEffect(Unit) { withContext(ioDispatcher) { koinApp.koin.get<MeshLogCleanup>().runHourly() } }
         ThemeAndLocaleProvider(uiViewModel)
     }
 
@@ -188,7 +203,11 @@ fun main(args: Array<String>) {
 
 /** Processes deep-link URIs from CLI arguments and OS-level URI handlers. */
 @Composable
-private fun ApplicationScope.DeepLinkHandler(args: Array<String>, uiViewModel: UIViewModel) {
+private fun ApplicationScope.DeepLinkHandler(
+    args: Array<String>,
+    uiViewModel: UIViewModel,
+    launchOptions: LaunchOptions,
+) {
     LaunchedEffect(args) {
         args.forEach { arg ->
             if (
@@ -206,6 +225,8 @@ private fun ApplicationScope.DeepLinkHandler(args: Array<String>, uiViewModel: U
     LaunchedEffect(Unit) {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.APP_OPEN_URI)) {
             Desktop.getDesktop().setOpenURIHandler { event ->
+                // The launch switch covers the links this process was started with, never one the OS hands over later.
+                launchOptions.skipDeepLinkConfirmation = false
                 val uriStr = event.uri.toString()
                 uiViewModel.handleDeepLink(CommonUri.parse(uriStr)) { Logger.e { "Invalid URI from OS: $uriStr" } }
             }
@@ -352,6 +373,7 @@ private fun WindowBoundsManager(
     windowState: WindowState,
     onReady: () -> Unit,
 ) {
+    val currentOnReady by rememberUpdatedState(onReady)
     LaunchedEffect(Unit) {
         val initialWidth = desktopPrefs.windowWidth.first()
         val initialHeight = desktopPrefs.windowHeight.first()
@@ -366,7 +388,7 @@ private fun WindowBoundsManager(
                 WindowPosition(Alignment.Center)
             }
 
-        onReady()
+        currentOnReady()
 
         snapshotFlow {
             val x = if (windowState.position.isSpecified) windowState.position.x.value else Float.NaN
@@ -396,7 +418,7 @@ private fun ApplicationScope.MeshtasticWindow(
     val multiBackstack =
         rememberMultiBackstack(
             // Land on Connections for first-run / no-device-selected; otherwise on Nodes.
-            if (uiViewModel.currentDeviceAddressFlow.value.let { it.isNullOrBlank() || it == "n" }) {
+            if (DeviceAddress.parse(uiViewModel.currentDeviceAddressFlow.value) == null) {
                 TopLevelDestination.Connect.route
             } else {
                 TopLevelDestination.Nodes.route
@@ -411,7 +433,7 @@ private fun ApplicationScope.MeshtasticWindow(
         visible = visible,
         onPreviewKeyEvent = { event -> handleKeyboardShortcut(event, multiBackstack, ::exitApplication) },
     ) {
-        val eventEdition by uiViewModel.eventEdition.collectAsState()
+        val eventEdition by uiViewModel.eventEdition.collectAsStateWithLifecycle()
 
         CoilImageLoaderSetup()
         // Each window hands MapLibre its own GPU context; the map composites into Compose from there.
@@ -435,13 +457,14 @@ private fun ApplicationScope.MeshtasticWindow(
                     },
                 LocalInlineMapProvider provides { node, modifier -> MapLibreInlineMap(node, modifier) },
                 LocalNodeTrackMapProvider provides
-                    { destNum, positions, modifier, selectedPositionTime, onPositionSelect ->
+                    { destNum, positions, modifier, selectedPositionTime, onPositionSelect, showAttribution ->
                         MapLibreNodeTrackMap(
                             destNum = destNum,
                             positions = positions,
                             modifier = modifier,
                             selectedPositionTime = selectedPositionTime,
                             onPositionSelect = onPositionSelect,
+                            showAttribution = showAttribution,
                         )
                     },
                 LocalDiscoveryMapProvider provides
@@ -452,6 +475,9 @@ private fun ApplicationScope.MeshtasticWindow(
                     { overlay, nodePositions, onMappableCountChanged, modifier ->
                         DesktopTracerouteMap(overlay, nodePositions, onMappableCountChanged, modifier)
                     },
+                // Clear of the MapLibre logo and attribution row along the bottom edge.
+                LocalTracerouteMapOverlayInsetsProvider provides
+                    TracerouteMapOverlayInsets(overlayPadding = PaddingValues(bottom = 48.dp)),
             ) {
                 AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
             }

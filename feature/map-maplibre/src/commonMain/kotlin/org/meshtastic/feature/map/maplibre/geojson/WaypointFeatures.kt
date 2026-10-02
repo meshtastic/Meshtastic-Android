@@ -65,7 +65,7 @@ fun waypointsToFeatureCollection(waypoints: Collection<DataPacket>): FeatureColl
                     put(WaypointFeatureKeys.WAYPOINT_ID, waypoint.id)
                     put(WaypointFeatureKeys.NAME, waypoint.name)
                     put(WaypointFeatureKeys.ICON, iconGlyph(waypoint.icon))
-                    put(WaypointFeatureKeys.IS_LOCKED, (waypoint.locked_to ?: 0) != 0)
+                    put(WaypointFeatureKeys.IS_LOCKED, waypoint.locked_to != 0)
                 },
             )
         },

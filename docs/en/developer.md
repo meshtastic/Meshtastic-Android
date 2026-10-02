@@ -14,7 +14,7 @@ Technical documentation for contributing to the Meshtastic Android and Desktop a
 Things that trip up first-time contributors — check these before requesting review:
 
 - **Formatting passes** — run `./gradlew spotlessApply` to auto-format, then verify with `spotlessCheck`
-- **Detekt passes** — run `./gradlew detekt` and fix all reported issues
+- **Detekt passes** — run `./gradlew detekt detektTypeResolved` and fix all reported issues; the second task runs the rules that need the compile classpath
 - **All tests pass** — run `./gradlew test allTests` (both are needed: `test` covers Android-only modules, `allTests` covers KMP)
 - **Screenshot tests pass** — if you touched any Compose UI, run `./gradlew :screenshot-tests:validateDebugScreenshotTest` and update reference images if needed
 - **Protos are an external dependency** — protobuf models come from the `org.meshtastic:protobufs` Maven artifact (pinned in `gradle/libs.versions.toml`); change protos upstream and bump the version, never edit generated code locally

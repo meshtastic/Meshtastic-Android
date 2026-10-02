@@ -51,8 +51,6 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Composable actual fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit = {}
 
-@Composable actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { _, _ -> null }
-
 @Composable
 actual fun KeepScreenOn(enabled: Boolean) {
     // No-op iOS stub.
@@ -70,6 +68,8 @@ actual val bleScanRequiresLocationServices: Boolean = false
 
 @Composable actual fun isBluetoothDisabled(): Boolean = false
 
+@Composable actual fun isBluetoothSupported(): Boolean = true
+
 @Composable actual fun isWifiUnavailable(): Boolean = false
 
 @Composable
@@ -80,6 +80,8 @@ actual fun SetScreenBrightness(brightness: Float) {
 @Composable actual fun rememberOpenAppSettings(): () -> Unit = {}
 
 @Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+@Composable actual fun rememberPreciseLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
 
 @Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedPermissionUiState()
 

@@ -2,7 +2,7 @@ name: Internal testing - Bug Report
 description: File a bug report.
 title: "[Bug]: "
 labels: [bug, ch_testing]
-projects: [meshtastic/Meshtastic-Android]
+projects: [meshtastic/26]
 body:
   - type: markdown
     attributes:

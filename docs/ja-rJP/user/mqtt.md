@@ -1,8 +1,7 @@
 ---
 title: MQTT
-parent: User Guide
 nav_order: 11
-last_updated: 2026-09-11
+last_updated: 2026-09-19
 description: メッシュをインターネットに橋渡しします。MQTT サーバーの設定、暗号化の各レイヤー、マップ報告について説明します。
 aliases:
   - mqtt
@@ -49,13 +48,13 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 | **JSON output enabled**     | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app's own proxy honors it | 無効                                                                      |
 | **TLS enabled**             | サーバーへのセキュアな接続                                                                                                                                                                     | 無効                                                                      |
 | **Map reporting**           | 公開マップに位置を報告                                                                                                                                                                       | 無効                                                                      |
-| **Proxy to client enabled** | Relay MQTT through the connected phone                                                                                                                                            | 無効                                                                      |
+| **Proxy to client enabled** | Relay MQTT through the connected app                                                                                                                                              | 無効                                                                      |
 
 ### Connection Status and Test Connection
 
-The top of the MQTT settings screen shows the status of the relay this phone runs —
+The top of the MQTT settings screen shows the status of the relay this app runs:
 **Connected**, **Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**. It reads
-**Inactive** whenever the phone is not relaying, which includes the normal case of a radio
+**Inactive** whenever the app is not relaying, which includes the normal case of a radio
 reaching the broker over its own Wi-Fi or Ethernet. The radio's own connection to the broker is
 not reported here.
 
@@ -63,21 +62,19 @@ not reported here.
 distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
 TLS failing, the attempt timing out, or the broker rejecting your credentials with a reason.
 
-### このスマートフォンでの MQTT プロキシ
+### MQTT Proxy in This App
 
-If your radio has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
+If your radio has no internet access of its own, it can use the app as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's or computer's internet connection.
 
-> ℹ️ **Note:** The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.
-
-The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately — without editing and re-saving the radio's MQTT configuration.
+The **MQTT proxy in this app** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately, without editing and re-saving the radio's MQTT configuration.
 
 ### デフォルトの Meshtastic サーバー
 
-コミュニティが `mqtt.meshtastic.org` で公開サーバーを運用しています。 これは一般的な利用やテストを目的としています。
+コミュニティが `mqtt.meshtastic.org` で公開サーバーを運用しています。これは一般的な利用やテストを目的としています。
 
-When this phone relays MQTT for the radio, connections to that broker always use TLS on port 8883 even if **TLS enabled** is off — the app forces the switch on and grays it out. A radio that reaches the broker over its own Wi-Fi or Ethernet forces nothing: turn **TLS enabled** on yourself, or it connects in the clear on port 1883. For any other broker the toggle decides in both cases (port 8883 with TLS, 1883 without).
+When this app relays MQTT for the radio, connections to that broker always use TLS on port 8883 even if **TLS enabled** is off. That upgrade is the app's own, and the switch says so. A radio that reaches the broker over its own Wi-Fi or Ethernet forces nothing: it uses **TLS enabled** as stored, so turn it on yourself or the radio connects in the clear on port 1883. For any other broker the toggle decides in both cases (port 8883 with TLS, 1883 without).
 
-> 🔒 **プライバシー：** 公開サーバー上のメッセージは、購読している誰もが読めます。 プライベートな通信には、必ずチャンネルの暗号化を使用してください。
+> 🔒 **プライバシー：** 公開サーバー上のメッセージは、購読している誰もが読めます。プライベートな通信には、必ずチャンネルの暗号化を使用してください。
 
 ### プライベートサーバー
 
@@ -93,7 +90,7 @@ When this phone relays MQTT for the radio, connections to that broker always use
 
 When **Map reporting** is on, your node periodically publishes a map report to the broker. The report goes out unencrypted, whatever keys your channels use, and carries your node id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset, and primary channel name.
 
-Turning it on opens a consent card. Turn on **I agree.** and choose a **Map reporting interval (seconds)** of one hour or more — the screen will not save until you do. A slider sets the position precision, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
+Turning it on opens a consent card. Turn on **I agree.** and choose a **Map Publish Interval** of one hour or more — the screen will not save until you do. A slider sets the position precision, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
 
 Reports appear at [meshmap.net](https://meshmap.net) and similar community map services.
 
@@ -125,11 +122,11 @@ MQTT carries two payload formats:
 
 階層化された暗号化モデルを理解する：
 
-1. **チャンネルの暗号化**は、MQTT &#x306E;_&#x524D;&#x306B;_&#x30E1;ッシュ上で行われます。 チャンネルに PSK が設定されている場合、MQTT ペイロードはすでに暗号化されています。サーバーや購読者には暗号文しか見えません。
+1. **チャンネルの暗号化**は、MQTT &#x306E;_&#x524D;&#x306B;_&#x30E1;ッシュ上で行われます。チャンネルに PSK が設定されている場合、MQTT ペイロードはすでに暗号化されています。サーバーや購読者には暗号文しか見えません。
 2. **Encryption enabled** (the module setting) decides which copy of the packet the gateway publishes — it is not an extra layer. Leave it on and the broker receives the packet still encrypted with your channel key. Turn it off and the gateway publishes the decrypted packet, so anyone subscribed to the topic reads your messages in the clear. Turn it off only when you own the broker and want plain payloads for a dashboard.
 3. **TLS** はサーバーへの TCP 接続自体を暗号化し、ネットワークレベルの盗聴を防ぎます。
 
-> 🔒 **Security:** The default public channel has a well-known key. デフォルトチャンネルで MQTT 経由で送信されるメッセージは、実質的に**暗号化されていません**。誰でも解読できます。 プライベートな通信には、必ずカスタムの PSK を使用してください。
+> 🔒 **Security:** The default public channel has a well-known key. デフォルトチャンネルで MQTT 経由で送信されるメッセージは、実質的に**暗号化されていません**。誰でも解読できます。プライベートな通信には、必ずカスタムの PSK を使用してください。
 
 ## ベストプラクティス
 
@@ -146,12 +143,12 @@ MQTT carries two payload formats:
 - **Check Wi-Fi** — the gateway node must have an active internet connection (Wi-Fi or Ethernet). MQTT は LoRa の無線リンク自体では動作しません。
 - **Verify credentials** — with incorrect credentials, most brokers fail silently — double-check for trailing spaces.
 - **Firewall** — port 1883 (MQTT) or 8883 (MQTT over TLS) must be reachable. Some networks allow only web traffic (ports 80 and 443).
-- **DNS 解決：** カスタムのサーバーホスト名を使う場合は、ノードがそれを解決できるか確認してください。 サーバーの IP アドレスを直接試してみてください。
+- **DNS 解決：** カスタムのサーバーホスト名を使う場合は、ノードがそれを解決できるか確認してください。サーバーの IP アドレスを直接試してみてください。
 
 ### メッセージが橋渡しされない
 
-- **アップリンク／ダウンリンクの設定を確認：** アップリンクのみが有効な場合、メッセージはメッシュから MQTT へ流れますが、戻ってきません。 受信側のゲートウェイでダウンリンクを有効にしてください。
-- **チャンネルの不一致：** 両方のゲートウェイが、同じ PSK を持つ同じチャンネルを共有している必要があります。 不一致の場合、メッセージは異なる鍵で暗号化され、判読できないデータとして表示されます。
+- **アップリンク／ダウンリンクの設定を確認：** アップリンクのみが有効な場合、メッセージはメッシュから MQTT へ流れますが、戻ってきません。受信側のゲートウェイでダウンリンクを有効にしてください。
+- **チャンネルの不一致：** 両方のゲートウェイが、同じ PSK を持つ同じチャンネルを共有している必要があります。不一致の場合、メッセージは異なる鍵で暗号化され、判読できないデータとして表示されます。
 - **Topic mismatch** — both gateways must use exactly the same root topic. Setting a region rewrites a default root to `msh/<REGION>` (for example `msh/US`), so gateways in different regions do not meet until you give both the same explicit root.
 - **Ignore MQTT is on** — in a region with a duty-cycle limit, the radio turns on **Ignore MQTT** (LoRa config, **Advanced**) when you set the region, and then drops every packet that reached it via MQTT. Turn it off on the receiving nodes, not only on the gateway.
 - **Ok to MQTT is off** — on a public broker a gateway uplinks other nodes' packets only when the sending node has **Ok to MQTT** (LoRa config, **Advanced**) on. Your own traffic bridges either way; your neighbors' does not until they opt in.

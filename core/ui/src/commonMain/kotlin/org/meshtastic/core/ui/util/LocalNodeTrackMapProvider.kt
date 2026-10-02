@@ -24,14 +24,16 @@ import org.meshtastic.proto.Position
 
 /**
  * Provides an embeddable position-track map composable that renders a polyline with markers for the given [positions].
- * Unlike [LocalNodeMapScreenProvider], this does **not** include a Scaffold or AppBar — it is designed to be embedded
- * inside another screen layout (e.g. the position-log adaptive layout).
+ * It has no Scaffold or AppBar, so it can be embedded inside another screen layout (e.g. the position-log adaptive
+ * layout).
  *
  * Supports optional synchronized selection:
  * - [selectedPositionTime]: the `Position.time` of the currently selected position (or `null` for no selection). When
  *   non-null, the map should visually highlight the corresponding marker and center the camera on it.
  * - [onPositionSelected]: callback invoked when a position marker is tapped on the map, passing the `Position.time` so
  *   the host can synchronize the card list.
+ * - [showAttribution]: whether the credit opens with the map or stays collapsed behind its own button. The embedded
+ *   instance collapses it; a full-screen one does not.
  *
  * On Desktop/JVM targets where native maps are not yet available, it falls back to a [PlaceholderScreen].
  */
@@ -44,7 +46,8 @@ val LocalNodeTrackMapProvider =
             modifier: Modifier,
             selectedPositionTime: Int?,
             onPositionSelected: ((Int) -> Unit)?,
+            showAttribution: Boolean,
         ) -> Unit,
         > {
-        { _, _, _, _, _ -> PlaceholderScreen("Position Track Map") }
+        { _, _, _, _, _, _ -> PlaceholderScreen("Position Track Map") }
     }

@@ -23,10 +23,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalClipboard
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.ioDispatcher
 import java.awt.Desktop
 import java.awt.FileDialog
 import java.awt.Frame
@@ -55,8 +53,8 @@ actual fun rememberShowToastResource(): suspend (StringResource) -> Unit = { _ -
 
 /** JVM stub — map opening is not available on Desktop. */
 @Composable
-actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit = { lat, lon, label ->
-    Logger.i { "Open map: $lat, $lon ($label)" }
+actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit = { _, _, _ ->
+    Logger.i { "Open map requested; not available on Desktop" }
 }
 
 /** JVM stub — URL opening via Desktop browse API. */
@@ -112,29 +110,6 @@ actual fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Uni
     }
 }
 
-/** JVM — Reads text from a file URI. */
-@Composable
-actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { uri, maxChars ->
-    withContext(ioDispatcher) {
-        @Suppress("TooGenericExceptionCaught")
-        try {
-            val file = File(URI(uri.toString()))
-            if (file.exists()) {
-                file.bufferedReader().use { reader ->
-                    val buffer = CharArray(maxChars)
-                    val read = reader.read(buffer)
-                    if (read > 0) String(buffer, 0, read) else null
-                }
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            Logger.e(e) { "Failed to read text from URI: $uri" }
-            null
-        }
-    }
-}
-
 /** JVM no-op — Keep screen on is not applicable on Desktop. */
 @Composable
 actual fun KeepScreenOn(enabled: Boolean) {
@@ -162,6 +137,8 @@ actual val bleScanRequiresLocationServices: Boolean = false
 /** JVM — Bluetooth adapter state is not surfaced on Desktop. */
 @Composable actual fun isBluetoothDisabled(): Boolean = false
 
+@Composable actual fun isBluetoothSupported(): Boolean = true
+
 /** JVM — local-network availability is not gated on Desktop. */
 @Composable actual fun isWifiUnavailable(): Boolean = false
 
@@ -171,6 +148,9 @@ actual fun rememberOpenAppSettings(): () -> Unit = { Logger.w { "App settings no
 
 /** JVM — Desktop does not gate location behind a runtime permission. */
 @Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+/** Desktop has no runtime gate on location precision either. */
+@Composable actual fun rememberPreciseLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
 
 /** JVM — Desktop does not gate Bluetooth behind a runtime permission. */
 @Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedPermissionUiState()

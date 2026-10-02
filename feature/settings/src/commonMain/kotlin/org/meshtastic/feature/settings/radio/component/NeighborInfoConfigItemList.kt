@@ -25,12 +25,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.config_device_transmitOverLora_summary
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.neighbor_info_config
-import org.meshtastic.core.resources.neighbor_info_enabled
-import org.meshtastic.core.resources.transmit_over_lora
-import org.meshtastic.core.resources.update_interval_seconds
+import org.meshtastic.core.resources.schema_neighborinfo_enabled
+import org.meshtastic.core.resources.schema_neighborinfo_enabled_description
+import org.meshtastic.core.resources.schema_neighborinfo_transmit_over_lora
+import org.meshtastic.core.resources.schema_neighborinfo_transmit_over_lora_description
+import org.meshtastic.core.resources.schema_neighborinfo_update_interval
+import org.meshtastic.core.resources.schema_neighborinfo_update_interval_description
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -61,7 +63,8 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
         item {
             TitledCard(title = stringResource(Res.string.neighbor_info_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.neighbor_info_enabled),
+                    title = stringResource(Res.string.schema_neighborinfo_enabled),
+                    summary = stringResource(Res.string.schema_neighborinfo_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -71,7 +74,8 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.update_interval_seconds),
+                    title = stringResource(Res.string.schema_neighborinfo_update_interval),
+                    summary = stringResource(Res.string.schema_neighborinfo_update_interval_description),
                     value = formState.value.update_interval,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -81,8 +85,8 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.transmit_over_lora),
-                    summary = stringResource(Res.string.config_device_transmitOverLora_summary),
+                    title = stringResource(Res.string.schema_neighborinfo_transmit_over_lora),
+                    summary = stringResource(Res.string.schema_neighborinfo_transmit_over_lora_description),
                     checked = formState.value.transmit_over_lora,
                     enabled = state.connected,
                     onCheckedChange = {

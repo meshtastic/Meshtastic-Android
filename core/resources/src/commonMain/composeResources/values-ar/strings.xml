@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">الرطوبة</string>
+    <string name="a11y_temperature">الحرارة</string>
     <string name="about">حول</string>
     <string name="accept">قبول</string>
     <!-- ACTION -->
@@ -25,7 +27,6 @@
     <string name="add_network_device">أضف</string>
     <string name="administration">الإدارة</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">مطلوب تحديث التطبيق</string>
     <string name="apply">تفعيل</string>
@@ -34,7 +35,6 @@
     <string name="are_you_sure">هل أنت متيقِّن؟</string>
     <string name="audio">إعدادات الصوت</string>
     <string name="bad">سيئ</string>
-    <!-- BANDWIDTH -->
     <string name="battery">البطارية</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">إعدادات بلوتوث</string>
@@ -51,7 +51,6 @@
     <string name="channel_6">القناة 6</string>
     <string name="channel_7">القناة 7</string>
     <string name="channel_8">القناة 8</string>
-    <string name="channel_label">عربي</string>
     <string name="channel_name">اسم القناة</string>
     <string name="channels">القنوات</string>
     <!-- CHIRPY -->
@@ -78,19 +77,17 @@
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">مباشره</string>
     <string name="discovery_stat_messages">الرسائل</string>
-    <!-- DISPLAY -->
     <string name="display">إعدادات الشاشة</string>
     <!-- DISTANCE -->
     <string name="distance">المسافة</string>
     <!-- DOC -->
     <string name="doc_title_mqtt">MQTT</string>
+    <!-- DURATION -->
     <string name="edit">تعديل</string>
     <string name="eight_hours">8 ساعات</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">المفتاح العام غير متطابق</string>
     <string name="encryption_pkc">تشفير المفتاح العام</string>
-    <!-- ENVIRONMENT -->
     <string name="error">غلط</string>
     <!-- EXPORT -->
     <string name="fair">مناسب</string>
@@ -105,10 +102,8 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">جيد</string>
-    <!-- GPIO -->
     <string name="i_know_what_i_m_doing">أنا أعرف ما أفعله.</string>
     <string name="iaq">معدل جودة الهواء الداخلي</string>
-    <!-- IGNORE -->
     <string name="ignore">تجاهل</string>
     <string name="ignore_add">أضف '%1$s' إلى قائمة التجاهل؟</string>
     <!-- IMPORT -->
@@ -176,6 +171,7 @@
     <!-- NODES -->
     <string name="none_quality">لا يوجد</string>
     <string name="not_connected">غير متصل</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">حسنا</string>
@@ -183,21 +179,18 @@
     <string name="one_day">24 ساعات</string>
     <string name="one_week">أسبوع</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
+    <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">اللغات</string>
     <!-- PREVIEW -->
     <string name="qr_code">رمز الاستجابة السريع</string>
     <!-- QUICK -->
     <string name="radio_configuration">إعدادات الراديو</string>
     <string name="reboot">إعادة التشغيل</string>
-    <!-- REBROADCAST -->
-    <string name="region_frequency_plan">الجهة</string>
     <!-- REMOTE -->
     <!-- REMOVE -->
     <string name="replace">استبدال</string>
@@ -213,7 +206,6 @@
     <string name="routing_error_none">استلم</string>
     <string name="routing_error_timeout">استغرق وقت طويل</string>
     <string name="rssi">مؤشر القوة النسبية</string>
-    <!-- SAVE -->
     <string name="save">حفظ</string>
     <string name="save_changes">حفظ</string>
     <!-- SCAN -->
@@ -221,7 +213,6 @@
     <!-- SECURITY -->
     <string name="security">إعدادات الحماية</string>
     <string name="send">ارسل</string>
-    <!-- SERIAL -->
     <string name="serial">رقم التسلسلي</string>
     <string name="settings">الإعدادات</string>
     <!-- SHARE -->
@@ -251,7 +242,6 @@
     <string name="unknown_username">اسم المستخدم غير معروف</string>
     <string name="unrecognized">غير المعروفين</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="user">اسم المستخدم</string>
     <string name="via_mqtt">فقط شبكة MQTT</string>

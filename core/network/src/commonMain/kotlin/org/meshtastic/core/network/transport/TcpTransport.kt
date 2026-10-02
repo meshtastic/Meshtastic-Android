@@ -40,6 +40,8 @@ import kotlinx.io.IOException
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.model.util.anonymizePublicHost
 import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
 
@@ -100,7 +102,6 @@ class TcpTransport(
         /** TCP connect timeout. A failed connect just feeds the reconnect/backoff loop, so it is not fatal. */
         const val CONNECT_TIMEOUT_MS = 30_000L
         private const val READ_BUFFER_SIZE = 1024
-        private const val MILLIS_PER_SECOND = 1_000L
 
         /**
          * Minimum session duration for backoff to reset. Sessions shorter than this that ended in peer-EOF are treated
@@ -199,7 +200,8 @@ class TcpTransport(
 
     // region Connection lifecycle
 
-    @Suppress("NestedBlockDepth")
+    // Cancellation tears the socket down before it is rethrown to end the loop.
+    @Suppress("NestedBlockDepth", "SuspendFunSwallowedCancellation")
     private suspend fun connectWithRetry(address: String) {
         var retryCount = 1
         var backoff = MIN_BACKOFF_MILLIS
@@ -209,11 +211,11 @@ class TcpTransport(
                 try {
                     connectAndRead(address)
                 } catch (ex: TimeoutCancellationException) {
-                    Logger.w(ex) { "$logTag: [$address] TCP connect timed out" }
+                    Logger.w(ex) { "$logTag: [${address.anonymizePublicHost()}] TCP connect timed out" }
                     disconnectSocket()
                     false
                 } catch (ex: IOException) {
-                    Logger.w(ex) { "$logTag: [$address] TCP connection error" }
+                    Logger.w(ex) { "$logTag: [${address.anonymizePublicHost()}] TCP connection error" }
                     disconnectSocket()
                     false
                 } catch (ce: CancellationException) {
@@ -225,9 +227,9 @@ class TcpTransport(
                     // (UnresolvedAddressException, which is an IllegalArgumentException and so misses the IOException
                     // branch above). Log it, retry it, but keep it out of error tracking.
                     if (ex.isExpectedConnectionFailure()) {
-                        Logger.w(ex) { "$logTag: [$address] Radio unreachable" }
+                        Logger.w(ex) { "$logTag: [${address.anonymizePublicHost()}] Radio unreachable" }
                     } else {
-                        Logger.e(ex) { "$logTag: [$address] TCP exception" }
+                        Logger.e(ex) { "$logTag: [${address.anonymizePublicHost()}] TCP exception" }
                     }
                     disconnectSocket()
                     false
@@ -238,18 +240,22 @@ class TcpTransport(
             // growing so the radio has time to recover between reconnect attempts.
             val sessionUptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
             if (shouldResetBackoff(hadData, sessionUptime, SHORT_SESSION_THRESHOLD_MS)) {
-                Logger.d { "$logTag: [$address] Resetting backoff after successful data exchange (${sessionUptime}ms)" }
+                Logger.d {
+                    "$logTag: [${address.anonymizePublicHost()}] Resetting backoff after successful data exchange " +
+                        "(${sessionUptime}ms)"
+                }
                 retryCount = 1
                 backoff = MIN_BACKOFF_MILLIS
             } else if (hadData) {
-                val backoffSec = backoff / MILLIS_PER_SECOND
+                val backoffSec = backoff / TimeConstants.MS_PER_SEC
                 Logger.d {
-                    "$logTag: [$address] Short session (${sessionUptime}ms) — keeping backoff at ${backoffSec}s"
+                    "$logTag: [${address.anonymizePublicHost()}] Short session (${sessionUptime}ms); " +
+                        "keeping backoff at ${backoffSec}s"
                 }
             }
 
-            val delaySec = backoff / MILLIS_PER_SECOND
-            Logger.i { "$logTag: [$address] Reconnect #$retryCount in ${delaySec}s" }
+            val delaySec = backoff / TimeConstants.MS_PER_SEC
+            Logger.i { "$logTag: [${address.anonymizePublicHost()}] Reconnect #$retryCount in ${delaySec}s" }
             delay(backoff)
             retryCount++
             backoff = minOf(backoff * 2, MAX_BACKOFF_MILLIS)
@@ -264,7 +270,7 @@ class TcpTransport(
     private suspend fun connectAndRead(address: String): Boolean = withContext(dispatchers.io) {
         val (host, port) = parseHostAndPort(address)
 
-        Logger.i { "$logTag: [$address] Connecting to $host:$port" }
+        Logger.i { "$logTag: [${address.anonymizePublicHost()}] Connecting to ${host.anonymizePublicHost()}:$port" }
         val attemptStart = nowMillis
 
         val selector = SelectorManager(dispatchers.io)
@@ -284,7 +290,7 @@ class TcpTransport(
             resetMetrics()
             codec.reset()
 
-            Logger.i { "$logTag: [$address] Socket connected in ${connectTime}ms" }
+            Logger.i { "$logTag: [${address.anonymizePublicHost()}] Socket connected in ${connectTime}ms" }
 
             val output = sock.openWriteChannel(autoFlush = false)
             writeChannel = output
@@ -342,12 +348,12 @@ class TcpTransport(
                     timeoutCount++
                     timeoutEvents++
                     if (timeoutCount % TIMEOUT_LOG_INTERVAL == 0) {
-                        Logger.d { "$logTag: [$address] Timeout $timeoutCount/$SOCKET_RETRIES" }
+                        Logger.d { "$logTag: [${address.anonymizePublicHost()}] Timeout $timeoutCount/$SOCKET_RETRIES" }
                     }
                 }
 
                 read == -1 -> {
-                    Logger.i { "$logTag: [$address] EOF after $packetsReceived packets" }
+                    Logger.i { "$logTag: [${address.anonymizePublicHost()}] EOF after $packetsReceived packets" }
                     return
                 }
 
@@ -360,7 +366,7 @@ class TcpTransport(
                 }
             }
         }
-        Logger.w { "$logTag: [$address] Closing after $SOCKET_RETRIES consecutive timeouts" }
+        Logger.w { "$logTag: [${address.anonymizePublicHost()}] Closing after $SOCKET_RETRIES consecutive timeouts" }
     }
 
     // Guards against recursive disconnects triggered by listener callbacks.
@@ -375,14 +381,14 @@ class TcpTransport(
             if (s != null) {
                 val uptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
                 Logger.i {
-                    "$logTag: [$currentAddress] Disconnecting - Uptime: ${uptime}ms, " +
+                    "$logTag: [${currentAddress?.anonymizePublicHost()}] Disconnecting - Uptime: ${uptime}ms, " +
                         "RX: $packetsReceived ($bytesReceived bytes), " +
                         "TX: $packetsSent ($bytesSent bytes)"
                 }
                 try {
                     s.close()
                 } catch (ex: IOException) {
-                    Logger.w(ex) { "$logTag: [$currentAddress] Error closing socket" }
+                    Logger.w(ex) { "$logTag: [${currentAddress?.anonymizePublicHost()}] Error closing socket" }
                 }
             }
             selectorManager?.close()
@@ -408,13 +414,15 @@ class TcpTransport(
         val stream =
             writeChannel
                 ?: run {
-                    Logger.w { "$logTag: [$currentAddress] Cannot send ${p.size} bytes: not connected" }
+                    Logger.w {
+                        "$logTag: [${currentAddress?.anonymizePublicHost()}] Cannot send ${p.size} bytes: not connected"
+                    }
                     return
                 }
         try {
             stream.writeFully(p)
         } catch (ex: IOException) {
-            Logger.w(ex) { "$logTag: [$currentAddress] TCP write error" }
+            Logger.w(ex) { "$logTag: [${currentAddress?.anonymizePublicHost()}] TCP write error" }
             disconnectSocket()
         }
     }
@@ -424,7 +432,7 @@ class TcpTransport(
         try {
             stream.flush()
         } catch (ex: IOException) {
-            Logger.w(ex) { "$logTag: [$currentAddress] TCP flush error" }
+            Logger.w(ex) { "$logTag: [${currentAddress?.anonymizePublicHost()}] TCP flush error" }
             disconnectSocket()
         }
     }

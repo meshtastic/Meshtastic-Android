@@ -79,3 +79,6 @@ executing the Gradle build, or run the full script on a Linux host.
 - `desktop-offline.yaml` — patched manifest. Kept in sync manually with the upstream packaging;
   diff against `https://raw.githubusercontent.com/flathub/org.meshtastic.MeshtasticDesktop/master/org.meshtastic.MeshtasticDesktop.yaml`
   if upstream changes something material.
+- `bump-flathub-manifest.py` - points the upstream manifest at a release: the source tag and
+  commit, and the Gradle zip the tag's wrapper pins. `promote.yml`'s `update-flathub` job runs it
+  on every production promotion, then commits the release's `flatpak-sources.json` beside it.

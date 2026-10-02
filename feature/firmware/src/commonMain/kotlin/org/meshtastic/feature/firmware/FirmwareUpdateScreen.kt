@@ -85,15 +85,20 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
+import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.dont_show_again_for_device
+import org.meshtastic.core.resources.firmware_maintenance_bootloader_available
+import org.meshtastic.core.resources.firmware_maintenance_bootloader_installed
+import org.meshtastic.core.resources.firmware_maintenance_bootloader_latest_hint
+import org.meshtastic.core.resources.firmware_maintenance_bootloader_up_to_date
+import org.meshtastic.core.resources.firmware_maintenance_bootloader_up_to_date_hint
 import org.meshtastic.core.resources.firmware_maintenance_select_drive
 import org.meshtastic.core.resources.firmware_maintenance_upgrade_bootloader_action
 import org.meshtastic.core.resources.firmware_maintenance_upgrade_confirm_text
@@ -150,8 +155,11 @@ import org.meshtastic.core.resources.i_know_what_i_m_doing
 import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.resources.img_hw_unknown
 import org.meshtastic.core.resources.learn_more
+import org.meshtastic.core.resources.next
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.save
+import org.meshtastic.core.resources.skip
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Bluetooth
@@ -218,6 +226,8 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                 onSaveFile = { fileName -> saveFileLauncher(fileName, UF2_MIME_TYPE) },
                 onPickVolume = volumePickerLauncher,
                 onBootloaderUpgrade = viewModel::startBootloaderUpgrade,
+                onConfirmBootloaderUpgrade = viewModel::confirmBootloaderUpgrade,
+                onSkipBootloaderUpgrade = viewModel::skipBootloaderUpgrade,
                 onConfirmLocalFile = viewModel::confirmLocalFirmwareFile,
                 onDismissLocalFile = viewModel::dismissLocalFirmwareFile,
                 onRetry = viewModel::checkForUpdates,
@@ -394,6 +404,9 @@ private fun shouldKeepFirmwareScreenOn(state: FirmwareUpdateState): Boolean = wh
     // ViewModel, so letting the screen sleep (and the ViewModel clear) would strand the device.
     is FirmwareUpdateState.AwaitingFileSave -> state.step.isDestructive || state.retryMessage != null
 
+    // The device is sitting in update mode with the rest of the sequence queued in the ViewModel.
+    is FirmwareUpdateState.ReviewingBootloader -> true
+
     else -> false
 }
 
@@ -436,6 +449,13 @@ private fun FirmwareUpdateContent(
                     onDone = actions.onDone,
                     wasLowSpeedTransfer = state.wasLowSpeedTransfer,
                     deviceWasWiped = state.deviceWasWiped,
+                )
+
+            is FirmwareUpdateState.ReviewingBootloader ->
+                BootloaderReviewState(
+                    versions = state.versions,
+                    onUpgrade = actions.onConfirmBootloaderUpgrade,
+                    onSkip = actions.onSkipBootloaderUpgrade,
                 )
 
             is FirmwareUpdateState.AwaitingFileSave ->
@@ -515,7 +535,11 @@ private fun ReadyState(
     }
 
     if (state.maintenance.showBootloaderUpgrade) {
-        UsbMaintenanceCard(deviceName = device.displayName, onBootloaderUpgrade = actions.onBootloaderUpgrade)
+        UsbMaintenanceCard(
+            deviceName = device.displayName,
+            latestBootloader = state.maintenance.latestBootloader,
+            onBootloaderUpgrade = actions.onBootloaderUpgrade,
+        )
         Spacer(Modifier.height(16.dp))
     }
 
@@ -884,7 +908,7 @@ private fun DeviceInfoCard(
  * on.
  */
 @Composable
-internal fun UsbMaintenanceCard(deviceName: String, onBootloaderUpgrade: () -> Unit) {
+internal fun UsbMaintenanceCard(deviceName: String, latestBootloader: String?, onBootloaderUpgrade: () -> Unit) {
     var showUpgradeConfirmation by rememberSaveable { mutableStateOf(false) }
 
     if (showUpgradeConfirmation) {
@@ -905,6 +929,76 @@ internal fun UsbMaintenanceCard(deviceName: String, onBootloaderUpgrade: () -> U
         Column(modifier = Modifier.padding(16.dp)) {
             TextButton(onClick = { showUpgradeConfirmation = true }) {
                 Text(stringResource(Res.string.firmware_maintenance_upgrade_bootloader_action))
+            }
+            latestBootloader?.let {
+                Text(
+                    text = stringResource(Res.string.firmware_maintenance_bootloader_latest_hint, it),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Installed against latest bootloader, read from the drive before an upgrade is written. The running firmware cannot
+ * report its bootloader, so this is the first point the app knows the installed version.
+ */
+@Composable
+internal fun BootloaderReviewState(versions: BootloaderVersions, onUpgrade: () -> Unit, onSkip: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(
+            if (versions.isCurrent) MeshtasticIcons.CheckCircle else MeshtasticIcons.Usb,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.height(24.dp))
+        Text(
+            stringResource(
+                if (versions.isCurrent) {
+                    Res.string.firmware_maintenance_bootloader_up_to_date
+                } else {
+                    Res.string.firmware_maintenance_upgrade_confirm_title
+                },
+            ),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            stringResource(
+                Res.string.firmware_maintenance_bootloader_installed,
+                versions.installed ?: stringResource(Res.string.unknown),
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            fontFamily = FontFamily.Monospace,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            stringResource(Res.string.firmware_maintenance_bootloader_available, versions.available),
+            style = MaterialTheme.typography.bodyMedium,
+            fontFamily = FontFamily.Monospace,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(24.dp))
+        if (versions.isCurrent) {
+            Text(
+                stringResource(Res.string.firmware_maintenance_bootloader_up_to_date_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(16.dp))
+            Button(onClick = onSkip) { Text(stringResource(Res.string.next)) }
+        } else {
+            Row(horizontalArrangement = spacedBy(16.dp)) {
+                OutlinedButton(onClick = onSkip) { Text(stringResource(Res.string.skip)) }
+                Button(onClick = onUpgrade) {
+                    Text(stringResource(Res.string.firmware_maintenance_upgrade_bootloader_action))
+                }
             }
         }
     }
@@ -1034,7 +1128,7 @@ private fun ProgressContent(
         if (details != null) {
             Spacer(Modifier.height(4.dp))
             Text(
-                text = details,
+                text = details.asString(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

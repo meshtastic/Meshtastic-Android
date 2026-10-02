@@ -17,7 +17,7 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.Flow
-import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.model.QuickChatAction
 
 interface QuickChatActionRepository {
     fun getAllActions(): Flow<List<QuickChatAction>>

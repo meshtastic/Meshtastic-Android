@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.ble
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -146,8 +146,8 @@ class AndroidBluetoothRepositoryBondTest {
         // Make the device already bonded both at the adapter level (so isBonded is observable) and per-device
         // (so bond() hits the early BOND_BONDED guard at line 85 without ever calling createBond()).
         RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_BONDED, createBondReturns = false)
-        shadowOf(BluetoothAdapter.getDefaultAdapter())
-            .setBondedDevices(setOf(BluetoothAdapter.getDefaultAdapter().getRemoteDevice(mac)))
+        val adapter = RobolectricBleBonding.adapter
+        shadowOf(adapter).setBondedDevices(setOf(adapter.getRemoteDevice(mac)))
         val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
 
         assertNull(launchBond(repo, mac).await(), "an already-bonded device should return without error")
@@ -401,12 +401,36 @@ class AndroidBluetoothRepositoryBondTest {
         val bondedMac = "AA:BB:CC:DD:EE:06"
         val otherMac = "AA:BB:CC:DD:EE:07"
         RobolectricBleBonding.grantBluetoothConnectPermission()
-        val bondedDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(bondedMac)
-        shadowOf(BluetoothAdapter.getDefaultAdapter()).setBondedDevices(setOf(bondedDevice))
+        val adapter = RobolectricBleBonding.adapter
+        shadowOf(adapter).setBondedDevices(setOf(adapter.getRemoteDevice(bondedMac)))
         val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
 
         assertTrue(repo.isBonded(bondedMac))
         assertFalse(repo.isBonded(otherMac))
+    }
+
+    @Test
+    fun `every bond receiver is exported so the Bluetooth app can reach it`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:12"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac)
+        // The parked bond's wait receiver and the bond event log both listen while bond() waits.
+        val bondReceivers =
+            shadowOf(RuntimeEnvironment.getApplication()).registeredReceivers.filter {
+                it.intentFilter.hasAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+            }
+        assertEquals(2, bondReceivers.size)
+        assertTrue(bondReceivers.all { (it.flags and Context.RECEIVER_EXPORTED) == Context.RECEIVER_EXPORTED })
+
+        RobolectricBleBonding.sendBondStateChanged(
+            mac,
+            newState = BluetoothDevice.BOND_BONDED,
+            previousState = BluetoothDevice.BOND_BONDING,
+        )
+        assertNull(failure.await())
     }
 
     @Test

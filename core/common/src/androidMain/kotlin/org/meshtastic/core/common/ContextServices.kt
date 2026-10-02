@@ -35,6 +35,12 @@ fun Context.hasGps(): Boolean {
     return lm?.allProviders?.contains(LocationManager.GPS_PROVIDER) == true
 }
 
+/** Checks if the device has Bluetooth LE hardware at all, as distinct from Bluetooth being switched off. */
+fun Context.hasBluetoothLe(): Boolean = packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
+
+/** Checks if the device can act as a USB host, which USB serial radios need (Android XR headsets cannot). */
+fun Context.hasUsbHost(): Boolean = packageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
+
 /** Checks if the device has a GPS receiver and it is currently disabled. */
 fun Context.gpsDisabled(): Boolean {
     val lm = getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return false
@@ -85,8 +91,14 @@ fun Context.hasLocalNetworkPermission(): Boolean = Build.VERSION.SDK_INT < LOCAL
     ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_LOCAL_NETWORK) ==
     PackageManager.PERMISSION_GRANTED
 
-/** @return true if the user already has location permission (ACCESS_FINE_LOCATION). */
-fun Context.hasLocationPermission(): Boolean {
-    val perms = listOf(Manifest.permission.ACCESS_FINE_LOCATION)
-    return perms.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }
+/**
+ * @param precise true to require ACCESS_FINE_LOCATION. An approximate-only grant (ACCESS_COARSE_LOCATION) satisfies
+ *   `precise = false` alone.
+ * @return true if the user has granted location at the requested precision.
+ */
+fun Context.hasLocationPermission(precise: Boolean): Boolean {
+    fun granted(permission: String) =
+        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+    return granted(Manifest.permission.ACCESS_FINE_LOCATION) ||
+        (!precise && granted(Manifest.permission.ACCESS_COARSE_LOCATION))
 }

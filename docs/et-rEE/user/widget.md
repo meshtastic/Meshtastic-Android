@@ -1,6 +1,5 @@
 ---
 title: Home Screen Widget
-parent: Kasutaja juhis
 nav_order: 20
 last_updated: 2026-08-30
 description: Lisa Meshtastici avakuva vidin, et vaadata ühendatud raadio kohalikku statistikat ilma rakendust avamata.

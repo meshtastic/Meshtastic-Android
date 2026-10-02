@@ -18,7 +18,6 @@ package org.meshtastic.feature.discovery.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,6 +50,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
@@ -61,10 +61,12 @@ import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.discovery_delete_session
 import org.meshtastic.core.resources.discovery_delete_session_confirm
 import org.meshtastic.core.resources.discovery_empty_history
+import org.meshtastic.core.resources.discovery_empty_history_hint
 import org.meshtastic.core.resources.discovery_history
 import org.meshtastic.core.resources.discovery_scan_complete
 import org.meshtastic.core.resources.discovery_scan_incomplete
-import org.meshtastic.core.resources.discovery_unique_nodes
+import org.meshtastic.core.resources.discovery_unique_nodes_count
+import org.meshtastic.core.ui.component.EmptyState
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.CheckCircle
 import org.meshtastic.core.ui.icon.Delete
@@ -118,31 +120,33 @@ fun DiscoveryHistoryScreen(
 
 @Composable
 private fun EmptyHistoryState(modifier: Modifier = Modifier) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = MeshtasticIcons.History,
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = stringResource(Res.string.discovery_empty_history),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
+    EmptyState(
+        icon = MeshtasticIcons.History,
+        title = stringResource(Res.string.discovery_empty_history),
+        supportingText = stringResource(Res.string.discovery_empty_history_hint),
+        modifier = modifier,
+    )
 }
 
 @Composable
 private fun SessionListItem(session: DiscoverySessionEntity, onClick: () -> Unit, onDelete: () -> Unit) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val uniqueNodes =
+        pluralStringResource(
+            Res.plurals.discovery_unique_nodes_count,
+            session.totalUniqueNodes,
+            session.totalUniqueNodes,
+        )
+    val status =
+        stringResource(
+            if (session.completionStatus == "complete") {
+                Res.string.discovery_scan_complete
+            } else {
+                Res.string.discovery_scan_incomplete
+            },
+        )
     val sessionDescription =
-        "${formatTimestamp(session.timestamp)}, ${session.presetsScanned}, " +
-            "${session.totalUniqueNodes} unique nodes, " +
-            if (session.completionStatus == "complete") "complete" else "incomplete"
+        listOf(formatTimestamp(session.timestamp), session.presetsScanned, uniqueNodes, status).joinToString(", ")
 
     Card(
         modifier =
@@ -163,7 +167,7 @@ private fun SessionListItem(session: DiscoverySessionEntity, onClick: () -> Unit
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = stringResource(Res.string.discovery_unique_nodes, session.totalUniqueNodes),
+                    text = uniqueNodes,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

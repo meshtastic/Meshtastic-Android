@@ -90,8 +90,6 @@ core:domain
   ├── core:model                   (domain models)
   ├── org.meshtastic:protobufs     (Meshtastic protobuf types, Maven)
   ├── core:common
-  ├── core:database
-  ├── core:datastore
   └── core:resources
 ```
 
@@ -110,8 +108,6 @@ graph TB
   :core:domain -.-> :core:repository
   :core:domain -.-> :core:model
   :core:domain -.-> :core:common
-  :core:domain -.-> :core:database
-  :core:domain -.-> :core:datastore
   :core:domain -.-> :core:resources
   :core:domain -.-> :core:testing
 

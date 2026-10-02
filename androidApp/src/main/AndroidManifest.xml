@@ -42,6 +42,8 @@
 
     <!-- API 33+ Notification runtime permissions -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- API 36.1+ lets a running firmware update show as a Live Update -->
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
 
     <!-- Permissions required for providing location (from phone GPS) to mesh -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -85,8 +87,17 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <!-- The legacy BLUETOOTH permissions imply this feature as required, which hides the app on Android XR. -->
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+
     <uses-feature
         android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+
+    <uses-feature
+        android:name="android.hardware.touchscreen"
         android:required="false" />
 
     <uses-feature
@@ -147,11 +158,6 @@
           on a low-RAM device AND under the large-mesh + chaos-fuzz soak that motivated this, not just
           the flagship test device.
         -->
-
-        <uses-library
-            android:name="org.apache.http.legacy"
-            android:required="false" />
-
 
         <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
         <meta-data
@@ -332,9 +338,10 @@
                     android:path="com.geeksville.mesh" /> -->
             </intent-filter>
         </receiver>
-        <receiver android:name="org.meshtastic.core.service.ReplyReceiver" android:exported="false" />
-        <receiver android:name="org.meshtastic.core.service.MarkAsReadReceiver" android:exported="false" />
-        <receiver android:name="org.meshtastic.core.service.ReactionReceiver" android:exported="false" />
+        <!-- Reply, mark-as-read and thumbs-up from a conversation notification, including from Android Auto -->
+        <service
+            android:name="org.meshtastic.core.service.ConversationActionService"
+            android:exported="false" />
 
         <receiver
             android:name="org.meshtastic.feature.widget.LocalStatsWidgetReceiver"
@@ -372,6 +379,14 @@
         -->
         <activity
             android:name="androidx.glance.appwidget.action.ActionTrampolineActivity"
+            tools:node="remove" />
+
+        <!--
+            The JetBrains ui-tooling facade AAR declares this exported activity but ships no class for it, so any
+            launch crashes the app on instantiation. Android Studio previews use androidx.compose.ui.tooling's own.
+        -->
+        <activity
+            android:name="org.jetbrains.androidx.compose.ui.tooling.PreviewActivity"
             tools:node="remove" />
 
         <!--

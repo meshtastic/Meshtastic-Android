@@ -13,7 +13,9 @@ on:
     branches: [main]
     paths:
       - "docs/en/**"
+      - "docs/**/*.md"
       - "feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/data/DocBundleLoader.kt"
+      - "scripts/docs/sync-locale-front-matter.py"
       - "scripts/check-doc-aliases.js"
       - "scripts/check-doc-coverage.js"
       - "scripts/check-doc-freshness.js"
@@ -102,6 +104,11 @@ jobs:
         # before render and stripped again by sync-android-docs.js — so an alias authored in
         # frontmatter and never registered is a search term no consumer ever sees.
         run: node scripts/check-doc-aliases.js .
+
+      - name: Check locale front matter
+        # layout and nav_order in every docs/<locale>/ page must match docs/en, and no locale
+        # page may have a parent or grand_parent, which would list it in an English section.
+        run: python3 scripts/docs/sync-locale-front-matter.py --check
 
       - name: Check doc freshness
         # Advisory, as it always was: a page being old is a prompt to look, not a defect.

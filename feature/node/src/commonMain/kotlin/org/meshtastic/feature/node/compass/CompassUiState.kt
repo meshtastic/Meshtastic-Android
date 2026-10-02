@@ -36,7 +36,7 @@ data class CompassUiState(
     val bearing: Float? = null,
     val distanceText: String? = null,
     val bearingText: String? = null,
-    val lastUpdateText: String? = null,
+    val lastUpdateAgeSeconds: Long? = null,
     val positionTimeSec: Long? = null, // Epoch seconds for the target position (used for elapsed display)
     val warnings: List<CompassWarning> = emptyList(),
     val errorRadiusText: String? = null,

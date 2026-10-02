@@ -1,6 +1,6 @@
 ---
 title: Etusivu
-layout: oletus
+layout: default
 nav_order: 0
 ---
 

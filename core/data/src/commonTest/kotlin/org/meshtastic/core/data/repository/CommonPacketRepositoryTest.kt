@@ -16,12 +16,16 @@
  */
 package org.meshtastic.core.data.repository
 
+import app.cash.turbine.test
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
@@ -30,6 +34,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
@@ -39,6 +44,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
@@ -405,6 +411,81 @@ abstract class CommonPacketRepositoryTest {
         assertEquals(2, pagedCandidates.size)
         assertNull(pagedCandidates.singleOrNull())
     }
+
+    @Test
+    fun `getMessagesFrom follows the active database across a device switch`() = runTest(testDispatcher) {
+        val contact = "0^all"
+        repository.savePacket(0, contact, textPacket(id = 1, text = "device A"), 1L)
+
+        repository.getMessagesFrom(contact, getNode = ::testNode).test {
+            assertEquals(listOf("device A"), awaitItem().map { it.text })
+
+            dbProvider.switchToNewDatabase()
+            assertEquals(emptyList(), awaitItem().map { it.text })
+
+            repository.savePacket(0, contact, textPacket(id = 2, text = "device B"), 2L)
+            assertEquals(listOf("device B"), awaitItem().map { it.text })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `replaceMessage deletes the original only after the send returns`() = runTest(testDispatcher) {
+        val original = repository.savePacket(0, "0^all", textPacket(id = 1, text = "original"), 1L)
+        var presentDuringSend = false
+
+        repository.replaceMessage(original.uuid) {
+            presentDuringSend = repository.getPacketByPersistedId(original) != null
+        }
+
+        assertTrue(presentDuringSend)
+        assertNull(repository.getPacketByPersistedId(original))
+    }
+
+    @Test
+    fun `replaceMessage keeps the original when the send fails`() = runTest(testDispatcher) {
+        val original = repository.savePacket(0, "0^all", textPacket(id = 1, text = "original"), 1L)
+
+        assertFailsWith<IllegalStateException> {
+            repository.replaceMessage(original.uuid) { error("queue refused the message") }
+        }
+
+        assertNotNull(repository.getPacketByPersistedId(original))
+    }
+
+    @Test
+    fun `replaceMessage still deletes the original when the caller is cancelled after the send`() =
+        runTest(testDispatcher) {
+            val original = repository.savePacket(0, "0^all", textPacket(id = 1, text = "original"), 1L)
+
+            launch { repository.replaceMessage(original.uuid) { currentCoroutineContext().cancel() } }.join()
+
+            assertNull(repository.getPacketByPersistedId(original))
+        }
+
+    @Test
+    fun `replaceMessage leaves the newly active database alone`() = runTest(testDispatcher) {
+        val original = repository.savePacket(0, "0^all", textPacket(id = 1, text = "device A"), 1L)
+        var unrelated: PersistedPacketId? = null
+
+        repository.replaceMessage(original.uuid) {
+            dbProvider.switchToNewDatabase()
+            unrelated = repository.savePacket(0, "0^all", textPacket(id = 2, text = "device B"), 2L)
+        }
+
+        val survivor = assertNotNull(unrelated)
+        assertEquals(original.uuid, survivor.uuid, "the new database reuses the original's UUID")
+        assertNotNull(repository.getPacketByPersistedId(survivor))
+    }
+
+    private fun textPacket(id: Int, text: String) = DataPacket(
+        from = "!aaaa0001",
+        to = "^all",
+        bytes = text.encodeToByteArray().toByteString(),
+        dataType = PortNum.TEXT_MESSAGE_APP.value,
+        id = id,
+        status = MessageStatus.RECEIVED,
+    )
 
     private fun testNode(id: String?): Node =
         Node(num = 0, user = User.Builder().also { wb -> wb.id = id.orEmpty() }.build())

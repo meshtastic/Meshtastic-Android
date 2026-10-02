@@ -2,8 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>LambdaParameterInRestartableEffect:BarcodeScannerProvider.kt:onCameraError: () -> Unit</ID>
-    <ID>LambdaParameterInRestartableEffect:BarcodeScannerProvider.kt:onCameraReady: (Boolean) -> Unit</ID>
-    <ID>LambdaParameterInRestartableEffect:BarcodeScannerProvider.kt:onResult: (String) -> Unit</ID>
+    <ID>UnnecessaryLaunchedEffect:BarcodeScannerProvider.kt:LaunchedEffect</ID>
   </CurrentIssues>
 </SmellBaseline>

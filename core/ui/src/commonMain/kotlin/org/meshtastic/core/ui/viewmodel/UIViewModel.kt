@@ -42,12 +42,12 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.TracerouteMapAvailability
+import org.meshtastic.core.model.asDeviceVersion
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
@@ -59,15 +59,14 @@ import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshLogRepository
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.core.repository.notificationId
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.compromised_keys
@@ -102,7 +101,7 @@ class UIViewModel(
     private val eventFirmwareRepository: EventFirmwareRepository,
     private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
     private val uiPrefs: UiPrefs,
-    private val notificationManager: NotificationManager,
+    private val serviceNotifications: MeshNotificationManager,
     packetRepository: PacketRepository,
     val alertManager: AlertManager,
     val snackbarManager: SnackbarManager,
@@ -192,7 +191,7 @@ class UIViewModel(
 
     fun clearClientNotification(notification: ClientNotification) {
         serviceRepository.clearClientNotification()
-        notificationManager.cancel(notification.notificationId())
+        serviceNotifications.clearClientNotification(notification)
     }
 
     val lockdownState = serviceRepository.lockdownState

@@ -1,8 +1,7 @@
 ---
 title: Начало работы
-parent: Руководство пользователя
 nav_order: 1
-last_updated: 2026-08-30
+last_updated: 2026-09-28
 description: Настройка при первом запуске — разрешения, процесс знакомства с приложением и следующие шаги после подключения твоей радиостанции.
 aliases:
   - first-launch
@@ -55,9 +54,11 @@ Meshtastic также использует местоположение для:
 - Вычисление расстояний до других нод
 - Обмен GPS-координатами с другими участниками сети (если включено)
 
-Предоставьте **"При использовании приложения"**. The app does not request background location — `ACCESS_BACKGROUND_LOCATION` is not in its manifest — so Android will not offer an "Always" option, and position updates happen while the app is in the foreground or running its foreground service.
+On Android 12 and newer, choose **Precise** to share your position with the mesh: an approximate grant still shows you on the map, but position sharing needs precise location.
 
-Declining leaves the rest of the app working: on Android 12 and newer, Bluetooth is unaffected and only the map position and position sharing are disabled. On Android 11 and older, Bluetooth scanning also stops, because that is the permission Android gates it behind — and system **Location Services** must also be switched on for a scan to return anything.
+Предоставьте **"При использовании приложения"**. Приложение не запрашивает фоновое определение местоположения — в его манифесте нет параметра `ACCESS_BACKGROUND_LOCATION` — поэтому Android не предлагает опцию "Всегда", и обновление местоположения происходит, когда приложение находится на переднем плане или выполняет функцию службы переднего плана.
+
+При отключении остальная часть приложения продолжает работать: на Android 12 и более новых версиях Bluetooth не затрагивается, отключаются только отображение местоположения на карте и обмен данными о местоположении. На Android 11 и более ранних версиях сканирование Bluetooth также прекращается, поскольку для этого требуется разрешение, которое Android блокирует. Кроме того, для получения каких-либо результатов сканирования необходимо включить системные **службы определения местоположения**.
 
 ### Разрешение на уведомления
 
@@ -71,25 +72,25 @@ Declining leaves the rest of the app working: on Android 12 and newer, Bluetooth
 
 ### Разрешение на критические уведомления
 
-Critical alerts are high-priority notifications that break through Do Not Disturb — for emergency mesh alerts and urgent messages.
+Критические оповещения — это уведомления с высоким приоритетом, которые проходят через режим «Не беспокоить» и предназначены для экстренных вызовов и срочных сообщений.
 
-This step is not a runtime permission prompt. There is no grant/deny dialog: the button opens the Android system settings page for the app's **Alerts** notification channel, where you turn the breakthrough behavior on yourself. Tap **Configure Critical Alerts** to open that page, or **Skip** to move on — you can reach the same page later from Android's notification settings for Meshtastic. This step appears only if you granted notifications on the previous screen — skip or decline them and setup ends there.
+Этот шаг не является запросом на разрешение запуска. There is no grant/deny dialog: the button opens the Android system settings page for the app's **Alerts** notification channel, where you turn the breakthrough behavior on yourself. Tap **Configure Critical Alerts** to open that page, or **Skip** to move on — you can reach the same page later from Android's notification settings for Meshtastic. This step appears only if you granted notifications on the previous screen — skip or decline them and setup ends there.
 
-### Reviewing permissions later
+### Пересмотреть разрешения позже
 
 The **Permissions** section of **Settings** summarizes where every runtime permission stands. On Android 12 and newer it lists five: **Nearby devices permission** (Bluetooth), **Location permission**, **App Notifications**, **Camera permission** (scanning channel and contact QR codes) and **Local network permission** (finding radios over Wi-Fi by mDNS). On Android 11 and older a single **Location permission** row covers both Bluetooth and location, so there are four. The last two are never asked for during setup, only when a feature first needs them.
 
 The section reads _All allowed_ when every permission is granted, _Nothing needs your attention_ when some have simply never been asked for, and names a count when one is denied — in which case it expands itself. Tap the row to expand or collapse it at any time:
 
-| Состояние                                   | What tapping the row does                                                                    |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **Allowed**                                 | Opens the system page, so you can review or revoke it                                        |
-| **Not asked yet**                           | Requests it                                                                                  |
-| **Denied — tap to allow**                   | Explains what the permission is for, then asks again if you agree                            |
-| **Blocked — tap to open system settings**   | Android will no longer show its dialog, so this opens the page where you can turn it back on |
-| **Not required on this version of Android** | Ничего — разрешения на твоём устройстве нет                                                  |
+| Состояние                                                    | What tapping the row does                                                                                           |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| **Разрешено**                                                | Открывает страницу системы, на которой можно просмотреть или отозвать запрос                                        |
+| **Ещё не спрашивали**                                        | Запросить                                                                                                           |
+| **Отклонено — нажми для разрешения**                         | Объясняет, для чего нужно разрешение, а затем снова спрашивает, согласен ли ты.                     |
+| **Заблокировано — нажми, чтобы открыть системные настройки** | Android больше не будет отображать диалоговое окно, поэтому откроется страница, на которой можно снова его включить |
+| **Не требуется для данной версии Android**                   | Ничего — разрешения на твоём устройстве нет                                                                         |
 
-This matters most for notifications. If you decline them during setup, this row is the way back: Android stops showing the dialog once you have declined firmly (a second denial), at which point this row switches to **Blocked** and sends you to the system settings page instead. Подсказка уведомлений есть только на Android 13 и новее — на более старых версиях уведомления включены по умолчанию и ими управляют через настройки самого Android.
+Это больше всего важно для уведомлений. Если вы отклонил их во время настройки, эта строка станет обратной: Android перестанет показывать диалоговое окно, как только ты решительно откажешься (повторный отказ), после чего эта строка переключится на \*\* Заблокировано \*\* и вместо этого отправит тебя на страницу настроек системы. Подсказка уведомлений есть только на Android 13 и новее — на более старых версиях уведомления включены по умолчанию и ими управляют через настройки самого Android.
 
 ## После настройки
 
@@ -107,4 +108,4 @@ This matters most for notifications. If you decline them during setup, this row 
 - [Сообщения и каналы](messages-and-channels) — отправь  своё первое сообщение
 - [Ноды](nodes) — посмотри, кто ещё в твоей сети
 - [Карта и контрольные точки](map-and-waypoints) — просмотр позиций нод
-- [Settings — Radio & User](settings-radio-user) — configure your radio and user profile
+- [Настройки — Радио и пользователь](settings-radio-user) — настрой радио и свой профиль пользователя

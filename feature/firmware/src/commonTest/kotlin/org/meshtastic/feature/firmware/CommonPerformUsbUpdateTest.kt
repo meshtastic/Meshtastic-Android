@@ -14,18 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
-
 package org.meshtastic.feature.firmware
 
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_update_transfer_percent
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -209,9 +211,36 @@ abstract class CommonPerformUsbUpdateTest {
 
         val downloadingStates = states.filterIsInstance<FirmwareUpdateState.Downloading>()
         assertTrue(downloadingStates.size >= 2, "Expected multiple Downloading states for progress updates")
-        assertTrue(downloadingStates.any { it.progressState.details == "25%" }, "Expected 25% progress detail")
-        assertTrue(downloadingStates.any { it.progressState.details == "75%" }, "Expected 75% progress detail")
+        assertEquals(
+            listOf(percentDetail(25), percentDetail(75)),
+            downloadingStates.mapNotNull { it.progressState.details },
+        )
     }
+
+    @Test
+    fun `maintenance download reports progress as a translated percentage`() = runTest {
+        val states = mutableListOf<FirmwareUpdateState>()
+
+        performUsbMaintenance(
+            request = UsbMaintenanceRequest.FactoryErase,
+            release = testRelease,
+            hardware = testHardware,
+            radioController = FakeRadioController(),
+            nodeRepository = FakeNodeRepository(),
+            updateState = { states.add(it) },
+            retrieveUsbFirmware = { _, _, onProgress ->
+                onProgress(0.4f)
+                null
+            },
+        )
+
+        assertEquals(
+            listOf(percentDetail(40)),
+            states.filterIsInstance<FirmwareUpdateState.Downloading>().mapNotNull { it.progressState.details },
+        )
+    }
+
+    private fun percentDetail(percent: Int) = UiText.Resource(Res.string.firmware_update_transfer_percent, percent)
 
     @Test
     fun `download path returns artifact for caller cleanup`() = runTest {

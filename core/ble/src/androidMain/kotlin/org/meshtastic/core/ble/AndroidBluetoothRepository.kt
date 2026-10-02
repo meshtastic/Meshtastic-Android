@@ -32,12 +32,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
+import org.meshtastic.core.common.hasBluetoothLe
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.util.anonymize
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -58,13 +59,17 @@ class AndroidBluetoothRepository(
     private val dispatchers: CoroutineDispatchers,
     @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
 ) : BluetoothRepository {
-    private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+    private val bluetoothAdapter: BluetoothAdapter? =
+        (context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
+
+    override val isSupported: Boolean = context.hasBluetoothLe()
 
     private val _state = MutableStateFlow(BluetoothState(hasPermissions = hasBluetoothPermissions()))
     override val state: StateFlow<BluetoothState> = _state.asStateFlow()
 
     private val deviceCache = mutableMapOf<String, MeshtasticBleDevice>()
+
+    private val bondEvents = BondEventReceiver(context, processLifecycle.coroutineScope + dispatchers.default)
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) { updateBluetoothState() }
@@ -93,6 +98,7 @@ class AndroidBluetoothRepository(
     @SuppressLint("MissingPermission")
     override suspend fun bond(device: BleDevice) {
         val macAddress = device.address
+        bondEvents.watch(macAddress)
         val remoteDevice =
             bluetoothAdapter?.getRemoteDevice(macAddress) ?: throw Exception("Bluetooth adapter unavailable")
 
@@ -109,7 +115,9 @@ class AndroidBluetoothRepository(
 
                     val filter =
                         android.content.IntentFilter(android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-                    ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+                    // The Bluetooth app sends this under its own uid, which a NOT_EXPORTED receiver refuses. It is a
+                    // protected broadcast, so exporting admits no other sender.
+                    ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
 
                     try {
                         val start = startOrObserveBond(remoteDevice, result)
@@ -124,27 +132,6 @@ class AndroidBluetoothRepository(
             if (!bonded) {
                 throw Exception("Timed out waiting for bonding to complete")
             }
-        } finally {
-            updateBluetoothState()
-        }
-    }
-
-    @Suppress("TooGenericExceptionCaught", "SwallowedException", "ReturnCount")
-    @SuppressLint("MissingPermission")
-    override suspend fun removeBond(address: String): Boolean {
-        val remoteDevice = bluetoothAdapter?.getRemoteDevice(address)
-        if (remoteDevice == null || remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_NONE) {
-            return false
-        }
-        return try {
-            // removeBond() is a public-but-hidden BluetoothDevice API (no SDK stub); reflection is the standard access
-            // path used across the Android BLE/DFU ecosystem (incl. Nordic's DFU library).
-            val removed = remoteDevice.javaClass.getMethod("removeBond").invoke(remoteDevice) as? Boolean ?: false
-            Logger.i { "removeBond(${address.anonymize()}) -> $removed" }
-            removed
-        } catch (e: Exception) {
-            Logger.w(e) { "removeBond(${address.anonymize()}) reflection failed" }
-            false
         } finally {
             updateBluetoothState()
         }
@@ -346,10 +333,13 @@ class AndroidBluetoothRepository(
     }
 
     @SuppressLint("MissingPermission")
-    override fun isBonded(address: String): Boolean = try {
-        bluetoothAdapter?.bondedDevices?.any { it.address.equals(address, ignoreCase = true) } ?: false
-    } catch (e: SecurityException) {
-        Logger.w(e) { "SecurityException checking bonded devices. Missing BLUETOOTH_CONNECT?" }
-        false
+    override fun isBonded(address: String): Boolean {
+        bondEvents.watch(address)
+        return try {
+            bluetoothAdapter?.bondedDevices?.any { it.address.equals(address, ignoreCase = true) } ?: false
+        } catch (e: SecurityException) {
+            Logger.w(e) { "SecurityException checking bonded devices. Missing BLUETOOTH_CONNECT?" }
+            false
+        }
     }
 }

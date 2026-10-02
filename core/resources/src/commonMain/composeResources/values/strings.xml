@@ -17,18 +17,24 @@
 
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Humidity</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message from %1$s: %2$s</string>
     <string name="a11y_node_battery">battery %1$d%</string>
+    <string name="a11y_node_channel">Channel %1$d</string>
     <string name="a11y_node_distance_away">%1$s away</string>
     <string name="a11y_node_favorite">favorite</string>
-    <string name="a11y_node_hops_away">%1$d hops away</string>
+    <plurals name="a11y_node_hops_count">
+        <item quantity="one">%1$d hop away</item>
+        <item quantity="other">%1$d hops away</item>
+    </plurals>
     <string name="a11y_node_last_heard">last heard %1$s</string>
     <string name="a11y_node_offline">offline</string>
     <string name="a11y_node_online">online</string>
     <string name="a11y_node_role">role %1$s</string>
     <string name="a11y_node_signal">signal %1$s</string>
     <string name="a11y_nodes_at_hop">Hop %1$d: %2$d nodes</string>
+    <string name="a11y_temperature">Temperature</string>
     <string name="about">About</string>
     <string name="accept">Accept</string>
     <string name="acknowledgements">Acknowledgements</string>
@@ -46,7 +52,6 @@
     <string name="action_translate_message">Translate message</string>
     <string name="actions">Actions</string>
     <string name="adc_multiplier_override">ADC multiplier override</string>
-    <string name="adc_multiplier_override_ratio">ADC multiplier override ratio</string>
     <string name="adc_voltage">ADC Voltage</string>
     <!-- ADD -->
     <string name="add">Add</string>
@@ -60,7 +65,6 @@
     <string name="add_network_device_manually">Add device manually…</string>
     <string name="add_network_layer">Add Network Layer</string>
     <string name="address">Address</string>
-    <string name="admin_key">Admin Key</string>
     <string name="admin_keys">Admin Keys</string>
     <string name="administration">Administration</string>
     <string name="advanced">Advanced</string>
@@ -70,24 +74,14 @@
     <string name="air_quality">Air Quality</string>
     <string name="air_quality_icon">Air quality icon</string>
     <string name="air_quality_metrics_log">Air Quality Metrics Log</string>
-    <string name="air_quality_metrics_module_enabled">Air quality metrics module enabled</string>
-    <string name="air_quality_metrics_update_interval_seconds">Air quality metrics update interval</string>
     <string name="air_util_definition">Percent of airtime for transmission used within the last hour.</string>
     <string name="air_utilization">AirUtil</string>
-    <!-- ALERT -->
-    <string name="alert_bell_buzzer">Alert bell buzzer</string>
-    <string name="alert_bell_led">Alert bell LED</string>
     <string name="alert_bell_text">Alert Bell Character!</string>
-    <string name="alert_bell_vibra">Alert bell vibra</string>
-    <string name="alert_message_buzzer">Alert message buzzer</string>
-    <string name="alert_message_led">Alert message LED</string>
-    <string name="alert_message_vibra">Alert message vibra</string>
     <string name="all_time">All</string>
     <string name="allow_input_source">Allow input source</string>
     <string name="allow_undefined_pin_access">Allow undefined pin access</string>
     <string name="alt">Alt</string>
     <string name="altitude">Altitude</string>
-    <string name="always_point_north">Always point north</string>
     <string name="ambient_lighting">Ambient Lighting</string>
     <string name="ambient_lighting_config">Ambient Lighting Config</string>
     <string name="ammonium">Ammonium</string>
@@ -138,8 +132,6 @@
     <string name="backup_keys_confirmation">Saves the public and private keys to secure, encrypted storage on this device.</string>
     <string name="backup_restore">Backup &amp; Restore</string>
     <string name="bad">Bad</string>
-    <!-- BANDWIDTH -->
-    <string name="bandwidth">Bandwidth</string>
     <string name="bandwidth_default">Default (%1$s kHz)</string>
     <string name="bandwidth_option_khz">%1$s kHz</string>
     <string name="bandwidth_unsupported">Unsupported (%1$s)</string>
@@ -149,15 +141,12 @@
     <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
     <string name="biochemical_oxygen_demand">BOD</string>
     <string name="ble_devices">Bluetooth Devices</string>
-    <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI threshold (defaults to -80)</string>
     <string name="ble_scan_needs_location_services">Bluetooth scanning also needs location services switched on for this version of Android. Your position is not used.</string>
-    <string name="blue">Blue</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_available_devices">Available Bluetooth Devices</string>
     <string name="bluetooth_config">Bluetooth Config</string>
     <string name="bluetooth_disabled">Bluetooth is off. Turn it on to scan for nearby devices.</string>
-    <string name="bluetooth_enabled">Bluetooth enabled</string>
     <string name="bluetooth_feature_config">Configuration</string>
     <string name="bluetooth_feature_config_description">Wirelessly manage your device settings and channels.</string>
     <string name="bluetooth_feature_discovery">Discovery</string>
@@ -178,16 +167,12 @@
         <item quantity="one">Bluetooth scan limit reached. Try again in %1$d second.</item>
         <item quantity="other">Bluetooth scan limit reached. Try again in %1$d seconds.</item>
     </plurals>
-    <string name="bold_heading">Bold Heading</string>
     <string name="bonding_failed_permissions">Pairing failed. Grant nearby device permissions and try again.</string>
     <string name="bonding_failed_retry">Pairing did not complete. Try pairing again.</string>
     <string name="boot_reconnect_blocked_message">Nearby devices permission is off, so your radio cannot be reached over Bluetooth. Tap to turn it back on.</string>
     <string name="boot_reconnect_blocked_title">Meshtastic can't reconnect</string>
     <string name="bottom_nav_settings">Settings</string>
-    <string name="broadcast_interval">Broadcast Interval</string>
     <string name="busy_noise_floor">Busy floor</string>
-    <string name="button_gpio">Button GPIO</string>
-    <string name="buzzer_gpio">Buzzer GPIO</string>
     <plurals name="cache_limit_eviction_warning">
         <item quantity="one">Lowering this will permanently delete the saved history for %1$d device.</item>
         <item quantity="other">Lowering this will permanently delete the saved history for %1$d devices.</item>
@@ -205,7 +190,6 @@
     <string name="canned_message_enabled">Canned message enabled</string>
     <string name="cant_change_no_radio">Couldn't change channel, because radio is not yet connected. Please try again.</string>
     <string name="cant_shutdown">Shutdown not supported on this device</string>
-    <string name="carousel_interval">Carousel interval</string>
     <string name="ch_util_definition">Utilization for the current channel, including well formed TX, RX and malformed RX (aka noise).</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
@@ -219,7 +203,6 @@
     <string name="channel_8">Channel 8</string>
     <string name="channel_features">Channel Features</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
-    <string name="channel_label">Channel</string>
     <string name="channel_name">Channel Name</string>
     <string name="channel_url">Channel URL</string>
     <string name="channel_utilization">ChUtil</string>
@@ -238,6 +221,7 @@
     <string name="chirpy_error_unknown">Oops! We hit some heavy packet loss or signal interference! 📡 Let's re-transmit that query and see if we can get through.</string>
     <string name="chirpy_error_unsupported_flavor">I'm operating on a limited frequency on this app flavor! 🔌 Try using a version with full AI Core integration.</string>
     <string name="chirpy_error_unsupported_platform">Oh no! My antenna can't seem to establish a connection on this platform. 📡 Please double-check your hardware compatibility!</string>
+    <string name="chirpy_fallback_unavailable">AI assistant is not available on this platform. Here are pages that may help:</string>
     <string name="chirpy_intro">Hey there! 📡 I'm Chirpy, your on-device Meshtastic assistant! I can help with setup, configuration, troubleshooting, and mesh networking tips. What can I help you with?</string>
     <string name="chirpy_ready">Ask Chirpy</string>
     <string name="chirpy_search_placeholder">Ask about Meshtastic…</string>
@@ -265,9 +249,6 @@
     <string name="co2">CO₂</string>
     <string name="co2_humidity">CO₂ Hum</string>
     <string name="co2_temperature">CO₂ Temp</string>
-    <string name="codec_2_enabled">CODEC 2 enabled</string>
-    <string name="codec2_sample_rate">CODEC2 sample rate</string>
-    <string name="coding_rate">Coding Rate</string>
     <string name="collapse_chart">Collapse chart</string>
     <string name="collapsed">Collapsed</string>
     <string name="communicate_off_the_grid">Communicate off-the-grid with your friends and community without cell service.</string>
@@ -280,49 +261,28 @@
     <string name="compass_no_location_permission">Location permission is required to show distance and bearing.</string>
     <string name="compass_no_magnetometer">This device does not have a compass sensor. Heading is unavailable.</string>
     <string name="compass_north_top">Compass north top</string>
-    <string name="compass_orientation">Compass orientation</string>
     <string name="compass_title">Compass</string>
     <string name="compass_uncertainty">Estimated area: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Estimated area: unknown accuracy</string>
     <string name="compromised_keys">Compromised keys detected, select OK to regenerate.</string>
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">Treat double tap on supported accelerometers as a user button press.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Controls the blinking LED on the device. For most devices this will control one of the up to 4 LEDs, the charger and GPS LEDs are not controllable.</string>
-    <string name="config_device_transmitOverLora_summary">Whether in addition to sending it to MQTT and the PhoneAPI, our NeighborInfo should be transmitted over LoRa. Not available on a channel with default key and name.</string>
     <string name="config_device_tripleClickAsAdHocPing_summary">Send a position on the primary channel when the user button is triple clicked.</string>
     <string name="config_device_tzdef_summary">Time zone for dates on the device screen and log.</string>
     <string name="config_device_use_phone_tz">Use phone time zone</string>
-    <string name="config_display_auto_screen_carousel_secs_summary">Automatically toggles to the next page on the screen like a carousel, based the specified interval.</string>
-    <string name="config_display_compass_north_top_summary">The compass heading on the screen outside of the circle will always point north.</string>
-    <string name="config_display_displaymode_summary">Override default screen layout.</string>
-    <string name="config_display_flip_screen_summary">Flip screen vertically.</string>
-    <string name="config_display_heading_bold_summary">Bold the heading text on the screen.</string>
-    <string name="config_display_oled_summary">Override automatic OLED screen detection.</string>
-    <string name="config_display_screen_on_secs_summary">How long the screen remains on after the user button is pressed or messages are received.</string>
-    <string name="config_display_units_summary">Units displayed on the device screen.</string>
-    <string name="config_display_wake_on_tap_or_motion_summary">Requires that there be an accelerometer on your device.</string>
-    <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
-    <string name="config_lora_hop_limit_summary">Sets the maximum number of hops, default is 3. Increasing hops also increases congestion and should be used carefully. 0 hop broadcast messages will not get ACKs.</string>
+    <string name="config_lora_coding_rate_fraction">4/%1$d</string>
+    <string name="config_lora_coding_rate_override">Coding Rate Override</string>
+    <string name="config_lora_coding_rate_override_max_summary">This preset already uses the highest coding rate.</string>
+    <string name="config_lora_coding_rate_override_summary">Adds error correction on top of the preset. A higher coding rate makes every packet longer on air and uses more of the duty cycle and channel utilization budget.</string>
+    <string name="config_lora_coding_rate_preset_default">Preset default (%1$s)</string>
     <string name="config_lora_modem_preset_licensed_summary">This region's presets are for licensed (amateur radio) operators only. Enable Licensed amateur radio (Ham) in User Config to select them.</string>
     <string name="config_lora_modem_preset_summary">Available modem presets, default is Long Fast.</string>
     <string name="config_lora_region_summary">The region where you will be using your radios.</string>
-    <string name="config_network_eth_enabled_summary">Enabling Ethernet will disable the bluetooth connection to the app. TCP node connections are not available on Apple devices.</string>
     <string name="config_network_udp_enabled_summary">Enable broadcasting packets via UDP over the local network.</string>
-    <string name="config_network_wifi_enabled_summary">Enabling Wi-Fi will disable the bluetooth connection to the app.</string>
-    <string name="config_position_broadcast_secs_summary">The maximum interval that can elapse without a node broadcasting a position.</string>
-    <string name="config_position_broadcast_smart_minimum_distance_summary">The minimum distance change in meters to be considered for a smart position broadcast.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">The fastest that position updates will be sent if the minimum distance has been satisfied.</string>
-    <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
-    <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
-    <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don't use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
     <string name="config_saved_restarting">The node is restarting and will be briefly unreachable.</string>
-    <string name="config_security_admin_key">The public key authorized to send admin messages to this node.</string>
-    <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
-    <string name="config_security_is_managed">Device is managed by a mesh administrator, the user is unable to access any of the device settings.</string>
     <string name="config_security_private_key">Used to create a shared key with a remote device.</string>
     <string name="config_security_private_key_remote">The device does not share its private key over remote administration. You can set a new key, but it can never be read back.</string>
     <string name="config_security_public_key">Generated from your private key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
-    <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
     <string name="configuration">Configuration</string>
     <string name="configure_bluetooth_permissions">Configure Bluetooth Permissions</string>
     <string name="configure_critical_alerts">Configure Critical Alerts</string>
@@ -375,7 +335,6 @@
     <string name="debug_filter_included">Filter included</string>
     <string name="debug_filter_preset_title">Preset Filters</string>
     <string name="debug_filters">Filters</string>
-    <string name="debug_log_api_enabled">Debug log API enabled</string>
     <string name="debug_logcat_empty">No app logs to show</string>
     <string name="debug_logcat_refresh">Refresh</string>
     <string name="debug_logs_export">Export Logs</string>
@@ -426,8 +385,6 @@
     <string name="details">Details</string>
     <string name="detection_sensor">Detection Sensor</string>
     <string name="detection_sensor_config">Detection Sensor Config</string>
-    <string name="detection_sensor_enabled">Detection Sensor enabled</string>
-    <string name="detection_trigger_type">Detection trigger type</string>
     <!-- DEVICE -->
     <string name="device">Device</string>
     <string name="device_configuration">Device configuration</string>
@@ -442,17 +399,15 @@
     <string name="device_metrics_log">Device Metrics</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
-    <string name="device_metrics_update_interval_seconds">Device metrics update interval</string>
     <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_sleeping">Device sleeping</string>
     <string name="device_storage_ui_title">Device Storage &amp; UI (Read-Only)</string>
-    <string name="device_telemetry_enabled">Send Device Telemetry</string>
-    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh. These are nominal values. Congested meshes will automatically scale to longer intervals based on number of online nodes.</string>
     <string name="device_theme_language">Theme: %1$s, Language: %2$s</string>
     <string name="dew_point">Dew Point</string>
     <string name="direct_message">Direct Message</string>
     <string name="direct_message_key">Direct Message Key</string>
     <string name="direct_messages">Direct Messages</string>
+    <string name="disabled">Disabled</string>
     <string name="discard_changes">Discard</string>
     <string name="disconnect">Disconnect</string>
     <string name="disconnected">Disconnected</string>
@@ -468,6 +423,7 @@
     <string name="discovery_dwell_time">Dwell Time</string>
     <string name="discovery_dwell_time_description">Time to listen on each preset</string>
     <string name="discovery_empty_history">No discovery sessions yet</string>
+    <string name="discovery_empty_history_hint">Start a scan from Local Mesh Discovery to see its results here.</string>
     <string name="discovery_export_report">Export report</string>
     <string name="discovery_history">Discovery History</string>
     <string name="discovery_interrupted_scan_restored">Restored radio to home config (%1$s) after an interrupted discovery scan</string>
@@ -530,15 +486,14 @@
     <string name="discovery_stop_scan">Stop Scan</string>
     <string name="discovery_summary_not_available">AI analysis not available</string>
     <string name="discovery_time_remaining">%1$s remaining</string>
-    <string name="discovery_unique_nodes">%1$d unique nodes</string>
+    <plurals name="discovery_unique_nodes_count">
+        <item quantity="one">%1$d unique node</item>
+        <item quantity="other">%1$d unique nodes</item>
+    </plurals>
     <string name="discovery_view_map">View map</string>
     <string name="disk_free_indexed">Disk Free %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Display</string>
     <string name="display_config">Device Display</string>
-    <string name="display_mode">Display mode</string>
-    <string name="display_time_in_12h_format">When enabled, the device will display the time in 12-hour format on screen.</string>
-    <string name="display_units">Display units</string>
     <string name="dissolved_oxygen">Dissolved O₂</string>
     <!-- DISTANCE -->
     <string name="distance">Distance</string>
@@ -546,9 +501,10 @@
     <string name="distance_filters_description">Filter the node list and mesh map based on proximity to your phone.</string>
     <string name="distance_measurements">Distance Measurements</string>
     <string name="distance_measurements_description">Display the distance between your phone and other Meshtastic nodes with positions.</string>
-    <string name="dns">DNS</string>
     <!-- DOC -->
+    <string name="doc_auto_translated">Auto-translated</string>
     <string name="doc_clear_search">Clear search</string>
+    <string name="doc_community_translated">Community translated</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
     <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
     <string name="doc_keywords_debug_logs">debug,logs,logcat,export,bug report,issue,troubleshooting,diagnostics</string>
@@ -562,6 +518,7 @@
     <string name="doc_keywords_mqtt">mqtt,broker,internet,bridge,uplink,downlink</string>
     <string name="doc_keywords_node_metrics">metrics,telemetry,signal,snr,rssi,battery,traceroute</string>
     <string name="doc_keywords_nodes">node,mesh,list,role,status,favorite,filter</string>
+    <string name="doc_keywords_notifications">notification,alert,sound,mute,reply,watch,wear os</string>
     <string name="doc_keywords_onboarding">setup,welcome,permissions,first-launch</string>
     <string name="doc_keywords_settings_module">module,serial,telemetry,canned,store-forward,administration</string>
     <string name="doc_keywords_settings_radio">settings,radio,lora,region,modem,device,power,security</string>
@@ -572,8 +529,12 @@
     <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
     <string name="doc_keywords_widget">widget,home screen,local stats,glance,battery,utilization</string>
     <string name="doc_loading">Loading documentation…</string>
+    <string name="doc_no_content">No content available.</string>
     <string name="doc_no_documentation">No documentation available</string>
     <string name="doc_no_results">No results found</string>
+    <string name="doc_open_page">Open %1$s</string>
+    <string name="doc_page_not_found">Page not found: %1$s</string>
+    <string name="doc_page_not_found_detail">This page may have been moved or removed.</string>
     <string name="doc_search_placeholder">Search documentation…</string>
     <string name="doc_section_developer">Developer Guide</string>
     <string name="doc_section_user">User Guide</string>
@@ -590,6 +551,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_node_metrics">Node Metrics</string>
     <string name="doc_title_nodes">Nodes</string>
+    <string name="doc_title_notifications">Notifications</string>
     <string name="doc_title_onboarding">Getting Started</string>
     <string name="doc_title_settings_module">Settings — Modules &amp; Admin</string>
     <string name="doc_title_settings_radio">Settings — Radio &amp; User</string>
@@ -602,15 +564,19 @@
     <string name="documentation">Documentation</string>
     <string name="done">Done</string>
     <string name="dont_show_again_for_device">Don't show again for this device</string>
-    <string name="double_tap_as_button_press">Double Tap as Button</string>
     <string name="downlink_enabled">MQTT Downlink Enabled</string>
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
     <string name="download">Download</string>
     <string name="download_this_area">Download this area</string>
     <string name="duplicated_public_key_title">Duplicate Public Key Detected</string>
+    <!-- DURATION -->
+    <string name="duration_ago">%1$s ago</string>
+    <string name="duration_days_short">%1$dd</string>
+    <string name="duration_hours_short">%1$dh</string>
+    <string name="duration_minutes_short">%1$dm</string>
+    <string name="duration_seconds_short">%1$ds</string>
     <string name="dynamic">Dynamic</string>
     <string name="easily_set_up_private_mesh_networks">Easily set up private mesh networks for secure and reliable communication in remote areas.</string>
-    <string name="echo_enabled">Echo enabled</string>
     <string name="edit">Edit</string>
     <string name="edit_custom_tile_source">Edit Network Tile Source</string>
     <string name="eight_hours">8 Hours</string>
@@ -629,28 +595,19 @@
     <string name="emoji_load_error">Unable to load emoji</string>
     <string name="emoji_no_results">No emoji found</string>
     <string name="emoji_recently_used">Recently Used</string>
-    <string name="enable_power_saving_mode">Enable power saving mode</string>
     <string name="enabled">Enabled</string>
-    <!-- ENCRYPTION -->
-    <string name="encryption_enabled">Encryption enabled</string>
     <string name="encryption_error">Public key mismatch</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
     <string name="encryption_pkc">Public Key Encryption</string>
     <string name="encryption_pkc_text">A public key is on file for this node, so interactions with it use public key encryption.</string>
     <string name="env_metrics_log">Environment Metrics</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Environment</string>
-    <string name="environment_metrics_module_enabled">Environment metrics module enabled</string>
-    <string name="environment_metrics_on_screen_enabled">Environment metrics on-screen enabled</string>
-    <string name="environment_metrics_update_interval_seconds">Environment metrics update interval</string>
-    <string name="environment_metrics_use_fahrenheit">Environment metrics use Fahrenheit</string>
     <string name="error">Error</string>
     <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
     <string name="error_recovery_exhausted">Could not establish a stable connection after repeated attempts. Please re-select the node to retry.</string>
     <string name="establish_session">Connect &amp; administer</string>
     <string name="establishing_session">Establishing remote session…</string>
     <string name="ethernet_config">Ethernet Options</string>
-    <string name="ethernet_enabled">Ethernet enabled</string>
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="event_firmware_running">Running event firmware</string>
     <string name="event_use_event_theme">Use event theme</string>
@@ -666,7 +623,7 @@
     <string name="export_tak_data_package">Export TAK Data Package</string>
     <string name="external_notification">External Notification</string>
     <string name="external_notification_config">External Notification Config</string>
-    <string name="external_notification_enabled">External notification enabled</string>
+    <string name="external_power_short">PWR</string>
     <string name="factory_reset">Factory reset</string>
     <string name="fair">Fair</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
@@ -677,10 +634,10 @@
     <string name="files_available">Files available (%1$d):</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">Add word or regex:pattern</string>
-    <string name="filter_disable_for_contact">Disable filtering</string>
-    <string name="filter_enable">Enable Filtering</string>
-    <string name="filter_enable_for_contact">Enable filtering</string>
-    <string name="filter_enable_summary">Hide messages containing filter words</string>
+    <string name="filter_disable_for_contact">Disable filter here</string>
+    <string name="filter_enable">Filter all conversations</string>
+    <string name="filter_enable_for_contact">Enable filter here</string>
+    <string name="filter_enable_summary">Hide messages containing filter words in every channel and DM. Turn it off for one conversation from its menu.</string>
     <string name="filter_hide_count">Hide %1$d filtered</string>
     <string name="filter_icon">Filter</string>
     <string name="filter_message_label">Filtered</string>
@@ -697,6 +654,11 @@
     <string name="firmware_edition">Firmware Edition</string>
     <string name="firmware_event_ended_banner">%1$s has ended. Return to standard Meshtastic firmware to restore normal features.</string>
     <string name="firmware_event_ended_button">Update firmware</string>
+    <string name="firmware_maintenance_bootloader_available">Latest: %1$s</string>
+    <string name="firmware_maintenance_bootloader_installed">Installed: %1$s</string>
+    <string name="firmware_maintenance_bootloader_latest_hint">Latest version: %1$s. The installed version is shown once the device restarts into update mode.</string>
+    <string name="firmware_maintenance_bootloader_up_to_date">Bootloader is up to date</string>
+    <string name="firmware_maintenance_bootloader_up_to_date_hint">Nothing to upgrade. The firmware is reinstalled next, which restarts the device.</string>
     <string name="firmware_maintenance_cdc_unblock_failed">The erase file was copied but the device didn't start erasing. Nothing has been changed yet. Unplug the device, double-press its reset button, and try again.</string>
     <string name="firmware_maintenance_copy_failed">Couldn't copy the file to the device's drive. Make sure the drive is still connected and try again.</string>
     <string name="firmware_maintenance_data_unavailable">The erase image list isn't available right now. Check your connection and try again, or use the web flasher at flasher.meshtastic.org.</string>
@@ -791,6 +753,8 @@
     <string name="firmware_update_taking_a_while">This might take a minute...</string>
     <string name="firmware_update_target">Target: %1$s</string>
     <string name="firmware_update_title">Firmware Update</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
+    <string name="firmware_update_transfer_progress">%1$d% (%2$s/s, ETA: %3$ds)</string>
     <string name="firmware_update_unknown_error">Unknown error</string>
     <string name="firmware_update_unknown_hardware">Unknown hardware model: %1$d</string>
     <string name="firmware_update_unknown_release">Unknown remote release</string>
@@ -811,9 +775,7 @@
     <string name="firmware_update_wipe_label">Erase device during update</string>
     <string name="firmware_update_wipe_usb_detail">Wipes the device's flash completely, then installs the selected firmware from scratch.</string>
     <string name="firmware_version">Firmware version: %1$s</string>
-    <string name="fixed_pin">Fixed PIN</string>
     <string name="fixed_position">Fixed Position</string>
-    <string name="flip_screen">Flip screen</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
     <!-- FORMAT -->
     <string name="format_bold">Bold</string>
@@ -825,13 +787,7 @@
     <string name="free_memory">Free Memory</string>
     <string name="free_memory_description">Available system memory in bytes</string>
     <string name="freq">Freq</string>
-    <string name="frequency_slot">Frequency Slot</string>
-    <string name="friendly_name">Friendly name</string>
     <string name="gas_resistance">Gas Resistance</string>
-    <string name="gateway">Gateway</string>
-    <string name="generate_input_event_on_ccw">Generate input event on CCW</string>
-    <string name="generate_input_event_on_cw">Generate input event on CW</string>
-    <string name="generate_input_event_on_press">Generate input event on Press</string>
     <string name="generate_qr_code">Generate QR Code</string>
     <!-- GEOFENCE -->
     <string name="geofence">Geofence</string>
@@ -856,32 +812,18 @@
     <string name="get_started">Get started</string>
     <string name="github_repository">GitHub Repository</string>
     <string name="good">Good</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO pin</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">GPIO pin for rotary encoder A port</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">GPIO pin for rotary encoder B port</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">GPIO pin for rotary encoder Press port</string>
-    <string name="gpio_pin_to_monitor">GPIO pin to monitor</string>
-    <string name="gps_en_gpio">GPS EN GPIO</string>
-    <string name="gps_mode">GPS Mode (Physical Hardware)</string>
-    <string name="gps_receive_gpio">GPS Receive GPIO</string>
-    <string name="gps_transmit_gpio">GPS Transmit GPIO</string>
     <string name="grant_permission">Grant permission</string>
-    <string name="green">Green</string>
     <string name="ham_long_name_summary">Optional. Appended to your call sign, e.g. KD2ABC//Attic Heltec</string>
     <string name="hardware">Hardware</string>
     <string name="hardware_model">Hardware model</string>
     <string name="heading">Heading</string>
-    <string name="heartbeat">Heartbeat</string>
     <string name="help_and_documentation">Help &amp; Documentation</string>
     <string name="hide_layer">Hide Layer</string>
     <string name="hide_password">Hide password</string>
-    <string name="history_return_max">History return max</string>
-    <string name="history_return_window">History return window</string>
     <string name="hop_histogram_empty">No nodes heard in this window</string>
     <string name="hop_histogram_title">Nodes per Hop</string>
-    <string name="hop_limit">Number of Hops</string>
     <string name="hops_away">Hops Away</string>
     <string name="host">Host</string>
     <string name="host_metrics_log">Host Metrics</string>
@@ -889,18 +831,13 @@
     <string name="i_agree">I agree.</string>
     <string name="i_agree_to_share_my_location">I have read and understand the above. I voluntarily consent to the unencrypted transmission of my node data via MQTT</string>
     <string name="i_know_what_i_m_doing">I know what I'm doing.</string>
-    <string name="i2s_clock">I2S clock</string>
-    <string name="i2s_data_in">I2S data in</string>
-    <string name="i2s_data_out">I2S data out</string>
-    <string name="i2s_word_select">I2S word select</string>
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
+    <string name="iaq_value">IAQ %1$d</string>
     <string name="icon_meanings">Icon Meanings</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignore</string>
     <string name="ignore_add">Add '%1$s' to ignore list?</string>
     <string name="ignore_incoming">Ignore incoming</string>
-    <string name="ignore_mqtt">Ignore MQTT</string>
     <string name="ignore_remove">Remove '%1$s' from ignore list?</string>
     <!-- IMPORT -->
     <string name="import_configuration">Import configuration</string>
@@ -928,7 +865,6 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP Address:</string>
     <string name="ip_port">Port:</string>
-    <string name="ipv4_mode">IPv4 mode</string>
     <string name="json_output_enabled">JSON output enabled</string>
     <string name="jump_to_latest_from">%1$s</string>
     <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
@@ -941,6 +877,7 @@
     <string name="key_verification_final_title">Key Verification Complete</string>
     <string name="key_verification_request_title">Key Verification Request</string>
     <string name="key_verification_title">Key Verification</string>
+    <string name="label_with_unit">%1$s (%2$s)</string>
     <string name="last_heard_filter_label">Filter by Last Heard time: %1$s</string>
     <string name="last_position_update">Last position update</string>
     <string name="latest_alpha_firmware">Latest alpha</string>
@@ -953,8 +890,6 @@
     <string name="layer_type_kml" translatable="false">KML</string>
     <string name="layer_type_network">Network layer</string>
     <string name="learn_more">Learn more</string>
-    <string name="led_heartbeat">LED Heartbeat</string>
-    <string name="led_state">LED state</string>
     <string name="legacy_admin_channel">Legacy Admin channel</string>
     <string name="library_count">%1$d libraries</string>
     <string name="license">License</string>
@@ -1004,6 +939,8 @@
     <string name="location_permission_blocked_toast">Location permission is off. Turn it on in app settings to share your position.</string>
     <string name="location_permission_denied_notice">Without location access, the map will not show where you are and Meshtastic cannot share your position with the mesh. Everything else keeps working, and you can turn it on later.</string>
     <string name="location_permission_rationale">Meshtastic uses your location to place you on the map, measure distance to nodes, and — only if you turn it on — share your position with the mesh. Declining leaves everything else working.</string>
+    <string name="location_precise_blocked_toast">Precise location is off. Turn on Use precise location in app settings to share your position.</string>
+    <string name="location_precise_rationale">Sharing your position with the mesh needs precise location, so other nodes see where you are rather than a rough area. When Android asks, choose Precise. The map and everything else keep working with approximate location.</string>
     <string name="location_sharing">Location Sharing</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Try again in %1$d seconds.</string>
@@ -1053,6 +990,8 @@
     <string name="longitude">Longitude</string>
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
+    <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
+    <string name="lora_config_changes">LoRa Configuration Changes:</string>
     <string name="low_battery">Low Battery</string>
     <string name="low_battery_message">Node %1$s has a low battery (%2$d%)</string>
     <string name="low_battery_title">Low battery: %1$s</string>
@@ -1060,13 +999,10 @@
     <string name="lux">Lux</string>
     <string name="manage_custom_tile_sources">Manage Custom Tile Sources</string>
     <string name="manage_map_layers">Manage Map Layers</string>
-    <string name="managed_mode">Managed Mode</string>
     <string name="manual_position_request">Manual position request required</string>
     <!-- MAP -->
     <string name="map">Mesh Map</string>
-    <string name="map_cache_info">Cache Capacity: %1$d MB\nCache Usage: %2$d MB</string>
     <string name="map_cache_manager">Cache Manager</string>
-    <string name="map_cache_megabytes">%1$s MB</string>
     <string name="map_cache_size">Current Cache size</string>
     <string name="map_cache_tiles">%1$d tiles</string>
     <string name="map_clear_tiles">Clear Downloaded Tiles</string>
@@ -1087,6 +1023,8 @@
     <string name="map_filter_title">Filter map</string>
     <string name="map_layer_formats">Map layers support .kml, .kmz, or GeoJSON formats.</string>
     <string name="map_layer_opacity">Opacity: %1$d%</string>
+    <string name="map_layer_open_failed">Couldn't open that map file.</string>
+    <string name="map_layer_too_large">Map files over %1$d MB can't be imported.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Last heard: %2$s&lt;br&gt;Last position: %3$s&lt;br&gt;Battery: %4$s</string>
     <string name="map_offline_banner">Offline — showing cached map data</string>
     <string name="map_offline_download_failed_build">No offline map data available right now — try again later</string>
@@ -1109,11 +1047,8 @@
     <string name="map_overlay_weather_radar">Weather radar</string>
     <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
     <string name="map_purge_success">SQL Cache purged for %1$s</string>
-    <string name="map_reporting">Map reporting</string>
     <string name="map_reporting_consent_header">Consent to Share Unencrypted Node Data via MQTT</string>
     <string name="map_reporting_consent_text">By enabling this feature, you acknowledge and expressly consent to the transmission of your device’s real-time geographic location over the MQTT protocol without encryption. This location data may be used for purposes such as live map reporting, device tracking, and related telemetry functions.</string>
-    <string name="map_reporting_interval_seconds">Map reporting interval (seconds)</string>
-    <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
     <string name="map_select_download_region">Select download region</string>
     <string name="map_start_download">Start Download</string>
     <string name="map_style_selection">Map style selection</string>
@@ -1144,7 +1079,6 @@
     <string name="mesh_beacon_invitations_title">Mesh invitations</string>
     <string name="mesh_beacon_listen">Listen for beacons</string>
     <string name="mesh_beacon_listen_summary">Capture invitations advertised by nearby meshes</string>
-    <string name="mesh_beacon_message">Beacon message</string>
     <string name="mesh_beacon_message_error">Maximum %1$d bytes</string>
     <string name="mesh_beacon_no_channels">No channels available</string>
     <string name="mesh_beacon_notification_body">A nearby mesh invited you to join</string>
@@ -1176,15 +1110,30 @@
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Alert notifications</string>
+    <string name="meshtastic_alerts_notifications_description">Critical alerts sent by nodes on the mesh.</string>
     <string name="meshtastic_app_name">Meshtastic</string>
     <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
+    <string name="meshtastic_broadcast_notifications_description">Messages sent to your channels.</string>
+    <string name="meshtastic_client_notifications">Radio notifications</string>
+    <string name="meshtastic_client_notifications_description">Notices from your radio, such as key verification requests and security warnings.</string>
+    <string name="meshtastic_device_status_notifications">Update and connection notifications</string>
+    <string name="meshtastic_device_status_notifications_description">Firmware updates for your radio, and problems reconnecting to it.</string>
     <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
+    <string name="meshtastic_low_battery_notifications_description">Your radio's battery is running low.</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Low battery notifications (favorite nodes)</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications_description">A favorite node's battery is running low.</string>
     <string name="meshtastic_mesh_beacon_notifications">Mesh invitation notifications</string>
+    <string name="meshtastic_mesh_beacon_notifications_description">Invitations to join a nearby mesh.</string>
     <string name="meshtastic_messages_notifications">Direct message notifications</string>
+    <string name="meshtastic_messages_notifications_description">Messages sent directly to you.</string>
     <string name="meshtastic_new_nodes_notifications">New node notifications</string>
+    <string name="meshtastic_new_nodes_notifications_description">Nodes heard for the first time.</string>
+    <string name="meshtastic_reactions_notifications">Reaction notifications</string>
+    <string name="meshtastic_reactions_notifications_description">Emoji reactions to messages.</string>
     <string name="meshtastic_service_notifications">Service notifications</string>
+    <string name="meshtastic_service_notifications_description">Shows the connection to your radio while Meshtastic runs in the background.</string>
     <string name="meshtastic_waypoints_notifications">Waypoint notifications</string>
+    <string name="meshtastic_waypoints_notifications_description">Waypoints shared on the mesh, and geofence crossings.</string>
     <!-- MESSAGE -->
     <string name="message">Message</string>
     <string name="message_delivery_status">Message delivery status</string>
@@ -1221,10 +1170,12 @@
     <string name="message_routing_error_timeout_detail">No acknowledgment was received in time. Try again when you have better signal or more mesh coverage.</string>
     <string name="message_routing_error_too_large">Message is too large to send</string>
     <string name="message_routing_error_too_large_detail">Shorten the message and send it again.</string>
+    <string name="message_status_ack_proof_invalid">Delivery proof failed</string>
     <string name="message_status_delivered">Delivered to mesh</string>
     <string name="message_status_enroute">Sending...</string>
     <string name="message_status_queued">Queued for sending</string>
     <string name="message_status_recipient_delivered">Delivered to recipient</string>
+    <string name="message_status_recipient_delivered_proven">Delivered to recipient · proven</string>
     <string name="message_status_relayed_not_confirmed">Relayed, not confirmed by recipient</string>
     <string name="message_status_sfpp_confirmed">Confirmed on SF++ chain</string>
     <string name="message_status_sfpp_routing">Routing via SF++ chain…</string>
@@ -1234,9 +1185,6 @@
     <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
-    <string name="minimum_broadcast_seconds">Minimum broadcast (seconds)</string>
-    <string name="minimum_distance">Smart Distance</string>
-    <string name="minimum_interval">Smart Interval</string>
     <string name="minimum_wake_time_seconds">Minimum wake time</string>
     <!-- MIRROR -->
     <string name="mirror_active">Mirroring</string>
@@ -1265,7 +1213,6 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT Config</string>
-    <string name="mqtt_enabled">MQTT enabled</string>
     <string name="mqtt_error_connection_lost">MQTT: connection lost</string>
     <string name="mqtt_error_credentials_rejected">MQTT: connection rejected (check credentials)</string>
     <string name="mqtt_error_proxy_failed">MQTT proxy failed: %1$s</string>
@@ -1279,8 +1226,8 @@
     <string name="mqtt_probe_tcp_failure">Cannot reach broker (TCP)</string>
     <string name="mqtt_probe_timeout">Timed out after %1$d ms</string>
     <string name="mqtt_probe_tls_failure">TLS handshake failed: %1$s</string>
-    <string name="mqtt_proxy_local">MQTT proxy on this phone</string>
-    <string name="mqtt_proxy_local_summary">This phone relays MQTT traffic for the connected device. Turn off to cut the relay immediately without changing the device's MQTT setting — useful when MQTT traffic is overwhelming the connection. Turn back on to resume relaying.</string>
+    <string name="mqtt_proxy_local">MQTT proxy in this app</string>
+    <string name="mqtt_proxy_local_summary">This app relays MQTT traffic for the connected device. Turn off to cut the relay immediately without changing the device's MQTT setting, which helps when MQTT traffic is overwhelming the connection. Turn back on to resume relaying.</string>
     <string name="mqtt_status_connected">Connected</string>
     <string name="mqtt_status_connecting">Connecting…</string>
     <string name="mqtt_status_disconnected">Disconnected</string>
@@ -1288,6 +1235,8 @@
     <string name="mqtt_status_inactive">Inactive</string>
     <string name="mqtt_status_reconnecting">Reconnecting…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Reconnecting (attempt %1$d) — %2$s</string>
+    <string name="mqtt_status_topics_refused_all">Connected, but the broker refused every topic: %1$s</string>
+    <string name="mqtt_status_topics_refused_some">Connected, but the broker refused %1$s</string>
     <string name="mqtt_test_connection">Test connection</string>
     <string name="must_set_region">You must set a region!</string>
     <string name="must_update">You must update this application on the app store (or Github). It is too old to talk to this radio firmware.  Please read our <a href="https://meshtastic.org/docs/software/android/installation">docs</a> on this topic.</string>
@@ -1303,7 +1252,6 @@
     <string name="mute_status_muted_for_days">Muted for %1$d days, %2$s hours</string>
     <string name="mute_status_muted_for_hours">Muted for %1$s hours</string>
     <string name="mute_status_unmuted">Not muted</string>
-    <string name="nag_timeout_seconds">Nag timeout (seconds)</string>
     <string name="name">Name</string>
     <string name="name_cannot_be_empty">Name cannot be empty.</string>
     <string name="navigate_back">Navigate Back</string>
@@ -1313,7 +1261,6 @@
     <string name="need_hardware_description">Meshtastic requires a compatible device. Our backers and partners offer ready-to-use hardware. Here are some of the most popular options.</string>
     <string name="neighbor_info">Neighbor Info</string>
     <string name="neighbor_info_config">Neighbor Info Config</string>
-    <string name="neighbor_info_enabled">Neighbor Info enabled</string>
     <string name="network">Network</string>
     <string name="network_layer_url_hint" translatable="false">https://example.com/map.kml or .geojson</string>
     <string name="new_channel_rcvd">New Channel URL received</string>
@@ -1329,7 +1276,6 @@
     <string name="no_bluetooth_devices_seen">No Bluetooth devices seen</string>
     <string name="no_custom_tile_sources_found">No custom tile sources found.</string>
     <string name="no_device_selected">No device selected</string>
-    <string name="no_devices_found">No devices found</string>
     <string name="no_files_manifested">No files manifested.</string>
     <string name="no_local_stats">No Stats Available</string>
     <string name="no_map_layers_loaded">No map layers loaded.</string>
@@ -1402,7 +1348,6 @@
     <string name="node_sort_via_favorite">via Favorite</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="nodedb_reset">NodeDB reset</string>
-    <string name="nodeinfo_broadcast_interval">Node Info Broadcast Interval</string>
     <!-- NODES -->
     <string name="nodes">Nodes</string>
     <string name="nodes_at_this_location">Nodes at this location</string>
@@ -1424,10 +1369,13 @@
     <string name="not_now">Not now</string>
     <string name="note">Note</string>
     <string name="notes">Notes</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Mesh</string>
     <string name="notification_permission_blocked_notice">Notifications are turned off and Android will not ask again. Turn them on in app settings to hear about new messages and alerts.</string>
     <string name="notification_permission_denied_notice">Without notifications, Meshtastic cannot alert you to new messages, new nodes, or a low battery while the app is in the background.</string>
     <string name="notification_permission_rationale">Notifications are how Meshtastic reaches you when the app is not open: new messages, newly discovered nodes, and a radio running low on battery. Nothing else changes if you decline.</string>
     <string name="notification_permissions_description">Meshtastic uses notifications to keep you updated on new messages and other important events. You can update your notification permissions at any time from settings.</string>
+    <string name="notification_reaction_to">%1$s to “%2$s”</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Notifications for channel and direct messages.</string>
     <string name="notifications_for_low_battery_alerts">Notifications for low battery alerts for the connected device.</string>
@@ -1435,8 +1383,6 @@
     <string name="notifications_on_alert_bell_receipt">Notifications on alert/bell receipt</string>
     <string name="notifications_on_message_receipt">Notifications on message receipt</string>
     <string name="now">Now</string>
-    <string name="ntp_server">NTP server</string>
-    <string name="number_of_records">Number of records</string>
     <!-- OFFLINE -->
     <string name="offline_maps">Offline maps</string>
     <string name="offline_maps_empty">No areas downloaded yet</string>
@@ -1444,9 +1390,7 @@
     <string name="offline_terrain_empty">No terrain downloaded yet</string>
     <string name="offline_terrain_manager">Offline Terrain</string>
     <string name="offline_terrain_regional_detail">Includes high-detail regional terrain</string>
-    <string name="ok_to_mqtt">Ok to MQTT</string>
     <string name="okay">OK</string>
-    <string name="oled_type">OLED type</string>
     <!-- ONE -->
     <string name="one_day">24 Hours</string>
     <string name="one_hour">1 Hour</string>
@@ -1466,23 +1410,14 @@
     <string name="options">Options</string>
     <string name="orient_north">Orient north</string>
     <string name="orp">ORP</string>
-    <!-- OUTPUT -->
-    <string name="output_buzzer_gpio">Output buzzer (GPIO)</string>
-    <string name="output_duration_milliseconds">Output duration (milliseconds)</string>
-    <string name="output_led_active_high">Output LED active high</string>
-    <string name="output_led_gpio">Output LED (GPIO)</string>
-    <string name="output_vibra_gpio">Output vibra (GPIO)</string>
     <string name="overflow_menu">Overflow menu</string>
     <string name="override_console_serial_port">Override console serial port</string>
-    <string name="override_duty_cycle">Override Duty Cycle</string>
-    <string name="override_frequency_mhz">Frequency Override</string>
-    <string name="pa_fan_disabled">PA fan disabled</string>
     <!-- PACKET -->
     <string name="packet_authenticity">Packet authenticity</string>
     <string name="packet_authenticity_balanced">Balanced — Prefer authenticated</string>
     <string name="packet_authenticity_balanced_summary">Recommended. Reject unsigned downgrade attempts from nodes known to sign.</string>
     <string name="packet_authenticity_compatible">Compatible — Accept unsigned</string>
-    <string name="packet_authenticity_compatible_summary">Authenticate packets when possible, but accept unsigned traffic for maximum compatibility.</string>
+    <string name="packet_authenticity_compatible_summary">Accept unsigned traffic for maximum compatibility. A signature that can be checked and is wrong still drops the packet.</string>
     <string name="packet_authenticity_level">Protection level</string>
     <string name="packet_authenticity_strict">Strict — Require authentication</string>
     <string name="packet_authenticity_strict_confirm">Enable Strict</string>
@@ -1490,7 +1425,6 @@
     <string name="packet_authenticity_strict_summary">Only show and process cryptographically authenticated mesh packets. Older nodes and oversized packets may disappear.</string>
     <string name="packet_authenticity_strict_title">Enable Strict authentication?</string>
     <string name="packet_authenticity_unsupported">This connected device does not support packet signature verification.</string>
-    <string name="pairing_mode">Pairing mode</string>
     <string name="password">Password</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
@@ -1503,7 +1437,6 @@
     <string name="pax_wifi_marker">Wi-Fi: %1$s</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Paxcounter Config</string>
-    <string name="paxcounter_enabled">Paxcounter enabled</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
     <!-- PERMISSION -->
     <string name="permission_camera_summary">Scan channel and contact QR codes</string>
@@ -1515,6 +1448,7 @@
     <string name="permission_nearby_devices_summary">Find and connect to your radio over Bluetooth</string>
     <string name="permission_notifications_summary">Alert you to messages, new nodes and low battery</string>
     <string name="permission_state_allowed">Allowed</string>
+    <string name="permission_state_approximate_only">Approximate only. Sharing your position with the mesh needs precise location.</string>
     <string name="permission_state_blocked">Blocked — tap to open system settings</string>
     <string name="permission_state_denied">Denied — tap to allow</string>
     <string name="permission_state_not_applicable">Not required on this version of Android</string>
@@ -1537,6 +1471,10 @@
     <plurals name="plurals_hours">
         <item quantity="one">%1$d hour</item>
         <item quantity="other">%1$d hours</item>
+    </plurals>
+    <plurals name="plurals_milliseconds">
+        <item quantity="one">%1$d millisecond</item>
+        <item quantity="other">%1$d milliseconds</item>
     </plurals>
     <plurals name="plurals_minutes">
         <item quantity="one">%1$d minute</item>
@@ -1563,17 +1501,12 @@
     <string name="position">Position</string>
     <string name="position_config_set_fixed_from_phone">Set from current phone location</string>
     <string name="position_enabled">Position enabled</string>
-    <string name="position_flags">Position Flags</string>
     <string name="position_log">Position</string>
     <string name="position_packet">Position Packet</string>
     <string name="potassium">Potassium</string>
-    <!-- POWER -->
     <string name="power">Power</string>
     <string name="power_config">Power Config</string>
     <string name="power_metrics_log">Power Metrics</string>
-    <string name="power_metrics_module_enabled">Power metrics module enabled</string>
-    <string name="power_metrics_on_screen_enabled">Power metrics on-screen enabled</string>
-    <string name="power_metrics_update_interval_seconds">Power metrics update interval</string>
     <string name="powered">Powered</string>
     <string name="ppm">ppm</string>
     <string name="precise_location">Precise location</string>
@@ -1596,14 +1529,11 @@
     <string name="primary">Primary</string>
     <string name="primary_channel_feature">Periodic position and telemetry broadcast</string>
     <string name="privacy_url" translatable="false">https://meshtastic.org/docs/legal/privacy/</string>
-    <string name="private_key">Private Key</string>
     <string name="project_information">Project information</string>
     <string name="provide_location_to_mesh">Provide phone location to mesh</string>
     <string name="provider_name_exists">Provider name exists.</string>
-    <string name="proxy_to_client_enabled">Proxy to client enabled</string>
     <string name="psk">PSK</string>
     <string name="pt_BR" translatable="false">Português do Brasil</string>
-    <string name="ptt_pin">PTT pin</string>
     <string name="public_key">Public Key</string>
     <string name="public_key_changed">Public Key Changed</string>
     <string name="qr_code">QR code</string>
@@ -1621,26 +1551,17 @@
     <string name="rainfall_24h">Rain (24h)</string>
     <string name="range_test">Range Test</string>
     <string name="range_test_config">Range Test Config</string>
-    <string name="range_test_enabled">Range test enabled</string>
     <string name="react">React</string>
     <string name="reboot">Reboot</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode">Rebroadcast Mode</string>
-    <string name="rebroadcast_mode_all_desc">Rebroadcast any observed message, if it was on our private channel or from another mesh with the same lora parameters.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Same as behavior as ALL but skips packet decoding and simply rebroadcasts them. Only available in Repeater role. Setting this on any other roles will result in ALL behavior.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignores packets from non-standard portnums such as: TAK, RangeTest, PaxCounter, etc. Only rebroadcasts packets with standard portnums: NodeInfo, Text, Position, Telemetry, and Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignores observed messages from foreign meshes like LOCAL ONLY, but takes it step further by also ignoring messages from nodes not already in the node's known list.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignores observed messages from foreign meshes that are open or those which it cannot decrypt. Only rebroadcasts message on the nodes local primary / secondary channels.</string>
-    <string name="rebroadcast_mode_none_desc">Only permitted for SENSOR, TRACKER and TAK_TRACKER roles, this will inhibit all rebroadcasts, not unlike CLIENT_MUTE role.</string>
+    <string name="reboot_into_dfu">Reboot into DFU mode</string>
+    <string name="reboot_into_dfu_warning">The node stays in its bootloader and off the mesh until new firmware is flashed or it is reset.</string>
     <string name="recent_network_devices">Recent Network Devices</string>
     <string name="reconnecting">Reconnecting…</string>
-    <string name="red">Red</string>
     <string name="redacted" translatable="false">***[REDACTED]***</string>
     <string name="refresh">Refresh</string>
     <string name="refresh_metadata">Refresh metadata</string>
     <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
     <string name="regenerate_private_key">Regenerate Private Key</string>
-    <string name="region_frequency_plan">Region</string>
     <plurals name="relays">
         <item quantity="one">Heard %1$d relay</item>
         <item quantity="other">Heard %1$d relays</item>
@@ -1692,32 +1613,17 @@
     <string name="role">Device Role</string>
     <string name="role_client">Client</string>
     <string name="role_client_base">Client Base</string>
-    <string name="role_client_base_desc">Treats packets from or to favorited nodes as ROUTER_LATE, and all other packets as CLIENT.</string>
-    <string name="role_client_desc">App connected or standalone messaging device.</string>
     <string name="role_client_hidden">Client Hidden</string>
-    <string name="role_client_hidden_desc">Device that only broadcasts as needed for stealth or power savings.</string>
     <string name="role_client_mute">Client Mute</string>
-    <string name="role_client_mute_desc">Device that does not forward packets from other devices.</string>
     <string name="role_lost_and_found">Lost and Found</string>
-    <string name="role_lost_and_found_desc">Broadcasts location as message to default channel regularly to assist with device recovery.</string>
     <string name="role_repeater">Repeater</string>
-    <string name="role_repeater_desc">Infrastructure node for extending network coverage by relaying messages with minimal overhead. Not visible in nodes list.</string>
     <string name="role_router">Router</string>
     <string name="role_router_client">Router Client</string>
-    <string name="role_router_client_desc">Combination of both ROUTER and CLIENT. Not for mobile devices.</string>
-    <string name="role_router_desc">Infrastructure node for extending network coverage by relaying messages. Visible in nodes list.</string>
     <string name="role_router_late">Router Late</string>
-    <string name="role_router_late_desc">Infrastructure node that always rebroadcasts packets once but only after all other modes, ensuring additional coverage for local clusters. Visible in nodes list.</string>
     <string name="role_sensor">Sensor</string>
-    <string name="role_sensor_desc">Broadcasts telemetry packets as priority.</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Optimized for ATAK system communication, reduces routine broadcasts.</string>
     <string name="role_tak_tracker">TAK Tracker</string>
-    <string name="role_tak_tracker_desc">Enables automatic TAK PLI broadcasts and reduces routine broadcasts.</string>
     <string name="role_tracker">Tracker</string>
-    <string name="role_tracker_desc">Broadcasts GPS position packets as priority.</string>
-    <string name="root_topic">Root topic</string>
-    <string name="rotary_encoder_1_enabled">Rotary encoder #1 enabled</string>
     <string name="router_role_confirmation_text">I have read the &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Device Role Documentation&lt;/a&gt; and the blog post about &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Admin session expired</string>
@@ -1740,15 +1646,12 @@
     <string name="routing_error_too_large">Message is too large to send</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
-    <string name="rsyslog_server">rsyslog server</string>
     <string name="salinity">Salinity</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I'm kinda scared.</string>
     <string name="sats">Sats</string>
-    <!-- SAVE -->
     <string name="save">Save</string>
     <string name="save_and_restart">Save &amp; restart</string>
     <string name="save_changes">Save</string>
-    <string name="save_csv_in_storage_esp32_only">Save .CSV in storage (ESP32 only)</string>
     <string name="save_rangetest">Export rangetest packets</string>
     <!-- SCAN -->
     <string name="scan">Scan</string>
@@ -1762,7 +1665,6 @@
     <string name="scan_shared_contact_qr">Scan Shared Contact QR Code</string>
     <string name="scanning_bluetooth">Scanning…</string>
     <string name="scanning_network">Scanning…</string>
-    <string name="screen_on_for">Screen on for</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
     <string name="search_emoji">Search emoji...</string>
     <string name="search_messages">Search messages…</string>
@@ -1771,6 +1673,12 @@
     <string name="secondary_no_telemetry">No periodic telemetry broadcast</string>
     <!-- SECURITY -->
     <string name="security">Security</string>
+    <string name="security_ack_proof_failed">Delivery proof failed</string>
+    <string name="security_ack_proof_failed_info">Something acknowledged this message without the key only the recipient holds.</string>
+    <string name="security_ack_proof_no_key">Delivery proof unchecked</string>
+    <string name="security_ack_proof_no_key_info">A delivery proof arrived, but there was no key to check it against.</string>
+    <string name="security_ack_proof_verified">Delivery proven</string>
+    <string name="security_ack_proof_verified_info">The node you addressed proved it received this message.</string>
     <string name="security_icon_badge_warning_description">Warning Badge</string>
     <string name="security_icon_description">Security Status</string>
     <string name="security_icon_help_dismiss">Dismiss</string>
@@ -1801,25 +1709,16 @@
     <string name="selected">Selected</string>
     <string name="selected_map_type">Selected Map Type</string>
     <string name="send">Send</string>
-    <string name="send_bell">Send bell</string>
-    <string name="send_bell_with_alert_message">Send bell with alert message</string>
-    <string name="sender_message_interval_seconds">Sender message interval (seconds)</string>
-    <!-- SERIAL -->
     <string name="serial">Serial</string>
-    <string name="serial_baud_rate">Serial baud rate</string>
     <string name="serial_config">Serial Config</string>
-    <string name="serial_console">Serial console</string>
-    <string name="serial_enabled">Serial enabled</string>
-    <string name="serial_mode">Serial mode</string>
-    <string name="serial_rx_pin">RX</string>
-    <string name="serial_tx_pin">TX</string>
-    <string name="server">Server</string>
     <string name="session_active">Session active</string>
     <string name="session_refresh_required">Refresh required</string>
     <string name="set_time">Set time</string>
     <string name="set_up_connection">Set up connection</string>
     <string name="set_your_region">Set your region</string>
     <string name="settings">settings</string>
+    <string name="settings_search_no_results">No settings match that</string>
+    <string name="settings_search_placeholder">Search settings</string>
     <!-- SHARE -->
     <string name="share">Share</string>
     <string name="share_action">Share link</string>
@@ -1853,7 +1752,6 @@
     <string name="show_waypoints">Show Waypoints</string>
     <string name="shutdown">Shutdown</string>
     <string name="shutdown_node_name">Node: %1$s</string>
-    <string name="shutdown_on_power_loss">Shutdown on power loss</string>
     <string name="shutdown_warning">⚠️ This will SHUTDOWN the node. Physical interaction will be required to turn it back on.</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signal Quality</string>
@@ -1887,7 +1785,6 @@
     <string name="site_planner_webview_updating">The system WebView is updating. Please try again in a moment.</string>
     <string name="skip">Skip</string>
     <string name="slot">Slot</string>
-    <string name="smart_position">Smart Position</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, a measure used in communications to quantify the level of a desired signal to the level of background noise. In Meshtastic and other wireless systems, a higher SNR indicates a clearer signal that can enhance the reliability and quality of data transmission.</string>
     <string name="soil_moisture">Soil Moist</string>
@@ -1898,39 +1795,24 @@
     <string name="speed">Speed</string>
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="speed_mph">%1$d mph</string>
-    <string name="spread_factor">Spread Factor</string>
-    <string name="ssid">SSID</string>
-    <string name="state_broadcast_seconds">State broadcast (seconds)</string>
     <string name="status_message">Status Message</string>
     <string name="status_message_summary">A public status message that is broadcast to the mesh on change and every 12 hours.</string>
     <string name="stay_connected_anywhere">Stay Connected Anywhere</string>
     <string name="stop_connecting">Stop Connecting</string>
     <string name="store_forward">Store &amp; Forward</string>
     <string name="store_forward_config">Store &amp; Forward Config</string>
-    <string name="store_forward_enabled">Store &amp; Forward enabled</string>
-    <string name="subnet">Subnet</string>
     <string name="success">Success</string>
     <string name="super_deep_sleep_duration_seconds">Super deep sleep duration</string>
     <string name="supported">Supported</string>
     <string name="supported_by_community">Supported by Meshtastic Community</string>
+    <string name="supported_by_maker">Independent maker hardware</string>
     <string name="swipe_action_delete">Delete</string>
     <string name="swipe_action_mute">Mute</string>
     <string name="swipe_action_unmute">Unmute</string>
-    <string name="sx126x_rx_boosted_gain">RX Boosted Gain</string>
     <string name="system_settings">System Settings</string>
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK Configuration</string>
-    <string name="tak_role">Member Role</string>
-    <string name="tak_role_forwardobserver">Forward Observer</string>
-    <string name="tak_role_hq">Headquarters</string>
-    <string name="tak_role_k9">Doggo (K9)</string>
-    <string name="tak_role_medic">Medic</string>
-    <string name="tak_role_rto">Radio Telephone Operator</string>
-    <string name="tak_role_sniper">Sniper</string>
-    <string name="tak_role_teamlead">Team Lead</string>
-    <string name="tak_role_teammember">Team Member</string>
-    <string name="tak_role_unspecified">Unspecified</string>
     <string name="tak_server">TAK Server</string>
     <string name="tak_server_channel">TAK Mesh Channel</string>
     <string name="tak_server_channel_desc">Meshtastic channel used for outgoing TAK traffic</string>
@@ -1965,22 +1847,6 @@
     <string name="tak_server_test_run">Run</string>
     <string name="tak_server_test_running">Running: %1$s</string>
     <string name="tak_server_v1_fallback_notice">Connected node firmware doesn't support full TAK integration — only location and chat messages will bridge to ATAK. Markers and other event types need firmware 2.8.0 or newer.</string>
-    <string name="tak_team">Team Color</string>
-    <string name="tak_team_blue">Blue</string>
-    <string name="tak_team_brown">Brown</string>
-    <string name="tak_team_cyan">Cyan</string>
-    <string name="tak_team_dark_blue">Dark Blue</string>
-    <string name="tak_team_dark_green">Dark Green</string>
-    <string name="tak_team_green">Green</string>
-    <string name="tak_team_magenta">Magenta</string>
-    <string name="tak_team_maroon">Maroon</string>
-    <string name="tak_team_orange">Orange</string>
-    <string name="tak_team_purple">Purple</string>
-    <string name="tak_team_red">Red</string>
-    <string name="tak_team_teal">Teal</string>
-    <string name="tak_team_unspecified_color">Unspecified</string>
-    <string name="tak_team_white">White</string>
-    <string name="tak_team_yellow">Yellow</string>
     <string name="telemetry">Telemetry</string>
     <string name="telemetry_config">Telemetry Config</string>
     <string name="temperature">Temp</string>
@@ -1989,10 +1855,9 @@
     <string name="theme_light">Light</string>
     <string name="theme_system">System default</string>
     <string name="time">Time</string>
-    <string name="time_zone">Time Zone</string>
     <string name="timeout">Timeout</string>
     <string name="timestamp">Timestamp</string>
-    <string name="tls_enabled">TLS enabled</string>
+    <string name="tls_enabled_public_broker_summary">When this app relays MQTT it always connects to mqtt.meshtastic.org over TLS. This setting applies when the radio reaches the broker over its own Wi-Fi or Ethernet.</string>
     <string name="toggle_my_position">Toggle my position</string>
     <string name="trace_route">Trace Route</string>
     <!-- TRACEROUTE -->
@@ -2044,7 +1909,6 @@
     <string name="translation_not_required">Message is already in your language</string>
     <string name="transmit_disabled">Transmit is disabled</string>
     <string name="transmit_disabled_summary">This device can receive but will not send anything over LoRa.</string>
-    <string name="transmit_over_lora">Transmit over LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Transport</string>
     <string name="transport_api">API</string>
@@ -2059,12 +1923,13 @@
     <string name="twenty_four_hours">24H</string>
     <string name="two_days">48 Hours</string>
     <string name="two_weeks">2W</string>
-    <string name="tx_enabled">Transmit Enabled</string>
-    <string name="tx_power_dbm">Transmit Power</string>
     <string name="type">Type</string>
     <string name="type_a_message">Type a message</string>
     <string name="udp_enabled">UDP broadcasting</string>
     <string name="undo">Undo</string>
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_khz">kHz</string>
+    <string name="unit_meters">m</string>
     <!-- UNITS -->
     <string name="units">Units</string>
     <string name="units_follow_system">System default</string>
@@ -2085,9 +1950,7 @@
     <string name="unpin_selected">Unpin</string>
     <string name="unrecognized">Unrecognized</string>
     <string name="unset">Unset - 0</string>
-    <string name="up_down_select_input_enabled">Up/Down/Select input enabled</string>
-    <string name="update_interval">GPS Polling Interval</string>
-    <string name="update_interval_seconds">Update interval (seconds)</string>
+    <string name="unsupported_device">This device isn't supported</string>
     <string name="update_status">Update status</string>
     <string name="updated">Updated</string>
     <string name="uplink_enabled">MQTT Uplink Enabled</string>
@@ -2096,19 +1959,14 @@
     <!-- URL -->
     <string name="url">URL</string>
     <string name="url_cannot_be_empty">URL cannot be empty.</string>
+    <string name="url_http_localhost_only">Use https:// here. Plain http:// only works for localhost.</string>
     <string name="url_must_be_http">URL must start with http:// or https://.</string>
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">URL Template</string>
     <string name="url_template_hint" translatable="false">https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
     <string name="usb">USB</string>
     <string name="usb_permission_denied">USB permission denied. Reconnect the device to try again.</string>
-    <!-- USE -->
-    <string name="use_12h_format">Use 12h clock format</string>
     <string name="use_homoglyph_characters_encoding">Compact encoding for Cyrillic</string>
-    <string name="use_i2s_as_buzzer">Use I2S as buzzer</string>
-    <string name="use_input_pullup_mode">Use INPUT_PULLUP mode</string>
-    <string name="use_modem_preset">Use Preset</string>
-    <string name="use_pwm_buzzer">Use PWM buzzer</string>
     <!-- USER -->
     <string name="user">User</string>
     <string name="user_config">User Config</string>
@@ -2116,7 +1974,6 @@
     <string name="user_info">User info</string>
     <string name="user_string">User String</string>
     <string name="userinfo">User Info</string>
-    <string name="username">Username</string>
     <string name="uv_lux">UV Lux</string>
     <string name="via_api">via API</string>
     <string name="via_mqtt">via MQTT</string>
@@ -2124,8 +1981,6 @@
     <string name="view_on_map">View on map</string>
     <string name="view_release">View Release</string>
     <string name="voltage">Voltage</string>
-    <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration</string>
-    <string name="wake_on_tap_or_motion">Wake on tap or motion</string>
     <string name="warning">Warning</string>
     <string name="water_ph">Water pH</string>
     <string name="waypoint_delete">Delete waypoint?</string>
@@ -2139,7 +1994,6 @@
     <!-- WIFI -->
     <string name="wifi_config">Wi-Fi Options</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
-    <string name="wifi_enabled">Wi-Fi enabled</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Available Networks</string>
     <string name="wifi_provision_connect_failed">Could not connect: %1$s</string>
@@ -2177,7 +2031,6 @@
     <string name="wifi_provisioning">Wi-Fi Provisioning for mPWRD-OS</string>
     <string name="wifi_qr_code_error">Invalid Wi-Fi Credential QR code format</string>
     <string name="wifi_qr_code_scan">Scan Wi-Fi QR code</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">Wi-Fi RSSI threshold (defaults to -80)</string>
     <string name="wifi_unavailable">Not connected to Wi-Fi. Network scan may not find nearby devices.</string>
     <!-- WIND -->
     <string name="wind">Wind</string>

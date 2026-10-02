@@ -28,15 +28,14 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.repository.FromRadioPacketHandler
@@ -56,7 +55,6 @@ import org.meshtastic.proto.PortNum
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -108,12 +106,12 @@ class MeshMessageProcessorImplTest {
                     false
                 }
             }
-        everySuspend { radioInterfaceService.runWhileSessionActive(any(), any()) } calls
+        everySuspend { radioInterfaceService.runWhileSessionActive(any(), any(), any()) } calls
             {
                 val requestedSession = it.args[0] as RadioSessionContext
 
                 @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend () -> Unit)
+                val block = it.args[2] as (suspend () -> Unit)
                 if (activeSession.value == requestedSession) {
                     block()
                     true
@@ -207,7 +205,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         verify(mode = VerifyMode.exactly(0)) { fromRadioDispatcher.handleFromRadio(any(), any()) }
-        verifySuspend(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeAndPersist(any(), any(), any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeForSession(any(), any(), any(), any()) }
         verifySuspend(mode = VerifyMode.exactly(0)) { meshLogRepository.insert(any()) }
     }
 
@@ -218,70 +216,93 @@ class MeshMessageProcessorImplTest {
             FromRadio.Builder()
                 .also { wb -> wb.log_record = LogRecord.Builder().also { wb -> wb.message = "revoked" }.build() }
                 .build()
-        everySuspend { radioInterfaceService.runWhileSessionActive(session, any()) } returns false
+        everySuspend { radioInterfaceService.runWhileSessionActive(session, any(), any()) } returns false
 
         processor.handleFromRadio(frame(fromRadio.encode()), myNodeNum)
         advanceUntilIdle()
 
         verify(mode = VerifyMode.exactly(0)) { fromRadioDispatcher.handleFromRadio(any(), any()) }
-        verifySuspend(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeAndPersist(any(), any(), any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeForSession(any(), any(), any(), any()) }
         verifySuspend(mode = VerifyMode.exactly(0)) { meshLogRepository.insert(any()) }
     }
 
     @Test
-    fun `packet processing awaits node persistence before releasing session authority`() = runTest(testDispatcher) {
-        isNodeDbReady.value = true
-        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
-        var authorityDepth = 0
-        everySuspend { radioInterfaceService.runWhileSessionActive(session, any()) } calls
-            {
-                @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend () -> Unit)
-                authorityDepth += 1
-                try {
-                    block()
-                    true
-                } finally {
-                    authorityDepth -= 1
+    fun `packet node updates are handed to session-bound persistence from inside the handler`() =
+        runTest(testDispatcher) {
+            isNodeDbReady.value = true
+            every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+            var authorityDepth = 0
+            everySuspend { radioInterfaceService.runWhileSessionActive(session, any(), any()) } calls
+                {
+                    @Suppress("UNCHECKED_CAST")
+                    val block = it.args[2] as (suspend () -> Unit)
+                    authorityDepth += 1
+                    try {
+                        block()
+                        true
+                    } finally {
+                        authorityDepth -= 1
+                    }
                 }
-            }
-        processor = createProcessor(backgroundScope)
-        val persistenceStarted = CompletableDeferred<Unit>()
-        val releasePersistence = CompletableDeferred<Unit>()
-        everySuspend { nodeManager.updateNodeAndPersist(any(), any(), any()) } calls
-            {
-                assertTrue(authorityDepth > 0, "node persistence must begin while session authority is held")
-                persistenceStarted.complete(Unit)
-                releasePersistence.await()
-            }
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.id = 9
-                    wb.from = 999
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.TEXT_MESSAGE_APP
-                                wb.payload = ByteString.EMPTY
-                            }
-                            .build()
-                    wb.rx_time = 1000
+            processor = createProcessor(backgroundScope)
+            val updatedNodes = mutableListOf<Int>()
+            every { nodeManager.updateNodeForSession(any(), session, any(), any()) } calls
+                {
+                    assertTrue(authorityDepth > 0, "the nested lease must be taken while the handler holds authority")
+                    updatedNodes += it.arg<Int>(0)
                 }
-                .build()
+            val packet = textPacket(id = 9, from = 999)
 
-        val processing = async {
             processor.handleFromRadio(
                 frame(FromRadio.Builder().also { wb -> wb.packet = packet }.build().encode()),
                 myNodeNum,
             )
-        }
-        persistenceStarted.await()
+            advanceUntilIdle()
 
-        assertFalse(processing.isCompleted, "session authority must remain held until node persistence finishes")
-        releasePersistence.complete(Unit)
-        processing.await()
+            assertEquals(listOf(myNodeNum, 999), updatedNodes)
+        }
+
+    @Test
+    fun `handleFromRadio names the handler by variant and port without payload`() = runTest(testDispatcher) {
+        isNodeDbReady.value = true
+        val labels = mutableListOf<String>()
+        everySuspend { radioInterfaceService.runWhileSessionActive(session, any(), any()) } calls
+            {
+                labels += it.arg<String>(1)
+                true
+            }
+        processor = createProcessor(backgroundScope)
+        val packet = textPacket(id = 11, from = 999, payload = "secret text".encodeUtf8())
+        val logRecord = LogRecord.Builder().also { wb -> wb.message = "secret log" }.build()
+
+        processor.handleFromRadio(
+            frame(FromRadio.Builder().also { wb -> wb.packet = packet }.build().encode()),
+            myNodeNum,
+        )
+        processor.handleFromRadio(
+            frame(FromRadio.Builder().also { wb -> wb.log_record = logRecord }.build().encode()),
+            myNodeNum,
+        )
+        advanceUntilIdle()
+
+        assertEquals(listOf("FromRadio packet TEXT_MESSAGE_APP", "FromRadio log_record"), labels)
     }
+
+    private fun textPacket(id: Int, from: Int, payload: ByteString = ByteString.EMPTY): MeshPacket =
+        MeshPacket.Builder()
+            .also { wb ->
+                wb.id = id
+                wb.from = from
+                wb.decoded =
+                    Data.Builder()
+                        .also { d ->
+                            d.portnum = PortNum.TEXT_MESSAGE_APP
+                            d.payload = payload
+                        }
+                        .build()
+                wb.rx_time = 1000
+            }
+            .build()
 
     @Test
     fun `local sender packet persists one combined node update`() = runTest(testDispatcher) {
@@ -310,7 +331,7 @@ class MeshMessageProcessorImplTest {
         )
         advanceUntilIdle()
 
-        verifySuspend(mode = VerifyMode.exactly(1)) { nodeManager.updateNodeAndPersist(myNodeNum, any(), any()) }
+        verify(mode = VerifyMode.exactly(1)) { nodeManager.updateNodeForSession(myNodeNum, session, any(), any()) }
     }
 
     @Test
@@ -329,7 +350,7 @@ class MeshMessageProcessorImplTest {
             processor.handleFromRadio(frame(fromRadio.encode(), replacementSession), myNodeNum)
             advanceUntilIdle()
 
-            verifySuspend(mode = VerifyMode.exactly(2)) { nodeManager.updateNodeAndPersist(myNodeNum, any(), any()) }
+            verify(mode = VerifyMode.exactly(2)) { nodeManager.updateNodeForSession(myNodeNum, any(), any(), any()) }
         }
 
     @Test
@@ -636,8 +657,8 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle() // must not throw -- this is the crash repro point
 
         // Both packets were attempted -- the poisoned packet's throw did not stop the rest of the batch.
-        verifySuspend { nodeManager.updateNodeAndPersist(999, any(), any()) }
-        verifySuspend { nodeManager.updateNodeAndPersist(998, any(), any()) }
+        verify { nodeManager.updateNodeForSession(999, session, any(), any()) }
+        verify { nodeManager.updateNodeForSession(998, session, any(), any()) }
     }
 
     // ---------- handleReceivedMeshPacket: rx_time normalization ----------
@@ -752,7 +773,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for myNodeNum (lastHeard update)
-        verifySuspend { nodeManager.updateNodeAndPersist(myNodeNum, any(), any()) }
+        verify { nodeManager.updateNodeForSession(myNodeNum, session, any(), any()) }
     }
 
     @Test
@@ -782,7 +803,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for the sender
-        verifySuspend { nodeManager.updateNodeAndPersist(senderNode, any(), any()) }
+        verify { nodeManager.updateNodeForSession(senderNode, session, any(), any()) }
     }
 
     // ---------- handleReceivedMeshPacket: null decoded ----------

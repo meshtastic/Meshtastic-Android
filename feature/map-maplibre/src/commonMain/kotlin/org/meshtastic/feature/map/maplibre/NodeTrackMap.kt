@@ -92,6 +92,7 @@ fun MapLibreNodeTrackMap(
     modifier: Modifier = Modifier,
     selectedPositionTime: Int? = null,
     onPositionSelect: ((Int) -> Unit)? = null,
+    showAttribution: Boolean = true,
     customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
 ) {
     // Oldest first, as the Google flavor sorts its own track. Everything downstream reads order as age: the gradient
@@ -141,7 +142,7 @@ fun MapLibreNodeTrackMap(
     // The map and its toolbar stay up even when the filter empties the track — otherwise the control that emptied it
     // disappears along with the points, leaving no way back.
     Box(modifier = modifier) {
-        SecondaryMapSurface(mapState = mapState, basemaps = basemaps)
+        SecondaryMapSurface(mapState = mapState, basemaps = basemaps, showAttribution = showAttribution)
         SecondaryMapChrome(
             mapState = mapState,
             basemaps = basemaps,
@@ -168,8 +169,8 @@ fun MapLibreNodeTrackMap(
                 ?.takeIf { selected -> points.any { it.second == selected } }
                 ?.let { selected -> positions.firstOrNull { it.time == selected } },
             displayUnits = displayUnits,
-            // Clear of the logo and attribution along the bottom edge, which the styles are licensed on condition of
-            // showing. See MeshMapOrnaments.
+            // Clear of the wordmark and attribution button along the bottom edge, which every map shows.
+            // See MeshMapOrnaments.
             modifier =
             Modifier.align(Alignment.BottomStart)
                 .padding(start = CARD_INSET.dp, end = CARD_INSET.dp, bottom = ORNAMENT_CLEARANCE.dp),
@@ -188,10 +189,10 @@ private fun ProtoPosition.toTrackPoint(): TrackPoint? {
     return if (latitude == 0.0 && longitude == 0.0) {
         null
     } else {
-        // A missing time becomes 0 deliberately: RTC-less nodes report positions with no usable time, and
-        // dropping those points would erase real tracks. Zero sorts them oldest; the card's guard keeps an
-        // unselected map from matching them.
-        GeoPosition(longitude = longitude, latitude = latitude) to (time ?: 0)
+        // A missing time arrives as 0 and is kept deliberately: RTC-less nodes report positions with no usable
+        // time, and dropping those points would erase real tracks. Zero sorts them oldest; the card's guard keeps
+        // an unselected map from matching them.
+        GeoPosition(longitude = longitude, latitude = latitude) to time
     }
 }
 

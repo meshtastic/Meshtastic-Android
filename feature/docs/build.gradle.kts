@@ -18,10 +18,10 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.meshtastic.kmp.jvm.android)
 }
 
 kotlin {
+    // No withHostTest: commonTest holds Compose UI tests, which NPE on the host-test stubs' null Build.FINGERPRINT.
     android {
         namespace = "org.meshtastic.feature.docs"
         androidResources.enable = true
@@ -35,7 +35,6 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.di)
 
-            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.jetbrains.compose.material3.adaptive)
             implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
             implementation(libs.coil)

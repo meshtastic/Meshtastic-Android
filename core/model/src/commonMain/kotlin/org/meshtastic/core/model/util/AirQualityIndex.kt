@@ -30,7 +30,6 @@ import kotlin.math.pow
 object AirQualityIndex {
 
     private const val NOWCAST_WINDOW_HOURS = 12
-    private const val SECONDS_PER_HOUR = 3600L
 
     /** EPA requires the most recent hour plus at least 2 of the 3 most recent hours, or NowCast isn't reported. */
     private const val MIN_VALID_HOURS = 2
@@ -49,7 +48,7 @@ object AirQualityIndex {
         val sums = DoubleArray(NOWCAST_WINDOW_HOURS)
         val counts = IntArray(NOWCAST_WINDOW_HOURS)
         for ((time, pm25) in readings) {
-            val hoursAgo = (nowEpochSeconds - time) / SECONDS_PER_HOUR
+            val hoursAgo = (nowEpochSeconds - time) / TimeConstants.SECONDS_PER_HOUR
             if (hoursAgo in 0 until NOWCAST_WINDOW_HOURS) {
                 sums[hoursAgo.toInt()] += pm25
                 counts[hoursAgo.toInt()]++
@@ -87,7 +86,7 @@ object AirQualityIndex {
      * of readings per 12-hour window rather than quadratic over the whole time frame.
      */
     fun nowCastAqiSeries(readings: List<Pair<Long, Double>>): List<Int?> {
-        val windowSeconds = NOWCAST_WINDOW_HOURS * SECONDS_PER_HOUR
+        val windowSeconds = NOWCAST_WINDOW_HOURS.toLong() * TimeConstants.SECONDS_PER_HOUR
         var start = 0
         return readings.mapIndexed { index, (time, _) ->
             // Readings at or before this cutoff fall outside the point's own 12h window, so drop them from the front.

@@ -1,6 +1,52 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 1.4.1 → 1.4.2
+Modified principles:
+  - I. Kotlin Multiplatform Core: the list of source sets that may hold actual declarations
+    gains `jvmAndroidMain`, the source set Android and Desktop share through
+    meshtastic.kmp.jvm.android, and the iOS source sets `iosMain` and `nativeMain`. Actuals
+    already live in all three, and JVM-only APIs such as java.util.zip cannot move to
+    commonMain. The principle is unchanged: commonMain still
+    holds the business logic and still takes no java.* or android.* imports. PATCH: the
+    text now matches the source sets the modules use.
+Added sections: none
+Removed sections: none
+Templates requiring updates:
+  - .specify/templates/spec-template.md ✅ updated (source-set table: jvmMain is Desktop-only,
+    jvmAndroidMain row added)
+  - .specify/templates/plan-template.md ✅ no change (names no source set)
+  - .specify/templates/checklist-template.md ✅ no change (names no source set)
+  - .specify/templates/tasks-template.md ✅ no reference
+Downstream references (Amendment Procedure step 3):
+  - .skills/speckit/SKILL.md ✅ updated (declared constitution version)
+  - AGENTS.md ✅ no change (names no actual-declaration source sets; principle count still 7)
+Follow-up TODOs: none
+
+SYNC IMPACT REPORT
+==================
+Version change: 1.4.0 → 1.4.1
+Modified principles:
+  - VI. Documentation Freshness: the docs-quality.yml gate also runs on PRs that touch
+    any docs/**/*.md, locale pages included, and runs
+    scripts/docs/sync-locale-front-matter.py --check, which fails when a docs/<locale>/
+    page's layout or nav_order differs from docs/en. The local command list gains that
+    check. PATCH: the principle now describes the gate the workflow already runs.
+Added sections: none
+Removed sections: none
+Templates requiring updates:
+  - .specify/templates/plan-template.md ✅ no change (names no gate trigger)
+  - .specify/templates/checklist-template.md ✅ no change (CHK006 names no gate trigger)
+  - .specify/templates/spec-template.md ✅ no reference
+  - .specify/templates/tasks-template.md ✅ no reference
+Downstream references (Amendment Procedure step 3):
+  - .skills/speckit/SKILL.md ✅ updated (declared constitution version; its principle VI
+    summary already names the locale check)
+  - AGENTS.md ✅ no change (names no docs gate; principle count still 7)
+Follow-up TODOs: none
+
+SYNC IMPACT REPORT
+==================
 Version change: 1.3.7 → 1.4.0
 Modified principles:
   - V. Design Standards Compliance: the canonical reference is now the standards
@@ -104,8 +150,11 @@ MUST be used in place of JVM/Android-specific APIs:
 - MUST use Okio (not `java.io`), Ktor (not `java.net`/OkHttp in common), Mutex/atomicfu
   (not `java.util.concurrent`), Room KMP, DataStore KMP, and Koin 4.2+.
 - MUST NOT import `java.*` or `android.*` in any `commonMain` module.
-- Platform-specific implementations belong in `androidMain`/`jvmMain` actual
-  declarations only (there is no `desktopMain` source set; Desktop is the `jvm` target).
+- Platform-specific implementations belong in platform source sets as actual declarations
+  only: `androidMain`, `jvmMain`, `jvmAndroidMain`, and `iosMain` or `nativeMain` (there is
+  no `desktopMain` source set; Desktop is the `jvm` target). `jvmAndroidMain`, enabled by
+  `meshtastic.kmp.jvm.android`, holds the JVM APIs Android and Desktop share, such as
+  `java.util.zip`, which `commonMain` cannot use.
 <!-- Rationale: Multi-platform parity (Android, Desktop, iOS). Framework bleed in commonMain breaks compilability on non-Android targets. -->
 
 ### II. Zero Lint Tolerance
@@ -198,15 +247,18 @@ Governance rules:
   from Crowdin (`crowdin.yml`) — never hand-edit a locale page; deleting an English page
   means deleting its locale copies in the same commit.
 
-Verification tooling — also enforced in CI: `.github/workflows/docs-quality.yml` runs the
-link check, the coverage check, a two-way `DocBundleLoader.kt` registry check, and the alias
-registration check as a **blocking** gate on PRs touching `docs/en/**` (freshness stays
-advisory). Run locally before pushing docs changes:
+Verification tooling, also enforced in CI: `.github/workflows/docs-quality.yml` runs the
+link check, the coverage check, a two-way `DocBundleLoader.kt` registry check, the alias
+registration check, and a locale front matter check (`layout` and `nav_order` in every
+`docs/<locale>/` page match `docs/en/`) as a **blocking** gate on PRs touching `docs/en/**`
+or any other `docs/**/*.md`, locale pages included (freshness stays advisory). Run locally
+before pushing docs changes:
 
 ```bash
 node scripts/check-doc-coverage.js    # every user-facing feature module has a page
 node scripts/validate-doc-links.js    # internal cross-references and image paths resolve
 node scripts/check-doc-aliases.js     # frontmatter aliases are registered in DocBundleLoader.kt
+python3 scripts/docs/sync-locale-front-matter.py --check  # locale layout/nav_order match docs/en; drop --check to restore
 node scripts/check-doc-freshness.js   # advisory: pages >180 days old, or missing last_updated
 ```
 <!-- Rationale: Documentation drift misleads users and increases support burden. Three distinct consumers means changes must be verified across all delivery channels. -->
@@ -290,4 +342,4 @@ summary derived from this constitution. The files `.github/copilot-instructions.
 Constitution Check confirming all seven principles were evaluated. Complexity violations
 require explicit justification in the Complexity Tracking table of the plan document.
 
-**Version**: 1.4.0 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-09-15
+**Version**: 1.4.2 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-09-28

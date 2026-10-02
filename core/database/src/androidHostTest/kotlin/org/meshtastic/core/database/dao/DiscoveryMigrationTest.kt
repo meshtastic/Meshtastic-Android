@@ -44,7 +44,6 @@ import kotlin.test.assertTrue
  */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
-@Suppress("MagicNumber")
 class DiscoveryMigrationTest {
     private lateinit var database: MeshtasticDatabase
     private lateinit var discoveryDao: DiscoveryDao
@@ -190,7 +189,7 @@ class DiscoveryMigrationTest {
         assertNull(loaded.longitude)
         assertNull(loaded.distanceFromUser)
         assertEquals(0, loaded.hopCount)
-        assertEquals(0f, loaded.snr)
+        assertNull(loaded.snr)
         assertNull(loaded.rssi)
         assertEquals(0, loaded.messageCount)
         assertEquals(0, loaded.sensorPacketCount)

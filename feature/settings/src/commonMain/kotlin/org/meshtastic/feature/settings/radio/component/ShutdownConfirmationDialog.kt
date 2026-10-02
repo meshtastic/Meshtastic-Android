@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
@@ -47,16 +48,18 @@ fun ShutdownConfirmationDialog(
     onDismiss: () -> Unit,
     isShutdown: Boolean = true,
     icon: ImageVector? = null,
+    warning: StringResource? = null,
     onConfirm: () -> Unit,
 ) {
     val nodeLongName = node?.user?.long_name ?: "Unknown Node"
     val resolvedIcon = icon ?: MeshtasticIcons.Warning
+    val resolvedWarning = warning ?: Res.string.shutdown_warning.takeIf { isShutdown }
 
     MeshtasticDialog(
         onDismiss = onDismiss,
         icon = resolvedIcon,
         title = title,
-        text = { ShutdownDialogContent(nodeLongName = nodeLongName, isShutdown = isShutdown) },
+        text = { ShutdownDialogContent(nodeLongName = nodeLongName, warning = resolvedWarning) },
         confirmText = stringResource(Res.string.send),
         onConfirm = {
             onDismiss()
@@ -67,7 +70,7 @@ fun ShutdownConfirmationDialog(
 }
 
 @Composable
-private fun ShutdownDialogContent(nodeLongName: String, isShutdown: Boolean) {
+private fun ShutdownDialogContent(nodeLongName: String, warning: StringResource?) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
         Text(
             text = stringResource(Res.string.shutdown_node_name, nodeLongName),
@@ -77,10 +80,10 @@ private fun ShutdownDialogContent(nodeLongName: String, isShutdown: Boolean) {
             textAlign = TextAlign.Center,
         )
 
-        if (isShutdown) {
+        if (warning != null) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = stringResource(Res.string.shutdown_warning),
+                text = stringResource(warning),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.fillMaxWidth(),

@@ -28,5 +28,5 @@ import org.koin.core.annotation.Single
 class CoreBleAndroidModule {
     @Single
     fun provideLocationManager(app: Application): LocationManager =
-        ContextCompat.getSystemService(app, LocationManager::class.java)!!
+        checkNotNull(ContextCompat.getSystemService(app, LocationManager::class.java)) { "No LocationManager service" }
 }

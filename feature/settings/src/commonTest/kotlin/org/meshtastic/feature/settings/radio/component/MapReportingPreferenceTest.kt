@@ -25,8 +25,8 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.i_agree
-import org.meshtastic.core.resources.map_reporting
-import org.meshtastic.core.resources.map_reporting_summary
+import org.meshtastic.core.resources.schema_mqtt_map_reporting_enabled
+import org.meshtastic.core.resources.schema_mqtt_map_reporting_enabled_description
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -62,8 +62,8 @@ class MapReportingPreferenceTest {
             }
         }
         // Verify that the dialog title is displayed
-        onNodeWithText(getString(Res.string.map_reporting)).assertIsDisplayed()
-        onNodeWithText(getString(Res.string.map_reporting_summary)).assertIsDisplayed()
+        onNodeWithText(getString(Res.string.schema_mqtt_map_reporting_enabled)).assertIsDisplayed()
+        onNodeWithText(getString(Res.string.schema_mqtt_map_reporting_enabled_description)).assertIsDisplayed()
     }
 
     @Test
@@ -84,14 +84,14 @@ class MapReportingPreferenceTest {
             }
         }
         onNodeWithText(getString(Res.string.i_agree)).assertDoesNotExist()
-        onNodeWithText(getString(Res.string.map_reporting)).performClick()
+        onNodeWithText(getString(Res.string.schema_mqtt_map_reporting_enabled)).performClick()
         assertFalse(mapReportingEnabled)
         assertFalse(shouldReportLocation)
         onNodeWithText(getString(Res.string.i_agree)).assertIsDisplayed()
         onNodeWithText(getString(Res.string.i_agree)).performClick()
         assertTrue(shouldReportLocation)
         assertTrue(mapReportingEnabled)
-        onNodeWithText(getString(Res.string.map_reporting)).performClick()
+        onNodeWithText(getString(Res.string.schema_mqtt_map_reporting_enabled)).performClick()
         onNodeWithText(getString(Res.string.i_agree)).assertDoesNotExist()
         assertTrue(shouldReportLocation)
         assertFalse(mapReportingEnabled)

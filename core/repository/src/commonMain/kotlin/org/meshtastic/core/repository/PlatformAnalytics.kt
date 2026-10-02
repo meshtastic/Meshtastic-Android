@@ -71,7 +71,7 @@ interface PlatformAnalytics {
      * [stopScreenView] using the same [key] when the screen is left.
      *
      * @param key A stable identifier that pairs this start with its matching [stopScreenView].
-     * @param name The route-derived view name (e.g. `org.meshtastic.core.navigation.NodesRoute.Nodes`).
+     * @param name The route-derived view name (e.g. `NodesRoute.Nodes`).
      */
     fun startScreenView(key: String, name: String) {
         // Default no-op for platforms that don't support RUM (fdroid, desktop)

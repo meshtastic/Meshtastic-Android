@@ -70,9 +70,9 @@ class MeshMessageProcessorImpl(
 ) : MeshMessageProcessor {
 
     /**
-     * Epoch-millisecond timestamp of the last local-node `lastHeard` DB write. Used to throttle updates to at most once
-     * per [LOCAL_NODE_REFRESH_INTERVAL_MS] so that high-frequency FromRadio variants (log records, queue status) don't
-     * flood the DB.
+     * Epoch-millisecond timestamp of the last local-node `lastHeard` refresh. Used to throttle refreshes, and the
+     * database writes they schedule, to at most once per [LOCAL_NODE_REFRESH_INTERVAL_MS] so that high-frequency
+     * FromRadio variants (log records, queue status) don't flood the DB.
      */
     @Volatile private var lastLocalNodeRefreshMs = 0L
 
@@ -112,25 +112,26 @@ class MeshMessageProcessorImpl(
             return
         }
         val bytes = frame.payload.toByteArray()
-        val proto =
-            safeCatching { FromRadio.ADAPTER.decode(bytes) }
-                .getOrElse { primaryException ->
-                    safeCatching {
-                        FromRadio.Builder().also { wb -> wb.log_record = LogRecord.ADAPTER.decode(bytes) }.build()
-                    }
-                        .getOrElse {
-                            Logger.e(primaryException) {
-                                "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
-                            }
-                            return
-                        }
+        val proto = safeCatching {
+            FromRadio.ADAPTER.decode(bytes)
+        }
+            .getOrElse { primaryException ->
+                safeCatching {
+                    FromRadio.Builder().also { wb -> wb.log_record = LogRecord.ADAPTER.decode(bytes) }.build()
                 }
+                    .getOrElse {
+                        Logger.e(primaryException) {
+                            "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
+                        }
+                        return
+                    }
+            }
         processFromRadio(proto, myNodeNum, frame.session)
     }
 
     private suspend fun processFromRadio(proto: FromRadio, myNodeNum: Int?, session: RadioSessionContext) {
         val admitted =
-            radioInterfaceService.runWhileSessionActive(session) {
+            radioInterfaceService.runWhileSessionActive(session, "FromRadio ${proto.variantLabel()}") {
                 safeCatching {
                     // Audit log every incoming variant without allowing delayed work to cross a session boundary.
                     logVariant(proto, session)
@@ -155,6 +156,11 @@ class MeshMessageProcessorImpl(
     }
 
     private fun logVariant(proto: FromRadio, session: RadioSessionContext) {
+        val myInfo = proto.my_info
+        val nodeInfo = proto.node_info
+        val config = proto.config
+        val moduleConfig = proto.moduleConfig
+        val channel = proto.channel
         val (type, message) =
             when {
                 proto.log_record != null -> "LogRecord" to proto.log_record.toString()
@@ -162,11 +168,11 @@ class MeshMessageProcessorImpl(
                 proto.xmodemPacket != null -> "XmodemPacket" to proto.xmodemPacket.toString()
                 proto.deviceuiConfig != null -> "DeviceUIConfig" to proto.deviceuiConfig.toString()
                 proto.fileInfo != null -> "FileInfo" to proto.fileInfo.toString()
-                proto.my_info != null -> "MyInfo" to proto.my_info!!.toOneLineString()
-                proto.node_info != null -> "NodeInfo" to proto.node_info!!.toPIIString()
-                proto.config != null -> "Config" to proto.config!!.toOneLineString()
-                proto.moduleConfig != null -> "ModuleConfig" to proto.moduleConfig!!.toOneLineString()
-                proto.channel != null -> "Channel" to proto.channel!!.toOneLineString()
+                myInfo != null -> "MyInfo" to myInfo.toOneLineString()
+                nodeInfo != null -> "NodeInfo" to nodeInfo.toPIIString()
+                config != null -> "Config" to config.toOneLineString()
+                moduleConfig != null -> "ModuleConfig" to moduleConfig.toOneLineString()
+                channel != null -> "Channel" to channel.toOneLineString()
                 proto.clientNotification != null -> "ClientNotification" to proto.clientNotification.toString()
                 else -> return
             }
@@ -253,7 +259,10 @@ class MeshMessageProcessorImpl(
 
     private suspend fun processBufferedPacket(buffered: BufferedMeshPacket, myNodeNum: Int): Boolean {
         val admitted =
-            radioInterfaceService.runWhileSessionActive(buffered.session) {
+            radioInterfaceService.runWhileSessionActive(
+                buffered.session,
+                "buffered packet ${buffered.packet.portLabel()}",
+            ) {
                 safeCatching { processReceivedMeshPacket(buffered.packet, myNodeNum, buffered.session) }
                     .onFailure {
                         Logger.e(it) { "Dropped a buffered early packet after a handler error; replay continued" }
@@ -282,20 +291,18 @@ class MeshMessageProcessorImpl(
 
         launchSessionBound(session, "mesh-packet emission") { serviceStateWriter.emitMeshPacket(packet) }
 
+        // The in-memory update is synchronous; the database write runs on its own session lease so this handler,
+        // which holds the whole inbound pipeline, never waits on the database writer gate.
         val from = packet.from
         if (from == myNodeNum) {
-            persistNodeUpdate(
-                myNodeNum,
-                channel = packet.channel,
-                operation = "local sender-node packet update",
-            ) { node ->
+            nodeManager.updateNodeForSession(myNodeNum, session, channel = packet.channel) { node ->
                 applySenderPacketUpdate(node, packet, decoded).copy(lastHeard = nowSeconds.toInt())
             }
         } else {
-            persistNodeUpdate(myNodeNum, operation = "local-node packet refresh") { node: Node ->
+            nodeManager.updateNodeForSession(myNodeNum, session) { node: Node ->
                 node.copy(lastHeard = nowSeconds.toInt())
             }
-            persistNodeUpdate(from, channel = packet.channel, operation = "sender-node packet update") { node ->
+            nodeManager.updateNodeForSession(from, session, channel = packet.channel) { node ->
                 applySenderPacketUpdate(node, packet, decoded)
             }
         }
@@ -339,32 +346,44 @@ class MeshMessageProcessorImpl(
      * appear stale in the UI even though the connection is healthy.
      *
      * To avoid flooding the DB on high-frequency variants (log records arrive many times per second when debug logging
-     * is enabled), writes are throttled to at most once per [LOCAL_NODE_REFRESH_INTERVAL_MS].
+     * is enabled), refreshes are throttled to at most once per [LOCAL_NODE_REFRESH_INTERVAL_MS]. The write is scheduled
+     * on the node's session lease like the packet updates, so the handler never waits on the database.
      */
-    private suspend fun refreshLocalNodeLastHeard(session: RadioSessionContext) {
+    private fun refreshLocalNodeLastHeard(session: RadioSessionContext) {
         val now = nowMillis
         val sameGeneration = lastLocalNodeRefreshGeneration == session.generation
         if (sameGeneration && now - lastLocalNodeRefreshMs < LOCAL_NODE_REFRESH_INTERVAL_MS) return
 
         val myNum = nodeManager.myNodeNum.value ?: return
-        val persisted =
-            persistNodeUpdate(myNum, operation = "local-node link refresh") { node: Node ->
-                node.copy(lastHeard = nowSeconds.toInt())
-            }
-        if (persisted) {
-            lastLocalNodeRefreshGeneration = session.generation
-            lastLocalNodeRefreshMs = now
-        }
+        nodeManager.updateNodeForSession(myNum, session) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
+        lastLocalNodeRefreshGeneration = session.generation
+        lastLocalNodeRefreshMs = now
     }
 
-    private suspend fun persistNodeUpdate(
-        nodeNum: Int,
-        channel: Int = 0,
-        operation: String,
-        transform: (Node) -> Node,
-    ): Boolean = safeCatching { nodeManager.updateNodeAndPersist(nodeNum, channel, transform) }
-        .onFailure { Logger.e(it) { "Failed $operation; packet processing continued" } }
-        .isSuccess
+    /** Names the variant for diagnostics from field names and the port only, never payload values. */
+    private fun FromRadio.variantLabel(): String = packet?.let { "packet ${it.portLabel()}" }
+        ?: when {
+            my_info != null -> "my_info"
+            node_info != null -> "node_info"
+            config != null -> "config"
+            moduleConfig != null -> "moduleConfig"
+            channel != null -> "channel"
+            config_complete_id != null -> "config_complete_id"
+            metadata != null -> "metadata"
+            deviceuiConfig != null -> "deviceuiConfig"
+            fileInfo != null -> "fileInfo"
+            region_presets != null -> "region_presets"
+            queueStatus != null -> "queueStatus"
+            log_record != null -> "log_record"
+            mqttClientProxyMessage != null -> "mqttClientProxyMessage"
+            xmodemPacket != null -> "xmodemPacket"
+            lockdown_status != null -> "lockdown_status"
+            clientNotification != null -> "clientNotification"
+            rebooted != null -> "rebooted"
+            else -> "other"
+        }
+
+    private fun MeshPacket.portLabel(): String = decoded?.portnum?.name ?: "encrypted"
 
     private fun insertMeshLog(log: MeshLog, session: RadioSessionContext): Job =
         launchSessionBound(session, "mesh-log insert") { meshLogRepository.value.insert(log) }

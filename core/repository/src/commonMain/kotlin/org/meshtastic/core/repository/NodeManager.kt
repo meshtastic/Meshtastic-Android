@@ -183,16 +183,6 @@ interface NodeManager : NodeIdLookup {
     /** Session-bound counterpart to [updateNode]; deferred persistence is admitted only for [session]. */
     fun updateNodeForSession(nodeNum: Int, session: RadioSessionContext, channel: Int = 0, transform: (Node) -> Node)
 
-    /**
-     * Updates a node using a side-effect-free [transform] and awaits any required persistence before returning. The
-     * transform may be evaluated more than once after compare-and-set contention.
-     *
-     * Session-scoped packet processing uses this while holding transport authority so an old session cannot enqueue a
-     * database write that resumes after a device switch. Non-session UI and controller updates continue to use
-     * [updateNode].
-     */
-    suspend fun updateNodeAndPersist(nodeNum: Int, channel: Int = 0, transform: (Node) -> Node)
-
     /** Removes a node from the in-memory database by its number. */
     fun removeByNodenum(nodeNum: Int)
 

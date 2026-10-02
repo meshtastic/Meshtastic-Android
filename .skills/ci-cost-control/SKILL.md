@@ -1,3 +1,8 @@
+---
+name: ci-cost-control
+description: Keep GitHub Actions spend down on Meshtastic-Android - avoid redundant runs, cancel superseded ones, and pick the narrowest CI path for the change. Use this whenever you are about to push repeatedly, re-run a workflow, touch `.github/workflows/`, or someone asks why CI is slow, queued or expensive.
+---
+
 # Skill: CI Cost Control & Monitoring
 
 ## Description
@@ -15,7 +20,7 @@ gh run list --branch $(git branch --show-current) --limit 5
 
 ### 2. Local First
 NEVER use CI as a "remote compiler." 
-- You must run `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests` locally before pushing.
+- You must run `./gradlew spotlessApply spotlessCheck detekt detektTypeResolved assembleDebug test allTests` locally before pushing.
 - If local tests fail, CI **will** fail. Do not waste the tokens or the compute.
 
 ### 3. Let the path filters do their job

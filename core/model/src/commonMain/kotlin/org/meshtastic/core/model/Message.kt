@@ -51,9 +51,11 @@ import org.meshtastic.core.resources.message_routing_error_rate_limit_exceeded_d
 import org.meshtastic.core.resources.message_routing_error_timeout_detail
 import org.meshtastic.core.resources.message_routing_error_too_large
 import org.meshtastic.core.resources.message_routing_error_too_large_detail
+import org.meshtastic.core.resources.message_status_ack_proof_invalid
 import org.meshtastic.core.resources.message_status_delivered
 import org.meshtastic.core.resources.message_status_enroute
 import org.meshtastic.core.resources.message_status_recipient_delivered
+import org.meshtastic.core.resources.message_status_recipient_delivered_proven
 import org.meshtastic.core.resources.message_status_relayed_not_confirmed
 import org.meshtastic.core.resources.message_status_sfpp_confirmed
 import org.meshtastic.core.resources.message_status_sfpp_routing
@@ -76,6 +78,12 @@ import org.meshtastic.core.resources.routing_error_pki_unknown_pubkey
 import org.meshtastic.core.resources.routing_error_rate_limit_exceeded
 import org.meshtastic.core.resources.routing_error_timeout
 import org.meshtastic.core.resources.routing_error_too_large
+import org.meshtastic.core.resources.security_ack_proof_failed
+import org.meshtastic.core.resources.security_ack_proof_failed_info
+import org.meshtastic.core.resources.security_ack_proof_no_key
+import org.meshtastic.core.resources.security_ack_proof_no_key_info
+import org.meshtastic.core.resources.security_ack_proof_verified
+import org.meshtastic.core.resources.security_ack_proof_verified_info
 import org.meshtastic.core.resources.unrecognized
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Routing
@@ -183,38 +191,81 @@ fun getMessageRoutingErrorDetailResFrom(routingError: Int): StringResource? = wh
 fun getMessageStatusDetailRes(status: MessageStatus?, routingError: Int): StringResource? =
     if (status == MessageStatus.ERROR) getMessageRoutingErrorDetailResFrom(routingError) else null
 
+/**
+ * The ack proof rows the message detail sheet shows, or null when no proof was carried - the ordinary case, and every
+ * ack from firmware that predates [MeshPacket.AckProofStatus].
+ */
+fun getAckProofStatusRes(ackProofStatus: Int): Pair<StringResource, StringResource>? =
+    when (MeshPacket.AckProofStatus.fromValue(ackProofStatus)) {
+        MeshPacket.AckProofStatus.ACK_PROOF_VALID ->
+            Res.string.security_ack_proof_verified to Res.string.security_ack_proof_verified_info
+
+        MeshPacket.AckProofStatus.ACK_PROOF_INVALID ->
+            Res.string.security_ack_proof_failed to Res.string.security_ack_proof_failed_info
+
+        MeshPacket.AckProofStatus.ACK_PROOF_NO_KEY ->
+            Res.string.security_ack_proof_no_key to Res.string.security_ack_proof_no_key_info
+
+        MeshPacket.AckProofStatus.ACK_PROOF_ABSENT,
+        null,
+        -> null
+    }
+
+/**
+ * True when an ack carried a proof and it did not verify, which is an attempted forgery rather than a quiet absence.
+ */
+fun isAckProofForged(ackProofStatus: Int): Boolean =
+    MeshPacket.AckProofStatus.fromValue(ackProofStatus) == MeshPacket.AckProofStatus.ACK_PROOF_INVALID
+
 fun getMessageStatusStringRes(
     status: MessageStatus?,
     routingError: Int,
     isDirectMessage: Boolean = false,
+    ackProofStatus: Int = 0,
 ): Pair<StringResource, StringResource> {
     val title = if (routingError > 0) Res.string.error else Res.string.message_delivery_status
+    val proven = MeshPacket.AckProofStatus.fromValue(ackProofStatus) == MeshPacket.AckProofStatus.ACK_PROOF_VALID
     val text =
-        when (status) {
-            MessageStatus.RECEIVED -> Res.string.message_status_recipient_delivered
-
-            MessageStatus.QUEUED -> Res.string.message_status_enroute
-
-            MessageStatus.ENROUTE -> Res.string.message_status_enroute
-
-            MessageStatus.SFPP_ROUTING -> Res.string.message_status_sfpp_routing
-
-            MessageStatus.SFPP_CONFIRMED -> Res.string.message_status_sfpp_confirmed
-
-            MessageStatus.DELIVERED ->
-                if (isDirectMessage) {
-                    Res.string.message_status_relayed_not_confirmed
-                } else {
-                    Res.string.message_status_delivered
-                }
-
-            MessageStatus.ERROR -> getMessageRoutingErrorStringResFrom(routingError)
-
-            MessageStatus.UNKNOWN,
-            null,
-            -> Res.string.message_status_unknown
+        when {
+            isAckProofForged(ackProofStatus) -> Res.string.message_status_ack_proof_invalid
+            else -> messageStatusText(status, routingError, isDirectMessage, proven)
         }
     return title to text
+}
+
+private fun messageStatusText(
+    status: MessageStatus?,
+    routingError: Int,
+    isDirectMessage: Boolean,
+    proven: Boolean,
+): StringResource = when (status) {
+    MessageStatus.RECEIVED ->
+        if (proven) {
+            Res.string.message_status_recipient_delivered_proven
+        } else {
+            Res.string.message_status_recipient_delivered
+        }
+
+    MessageStatus.QUEUED -> Res.string.message_status_enroute
+
+    MessageStatus.ENROUTE -> Res.string.message_status_enroute
+
+    MessageStatus.SFPP_ROUTING -> Res.string.message_status_sfpp_routing
+
+    MessageStatus.SFPP_CONFIRMED -> Res.string.message_status_sfpp_confirmed
+
+    MessageStatus.DELIVERED ->
+        if (isDirectMessage) {
+            Res.string.message_status_relayed_not_confirmed
+        } else {
+            Res.string.message_status_delivered
+        }
+
+    MessageStatus.ERROR -> getMessageRoutingErrorStringResFrom(routingError)
+
+    MessageStatus.UNKNOWN,
+    null,
+    -> Res.string.message_status_unknown
 }
 
 fun isMessageStatusRetryable(status: MessageStatus?, routingError: Int, isDirectMessage: Boolean = false): Boolean =
@@ -260,6 +311,8 @@ data class Message(
     val transportMechanism: Int = 0,
     /** True when the radio verified this broadcast's XEdDSA signature ([MeshPacket.xeddsa_signed]). */
     val xeddsaSigned: Boolean = false,
+    /** The radio's verdict on the ack that delivered this message (see [MeshPacket.AckProofStatus]). */
+    val ackProofStatus: Int = 0,
     /** On-device translation of [text], persisted so the user can toggle back to it without re-translating. */
     val translatedText: String? = null,
     /** Whether the bubble currently displays [translatedText] instead of [text]. */
@@ -281,7 +334,7 @@ data class Message(
         if (showTranslated && translatedText != null && !searching) translatedText else text
 
     fun getStatusStringRes(isDirectMessage: Boolean = false): Pair<StringResource, StringResource> =
-        getMessageStatusStringRes(status, routingError, isDirectMessage)
+        getMessageStatusStringRes(status, routingError, isDirectMessage, ackProofStatus)
 
     fun getStatusDetailRes(): StringResource? = getMessageStatusDetailRes(status, routingError)
 

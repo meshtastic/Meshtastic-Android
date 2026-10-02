@@ -7,7 +7,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 <context_and_memory>
 - **Project Goal:** Decouple business logic from Android for multi-platform (Android, Desktop, iOS).
 - **Agent Memory:** `.agent_memory/` is local-only scratch (git-ignored) — never stage or commit it. Skim the top (most recent) entry of `.agent_memory/session_context.md` for current state — it is capped at ~5 entries; older handovers live in `session_context.archive.md` (read only if you need historical detail).
-- **Skills Directory (CONSULT THESE FIRST):** 
+- **Skills Directory (CONSULT THESE FIRST):** each is also symlinked into `.claude/skills/`, which is the only path Claude Code discovers skills from; the files themselves live here.
   - `.skills/project-overview/` - Codebase map, namespacing, **Bootstrap Steps**.
   - `.skills/kmp-architecture/` - Expect/actual, source-sets, conventions.
   - `.skills/compose-ui/` - Adaptive UI, **String Resources (consult strings-index.txt first)**.
@@ -27,7 +27,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 - **Memory Persistence:** Add a new entry to the TOP of `.agent_memory/session_context.md` at the end of every session or major task. Keep it capped at ~5 entries — move anything older to `session_context.archive.md`.
 - **Bootstrap First:** Run the mandatory bootstrap steps in `.skills/project-overview/SKILL.md` before any build.
 - **Plan Before Execution:** Use `.agent_plans/` (git-ignored) for complex refactors.
-- **Baseline Verification:** Always run: `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests`
+- **Baseline Verification:** Always run: `./gradlew spotlessApply spotlessCheck detekt detektTypeResolved assembleDebug test allTests`
 </process_essentials>
 
 <rules>

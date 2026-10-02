@@ -1,6 +1,5 @@
 ---
 title: Wie das Meshtastic Signal Meter funktioniert
-parent: User Guide
 nav_order: 15
 last_updated: 2026-09-09
 description: Wie das Signal Meter die Qualität von SNR relativ zum Modem preset bewertet - spread spectrum, presets, und was die Balken wirklich bedeuten.

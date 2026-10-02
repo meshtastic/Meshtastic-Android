@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
-
 package org.meshtastic.feature.firmware.ota
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_update_transfer_percent
+import org.meshtastic.core.resources.firmware_update_transfer_progress
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -32,20 +34,26 @@ class FirmwareUpdateHelpersTest {
 
     @Test
     fun `formatTransferProgress omits speed when throughput is zero`() {
-        assertEquals("50%", formatTransferProgress(progress = 0.5f, totalBytes = 1000, bytesPerSecond = 0))
+        assertEquals(
+            UiText.Resource(Res.string.firmware_update_transfer_percent, 50),
+            formatTransferProgress(progress = 0.5f, totalBytes = 1000, bytesPerSecond = 0),
+        )
     }
 
     @Test
     fun `formatTransferProgress omits speed when throughput is non-positive`() {
-        assertEquals("0%", formatTransferProgress(progress = 0f, totalBytes = 1000, bytesPerSecond = -5))
+        assertEquals(
+            UiText.Resource(Res.string.firmware_update_transfer_percent, 0),
+            formatTransferProgress(progress = 0f, totalBytes = 1000, bytesPerSecond = -5),
+        )
     }
 
     @Test
-    fun `formatTransferProgress includes KiB per second and ETA`() {
-        // 50% of 2048 bytes (1024 remaining) at 1024 B/s → 1.0 KiB/s, 1s ETA.
+    fun `formatTransferProgress passes the rate in decimal kilobytes and the ETA in seconds`() {
+        // 1,000,000 bytes left at 12,600 B/s: 12.60 kB/s (12.3 KiB/s in binary), 79 s to go.
         assertEquals(
-            "50% (1.0 KiB/s, ETA: 1s)",
-            formatTransferProgress(progress = 0.5f, totalBytes = 2048, bytesPerSecond = 1024),
+            UiText.Resource(Res.string.firmware_update_transfer_progress, 50, "12.60 kB", 79),
+            formatTransferProgress(progress = 0.5f, totalBytes = 2_000_000, bytesPerSecond = 12_600),
         )
     }
 

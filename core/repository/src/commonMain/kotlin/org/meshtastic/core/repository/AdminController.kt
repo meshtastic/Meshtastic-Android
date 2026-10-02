@@ -142,7 +142,7 @@ interface AdminController {
     suspend fun reboot(destNum: Int, packetId: Int)
 
     /** Commands a node to reboot into DFU mode. */
-    suspend fun rebootToDfu(nodeNum: Int)
+    suspend fun rebootToDfu(nodeNum: Int, packetId: Int)
 
     /** Initiates an OTA reboot request. */
     suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?)

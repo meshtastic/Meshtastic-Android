@@ -14,7 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-plugins { alias(libs.plugins.meshtastic.kmp.feature) }
+plugins {
+    alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
+}
 
 // Offline terrain: Terrarium elevation decode, hillshade shading, and contour-line generation —
 // pure computation shared by both the Google flavor (androidApp/src/google, pre-rendered hillshade
@@ -36,7 +39,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.common)
             implementation(libs.kotlinx.coroutines.core)
             // Local terrain-tile storage is a plain file hierarchy, not SQLite: unlike the base offline layer's
             // Google-only archive (which can assume Android's SQLite), this module's storage must also work on
@@ -46,13 +48,10 @@ kotlin {
 
         commonTest.dependencies { implementation(libs.okio.fakefilesystem) }
 
-        // ch.poole.geo.pmtiles:Reader is a plain Java library, usable identically from both the android and
-        // jvm targets — but KMP has no built-in "android+jvm, not native" source set to put it in once, so the
-        // small amount of code wrapping it is duplicated between androidMain and jvmMain, same as
-        // ElevationTile's platform-specific decode actuals.
-        androidMain.dependencies { implementation(libs.pmtiles.reader) }
+        // ch.poole.geo.pmtiles:Reader is a plain Java library, so the tile fetcher wrapping it is shared by the
+        // android and jvm targets. ElevationTile's decode still differs per platform (BitmapFactory vs Skia).
+        getByName("jvmAndroidMain") { dependencies { implementation(libs.pmtiles.reader) } }
         jvmMain.dependencies {
-            implementation(libs.pmtiles.reader)
             // Skia's Image decoder reaches WebP directly; brought in transitively by Compose
             // Multiplatform's desktop UI artifact, which the `meshtastic.kmp.feature` convention plugin
             // already applies — see feature/map-maplibre's identical jvmTest dependency for precedent.

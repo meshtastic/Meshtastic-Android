@@ -89,7 +89,8 @@ internal class TransportLifecycleGate(
      * complete within their bounds. A phase failure is recorded on the shared completion and rethrown to every closer;
      * the gate is deliberately not reopened or retried after a poisoned close.
      */
-    @Suppress("TooGenericExceptionCaught")
+    // Every failure, cancellation included, is recorded on the shared completion and then rethrown.
+    @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
     suspend fun close(beforeDrain: suspend () -> Unit = {}, teardown: suspend () -> Unit = {}): Boolean =
         withContext(NonCancellable) {
             val plan = closePlan()

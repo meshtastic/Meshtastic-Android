@@ -16,12 +16,21 @@
  */
 package org.meshtastic.buildlogic
 
+import com.android.build.api.variant.AndroidComponentsExtension
 import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.DetektCreateBaselineTask
 import dev.detekt.gradle.extensions.DetektExtension
 import dev.detekt.gradle.extensions.FailOnSeverity
 import org.gradle.api.Project
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+import java.io.File
 
 internal fun Project.configureDetekt(extension: DetektExtension) = extension.apply {
     toolVersion.set(libs.version("detekt"))
@@ -40,51 +49,108 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
         baseline.set(baselineFile)
     }
 
-    // Default sources. Every production source set that ships code must be listed explicitly — detekt silently
-    // skips anything not named here, which is how src/fdroid, src/google, src/iosMain, and src/jvmAndroidMain
-    // went unanalyzed for as long as only the main/common sets were listed. (Test source sets are deliberately
-    // not scanned, matching the original list.)
+    // Every source set under src/ (main, *Main, flavors, build types), so a new one is analysed without being
+    // listed here. Test source sets (test*, *Test*) are skipped.
     source.setFrom(
-        files(
-            "src/main/java",
-            "src/main/kotlin",
-            "src/commonMain/kotlin",
-            "src/androidMain/kotlin",
-            "src/jvmMain/kotlin",
-            "src/jvmAndroidMain/kotlin",
-            "src/iosMain/kotlin",
-            "src/fdroid/java",
-            "src/fdroid/kotlin",
-            "src/google/java",
-            "src/google/kotlin",
-        ),
+        fileTree("src") {
+            include("*/kotlin/**", "*/java/**")
+            exclude("test*/**", "*Test*/**")
+        },
     )
 
+    // Type-resolved tasks take their sources from the compilation, which includes generated code under build/.
+    val buildDirPrefix = layout.buildDirectory.get().asFile.absolutePath + File.separator
     tasks.withType<Detekt>().configureEach {
         val isCi = project.findProperty("ci") == "true"
+        // One baseline per module for every task: detekt would otherwise prefer a detekt-baseline-<compilation>.xml.
+        if (baselineFile.exists()) baseline.set(baselineFile)
+        exclude { it.file.absolutePath.startsWith(buildDirPrefix) }
+        // Named per task: plain and type-resolved tasks run in the same build and must not share report files.
+        val reportName = name
         reports {
             checkstyle {
                 required.set(true)
-                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.xml"))
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/$reportName.xml"))
             }
             sarif {
                 required.set(true)
-                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.sarif"))
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/$reportName.sarif"))
             }
             // In CI, only generate checkstyle and sarif (needed for GitHub reporting).
             // Skip html and markdown to save processing time.
             html {
                 required.set(!isCi)
-                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.html"))
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/$reportName.html"))
             }
             markdown {
                 required.set(!isCi)
-                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.md"))
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/$reportName.md"))
             }
         }
     }
+    registerTypeResolvedDetekt()
     dependencies {
         "detektPlugins"(libs.library("detekt-formatting"))
         "detektPlugins"(libs.library("detekt-compose"))
     }
+}
+
+/**
+ * Registers `detektTypeResolved`, which runs detekt with the production classpath of each JVM and Android debug
+ * compilation. Plain `detekt` has no classpath, so every rule that needs type resolution is skipped there.
+ */
+private fun Project.registerTypeResolvedDetekt() {
+    val typeResolved =
+        tasks.register("detektTypeResolved") {
+            group = "verification"
+            description = "Runs detekt with type resolution on the production JVM and Android debug compilations"
+        }
+
+    fun include(suffix: String) {
+        val taskName = "detekt${suffix.replaceFirstChar { char -> char.uppercase() }}"
+        // Filters by name only, so the rest of the project's tasks stay unrealized.
+        typeResolved.configure { dependsOn(tasks.named { name -> name == taskName }) }
+    }
+
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        extensions
+            .getByType<KotlinMultiplatformExtension>()
+            .targets
+            .matching { target ->
+                target.platformType == KotlinPlatformType.jvm || target.platformType == KotlinPlatformType.androidJvm
+            }
+            .configureEach { include("main${name.replaceFirstChar { char -> char.uppercase() }}") }
+    }
+    plugins.withId("org.jetbrains.kotlin.jvm") { include("main") }
+    listOf("com.android.application", "com.android.library").forEach { pluginId ->
+        plugins.withId(pluginId) {
+            val components = extensions.getByType(AndroidComponentsExtension::class.java)
+            components.onVariants(components.selector().withBuildType("debug")) { variant -> include(variant.name) }
+            components.onVariants { variant -> addJavacClassesToDetektClasspath(variant.name) }
+        }
+    }
+}
+
+/**
+ * Generated Java such as `BuildConfig` reaches the analysis only as javac's classes, which the plugin leaves off the
+ * classpath. Its classpath is a convention set after this action runs, so the whole value is set here instead.
+ */
+private fun Project.addJavacClassesToDetektClasspath(variantName: String) {
+    val suffix = variantName.replaceFirstChar { char -> char.uppercase() }
+    fun variantClasspath() = listOf(
+        tasks.named<KotlinJvmCompile>("compile${suffix}Kotlin").map { task -> task.libraries },
+        tasks.named<JavaCompile>("compile${suffix}JavaWithJavac").flatMap { task -> task.destinationDirectory },
+    )
+    tasks
+        .withType<Detekt>()
+        .named { name -> name == "detekt$suffix" }
+        .configureEach {
+            classpath.setFrom(variantClasspath())
+        }
+    tasks
+        .withType<DetektCreateBaselineTask>()
+        .named { name -> name == "detektBaseline$suffix" }
+        .configureEach {
+            classpath.setFrom(variantClasspath())
+        }
 }

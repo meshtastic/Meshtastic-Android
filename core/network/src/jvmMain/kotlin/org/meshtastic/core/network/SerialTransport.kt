@@ -301,6 +301,8 @@ private constructor(
     }
 
     /** Attempts to open the serial port and starts the read loop. Returns true if successful, false otherwise. */
+    // Cancellation is inspected after runCatching: the port is closed, then the cancellation rethrown.
+    @Suppress("SuspendFunSwallowedCancellation")
     private suspend fun startConnection(): Boolean {
         if (portState.isClosing(lifecycle.isClosed)) return false
         var candidatePort: SerialPort? = null
@@ -429,12 +431,11 @@ private constructor(
             // beginClose makes new sends reject synchronously. Stop the framed-send worker now so queued sends release
             // their lifecycle leases before the gate waits for admitted operations.
             super.close()
-            val completed =
-                lifecycle.close {
-                    val currentReadJob = portState.takeReadJob()
-                    runInterruptible(dispatchers.io) { portState.takePort()?.let { closeSerialPort(portName, it) } }
-                    currentReadJob?.cancelAndJoin()
-                }
+            val completed = lifecycle.close {
+                val currentReadJob = portState.takeReadJob()
+                runInterruptible(dispatchers.io) { portState.takePort()?.let { closeSerialPort(portName, it) } }
+                currentReadJob?.cancelAndJoin()
+            }
             if (!completed) Logger.w { "[$portName] JVM serial teardown did not complete within its lifecycle bounds" }
         }
     }

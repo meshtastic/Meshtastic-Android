@@ -17,9 +17,14 @@
 package org.meshtastic.feature.firmware
 
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.FilterInputStream
 import java.io.InputStream
+import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.zip.ZipInputStream
+import kotlin.io.path.createTempDirectory
 
 /**
  * Ceiling on a firmware archive as delivered. Real Meshtastic release zips are tens of MB, and the whole archive is
@@ -34,6 +39,18 @@ internal const val MAX_FIRMWARE_ZIP_BYTES = 128L * 1024 * 1024
  * every entry is retained in the returned map at once.
  */
 internal const val MAX_FIRMWARE_UNCOMPRESSED_BYTES = 96L * 1024 * 1024
+
+/**
+ * Ceiling on bytes [extractFirmwareEntry] writes to disk across the entries it keeps. A single firmware image is a few
+ * MB, so this only needs to stop an entry that inflates without end.
+ */
+internal const val MAX_FIRMWARE_EXTRACTED_BYTES = 96L * 1024 * 1024
+
+/**
+ * Ceiling on bytes [extractFirmwareEntry] inflates from entries it skips. The largest release archive inflates to
+ * several hundred MB, so this only needs to stop an entry that inflates without end.
+ */
+internal const val MAX_FIRMWARE_SKIPPED_BYTES = 2L * 1024 * 1024 * 1024
 
 /** Ceiling on entry count. A release archive holds a few hundred at most. */
 internal const val MAX_FIRMWARE_ZIP_ENTRIES = 4096
@@ -71,14 +88,22 @@ private class LimitedInputStream(delegate: InputStream, private val limit: Long)
  */
 internal fun readAtMost(input: InputStream, limit: Long): ByteArray? {
     val out = ByteArrayOutputStream()
+    return copyAtMost(input, out, limit)?.let { out.toByteArray() }
+}
+
+/**
+ * Copies at most [limit] bytes from [input] to [output], returning the count, or null once the source proves longer.
+ * Stops reading as soon as the limit is passed, so no more than `limit + `[COPY_BUFFER_SIZE] bytes are ever pulled.
+ */
+internal fun copyAtMost(input: InputStream, output: OutputStream, limit: Long): Long? {
     val buffer = ByteArray(COPY_BUFFER_SIZE)
     var total = 0L
     while (true) {
         val read = input.read(buffer)
-        if (read < 0) return out.toByteArray()
+        if (read < 0) return total
         total += read
         if (total > limit) return null
-        out.write(buffer, 0, read)
+        output.write(buffer, 0, read)
     }
 }
 
@@ -122,4 +147,114 @@ internal fun extractZipEntriesBounded(
         }
     }
     return entries
+}
+
+/**
+ * Streams the firmware image for [target] out of the zip in [input] into [outputDir] and returns the written file, or
+ * null when no entry matches. With [preferredFilename] the first entry of exactly that name wins; otherwise every match
+ * is staged and the shortest entry name wins, the canonical image when a bundle carries variants.
+ *
+ * Bounded by entry count, bytes written and bytes inflated from skipped entries, not by archive size: a release archive
+ * runs past 200 MB and 250 entries, while a single firmware image is a few MB. Throws [IllegalArgumentException] when a
+ * bound is exceeded and [java.io.IOException] on a corrupt archive. Matches are staged in a directory of their own and
+ * only the winner is moved into [outputDir], so a failed call leaves [outputDir] as it found it.
+ */
+internal fun extractFirmwareEntry(
+    input: InputStream,
+    outputDir: File,
+    target: String,
+    fileExtension: String,
+    preferredFilename: String?,
+    maxEntries: Int = MAX_FIRMWARE_ZIP_ENTRIES,
+    maxWrittenBytes: Long = MAX_FIRMWARE_EXTRACTED_BYTES,
+    maxSkippedBytes: Long = MAX_FIRMWARE_SKIPPED_BYTES,
+): File? {
+    outputDir.mkdirs()
+    val staging = createTempDirectory(outputDir.toPath(), ".extract").toFile()
+    try {
+        val limits = ExtractionLimits(maxEntries, maxWrittenBytes, maxSkippedBytes)
+        val (entryName, staged) =
+            ZipInputStream(input).use { zip ->
+                stageFirmwareEntry(zip, staging, target, fileExtension, preferredFilename, limits)
+            } ?: return null
+        // Only the last path segment is kept, so an entry name cannot write outside outputDir.
+        val outFile = File(outputDir, File(entryName.lowercase()).name)
+        Files.move(staged.toPath(), outFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        return outFile
+    } finally {
+        staging.deleteRecursively()
+    }
+}
+
+private class ExtractionLimits(val maxEntries: Int, val maxWrittenBytes: Long, val maxSkippedBytes: Long)
+
+/** Discards what it is given, so a skipped entry can be inflated and counted without being kept. */
+private object DiscardOutputStream : OutputStream() {
+    override fun write(b: Int) = Unit
+
+    override fun write(b: ByteArray, off: Int, len: Int) = Unit
+}
+
+/**
+ * Writes each matching entry of [zip] to its own file in [staging] and returns the chosen one with its entry name.
+ * Unmatched entries are inflated against [ExtractionLimits.maxSkippedBytes] on the way past.
+ */
+private fun stageFirmwareEntry(
+    zip: ZipInputStream,
+    staging: File,
+    target: String,
+    fileExtension: String,
+    preferredFilename: String?,
+    limits: ExtractionLimits,
+): Pair<String, File>? {
+    val candidates = mutableListOf<Pair<String, File>>()
+    var writeRemaining = limits.maxWrittenBytes
+    var skipRemaining = limits.maxSkippedBytes
+    var entriesSeen = 0
+    var entry = zip.nextEntry
+    while (entry != null) {
+        if (!entry.isDirectory) {
+            entriesSeen++
+            require(entriesSeen <= limits.maxEntries) { "Firmware archive has more than ${limits.maxEntries} entries" }
+        }
+        if (isFirmwareEntryMatch(entry.name, entry.isDirectory, target, fileExtension, preferredFilename)) {
+            // Named by position, so entries sharing a basename in different directories stay distinct.
+            val staged = File(staging, candidates.size.toString())
+            writeRemaining -=
+                staged.outputStream().use { copyAtMost(zip, it, writeRemaining) }
+                    ?: throw IllegalArgumentException(
+                        "Firmware entry expands past the ${limits.maxWrittenBytes}-byte limit",
+                    )
+            candidates += entry.name to staged
+            if (preferredFilename != null) return candidates.last()
+        } else {
+            skipRemaining -=
+                copyAtMost(zip, DiscardOutputStream, skipRemaining)
+                    ?: throw IllegalArgumentException(
+                        "Skipped entries inflate past the ${limits.maxSkippedBytes}-byte limit",
+                    )
+        }
+        entry = zip.nextEntry
+    }
+    return candidates.minByOrNull { (name, _) -> name.length }
+}
+
+/**
+ * Whether zip entry [entryName] is the firmware to extract: exactly [preferredFilename] (ignoring its directory and
+ * case) when one is given, otherwise a firmware image for [target] with [fileExtension]. Directories never match.
+ */
+internal fun isFirmwareEntryMatch(
+    entryName: String,
+    isDirectory: Boolean,
+    target: String,
+    fileExtension: String,
+    preferredFilename: String?,
+): Boolean {
+    if (isDirectory) return false
+    val name = entryName.lowercase()
+    return if (preferredFilename != null) {
+        File(name).name == preferredFilename.lowercase()
+    } else {
+        isValidFirmwareFile(name, target.lowercase(), fileExtension)
+    }
 }

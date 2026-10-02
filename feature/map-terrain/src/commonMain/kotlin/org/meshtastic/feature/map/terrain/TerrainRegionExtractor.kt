@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.terrain
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -55,25 +56,16 @@ class TerrainRegionExtractor(
         fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray?
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // cancellation deletes the partial region, then is rethrown
     fun download(bounds: GeoBounds, maxZoom: Int): Flow<TerrainDownloadState> = flow {
-        val globalZoomRange = 0..minOf(maxZoom, MapterhornEndpoints.GLOBAL_MAX_ZOOM)
-        val regionalUrl =
-            if (maxZoom > MapterhornEndpoints.GLOBAL_MAX_ZOOM) MapterhornEndpoints.regionalUrlFor(bounds) else null
-        val regionalZoomRange =
-            MapterhornEndpoints.REGIONAL_MIN_ZOOM..minOf(maxZoom, MapterhornEndpoints.REGIONAL_MAX_ZOOM)
+        val globalZoomRange = globalTerrainZooms(maxZoom)
+        val regionalZoomRange = regionalTerrainZooms(bounds, maxZoom)
+        val regionalUrl = regionalZoomRange?.let { MapterhornEndpoints.regionalUrlFor(bounds) }
 
-        // Counted cheaply — via TerrainTileMath.tileCountAt's corner arithmetic, O(1) per zoom — before anything is
-        // materialized. A single regional z6 tile at maxZoom 18 is ~16.7M tiles at z18 alone; flatMap-ing a TileIndex
-        // per tile before this check runs would allocate that whole list first and risk OOM on exactly the oversized
+        // Counted from tile corners before anything is materialized. A single regional z6 tile at maxZoom 18 is ~16.7M
+        // tiles at z18 alone; enumerating before this check would allocate that whole list on exactly the oversized
         // requests this limit exists to reject.
-        val globalCount = globalZoomRange.sumOf { zoom -> TerrainTileMath.tileCountAt(zoom, bounds) }
-        val regionalCount =
-            if (regionalUrl != null) {
-                regionalZoomRange.sumOf { zoom -> TerrainTileMath.tileCountAt(zoom, bounds) }
-            } else {
-                0L
-            }
-        val totalTiles = globalCount + regionalCount
+        val totalTiles = terrainTileCount(bounds, maxZoom)
         if (totalTiles > MAX_TILES) {
             emit(TerrainDownloadState.Failed(TerrainDownloadFailure.TILE_LIMIT_EXCEEDED))
             return@flow
@@ -85,12 +77,7 @@ class TerrainRegionExtractor(
 
         // Only materialized now that the cheap count above has confirmed it's under MAX_TILES.
         val globalTiles = globalZoomRange.flatMap { zoom -> TerrainTileMath.tilesAt(zoom, bounds) }
-        val regionalTiles =
-            if (regionalUrl != null) {
-                regionalZoomRange.flatMap { zoom -> TerrainTileMath.tilesAt(zoom, bounds) }
-            } else {
-                emptyList()
-            }
+        val regionalTiles = regionalZoomRange?.flatMap { zoom -> TerrainTileMath.tilesAt(zoom, bounds) }.orEmpty()
         val total = totalTiles.toInt()
 
         var global = FetchResult(processed = 0, stored = 0)
@@ -104,6 +91,10 @@ class TerrainRegionExtractor(
                 regional =
                     fetchInto(regionalUrl, TerrainSource.REGIONAL, regionalTiles, global.processed, total) { emit(it) }
             }
+        } catch (e: CancellationException) {
+            // A cancelled download leaves no partial region behind, and nothing may be emitted after cancellation.
+            store.deleteAll()
+            throw e
         } catch (_: Exception) {
             store.deleteAll()
             emit(TerrainDownloadState.Failed(TerrainDownloadFailure.IO_ERROR))

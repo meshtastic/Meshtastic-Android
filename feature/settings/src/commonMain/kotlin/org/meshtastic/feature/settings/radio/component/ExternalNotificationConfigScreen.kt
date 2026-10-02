@@ -34,31 +34,47 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
-import org.meshtastic.core.resources.alert_bell_buzzer
-import org.meshtastic.core.resources.alert_bell_led
-import org.meshtastic.core.resources.alert_bell_vibra
-import org.meshtastic.core.resources.alert_message_buzzer
-import org.meshtastic.core.resources.alert_message_led
-import org.meshtastic.core.resources.alert_message_vibra
 import org.meshtastic.core.resources.external_notification
 import org.meshtastic.core.resources.external_notification_config
-import org.meshtastic.core.resources.external_notification_enabled
-import org.meshtastic.core.resources.nag_timeout_seconds
 import org.meshtastic.core.resources.notifications_on_alert_bell_receipt
 import org.meshtastic.core.resources.notifications_on_message_receipt
-import org.meshtastic.core.resources.output_buzzer_gpio
-import org.meshtastic.core.resources.output_duration_milliseconds
-import org.meshtastic.core.resources.output_led_active_high
-import org.meshtastic.core.resources.output_led_gpio
-import org.meshtastic.core.resources.output_vibra_gpio
 import org.meshtastic.core.resources.ringtone
-import org.meshtastic.core.resources.use_i2s_as_buzzer
-import org.meshtastic.core.resources.use_pwm_buzzer
+import org.meshtastic.core.resources.schema_externalnotification_active
+import org.meshtastic.core.resources.schema_externalnotification_active_description
+import org.meshtastic.core.resources.schema_externalnotification_alert_bell
+import org.meshtastic.core.resources.schema_externalnotification_alert_bell_buzzer
+import org.meshtastic.core.resources.schema_externalnotification_alert_bell_buzzer_description
+import org.meshtastic.core.resources.schema_externalnotification_alert_bell_description
+import org.meshtastic.core.resources.schema_externalnotification_alert_bell_vibra
+import org.meshtastic.core.resources.schema_externalnotification_alert_bell_vibra_description
+import org.meshtastic.core.resources.schema_externalnotification_alert_message
+import org.meshtastic.core.resources.schema_externalnotification_alert_message_buzzer
+import org.meshtastic.core.resources.schema_externalnotification_alert_message_buzzer_description
+import org.meshtastic.core.resources.schema_externalnotification_alert_message_description
+import org.meshtastic.core.resources.schema_externalnotification_alert_message_vibra
+import org.meshtastic.core.resources.schema_externalnotification_alert_message_vibra_description
+import org.meshtastic.core.resources.schema_externalnotification_enabled
+import org.meshtastic.core.resources.schema_externalnotification_enabled_description
+import org.meshtastic.core.resources.schema_externalnotification_nag_timeout
+import org.meshtastic.core.resources.schema_externalnotification_nag_timeout_description
+import org.meshtastic.core.resources.schema_externalnotification_output
+import org.meshtastic.core.resources.schema_externalnotification_output_buzzer
+import org.meshtastic.core.resources.schema_externalnotification_output_buzzer_description
+import org.meshtastic.core.resources.schema_externalnotification_output_description
+import org.meshtastic.core.resources.schema_externalnotification_output_ms
+import org.meshtastic.core.resources.schema_externalnotification_output_ms_description
+import org.meshtastic.core.resources.schema_externalnotification_output_vibra
+import org.meshtastic.core.resources.schema_externalnotification_output_vibra_description
+import org.meshtastic.core.resources.schema_externalnotification_use_i2s_as_buzzer
+import org.meshtastic.core.resources.schema_externalnotification_use_i2s_as_buzzer_description
+import org.meshtastic.core.resources.schema_externalnotification_use_pwm
+import org.meshtastic.core.resources.schema_externalnotification_use_pwm_description
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.util.FixedOutputDurations
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfig
@@ -106,7 +122,8 @@ fun ExternalNotificationConfigScreenCommon(
         item {
             TitledCard(title = stringResource(Res.string.external_notification_config)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.external_notification_enabled),
+                    title = stringResource(Res.string.schema_externalnotification_enabled),
+                    summary = stringResource(Res.string.schema_externalnotification_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -120,7 +137,8 @@ fun ExternalNotificationConfigScreenCommon(
         item {
             TitledCard(title = stringResource(Res.string.notifications_on_message_receipt)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.alert_message_led),
+                    title = stringResource(Res.string.schema_externalnotification_alert_message),
+                    summary = stringResource(Res.string.schema_externalnotification_alert_message_description),
                     checked = formState.value.alert_message,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -130,7 +148,8 @@ fun ExternalNotificationConfigScreenCommon(
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.alert_message_buzzer),
+                    title = stringResource(Res.string.schema_externalnotification_alert_message_buzzer),
+                    summary = stringResource(Res.string.schema_externalnotification_alert_message_buzzer_description),
                     checked = formState.value.alert_message_buzzer,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -141,7 +160,8 @@ fun ExternalNotificationConfigScreenCommon(
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.alert_message_vibra),
+                    title = stringResource(Res.string.schema_externalnotification_alert_message_vibra),
+                    summary = stringResource(Res.string.schema_externalnotification_alert_message_vibra_description),
                     checked = formState.value.alert_message_vibra,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -156,7 +176,8 @@ fun ExternalNotificationConfigScreenCommon(
         item {
             TitledCard(title = stringResource(Res.string.notifications_on_alert_bell_receipt)) {
                 SwitchPreference(
-                    title = stringResource(Res.string.alert_bell_led),
+                    title = stringResource(Res.string.schema_externalnotification_alert_bell),
+                    summary = stringResource(Res.string.schema_externalnotification_alert_bell_description),
                     checked = formState.value.alert_bell,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -166,7 +187,8 @@ fun ExternalNotificationConfigScreenCommon(
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.alert_bell_buzzer),
+                    title = stringResource(Res.string.schema_externalnotification_alert_bell_buzzer),
+                    summary = stringResource(Res.string.schema_externalnotification_alert_bell_buzzer_description),
                     checked = formState.value.alert_bell_buzzer,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -176,7 +198,8 @@ fun ExternalNotificationConfigScreenCommon(
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.alert_bell_vibra),
+                    title = stringResource(Res.string.schema_externalnotification_alert_bell_vibra),
+                    summary = stringResource(Res.string.schema_externalnotification_alert_bell_vibra_description),
                     checked = formState.value.alert_bell_vibra,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -191,7 +214,8 @@ fun ExternalNotificationConfigScreenCommon(
             TitledCard(title = stringResource(Res.string.advanced)) {
                 val gpio = remember { org.meshtastic.feature.settings.util.gpioPins }
                 DropDownPreference(
-                    title = stringResource(Res.string.output_led_gpio),
+                    title = stringResource(Res.string.schema_externalnotification_output),
+                    summary = stringResource(Res.string.schema_externalnotification_output_description),
                     items = gpio,
                     selectedItem = formState.value.output.toLong(),
                     enabled = state.connected,
@@ -202,7 +226,8 @@ fun ExternalNotificationConfigScreenCommon(
                 if (formState.value.output != 0) {
                     HorizontalDivider()
                     SwitchPreference(
-                        title = stringResource(Res.string.output_led_active_high),
+                        title = stringResource(Res.string.schema_externalnotification_active),
+                        summary = stringResource(Res.string.schema_externalnotification_active_description),
                         checked = formState.value.active,
                         enabled = state.connected,
                         onCheckedChange = {
@@ -213,7 +238,8 @@ fun ExternalNotificationConfigScreenCommon(
                 }
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(Res.string.output_buzzer_gpio),
+                    title = stringResource(Res.string.schema_externalnotification_output_buzzer),
+                    summary = stringResource(Res.string.schema_externalnotification_output_buzzer_description),
                     items = gpio,
                     selectedItem = formState.value.output_buzzer.toLong(),
                     enabled = state.connected,
@@ -225,7 +251,8 @@ fun ExternalNotificationConfigScreenCommon(
                 if (formState.value.output_buzzer != 0) {
                     HorizontalDivider()
                     SwitchPreference(
-                        title = stringResource(Res.string.use_pwm_buzzer),
+                        title = stringResource(Res.string.schema_externalnotification_use_pwm),
+                        summary = stringResource(Res.string.schema_externalnotification_use_pwm_description),
                         checked = formState.value.use_pwm,
                         enabled = state.connected,
                         onCheckedChange = {
@@ -236,7 +263,8 @@ fun ExternalNotificationConfigScreenCommon(
                 }
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(Res.string.output_vibra_gpio),
+                    title = stringResource(Res.string.schema_externalnotification_output_vibra),
+                    summary = stringResource(Res.string.schema_externalnotification_output_vibra_description),
                     items = gpio,
                     selectedItem = formState.value.output_vibra.toLong(),
                     enabled = state.connected,
@@ -246,9 +274,10 @@ fun ExternalNotificationConfigScreenCommon(
                     },
                 )
                 HorizontalDivider()
-                val outputItems = remember { IntervalConfiguration.OUTPUT.allowedIntervals }
+                val outputItems = remember { FixedOutputDurations.allowed }
                 DropDownPreference(
-                    title = stringResource(Res.string.output_duration_milliseconds),
+                    title = stringResource(Res.string.schema_externalnotification_output_ms),
+                    summary = stringResource(Res.string.schema_externalnotification_output_ms_description),
                     items = outputItems.map { it.value to it.toDisplayString() },
                     selectedItem = formState.value.output_ms.toLong(),
                     enabled = state.connected,
@@ -259,7 +288,8 @@ fun ExternalNotificationConfigScreenCommon(
                 HorizontalDivider()
                 val nagItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(Res.string.nag_timeout_seconds),
+                    title = stringResource(Res.string.schema_externalnotification_nag_timeout),
+                    summary = stringResource(Res.string.schema_externalnotification_nag_timeout_description),
                     items = nagItems.map { it.value to it.toDisplayString() },
                     selectedItem = formState.value.nag_timeout.toLong(),
                     enabled = state.connected,
@@ -289,7 +319,8 @@ fun ExternalNotificationConfigScreenCommon(
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.use_i2s_as_buzzer),
+                    title = stringResource(Res.string.schema_externalnotification_use_i2s_as_buzzer),
+                    summary = stringResource(Res.string.schema_externalnotification_use_i2s_as_buzzer_description),
                     checked = formState.value.use_i2s_as_buzzer,
                     enabled = state.connected,
                     onCheckedChange = {

@@ -2,7 +2,7 @@ name: Feature Request
 description: File a request for new feature or functionality.
 title: "[Feature Request]: "
 labels: [enhancement]
-projects: [meshtastic/Meshtastic-Android]
+projects: [meshtastic/30]
 body:
   - type: checkboxes
     id: checklist

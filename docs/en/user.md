@@ -17,6 +17,8 @@ Documentation for using the Meshtastic Android and Desktop app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
+**September 2026** — [Notifications](user/notifications) — A new page lists every notification category, what each opens when tapped, when a message stays quiet, and what a message notification lets you do from the shade or a watch.
+
 **September 2026** — [Nodes](user/nodes) — Nodes your node has not heard since its LoRa settings changed now carry an orange marker, a **Hide unheard nodes** filter, and a banner whose **Remove** action deletes them in bulk.
 
 **September 2026** — [Settings — Radio & User](user/settings-radio-user) — Lockdown's debug-port lock is not reversible from the app, Managed Mode locks the whole configuration list, and the preset list is filtered to what your region permits.

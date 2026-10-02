@@ -2,7 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>LambdaParameterInRestartableEffect:NfcScanner.kt:onResult: (String?) -> Unit</ID>
     <ID>ParameterNaming:NfcScanner.kt:onNfcDisabled: (() -> Unit)? = null</ID>
   </CurrentIssues>
 </SmellBaseline>

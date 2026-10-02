@@ -17,29 +17,25 @@
 package org.meshtastic.feature.settings.filter
 
 import dev.mokkery.MockMode
-import dev.mokkery.answering.returns
-import dev.mokkery.every
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
-import kotlinx.coroutines.flow.MutableStateFlow
-import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.MessageFilter
+import org.meshtastic.core.testing.FakeFilterPrefs
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class FilterSettingsViewModelTest {
 
-    private val filterPrefs: FilterPrefs = mock(MockMode.autofill)
+    private val filterPrefs = FakeFilterPrefs()
     private val messageFilter: MessageFilter = mock(MockMode.autofill)
 
     private lateinit var viewModel: FilterSettingsViewModel
 
     @BeforeTest
     fun setUp() {
-        every { filterPrefs.filterEnabled } returns MutableStateFlow(true)
-        every { filterPrefs.filterWords } returns MutableStateFlow(setOf("apple", "banana"))
+        filterPrefs.setFilterEnabled(true)
+        filterPrefs.setFilterWords(setOf("apple", "banana"))
 
         viewModel = FilterSettingsViewModel(filterPrefs = filterPrefs, messageFilter = messageFilter)
     }
@@ -47,25 +43,35 @@ class FilterSettingsViewModelTest {
     @Test
     fun setFilterEnabled_updates_prefs_and_state() {
         viewModel.setFilterEnabled(false)
-        verify { filterPrefs.setFilterEnabled(false) }
+        assertEquals(false, filterPrefs.filterEnabled.value)
         assertEquals(false, viewModel.filterEnabled.value)
+    }
+
+    @Test
+    fun state_follows_prefs_that_load_after_creation() {
+        val coldPrefs = FakeFilterPrefs()
+        val coldViewModel = FilterSettingsViewModel(filterPrefs = coldPrefs, messageFilter = messageFilter)
+
+        coldPrefs.setFilterEnabled(true)
+        coldPrefs.setFilterWords(setOf("cherry"))
+
+        assertEquals(true, coldViewModel.filterEnabled.value)
+        assertEquals(setOf("cherry"), coldViewModel.filterWords.value)
     }
 
     @Test
     fun addFilterWord_updates_prefs_and_rebuilds_patterns() {
         viewModel.addFilterWord("cherry")
 
-        verify { filterPrefs.setFilterWords(any()) }
         verify { messageFilter.rebuildPatterns() }
-        assertEquals(listOf("apple", "banana", "cherry"), viewModel.filterWords.value)
+        assertEquals(setOf("apple", "banana", "cherry"), viewModel.filterWords.value)
     }
 
     @Test
     fun removeFilterWord_updates_prefs_and_rebuilds_patterns() {
         viewModel.removeFilterWord("apple")
 
-        verify { filterPrefs.setFilterWords(any()) }
         verify { messageFilter.rebuildPatterns() }
-        assertEquals(listOf("banana"), viewModel.filterWords.value)
+        assertEquals(setOf("banana"), viewModel.filterWords.value)
     }
 }

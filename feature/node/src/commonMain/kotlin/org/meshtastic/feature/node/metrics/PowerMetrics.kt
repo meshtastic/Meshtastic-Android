@@ -274,18 +274,18 @@ private fun PowerMetricsChart(
             modelProducer.runTransaction {
                 if (currentData.isNotEmpty()) {
                     lineModel {
-                        series(
-                            x = currentData.map { it.time },
-                            y = currentData.map { retrieveCurrent(selectedChannel, it) },
-                        )
+                        splitAtGaps(currentData) { it.time }
+                            .forEach { run ->
+                                series(x = run.map { it.time }, y = run.map { retrieveCurrent(selectedChannel, it) })
+                            }
                     }
                 }
                 if (voltageData.isNotEmpty()) {
                     lineModel {
-                        series(
-                            x = voltageData.map { it.time },
-                            y = voltageData.map { retrieveVoltage(selectedChannel, it) },
-                        )
+                        splitAtGaps(voltageData) { it.time }
+                            .forEach { run ->
+                                series(x = run.map { it.time }, y = run.map { retrieveVoltage(selectedChannel, it) })
+                            }
                     }
                 }
             }

@@ -38,9 +38,6 @@ dependencies {
     // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
 
-    // Self-updating embedded Gradle Kotlin version
-    val gradleKotlinVersion = KotlinVersion.CURRENT.toString()
-
     // ── Convention plugin compile dependencies ──────────────────────────────
     // These are standard compile-time dependencies used by our convention plugins.
     compileOnly(libs.android.gradleApiPlugin)
@@ -102,7 +99,6 @@ detekt {
     config.setFrom(repoConfigDir.file("detekt/detekt.yml").asFile)
     buildUponDefaultConfig = true
     allRules = false
-    baseline = file("detekt-baseline.xml")
     source.setFrom(files("src/main/java", "src/main/kotlin"))
 }
 
@@ -137,12 +133,15 @@ gradlePlugin {
         }
         register("androidSecrets") {
             id = "meshtastic.android.secrets"
-            implementationClass =
-                "com.google.android.libraries.mapsplatform.secrets_gradle_plugin.SecretsPlugin"
+            implementationClass = "com.google.android.libraries.mapsplatform.secrets_gradle_plugin.SecretsPlugin"
         }
         register("androidScreenshot") {
             id = "meshtastic.android.screenshot"
             implementationClass = "AndroidScreenshotConventionPlugin"
+        }
+        register("androidTest") {
+            id = "meshtastic.android.test"
+            implementationClass = "AndroidTestConventionPlugin"
         }
         register("androidApplicationCompose") {
             id = "meshtastic.android.application.compose"

@@ -33,20 +33,17 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
-            implementation(projects.core.data)
             implementation(projects.core.database)
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
-            implementation(projects.core.network)
-            implementation(projects.core.prefs)
             implementation(projects.core.repository)
             implementation(projects.core.resources)
-            implementation(projects.core.service)
             implementation(projects.core.ui)
 
-            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.meshtastic.protobufs)
         }
+
+        commonTest.dependencies { implementation(projects.core.data) }
     }
 }

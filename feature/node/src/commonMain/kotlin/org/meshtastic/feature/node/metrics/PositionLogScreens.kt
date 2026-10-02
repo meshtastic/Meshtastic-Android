@@ -24,10 +24,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.hasFix
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.clear_position_track_message
@@ -51,6 +53,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val exportPositionLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionCSV(uri, positions) }
     val nodeName = state.node?.user?.long_name ?: ""
     val exportGpxLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionGpx(uri, positions, nodeName) }
+    val hasTrackPoint = remember(positions) { positions.any { it.hasFix() } }
 
     val trackMap = LocalNodeTrackMapProvider.current
     val destNum = state.node?.num ?: 0
@@ -64,13 +67,15 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         timeProvider = { it.time.toDouble() },
         onExportCsv = { exportPositionLauncher("position.csv", "text/csv") },
         extraActions = {
-            if (positions.isNotEmpty()) {
+            if (hasTrackPoint) {
                 IconButton(onClick = { exportGpxLauncher("track.gpx", "application/gpx+xml") }) {
                     Icon(
                         imageVector = MeshtasticIcons.FileDownload,
                         contentDescription = stringResource(Res.string.export_gpx),
                     )
                 }
+            }
+            if (positions.isNotEmpty()) {
                 ClearPositionTrackButton(onConfirm = { viewModel.clearPosition() })
             }
             if (!state.isLocal) {
@@ -81,7 +86,9 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         },
         chartPart = { modifier, selectedX, _, onPointSelected ->
             val selectedTime = selectedX?.toInt()
-            trackMap(destNum, positions, modifier, selectedTime) { time -> onPointSelected(time.toDouble()) }
+            // Positional: trackMap is a function type, so it takes no named arguments. Collapsed credit, this being a
+            // strip inside a screen whose own map is a tab away.
+            trackMap(destNum, positions, modifier, selectedTime, { time -> onPointSelected(time.toDouble()) }, false)
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {

@@ -39,6 +39,7 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
@@ -178,6 +179,8 @@ class MeshConnectionManagerImpl(
         scope.launch {
             try {
                 appWidgetUpdater.updateAll()
+            } catch (e: CancellationException) {
+                throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 Logger.e(e) { "Failed to kickstart LocalStatsWidget" }
             }
@@ -311,13 +314,12 @@ class MeshConnectionManagerImpl(
         // power-saving state where the NimBLE callback context needs warming up. The 100ms
         // delay ensures the heartbeat BLE write is enqueued before the want_config_id
         // (sendToRadio is fire-and-forget through async coroutine launches).
-        preHandshakeJob =
-            scope.handledLaunch {
-                heartbeatSender.sendHeartbeat("pre-handshake")
-                delay(PRE_HANDSHAKE_SETTLE_MS)
-                Logger.i { "Starting mesh handshake (Stage 1)" }
-                startConfigOnly()
-            }
+        preHandshakeJob = scope.handledLaunch {
+            heartbeatSender.sendHeartbeat("pre-handshake")
+            delay(PRE_HANDSHAKE_SETTLE_MS)
+            Logger.i { "Starting mesh handshake (Stage 1)" }
+            startConfigOnly()
+        }
     }
 
     private fun armStageGuard(stage: Int, timeout: Duration) {
@@ -353,7 +355,7 @@ class MeshConnectionManagerImpl(
         // progress. The aggressive 12s fast timeout recovers a stuck session quickly; BLE keeps
         // the original generous budget because its GATT latency is high and variable.
         val effectiveTimeout = if (fastTransport) FAST_HANDSHAKE_TIMEOUT else spec.timeout
-        val transportLabel = if (fastTransport) "fast transport" else "BLE"
+        val transportLabel = transportLabel()
         // Collapse cancel+reassign into one atomic swap so a concurrent re-arm cannot orphan a
         // job in the gap between cancel and reassign.
         handshakeTimeout
@@ -450,8 +452,10 @@ class MeshConnectionManagerImpl(
                 // safeCatchingAll swallows Skiko ExceptionInInitializerError on headless JVM tests
                 // where compose-resources can't load native libs. Production resolves the localized
                 // string normally; tests fall back to empty and setErrorMessage is still called.
-                val errorMessage =
-                    safeCatchingAll { getStringSuspend(Res.string.error_recovery_exhausted) }.getOrDefault("")
+                val errorMessage = safeCatchingAll {
+                    getStringSuspend(Res.string.error_recovery_exhausted)
+                }
+                    .getOrDefault("")
                 serviceRepository.setErrorMessage(errorMessage, Severity.Error)
                 return@handledLaunch
             }
@@ -524,22 +528,17 @@ class MeshConnectionManagerImpl(
             )
         }
 
-        sleepTimeout =
-            scope.handledLaunch {
-                try {
-                    val localConfig = radioConfigRepository.localConfigFlow.first()
-                    val rawTimeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
-                    // Cap the timeout so routers or power-saving configs (ls_secs=3600) don't
-                    // leave the UI stuck in DeviceSleep for over an hour.
-                    val timeout = rawTimeout.coerceAtMost(MAX_SLEEP_TIMEOUT_SECONDS)
-                    Logger.d { "Waiting for sleeping device, timeout=$timeout secs (raw=$rawTimeout)" }
-                    delay(timeout.seconds)
-                    Logger.w { "Device timed out, setting disconnected" }
-                    onConnectionChanged(ConnectionState.Disconnected)
-                } catch (_: CancellationException) {
-                    Logger.d { "device sleep timeout cancelled" }
-                }
-            }
+        sleepTimeout = scope.handledLaunch {
+            val localConfig = radioConfigRepository.localConfigFlow.first()
+            val rawTimeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
+            // Cap the timeout so routers or power-saving configs (ls_secs=3600) don't
+            // leave the UI stuck in DeviceSleep for over an hour.
+            val timeout = rawTimeout.coerceAtMost(MAX_SLEEP_TIMEOUT_SECONDS)
+            Logger.d { "Waiting for sleeping device, timeout=$timeout secs (raw=$rawTimeout)" }
+            delay(timeout.seconds)
+            Logger.w { "Device timed out, setting disconnected" }
+            onConnectionChanged(ConnectionState.Disconnected)
+        }
     }
 
     private fun handleDisconnected() {
@@ -639,56 +638,55 @@ class MeshConnectionManagerImpl(
             Logger.w { "Skipping post-handshake requests because the connected local-node state is unavailable" }
             return@withLock
         }
-        postHandshakeRequestsJob =
-            scope.handledLaunch {
-                // The requests are independent. One unexpected request failure must not cancel the others, and
-                // teardown serializes with this job publication through connectionMutex.
-                supervisorScope {
-                    launch {
-                        retryPostHandshakeRequest("Session-passkey seed", myNodeNum, connectedLifecycle.version) {
-                            commandSender.sendAdminForConnection(
-                                destNum = myNodeNum,
-                                expectedConnectionVersion = connectedLifecycle.version,
-                                wantResponse = true,
-                            ) {
-                                AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
-                            }
+        postHandshakeRequestsJob = scope.handledLaunch {
+            // The requests are independent. One unexpected request failure must not cancel the others, and
+            // teardown serializes with this job publication through connectionMutex.
+            supervisorScope {
+                launch {
+                    retryPostHandshakeRequest("Session-passkey seed", myNodeNum, connectedLifecycle.version) {
+                        commandSender.sendAdminForConnection(
+                            destNum = myNodeNum,
+                            expectedConnectionVersion = connectedLifecycle.version,
+                            wantResponse = true,
+                        ) {
+                            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
                         }
                     }
-                    listOf(TelemetryType.LOCAL_STATS, TelemetryType.DEVICE).forEach { type ->
-                        launch {
-                            retryPostHandshakeRequest(
-                                label = "$type telemetry request",
-                                myNodeNum = myNodeNum,
-                                connectedVersion = connectedLifecycle.version,
-                            ) {
-                                commandSender.requestTelemetryForConnection(
-                                    commandSender.generatePacketId(),
-                                    myNodeNum,
-                                    type.ordinal,
-                                    connectedLifecycle.version,
-                                )
-                            }
-                        }
-                    }
+                }
+                listOf(TelemetryType.LOCAL_STATS, TelemetryType.DEVICE).forEach { type ->
                     launch {
-                        val config = radioConfigRepository.moduleConfigFlow.first().store_forward ?: return@launch
                         retryPostHandshakeRequest(
-                            label = "History replay",
+                            label = "$type telemetry request",
                             myNodeNum = myNodeNum,
                             connectedVersion = connectedLifecycle.version,
                         ) {
-                            historyManager.requestHistoryReplay(
-                                trigger = "onNodeDbReady",
-                                myNodeNum = myNodeNum,
-                                storeForwardConfig = config,
-                                transport = "Unknown",
-                                expectedConnectionVersion = connectedLifecycle.version,
+                            commandSender.requestTelemetryForConnection(
+                                commandSender.generatePacketId(),
+                                myNodeNum,
+                                type.ordinal,
+                                connectedLifecycle.version,
                             )
                         }
                     }
                 }
+                launch {
+                    val config = radioConfigRepository.moduleConfigFlow.first().store_forward ?: return@launch
+                    retryPostHandshakeRequest(
+                        label = "History replay",
+                        myNodeNum = myNodeNum,
+                        connectedVersion = connectedLifecycle.version,
+                    ) {
+                        historyManager.requestHistoryReplay(
+                            trigger = "onNodeDbReady",
+                            myNodeNum = myNodeNum,
+                            storeForwardConfig = config,
+                            transport = "Unknown",
+                            expectedConnectionVersion = connectedLifecycle.version,
+                        )
+                    }
+                }
             }
+        }
     }
 
     private fun logLocationSendFailure(failure: Throwable, warning: String) {
@@ -782,7 +780,7 @@ class MeshConnectionManagerImpl(
         )
 
         // DataDog RUM custom action matching Apple's "connect" event for cross-platform analytics.
-        val transportType = radioInterfaceService.getDeviceAddress()?.let { DeviceType.fromAddress(it)?.name }
+        val transportType = currentDeviceType()?.name ?: currentVirtualInterface()?.name
         analytics.trackConnect(
             firmwareVersion = myNode?.firmwareVersion,
             transportType = transportType,
@@ -798,14 +796,27 @@ class MeshConnectionManagerImpl(
     }
 
     /**
-     * True when the active transport is a TCP or USB serial connection — i.e. a transport whose firmware handshake
-     * reliably completes in roughly 1s when healthy and therefore benefits from aggressive silent-restart on stall.
-     * Uses the same [DeviceType.fromAddress] pattern as [reportConnection] for transport classification. BLE is
-     * excluded because its GATT latency budget is high and variable enough that the long-and-retry stall-guard budgets
-     * remain the right trade-off.
+     * True when the active transport is a TCP or USB serial connection, or the Demo Mode mock — i.e. one whose
+     * handshake reliably completes in roughly 1s when healthy and therefore benefits from aggressive silent-restart on
+     * stall. BLE is excluded because its GATT latency budget is high and variable enough that the long-and-retry
+     * stall-guard budgets remain the right trade-off.
      */
     private fun isFastRecoveryTransport(): Boolean =
-        radioInterfaceService.getDeviceAddress()?.let { DeviceType.fromAddress(it) } in FAST_RECOVERY_TYPES
+        currentDeviceType() in FAST_RECOVERY_TYPES || currentVirtualInterface() == InterfaceId.MOCK
+
+    private fun currentDeviceType(): DeviceType? =
+        radioInterfaceService.getDeviceAddress()?.let { DeviceType.fromAddress(it) }
+
+    private fun currentVirtualInterface(): InterfaceId? =
+        radioInterfaceService.getDeviceAddress()?.firstOrNull()?.let(InterfaceId::forIdChar)?.takeIf { it.isVirtual }
+
+    /**
+     * Names the concrete transport (BLE, TCP, USB, MOCK, REPLAY) in stall reports. TCP and USB share the fast-recovery
+     * budget but fail for different reasons, and the field reports can only be split by transport if the report says
+     * which one.
+     */
+    private fun transportLabel(): String =
+        currentDeviceType()?.name ?: currentVirtualInterface()?.name ?: UNKNOWN_TRANSPORT_LABEL
 
     override fun onHandshakeProgress() {
         // Progress only matters while a handshake is live, before the completion latch has fired.
@@ -836,7 +847,8 @@ class MeshConnectionManagerImpl(
                     // non-fatal in Crashlytics and a RUM error, which made this one of the loudest issues in triage.
                     // Track it as a rate over this log line instead.
                     Logger.w {
-                        "Fast-handshake watchdog expired after progress stalled — requesting forced transport restart"
+                        "Fast-handshake watchdog expired on ${transportLabel()} after progress stalled — " +
+                            "requesting forced transport restart"
                     }
                     runSiblingHandshakeRecovery()
                 },
@@ -861,6 +873,8 @@ class MeshConnectionManagerImpl(
         // Hoisted constant — used on every meaningful handshake packet via
         // isFastRecoveryTransport(); avoids allocating a fresh Set per packet.
         private val FAST_RECOVERY_TYPES = setOf(DeviceType.TCP, DeviceType.USB)
+
+        private const val UNKNOWN_TRANSPORT_LABEL = "unknown transport"
 
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
 

@@ -23,11 +23,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
+import org.meshtastic.core.testing.FakeBluetoothRepository
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -46,7 +46,7 @@ class MockTransportAddressAdmissionTest {
         object :
             BaseRadioTransportFactory(
                 scanner = mock<BleScanner>(MockMode.autofill),
-                bluetoothRepository = mock<BluetoothRepository>(MockMode.autofill),
+                bluetoothRepository = FakeBluetoothRepository(),
                 connectionFactory = mock<BleConnectionFactory>(MockMode.autofill),
                 dispatchers =
                 CoroutineDispatchers(

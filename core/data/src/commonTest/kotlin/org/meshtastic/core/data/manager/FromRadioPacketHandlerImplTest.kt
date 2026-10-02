@@ -31,8 +31,8 @@ import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MqttManager
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
@@ -67,7 +67,7 @@ class FromRadioPacketHandlerImplTest {
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val mqttManager: MqttManager = mock(MockMode.autofill)
     private val packetHandler: PacketHandler = mock(MockMode.autofill)
-    private val notificationManager: NotificationManager = mock(MockMode.autofill)
+    private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val configFlowManager: MeshConfigFlowManager = mock(MockMode.autofill)
     private val configHandler: MeshConfigHandler = mock(MockMode.autofill)
     private val xmodemManager: XModemManager = mock(MockMode.autofill)
@@ -112,7 +112,7 @@ class FromRadioPacketHandlerImplTest {
                 lazy { displayMirrorManager },
                 mqttManager,
                 packetHandler,
-                notificationManager,
+                serviceNotifications,
                 lockdownCoordinator,
                 firmwareUpdateStatusRepository,
                 radioInterfaceService,
@@ -378,7 +378,7 @@ class FromRadioPacketHandlerImplTest {
     @Test
     fun `platform-suppressed client notification skips modal state but preserves system delivery`() {
         val notification = protectedPositionAdvisory(replyId = 100, time = 1_000)
-        every { notificationManager.suppressClientNotificationModal(notification) } returns true
+        every { serviceNotifications.suppressClientNotificationModal(notification) } returns true
 
         handle(FromRadio.Builder().also { wb -> wb.clientNotification = notification }.build())
 
@@ -389,7 +389,7 @@ class FromRadioPacketHandlerImplTest {
     @Test
     fun `default platform policy preserves modal and system delivery for exact advisory`() {
         val notification = protectedPositionAdvisory(replyId = 200, time = 2_000)
-        every { notificationManager.suppressClientNotificationModal(notification) } returns false
+        every { serviceNotifications.suppressClientNotificationModal(notification) } returns false
 
         handle(FromRadio.Builder().also { wb -> wb.clientNotification = notification }.build())
 
@@ -405,7 +405,7 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio.Builder().also { wb -> wb.clientNotification = notification }.build())
 
         verify(mode = VerifyMode.exactly(0)) { serviceRepository.setClientNotification(any()) }
-        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatchClientNotification(any(), any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { serviceNotifications.showClientNotification(any(), any(), any()) }
     }
 
     @Test
@@ -416,7 +416,7 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio.Builder().also { wb -> wb.clientNotification = notification }.build())
 
         verify { serviceRepository.setClientNotification(notification) }
-        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatchClientNotification(any(), any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { serviceNotifications.showClientNotification(any(), any(), any()) }
     }
 
     @Test

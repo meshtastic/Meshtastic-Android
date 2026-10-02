@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Υγρασία</string>
+    <string name="a11y_temperature">Θερμοκρασία</string>
     <string name="about">Σχετικά</string>
     <string name="accept">Αποδοχή</string>
     <!-- ACTION -->
@@ -26,16 +28,13 @@
     <string name="address">Διεύθυνση</string>
     <string name="administration">Διαχείριση</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Εφαρμογή πολύ παλαιά</string>
     <string name="apply">Εφαρμογή</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Είστε σίγουροι ότι θέλετε να αλλάξετε στο προεπιλεγμένο κανάλι;</string>
     <string name="audio">Ήχος</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Μπαταρία</string>
-    <string name="blue">Μπλε</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_config">Ρυθμίσεις Bluetooth</string>
@@ -54,7 +53,6 @@
     <string name="channel_7">Κανάλι 7</string>
     <string name="channel_8">Κανάλι 8</string>
     <string name="channel_invalid">Αυτό το κανάλι URL δεν είναι ορθό και δεν μπορεί να χρησιμοποιηθεί</string>
-    <string name="channel_label">Κανάλι</string>
     <string name="channel_name">Όνομα Καναλιού</string>
     <string name="channels">Κανάλια</string>
     <!-- CHIRPY -->
@@ -88,19 +86,17 @@
     <string name="disconnected">Αποσυνδεδεμένο</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_messages">Μηνύματα</string>
-    <!-- DISPLAY -->
     <string name="display">Οθόνη</string>
     <!-- DISTANCE -->
     <string name="distance">Απόσταση</string>
     <!-- DOC -->
     <string name="doc_title_mqtt">MQTT</string>
+    <!-- DURATION -->
     <string name="edit">Επεξεργασία</string>
     <string name="eight_hours">8 Ώρες</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Ασυμφωνία δημόσιου κλειδιού</string>
     <string name="encryption_pkc">Κρυπτογράφηση Δημόσιου Κλειδιού</string>
-    <!-- ENVIRONMENT -->
     <string name="error">Σφάλμα</string>
     <!-- EXPORT -->
     <string name="factory_reset">Επαναφορά εργοστασιακών ρυθμίσεων</string>
@@ -113,10 +109,7 @@
     <string name="firmware_update_failed">Αποτυχία ενημέρωσης</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
-    <!-- GPIO -->
-    <string name="green">Πράσινο</string>
     <string name="i_know_what_i_m_doing">Ξέρω τι κάνω.</string>
-    <!-- IGNORE -->
     <string name="ignore">Παράβλεψη</string>
     <!-- IMPORT -->
     <string name="info">Πληροφορίες</string>
@@ -141,7 +134,6 @@
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <!-- MAP -->
-    <string name="map_cache_info">Χωρητικότητα προσωρινής μνήμης: %1$d MB\nΧρήση προσωρινής μνήμης: %2$d MB</string>
     <string name="map_cache_manager">Διαχείριση Προσωρινής Αποθήκευσης</string>
     <string name="map_cache_size">Μέγεθος τρέχουσας προσωρινής μνήμης</string>
     <string name="map_download_complete">Η λήψη ολοκληρώθηκε!</string>
@@ -188,26 +180,25 @@
     <string name="nodes_unheard_remove">Διαγραφή</string>
     <string name="none">Κανένα (απενεργοποιημένο)</string>
     <string name="not_connected">Αποσυνδεδεμένο</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Εντάξει</string>
     <!-- ONE -->
     <string name="one_day">24 Ώρες</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <string name="password">Κωδικός πρόσβασης</string>
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Τοποθεσία</string>
     <string name="position_log">Τοποθεσία</string>
-    <!-- POWER -->
     <string name="preferences_language">Γλώσσα</string>
     <string name="preferences_system_default">Προκαθορισμένο του συστήματος</string>
     <!-- PREVIEW -->
-    <string name="private_key">Ιδιωτικό Κλειδί</string>
     <string name="provide_location_to_mesh">Παρέχετε τοποθεσία στο πλέγμα</string>
     <string name="psk">PSK</string>
     <string name="public_key">Δημόσιο Κλειδί</string>
@@ -219,9 +210,6 @@
     <string name="quick_chat_new">Νέα γρήγορη συνομιλία</string>
     <string name="radio_configuration">Ρυθμίσεις συσκευής</string>
     <string name="reboot">Επανεκκίνηση</string>
-    <!-- REBROADCAST -->
-    <string name="red">Κόκκινο</string>
-    <string name="region_frequency_plan">Περιφέρεια</string>
     <!-- REMOTE -->
     <string name="remote_admin">Απομακρυσμένη Διαχείριση</string>
     <!-- REMOVE -->
@@ -238,7 +226,6 @@
     <string name="role_client_base">Πελάτης Βάση</string>
     <!-- ROUTING -->
     <string name="routing_error_timeout">Λήξη χρονικού ορίου</string>
-    <!-- SAVE -->
     <string name="save">Αποθήκευση</string>
     <string name="save_changes">Αποθήκευση</string>
     <!-- SCAN -->
@@ -247,7 +234,6 @@
     <string name="security">Ασφάλεια</string>
     <string name="select_all">Επιλογή όλων</string>
     <string name="send">Αποστολή</string>
-    <!-- SERIAL -->
     <string name="settings">ρυθμίσεις</string>
     <!-- SHARE -->
     <string name="share">Κοινοποίηση</string>
@@ -255,13 +241,9 @@
     <string name="shutdown">Τερματισμός λειτουργίας</string>
     <!-- SITE -->
     <string name="site_planner_section_display">Οθόνη</string>
-    <string name="ssid">SSID</string>
     <string name="swipe_action_delete">Διαγραφή</string>
     <string name="swipe_action_mute">Σίγαση</string>
     <!-- TAK -->
-    <string name="tak_team_blue">Μπλε</string>
-    <string name="tak_team_green">Πράσινο</string>
-    <string name="tak_team_red">Κόκκινο</string>
     <string name="telemetry">Τηλεμετρία</string>
     <string name="theme">Θέμα</string>
     <string name="theme_dark">Σκούρο</string>
@@ -283,10 +265,8 @@
     <string name="unknown_username">Άγνωστο Όνομα Χρήστη</string>
     <!-- URL -->
     <string name="url">URL</string>
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Χρήστης</string>
-    <string name="username">Όνομα χρήστη</string>
     <string name="via_mqtt">μέσω MQTT</string>
     <string name="voltage">Τάση</string>
     <string name="waypoint_delete">Διαγραφή σημείου πορείας;</string>

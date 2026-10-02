@@ -16,18 +16,20 @@
  */
 package org.meshtastic.core.data.ai
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.proto.Constants
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
@@ -90,15 +92,22 @@ class AiFunctionProviderImpl(
 
             // Send via existing use case and capture the generated messageId
             try {
-                val messageId = sendMessageUseCase.invoke(text, key)
+                when (val outcome = sendMessageUseCase.invoke(text, key)) {
+                    is SendMessageOutcome.Queued ->
+                        SendMessageResult.Success(
+                            messageId = outcome.packetId,
+                            channel = contactKey.channelName,
+                            timestamp = clock.now().toEpochMilliseconds(),
+                        )
 
-                SendMessageResult.Success(
-                    messageId = messageId,
-                    channel = contactKey.channelName,
-                    timestamp = clock.now().toEpochMilliseconds(),
-                )
+                    SendMessageOutcome.Refused ->
+                        SendMessageResult.InvalidArgument(
+                            "That conversation is retired: its channel is no longer on the radio.",
+                        )
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
-                if (ex is CancellationException) throw ex
                 SendMessageResult.InvalidArgument("Failed to send message: ${ex.message}")
             }
         }
@@ -134,13 +143,14 @@ class AiFunctionProviderImpl(
                         id = NodeAddress.numToDefaultId(node.num),
                         name = node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
                         batteryLevel = node.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
-                        lastHeard = node.lastHeard.toLong() * MS_PER_SEC,
+                        lastHeard = node.lastHeard.toLong() * TimeConstants.MS_PER_SEC,
                         isOnline = node.isOnline,
                     )
                 }
             GetNodeListResult.Success(nodes.sortedByDescending { it.lastHeard })
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetNodeListResult.Error("Failed to retrieve node list: ${ex.message}")
         }
     }
@@ -164,8 +174,9 @@ class AiFunctionProviderImpl(
                     )
                 }
             GetChannelInfoResult.Success(channels)
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetChannelInfoResult.Error("Failed to retrieve channel info: ${ex.message}")
         }
     }
@@ -187,8 +198,9 @@ class AiFunctionProviderImpl(
                     isActive = serviceRepository.connectionState.value == ConnectionState.Connected,
                 )
             GetDeviceStatusResult.Success(deviceStatus)
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetDeviceStatusResult.Error("Failed to retrieve device status: ${ex.message}")
         }
     }
@@ -234,15 +246,16 @@ class AiFunctionProviderImpl(
                     rssi = node.rssiOrNull,
                     hopsAway = node.hopsAway,
                     channel = node.channel,
-                    lastHeard = node.lastHeard.toLong() * MS_PER_SEC,
+                    lastHeard = node.lastHeard.toLong() * TimeConstants.MS_PER_SEC,
                     userRole = node.user.role.name,
                     isLicensed = node.user.is_licensed,
                     latitude = node.latitude.takeIf { hasValidPosition },
                     longitude = node.longitude.takeIf { hasValidPosition },
                 )
             GetNodeDetailsResult.Success(details)
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetNodeDetailsResult.Error("Failed to retrieve node details: ${ex.message}")
         }
     }
@@ -277,8 +290,11 @@ class AiFunctionProviderImpl(
 
             // Find most recent packet: max lastHeard across all nodes (convert seconds to ms)
             val mostRecentPacketTimeMs =
-                nodeMap.values.maxOfOrNull { it.lastHeard }?.takeIf { it > 0 }?.toLong()?.times(MS_PER_SEC)
-                    ?: clock.now().toEpochMilliseconds()
+                nodeMap.values
+                    .maxOfOrNull { it.lastHeard }
+                    ?.takeIf { it > 0 }
+                    ?.toLong()
+                    ?.times(TimeConstants.MS_PER_SEC) ?: clock.now().toEpochMilliseconds()
 
             // Get local device uptime from its DeviceMetrics (node #0 is typically the local device)
             val localNode = nodeMap.values.find { it.num == 0 } ?: nodeMap.values.firstOrNull()
@@ -295,8 +311,9 @@ class AiFunctionProviderImpl(
                     channelUtilizationPercent = null, // Could compute from radioConfigRepository if needed
                 )
             GetMeshMetricsResult.Success(metrics)
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetMeshMetricsResult.Error("Failed to retrieve mesh metrics: ${ex.message}")
         }
     }
@@ -348,21 +365,21 @@ class AiFunctionProviderImpl(
                     }
 
                 val channelSet = radioConfigRepository.channelSetFlow.first()
-                val summaries =
-                    messages.map { msg ->
-                        MessageSummary(
-                            senderName = msg.node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${msg.node.num}",
-                            text = msg.text,
-                            contactName = resolveContactDisplayName(msg, channelSet),
-                            receivedTime = msg.receivedTime,
-                            fromLocal = msg.fromLocal,
-                            read = msg.read,
-                        )
-                    }
+                val summaries = messages.map { msg ->
+                    MessageSummary(
+                        senderName = msg.node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${msg.node.num}",
+                        text = msg.text,
+                        contactName = resolveContactDisplayName(msg, channelSet),
+                        receivedTime = msg.receivedTime,
+                        fromLocal = msg.fromLocal,
+                        read = msg.read,
+                    )
+                }
 
                 GetRecentMessagesResult.Success(summaries)
+            } catch (e: CancellationException) {
+                throw e
             } catch (ex: Exception) {
-                if (ex is CancellationException) throw ex
                 GetRecentMessagesResult.Error("Failed to retrieve messages: ${ex.message}")
             }
         }
@@ -377,30 +394,29 @@ class AiFunctionProviderImpl(
 
             val nonMutedContacts = contacts.filter { (key, _) -> settings[key]?.isMuted != true }
 
-            val contactUnreads =
-                nonMutedContacts.mapNotNull { (contactKey, lastPacket) ->
-                    val unreadCount = packetRepository.getUnreadCount(contactKey)
-                    if (unreadCount <= 0) return@mapNotNull null
+            val contactUnreads = nonMutedContacts.mapNotNull { (contactKey, lastPacket) ->
+                val unreadCount = packetRepository.getUnreadCount(contactKey)
+                if (unreadCount <= 0) return@mapNotNull null
 
-                    val isBroadcast = lastPacket.to == NodeAddress.ID_BROADCAST
-                    val displayName =
-                        if (isBroadcast) {
-                            val channelIndex = contactKey.firstOrNull()?.digitToIntOrNull() ?: 0
-                            channelSet.settings.getOrNull(channelIndex)?.name?.ifBlank { "Channel $channelIndex" }
-                                ?: "Channel $channelIndex"
-                        } else {
-                            val userId = lastPacket.from ?: ""
-                            val node = nodeMap.values.find { it.user.id == userId }
-                            node?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Unknown"
-                        }
+                val isBroadcast = lastPacket.to == NodeAddress.ID_BROADCAST
+                val displayName =
+                    if (isBroadcast) {
+                        val channelIndex = contactKey.firstOrNull()?.digitToIntOrNull() ?: 0
+                        channelSet.settings.getOrNull(channelIndex)?.name?.ifBlank { "Channel $channelIndex" }
+                            ?: "Channel $channelIndex"
+                    } else {
+                        val userId = lastPacket.from ?: ""
+                        val node = nodeMap.values.find { it.user.id == userId }
+                        node?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Unknown"
+                    }
 
-                    ContactUnread(
-                        name = displayName,
-                        unreadCount = unreadCount,
-                        lastMessagePreview = lastPacket.text?.take(MESSAGE_PREVIEW_MAX_LENGTH),
-                        lastMessageTime = lastPacket.time.takeIf { it > 0 },
-                    )
-                }
+                ContactUnread(
+                    name = displayName,
+                    unreadCount = unreadCount,
+                    lastMessagePreview = lastPacket.text?.take(MESSAGE_PREVIEW_MAX_LENGTH),
+                    lastMessageTime = lastPacket.time.takeIf { it > 0 },
+                )
+            }
 
             val totalUnread = contactUnreads.sumOf { it.unreadCount }
 
@@ -410,8 +426,9 @@ class AiFunctionProviderImpl(
                     contacts = contactUnreads.sortedByDescending { it.lastMessageTime },
                 ),
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (ex: Exception) {
-            if (ex is CancellationException) throw ex
             GetUnreadSummaryResult.Error("Failed to retrieve unread summary: ${ex.message}")
         }
     }
@@ -507,7 +524,6 @@ class AiFunctionProviderImpl(
     companion object {
         private val OPERATION_TIMEOUT = 5.seconds
         private const val MAX_BATTERY_LEVEL = 100
-        private const val MS_PER_SEC = 1000L
         private const val HEALTH_SCORE_BASE = 50
         private const val HEALTH_SCORE_ONLINE_RATIO = 50
         private const val HEALTH_SCORE_DEGRADED = 10

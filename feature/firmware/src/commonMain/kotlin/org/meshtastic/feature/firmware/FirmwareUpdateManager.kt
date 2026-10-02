@@ -17,8 +17,8 @@
 package org.meshtastic.feature.firmware
 
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 
 /**
  * Routes firmware update requests to the appropriate platform-specific handler based on the active connection type

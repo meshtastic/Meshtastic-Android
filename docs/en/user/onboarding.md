@@ -2,7 +2,7 @@
 title: Getting Started
 parent: User Guide
 nav_order: 1
-last_updated: 2026-08-30
+last_updated: 2026-09-28
 description: First-launch setup — permissions, onboarding flow, and next steps after connecting your radio.
 aliases:
   - first-launch
@@ -52,6 +52,8 @@ Meshtastic also uses your location for:
 - Showing your position on the mesh map
 - Calculating distances to other nodes
 - Sharing your GPS coordinates with other mesh members (if enabled)
+
+On Android 12 and newer, choose **Precise** to share your position with the mesh: an approximate grant still shows you on the map, but position sharing needs precise location.
 
 Grant **"While using the app"**. The app does not request background location — `ACCESS_BACKGROUND_LOCATION` is not in its manifest — so Android will not offer an "Always" option, and position updates happen while the app is in the foreground or running its foreground service.
 

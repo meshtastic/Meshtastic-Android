@@ -33,8 +33,9 @@ internal fun EntryProviderScope<NavKey>.introGraph(
         current: NavKey,
         permissionsGranted: Boolean = true,
         bluetoothRequiresLocation: Boolean = false,
+        bluetoothSupported: Boolean = true,
     ) {
-        val next = viewModel.getNextKey(current, permissionsGranted, bluetoothRequiresLocation)
+        val next = viewModel.getNextKey(current, permissionsGranted, bluetoothRequiresLocation, bluetoothSupported)
         if (next != null) {
             backStack.add(next)
         } else {
@@ -54,7 +55,10 @@ internal fun EntryProviderScope<NavKey>.introGraph(
         }
     }
 
-    entry<Welcome> { WelcomeScreen(onGetStarted = { navigateToNext(Welcome) }) }
+    entry<Welcome> {
+        val permissions = LocalIntroPermissions.current
+        WelcomeScreen(onGetStarted = { navigateToNext(Welcome, bluetoothSupported = permissions.bluetoothSupported) })
+    }
 
     entry<Bluetooth> {
         val permissions = LocalIntroPermissions.current

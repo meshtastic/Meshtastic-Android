@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.LocaleUnitsProvider
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.MapCameraPosition
 import org.meshtastic.core.repository.MapPrefs
@@ -33,7 +32,6 @@ import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.MapLayersManager
@@ -111,19 +109,6 @@ class MapViewModel(
     fun refreshAllVisibleNetworkLayers() = mapLayersManager.refreshAllVisibleNetworkLayers()
 
     suspend fun readLayerBytes(layerItem: MapLayerItem): ByteArray? = mapLayersManager.readLayerBytes(layerItem)
-
-    // Injected by the map provider because this SavedStateHandle is not the Navigation 3 entry's route state.
-    private val sitePlannerRequestState = SitePlannerRequestState(nodeRepository.nodeDBbyNum)
-    val sitePlannerRequest: StateFlow<Node?> =
-        sitePlannerRequestState.request.stateInWhileSubscribed(initialValue = null)
-
-    fun setSitePlannerNodeNum(nodeNum: Int?) {
-        sitePlannerRequestState.setNodeNum(nodeNum)
-    }
-
-    fun consumeSitePlannerRequest(nodeNum: Int) {
-        sitePlannerRequestState.consume(nodeNum)
-    }
 }
 
 internal sealed interface InitialCameraState {

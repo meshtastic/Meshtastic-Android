@@ -16,21 +16,14 @@
  */
 package org.meshtastic.core.repository
 
+/** A notification as the desktop dispatch primitive ([NotificationManager]) sees it. */
 data class Notification(
     val title: String,
     val message: String,
     val type: Type = Type.Info,
     val category: Category = Category.Message,
-    val contactKey: String? = null,
     val isSilent: Boolean = false,
-    val group: String? = null,
     val id: Int? = null,
-    /**
-     * Optional deep-link URI invoked when the user taps the notification. Platform implementations are responsible for
-     * converting this into the appropriate intent / activation action. When null, tapping the notification has no
-     * effect.
-     */
-    val deepLinkUri: String? = null,
 ) {
     enum class Type {
         None,
@@ -46,7 +39,10 @@ data class Notification(
         Alert,
         Service,
 
-        /** Advisory Mesh Beacon invitations from other meshes — low-importance, its own channel. */
+        /** Advisory Mesh Beacon invitations from other meshes. */
         MeshBeacon,
+
+        /** Notices from the radio's firmware (ClientNotification). */
+        Client,
     }
 }

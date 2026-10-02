@@ -16,12 +16,10 @@
  */
 package org.meshtastic.core.service
 
-import android.Manifest
 import android.app.Application
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 import kotlinx.coroutines.flow.firstOrNull
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
@@ -30,14 +28,9 @@ import org.meshtastic.core.repository.LocationService
 class AndroidLocationService(private val context: Application, private val locationRepository: LocationRepository) :
     LocationService {
 
+    // The fix becomes the node's fixed position, so an approximate one is refused rather than stored as exact.
     override suspend fun getCurrentLocation(): Location? {
-        val hasPermission =
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED
-
-        if (!hasPermission) {
-            return null
-        }
+        if (!context.hasLocationPermission(precise = true)) return null
 
         return locationRepository.getLocations().firstOrNull()
     }

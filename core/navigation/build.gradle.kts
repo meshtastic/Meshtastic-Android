@@ -22,6 +22,7 @@ plugins {
 }
 
 kotlin {
+    // No withHostTest: commonTest reaches android.net.Uri and Bundle, which the host-test stubs do not implement.
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
@@ -33,7 +34,5 @@ kotlin {
             implementation(libs.androidx.navigation3.runtime)
             implementation(libs.kermit)
         }
-
-        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

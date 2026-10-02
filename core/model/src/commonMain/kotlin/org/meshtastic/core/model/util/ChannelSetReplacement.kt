@@ -129,7 +129,7 @@ fun normalizeReplacementSettings(
 }
 
 /** True when these settings carry no name and no PSK, making them padding rather than an intended channel. */
-fun ChannelSettings.isChannelPlaceholder(): Boolean = name.isNullOrBlank() && psk.size == 0
+fun ChannelSettings.isChannelPlaceholder(): Boolean = name.isBlank() && psk.size == 0
 
 /** Semantic channel identity based on the effective name and effective PSK. */
 data class ChannelIdentity(val name: String, val psk: ByteString) {

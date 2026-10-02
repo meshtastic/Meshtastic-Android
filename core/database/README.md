@@ -30,7 +30,6 @@ graph TB
   :core:database --> :core:common
   :core:database --> :core:model
   :core:database -.-> :core:di
-  :core:database -.-> :core:resources
   :core:database -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

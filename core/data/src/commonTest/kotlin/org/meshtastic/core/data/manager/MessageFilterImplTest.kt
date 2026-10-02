@@ -99,4 +99,14 @@ class MessageFilterImplTest {
         filterService.rebuildPatterns()
         assertTrue(filterService.shouldFilter("spam message", isFilteringDisabled = false))
     }
+
+    @Test
+    fun `shouldFilter applies words that load after construction without a rebuild`() {
+        filterWordsFlow.value = emptySet()
+        val coldService = MessageFilterImpl(filterPrefs)
+        assertFalse(coldService.shouldFilter("green eggs"))
+
+        filterWordsFlow.value = setOf("eggs")
+        assertTrue(coldService.shouldFilter("green eggs"))
+    }
 }

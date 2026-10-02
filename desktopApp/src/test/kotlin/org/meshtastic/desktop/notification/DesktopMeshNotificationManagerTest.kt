@@ -16,44 +16,83 @@
  */
 package org.meshtastic.desktop.notification
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.notificationId
+import org.meshtastic.proto.ClientNotification
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class DesktopMeshNotificationManagerTest {
 
-    /** Records everything dispatched so the async bridge can be asserted deterministically. */
-    private class FakeNotificationManager : NotificationManager {
+    private class FakeNotificationManager(var accepts: Boolean = true) : NotificationManager {
         val dispatched = mutableListOf<Notification>()
+        val cancelled = mutableListOf<Int>()
 
         override suspend fun dispatch(notification: Notification): Boolean {
-            dispatched.add(notification)
-            return true
+            if (accepts) dispatched.add(notification)
+            return accepts
         }
 
-        override fun cancel(id: Int) {}
+        override fun cancel(id: Int) {
+            cancelled.add(id)
+        }
 
         override fun cancelAll() {}
     }
 
-    @Test
-    fun `showAlertNotification dispatches on the injected scope`() = runTest(UnconfinedTestDispatcher()) {
-        val notificationManager = FakeNotificationManager()
-        // backgroundScope inherits the UnconfinedTestDispatcher, so the launched dispatch runs eagerly and is
-        // observable synchronously — no virtual-time advance or manual teardown needed.
-        val manager = DesktopMeshNotificationManager(notificationManager, scope = backgroundScope)
+    private val notificationManager = FakeNotificationManager()
+    private val manager = DesktopMeshNotificationManager(notificationManager)
 
+    @Test
+    fun `critical alerts dispatch in the alert category`() = runTest {
         manager.showAlertNotification(contactKey = "contact-1", name = "Alert", alert = "Something happened")
 
         val dispatched = notificationManager.dispatched.single()
         assertEquals("Alert", dispatched.title)
         assertEquals("Something happened", dispatched.message)
         assertEquals(Notification.Category.Alert, dispatched.category)
-        assertEquals("contact-1", dispatched.contactKey)
+    }
+
+    @Test
+    fun `client notifications keep their title and severity under a stable id`() = runTest {
+        val clientNotification = ClientNotification.Builder().also { wb -> wb.message = "Duplicate key" }.build()
+
+        manager.showClientNotification(clientNotification, title = "Key conflict", severity = Notification.Type.Warning)
+        manager.clearClientNotification(clientNotification)
+
+        val dispatched = notificationManager.dispatched.single()
+        assertEquals("Key conflict", dispatched.title)
+        assertEquals(Notification.Type.Warning, dispatched.type)
+        assertEquals(Notification.Category.Client, dispatched.category)
+        assertEquals(clientNotification.notificationId(), dispatched.id)
+        assertEquals(listOf(clientNotification.notificationId()), notificationManager.cancelled)
+    }
+
+    @Test
+    fun `a low-battery refresh never re-posts`() = runTest {
+        manager.updateLowBatteryNotification(Node(num = 7), isRemote = false)
+
+        assertTrue(notificationManager.dispatched.isEmpty())
+    }
+
+    @Test
+    fun `new-node notifications cancel by node number`() = runTest {
+        manager.showNewNodeSeenNotification(Node(num = 7), title = "New node seen: N7")
+        manager.cancelNewNodeNotification(7)
+
+        assertEquals(7, notificationManager.dispatched.single().id)
+        assertEquals("New node seen: N7", notificationManager.dispatched.single().title)
+        assertEquals(listOf(7), notificationManager.cancelled)
+    }
+
+    @Test
+    fun `reconnect-blocked is never shown on desktop`() = runTest {
+        assertFalse(manager.showReconnectBlockedNotification("title", "message"))
+        assertTrue(notificationManager.dispatched.isEmpty())
     }
 }

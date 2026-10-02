@@ -1,8 +1,7 @@
 ---
 title: 地圖與航點
-parent: 使用者指南
 nav_order: 6
-last_updated: 2026-09-11
+last_updated: 2026-09-28
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -102,7 +101,7 @@ Since waypoints (and their geofences) are broadcast to the whole mesh, only the 
 
 ## 地圖圖層
 
-Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. **Add Network Layer** instead takes a name and an `http://` or `https://` URL pointing at a KML or GeoJSON file; that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
+Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format, including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. **Add Network Layer** instead takes a name and an `https://` URL pointing at a KML or GeoJSON file (`http://` also works on Desktop, but on Android only for `localhost`); that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
 
 Imported layers are listed with a toggle to show/hide each one and an option to remove it. Each layer — imported or built-in overlay — carries its own opacity slider while it is switched on, so an overlay can be faded back rather than only switched off. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
 
@@ -125,7 +124,7 @@ Configure position behavior in **Settings → Device configuration → Position*
 
 ### 隱私注意事項
 
-> 🔒 隱私：位置資料將廣播至您頻道上的所有節點。 若不想分享您的位置，請在設定中停用 GPS 定位，或使用固定／假位置。 To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point.
+> 🔒 隱私：位置資料將廣播至您頻道上的所有節點。若不想分享您的位置，請在設定中停用 GPS 定位，或使用固定／假位置。 To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point.
 
 ## 地圖來源
 
@@ -160,6 +159,8 @@ Tile Sources** at the foot of the base map picker and paste a URL template using
 ```text
 https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
 ```
+
+On **Android** the template must use `https://`; plain `http://` works only for `localhost`.
 
 Tiles are cached on disk, so panning does not re-download what you were just looking at.
 

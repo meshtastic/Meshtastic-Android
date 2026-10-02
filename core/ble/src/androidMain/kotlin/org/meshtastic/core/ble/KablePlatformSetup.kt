@@ -23,6 +23,7 @@ import com.juul.kable.PeripheralBuilder
 import com.juul.kable.PooledThreadingStrategy
 import com.juul.kable.ScannerBuilder
 import com.juul.kable.toIdentifier
+import kotlinx.coroutines.CancellationException
 import org.meshtastic.core.model.util.anonymize
 
 // The scan callback never blocks; a capacity of 1 conflates, so a dense BLE environment cannot back
@@ -67,6 +68,8 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
             @Suppress("MagicNumber")
             val negotiatedMtu = requestMtu(512)
             Logger.i { "[${device.address.anonymize()}] Negotiated MTU: $negotiatedMtu" }
+        } catch (e: CancellationException) {
+            throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.w(e) { "[${device.address.anonymize()}] Failed to request MTU" }
         }

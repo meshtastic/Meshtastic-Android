@@ -51,8 +51,6 @@ class AndroidLintConventionPlugin : Plugin<Project> {
 }
 
 private fun Lint.configure(@Suppress("UnusedParameter") project: Project) {
-    xmlReport = true
-    sarifReport = true
     checkDependencies = true
     abortOnError = false
     disable += "GradleDependency"

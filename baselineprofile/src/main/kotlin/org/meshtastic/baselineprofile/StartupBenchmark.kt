@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
  *
  * Run it with:
  * ```
- * ./gradlew :androidApp:benchmarkGoogleReleaseBaselineProfile
+ * ./gradlew :baselineprofile:connectedGoogleBenchmarkReleaseAndroidTest
  * ```
  *
  * Compare `startupCompilationNone` vs `startupCompilationBaselineProfiles` in the output: the delta

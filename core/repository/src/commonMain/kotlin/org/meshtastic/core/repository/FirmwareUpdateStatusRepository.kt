@@ -20,12 +20,27 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.meshtastic.core.resources.UiText
 
 data class FirmwareUpdateStatus(val isOtaUpdateActive: Boolean = false, val isAwaitingOtaStatus: Boolean = false)
+
+/**
+ * What a running firmware update is doing, for surfaces outside the firmware screen. [percent] is null when unknown.
+ */
+data class FirmwareUpdateProgress(val message: UiText, val percent: Int?)
 
 class FirmwareUpdateStatusRepository {
     private val _status = MutableStateFlow(FirmwareUpdateStatus())
     val status: StateFlow<FirmwareUpdateStatus> = _status.asStateFlow()
+
+    private val _progress = MutableStateFlow<FirmwareUpdateProgress?>(null)
+
+    /** Null whenever no update is transferring, including while the flow waits on the user. */
+    val progress: StateFlow<FirmwareUpdateProgress?> = _progress.asStateFlow()
+
+    fun publishProgress(progress: FirmwareUpdateProgress?) {
+        _progress.value = progress
+    }
 
     fun beginOtaUpdate() {
         _status.value = FirmwareUpdateStatus(isOtaUpdateActive = true)

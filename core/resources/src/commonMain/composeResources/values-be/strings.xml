@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Вільготнасць</string>
+    <string name="a11y_temperature">Тэмпература</string>
     <string name="about">О нас</string>
     <string name="accept">Прыняць</string>
     <!-- ACTION -->
@@ -24,7 +26,6 @@
     <string name="add">Дадаць</string>
     <string name="add_network_device">Дадаць</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <string name="all_time">Усе</string>
     <!-- APP -->
     <string name="app_settings">Праграма</string>
@@ -32,9 +33,7 @@
     <string name="apply">Прымяніць</string>
     <!-- AQI -->
     <string name="audio">Аўдыё</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Батарэя</string>
-    <string name="blue">Сіні</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_feature_config">Конфигурация</string>
@@ -50,7 +49,6 @@
     <string name="channel_6">Канал 6</string>
     <string name="channel_7">Канал 7</string>
     <string name="channel_8">Канал 8</string>
-    <string name="channel_label">Канал</string>
     <string name="channel_name">Назва канала</string>
     <string name="channels">Каналы</string>
     <!-- CHIRPY -->
@@ -92,7 +90,6 @@
     <string name="disconnected">Адлучана</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_messages">Паведамленні</string>
-    <!-- DISPLAY -->
     <string name="display">Экран</string>
     <!-- DISTANCE -->
     <string name="distance">Адлегласць</string>
@@ -100,12 +97,11 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_onboarding">Начало работы</string>
     <string name="download">Сцягнуць</string>
+    <!-- DURATION -->
     <string name="edit">Змяніць</string>
     <string name="eight_hours">8 Гадзін</string>
     <!-- EMOJI -->
     <string name="enabled">Уключана</string>
-    <!-- ENCRYPTION -->
-    <!-- ENVIRONMENT -->
     <string name="environment">Асяроддзе</string>
     <string name="error">Памылка</string>
     <string name="ethernet_ip">Ethernet IP:</string>
@@ -121,14 +117,11 @@
     <string name="free_memory">Вольная памяць</string>
     <!-- GEOFENCE -->
     <string name="get_started">Пачаць</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
-    <string name="green">Зялёны</string>
     <string name="hardware">Устройства</string>
     <string name="hide_password">Схаваць пароль</string>
     <string name="i_know_what_i_m_doing">Я ведаю, што я раблю.</string>
     <string name="iaq">Якасць паветра</string>
-    <!-- IGNORE -->
     <string name="ignore">Ігнараваць</string>
     <!-- IMPORT -->
     <string name="info">Звесткі</string>
@@ -204,16 +197,15 @@
     <string name="none">Няма (адключана)</string>
     <string name="none_quality">Нічога</string>
     <string name="not_connected">Не злучана</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Добра</string>
-    <string name="oled_type">Тып OLED</string>
     <!-- ONE -->
     <string name="one_day">24 Гадзін</string>
     <string name="one_hour">1 гадзіна</string>
     <string name="one_week">1тыд</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <string name="password">Пароль</string>
     <!-- PAX -->
@@ -221,21 +213,17 @@
     <!-- PERMISSIONS -->
     <string name="phone_location">Месцазнаходжанне тэлефона</string>
     <string name="play">Граць</string>
+    <!-- PM -->
     <!-- POSITION -->
     <string name="position">Месцазнаходжанне</string>
     <string name="position_log">Месцазнаходжанне</string>
     <string name="position_packet">Пакет месцазнаходжання</string>
-    <!-- POWER -->
     <string name="preferences_language">Мова</string>
     <!-- PREVIEW -->
-    <string name="private_key">Прыватны ключ</string>
     <string name="qr_code">QR-код</string>
     <!-- QUICK -->
     <string name="quick_chat_instant">Імгненна даслаць</string>
     <string name="reboot">Перазагрузіць</string>
-    <!-- REBROADCAST -->
-    <string name="red">Чырвоны</string>
-    <string name="region_frequency_plan">Рэгіён</string>
     <!-- REMOTE -->
     <!-- REMOVE -->
     <string name="remove">Прыбраць</string>
@@ -247,30 +235,23 @@
     <string name="retry">Паспрабаваць яшчэ раз</string>
     <!-- ROLE -->
     <string name="role_client">CLIENT</string>
-    <string name="role_client_desc">Прылада для паведамленняў, што працуе з прыкладаннем або самастойна.</string>
     <string name="role_client_hidden">CLIENT HIDDEN</string>
     <string name="role_client_mute">CLIENT MUTE</string>
-    <string name="role_client_mute_desc">Прылада, якая не перасылае пакеты ад іншых прылад.</string>
     <string name="role_lost_and_found">LOST AND FOUND</string>
     <string name="role_repeater">REPEATER</string>
-    <string name="role_repeater_desc">Інфраструктурны вузел для пашырэння пакрыцця сеткі праз перасылку паведамленняў з мінімальнымі накладнымі выдаткамі. Не бачны ў спісе вузлоў.</string>
     <string name="role_router">ROUTER</string>
     <string name="role_router_client">ROUTER CLIENT</string>
-    <string name="role_router_desc">Інфраструктурны вузел для пашырэння пакрыцця сеткі праз перасылку паведамленняў. Бачны ў спісе вузлоў.</string>
     <string name="role_router_late">ROUTER LATE</string>
     <string name="role_sensor">SENSOR</string>
     <string name="role_tak">TAK</string>
-    <string name="role_tak_desc">Аптымізавана для сувязі з сістэмай ATAK, змяншае руцінныя трансляцыі.</string>
     <string name="role_tak_tracker">TAK TRACKER</string>
     <string name="role_tracker">TRACKER</string>
-    <string name="role_tracker_desc">Транслюе пакеты з GPS-каардынатамі з высокім прыярытэтам.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Атрымана адмоўнае пацвярджэнне</string>
     <string name="routing_error_no_route">Няма маршруту</string>
     <string name="routing_error_none">Пацверджана</string>
     <string name="routing_error_timeout">Скончыўся час чакання</string>
     <string name="rssi">адносная магутнасць</string>
-    <!-- SAVE -->
     <string name="save">Запісаць</string>
     <string name="save_changes">Запісаць</string>
     <!-- SCAN -->
@@ -279,9 +260,7 @@
     <string name="security">Бяспека</string>
     <string name="select_all">Вылучыць усе</string>
     <string name="send">Адправіць</string>
-    <!-- SERIAL -->
     <string name="serial">Паслядоўны</string>
-    <string name="server">Сервер</string>
     <string name="set_your_region">Выберыце ваш рэгіён</string>
     <string name="settings">налады</string>
     <!-- SHARE -->
@@ -294,13 +273,9 @@
     <string name="skip">Прапусціць</string>
     <string name="snr">сігнал-шум</string>
     <string name="speed">Хуткасць</string>
-    <string name="ssid">SSID</string>
     <string name="swipe_action_delete">Прыбраць</string>
     <!-- TAK -->
     <string name="tak_server_section">Сервер</string>
-    <string name="tak_team_blue">Сіні</string>
-    <string name="tak_team_green">Зялёны</string>
-    <string name="tak_team_red">Чырвоны</string>
     <string name="telemetry">Тэлеметрыя</string>
     <string name="theme">Тэма</string>
     <string name="timeout">Скончыўся час чакання</string>
@@ -318,10 +293,8 @@
     <!-- UNKNOWN -->
     <string name="unrecognized">Нераспазнанае</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="user">Карыстальнік</string>
-    <string name="username">Імя карыстальніка</string>
     <string name="via_mqtt">праз MQTT</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-адрас</string>

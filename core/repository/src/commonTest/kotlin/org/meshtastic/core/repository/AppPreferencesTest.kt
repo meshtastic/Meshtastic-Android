@@ -31,6 +31,20 @@ class AppPreferencesTest {
     }
 
     @Test
+    fun `RadioPrefs isBle returns true for the legacy bang prefix`() {
+        val prefs = FakeRadioPrefs()
+        prefs.setDevAddr("!12345678")
+        assertTrue(prefs.isBle())
+    }
+
+    @Test
+    fun `RadioPrefs reports no transport for the none sentinel`() {
+        val prefs = FakeRadioPrefs()
+        prefs.setDevAddr("n")
+        assertFalse(prefs.isBle() || prefs.isSerial() || prefs.isTcp() || prefs.isMock())
+    }
+
+    @Test
     fun `RadioPrefs isBle returns false for other prefix`() {
         val prefs = FakeRadioPrefs()
         prefs.setDevAddr("s12345678")

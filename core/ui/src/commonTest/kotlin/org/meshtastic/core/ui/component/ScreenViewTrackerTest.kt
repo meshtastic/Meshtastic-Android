@@ -35,9 +35,9 @@ class ScreenViewTrackerTest {
 
         assertEquals(
             listOf(
-                "start:org.meshtastic.core.navigation.NodesRoute.Nodes:name=org.meshtastic.core.navigation.NodesRoute.Nodes",
-                "stop:org.meshtastic.core.navigation.NodesRoute.Nodes",
-                "start:org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics:name=org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics",
+                "start:NodesRoute.Nodes:name=NodesRoute.Nodes",
+                "stop:NodesRoute.Nodes",
+                "start:NodeDetailRoute.DeviceMetrics:name=NodeDetailRoute.DeviceMetrics",
             ),
             analytics.events,
         )
@@ -54,8 +54,8 @@ class ScreenViewTrackerTest {
 
         assertEquals(
             listOf(
-                "start:org.meshtastic.core.navigation.NodesRoute.Nodes:name=org.meshtastic.core.navigation.NodesRoute.Nodes",
-                "stop:org.meshtastic.core.navigation.NodesRoute.Nodes",
+                "start:NodesRoute.Nodes:name=NodesRoute.Nodes",
+                "stop:NodesRoute.Nodes",
             ),
             analytics.events,
         )
@@ -70,9 +70,7 @@ class ScreenViewTrackerTest {
         tracker.onCurrentKeyChanged(NodeDetailRoute.DeviceMetrics(destNum = 2))
 
         assertEquals(
-            listOf(
-                "start:org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics:name=org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics",
-            ),
+            listOf("start:NodeDetailRoute.DeviceMetrics:name=NodeDetailRoute.DeviceMetrics"),
             analytics.events,
         )
     }
@@ -87,8 +85,8 @@ class ScreenViewTrackerTest {
 
         assertEquals(
             listOf(
-                "start:org.meshtastic.core.navigation.NodesRoute.Nodes:name=org.meshtastic.core.navigation.NodesRoute.Nodes",
-                "stop:org.meshtastic.core.navigation.NodesRoute.Nodes",
+                "start:NodesRoute.Nodes:name=NodesRoute.Nodes",
+                "stop:NodesRoute.Nodes",
             ),
             analytics.events,
         )

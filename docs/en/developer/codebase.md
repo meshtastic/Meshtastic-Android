@@ -2,7 +2,7 @@
 title: Codebase
 parent: Developer Guide
 nav_order: 2
-last_updated: 2026-09-11
+last_updated: 2026-09-28
 description: Repository layout, package namespacing, and the Gradle build system — convention plugins, build variants, and key tasks.
 aliases:
   - repository-layout
@@ -29,6 +29,7 @@ Meshtastic-Android/
 │   ├── connections/
 │   ├── map/
 │   ├── map-maplibre/
+│   ├── map-terrain/
 │   ├── node/
 │   ├── settings/
 │   ├── firmware/
@@ -104,7 +105,7 @@ Located in `build-logic/convention/src/main/kotlin/`. The full set is registered
 | `meshtastic.kmp.feature` | Standard feature module setup |
 | `meshtastic.kmp.library` | Shared KMP library module |
 | `meshtastic.kmp.library.compose` | KMP library that also ships Compose UI |
-| `meshtastic.kmp.jvm.android` | JVM + Android target configuration |
+| `meshtastic.kmp.jvm.android` | Adds the `jvmAndroidMain` source set shared by the Android and desktop JVM targets |
 | `meshtastic.koin` | Koin Annotations + K2 compiler plugin |
 | `meshtastic.kotlinx.serialization` | Serialization plugin setup |
 | `meshtastic.android.room` | Room KMP setup and schema location |
@@ -124,14 +125,14 @@ block rather than assuming a plugin does or does not exist.
 ### Key Gradle Tasks
 
 ```shell
-# Compile check across all KMP targets
+# Compile check of every KMP module for JVM and iosSimulatorArm64 (excludes :desktopApp), plus the device-test APKs
 ./gradlew kmpSmokeCompile
 
-# Run all tests
-./gradlew allTests
+# Run all tests: allTests covers KMP modules, test covers Android/JVM-only modules; run both
+./gradlew test allTests
 
 # Code quality
-./gradlew spotlessCheck detekt
+./gradlew spotlessCheck detekt detektTypeResolved
 
 # Android build
 ./gradlew assembleGoogleDebug assembleFdroidDebug
@@ -143,7 +144,7 @@ block rather than assuming a plugin does or does not exist.
 ./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
 
 # API reference (Dokka HTML → build/dokka/html)
-./gradlew dokkaGeneratePublicationHtml
+./gradlew :dokkaGeneratePublicationHtml
 ```
 
 ## Version Catalog Highlights

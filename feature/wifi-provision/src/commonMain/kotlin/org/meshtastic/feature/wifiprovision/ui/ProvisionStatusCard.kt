@@ -29,6 +29,7 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -70,6 +71,7 @@ internal fun ProvisionStatusCard(provisionStatus: ProvisionStatus, isProvisionin
 
 /** Resolve container + content color pair for the provision status card. */
 @Composable
+@ReadOnlyComposable
 private fun statusCardColors(provisionStatus: ProvisionStatus, isProvisioning: Boolean): Pair<Color, Color> = when {
     isProvisioning -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
 

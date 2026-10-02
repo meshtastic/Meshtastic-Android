@@ -50,14 +50,12 @@ import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import co.touchlab.kermit.Logger
-import com.eygraber.uri.toAndroidUri
 import com.eygraber.uri.toKmpUri
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.common.gpsDisabled
+import org.meshtastic.core.common.hasBluetoothLe
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.ioDispatcher
 import java.net.URLEncoder
 
 @Composable
@@ -186,32 +184,6 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
     return remember(launcher) { { mimeType -> launcher.launch(mimeType) } }
 }
 
-@Suppress("Wrapping")
-@Composable
-actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? {
-    val context = LocalContext.current
-    return remember(context) {
-        { uri, maxChars ->
-            withContext(ioDispatcher) {
-                @Suppress("TooGenericExceptionCaught")
-                try {
-                    val androidUri = uri.toAndroidUri()
-                    context.contentResolver.openInputStream(androidUri)?.use { stream ->
-                        stream.bufferedReader().use { reader ->
-                            val buffer = CharArray(maxChars)
-                            val read = reader.read(buffer)
-                            if (read > 0) String(buffer, 0, read) else null
-                        }
-                    }
-                } catch (e: Exception) {
-                    Logger.e(e) { "Failed to read text from URI: $uri" }
-                    null
-                }
-            }
-        }
-    }
-}
-
 @Composable
 actual fun KeepScreenOn(enabled: Boolean) {
     val view = LocalView.current
@@ -290,6 +262,12 @@ actual fun rememberOpenWifiSettings(): () -> Unit {
 
 actual val bleScanRequiresLocationServices: Boolean =
     android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S
+
+@Composable
+actual fun isBluetoothSupported(): Boolean {
+    val context = LocalContext.current
+    return remember(context) { context.hasBluetoothLe() }
+}
 
 @Composable
 actual fun isBluetoothDisabled(): Boolean {
@@ -371,16 +349,15 @@ actual fun isWifiUnavailable(): Boolean {
 // until a callback-based rewrite is warranted.
 @Suppress("DEPRECATION")
 private fun ConnectivityManager.hasLocalNetwork(): Boolean {
-    val transports =
-        allNetworks.mapNotNull { network ->
-            getNetworkCapabilities(network)?.let { caps ->
-                NetworkTransportInfo(
-                    hasWifi = caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI),
-                    hasEthernet = caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET),
-                    hasVpn = caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN),
-                )
-            }
+    val transports = allNetworks.mapNotNull { network ->
+        getNetworkCapabilities(network)?.let { caps ->
+            NetworkTransportInfo(
+                hasWifi = caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI),
+                hasEthernet = caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET),
+                hasVpn = caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN),
+            )
         }
+    }
     return anyNetworkScanTransportAvailable(transports)
 }
 
@@ -424,6 +401,18 @@ actual fun rememberLocationPermissionState(): PermissionUiState = rememberRuntim
     ),
     // Coarse-only grants are an accepted degraded mode, so any granted permission counts.
     requireAll = false,
+)
+
+@Composable
+actual fun rememberPreciseLocationPermissionState(): PermissionUiState = rememberRuntimePermissionState(
+    // Android 12+ ignores a fine request that does not also ask for coarse. Fine leads so the rationale and the
+    // requested flag follow the permission that decides the grant.
+    permissions =
+    arrayOf(
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+    ),
+    requireAll = true,
 )
 
 @Composable

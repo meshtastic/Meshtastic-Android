@@ -26,6 +26,7 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,16 +40,18 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
+import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareUpdateProgress
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -56,7 +59,9 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_battery_low
+import org.meshtastic.core.resources.firmware_update_no_device
 import org.meshtastic.core.resources.firmware_update_unknown_hardware
+import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
@@ -66,6 +71,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 /**
@@ -89,6 +95,7 @@ class FirmwareUpdateViewModelTest {
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
     private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
+    private val bluetoothRepository = FakeBluetoothRepository()
 
     private lateinit var viewModel: FirmwareUpdateViewModel
 
@@ -158,7 +165,11 @@ class FirmwareUpdateViewModelTest {
         hiddenFeaturesUnlock,
         analytics,
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
+        bluetoothRepository,
+        firmwareUpdateStatusRepository,
     )
+
+    private val firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
 
     @Test
     fun `initialization checks for updates and transitions to Ready`() = runTest {
@@ -262,6 +273,30 @@ class FirmwareUpdateViewModelTest {
                 state is FirmwareUpdateState.VerificationFailed,
             "Final state was $state",
         )
+    }
+
+    @Test
+    fun `a running flash publishes its progress for the service notification`() = runTest {
+        advanceUntilIdle()
+        val transferring = CompletableDeferred<Unit>()
+        val message = UiText.DynamicString("Writing firmware")
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Updating(ProgressState(message = message, progress = 0.42f)))
+                transferring.await()
+                null
+            }
+
+        viewModel.startUpdate()
+        runCurrent()
+
+        assertEquals(FirmwareUpdateProgress(message, percent = 42), firmwareUpdateStatusRepository.progress.value)
+
+        transferring.complete(Unit)
+        advanceUntilIdle()
+        assertNotEquals(42, firmwareUpdateStatusRepository.progress.value?.percent)
     }
 
     @Test
@@ -467,6 +502,19 @@ class FirmwareUpdateViewModelTest {
     }
 
     @Test
+    fun `update method is Unknown for a BLE address on hardware without Bluetooth`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+        bluetoothRepository.isSupported = false
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertIs<FirmwareUpdateMethod.Unknown>(state.updateMethod)
+    }
+
+    @Test
     fun `update method is Wifi for TCP-prefixed address`() = runTest {
         val hardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
@@ -564,6 +612,30 @@ class FirmwareUpdateViewModelTest {
         assertTrue(state.isRecovery, "Expected recovery Ready but was $state")
         assertEquals("1234abcd", state.address) // fullAddress.drop(1)
         assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
+    }
+
+    @Test
+    fun `recovery is not offered on hardware without Bluetooth`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "STABLE",
+                    deviceName = "My Node",
+                ),
+            )
+        bluetoothRepository.isSupported = false
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val errorState = assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        val error = assertIs<UiText.Resource>(errorState.error)
+        assertEquals(Res.string.firmware_update_no_device, error.res)
+        verifySuspend(mode = VerifyMode.not) { firmwareRecoveryDataSource.clear() }
     }
 
     @Test

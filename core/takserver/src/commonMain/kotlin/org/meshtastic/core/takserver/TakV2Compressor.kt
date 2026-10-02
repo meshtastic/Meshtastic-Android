@@ -92,133 +92,142 @@ internal object TakV2Compressor {
         val cotTypeId = packet.cot_type_id.value
         val cotTypeStr = if (cotTypeId == 0 && packet.cot_type_str.isNotEmpty()) packet.cot_type_str else null
 
+        // Wire's generated fields live in another module, so only locals smart-cast after a null check.
+        val chat = packet.chat
+        val taktalk = packet.taktalk
+        val taktalkRoom = packet.taktalk_room
+        val aircraft = packet.aircraft
+        val shape = packet.shape
+        val marker = packet.marker
+        val rab = packet.rab
+        val route = packet.route
+        val casevac = packet.casevac
+        val emergency = packet.emergency
+        val task = packet.task
+        val rawDetail = packet.raw_detail
         val payload =
             when {
-                packet.chat != null ->
+                chat != null ->
                     TakPacketV2Data.Payload.Chat(
-                        message = packet.chat!!.message,
-                        to = packet.chat!!.to,
-                        toCallsign = packet.chat!!.to_callsign,
-                        receiptForUid = packet.chat!!.receipt_for_uid,
-                        receiptType = packet.chat!!.receipt_type.value,
+                        message = chat.message,
+                        to = chat.to,
+                        toCallsign = chat.to_callsign,
+                        receiptForUid = chat.receipt_for_uid,
+                        receiptType = chat.receipt_type.value,
                         // TAKTALK sidecars (proto3 optional → wire nullable).
                         // Empty string = empty `<Ea/>` / `<roomId/>` in source XML;
                         // null on the wire = field absent.  The SDK's Chat data class
                         // uses "" for absent, so map null → "".  voice_profile_id has
                         // a present-vs-empty-marker distinction tracked separately
                         // via hasVoiceProfile.
-                        lang = packet.chat!!.lang ?: "",
-                        roomId = packet.chat!!.room_id ?: "",
-                        voiceProfileId = packet.chat!!.voice_profile_id ?: "",
-                        hasVoiceProfile = packet.chat!!.voice_profile_id != null,
+                        lang = chat.lang.orEmpty(),
+                        roomId = chat.room_id.orEmpty(),
+                        voiceProfileId = chat.voice_profile_id.orEmpty(),
+                        hasVoiceProfile = chat.voice_profile_id != null,
                     )
 
                 // TAKTALK voice/text message (m-t-t).  Without this branch,
                 // m-t-t events fall through to Payload.None and the receiver
                 // can't rebuild the CoT event, so TTS playback never fires.
-                packet.taktalk != null ->
+                taktalk != null ->
                     TakPacketV2Data.Payload.TakTalk(
-                        text = packet.taktalk!!.text,
-                        chatroomId = packet.taktalk!!.chatroom_id,
-                        lang = packet.taktalk!!.lang,
-                        fromVoice = packet.taktalk!!.from_voice,
+                        text = taktalk.text,
+                        chatroomId = taktalk.chatroom_id,
+                        lang = taktalk.lang,
+                        fromVoice = taktalk.from_voice,
                     )
 
                 // TAKTALK room/membership broadcast (y-).
-                packet.taktalk_room != null ->
+                taktalkRoom != null ->
                     TakPacketV2Data.Payload.TakTalkRoom(
-                        roomId = packet.taktalk_room!!.room_id,
-                        roomName = packet.taktalk_room!!.room_name,
-                        participants = packet.taktalk_room!!.participants.toList(),
+                        roomId = taktalkRoom.room_id,
+                        roomName = taktalkRoom.room_name,
+                        participants = taktalkRoom.participants.toList(),
                     )
 
-                packet.aircraft != null ->
+                aircraft != null ->
                     TakPacketV2Data.Payload.Aircraft(
-                        icao = packet.aircraft!!.icao,
-                        registration = packet.aircraft!!.registration,
-                        flight = packet.aircraft!!.flight,
-                        aircraftType = packet.aircraft!!.aircraft_type,
-                        squawk = packet.aircraft!!.squawk,
-                        category = packet.aircraft!!.category,
-                        rssiX10 = packet.aircraft!!.rssi_x10,
-                        gps = packet.aircraft!!.gps,
-                        cotHostId = packet.aircraft!!.cot_host_id,
+                        icao = aircraft.icao,
+                        registration = aircraft.registration,
+                        flight = aircraft.flight,
+                        aircraftType = aircraft.aircraft_type,
+                        squawk = aircraft.squawk,
+                        category = aircraft.category,
+                        rssiX10 = aircraft.rssi_x10,
+                        gps = aircraft.gps,
+                        cotHostId = aircraft.cot_host_id,
                     )
 
                 // Typed geometry variants added by takv2_geometry (tags 34-37).
                 // All GeoPoint fields on the wire are delta-encoded from the
                 // event anchor; the SDK data class stores absolute lat/lon, so
                 // we add packet.latitude_i / longitude_i here.
-                packet.shape != null -> {
-                    val s = packet.shape!!
+                shape != null -> {
                     TakPacketV2Data.Payload.DrawnShape(
-                        kind = s.kind.value,
-                        style = s.style.value,
-                        majorCm = s.major_cm,
-                        minorCm = s.minor_cm,
-                        angleDeg = s.angle_deg,
-                        strokeColor = s.stroke_color.value,
-                        strokeArgb = s.stroke_argb,
-                        strokeWeightX10 = s.stroke_weight_x10,
-                        fillColor = s.fill_color.value,
-                        fillArgb = s.fill_argb,
-                        labelsOn = s.labels_on,
+                        kind = shape.kind.value,
+                        style = shape.style.value,
+                        majorCm = shape.major_cm,
+                        minorCm = shape.minor_cm,
+                        angleDeg = shape.angle_deg,
+                        strokeColor = shape.stroke_color.value,
+                        strokeArgb = shape.stroke_argb,
+                        strokeWeightX10 = shape.stroke_weight_x10,
+                        fillColor = shape.fill_color.value,
+                        fillArgb = shape.fill_argb,
+                        labelsOn = shape.labels_on,
                         // v0.4.0: vertices are two packed sint32 delta columns
                         // (vertex_lat_deltas / vertex_lon_deltas), zigzag deltas
                         // from the event anchor; SDK data stores absolute lat/lon.
                         vertices =
-                        s.vertex_lat_deltas.zip(s.vertex_lon_deltas) { latD, lonD ->
+                        shape.vertex_lat_deltas.zip(shape.vertex_lon_deltas) { latD, lonD ->
                             TakPacketV2Data.Payload.Vertex(
                                 latI = packet.latitude_i + latD,
                                 lonI = packet.longitude_i + lonD,
                             )
                         },
-                        truncated = s.truncated,
-                        bullseyeDistanceDm = s.bullseye_distance_dm,
-                        bullseyeBearingRef = s.bullseye_bearing_ref,
-                        bullseyeFlags = s.bullseye_flags,
-                        bullseyeUidRef = s.bullseye_uid_ref,
+                        truncated = shape.truncated,
+                        bullseyeDistanceDm = shape.bullseye_distance_dm,
+                        bullseyeBearingRef = shape.bullseye_bearing_ref,
+                        bullseyeFlags = shape.bullseye_flags,
+                        bullseyeUidRef = shape.bullseye_uid_ref,
                     )
                 }
 
-                packet.marker != null -> {
-                    val m = packet.marker!!
+                marker != null -> {
                     TakPacketV2Data.Payload.Marker(
-                        kind = m.kind.value,
-                        color = m.color.value,
-                        colorArgb = m.color_argb,
-                        readiness = m.readiness,
-                        parentUid = m.parent_uid,
-                        parentType = m.parent_type,
-                        parentCallsign = m.parent_callsign,
-                        iconset = m.iconset,
+                        kind = marker.kind.value,
+                        color = marker.color.value,
+                        colorArgb = marker.color_argb,
+                        readiness = marker.readiness,
+                        parentUid = marker.parent_uid,
+                        parentType = marker.parent_type,
+                        parentCallsign = marker.parent_callsign,
+                        iconset = marker.iconset,
                     )
                 }
 
-                packet.rab != null -> {
-                    val r = packet.rab!!
-                    val anchor = r.anchor
+                rab != null -> {
+                    val anchor = rab.anchor
                     TakPacketV2Data.Payload.RangeAndBearing(
                         anchorLatI = packet.latitude_i + (anchor?.lat_delta_i ?: 0),
                         anchorLonI = packet.longitude_i + (anchor?.lon_delta_i ?: 0),
-                        anchorUid = r.anchor_uid,
-                        rangeCm = r.range_cm,
-                        bearingCdeg = r.bearing_cdeg,
-                        strokeColor = r.stroke_color.value,
-                        strokeArgb = r.stroke_argb,
-                        strokeWeightX10 = r.stroke_weight_x10,
+                        anchorUid = rab.anchor_uid,
+                        rangeCm = rab.range_cm,
+                        bearingCdeg = rab.bearing_cdeg,
+                        strokeColor = rab.stroke_color.value,
+                        strokeArgb = rab.stroke_argb,
+                        strokeWeightX10 = rab.stroke_weight_x10,
                     )
                 }
 
-                packet.route != null -> {
-                    val rt = packet.route!!
+                route != null -> {
                     TakPacketV2Data.Payload.Route(
-                        method = rt.method.value,
-                        direction = rt.direction.value,
-                        prefix = rt.prefix,
-                        strokeWeightX10 = rt.stroke_weight_x10,
+                        method = route.method.value,
+                        direction = route.direction.value,
+                        prefix = route.prefix,
+                        strokeWeightX10 = route.stroke_weight_x10,
                         links =
-                        rt.links.map { link ->
+                        route.links.map { link ->
                             val pt = link.point
                             TakPacketV2Data.Payload.Route.Link(
                                 latI = packet.latitude_i + (pt?.lat_delta_i ?: 0),
@@ -228,53 +237,50 @@ internal object TakV2Compressor {
                                 linkType = link.link_type,
                             )
                         },
-                        truncated = rt.truncated,
+                        truncated = route.truncated,
                     )
                 }
 
-                packet.casevac != null -> {
-                    val c = packet.casevac!!
+                casevac != null -> {
                     TakPacketV2Data.Payload.CasevacReport(
-                        precedence = c.precedence.value,
-                        equipmentFlags = c.equipment_flags,
-                        litterPatients = c.litter_patients,
-                        ambulatoryPatients = c.ambulatory_patients,
-                        security = c.security.value,
-                        hlzMarking = c.hlz_marking.value,
-                        zoneMarker = c.zone_marker,
-                        usMilitary = c.us_military,
-                        usCivilian = c.us_civilian,
-                        nonUsMilitary = c.non_us_military,
-                        nonUsCivilian = c.non_us_civilian,
-                        epw = c.epw,
-                        child = c.child,
-                        terrainFlags = c.terrain_flags,
-                        frequency = c.frequency,
+                        precedence = casevac.precedence.value,
+                        equipmentFlags = casevac.equipment_flags,
+                        litterPatients = casevac.litter_patients,
+                        ambulatoryPatients = casevac.ambulatory_patients,
+                        security = casevac.security.value,
+                        hlzMarking = casevac.hlz_marking.value,
+                        zoneMarker = casevac.zone_marker,
+                        usMilitary = casevac.us_military,
+                        usCivilian = casevac.us_civilian,
+                        nonUsMilitary = casevac.non_us_military,
+                        nonUsCivilian = casevac.non_us_civilian,
+                        epw = casevac.epw,
+                        child = casevac.child,
+                        terrainFlags = casevac.terrain_flags,
+                        frequency = casevac.frequency,
                     )
                 }
 
-                packet.emergency != null -> {
-                    val e = packet.emergency!!
+                emergency != null -> {
                     TakPacketV2Data.Payload.EmergencyAlert(
-                        type = e.type.value,
-                        authoringUid = e.authoring_uid,
-                        cancelReferenceUid = e.cancel_reference_uid,
+                        type = emergency.type.value,
+                        authoringUid = emergency.authoring_uid,
+                        cancelReferenceUid = emergency.cancel_reference_uid,
                     )
                 }
 
-                packet.task != null -> {
-                    val t = packet.task!!
+                task != null -> {
                     TakPacketV2Data.Payload.TaskRequest(
-                        taskType = t.task_type,
-                        targetUid = t.target_uid,
-                        assigneeUid = t.assignee_uid,
-                        priority = t.priority.value,
-                        status = t.status.value,
-                        note = t.note,
+                        taskType = task.task_type,
+                        targetUid = task.target_uid,
+                        assigneeUid = task.assignee_uid,
+                        priority = task.priority.value,
+                        status = task.status.value,
+                        note = task.note,
                     )
                 }
 
-                packet.raw_detail != null -> TakPacketV2Data.Payload.RawDetail(packet.raw_detail!!.toByteArray())
+                rawDetail != null -> TakPacketV2Data.Payload.RawDetail(rawDetail.toByteArray())
 
                 // v0.4.0: PLI is implicit — a packet with no payload_variant set
                 // is a position report (the bool pli oneof arm was removed).

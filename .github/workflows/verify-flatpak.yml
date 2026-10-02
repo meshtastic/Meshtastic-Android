@@ -8,29 +8,17 @@ on:
     paths:
       - 'scripts/verify-flatpak/**'
       - '.github/workflows/verify-flatpak.yml'
-  # The dependency surface the manifest captures is verified post-merge. This is not a
-  # required check and never ran in the merge queue, so per-PR it cost ~2 runner slots
-  # for a signal that blocks nothing; post-merge still catches a break within one merge,
-  # and `main` itself was previously never verified at all.
+  # Post-merge only for what the check itself depends on. The offline manifest pins the
+  # Gradle distribution apart from the wrapper, so a wrapper bump is checked on merge.
   push:
     branches: [ main ]
     paths:
       - 'scripts/verify-flatpak/**'
       - '.github/workflows/verify-flatpak.yml'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      # The desktop module's build config shapes the uber jar the flatpak wraps.
-      - 'desktopApp/**'
-      # The offline manifest pins the Gradle distribution independently of the wrapper —
-      # a wrapper bump without a manifest update breaks the offline build silently.
       - 'gradle/wrapper/**'
-      # build.gradle.kts reads compose-multiplatform from the catalog (#6911), so a
-      # catalog-only bump changes the manifest's platform URLs. Deliberately the whole
-      # file and not a key filter: a filter naming today's keys goes stale silently the
-      # moment the manifest reads another one — the failure #6911 existed to remove.
-      - 'gradle/libs.versions.toml'
-  # Drift no path filter can see: a Flathub runtime bump, or an upstream artifact that
-  # moved or vanished. Nothing in this repo changes, so no other trigger would fire.
+  # The dependency surface the manifest captures (desktopApp/**, the version catalog, the
+  # root build scripts) is verified nightly, as is drift no path filter can see: a
+  # Flathub runtime bump, or an upstream artifact that moved or vanished.
   schedule:
     - cron: '0 4 * * *'
   workflow_dispatch:
@@ -60,8 +48,6 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          submodules: recursive
 
       # Renovate mirrors wrapper bumps into the manifest's distribution URL but cannot
       # rewrite its sha256, so on a wrapper bump this drift is expected: fail here in
@@ -106,7 +92,7 @@ jobs:
         if: steps.setup-jbr.outcome == 'failure'
         run: echo "::warning::JBR setup-java failed; falling back to Foojay toolchain provisioning."
 
-      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
@@ -121,9 +107,11 @@ jobs:
           echo "### Flatpak Sources Summary (${{ matrix.arch }})" >> "$GITHUB_STEP_SUMMARY"
           echo "- URLs captured: $(jq length flatpak-sources.json)" >> "$GITHUB_STEP_SUMMARY"
 
-      # flatpak-builder re-downloads the whole closure anyway; a second copy just eats disk.
-      - name: Reclaim the isolated Gradle home
-        run: rm -rf "$RUNNER_TEMP/flatpak-gradle-home"
+      # The sandbox build below starts its own Gradle and Kotlin daemons. The pair
+      # this step left running holds the other half of the runner's memory, and the
+      # VM stalls and is shut down mid-compile. Stop them; the home itself can stay.
+      - name: Stop the outer Gradle daemon
+        run: ./gradlew -Dgradle.user.home="$RUNNER_TEMP/flatpak-gradle-home" --stop
 
       - name: Clone the Flathub packaging repo
         run: |

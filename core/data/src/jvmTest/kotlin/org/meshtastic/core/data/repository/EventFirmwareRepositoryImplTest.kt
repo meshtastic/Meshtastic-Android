@@ -21,26 +21,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import okio.Buffer
-import okio.Source
-import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.EventFirmwareEditionLocalDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareBuild
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.EventFirmwareFonts
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.EventFirmwareTheme
 import org.meshtastic.core.model.EventFirmwareThemeColors
-import org.meshtastic.core.model.FirmwareReleaseManifest
-import org.meshtastic.core.model.MaintenanceUf2Manifest
-import org.meshtastic.core.model.NetworkDeviceHardware
-import org.meshtastic.core.model.NetworkDeviceLinksResponse
-import org.meshtastic.core.model.NetworkFirmwareNightly
-import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.EventFirmwareRemoteDataSource
-import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -51,44 +40,6 @@ import kotlin.test.assertNull
 import kotlin.time.Duration.Companion.seconds
 
 class EventFirmwareRepositoryImplTest {
-
-    /** Only [getEventFirmware] is exercised; the other endpoints are never called by this repository. */
-    private class FakeApiService(var response: EventFirmwareResponse) : ApiService {
-        var eventFirmwareCalls = 0
-            private set
-
-        override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = error("unused")
-
-        override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = error("unused")
-
-        override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
-
-        override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest = error("unused")
-
-        override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? = error("unused")
-
-        override suspend fun getEventFirmware(): EventFirmwareResponse {
-            eventFirmwareCalls++
-            return response
-        }
-
-        override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
-
-        override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest = error("unused")
-    }
-
-    /** Serves only `event_firmware.json`, serializing [editions] so the repo decodes via the real path. */
-    private class FakeBundledAssetReader(
-        var editions: List<EventFirmwareEdition>,
-        private val json: Json,
-        var present: Boolean = true,
-    ) : BundledAssetReader {
-        override fun open(name: String): Source? {
-            if (name != "event_firmware.json" || !present) return null
-            val bytes = json.encodeToString(EventFirmwareResponse(editions = editions)).encodeToByteArray()
-            return Buffer().write(bytes)
-        }
-    }
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -106,12 +57,21 @@ class EventFirmwareRepositoryImplTest {
     private fun edition(name: String) =
         EventFirmwareEdition(edition = name, displayName = name.lowercase(), welcomeMessage = "hi $name")
 
+    /** Seeds `event_firmware.json` through the real decode path. */
+    private fun seedEditions(editions: List<EventFirmwareEdition>) =
+        seed.put(EVENT_ASSET, EventFirmwareResponse(editions = editions), json)
+
+    private fun serveEditions(editions: List<EventFirmwareEdition>) {
+        api.eventFirmware = { EventFirmwareResponse(editions = editions) }
+    }
+
     @BeforeTest
     fun setup() {
         dbProvider = FakeDatabaseProvider()
         local = EventFirmwareEditionLocalDataSource(dbProvider, dispatchers)
-        api = FakeApiService(EventFirmwareResponse())
-        seed = FakeBundledAssetReader(emptyList(), json)
+        api = FakeApiService(eventFirmware = { EventFirmwareResponse() })
+        seed = FakeBundledAssetReader()
+        seedEditions(emptyList())
         repository =
             EventFirmwareRepositoryImpl(
                 remoteDataSource = EventFirmwareRemoteDataSource(api, dispatchers),
@@ -126,7 +86,7 @@ class EventFirmwareRepositoryImplTest {
 
     @Test
     fun getEditionReturnsMatchingRecordByEnumName() = runBlocking {
-        seed.editions = listOf(edition("HAMVENTION"), edition("DEFCON"))
+        seedEditions(listOf(edition("HAMVENTION"), edition("DEFCON")))
 
         assertEquals("hamvention", repository.getEdition("HAMVENTION")?.displayName)
         assertEquals("hi DEFCON", repository.getEdition("DEFCON")?.welcomeMessage)
@@ -134,7 +94,7 @@ class EventFirmwareRepositoryImplTest {
 
     @Test
     fun getEditionReturnsNullForUnknownEdition() = runBlocking {
-        seed.editions = listOf(edition("HAMVENTION"))
+        seedEditions(listOf(edition("HAMVENTION")))
 
         assertNull(repository.getEdition("VANILLA"))
     }
@@ -145,8 +105,8 @@ class EventFirmwareRepositoryImplTest {
         // must reach the UI when the refresh lands, without the caller re-subscribing. The new value therefore has to
         // arrive *through the refresh path*; writing it into the cache by hand would still pass if observeEdition
         // stopped refreshing at all.
-        seed.editions = listOf(edition("HAMVENTION"))
-        api.response = EventFirmwareResponse(editions = listOf(edition("HAMVENTION"), edition("DEFCON")))
+        seedEditions(listOf(edition("HAMVENTION")))
+        serveEditions(listOf(edition("HAMVENTION"), edition("DEFCON")))
 
         repository.observeEdition("DEFCON").test(timeout = EMISSION_TIMEOUT) {
             // The first item is null only if the refresh is still in flight when collection starts; under
@@ -164,34 +124,35 @@ class EventFirmwareRepositoryImplTest {
 
     @Test
     fun observeEditionEmitsNullForUnknownEdition() = runBlocking {
-        seed.editions = listOf(edition("HAMVENTION"))
+        seedEditions(listOf(edition("HAMVENTION")))
 
         assertNull(repository.observeEdition("VANILLA").first())
     }
 
     @Test
     fun absentAssetYieldsNullWithoutCrashing() = runBlocking {
-        seed.present = false
+        seed.remove(EVENT_ASSET)
 
         assertNull(repository.getEdition("HAMVENTION"))
     }
 
     @Test
     fun seedsFromBundledJsonOnlyWhenTableEmpty() = runBlocking {
-        seed.editions = listOf(edition("HAMVENTION"))
+        val first = listOf(edition("HAMVENTION"))
+        seedEditions(first)
         repository.getEdition("HAMVENTION")
         assertEquals(1, local.count())
 
         // A larger snapshot must NOT re-seed once the table is populated.
-        seed.editions = seed.editions + edition("DEFCON")
+        seedEditions(first + edition("DEFCON"))
         repository.getEdition("DEFCON")
         assertEquals(1, local.count())
     }
 
     @Test
     fun networkRefreshReplacesBundledSnapshot() = runBlocking {
-        seed.editions = listOf(edition("HAMVENTION"))
-        api.response = EventFirmwareResponse(editions = listOf(edition("DEFCON")))
+        seedEditions(listOf(edition("HAMVENTION")))
+        serveEditions(listOf(edition("DEFCON")))
 
         // First call is always stale (never refreshed yet), so it triggers + awaits the network fetch.
         assertNull(repository.getEdition("HAMVENTION"))
@@ -200,8 +161,8 @@ class EventFirmwareRepositoryImplTest {
 
     @Test
     fun emptyNetworkResponseLeavesBundledSnapshotInPlace() = runBlocking {
-        seed.editions = listOf(edition("HAMVENTION"))
-        api.response = EventFirmwareResponse(editions = emptyList())
+        seedEditions(listOf(edition("HAMVENTION")))
+        serveEditions(emptyList())
 
         assertEquals("hamvention", repository.getEdition("HAMVENTION")?.displayName)
     }
@@ -210,8 +171,8 @@ class EventFirmwareRepositoryImplTest {
     fun failedRefreshDoesNotRetryOnEveryCall() = runBlocking {
         // Empty response never advances the success timestamp; without the retry cooldown the second call would
         // re-enter the stale branch and fetch again. The cooldown (minutes) means a second immediate call skips it.
-        seed.editions = listOf(edition("HAMVENTION"))
-        api.response = EventFirmwareResponse(editions = emptyList())
+        seedEditions(listOf(edition("HAMVENTION")))
+        serveEditions(emptyList())
 
         repository.getEdition("HAMVENTION")
         repository.getEdition("HAMVENTION")
@@ -221,7 +182,7 @@ class EventFirmwareRepositoryImplTest {
 
     @Test
     fun v2FieldsRoundTripThroughCache() = runBlocking {
-        seed.editions =
+        seedEditions(
             listOf(
                 EventFirmwareEdition(
                     edition = "HAMVENTION",
@@ -238,7 +199,8 @@ class EventFirmwareRepositoryImplTest {
                     ),
                     firmware = EventFirmwareBuild(version = "2.7.23.07741e6", zipUrl = "https://example/f.zip"),
                 ),
-            )
+            ),
+        )
 
         val got = repository.getEdition("HAMVENTION")!!
 
@@ -255,11 +217,11 @@ class EventFirmwareRepositoryImplTest {
 
     @Test
     fun persistsAcrossRepositoryInstancesBackedByTheSameDb() = runBlocking {
-        seed.editions = listOf(edition("HAMVENTION"))
+        seedEditions(listOf(edition("HAMVENTION")))
         repository.getEdition("HAMVENTION")
 
         // A fresh repository instance (e.g. after a process restart) reads the same DB without re-seeding.
-        seed.editions = emptyList()
+        seedEditions(emptyList())
         val restarted =
             EventFirmwareRepositoryImpl(
                 remoteDataSource = EventFirmwareRemoteDataSource(api, dispatchers),
@@ -275,5 +237,7 @@ class EventFirmwareRepositoryImplTest {
     private companion object {
         /** Room's invalidation tracker plus the fake network round-trip; generous, since it only bounds a failure. */
         private val EMISSION_TIMEOUT = 10.seconds
+
+        private const val EVENT_ASSET = "event_firmware.json"
     }
 }

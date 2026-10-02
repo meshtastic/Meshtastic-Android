@@ -23,6 +23,10 @@ Thank you for your interest in contributing to Meshtastic-Android! We welcome co
 - **Strings:** Use localised strings via the **Compose Multiplatform Resource** library in `:core:resources`.
   - Do **not** use the legacy `androidApp/src/main/res/values/strings.xml`.
   - **Definition:** Add strings to `core/resources/src/commonMain/composeResources/values/strings.xml`.
+  - **Schema strings:** every label and description in the protobufs field metadata is generated into
+    `values/schema_strings.xml`, keyed by schema path (`Res.string.schema_lora_hop_limit`). A settings control
+    that edits one protobuf field uses that key. Do not edit the file or write a `schema_` key by hand
+    (`./gradlew :schema-strings:sync` regenerates it); wrong wording is a change to `meshtastic/protobufs`.
   - **Usage:**
     ```kotlin
     import org.jetbrains.compose.resources.stringResource
@@ -36,7 +40,7 @@ Thank you for your interest in contributing to Meshtastic-Android! We welcome co
 
 Meshtastic-Android uses [Detekt](https://detekt.dev/) for static code analysis and linting of Kotlin code.
 
-- Run `./gradlew detekt` before submitting your pull request to ensure your code passes all lint checks.
+- Run `./gradlew detekt detektTypeResolved` before submitting your pull request to ensure your code passes all lint checks. `detektTypeResolved` runs the rules that need the compile classpath, which plain `detekt` skips.
 - Fix any Detekt warnings or errors reported in your code.
 - Suppress individual warnings only as a last resort.
 - You can find Detekt configuration in the `config/detekt` directory. If you believe a rule should be changed or suppressed, discuss it in your PR.
@@ -55,7 +59,7 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
 - Ensure all tests pass by running:
   - `./gradlew test` for unit and Robolectric tests (pure-Android modules)
   - `./gradlew allTests` for KMP module tests (`core:*`, `feature:*`) — neither `test` nor `allTests` alone is sufficient; both must pass.
-  - `./gradlew kmpSmokeCompile` when touching any KMP module — compiles the non-Android targets the unit tests don't cover
+  - `./gradlew kmpSmokeCompile` when touching any KMP module, to compile the non-Android targets the unit tests don't cover and assemble the device-test APKs
   - `./gradlew connectedAndroidTest` for instrumented tests
 - For UI components, write Robolectric Compose tests where possible for faster execution.
 - If your change is difficult to test, explain why in your pull request.

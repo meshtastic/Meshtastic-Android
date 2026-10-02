@@ -20,6 +20,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
@@ -74,6 +75,7 @@ fun ConnectionsNavIcon(
 }
 
 @Composable
+@ReadOnlyComposable
 private fun getTint(connectionState: ConnectionState): Color = when (connectionState) {
     ConnectionState.Connecting -> colorScheme.StatusOrange
     ConnectionState.Disconnected -> colorScheme.StatusRed

@@ -36,13 +36,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.details
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.component.ShareContactDialog
 import org.meshtastic.core.ui.util.ActiveWhileStarted
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassViewModel
@@ -71,7 +71,8 @@ fun NodeDetailScreen(
 ) {
     SideEffect(nodeId) { viewModel.start(nodeId) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(viewModel) { viewModel.navigationEvents.collect { onNavigate(it) } }
+    val currentOnNavigate by rememberUpdatedState(onNavigate)
+    LaunchedEffect(viewModel) { viewModel.navigationEvents.collect { currentOnNavigate(it) } }
     NodeDetailScaffold(
         modifier = modifier,
         uiState = uiState,
@@ -190,7 +191,7 @@ private fun NodeDetailOverlays(
     }
 
     when (overlay) {
-        is NodeDetailOverlay.SharedContact -> node?.let { SharedContactDialog(it, onDismiss, isOwnContact = isLocal) }
+        is NodeDetailOverlay.SharedContact -> node?.let { ShareContactDialog(it, onDismiss, isOwnContact = isLocal) }
 
         is NodeDetailOverlay.FirmwareReleaseInfo ->
             NodeDetailBottomSheet(onDismiss) { FirmwareReleaseSheetContent(firmwareRelease = overlay.release) }

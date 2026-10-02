@@ -22,18 +22,19 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 import org.meshtastic.core.datastore.model.RecentAddress
 
+/**
+ * The stored addresses and names are user data, so no log line here carries the stored value or an exception message,
+ * which kotlinx.serialization can fill with the input it failed on.
+ */
 @Single
 open class RecentAddressesDataSource(private val dataStore: CorePreferencesDataStore) {
     private object PreferencesKeys {
@@ -45,14 +46,10 @@ open class RecentAddressesDataSource(private val dataStore: CorePreferencesDataS
             val jsonString = preferences[PreferencesKeys.RECENT_IP_ADDRESSES]
             if (jsonString != null) {
                 try {
-                    Json.decodeFromString<List<RecentAddress>>(jsonString)
+                    DatastoreJson.decodeFromString<List<RecentAddress>>(jsonString)
                 } catch (e: IllegalArgumentException) {
-                    Logger.w { "Could not parse recent addresses, falling back to legacy parsing: ${e.message}" }
-                    // Fallback to legacy parsing
-                    parseLegacyRecentAddresses(jsonString)
-                } catch (e: SerializationException) {
-                    Logger.w { "Could not parse recent addresses, falling back to legacy parsing: ${e.message}" }
-                    // Fallback to legacy parsing
+                    // SerializationException is an IllegalArgumentException.
+                    Logger.w { "Could not parse recent addresses (${e::class.simpleName}), trying legacy format" }
                     parseLegacyRecentAddresses(jsonString)
                 }
             } else {
@@ -60,19 +57,21 @@ open class RecentAddressesDataSource(private val dataStore: CorePreferencesDataS
             }
         }
 
-    private fun parseLegacyRecentAddresses(jsonAddresses: String): List<RecentAddress> {
-        val jsonArray = Json.parseToJsonElement(jsonAddresses).jsonArray
-        return jsonArray.mapNotNull(::parseLegacyRecentAddress)
+    private fun parseLegacyRecentAddresses(jsonAddresses: String): List<RecentAddress> = try {
+        DatastoreJson.parseToJsonElement(jsonAddresses).jsonArray.mapNotNull(::parseLegacyRecentAddress)
+    } catch (e: IllegalArgumentException) {
+        Logger.w { "Discarding unreadable recent addresses (${e::class.simpleName})" }
+        emptyList()
     }
 
     private fun parseLegacyRecentAddress(item: kotlinx.serialization.json.JsonElement): RecentAddress? = when (item) {
         is JsonObject -> {
-            val address = item["address"]?.jsonPrimitive?.contentOrNull
-            val name = item["name"]?.jsonPrimitive?.contentOrNull
+            val address = (item["address"] as? JsonPrimitive)?.contentOrNull
+            val name = (item["name"] as? JsonPrimitive)?.contentOrNull
             if (address != null && name != null) {
                 RecentAddress(address = address, name = name)
             } else {
-                Logger.w { "Skipping malformed recent address object: $item" }
+                Logger.w { "Skipping malformed recent address object" }
                 null
             }
         }
@@ -82,20 +81,20 @@ open class RecentAddressesDataSource(private val dataStore: CorePreferencesDataS
             if (address != null) {
                 RecentAddress(address = address, name = "Meshtastic")
             } else {
-                Logger.w { "Skipping malformed recent address primitive: $item" }
+                Logger.w { "Skipping malformed recent address primitive" }
                 null
             }
         }
 
         is JsonArray -> {
-            Logger.w { "Skipping nested array in recent IP addresses: $item" }
+            Logger.w { "Skipping nested array in recent IP addresses" }
             null
         }
     }
 
     open suspend fun setRecentAddresses(addresses: List<RecentAddress>) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.RECENT_IP_ADDRESSES] = Json.encodeToString(addresses)
+            preferences[PreferencesKeys.RECENT_IP_ADDRESSES] = DatastoreJson.encodeToString(addresses)
         }
     }
 

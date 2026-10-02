@@ -25,9 +25,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.common)
-            implementation(projects.core.model)
-            implementation(projects.core.repository)
             implementation(projects.core.ui)
             implementation(projects.core.resources)
         }

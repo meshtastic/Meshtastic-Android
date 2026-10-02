@@ -21,11 +21,19 @@ import kotlin.test.assertEquals
 
 class ServiceStayAliveDecisionTest {
 
+    private val anyAddressConnects: (String) -> Boolean = { true }
+
+    private val noAddressConnects: (String) -> Boolean = { false }
+
     @Test
     fun selectedDeviceKeepsServiceAlive() {
         assertEquals(
             ServiceStayAliveDecision.STAY_FOR_DEVICE,
-            serviceStayAliveDecision(address = "x11:22:33:44:55:66", hasActiveRadioOperation = false),
+            serviceStayAliveDecision(
+                address = "x11:22:33:44:55:66",
+                hasActiveRadioOperation = false,
+                canConnect = anyAddressConnects,
+            ),
         )
     }
 
@@ -33,7 +41,11 @@ class ServiceStayAliveDecisionTest {
     fun selectedDeviceWinsOverOperation() {
         assertEquals(
             ServiceStayAliveDecision.STAY_FOR_DEVICE,
-            serviceStayAliveDecision(address = "t10.0.2.2:4403", hasActiveRadioOperation = true),
+            serviceStayAliveDecision(
+                address = "t10.0.2.2:4403",
+                hasActiveRadioOperation = true,
+                canConnect = anyAddressConnects,
+            ),
         )
     }
 
@@ -42,7 +54,7 @@ class ServiceStayAliveDecisionTest {
         // The exact firmware-update case: the flow sets the address to the "none" sentinel to free the transport.
         assertEquals(
             ServiceStayAliveDecision.STAY_FOR_OPERATION,
-            serviceStayAliveDecision(address = "n", hasActiveRadioOperation = true),
+            serviceStayAliveDecision(address = "n", hasActiveRadioOperation = true, canConnect = anyAddressConnects),
         )
     }
 
@@ -50,7 +62,7 @@ class ServiceStayAliveDecisionTest {
     fun noAddressDuringAnOperationStaysAlive() {
         assertEquals(
             ServiceStayAliveDecision.STAY_FOR_OPERATION,
-            serviceStayAliveDecision(address = null, hasActiveRadioOperation = true),
+            serviceStayAliveDecision(address = null, hasActiveRadioOperation = true, canConnect = anyAddressConnects),
         )
     }
 
@@ -58,7 +70,7 @@ class ServiceStayAliveDecisionTest {
     fun deselectedWithNothingRunningStops() {
         assertEquals(
             ServiceStayAliveDecision.STOP,
-            serviceStayAliveDecision(address = "n", hasActiveRadioOperation = false),
+            serviceStayAliveDecision(address = "n", hasActiveRadioOperation = false, canConnect = anyAddressConnects),
         )
     }
 
@@ -66,11 +78,35 @@ class ServiceStayAliveDecisionTest {
     fun blankAddressWithNothingRunningStops() {
         assertEquals(
             ServiceStayAliveDecision.STOP,
-            serviceStayAliveDecision(address = "", hasActiveRadioOperation = false),
+            serviceStayAliveDecision(address = "", hasActiveRadioOperation = false, canConnect = anyAddressConnects),
         )
         assertEquals(
             ServiceStayAliveDecision.STOP,
-            serviceStayAliveDecision(address = null, hasActiveRadioOperation = false),
+            serviceStayAliveDecision(address = null, hasActiveRadioOperation = false, canConnect = anyAddressConnects),
+        )
+    }
+
+    @Test
+    fun savedAddressThatCannotConnectStops() {
+        assertEquals(
+            ServiceStayAliveDecision.STOP,
+            serviceStayAliveDecision(
+                address = "s1027:29987:0",
+                hasActiveRadioOperation = false,
+                canConnect = noAddressConnects,
+            ),
+        )
+    }
+
+    @Test
+    fun savedAddressThatCannotConnectStillStaysForAnOperation() {
+        assertEquals(
+            ServiceStayAliveDecision.STAY_FOR_OPERATION,
+            serviceStayAliveDecision(
+                address = "s1027:29987:0",
+                hasActiveRadioOperation = true,
+                canConnect = noAddressConnects,
+            ),
         )
     }
 }

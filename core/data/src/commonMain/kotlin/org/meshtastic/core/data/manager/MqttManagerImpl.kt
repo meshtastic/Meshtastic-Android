@@ -75,8 +75,22 @@ class MqttManagerImpl(
     override val proxyActive: StateFlow<Boolean> = _proxyActive.asStateFlow()
 
     override val mqttConnectionState: StateFlow<MqttConnectionState> =
-        combine(_proxyActive, mqttRepository.connectionState) { active, libState ->
-            if (!active) MqttConnectionState.Inactive else libState.toAppState()
+        combine(_proxyActive, mqttRepository.connectionState, mqttRepository.subscriptionRefusal) {
+                active,
+                libState,
+                refusal,
+            ->
+            when {
+                !active -> MqttConnectionState.Inactive
+
+                libState is ConnectionState.Connected && refusal != null ->
+                    MqttConnectionState.SubscriptionRefused(
+                        refused = refusal.refused.mapValues { (_, code) -> code.name },
+                        granted = refusal.granted.size,
+                    )
+
+                else -> libState.toAppState()
+            }
         }
             .stateIn(scope, SharingStarted.Eagerly, MqttConnectionState.Inactive)
 
@@ -96,23 +110,21 @@ class MqttManagerImpl(
                         // safeCatchingAll swallows the Skiko ExceptionInInitializerError that
                         // compose-resources raises on headless JVM tests; production resolves the
                         // localized string and the error is still surfaced either way.
-                        val message =
-                            safeCatchingAll {
-                                when {
-                                    throwable is MqttException.ConnectionRejected &&
-                                        throwable.isCredentialRejection() ->
-                                        getStringSuspend(Res.string.mqtt_error_credentials_rejected)
+                        val message = safeCatchingAll {
+                            when {
+                                throwable is MqttException.ConnectionRejected && throwable.isCredentialRejection() ->
+                                    getStringSuspend(Res.string.mqtt_error_credentials_rejected)
 
-                                    throwable is MqttException.ConnectionRejected ->
-                                        getStringSuspend(Res.string.mqtt_error_rejected, throwable.detail())
+                                throwable is MqttException.ConnectionRejected ->
+                                    getStringSuspend(Res.string.mqtt_error_rejected, throwable.detail())
 
-                                    throwable is MqttException.ConnectionLost ->
-                                        getStringSuspend(Res.string.mqtt_error_connection_lost)
+                                throwable is MqttException.ConnectionLost ->
+                                    getStringSuspend(Res.string.mqtt_error_connection_lost)
 
-                                    else -> getStringSuspend(Res.string.mqtt_error_proxy_failed, throwable.detail())
-                                }
+                                else -> getStringSuspend(Res.string.mqtt_error_proxy_failed, throwable.detail())
                             }
-                                .getOrDefault("")
+                        }
+                            .getOrDefault("")
                         serviceStateWriter.setErrorMessage(text = message, severity = Severity.Warn)
                     }
                     .launchIn(scope)
@@ -132,17 +144,8 @@ class MqttManagerImpl(
         val topic = message.topic
         Logger.d { "[mqttClientProxyMessage] $topic" }
         val retained = message.retained == true
-        when {
-            message.text != null -> {
-                mqttRepository.publish(topic, message.text!!.encodeToByteArray(), retained)
-            }
-
-            message.data_ != null -> {
-                mqttRepository.publish(topic, message.data_!!.toByteArray(), retained)
-            }
-
-            else -> {}
-        }
+        val payload = message.text?.encodeToByteArray() ?: message.data_?.toByteArray()
+        if (payload != null) mqttRepository.publish(topic, payload, retained)
     }
 
     private fun ConnectionState.toAppState(): MqttConnectionState = when (this) {
@@ -189,14 +192,13 @@ class MqttManagerImpl(
     private fun ProbeResult.toAppStatus(): MqttProbeStatus = when (this) {
         is ProbeResult.Success -> {
             val info = serverInfo
-            val summary =
-                buildList {
-                    info.assignedClientIdentifier?.let { add("client=$it") }
-                    info.maximumQosOrdinal?.let { add("maxQoS=$it") }
-                    info.serverKeepAliveSeconds?.let { add("keepalive=${it}s") }
-                }
-                    .joinToString(", ")
-                    .ifEmpty { null }
+            val summary = buildList {
+                info.assignedClientIdentifier?.let { add("client=$it") }
+                info.maximumQosOrdinal?.let { add("maxQoS=$it") }
+                info.serverKeepAliveSeconds?.let { add("keepalive=${it}s") }
+            }
+                .joinToString(", ")
+                .ifEmpty { null }
             MqttProbeStatus.Success(serverInfo = summary)
         }
 

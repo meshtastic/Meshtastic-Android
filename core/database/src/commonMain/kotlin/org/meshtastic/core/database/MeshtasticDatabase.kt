@@ -149,8 +149,11 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 58, to = 59),
         AutoMigration(from = 59, to = 60),
         AutoMigration(from = 60, to = 61),
+        AutoMigration(from = 61, to = 62),
+        AutoMigration(from = 62, to = 63),
+        // 63 -> 64 is the manual MIGRATION_63_64 (log index added in place), applied via configureCommon().
     ],
-    version = 61,
+    version = 64,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -208,6 +211,55 @@ abstract class MeshtasticDatabase : RoomDatabase() {
             }
 
         /**
+         * Makes `discovered_node.snr` nullable and indexes `log.received_date`.
+         *
+         * Room's auto-migration for this step rebuilds `log` too: it copies every log row, `from_radio` blobs included,
+         * and drops the parent table of `traceroute_node_position`, all inside the exclusive migration transaction.
+         * Only `discovered_node` needs a rebuild, because SQLite cannot drop NOT NULL in place, so its statements below
+         * are Room's generated copy-swap verbatim, and the log index is created in place.
+         */
+        internal val MIGRATION_63_64: Migration =
+            object : Migration(63, 64) {
+                override suspend fun migrate(connection: SQLiteConnection) {
+                    connection.execSQL(
+                        "CREATE TABLE IF NOT EXISTS `_new_discovered_node` (" +
+                            "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `preset_result_id` INTEGER NOT NULL, " +
+                            "`node_num` INTEGER NOT NULL, `short_name` TEXT, `long_name` TEXT, " +
+                            "`neighbor_type` TEXT NOT NULL DEFAULT 'direct', `latitude` REAL, `longitude` REAL, " +
+                            "`distance_from_user` REAL, `hop_count` INTEGER NOT NULL DEFAULT 0, `snr` REAL, " +
+                            "`rssi` INTEGER, `message_count` INTEGER NOT NULL DEFAULT 0, " +
+                            "`sensor_packet_count` INTEGER NOT NULL DEFAULT 0, " +
+                            "`is_infrastructure` INTEGER NOT NULL DEFAULT 0, " +
+                            "FOREIGN KEY(`preset_result_id`) REFERENCES `discovery_preset_result`(`id`) " +
+                            "ON UPDATE NO ACTION ON DELETE CASCADE )",
+                    )
+                    connection.execSQL(
+                        "INSERT INTO `_new_discovered_node` (`id`,`preset_result_id`,`node_num`,`short_name`," +
+                            "`long_name`,`neighbor_type`,`latitude`,`longitude`,`distance_from_user`,`hop_count`," +
+                            "`snr`,`rssi`,`message_count`,`sensor_packet_count`,`is_infrastructure`) " +
+                            "SELECT `id`,`preset_result_id`,`node_num`,`short_name`,`long_name`,`neighbor_type`," +
+                            "`latitude`,`longitude`,`distance_from_user`,`hop_count`,`snr`,`rssi`,`message_count`," +
+                            "`sensor_packet_count`,`is_infrastructure` FROM `discovered_node`",
+                    )
+                    connection.execSQL("DROP TABLE `discovered_node`")
+                    connection.execSQL("ALTER TABLE `_new_discovered_node` RENAME TO `discovered_node`")
+                    connection.execSQL(
+                        "CREATE INDEX IF NOT EXISTS `index_discovered_node_preset_result_id` " +
+                            "ON `discovered_node` (`preset_result_id`)",
+                    )
+                    connection.execSQL(
+                        "CREATE INDEX IF NOT EXISTS `index_discovered_node_node_num` ON `discovered_node` (`node_num`)",
+                    )
+                    connection.prepare("PRAGMA foreign_key_check(`discovered_node`)").use { violations ->
+                        check(!violations.step()) { "discovered_node has rows whose preset result does not exist" }
+                    }
+                    connection.execSQL(
+                        "CREATE INDEX IF NOT EXISTS `index_log_received_date` ON `log` (`received_date`)",
+                    )
+                }
+            }
+
+        /**
          * Configures a [RoomDatabase.Builder] with standard settings for this project.
          *
          * All platforms force [setSingleConnectionPool]. Without it, Room defaults to a 4-reader pool for named
@@ -223,7 +275,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
         @OptIn(ExperimentalCoroutinesApi::class)
         fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
             this.fallbackToDestructiveMigration(dropAllTables = false)
-                .addMigrations(MIGRATION_52_53)
+                .addMigrations(MIGRATION_52_53, MIGRATION_63_64)
                 .setSingleConnectionPool()
                 .setQueryCoroutineContext(
                     // limitedParallelism(1) has the same throughput ceiling as the single-connection pool

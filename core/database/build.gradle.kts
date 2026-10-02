@@ -28,6 +28,8 @@ kotlin {
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }
 
+    compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
@@ -39,7 +41,6 @@ kotlin {
             implementation(projects.core.di)
             api(projects.core.model)
             implementation(libs.meshtastic.protobufs)
-            implementation(projects.core.resources)
             implementation(libs.androidx.room.paging)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kermit)

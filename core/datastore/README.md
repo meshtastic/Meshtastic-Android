@@ -4,12 +4,11 @@
 
 **Targets:** Android · JVM (Desktop) · iOS
 
-The `:core:datastore` module manages structured, asynchronous data storage using **Jetpack DataStore**. It is primarily used for storing complex configuration objects like radio channel sets and local device configurations.
+The `:core:datastore` module manages structured, asynchronous data storage using **Jetpack DataStore**. It is primarily used for storing complex configuration objects like the connected device's local and module configurations.
 
 ## Key Components
 
 ### 1. Data Sources
-- **`ChannelSetDataSource`**: Manages the storage of radio channel configurations.
 - **`LocalConfigDataSource`** / **`ModuleConfigDataSource`**: Store the connected device's `LocalConfig` and `LocalModuleConfig` protos.
 - **`LocalStatsDataSource`**: Stores the latest local device statistics telemetry.
 - **`RecentAddressesDataSource`**: Stores a list of recently connected radio addresses (BLE/USB/TCP).

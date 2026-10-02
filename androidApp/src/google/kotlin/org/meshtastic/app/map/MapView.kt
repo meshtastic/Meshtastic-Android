@@ -22,6 +22,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Paint
 import android.location.Location
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,7 +43,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -59,8 +59,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.applyCanvas
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -70,6 +79,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.GroundOverlay
@@ -77,6 +87,8 @@ import com.google.android.gms.maps.model.GroundOverlayOptions
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.StrokeStyle
+import com.google.android.gms.maps.model.StyleSpan
 import com.google.maps.android.SphericalUtil
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.Circle
@@ -88,7 +100,7 @@ import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.MarkerComposable
-import com.google.maps.android.compose.MarkerInfoWindowComposable
+import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
@@ -109,9 +121,11 @@ import com.google.maps.android.data.renderer.model.PointStyle
 import com.google.maps.android.data.renderer.model.PolygonStyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -130,14 +144,18 @@ import org.meshtastic.app.map.offline.terrain.ContourOverlay
 import org.meshtastic.app.map.offline.terrain.HillshadeTileProvider
 import org.meshtastic.app.map.tiles.RasterBasemap
 import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.common.util.NumberFormatter
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.toGeofence
+import org.meshtastic.core.model.hasFix
 import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.isValidCodePoint
 import org.meshtastic.core.model.util.kmhIn
 import org.meshtastic.core.model.util.metersIn
@@ -167,7 +185,6 @@ import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.TripOrigin
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.ActiveWhileStarted
 import org.meshtastic.core.ui.util.KeepScreenOn
@@ -175,9 +192,11 @@ import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.MapBounds
 import org.meshtastic.feature.map.MapNodePolicy
+import org.meshtastic.feature.map.TRACK_STOP_RADIUS_METERS
 import org.meshtastic.feature.map.component.ClusterMemberEntry
 import org.meshtastic.feature.map.component.ClusterMembersDialog
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
@@ -186,6 +205,7 @@ import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterSheet
+import org.meshtastic.feature.map.component.MeshMapFitPadding
 import org.meshtastic.feature.map.component.NodeTrackFilterMenu
 import org.meshtastic.feature.map.component.OfflineStatusBanner
 import org.meshtastic.feature.map.component.RasterOverlayToggles
@@ -201,6 +221,7 @@ import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
+import org.meshtastic.feature.map.mergeStationaryRuns
 import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
@@ -250,6 +271,26 @@ sealed interface GoogleMapMode {
 private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
 
+/**
+ * Fits [bounds] inside [MeshMapFitPadding], clear of the toolbar and the zoom pair. `newLatLngBounds` takes one padding
+ * for every edge and centres the fit, so it fits the padded box and then moves that box to where the padding puts it.
+ */
+private fun CameraPositionState.frameInsideChrome(
+    bounds: LatLngBounds,
+    mapSize: IntSize,
+    density: Density,
+    layoutDirection: LayoutDirection,
+) = with(density) {
+    val left = MeshMapFitPadding.calculateLeftPadding(layoutDirection).roundToPx()
+    val right = MeshMapFitPadding.calculateRightPadding(layoutDirection).roundToPx()
+    val top = MeshMapFitPadding.calculateTopPadding().roundToPx()
+    val bottom = MeshMapFitPadding.calculateBottomPadding().roundToPx()
+    val width = (mapSize.width - left - right).coerceAtLeast(1)
+    val height = (mapSize.height - top - bottom).coerceAtLeast(1)
+    move(CameraUpdateFactory.newLatLngBounds(bounds, width, height, 0))
+    move(CameraUpdateFactory.scrollBy((right - left) / 2f, (bottom - top) / 2f))
+}
+
 // Shared geofence overlay styling (orange, matching the fdroid flavor).
 private val GEOFENCE_OVERLAY_COLOR = Color(0xFFFF9800)
 private const val GEOFENCE_FILL_ALPHA = 0.12f
@@ -274,6 +315,16 @@ private const val TERRAIN_HILLSHADE_Z_INDEX = -0.9f
 private val ATTRIBUTION_BOTTOM_PADDING = 4.dp
 private const val ATTRIBUTION_SCRIM_ALPHA = 0.7f
 
+/** Faded rather than transparent, so the oldest point stays visible and tappable, as on the MapLibre track. */
+private const val OLDEST_TRACK_ALPHA = 0.25f
+private const val TRACK_FADE_LEVELS = 8
+private const val MAX_TRACK_MARKERS = 500
+private const val TRACK_POINT_SIZE_DP = 24f
+private const val SELECTED_TRACK_POINT_SIZE_DP = 32f
+private const val TRACK_POINT_OUTER_FRACTION = 10f / 24f
+private const val TRACK_POINT_RING_FRACTION = 4f / 24f
+private const val COORDINATE_DECIMALS = 5
+
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -286,6 +337,9 @@ fun MapView(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
+
+    // Collected here, not in a sheet: basemap selection and network layers report errors while no sheet is open.
+    LaunchedEffect(mapViewModel) { mapViewModel.errorFlow.collectLatest { context.showToast(it) } }
 
     // --- Location permissions ---
     val locationPermission = rememberLocationPermissionState()
@@ -383,6 +437,7 @@ fun MapView(
                             try {
                                 cameraPositionState.animate(cameraUpdate)
                             } catch (e: IllegalStateException) {
+                                if (e is CancellationException) currentCoroutineContext().ensureActive()
                                 Logger.d { "Error animating camera to location: ${e.message}" }
                             }
                         }
@@ -419,7 +474,12 @@ fun MapView(
 
     val filteredNodes = MapNodePolicy.visibleNodes(allNodes, mapFilterState, nowSeconds, ourNodeInfo?.num)
 
-    LaunchedEffect(mode, cameraInitialization, isMapLoaded, filteredNodes) {
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    var mapSize by remember { mutableStateOf(IntSize.Zero) }
+    LaunchedEffect(mode, cameraInitialization, isMapLoaded, filteredNodes, mapSize) {
+        // The fit is sized to the map, so it waits for the first layout.
+        if (mapSize == IntSize.Zero) return@LaunchedEffect
         if (
             mode is GoogleMapMode.Main &&
             cameraInitialization == CameraInitialization.FitNodes &&
@@ -427,17 +487,14 @@ fun MapView(
             filteredNodes.isNotEmpty()
         ) {
             val points = filteredNodes.map { it.position.toLatLng() }
-            val cameraUpdate =
-                if (points.size == 1) {
-                    CameraUpdateFactory.newLatLngZoom(points.first(), 12f)
-                } else {
-                    // Shared with the MapLibre map, which pads a degenerate box rather than handing the camera
-                    // something it cannot fit to.
-                    val bounds = MapBounds.aroundNodes(filteredNodes)?.toLatLngBounds()
-                    if (bounds == null) return@LaunchedEffect
-                    CameraUpdateFactory.newLatLngBounds(bounds, 80)
-                }
-            cameraPositionState.move(cameraUpdate)
+            if (points.size == 1) {
+                cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(points.first(), 12f))
+            } else {
+                // Shared with the MapLibre map, which pads a degenerate box rather than handing the camera
+                // something it cannot fit to.
+                val bounds = MapBounds.aroundNodes(filteredNodes)?.toLatLngBounds() ?: return@LaunchedEffect
+                cameraPositionState.frameInsideChrome(bounds, mapSize, density, layoutDirection)
+            }
             mapViewModel.onInitialNodeBoundsApplied()
         }
     }
@@ -462,12 +519,14 @@ fun MapView(
     val mapColorScheme = if (dark) ComposeMapColorScheme.DARK else ComposeMapColorScheme.LIGHT
 
     // --- Mode-specific data ---
-    // Node track: apply time filter
+    // Node track: apply time filter, and drop reports with no fix so toLatLng never draws them at 0,0
     val sortedTrackPositions =
         if (mode is GoogleMapMode.NodeTrack) {
             val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
             remember(mode.positions, lastHeardTrackFilter) {
-                mode.positions.filter { lastHeardTrackFilter.includes(it.time, nowSeconds) }.sortedBy { it.time }
+                mode.positions
+                    .filter { it.hasFix() && lastHeardTrackFilter.includes(it.time, nowSeconds) }
+                    .sortedBy { it.time }
             }
         } else {
             emptyList()
@@ -554,6 +613,8 @@ fun MapView(
                 cameraPositionState.animate(cameraUpdate)
                 hasCentered = true
             } catch (e: IllegalStateException) {
+                if (e is CancellationException) currentCoroutineContext().ensureActive()
+                // Reached for a user gesture interrupting animate() too: that cancels the animation, not this effect.
                 Logger.d { "Error centering track map: ${e.message}" }
             }
         }
@@ -565,6 +626,7 @@ fun MapView(
             try {
                 cameraPositionState.animate(CameraUpdateFactory.newLatLng(selectedPos.toLatLng()))
             } catch (e: IllegalStateException) {
+                if (e is CancellationException) currentCoroutineContext().ensureActive()
                 Logger.d { "Error animating to selected position: ${e.message}" }
             }
         }
@@ -590,6 +652,7 @@ fun MapView(
                     cameraPositionState.animate(cameraUpdate)
                     hasCentered = true
                 } catch (e: IllegalStateException) {
+                    if (e is CancellationException) currentCoroutineContext().ensureActive()
                     Logger.d { "Error centering traceroute overlay: ${e.message}" }
                 }
             }
@@ -625,7 +688,7 @@ fun MapView(
     Box(modifier = modifier) {
         GoogleMap(
             mapColorScheme = mapColorScheme,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().onSizeChanged { mapSize = it },
             cameraPositionState = cameraPositionState,
             uiSettings =
             MapUiSettings(
@@ -643,7 +706,11 @@ fun MapView(
                 mapType = effectiveGoogleMapType,
                 isMyLocationEnabled = isLocationTrackingEnabled && locationPermission.isGranted,
             ),
-            onMapLoaded = { isMapLoaded = true },
+            onMapLoaded = {
+                isMapLoaded = true
+                // The store-screenshot capture waits for this tag instead of a fixed delay.
+                Logger.withTag("MapDrawn").d { "tiles drawn" }
+            },
             onMapClick = { latLng ->
                 if (isMainMode && boxAuthoringDraft != null) {
                     val first = boxAuthoringFirstCorner
@@ -1074,6 +1141,7 @@ fun MapView(
                             cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(newCameraPosition))
                             Logger.d { "Oriented map to north" }
                         } catch (e: IllegalStateException) {
+                            if (e is CancellationException) currentCoroutineContext().ensureActive()
                             Logger.d { "Error orienting map to north: ${e.message}" }
                         }
                     }
@@ -1203,21 +1271,19 @@ fun MapView(
     }
 }
 
-private const val SECONDS_PER_MINUTE = 60L
-private const val MILLIS_PER_SECOND = 1_000L
-
 @Composable
 private fun rememberRelativeTimeBucket(): Long {
     val buckets = remember { relativeTimeBuckets() }
-    return buckets.collectAsStateWithLifecycle(initialValue = nowSeconds / SECONDS_PER_MINUTE).value
+    return buckets.collectAsStateWithLifecycle(initialValue = nowSeconds / TimeConstants.SECONDS_PER_MINUTE).value
 }
 
 internal fun relativeTimeBuckets(now: () -> Long = { nowSeconds }): Flow<Long> = flow {
     while (true) {
         val currentSeconds = now()
-        emit(currentSeconds / SECONDS_PER_MINUTE)
-        val secondsUntilNextMinute = SECONDS_PER_MINUTE - currentSeconds.mod(SECONDS_PER_MINUTE)
-        delay(secondsUntilNextMinute * MILLIS_PER_SECOND)
+        emit(currentSeconds / TimeConstants.SECONDS_PER_MINUTE)
+        val secondsUntilNextMinute =
+            TimeConstants.SECONDS_PER_MINUTE - currentSeconds.mod(TimeConstants.SECONDS_PER_MINUTE)
+        delay(secondsUntilNextMinute * TimeConstants.MS_PER_SEC)
     }
 }
 
@@ -1358,12 +1424,13 @@ private fun WaypointGeofenceOverlay(waypoint: Waypoint) {
 // region --- Node Track Overlay ---
 
 /**
- * Renders the position track polyline segments and markers inside a [GoogleMap] content scope. Each marker fades from
- * transparent (oldest) to opaque (newest). The newest position shows the node's [NodeChip]; older positions show a
- * [TripOrigin] dot with an info-window on tap.
+ * Renders the position track polyline and markers inside a [GoogleMap] content scope. Consecutive fixes within
+ * [TRACK_STOP_RADIUS_METERS] of each other draw as one point, the newest fix of their run. Markers fade from faint
+ * (oldest) to opaque (newest). The newest point shows the node's [NodeChip]; older points show a ring with an
+ * info-window on tap. Beyond the newest [MAX_TRACK_MARKERS] points the track is drawn by the line alone.
  *
- * When [selectedPositionTime] matches a marker's `Position.time`, that marker is highlighted with the primary color and
- * elevated z-index. Tapping a marker invokes [onPositionSelect] for list synchronization.
+ * When [selectedPositionTime] falls within a point's run, that marker is highlighted with the primary color and
+ * elevated z-index. Tapping a marker invokes [onPositionSelect] with its fix's time for list synchronization.
  */
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
@@ -1378,26 +1445,35 @@ private fun NodeTrackOverlay(
 ) {
     val isHighPriority = focusedNode.num == myNodeNum || focusedNode.isFavorite
     val activeNodeZIndex = if (isHighPriority) 5f else 4f
+    val trackColor = Color(focusedNode.colors.second)
     val selectedColor = MaterialTheme.colorScheme.primary
+    val density = LocalDensity.current.density
 
-    sortedPositions.forEachIndexed { index, position ->
-        key(position.time) {
+    // Every point shares one of a few prebuilt icons. A composable rendered to a bitmap per point runs on the main
+    // thread, and a track holds up to DEFAULT_MAX_LOGS points.
+    val pointIcons =
+        remember(trackColor, density) {
+            List(TRACK_FADE_LEVELS) { level ->
+                trackPointIcon(trackColor.copy(alpha = trackFadeAlpha(level)), TRACK_POINT_SIZE_DP, density)
+            }
+        }
+    val selectedIcon =
+        remember(selectedColor, density) { trackPointIcon(selectedColor, SELECTED_TRACK_POINT_SIZE_DP, density) }
+    val pointTitle = stringResource(Res.string.position)
+    val pointDescription = stringResource(Res.string.track_point)
+    val runs = remember(sortedPositions) { mergeStationaryRuns(sortedPositions) }
+    // Every marker is added on the main thread, so only the newest points and the selected one get one.
+    val firstMarkerIndex = (runs.size - MAX_TRACK_MARKERS).coerceAtLeast(0)
+
+    runs.forEachIndexed { index, run ->
+        val position = run.position
+        val isSelected = selectedPositionTime?.let(run::covers) == true
+        if (index < firstMarkerIndex && !isSelected) return@forEachIndexed
+        // Keyed on the run's start: its newest fix changes while the node stays put.
+        key(run.firstTime) {
             val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
-            val alpha =
-                if (sortedPositions.size > 1) {
-                    index.toFloat() / (sortedPositions.size.toFloat() - 1)
-                } else {
-                    1f
-                }
-            val isSelected = position.time == selectedPositionTime
-            val color =
-                if (isSelected) {
-                    selectedColor
-                } else {
-                    Color(focusedNode.colors.second).copy(alpha = alpha)
-                }
 
-            if (index == sortedPositions.lastIndex) {
+            if (index == runs.lastIndex) {
                 MarkerComposable(
                     state = markerState,
                     zIndex = activeNodeZIndex,
@@ -1410,42 +1486,60 @@ private fun NodeTrackOverlay(
                     NodeChip(node = focusedNode)
                 }
             } else {
-                MarkerInfoWindowComposable(
+                val level = trackFadeLevel(index, runs.lastIndex)
+                MarkerInfoWindow(
                     state = markerState,
-                    title = stringResource(Res.string.position),
+                    contentDescription = pointDescription,
+                    icon = if (isSelected) selectedIcon else pointIcons[level],
+                    title = pointTitle,
                     snippet = formatAgo(position.time),
-                    zIndex = if (isSelected) activeNodeZIndex - 0.5f else 1f + alpha,
+                    zIndex = if (isSelected) activeNodeZIndex - 0.5f else 1f + trackFadeAlpha(level),
                     onClick = {
                         onPositionSelect?.invoke(position.time)
                         false // Allow default info window behavior
                     },
-                    infoContent = { PositionInfoWindowContent(position = position, displayUnits = displayUnits) },
                 ) {
-                    Icon(
-                        imageVector = MeshtasticIcons.TripOrigin,
-                        contentDescription = stringResource(Res.string.track_point),
-                        tint = color,
-                        modifier = if (isSelected) Modifier.size(32.dp) else Modifier,
-                    )
+                    PositionInfoWindowContent(position = position, displayUnits = displayUnits)
                 }
             }
         }
     }
 
-    // Gradient polyline segments
-    if (sortedPositions.size > 1) {
-        val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
-        segments.forEachIndexed { index, segmentPoints ->
-            val alpha = index.toFloat() / (segments.size.toFloat() - 1)
-            Polyline(
-                points = segmentPoints.map { it.toLatLng() },
-                jointType = JointType.ROUND,
-                color = Color(focusedNode.colors.second).copy(alpha = alpha),
-                width = 8f,
-                zIndex = 0.6f,
-            )
-        }
+    if (runs.size > 1) {
+        val points = remember(runs) { runs.map { it.position.toLatLng() } }
+        // A span without a segment count covers only the first segment.
+        val spans =
+            remember(trackColor, points.size) {
+                val oldest = trackColor.copy(alpha = OLDEST_TRACK_ALPHA).toArgb()
+                val gradient = StrokeStyle.gradientBuilder(oldest, trackColor.toArgb()).build()
+                listOf(StyleSpan(gradient, (points.size - 1).toDouble()))
+            }
+        Polyline(points = points, spans = spans, jointType = JointType.ROUND, width = 8f, zIndex = 0.6f)
     }
+}
+
+/** Buckets a point's position along the track so that appending a point changes the icon of only a few markers. */
+private fun trackFadeLevel(index: Int, lastIndex: Int): Int =
+    if (lastIndex <= 0) TRACK_FADE_LEVELS - 1 else index * (TRACK_FADE_LEVELS - 1) / lastIndex
+
+private fun trackFadeAlpha(level: Int): Float =
+    OLDEST_TRACK_ALPHA + (1f - OLDEST_TRACK_ALPHA) * level / (TRACK_FADE_LEVELS - 1)
+
+/** A ring, drawn straight to a bitmap so building it never composes. */
+private fun trackPointIcon(color: Color, sizeDp: Float, density: Float): BitmapDescriptor {
+    val sizePx = (sizeDp * density).roundToInt().coerceAtLeast(1)
+    val bitmap = createBitmap(sizePx, sizePx)
+    val stroke = sizePx * TRACK_POINT_RING_FRACTION
+    val paint =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = stroke
+            this.color = color.toArgb()
+        }
+    // The ring's outer edge sits inside a 24-unit box at radius 10, matching the TripOrigin glyph.
+    val outerRadius = sizePx * TRACK_POINT_OUTER_FRACTION
+    bitmap.applyCanvas { drawCircle(sizePx / 2f, sizePx / 2f, outerRadius - stroke / 2f, paint) }
+    return BitmapDescriptorFactory.fromBitmap(bitmap)
 }
 
 @Composable
@@ -1464,11 +1558,11 @@ private fun PositionInfoWindowContent(position: Position, displayUnits: Measurem
         Column(modifier = Modifier.padding(8.dp)) {
             PositionRow(
                 label = stringResource(Res.string.latitude),
-                value = "%.5f".format((position.latitude_i ?: 0) * DEG_D),
+                value = NumberFormatter.format((position.latitude_i ?: 0) * DEG_D, COORDINATE_DECIMALS),
             )
             PositionRow(
                 label = stringResource(Res.string.longitude),
-                value = "%.5f".format((position.longitude_i ?: 0) * DEG_D),
+                value = NumberFormatter.format((position.longitude_i ?: 0) * DEG_D, COORDINATE_DECIMALS),
             )
             PositionRow(label = stringResource(Res.string.sats), value = position.sats_in_view.toString())
             PositionRow(
@@ -1478,7 +1572,7 @@ private fun PositionInfoWindowContent(position: Position, displayUnits: Measurem
             PositionRow(label = stringResource(Res.string.speed), value = speedFromPosition(position, displayUnits))
             PositionRow(
                 label = stringResource(Res.string.heading),
-                value = "%.0f°".format((position.ground_track ?: 0) * HEADING_DEG),
+                value = "${NumberFormatter.format((position.ground_track ?: 0) * HEADING_DEG, 0)}°",
             )
             PositionRow(label = stringResource(Res.string.timestamp), value = position.formatPositionTime())
         }
@@ -1554,20 +1648,19 @@ private fun offsetPolyline(
     val headingPoints = headingReferencePoints.takeIf { it.size >= 2 } ?: points
     if (points.size < 2 || headingPoints.size < 2 || offsetMeters == 0.0) return points
 
-    val headings =
-        headingPoints.mapIndexed { index, _ ->
-            when (index) {
-                0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
+    val headings = headingPoints.mapIndexed { index, _ ->
+        when (index) {
+            0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
 
-                headingPoints.lastIndex ->
-                    SphericalUtil.computeHeading(
-                        headingPoints[headingPoints.lastIndex - 1],
-                        headingPoints[headingPoints.lastIndex],
-                    )
+            headingPoints.lastIndex ->
+                SphericalUtil.computeHeading(
+                    headingPoints[headingPoints.lastIndex - 1],
+                    headingPoints[headingPoints.lastIndex],
+                )
 
-                else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
-            }
+            else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
         }
+    }
 
     return points.mapIndexed { index, point ->
         val heading = headings[index.coerceIn(0, headings.lastIndex)]
@@ -1594,7 +1687,7 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, opacity: Float, mapViewMode
         val layer =
             try {
                 val dataLayer =
-                    withContext(Dispatchers.IO) {
+                    withContext(ioDispatcher) {
                         // Buffered because the KMZ sniff marks and resets the stream before the parser reads it.
                         BufferedInputStream(ByteArrayInputStream(bytes)).use { stream ->
                             parseMapLayer(layerItem.layerType, stream)

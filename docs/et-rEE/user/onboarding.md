@@ -1,8 +1,7 @@
 ---
 title: Getting Started
-parent: Kasutusjuhend
 nav_order: 1
-last_updated: 2026-08-30
+last_updated: 2026-09-28
 description: Esimese käivitamise seadistus — õigused, sissejuhatav voog ja järgmised sammud pärast raadio ühendamist.
 aliases:
   - first-launch
@@ -54,6 +53,8 @@ Meshtastic kasutab sinu asukohta ka järgmiseks:
 - Kuvatakse asukoht kärgvõrgu kaardil
 - Calculating distances to other nodes
 - GPS koordinaatide jagamine teiste kärgvõrgu liikmetega (kui lubatud)
+
+On Android 12 and newer, choose **Precise** to share your position with the mesh: an approximate grant still shows you on the map, but position sharing needs precise location.
 
 Grant **"While using the app"**. The app does not request background location — `ACCESS_BACKGROUND_LOCATION` is not in its manifest — so Android will not offer an "Always" option, and position updates happen while the app is in the foreground or running its foreground service.
 

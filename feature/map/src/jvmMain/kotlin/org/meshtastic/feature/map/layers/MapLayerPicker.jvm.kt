@@ -19,9 +19,9 @@ package org.meshtastic.feature.map.layers
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.ioDispatcher
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
@@ -32,7 +32,7 @@ actual fun rememberMapLayerPicker(onPick: (PickedMapFile) -> Unit): MapLayerPick
     return MapLayerPickerLauncher {
         scope.launch {
             val chosen =
-                withContext(Dispatchers.IO) {
+                withContext(ioDispatcher) {
                     @Suppress("TooGenericExceptionCaught")
                     try {
                         // AWT's dialog rather than Swing's chooser: it is the platform's own, which matters for a
@@ -55,7 +55,7 @@ actual fun rememberMapLayerPicker(onPick: (PickedMapFile) -> Unit): MapLayerPick
                     displayName = chosen.name,
                     extensionOrMime = chosen.extension.ifBlank { null },
                     read = {
-                        withContext(Dispatchers.IO) {
+                        withContext(ioDispatcher) {
                             @Suppress("TooGenericExceptionCaught")
                             try {
                                 chosen.readBytes()

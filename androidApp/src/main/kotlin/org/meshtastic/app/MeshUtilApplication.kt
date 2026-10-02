@@ -21,6 +21,7 @@ import android.app.Application
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.os.Build
+import android.os.StrictMode
 import androidx.annotation.RequiresApi
 import androidx.collection.intSetOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -32,6 +33,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -87,16 +89,31 @@ open class MeshUtilApplication :
         Logger.e(throwable) { "Background application init failed in $context" }
     }
 
+    @Suppress("InjectDispatcher") // built with the Application, before Koin can inject anything
     protected val applicationScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Default + applicationScopeExceptionHandler)
+
+    /**
+     * False when this device can't load the bundled SQLite that every database open goes through. Koin is then never
+     * started, and MainActivity shows only [UnsupportedDeviceScreen].
+     */
+    var isSupportedDevice: Boolean = true
+        private set
 
     /** Supplies Coil's process-wide loader without retaining an Activity in its singleton factory. */
     override fun newImageLoader(context: Context): ImageLoader = get<ImageLoader>()
 
     override fun onCreate() {
         super.onCreate()
+        if (BuildConfig.DEBUG) enableDebugVmPolicy()
         ContextServices.app = this
         configureFlavorApplication(BuildConfig.APPLICATION_ID)
+
+        isSupportedDevice = bundledSqliteLoads(::loadBundledSqlite)
+        if (!isSupportedDevice) {
+            disableAppEntryPoints()
+            return
+        }
 
         startKoin<AndroidKoinApp> {
             androidContext(this@MeshUtilApplication)
@@ -106,13 +123,18 @@ open class MeshUtilApplication :
         startBackgroundInit()
     }
 
+    /** Open so a test can stand in for the device's linker; the host JVM has no `libsqliteJni.so` to load by name. */
+    protected open fun loadBundledSqlite() = System.loadLibrary(BUNDLED_SQLITE_LIBRARY)
+
     /**
-     * Launches the best-effort init that does not have to finish before the first Activity: log cleanup, the
-     * previous-exit report, the widget preview, the active database, and discovery-scan recovery. Open so a test can
-     * boot the real Application without any of it — chiefly the database, whose connection is what makes an
-     * un-terminated Application unsafe.
+     * Launches the best-effort init that does not have to finish before the first Activity: re-enabling entry points a
+     * failed SQLite load disabled, log cleanup, the previous-exit report, the widget preview, the active database, and
+     * discovery-scan recovery. Open so a test can boot the real Application without any of it — chiefly the database,
+     * whose connection is what makes an un-terminated Application unsafe.
      */
     protected open fun startBackgroundInit() {
+        applicationScope.launch { restoreAppEntryPoints() }
+
         // Schedule periodic MeshLog cleanup. Off-main: WorkManager uses on-demand init here
         // (the startup provider is removed), so getInstance() opens WorkManager's Room DB.
         applicationScope.launch { scheduleMeshLogCleanup() }
@@ -136,6 +158,8 @@ open class MeshUtilApplication :
                                     intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN),
                                 )
                         Logger.i { "setWidgetPreviews result: $result" }
+                    } catch (e: CancellationException) {
+                        throw e
                     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                         Logger.e(e) { "Failed to set widget preview" }
                     }
@@ -192,6 +216,7 @@ open class MeshUtilApplication :
     override fun onTerminate() {
         // cancel() not cancelAndJoin(): joining under runBlocking on the main thread can deadlock.
         cancelBackgroundInit()
+        if (!isSupportedDevice) return super.onTerminate()
         try {
             runBlocking { get<DatabaseManager>().close() }
         } finally {
@@ -254,4 +279,12 @@ open class MeshUtilApplication :
      */
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(KoinWorkerFactory()).build()
+}
+
+/** Logs hidden-API reflection, such as the GATT cache refresh, and implicit URI permission grants. */
+private fun enableDebugVmPolicy() {
+    val policy = StrictMode.VmPolicy.Builder()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) policy.detectNonSdkApiUsage()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) policy.detectImplicitUriPermissionGrant()
+    StrictMode.setVmPolicy(policy.penaltyLog().build())
 }

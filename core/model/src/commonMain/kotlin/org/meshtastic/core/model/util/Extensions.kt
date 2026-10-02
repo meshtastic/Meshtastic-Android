@@ -41,43 +41,34 @@ fun Any?.anonymize(maxLen: Int = 3) = if (this != null) "...${this.toString().ta
 // A toString that makes sure all newlines are removed (for nice logging).
 fun Any.toOneLineString() = this.toString().replace('\n', ' ')
 
-fun Config.toOneLineString(): String {
-    // Wire toString uses field=value format
-    val redactedFields = """(wifi_psk|public_key|private_key|admin_key)=[^,}]+"""
-    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
-}
+// Wire toString uses field=value format. Compiled once: these run for every config frame.
+private val CONFIG_SECRETS = Regex("""(wifi_psk|public_key|private_key|admin_key)=[^,}]+""")
+private val MESH_PACKET_SECRETS = Regex("""(public_key|private_key|admin_key)=[^,}]+""")
+private val CHANNEL_SECRETS = Regex("""(psk)=[^,}]+""")
+private val MODULE_CONFIG_SECRETS = Regex("""(password|username)=[^,}]+""")
+private val MY_NODE_INFO_SECRETS = Regex("""(device_id)=[^,}]+""")
 
-fun MeshPacket.toOneLineString(): String {
-    val redactedFields = """(public_key|private_key|admin_key)=[^,}]+""" // Redact keys
-    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
-}
+private fun String.redactOneLine(fields: Regex): String =
+    replace(fields) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
 
-fun Channel.toOneLineString(): String {
-    // Redact the channel preshared key (psk) from logs.
-    val redactedFields = """(psk)=[^,}]+"""
-    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
-}
+fun Config.toOneLineString(): String = toString().redactOneLine(CONFIG_SECRETS)
 
-fun ModuleConfig.toOneLineString(): String {
-    // Redact MQTT credentials from logs.
-    val redactedFields = """(password|username)=[^,}]+"""
-    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
-}
+fun MeshPacket.toOneLineString(): String = toString().redactOneLine(MESH_PACKET_SECRETS)
 
-fun MyNodeInfo.toOneLineString(): String {
-    // Redact the hardware unique identifier from logs.
-    val redactedFields = """(device_id)=[^,}]+"""
-    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
-}
+/** Redacts the channel preshared key. */
+fun Channel.toOneLineString(): String = toString().redactOneLine(CHANNEL_SECRETS)
+
+/** Redacts MQTT credentials. */
+fun ModuleConfig.toOneLineString(): String = toString().redactOneLine(MODULE_CONFIG_SECRETS)
+
+/** Redacts the hardware unique identifier. */
+fun MyNodeInfo.toOneLineString(): String = toString().redactOneLine(MY_NODE_INFO_SECRETS)
 
 fun Any.toPIIString() = if (!isDebug) {
     "<PII?>"
 } else {
     this.toOneLineString()
 }
-
-@Suppress("MagicNumber")
-fun ByteArray.toHexString() = joinToString("") { it.toUByte().toString(16).padStart(2, '0') }
 
 /** Returns true if this packet arrived via a LoRa transport mechanism. */
 fun MeshPacket.isLora(): Boolean = transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA ||
@@ -119,7 +110,7 @@ fun MeshPacket.isDirectSignal(): Boolean =
  */
 fun Telemetry.hasValidEnvironmentMetrics(): Boolean {
     val metrics = this.environment_metrics ?: return false
-    val hasClimate = metrics.relative_humidity != null && metrics.temperature != null && !metrics.temperature!!.isNaN()
+    val hasClimate = metrics.relative_humidity != null && metrics.temperature?.isNaN() == false
     val hasLightning = metrics.lightning_strike_count_1h != null || metrics.lightning_distance_km?.isNaN() == false
     return hasClimate || hasLightning
 }

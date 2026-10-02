@@ -89,6 +89,8 @@ Two runtime facts make the sketch path safety-critical, not just another UF2 wri
 - **The nRF52 erase sketch is SoftDevice-version-specific.** Writing the S140 6.1.1 image to a 7.3.0 device (or vice versa) corrupts the SoftDevice with no on-device recovery. `MaintenanceUf2.kt` treats the mounted volume's own `INFO_UF2.TXT` `SoftDevice:` line as authoritative over the bundled hardware-catalog hint — the two must agree, or the app refuses rather than guessing (`EraseImageResolution.Conflict`). The sketch also blocks in `while (!Serial)` until a host asserts DTR, which is what `UsbPassWriter`'s CDC unblock step is for (`MaintenanceUf2.requiresCdcUnblock`).
 - **OTAFIX bootloaders are resolved by `Board-ID`, not by build target or USB VID/PID** — both of the latter collide across multiple boards. `otafixUf2ForBoardId()` looks up the exact bootloader image for the `Board-ID:` line the volume reports; the Meshtastic build-target name is only ever used to decide whether to *offer* the action in the UI.
 
+A bootloader upgrade stops at `FirmwareUpdateState.ReviewingBootloader` once the drive is read and before anything is downloaded: `parseUf2BootloaderVersion()` takes the installed version from the `UF2 Bootloader` line and `reviewBootloader()` sets it beside the manifest's `otafixReleaseTag`. An exact match reads as up to date and skips the bootloader write; anything else is only "different", since bench and vendor tags carry no order. The running firmware cannot report its bootloader (the app only sees the packed `0x000902` the bootloader leaves in `NRF_TIMER2->CC[0]`, the same for stock and every OTAFIX build), so this is the first point the app knows the installed version.
+
 ```mermaid
 sequenceDiagram
     participant App as Android App
@@ -123,7 +125,7 @@ A `FirmwareMaintenanceLock` (`:core:common`) is held for the duration of the seq
 - `SecureDfuTransport.kt`: BLE transport layer for Secure DFU using Kable (control/data point characteristics, PRN flow control).
 - `DfuZipParser.kt`: Parses Nordic DFU ZIP archives (manifest, init packet, firmware binary).
 - `UsbUpdateHandler.kt`: Handles USB/UF2 firmware updates across platforms.
-- `MaintenanceUf2.kt`: Pinned erase/OTAFIX image resolution, `INFO_UF2.TXT` parsing (Board-ID, SoftDevice, Factory-Erase family), the drive-vs-map SoftDevice resolution used to pick a safe erase sketch, and the bootloader-driven erase resolver that pre-empts it.
+- `MaintenanceUf2.kt`: Pinned erase/OTAFIX image resolution, `INFO_UF2.TXT` parsing (bootloader version, Board-ID, SoftDevice, Factory-Erase family), the drive-vs-map SoftDevice resolution used to pick a safe erase sketch, and the bootloader-driven erase resolver that pre-empts it.
 - `Uf2Header.kt`: UF2 block-header readers (first target address, family ID) that `FirmwareRetriever` checks a downloaded maintenance image against before it can be written.
 - `UsbMaintenance.kt`: Pure gating (`usbMaintenanceGate`) and volume-inspection/image-choice types for the factory-erase and bootloader-upgrade actions.
 - `UsbUpdateSupport.kt`: Sequences a maintenance pass (download → reboot to DFU → vet volume → write → confirm landed) and drives the two-pass state machine.
@@ -136,16 +138,12 @@ graph TB
   :feature:firmware[firmware]:::kmp-feature
   :feature:firmware -.-> :core:ble
   :feature:firmware -.-> :core:common
-  :feature:firmware -.-> :core:data
-  :feature:firmware -.-> :core:database
   :feature:firmware -.-> :core:datastore
   :feature:firmware -.-> :core:di
   :feature:firmware -.-> :core:model
   :feature:firmware -.-> :core:navigation
   :feature:firmware -.-> :core:network
-  :feature:firmware -.-> :core:prefs
   :feature:firmware -.-> :core:repository
-  :feature:firmware -.-> :core:service
   :feature:firmware -.-> :core:resources
   :feature:firmware -.-> :core:ui
   :feature:firmware -.-> :core:testing

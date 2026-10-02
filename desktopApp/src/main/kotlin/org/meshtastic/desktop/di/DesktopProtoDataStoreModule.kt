@@ -26,20 +26,16 @@ import okio.Path.Companion.toPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.desktopDataDir
-import org.meshtastic.core.datastore.di.CoreChannelSetDataStore
 import org.meshtastic.core.datastore.di.CoreLocalConfigDataStore
 import org.meshtastic.core.datastore.di.CoreLocalStatsDataStore
 import org.meshtastic.core.datastore.di.CoreModuleConfigDataStore
 import org.meshtastic.core.datastore.di.DataStoreScope
-import org.meshtastic.core.datastore.di.asCoreChannelSetDataStore
 import org.meshtastic.core.datastore.di.asCoreLocalConfigDataStore
 import org.meshtastic.core.datastore.di.asCoreLocalStatsDataStore
 import org.meshtastic.core.datastore.di.asCoreModuleConfigDataStore
-import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
-import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
@@ -57,11 +53,6 @@ class DesktopProtoDataStoreModule {
     fun moduleConfigDataStore(scope: DataStoreScope): CoreModuleConfigDataStore =
         protoStore(ModuleConfigSerializer, "module_config.pb", { LocalModuleConfig.Builder().build() }, scope)
             .asCoreModuleConfigDataStore()
-
-    @Single
-    fun channelSetDataStore(scope: DataStoreScope): CoreChannelSetDataStore =
-        protoStore(ChannelSetSerializer, "channel_set.pb", { ChannelSet.Builder().build() }, scope)
-            .asCoreChannelSetDataStore()
 
     @Single
     fun localStatsDataStore(scope: DataStoreScope): CoreLocalStatsDataStore =

@@ -18,10 +18,12 @@ package org.meshtastic.core.data.ai
 
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -33,6 +35,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Constants
@@ -41,6 +44,7 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
@@ -301,7 +305,7 @@ class AiFunctionProviderImplTest {
     @Test
     fun sendMessage_accepts_text_exactly_at_the_byte_limit() = runTest {
         every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet.Builder().build())
-        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns 42
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.Queued(42)
 
         val text = "a".repeat(AiFunctionProviderImpl.MAX_MESSAGE_LENGTH)
         assertEquals(AiFunctionProviderImpl.MAX_MESSAGE_LENGTH, text.encodeToByteArray().size)
@@ -310,6 +314,25 @@ class AiFunctionProviderImplTest {
 
         assertIs<SendMessageResult.Success>(result)
         assertEquals(42, result.messageId)
+    }
+
+    @Test
+    fun sendMessage_reports_a_refused_send_as_invalid_not_success() = runTest {
+        every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet.Builder().build())
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.Refused
+
+        val result = createProvider().sendMessage("hello", null, null)
+
+        val invalid = assertIs<SendMessageResult.InvalidArgument>(result)
+        assertTrue(invalid.reason.contains("retired"), "the refusal reason should be reported: ${invalid.reason}")
+    }
+
+    @Test
+    fun sendMessage_propagates_cancellation_from_the_send() = runTest {
+        every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet.Builder().build())
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } throws CancellationException("scope closed")
+
+        assertFailsWith<CancellationException> { createProvider().sendMessage("hello", null, null) }
     }
 
     @Test
@@ -330,7 +353,7 @@ class AiFunctionProviderImplTest {
     @Test
     fun sendMessage_counts_multi_byte_text_in_bytes_not_characters() = runTest {
         every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet.Builder().build())
-        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns 7
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.Queued(7)
 
         // "\u00fc" is two UTF-8 bytes, so half as many characters fit.
         val fits = "\u00fc".repeat(AiFunctionProviderImpl.MAX_MESSAGE_LENGTH / 2)

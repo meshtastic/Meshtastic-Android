@@ -16,26 +16,18 @@
  */
 package org.meshtastic.core.network.repository
 
-import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import co.touchlab.kermit.loggerConfigInit
 import kotlinx.io.IOException
+import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.mqtt.MqttLogLevel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class KermitMqttLoggerTest {
 
-    private class CapturingWriter : LogWriter() {
-        val entries = mutableListOf<Triple<Severity, String, String>>()
-
-        override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
-            entries += Triple(severity, tag, message)
-        }
-    }
-
-    private val writer = CapturingWriter()
+    private val writer = CapturingLogWriter()
     private val mqttLogger = KermitMqttLogger(Logger(loggerConfigInit(writer), tag = "Test"))
 
     @Test
@@ -50,8 +42,8 @@ class KermitMqttLoggerTest {
         )
 
         assertEquals(1, writer.entries.size)
-        assertEquals(Severity.Warn, writer.entries[0].first)
-        assertEquals("MqttConnection", writer.entries[0].second)
+        assertEquals(Severity.Warn, writer.entries[0].severity)
+        assertEquals("MqttConnection", writer.entries[0].tag)
     }
 
     @Test
@@ -63,7 +55,7 @@ class KermitMqttLoggerTest {
             throwable = IllegalStateException("bad state"),
         )
 
-        assertEquals(Severity.Error, writer.entries.single().first)
+        assertEquals(Severity.Error, writer.entries.single().severity)
     }
 
     @Test
@@ -71,7 +63,7 @@ class KermitMqttLoggerTest {
         // A bare message carries no stack or type to triage, so it must not count as an application error.
         mqttLogger.log(level = MqttLogLevel.ERROR, tag = "MqttClient", message = "boom", throwable = null)
 
-        assertEquals(Severity.Warn, writer.entries.single().first)
+        assertEquals(Severity.Warn, writer.entries.single().severity)
     }
 
     @Test
@@ -83,7 +75,7 @@ class KermitMqttLoggerTest {
             throwable = null,
         )
 
-        assertEquals(Severity.Warn, writer.entries.single().first)
+        assertEquals(Severity.Warn, writer.entries.single().severity)
     }
 
     @Test
@@ -96,7 +88,7 @@ class KermitMqttLoggerTest {
             throwable = null,
         )
 
-        assertEquals(Severity.Warn, writer.entries.single().first)
+        assertEquals(Severity.Warn, writer.entries.single().severity)
     }
 
     @Test
@@ -105,8 +97,8 @@ class KermitMqttLoggerTest {
         mqttLogger.log(MqttLogLevel.INFO, "MqttClient", "info", null)
         mqttLogger.log(MqttLogLevel.DEBUG, "MqttClient", "debug", null)
 
-        assertEquals(listOf(Severity.Warn, Severity.Info, Severity.Debug), writer.entries.map { it.first })
-        assertEquals(listOf("MqttClient", "MqttClient", "MqttClient"), writer.entries.map { it.second })
+        assertEquals(listOf(Severity.Warn, Severity.Info, Severity.Debug), writer.entries.map { it.severity })
+        assertEquals(listOf("MqttClient", "MqttClient", "MqttClient"), writer.entries.map { it.tag })
     }
 
     @Test

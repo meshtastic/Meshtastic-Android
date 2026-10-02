@@ -166,12 +166,13 @@ internal constructor(
 
             // Best-effort DFU Version read — gate out unsupported old bootloaders (SDK ≤ 6).
             val versionChar = service.characteristic(LEGACY_DFU_VERSION_UUID)
-            val version =
-                safeCatching { service.read(versionChar) }
-                    .map { bytes ->
-                        if (bytes.size >= 2) (bytes[0].toInt() and 0xFF) or ((bytes[1].toInt() and 0xFF) shl 8) else -1
-                    }
-                    .getOrElse { -1 }
+            val version = safeCatching {
+                service.read(versionChar)
+            }
+                .map { bytes ->
+                    if (bytes.size >= 2) (bytes[0].toInt() and 0xFF) or ((bytes[1].toInt() and 0xFF) shl 8) else -1
+                }
+                .getOrElse { -1 }
             dfuVersion = version
             Logger.i { "Legacy DFU: DFU Version characteristic = $version (-1 ⇒ absent / unreadable)" }
             if (version in 1..MIN_SUPPORTED_DFU_VERSION - 1) {
@@ -335,7 +336,8 @@ internal constructor(
      * the bootloader's bytes-received count. The [streamOffset], [streamLastPrnOffset], and [streamLastPrnLatencyMs]
      * snapshots give the watcher's onDrop callback visible diagnostic values.
      */
-    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "LongMethod")
+    // Cancellations are logged with the stream offset for diagnosis, then rethrown.
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "LongMethod", "SuspendFunSwallowedCancellation")
     private suspend fun streamFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit) {
         // Packet size = negotiated ATT MTU − 3, word-aligned and capped at 244 (see computeStreamPacketSize). Falls
         // back to 20 bytes when the bootloader did not negotiate a larger MTU, which is the self-gating safety against
@@ -468,6 +470,7 @@ internal constructor(
      *
      * Parent cancellation is preserved: a [CancellationException] that escapes `withTimeoutOrNull` is propagated.
      */
+    @Suppress("SuspendFunSwallowedCancellation") // the cancellation is logged, then rethrown
     override suspend fun abort() {
         val write =
             try {
@@ -606,8 +609,8 @@ internal constructor(
                 if (response.requestOpcode != expectedOpcode) {
                     throw DfuException.TransferFailed(
                         "Legacy DFU response opcode mismatch: expected " +
-                            "0x${expectedOpcode.toUByte().toString(16).padStart(2, '0')}, " +
-                            "got 0x${response.requestOpcode.toUByte().toString(16).padStart(2, '0')}",
+                            "0x${expectedOpcode.toHexString()}, " +
+                            "got 0x${response.requestOpcode.toHexString()}",
                     )
                 }
 

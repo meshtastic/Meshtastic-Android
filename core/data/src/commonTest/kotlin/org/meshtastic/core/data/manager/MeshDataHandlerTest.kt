@@ -41,6 +41,7 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
@@ -53,7 +54,6 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -95,7 +95,6 @@ class MeshDataHandlerTest {
     private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
-    private val notificationManager: NotificationManager = mock(MockMode.autofill)
     private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
     private val dataMapper: MeshDataMapper = mock(MockMode.autofill)
@@ -155,7 +154,6 @@ class MeshDataHandlerTest {
                 packetHandler = packetHandler,
                 serviceStateWriter = serviceRepository,
                 packetRepository = lazy { packetRepository },
-                notificationManager = notificationManager,
                 serviceNotifications = serviceNotifications,
                 analytics = analytics,
                 dataMapper = dataMapper,
@@ -222,7 +220,7 @@ class MeshDataHandlerTest {
     }
 
     @Test
-    fun `handleReceivedData does not broadcast for position from local node`() {
+    fun `position from the local node updates our own node`() {
         val myNodeNum = 123
         val position =
             Position.Builder()
@@ -256,30 +254,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, myNodeNum)
 
-        // Position from local node — no further action expected
-    }
-
-    @Test
-    fun `handleReceivedData broadcasts for remote packets`() {
-        val myNodeNum = 123
-        val remoteNum = 456
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = remoteNum
-                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.PRIVATE_APP }.build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = NodeAddress.numToDefaultId(remoteNum),
-                to = NodeAddress.ID_BROADCAST,
-                bytes = null,
-                dataType = PortNum.PRIVATE_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, myNodeNum)
+        verify { nodeManager.handleReceivedPosition(myNodeNum, myNodeNum, position, 1000L, session) }
     }
 
     @Test
@@ -683,7 +658,47 @@ class MeshDataHandlerTest {
 
         // Still stored, so it can reappear in the invitations list if the user later deletes the channel.
         assertEquals(1, meshBeaconRepository.offers.value.size)
-        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) {
+            serviceNotifications.showMeshBeaconNotification(any())
+        }
+    }
+
+    @Test
+    fun `mesh beacon offering a channel the radio lacks notifies with the offer`() = testScope.runTest {
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
+        val beacon =
+            MeshBeacon.Builder()
+                .also { wb ->
+                    wb.message = "Join us"
+                    wb.offer_channel = ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build()
+                }
+                .build()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.MESH_BEACON_APP
+                                wb.payload = beacon.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                from = "!remote",
+                bytes = beacon.encode().toByteString(),
+                dataType = PortNum.MESH_BEACON_APP.value,
+            )
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.showMeshBeaconNotification(meshBeaconRepository.offers.value.single())
+        }
     }
 
     // --- Store-and-Forward handling ---
@@ -719,12 +734,16 @@ class MeshDataHandlerTest {
 
     // --- Routing/ACK-NAK handling ---
 
-    private fun routingPacket(error: Routing.Error): MeshPacket {
+    private fun routingPacket(
+        error: Routing.Error,
+        ackProofStatus: MeshPacket.AckProofStatus = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT,
+    ): MeshPacket {
         val routing = Routing.Builder().also { wb -> wb.error_reason = error }.build()
         val packet =
             MeshPacket.Builder()
                 .also { wb ->
                     wb.from = 456
+                    wb.ack_proof_status = ackProofStatus
                     wb.decoded =
                         Data.Builder()
                             .also { wb ->
@@ -752,6 +771,140 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         verifySuspend { packetHandler.completeDispatchedResponse(99, complete = true) }
+    }
+
+    private fun sentPacket(ackProofStatus: Int = 0) = DataPacket(
+        from = NodeAddress.ID_LOCAL,
+        to = "!remote",
+        bytes = byteArrayOf(1).toByteString(),
+        dataType = PortNum.TEXT_MESSAGE_APP.value,
+        id = 99,
+        status = MessageStatus.ENROUTE,
+        ackProofStatus = ackProofStatus,
+    )
+
+    @Test
+    fun `a proven ack records its verdict on the packet it acknowledges`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(
+            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            123,
+        )
+        advanceUntilIdle()
+
+        assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updates.single().ackProofStatus)
+    }
+
+    @Test
+    fun `a forged ack is recorded as invalid rather than as a plain delivery`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(
+            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_INVALID),
+            123,
+        )
+        advanceUntilIdle()
+
+        assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_INVALID.value, updates.single().ackProofStatus)
+    }
+
+    @Test
+    fun `an unproven ack does not erase a verdict an earlier ack established`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        val proven = MeshPacket.AckProofStatus.ACK_PROOF_VALID.value
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket(proven))
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
+        advanceUntilIdle()
+
+        assertEquals(proven, updates.single().ackProofStatus)
+    }
+
+    @Test
+    fun `a genuine proof is still recorded after a forged ack has settled the packet`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        val forged =
+            sentPacket(MeshPacket.AckProofStatus.ACK_PROOF_INVALID.value).copy(status = MessageStatus.RECEIVED)
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(forged)
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(
+            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            123,
+        )
+        advanceUntilIdle()
+
+        val updated = updates.single()
+        assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updated.ackProofStatus)
+        assertEquals(MessageStatus.RECEIVED, updated.status)
+    }
+
+    private fun sentReaction(ackProofStatus: Int = 0, status: MessageStatus = MessageStatus.ENROUTE) = Reaction(
+        replyId = 42,
+        user = User.Builder().also { wb -> wb.id = NodeAddress.ID_LOCAL }.build(),
+        emoji = "👍",
+        timestamp = 1000L,
+        snr = null,
+        rssi = null,
+        hopsAway = 0,
+        packetId = 99,
+        status = status,
+        to = "!remote",
+        ackProofStatus = ackProofStatus,
+    )
+
+    @Test
+    fun `a proven ack records its verdict on the reaction it acknowledges`() = testScope.runTest {
+        val updates = mutableListOf<Reaction>()
+        everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(sentReaction())
+        everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(
+            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            123,
+        )
+        advanceUntilIdle()
+
+        val updated = updates.single()
+        assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updated.ackProofStatus)
+        assertEquals(MessageStatus.RECEIVED, updated.status)
+    }
+
+    @Test
+    fun `an unproven ack does not erase a verdict an earlier ack established on a reaction`() = testScope.runTest {
+        val updates = mutableListOf<Reaction>()
+        val proven = MeshPacket.AckProofStatus.ACK_PROOF_VALID.value
+        everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(sentReaction(proven))
+        everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
+        advanceUntilIdle()
+
+        assertEquals(proven, updates.single().ackProofStatus)
+    }
+
+    @Test
+    fun `a genuine proof is still recorded after a forged ack has settled the reaction`() = testScope.runTest {
+        val updates = mutableListOf<Reaction>()
+        val forged = sentReaction(MeshPacket.AckProofStatus.ACK_PROOF_INVALID.value, MessageStatus.RECEIVED)
+        everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(forged)
+        everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(
+            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            123,
+        )
+        advanceUntilIdle()
+
+        val updated = updates.single()
+        assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updated.ackProofStatus)
+        assertEquals(MessageStatus.RECEIVED, updated.status)
     }
 
     @Test
@@ -798,36 +951,6 @@ class MeshDataHandlerTest {
         verifySuspend(exactly(0)) { packetRepository.findReactionsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
         verifySuspend(exactly(0)) { packetHandler.completeDispatchedResponse(any(), any()) }
-    }
-
-    @Test
-    fun `routing packet always broadcasts`() {
-        val routing = Routing.Builder().also { wb -> wb.error_reason = Routing.Error.NONE }.build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = 456
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.ROUTING_APP
-                                wb.payload = routing.encode().toByteString()
-                                wb.request_id = 99
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = routing.encode().toByteString(),
-                dataType = PortNum.ROUTING_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-        every { nodeManager.toNodeID(456) } returns "!remote"
-
-        handler.handleReceivedData(packet, 123)
     }
 
     // --- Telemetry handling ---
@@ -1131,6 +1254,51 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         verifySuspend { packetRepository.insertReaction(any(), 123) }
+    }
+
+    @Test
+    fun `a signed broadcast reaction is persisted as signed`() = testScope.runTest {
+        val emojiBytes = "👍".encodeToByteArray()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 99
+                    wb.from = 456
+                    wb.to = NodeAddress.NODENUM_BROADCAST
+                    wb.xeddsa_signed = true
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emojiBytes.toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
+        var persistedReaction: Reaction? = null
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                id = 99,
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = emojiBytes.toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                xeddsaSigned = true,
+            )
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        everySuspend { packetRepository.findReactionsWithId(99) } returns emptyList()
+        everySuspend { packetRepository.insertReaction(any(), 123) } calls
+            {
+                persistedReaction = it.args[0] as Reaction
+            }
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        assertEquals(true, assertNotNull(persistedReaction).xeddsaSigned)
     }
 
     @Test
@@ -1603,6 +1771,34 @@ class MeshDataHandlerTest {
         }
     }
 
+    @Test
+    fun `a message on the unnamed primary channel is titled by its modem preset`() = testScope.runTest {
+        arrangeUnmutedBroadcast()
+        every { radioConfigRepository.channelSetFlow } returns
+            MutableStateFlow(
+                ChannelSet.Builder()
+                    .also { wb ->
+                        wb.settings = listOf(ChannelSettings.Builder().build())
+                        wb.lora_config =
+                            Config.LoRaConfig.Builder()
+                                .also { wb ->
+                                    wb.use_preset = true
+                                    wb.modem_preset = ModemPreset.LONG_FAST
+                                }
+                                .build()
+                    }
+                    .build(),
+            )
+
+        handler.handleReceivedData(mentionPacket(), 123)
+        advanceUntilIdle()
+
+        // A group conversation's title is read aloud in the car; an unnamed primary must not be read as "".
+        verifySuspend {
+            serviceNotifications.updateMessageNotification(any(), any(), any(), true, "LongFast", any())
+        }
+    }
+
     // --- Waypoint persisted-owner enforcement ---
     //
     // A locked waypoint (locked_to != 0) may only be modified by the node it is locked to. The inbound-payload check
@@ -1801,6 +1997,78 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         verifySuspend { packetRepository.insert(any(), 123, any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `received waypoint notifies on the waypoint path`() = testScope.runTest {
+        handler.waypointMessageFormatter = { name -> "Waypoint received: $name" }
+        every { packetRepository.getWaypoints() } returns flowOf(emptyList())
+        every { nodeManager.getNodeById(any()) } returns
+            Node(num = 999, user = User.Builder().also { wb -> wb.long_name = "Hawk Ridge" }.build())
+        val packet =
+            waypointPacket(
+                txId = 506,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.name = "Camp"
+                        wb.expire = Int.MAX_VALUE
+                    }
+                    .build(),
+            )
+        stubWaypointPersistDependencies(506)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.updateWaypointNotification(
+                any(),
+                "Hawk Ridge",
+                "Waypoint received: Camp",
+                42,
+                false,
+            )
+        }
+    }
+
+    @Test
+    fun `critical alert notifies on the alert path with its conversation`() = testScope.runTest {
+        val payload = "Fire at camp".encodeToByteArray().toByteString()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 507
+                    wb.from = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.ALERT_APP
+                                wb.payload = payload
+                            }
+                            .build()
+                }
+                .build()
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                id = 507,
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = payload,
+                dataType = PortNum.ALERT_APP.value,
+            )
+        everySuspend { packetRepository.findPacketsWithId(507) } returns emptyList()
+        everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
+        every { messageFilter.shouldFilter(any(), any()) } returns false
+        every { nodeManager.getNodeById("!remote") } returns
+            Node(num = 456, user = User.Builder().also { wb -> wb.long_name = "Remote User" }.build())
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { serviceNotifications.showAlertNotification("0^all", "Remote User", "Fire at camp") }
     }
 
     @Test

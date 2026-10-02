@@ -2,7 +2,7 @@
 title: Contributing
 parent: Developer Guide
 nav_order: 8
-last_updated: 2026-09-11
+last_updated: 2026-09-28
 description: Branch naming, commit style, PR workflow, and the verification gates a change must pass before merge.
 aliases:
   - contributing
@@ -41,7 +41,7 @@ Examples:
 
 1. **Fork** the repository (external contributors) or create a branch (maintainers).
 2. **Implement** your changes following the architecture guidelines.
-3. **Test** locally: `./gradlew spotlessCheck detekt kmpSmokeCompile test allTests`
+3. **Test** locally: `./gradlew spotlessCheck detekt detektTypeResolved kmpSmokeCompile test allTests`
 4. **Commit** with clear, descriptive messages.
 5. **Push** and open a Pull Request.
 
@@ -61,7 +61,7 @@ Before submitting:
 - [ ] Code compiles on all targets: `./gradlew kmpSmokeCompile`
 - [ ] All tests pass: `./gradlew allTests`
 - [ ] Code style passes: `./gradlew spotlessCheck`
-- [ ] Static analysis passes: `./gradlew detekt`
+- [ ] Static analysis passes: `./gradlew detekt detektTypeResolved`
 - [ ] New code has appropriate test coverage
 - [ ] No `android.*` imports in `commonMain`
 - [ ] Koin modules registered if new DI is added
@@ -92,7 +92,7 @@ Run formatting:
 
 Full pre-merge verification:
 ```shell
-./gradlew spotlessCheck detekt kmpSmokeCompile test allTests
+./gradlew spotlessCheck detekt detektTypeResolved kmpSmokeCompile test allTests
 ```
 
 For docs-specific changes, also run:

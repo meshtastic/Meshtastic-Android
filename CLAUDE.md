@@ -8,12 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Claude-Specific Instructions
 
-- **Skills:** Load only the `.skills/` module relevant to the current task — don't read them all. Start with `.skills/project-overview/SKILL.md` (codebase map, bootstrap, troubleshooting).
+- **Skills:** Load only the `.skills/` module relevant to the current task — don't read them all. Start with `.skills/project-overview/SKILL.md` (codebase map, bootstrap, troubleshooting). Each module is symlinked into `.claude/skills/` so it can also be selected by name, since that is the only directory Claude Code discovers skills from.
 - **Plan Mode:** Use it for changes spanning multiple modules; write plans to `.agent_plans/` (git-ignored).
 - **Delegate to keep context lean** (this is a 20+ module KMP repo):
   - **Broad searches** ("where is X used", "find all implementers of Y") → dispatch the `Explore` subagent so file dumps stay out of the main context; you get back the conclusion.
   - **Gradle builds/tests/lint** → dispatch the `gradle-runner` subagent. A full `assembleDebug`/`allTests` log is thousands of lines; the subagent returns only pass/fail + failing tests. Don't run heavy `./gradlew` tasks inline.
-  - **Symbol navigation** ("where is this defined", "who calls this", "find implementers") → use the `LSP` tool (`goToDefinition` / `findReferences` / `goToImplementation`) instead of reading whole files. `kotlin-language-server` is supplied by the `nixtastic` plugin; this repo configures nothing. If the `LSP` tool answers "No LSP server available for file type: .kt", the plugin is not loaded or the binary is not on PATH — there is nothing to fix in this repo.
+  - **Symbol navigation** ("where is this defined", "who calls this", "find implementers") → `rg` for the symbol, then read only the matching range. There is no Kotlin LSP server: none available today handles KMP reliably, so the `LSP` tool answering "No LSP server available for file type: .kt" is expected.
 - **Big files are guarded, not free:** `.claude/settings.json` denies the Crowdin locale `strings.xml` files and prompts before reading the base `strings.xml`, `firmware_releases.json`, `emoji-data.json`, and `flatpak-sources.json`. For strings, consult `.skills/compose-ui/strings-index.txt` instead of the raw file.
 
 ## Quick Reference
@@ -29,13 +29,13 @@ want real Google Maps tiles (`MAPS_API_KEY=…`). `local.properties` is not read
 
 **Baseline verification — run before every push** (CI has failed on skipped local checks):
 ```bash
-./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests
+./gradlew spotlessApply spotlessCheck detekt detektTypeResolved assembleDebug test allTests
 ```
-Both `test` and `allTests` are required: `allTests` covers KMP modules (where the bare `test` task is ambiguous and silently skips), `test` covers pure-Android/JVM modules. Add `kmpSmokeCompile` when touching a KMP module. After adding string resources, run `python3 scripts/sort-strings.py`. Change-type matrix and CI architecture: `.skills/testing-ci/SKILL.md`.
+Both `test` and `allTests` are required: `allTests` runs each KMP module's `jvmTest` and Android host tests (a KMP module has no `test` task, and naming `:core:data:test` fails as ambiguous), `test` covers pure-Android/JVM modules and skips KMP ones. Add `kmpSmokeCompile` when touching a KMP module. After adding string resources, run `python3 scripts/sort-strings.py`. Change-type matrix and CI architecture: `.skills/testing-ci/SKILL.md`.
 
 **Single test:**
 ```bash
 ./gradlew :feature:messaging:allTests                              # one KMP module
 ./gradlew :androidApp:testFdroidDebugUnitTest                      # one Android/JVM module
-./gradlew :core:data:allTests --tests "*PacketHandlerTest*"        # filter to one class/method
+./gradlew :core:data:jvmTest --tests "*PacketHandlerTest*"         # filter to one class/method (allTests takes no --tests)
 ```

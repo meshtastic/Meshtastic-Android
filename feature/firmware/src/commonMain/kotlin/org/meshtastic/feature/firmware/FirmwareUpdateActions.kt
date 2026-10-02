@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.firmware
 
-import org.meshtastic.core.database.entity.FirmwareReleaseType
+import org.meshtastic.core.model.FirmwareReleaseType
 
 data class FirmwareUpdateActions(
     val onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
@@ -27,6 +27,9 @@ data class FirmwareUpdateActions(
     /** Pick the device's UF2 volume for a maintenance pass, which vets the drive before writing to it. */
     val onPickVolume: () -> Unit,
     val onBootloaderUpgrade: () -> Unit,
+    val onConfirmBootloaderUpgrade: () -> Unit,
+    /** Leaves the bootloader as it is and moves on to reinstalling the firmware. */
+    val onSkipBootloaderUpgrade: () -> Unit,
     val onConfirmLocalFile: () -> Unit,
     val onDismissLocalFile: () -> Unit,
     val onRetry: () -> Unit,

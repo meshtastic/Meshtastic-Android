@@ -22,16 +22,13 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.meshtastic.app.map.MapViewModel
 import org.meshtastic.app.map.importMbTiles
-import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.component.CustomTileProviderManager
 import org.meshtastic.feature.map.layers.getFileName
 import java.io.File
@@ -64,8 +61,6 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
                 }
             }
         }
-
-    LaunchedEffect(Unit) { mapViewModel.errorFlow.collectLatest { context.showToast(it) } }
 
     CustomTileProviderManager(
         providers = providers,

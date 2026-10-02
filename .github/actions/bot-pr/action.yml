@@ -1,0 +1,78 @@
+name: Bot PR
+description: Open or update a PR from the working tree's changes and hand it to the merge queue.
+# The token must be a PAT: GITHUB_TOKEN may not enable auto-merge on protected main, and
+# PRs it opens start no workflows, so the required checks would never report.
+inputs:
+  token:
+    description: 'PAT that pushes the branch, opens the PR and requests the merge'
+    required: true
+  branch:
+    description: 'PR head branch'
+    required: true
+  base:
+    description: 'PR base branch; must be the branch checked out in the workspace'
+    default: 'main'
+  title:
+    description: 'PR title'
+    required: true
+  commit-message:
+    description: 'Commit message; defaults to the title'
+    default: ''
+  body:
+    description: 'PR body'
+    default: ''
+  add-paths:
+    description: 'Newline-separated pathspecs to commit; all changes when empty'
+    default: ''
+  labels:
+    description: 'Newline-separated labels'
+    default: ''
+outputs:
+  number:
+    description: 'PR number'
+    value: ${{ steps.pr.outputs.pull-request-number }}
+  url:
+    description: 'PR URL'
+    value: ${{ steps.pr.outputs.pull-request-url }}
+  operation:
+    description: 'created, updated, closed or none'
+    value: ${{ steps.pr.outputs.pull-request-operation }}
+runs:
+  using: composite
+  steps:
+    - name: Open or update the PR
+      id: pr
+      uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+      with:
+        token: ${{ inputs.token }}
+        branch: ${{ inputs.branch }}
+        base: ${{ inputs.base }}
+        title: ${{ inputs.title }}
+        commit-message: ${{ inputs.commit-message || inputs.title }}
+        body: ${{ inputs.body }}
+        add-paths: ${{ inputs.add-paths }}
+        labels: ${{ inputs.labels }}
+        delete-branch: true
+
+    # No merge method is passed; the queue sets it. Re-requested on every update, since a
+    # push can clear the request. GitHub refuses it on a PR that is already mergeable, so
+    # that case merges directly.
+    - name: Enable auto-merge
+      if: ${{ steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        GH_REPO: ${{ github.repository }}
+        PR_NUMBER: ${{ steps.pr.outputs.pull-request-number }}
+      run: |
+        PR_ID=$(gh pr view "$PR_NUMBER" --json id --jq .id)
+        QUERY=$(cat <<'GQL'
+        mutation($id: ID!) {
+          enablePullRequestAutoMerge(input: { pullRequestId: $id }) {
+            pullRequest { number autoMergeRequest { enabledAt } }
+          }
+        }
+        GQL
+        )
+        gh api graphql -f query="$QUERY" -F id="$PR_ID" \
+          || gh pr merge "$PR_NUMBER"

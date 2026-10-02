@@ -19,14 +19,19 @@ package org.meshtastic.feature.wifiprovision
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.feature.wifiprovision.domain.NymeaWifiService
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
@@ -110,13 +115,16 @@ class WifiProvisionViewModel(
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,
     private val dispatchers: CoroutineDispatchers,
+    private val applicationScope: ApplicationCoroutineScope,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WifiProvisionUiState())
     val uiState: StateFlow<WifiProvisionUiState> = _uiState.asStateFlow()
 
-    /** Lazily-created service; reset on [reset]. */
+    /** Lazily-created service; replaced by [connectToDevice], closed by [disconnect] and [onCleared]. */
     private var service: NymeaWifiService? = null
+
+    private var connectJob: Job? = null
 
     // region Public actions (called from UI)
 
@@ -130,9 +138,13 @@ class WifiProvisionViewModel(
     fun connectToDevice(address: String? = null) {
         _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.ConnectingBle, error = null) }
 
-        viewModelScope.launch {
-            val nymeaService = NymeaWifiService(bleScanner, bleConnectionFactory, dispatchers.default)
-            service = nymeaService
+        val previousJob = connectJob
+        val previousService = service
+        val nymeaService = NymeaWifiService(bleScanner, bleConnectionFactory, dispatchers.default)
+        service = nymeaService
+
+        connectJob = viewModelScope.launch {
+            release(previousJob, previousService)
 
             nymeaService
                 .connect(address)
@@ -211,9 +223,10 @@ class WifiProvisionViewModel(
 
     /** Disconnect and close any active BLE connection. */
     fun disconnect() {
+        val nymeaService = service
+        service = null
         viewModelScope.launch {
-            service?.close()
-            service = null
+            nymeaService?.close()
             _uiState.value = WifiProvisionUiState()
         }
     }
@@ -222,10 +235,25 @@ class WifiProvisionViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        service?.cancel()
+        val job = connectJob
+        val nymeaService = service
+        service = null
+        // viewModelScope is already cancelled here, and the peripheral is only released by close().
+        applicationScope.launch { release(job, nymeaService) }
     }
 
     // region Private helpers
+
+    /**
+     * Waits out [job] so a peripheral it was still installing belongs to [nymeaService] before that closes. Runs
+     * non-cancellable so a caller cancelled mid-release still closes the service.
+     */
+    private suspend fun release(job: Job?, nymeaService: NymeaWifiService?) {
+        withContext(NonCancellable) {
+            job?.cancelAndJoin()
+            nymeaService?.close()
+        }
+    }
 
     private suspend fun loadNetworks(nymeaService: NymeaWifiService) {
         _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.LoadingNetworks) }

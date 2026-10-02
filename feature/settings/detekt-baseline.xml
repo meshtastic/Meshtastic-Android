@@ -12,24 +12,17 @@
     <ID>ComposableParamOrder:WarningDialog.kt:@Composable fun WarningDialog</ID>
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
     <ID>LambdaParameterEventTrailing:NodeActionButton.kt:onClick: () -> Unit</ID>
-    <ID>LambdaParameterInRestartableEffect:PacketResponseStateDialog.kt:onBack: () -> Unit = {}</ID>
-    <ID>LambdaParameterInRestartableEffect:PacketResponseStateDialog.kt:onDismiss: () -> Unit = {}</ID>
-    <ID>LambdaParameterInRestartableEffect:PrivacySection.kt:startProvideLocation: () -> Unit</ID>
-    <ID>LambdaParameterInRestartableEffect:PrivacySection.kt:stopProvideLocation: () -> Unit</ID>
-    <ID>LambdaParameterInRestartableEffect:TakPermissionUtil.kt:onPermissionResult: (Boolean) -> Unit</ID>
     <ID>LongMethod:AudioConfigItemList.kt:@Composable fun AudioConfigScreen</ID>
     <ID>LongMethod:DetectionSensorConfigItemList.kt:@Composable fun DetectionSensorConfigScreen</ID>
     <ID>LongMethod:LoRaConfigItemList.kt:@Composable fun LoRaConfigScreen</ID>
     <ID>LongMethod:PowerConfigItemList.kt:@Composable fun PowerConfigScreen</ID>
     <ID>LongMethod:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
-    <ID>LongMethod:SecurityConfigScreen.android.kt:@Composable actual fun SecurityKeyBackupActions</ID>
     <ID>LongMethod:SerialConfigItemList.kt:@Composable fun SerialConfigScreen</ID>
     <ID>LongMethod:StoreForwardConfigItemList.kt:@Composable fun StoreForwardConfigScreen</ID>
     <ID>LongMethod:TelemetryConfigItemList.kt:@Composable fun TelemetryConfigScreen</ID>
     <ID>LongMethod:UserConfigItemList.kt:@Composable fun UserConfigScreen</ID>
     <ID>MagicNumber:Debug.kt:3</ID>
     <ID>MagicNumber:DebugViewModel.kt:DebugViewModel$16</ID>
-    <ID>MagicNumber:DebugViewModel.kt:DebugViewModel$8</ID>
     <ID>MagicNumber:EditChannelDialog.kt:16</ID>
     <ID>MagicNumber:EditChannelDialog.kt:32</ID>
     <ID>MagicNumber:EditDeviceProfileDialog.kt:ProfileField.CHANNEL_URL$3</ID>
@@ -61,7 +54,6 @@
     <ID>ModifierMissing:NeighborInfoConfigItemList.kt:@Composable fun NeighborInfoConfigScreen</ID>
     <ID>ModifierMissing:NetworkConfigItemList.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun NetworkConfigScreen</ID>
     <ID>ModifierMissing:PacketResponseStateDialog.kt:@Composable fun &lt;T> PacketResponseStateDialog</ID>
-    <ID>ModifierMissing:PaxcounterConfigItemList.kt:@Composable fun PaxcounterConfigScreen</ID>
     <ID>ModifierMissing:PositionConfigScreen.android.kt:@Composable actual fun DeviceLocationButton</ID>
     <ID>ModifierMissing:PositionConfigScreen.kt:@Composable @Suppress("LongMethod", "CyclomaticComplexMethod") fun PositionConfigScreenCommon</ID>
     <ID>ModifierMissing:PowerConfigItemList.kt:@Composable fun PowerConfigScreen</ID>
@@ -80,7 +72,12 @@
     <ID>MultipleEmitters:PacketResponseStateDialog.kt:@Composable private fun ErrorContent</ID>
     <ID>MultipleEmitters:PacketResponseStateDialog.kt:@Composable private fun SuccessContent</ID>
     <ID>MultipleEmitters:SecurityConfigScreen.android.kt:@Composable actual fun SecurityKeyBackupActions</ID>
-    <ID>MutableStateAutoboxing:DesktopSettingsScreen.kt:mutableStateOf(0)</ID>
+    <ID>NoNameShadowing:Debug.kt:{ filterMode = it }</ID>
+    <ID>NoNameShadowing:DebugViewModel.kt:LogSearchManager${ SearchMatch(logIndex, it.range.first, it.range.last, "decodedPayload") }</ID>
+    <ID>NoNameShadowing:MeshBeaconConfigPolicy.kt:wb</ID>
+    <ID>NoNameShadowing:NetworkConfigItemList.kt:wb</ID>
+    <ID>NoNameShadowing:RadioConfigViewModel.kt:RadioConfigViewModel${ it.copy( isLocal = false, pioEnv = null, channelList = emptyList(), radioConfig = LocalConfig.Builder().build(), moduleConfig = LocalModuleConfig.Builder().build(), ) }</ID>
+    <ID>NoNameShadowing:UserConfigItemList.kt:wb</ID>
     <ID>ParameterNaming:ChannelConfigScreen.kt:onPositiveClicked: (List&lt;ChannelSettings>) -> Unit</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt:onCheckedChanged: (Boolean) -> Unit</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt:onDaysChanged: (Float) -> Unit</ID>
@@ -104,6 +101,24 @@
     <ID>ReturnCount:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
     <ID>TooGenericExceptionCaught:DebugViewModel.kt:DebugViewModel$e: Exception</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt:RadioConfigViewModel : ViewModel</ID>
+    <ID>UnnecessaryLaunchedEffect:ChannelConfigScreen.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:Debug.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:LicensedModeSetting.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:Logcat.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:PacketAuthenticitySetting.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:SettingsNavigation.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:SettingsSearchBar.kt:LaunchedEffect</ID>
+    <ID>UnnecessaryLaunchedEffect:TakPermissionUtil.kt:LaunchedEffect</ID>
+    <ID>UnusedPrivateProperty:DebugViewModel.kt:DebugViewModel$private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers</ID>
+    <ID>UnusedPrivateProperty:DebugViewModel.kt:DebugViewModel$private val meshLogPrefs: MeshLogPrefs</ID>
+    <ID>UnusedPrivateProperty:RadioConfigViewModel.kt:RadioConfigViewModel$private val locationRepository: LocationRepository</ID>
+    <ID>UnusedPrivateProperty:SettingsViewModel.kt:SettingsViewModel$private val isOtaCapableUseCase: IsOtaCapableUseCase</ID>
+    <ID>UnusedPrivateProperty:SettingsViewModel.kt:SettingsViewModel$private val meshLogPrefs: MeshLogPrefs</ID>
+    <ID>UnusedPrivateProperty:SettingsViewModel.kt:SettingsViewModel$private val nodeRepository: NodeRepository</ID>
+    <ID>UseOrEmpty:AboutLibrariesLoader.kt:SettingsRoute::class.java.getResource("/aboutlibraries.json")?.readText() ?: ""</ID>
+    <ID>UseOrEmpty:DebugViewModel.kt:DebugViewModel$user?.short_name?.takeIf { it.isNotEmpty() } ?: ""</ID>
+    <ID>UseOrEmpty:DebugViewModel.kt:LogSearchManager$log.decodedPayload?.let { regex.findAll(it).map { SearchMatch(logIndex, it.range.first, it.range.last, "decodedPayload") } } ?: emptySequence()</ID>
+    <ID>UseOrEmpty:SettingsScreen.kt:ourNode?.user?.short_name ?: ""</ID>
     <ID>ViewModelForwarding:AdministrationScreen.kt:AdminRouteItems(viewModel = viewModel, enabled = enabled, state = state, destNode = destNode)</ID>
     <ID>ViewModelForwarding:PositionConfigScreen.kt:DeviceLocationButton( viewModel = viewModel, enabled = state.connected, onLocationReceived = { locationInput = it }, )</ID>
     <ID>ViewModelForwarding:SecurityConfigScreen.kt:SecurityKeyBackupActions( viewModel = viewModel, enabled = state.connected, securityConfig = securityConfig, )</ID>

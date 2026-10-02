@@ -22,24 +22,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.repository.DiscoveryRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 
 @KoinViewModel
 class DiscoveryHistoryDetailViewModel(
     @InjectedParam private val sessionId: Long,
-    private val discoveryDao: DiscoveryDao,
+    private val discoveryRepository: DiscoveryRepository,
 ) : ViewModel() {
 
     val session: StateFlow<DiscoverySessionEntity?> =
-        discoveryDao.getSessionFlow(sessionId).stateInWhileSubscribed(initialValue = null)
+        discoveryRepository.getSessionFlow(sessionId).stateInWhileSubscribed(initialValue = null)
 
     val presetResults: StateFlow<List<DiscoveryPresetResultEntity>> =
-        discoveryDao.getPresetResultsFlow(sessionId).stateInWhileSubscribed(initialValue = emptyList())
+        discoveryRepository.getPresetResultsFlow(sessionId).stateInWhileSubscribed(initialValue = emptyList())
 
     private val _nodesByPreset = MutableStateFlow<Map<Long, List<DiscoveredNodeEntity>>>(emptyMap())
     val nodesByPreset: StateFlow<Map<Long, List<DiscoveredNodeEntity>>> = _nodesByPreset.asStateFlow()
@@ -50,12 +50,8 @@ class DiscoveryHistoryDetailViewModel(
 
     private fun loadNodes() {
         safeLaunch(tag = "loadNodes") {
-            val results = discoveryDao.getPresetResults(sessionId)
-            val nodesMap = mutableMapOf<Long, List<DiscoveredNodeEntity>>()
-            for (result in results) {
-                nodesMap[result.id] = discoveryDao.getDiscoveredNodes(result.id)
-            }
-            _nodesByPreset.value = nodesMap
+            val results = discoveryRepository.getPresetResults(sessionId)
+            _nodesByPreset.value = discoveryRepository.getNodesByPresetResult(results.map { it.id })
         }
     }
 }

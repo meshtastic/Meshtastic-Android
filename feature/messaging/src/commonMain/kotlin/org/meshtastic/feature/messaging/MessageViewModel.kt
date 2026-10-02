@@ -29,10 +29,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -43,6 +41,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
@@ -50,6 +49,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.ActiveConversationTracker
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.CustomEmojiPrefs
+import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessagingController
@@ -105,6 +105,7 @@ class MessageViewModel(
     private val uiPrefs: UiPrefs,
     private val customEmojiPrefs: CustomEmojiPrefs,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
+    filterPrefs: FilterPrefs,
     private val meshNotificationManager: MeshNotificationManager,
     private val activeConversationTracker: ActiveConversationTracker,
     private val sendMessageUseCase: SendMessageUseCase,
@@ -163,12 +164,11 @@ class MessageViewModel(
         _draftMessage.value = text
         val contactKey = draftContactKey ?: return
         pendingDraftPersistence?.cancel()
-        pendingDraftPersistence =
-            viewModelScope.launch {
-                delay(DRAFT_PERSISTENCE_DELAY_MS)
-                savedStateHandle[draftKey(contactKey)] = text
-                withContext(ioDispatcher) { packetRepository.setDraft(contactKey, text) }
-            }
+        pendingDraftPersistence = viewModelScope.launch {
+            delay(DRAFT_PERSISTENCE_DELAY_MS)
+            savedStateHandle[draftKey(contactKey)] = text
+            withContext(ioDispatcher) { packetRepository.setDraft(contactKey, text) }
+        }
     }
 
     fun clearDraftMessage() {
@@ -192,6 +192,8 @@ class MessageViewModel(
     val showQuickChat = uiPrefs.showQuickChat
 
     val showFullMessageTimestamps = uiPrefs.showFullMessageTimestamps
+
+    val messageFilterEnabled = filterPrefs.filterEnabled
 
     private val _showFiltered = MutableStateFlow(false)
     val showFiltered: StateFlow<Boolean> = _showFiltered.asStateFlow()
@@ -357,11 +359,11 @@ class MessageViewModel(
         if (contactKeyForPagedMessages.value != contactKey) {
             contactKeyForPagedMessages.value = contactKey
         }
-        return flow { emitAll(packetRepository.getMessagesFrom(contactKey, limit = limit, getNode = ::getNode)) }
+        return packetRepository.getMessagesFrom(contactKey, limit = limit, getNode = ::getNode)
     }
 
     fun toggleShowQuickChat() {
-        uiPrefs.setShowQuickChat(!uiPrefs.showQuickChat.value)
+        uiPrefs.toggleShowQuickChat()
     }
 
     fun toggleShowFiltered() {
@@ -403,12 +405,25 @@ class MessageViewModel(
     fun deleteMessages(uuidList: List<Long>) =
         safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }
 
+    /**
+     * Replaces message [uuid] with a fresh send of [text]. The original row is deleted only after the new one is
+     * queued, so a refused or failed send leaves it in place rather than losing the message.
+     */
+    fun resendMessage(uuid: Long, text: String, contactKey: String) {
+        // A retired conversation has no channel to send on; refuse here, where the delete would otherwise follow.
+        if (ContactKey(contactKey).isRetired) return
+        safeLaunch(errorEvents = sendErrorEvents, tag = "resendMessage") {
+            packetRepository.replaceMessage(uuid) { sendMessageUseCase.invoke(text, contactKey, null) }
+        }
+    }
+
     // region ── Translation ──
 
     /** Whether on-device translation into the current locale is possible (always false on F-Droid/desktop). */
-    val translationAvailable: StateFlow<Boolean> =
-        flow { emit(messageTranslationService.isLanguageAvailable(currentLocaleCode())) }
-            .stateInWhileSubscribed(initialValue = false)
+    val translationAvailable: StateFlow<Boolean> = flow {
+        emit(messageTranslationService.isLanguageAvailable(currentLocaleCode()))
+    }
+        .stateInWhileSubscribed(initialValue = false)
 
     private val _translationDialogState = MutableStateFlow<TranslationDialogState>(TranslationDialogState.Hidden)
     val translationDialogState: StateFlow<TranslationDialogState> = _translationDialogState.asStateFlow()

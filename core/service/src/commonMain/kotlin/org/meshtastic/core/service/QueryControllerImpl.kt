@@ -46,7 +46,7 @@ internal class QueryControllerImpl(
     override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
         if (destNum == nodeManager.myNodeNum.value) return
         val provideLocation = uiPrefs.shouldProvideNodeLocation(myNodeNum).value
-        // Position(0.0, 0.0, 0) is the protocol-level "no position" sentinel.
+        // Position(0.0, 0.0, 0) means "attach no coordinates"; the sender leaves them off the wire.
         val resolvedPosition =
             if (provideLocation) {
                 currentPosition.takeIf { it.isValid() }

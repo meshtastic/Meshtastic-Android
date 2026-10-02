@@ -26,6 +26,10 @@ enum class InterfaceId(val id: Char) {
     TCP('t'),
     ;
 
+    /** True for the Demo Mode transports, which answer locally and reach no radio. */
+    val isVirtual: Boolean
+        get() = this == MOCK || this == REPLAY
+
     companion object {
         fun forIdChar(id: Char): InterfaceId? = entries.firstOrNull { it.id == id }
     }

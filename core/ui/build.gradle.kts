@@ -24,6 +24,8 @@ plugins {
 }
 
 kotlin {
+    // No withHostTest: commonTest holds Compose UI tests, which NPE on the host-test stubs' null Build.FINGERPRINT.
+
     // Required for CMP files/ resources (emoji-data.json) to be packaged as Android assets.
     // Without this, Res.readBytes() throws MissingResourceException at runtime.
     android { androidResources.enable = true }
@@ -31,16 +33,11 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
-            implementation(projects.core.data)
-            implementation(projects.core.database)
-            implementation(projects.core.datastore)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
-            implementation(projects.core.prefs)
             implementation(libs.meshtastic.protobufs)
             implementation(projects.core.repository)
             implementation(projects.core.resources)
-            implementation(projects.core.service)
 
             implementation(libs.compose.multiplatform.animation)
             implementation(libs.compose.multiplatform.material3)
@@ -72,8 +69,6 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.viewmodel.compose)
             implementation(libs.jetbrains.lifecycle.runtime.compose)
         }
-
-        getByName("jvmAndroidMain") { dependencies { implementation(libs.compose.multiplatform.ui.tooling) } }
 
         androidMain.dependencies { implementation(libs.androidx.activity.compose) }
 

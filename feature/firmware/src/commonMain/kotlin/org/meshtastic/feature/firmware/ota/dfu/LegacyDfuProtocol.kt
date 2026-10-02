@@ -88,7 +88,7 @@ internal object LegacyDfuStatus {
         DATA_SIZE_EXCEEDS_LIMIT -> "DATA_SIZE_EXCEEDS_LIMIT"
         CRC_ERROR -> "CRC_ERROR"
         OPERATION_FAILED -> "OPERATION_FAILED"
-        else -> "UNKNOWN(0x${status.toUByte().toString(16).padStart(2, '0')})"
+        else -> "UNKNOWN(0x${status.toHexString()})"
     }
 }
 
@@ -216,7 +216,7 @@ sealed class LegacyDfuException(message: String, cause: Throwable? = null) : Dfu
     /** Device returned a non-success status for a given opcode. */
     class ProtocolError(val requestOpcode: Byte, val status: Byte) :
         LegacyDfuException(
-            "Legacy DFU protocol error: opcode=0x${requestOpcode.toUByte().toString(16).padStart(2, '0')} " +
+            "Legacy DFU protocol error: opcode=0x${requestOpcode.toHexString()} " +
                 "status=${LegacyDfuStatus.describe(status)}",
         )
 

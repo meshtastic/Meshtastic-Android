@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.connections.component.BluetoothScanPreview
-import org.meshtastic.feature.connections.component.EmptyStateContentPreview
 
 // Doc-framed connections compositions (bounded-height crops tuned for the docs site). The atomic connections
 // components (device list item, transport selector, disconnect button, etc.) remain regression-gated in
@@ -31,11 +30,4 @@ import org.meshtastic.feature.connections.component.EmptyStateContentPreview
 @Composable
 fun ScreenshotConnectionsBluetoothScan() {
     BluetoothScanPreview()
-}
-
-@PreviewTest
-@PreviewLightDark
-@Composable
-fun ScreenshotEmptyStateContent() {
-    EmptyStateContentPreview()
 }

@@ -61,7 +61,6 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeSecurityIndicator
-import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_label_value
 import org.meshtastic.core.resources.copy
@@ -69,6 +68,7 @@ import org.meshtastic.core.resources.details
 import org.meshtastic.core.resources.encryption_error
 import org.meshtastic.core.resources.encryption_error_text
 import org.meshtastic.core.resources.error
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.hops_away
 import org.meshtastic.core.resources.no_public_key
 import org.meshtastic.core.resources.no_public_key_text
@@ -112,7 +112,6 @@ import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.proto.MeshPacket.TransportMechanism
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
 fun NodeDetailsSection(
@@ -291,7 +290,7 @@ private fun UserAndUptimeRow(node: Node) {
         if (uptimeSeconds != null && uptimeSeconds > 0) {
             InfoItem(
                 label = stringResource(Res.string.uptime),
-                value = formatUptime(uptimeSeconds),
+                value = formatDuration(uptimeSeconds.toLong()),
                 icon = MeshtasticIcons.ArrowCircleUp,
                 modifier = Modifier.weight(1f),
             )
@@ -376,7 +375,7 @@ private fun SecurityRow(node: Node, isLocal: Boolean) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalEncodingApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod", "MagicNumber")
 @Composable
 private fun PublicKeyItem(publicKeyBytes: ByteArray) {

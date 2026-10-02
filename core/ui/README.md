@@ -52,15 +52,10 @@ MeshtasticResourceDialog(
 graph TB
   :core:ui[ui]:::kmp-library-compose
   :core:ui -.-> :core:common
-  :core:ui -.-> :core:data
-  :core:ui -.-> :core:database
-  :core:ui -.-> :core:datastore
   :core:ui -.-> :core:model
   :core:ui -.-> :core:navigation
-  :core:ui -.-> :core:prefs
   :core:ui -.-> :core:repository
   :core:ui -.-> :core:resources
-  :core:ui -.-> :core:service
   :core:ui -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

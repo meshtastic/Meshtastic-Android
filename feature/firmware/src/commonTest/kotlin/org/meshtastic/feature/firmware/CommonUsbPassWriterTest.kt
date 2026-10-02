@@ -23,6 +23,9 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.MaintenanceUf2Repository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_update_transfer_percent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -38,33 +41,34 @@ import kotlin.test.assertTrue
  */
 abstract class CommonUsbPassWriterTest {
 
+    private val manifestJson = Json { ignoreUnknownKeys = true }
+
     private val manifest =
-        Json { ignoreUnknownKeys = true }
-            .decodeFromString<MaintenanceUf2Manifest>(
-                """
-                {
-                  "manifestVersion": 1,
-                  "otafixReleaseTag": "0.9.2-OTAFIX2.3-BP1.5",
-                  "otafixBase": "https://example.invalid/otafix",
-                  "erase": {
-                    "nrf52": {
-                      "6.1.1": { "fileName": "nrf_erase2.uf2", "sha256": "00", "expectedFirstTargetAddress": 155648 }
-                    },
-                    "nrf52Bootloader": {
-                      "fileName": "meshtastic_factory_erase.uf2",
-                      "sha256": "00",
-                      "expectedFamilyId": 1296388936
-                    },
-                    "rp2040": { "fileName": "pico_erase.uf2", "sha256": "00" }
-                  },
-                  "otafixByBoardId": {
-                    "WisBlock-RAK4631-Board": { "otafixBoardSlug": "wiscore_rak4631_board", "sha256": "00" }
-                  },
-                  "otafixSupportedTargets": ["rak4631"]
-                }
-                """
-                    .trimIndent(),
-            )
+        manifestJson.decodeFromString<MaintenanceUf2Manifest>(
+            """
+            {
+              "manifestVersion": 1,
+              "otafixReleaseTag": "0.9.2-OTAFIX2.3-BP1.5",
+              "otafixBase": "https://example.invalid/otafix",
+              "erase": {
+                "nrf52": {
+                  "6.1.1": { "fileName": "nrf_erase2.uf2", "sha256": "00", "expectedFirstTargetAddress": 155648 }
+                },
+                "nrf52Bootloader": {
+                  "fileName": "meshtastic_factory_erase.uf2",
+                  "sha256": "00",
+                  "expectedFamilyId": 1296388936
+                },
+                "rp2040": { "fileName": "pico_erase.uf2", "sha256": "00" }
+              },
+              "otafixByBoardId": {
+                "WisBlock-RAK4631-Board": { "otafixBoardSlug": "wiscore_rak4631_board", "sha256": "00" }
+              },
+              "otafixSupportedTargets": ["rak4631"]
+            }
+            """
+                .trimIndent(),
+        )
 
     private val treeUri = CommonUri.parse("content://com.android.externalstorage.documents/tree/1234-5678%3A")
 
@@ -108,7 +112,8 @@ abstract class CommonUsbPassWriterTest {
             UsbPassWriter(
                 fileHandler = WritableVolume(info),
                 maintenanceUf2Repository = FixedManifest(manifest),
-                retrieveMaintenanceUf2 = { asset, _ ->
+                retrieveMaintenanceUf2 = { asset, onProgress ->
+                    onProgress(0.5f)
                     written += asset.fileName
                     FirmwareArtifact(uri = CommonUri.parse("file:///tmp/${asset.fileName}"), fileName = asset.fileName)
                 },
@@ -136,6 +141,19 @@ abstract class CommonUsbPassWriterTest {
     }
 
     @Test
+    fun `the maintenance image download shows its percent`() = runTest {
+        val h = harness(sketchInfo)
+        val states = mutableListOf<FirmwareUpdateState>()
+
+        h.writer.write(erasePass, treeUri, rak) { states += it }
+
+        assertEquals(
+            listOf<UiText?>(UiText.Resource(Res.string.firmware_update_transfer_percent, 50)),
+            states.filterIsInstance<FirmwareUpdateState.Downloading>().map { it.progressState.details },
+        )
+    }
+
+    @Test
     fun `the bootloader erase image never has its cdc port opened`() = runTest {
         // After the bootloader consumes the block the only CDC port present is the bootloader's own; opening it would
         // latch onto the wrong port and hold the flow for the whole unblock timeout for nothing.
@@ -156,6 +174,23 @@ abstract class CommonUsbPassWriterTest {
         val bootloader = harness(bootloaderEraseInfo).apply { unblockResult = false }
         assertEquals(UsbPassResult.Written, bootloader.writer.write(erasePass, treeUri, rak) {})
         assertTrue(bootloader.unblockCalls.isEmpty())
+    }
+
+    @Test
+    fun `reviewing a bootloader upgrade reads the drive and writes nothing`() = runTest {
+        val h = harness(sketchInfo)
+
+        val review = h.writer.review(treeUri)
+
+        assertEquals(BootloaderReview.Ready(BootloaderVersions("0.4.3", "0.9.2-OTAFIX2.3-BP1.5")), review)
+        assertTrue(h.written.isEmpty(), "no image is fetched until the user confirms")
+    }
+
+    @Test
+    fun `reviewing refuses a drive that is not a bootloader volume`() = runTest {
+        val h = harness("Model: Something\r\n")
+
+        assertEquals(BootloaderReview.Refused(UsbMaintenanceRefusal.NotABootloaderVolume), h.writer.review(treeUri))
     }
 
     @Test

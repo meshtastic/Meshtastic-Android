@@ -100,7 +100,7 @@ class ContactsViewModel(
             packetRepository.getContactSettings(),
             keyedNodeNums,
         ) { identity, contacts, channelSet, settings, keyedNodes ->
-            val (myNodeInfo, myId) = identity
+            val (myNodeInfo, _) = identity
             val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList<Contact>()
             // Add empty channel placeholders (always show Broadcast contacts, even when empty)
             val placeholder =

@@ -19,10 +19,7 @@
 // scan every module's source from disk and assert the repo's KMP boundary rules.
 // Konsist is JVM-only, so its tests live in jvmTest (it cannot go in commonTest).
 // Runs under the existing `allTests` baseline gate via :core:konsist:allTests.
-plugins {
-    alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.meshtastic.kmp.jvm.android)
-}
+plugins { alias(libs.plugins.meshtastic.kmp.library) }
 
 kotlin {
     android { withHostTest {} }
@@ -35,4 +32,18 @@ kotlin {
             }
         }
     }
+}
+
+// Konsist reads every `.kt` in the checkout from disk, which Gradle cannot see. The patterns are anchored at the
+// source roots because a leading `**` also claims the directories other tasks write, such as the docs sync targets.
+tasks.named<Test>("jvmTest") {
+    inputs
+        .files(
+            fileTree(isolated.rootProject.projectDirectory) {
+                include("*/src/*/kotlin/**/*.kt", "*/*/src/*/kotlin/**/*.kt", "config/spotless/*.kt")
+                exclude("**/build/**")
+            },
+        )
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+        .withPropertyName("konsistScannedSources")
 }

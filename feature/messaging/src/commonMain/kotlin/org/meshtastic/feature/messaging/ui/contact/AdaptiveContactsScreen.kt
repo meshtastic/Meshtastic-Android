@@ -25,6 +25,7 @@ import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.navigation.ChannelsRoute
 import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.NodesRoute
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 
 @Composable
@@ -42,6 +43,7 @@ fun AdaptiveContactsScreen(
         onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
         onNavigateToMessages = { contactKey -> backStack.add(ContactsRoute.Messages(contactKey)) },
         onNavigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) },
+        onNavigateToFilterSettings = { backStack.add(SettingsRoute.FilterSettings) },
         scrollToTopEvents = scrollToTopEvents,
         activeContactKey = null,
     )

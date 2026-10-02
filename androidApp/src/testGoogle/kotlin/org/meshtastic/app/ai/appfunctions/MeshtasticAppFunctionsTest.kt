@@ -16,7 +16,6 @@
  */
 package org.meshtastic.app.ai.appfunctions
 
-import androidx.appfunctions.AppFunctionContext
 import androidx.appfunctions.AppFunctionElementNotFoundException
 import androidx.appfunctions.AppFunctionInvalidArgumentException
 import androidx.appfunctions.AppFunctionNotSupportedException
@@ -56,7 +55,6 @@ import kotlin.test.assertTrue
 class MeshtasticAppFunctionsTest {
 
     private val provider: AiFunctionProvider = mock(MockMode.autofill)
-    private val context: AppFunctionContext = mock(MockMode.autofill)
     private val appFunctions = MeshtasticAppFunctions(provider)
 
     @Test
@@ -64,7 +62,7 @@ class MeshtasticAppFunctionsTest {
         everySuspend { provider.sendMessage("Hello", "Alice", null) } returns
             SendMessageResult.Success(messageId = 1234, channel = "Primary", timestamp = 1700000000L)
 
-        val response = appFunctions.sendMessage(context, "Hello", "Alice", null)
+        val response = appFunctions.sendMessage("Hello", "Alice", null)
 
         assertEquals(1234, response.messageId)
         assertEquals("Primary", response.channel)
@@ -77,9 +75,7 @@ class MeshtasticAppFunctionsTest {
             SendMessageResult.AmbiguousName(listOf("Alice", "Albert"))
 
         val exception =
-            assertFailsWith<AppFunctionInvalidArgumentException> {
-                appFunctions.sendMessage(context, "Hello", "Al", null)
-            }
+            assertFailsWith<AppFunctionInvalidArgumentException> { appFunctions.sendMessage("Hello", "Al", null) }
         assertTrue(exception.message!!.contains("Multiple nodes match that name"))
     }
 
@@ -88,7 +84,7 @@ class MeshtasticAppFunctionsTest {
         everySuspend { provider.sendMessage("Hello", "Alice", null) } returns
             SendMessageResult.NotConnected("Not connected")
 
-        assertFailsWith<AppFunctionNotSupportedException> { appFunctions.sendMessage(context, "Hello", "Alice", null) }
+        assertFailsWith<AppFunctionNotSupportedException> { appFunctions.sendMessage("Hello", "Alice", null) }
     }
 
     @Test
@@ -102,7 +98,7 @@ class MeshtasticAppFunctionsTest {
                 localNodeName = "MyNode",
             )
 
-        val response = appFunctions.getMeshStatus(context)
+        val response = appFunctions.getMeshStatus()
 
         assertEquals("CONNECTED", response.connectionState)
         assertEquals(5, response.onlineNodeCount)
@@ -120,7 +116,7 @@ class MeshtasticAppFunctionsTest {
             )
         everySuspend { provider.getNodeList() } returns GetNodeListResult.Success(nodes)
 
-        val response = appFunctions.getNodeList(context)
+        val response = appFunctions.getNodeList()
 
         assertEquals(2, response.nodes.size)
         assertEquals("1", response.nodes[0].id)
@@ -152,7 +148,7 @@ class MeshtasticAppFunctionsTest {
             )
         everySuspend { provider.getChannelInfo() } returns GetChannelInfoResult.Success(channels)
 
-        val response = appFunctions.getChannelInfo(context)
+        val response = appFunctions.getChannelInfo()
 
         assertEquals(2, response.channels.size)
         assertEquals("Primary", response.channels[0].name)
@@ -174,7 +170,7 @@ class MeshtasticAppFunctionsTest {
             )
         everySuspend { provider.getDeviceStatus() } returns GetDeviceStatusResult.Success(device)
 
-        val response = appFunctions.getDeviceStatus(context)
+        val response = appFunctions.getDeviceStatus()
 
         assertEquals("T-Beam", response.model)
         assertEquals("2.3.15", response.firmwareVersion)
@@ -207,7 +203,7 @@ class MeshtasticAppFunctionsTest {
             )
         everySuspend { provider.getNodeDetails("!abc12345") } returns GetNodeDetailsResult.Success(nodeDetails)
 
-        val response = appFunctions.getNodeDetails(context, "!abc12345")
+        val response = appFunctions.getNodeDetails("!abc12345")
 
         assertEquals("!abc12345", response.id)
         assertEquals("TestNode", response.name)
@@ -220,7 +216,7 @@ class MeshtasticAppFunctionsTest {
     fun getNodeDetails_notFound() = runTest {
         everySuspend { provider.getNodeDetails("!unknown") } returns GetNodeDetailsResult.NotFound("Node not found")
 
-        assertFailsWith<AppFunctionElementNotFoundException> { appFunctions.getNodeDetails(context, "!unknown") }
+        assertFailsWith<AppFunctionElementNotFoundException> { appFunctions.getNodeDetails("!unknown") }
     }
 
     @Test
@@ -237,7 +233,7 @@ class MeshtasticAppFunctionsTest {
             )
         everySuspend { provider.getMeshMetrics() } returns GetMeshMetricsResult.Success(metrics)
 
-        val response = appFunctions.getMeshMetrics(context)
+        val response = appFunctions.getMeshMetrics()
 
         assertEquals(12, response.totalNodeCount)
         assertEquals(4, response.onlineNodeCount)
@@ -260,7 +256,7 @@ class MeshtasticAppFunctionsTest {
             )
         everySuspend { provider.getRecentMessages(null, 10) } returns GetRecentMessagesResult.Success(messages)
 
-        val response = appFunctions.getRecentMessages(context, null, 10)
+        val response = appFunctions.getRecentMessages(null, 10)
 
         assertEquals(1, response.messages.size)
         assertEquals("Alice", response.messages[0].senderName)
@@ -284,7 +280,7 @@ class MeshtasticAppFunctionsTest {
             )
         everySuspend { provider.getUnreadSummary() } returns GetUnreadSummaryResult.Success(summary)
 
-        val response = appFunctions.getUnreadSummary(context)
+        val response = appFunctions.getUnreadSummary()
 
         assertEquals(3, response.totalUnreadCount)
         assertEquals(1, response.contacts.size)

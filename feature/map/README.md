@@ -23,7 +23,7 @@ All providers are injected via `CompositionLocal` — in `MainActivity.kt` on An
 ### Shared ViewModels (in `commonMain`)
 
 - **`BaseMapViewModel`** — Core contract for all map state management, node markers, camera positions, and traceroute node selection logic (`TracerouteNodeSelection`, `tracerouteNodeSelection()`).
-- **`NodeMapViewModel`** — Shared logic for per-node map views (track display, position history).
+- **`NodeMapViewModel`**: resolves a node number to its `Node` for the Google flavor's embedded node-track map.
 
 ### Shared Logic (in `commonMain`)
 
@@ -63,15 +63,10 @@ Rules both renderers must agree on, so a behaviour difference between the flavor
 ```mermaid
 graph TB
   :feature:map[map]:::kmp-feature
-  :feature:map -.-> :core:data
-  :feature:map -.-> :core:database
-  :feature:map -.-> :core:datastore
   :feature:map -.-> :core:model
   :feature:map -.-> :core:navigation
   :feature:map -.-> :core:network
-  :feature:map -.-> :core:prefs
   :feature:map -.-> :core:repository
-  :feature:map -.-> :core:service
   :feature:map -.-> :core:resources
   :feature:map -.-> :core:ui
   :feature:map -.-> :core:di

@@ -21,7 +21,6 @@ import kotlin.test.assertContains
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@Suppress("MagicNumber")
 class BuildNodeDescriptionTest {
 
     private val testStrings =
@@ -31,7 +30,7 @@ class BuildNodeDescriptionTest {
             favorite = "favorite",
             lastHeard = "last heard %s",
             role = "role %s",
-            hopsAway = "0 hops away",
+            hopsAway = "3 hops away",
             battery = "battery 0%",
             distanceAway = "%s away",
             signal = "signal %s",

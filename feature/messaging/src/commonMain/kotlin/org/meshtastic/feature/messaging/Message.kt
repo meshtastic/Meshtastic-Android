@@ -91,12 +91,12 @@ import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
-import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.MENTION_TOKEN_REGEX
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.QuickChatAction
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.archived_channel_read_only
@@ -104,7 +104,7 @@ import org.meshtastic.core.resources.send
 import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown_channel
 import org.meshtastic.core.ui.component.InlineStyle
-import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.component.ShareContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -187,6 +187,7 @@ fun MessageScreen(
     val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
+    val messageFilterEnabled by viewModel.messageFilterEnabled.collectAsStateWithLifecycle()
     val isSearchActive by viewModel.isSearchActive.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
@@ -394,7 +395,7 @@ fun MessageScreen(
         onDismiss = viewModel::dismissTranslationDialog,
     )
 
-    sharedContact?.let { contact -> SharedContactDialog(contact = contact, onDismiss = { sharedContact = null }) }
+    sharedContact?.let { contact -> ShareContactDialog(contact = contact, onDismiss = { sharedContact = null }) }
 
     val originalMessage by
         remember(replyingToPacketId, pagedMessages.itemCount) {
@@ -462,6 +463,7 @@ fun MessageScreen(
                     showQuickChat = showQuickChat,
                     onToggleQuickChat = viewModel::toggleShowQuickChat,
                     onNavigateToQuickChatOptions = navigateToQuickChatOptions,
+                    showFilterToggle = messageFilterEnabled,
                     filteringDisabled = filteringDisabled,
                     onToggleFilteringDisabled = {
                         viewModel.setContactFilteringDisabled(contactKey, !filteringDisabled)
@@ -552,7 +554,9 @@ fun MessageScreen(
                     },
                     onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
                     onDeleteMessages = { viewModel.deleteMessages(it) },
-                    onSendMessage = { text, key -> if (!isRetiredChannel) viewModel.sendMessage(text, key) },
+                    onResendMessage = { message ->
+                        viewModel.resendMessage(message.uuid, message.text, contactKey)
+                    },
                     onReply = { message -> if (!isRetiredChannel) replyingToPacketId = message?.packetId },
                     onTranslate = { onEvent(MessageScreenEvent.TranslateMessage(it)) },
                     onToggleTranslation = { onEvent(MessageScreenEvent.ToggleShowTranslated(it)) },
@@ -663,16 +667,19 @@ internal fun liveInlineMarkdownStyleRanges(source: String): List<LiveStyleSpan> 
         codeMatches.any { codeMatch -> match.range.first in codeMatch.range || match.range.last in codeMatch.range }
     }
     return buildList {
-        LIVE_BOLD.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
-            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Bold))
-        }
-        LIVE_ITALIC.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
-            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Italic))
-        }
-        LIVE_STRIKE.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
-            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Strikethrough))
-        }
-        codeMatches.forEach { add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Code)) }
+        LIVE_BOLD.findAll(source)
+            .filterNot(isBlockedByCodeSpan)
+            .mapNotNull { it.groups[1] }
+            .forEach { add(LiveStyleSpan(it.range, InlineStyle.Bold)) }
+        LIVE_ITALIC.findAll(source)
+            .filterNot(isBlockedByCodeSpan)
+            .mapNotNull { it.groups[1] }
+            .forEach { add(LiveStyleSpan(it.range, InlineStyle.Italic)) }
+        LIVE_STRIKE.findAll(source)
+            .filterNot(isBlockedByCodeSpan)
+            .mapNotNull { it.groups[1] }
+            .forEach { add(LiveStyleSpan(it.range, InlineStyle.Strikethrough)) }
+        codeMatches.mapNotNull { it.groups[1] }.forEach { add(LiveStyleSpan(it.range, InlineStyle.Code)) }
     }
         .sortedWith(compareBy<LiveStyleSpan>({ it.range.first }, { it.range.last }, { it.style.ordinal }))
 }

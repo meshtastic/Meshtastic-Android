@@ -21,7 +21,6 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclassesOfSealed
 
 /**
  * Shared polymorphic serialization configuration for Navigation 3 saved-state support. Uses sealed interface

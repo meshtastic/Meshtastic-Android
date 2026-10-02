@@ -51,6 +51,8 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.numChannels
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.repository.DiscoveryPacketCollector
@@ -185,7 +187,8 @@ class DiscoveryScanEngine(
         var neighborType: String = "direct",
         var latitude: Double? = null,
         var longitude: Double? = null,
-        var snr: Float = 0f,
+        /** Null until a packet reports one, so an absent reading stays distinct from a valid 0 dB. */
+        var snr: Float? = null,
         /** Null until a packet reports one, so an absent reading stays distinct from a valid 0 dBm. */
         var rssi: Int? = null,
         var hopCount: Int = 0,
@@ -369,29 +372,28 @@ class DiscoveryScanEngine(
 
     /** Stops the active scan and restores the home preset. */
     suspend fun stopScan() {
-        val request =
-            mutex.withLock {
-                if (!isActive) {
-                    null
-                } else if (_scanState.value is DiscoveryScanState.Analysis) {
-                    Logger.i { "DiscoveryScanEngine: ignoring stop after terminal analysis has started" }
-                    null
-                } else {
-                    if (_scanState.value !is DiscoveryScanState.Cancelling) {
-                        Logger.i { "DiscoveryScanEngine: stopping scan" }
-                        _scanState.value = DiscoveryScanState.Cancelling
-                    }
-                    // Freeze the scan generation before snapshotting its restore plan.
-                    // No later target shift may race this terminal request.
-                    cancelScanInternal()
-                    terminalRequestLocked(
-                        pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_STOPPED,
-                        outcome = DiscoveryScanState.CompletionOutcome.Cancelled,
-                        awaitRestore = false,
-                        generateAi = false,
-                    )
+        val request = mutex.withLock {
+            if (!isActive) {
+                null
+            } else if (_scanState.value is DiscoveryScanState.Analysis) {
+                Logger.i { "DiscoveryScanEngine: ignoring stop after terminal analysis has started" }
+                null
+            } else {
+                if (_scanState.value !is DiscoveryScanState.Cancelling) {
+                    Logger.i { "DiscoveryScanEngine: stopping scan" }
+                    _scanState.value = DiscoveryScanState.Cancelling
                 }
+                // Freeze the scan generation before snapshotting its restore plan.
+                // No later target shift may race this terminal request.
+                cancelScanInternal()
+                terminalRequestLocked(
+                    pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_STOPPED,
+                    outcome = DiscoveryScanState.CompletionOutcome.Cancelled,
+                    awaitRestore = false,
+                    generateAi = false,
+                )
             }
+        }
         if (request != null) {
             terminalCoordinator.complete(request = request, beforeFinalize = ::persistCurrentDwellResults)
         }
@@ -427,6 +429,8 @@ class DiscoveryScanEngine(
 
         mutex.withLock {
             val node = collectedNodes.getOrPut(fromNum) { CollectedNodeData(nodeNum = fromNum) }
+            // Hearing the node itself is a direct sighting, even if NeighborInfo named it first.
+            node.neighborType = "direct"
             // Update signal info from the direct packet
             // Explicit presence: record a reported 0 dB/0 dBm, skip only a genuinely absent one.
             meshPacket.snrOrNull()?.let { node.snr = it }
@@ -471,21 +475,20 @@ class DiscoveryScanEngine(
         for (target in targets) {
             if (!isActive) return
 
-            val shouldShift =
-                mutex.withLock {
-                    if (!canAdvanceScanLocked()) {
-                        false
-                    } else {
-                        currentPresetName = target.label
-                        totalDwellSeconds = dwellDurationSeconds
-                        currentDwellPersisted = false
-                        collectedNodes.clear()
-                        deviceMetricsLog.clear()
-                        lastLocalStats = null
-                        _scanState.value = DiscoveryScanState.Shifting(target.label)
-                        true
-                    }
+            val shouldShift = mutex.withLock {
+                if (!canAdvanceScanLocked()) {
+                    false
+                } else {
+                    currentPresetName = target.label
+                    totalDwellSeconds = dwellDurationSeconds
+                    currentDwellPersisted = false
+                    collectedNodes.clear()
+                    deviceMetricsLog.clear()
+                    lastLocalStats = null
+                    _scanState.value = DiscoveryScanState.Shifting(target.label)
+                    true
                 }
+            }
             if (!shouldShift) return
 
             // Shift to the new target (preset, plus a custom primary channel for beacon-channel targets)
@@ -521,17 +524,16 @@ class DiscoveryScanEngine(
         }
 
         // Elect normal completion under the same mutex used by stopScan so a late stop cannot replace its outcome.
-        val request =
-            mutex.withLock {
-                collectorRegistry.collector = null
-                _scanState.value = DiscoveryScanState.Analysis
-                terminalRequestLocked(
-                    pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_COMPLETE,
-                    outcome = DiscoveryScanState.CompletionOutcome.Success,
-                    awaitRestore = true,
-                    generateAi = true,
-                )
-            }
+        val request = mutex.withLock {
+            collectorRegistry.collector = null
+            _scanState.value = DiscoveryScanState.Analysis
+            terminalRequestLocked(
+                pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_COMPLETE,
+                outcome = DiscoveryScanState.CompletionOutcome.Success,
+                awaitRestore = true,
+                generateAi = true,
+            )
+        }
         // complete() cancels scanScope before terminal cleanup finishes. This scan coroutine ends inside the call;
         // follow-up work belongs in terminal-coordinator callbacks, not after this invocation.
         terminalCoordinator.complete(request = request, generateAi = ::generateAiSummaries)
@@ -539,20 +541,19 @@ class DiscoveryScanEngine(
 
     /** Common cleanup path when a scan step fails mid-loop. */
     private suspend fun pauseAndAbort(persistPartialDwell: Boolean = false) {
-        val request =
-            mutex.withLock {
-                if (_scanState.value is DiscoveryScanState.Cancelling) {
-                    null
-                } else {
-                    _scanState.value = DiscoveryScanState.Analysis
-                    terminalRequestLocked(
-                        pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_FAILED,
-                        outcome = DiscoveryScanState.CompletionOutcome.Failed,
-                        awaitRestore = false,
-                        generateAi = false,
-                    )
-                }
+        val request = mutex.withLock {
+            if (_scanState.value is DiscoveryScanState.Cancelling) {
+                null
+            } else {
+                _scanState.value = DiscoveryScanState.Analysis
+                terminalRequestLocked(
+                    pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_FAILED,
+                    outcome = DiscoveryScanState.CompletionOutcome.Failed,
+                    awaitRestore = false,
+                    generateAi = false,
+                )
             }
+        }
         if (request == null) return
         if (persistPartialDwell) {
             terminalCoordinator.complete(request = request, beforeFinalize = ::persistCurrentDwellResults)
@@ -584,22 +585,26 @@ class DiscoveryScanEngine(
             )
             Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (use_preset=true)" }
         } else {
-            // Beacon custom-channel target: apply the offered preset+region, reset channel_num so firmware derives the
-            // frequency from the new name, then tune the primary channel to the offered name+PSK so nodes on that mesh
-            // are heard. The original primary channel is restored after the scan.
+            // Beacon custom-channel target: apply the offered preset+region, take the slot the mesh pinned or reset
+            // channel_num so firmware derives it from the new name, then tune the primary channel to the offered
+            // name+PSK so nodes on that mesh are heard. The original primary channel is restored after the scan.
+            val targetLora =
+                base
+                    .newBuilder()
+                    .also { wb ->
+                        wb.use_preset = true
+                        wb.modem_preset = target.preset.modemPreset
+                        wb.region = target.region ?: base.region
+                    }
+                    .build()
+            // Bound the pinned slot against the config we are about to apply, not the one we are leaving: a nonzero
+            // channel_num is taken verbatim, so an unaddressable slot would tune the scan to a frequency that does
+            // not exist. Zero puts us back on deriving it from the offered name.
+            val frequencySlot = target.frequencySlot?.takeIf { it in 1..targetLora.numChannels } ?: 0
             radioController.setLocalConfig(
                 Config.Builder()
                     .also { wb ->
-                        wb.lora =
-                            base
-                                .newBuilder()
-                                .also { wb ->
-                                    wb.use_preset = true
-                                    wb.modem_preset = target.preset.modemPreset
-                                    wb.region = target.region ?: base.region
-                                    wb.channel_num = 0
-                                }
-                                .build()
+                        wb.lora = targetLora.newBuilder().also { lb -> lb.channel_num = frequencySlot }.build()
                     }
                     .build(),
             )
@@ -724,12 +729,8 @@ class DiscoveryScanEngine(
         val ni = NeighborInfo.ADAPTER.decodeOrNull(payload, Logger) ?: return
         for (neighbor in ni.neighbors) {
             val neighborNum = neighbor.node_id.toLong()
-            val node =
-                collectedNodes.getOrPut(neighborNum) { CollectedNodeData(nodeNum = neighborNum, neighborType = "mesh") }
-            // Only mark as mesh if not already seen directly
-            if (node.snr == 0f && node.rssi == null) {
-                node.neighborType = "mesh"
-            }
+            // Only a node not yet heard is added as mesh; one already heard directly keeps its type.
+            collectedNodes.getOrPut(neighborNum) { CollectedNodeData(nodeNum = neighborNum, neighborType = "mesh") }
         }
     }
 
@@ -773,8 +774,8 @@ class DiscoveryScanEngine(
             // A null return means this device's session row is not in the active database and the dwell is unwritable.
             if (discoveryDao.insertDwellIfSessionExists(result, discoveredNodeEntities(), deviceAddress) == null) {
                 Logger.w {
-                    "DiscoveryScanEngine: session $sessionId for $deviceAddress is not in the active database; " +
-                        "skipping dwell persistence"
+                    "DiscoveryScanEngine: session $sessionId for ${deviceAddress.anonymize()} is not in the active " +
+                        "database; skipping dwell persistence"
                 }
                 return@withLock
             }
@@ -854,9 +855,11 @@ class DiscoveryScanEngine(
         userLat: Double,
         userLon: Double,
     ): DiscoveredNodeEntity {
+        val lat = latitude
+        val lon = longitude
         val distance =
-            if (hasValidCoordinates(latitude, longitude) && hasValidCoordinates(userLat, userLon)) {
-                latLongToMeter(userLat, userLon, latitude!!, longitude!!)
+            if (lat != null && lon != null && hasValidCoordinates(lat, lon) && hasValidCoordinates(userLat, userLon)) {
+                latLongToMeter(userLat, userLon, lat, lon)
             } else {
                 null
             }

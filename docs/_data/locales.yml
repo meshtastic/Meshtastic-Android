@@ -33,6 +33,9 @@ et-rEE:
 fi-rFI:
   name: "Suomi"
   dir: ltr
+fr-rCA:
+  name: "Français (Canada)"
+  dir: ltr
 fr-rFR:
   name: "Français"
   dir: ltr

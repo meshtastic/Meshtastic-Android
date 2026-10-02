@@ -48,7 +48,6 @@ import org.meshtastic.core.resources.mesh_beacon_interval
 import org.meshtastic.core.resources.mesh_beacon_interval_error
 import org.meshtastic.core.resources.mesh_beacon_listen
 import org.meshtastic.core.resources.mesh_beacon_listen_summary
-import org.meshtastic.core.resources.mesh_beacon_message
 import org.meshtastic.core.resources.mesh_beacon_no_channels
 import org.meshtastic.core.resources.mesh_beacon_offer_channel_name
 import org.meshtastic.core.resources.mesh_beacon_on_preset
@@ -61,6 +60,7 @@ import org.meshtastic.core.resources.mesh_beacon_target_default
 import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.mesh_beacon_targets
 import org.meshtastic.core.resources.plurals_seconds
+import org.meshtastic.core.resources.schema_meshbeacon_broadcast_message
 import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -68,6 +68,7 @@ import org.meshtastic.core.ui.component.RegularPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
@@ -78,7 +79,8 @@ import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 
-private const val MESSAGE_MAX_BYTES = 100
+// nanopb's max_size is 61 because it counts the terminator; the string itself gets a round 60.
+private const val MESSAGE_MAX_BYTES = 60
 private val MIN_INTERVAL_SECS = FixedUpdateIntervals.ONE_HOUR.value.toInt()
 
 // Sentinel DropDownItem values (design#140's never-render-blank rule): -1 marks a stale stored value that no longer
@@ -180,6 +182,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
         // broadcast fields verbatim.
         saveEnabled =
         meshBeaconSaveEnabled(state.connected, radioLora.use_preset, intervalValid, state.channelList.isNotEmpty()),
+        rebootBehavior = RebootBehavior.NEVER,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
@@ -238,7 +241,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                 if (broadcastGate.sectionsVisible) {
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(Res.string.mesh_beacon_message),
+                        title = stringResource(Res.string.schema_meshbeacon_broadcast_message),
                         value = formState.value.broadcast_message,
                         maxSize = MESSAGE_MAX_BYTES,
                         enabled = broadcastGate.sectionsEnabled,

@@ -26,15 +26,16 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugin.use.PluginDependency
 import java.io.FileInputStream
+import java.time.Duration
 import java.util.Properties
 
 private const val MAX_TEST_RETRIES = 2
 private const val MAX_TEST_FAILURES = 10
+private const val TEST_TASK_TIMEOUT_MINUTES = 15L
 
 val Project.libs
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
@@ -64,16 +65,20 @@ val Project.configProperties: Properties
 
 /** Configure common test options like parallel execution and logging. */
 internal fun Project.configureTestOptions() {
-    // Gradle 9 requires junit-platform-launcher on every test runtime classpath when
-    // useJUnitPlatform() is active.  Add it lazily to all *UnitTestRuntimeClasspath and
-    // *TestRuntimeClasspath configurations so all Android and JVM test tasks get it
-    // without requiring per-module declarations.
+    // Only JUnit Platform test tasks need the launcher. Instrumented test APKs run under AndroidJUnitRunner, and a KMP
+    // device-test APK fails to dex and package the JUnit Platform jars.
     configurations
-        .matching { it.name.endsWith("UnitTestRuntimeClasspath") || it.name.endsWith("TestRuntimeClasspath") }
+        .matching {
+            it.name.endsWith("TestRuntimeClasspath") &&
+                !it.name.contains("DeviceTest") &&
+                !it.name.contains("AndroidTest")
+        }
         .configureEach {
             val launcher = libs.library("junit-platform-launcher")
             project.dependencies.add(name, launcher)
         }
+
+    val isCi = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
 
     tasks.withType<Test>().configureEach {
         // JUnit 5: activate JUnit Platform — but NOT for androidHostTest (Robolectric) tasks
@@ -85,7 +90,6 @@ internal fun Project.configureTestOptions() {
         }
         // Parallelize unit tests at the Gradle fork level.
         // In CI, use all available processors; locally use half to keep the machine responsive.
-        val isCi = project.findProperty("ci") == "true"
         maxParallelForks =
             if (isCi) {
                 Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
@@ -100,11 +104,22 @@ internal fun Project.configureTestOptions() {
         systemProperty("java.awt.headless", "true")
         jvmArgs("-Dapple.awt.UIElement=true")
 
+        // JDK 24+ warns on every System.load from the class path (bundled SQLite, Skiko) unless native access is on.
+        jvmArgs("--enable-native-access=ALL-UNNAMED")
+
         // Numbers and units format in the OS locale, so the forked test JVMs are pinned to one: otherwise a
         // contributor whose machine defaults to de-DE gets "0,0°C" and fails every test that pins "0.0°C".
         // Locale-specific behaviour is asserted by tests that set the locale themselves.
         systemProperty("user.language", "en")
         systemProperty("user.country", "US")
+
+        // A hung test fails by name instead of running into the CI job timeout. SEPARATE_THREAD lets the timeout
+        // fire even when the stuck code never checks for interruption.
+        systemProperty("junit.jupiter.execution.timeout.default", "2 m")
+        systemProperty("junit.jupiter.execution.timeout.thread.mode.default", "SEPARATE_THREAD")
+        systemProperty("junit.jupiter.execution.timeout.mode", "disabled_on_debug")
+        // Backstop for JUnit 4 host tests, which Jupiter's timeout does not reach, and for a wedged test JVM.
+        timeout.set(Duration.ofMinutes(TEST_TASK_TIMEOUT_MINUTES))
 
         // JUnit Jupiter parallel execution within each Gradle fork.
         // Classes run sequentially ("same_thread") because 19+ ViewModel test classes use

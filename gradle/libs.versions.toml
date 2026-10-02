@@ -4,11 +4,11 @@ xmlutil = "1.0.2.1"
 # Android
 agp = "9.4.1"
 appcompat = "1.8.0"
-appfunctions = "1.0.0-alpha11"
+appfunctions = "1.0.0-alpha12"
 
 # androidx
 androidx-sqlite-bundled = "2.7.1"
-androidx-work = "2.11.2"
+androidx-work = "2.12.0"
 datastore = "1.2.1"
 glance = "1.2.0"
 lifecycle = "2.11.0"
@@ -17,7 +17,7 @@ navigation3 = "1.2.0-beta01"
 # navigation3-runtime is AndroidX's own KMP artifact, separate from the JetBrains
 # navigation3-ui mirror above; the two refs move independently and the mirror does not
 # publish every AndroidX version, so they are not always equal.
-navigation3-runtime = "1.2.0-rc01"
+navigation3-runtime = "1.2.0"
 navigationevent = "1.1.0"
 paging = "3.5.1"
 room = "3.0.3"
@@ -29,12 +29,12 @@ kotlin = "2.4.20"
 kotlinx-coroutines-android = "1.11.0"
 kotlinx-datetime = "0.8.0-0.6.x-compat"
 kotlinx-serialization = "1.11.0"
-ktlint = "1.7.1"
-ktfmt = "0.61"
-kover = "0.9.9"
+ktlint = "1.8.0"
+ktfmt = "0.64"
+kover = "0.9.11"
 mokkery = "3.5.0"
 junit5 = "6.1.3"
-junit-platform = "6.1.3" # aligned with junit5 — JUnit Platform uses 1.x scheme
+junit-platform = "6.1.3" # JUnit Platform shares the junit5 version since JUnit 6
 kotest = "6.2.5"
 konsist = "0.17.3"
 turbine = "1.2.1"
@@ -44,14 +44,13 @@ compose-screenshot = "0.0.1-alpha16"
 
 # Baseline Profiles / Macrobenchmark
 # `benchmark` drives both the androidx.benchmark macro lib AND the androidx.baselineprofile
-# Gradle plugin (same coordinates/version). Kept on the alpha track to stay compatible with
-# AGP 9.x (the stable 1.4.x line predates AGP 9 support).
+# Gradle plugin (same coordinates/version). The stable 1.4.x line predates AGP 9 support.
 benchmark = "1.5.0"
 profileinstaller = "1.4.1"
 androidx-uiautomator = "2.4.0"
 
 # Compose Multiplatform
-compose-multiplatform = "1.12.0"
+compose-multiplatform = "1.12.1"
 compose-multiplatform-material3 = "1.12.0-alpha03"
 # `androidx-compose-bom-aligned` tracks androidx.compose.{runtime,ui,foundation,animation}
 # artifacts that ship in lockstep with CMP. Kept as a separate version ref so Renovate
@@ -70,9 +69,9 @@ jetbrains-adaptive = "1.3.0-rc01"
 # won conflict resolution, so every KML/KMZ import died with NoSuchMethodError (fatal in prod,
 # 2.8.0–2.8.1). KML is now read by the app's own xmlutil-based converter and that parser is unused, so
 # the pairing — and the canary test that guarded it — is gone. The floor stays as a plain minimum.
-android-maps-utils = "5.2.0"
-maplibre-compose = "0.17.0"
-maps-compose = "8.6.0"
+android-maps-utils = "6.0.0"
+maplibre-compose = "0.19.0"
+maps-compose = "9.0.0"
 
 # ML Kit
 mlkit-barcode-scanning = "17.3.0"
@@ -91,32 +90,31 @@ aboutlibraries = "15.2.0"
 jserialcomm = "2.11.4"
 coil = "3.6.3"
 datadog-gradle = "1.31.0"
-dd-sdk-android = "3.14.0"
+dd-sdk-android = "3.14.1"
 detekt = "2.0.0-alpha.6"
 dokka = "2.2.0"
 devtools-ksp = "2.3.12"
 firebase-crashlytics-gradle = "3.0.8"
 google-services-gradle = "4.5.0"
-markdown = "0.7.14"
+markdown = "0.7.16"
 markdownRenderer = "0.45.0"
 okio = "3.18.2"
 uri-kmp = "0.0.21"
-spotless = "8.10.2"
+spotless = "8.10.3"
 vico = "3.3.1"
 kable = "0.45.0"
-mqttastic = "0.8.2"
+mqttastic = "0.9.0"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.9.2-SNAPSHOT"
 # PoC: DisplayFrame screen mirroring, locally published from protobufs@screen-mirror-poc.
-# Revert to main's pin once protobufs#1054 is tagged. main tracks 2.8.0.96-g16fbc6c-SNAPSHOT.
+# Revert to main's pin once protobufs#1054 is tagged. main pins 2.8.1.
 # (requires -PuseMavenLocal or the gradle.properties flag on this branch)
 meshtastic-protobufs = "2.99.0-screen-mirror-poc-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
-develocity = "4.5.1"
-foojay-resolver = "1.0.0"
+develocity = "4.6.0"
 
 
 [libraries]
@@ -125,7 +123,7 @@ xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", v
 
 # AndroidX
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
-androidx-annotation = { module = "androidx.annotation:annotation", version = "1.10.0" }
+androidx-annotation = { module = "androidx.annotation:annotation", version = "1.11.0" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-appfunctions = { module = "androidx.appfunctions:appfunctions", version.ref = "appfunctions" }
 androidx-appfunctions-compiler = { module = "androidx.appfunctions:appfunctions-compiler", version.ref = "appfunctions" }
@@ -135,7 +133,7 @@ androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", versi
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
 androidx-camera-viewfinder-compose = { module = "androidx.camera.viewfinder:viewfinder-compose", version = "1.6.2" }
-androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.19.0" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.19.1" }
 androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.0" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version = "1.1.0" }
@@ -340,7 +338,7 @@ compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version.ref = "datadog-gradle" }
 compose-screenshot-gradlePlugin = { module = "com.android.compose.screenshot:screenshot-test-gradle-plugin", version.ref = "compose-screenshot" }
-detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.6.6" }
+detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.6.7" }
 detekt-formatting = { module = "dev.detekt:detekt-rules-ktlint-wrapper", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
@@ -384,7 +382,6 @@ dd-sdk-android = [
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
-android-test = { id = "com.android.test" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "compose-screenshot" }
 
@@ -413,9 +410,6 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 room = { id = "androidx.room3", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 
-develocity = { id = "com.gradle.develocity", version.ref = "develocity" }
-foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver", version.ref = "foojay-resolver" }
-
 # Meshtastic
 meshtastic-android-application = { id = "meshtastic.android.application" }
 meshtastic-android-application-compose = { id = "meshtastic.android.application.compose" }
@@ -427,6 +421,7 @@ meshtastic-android-room = { id = "meshtastic.android.room" }
 meshtastic-android-screenshot = { id = "meshtastic.android.screenshot" }
 # Vendored google/secrets-gradle-plugin (Isolated-Projects-safe) — see build-logic/convention.
 meshtastic-android-secrets = { id = "meshtastic.android.secrets" }
+meshtastic-android-test = { id = "meshtastic.android.test" }
 meshtastic-detekt = { id = "meshtastic.detekt" }
 meshtastic-docs = { id = "meshtastic.docs" }
 meshtastic-koin = { id = "meshtastic.koin" }
@@ -438,5 +433,4 @@ meshtastic-kmp-library = { id = "meshtastic.kmp.library" }
 meshtastic-kmp-library-compose = { id = "meshtastic.kmp.library.compose" }
 meshtastic-root = { id = "meshtastic.root" }
 meshtastic-spotless = { id = "meshtastic.spotless" }
-meshtastic-publishing = { id = "meshtastic.publishing" }
 meshtastic-aboutlibraries = { id = "meshtastic.aboutlibraries" }

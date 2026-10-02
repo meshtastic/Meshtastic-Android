@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -60,11 +61,13 @@ fun <T> PacketResponseStateDialog(
     onBack: () -> Unit = {},
     rebootBehavior: RebootBehavior = RebootBehavior.MAY_RESTART,
 ) {
+    val currentOnDismiss by rememberUpdatedState(onDismiss)
+    val currentOnBack by rememberUpdatedState(onBack)
     LaunchedEffect(state) {
         if (state is ResponseState.Success) {
             delay(AUTO_DISMISS_DELAY_MS)
-            onDismiss()
-            onBack()
+            currentOnDismiss()
+            currentOnBack()
         }
     }
 

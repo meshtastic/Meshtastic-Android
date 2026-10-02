@@ -1,6 +1,5 @@
 ---
 title: ホーム画面ウィジェット
-parent: User Guide
 nav_order: 20
 last_updated: 2026-08-30
 description: Meshtastic のホーム画面ウィジェットを追加すると、アプリを開かずに、接続中の無線機のローカル統計をひと目で確認できます。

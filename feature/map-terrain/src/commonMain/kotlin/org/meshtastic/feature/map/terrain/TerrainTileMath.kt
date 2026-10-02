@@ -33,22 +33,27 @@ data class TileIndex(val zoom: Int, val x: Int, val y: Int)
 data class LonLat(val longitude: Double, val latitude: Double)
 
 /**
- * Standard XYZ/slippy-map Web Mercator tile math, self-contained here (rather than reused from either flavor's own copy
- * — `feature/map-maplibre`'s `TileEstimate.kt` and the Google flavor's `WebMercatorTileMath` in the sibling
- * `feat/map-google-pmtiles-offline` branch) so this module has no dependency in either direction on flavor-specific
- * code — this module is a shared math library, not a consumer of one flavor's app code.
+ * Standard XYZ/slippy-map Web Mercator tile math. Depends on no map stack, so the terrain extractor, the Google
+ * flavor's offline maps and MapLibre's node clustering share it.
  */
 object TerrainTileMath {
 
     private const val MAX_LATITUDE = 85.05112878
 
-    fun tileAt(zoom: Int, latitude: Double, longitude: Double): TileIndex {
-        val n = 2.0.pow(zoom)
+    /** Where a point falls on the Web Mercator world, from 0.0 at the northwest corner to 1.0 on each axis. */
+    fun worldFraction(latitude: Double, longitude: Double): Pair<Double, Double> {
         val clampedLat = latitude.coerceIn(-MAX_LATITUDE, MAX_LATITUDE)
         val latRad = clampedLat * PI / HALF_TURN_DEGREES
-        val x = (((longitude + FULL_TURN_DEGREES / 2) / FULL_TURN_DEGREES) * n).toInt().coerceIn(0, (n - 1).toInt())
-        val y = (((1.0 - asinh(tan(latRad)) / PI) / 2.0) * n).toInt().coerceIn(0, (n - 1).toInt())
-        return TileIndex(zoom, x, y)
+        val x = (longitude + FULL_TURN_DEGREES / 2) / FULL_TURN_DEGREES
+        val y = (1.0 - asinh(tan(latRad)) / PI) / 2.0
+        return x to y
+    }
+
+    fun tileAt(zoom: Int, latitude: Double, longitude: Double): TileIndex {
+        val n = 2.0.pow(zoom)
+        val max = (n - 1).toInt()
+        val (x, y) = worldFraction(latitude, longitude)
+        return TileIndex(zoom, (x * n).toInt().coerceIn(0, max), (y * n).toInt().coerceIn(0, max))
     }
 
     /** The largest valid tile-column/row index at [zoom] — `2^zoom - 1`, the same bound [tileAt] clamps into. */
@@ -111,10 +116,14 @@ object TerrainTileMath {
      *
      * Standard inverse spherical Web Mercator — the mirror of [tileAt]'s own `asinh(tan(...))` forward transform.
      */
-    fun lonLatAt(tile: TileIndex, localX: Float, localY: Float): LonLat {
-        val n = 2.0.pow(tile.zoom)
-        val x = (tile.x + localX) / n
-        val y = (tile.y + localY) / n
+    fun lonLatAt(tile: TileIndex, localX: Float, localY: Float): LonLat =
+        lonLatAt(tile.zoom, (tile.x + localX).toDouble(), (tile.y + localY).toDouble())
+
+    /** [lonLatAt] for a point given in fractional tile units at [zoom], e.g. `x = 3.25` is a quarter into column 3. */
+    fun lonLatAt(zoom: Int, tileX: Double, tileY: Double): LonLat {
+        val n = 2.0.pow(zoom)
+        val x = tileX / n
+        val y = tileY / n
         val longitude = x * FULL_TURN_DEGREES - FULL_TURN_DEGREES / 2
         val latitudeRadians = atan(sinh(PI * (1.0 - 2.0 * y)))
         val latitude = latitudeRadians * HALF_TURN_DEGREES / PI

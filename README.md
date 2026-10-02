@@ -49,8 +49,8 @@ What those two channels point at right now:
 
 | Channel | Currently | Released |
 |---|---|---|
-| **Latest release** | `v2.8.1` | 2026-08-20 |
-| **Open beta** | `v2.8.2-open.2` | 2026-09-13 |
+| **Latest release** | `v2.8.2` | 2026-09-25 |
+| **Open beta** | *none published right now* | — |
 
 <!-- END GENERATED STATUS -->
 
@@ -84,7 +84,7 @@ The two documentation sites below are deployed to GitHub Pages automatically on 
 
 | Site | URL | Contents |
 |---|---|---|
-| **User & Developer Docs** | [meshtastic.github.io/Meshtastic-Android](https://meshtastic.github.io/Meshtastic-Android/) | Jekyll site — user guide, developer guide, in-app doc content |
+| **User & Developer Docs** | [meshtastic.github.io/Meshtastic-Android](https://meshtastic.github.io/Meshtastic-Android/) | Jekyll site with the user and developer guides |
 | **API Reference** | [meshtastic.github.io/Meshtastic-Android/api](https://meshtastic.github.io/Meshtastic-Android/api/) | Dokka-generated KDoc for all public APIs |
 
 ### Generating Locally
@@ -98,7 +98,7 @@ BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll serve \
 
 **API Reference (Dokka):**
 ```bash
-./gradlew dokkaGeneratePublicationHtml
+./gradlew :dokkaGeneratePublicationHtml
 # Output: build/dokka/html/index.html
 ```
 

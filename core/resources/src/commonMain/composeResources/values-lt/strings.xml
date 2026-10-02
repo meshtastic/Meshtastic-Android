@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Drėgmė</string>
+    <string name="a11y_temperature">Temperatūra</string>
     <string name="about">Apie</string>
     <string name="accept">Priimti</string>
     <!-- ACTION -->
@@ -27,7 +29,6 @@
     <string name="administration">Administravimas</string>
     <!-- AIR -->
     <string name="air_util_definition">Procentas eterio laiko naudoto perdavimams per pastarąją valandą.</string>
-    <!-- ALERT -->
     <string name="alert_bell_text">Skambučio simbolis!</string>
     <!-- APP -->
     <string name="app_too_old">Reikalingas programos atnaujinimas</string>
@@ -36,7 +37,6 @@
     <string name="aqi_good">Geras</string>
     <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>
     <string name="bad">Silpnas</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Baterija</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Skaičiuojama…</string>
@@ -47,7 +47,6 @@
     <string name="ch_util_definition">Dabartinio kanalo panaudojimas, įskaitant gerai suformuotą TX (siuntimas), RX (gavimas) ir netinkamai suformuotą RX (arba - triukšmas).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Šio kanalo URL yra neteisingas ir negali būti naudojamas</string>
-    <string name="channel_label">Kanalas</string>
     <string name="channel_name">Kanalo pavadinimas</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Pasirinkite Aplinką</string>
@@ -81,17 +80,15 @@
     <string name="disconnected">Atsijungta</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Tiesiogiai</string>
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Atstumas</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Redaguoti</string>
     <string name="eight_hours">8 Valandos</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Viešojo rakto neatitikimas</string>
     <string name="encryption_pkc">Viešojo rakto šifruotė</string>
-    <!-- ENVIRONMENT -->
     <string name="error">Klaida</string>
     <string name="error_duty_cycle">Pasiektas veikimo ciklo limitas. Šiuo metu negalima siųsti žinučių, bandykite vėliau.</string>
     <!-- EXPORT -->
@@ -106,9 +103,7 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Geras</string>
-    <!-- GPIO -->
     <string name="hops_away">Persiuntimų kiekis</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignoruoti</string>
     <string name="ignore_add">Ar pridėti „%1$s“ į ignoruojamų sąrašą? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
     <string name="ignore_remove">Ar pašalinti „%1$s“ iš ignoruojamų sąrašo? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
@@ -129,7 +124,6 @@
     <!-- LOG -->
     <string name="logs">Log`ai</string>
     <!-- MAP -->
-    <string name="map_cache_info">Talpyklos talpa: %1$d MB\nTalpyklos naudojimas: %2$d MB</string>
     <string name="map_cache_manager">Talpyklos valdymas</string>
     <string name="map_cache_size">Dabartinis talpyklos dydis</string>
     <string name="map_cache_tiles">%1$d plytelės</string>
@@ -189,6 +183,7 @@
     <string name="none">Nėra (išjungti)</string>
     <string name="none_quality">Nėra</string>
     <string name="not_connected">Neprijungtas</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Gerai</string>
@@ -197,17 +192,15 @@
     <string name="one_week">1 sav</string>
     <!-- OPEN -->
     <string name="open_settings">Atidaryti nustatymus</string>
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
+    <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Kalba</string>
     <string name="preferences_system_default">Numatytoji sistema</string>
     <!-- PREVIEW -->
-    <string name="private_key">Privatus raktas</string>
     <string name="provide_location_to_mesh">Pateikti telefono vietą tinklui</string>
     <string name="public_key">Viešasis raktas</string>
     <string name="qr_code">QR kodas</string>
@@ -219,12 +212,6 @@
     <string name="quick_chat_new">Naujas greitas pokalbis</string>
     <string name="radio_configuration">Radijo modulio konfigūracija</string>
     <string name="reboot">Perkrauti</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Persiųsti visas žinutes, nesvarbu jos iš Jūsų privataus tinklo ar iš kito tinklo su analogiškais LoRa parametrais.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Taip pat kaip ir VISI bet nebando dekoduoti paketų ir juos tiesiog persiunčia. Galima naudoti tik Repeater rolės įtaise. Įjungus bet kokiame kitame įtaise - veiks tiesiog kaip VISI.</string>
-    <string name="rebroadcast_mode_none_desc">Leidžiama tik SENSOR, TRACKER ar TAK_TRACKER rolių įtaisams. Tai užblokuos visas retransliacijas, ne taip kaip CLIENT_MUTE atveju.</string>
-    <string name="red">Raudona</string>
-    <string name="region_frequency_plan">Regionas</string>
     <!-- REMOTE -->
     <string name="remote_admin">Nuotolinis administravimas</string>
     <!-- REMOVE -->
@@ -238,23 +225,12 @@
     <string name="reset">Nustatyti iš naujo</string>
     <string name="reset_to_defaults">Atkurti numatytuosius parametrus</string>
     <!-- ROLE -->
-    <string name="role_client_desc">Programėlė prijungta prie atskiro susirašinėjimo įtaiso.</string>
-    <string name="role_client_hidden_desc">Įtaisas transliuojantis tik prireikus. Naudojama slaptumo ar energijos taupymui.</string>
-    <string name="role_client_mute_desc">Įtaisas kuris nepersiunčia kitų įtaisų paketų.</string>
-    <string name="role_repeater_desc">Stacionarus įtaisas tinklo išplėtimui, persiunčiantis žinutes. Nerodomas įtaisų sąraše.</string>
-    <string name="role_router_client_desc">ROUTER ir CLIENT kombinacija. Neskirta mobiliems įtaisams.</string>
-    <string name="role_router_desc">Stacionarus aukštuminis įtaisas geresniam tinklo padengimui. Matomas node`ų sąraše.</string>
-    <string name="role_sensor_desc">Pirmenybinis telemetrijos paketų siuntimas</string>
-    <string name="role_tak_desc">Optimizuota ATAK komunikacijai, sumažinta rutininių transliacijų</string>
-    <string name="role_tak_tracker_desc">Įgalina automatines TAK PLI transliacijas ir sumažina rutininių transliacijų kiekį.</string>
-    <string name="role_tracker_desc">Pirmenybinis GPS pozicijos paketų siuntimas</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Gautas negatyvus patvirtinimas</string>
     <string name="routing_error_no_route">Nėra maršruto</string>
     <string name="routing_error_none">Pristatymas patvirtintas</string>
     <string name="routing_error_timeout">Baigėsi laikas</string>
     <string name="rssi">RSSI</string>
-    <!-- SAVE -->
     <string name="save">Išsaugoti</string>
     <string name="save_changes">Išsaugoti</string>
     <!-- SCAN -->
@@ -262,7 +238,6 @@
     <!-- SECURITY -->
     <string name="select_all">Pažymėti visus</string>
     <string name="send">Siųsti</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Dalintis</string>
     <string name="share_to">Dalintis su…</string>
@@ -275,7 +250,6 @@
     <string name="swipe_action_delete">Ištrinti</string>
     <string name="swipe_action_mute">Nutildyti</string>
     <!-- TAK -->
-    <string name="tak_team_red">Raudona</string>
     <string name="theme">Išvaizda</string>
     <string name="theme_dark">Tamsi</string>
     <string name="theme_light">Šviesi</string>
@@ -304,7 +278,6 @@
     <string name="unknown_username">Nežinomas vartotojo vardas</string>
     <string name="unrecognized">Be kategorijos</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">per MQTT</string>
     <string name="waypoint_delete">Ištrinti orientyrą?</string>

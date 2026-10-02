@@ -34,17 +34,19 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
@@ -130,6 +132,8 @@ class FirmwareUpdateIntegrationTest {
         HiddenFeaturesUnlock(),
         analytics,
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
+        FakeBluetoothRepository(),
+        FirmwareUpdateStatusRepository(),
     )
 
     @Test

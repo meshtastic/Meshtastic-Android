@@ -1,6 +1,5 @@
 ---
 title: ファームウェア更新
-parent: User Guide
 nav_order: 13
 last_updated: 2026-09-06
 description: 無線機のファームウェアを Bluetooth または USB で更新します。OTA の手順、バージョンチャンネル、事前チェック、復旧について説明します。
@@ -60,7 +59,7 @@ Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB updat
 
 ### アプリ内での USB 更新
 
-無線機が（Bluetooth ではなく）**USB／シリアル**で接続されている場合、ファームウェア更新画面に「**USB ファイル転送**」が表示されます。 アプリはデバイスを DFU モードで再起動し、システムのファイル選択画面を使って `.uf2` ファイルをデバイスの DFU ドライブに保存するよう促します。 このオプションは USB／シリアル接続でのみ表示され、Bluetooth では利用できません。
+無線機が（Bluetooth ではなく）**USB／シリアル**で接続されている場合、ファームウェア更新画面に「**USB ファイル転送**」が表示されます。アプリはデバイスを DFU モードで再起動し、システムのファイル選択画面を使って `.uf2` ファイルをデバイスの DFU ドライブに保存するよう促します。このオプションは USB／シリアル接続でのみ表示され、Bluetooth では利用できません。
 
 > ℹ️ **Note:** A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
 
@@ -75,6 +74,8 @@ Select a firmware version before either one: the app hides both until a release 
 Both a USB erase and a bootloader upgrade write two files in turn, so you are asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
 
 The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything.
+
+For a bootloader upgrade, the app also reads the installed bootloader version from `INFO_UF2.TXT` and shows it next to the latest release before writing anything. The running firmware doesn't report its bootloader, so the installed version appears only once the device has restarted into update mode, never on the firmware screen while connected. If the two match, the bootloader is left as it is and the app moves straight on to reinstalling the firmware. Otherwise choose **Upgrade bootloader** to write it, or **Skip** to reinstall the firmware without changing it.
 
 On nRF52 the app must already know which Bluetooth stack your device uses before it starts, because it can't read the bootloader until the device has rebooted. If it can't confirm the stack, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
 

@@ -34,8 +34,6 @@ import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -45,7 +43,6 @@ import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.DeviceListItem
 import org.meshtastic.feature.connections.ui.components.DeviceSectionHeader
 import org.meshtastic.feature.connections.ui.components.DisconnectButton
-import org.meshtastic.feature.connections.ui.components.EmptyStateContent
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.proto.User
 
@@ -98,18 +95,6 @@ fun ConnectingDeviceInfoPreview() {
     }
 }
 
-@PreviewLightDark
-@Composable
-fun EmptyStateContentPreview() {
-    // Bounded height so the docs reference is a tight crop of the empty-state block, not a full-screen frame
-    // (EmptyStateContent fills its parent to center its content).
-    AppTheme {
-        Surface(modifier = Modifier.fillMaxWidth().height(220.dp)) {
-            EmptyStateContent(text = "No devices found", imageVector = MeshtasticIcons.Search)
-        }
-    }
-}
-
 // Real Connections-screen Bluetooth scan: the device list with the scan-in-progress header and a discovered radio.
 // Replaces the old wifi-provision "Searching for device…" splash that was mislabeled as the BLE scan in the docs.
 @PreviewLightDark
@@ -155,6 +140,30 @@ fun TransportSelectorPreview() {
         Surface {
             Box(modifier = Modifier.width(360.dp).padding(16.dp)) {
                 TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {})
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun TransportSelectorNoBluetoothPreview() {
+    AppTheme {
+        Surface {
+            Box(modifier = Modifier.width(360.dp).padding(16.dp)) {
+                TransportSelector(activeTransport = DeviceType.TCP, onSelectTransport = {}, showBluetooth = false)
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun TransportSelectorNoUsbPreview() {
+    AppTheme {
+        Surface {
+            Box(modifier = Modifier.width(360.dp).padding(16.dp)) {
+                TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {}, showUsb = false)
             }
         }
     }
@@ -257,6 +266,30 @@ private fun UsbPaneEmptyPreview() {
             onToggleNetworkScan = {},
             onAddManualAddress = { _, _ -> },
             onRemoveRecentAddress = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun DemoModeSectionPreview() {
+    AppTheme {
+        DeviceList(
+            connectionState = ConnectionState.Disconnected,
+            selectedDevice = "",
+            bleDevices = emptyList(),
+            usbDevices = emptyList(),
+            discoveredTcpDevices = emptyList(),
+            recentTcpDevices = emptyList(),
+            isBleScanning = false,
+            isNetworkScanning = false,
+            activeTransport = DeviceType.TCP,
+            onSelectDevice = {},
+            onToggleBleScan = {},
+            onToggleNetworkScan = {},
+            onAddManualAddress = { _, _ -> },
+            onRemoveRecentAddress = {},
+            virtualDevices = listOf(DeviceListEntry.Mock("Demo Mode"), DeviceListEntry.Replay("Demo Mode (Replay)")),
         )
     }
 }

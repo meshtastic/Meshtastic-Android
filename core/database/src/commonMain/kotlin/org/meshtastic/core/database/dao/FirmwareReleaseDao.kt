@@ -21,7 +21,7 @@ import androidx.room3.Query
 import androidx.room3.Transaction
 import androidx.room3.Upsert
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
-import org.meshtastic.core.database.entity.FirmwareReleaseType
+import org.meshtastic.core.model.FirmwareReleaseType
 
 @Dao
 interface FirmwareReleaseDao {

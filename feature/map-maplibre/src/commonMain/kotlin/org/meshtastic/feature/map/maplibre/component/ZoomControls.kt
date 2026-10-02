@@ -37,6 +37,9 @@ private const val ZOOM_INSET = 8
 /**
  * Lift above the attribution button, which is 40dp of icon plus its pill padding and shares this corner. More than the
  * cards need on the other side, where only the 23dp wordmark sits.
+ *
+ * The button is there either way — the small maps only collapse its credit, see [CollapsedAttributionOrnaments] — so
+ * this clears it whether it is expanded or not.
  */
 private const val ZOOM_BOTTOM_INSET = 56
 
@@ -47,8 +50,8 @@ private const val ZOOM_BOTTOM_INSET = 56
  * extension because the placement is the point: a caller that had to align it itself would eventually align it
  * somewhere else.
  *
- * Lifted clear of the logo and attribution row along the bottom edge, which the styles are licensed on condition of
- * showing — see [MeshMapOrnaments].
+ * Lifted clear of the wordmark and attribution button along the bottom edge, which every map shows. See
+ * [MeshMapOrnaments] for why the main map carries the credit outright and the small maps behind the button.
  */
 @Composable
 internal fun BoxScope.MapZoom(mapState: MapState, basemap: Basemap) {

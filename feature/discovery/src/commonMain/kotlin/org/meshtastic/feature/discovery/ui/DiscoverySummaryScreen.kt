@@ -66,6 +66,7 @@ import org.meshtastic.core.resources.discovery_stat_total_dwell_time
 import org.meshtastic.core.resources.discovery_stat_total_unique_nodes
 import org.meshtastic.core.resources.discovery_summary_not_available
 import org.meshtastic.core.resources.discovery_view_map
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -76,6 +77,7 @@ import org.meshtastic.feature.discovery.export.ExportResult
 import org.meshtastic.feature.discovery.export.rememberExportSaver
 import org.meshtastic.feature.discovery.scan.PresetRanking
 import org.meshtastic.feature.discovery.ui.component.PresetResultCard
+import kotlin.time.DurationUnit
 
 @Composable
 fun DiscoverySummaryScreen(
@@ -235,7 +237,7 @@ private fun SessionOverviewCard(session: DiscoverySessionEntity) {
             )
             StatRow(
                 label = stringResource(Res.string.discovery_stat_total_dwell_time),
-                value = formatDuration(session.totalDwellSeconds),
+                value = formatDuration(session.totalDwellSeconds, smallest = DurationUnit.MINUTES),
             )
             StatRow(
                 label = stringResource(Res.string.discovery_stat_status),
@@ -311,11 +313,4 @@ internal fun StatRow(label: String, value: String, modifier: Modifier = Modifier
         )
         Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
     }
-}
-
-internal fun formatDuration(totalSeconds: Long): String {
-    val minutes = totalSeconds / 60
-    val hours = minutes / 60
-    val remainingMinutes = minutes % 60
-    return if (hours > 0) "${hours}h ${remainingMinutes}m" else "${minutes}m"
 }

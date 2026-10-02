@@ -37,6 +37,44 @@ class TerrainTileMathTest {
     }
 
     @Test
+    fun `tileAt matches published slippy map tiles`() {
+        assertEquals(TileIndex(10, 163, 395), TerrainTileMath.tileAt(10, latitude = 37.7749, longitude = -122.4194))
+        assertEquals(TileIndex(16, 32745, 21794), TerrainTileMath.tileAt(16, latitude = 51.5007, longitude = -0.1246))
+    }
+
+    @Test
+    fun `lonLatAt returns a tile's northwest corner in fractional tile units`() {
+        val corner = TerrainTileMath.lonLatAt(zoom = 10, tileX = 163.0, tileY = 395.0)
+        assertEquals(-122.6953125, corner.longitude, absoluteTolerance = 1e-9)
+        assertEquals(37.99616267972812, corner.latitude, absoluteTolerance = 1e-9)
+
+        val inside = TerrainTileMath.lonLatAt(zoom = 2, tileX = 3.25, tileY = 1.75)
+        assertEquals(112.5, inside.longitude, absoluteTolerance = 1e-9)
+        assertEquals(21.943045533438177, inside.latitude, absoluteTolerance = 1e-9)
+    }
+
+    @Test
+    fun `worldFraction is the inverse of lonLatAt and pins the poles to the edges`() {
+        assertEquals(0.5 to 0.5, TerrainTileMath.worldFraction(latitude = 0.0, longitude = 0.0))
+
+        val (x, y) = TerrainTileMath.worldFraction(latitude = 37.7749, longitude = -122.4194)
+        val back = TerrainTileMath.lonLatAt(zoom = 0, tileX = x, tileY = y)
+        assertEquals(-122.4194, back.longitude, absoluteTolerance = 1e-9)
+        assertEquals(37.7749, back.latitude, absoluteTolerance = 1e-9)
+
+        assertEquals(
+            0.0,
+            TerrainTileMath.worldFraction(latitude = 90.0, longitude = 0.0).second,
+            absoluteTolerance = 1e-9,
+        )
+        assertEquals(
+            1.0,
+            TerrainTileMath.worldFraction(latitude = -90.0, longitude = 0.0).second,
+            absoluteTolerance = 1e-9,
+        )
+    }
+
+    @Test
     fun `tilesAt covers a bbox's own corners inclusively`() {
         val bounds = GeoBounds(south = -1.0, west = -1.0, north = 1.0, east = 1.0)
         val tiles = TerrainTileMath.tilesAt(zoom = 2, bounds)

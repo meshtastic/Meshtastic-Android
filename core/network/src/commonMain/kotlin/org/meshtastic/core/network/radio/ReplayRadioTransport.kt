@@ -215,7 +215,7 @@ class ReplayRadioTransport(
 
     /** Reads a big-endian `u32` as a non-negative [Int], rejecting truncation and the >2 GiB high-bit range. */
     private fun Buffer.readUInt32(label: String): Int {
-        if (size < INT_BYTES) throw IllegalArgumentException("Malformed replay asset: truncated $label")
+        require(size >= INT_BYTES) { "Malformed replay asset: truncated $label" }
         val value =
             try {
                 readInt()

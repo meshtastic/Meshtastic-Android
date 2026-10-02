@@ -39,6 +39,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.ChannelKeyChange
 import org.meshtastic.core.model.util.ConversationSlot
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.proto.MeshPacket
 
 @Suppress("TooManyFunctions", "LargeClass")
@@ -351,8 +352,7 @@ interface PacketDao {
      */
     @Transaction
     suspend fun applyOutgoingReactionQueueStatus(packetId: Int, status: MessageStatus): ReactionEntity? {
-        val match =
-            findReactionsWithId(packetId).filter { it.status != MessageStatus.RECEIVED }.singleOrNull() ?: return null
+        val match = findReactionsWithId(packetId).singleOrNull { it.status != MessageStatus.RECEIVED } ?: return null
         if (shouldApplyOutgoingQueueStatus(match.status, status)) update(match.copy(status = status))
         return match
     }
@@ -1006,7 +1006,8 @@ interface PacketDao {
     private fun MessageStatus.isDowngradeFrom(current: MessageStatus?) =
         current == MessageStatus.SFPP_CONFIRMED && this == MessageStatus.SFPP_ROUTING
 
-    private fun resolveNewTime(rxTime: Long, fallback: Long) = if (rxTime > 0) rxTime * MILLIS_PER_SECOND else fallback
+    private fun resolveNewTime(rxTime: Long, fallback: Long) =
+        if (rxTime > 0) rxTime * TimeConstants.MS_PER_SEC else fallback
 
     /**
      * Atomically applies an SFPP delivery-status transition to every packet and reaction matching [packetId] + address
@@ -1089,10 +1090,6 @@ interface PacketDao {
     }
 
     // endregion
-
-    companion object {
-        private const val MILLIS_PER_SECOND = 1000L
-    }
 
     // region ── FTS5 Search ──
 
@@ -1197,10 +1194,9 @@ private suspend fun PacketDao.applyLiveMoves(liveMoves: List<ChannelKeyChange>) 
         } else {
             getAllUserPacketsForMigration().filter { ContactKey(it.contact_key).channelOrNull in sourceIndices }
         }
-    val moveByIndex =
-        liveMoves.associate { change ->
-            (change.from as ConversationSlot.Live).index to (change.to as ConversationSlot.Live).index
-        }
+    val moveByIndex = liveMoves.associate { change ->
+        (change.from as ConversationSlot.Live).index to (change.to as ConversationSlot.Live).index
+    }
 
     // Settings are re-keyed the same way: read every affected row, then rewrite, so a swap cannot land a
     // conversation's mute or pin on the channel it traded places with.

@@ -36,7 +36,8 @@ class SendMessageWorker(
     private val radioController: RadioController,
 ) : CoroutineWorker(context, params) {
 
-    @Suppress("TooGenericExceptionCaught", "SwallowedException", "ReturnCount")
+    // A failed or cancelled send rolls its claim back (NonCancellable in the repository); cancellation is rethrown.
+    @Suppress("TooGenericExceptionCaught", "SwallowedException", "ReturnCount", "SuspendFunSwallowedCancellation")
     override suspend fun doWork(): Result {
         val packetUuid = inputData.getLong(KEY_PACKET_UUID, 0L)
         val myNodeNum = inputData.getInt(KEY_MY_NODE_NUM, 0)

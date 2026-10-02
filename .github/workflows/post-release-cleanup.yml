@@ -1,5 +1,7 @@
 name: Post-Release Cleanup
 
+# docs-release.yml dispatches this with confirm_deletion=true once a production tag's
+# /vX.Y.Z/ is on gh-pages. A manual dispatch is the retry path and defaults to a dry run.
 on:
   workflow_dispatch:
     inputs:
@@ -37,6 +39,18 @@ jobs:
     env:
       BASE_VERSION: ${{ github.event.inputs.base_version }}
       CONFIRM_DELETION: ${{ github.event.inputs.confirm_deletion }}
+      # Keeps the vX.Y.Z-* names on stdin whose X.Y.Z is at or below BASE_VERSION. Anything
+      # above it belongs to a later cycle, whose draft release promote.yml still needs.
+      AT_OR_BELOW: |
+        {
+          v = $0; sub(/^v/, "", v); sub(/-.*/, "", v)
+          split(v, a, "."); split(base, b, ".")
+          for (i = 1; i <= 3; i++) {
+            if (a[i] + 0 < b[i] + 0) { print; next }
+            if (a[i] + 0 > b[i] + 0) next
+          }
+          print
+        }
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -65,12 +79,12 @@ jobs:
           # v2.7.14-internal.N draft built while working toward 2.8.0). Scoping this
           # sweep to "v${BASE_VERSION}-*" misses exactly those, leaving stale drafts
           # behind forever. Once base_version has shipped as a stable release, every
-          # numbered internal/open/closed pre-release — regardless of which version
-          # it was tagged under — is superseded, so match on the pre-release SHAPE
-          # instead of a version prefix.
+          # numbered internal/open/closed pre-release at or below it is superseded,
+          # so match on the pre-release SHAPE capped by AT_OR_BELOW instead of a
+          # version prefix.
           TAG_PATTERN='^v[0-9]+\.[0-9]+\.[0-9]+-(internal|open|closed)\.[0-9]+$'
-          echo "Searching for pre-releases matching pattern '$TAG_PATTERN'."
-          RELEASES_TO_DELETE=$(gh release list --json tagName,isPrerelease,isDraft --limit 1000 | jq -r --arg pattern "$TAG_PATTERN" '.[] | select((.isPrerelease == true or .isDraft == true) and .tagName != null and (.tagName | test($pattern))) | .tagName')
+          echo "Searching for pre-releases matching pattern '$TAG_PATTERN' at or below $BASE_VERSION."
+          RELEASES_TO_DELETE=$(gh release list --json tagName,isPrerelease,isDraft --limit 1000 | jq -r --arg pattern "$TAG_PATTERN" '.[] | select((.isPrerelease == true or .isDraft == true) and .tagName != null and (.tagName | test($pattern))) | .tagName' | awk -v base="$BASE_VERSION" "$AT_OR_BELOW")
 
           if [ -z "$RELEASES_TO_DELETE" ]; then
             echo "No stale internal/open/closed pre-releases found."
@@ -88,8 +102,9 @@ jobs:
 
       # The docs site keeps a per-tag snapshot for every open/closed testing tag
       # in a version cycle (see docs-release.yml). Once vX.Y.Z ships, /vX.Y.Z/
-      # supersedes them all, so reap them to stop gh-pages growing without bound.
-      - name: Cleanup pre-release docs snapshots on gh-pages
+      # supersedes them all, so reap them. Production copies older than the
+      # release before vX.Y.Z go too, to keep gh-pages under the Pages size limit.
+      - name: Cleanup superseded docs on gh-pages
         run: |
           set -euo pipefail
           DRY_RUN=true
@@ -121,29 +136,51 @@ jobs:
           # dev cycle, including before the version-bump commit lands, so some may
           # still be named after the PRIOR release (e.g. v2.7.14-open.3 built while
           # working toward 2.8.0). Once /v${BASE_VERSION}/ is confirmed published
-          # above, every numbered open/closed snapshot is superseded regardless of
-          # which version it was tagged under — so match the snapshot-dir SHAPE
-          # instead of a version prefix.
+          # above, every numbered open/closed snapshot at or below it is superseded,
+          # so match the snapshot-dir SHAPE capped by AT_OR_BELOW instead of a
+          # version prefix.
           mapfile -t stale < <(
             find "$work" -maxdepth 1 -mindepth 1 -type d \
               -regextype posix-extended \
-              -regex ".*/v[0-9]+\.[0-9]+\.[0-9]+-(open|closed)\.[0-9]+" -printf '%f\n' | sort
+              -regex ".*/v[0-9]+\.[0-9]+\.[0-9]+-(open|closed)\.[0-9]+" -printf '%f\n' \
+              | awk -v base="$BASE_VERSION" "$AT_OR_BELOW" | sort
           )
 
-          if [ ${#stale[@]} -eq 0 ]; then
-            echo "No pre-release docs snapshots found."
+          # Production copies strictly below base_version, oldest first. The newest of them
+          # stays beside base_version; nothing above base_version is listed, so a backfill
+          # dispatch for an old version never deletes newer docs.
+          mapfile -t older < <(
+            find "$work" -maxdepth 1 -mindepth 1 -type d \
+              -regextype posix-extended \
+              -regex ".*/v[0-9]+\.[0-9]+\.[0-9]+" -printf '%f\n' \
+              | awk -v base="$BASE_VERSION" "$AT_OR_BELOW" \
+              | grep -vxF "v${BASE_VERSION}" | sort -V || true
+          )
+          culled=()
+          if [ ${#older[@]} -gt 1 ]; then
+            culled=("${older[@]:0:${#older[@]}-1}")
+          fi
+
+          if [ ${#stale[@]} -eq 0 ] && [ ${#culled[@]} -eq 0 ]; then
+            echo "No superseded docs found."
             exit 0
           fi
 
-          printf 'Pre-release docs snapshots to reap:\n'
-          printf '  %s\n' "${stale[@]}"
+          if [ ${#stale[@]} -gt 0 ]; then
+            printf 'Pre-release docs snapshots to reap:\n'
+            printf '  %s\n' "${stale[@]}"
+          fi
+          if [ ${#culled[@]} -gt 0 ]; then
+            printf 'Production docs older than %s to remove:\n' "${older[-1]}"
+            printf '  %s\n' "${culled[@]}"
+          fi
 
           if [ "$DRY_RUN" = true ]; then
             echo "DRY RUN: the directories above would be removed from gh-pages."
             exit 0
           fi
 
-          for d in "${stale[@]}"; do
+          for d in "${stale[@]}" "${culled[@]}"; do
             rm -rf "${work:?}/$d"
           done
 
@@ -159,9 +196,9 @@ jobs:
           fi
           git -c user.name='github-actions[bot]' \
               -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-              commit -q -m "docs: reap pre-release snapshots for ${BASE_VERSION}"
+              commit -q -m "docs: reap superseded docs for ${BASE_VERSION}"
           git push --quiet origin HEAD:gh-pages
-          echo "Removed ${#stale[@]} pre-release docs snapshot(s) from gh-pages."
+          echo "Removed ${#stale[@]} pre-release and ${#culled[@]} production docs directories from gh-pages."
 
       - name: Cleanup dangling pre-release tags
         env:
@@ -169,8 +206,8 @@ jobs:
         run: |
           set -euo pipefail
           # Same rationale as the release-cleanup step above: match the
-          # internal/open/closed pre-release tag SHAPE across all versions, not just
-          # tags prefixed with this dispatch's base_version.
+          # internal/open/closed pre-release tag SHAPE at or below base_version,
+          # not just tags prefixed with it.
           TAG_PATTERN='^v[0-9]+\.[0-9]+\.[0-9]+-(internal|open|closed)\.[0-9]+$'
           echo "Searching for any remaining remote pre-release tags matching pattern '$TAG_PATTERN'."
 
@@ -181,7 +218,7 @@ jobs:
           REMOTE_TAGS=$(git ls-remote --tags origin "refs/tags/v*" | awk '{print $2}' | sed 's|refs/tags/||')
 
           # Some tags may have been deleted already by the previous 'release delete' step.
-          TAGS_TO_DELETE=$(grep -E "$TAG_PATTERN" <<<"$REMOTE_TAGS" || true)
+          TAGS_TO_DELETE=$(grep -E "$TAG_PATTERN" <<<"$REMOTE_TAGS" | awk -v base="$BASE_VERSION" "$AT_OR_BELOW" || true)
 
           if [ -z "$TAGS_TO_DELETE" ]; then
             echo "No dangling pre-release tags found."

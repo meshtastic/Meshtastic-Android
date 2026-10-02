@@ -33,15 +33,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -71,7 +72,7 @@ class RadioControllerRestoreTest {
         private val dataHandler: MeshDataHandler = mock(MockMode.autofill)
         private val analytics: PlatformAnalytics = mock(MockMode.autofill)
         private val uiPrefs: UiPrefs = mock(MockMode.autofill)
-        private val notificationManager: NotificationManager = mock(MockMode.autofill)
+        private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
         private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
         private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
 
@@ -99,10 +100,11 @@ class RadioControllerRestoreTest {
                 meshPrefs = meshPrefs,
                 uiPrefs = uiPrefs,
                 databaseManager = databaseManager,
-                notificationManager = notificationManager,
+                serviceNotifications = serviceNotifications,
                 messageProcessor = lazy { messageProcessor },
                 radioConfigRepository = radioConfigRepository,
-                scope = scope,
+                scope = scope.asServiceScope(),
+                deviceAddressChangeHook = {},
             )
         }
     }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2026 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!--
+          The automation entry point: MainActivity honours its launch switches only when started through this alias.
+          DUMP is held by the shell and never by an installed app, so `adb shell am start` and UiAutomation can use it
+          and nothing else on the device can.
+        -->
+        <activity-alias
+            android:name="org.meshtastic.app.AutomationLauncher"
+            android:targetActivity="org.meshtastic.app.MainActivity"
+            android:permission="android.permission.DUMP"
+            android:exported="true" />
+    </application>
+
+</manifest>

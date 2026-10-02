@@ -29,7 +29,7 @@ class AboutLibrariesConventionPlugin : Plugin<Project> {
             pluginManager.apply(libs.plugin("aboutlibraries").get().pluginId)
 
             extensions.configure<AboutLibrariesExtension> {
-                // aboutLibraries.release=true is only passed for google builds (see Fastfile).
+                // release.yml passes aboutLibraries.release=true to the Google and desktop release builds only.
                 // For fdroid/reproducible builds, offlineMode=true ensures no network calls
                 // and deterministic output. See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
                 val isReleaseBuild =
@@ -46,11 +46,12 @@ class AboutLibrariesConventionPlugin : Plugin<Project> {
 
                 collect {
                     configPath.set(licenseConfigDir)
-                    fetchRemoteLicense.set(isReleaseBuild && ghToken.isPresent)
-                    fetchRemoteFunding.set(isReleaseBuild && ghToken.isPresent)
-                    if (ghToken.isPresent) {
-                        gitHubApiToken.set(ghToken.get())
-                    }
+                    // Wired as providers, never read here: CI issues a new token per step, and a token read at
+                    // configuration time becomes a configuration cache input that no later step can reuse.
+                    val fetchRemote = ghToken.map { isReleaseBuild }.orElse(false)
+                    fetchRemoteLicense.set(fetchRemote)
+                    fetchRemoteFunding.set(fetchRemote)
+                    gitHubApiToken.set(ghToken)
                 }
                 export {
                     excludeFields.set(listOf("generated"))
@@ -69,8 +70,7 @@ class AboutLibrariesConventionPlugin : Plugin<Project> {
             // See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
             tasks
                 .matching {
-                    it.name.startsWith("process") &&
-                        (it.name.endsWith("Resources") || it.name.endsWith("JavaRes"))
+                    it.name.startsWith("process") && (it.name.endsWith("Resources") || it.name.endsWith("JavaRes"))
                 }
                 .configureEach { dependsOn("exportLibraryDefinitions") }
         }

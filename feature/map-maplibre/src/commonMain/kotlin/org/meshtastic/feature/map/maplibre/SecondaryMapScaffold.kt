@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.interaction.MapInteractions
@@ -34,15 +35,18 @@ import org.maplibre.compose.map.MapState
 import org.maplibre.compose.map.MapUiOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.rememberMapState
+import org.maplibre.compose.overlay.include
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.feature.map.component.MapEngineUnavailable
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
+import org.meshtastic.feature.map.maplibre.component.CollapsedAttributionOrnaments
 import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.feature.map.maplibre.style.zoomRange
+import org.maplibre.compose.overlay.MapOverlay as MaplibreOverlay
 
 /**
  * The map state the maps outside the main one all share.
@@ -82,6 +86,9 @@ internal fun rememberSecondaryMapState(
  *
  * [basemaps] must be the same selection that state was built with: it supplies the zoom range the camera is held to,
  * and a different value here would clamp the camera to a range the loaded style cannot serve.
+ *
+ * [showAttribution] picks between the credit open and the credit collapsed; both keep the wordmark and the button that
+ * reveals it. See [CollapsedAttributionOrnaments].
  */
 @Composable
 internal fun SecondaryMapSurface(
@@ -90,9 +97,10 @@ internal fun SecondaryMapSurface(
     modifier: Modifier = Modifier.fillMaxSize(),
     interactions: MapInteractions = SecondaryMapInteractions,
     uiOptions: MapUiOptions = MapUiOptions.Standard,
+    showAttribution: Boolean = true,
 ) {
-    // Same guard as MeshMap, and in the same place: the state is pure Kotlin, the map view is what loads the
-    // native library. The style content is never composed without a presentation, so it stops here too.
+    // Same guard as MeshMap, and in the same place: the style content is never composed without a presentation, so
+    // it stops here too. Like MeshMap's, it covers the view and not the state.
     if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
 
     val zoomRange = basemaps.current.zoomRange()
@@ -104,6 +112,8 @@ internal fun SecondaryMapSurface(
         CameraConstraints(minZoom = zoomRange.start.toDouble(), maxZoom = zoomRange.endInclusive.toDouble()),
         interactions = interactions,
         uiOptions = uiOptions,
+        // The library's default, spelled out so the collapsed branch stays a narrowing of it.
+        overlay = { include(if (showAttribution) MaplibreOverlay.Default else CollapsedAttributionOrnaments) },
     )
 }
 
@@ -153,8 +163,9 @@ internal fun FitBoundsOnceVisible(
     // is cancelled by user input as well as by [key]: a fit lost that way is not retried until [key] changes
     // again, which for these maps may be never.
     val hasViewport = mapState.viewport != null
+    val fitPadding = padding.toDpPadding(LocalLayoutDirection.current)
     LaunchedEffect(key, hasViewport) {
         if (!hasViewport) return@LaunchedEffect
-        currentBounds()?.let { mapState.frameBounds(it, padding = padding) }
+        currentBounds()?.let { mapState.frameBounds(it, padding = fitPadding) }
     }
 }

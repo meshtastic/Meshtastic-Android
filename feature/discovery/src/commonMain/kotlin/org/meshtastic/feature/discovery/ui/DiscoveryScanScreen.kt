@@ -68,6 +68,7 @@ import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.discovery_analysing_results
 import org.meshtastic.core.resources.discovery_cancelling_scan
 import org.meshtastic.core.resources.discovery_connection_warning
+import org.meshtastic.core.resources.discovery_dwell_minutes
 import org.meshtastic.core.resources.discovery_dwell_time
 import org.meshtastic.core.resources.discovery_dwell_time_description
 import org.meshtastic.core.resources.discovery_keep_screen_awake
@@ -355,7 +356,7 @@ private fun DwellTimePicker(
             )
             ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { if (enabled) expanded = it }) {
                 OutlinedTextField(
-                    value = "$selectedMinutes min",
+                    value = stringResource(Res.string.discovery_dwell_minutes, selectedMinutes),
                     onValueChange = {},
                     readOnly = true,
                     enabled = enabled,
@@ -365,7 +366,7 @@ private fun DwellTimePicker(
                 ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     DWELL_OPTIONS.forEach { minutes ->
                         DropdownMenuItem(
-                            text = { Text("$minutes min") },
+                            text = { Text(stringResource(Res.string.discovery_dwell_minutes, minutes)) },
                             onClick = {
                                 onMinuteSelect(minutes)
                                 expanded = false

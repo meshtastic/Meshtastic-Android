@@ -17,14 +17,20 @@
 package org.meshtastic.core.repository.usecase
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.model.ContactKey
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MessageQueue
@@ -39,6 +45,8 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 
 class SendMessageUseCaseTest {
 
@@ -78,7 +86,7 @@ class SendMessageUseCaseTest {
         // Arrange
         val ourNode = Node(num = 1, user = User.Builder().also { wb -> wb.id = "!1234" }.build())
         nodeRepository.setOurNode(ourNode)
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act
         useCase("Hello broadcast", "0${NodeAddress.ID_BROADCAST}", null)
@@ -93,7 +101,7 @@ class SendMessageUseCaseTest {
         // Arrange
         val ourNode = Node(num = 1, user = User.Builder().also { wb -> wb.id = "!1234" }.build())
         nodeRepository.setOurNode(ourNode)
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act
         useCase("Hello", "0${NodeAddress.ID_BROADCAST}", null)
@@ -110,6 +118,91 @@ class SendMessageUseCaseTest {
         useCase("persisted identity", "0${NodeAddress.ID_BROADCAST}", null)
 
         verifySuspend { messageQueue.enqueue(persistedId) }
+    }
+
+    @Test
+    fun `a queued message reports the packet id it was saved under`() = runTest {
+        var savedPacket: DataPacket? = null
+        everySuspend { packetRepository.savePacket(any(), any(), any(), any(), any(), any()) } calls
+            { call ->
+                savedPacket = call.arg<DataPacket>(2)
+                PersistedPacketId(myNodeNum = 1, uuid = 10L)
+            }
+
+        val outcome = useCase("Hello", "0${NodeAddress.ID_BROADCAST}", null)
+
+        val queued = assertIs<SendMessageOutcome.Queued>(outcome)
+        queued.packetId shouldBe savedPacket?.id
+    }
+
+    @Test
+    fun `a retired conversation is refused and nothing is saved or queued`() = runTest {
+        nodeRepository.setOurNode(Node(num = 1))
+
+        val outcome = useCase("Hello", ContactKey.retiredBroadcast("token").value, null)
+
+        outcome shouldBe SendMessageOutcome.Refused
+        verifySuspend(VerifyMode.exactly(0)) { packetRepository.savePacket(any(), any(), any(), any(), any(), any()) }
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    @Test
+    fun `cancellation while sharing the contact propagates and nothing is queued`() = runTest {
+        setUpDirectMessage(firmwareVersion = "2.7.12")
+        radioController.sendSharedContactFailure = CancellationException("scope closed")
+
+        assertFailsWith<CancellationException> { useCase("Direct message", "!dest", null) }
+
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    @Test
+    fun `cancellation while favoriting propagates and nothing is queued`() = runTest {
+        setUpDirectMessage(firmwareVersion = "2.0.0")
+        radioController.setFavoriteFailure = CancellationException("scope closed")
+
+        assertFailsWith<CancellationException> { useCase("Direct message", "!dest", null) }
+
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    @Test
+    fun `a failed contact share still queues the message`() = runTest {
+        setUpDirectMessage(firmwareVersion = "2.7.12")
+        radioController.sendSharedContactFailure = RuntimeException("radio down")
+
+        val outcome = useCase("Direct message", "!dest", null)
+
+        assertIs<SendMessageOutcome.Queued>(outcome)
+        verifySuspend { messageQueue.enqueue(any()) }
+    }
+
+    @Test
+    fun `cancellation while saving propagates`() = runTest {
+        everySuspend { packetRepository.savePacket(any(), any(), any(), any(), any(), any()) } throws
+            CancellationException("scope closed")
+
+        assertFailsWith<CancellationException> { useCase("Hello", "0${NodeAddress.ID_BROADCAST}", null) }
+
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    private suspend fun setUpDirectMessage(firmwareVersion: String) {
+        nodeRepository.setOurNode(
+            Node(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!local"
+                        wb.role = Config.DeviceConfig.Role.CLIENT
+                    }
+                    .build(),
+                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = firmwareVersion }.build(),
+            ),
+        )
+        nodeRepository.upsert(Node(num = 12345, user = User.Builder().also { wb -> wb.id = "!dest" }.build()))
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
     }
 
     @Test
@@ -132,7 +225,7 @@ class SendMessageUseCaseTest {
         val destNode = Node(num = 12345, user = User.Builder().also { wb -> wb.id = "!dest" }.build())
         nodeRepository.upsert(destNode)
 
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act
         useCase("Direct message", "!dest", null)
@@ -162,7 +255,7 @@ class SendMessageUseCaseTest {
         val destNode = Node(num = 67890, user = User.Builder().also { wb -> wb.id = "!dest" }.build())
         nodeRepository.upsert(destNode)
 
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act
         useCase("Direct message", "!dest", null)
@@ -177,7 +270,7 @@ class SendMessageUseCaseTest {
         // Arrange
         val ourNode = Node(num = 1)
         nodeRepository.setOurNode(ourNode)
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(true)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = true
 
         val originalText = "\u0410pple" // Cyrillic A
 
@@ -208,7 +301,7 @@ class SendMessageUseCaseTest {
         val destNode = Node(num = 0x70fdde9b.toInt(), user = User.Builder().also { wb -> wb.id = "!70fdde9b" }.build())
         nodeRepository.upsert(destNode)
 
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act — PKI DM: channel 8 + node ID
         useCase("PKI direct message", "${NodeAddress.PKC_CHANNEL_INDEX}!70fdde9b", null)
@@ -239,7 +332,7 @@ class SendMessageUseCaseTest {
         val destNode = Node(num = 0x12345678, user = User.Builder().also { wb -> wb.id = "!12345678" }.build())
         nodeRepository.upsert(destNode)
 
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act — channel 1 DM (not PKI, not legacy)
         useCase("Channel DM", "1!12345678", null)
@@ -269,7 +362,7 @@ class SendMessageUseCaseTest {
         val destNode = Node(num = 0xABCDEF01.toInt(), user = User.Builder().also { wb -> wb.id = "!abcdef01" }.build())
         nodeRepository.upsert(destNode)
 
-        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+        appPreferences.homoglyph.homoglyphEncodingEnabled.value = false
 
         // Act — PKI DM with firmware that doesn't support verified contacts
         useCase("Old PKI DM", "${NodeAddress.PKC_CHANNEL_INDEX}!abcdef01", null)

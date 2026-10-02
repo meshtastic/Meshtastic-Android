@@ -69,6 +69,7 @@ import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.show_layer
 import org.meshtastic.core.resources.url
 import org.meshtastic.core.resources.url_cannot_be_empty
+import org.meshtastic.core.resources.url_http_localhost_only
 import org.meshtastic.core.resources.url_must_be_http
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.CellTower
@@ -80,6 +81,7 @@ import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
 import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
+import org.meshtastic.feature.map.layers.isRefusedCleartextLayerUrl
 import org.meshtastic.feature.map.layers.isValidNetworkLayerUrl
 import org.meshtastic.feature.map.layers.opacityOf
 
@@ -271,6 +273,7 @@ fun AddNetworkLayerDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> 
     val emptyNameError = stringResource(Res.string.name_cannot_be_empty)
     val emptyUrlError = stringResource(Res.string.url_cannot_be_empty)
     val invalidUrlError = stringResource(Res.string.url_must_be_http)
+    val httpLocalhostOnlyError = stringResource(Res.string.url_http_localhost_only)
 
     // Validated here, not just in the store: the store's error return is dropped by two of its three callers,
     // so this dialog is the one place the user can be told. Same rules as [isValidNetworkLayerUrl].
@@ -279,6 +282,7 @@ fun AddNetworkLayerDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> 
         urlError =
             when {
                 url.isBlank() -> emptyUrlError
+                isRefusedCleartextLayerUrl(url.trim()) -> httpLocalhostOnlyError
                 !isValidNetworkLayerUrl(url.trim()) -> invalidUrlError
                 else -> null
             }

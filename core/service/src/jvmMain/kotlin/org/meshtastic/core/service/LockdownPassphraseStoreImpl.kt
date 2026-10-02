@@ -22,34 +22,25 @@ import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.StoredPassphrase
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.security.KeyStore
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import javax.crypto.spec.GCMParameterSpec
 
 /**
  * File-backed encrypted passphrase store for JVM/Desktop.
  *
- * Uses a PKCS12 KeyStore to hold an AES-256 master key and AES-256-GCM to encrypt each passphrase entry. Entries are
- * stored as individual `.enc` files under `$MESHTASTIC_DATA_DIR/lockdown/` (default: `~/.meshtastic/lockdown/`), keyed
- * by a sanitized device address.
- *
- * The keystore password is fixed because the threat model mirrors Android's `EncryptedSharedPreferences`: file-system
- * permission is the primary access control; the encryption layer protects data at rest against casual file browsing or
- * backup leakage, not against a compromised user account.
+ * Each passphrase entry is an AES-256-GCM `.enc` file under `$MESHTASTIC_DATA_DIR/lockdown/` (default:
+ * `~/.meshtastic/lockdown/`), keyed by a sanitized device address; see [DesktopKeystoreCipher] for the key handling.
  */
 @Single(binds = [LockdownPassphraseStore::class])
 @Suppress("TooGenericExceptionCaught")
-class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
+class LockdownPassphraseStoreImpl(dataDir: File = File(desktopDataDir())) : LockdownPassphraseStore {
 
-    private val lockdownDir: File by lazy { File(desktopDataDir(), LOCKDOWN_DIR).also { it.mkdirs() } }
+    private val lockdownDir: File by lazy { File(dataDir, LOCKDOWN_DIR).also { it.mkdirs() } }
+
+    private val cipher by lazy { DesktopKeystoreCipher(lockdownDir, KEY_ALIAS, KEYSTORE_PASSWORD) }
 
     private val masterKey: SecretKey? by lazy {
         try {
-            loadOrCreateMasterKey()
+            cipher.loadOrCreateMasterKey()
         } catch (e: Exception) {
             Logger.e(e) { "Lockdown: Failed to initialize desktop keystore" }
             null
@@ -62,8 +53,7 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
         val file = entryFile(deviceAddress)
         if (!file.exists()) return null
         return try {
-            val encrypted = file.readBytes()
-            val plaintext = decrypt(key, encrypted)
+            val plaintext = cipher.decrypt(key, file.readBytes())
             deserialize(plaintext)
         } catch (e: Exception) {
             Logger.e(e) { "Lockdown: Failed to read passphrase for device" }
@@ -80,8 +70,7 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
     ) {
         val key = masterKey ?: error("Lockdown: Cannot save passphrase - keystore unavailable")
         val plaintext = serialize(passphrase, boots, hours, maxSessionSeconds)
-        val encrypted = encrypt(key, plaintext)
-        entryFile(deviceAddress).writeBytes(encrypted)
+        entryFile(deviceAddress).writeBytes(cipher.encrypt(key, plaintext))
     }
 
     override fun clearPassphrase(deviceAddress: String) {
@@ -95,28 +84,6 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
         val sanitized = deviceAddress.replace(Regex("[^a-zA-Z0-9_-]"), "_")
         return File(lockdownDir, "$sanitized.enc")
     }
-
-    // region Encryption
-
-    private fun encrypt(key: SecretKey, plaintext: ByteArray): ByteArray {
-        val cipher = Cipher.getInstance(AES_GCM_TRANSFORM)
-        cipher.init(Cipher.ENCRYPT_MODE, key)
-        val iv = cipher.iv
-        val ciphertext = cipher.doFinal(plaintext)
-        // Format: [1 byte IV length][IV][ciphertext]
-        return byteArrayOf(iv.size.toByte()) + iv + ciphertext
-    }
-
-    private fun decrypt(key: SecretKey, data: ByteArray): ByteArray {
-        val ivLength = data[0].toInt() and BYTE_MASK
-        val iv = data.copyOfRange(1, 1 + ivLength)
-        val ciphertext = data.copyOfRange(1 + ivLength, data.size)
-        val cipher = Cipher.getInstance(AES_GCM_TRANSFORM)
-        cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(GCM_TAG_BITS, iv))
-        return cipher.doFinal(ciphertext)
-    }
-
-    // endregion
 
     // region Serialization (simple line-based to avoid adding kotlinx-serialization dependency)
 
@@ -160,42 +127,12 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
 
     // endregion
 
-    // region KeyStore
-
-    private fun loadOrCreateMasterKey(): SecretKey {
-        val ksFile = File(lockdownDir, KEYSTORE_FILE)
-        val ks = KeyStore.getInstance(KEYSTORE_TYPE)
-        val protection = KeyStore.PasswordProtection(KEYSTORE_PASSWORD)
-        if (ksFile.exists()) {
-            FileInputStream(ksFile).use { ks.load(it, KEYSTORE_PASSWORD) }
-            val entry = ks.getEntry(KEY_ALIAS, protection)
-            if (entry is KeyStore.SecretKeyEntry) return entry.secretKey
-        }
-        // Generate new master key
-        val keyGen = KeyGenerator.getInstance(AES_ALGORITHM)
-        keyGen.init(AES_KEY_BITS)
-        val secretKey = keyGen.generateKey()
-        ks.load(null, KEYSTORE_PASSWORD)
-        ks.setEntry(KEY_ALIAS, KeyStore.SecretKeyEntry(secretKey), protection)
-        FileOutputStream(ksFile).use { ks.store(it, KEYSTORE_PASSWORD) }
-        return secretKey
-    }
-
-    // endregion
-
     private companion object {
         private const val LOCKDOWN_DIR = "lockdown"
-        private const val KEYSTORE_FILE = "keystore.p12"
-        private const val KEYSTORE_TYPE = "PKCS12"
         private const val KEY_ALIAS = "lockdown_master"
 
         // Intentional: this mirrors the documented desktop threat model for at-rest protection only.
         private val KEYSTORE_PASSWORD = "meshtastic-lockdown".toCharArray()
-        private const val AES_ALGORITHM = "AES"
-        private const val AES_GCM_TRANSFORM = "AES/GCM/NoPadding"
-        private const val AES_KEY_BITS = 256
-        private const val GCM_TAG_BITS = 128
-        private const val BYTE_MASK = 0xFF
         private const val SERIALIZED_LINE_COUNT_V1 = 3
         private const val SERIALIZED_LINE_COUNT_V2 = 4
     }

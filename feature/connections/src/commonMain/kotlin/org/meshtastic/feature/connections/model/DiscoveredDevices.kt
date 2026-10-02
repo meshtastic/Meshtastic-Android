@@ -24,6 +24,8 @@ data class DiscoveredDevices(
     val usbDevices: List<DeviceListEntry> = emptyList(),
     val discoveredTcpDevices: List<DeviceListEntry> = emptyList(),
     val recentTcpDevices: List<DeviceListEntry> = emptyList(),
+    /** Demo Mode entries, offered under every transport pane because they belong to none of them. */
+    val virtualDevices: List<DeviceListEntry> = emptyList(),
 )
 
 interface GetDiscoveredDevicesUseCase {

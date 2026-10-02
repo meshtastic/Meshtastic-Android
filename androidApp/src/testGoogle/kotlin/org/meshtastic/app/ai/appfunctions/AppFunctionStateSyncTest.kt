@@ -51,4 +51,35 @@ class AppFunctionStateSyncTest {
 
         assertEquals(listOf(AppFunctionStateSync.GET_NODE_LIST_ID to false), pendingWrites(desired, actual))
     }
+
+    @Test
+    fun `toggle ids match the generated function ids`() {
+        assertEquals(MeshtasticAppFunctionService.FUNCTION_ID_SEND_MESSAGE, AppFunctionStateSync.SEND_MESSAGE_ID)
+        assertEquals(MeshtasticAppFunctionService.FUNCTION_ID_GET_MESH_STATUS, AppFunctionStateSync.GET_MESH_STATUS_ID)
+        assertEquals(MeshtasticAppFunctionService.FUNCTION_ID_GET_NODE_LIST, AppFunctionStateSync.GET_NODE_LIST_ID)
+        assertEquals(
+            MeshtasticAppFunctionService.FUNCTION_ID_GET_CHANNEL_INFO,
+            AppFunctionStateSync.GET_CHANNEL_INFO_ID,
+        )
+        assertEquals(
+            MeshtasticAppFunctionService.FUNCTION_ID_GET_DEVICE_STATUS,
+            AppFunctionStateSync.GET_DEVICE_STATUS_ID,
+        )
+        assertEquals(
+            MeshtasticAppFunctionService.FUNCTION_ID_GET_NODE_DETAILS,
+            AppFunctionStateSync.GET_NODE_DETAILS_ID,
+        )
+        assertEquals(
+            MeshtasticAppFunctionService.FUNCTION_ID_GET_MESH_METRICS,
+            AppFunctionStateSync.GET_MESH_METRICS_ID,
+        )
+        assertEquals(
+            MeshtasticAppFunctionService.FUNCTION_ID_GET_RECENT_MESSAGES,
+            AppFunctionStateSync.GET_RECENT_MESSAGES_ID,
+        )
+        assertEquals(
+            MeshtasticAppFunctionService.FUNCTION_ID_GET_UNREAD_SUMMARY,
+            AppFunctionStateSync.GET_UNREAD_SUMMARY_ID,
+        )
+    }
 }

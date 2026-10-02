@@ -26,6 +26,7 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.util.anonymizePublicHost
 import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.core.network.transport.TcpTransport
 import org.meshtastic.core.repository.RadioTransport
@@ -88,7 +89,7 @@ internal constructor(
                     dispatchers = dispatchers,
                     scope = scope,
                     listener = listener,
-                    logTag = "TcpRadioTransport[$address]",
+                    logTag = "TcpRadioTransport[${address.anonymizePublicHost()}]",
                 ),
             )
         },
@@ -125,7 +126,10 @@ internal constructor(
     override fun start() {
         lifecycle.runIfOpen {
             if (transportStopped.value) {
-                Logger.w { "[$address] Ignoring start on a stopped TCP transport; a fresh transport is required" }
+                Logger.w {
+                    "[${address.anonymizePublicHost()}] Ignoring start on a stopped TCP transport; " +
+                        "a fresh transport is required"
+                }
             } else {
                 transport.start(address)
             }
@@ -133,7 +137,7 @@ internal constructor(
     }
 
     override suspend fun close() {
-        Logger.d { "[$address] Closing TCP transport" }
+        Logger.d { "[${address.anonymizePublicHost()}] Closing TCP transport" }
         val completed =
             lifecycle.close(
                 teardown = {
@@ -141,14 +145,16 @@ internal constructor(
                     cancelOutstandingOperations()
                 },
             )
-        if (!completed) Logger.w { "[$address] TCP teardown did not complete within its lifecycle bounds" }
+        if (!completed) {
+            Logger.w { "[${address.anonymizePublicHost()}] TCP teardown did not complete within its lifecycle bounds" }
+        }
         // Do NOT emit onDisconnect(isPermanent = true) here. The explicit-disconnect signal is the service layer's
         // responsibility (SharedRadioInterfaceService.stopTransportLocked); emitting it here causes a double-disconnect
         // and prevents the auto-reconnect loop from owning its transient lifecycle.
     }
 
     override fun keepAlive() {
-        Logger.d { "[$address] TCP keepAlive" }
+        Logger.d { "[${address.anonymizePublicHost()}] TCP keepAlive" }
         launchConnectionOperation("heartbeat") { transport.sendHeartbeat() }
     }
 
@@ -173,7 +179,9 @@ internal constructor(
                     scope.handledLaunch {
                         val completed = withTimeoutOrNull(OPERATION_TIMEOUT) { block() } != null
                         if (!completed) {
-                            Logger.w { "[$address] TCP $operation timed out after $OPERATION_TIMEOUT" }
+                            Logger.w {
+                                "[${address.anonymizePublicHost()}] TCP $operation timed out after $OPERATION_TIMEOUT"
+                            }
                             // Cancellation may leave a framed write partially emitted. Stopping this one-shot
                             // transport forces the service reconnect path to create a fresh transport before another
                             // send.
@@ -197,7 +205,9 @@ internal constructor(
         val jobs = synchronized(operationJobsLock) { operationJobs.toList() }
         jobs.forEach { it.cancel() }
         val joined = withTimeoutOrNull(OPERATION_TIMEOUT) { jobs.joinAll() } != null
-        if (!joined) Logger.w { "[$address] TCP operation jobs did not stop after transport teardown" }
+        if (!joined) {
+            Logger.w { "[${address.anonymizePublicHost()}] TCP operation jobs did not stop after transport teardown" }
+        }
     }
 
     private fun stopTransport() {

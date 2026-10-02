@@ -26,12 +26,12 @@ class DeviceTypeTest {
     fun fromAddress_preserves_transport_analytics_names() {
         assertEquals("BLE", DeviceType.fromAddress("x123")?.name)
         assertEquals("USB", DeviceType.fromAddress("s/dev/bus/usb/001/002")?.name)
-        assertEquals("USB", DeviceType.fromAddress("m")?.name)
         assertEquals("TCP", DeviceType.fromAddress("t192.0.2.1")?.name)
     }
 
     @Test
     fun fromAddress_returns_null_for_non_presented_prefixes() {
+        assertNull(DeviceType.fromAddress("m"))
         assertNull(DeviceType.fromAddress("r"))
         assertNull(DeviceType.fromAddress("n"))
         assertNull(DeviceType.fromAddress(""))

@@ -1,6 +1,5 @@
 ---
 title: Обновления прошивки
-parent: Руководство пользователя
 nav_order: 13
 last_updated: 2026-09-06
 description: Обновляйте прошивку своего радио по Bluetooth или USB — процесс OTA, каналы версий, предполётные проверки и восстановление.
@@ -17,7 +16,7 @@ aliases:
 
 ## Проверка обновлений
 
-1. Откройте конфигурацию подключённого радио и в разделе **"Дополнительно"** нажмите **"Обновление прошивки"**. The entry appears only for OTA-capable radios.
+1. Откройте конфигурацию подключённого радио и в разделе **"Дополнительно"** нажмите **"Обновление прошивки"**. Этот пункт появляется только для устройств, поддерживающих OTA.
 2. Приложение проверяет доступные версии прошивки.
 3. Доступные обновления показывают номер версии и сводку изменений.
 
@@ -27,12 +26,12 @@ aliases:
 
 Наиболее распространённый способ обновления для пользователей Android:
 
-> ⚠️ **Warning:** Interrupting a firmware update can leave the radio unable to boot. Keep the phone nearby and both devices powered until the update completes.
+> ⚠️ **Предупреждение:** Прерывание обновления прошивки может привести к невозможности загрузки устройства. Держите телефон рядом и оба устройства включенными до завершения обновления.
 
 1. Убедитесь, что твоё радио подключено по Bluetooth.
 2. Перейдите на экран "Обновление прошивки".
 3. Выберите нужную версию прошивки.
-4. Tap **Update**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
+4. Нажмите **Обновить**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Дождитесь завершения обновления — **не отключайте устройство** во время обновления.
 
 ![Проверка обновлений прошивки](../../assets/screenshots/firmware_checking.png)
@@ -75,6 +74,8 @@ Select a firmware version before either one: the app hides both until a release 
 Both a USB erase and a bootloader upgrade write two files in turn, so you are asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
 
 Приложение считывает `INFO_UF2.TXT` с выбранного тобою диска, чтобы убедиться, что это действительно диск обновления устройства, и определить плату до записи чего-либо.
+
+For a bootloader upgrade, the app also reads the installed bootloader version from `INFO_UF2.TXT` and shows it next to the latest release before writing anything. The running firmware doesn't report its bootloader, so the installed version appears only once the device has restarted into update mode, never on the firmware screen while connected. If the two match, the bootloader is left as it is and the app moves straight on to reinstalling the firmware. Otherwise choose **Upgrade bootloader** to write it, or **Skip** to reinstall the firmware without changing it.
 
 On nRF52 the app must already know which Bluetooth stack your device uses before it starts, because it can't read the bootloader until the device has rebooted. If it can't confirm the stack, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
 

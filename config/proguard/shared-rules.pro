@@ -32,12 +32,14 @@
 -keep class org.meshtastic.core.resources.Res { *; }
 -keepclassmembers class org.meshtastic.core.resources.Res$* { *; }
 
-# ---- Koin Annotations (KSP-generated DI graph) ------------------------------
--keep @org.koin.core.annotation.Module class * { *; }
--keep @org.koin.core.annotation.ComponentScan class * { *; }
--keep @org.koin.core.annotation.Single class * { *; }
--keep @org.koin.core.annotation.Factory class * { *; }
--keep @org.koin.core.annotation.KoinViewModel class * { *; }
+# ---- Koin Annotations -------------------------------------------------------
+# R8 must not merge a Koin-annotated class: the registration's const-class is
+# its Koin key. Members may still shrink.
+-keep,allowshrinking @org.koin.core.annotation.Module class *
+-keep,allowshrinking @org.koin.core.annotation.ComponentScan class *
+-keep,allowshrinking @org.koin.core.annotation.Single class *
+-keep,allowshrinking @org.koin.core.annotation.Factory class *
+-keep,allowshrinking @org.koin.core.annotation.KoinViewModel class *
 
 # ---- kotlinx.coroutines (inlined from coroutines.pro consumer rules) --------
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}

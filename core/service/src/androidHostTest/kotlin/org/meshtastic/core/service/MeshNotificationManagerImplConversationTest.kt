@@ -18,7 +18,12 @@ package org.meshtastic.core.service
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.os.Parcelable
+import androidx.core.app.NotificationCompat
+import androidx.core.app.RemoteInput
+import androidx.core.os.BundleCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.mokkery.MockMode
@@ -42,6 +47,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -49,6 +55,7 @@ import org.meshtastic.core.testing.runUntilSettled
 import org.meshtastic.core.testing.runWithRenderScope
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.User
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -116,6 +123,7 @@ class MeshNotificationManagerImplConversationTest {
         },
         radioConfigRepository = lazy { radioConfigRepository },
         radioOperationLock = RadioOperationLock(),
+        firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository(),
         scope = scope.asServiceScope(),
     )
 
@@ -141,7 +149,7 @@ class MeshNotificationManagerImplConversationTest {
 
     /** Newest-first message history, mirroring the repository's ordering. */
     private fun mockHistory(vararg messages: Message) {
-        everySuspend { packetRepository.getMessagesFrom(any(), any(), any(), any()) } returns flowOf(messages.toList())
+        every { packetRepository.getMessagesFrom(any(), any(), any(), any()) } returns flowOf(messages.toList())
     }
 
     private fun message(text: String, read: Boolean, receivedTime: Long): Message = Message(
@@ -203,6 +211,11 @@ class MeshNotificationManagerImplConversationTest {
         val bubble = posted.bubbleMetadata
         assertNotNull(bubble, "conversation notifications must offer a bubble")
         assertNotNull(bubble.icon, "a bubble without an icon is rejected")
+        assertEquals(
+            android.graphics.drawable.Icon.TYPE_ADAPTIVE_BITMAP,
+            bubble.icon?.type,
+            "Android 10 rejects a plain bitmap bubble icon",
+        )
         assertEquals("0^all", posted.shortcutId, "the bubble needs its long-lived conversation shortcut")
         assertTrue(
             posted.extras.containsKey(Notification.EXTRA_PEOPLE_LIST),
@@ -234,6 +247,104 @@ class MeshNotificationManagerImplConversationTest {
     }
 
     @Test
+    fun `conversation actions work from a watch without opening the phone`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
+        mockHistory(message("hello", read = false, receivedTime = 1_000))
+
+        manager.updateMessageNotification("0^all", "Hawk Ridge", "hello", isBroadcast = true, channelName = "LongFast")
+        advanceUntilIdle()
+
+        val actions = activeByTag("message").single().notification.actions.orEmpty()
+        val reply = actions.single { it.semanticAction == Notification.Action.SEMANTIC_ACTION_REPLY }
+        assertTrue(reply.allowGeneratedReplies, "Smart Reply suggestions on a watch need generated replies allowed")
+        val thumbsUp = actions.single { it.semanticAction == Notification.Action.SEMANTIC_ACTION_THUMBS_UP }
+        assertEquals(false, thumbsUp.extras.getBoolean(SHOWS_USER_INTERFACE, true))
+        assertTrue(actions.any { it.semanticAction == Notification.Action.SEMANTIC_ACTION_MARK_AS_READ })
+    }
+
+    /**
+     * The contract Android Auto checks before it shows a conversation in the car: a MessagingStyle naming the device
+     * user, a reply action with exactly one RemoteInput whose mutable PendingIntent reaches a Service without opening
+     * UI, and a mark-as-read action that opens no UI either.
+     */
+    @Test
+    fun `a direct message meets Android Auto's messaging contract`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
+        mockHistory(message("hello", read = false, receivedTime = 1_000))
+
+        manager.updateMessageNotification("0!abcd1234", "Hawk Ridge", "hello", isBroadcast = false, channelName = null)
+        advanceUntilIdle()
+
+        val posted = activeByTag("message").single().notification
+        assertEquals(Notification.CATEGORY_MESSAGE, posted.category)
+        val style = assertNotNull(NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(posted))
+        assertNotNull(style.user.name, "the device user is named, and read aloud in the car")
+        assertNull(style.conversationTitle, "a one-to-one chat has no title; a title marks a group")
+        assertEquals(false, style.isGroupConversation)
+        assertEquals("Hawk Ridge", style.messages.single().person?.name?.toString())
+
+        val actions = posted.actions.orEmpty()
+        val reply = actions.single { it.semanticAction == Notification.Action.SEMANTIC_ACTION_REPLY }
+        val markAsRead = actions.single { it.semanticAction == Notification.Action.SEMANTIC_ACTION_MARK_AS_READ }
+        listOf(reply, markAsRead).forEach { action ->
+            assertEquals(false, action.extras.getBoolean(SHOWS_USER_INTERFACE, true))
+            val pendingIntent = shadowOf(action.actionIntent)
+            assertTrue(pendingIntent.isService, "Android Auto has these actions handled by a Service")
+            assertEquals(ConversationActionService::class.java.name, pendingIntent.savedIntent.component?.className)
+        }
+        assertEquals(1, reply.remoteInputs?.size)
+        assertTrue(shadowOf(reply.actionIntent).flags and PendingIntent.FLAG_MUTABLE != 0, "Auto fills the reply in")
+        assertTrue(shadowOf(markAsRead.actionIntent).flags and PendingIntent.FLAG_IMMUTABLE != 0)
+        assertTrue(reply.actionIntent != markAsRead.actionIntent)
+
+        // Fire the reply the way the car does: the RemoteInput text filled into the mutable PendingIntent.
+        val fillIn = android.content.Intent()
+        val results =
+            android.os.Bundle().apply { putCharSequence(reply.remoteInputs!!.single().resultKey, "on my way") }
+        android.app.RemoteInput.addResultsToIntent(reply.remoteInputs, fillIn, results)
+        reply.actionIntent.send(context, 0, fillIn)
+        val started = assertNotNull(shadowOf(context as android.app.Application).nextStartedService)
+        assertEquals(ConversationActionService.ACTION_REPLY, started.action)
+        assertEquals("0!abcd1234", started.getStringExtra(ConversationActionService.EXTRA_CONTACT_KEY))
+        assertEquals(
+            "on my way",
+            RemoteInput.getResultsFromIntent(started)
+                ?.getCharSequence(ConversationActionService.KEY_TEXT_REPLY)
+                ?.toString(),
+        )
+    }
+
+    @Test
+    fun `a channel message is a titled group conversation`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
+        mockHistory(message("hello", read = false, receivedTime = 1_000))
+
+        manager.updateMessageNotification("0^all", "Hawk Ridge", "hello", isBroadcast = true, channelName = "LongFast")
+        advanceUntilIdle()
+
+        val style =
+            assertNotNull(
+                NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(
+                    activeByTag("message").single().notification,
+                ),
+            )
+        assertEquals("LongFast", style.conversationTitle?.toString())
+        assertEquals(true, style.isGroupConversation)
+    }
+
+    @Test
+    @Config(sdk = [29])
+    fun `conversation notifications post on Android 10`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
+        mockHistory(message("hello", read = false, receivedTime = 1_000))
+
+        manager.updateMessageNotification("0^all", "Hawk Ridge", "hello", isBroadcast = true, channelName = "LongFast")
+        advanceUntilIdle()
+
+        assertNotNull(activeByTag("message").single().notification.bubbleMetadata)
+    }
+
+    @Test
     fun `read messages become historic context and unread messages stay alerting`() = runWithRenderScope { scope ->
         val manager = createManager(scope).also { it.initChannels() }
         mockHistory(
@@ -252,8 +363,10 @@ class MeshNotificationManagerImplConversationTest {
         advanceUntilIdle()
 
         val posted = activeByTag("message").single().notification
-        val alerting = posted.extras.getParcelableArray(Notification.EXTRA_MESSAGES)
-        val historic = posted.extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES)
+        val alerting =
+            BundleCompat.getParcelableArray(posted.extras, Notification.EXTRA_MESSAGES, Parcelable::class.java)
+        val historic =
+            BundleCompat.getParcelableArray(posted.extras, Notification.EXTRA_HISTORIC_MESSAGES, Parcelable::class.java)
         assertEquals(1, alerting?.size, "only the unread message should be presented as new content")
         assertEquals(2, historic?.size, "read context should be carried as historic messages")
         assertEquals("new unread", posted.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString())
@@ -276,13 +389,12 @@ class MeshNotificationManagerImplConversationTest {
 
             val summary = activeByTag("message_summary").single().notification
             assertEquals(Notification.GROUP_ALERT_CHILDREN, summary.groupAlertBehavior)
-            // The summary line is rebuilt from the child's real MessagingStyle, so it carries the actual sender.
-            val summaryLatest =
-                androidx.core.app.NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(summary)
-                    ?.messages
-                    ?.lastOrNull()
-            assertEquals("hello", summaryLatest?.text?.toString())
-            assertEquals("Hawk Ridge", summaryLatest?.person?.name?.toString())
+            // The summary line is rebuilt from the child's real MessagingStyle, so it carries the actual sender, but
+            // the
+            // summary itself is not a conversation Android Auto could try to answer.
+            assertNull(NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(summary))
+            val lines = summary.extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES)?.map { it.toString() }
+            assertEquals(listOf("Hawk Ridge: hello"), lines)
 
             manager.cancelMessageNotification("0^all")
 
@@ -296,7 +408,7 @@ class MeshNotificationManagerImplConversationTest {
             val manager = createManager(scope).also { it.initChannels() }
             // SERVICE_NOTIFY_ID is 101; a node whose num is also 101 used to overwrite the foreground notification.
             manager.updateServiceStateNotification(ConnectionState.Connected, telemetry = null)
-            manager.showOrUpdateLowBatteryNotification(Node(num = 101), isRemote = false)
+            manager.showLowBatteryNotification(Node(num = 101), isRemote = false)
             runUntilSettled {
                 systemNotificationManager.activeNotifications.any { it.id == 101 && it.tag == null } &&
                     activeByTag("low_battery").any { it.id == 101 }
@@ -321,7 +433,9 @@ class MeshNotificationManagerImplConversationTest {
             val posted = activeByTag("message").single().notification
             // Empty primary channel resolves to its modem-preset display name, matching the in-app conversation list.
             assertEquals("LongFast", posted.extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString())
-            assertNotNull(posted.extras.getParcelableArray(Notification.EXTRA_MESSAGES))
+            assertNotNull(
+                BundleCompat.getParcelableArray(posted.extras, Notification.EXTRA_MESSAGES, Parcelable::class.java),
+            )
         }
 
     @Test
@@ -343,3 +457,6 @@ class MeshNotificationManagerImplConversationTest {
         assertEquals("Hawk Ridge", shortcut.shortLabel)
     }
 }
+
+/** NotificationCompat stores an action's showsUserInterface flag in its extras under this key. */
+private const val SHOWS_USER_INTERFACE = "android.support.action.showsUserInterface"

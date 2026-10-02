@@ -33,31 +33,27 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.FirmwareUpdateNoticePolicy
 import org.meshtastic.core.model.FirmwareUpdateTransport
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.firmware_update_available
-import org.meshtastic.core.resources.firmware_update_notification_android
-import org.meshtastic.core.resources.firmware_update_notification_flasher
-import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 
@@ -105,7 +101,7 @@ class ConnectionsViewModel(
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val radioPrefs: RadioPrefs,
-    private val notificationManager: NotificationManager,
+    private val serviceNotifications: MeshNotificationManager,
 ) : ViewModel() {
 
     private val scheduledFirmwareUpdateNotificationKeys = mutableSetOf<String>()
@@ -245,7 +241,8 @@ class ConnectionsViewModel(
         combine(firmwareUpdateInputs, localHardware) { inputs, hardware ->
             val state = inputs.connectionState
             if (state !is ConnectionState.Connected) return@combine null
-            val transport = inputs.address?.firstOrNull()?.toFirmwareUpdateTransport() ?: return@combine null
+            val transport =
+                DeviceAddress.parse(inputs.address)?.interfaceId?.toFirmwareUpdateTransport() ?: return@combine null
             val stableRelease = inputs.stableRelease ?: return@combine null
             val deviceHardware = hardware ?: return@combine null
             FirmwareUpdateCandidate(
@@ -293,42 +290,7 @@ class ConnectionsViewModel(
             }
             .filterNotNull()
             .onEach { notice ->
-                val message =
-                    when (notice.destination) {
-                        org.meshtastic.core.model.FirmwareUpdateDestination.AndroidUpdate ->
-                            getStringSuspend(
-                                Res.string.firmware_update_notification_android,
-                                notice.currentVersion,
-                                notice.stableVersion,
-                            )
-
-                        org.meshtastic.core.model.FirmwareUpdateDestination.MeshtasticFlasher ->
-                            getStringSuspend(
-                                Res.string.firmware_update_notification_flasher,
-                                notice.currentVersion,
-                                notice.stableVersion,
-                            )
-                    }
-                if (
-                    notificationManager.dispatch(
-                        Notification(
-                            id = notice.notificationKey.hashCode(),
-                            title = getStringSuspend(Res.string.firmware_update_available),
-                            message = message,
-                            type = Notification.Type.Info,
-                            category = Notification.Category.NodeEvent,
-                            deepLinkUri =
-                            if (
-                                notice.destination ==
-                                org.meshtastic.core.model.FirmwareUpdateDestination.AndroidUpdate
-                            ) {
-                                "meshtastic:///firmware/update"
-                            } else {
-                                "https://flasher.meshtastic.org"
-                            },
-                        ),
-                    )
-                ) {
+                if (serviceNotifications.showFirmwareUpdateNotification(notice)) {
                     scheduledFirmwareUpdateNotificationKeys += notice.notificationKey
                     uiPrefs.recordFirmwareUpdateNotificationKey(notice.notificationKey)
                 }
@@ -353,9 +315,15 @@ private data class FirmwareUpdateCandidate(
     val transport: FirmwareUpdateTransport,
 )
 
-private fun Char.toFirmwareUpdateTransport(): FirmwareUpdateTransport? = when (this) {
-    'x' -> FirmwareUpdateTransport.Bluetooth
-    's' -> FirmwareUpdateTransport.Serial
-    't' -> FirmwareUpdateTransport.Tcp
-    else -> null
+private fun InterfaceId.toFirmwareUpdateTransport(): FirmwareUpdateTransport? = when (this) {
+    InterfaceId.BLUETOOTH -> FirmwareUpdateTransport.Bluetooth
+
+    InterfaceId.SERIAL -> FirmwareUpdateTransport.Serial
+
+    InterfaceId.TCP -> FirmwareUpdateTransport.Tcp
+
+    InterfaceId.MOCK,
+    InterfaceId.NOP,
+    InterfaceId.REPLAY,
+    -> null
 }

@@ -18,7 +18,6 @@ package org.meshtastic.core.model.util
 
 import org.meshtastic.core.model.util.TimeConstants.HOURS_PER_DAY
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Returns a short string representing the time if it's within the last 24 hours, otherwise returns a combined short
@@ -28,26 +27,6 @@ import kotlin.time.Duration.Companion.seconds
  * @return Formatted date/time string
  */
 expect fun getShortDateTime(time: Long): String
-
-/**
- * Formats a duration in seconds as a human-readable uptime string (e.g., "1d 2h 3m 4s").
- *
- * @param seconds The duration in seconds.
- * @return A formatted uptime string.
- */
-fun formatUptime(seconds: Int): String {
-    val secs = seconds.toLong()
-    if (secs == 0L) return "0s"
-    return secs.seconds.toComponents { days, hours, minutes, s, _ ->
-        listOfNotNull(
-            "${days}d".takeIf { days > 0 },
-            "${hours}h".takeIf { hours > 0 },
-            "${minutes}m".takeIf { minutes > 0 },
-            "${s}s".takeIf { s > 0 },
-        )
-            .joinToString(" ")
-    }
-}
 
 /**
  * Calculates the remaining mute time in days and hours.

@@ -2,21 +2,26 @@
 #
 # PostToolUse hook (Edit|Write|MultiEdit) for Meshtastic-Android.
 #
-# Front-runs three of this repo's own CI/governance gates locally, so the
+# Front-runs four of this repo's own CI/governance gates locally, so the
 # failure surfaces at edit time instead of in CI. Dispatches by edited path:
 #
 #   - base strings.xml      -> run scripts/sort-strings.py (keeps the file sorted
 #                              and regenerates .skills/compose-ui/strings-index.txt;
 #                              AGENTS.md mandates this but no CI job enforces it)
-#   - fastlane/metadata/**  -> run scripts/check-metadata-length.py and BLOCK on
-#                              overlength store listings (the pull-request.yml
+#   - fastlane/metadata/**  -> run scripts/check-store-metadata.py and BLOCK on
+#                              store-rule violations (the pull-request.yml
 #                              check-metadata job is blocking; F-Droid #4262)
-#   - settings.gradle.kts   -> remind about the pull-request.yml paths-filter drift
-#                              guard for NEW top-level modules (#5735)
+#   - settings.gradle.kts   -> remind about the pull-request.yml paths-filter and
+#                              ALL_MODULES_FULL drift guards for NEW top-level modules
+#   - commonMain/commonTest -> BLOCK on java.*/android.* imports in .kt files (the
+#                              KMP boundary, otherwise first caught by the iOS compile
+#                              in kmpSmokeCompile for main sources or allTests for tests)
+#
+# Kotlin edits outside tests and previews also get warn-only Compose-pitfall notes.
 #
 # FAILS OPEN: any tooling/parse error allows the edit to stand (exit 0). Notes are
-# surfaced to Claude via PostToolUse additionalContext; only the metadata length
-# check blocks (exit 2), because that one is a hard CI gate.
+# surfaced to Claude via PostToolUse additionalContext; only the store metadata and
+# KMP-boundary checks block (exit 2), because each front-runs a failing CI job.
 
 input=$(cat)
 
@@ -41,8 +46,7 @@ emit_context() {
 
 case "$file_path" in
   *core/resources/src/commonMain/composeResources/values/strings.xml)
-    out=$( (cd "$repo_root" && python3 scripts/sort-strings.py) 2>&1 )
-    if [ $? -eq 0 ]; then
+    if out=$( (cd "$repo_root" && python3 scripts/sort-strings.py) 2>&1 ); then
       emit_context "Auto-ran scripts/sort-strings.py: base strings.xml re-sorted and .skills/compose-ui/strings-index.txt regenerated. Line positions changed — re-read the file before any further edits to it."
     else
       emit_context "Tried to auto-run scripts/sort-strings.py after your strings.xml edit but it failed (likely malformed XML in what was just written — please check):
@@ -51,11 +55,13 @@ $out"
     ;;
 
   *fastlane/metadata/android/*)
-    out=$( (cd "$repo_root" && python3 scripts/check-metadata-length.py) 2>&1 )
-    if [ $? -ne 0 ]; then
+    out=$( (cd "$repo_root" && python3 scripts/check-store-metadata.py) 2>&1 )
+    rc=$?
+    # 1 is a store-rule violation; any other failure is tooling and fails open.
+    if [ "$rc" -eq 1 ]; then
       {
-        printf '%s\n' "Store-listing metadata exceeds a length limit (scripts/check-metadata-length.py)."
-        printf '%s\n' "Fix this before it lands — the pull-request.yml check-metadata job is blocking (F-Droid #4262; limits count Unicode code points, not bytes). Details:"
+        printf '%s\n' "Store-listing metadata breaks a store rule (scripts/check-store-metadata.py)."
+        printf '%s\n' "Fix this before it lands: the pull-request.yml check-metadata job is blocking (F-Droid #4262; limits count Unicode code points, not bytes). Details:"
         printf '%s\n' "$out"
       } >&2
       exit 2
@@ -64,7 +70,7 @@ $out"
     ;;
 
   *settings.gradle.kts)
-    emit_context "You edited settings.gradle.kts. If you added a NEW TOP-LEVEL module directory, add its '<root>/**' line to the 'android:' paths-filter in .github/workflows/pull-request.yml (case-sensitive) or the verify-check-changes-filter drift guard will fail the PR (bit us on #5735). New sub-modules under an already-listed root (core/**, feature/**, etc.) are already covered — no change needed."
+    emit_context "You edited settings.gradle.kts. If you added a NEW TOP-LEVEL module directory, add its '<root>/**' line to the 'android:' paths-filter in .github/workflows/pull-request.yml (case-sensitive) or scripts/check-changes-filter.py will fail the PR, and add the module to ALL_MODULES_FULL in RootConventionPlugin.kt or scripts/check-module-list.py will. New sub-modules under an already-listed root (core/**, feature/**, etc.) need no filter change."
     ;;
 
   */src/commonMain/*.kt|*/src/commonTest/*.kt)

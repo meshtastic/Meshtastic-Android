@@ -84,10 +84,10 @@ class MeshConfigHandlerImplTest {
                 block()
                 true
             }
-        everySuspend { radioInterfaceService.runWhileSessionActive(session, any()) } calls
+        everySuspend { radioInterfaceService.runWhileSessionActive(session, any(), any()) } calls
             {
                 @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend () -> Unit)
+                val block = it.args[2] as (suspend () -> Unit)
                 block()
                 true
             }
@@ -197,10 +197,10 @@ class MeshConfigHandlerImplTest {
                 block()
                 true
             }
-        everySuspend { radioInterfaceService.runWhileSessionActive(session, any()) } calls
+        everySuspend { radioInterfaceService.runWhileSessionActive(session, any(), any()) } calls
             {
                 @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend () -> Unit)
+                val block = it.args[2] as (suspend () -> Unit)
                 block()
                 true
             }
@@ -232,7 +232,7 @@ class MeshConfigHandlerImplTest {
                 block()
                 true
             }
-        everySuspend { radioInterfaceService.runWhileSessionActive(session, any()) } returns false
+        everySuspend { radioInterfaceService.runWhileSessionActive(session, any(), any()) } returns false
 
         handler.handleDeviceConfig(config, session)
         advanceUntilIdle()

@@ -23,6 +23,7 @@ import org.meshtastic.core.model.SoftDeviceVariant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -39,119 +40,120 @@ import kotlin.test.assertTrue
  */
 class UsbMaintenanceGateTest {
 
+    private val manifestJson = Json { ignoreUnknownKeys = true }
+
     /**
      * The real maintenance-UF2 manifest ([api/data/maintenanceUf2.json] in `meshtastic/api`, embedded verbatim), so
      * this test suite keeps exercising the exact board/digest table that ships, not a hand-trimmed fixture that could
      * drift from it silently.
      */
     private val testManifest =
-        Json { ignoreUnknownKeys = true }
-            .decodeFromString<MaintenanceUf2Manifest>(
-                """
-                {
-                  "manifestVersion": 1,
-                  "otafixReleaseTag": "0.9.2-OTAFIX2.3-BP1.5",
-                  "otafixBase": "https://github.com/meshtastic/Adafruit_nRF52_Bootloader_OTAFIX/releases/download/0.9.2-OTAFIX2.3-BP1.5",
-                  "erase": {
-                    "nrf52": {
-                      "6.1.1": {
-                        "fileName": "nrf_erase2.uf2",
-                        "sha256": "4b778a3def19854415db64cb51bfd29c15b11cc46006353dd518f62d09efe3fe",
-                        "expectedFirstTargetAddress": 155648
-                      },
-                      "7.3.0": {
-                        "fileName": "nrf_erase_sd7_3.uf2",
-                        "sha256": "13941bedce009e61255c37b1524d11ca604e88c38e7588bb8b391e2998da468f",
-                        "expectedFirstTargetAddress": 159744
-                      }
-                    },
-                    "nrf52Bootloader": {
-                      "fileName": "meshtastic_factory_erase.uf2",
-                      "sha256": "6ef3146505c40079ee9e7e692448e40a793dad636f55d1545063299d28908f0d",
-                      "expectedFamilyId": 1296388936
-                    },
-                    "rp2040": {
-                      "fileName": "pico_erase.uf2",
-                      "sha256": "08aa7d561e8b8bf2f9b061b3506fb4d8f135e832efe0f3ae978241db2da0c853"
-                    }
+        manifestJson.decodeFromString<MaintenanceUf2Manifest>(
+            """
+            {
+              "manifestVersion": 1,
+              "otafixReleaseTag": "0.9.2-OTAFIX2.3-BP1.5",
+              "otafixBase": "https://github.com/meshtastic/Adafruit_nRF52_Bootloader_OTAFIX/releases/download/0.9.2-OTAFIX2.3-BP1.5",
+              "erase": {
+                "nrf52": {
+                  "6.1.1": {
+                    "fileName": "nrf_erase2.uf2",
+                    "sha256": "4b778a3def19854415db64cb51bfd29c15b11cc46006353dd518f62d09efe3fe",
+                    "expectedFirstTargetAddress": 155648
                   },
-                  "otafixByBoardId": {
-                    "HT-n5262": {
-                      "otafixBoardSlug": "heltec_t114",
-                      "sha256": "ae92d3577cb58dd9b43c9b61ffb9bfffda05b0eca4113a0ec42a37cd8be53b19"
-                    },
-                    "MinewSemi-MX25LE01": {
-                      "otafixBoardSlug": "minewsemi_mx25le01",
-                      "sha256": "e09564fd8dd03fc25d76dcb732a0214c79653da3b130240949b783254d3dfc1b"
-                    },
-                    "TRACKER L1": {
-                      "otafixBoardSlug": "wio_tracker_l1",
-                      "sha256": "70fbce0eda9d70d7bd8a4367057badf5ec310838bf3221370d45a56f04956b9e"
-                    },
-                    "WisBlock-RAK4631-Board": {
-                      "otafixBoardSlug": "wiscore_rak4631_board",
-                      "sha256": "8741bc677a3c24f28422c5ffb80761de7d98a127a3b0191ba6585bf57ce9f305"
-                    },
-                    "WisMesh-Tag": {
-                      "otafixBoardSlug": "wismesh_tag",
-                      "sha256": "96d42e1990e17251e8c625e98a1551cac12c6e29111bc2e59ab7c9fe6dec8758"
-                    },
-                    "nRF52840-SeeedSenseCAPSolarP1-v1": {
-                      "otafixBoardSlug": "sensecap_solar_p1",
-                      "sha256": "9b4bce48c1b4830617715c5619457bce6b21f3079803e35e13433de7701290f5"
-                    },
-                    "nRF52840-SeeedXiao-v1": {
-                      "otafixBoardSlug": "xiao_nrf52840_ble",
-                      "sha256": "ff8a0916e98cceb394fd66590bccc17f63612c11ff56b086ef88bd436c8df67f"
-                    },
-                    "nRF52840-SeeedXiaoSense-v1": {
-                      "otafixBoardSlug": "xiao_nrf52840_ble_sense",
-                      "sha256": "fc233d83a1011419625fcb50b49084578460c25bbc0270374ca176757a3c40da"
-                    },
-                    "nRF52840-T1000-E-v1": {
-                      "otafixBoardSlug": "t1000_e",
-                      "sha256": "5c065e11b8acd5b0cefa9295f98bca1512306cfa478856aa76a871124a904cc4"
-                    },
-                    "nRF52840-TEcho-v1": {
-                      "otafixBoardSlug": "lilygo_techo",
-                      "sha256": "2ddb36188ffe521c270bb2ce8441d742d0fe45325c57e4db6475bf63162a59b0"
-                    },
-                    "nRF52840-ThinkNode-M3-v1": {
-                      "otafixBoardSlug": "thinknode_m3",
-                      "sha256": "bf90979f2f6adc96ef6ca09c280b2ab7e66cb8ce2654fc80da9b20407bfb8708"
-                    },
-                    "nRF52840-ThinkNodeM1-v1": {
-                      "otafixBoardSlug": "thinknode_m1",
-                      "sha256": "aa0721b573c60e0b179274d5a5296bac7a8436faf339cfc03116ebe8a4375795"
-                    },
-                    "nRF52840-ThinkNodeM6-v1": {
-                      "otafixBoardSlug": "thinknode_m6",
-                      "sha256": "aaf94953a540a18f3e48f4cdec0c78290ad3c5f8740aea26fa3b3ce3632a8d4a"
-                    },
-                    "nRF52840-promicro": {
-                      "otafixBoardSlug": "promicro_nrf52840",
-                      "sha256": "46ef3440f151d6f2606075bcd1aa83db25a660da7d25b988aeb47ef350c98794"
-                    }
-                  },
-                  "otafixSupportedTargets": [
-                    "rak4631",
-                    "rak_wismeshtag",
-                    "t-echo",
-                    "heltec-mesh-node-t114",
-                    "nrf52_promicro_diy_tcxo",
-                    "thinknode_m1",
-                    "thinknode_m3",
-                    "thinknode_m6",
-                    "tracker-t1000-e",
-                    "seeed_wio_tracker_L1",
-                    "seeed_wio_tracker_L1_eink",
-                    "seeed_solar_node",
-                    "seeed_xiao_nrf52840_kit"
-                  ]
+                  "7.3.0": {
+                    "fileName": "nrf_erase_sd7_3.uf2",
+                    "sha256": "13941bedce009e61255c37b1524d11ca604e88c38e7588bb8b391e2998da468f",
+                    "expectedFirstTargetAddress": 159744
+                  }
+                },
+                "nrf52Bootloader": {
+                  "fileName": "meshtastic_factory_erase.uf2",
+                  "sha256": "6ef3146505c40079ee9e7e692448e40a793dad636f55d1545063299d28908f0d",
+                  "expectedFamilyId": 1296388936
+                },
+                "rp2040": {
+                  "fileName": "pico_erase.uf2",
+                  "sha256": "08aa7d561e8b8bf2f9b061b3506fb4d8f135e832efe0f3ae978241db2da0c853"
                 }
-                """
-                    .trimIndent(),
-            )
+              },
+              "otafixByBoardId": {
+                "HT-n5262": {
+                  "otafixBoardSlug": "heltec_t114",
+                  "sha256": "ae92d3577cb58dd9b43c9b61ffb9bfffda05b0eca4113a0ec42a37cd8be53b19"
+                },
+                "MinewSemi-MX25LE01": {
+                  "otafixBoardSlug": "minewsemi_mx25le01",
+                  "sha256": "e09564fd8dd03fc25d76dcb732a0214c79653da3b130240949b783254d3dfc1b"
+                },
+                "TRACKER L1": {
+                  "otafixBoardSlug": "wio_tracker_l1",
+                  "sha256": "70fbce0eda9d70d7bd8a4367057badf5ec310838bf3221370d45a56f04956b9e"
+                },
+                "WisBlock-RAK4631-Board": {
+                  "otafixBoardSlug": "wiscore_rak4631_board",
+                  "sha256": "8741bc677a3c24f28422c5ffb80761de7d98a127a3b0191ba6585bf57ce9f305"
+                },
+                "WisMesh-Tag": {
+                  "otafixBoardSlug": "wismesh_tag",
+                  "sha256": "96d42e1990e17251e8c625e98a1551cac12c6e29111bc2e59ab7c9fe6dec8758"
+                },
+                "nRF52840-SeeedSenseCAPSolarP1-v1": {
+                  "otafixBoardSlug": "sensecap_solar_p1",
+                  "sha256": "9b4bce48c1b4830617715c5619457bce6b21f3079803e35e13433de7701290f5"
+                },
+                "nRF52840-SeeedXiao-v1": {
+                  "otafixBoardSlug": "xiao_nrf52840_ble",
+                  "sha256": "ff8a0916e98cceb394fd66590bccc17f63612c11ff56b086ef88bd436c8df67f"
+                },
+                "nRF52840-SeeedXiaoSense-v1": {
+                  "otafixBoardSlug": "xiao_nrf52840_ble_sense",
+                  "sha256": "fc233d83a1011419625fcb50b49084578460c25bbc0270374ca176757a3c40da"
+                },
+                "nRF52840-T1000-E-v1": {
+                  "otafixBoardSlug": "t1000_e",
+                  "sha256": "5c065e11b8acd5b0cefa9295f98bca1512306cfa478856aa76a871124a904cc4"
+                },
+                "nRF52840-TEcho-v1": {
+                  "otafixBoardSlug": "lilygo_techo",
+                  "sha256": "2ddb36188ffe521c270bb2ce8441d742d0fe45325c57e4db6475bf63162a59b0"
+                },
+                "nRF52840-ThinkNode-M3-v1": {
+                  "otafixBoardSlug": "thinknode_m3",
+                  "sha256": "bf90979f2f6adc96ef6ca09c280b2ab7e66cb8ce2654fc80da9b20407bfb8708"
+                },
+                "nRF52840-ThinkNodeM1-v1": {
+                  "otafixBoardSlug": "thinknode_m1",
+                  "sha256": "aa0721b573c60e0b179274d5a5296bac7a8436faf339cfc03116ebe8a4375795"
+                },
+                "nRF52840-ThinkNodeM6-v1": {
+                  "otafixBoardSlug": "thinknode_m6",
+                  "sha256": "aaf94953a540a18f3e48f4cdec0c78290ad3c5f8740aea26fa3b3ce3632a8d4a"
+                },
+                "nRF52840-promicro": {
+                  "otafixBoardSlug": "promicro_nrf52840",
+                  "sha256": "46ef3440f151d6f2606075bcd1aa83db25a660da7d25b988aeb47ef350c98794"
+                }
+              },
+              "otafixSupportedTargets": [
+                "rak4631",
+                "rak_wismeshtag",
+                "t-echo",
+                "heltec-mesh-node-t114",
+                "nrf52_promicro_diy_tcxo",
+                "thinknode_m1",
+                "thinknode_m3",
+                "thinknode_m6",
+                "tracker-t1000-e",
+                "seeed_wio_tracker_L1",
+                "seeed_wio_tracker_L1_eink",
+                "seeed_solar_node",
+                "seeed_xiao_nrf52840_kit"
+              ]
+            }
+            """
+                .trimIndent(),
+        )
 
     private fun nrf(
         variant: SoftDeviceVariant? = SoftDeviceVariant.S140_6_1_1,
@@ -211,20 +213,19 @@ class UsbMaintenanceGateTest {
     @Test
     fun `an unsafe erase filename refuses the image instead of throwing`() {
         val hostile =
-            Json { ignoreUnknownKeys = true }
-                .decodeFromString<MaintenanceUf2Manifest>(
-                    """
-                    {
-                      "erase": {
-                        "nrf52": {
-                          "6.1.1": { "fileName": "../../etc/passwd", "sha256": "00" }
-                        },
-                        "rp2040": { "fileName": "sub/dir/pico_erase.uf2", "sha256": "00" }
-                      }
-                    }
-                    """
-                        .trimIndent(),
-                )
+            manifestJson.decodeFromString<MaintenanceUf2Manifest>(
+                """
+                {
+                  "erase": {
+                    "nrf52": {
+                      "6.1.1": { "fileName": "../../etc/passwd", "sha256": "00" }
+                    },
+                    "rp2040": { "fileName": "sub/dir/pico_erase.uf2", "sha256": "00" }
+                  }
+                }
+                """
+                    .trimIndent(),
+            )
 
         assertNull(eraseUf2For(hostile, nrf()), "A traversal fileName must resolve to null, not throw")
         assertNull(eraseUf2For(hostile, rp2040()), "A separator in fileName must resolve to null, not throw")
@@ -237,19 +238,18 @@ class UsbMaintenanceGateTest {
     @Test
     fun `an unsafe otafix slug or tag refuses the image instead of throwing`() {
         val hostile =
-            Json { ignoreUnknownKeys = true }
-                .decodeFromString<MaintenanceUf2Manifest>(
-                    """
-                    {
-                      "otafixReleaseTag": "../../../evil",
-                      "otafixBase": "https://example.invalid/releases",
-                      "otafixByBoardId": {
-                        "rak4631": { "otafixBoardSlug": "rak4631", "sha256": "00" }
-                      }
-                    }
-                    """
-                        .trimIndent(),
-                )
+            manifestJson.decodeFromString<MaintenanceUf2Manifest>(
+                """
+                {
+                  "otafixReleaseTag": "../../../evil",
+                  "otafixBase": "https://example.invalid/releases",
+                  "otafixByBoardId": {
+                    "rak4631": { "otafixBoardSlug": "rak4631", "sha256": "00" }
+                  }
+                }
+                """
+                    .trimIndent(),
+            )
 
         assertNull(otafixUf2ForBoardId(hostile, "rak4631"), "A traversal release tag must resolve to null, not throw")
     }
@@ -867,5 +867,97 @@ class UsbMaintenanceGateTest {
     fun `non-uf2 payloads yield no family id`() {
         assertNull(uf2FamilyId(ByteArray(UF2_BLOCK_BYTES)), "Zeroed bytes carry no UF2 magic")
         assertNull(uf2FamilyId(ByteArray(32)), "A short payload cannot hold a UF2 block")
+    }
+
+    // ── Installed bootloader version against the release ─────────────────────
+
+    /**
+     * The `INFO_UF2.TXT` text embedded in the released `update-wismesh_tag_bootloader-0.9.2-OTAFIX2.5_nosd.uf2`,
+     * extracted from its UF2 payload. The running bootloader appends its `SoftDevice:` line to this at boot.
+     */
+    private val wismeshTagOtafix25Info =
+        "UF2 Bootloader 0.9.2-OTAFIX2.5 lib/nrfx (v3.14.0) lib/tinyusb (0.21.0-435-g3898a1df4) " +
+            "lib/uf2 (heads/master)\r\n" +
+            "Model: WisMesh Tag\r\nBoard-ID: WisMesh-Tag\r\nDate: Sep  8 2026\r\n" +
+            "Factory-Erase: UF2 family 0x4D455348\r\n"
+
+    private fun volumeFrom(info: String) = MaintenanceVolume(
+        boardId = assertNotNull(parseUf2BoardId(info)),
+        softDevice = parseUf2SoftDevice(info),
+        bootloaderVersion = parseUf2BootloaderVersion(info),
+    )
+
+    @Test
+    fun `bootloader version is the first token of the uf2 bootloader line on every known vintage`() {
+        assertEquals("0.4.3", parseUf2BootloaderVersion(rak4631StockInfo))
+        assertEquals("0.9.2-OTAFIX2.2-BP1.3", parseUf2BootloaderVersion(rak4631OtafixInfo))
+        assertEquals("0.9.2-dirty", parseUf2BootloaderVersion(seeedL1Info), "stock Seeed builds carry git's suffix")
+        assertEquals("0.9.2-OTAFIX2.3-BP1.6", parseUf2BootloaderVersion(rakOtafixEraseInfo))
+        assertEquals("0.9.2-OTAFIX2.5", parseUf2BootloaderVersion(wismeshTagOtafix25Info))
+    }
+
+    @Test
+    fun `bootloader version falls back to the ver line and is null when neither line is present`() {
+        assertEquals("0.4.3", parseUf2BootloaderVersion("Board-ID: WisBlock-RAK4631-Board\r\nVer: 0.4.3\r\n"))
+        assertNull(parseUf2BootloaderVersion("Board-ID: WisBlock-RAK4631-Board\r\n"))
+        assertNull(parseUf2BootloaderVersion("UF2 Bootloader \r\nBoard-ID: X\r\n"), "an empty version is no version")
+        assertNull(parseUf2BootloaderVersion(""))
+    }
+
+    @Test
+    fun `the released bootloader reads as current against its own release tag`() {
+        val manifest = testManifest.copy(otafixReleaseTag = "0.9.2-OTAFIX2.5")
+
+        val review = assertIs<BootloaderReview.Ready>(reviewBootloader(manifest, volumeFrom(wismeshTagOtafix25Info)))
+
+        assertEquals(BootloaderVersions(installed = "0.9.2-OTAFIX2.5", available = "0.9.2-OTAFIX2.5"), review.versions)
+        assertTrue(review.versions.isCurrent)
+    }
+
+    @Test
+    fun `any other installed version reads as not current without claiming an order`() {
+        // testManifest is on BP1.5; BP1.6 is a bench build newer than it, and still only "different".
+        for (info in listOf(rak4631StockInfo, rak4631OtafixInfo, rakOtafixEraseInfo, wismeshTagOtafix25Info)) {
+            val review = assertIs<BootloaderReview.Ready>(reviewBootloader(testManifest, volumeFrom(info)))
+            assertFalse(review.versions.isCurrent, "installed ${review.versions.installed}")
+            assertEquals("0.9.2-OTAFIX2.3-BP1.5", review.versions.available)
+        }
+    }
+
+    @Test
+    fun `a drive reporting no version is never current`() {
+        val volume = MaintenanceVolume(boardId = "WisMesh-Tag", softDevice = null, bootloaderVersion = null)
+
+        val review = assertIs<BootloaderReview.Ready>(reviewBootloader(testManifest, volume))
+
+        assertNull(review.versions.installed)
+        assertFalse(BootloaderVersions(installed = null, available = "").isCurrent, "two unknowns are not a match")
+        assertFalse(review.versions.isCurrent)
+    }
+
+    @Test
+    fun `review refuses an unrecognized board id before anything is downloaded`() {
+        val volume = MaintenanceVolume(boardId = "SomeOtherBoard-v9", softDevice = null, bootloaderVersion = "0.9.2")
+
+        assertEquals(
+            BootloaderReview.Refused(UsbMaintenanceRefusal.UnknownBoardId),
+            reviewBootloader(testManifest, volume),
+        )
+    }
+
+    @Test
+    fun `the gate carries the latest bootloader only where the upgrade is offered`() {
+        val offered = maintenanceGate(testManifest, nrf(), FirmwareUpdateMethod.Usb, hasRelease = true)
+        assertEquals("0.9.2-OTAFIX2.3-BP1.5", offered.latestBootloader)
+
+        val unsupported = maintenanceGate(testManifest, nrf(target = "wio-sdk-wm1110"), FirmwareUpdateMethod.Usb, true)
+        assertFalse(unsupported.showBootloaderUpgrade)
+        assertNull(unsupported.latestBootloader)
+
+        assertNull(maintenanceGate(testManifest, rp2040(), FirmwareUpdateMethod.Usb, true).latestBootloader)
+        assertNull(
+            maintenanceGate(MaintenanceUf2Manifest(), nrf(), FirmwareUpdateMethod.Usb, true).latestBootloader,
+            "no manifest, no version to show",
+        )
     }
 }

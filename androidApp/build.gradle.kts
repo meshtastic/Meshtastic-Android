@@ -124,8 +124,6 @@ configure<ApplicationExtension> {
             )
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") }
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // Disable ABI splits for bundle builds or when explicitly requested via Gradle property.
@@ -174,6 +172,9 @@ configure<ApplicationExtension> {
                 // what a real build carries comes from the plugin. See #6883.
                 manifestPlaceholders["MAPS_API_KEY"] = "dummy"
             }
+            if (name == "fdroid") {
+                proguardFile("proguard-rules-fdroid.pro")
+            }
         }
     }
 
@@ -197,23 +198,21 @@ secrets {
     propertiesFileName = "secrets.properties"
 }
 
-ksp { arg("appfunctions:aggregateAppFunctions", "true") }
+// AppSearch without dynamic-schema support indexes only the v1 XML named by the `android.app.appfunctions` property.
+ksp { arg("appfunctions:generateV1Xml", "true") }
+
+// Merging into src/main is what ships the profile in fdroid too.
+baselineProfile { mergeIntoMain = true }
+
+// The producer only has the google flavor, so only googleRelease may depend on it: fdroidRelease would fail to resolve
+// it. The plugin creates this configuration per variant, after this script runs.
+configurations
+    .matching { it.name == "googleReleaseBaselineProfile" }
+    .configureEach { dependencies.add(projects.baselineprofile) }
 
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
         variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
-    }
-
-    onVariants(selector().withBuildType("release")) { variant ->
-        if (variant.flavorName == "google") {
-            val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
-            val minifyTaskName = "minify${variantNameCapped}WithR8"
-            val uploadTaskName = "uploadMapping$variantNameCapped"
-            // Use tasks.names to check existence without eagerly realizing tasks
-            if (tasks.names.contains(uploadTaskName) && tasks.names.contains(minifyTaskName)) {
-                tasks.named(minifyTaskName).configure { finalizedBy(uploadTaskName) }
-            }
-        }
     }
 }
 
@@ -348,8 +347,4 @@ dependencies {
     testImplementation(libs.androidx.glance.appwidget)
     // JVM variant provides the host-platform native library for BundledSQLiteDriver under Robolectric
     testRuntimeOnly(libs.androidx.sqlite.bundled.jvm)
-
-    // Producer of the baseline profile consumed by the release build. The androidx.baselineprofile
-    // plugin merges the generated rules into src/<variant>/generated/baselineProfiles at build time.
-    baselineProfile(projects.baselineprofile)
 }

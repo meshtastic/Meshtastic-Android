@@ -31,7 +31,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.model.QuickChatAction
 import org.meshtastic.core.repository.QuickChatActionRepository
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

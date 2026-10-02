@@ -220,10 +220,10 @@ class AirQualityChartReproTest {
             every { nodeManager.isNodeDbReady } returns MutableStateFlow(true)
             every { nodeManager.myNodeNum } returns myNodeNumFlow
             every { radioInterfaceService.isSessionActive(session) } returns true
-            everySuspend { radioInterfaceService.runWhileSessionActive(session, any()) } calls
+            everySuspend { radioInterfaceService.runWhileSessionActive(session, any(), any()) } calls
                 {
                     @Suppress("UNCHECKED_CAST")
-                    val block = it.args[1] as (suspend () -> Unit)
+                    val block = it.args[2] as (suspend () -> Unit)
                     block()
                     true
                 }

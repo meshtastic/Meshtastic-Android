@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,27 +72,37 @@ private fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
 )
 
 @Composable
-internal fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
-    AnimatedVisibility(visible = fromLocal) {
-        IconButton(onClick = onStatusClick) {
-            Crossfade(targetState = status, label = "MessageStatusIcon") { currentStatus ->
-                Icon(
-                    imageVector =
-                    when (currentStatus) {
-                        MessageStatus.RECEIVED -> MeshtasticIcons.Acknowledged
-                        MessageStatus.QUEUED -> MeshtasticIcons.CloudUpload
-                        MessageStatus.DELIVERED -> MeshtasticIcons.MqttDelivered
-                        MessageStatus.SFPP_ROUTING -> MeshtasticIcons.AddLink
-                        MessageStatus.SFPP_CONFIRMED -> MeshtasticIcons.LinkIcon
-                        MessageStatus.ENROUTE -> MeshtasticIcons.MessageEnroute
-                        MessageStatus.ERROR -> MeshtasticIcons.MessageError
-                        else -> MeshtasticIcons.Warning
-                    },
-                    contentDescription = stringResource(Res.string.message_delivery_status),
-                )
-            }
+internal fun MessageStatusButton(
+    status: MessageStatus,
+    fromLocal: Boolean,
+    onStatusClick: () -> Unit = {},
+    isWarning: Boolean = false,
+) = AnimatedVisibility(visible = fromLocal) {
+    IconButton(onClick = onStatusClick) {
+        Crossfade(targetState = status, label = "MessageStatusIcon") { currentStatus ->
+            Icon(
+                imageVector =
+                when (currentStatus) {
+                    MessageStatus.RECEIVED -> MeshtasticIcons.Acknowledged
+                    MessageStatus.QUEUED -> MeshtasticIcons.CloudUpload
+                    MessageStatus.DELIVERED -> MeshtasticIcons.MqttDelivered
+                    MessageStatus.SFPP_ROUTING -> MeshtasticIcons.AddLink
+                    MessageStatus.SFPP_CONFIRMED -> MeshtasticIcons.LinkIcon
+                    MessageStatus.ENROUTE -> MeshtasticIcons.MessageEnroute
+                    MessageStatus.ERROR -> MeshtasticIcons.MessageError
+                    else -> MeshtasticIcons.Warning
+                },
+                contentDescription = stringResource(Res.string.message_delivery_status),
+                tint =
+                if (isWarning) {
+                    messageStatusColor(currentStatus, isWarning = true)
+                } else {
+                    LocalContentColor.current
+                },
+            )
         }
     }
+}
 
 @Composable
 internal fun MessageActions(

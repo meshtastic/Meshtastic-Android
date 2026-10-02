@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.network.radio
 
+import co.touchlab.kermit.Logger
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
@@ -36,14 +37,22 @@ abstract class BaseRadioTransportFactory(
     protected val dispatchers: CoroutineDispatchers,
 ) : RadioTransportFactory {
 
+    init {
+        if (!bluetoothRepository.isSupported) Logger.w { "No Bluetooth LE on this hardware; BLE addresses are refused" }
+    }
+
     override fun isAddressValid(address: String?): Boolean {
         val spec = address?.firstOrNull() ?: return false
         return when (spec) {
-            InterfaceId.TCP.id,
-            InterfaceId.SERIAL.id,
+            InterfaceId.TCP.id -> true
+
+            // A saved serial address restored onto hardware with no USB host is kept but never armed.
+            InterfaceId.SERIAL.id -> isSerialSupported
+
+            // A saved BLE address restored onto hardware with no Bluetooth LE is kept but never armed.
             InterfaceId.BLUETOOTH.id,
             '!',
-            -> true
+            -> bluetoothRepository.isSupported
 
             // Virtual transports stay inadmissible until deliberately enabled: `connections?address=m` is reachable
             // from any web page through the verified meshtastic.org app link, so a drive-by deep link must not be able
@@ -55,6 +64,9 @@ abstract class BaseRadioTransportFactory(
             else -> isPlatformAddressValid(address)
         }
     }
+
+    /** Whether this hardware can host a USB serial radio. */
+    protected open val isSerialSupported: Boolean = true
 
     protected open fun isPlatformAddressValid(address: String): Boolean = false
 

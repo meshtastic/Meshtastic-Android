@@ -20,6 +20,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import androidx.core.app.NotificationCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.mokkery.MockMode
@@ -27,8 +28,10 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -37,11 +40,15 @@ import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.repository.FirmwareUpdateProgress
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.firmware_update_in_progress
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.local_stats_nodes
 import org.meshtastic.core.testing.runUntilSettled
@@ -61,6 +68,7 @@ class MeshNotificationManagerImplTest {
     private lateinit var context: Context
     private lateinit var systemNotificationManager: NotificationManager
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
+    private val firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
 
     @Before
     fun setUp() {
@@ -78,30 +86,79 @@ class MeshNotificationManagerImplTest {
     }
 
     @Test
-    fun `initChannels removes legacy categories and creates canonical channels`() = runWithRenderScope { renderScope ->
-        NotificationChannels.LEGACY_CATEGORY_IDS.forEach(::createChannel)
-        val notifications = createManager(renderScope)
-        notifications.initChannels()
+    fun `initChannels removes legacy categories and has the service channel ready at once`() =
+        runWithRenderScope { renderScope ->
+            NotificationChannels.LEGACY_CATEGORY_IDS.forEach(::createChannel)
+            val notifications = createManager(renderScope)
+            notifications.initChannels()
 
-        NotificationChannels.LEGACY_CATEGORY_IDS.forEach { legacyId ->
-            assertNull(systemNotificationManager.getNotificationChannel(legacyId))
+            NotificationChannels.LEGACY_CATEGORY_IDS.forEach { legacyId ->
+                assertNull(systemNotificationManager.getNotificationChannel(legacyId))
+            }
+            // The foreground-service notification is posted right after initChannels returns, and the platform (not
+            // Robolectric) rejects a channel whose group does not exist yet.
+            val service = assertNotNull(systemNotificationManager.getNotificationChannel(NotificationChannels.SERVICE))
+            assertEquals(NotificationChannelGroupSpec.Device.id, service.group)
+            assertNotNull(systemNotificationManager.getNotificationChannelGroup(NotificationChannelGroupSpec.Device.id))
         }
 
-        val canonicalChannelIds =
-            listOf(
-                NotificationChannels.SERVICE,
-                NotificationChannels.MESSAGES,
-                NotificationChannels.BROADCASTS,
-                NotificationChannels.WAYPOINTS,
-                NotificationChannels.ALERTS,
-                NotificationChannels.NEW_NODES,
-                NotificationChannels.LOW_BATTERY,
-                NotificationChannels.LOW_BATTERY_REMOTE,
-                NotificationChannels.CLIENT,
-            )
+    /**
+     * Pins every channel's importance and group. Importance is fixed when a channel is first created, so changing one
+     * here only reaches new installs, and lowering one below what shipped also lowers it on unmodified existing
+     * installs: an edit to this table is a product decision, not a refactor.
+     */
+    @Test
+    fun `every channel is created with its importance, group and description`() = runWithRenderScope { renderScope ->
+        // Labels load on real threads; under virtual time the label timeout would fire at once and fall back.
+        withContext(Dispatchers.Default) { createManager(renderScope).ensureChannels() }
 
-        canonicalChannelIds.forEach { channelId ->
-            assertNotNull(systemNotificationManager.getNotificationChannel(channelId))
+        NotificationChannelSpec.entries.forEach { spec ->
+            val (importance, group) =
+                when (spec) {
+                    NotificationChannelSpec.Service ->
+                        NotificationManager.IMPORTANCE_LOW to NotificationChannelGroupSpec.Device
+
+                    NotificationChannelSpec.DirectMessages ->
+                        NotificationManager.IMPORTANCE_HIGH to NotificationChannelGroupSpec.Messages
+
+                    NotificationChannelSpec.Broadcasts ->
+                        NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Messages
+
+                    NotificationChannelSpec.Waypoints ->
+                        NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Messages
+
+                    NotificationChannelSpec.Reactions ->
+                        NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Messages
+
+                    NotificationChannelSpec.Alerts ->
+                        NotificationManager.IMPORTANCE_HIGH to NotificationChannelGroupSpec.Messages
+
+                    NotificationChannelSpec.NewNodes ->
+                        NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Mesh
+
+                    NotificationChannelSpec.MeshBeacon ->
+                        NotificationManager.IMPORTANCE_LOW to NotificationChannelGroupSpec.Mesh
+
+                    NotificationChannelSpec.LowBatteryRemote ->
+                        NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Mesh
+
+                    NotificationChannelSpec.LowBattery ->
+                        NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Device
+
+                    NotificationChannelSpec.Client ->
+                        NotificationManager.IMPORTANCE_HIGH to NotificationChannelGroupSpec.Device
+
+                    NotificationChannelSpec.DeviceStatus ->
+                        NotificationManager.IMPORTANCE_DEFAULT to NotificationChannelGroupSpec.Device
+                }
+            val channel = assertNotNull(systemNotificationManager.getNotificationChannel(spec.id), spec.name)
+            assertEquals(importance, channel.importance, spec.name)
+            assertEquals(group.id, channel.group, spec.name)
+            assertEquals(getString(spec.nameRes), channel.name.toString(), spec.name)
+            assertEquals(getString(spec.descriptionRes), channel.description, spec.name)
+        }
+        NotificationChannelGroupSpec.entries.forEach { group ->
+            assertNotNull(systemNotificationManager.getNotificationChannelGroup(group.id), group.name)
         }
     }
 
@@ -162,6 +219,33 @@ class MeshNotificationManagerImplTest {
     }
 
     @Test
+    fun `a running flash makes the service notification a promotable progress notification`() =
+        runWithRenderScope { renderScope ->
+            val notifications = createManager(renderScope)
+            notifications.initChannels()
+            notifications.updateServiceStateNotification(ConnectionState.Disconnected, populatedTelemetry())
+            runUntilSettled { activeServiceNotification() != null }
+
+            firmwareUpdateStatusRepository.publishProgress(
+                FirmwareUpdateProgress(UiText.DynamicString("Writing firmware"), percent = 42),
+            )
+            runUntilSettled { serviceExtras()?.getInt(Notification.EXTRA_PROGRESS) == 42 }
+
+            val posted = assertNotNull(activeServiceNotification()).notification
+            assertEquals(getString(Res.string.firmware_update_in_progress), serviceTitle())
+            assertEquals("Writing firmware", serviceExtras()?.getCharSequence(Notification.EXTRA_TEXT)?.toString())
+            assertTrue(NotificationCompat.isRequestPromotedOngoing(posted))
+            assertEquals("42%", posted.extras.getString(NotificationCompat.EXTRA_SHORT_CRITICAL_TEXT))
+
+            firmwareUpdateStatusRepository.publishProgress(null)
+            runUntilSettled {
+                activeServiceNotification()?.notification?.let { !NotificationCompat.isRequestPromotedOngoing(it) } ==
+                    true
+            }
+            assertEquals(getString(Res.string.disconnected), serviceTitle())
+        }
+
+    @Test
     fun `service state seeds local stats before the local node row is available`() = runWithRenderScope { renderScope ->
         val stats =
             LocalStats.Builder()
@@ -190,6 +274,7 @@ class MeshNotificationManagerImplTest {
         conversationShortcutPublisher = lazy { error("Not used in this test") },
         radioConfigRepository = lazy { error("Not used in this test") },
         radioOperationLock = RadioOperationLock(),
+        firmwareUpdateStatusRepository = firmwareUpdateStatusRepository,
         scope = scope.asServiceScope(),
     )
 
@@ -209,6 +294,10 @@ class MeshNotificationManagerImplTest {
     private fun activeServiceNotification() =
         systemNotificationManager.activeNotifications.singleOrNull { it.id == SERVICE_NOTIFY_ID }
 
+    private fun serviceExtras() = activeServiceNotification()?.notification?.extras
+
+    private fun serviceTitle() = serviceExtras()?.getCharSequence(Notification.EXTRA_TITLE)?.toString()
+
     private fun createChannel(id: String) {
         systemNotificationManager.createNotificationChannel(
             NotificationChannel(id, id, NotificationManager.IMPORTANCE_DEFAULT),
@@ -216,20 +305,7 @@ class MeshNotificationManagerImplTest {
     }
 
     private fun clearManagedChannels() {
-        val channelIds =
-            NotificationChannels.LEGACY_CATEGORY_IDS +
-                listOf(
-                    NotificationChannels.SERVICE,
-                    NotificationChannels.MESSAGES,
-                    NotificationChannels.BROADCASTS,
-                    NotificationChannels.WAYPOINTS,
-                    NotificationChannels.ALERTS,
-                    NotificationChannels.NEW_NODES,
-                    NotificationChannels.LOW_BATTERY,
-                    NotificationChannels.LOW_BATTERY_REMOTE,
-                    NotificationChannels.CLIENT,
-                )
-
+        val channelIds = NotificationChannels.LEGACY_CATEGORY_IDS + NotificationChannelSpec.entries.map { it.id }
         channelIds.forEach { channelId -> systemNotificationManager.deleteNotificationChannel(channelId) }
     }
 }

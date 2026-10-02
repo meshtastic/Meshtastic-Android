@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -25,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -118,4 +120,29 @@ class AdaptiveTwoPaneUiTest {
         val restoredX = handle.fetchSemanticsNode().boundsInRoot.center.x
         assertTrue(abs(restoredX - draggedX) < 3f, "divider was at $draggedX but came back at $restoredX")
     }
+
+    @Test
+    fun panesRenderANewSlotLambda() = runComposeUiTest {
+        var swapped by mutableStateOf(false)
+        setContent { AppTheme { Box(modifier = Modifier.fillMaxSize()) { SwappablePanes(swapped = swapped) } } }
+
+        onNodeWithText("first A").assertIsDisplayed()
+        onNodeWithText("second A").assertIsDisplayed()
+
+        swapped = true
+        waitForIdle()
+
+        onNodeWithText("first B").assertIsDisplayed()
+        onNodeWithText("second B").assertIsDisplayed()
+    }
+}
+
+// Distinct lambda instances per slot, as a caller forwarding one of several slot parameters would pass.
+@Composable
+private fun SwappablePanes(swapped: Boolean) {
+    val firstA: @Composable ColumnScope.() -> Unit = { Text("first A") }
+    val firstB: @Composable ColumnScope.() -> Unit = { Text("first B") }
+    val secondA: @Composable ColumnScope.() -> Unit = { Text("second A") }
+    val secondB: @Composable ColumnScope.() -> Unit = { Text("second B") }
+    AdaptiveTwoPane(first = if (swapped) firstB else firstA, second = if (swapped) secondB else secondA)
 }

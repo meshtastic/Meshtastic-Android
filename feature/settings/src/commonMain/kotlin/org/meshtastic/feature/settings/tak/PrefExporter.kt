@@ -17,12 +17,17 @@
 package org.meshtastic.feature.settings.tak
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import org.meshtastic.core.ui.util.rememberFileExporter
 
 /**
- * Platform-specific composable that returns a launcher for exporting a TAK data package zip.
+ * Returns a launcher for exporting a TAK data package zip.
  *
  * @param dataPackageProvider suspend function producing the zip [ByteArray]
  * @return a lambda accepting the suggested file name to trigger the export
  */
 @Composable
-expect fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit
+fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit {
+    val export = rememberFileExporter(content = dataPackageProvider)
+    return remember(export) { { fileName -> export(fileName, "application/zip") } }
+}

@@ -49,6 +49,19 @@ constructor(
     }
 
     /**
+     * Reboots an nRF52 radio into its DFU bootloader.
+     *
+     * @param destNum The node number to reboot.
+     * @return The packet ID of the request.
+     */
+    open suspend fun rebootToDfu(destNum: Int, onRequestId: (Int) -> Unit = {}): Int {
+        val packetId = radioController.generatePacketId()
+        onRequestId(packetId)
+        radioController.rebootToDfu(destNum, packetId)
+        return packetId
+    }
+
+    /**
      * Shuts down the radio.
      *
      * @param destNum The node number to shut down.

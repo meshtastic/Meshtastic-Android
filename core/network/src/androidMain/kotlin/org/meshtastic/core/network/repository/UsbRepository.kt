@@ -25,6 +25,7 @@ import co.touchlab.kermit.Logger
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -38,6 +39,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
+import org.meshtastic.core.common.hasUsbHost
 import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.common.util.registerReceiverCompat
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -58,6 +60,9 @@ class UsbRepository(
     private val usbManagerLazy: Lazy<UsbManager?>,
     private val usbSerialProberLazy: Lazy<UsbSerialProber>,
 ) {
+    /** False when the device cannot act as a USB host, so no USB serial transport can ever work (e.g. Android XR). */
+    val isSupported: Boolean = application.hasUsbHost()
+
     private val _serialDevices = MutableStateFlow(emptyMap<String, UsbDevice>())
 
     val serialDevices =
@@ -127,6 +132,8 @@ class UsbRepository(
             port.rts = true
             delay(holdMillis)
             true
+        } catch (e: CancellationException) {
+            throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.w(e) { "DTR poke failed for ${driver.device.usbSerialStableKey()}" }
             false

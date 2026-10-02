@@ -2,9 +2,36 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>AbstractClassCanBeInterface:AiFunctionProviderImpl.kt:AiFunctionProviderImpl.ResolvedContact$ResolvedContact</ID>
+    <ID>AbstractClassCanBeInterface:AiFunctionResult.kt:GetChannelInfoResult$GetChannelInfoResult</ID>
+    <ID>AbstractClassCanBeInterface:AiFunctionResult.kt:GetDeviceStatusResult$GetDeviceStatusResult</ID>
+    <ID>AbstractClassCanBeInterface:AiFunctionResult.kt:GetMeshMetricsResult$GetMeshMetricsResult</ID>
+    <ID>AbstractClassCanBeInterface:AiFunctionResult.kt:GetNodeDetailsResult$GetNodeDetailsResult</ID>
+    <ID>AbstractClassCanBeInterface:AiFunctionResult.kt:GetNodeListResult$GetNodeListResult</ID>
+    <ID>AbstractClassCanBeInterface:AiFunctionResult.kt:GetRecentMessagesResult$GetRecentMessagesResult</ID>
+    <ID>AbstractClassCanBeInterface:AiFunctionResult.kt:GetUnreadSummaryResult$GetUnreadSummaryResult</ID>
+    <ID>AbstractClassCanBeInterface:AiFunctionResult.kt:SendMessageResult$SendMessageResult</ID>
+    <ID>AbstractClassCanBeInterface:FuzzyNameResolver.kt:ChannelNameResult$ChannelNameResult</ID>
+    <ID>AbstractClassCanBeInterface:FuzzyNameResolver.kt:NodeNameResult$NodeNameResult</ID>
+    <ID>AbstractClassCanBeInterface:MeshConfigFlowManagerImpl.kt:MeshConfigFlowManagerImpl.HandshakeState$HandshakeState</ID>
+    <ID>AbstractClassCanBeInterface:RateLimiter.kt:RateLimitResult$RateLimitResult</ID>
+    <ID>LongParameterList:AiFunctionProviderImpl.kt:AiFunctionProviderImpl</ID>
     <ID>MagicNumber:XModemManagerImpl.kt:XModemManagerImpl$0x8000</ID>
     <ID>MagicNumber:XModemManagerImpl.kt:XModemManagerImpl$0xFF</ID>
     <ID>MagicNumber:XModemManagerImpl.kt:XModemManagerImpl$0xFFFF</ID>
     <ID>MagicNumber:XModemManagerImpl.kt:XModemManagerImpl$8</ID>
+    <ID>NoNameShadowing:CommandSenderImpl.kt:CommandSenderImpl$wb</ID>
+    <ID>NoNameShadowing:DataLayerHeartbeatSender.kt:DataLayerHeartbeatSender$wb</ID>
+    <ID>NoNameShadowing:HistoryManagerImpl.kt:HistoryManagerImpl$wb</ID>
+    <ID>NoNameShadowing:XModemManagerImpl.kt:XModemManagerImpl$wb</ID>
+    <ID>UnusedPrivateProperty:BootloaderOtaQuirksRepositoryImpl.kt:BootloaderOtaQuirksRepositoryImpl$private val dispatchers: CoroutineDispatchers</ID>
+    <ID>UnusedPrivateProperty:DeviceHardwareRepositoryImpl.kt:DeviceHardwareRepositoryImpl$private val deviceLinkRepository: DeviceLinkRepository</ID>
+    <ID>UnusedPrivateProperty:DeviceHardwareRepositoryImpl.kt:DeviceHardwareRepositoryImpl$private val remoteDataSource: DeviceHardwareRemoteDataSource</ID>
+    <ID>UnusedPrivateProperty:EventFirmwareRepositoryImpl.kt:EventFirmwareRepositoryImpl$private val remoteDataSource: EventFirmwareRemoteDataSource</ID>
+    <ID>UnusedPrivateProperty:RadioConfigRepositoryImpl.kt:RadioConfigRepositoryImpl$private val nodeDB: NodeRepository</ID>
+    <ID>UseOrEmpty:AiFunctionProviderImpl.kt:AiFunctionProviderImpl$lastPacket.from ?: ""</ID>
+    <ID>UseOrEmpty:AiFunctionProviderImpl.kt:AiFunctionProviderImpl$userId ?: ""</ID>
+    <ID>UseOrEmpty:DeviceHardwareRepositoryImpl.kt:DeviceHardwareRepositoryImpl$target?.let { listOfNotNull(localDataSource.getByTarget(it)) } ?: emptyList()</ID>
+    <ID>UseOrEmpty:NodeManagerImpl.kt:NodeManagerImpl$nodeState.value.index.byNum[num]?.user?.id ?: ""</ID>
   </CurrentIssues>
 </SmellBaseline>

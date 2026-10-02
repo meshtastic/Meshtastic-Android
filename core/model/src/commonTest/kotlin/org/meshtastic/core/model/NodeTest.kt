@@ -198,6 +198,25 @@ class NodeTest {
         assertTrue(Node(num = 1).matchesSearch(""))
     }
 
+    @Test
+    fun matchesSearch_matchesTheStatusMessage() {
+        val node =
+            Node(
+                num = 1,
+                user = User.Builder().also { wb -> wb.long_name = "Summit Repeater" }.build(),
+                nodeStatus = "På fjellet",
+            )
+
+        assertTrue(node.matchesSearch("fjellet"))
+        assertTrue(node.matchesSearch("PÅ FJELLET"))
+        assertFalse(node.matchesSearch("nomatch"))
+    }
+
+    @Test
+    fun matchesSearch_toleratesAnAbsentStatusMessage() {
+        assertFalse(Node(num = 1, nodeStatus = null).matchesSearch("anything"))
+    }
+
     private fun nodeWithPosition(num: Int, latitudeI: Int, longitudeI: Int): Node = Node(
         num = num,
         position =

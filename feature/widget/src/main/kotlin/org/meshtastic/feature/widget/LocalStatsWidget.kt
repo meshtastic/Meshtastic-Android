@@ -67,8 +67,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_utilization
 import org.meshtastic.core.resources.battery
@@ -76,6 +76,7 @@ import org.meshtastic.core.resources.channel_utilization
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_diagnostics_prefix
@@ -221,14 +222,14 @@ class LocalStatsWidget :
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
                     StatRow(
                         label = stringResource(Res.string.channel_utilization),
-                        value = "%.1f%%".format(state.channelUtilization),
+                        value = MetricFormatter.percent(state.channelUtilization),
                         progress = state.channelUtilizationProgress,
                         isSmall = isSmall,
                         modifier = GlanceModifier.defaultWeight().padding(end = 4.dp),
                     )
                     StatRow(
                         label = stringResource(Res.string.air_utilization),
-                        value = "%.1f%%".format(state.airUtilization),
+                        value = MetricFormatter.percent(state.airUtilization),
                         progress = state.airUtilizationProgress,
                         isSmall = isSmall,
                         modifier = GlanceModifier.defaultWeight().padding(start = 4.dp),
@@ -368,7 +369,7 @@ class LocalStatsWidget :
                         style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
                     )
                     Text(
-                        text = formatUptime(state.uptimeSecs.toInt()),
+                        text = formatDuration(state.uptimeSecs),
                         maxLines = 1,
                         style =
                         TextStyle(

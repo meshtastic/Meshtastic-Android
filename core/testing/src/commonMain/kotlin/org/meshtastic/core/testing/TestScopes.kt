@@ -53,6 +53,7 @@ private val SETTLE_POLL_INTERVAL = 5.milliseconds
  * `runTest` advances the virtual clock to the next scheduled task whenever that happens, firing pending `delay`s early.
  * Such a test should instead load the resources it needs before scheduling anything it later advances past.
  */
+@Suppress("InjectDispatcher") // waits in real time, off the test scheduler, by design
 suspend fun TestScope.runUntilSettled(timeout: Duration = 10.seconds, isSettled: () -> Boolean) {
     val start = TimeSource.Monotonic.markNow()
     while (true) {

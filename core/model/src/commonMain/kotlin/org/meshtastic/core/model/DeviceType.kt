@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.model
 
-/** Represent the different ways a device can connect to the client. */
+/** The physical transports a radio can be reached over. Demo Mode reaches no radio and has no [DeviceType]. */
 enum class DeviceType {
     BLE,
     TCP,
@@ -28,13 +28,12 @@ enum class DeviceType {
             when (InterfaceId.forIdChar(address.firstOrNull() ?: return null)) {
                 InterfaceId.BLUETOOTH -> BLE
 
-                InterfaceId.SERIAL,
-                InterfaceId.MOCK, // Mock/demo mode historically presents as USB.
-                -> USB
+                InterfaceId.SERIAL -> USB
 
                 InterfaceId.TCP -> TCP
 
                 InterfaceId.NOP,
+                InterfaceId.MOCK,
                 InterfaceId.REPLAY,
                 null,
                 -> null

@@ -16,22 +16,26 @@
  */
 package org.meshtastic.feature.firmware
 
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
+import org.meshtastic.core.repository.FirmwareUpdateProgress
+import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_update_verifying
+import kotlin.math.roundToInt
 
 /**
  * Represents the progress of a long-running firmware update task.
  *
  * @property message A high-level status message (e.g., "Downloading...").
  * @property progress A value between 0.0 and 1.0 representing completion percentage.
- * @property details Optional high-frequency detail text (e.g., "1.2 MiB/s, 45%").
+ * @property details Optional high-frequency detail text (e.g., "45% (12.60 kB/s, ETA: 5s)").
  * @property hint Optional persistent advisory shown alongside the progress (e.g. a slow-bootloader tip).
  */
 data class ProgressState(
     val message: UiText = UiText.DynamicString(""),
     val progress: Float = 0f,
-    val details: String? = null,
+    val details: UiText? = null,
     val hint: UiText? = null,
 )
 
@@ -67,8 +71,14 @@ sealed interface FirmwareUpdateState {
     /** Firmware file is being downloaded from the release server. */
     data class Downloading(val progressState: ProgressState) : FirmwareUpdateState
 
-    /** Intermediate processing (e.g. extracting, preparing DFU). */
-    data class Processing(val progressState: ProgressState) : FirmwareUpdateState
+    /**
+     * Intermediate processing (e.g. extracting, preparing DFU).
+     *
+     * @property beforeConfirmation True while a picked local file is checked before the user has confirmed any update,
+     *   so nothing outside the screen reports it as a running update.
+     */
+    data class Processing(val progressState: ProgressState, val beforeConfirmation: Boolean = false) :
+        FirmwareUpdateState
 
     /** Firmware is actively being written to the device. */
     data class Updating(val progressState: ProgressState) : FirmwareUpdateState
@@ -110,7 +120,43 @@ sealed interface FirmwareUpdateState {
         val step: UsbFileSaveStep = UsbFileSaveStep.Firmware,
         val retryMessage: UiText? = null,
     ) : FirmwareUpdateState
+
+    /**
+     * The device's update drive has been read for a bootloader upgrade and nothing has been written yet. The user
+     * either upgrades or skips straight to reinstalling the firmware, which is also what restarts the device.
+     */
+    data class ReviewingBootloader(val versions: BootloaderVersions) : FirmwareUpdateState
 }
+
+/**
+ * The part of this state the foreground-service notification shows, or null when nothing is transferring. Determinate
+ * exactly where the screen draws a determinate bar: downloading and writing, not the processing and verifying waits.
+ */
+internal fun FirmwareUpdateState.toUpdateProgress(): FirmwareUpdateProgress? = when (this) {
+    is FirmwareUpdateState.Downloading -> FirmwareUpdateProgress(progressState.message, progressState.percent())
+
+    is FirmwareUpdateState.Updating -> FirmwareUpdateProgress(progressState.message, progressState.percent())
+
+    is FirmwareUpdateState.Processing ->
+        if (beforeConfirmation) null else FirmwareUpdateProgress(progressState.message, percent = null)
+
+    FirmwareUpdateState.Verifying ->
+        FirmwareUpdateProgress(UiText.Resource(Res.string.firmware_update_verifying), percent = null)
+
+    FirmwareUpdateState.Idle,
+    FirmwareUpdateState.Checking,
+    is FirmwareUpdateState.Ready,
+    FirmwareUpdateState.VerificationFailed,
+    is FirmwareUpdateState.Error,
+    is FirmwareUpdateState.Success,
+    is FirmwareUpdateState.AwaitingFileSave,
+    is FirmwareUpdateState.ReviewingBootloader,
+    -> null
+}
+
+private const val PERCENT = 100
+
+private fun ProgressState.percent(): Int = (progress * PERCENT).roundToInt().coerceIn(0, PERCENT)
 
 private val FORMAT_ARG_REGEX = Regex(":?\\s*%1\\\$d%?")
 

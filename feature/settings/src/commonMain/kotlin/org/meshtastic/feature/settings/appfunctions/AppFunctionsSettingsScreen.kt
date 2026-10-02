@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.repository.AppFunctionsSetting
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_functions_get_channel_info
 import org.meshtastic.core.resources.app_functions_get_device_status
@@ -87,33 +88,33 @@ fun AppFunctionsSettingsScreen(
         Column(modifier = Modifier.padding(padding).verticalScroll(rememberScrollState())) {
             MasterToggleSection(
                 masterEnabled = masterEnabled,
-                onToggle = { viewModel.setMasterEnabled(!masterEnabled) },
+                onToggle = { viewModel.toggle(AppFunctionsSetting.MASTER) },
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             WriteFunctionsSection(
                 masterEnabled = masterEnabled,
                 sendMessage = sendMessage,
-                onToggleSendMessage = { viewModel.setSendMessageEnabled(!sendMessage) },
+                onToggleSendMessage = { viewModel.toggle(AppFunctionsSetting.SEND_MESSAGE) },
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             ReadFunctionsSection(
                 masterEnabled = masterEnabled,
                 getMeshStatus = getMeshStatus,
-                onToggleMeshStatus = { viewModel.setGetMeshStatusEnabled(!getMeshStatus) },
+                onToggleMeshStatus = { viewModel.toggle(AppFunctionsSetting.GET_MESH_STATUS) },
                 getNodeList = getNodeList,
-                onToggleNodeList = { viewModel.setGetNodeListEnabled(!getNodeList) },
+                onToggleNodeList = { viewModel.toggle(AppFunctionsSetting.GET_NODE_LIST) },
                 getChannelInfo = getChannelInfo,
-                onToggleChannelInfo = { viewModel.setGetChannelInfoEnabled(!getChannelInfo) },
+                onToggleChannelInfo = { viewModel.toggle(AppFunctionsSetting.GET_CHANNEL_INFO) },
                 getDeviceStatus = getDeviceStatus,
-                onToggleDeviceStatus = { viewModel.setGetDeviceStatusEnabled(!getDeviceStatus) },
+                onToggleDeviceStatus = { viewModel.toggle(AppFunctionsSetting.GET_DEVICE_STATUS) },
                 getNodeDetails = getNodeDetails,
-                onToggleNodeDetails = { viewModel.setGetNodeDetailsEnabled(!getNodeDetails) },
+                onToggleNodeDetails = { viewModel.toggle(AppFunctionsSetting.GET_NODE_DETAILS) },
                 getMeshMetrics = getMeshMetrics,
-                onToggleMeshMetrics = { viewModel.setGetMeshMetricsEnabled(!getMeshMetrics) },
+                onToggleMeshMetrics = { viewModel.toggle(AppFunctionsSetting.GET_MESH_METRICS) },
                 getRecentMessages = getRecentMessages,
-                onToggleRecentMessages = { viewModel.setGetRecentMessagesEnabled(!getRecentMessages) },
+                onToggleRecentMessages = { viewModel.toggle(AppFunctionsSetting.GET_RECENT_MESSAGES) },
                 getUnreadSummary = getUnreadSummary,
-                onToggleUnreadSummary = { viewModel.setGetUnreadSummaryEnabled(!getUnreadSummary) },
+                onToggleUnreadSummary = { viewModel.toggle(AppFunctionsSetting.GET_UNREAD_SUMMARY) },
             )
         }
     }

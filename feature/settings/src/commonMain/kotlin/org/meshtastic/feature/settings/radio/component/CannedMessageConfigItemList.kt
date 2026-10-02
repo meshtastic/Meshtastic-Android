@@ -23,6 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
@@ -30,21 +31,31 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.allow_input_source
 import org.meshtastic.core.resources.canned_message
 import org.meshtastic.core.resources.canned_message_config
 import org.meshtastic.core.resources.canned_message_enabled
-import org.meshtastic.core.resources.generate_input_event_on_ccw
-import org.meshtastic.core.resources.generate_input_event_on_cw
-import org.meshtastic.core.resources.generate_input_event_on_press
-import org.meshtastic.core.resources.gpio_pin_for_rotary_encoder_a_port
-import org.meshtastic.core.resources.gpio_pin_for_rotary_encoder_b_port
-import org.meshtastic.core.resources.gpio_pin_for_rotary_encoder_press_port
 import org.meshtastic.core.resources.messages
-import org.meshtastic.core.resources.rotary_encoder_1_enabled
-import org.meshtastic.core.resources.send_bell
-import org.meshtastic.core.resources.up_down_select_input_enabled
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_event_ccw
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_event_ccw_description
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_event_cw
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_event_cw_description
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_event_press
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_event_press_description
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_pin_a
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_pin_a_description
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_pin_b
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_pin_b_description
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_pin_press
+import org.meshtastic.core.resources.schema_cannedmessage_inputbroker_pin_press_description
+import org.meshtastic.core.resources.schema_cannedmessage_rotary1_enabled
+import org.meshtastic.core.resources.schema_cannedmessage_rotary1_enabled_description
+import org.meshtastic.core.resources.schema_cannedmessage_send_bell
+import org.meshtastic.core.resources.schema_cannedmessage_send_bell_description
+import org.meshtastic.core.resources.schema_cannedmessage_updown1_enabled
+import org.meshtastic.core.resources.schema_cannedmessage_updown1_enabled_description
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -52,11 +63,15 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.allow_input_source
+import org.meshtastic.proto.enabled
 
 @Suppress("DEPRECATION", "LongMethod")
 @Composable
 fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val firmwareVersion = state.metadata?.firmware_version
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val cannedMessageConfig = state.moduleConfig.canned_message ?: ModuleConfig.CannedMessageConfig.Builder().build()
     val messages = state.cannedMessageMessages
     val formState = rememberConfigState(initialValue = cannedMessageConfig)
@@ -85,18 +100,21 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
     ) {
         item {
             TitledCard(title = stringResource(Res.string.canned_message_config)) {
+                if (capabilities.offers(ModuleConfig.CannedMessageConfig.enabled, isSet = formState.value.enabled)) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.canned_message_enabled),
+                        checked = formState.value.enabled,
+                        enabled = state.connected,
+                        onCheckedChange = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                        },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                    HorizontalDivider()
+                }
                 SwitchPreference(
-                    title = stringResource(Res.string.canned_message_enabled),
-                    checked = formState.value.enabled,
-                    enabled = state.connected,
-                    onCheckedChange = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
-                    },
-                    containerColor = CardDefaults.cardColors().containerColor,
-                )
-                HorizontalDivider()
-                SwitchPreference(
-                    title = stringResource(Res.string.rotary_encoder_1_enabled),
+                    title = stringResource(Res.string.schema_cannedmessage_rotary1_enabled),
+                    summary = stringResource(Res.string.schema_cannedmessage_rotary1_enabled_description),
                     checked = formState.value.rotary1_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -106,7 +124,8 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.gpio_pin_for_rotary_encoder_a_port),
+                    title = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_a),
+                    summary = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_a_description),
                     value = formState.value.inputbroker_pin_a,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -115,7 +134,8 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     },
                 )
                 EditTextPreference(
-                    title = stringResource(Res.string.gpio_pin_for_rotary_encoder_b_port),
+                    title = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_b),
+                    summary = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_b_description),
                     value = formState.value.inputbroker_pin_b,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -124,7 +144,8 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     },
                 )
                 EditTextPreference(
-                    title = stringResource(Res.string.gpio_pin_for_rotary_encoder_press_port),
+                    title = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_press),
+                    summary = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_press_description),
                     value = formState.value.inputbroker_pin_press,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -134,9 +155,9 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     },
                 )
                 DropDownPreference(
-                    title = stringResource(Res.string.generate_input_event_on_press),
+                    title = stringResource(Res.string.schema_cannedmessage_inputbroker_event_press),
+                    summary = stringResource(Res.string.schema_cannedmessage_inputbroker_event_press_description),
                     enabled = state.connected,
-                    items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
                     selectedItem = formState.value.inputbroker_event_press,
                     onItemSelected = {
                         formState.value =
@@ -145,9 +166,9 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(Res.string.generate_input_event_on_cw),
+                    title = stringResource(Res.string.schema_cannedmessage_inputbroker_event_cw),
+                    summary = stringResource(Res.string.schema_cannedmessage_inputbroker_event_cw_description),
                     enabled = state.connected,
-                    items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
                     selectedItem = formState.value.inputbroker_event_cw,
                     onItemSelected = {
                         formState.value =
@@ -156,9 +177,9 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(Res.string.generate_input_event_on_ccw),
+                    title = stringResource(Res.string.schema_cannedmessage_inputbroker_event_ccw),
+                    summary = stringResource(Res.string.schema_cannedmessage_inputbroker_event_ccw_description),
                     enabled = state.connected,
-                    items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
                     selectedItem = formState.value.inputbroker_event_ccw,
                     onItemSelected = {
                         formState.value =
@@ -167,7 +188,8 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(Res.string.up_down_select_input_enabled),
+                    title = stringResource(Res.string.schema_cannedmessage_updown1_enabled),
+                    summary = stringResource(Res.string.schema_cannedmessage_updown1_enabled_description),
                     checked = formState.value.updown1_enabled,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -176,21 +198,30 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                EditTextPreference(
-                    title = stringResource(Res.string.allow_input_source),
-                    value = formState.value.allow_input_source,
-                    maxSize = 63, // allow_input_source max_size:16
-                    enabled = state.connected,
-                    isError = false,
-                    keyboardOptions =
-                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.allow_input_source = it }.build()
-                    },
-                )
+                if (
+                    capabilities.offers(
+                        ModuleConfig.CannedMessageConfig.allow_input_source,
+                        isSet = formState.value.allow_input_source.isNotEmpty(),
+                    )
+                ) {
+                    EditTextPreference(
+                        title = stringResource(Res.string.allow_input_source),
+                        value = formState.value.allow_input_source,
+                        maxSize = 63, // allow_input_source max_size:16
+                        enabled = state.connected,
+                        isError = false,
+                        keyboardOptions =
+                        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = {
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.allow_input_source = it }.build()
+                        },
+                    )
+                }
                 SwitchPreference(
-                    title = stringResource(Res.string.send_bell),
+                    title = stringResource(Res.string.schema_cannedmessage_send_bell),
+                    summary = stringResource(Res.string.schema_cannedmessage_send_bell_description),
                     checked = formState.value.send_bell,
                     enabled = state.connected,
                     onCheckedChange = {

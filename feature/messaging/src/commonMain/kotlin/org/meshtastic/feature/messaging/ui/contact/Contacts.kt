@@ -100,6 +100,7 @@ import org.meshtastic.core.resources.delete_messages
 import org.meshtastic.core.resources.delete_selection
 import org.meshtastic.core.resources.direct_messages
 import org.meshtastic.core.resources.expanded
+import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.mark_as_read
 import org.meshtastic.core.resources.mark_unread_selected
 import org.meshtastic.core.resources.mute_1_week
@@ -131,6 +132,7 @@ import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.ExpandLess
 import org.meshtastic.core.ui.icon.ExpandMore
+import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.Keep
 import org.meshtastic.core.ui.icon.MarkChatRead
 import org.meshtastic.core.ui.icon.MarkChatUnread
@@ -152,6 +154,7 @@ fun ContactsScreen(
     onClickNodeChip: (Int) -> Unit,
     onNavigateToMessages: (String) -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
+    onNavigateToFilterSettings: () -> Unit,
     scrollToTopEvents: Flow<ScrollToTopEvent>?,
     activeContactKey: String?,
 ) {
@@ -181,9 +184,9 @@ fun ContactsScreen(
         }
     }
 
-    // Derived state for selected contacts and count
-    val selectedContacts =
-        remember(contacts, selectedContactKeys) { contacts.filter { it.contactKey in selectedContactKeys } }
+    // selectedContactKeys is mutated in place, so as a remember key it never changes; read it as state instead.
+    val selectedContacts by
+        remember(contacts) { derivedStateOf { contacts.filter { it.contactKey in selectedContactKeys } } }
     // Get message count directly from repository for selected contacts
     var selectedCount by remember { mutableIntStateOf(0) }
     LaunchedEffect(selectedContactKeys.size, selectedContactKeys.joinToString(",")) {
@@ -252,6 +255,12 @@ fun ContactsScreen(
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {
+                    IconButton(onClick = onNavigateToFilterSettings) {
+                        Icon(
+                            MeshtasticIcons.FilterList,
+                            contentDescription = stringResource(Res.string.filter_settings),
+                        )
+                    }
                     val unreadCountTotal by viewModel.unreadCountTotal.collectAsStateWithLifecycle(0)
                     if (unreadCountTotal > 0) {
                         IconButton(onClick = { viewModel.markAllAsRead() }) {

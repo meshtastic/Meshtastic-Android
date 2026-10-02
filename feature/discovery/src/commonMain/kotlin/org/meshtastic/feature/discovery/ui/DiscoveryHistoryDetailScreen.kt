@@ -55,11 +55,13 @@ import org.meshtastic.core.resources.discovery_stat_total_dwell_time
 import org.meshtastic.core.resources.discovery_stat_total_messages
 import org.meshtastic.core.resources.discovery_stat_unique_nodes
 import org.meshtastic.core.resources.discovery_view_map
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.discovery.DiscoveryHistoryDetailViewModel
 import org.meshtastic.feature.discovery.ui.component.PresetResultCard
+import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -139,7 +141,7 @@ private fun SessionMetadataCard(session: DiscoverySessionEntity) {
             MetadataRow(stringResource(Res.string.discovery_stat_total_messages), session.totalMessages.toString())
             MetadataRow(
                 stringResource(Res.string.discovery_stat_total_dwell_time),
-                formatDuration(session.totalDwellSeconds),
+                formatDuration(session.totalDwellSeconds, smallest = DurationUnit.MINUTES),
             )
             session.aiSummary?.let { summary ->
                 Spacer(Modifier.height(8.dp))

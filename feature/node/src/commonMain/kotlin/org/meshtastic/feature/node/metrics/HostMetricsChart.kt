@@ -29,6 +29,8 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import org.meshtastic.core.common.util.BYTES_PER_MEGABYTE
+import org.meshtastic.core.common.util.formatMegabytes
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.free_memory
@@ -123,9 +125,12 @@ internal fun buildHostMetricsChartData(data: List<Telemetry>): HostMetricsChartD
         telemetry.host_metrics
             ?.freemem_bytes
             ?.takeIf { it > 0 }
-            ?.let { HostMetricsChartPoint(time = telemetry.time, value = it.toDouble() / BYTES_IN_MB) }
+            ?.let { HostMetricsChartPoint(time = telemetry.time, value = it.toDouble() / BYTES_PER_MEGABYTE) }
     },
 )
+
+/** Free memory is plotted in megabytes; one unit for every tick keeps the axis comparable. */
+internal fun freeMemoryChartLabel(megabytes: Double): String = formatMegabytes(megabytes, 0)
 
 /**
  * Vico chart composable that renders load averages (1m, 5m, 15m) and free memory as dual-axis line series: load on the
@@ -186,7 +191,7 @@ internal fun HostMetricsChart(
                         load1Color -> formatString("L1: %.2f", value)
                         load5Color -> formatString("L5: %.2f", value)
                         load15Color -> formatString("L15: %.2f", value)
-                        else -> formatString("Mem: %.0f MB", value)
+                        else -> formatString("Mem: %s", freeMemoryChartLabel(value))
                     }
                 },
             )
@@ -233,7 +238,7 @@ internal fun HostMetricsChart(
                 if (memData.isNotEmpty()) {
                     VerticalAxis.rememberEnd(
                         label = ChartStyling.rememberAxisLabel(color = memColor),
-                        valueFormatter = { _, value, _ -> formatString("%.0f MB", value) },
+                        valueFormatter = { _, value, _ -> freeMemoryChartLabel(value) },
                     )
                 } else {
                     null

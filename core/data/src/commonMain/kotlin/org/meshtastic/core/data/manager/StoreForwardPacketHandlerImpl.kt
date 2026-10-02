@@ -165,7 +165,9 @@ class StoreForwardPacketHandlerImpl(
         myNodeNum: Int,
         session: RadioSessionContext?,
     ) {
-        val lastRequest = s.history?.last_request ?: 0
+        val history = s.history
+        val heartbeat = s.heartbeat
+        val lastRequest = history?.last_request ?: 0
         Logger.d { "StoreAndForward from=${dataPacket.from} lastRequest=$lastRequest" }
         when {
             s.stats != null -> {
@@ -178,24 +180,24 @@ class StoreForwardPacketHandlerImpl(
                 dataHandler.value.rememberDataPacket(u, myNodeNum, session = session)
             }
 
-            s.history != null -> {
-                val h = s.history!!
+            history != null -> {
                 val text =
-                    "Total messages: ${h.history_messages}\n" +
-                        "History window: ${h.window.milliseconds.inWholeMinutes} min\n" +
-                        "Last request: ${h.last_request}"
+                    "Total messages: ${history.history_messages}\n" +
+                        "History window: ${history.window.milliseconds.inWholeMinutes} min\n" +
+                        "Last request: ${history.last_request}"
                 val u =
                     dataPacket.copy(
                         bytes = text.encodeToByteArray().toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                     )
                 dataHandler.value.rememberDataPacket(u, myNodeNum, session = session)
-                historyManager.updateStoreForwardLastRequest("router_history", h.last_request, "Unknown")
+                historyManager.updateStoreForwardLastRequest("router_history", history.last_request, "Unknown")
             }
 
-            s.heartbeat != null -> {
-                val hb = s.heartbeat!!
-                Logger.d { "rxHeartbeat from=${dataPacket.from} period=${hb.period} secondary=${hb.secondary}" }
+            heartbeat != null -> {
+                Logger.d {
+                    "rxHeartbeat from=${dataPacket.from} period=${heartbeat.period} secondary=${heartbeat.secondary}"
+                }
             }
 
             s.text != null -> {

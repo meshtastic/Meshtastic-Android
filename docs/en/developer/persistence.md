@@ -2,7 +2,7 @@
 title: Persistence
 parent: Developer Guide
 nav_order: 6
-last_updated: 2026-08-29
+last_updated: 2026-09-28
 description: The app's three persistence layers — Room, DataStore, and core:prefs — and when a contributor should use each.
 aliases:
   - room
@@ -55,6 +55,10 @@ The primary structured data store:
 | `DiscoveryPresetResultEntity` | Per-preset result within a discovery session |
 | `DiscoveredNodeEntity` | Nodes found during a discovery preset scan |
 | `DeviceLinkEntity` | Cached `msh.to` device links from the Meshtastic API |
+| `EventFirmwareEditionEntity` | Event-firmware display records cached from the Meshtastic API (`/resource/eventFirmware`) |
+| `BootloaderOtaQuirksCacheEntity` | Single-row cache of the nRF52 bootloader/OTA quirk catalog (`/resource/bootloaderOtaQuirks`), stored as one serialized envelope |
+| `MaintenanceUf2CacheEntity` | Single-row cache of the maintenance-UF2 manifest (`/resource/maintenanceUf2`), stored as one serialized envelope |
+| `MergeMarkerEntity` | Marks a completed `DatabaseMerger` merge so a re-run on the next connection skips it instead of duplicating rows |
 
 > ℹ️ **Note:** Waypoints and telemetry are stored within the `Packet` entity (the `port_num` field distinguishes packet types), alongside a `channel` index recording which channel each packet used. Channel *configuration* — names and LoRa settings — lives separately, in `ChannelSetEntity`.
 

@@ -21,7 +21,7 @@ import com.sun.jna.Function
 import com.sun.jna.NativeLibrary
 import com.sun.jna.Pointer
 import org.meshtastic.core.repository.Notification
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 /**
  * Sends notifications through macOS UserNotifications (`UNUserNotificationCenter`) via JNA + Objective-C runtime. This
@@ -60,10 +60,17 @@ class MacOSNotificationSender private constructor(private val bridge: MacNotific
 
     internal fun categorySubtitle(category: Notification.Category): String = when (category) {
         Notification.Category.Message -> "Message"
+
         Notification.Category.NodeEvent -> "Node Event"
+
         Notification.Category.MeshBeacon -> "Mesh Invitation"
+
         Notification.Category.Battery -> "Low Battery"
-        Notification.Category.Alert -> "Alert"
+
+        Notification.Category.Alert,
+        Notification.Category.Client,
+        -> "Alert"
+
         Notification.Category.Service -> "Service"
     }
 
@@ -195,7 +202,7 @@ private class JnaMacNotificationBridge : MacNotificationBridge {
             msg(
                 requestClass,
                 selector("requestWithIdentifier:content:trigger:"),
-                nsString(UUID.randomUUID().toString()) ?: return false,
+                nsString(Uuid.random().toString()) ?: return false,
                 content,
                 Pointer.NULL,
             ) ?: return false

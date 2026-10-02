@@ -23,7 +23,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@Suppress("MagicNumber")
 class HostMetricsTest {
 
     private fun telemetry(time: Int, hostMetrics: HostMetrics? = null) = Telemetry.Builder()
@@ -46,7 +45,7 @@ class HostMetricsTest {
                                 wb.load1 = 150
                                 wb.load5 = 0
                                 wb.load15 = 225
-                                wb.freemem_bytes = 2_097_152L
+                                wb.freemem_bytes = 2_000_000L
                             }
                             .build(),
                     ),
@@ -99,5 +98,23 @@ class HostMetricsTest {
         assertTrue(chartData.load5.isEmpty())
         assertTrue(chartData.load15.isEmpty())
         assertTrue(chartData.freeMemoryMb.isEmpty())
+    }
+
+    @Test
+    fun free_memory_plots_and_labels_in_decimal_megabytes() {
+        val sixteenGib = 17_179_869_184L
+        val chartData =
+            buildHostMetricsChartData(
+                listOf(
+                    telemetry(
+                        time = 100,
+                        hostMetrics = HostMetrics.Builder().also { wb -> wb.freemem_bytes = sixteenGib }.build(),
+                    ),
+                ),
+            )
+
+        val point = chartData.freeMemoryMb.single()
+        assertEquals(17_179.869184, point.value)
+        assertEquals("17,180 MB", freeMemoryChartLabel(point.value))
     }
 }

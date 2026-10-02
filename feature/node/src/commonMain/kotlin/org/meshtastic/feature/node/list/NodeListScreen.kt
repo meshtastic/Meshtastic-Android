@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
@@ -56,7 +57,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.Flow
@@ -66,6 +66,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeListDensity
+import org.meshtastic.core.model.excludes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.resources.hop_histogram_title
@@ -80,12 +81,14 @@ import org.meshtastic.core.resources.nodes_unheard_banner_one
 import org.meshtastic.core.resources.nodes_unheard_keep
 import org.meshtastic.core.resources.nodes_unheard_remove
 import org.meshtastic.core.resources.set_up_connection
+import org.meshtastic.core.ui.component.EmptyState
+import org.meshtastic.core.ui.component.ListScrollbar
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.component.ShareContactDialog
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.BarChart
 import org.meshtastic.core.ui.icon.Info
@@ -98,17 +101,21 @@ import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
 import org.meshtastic.feature.node.component.LocalNodeContextMenu
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeCountSummary
-import org.meshtastic.feature.node.component.NodeFilterTextField
+import org.meshtastic.feature.node.component.NodeFilterSearchBar
 import org.meshtastic.feature.node.component.NodeFilterToggles
 import org.meshtastic.feature.node.component.NodeHopHistogramSheet
 import org.meshtastic.feature.node.component.NodeListHelp
+import org.meshtastic.proto.ExcludedModules
 
 /**
  * design#115: status message editing is offered on the connected local node only, and only where the firmware has the
  * module — absent, never disabled, everywhere else.
  */
 internal fun canEditStatusMessage(node: Node, ourNode: Node?, connectionState: ConnectionState): Boolean =
-    node.num == ourNode?.num && connectionState == ConnectionState.Connected && node.capabilities.supportsStatusMessage
+    node.num == ourNode?.num &&
+        connectionState == ConnectionState.Connected &&
+        node.capabilities.supportsStatusMessage &&
+        !node.metadata.excludes(ExcludedModules.STATUSMESSAGE_CONFIG)
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalFoundationApi::class)
@@ -189,7 +196,89 @@ fun NodeListScreen(
 
     var showShareContact by remember { mutableStateOf(false) }
     if (showShareContact) {
-        SharedContactDialog(contact = ourNode, onDismiss = { showShareContact = false }, isOwnContact = true)
+        ShareContactDialog(contact = ourNode, onDismiss = { showShareContact = false }, isOwnContact = true)
+    }
+
+    // One row renderer, used by the list itself and by the search bar's expanded results, so the two can never drift.
+    // It stays a LazyItemScope lambda rather than a composable of its own because animateItem() needs that receiver.
+    val nodeRow: @Composable LazyItemScope.(Node) -> Unit = { node ->
+        var expanded by remember { mutableStateOf(false) }
+
+        Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+            val isThisNode = node.num == ourNode?.num
+            val canEditStatus = canEditStatusMessage(node, ourNode, connectionState)
+            // Our own node only earns a long press while it has something to offer, or it opens an empty menu.
+            val longClick =
+                if (!isThisNode || canEditStatus) {
+                    { expanded = true }
+                } else {
+                    null
+                }
+
+            val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
+
+            when (density) {
+                NodeListDensity.COMPLETE ->
+                    NodeItem(
+                        modifier = Modifier.animateItem(),
+                        thisNode = ourNode,
+                        thatNode = node,
+                        distanceUnits = state.distanceUnits,
+                        tempInFahrenheit = state.tempInFahrenheit,
+                        onClick = { navigateToNodeDetails(node.num) },
+                        onLongClick = longClick,
+                        connectionState = connectionState,
+                        deviceType = deviceType,
+                        isActive = isActive,
+                        showTelemetry = showTelemetry,
+                        deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
+                    )
+
+                NodeListDensity.COMPACT ->
+                    NodeItemCompact(
+                        modifier = Modifier.animateItem(),
+                        thisNode = ourNode,
+                        thatNode = node,
+                        distanceUnits = state.distanceUnits,
+                        onClick = { navigateToNodeDetails(node.num) },
+                        onLongClick = longClick,
+                        isActive = isActive,
+                        showPower = showPower,
+                        showLastHeard = showLastHeard,
+                        lastHeardIsRelative = lastHeardIsRelative,
+                        showLocation = showLocation,
+                        showHops = showHops,
+                        showSignal = showSignal,
+                        showChannel = showChannel,
+                        showRole = showRole,
+                        showTelemetry = showTelemetry,
+                        tempInFahrenheit = state.tempInFahrenheit,
+                        deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
+                    )
+            }
+            if (canEditStatus) {
+                LocalNodeContextMenu(
+                    expanded = expanded,
+                    onUpdateStatus = onEditStatusMessage,
+                    onDismiss = { expanded = false },
+                )
+            } else if (!isThisNode) {
+                NodeContextMenu(
+                    expanded = expanded,
+                    node = node,
+                    onFavorite = { viewModel.favoriteNode(node) },
+                    onMute = { viewModel.muteNode(node) },
+                    onMessage = {
+                        val route = viewModel.getDirectMessageRoute(node)
+                        navigateToMessages(route)
+                    },
+                    onTraceRoute = { viewModel.traceRoute(node) },
+                    onIgnore = { viewModel.ignoreNode(node) },
+                    onRemove = { viewModel.removeNode(node) },
+                    onDismiss = { expanded = false },
+                )
+            }
+        }
     }
 
     Scaffold(
@@ -263,12 +352,27 @@ fun NodeListScreen(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                         )
                         val filterPrefs = viewModel.nodeFilterPreferences
-                        NodeFilterTextField(
+                        NodeFilterSearchBar(
                             filterText = state.filter.filterText,
                             onTextChange = { viewModel.nodeFilterText = it },
                             currentSortOption = state.sort,
                             onSortSelect = viewModel::setSortOption,
                             modifier = Modifier.fillMaxWidth(),
+                            searchResults = {
+                                // The full-screen expanded bar hides the sticky header's counts.
+                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    item {
+                                        NodeCountSummary(
+                                            onlineCount = onlineNodeCount,
+                                            shownCount = nodes.size,
+                                            totalCount = totalNodeCount,
+                                            modifier =
+                                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                                        )
+                                    }
+                                    items(nodes, key = { it.num }, itemContent = nodeRow)
+                                }
+                            },
                             toggles =
                             NodeFilterToggles(
                                 includeUnknown = state.filter.includeUnknown,
@@ -295,86 +399,7 @@ fun NodeListScreen(
                     }
                 }
 
-                items(nodes, key = { it.num }) { node ->
-                    var expanded by remember { mutableStateOf(false) }
-
-                    Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                        val isThisNode = node.num == ourNode?.num
-                        val canEditStatus = canEditStatusMessage(node, ourNode, connectionState)
-                        // Our own node only earns a long press while it has something to offer, or it opens an
-                        // empty menu.
-                        val longClick =
-                            if (!isThisNode || canEditStatus) {
-                                { expanded = true }
-                            } else {
-                                null
-                            }
-
-                        val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
-
-                        when (density) {
-                            NodeListDensity.COMPLETE ->
-                                NodeItem(
-                                    modifier = Modifier.animateItem(),
-                                    thisNode = ourNode,
-                                    thatNode = node,
-                                    distanceUnits = state.distanceUnits,
-                                    tempInFahrenheit = state.tempInFahrenheit,
-                                    onClick = { navigateToNodeDetails(node.num) },
-                                    onLongClick = longClick,
-                                    connectionState = connectionState,
-                                    deviceType = deviceType,
-                                    isActive = isActive,
-                                    showTelemetry = showTelemetry,
-                                    deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
-                                )
-
-                            NodeListDensity.COMPACT ->
-                                NodeItemCompact(
-                                    modifier = Modifier.animateItem(),
-                                    thisNode = ourNode,
-                                    thatNode = node,
-                                    distanceUnits = state.distanceUnits,
-                                    onClick = { navigateToNodeDetails(node.num) },
-                                    onLongClick = longClick,
-                                    isActive = isActive,
-                                    showPower = showPower,
-                                    showLastHeard = showLastHeard,
-                                    lastHeardIsRelative = lastHeardIsRelative,
-                                    showLocation = showLocation,
-                                    showHops = showHops,
-                                    showSignal = showSignal,
-                                    showChannel = showChannel,
-                                    showRole = showRole,
-                                    showTelemetry = showTelemetry,
-                                    tempInFahrenheit = state.tempInFahrenheit,
-                                    deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
-                                )
-                        }
-                        if (canEditStatus) {
-                            LocalNodeContextMenu(
-                                expanded = expanded,
-                                onUpdateStatus = onEditStatusMessage,
-                                onDismiss = { expanded = false },
-                            )
-                        } else if (!isThisNode) {
-                            NodeContextMenu(
-                                expanded = expanded,
-                                node = node,
-                                onFavorite = { viewModel.favoriteNode(node) },
-                                onMute = { viewModel.muteNode(node) },
-                                onMessage = {
-                                    val route = viewModel.getDirectMessageRoute(node)
-                                    navigateToMessages(route)
-                                },
-                                onTraceRoute = { viewModel.traceRoute(node) },
-                                onIgnore = { viewModel.ignoreNode(node) },
-                                onRemove = { viewModel.removeNode(node) },
-                                onDismiss = { expanded = false },
-                            )
-                        }
-                    }
-                }
+                items(nodes, key = { it.num }, itemContent = nodeRow)
                 if (nodes.isEmpty() && !state.filter.isActive) {
                     item {
                         NodeListEmptyState(
@@ -386,6 +411,7 @@ fun NodeListScreen(
                 }
                 item { Spacer(modifier = Modifier.height(88.dp)) }
             }
+            ListScrollbar(listState)
         }
     }
 }
@@ -416,36 +442,18 @@ private fun NodeListEmptyState(
                 stringResource(Res.string.nodes_empty_disconnected_hint),
             )
         }
-    Column(
-        modifier = modifier.padding(horizontal = 32.dp, vertical = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = hint,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        if (!isConnected) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onNavigateToConnections) { Text(stringResource(Res.string.set_up_connection)) }
-        }
-    }
+    EmptyState(
+        icon = icon,
+        title = title,
+        supportingText = hint,
+        modifier = modifier,
+        action =
+        if (isConnected) {
+            null
+        } else {
+            { Button(onClick = onNavigateToConnections) { Text(stringResource(Res.string.set_up_connection)) } }
+        },
+    )
 }
 
 /**

@@ -55,6 +55,23 @@
 -keep class * implements com.sun.jna.Callback { *; }
 -keep class * extends com.sun.jna.Structure { *; }
 
+# ---- MapLibre's Panama FFI bindings - upcalls resolved by MethodHandle ------
+# Every callback maplibre-native makes back into Kotlin is an upcall stub built
+# from a MethodHandle the bindings look up by name at <clinit>: `upcallHandle`
+# findVirtual's "apply" on each `mln_*_callback$Function`, and each callback
+# *State class findVirtual's its own "invoke". Nothing calls either statically,
+# so the shrinker empties the nine interfaces and drops the four methods, and
+# the lookup fails on the first map composed:
+#   NoSuchMethodException: no such method: ...mln_log_callback$Function
+#   .apply(MemorySegment,int,int,long,MemorySegment)int/invokeInterface
+# rethrown as "Could not configure MapLibre's offline runtime" (#7286). Same
+# shape as the JNA callbacks above: a vtable only native code ever calls.
+#
+# Android binds through JavaCPP/JNI instead, and that AAR ships the consumer
+# rules R8 needs. The JVM bindings jar ships none.
+-keep class org.maplibre.nativeffi.** { *; }
+-keep interface org.maplibre.nativeffi.** { *; }
+
 # ---- jSerialComm Android stubs (cross-platform serial library) --------------
 # jSerialComm bundles Android shims that reference android.* classes; harmless
 # on JVM/desktop but ProGuard fails the build on unresolved program classes

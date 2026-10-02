@@ -23,10 +23,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.LocaleUnitsProvider
-import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.repository.DiscoveryRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
@@ -40,7 +40,7 @@ import org.meshtastic.feature.discovery.scan.PresetRankingInput
 @KoinViewModel
 class DiscoverySummaryViewModel(
     @InjectedParam private val sessionId: Long,
-    private val discoveryDao: DiscoveryDao,
+    private val discoveryRepository: DiscoveryRepository,
     private val summaryGenerator: DiscoverySummaryGenerator,
     private val rankingEngine: DiscoveryRankingEngine,
     private val aiProvider: DiscoverySummaryAiProvider,
@@ -49,10 +49,10 @@ class DiscoverySummaryViewModel(
 ) : ViewModel() {
 
     val session: StateFlow<DiscoverySessionEntity?> =
-        discoveryDao.getSessionFlow(sessionId).stateInWhileSubscribed(initialValue = null)
+        discoveryRepository.getSessionFlow(sessionId).stateInWhileSubscribed(initialValue = null)
 
     val presetResults: StateFlow<List<DiscoveryPresetResultEntity>> =
-        discoveryDao.getPresetResultsFlow(sessionId).stateInWhileSubscribed(initialValue = emptyList())
+        discoveryRepository.getPresetResultsFlow(sessionId).stateInWhileSubscribed(initialValue = emptyList())
 
     private val _nodesByPreset = MutableStateFlow<Map<Long, List<DiscoveredNodeEntity>>>(emptyMap())
     val nodesByPreset: StateFlow<Map<Long, List<DiscoveredNodeEntity>>> = _nodesByPreset.asStateFlow()
@@ -82,12 +82,12 @@ class DiscoverySummaryViewModel(
     fun exportReport() {
         safeLaunch(tag = "exportReport") {
             val currentSession =
-                discoveryDao.getSession(sessionId)
+                discoveryRepository.getSession(sessionId)
                     ?: run {
                         _exportResult.value = ExportResult.Error("Session not found")
                         return@safeLaunch
                     }
-            val results = discoveryDao.getPresetResults(sessionId)
+            val results = discoveryRepository.getPresetResults(sessionId)
             val exportData =
                 DiscoveryExportData(
                     session = currentSession,
@@ -110,26 +110,25 @@ class DiscoverySummaryViewModel(
             _aiSummary.value = null
             _presetAiSummaries.value = emptyMap()
 
-            val currentSession = discoveryDao.getSession(sessionId) ?: return@safeLaunch
-            val results = discoveryDao.getPresetResults(sessionId)
+            val currentSession = discoveryRepository.getSession(sessionId) ?: return@safeLaunch
+            val results = discoveryRepository.getPresetResults(sessionId)
 
             // Clear persisted AI summaries
-            discoveryDao.updateSession(currentSession.copy(aiSummary = null))
+            discoveryRepository.updateSession(currentSession.copy(aiSummary = null))
             for (result in results) {
-                discoveryDao.updatePresetResult(result.copy(aiSummary = null))
+                discoveryRepository.updatePresetResult(result.copy(aiSummary = null))
             }
 
             // Regenerate algorithmic
             _algorithmicSummary.value = summaryGenerator.generateSessionSummary(currentSession, results)
 
             // Recompute rankings
-            val rankingInputs =
-                results.map { result ->
-                    PresetRankingInput(
-                        presetResult = result,
-                        discoveredNodes = _nodesByPreset.value[result.id].orEmpty(),
-                    )
-                }
+            val rankingInputs = results.map { result ->
+                PresetRankingInput(
+                    presetResult = result,
+                    discoveredNodes = _nodesByPreset.value[result.id].orEmpty(),
+                )
+            }
             _rankings.value = rankingEngine.rank(rankingInputs)
 
             // Regenerate AI
@@ -142,26 +141,24 @@ class DiscoverySummaryViewModel(
 
     private fun loadNodes() {
         safeLaunch(tag = "loadNodes") {
-            val results = discoveryDao.getPresetResults(sessionId)
-            val nodesMap = mutableMapOf<Long, List<DiscoveredNodeEntity>>()
-            for (result in results) {
-                nodesMap[result.id] = discoveryDao.getDiscoveredNodes(result.id)
-            }
+            val results = discoveryRepository.getPresetResults(sessionId)
+            val nodesMap = discoveryRepository.getNodesByPresetResult(results.map { it.id })
             _nodesByPreset.value = nodesMap
 
             // Compute deterministic rankings
-            val rankingInputs =
-                results.map { result ->
-                    PresetRankingInput(presetResult = result, discoveredNodes = nodesMap[result.id].orEmpty())
-                }
+            val rankingInputs = results.map { result ->
+                PresetRankingInput(presetResult = result, discoveredNodes = nodesMap[result.id].orEmpty())
+            }
             _rankings.value = rankingEngine.rank(rankingInputs)
 
             // Load cached per-preset AI summaries
             val cachedPresetSummaries =
-                results.filter { !it.aiSummary.isNullOrBlank() }.associate { it.id to it.aiSummary!! }
+                results
+                    .mapNotNull { result -> result.aiSummary?.takeUnless { it.isBlank() }?.let { result.id to it } }
+                    .toMap()
             _presetAiSummaries.value = cachedPresetSummaries
 
-            val session = discoveryDao.getSession(sessionId)
+            val session = discoveryRepository.getSession(sessionId)
             if (session != null) {
                 _algorithmicSummary.value = summaryGenerator.generateSessionSummary(session, results)
 
@@ -187,7 +184,7 @@ class DiscoverySummaryViewModel(
             val summary = aiProvider.generateSessionSummary(session, results)
             if (summary != null) {
                 _aiSummary.value = summary
-                discoveryDao.updateSession(session.copy(aiSummary = summary))
+                discoveryRepository.updateSession(session.copy(aiSummary = summary))
             }
         }
     }
@@ -199,7 +196,7 @@ class DiscoverySummaryViewModel(
                 val summary = aiProvider.generatePresetSummary(result)
                 if (summary != null) {
                     _presetAiSummaries.value = _presetAiSummaries.value + (result.id to summary)
-                    discoveryDao.updatePresetResult(result.copy(aiSummary = summary))
+                    discoveryRepository.updatePresetResult(result.copy(aiSummary = summary))
                 }
             }
         }

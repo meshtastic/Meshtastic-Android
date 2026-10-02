@@ -1,3 +1,8 @@
+---
+name: kmp-architecture
+description: Kotlin Multiplatform source-set rules for Meshtastic-Android - where commonMain ends, how expect/actual is bridged, and the networking, database and platform-integration boundaries. Use this whenever you add a file to a KMP module, move code between source sets, or hit a compile error that appears on only one target.
+---
+
 # Skill: KMP Architecture & Source-Set Bridging
 
 ## Description
@@ -6,7 +11,8 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 ## 1. Source-Set Boundaries
 - **`commonMain`:** All business logic, DB entities, API network logic, ViewModels, and UI rendering. NO `java.*` or `android.*` imports.
 - **`androidMain`:** Android framework integration (`Context`, system services, NFC hardware, BLE Android bindings).
-- **`jvmMain` / `jvmAndroidMain`:** Shared JVM code between Android and Desktop. Uses the `meshtastic.kmp.jvm.android` convention plugin to bridge `jvm` and `android` source sets without manual `dependsOn` hacks.
+- **`jvmMain`:** Desktop-only JVM code.
+- **`jvmAndroidMain`:** JVM code shared between Android and Desktop. Uses the `meshtastic.kmp.jvm.android` convention plugin to bridge `jvm` and `android` source sets without manual `dependsOn` hacks.
 - **`androidApp` / `desktopApp`:** Host shells. Responsible for Koin DI root wiring (`MainKoinModule`/`AppKoinModule`, `DesktopKoinModule`), host-level UI themes, and running the `MeshtasticNavDisplay`.
 
 ## 2. Bridging Strategies
@@ -49,7 +55,7 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 - In `build-logic/convention`, prefer lazy Gradle configuration (`configureEach`, `withPlugin`, provider APIs). Avoid `afterEvaluate` in convention plugins unless there is no viable lazy alternative.
 
 ## 8. Onboarding a New Target (Desktop/iOS)
-1. Ensure all new logic compiles against the KMP core (`jvm()`, `iosArm64()`, etc.).
+1. Ensure all new logic compiles against the KMP core targets (`jvm()`, `iosSimulatorArm64()`).
 2. Do not use platform-specific constructs in `commonMain` or you break the iOS/Desktop builds.
 3. Test using `kmpSmokeCompile` to verify cross-platform compilation.
 4. For desktop wiring, copy the pattern in `desktopApp/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt` and use `NoopStubs.kt` to temporarily mock missing platform implementations.

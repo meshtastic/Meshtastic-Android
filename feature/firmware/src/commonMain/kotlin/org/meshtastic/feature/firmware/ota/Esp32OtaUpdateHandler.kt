@@ -28,9 +28,9 @@ import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -59,7 +59,6 @@ import org.meshtastic.feature.firmware.ProgressState
 import org.meshtastic.feature.firmware.stripFormatArgs
 
 private const val RETRY_DELAY = 2000L
-private const val PERCENT_MAX = 100
 private const val REBOOT_MODE_BLE = 1
 private const val REBOOT_MODE_WIFI = 2
 
@@ -361,13 +360,12 @@ class Esp32OtaUpdateHandler(
 
         val firmwareFile =
             firmwareRetriever.retrieveEsp32Firmware(release, hardware) { progress ->
-                val percent = (progress * PERCENT_MAX).toInt()
                 updateState(
                     FirmwareUpdateState.Downloading(
                         ProgressState(
                             message = UiText.DynamicString(downloadingMsg),
                             progress = progress,
-                            details = "$percent%",
+                            details = formatTransferPercent(progress),
                         ),
                     ),
                 )
@@ -467,6 +465,7 @@ class Esp32OtaUpdateHandler(
         return connectedTransport ?: throw postConfirmConnectionFailed(rebootMode, attempts, null)
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // cancellation closes the attempt's transport, then is rethrown
     private suspend fun connectTransportAttempt(transport: UnifiedOtaProtocol, rebootMode: Int): Result<Unit> {
         val connectResult =
             try {
@@ -490,6 +489,7 @@ class Esp32OtaUpdateHandler(
         return Result.failure(error)
     }
 
+    @Suppress("SuspendFunSwallowedCancellation") // the close runs under NonCancellable, so no cancellation reaches it
     private suspend fun closeFailedTransport(transport: UnifiedOtaProtocol) {
         withContext(NonCancellable) {
             try {

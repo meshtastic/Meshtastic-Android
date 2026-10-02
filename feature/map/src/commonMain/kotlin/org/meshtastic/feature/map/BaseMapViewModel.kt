@@ -112,6 +112,21 @@ open class BaseMapViewModel(
             .map { nodes -> nodes.filterNot { node -> node.isIgnored } }
             .stateInWhileSubscribed(initialValue = emptyList())
 
+    // Set by the map provider because this SavedStateHandle is not the Navigation 3 entry's route state.
+    private val sitePlannerRequestState = SitePlannerRequestState(nodeRepository.nodeDBbyNum)
+
+    /** The node a Site Planner route asked the map to open, until the map consumes it. */
+    val sitePlannerRequest: StateFlow<Node?> =
+        sitePlannerRequestState.request.stateInWhileSubscribed(initialValue = null)
+
+    fun setSitePlannerNodeNum(nodeNum: Int?) {
+        sitePlannerRequestState.setNodeNum(nodeNum)
+    }
+
+    fun consumeSitePlannerRequest(nodeNum: Int) {
+        sitePlannerRequestState.consume(nodeNum)
+    }
+
     val waypoints: StateFlow<Map<Int, DataPacket>> =
         packetRepository
             .getWaypoints()
@@ -138,8 +153,9 @@ open class BaseMapViewModel(
 
     fun toggleShowWaypointsOnMap() = mapPrefs.updateMapFilters { it.copy(showWaypoints = !it.showWaypoints) }
 
-    fun toggleShowPrecisionCircleOnMap() =
-        mapPrefs.updateMapFilters { it.copy(showPrecisionCircle = !it.showPrecisionCircle) }
+    fun toggleShowPrecisionCircleOnMap() = mapPrefs.updateMapFilters {
+        it.copy(showPrecisionCircle = !it.showPrecisionCircle)
+    }
 
     fun toggleOnlyOnline() = mapPrefs.updateMapFilters { it.copy(onlyOnline = !it.onlyOnline) }
 
@@ -183,11 +199,13 @@ open class BaseMapViewModel(
 
     fun clearExcludedRoles() = mapPrefs.updateMapFilters { it.copy(excludedRoles = emptySet()) }
 
-    fun setLastHeardFilter(filter: LastHeardFilter) =
-        mapPrefs.updateMapFilters { it.copy(lastHeardSeconds = filter.seconds) }
+    fun setLastHeardFilter(filter: LastHeardFilter) = mapPrefs.updateMapFilters {
+        it.copy(lastHeardSeconds = filter.seconds)
+    }
 
-    fun setLastHeardTrackFilter(filter: LastHeardFilter) =
-        mapPrefs.updateMapFilters { it.copy(lastHeardTrackSeconds = filter.seconds) }
+    fun setLastHeardTrackFilter(filter: LastHeardFilter) = mapPrefs.updateMapFilters {
+        it.copy(lastHeardTrackSeconds = filter.seconds)
+    }
 
     open fun getUser(userId: String?) =
         nodeRepository.getUser(userId ?: org.meshtastic.core.model.NodeAddress.ID_BROADCAST)

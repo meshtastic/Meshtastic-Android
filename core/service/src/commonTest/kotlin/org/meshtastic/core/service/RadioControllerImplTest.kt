@@ -42,6 +42,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -58,10 +59,10 @@ import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -104,7 +105,7 @@ class RadioControllerImplTest {
     private val meshPrefs: MeshPrefs = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
-    private val notificationManager: NotificationManager = mock(MockMode.autofill)
+    private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
 
@@ -126,12 +127,12 @@ class RadioControllerImplTest {
             activeSession
                 ?: MutableStateFlow(deviceAddress.value?.let { RadioSessionContext(sessionGeneration.value, it) })
         every { radioInterfaceService.activeSession } returns resolvedActiveSession
-        everySuspend { radioInterfaceService.runWhileSessionActive(any(), any()) } calls
+        everySuspend { radioInterfaceService.runWhileSessionActive(any(), any(), any()) } calls
             {
                 val session = it.args[0] as RadioSessionContext
 
                 @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend () -> Unit)
+                val block = it.args[2] as (suspend () -> Unit)
                 if (resolvedActiveSession.value == session) {
                     block()
                     true
@@ -173,11 +174,11 @@ class RadioControllerImplTest {
             meshPrefs = meshPrefs,
             uiPrefs = uiPrefs,
             databaseManager = databaseManager,
-            notificationManager = notificationManager,
+            serviceNotifications = serviceNotifications,
             messageProcessor = lazy { messageProcessor },
             radioConfigRepository = radioConfigRepository,
-            scope = scope,
-            onDeviceAddressChanged = onDeviceAddressChanged,
+            scope = scope.asServiceScope(),
+            deviceAddressChangeHook = { onDeviceAddressChanged?.invoke() },
         )
     }
 

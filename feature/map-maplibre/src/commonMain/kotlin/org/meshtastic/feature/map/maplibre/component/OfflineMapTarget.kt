@@ -29,7 +29,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -37,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -44,16 +44,16 @@ import org.maplibre.compose.map.DefaultMapRuntime
 import org.maplibre.compose.offline.DownloadProgress
 import org.maplibre.compose.offline.DownloadStatus
 import org.maplibre.compose.offline.OfflineManager
+import org.maplibre.compose.offline.OfflineManagerState
 import org.maplibre.compose.offline.OfflinePack
 import org.maplibre.compose.offline.OfflinePackDefinition
 import org.maplibre.spatialk.geojson.BoundingBox
-import org.meshtastic.core.common.util.NumberFormatter
+import org.meshtastic.core.common.util.formatByteSize
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.map_cache_manager
-import org.meshtastic.core.resources.map_cache_megabytes
 import org.meshtastic.core.resources.map_cache_tiles
 import org.meshtastic.core.resources.map_download_status_complete
 import org.meshtastic.core.resources.map_download_status_downloading
@@ -91,7 +91,8 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
     // the one every map here uses, so its packs are the ones the user sees on the map.
     val manager = DefaultMapRuntime.instance.offlineManager
     val scope = rememberCoroutineScope()
-    val packs by manager.packs.collectAsState()
+    val managerState by manager.state.collectAsStateWithLifecycle()
+    val packs = (managerState as? OfflineManagerState.Ready)?.packs.orEmpty()
     // A pack definition now carries the pixel ratio it was downloaded at, so the tiles match this display.
     val pixelRatio = LocalDensity.current.density
 
@@ -165,7 +166,7 @@ private fun OfflinePackRow(
     onToggle: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val progress = pack.downloadProgress.collectAsState().value
+    val progress = pack.downloadProgress.collectAsStateWithLifecycle().value
     val bounds = (pack.definition as? OfflinePackDefinition.TilePyramid)?.bounds
 
     Row(
@@ -267,7 +268,7 @@ private fun DownloadProgress.fraction(): Float = when (this) {
  * One line describing a pack's state, assembled from resources rather than written in English.
  *
  * `status.name` went straight into the UI before, so every locale read the library's own enum constants. The tile count
- * and byte size reuse the strings the cache figures above already use, which keeps one set of units to translate.
+ * and byte size render as the cache figures above render them.
  */
 @Composable
 private fun DownloadProgress.summary(): String = when (this) {
@@ -281,7 +282,7 @@ private fun DownloadProgress.summary(): String = when (this) {
                 },
             ),
             stringResource(Res.string.map_cache_tiles, completedTileCount.toInt()),
-            stringResource(Res.string.map_cache_megabytes, completedResourceBytes.megabytes()),
+            formatByteSize(completedResourceBytes),
         )
             .joinToString(SUMMARY_SEPARATOR)
 
@@ -293,21 +294,12 @@ private fun DownloadProgress.summary(): String = when (this) {
     DownloadProgress.Unknown -> EM_DASH
 }
 
-/**
- * Bytes as megabytes, to one decimal place.
- *
- * Decimal megabytes rather than mebibytes: this number sits next to a phone's own storage figures, and those are
- * decimal.
- */
-internal fun Long.megabytes(): String = NumberFormatter.format(this.toDouble() / BYTES_PER_MEGABYTE, 1)
-
 private fun Double.round(): String {
     // Rounded, not truncated, so a negative coordinate labels the same way as its positive twin.
     val scaled = (this * COORD_SCALE).roundToInt() / COORD_SCALE
     return scaled.toString()
 }
 
-private const val BYTES_PER_MEGABYTE = 1_000_000.0
 private const val PACK_ROW_TEXT_FRACTION = 0.8f
 private const val PACK_EXTRA_ZOOM_LEVELS = 2
 

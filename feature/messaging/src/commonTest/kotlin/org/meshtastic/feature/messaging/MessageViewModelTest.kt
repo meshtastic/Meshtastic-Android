@@ -25,6 +25,7 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +48,9 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.meshtastic.core.testing.FakeFilterPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -81,6 +84,7 @@ class MessageViewModelTest {
     private val customEmojiPrefs: CustomEmojiPrefs = mock(MockMode.autofill)
     private val homoglyphPrefs: HomoglyphPrefs = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
+    private lateinit var filterPrefs: FakeFilterPrefs
     private val meshNotificationManager: org.meshtastic.core.repository.MeshNotificationManager =
         mock(MockMode.autofill)
     private val activeConversationTracker = ActiveConversationTracker()
@@ -100,6 +104,7 @@ class MessageViewModelTest {
         Dispatchers.setMain(testDispatcher)
         savedStateHandle = SavedStateHandle(mapOf("contactKey" to "0!12345678"))
         nodeRepository = FakeNodeRepository()
+        filterPrefs = FakeFilterPrefs()
 
         connectionStateFlow.value = ConnectionState.Disconnected
         showQuickChatFlow.value = false
@@ -118,7 +123,7 @@ class MessageViewModelTest {
         every { customEmojiPrefs.customEmojiFrequency } returns customEmojiFrequencyFlow
         every { homoglyphPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
         every { uiPrefs.showQuickChat } returns showQuickChatFlow
-        every { uiPrefs.setShowQuickChat(any()) } returns Unit
+        every { uiPrefs.toggleShowQuickChat() } returns Unit
         every { uiPrefs.showFullMessageTimestamps } returns showFullMessageTimestampsFlow
 
         every { packetRepository.getContactSettings() } returns contactSettingsFlow
@@ -141,6 +146,7 @@ class MessageViewModelTest {
                 sendMessageUseCase = sendMessageUseCase,
                 customEmojiPrefs = customEmojiPrefs,
                 homoglyphEncodingPrefs = homoglyphPrefs,
+                filterPrefs = filterPrefs,
                 uiPrefs = uiPrefs,
                 meshNotificationManager = meshNotificationManager,
                 activeConversationTracker = activeConversationTracker,
@@ -179,6 +185,13 @@ class MessageViewModelTest {
     }
 
     @Test fun testInitialization() = runTest { assertNotNull(viewModel) }
+
+    @Test
+    fun testMessageFilterEnabledFollowsTheGlobalSetting() = runTest {
+        assertEquals(false, viewModel.messageFilterEnabled.value)
+        filterPrefs.setFilterEnabled(true)
+        assertEquals(true, viewModel.messageFilterEnabled.value)
+    }
 
     private val draftContact = "0!12345678"
 
@@ -272,17 +285,10 @@ class MessageViewModelTest {
     }
 
     @Test
-    fun testToggleShowQuickChat() = runTest {
-        viewModel.showQuickChat.test {
-            assertEquals(false, awaitItem())
+    fun testToggleShowQuickChatDelegatesToThePrefsToggle() {
+        viewModel.toggleShowQuickChat()
 
-            viewModel.toggleShowQuickChat()
-            // Since setShowQuickChat is mocked to returns Unit, it doesn't update the flow.
-            // In a real app, the flow would update. We simulate it here.
-            showQuickChatFlow.value = true
-            assertEquals(true, awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
+        verify { uiPrefs.toggleShowQuickChat() }
     }
 
     @Test
@@ -307,7 +313,7 @@ class MessageViewModelTest {
 
     @Test
     fun testSendMessage() = runTest {
-        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns 1
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.Queued(1)
 
         viewModel.sendMessage("Hello", "0!12345678", null)
 

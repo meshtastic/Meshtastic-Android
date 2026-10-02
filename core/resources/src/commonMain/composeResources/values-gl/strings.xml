@@ -25,13 +25,11 @@
     <string name="add">Engadir</string>
     <string name="add_network_device">Engadir</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Actualización da aplicación requerida</string>
     <string name="apply">Aplicar</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
-    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="calculating">Calculando…</string>
     <string name="camera_permission">Permiso da cámara</string>
@@ -39,7 +37,6 @@
     <string name="cant_change_no_radio">Non se puido cambiar de canle, porque a radio aínda non está conectada. Por favor inténteo de novo.</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">A ligazón desta canle non é válida e non pode usarse</string>
-    <string name="channel_label">Canle</string>
     <string name="channel_name">Nome de canle</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Escoller tema</string>
@@ -72,15 +69,13 @@
     <string name="direct_message">Mensaxe directa</string>
     <string name="disconnected">Desconectado</string>
     <!-- DISCOVERY -->
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distancia</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
-    <!-- ENVIRONMENT -->
     <string name="error">Erro</string>
     <string name="error_duty_cycle">O límite do Ciclo de Traballo de Sinal foi alcanzado. Non se pode enviar mensaxes agora, inténtao despois.</string>
     <!-- EXPORT -->
@@ -93,8 +88,6 @@
     <string name="firmware_update_failed">Actualización fallou</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
-    <!-- GPIO -->
-    <!-- IGNORE -->
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Engadir '%1$s' á lista de ignorar?</string>
     <string name="ignore_remove">Quitar '%1$s' da lista de ignorar?</string>
@@ -114,7 +107,6 @@
     <string name="locked">Bloqueado</string>
     <!-- LOG -->
     <!-- MAP -->
-    <string name="map_cache_info">Capacidade de Caché: %1$d MB\nUso de Caché: %2$d MB</string>
     <string name="map_cache_manager">Xestor de caché</string>
     <string name="map_cache_size">Tamaño de caché actual</string>
     <string name="map_cache_tiles">%1$d 'tiles'</string>
@@ -167,19 +159,19 @@
     <string name="nodes_unheard_remove">Eliminar</string>
     <string name="none">Ningún (desactivado)</string>
     <string name="not_connected">Non conectado</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">OK</string>
     <!-- ONE -->
     <string name="one_day">24 Horas</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
+    <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Linguaxe</string>
     <string name="preferences_system_default">Predeterminado do sistema</string>
     <!-- PREVIEW -->
@@ -193,8 +185,6 @@
     <string name="quick_chat_new">Nova conversa rápida</string>
     <string name="radio_configuration">Configuración de radio</string>
     <string name="reboot">Reiniciar</string>
-    <!-- REBROADCAST -->
-    <string name="region_frequency_plan">Rexión</string>
     <!-- REMOTE -->
     <!-- REMOVE -->
     <string name="remove">Eliminar</string>
@@ -206,9 +196,7 @@
     <string name="reset_to_defaults">Restablecer a por defecto</string>
     <!-- ROLE -->
     <string name="role_client">Cliente</string>
-    <string name="role_client_desc">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
     <!-- ROUTING -->
-    <!-- SAVE -->
     <string name="save">Gardar</string>
     <string name="save_changes">Gardar</string>
     <!-- SCAN -->
@@ -216,7 +204,6 @@
     <!-- SECURITY -->
     <string name="select_all">Seleccionar todo</string>
     <string name="send">Enviar</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Compartir</string>
     <!-- SHOW -->
@@ -242,7 +229,6 @@
     <string name="unknown_username">Nome de usuario descoñecido</string>
     <string name="unrecognized">Non recoñecido</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">vía MQTT</string>
     <string name="waypoint_delete">Eliminar punto de ruta?</string>

@@ -16,20 +16,15 @@
  */
 package org.meshtastic.core.datastore
 
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import kotlinx.coroutines.flow.Flow
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.datastore.di.asCorePreferencesDataStore
@@ -44,7 +39,9 @@ import kotlin.uuid.Uuid
 
 class RecentAddressesDataSourceTest {
     private lateinit var tmpDir: Path
+    private lateinit var dataStore: DataStore<Preferences>
     private lateinit var dataSource: RecentAddressesDataSource
+    private lateinit var logs: CapturingLogWriter
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -53,17 +50,23 @@ class RecentAddressesDataSourceTest {
     fun setup() {
         tmpDir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "recentAddressesTest-${Uuid.random()}"
         FileSystem.SYSTEM.createDirectories(tmpDir)
-        val dataStore =
+        dataStore =
             PreferenceDataStoreFactory.createWithPath(
                 scope = testScope,
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         dataSource = RecentAddressesDataSource(dataStore.asCorePreferencesDataStore())
+        logs = CapturingLogWriter.install()
     }
 
     @AfterTest
     fun tearDown() {
+        CapturingLogWriter.uninstall()
         FileSystem.SYSTEM.deleteRecursively(tmpDir)
+    }
+
+    private suspend fun storeRaw(value: String) {
+        dataStore.edit { it[stringPreferencesKey("recent-ip-addresses")] = value }
     }
 
     // ---- recentAddresses flow ----
@@ -95,6 +98,16 @@ class RecentAddressesDataSourceTest {
         val result = dataSource.recentAddresses.first()
         assertEquals(1, result.size)
         assertEquals("5.6.7.8", result[0].address)
+    }
+
+    @Test
+    fun `corrupt stored value yields an empty list without logging the stored addresses`() = testScope.runTest {
+        storeRaw("""[{"address":"10.20.30.40","name":"CabinRadio",""")
+
+        val result = dataSource.recentAddresses.first()
+
+        assertTrue(result.isEmpty())
+        logs.assertNotLogged("10.20.30.40", "CabinRadio")
     }
 
     // ---- add() LRU behaviour ----
@@ -186,13 +199,12 @@ class RecentAddressesDataSourceTest {
         assertTrue(dataSource.recentAddresses.first().isEmpty())
     }
 
-    // ---- legacy JSON parsing (via LegacyParsingHarness) ----
+    // ---- legacy stored formats ----
 
     @Test
     fun `legacy JsonObject array is parsed correctly`() = testScope.runTest {
-        val legacyJson =
-            """[{"address":"192.168.1.100","name":"NodeA"},{"address":"192.168.1.101","name":"NodeB"}]"""
-        val result = LegacyParsingHarness(legacyJson).recentAddresses.first()
+        storeRaw("""[{"address":"192.168.1.100","name":"NodeA"},{"address":"192.168.1.101","name":"NodeB"}]""")
+        val result = dataSource.recentAddresses.first()
 
         assertEquals(2, result.size)
         assertEquals("192.168.1.100", result[0].address)
@@ -204,8 +216,8 @@ class RecentAddressesDataSourceTest {
     @Test
     fun `legacy bare string JsonPrimitive array is parsed correctly`() = testScope.runTest {
         // Old clients stored plain IP strings with no name field
-        val legacyJson = """["192.168.1.50","10.0.0.2"]"""
-        val result = LegacyParsingHarness(legacyJson).recentAddresses.first()
+        storeRaw("""["192.168.1.50","10.0.0.2"]""")
+        val result = dataSource.recentAddresses.first()
 
         assertEquals(2, result.size)
         assertEquals("192.168.1.50", result[0].address)
@@ -215,9 +227,18 @@ class RecentAddressesDataSourceTest {
     }
 
     @Test
+    fun `legacy value is parsed without logging the stored addresses`() = testScope.runTest {
+        storeRaw("""["192.168.1.50","10.0.0.2"]""")
+
+        dataSource.recentAddresses.first()
+
+        logs.assertNotLogged("192.168.1.50", "10.0.0.2")
+    }
+
+    @Test
     fun `legacy JsonObject missing address field is skipped`() = testScope.runTest {
-        val legacyJson = """[{"name":"NoAddress"},{"address":"1.2.3.4","name":"Good"}]"""
-        val result = LegacyParsingHarness(legacyJson).recentAddresses.first()
+        storeRaw("""[{"name":"NoAddress"},{"address":"1.2.3.4","name":"Good"}]""")
+        val result = dataSource.recentAddresses.first()
 
         assertEquals(1, result.size)
         assertEquals("1.2.3.4", result[0].address)
@@ -225,63 +246,44 @@ class RecentAddressesDataSourceTest {
 
     @Test
     fun `legacy JsonObject missing name field is skipped`() = testScope.runTest {
-        val legacyJson = """[{"address":"1.2.3.4"},{"address":"5.6.7.8","name":"Good"}]"""
-        val result = LegacyParsingHarness(legacyJson).recentAddresses.first()
+        storeRaw("""[{"address":"1.2.3.4"},{"address":"5.6.7.8","name":"Good"}]""")
+        val result = dataSource.recentAddresses.first()
 
         assertEquals(1, result.size)
         assertEquals("5.6.7.8", result[0].address)
     }
 
     @Test
+    fun `legacy JsonObject with non-primitive fields is skipped and keeps the other entries`() = testScope.runTest {
+        storeRaw(
+            """[{"address":{},"name":"BadA"},{"address":"9.9.9.9","name":["BadB"]},""" +
+                """{"address":"1.2.3.4","name":"Good"}]""",
+        )
+        val result = dataSource.recentAddresses.first()
+
+        assertEquals(listOf(RecentAddress("1.2.3.4", "Good")), result)
+        logs.assertNotLogged("BadA", "9.9.9.9", "BadB", "1.2.3.4", "Good")
+    }
+
+    @Test
     fun `legacy nested JsonArray entries are skipped`() = testScope.runTest {
-        val legacyJson = """[["nested","array"],{"address":"1.2.3.4","name":"Good"}]"""
-        val result = LegacyParsingHarness(legacyJson).recentAddresses.first()
+        storeRaw("""[["nested","array"],{"address":"1.2.3.4","name":"Good"}]""")
+        val result = dataSource.recentAddresses.first()
 
         assertEquals(1, result.size)
         assertEquals("1.2.3.4", result[0].address)
     }
 
     @Test
-    fun `legacy mixed array handles all element types`() = testScope.runTest {
+    fun `legacy mixed array handles all element types without logging entries`() = testScope.runTest {
         // JsonPrimitive + valid JsonObject + malformed JsonObject + nested JsonArray
-        val legacyJson = """["10.0.0.1",{"address":"10.0.0.2","name":"Node"},{"name":"bad"},[1,2]]"""
-        val result = LegacyParsingHarness(legacyJson).recentAddresses.first()
+        storeRaw("""["10.0.0.1",{"address":"10.0.0.2","name":"Node"},{"name":"BadEntryName"},["10.9.9.9"]]""")
+        val result = dataSource.recentAddresses.first()
 
         assertEquals(2, result.size)
         assertEquals("10.0.0.1", result[0].address)
         assertEquals("Meshtastic", result[0].name)
         assertEquals("10.0.0.2", result[1].address)
-    }
-}
-
-/**
- * Test harness that mirrors the private legacy parsing logic of [RecentAddressesDataSource] without needing to bypass
- * encapsulation. Exposes a [Flow] that emits the result of parsing a raw legacy JSON string using the same rules as the
- * production fallback path.
- */
-private class LegacyParsingHarness(private val rawJson: String) {
-    val recentAddresses: Flow<List<RecentAddress>> = flow {
-        val jsonArray = Json.parseToJsonElement(rawJson).jsonArray
-        emit(
-            jsonArray.mapNotNull { item ->
-                when (item) {
-                    is JsonObject -> {
-                        val address = item["address"]?.jsonPrimitive?.contentOrNull
-                        val name = item["name"]?.jsonPrimitive?.contentOrNull
-                        if (address != null && name != null) {
-                            RecentAddress(address = address, name = name)
-                        } else {
-                            null
-                        }
-                    }
-
-                    is JsonPrimitive -> {
-                        item.contentOrNull?.let { RecentAddress(address = it, name = "Meshtastic") }
-                    }
-
-                    is JsonArray -> null
-                }
-            },
-        )
+        logs.assertNotLogged("10.0.0.1", "10.0.0.2", "BadEntryName", "10.9.9.9")
     }
 }

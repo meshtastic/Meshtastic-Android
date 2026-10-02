@@ -37,6 +37,7 @@ import okio.Path
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MapPrefs
+import org.meshtastic.feature.map.tiles.isCleartextPermitted
 
 /**
  * Owner of the imported map-layer list, its on-disk persistence, and the import plumbing.
@@ -97,6 +98,8 @@ class MapLayersManager(
                 if (_mapLayers.value.isNotEmpty()) {
                     Logger.withTag(TAG).i("Loaded ${_mapLayers.value.size} persisted map layers.")
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 Logger.withTag(TAG).e(e) { "Error loading persisted map layers" }
                 _mapLayers.value = emptyList()
@@ -292,16 +295,35 @@ internal const val LAYERS_DIR = "map_layers"
  *
  * The scheme check is on the string, not the parsed protocol — Ktor's [Url] defaults a missing scheme to `http`, so
  * `example.com/map.kml` would parse as valid and then be stored as a string nothing can fetch. Shared with the
- * add-layer dialog so the form and the store cannot disagree about what is acceptable.
+ * add-layer dialog so the form and the store cannot disagree about what is acceptable. Plain http is accepted only for
+ * a host the platform allows it to.
  */
-fun isValidNetworkLayerUrl(url: String): Boolean {
-    val hasScheme = url.startsWith("http://", ignoreCase = true) || url.startsWith("https://", ignoreCase = true)
-    if (!hasScheme) return false
+fun isValidNetworkLayerUrl(
+    url: String,
+    cleartextPermitted: (host: String) -> Boolean = ::isCleartextPermitted,
+): Boolean {
+    val parsed = parseNetworkLayerUrl(url) ?: return false
+    return !parsed.isHttp || cleartextPermitted(parsed.url.host)
+}
+
+/** Whether [url] is a parseable http URL whose host the platform refuses plain http to. */
+fun isRefusedCleartextLayerUrl(
+    url: String,
+    cleartextPermitted: (host: String) -> Boolean = ::isCleartextPermitted,
+): Boolean {
+    val parsed = parseNetworkLayerUrl(url) ?: return false
+    return parsed.isHttp && !cleartextPermitted(parsed.url.host)
+}
+
+private class ParsedLayerUrl(val url: Url, val isHttp: Boolean)
+
+private fun parseNetworkLayerUrl(url: String): ParsedLayerUrl? {
+    val isHttp = url.startsWith("http://", ignoreCase = true)
+    if (!isHttp && !url.startsWith("https://", ignoreCase = true)) return null
     return try {
-        Url(url)
-        true
+        ParsedLayerUrl(Url(url), isHttp)
     } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
-        false
+        null
     }
 }
 

@@ -69,6 +69,7 @@ import org.meshtastic.core.resources.add_network_device_manually
 import org.meshtastic.core.resources.address
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.demo_mode
 import org.meshtastic.core.resources.ip_port
 import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.no_bluetooth_devices_hint
@@ -120,6 +121,7 @@ fun DeviceList(
     onAddManualAddress: (address: String, fullAddress: String) -> Unit,
     onRemoveRecentAddress: (DeviceListEntry) -> Unit,
     modifier: Modifier = Modifier,
+    virtualDevices: List<DeviceListEntry> = emptyList(),
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val sheetState =
@@ -177,6 +179,33 @@ fun DeviceList(
                     onSelectDevice = onSelectDevice,
                 )
         }
+        if (virtualDevices.isNotEmpty()) {
+            virtualSection(
+                virtualDevices = virtualDevices,
+                connectionState = connectionState,
+                selectedDevice = selectedDevice,
+                onSelectDevice = onSelectDevice,
+            )
+        }
+    }
+}
+
+private fun LazyListScope.virtualSection(
+    virtualDevices: List<DeviceListEntry>,
+    connectionState: ConnectionState,
+    selectedDevice: String,
+    onSelectDevice: (DeviceListEntry) -> Unit,
+) {
+    item(key = "header:demo", contentType = "header") {
+        DeviceSectionHeader(title = stringResource(Res.string.demo_mode))
+    }
+    items(virtualDevices, key = { device -> "demo:${device.fullAddress}" }, contentType = { "device" }) { device ->
+        DeviceCard(
+            device = device,
+            connectionState = connectionState,
+            selectedDevice = selectedDevice,
+            onSelect = onSelectDevice,
+        )
     }
 }
 

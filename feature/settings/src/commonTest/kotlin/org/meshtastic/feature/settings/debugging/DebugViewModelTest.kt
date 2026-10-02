@@ -16,14 +16,17 @@
  */
 package org.meshtastic.feature.settings.debugging
 
+import androidx.lifecycle.viewModelScope
 import dev.mokkery.MockMode
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -31,8 +34,10 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.MeshLogRetention
+import org.meshtastic.core.testing.FakeApplicationCoroutineScope
 import org.meshtastic.core.testing.FakeMeshLogPrefs
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -71,6 +76,12 @@ class DebugViewModelTest {
                 meshLogRepository = meshLogRepository,
                 nodeRepository = nodeRepository,
                 meshLogPrefs = meshLogPrefs,
+                setMeshLogSettingsUseCase =
+                SetMeshLogSettingsUseCase(
+                    meshLogRepository,
+                    meshLogPrefs,
+                    FakeApplicationCoroutineScope(testDispatcher),
+                ),
                 alertManager = alertManager,
                 dispatchers = dispatchers,
             )
@@ -121,6 +132,23 @@ class DebugViewModelTest {
 
         meshLogPrefs.retentionDays.value shouldBe MeshLogRetention.KEEP_FOREVER
         meshLogRepository.currentLogs.map { it.uuid } shouldBe listOf("ancient", "recent")
+    }
+
+    @Test
+    fun `retention prune keeps running after the view model is cleared`() = runTest {
+        val now = nowMillis
+        meshLogRepository.setLogs(
+            listOf(MeshLog("recent", "TEXT", now, ""), MeshLog("stale", "TEXT", now - 30.days.inWholeMilliseconds, "")),
+        )
+        val releasePrune = CompletableDeferred<Unit>()
+        meshLogRepository.beforeDeleteLogsOlderThan = { releasePrune.await() }
+
+        viewModel.setRetentionDays(14)
+        meshLogRepository.deleteLogsOlderThanCalls shouldBe 1
+        viewModel.viewModelScope.cancel()
+        releasePrune.complete(Unit)
+
+        meshLogRepository.currentLogs.map { it.uuid } shouldBe listOf("recent")
     }
 
     @Test

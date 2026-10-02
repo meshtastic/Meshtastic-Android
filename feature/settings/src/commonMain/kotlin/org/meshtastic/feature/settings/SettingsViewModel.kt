@@ -141,12 +141,12 @@ class SettingsViewModel(
     val meshLogLoggingEnabled: StateFlow<Boolean> = _meshLogLoggingEnabled.asStateFlow()
 
     fun setMeshLogRetentionDays(days: Int) {
-        safeLaunch(tag = "setMeshLogRetentionDays") { setMeshLogSettingsUseCase.setRetentionDays(days) }
+        setMeshLogSettingsUseCase.setRetentionDays(days)
         _meshLogRetentionDays.value = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
     }
 
     fun setMeshLogLoggingEnabled(enabled: Boolean) {
-        safeLaunch(tag = "setMeshLogLoggingEnabled") { setMeshLogSettingsUseCase.setLoggingEnabled(enabled) }
+        setMeshLogSettingsUseCase.setLoggingEnabled(enabled)
         _meshLogLoggingEnabled.value = enabled
     }
 

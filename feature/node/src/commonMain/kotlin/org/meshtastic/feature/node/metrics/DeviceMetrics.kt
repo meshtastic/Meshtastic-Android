@@ -62,7 +62,6 @@ import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
-import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_util_definition
 import org.meshtastic.core.resources.air_utilization
@@ -74,6 +73,7 @@ import org.meshtastic.core.resources.device_metrics_log
 import org.meshtastic.core.resources.device_metrics_numeric_value
 import org.meshtastic.core.resources.device_metrics_percent_value
 import org.meshtastic.core.resources.device_metrics_voltage_value
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
@@ -486,7 +486,11 @@ private fun DeviceMetricsCard(
                 }
                 Text(
                     text =
-                    formatString(labelValueTemplate, uptimeLabel, formatUptime(deviceMetrics?.uptime_seconds ?: 0)),
+                    formatString(
+                        labelValueTemplate,
+                        uptimeLabel,
+                        formatDuration((deviceMetrics?.uptime_seconds ?: 0).toLong()),
+                    ),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelLarge,
                 )

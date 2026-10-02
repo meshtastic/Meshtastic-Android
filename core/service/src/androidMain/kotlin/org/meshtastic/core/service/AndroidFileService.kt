@@ -19,6 +19,7 @@ package org.meshtastic.core.service
 import android.app.Application
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toAndroidUri
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import okio.BufferedSink
 import okio.BufferedSource
@@ -46,6 +47,8 @@ class AndroidFileService(private val context: Application, private val dispatche
                     FileOutputStream(descriptor.fileDescriptor).sink().buffer().use { sink -> block(sink) }
                 }
                 true
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.e(e) { "Failed to write to URI: $uri" }
                 false
@@ -61,6 +64,8 @@ class AndroidFileService(private val context: Application, private val dispatche
                         true
                     } ?: false
                 success
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.e(e) { "Failed to read from URI: $uri" }
                 false

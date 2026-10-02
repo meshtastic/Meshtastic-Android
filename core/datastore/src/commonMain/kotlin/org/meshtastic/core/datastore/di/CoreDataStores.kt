@@ -19,7 +19,6 @@ package org.meshtastic.core.datastore.di
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.CoroutineScope
-import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
@@ -41,12 +40,6 @@ interface CorePreferencesDataStore : DataStore<Preferences>
 /** Presents an existing store as [CorePreferencesDataStore]; the wrapper adds nothing but identity. */
 fun DataStore<Preferences>.asCorePreferencesDataStore(): CorePreferencesDataStore =
     object : CorePreferencesDataStore, DataStore<Preferences> by this {}
-
-interface CoreChannelSetDataStore : DataStore<ChannelSet>
-
-/** Presents an existing store as [CoreChannelSetDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<ChannelSet>.asCoreChannelSetDataStore(): CoreChannelSetDataStore =
-    object : CoreChannelSetDataStore, DataStore<ChannelSet> by this {}
 
 interface CoreLocalConfigDataStore : DataStore<LocalConfig>
 

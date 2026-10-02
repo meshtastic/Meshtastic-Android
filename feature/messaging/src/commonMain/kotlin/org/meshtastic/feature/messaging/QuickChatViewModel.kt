@@ -19,7 +19,7 @@ package org.meshtastic.feature.messaging
 import androidx.lifecycle.ViewModel
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.ioDispatcher
-import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.model.QuickChatAction
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed

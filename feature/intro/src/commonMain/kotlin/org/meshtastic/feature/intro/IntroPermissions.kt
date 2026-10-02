@@ -42,6 +42,11 @@ interface IntroPermissions {
      * rather than naming a permission the user will never see.
      */
     val bluetoothRequiresLocation: Boolean
+
+    /**
+     * False on hardware with no Bluetooth LE (e.g. Android XR), where there is nothing for the Bluetooth screen to ask.
+     */
+    val bluetoothSupported: Boolean
 }
 
 /** Provides platform-specific permission states to the intro nav graph. */

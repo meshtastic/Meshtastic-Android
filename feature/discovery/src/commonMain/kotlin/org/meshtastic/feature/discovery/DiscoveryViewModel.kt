@@ -24,13 +24,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MeshBeaconOffer
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.isAlreadyJoined
 import org.meshtastic.core.repository.DiscoveryPrefs
+import org.meshtastic.core.repository.DiscoveryRepository
 import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -50,7 +51,7 @@ class DiscoveryViewModel(
     private val check24GhzCapability: Check24GhzCapability,
     private val meshBeaconRepository: MeshBeaconRepository,
     radioConfigRepository: RadioConfigRepository,
-    discoveryDao: DiscoveryDao,
+    discoveryRepository: DiscoveryRepository,
 ) : ViewModel() {
 
     val scanState: StateFlow<DiscoveryScanState> = scanEngine.scanState
@@ -119,7 +120,7 @@ class DiscoveryViewModel(
             .stateInWhileSubscribed(initialValue = false)
 
     val sessions: StateFlow<List<DiscoverySessionEntity>> =
-        discoveryDao.getAllSessions().stateInWhileSubscribed(initialValue = emptyList())
+        discoveryRepository.getAllSessions().stateInWhileSubscribed(initialValue = emptyList())
 
     /** Beacon presets we've already auto-selected once, so a user's later deselection is never undone (FR-004). */
     private val autoSelectedBeaconPresets = mutableSetOf<ChannelOption>()
@@ -128,7 +129,7 @@ class DiscoveryViewModel(
     private val autoSelectedBeaconChannels = mutableSetOf<String>()
 
     init {
-        safeLaunch(tag = "markInterruptedSessions") { discoveryDao.markInterruptedSessions() }
+        safeLaunch(tag = "markInterruptedSessions") { discoveryRepository.markInterruptedSessions() }
         safeLaunch(tag = "check24GhzCapability") {
             val result = check24GhzCapability()
             _is24GhzBlocked.value =
@@ -216,13 +217,14 @@ class DiscoveryViewModel(
                                 }
                                 .build(),
                             region = bc.region.takeIf { it != RegionCode.UNSET },
+                            frequencySlot = bc.frequencySlot,
                         )
                     }
             val targets = presetTargets + channelTargets
             if (targets.isEmpty()) return@safeLaunch
             scanEngine.startScanTargets(
                 targets = targets,
-                dwellDurationSeconds = dwellDurationMinutes.value.toLong() * SECONDS_PER_MINUTE,
+                dwellDurationSeconds = dwellDurationMinutes.value.toLong() * TimeConstants.SECONDS_PER_MINUTE,
             )
         }
     }
@@ -238,10 +240,6 @@ class DiscoveryViewModel(
     private fun restoreSelectedPresets(): Set<ChannelOption> = discoveryPrefs.selectedPresets.value
         .mapNotNull { name -> ChannelOption.entries.firstOrNull { it.name == name } }
         .toSet()
-
-    companion object {
-        private const val SECONDS_PER_MINUTE = 60L
-    }
 }
 
 /**
@@ -276,6 +274,7 @@ internal fun filterAlreadyJoinedBeaconChannels(
             psk = ch.psk,
             preset = ChannelOption.from(offer.beacon.offer_preset),
             region = offer.beacon.offer_region,
+            frequencySlot = offer.beacon.offer_frequency_slot?.takeIf { it > 0 },
         )
     }
     .distinctBy { it.id }

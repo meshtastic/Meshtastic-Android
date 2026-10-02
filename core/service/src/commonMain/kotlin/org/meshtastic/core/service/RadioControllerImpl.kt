@@ -18,7 +18,6 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -30,7 +29,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.model.ConnectionEpochs
 import org.meshtastic.core.model.ConnectionLifecycle
 import org.meshtastic.core.model.ConnectionState
@@ -41,12 +42,12 @@ import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.QueryController
@@ -96,6 +97,16 @@ internal suspend fun restoreLocalConfigurationIfOwned(
  * surfacing, packet-id generation, location provisioning, and device-address switching.
  */
 @Suppress("LongParameterList")
+@Single(
+    binds =
+    [
+        RadioController::class,
+        AdminController::class,
+        MessagingController::class,
+        NodeController::class,
+        QueryController::class,
+    ],
+)
 class RadioControllerImpl(
     private val serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
@@ -109,11 +120,11 @@ class RadioControllerImpl(
     private val meshPrefs: MeshPrefs,
     uiPrefs: UiPrefs,
     private val databaseManager: DatabaseManager,
-    private val notificationManager: NotificationManager,
+    private val serviceNotifications: MeshNotificationManager,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
     radioConfigRepository: RadioConfigRepository,
-    scope: CoroutineScope,
-    private val onDeviceAddressChanged: (() -> Unit)? = null,
+    scope: ServiceScope,
+    private val deviceAddressChangeHook: DeviceAddressChangeHook,
 ) : RadioController,
     AdminController by AdminControllerImpl(
         commandSender = commandSender,
@@ -303,7 +314,7 @@ class RadioControllerImpl(
             }
         }
         // Keep callbacks outside the transition mutex so observers cannot deadlock by scheduling another selection.
-        onDeviceAddressChanged?.invoke()
+        deviceAddressChangeHook.onDeviceAddressChanged()
     }
 
     override fun requestGattCacheInvalidationOnNextConnect() {
@@ -321,14 +332,15 @@ class RadioControllerImpl(
         messageProcessor.value.clearEarlyPackets()
         databaseManager.switchActiveDatabase(deviceAddr)
         nodeManager.clear()
-        notificationManager.cancelAll()
+        serviceNotifications.clearNotifications()
         nodeManager.loadCachedNodeDB()
         // Commit the persisted selection last. MeshPrefs writes asynchronously, so the transport's synchronous
         // selected-address snapshot remains the rollback authority for a rapid subsequent selection.
         meshPrefs.setDeviceAddress(deviceAddr)
     }
 
-    @Suppress("TooGenericExceptionCaught")
+    // Only called under NonCancellable, so no cancellation of its own reaches attemptRollback's catch.
+    @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
     private suspend fun rollbackDeviceSwitch(previousAddress: String?, originalFailure: Exception) {
         suspend fun attemptRollback(description: String, block: suspend () -> Unit): Boolean = try {
             block()
@@ -349,7 +361,7 @@ class RadioControllerImpl(
             attemptRollback("fail-closed connection-identity clear") { nodeManager.clearConnectionIdentity() }
             attemptRollback("fail-closed node-state clear") { nodeManager.clear() }
             attemptRollback("fail-closed early-packet clear") { messageProcessor.value.clearEarlyPackets() }
-            attemptRollback("fail-closed notification clear") { notificationManager.cancelAll() }
+            attemptRollback("fail-closed notification clear") { serviceNotifications.clearNotifications() }
             attemptRollback("fail-closed persisted selection") { meshPrefs.setDeviceAddress(null) }
             attemptRollback("fail-closed transport selection") {
                 check(radioInterfaceService.setDeviceAddress(null)) { "Transport rejected fail-closed deselection" }
@@ -362,7 +374,7 @@ class RadioControllerImpl(
             nodeManager.clearConnectionIdentity()
             nodeManager.clear()
             messageProcessor.value.clearEarlyPackets()
-            notificationManager.cancelAll()
+            serviceNotifications.clearNotifications()
             nodeManager.loadCachedNodeDB()
         }
         attemptRollback("transport selection") {

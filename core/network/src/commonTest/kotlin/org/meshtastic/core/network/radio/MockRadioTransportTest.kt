@@ -23,8 +23,10 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.util.crc32
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.RadioTransportCallback
 import org.meshtastic.core.repository.TransportDisconnectReason
@@ -509,9 +511,101 @@ class MockRadioTransportTest {
         }
     }
 
+    @Test
+    fun `the showcase address plays the showcase mesh under its own identity`() = runTest {
+        val callback = RecordingCallback()
+        val scope = transportScope()
+        try {
+            val transport = MockRadioTransport(callback, scope, address = MockScenario.SHOWCASE_ADDRESS)
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
+
+            val myInfo = assertNotNull(callback.received.firstNotNullOfOrNull { it.my_info })
+            assertEquals(MockScenario.SHOWCASE.myNode, myInfo.my_node_num)
+            val names = callback.nodeInfos.map { it.user?.long_name }
+            assertEquals(listOf("Base Camp") + MockScenario.SHOWCASE.peers.map { it.longName }, names)
+            assertFalse(names.contains("Demo Handset"), "the showcase must not carry Demo Mode's identity")
+            val peerKeys = callback.nodeInfos.drop(1).map { it.user?.public_key?.size }
+            assertEquals(List(MockScenario.SHOWCASE.peers.size) { PUBLIC_KEY_SIZE }, peerKeys)
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun `every showcase peer number is the crc32 of its public key`() {
+        MockScenario.SHOWCASE.peers.forEach { peer ->
+            val key = assertNotNull(peer.publicKey, "${peer.longName} has no public key").decodeHex()
+            assertEquals(peer.num, key.crc32().toInt(), "${peer.longName} does not carry its key's node number")
+        }
+    }
+
+    @Test
+    fun `showcase battery voltages sit on the firmware LiPo curve`() {
+        MockScenario.SHOWCASE.peers
+            .filter { it.batteryLevel <= MAX_BATTERY_PERCENT }
+            .forEach { peer ->
+                val voltage = assertNotNull(peer.voltage, "${peer.longName} reports a charge level without a voltage")
+                assertEquals(lipoVolts(peer.batteryLevel), voltage, VOLTAGE_TOLERANCE, peer.longName)
+            }
+    }
+
+    @Test
+    fun `any other address plays the demo mesh`() = runTest {
+        val callback = RecordingCallback()
+        val scope = transportScope()
+        try {
+            val transport = MockRadioTransport(callback, scope, address = "anything")
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
+
+            assertEquals(MockScenario.DEMO.myNode, callback.received.firstNotNullOfOrNull { it.my_info }?.my_node_num)
+            assertEquals("Demo Handset", callback.nodeInfos.first().user?.long_name)
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun `the showcase seeds its thread once and then stays still`() = runTest {
+        val callback = RecordingCallback()
+        val scope = transportScope()
+        try {
+            val transport = MockRadioTransport(callback, scope, address = MockScenario.SHOWCASE_ADDRESS)
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
+            testScheduler.advanceTimeBy(SEED_WINDOW_MS)
+
+            val texts = callback.packetsOn(PortNum.TEXT_MESSAGE_APP)
+            assertEquals(
+                MockScenario.SHOWCASE.channelConversation.size + MockScenario.SHOWCASE.directConversation.size,
+                texts.size,
+            )
+            val afterSeed = callback.received.size
+
+            testScheduler.advanceTimeBy(LIVE_TICK_MS * LIVE_TICKS_AFTER_CLOSE)
+            assertEquals(afterSeed, callback.received.size, "a capture must see the same numbers however late it runs")
+        } finally {
+            scope.cancel()
+        }
+    }
+
     private companion object {
         const val BROADCAST_ADDR = -1
         const val MIN_DEMO_NODES = 8
+        const val PUBLIC_KEY_SIZE = 32
+        const val MAX_BATTERY_PERCENT = 100
+        const val VOLTAGE_TOLERANCE = 0.01f
+
+        /** Firmware's `OCV_ARRAY` for a LiPo cell (`Power.h`): millivolts at 100%, 90%, ... 0%. */
+        val LIPO_OCV_MV = intArrayOf(4190, 4050, 3990, 3890, 3800, 3720, 3630, 3530, 3420, 3300, 3100)
+
+        fun lipoVolts(percent: Int): Float {
+            val band = (MAX_BATTERY_PERCENT - percent) / 10
+            val upper = LIPO_OCV_MV[band]
+            val lower = LIPO_OCV_MV[minOf(band + 1, LIPO_OCV_MV.lastIndex)]
+            return (lower + (upper - lower) * (percent % 10) / 10f) / 1000f
+        }
 
         /** Comfortably longer than the seed pass, but shorter than the first live-telemetry tick. */
         const val SEED_WINDOW_MS = 10_000L

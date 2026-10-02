@@ -25,13 +25,11 @@
     <string name="add">Afegir</string>
     <string name="add_network_device">Afegir</string>
     <!-- AIR -->
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Actualització de l'aplicació necessària</string>
     <string name="apply">Aplicar</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Estàs segur que vols canviar al canal per defecte?</string>
-    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="calculating">Calculant…</string>
     <string name="camera_permission">Permisos de la càmera</string>
@@ -39,7 +37,6 @@
     <string name="cant_change_no_radio">No s'ha pogut canviar el canal perquè la ràdio no està configurada correctament. Si us plau torna-ho a provar.</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">La URL d'aquest canal és invàlida i no es pot fer servir</string>
-    <string name="channel_label">Canal</string>
     <string name="channel_name">Nom del canal</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Escollir tema</string>
@@ -70,15 +67,13 @@
     <string name="direct_message">Missatge directe</string>
     <string name="disconnected">Desconnectat</string>
     <!-- DISCOVERY -->
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distància</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Hores</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
-    <!-- ENVIRONMENT -->
     <string name="error">Error</string>
     <string name="error_duty_cycle">Límit del cicle de treball assolit. No es podran enviar més missatges, intenta-ho més tard.</string>
     <!-- EXPORT -->
@@ -92,8 +87,6 @@
     <string name="firmware_update_failed">Actualització fallida</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
-    <!-- GPIO -->
-    <!-- IGNORE -->
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Afegir '%1$s' a la llista d'ignorats?</string>
     <string name="ignore_remove">Treure '%1$s' de la llista d'ignorats?</string>
@@ -112,7 +105,6 @@
     <string name="locked">Bloquejat</string>
     <!-- LOG -->
     <!-- MAP -->
-    <string name="map_cache_info">Mida total de la memòria cau: %1$d MB\nMemoria cau feta servir: %2$d MB</string>
     <string name="map_cache_manager">Director de la memòria cau</string>
     <string name="map_cache_size">Mida actual de la memòria cau</string>
     <string name="map_cache_tiles">%1$d tessel·les</string>
@@ -173,19 +165,19 @@
     <string name="nodes_unheard_remove">Eliminar</string>
     <string name="none">Cap (desactivat)</string>
     <string name="not_connected">No connectat</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Acceptar</string>
     <!-- ONE -->
     <string name="one_day">24 Hores</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
+    <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Idioma</string>
     <string name="preferences_system_default">Defecte del sistema</string>
     <!-- PREVIEW -->
@@ -199,14 +191,6 @@
     <string name="quick_chat_new">Nova conversa ràpida</string>
     <string name="radio_configuration">Configuració de ràdio</string>
     <string name="reboot">Reiniciar</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Reenvia qualsevol missatge observat si era al nostre canal privat o d’una altra malla.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">.Mateix comportament que ALL, però sense decodificar paquets, només els reenvia. Només disponible en rol de Repeater. Configurar-ho en qualsevol altre rol resultarà en el comportament ALL.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignora paquets amb ports no estàndard com: TAK, RangeTest, PaxCounter, etc. Només reenvia paquets amb ports estàndard: NodeInfo, Text, Position, Telemetry i Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignora els missatges observats de malles externes com LOCAL ONLY, però va més enllà i també ignora missatges de nodes que no figuren a la llista de nodes coneguts del node.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignora els missatges observats de malles externes obertes o que no pot desxifrar. Només reenvia missatges als canals primari/secundari locals del node.</string>
-    <string name="rebroadcast_mode_none_desc">Només permès per als rols SENSOR, TRACKER i TAK_TRACKER; això inhibirà tots els reenviaments, de manera similar al rol CLIENT_MUTE.</string>
-    <string name="region_frequency_plan">Regió</string>
     <!-- REMOTE -->
     <!-- REMOVE -->
     <string name="remove">Eliminar</string>
@@ -217,23 +201,11 @@
     <string name="reset">Restablir</string>
     <string name="reset_to_defaults">Restablir els defectes</string>
     <!-- ROLE -->
-    <string name="role_client_desc">Dispositiu de missatgeria, connectat o autònom.</string>
-    <string name="role_client_hidden_desc">Dispositiu que només difon quan cal, per discreció o estalvi d’energia.</string>
-    <string name="role_client_mute_desc">Dispositiu sense reenviament de paquets.</string>
-    <string name="role_repeater_desc">Node d’infraestructura per ampliar cobertura amb mínima càrrega. Ocult a la llista de nodes.</string>
-    <string name="role_router_client_desc">Combinació ROUTER + CLIENT. No mòbils.</string>
-    <string name="role_router_desc">Node d’infraestructura per ampliar cobertura. Apareix a la llista de nodes.</string>
-    <string name="role_router_late_desc">Node d’infraestructura que sempre reenvia els paquets una vegada però només després de tots els altres modes, assegurant cobertura addicional per a clusters locals. Visible a la llista de nodes.</string>
-    <string name="role_sensor_desc">Difon telemetria com a prioritat</string>
-    <string name="role_tak_desc">Optimitzat per sistema ATAK, redueix les rutines de difusió.</string>
-    <string name="role_tak_tracker_desc">Activa les difusions automàtiques TAK PLI i redueix les difusions rutinàries.</string>
-    <string name="role_tracker_desc">Difon paquets de posició GPS com a prioritat</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Rebuda confirmació negativa</string>
     <string name="routing_error_no_route">Sense ruta</string>
     <string name="routing_error_none">Confirmat</string>
     <string name="routing_error_timeout">Temps esgotat</string>
-    <!-- SAVE -->
     <string name="save">Desar</string>
     <string name="save_changes">Desar</string>
     <!-- SCAN -->
@@ -241,7 +213,6 @@
     <!-- SECURITY -->
     <string name="select_all">Seleccionar tot</string>
     <string name="send">Enviar</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Compartir</string>
     <!-- SHOW -->
@@ -268,7 +239,6 @@
     <string name="unknown_username">Nom d'usuari desconegut</string>
     <string name="unrecognized">No reconeguts</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">via MQTT</string>
     <string name="waypoint_delete">Esborrar punt de pas?</string>

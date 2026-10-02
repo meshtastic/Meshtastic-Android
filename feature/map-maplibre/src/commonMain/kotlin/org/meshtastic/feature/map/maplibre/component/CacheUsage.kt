@@ -19,16 +19,16 @@ package org.meshtastic.feature.map.maplibre.component
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
 import org.maplibre.compose.offline.DownloadProgress
 import org.maplibre.compose.offline.OfflinePack
+import org.meshtastic.core.common.util.formatByteSize
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.map_cache_megabytes
 import org.meshtastic.core.resources.map_cache_size
 import org.meshtastic.core.resources.map_cache_tiles
 
@@ -58,16 +58,16 @@ internal fun rememberCacheUsage(packs: Set<OfflinePack>): CacheUsage {
                 }
             }
         }
-            .collectAsState(CacheUsage())
+            .collectAsStateWithLifecycle(CacheUsage())
     return usage
 }
 
 /**
  * How much disk the downloaded packs occupy.
  *
- * The OSMdroid map reported this in MB, which is the number that answers "is this filling my phone". No capacity beside
- * it: OSMdroid had one bounded SQLite cache, whereas MapLibre has explicitly downloaded packs the user deletes by hand
- * plus a separate ambient cache, and quoting a ceiling that governs neither would be a lie.
+ * In the phone's own decimal units, since this is the number that answers "is this filling my phone". No capacity
+ * beside it: OSMdroid had one bounded SQLite cache, whereas MapLibre has explicitly downloaded packs the user deletes
+ * by hand plus a separate ambient cache, and quoting a ceiling that governs neither would be a lie.
  */
 @Composable
 internal fun CacheUsageLine(storedBytes: Long, storedTiles: Long) {
@@ -75,7 +75,7 @@ internal fun CacheUsageLine(storedBytes: Long, storedTiles: Long) {
         text =
         stringResource(Res.string.map_cache_size) +
             ": " +
-            stringResource(Res.string.map_cache_megabytes, storedBytes.megabytes()) +
+            formatByteSize(storedBytes) +
             " · " +
             stringResource(Res.string.map_cache_tiles, storedTiles.toInt()),
         style = MaterialTheme.typography.bodySmall,

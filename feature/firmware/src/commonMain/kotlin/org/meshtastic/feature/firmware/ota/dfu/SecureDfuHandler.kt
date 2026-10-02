@@ -28,9 +28,9 @@ import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
-import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -55,6 +55,7 @@ import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.feature.firmware.ProgressState
 import org.meshtastic.feature.firmware.ota.ThroughputTracker
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
+import org.meshtastic.feature.firmware.ota.formatTransferPercent
 import org.meshtastic.feature.firmware.ota.formatTransferProgress
 import org.meshtastic.feature.firmware.ota.retryWithDelay
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
@@ -62,7 +63,6 @@ import org.meshtastic.feature.firmware.stripFormatArgs
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
-private const val PERCENT_MAX = 100
 private const val GATT_RELEASE_DELAY_MS = 1_500L
 private const val DFU_REBOOT_WAIT_MS = 3_000L
 private const val RETRY_DELAY_MS = 2_000L
@@ -180,7 +180,7 @@ internal class DfuFallbackCoordinator(private val detection: BootloaderDetection
                 }
             }
         }
-        throw IllegalStateException("DFU fallback exhausted with non-empty protocol list (detection=$detection)")
+        error("DFU fallback exhausted with non-empty protocol list (detection=$detection)")
     }
 
     /**
@@ -834,10 +834,9 @@ class SecureDfuHandler(
 
         val path =
             firmwareRetriever.retrieveOtaFirmware(release, hardware) { progress ->
-                val pct = (progress * PERCENT_MAX).toInt()
                 updateState(
                     FirmwareUpdateState.Downloading(
-                        ProgressState(UiText.DynamicString(downloadingMsg), progress, "$pct%"),
+                        ProgressState(UiText.DynamicString(downloadingMsg), progress, formatTransferPercent(progress)),
                     ),
                 )
             }

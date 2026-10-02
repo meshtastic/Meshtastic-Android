@@ -282,8 +282,8 @@ internal class AdminControllerImpl(
         }
     }
 
-    override suspend fun rebootToDfu(nodeNum: Int) {
-        commandSender.sendAdmin(nodeNum) {
+    override suspend fun rebootToDfu(nodeNum: Int, packetId: Int) {
+        commandSender.sendAdmin(nodeNum, packetId) {
             AdminMessage.Builder().also { wb -> wb.enter_dfu_mode_request = true }.build()
         }
     }
@@ -323,6 +323,7 @@ internal class AdminControllerImpl(
 
     // ── Edit Settings (transactional) ───────────────────────────────────────
 
+    @Suppress("SuspendFunSwallowedCancellation") // a block's cancellation is held only until the commit, then rethrown
     override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
         val isLocalDestination = destNum == nodeManager.myNodeNum.value
         requireBeginBoundaryAccepted(destNum)
@@ -439,7 +440,8 @@ internal class AdminControllerImpl(
             projections.forEach { projection -> applyProjection(projection) }
         }
 
-        @Suppress("TooGenericExceptionCaught")
+        // Only called under applyStagedProjections' NonCancellable, so no cancellation of its own reaches the catch.
+        @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
         private suspend fun applyProjection(projection: suspend () -> Unit) {
             try {
                 projection()

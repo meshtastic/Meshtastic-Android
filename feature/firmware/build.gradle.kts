@@ -30,22 +30,17 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.ble)
             implementation(projects.core.common)
-            implementation(projects.core.data)
-            implementation(projects.core.database)
             implementation(projects.core.datastore)
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(projects.core.network)
-            implementation(projects.core.prefs)
             implementation(projects.core.repository)
             implementation(libs.meshtastic.protobufs)
-            implementation(projects.core.service)
             implementation(projects.core.resources)
             implementation(projects.core.ui)
 
             implementation(libs.coil)
-            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.network)
             implementation(libs.markdown.renderer)
@@ -62,6 +57,9 @@ kotlin {
 
         // performUsbUpdate resolves compose-resources strings, whose desktop implementation needs
         // the skiko-awt runtime to read the system theme.
-        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
+        jvmTest.dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation(libs.ktor.client.mock)
+        }
     }
 }

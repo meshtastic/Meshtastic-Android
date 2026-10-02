@@ -17,12 +17,22 @@
 package org.meshtastic.app
 
 import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.recalculateWindowInsets
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -59,6 +69,11 @@ class BubbleActivity : AppCompatActivity() {
         }
         messageViewModel.setContactKey(contactKey)
 
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
+
         setContent {
             val theme by model.theme.collectAsStateWithLifecycle()
             val dark =
@@ -67,18 +82,27 @@ class BubbleActivity : AppCompatActivity() {
                     AppCompatDelegate.MODE_NIGHT_NO -> false
                     else -> isSystemInDarkTheme()
                 }
-            AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
-                MessageScreen(
-                    contactKey = contactKey,
-                    message = "",
-                    viewModel = messageViewModel,
-                    navigateToNodeDetails = { nodeNum -> openInApp("nodes/$nodeNum") },
-                    // Quick chat and message filters have no deep link of their own, so the full app opens on this
-                    // conversation — the screen those menu items live on.
-                    navigateToQuickChatOptions = { openInApp("messages/$contactKey") },
-                    navigateToFilterSettings = { openInApp("messages/$contactKey") },
-                    onNavigateBack = { finish() },
+            SideEffect {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
+                    navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
                 )
+            }
+            AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
+                // Edge to edge, only this padding keeps the composer clear of the keyboard and the navigation bar.
+                Box(Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding()) {
+                    MessageScreen(
+                        contactKey = contactKey,
+                        message = "",
+                        viewModel = messageViewModel,
+                        navigateToNodeDetails = { nodeNum -> openInApp("nodes/$nodeNum") },
+                        // Quick chat and message filters have no deep link of their own, so the full app opens on
+                        // this conversation, the screen those menu items live on.
+                        navigateToQuickChatOptions = { openInApp("messages/$contactKey") },
+                        navigateToFilterSettings = { openInApp("messages/$contactKey") },
+                        onNavigateBack = { finish() },
+                    )
+                }
             }
         }
     }

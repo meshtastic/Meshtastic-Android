@@ -34,13 +34,15 @@ class IntroViewModel : ViewModel() {
      *   in a row — and a user who declines both has spent both of Android's allowed denials before ever seeing the app,
      *   landing on USER_FIXED with no dialog available again. The Bluetooth screen covers both uses on those releases,
      *   so the second ask is dropped rather than duplicated.
+     * @param bluetoothSupported false on hardware with no Bluetooth LE, where the Bluetooth screen is skipped.
      */
     fun getNextKey(
         currentKey: NavKey,
         allPermissionsGranted: Boolean,
         bluetoothRequiresLocation: Boolean = false,
+        bluetoothSupported: Boolean = true,
     ): NavKey? = when (currentKey) {
-        is Welcome -> Bluetooth
+        is Welcome -> if (bluetoothSupported) Bluetooth else Location
         is Bluetooth -> if (bluetoothRequiresLocation) Notifications else Location
         is Location -> Notifications
         is Notifications -> if (allPermissionsGranted) CriticalAlerts else null

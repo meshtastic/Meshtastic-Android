@@ -32,18 +32,13 @@ Displays the open-source libraries the app is built on, with their licenses.
 ```mermaid
 graph TB
   :feature:settings[settings]:::kmp-feature
-  :feature:settings -.-> :core:barcode
-  :feature:settings -.-> :core:nfc
   :feature:settings -.-> :core:common
-  :feature:settings -.-> :core:data
   :feature:settings -.-> :core:database
-  :feature:settings -.-> :core:datastore
   :feature:settings -.-> :core:domain
   :feature:settings -.-> :core:model
   :feature:settings -.-> :core:navigation
   :feature:settings -.-> :core:network
   :feature:settings -.-> :core:repository
-  :feature:settings -.-> :core:service
   :feature:settings -.-> :core:resources
   :feature:settings -.-> :core:ui
   :feature:settings -.-> :core:di

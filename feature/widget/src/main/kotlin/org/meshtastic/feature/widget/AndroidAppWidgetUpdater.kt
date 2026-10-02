@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.updateAll
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -35,6 +36,7 @@ private const val WIDGET_UPDATE_DEBOUNCE_MS = 500L
 @Single
 class AndroidAppWidgetUpdater(private val context: Context, stateProvider: LocalStatsWidgetStateProvider) :
     AppWidgetUpdater {
+    @Suppress("InjectDispatcher") // feature:widget does not depend on core:di, where CoroutineDispatchers lives
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     init {
@@ -57,6 +59,8 @@ class AndroidAppWidgetUpdater(private val context: Context, stateProvider: Local
         @Suppress("TooGenericExceptionCaught")
         try {
             LocalStatsWidget().updateAll(context)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Logger.e(e) { "Failed to update widgets" }
         }

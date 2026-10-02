@@ -28,6 +28,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ExportDataUseCaseTest {
@@ -169,5 +170,45 @@ class ExportDataUseCaseTest {
         val output = buffer.readUtf8()
         // relay_node defaults to 0 (unset) -> blank field before the payload
         assertTrue(output.contains("\"0\",\"\",\"Hello\""))
+    }
+
+    @Test
+    fun `invoke writes one row per log in the order the repository reads them`() = runTest {
+        val senders = listOf(30, 10, 20, 50, 40)
+        meshLogRepository.setLogs(
+            senders.mapIndexed { index, from ->
+                MeshLog(
+                    uuid = "$index",
+                    message_type = "TEXT",
+                    received_date = 1000000000L + index,
+                    raw_message = "",
+                    fromRadio =
+                    FromRadio.Builder()
+                        .also { wb ->
+                            wb.packet =
+                                MeshPacket.Builder()
+                                    .also { wb ->
+                                        wb.from = from
+                                        wb.rx_snr = 5.0f
+                                        wb.decoded =
+                                            Data.Builder()
+                                                .also { wb ->
+                                                    wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                                    wb.payload = "Hi".encodeUtf8()
+                                                }
+                                                .build()
+                                    }
+                                    .build()
+                        }
+                        .build(),
+                )
+            },
+        )
+        val buffer = Buffer()
+
+        useCase(buffer, 1)
+
+        val rows = buffer.readUtf8().lines().drop(1).filter { it.isNotEmpty() }
+        assertEquals(senders.map { it.toString() }, rows.map { it.split("\",\"")[2] })
     }
 }

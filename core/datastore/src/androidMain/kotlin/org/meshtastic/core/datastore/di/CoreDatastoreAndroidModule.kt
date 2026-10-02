@@ -32,11 +32,9 @@ import okio.Path
 import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
-import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
-import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
@@ -84,18 +82,6 @@ class ModuleConfigDataStoreModule {
 }
 
 @Module
-class ChannelSetDataStoreModule {
-    @Single
-    fun provideChannelSetDataStore(context: Context, scope: DataStoreScope): CoreChannelSetDataStore = protoStore(
-        serializer = ChannelSetSerializer,
-        producePath = { context.dataStoreFile("channel_set.pb").toOkioPath() },
-        produceNewData = { ChannelSet.Builder().build() },
-        scope = scope,
-    )
-        .asCoreChannelSetDataStore()
-}
-
-@Module
 class LocalStatsDataStoreModule {
     @Single
     fun provideLocalStatsDataStore(context: Context, scope: DataStoreScope): CoreLocalStatsDataStore = protoStore(
@@ -125,7 +111,6 @@ private fun <T> protoStore(
         PreferencesDataStoreModule::class,
         LocalConfigDataStoreModule::class,
         ModuleConfigDataStoreModule::class,
-        ChannelSetDataStoreModule::class,
         LocalStatsDataStoreModule::class,
     ],
 )

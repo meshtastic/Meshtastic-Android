@@ -61,7 +61,6 @@ import org.meshtastic.app.map.tiles.RasterTileProvider
 import org.meshtastic.app.map.tiles.toRasterBasemap
 import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.MapPrefs
@@ -72,6 +71,9 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.url_http_localhost_only
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.layers.LayerOpacityStore
@@ -89,6 +91,8 @@ import org.meshtastic.feature.map.tiles.CustomTileProviderSaveResult
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.meshtastic.feature.map.tiles.RasterOverlaySource
 import org.meshtastic.feature.map.tiles.RasterTileSpec
+import org.meshtastic.feature.map.tiles.isCleartextPermitted
+import org.meshtastic.feature.map.tiles.isRefusedCleartextTileUrl
 import org.meshtastic.feature.map.tiles.isValidTileUrlTemplate
 import java.io.File
 import java.io.FileOutputStream
@@ -142,27 +146,13 @@ class MapViewModel(
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
-    // Injected by the map provider because this SavedStateHandle is not the Navigation 3 entry's route state.
-    private val sitePlannerRequestState = SitePlannerRequestState(nodeRepository.nodeDBbyNum)
-    val sitePlannerRequest: StateFlow<Node?> =
-        sitePlannerRequestState.request.stateInWhileSubscribed(initialValue = null)
-
-    fun setSitePlannerNodeNum(nodeNum: Int?) {
-        sitePlannerRequestState.setNodeNum(nodeNum)
-    }
-
-    fun consumeSitePlannerRequest(nodeNum: Int) {
-        sitePlannerRequestState.consume(nodeNum)
-    }
-
     fun setWaypointId(id: Int?) {
         if (_selectedWaypointId.value != id) {
             _selectedWaypointId.value = id
             if (id != null) {
                 viewModelScope.launch {
                     val wpMap = waypoints.first { it.containsKey(id) }
-                    wpMap[id]?.let { packet ->
-                        val waypoint = packet.waypoint!!
+                    wpMap[id]?.waypoint?.let { waypoint ->
                         val latLng =
                             LatLng(
                                 (waypoint.latitude_i ?: 0) / WAYPOINT_COORD_SCALE,
@@ -345,6 +335,9 @@ class MapViewModel(
         if (config != null) {
             if (!config.isLocal && !isValidTileUrlTemplate(config.urlTemplate)) {
                 Logger.withTag("MapViewModel").w("Attempted to select an invalid custom tile URL template")
+                if (config.urlTemplate.isRefusedCleartextTileUrl()) {
+                    viewModelScope.launch { _errorFlow.emit(getStringSuspend(Res.string.url_http_localhost_only)) }
+                }
                 clearCurrentTileProvider()
                 _selectedRasterBasemapId.value = null
                 _selectedGoogleMapType.value = MapType.NORMAL
@@ -443,8 +436,7 @@ class MapViewModel(
         }
     }
 
-    private fun isValidTileUrlTemplate(urlTemplate: String): Boolean =
-        urlTemplate.isValidTileUrlTemplate(requireHttps = false)
+    private fun isValidTileUrlTemplate(urlTemplate: String): Boolean = urlTemplate.isValidTileUrlTemplate()
 
     /** What to restore once the network returns from an auto-switch; null when nothing has been auto-switched. */
     private data class OfflineAutoSwitchState(val rasterBasemapId: String?, val googleMapType: MapType)
@@ -630,23 +622,22 @@ class MapViewModel(
 
         _terrainDownloadRegionId.value = regionId
         _terrainDownloadState.value = null
-        terrainDownloadJob =
-            viewModelScope.launch {
-                val store = terrainStoreForRegion(regionId)
-                val bounds =
-                    GeoBounds(
-                        south = region.southLat,
-                        west = region.westLon,
-                        north = region.northLat,
-                        east = region.eastLon,
-                    )
-                val maxZoom = TerrainDownloadPlanner.maxZoomFitting(bounds, TerrainRegionExtractor.MAX_TILES)
-                // flowOn: the extractor does blocking per-tile HTTP on its collector's dispatcher.
-                TerrainRegionExtractor(store).download(bounds, maxZoom).flowOn(dispatchers.io).collect { state ->
-                    _terrainDownloadState.value = state
-                    if (state is TerrainDownloadState.Complete) attachTerrain(region, state, store)
-                }
+        terrainDownloadJob = viewModelScope.launch {
+            val store = terrainStoreForRegion(regionId)
+            val bounds =
+                GeoBounds(
+                    south = region.southLat,
+                    west = region.westLon,
+                    north = region.northLat,
+                    east = region.eastLon,
+                )
+            val maxZoom = TerrainDownloadPlanner.maxZoomFitting(bounds, TerrainRegionExtractor.MAX_TILES)
+            // flowOn: the extractor does blocking per-tile HTTP on its collector's dispatcher.
+            TerrainRegionExtractor(store).download(bounds, maxZoom).flowOn(dispatchers.io).collect { state ->
+                _terrainDownloadState.value = state
+                if (state is TerrainDownloadState.Complete) attachTerrain(region, state, store)
             }
+        }
     }
 
     private suspend fun attachTerrain(
@@ -711,8 +702,7 @@ class MapViewModel(
         selectedWaypointId.value?.let { wpId ->
             viewModelScope.launch {
                 val wpMap = waypoints.first { it.containsKey(wpId) }
-                wpMap[wpId]?.let { packet ->
-                    val waypoint = packet.waypoint!!
+                wpMap[wpId]?.waypoint?.let { waypoint ->
                     val latLng =
                         LatLng(
                             (waypoint.latitude_i ?: 0) / WAYPOINT_COORD_SCALE,
@@ -765,6 +755,7 @@ class MapViewModel(
             if (selection.customTileUrl != null) googleMapsPrefs.setSelectedCustomTileUrl(null)
         } else {
             _selectedRasterBasemapId.value = null
+            if (resolvedSelection.refusedCleartextSource) reportRefusedCleartextSource()
             if (resolvedSelection.canDiscardMissingSelection) {
                 if (selectedProviderId != null) mapTileProviderPrefs.setSelectedCustomTileProviderId(null)
                 if (selection.customTileUrl != null) googleMapsPrefs.setSelectedCustomTileUrl(null)
@@ -780,6 +771,14 @@ class MapViewModel(
                 _selectedGoogleMapType.value = MapType.NORMAL
                 googleMapsPrefs.setSelectedGoogleMapType(null)
             }
+        }
+    }
+
+    /** Waits for a collector: this runs from init, before the map collects, and the selection is cleared next. */
+    private fun reportRefusedCleartextSource() {
+        viewModelScope.launch {
+            _errorFlow.subscriptionCount.first { it > 0 }
+            _errorFlow.emit(getStringSuspend(Res.string.url_http_localhost_only))
         }
     }
 
@@ -853,24 +852,30 @@ internal fun List<CustomTileProviderConfig>.findLegacyCustomTileProvider(
 internal data class PersistedCustomTileSelection(
     val provider: CustomTileProviderConfig?,
     val canDiscardMissingSelection: Boolean,
+    val refusedCleartextSource: Boolean = false,
 )
 
 internal fun List<CustomTileProviderConfig>.resolvePersistedCustomTileSelection(
     selectedProviderId: String?,
     legacySource: String?,
     providerLoadSuccessful: Boolean,
+    cleartextPermitted: (host: String) -> Boolean = ::isCleartextPermitted,
 ): PersistedCustomTileSelection {
-    val provider =
+    val candidates =
         listOfNotNull(findSelectedCustomTileProvider(selectedProviderId), findLegacyCustomTileProvider(legacySource))
-            .firstOrNull { it.hasValidGoogleTileSource() }
+    val provider = candidates.firstOrNull { it.hasValidGoogleTileSource(cleartextPermitted) }
     return PersistedCustomTileSelection(
         provider = provider,
         canDiscardMissingSelection = provider == null && providerLoadSuccessful,
+        refusedCleartextSource =
+        provider == null &&
+            candidates.any { !it.isLocal && it.urlTemplate.isRefusedCleartextTileUrl(cleartextPermitted) },
     )
 }
 
-internal fun CustomTileProviderConfig.hasValidGoogleTileSource(): Boolean =
-    isLocal || urlTemplate.isValidTileUrlTemplate(requireHttps = false)
+internal fun CustomTileProviderConfig.hasValidGoogleTileSource(
+    cleartextPermitted: (host: String) -> Boolean = ::isCleartextPermitted,
+): Boolean = isLocal || urlTemplate.isValidTileUrlTemplate(cleartextPermitted)
 
 private fun GoogleCameraPosition.toCameraPosition() = CameraPosition(LatLng(targetLat, targetLng), zoom, tilt, bearing)
 

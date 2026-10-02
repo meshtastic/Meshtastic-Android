@@ -1,8 +1,10 @@
 # ============================================================================
 # Meshtastic Android — ProGuard / R8 rules for release minification
 # ============================================================================
-# Open-source project: obfuscation is disabled (readable stack traces). We rely
-# on R8 optimization + tree-shaking (unused code removal) for APK size reduction.
+# Release builds are shrunk and optimized. The google flavor is also
+# obfuscated; its mapping goes to Crashlytics and Datadog and is attached to
+# each GitHub release. The fdroid flavor adds proguard-rules-fdroid.pro, which
+# keeps it unobfuscated.
 #
 # Cross-platform library rules (Koin, kotlinx-serialization, Wire, Room,
 # Ktor, Coil, Kable, Kermit, Okio, DataStore, Paging, Lifecycle, Navigation 3,
@@ -14,11 +16,7 @@
 
 # ---- General ----------------------------------------------------------------
 
-# Open-source — no need to obfuscate
--dontobfuscate
-
-# R8 optimization is ENABLED. Obfuscation stays off (-dontobfuscate above), so
-# stack traces remain readable; tree-shaking plus the full optimization pass
+# R8 optimization is ENABLED: tree-shaking plus the full optimization pass
 # (method inlining, class merging, Composer/ComposerImpl devirtualization,
 # unused-argument removal) all run.
 #
@@ -38,6 +36,29 @@
 # Dump the full merged R8 configuration (app rules + all library consumer rules)
 # for auditing. Inspect this file after a release build to see what libraries inject.
 -printconfiguration build/outputs/mapping/r8-merged-config.txt
+
+# ---- Names read at runtime --------------------------------------------------
+# Each name below is looked up by string, so obfuscation must leave it alone.
+
+# KableGattCacheRefresh reads these private Kable fields by reflection.
+-keepclassmembernames class com.juul.kable.BluetoothDeviceAndroidPeripheral {
+    kotlinx.coroutines.flow.MutableStateFlow connection;
+}
+-keepclassmembernames class com.juul.kable.Connection {
+    android.bluetooth.BluetoothGatt gatt;
+}
+
+# rumViewName() reports a route's class name as its Datadog view name.
+-keepnames class * implements androidx.navigation3.runtime.NavKey
+
+# isDeprecatedEnumEntry() finds each constant's field by name to read @Deprecated.
+-keepclassmembernames enum org.meshtastic.** {
+    <fields>;
+}
+
+# GooglePlatformAnalytics drops logging frames from Crashlytics stacks by class-name prefix.
+-keepnames class org.meshtastic.app.analytics.GooglePlatformAnalytics*
+-keepnames class co.touchlab.kermit.**
 
 # ---- Networking (transitive references from Ktor on Android) ----------------
 

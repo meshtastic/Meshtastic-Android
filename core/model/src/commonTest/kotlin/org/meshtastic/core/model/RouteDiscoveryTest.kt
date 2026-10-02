@@ -23,7 +23,6 @@ import kotlin.test.assertEquals
  * Tests for [evaluateTracerouteMapAvailability] — the pure function that determines whether a traceroute can be
  * visualised on a map based on node position data.
  */
-@Suppress("MagicNumber")
 class RouteDiscoveryTest {
 
     @Test

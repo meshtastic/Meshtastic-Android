@@ -19,9 +19,9 @@ package org.meshtastic.core.data.datasource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
-import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.entity.asEntity
+import org.meshtastic.core.model.FirmwareReleaseType
 import org.meshtastic.core.model.NetworkFirmwareRelease
 
 @Single

@@ -1,6 +1,5 @@
 ---
 title: 桌面版應用程式
-parent: 使用者指南
 nav_order: 14
 last_updated: 2026-09-11
 description: 在 Linux、macOS 及 Windows 上安裝並使用 Meshtastic 桌面版應用程式——涵蓋連線方式、功能對等性與鍵盤快速鍵。
@@ -53,7 +52,7 @@ Connect your radio via USB. The app detects the serial port automatically; if it
 
 Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/JuulLabs/kable) library:
 
-1. 請確認您的系統配備藍牙介面卡。 應用程式將自動掃描附近的 Meshtastic 無線電裝置。
+1. 請確認您的系統配備藍牙介面卡。應用程式將自動掃描附近的 Meshtastic 無線電裝置。
 2. Select your radio from the Connect screen.
 
 ## 功能對等性

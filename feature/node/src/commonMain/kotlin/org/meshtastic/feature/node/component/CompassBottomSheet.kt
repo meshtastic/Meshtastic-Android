@@ -64,9 +64,12 @@ import org.meshtastic.core.resources.compass_no_magnetometer
 import org.meshtastic.core.resources.compass_title
 import org.meshtastic.core.resources.compass_uncertainty
 import org.meshtastic.core.resources.compass_uncertainty_unknown
+import org.meshtastic.core.resources.duration_ago
 import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.exchange_position
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.last_position_update
+import org.meshtastic.core.ui.component.ElevationInfo
 import org.meshtastic.core.ui.icon.ErrorOutline
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
@@ -149,9 +152,10 @@ fun CompassSheetContent(
             }
         }
 
-        uiState.lastUpdateText?.let {
+        uiState.lastUpdateAgeSeconds?.let { ageSeconds ->
+            val age = stringResource(Res.string.duration_ago, formatDuration(ageSeconds))
             Text(
-                text = stringResource(Res.string.last_position_update) + ": $it",
+                text = stringResource(Res.string.last_position_update) + ": $age",
                 style = MaterialTheme.typography.bodyMedium,
             )
             // Quick way to re-request a fresh fix without leaving the compass sheet

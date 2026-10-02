@@ -24,7 +24,8 @@ import org.meshtastic.core.model.util.anonymize
 data class Position(
     val latitude: Double,
     val longitude: Double,
-    val altitude: Int,
+    /** Metres above mean sea level, or null when the fix reported none. 0 is sea level, not absence. */
+    val altitude: Int?,
     val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
     val satellitesInView: Int = 0,
     val groundSpeed: Int = 0,
@@ -51,7 +52,7 @@ data class Position(
     ) : this(
         degD(position.latitude_i ?: 0),
         degD(position.longitude_i ?: 0),
-        position.altitude ?: 0,
+        position.altitude,
         if (position.time != 0) position.time else defaultTime,
         position.sats_in_view,
         position.ground_speed ?: 0,
@@ -66,7 +67,7 @@ data class Position(
     fun bearing(o: Position) = bearing(latitude, longitude, o.latitude, o.longitude)
 
     /** Returns whether this position represents the protocol sentinel for removing a fixed position. */
-    fun isFixedPositionRemoval(): Boolean = latitude == 0.0 && longitude == 0.0 && altitude == 0
+    fun isFixedPositionRemoval(): Boolean = latitude == 0.0 && longitude == 0.0 && (altitude == null || altitude == 0)
 
     @Suppress("MagicNumber")
     fun isValid(): Boolean = latitude != 0.0 &&
@@ -77,3 +78,16 @@ data class Position(
     override fun toString(): String =
         "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=$time)"
 }
+
+/**
+ * The raw `latitude_i` and `longitude_i`, or null when either is absent or both are exactly 0. A 0 stand-in for a
+ * missing axis, or a 0,0 report, puts the node on the equator or the prime meridian where it never was.
+ */
+fun org.meshtastic.proto.Position.fixOrNull(): Pair<Int, Int>? {
+    val latI = latitude_i
+    val lonI = longitude_i
+    return if (latI == null || lonI == null || (latI == 0 && lonI == 0)) null else latI to lonI
+}
+
+/** Whether this report places the node on a map; see [fixOrNull]. */
+fun org.meshtastic.proto.Position.hasFix(): Boolean = fixOrNull() != null

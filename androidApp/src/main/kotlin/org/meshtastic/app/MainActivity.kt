@@ -49,17 +49,20 @@ import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toKmpUri
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
 import org.meshtastic.app.map.getMapViewProvider
 import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
+import org.meshtastic.core.common.state.LaunchOptions
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.nfc.NfcEmulatorEffect
@@ -67,6 +70,9 @@ import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.nfc.NfcWriterEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
+import org.meshtastic.core.resources.map_layer_formats
+import org.meshtastic.core.resources.map_layer_open_failed
+import org.meshtastic.core.resources.map_layer_too_large
 import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.service.ServiceStartTrigger
 import org.meshtastic.core.service.startService
@@ -90,42 +96,52 @@ import org.meshtastic.core.ui.util.LocalNfcEmulatorProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcWriterProvider
-import org.meshtastic.core.ui.util.LocalNodeMapScreenProvider
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
-import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
 import org.meshtastic.core.ui.util.accentColorOrNull
 import org.meshtastic.core.ui.util.brandHighlightOrNull
 import org.meshtastic.core.ui.util.brandPalette
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
-import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import org.meshtastic.feature.intro.IntroViewModel
 import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.layers.MapLayersManager
-import org.meshtastic.feature.map.layers.toPickedMapFile
-import org.meshtastic.feature.map.node.NodeMapViewModel
-import org.meshtastic.feature.node.metrics.MetricsViewModel
-import org.meshtastic.feature.node.metrics.TracerouteMapScreen
+import org.meshtastic.feature.map.layers.PickedMapFile
 
 class MainActivity : AppCompatActivity() {
     private val model: UIViewModel by viewModel()
 
     private val usbRepository: UsbRepository by inject()
     private val mapLayersManager: MapLayersManager by inject()
+    private val launchOptions: LaunchOptions by inject()
+    private val dispatchers: CoroutineDispatchers by inject()
+
+    /** Koin never started when this is false, so nothing that injects may run. */
+    private val isSupportedDevice: Boolean
+        get() = (application as? MeshUtilApplication)?.isSupportedDevice != false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
 
-        if (BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_ONBOARDING, false)) {
+        if (!isSupportedDevice) {
+            setContent { UnsupportedDeviceScreen() }
+            return
+        }
+
+        // MainActivity is exported, so any app can send these extras; only the shell can start the debug alias.
+        val automationLaunch = BuildConfig.DEBUG && intent.component?.className == AUTOMATION_LAUNCHER
+        if (automationLaunch && intent.getBooleanExtra(EXTRA_SKIP_ONBOARDING, false)) {
+            launchOptions.skipOnboarding = true
             model.onAppIntroCompleted()
         }
+        launchOptions.skipDeepLinkConfirmation =
+            automationLaunch && intent.getBooleanExtra(EXTRA_SKIP_CONNECT_CONFIRM, false)
 
         enableEdgeToEdge()
 
@@ -166,7 +182,7 @@ class MainActivity : AppCompatActivity() {
                     // once we've decided whether to show the intro or the main screen.
                     ReportDrawnWhen { true }
 
-                    if (appIntroCompleted) {
+                    if (appIntroCompleted || launchOptions.skipOnboarding) {
                         MainScreen()
                     } else {
                         val introViewModel = koinViewModel<IntroViewModel>()
@@ -177,18 +193,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Listen for new intents (e.g. deep links, NFC) without overriding onNewIntent
-        addOnNewIntentListener { intent -> handleIntent(intent) }
+        addOnNewIntentListener { intent ->
+            // The switch covers the launch it came with; a link that arrives later still asks.
+            launchOptions.skipDeepLinkConfirmation = false
+            handleIntent(intent)
+        }
 
-        handleIntent(intent)
+        // A recreated activity gets its launch intent back; acting on it again would re-import or re-open it.
+        if (savedInstanceState == null) handleIntent(intent)
     }
 
     override fun onStart() {
         super.onStart()
+        if (!isSupportedDevice) return
         MeshService.startService(this, ServiceStartTrigger.UserInterface)
     }
 
     override fun onResume() {
         super.onResume()
+        if (!isSupportedDevice) return
         // Belt-and-suspenders for the Android 12+ attach-intent quirk: if the activity is
         // resumed while a USB device is already attached (e.g. process restart, returning
         // from another app), the manifest-declared attach intent may have already fired
@@ -248,13 +271,14 @@ class MainActivity : AppCompatActivity() {
             LocalSitePlannerAvailable provides true,
             LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
             LocalNodeTrackMapProvider provides
-                { destNum, positions, modifier, selectedPositionTime, onPositionSelected ->
+                { destNum, positions, modifier, selectedPositionTime, onPositionSelected, showAttribution ->
                     org.meshtastic.app.map.node.NodeTrackMap(
                         destNum,
                         positions,
                         modifier,
                         selectedPositionTime,
                         onPositionSelected,
+                        showAttribution,
                     )
                 },
             LocalTracerouteMapOverlayInsetsProvider provides getTracerouteMapOverlayInsets(),
@@ -270,24 +294,6 @@ class MainActivity : AppCompatActivity() {
             LocalDiscoveryMapProvider provides
                 { userLat, userLon, nodes, modifier ->
                     org.meshtastic.app.map.discovery.DiscoveryMap(userLat, userLon, nodes, modifier)
-                },
-            LocalNodeMapScreenProvider provides
-                { destNum, onNavigateUp ->
-                    val vm = koinViewModel<NodeMapViewModel>()
-                    vm.setDestNum(destNum)
-                    org.meshtastic.app.map.node.NodeMapScreen(vm, onNavigateUp = onNavigateUp)
-                },
-            LocalTracerouteMapScreenProvider provides
-                { destNum, requestId, logUuid, onNavigateUp ->
-                    val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(destNum) }
-                    metricsViewModel.setNodeId(destNum)
-
-                    TracerouteMapScreen(
-                        metricsViewModel = metricsViewModel,
-                        requestId = requestId,
-                        logUuid = logUuid,
-                        onNavigateUp = onNavigateUp,
-                    )
                 },
             LocalMapMainScreenProvider provides
                 { onClickNodeChip, navigateToNodeDetails, waypointId, sitePlannerNodeNum ->
@@ -384,13 +390,39 @@ class MainActivity : AppCompatActivity() {
      *
      * Handed to the layer store directly rather than through a one-slot bus for the map to drain. The store is common
      * code now, so both flavours import a shared file; the bus only ever reached the Google map, which meant the same
-     * share silently did nothing on F-Droid. The read grant on [uri] lives as long as this activity, which is long
-     * enough for the store to copy the file in.
+     * share silently did nothing on F-Droid. The file is read here, in this activity's scope, because the read grant on
+     * [uri] lives only as long as the activity; the Map tab opens once the read succeeds.
      */
     private fun importMapFile(uri: Uri) {
         Logger.d { "Importing shared map file: $uri" }
-        mapLayersManager.addMapLayer(uri.toPickedMapFile(this))
-        handleMeshtasticUri("$DEEP_LINK_BASE_URI/map".toUri())
+        lifecycleScope.launch {
+            when (val load = withContext(dispatchers.io) { contentResolver.loadSharedMapFile(uri) }) {
+                is SharedMapFileLoad.Refused -> {
+                    Logger.w { "Refusing shared map file: ${load.reason}" }
+                    when (load.reason) {
+                        SharedMapFileRejection.UNSUPPORTED_TYPE -> showToast(Res.string.map_layer_formats)
+
+                        SharedMapFileRejection.TOO_LARGE ->
+                            showToast(Res.string.map_layer_too_large, MAX_SHARED_MAP_FILE_MB)
+
+                        SharedMapFileRejection.NOT_CONTENT_URI,
+                        SharedMapFileRejection.UNREADABLE,
+                        -> showToast(Res.string.map_layer_open_failed)
+                    }
+                }
+
+                is SharedMapFileLoad.Loaded -> {
+                    mapLayersManager.addMapLayer(
+                        PickedMapFile(
+                            displayName = load.file.displayName,
+                            extensionOrMime = load.file.extensionOrMime,
+                            read = { load.bytes },
+                        ),
+                    )
+                    handleMeshtasticUri("$DEEP_LINK_BASE_URI/map".toUri())
+                }
+            }
+        }
     }
 
     private fun createShareIntent(message: String): PendingIntent {
@@ -404,18 +436,22 @@ class MainActivity : AppCompatActivity() {
                 addNextIntentWithParentStack(startActivityIntent)
                 getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
             }
-        return resultPendingIntent!!
+        // Null only under FLAG_NO_CREATE, which is not passed.
+        return checkNotNull(resultPendingIntent) { "TaskStackBuilder returned no PendingIntent" }
     }
 
     private fun showConnectionsPageIfNoDeviceSelected() {
-        val selectedAddress = model.currentDeviceAddressFlow.value
-        if (!selectedAddress.isNullOrBlank() && selectedAddress != NO_DEVICE_SELECTED) return
+        if (DeviceAddress.parse(model.currentDeviceAddressFlow.value) != null) return
 
         handleMeshtasticUri("$DEEP_LINK_BASE_URI/connections".toUri())
     }
 
     private companion object {
         const val EXTRA_SKIP_ONBOARDING = "skip_onboarding"
+        const val EXTRA_SKIP_CONNECT_CONFIRM = "skip_connect_confirm"
+
+        /** The DUMP-guarded alias in the debug manifest. */
+        const val AUTOMATION_LAUNCHER = "org.meshtastic.app.AutomationLauncher"
     }
 }
 

@@ -108,6 +108,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
     val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
+    val searchTerms = remember(searchState.searchText) { compileSearchTerms(searchState.searchText) }
 
     var filterMode by remember { mutableStateOf(FilterMode.OR) }
 
@@ -225,7 +226,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                     DebugItem(
                         modifier = Modifier.animateItem(),
                         log = log,
-                        searchText = searchState.searchText,
+                        searchTerms = searchTerms,
                         isSelected = selectedLogId == log.uuid,
                         onLogClick = { viewModel.setSelectedLogId(if (selectedLogId == log.uuid) null else log.uuid) },
                     )
@@ -277,7 +278,7 @@ private fun DebugLogSettings(viewModel: DebugViewModel) {
 internal fun DebugItem(
     log: UiMeshLog,
     modifier: Modifier = Modifier,
-    searchText: String = "",
+    searchTerms: List<Regex> = emptyList(),
     isSelected: Boolean = false,
     onLogClick: () -> Unit = {},
 ) {
@@ -305,8 +306,8 @@ internal fun DebugItem(
             Column(
                 modifier = Modifier.padding(if (isSelected) 12.dp else 8.dp).fillMaxWidth().clickable { onLogClick() },
             ) {
-                DebugItemHeader(log = log, searchText = searchText, isSelected = isSelected, theme = colorScheme)
-                val messageAnnotatedString = rememberAnnotatedLogMessage(log, searchText)
+                DebugItemHeader(log = log, searchTerms = searchTerms, isSelected = isSelected, theme = colorScheme)
+                val messageAnnotatedString = rememberAnnotatedLogMessage(log, searchTerms)
                 Text(
                     text = messageAnnotatedString,
                     style =
@@ -322,7 +323,7 @@ internal fun DebugItem(
                         decodedPayload = log.decodedPayload,
                         isSelected = isSelected,
                         colorScheme = colorScheme,
-                        searchText = searchText,
+                        searchTerms = searchTerms,
                         modifier = Modifier,
                     )
                 }
@@ -332,13 +333,13 @@ internal fun DebugItem(
 }
 
 @Composable
-private fun DebugItemHeader(log: UiMeshLog, searchText: String, isSelected: Boolean, theme: ColorScheme) {
+private fun DebugItemHeader(log: UiMeshLog, searchTerms: List<Regex>, isSelected: Boolean, theme: ColorScheme) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = if (isSelected) 12.dp else 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val typeAnnotatedString = rememberAnnotatedString(text = log.messageType, searchText = searchText)
+        val typeAnnotatedString = rememberAnnotatedString(text = log.messageType, searchTerms = searchTerms)
         Text(
             text = typeAnnotatedString,
             modifier = Modifier.weight(1f),
@@ -353,7 +354,7 @@ private fun DebugItemHeader(log: UiMeshLog, searchText: String, isSelected: Bool
         // it must not carry key material either. Marked sensitive so the OS does not surface it in a paste preview.
         val fullLogText = remember(log.logMessage, log.decodedPayload) { formatLogEntryForCopy(log) }
         CopyIconButton(valueToCopy = fullLogText, modifier = Modifier.padding(start = 8.dp), sensitive = true)
-        val dateAnnotatedString = rememberAnnotatedString(text = log.formattedReceivedDate, searchText = searchText)
+        val dateAnnotatedString = rememberAnnotatedString(text = log.formattedReceivedDate, searchTerms = searchTerms)
         Text(
             text = dateAnnotatedString,
             style =
@@ -367,31 +368,40 @@ private fun DebugItemHeader(log: UiMeshLog, searchText: String, isSelected: Bool
 }
 
 @Composable
-private fun rememberAnnotatedString(text: String, searchText: String): AnnotatedString {
+private fun rememberAnnotatedString(text: String, searchTerms: List<Regex>): AnnotatedString {
     val theme = MaterialTheme.colorScheme
     val highlightStyle = SpanStyle(background = theme.primary.copy(alpha = 0.3f), color = theme.onSurface)
 
-    return remember(text, searchText) {
+    return remember(text, searchTerms) {
         buildAnnotatedString {
             append(text)
-            if (searchText.isNotEmpty()) {
-                searchText.split(" ").forEach { term ->
-                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(text).forEach { match ->
-                        addStyle(style = highlightStyle, start = match.range.first, end = match.range.last + 1)
-                    }
-                }
-            }
+            highlightMatches(text, searchTerms, highlightStyle)
+        }
+    }
+}
+
+/**
+ * Compiles each search term once per query, so every log row shares the same patterns instead of compiling its own.
+ * Blank terms are dropped: an empty pattern matches at every index.
+ */
+internal fun compileSearchTerms(searchText: String): List<Regex> =
+    searchText.split(" ").filter { it.isNotEmpty() }.map { Regex(Regex.escape(it), RegexOption.IGNORE_CASE) }
+
+private fun AnnotatedString.Builder.highlightMatches(text: String, searchTerms: List<Regex>, style: SpanStyle) {
+    searchTerms.forEach { term ->
+        term.findAll(text).forEach { match ->
+            addStyle(style = style, start = match.range.first, end = match.range.last + 1)
         }
     }
 }
 
 @Composable
-private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): AnnotatedString {
+private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchTerms: List<Regex>): AnnotatedString {
     val theme = MaterialTheme.colorScheme
     val style = SpanStyle(color = AnnotationColor, fontStyle = FontStyle.Italic)
     val highlightStyle = SpanStyle(background = theme.primary.copy(alpha = 0.3f), color = theme.onSurface)
 
-    return remember(log.uuid, searchText) {
+    return remember(log.uuid, searchTerms) {
         buildAnnotatedString {
             append(log.logMessage)
 
@@ -400,14 +410,7 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
                 addStyle(style = style, start = it.range.first, end = it.range.last + 1)
             }
 
-            // Add search highlight annotations
-            if (searchText.isNotEmpty()) {
-                searchText.split(" ").forEach { term ->
-                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(log.logMessage).forEach { match ->
-                        addStyle(style = highlightStyle, start = match.range.first, end = match.range.last + 1)
-                    }
-                }
-            }
+            highlightMatches(log.logMessage, searchTerms, highlightStyle)
         }
     }
 }
@@ -424,7 +427,7 @@ private fun DecodedPayloadBlock(
     decodedPayload: String,
     isSelected: Boolean,
     colorScheme: ColorScheme,
-    searchText: String = "",
+    searchTerms: List<Regex> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
     val commonTextStyle =
@@ -446,7 +449,7 @@ private fun DecodedPayloadBlock(
             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
         )
         Text(text = "{", style = commonTextStyle, modifier = Modifier.padding(start = 8.dp, bottom = 2.dp))
-        val annotatedPayload = rememberAnnotatedDecodedPayload(decodedPayload, searchText, colorScheme)
+        val annotatedPayload = rememberAnnotatedDecodedPayload(decodedPayload, searchTerms, colorScheme)
         Text(
             text = annotatedPayload,
             softWrap = true,
@@ -465,20 +468,14 @@ private fun DecodedPayloadBlock(
 @Composable
 private fun rememberAnnotatedDecodedPayload(
     decodedPayload: String,
-    searchText: String,
+    searchTerms: List<Regex>,
     colorScheme: ColorScheme,
 ): AnnotatedString {
     val highlightStyle = SpanStyle(background = colorScheme.primary.copy(alpha = 0.3f), color = colorScheme.onSurface)
-    return remember(decodedPayload, searchText) {
+    return remember(decodedPayload, searchTerms) {
         buildAnnotatedString {
             append(decodedPayload)
-            if (searchText.isNotEmpty()) {
-                searchText.split(" ").forEach { term ->
-                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(decodedPayload).forEach { match ->
-                        addStyle(style = highlightStyle, start = match.range.first, end = match.range.last + 1)
-                    }
-                }
-            }
+            highlightMatches(decodedPayload, searchTerms, highlightStyle)
         }
     }
 }

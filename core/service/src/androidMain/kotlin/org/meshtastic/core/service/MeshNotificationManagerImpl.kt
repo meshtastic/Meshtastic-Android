@@ -17,16 +17,13 @@
 package org.meshtastic.core.service
 
 import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
-import android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
 import android.content.Context
 import android.content.Intent
-import android.media.AudioAttributes
-import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.content.LocusIdCompat
@@ -39,39 +36,47 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.FirmwareUpdateNotice
+import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.noiseFloorOrNull
-import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.repository.FirmwareUpdateProgress
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
+import org.meshtastic.core.repository.notificationId
 import org.meshtastic.core.resources.R.drawable
-import org.meshtastic.core.resources.R.raw
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel
-import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.discovery_scan_in_progress
+import org.meshtastic.core.resources.firmware_update_available
 import org.meshtastic.core.resources.firmware_update_in_progress
-import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.firmware_update_notification_android
+import org.meshtastic.core.resources.formatDurationSuspend
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_battery
@@ -88,30 +93,23 @@ import org.meshtastic.core.resources.local_stats_utilization
 import org.meshtastic.core.resources.low_battery_message
 import org.meshtastic.core.resources.low_battery_title
 import org.meshtastic.core.resources.mark_as_read
-import org.meshtastic.core.resources.meshtastic_alerts_notifications
+import org.meshtastic.core.resources.mesh_beacon_notification_body
+import org.meshtastic.core.resources.mesh_beacon_notification_title
 import org.meshtastic.core.resources.meshtastic_app_name
-import org.meshtastic.core.resources.meshtastic_broadcast_notifications
-import org.meshtastic.core.resources.meshtastic_low_battery_notifications
-import org.meshtastic.core.resources.meshtastic_low_battery_temporary_remote_notifications
-import org.meshtastic.core.resources.meshtastic_messages_notifications
-import org.meshtastic.core.resources.meshtastic_new_nodes_notifications
-import org.meshtastic.core.resources.meshtastic_service_notifications
-import org.meshtastic.core.resources.meshtastic_waypoints_notifications
-import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.core.resources.no_local_stats
+import org.meshtastic.core.resources.notification_reaction_to
 import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.you
-import org.meshtastic.core.service.MarkAsReadReceiver.Companion.MARK_AS_READ_ACTION
-import org.meshtastic.core.service.ReactionReceiver.Companion.REACT_ACTION
-import org.meshtastic.core.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import org.meshtastic.core.repository.Notification as MeshNotification
 
 /**
  * Manages the creation and display of all app notifications.
@@ -128,6 +126,7 @@ class MeshNotificationManagerImpl(
     private val conversationShortcutPublisher: Lazy<ConversationShortcutPublisher>,
     private val radioConfigRepository: Lazy<RadioConfigRepository>,
     private val radioOperationLock: RadioOperationLock,
+    private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
     private val scope: ServiceScope,
 ) : MeshNotificationManager {
 
@@ -137,9 +136,6 @@ class MeshNotificationManagerImpl(
     companion object {
         const val MAX_BATTERY_LEVEL = 100
 
-        // Meshtastic brand accent (Green 500, see .skills/design-standards) — used as the notification accent color
-        // (small-icon tint) and the notification LED color.
-        private val NOTIFICATION_COLOR = 0xFF67EA94.toInt()
         private const val MAX_HISTORY_MESSAGES = 10
         private const val MIN_CONTEXT_MESSAGES = 3
         private const val SNIPPET_LENGTH = 30
@@ -164,10 +160,18 @@ class MeshNotificationManagerImpl(
         private const val BUBBLE_DESIRED_HEIGHT_DP = 600
         private const val TAG_MESSAGE_SUMMARY = "message_summary"
         private const val TAG_WAYPOINT = "waypoint"
+        private const val TAG_REACTION = "reaction"
         private const val TAG_ALERT = "alert"
         private const val TAG_NEW_NODE = "new_node"
         private const val TAG_LOW_BATTERY = "low_battery"
         private const val TAG_CLIENT = "client"
+        private const val TAG_MESH_BEACON = "mesh_beacon"
+        private const val TAG_FIRMWARE_UPDATE = "firmware_update"
+        private const val TAG_RECONNECT_BLOCKED = "reconnect_blocked"
+        private const val RECONNECT_BLOCKED_ID = 1
+        private val CHANNEL_LABEL_TIMEOUT = 2.seconds
+        private const val MAIN_ACTIVITY_CLASS = "org.meshtastic.app.MainActivity"
+        private const val THUMBS_UP = "👍"
     }
 
     private data class ServiceNotificationSnapshot(
@@ -177,9 +181,11 @@ class MeshNotificationManagerImpl(
         val previousMessage: String?,
         val nextUpdateAt: Long,
         val activeOperations: Set<RadioOperation> = emptySet(),
+        val firmwareProgress: FirmwareUpdateProgress? = null,
     )
 
-    private data class RenderedServiceNotification(val notification: Notification, val message: String)
+    /** [message] is the stats text to fall back on later; a firmware-progress render keeps the previous one. */
+    private data class RenderedServiceNotification(val notification: Notification, val message: String?)
 
     /**
      * Caches generated avatar icons keyed by (person id + short name + colors) so a conversation rebuild does not
@@ -188,10 +194,10 @@ class MeshNotificationManagerImpl(
      */
     private val personIconCache = ConcurrentHashMap<String, IconCompat>()
 
-    /** Rounded variant, for surfaces that mask the icon into a circle (notification bubbles). */
-    private fun cachedRoundedPersonIcon(key: String, shortName: String, backgroundColor: Int, foregroundColor: Int) =
-        personIconCache.getOrPut("rounded|$key|$shortName|$backgroundColor|$foregroundColor") {
-            PersonIconFactory.createLabel(shortName, backgroundColor, foregroundColor, rounded = true)
+    /** Adaptive variant, for notification bubbles, which the system masks to its own shape. */
+    private fun cachedBubblePersonIcon(key: String, shortName: String, backgroundColor: Int, foregroundColor: Int) =
+        personIconCache.getOrPut("adaptive|$key|$shortName|$backgroundColor|$foregroundColor") {
+            PersonIconFactory.createAdaptive(shortName, backgroundColor, foregroundColor)
         }
 
     /** Circular, node-colored avatar holding the sender's full short name (e.g. "2c3d"), not just its first letter. */
@@ -200,169 +206,83 @@ class MeshNotificationManagerImpl(
             PersonIconFactory.createLabel(shortName, backgroundColor, foregroundColor, rounded = false)
         }
 
-    /**
-     * Sealed class to define the properties of each notification channel. This centralizes channel configuration and
-     * makes it type-safe.
-     */
-    private sealed class NotificationType(
-        val channelId: String,
-        val channelNameRes: StringResource,
-        val importance: Int,
-    ) {
-        object ServiceState :
-            NotificationType(
-                NotificationChannels.SERVICE,
-                Res.string.meshtastic_service_notifications,
-                NotificationManager.IMPORTANCE_MIN,
-            )
-
-        object DirectMessage :
-            NotificationType(
-                NotificationChannels.MESSAGES,
-                Res.string.meshtastic_messages_notifications,
-                NotificationManager.IMPORTANCE_HIGH,
-            )
-
-        object BroadcastMessage :
-            NotificationType(
-                NotificationChannels.BROADCASTS,
-                Res.string.meshtastic_broadcast_notifications,
-                NotificationManager.IMPORTANCE_DEFAULT,
-            )
-
-        object Waypoint :
-            NotificationType(
-                NotificationChannels.WAYPOINTS,
-                Res.string.meshtastic_waypoints_notifications,
-                NotificationManager.IMPORTANCE_DEFAULT,
-            )
-
-        object Alert :
-            NotificationType(
-                NotificationChannels.ALERTS,
-                Res.string.meshtastic_alerts_notifications,
-                NotificationManager.IMPORTANCE_HIGH,
-            )
-
-        object NewNode :
-            NotificationType(
-                NotificationChannels.NEW_NODES,
-                Res.string.meshtastic_new_nodes_notifications,
-                NotificationManager.IMPORTANCE_DEFAULT,
-            )
-
-        object LowBatteryLocal :
-            NotificationType(
-                NotificationChannels.LOW_BATTERY,
-                Res.string.meshtastic_low_battery_notifications,
-                NotificationManager.IMPORTANCE_DEFAULT,
-            )
-
-        object LowBatteryRemote :
-            NotificationType(
-                NotificationChannels.LOW_BATTERY_REMOTE,
-                Res.string.meshtastic_low_battery_temporary_remote_notifications,
-                NotificationManager.IMPORTANCE_DEFAULT,
-            )
-
-        object Client :
-            NotificationType(
-                NotificationChannels.CLIENT,
-                Res.string.client_notification,
-                NotificationManager.IMPORTANCE_HIGH,
-            )
-
-        companion object {
-            // A list of all types for easy initialization.
-            fun allTypes() = listOf(
-                ServiceState,
-                DirectMessage,
-                BroadcastMessage,
-                Waypoint,
-                Alert,
-                NewNode,
-                LowBatteryLocal,
-                LowBatteryRemote,
-                Client,
-            )
-        }
-    }
-
     override fun clearNotifications() {
         notificationManager.cancelAll()
     }
 
     /**
-     * Creates all necessary notification channels on devices running Android O or newer. This should be called once
-     * when the service is created.
-     *
-     * Deliberately blocking (Main-thread, one-time cost): the orchestrator posts the foreground-service notification
-     * synchronously right after this returns, so channels must exist before then — do not lazy-gate this into the
-     * suspend notify paths. Blocking [getString] is safe here only because Main is not a Dispatchers.Default worker.
+     * Guarantees the foreground-service channel synchronously, because the orchestrator posts the service notification
+     * right after this returns, then creates the rest off the calling thread. Every post awaits [ensureChannels].
      */
     override fun initChannels() {
         notificationManager.removeLegacyCategoryChannels()
-        NotificationType.allTypes().forEach { type -> createNotificationChannel(type) }
+        ensureServiceChannel()
+        scope.launch { ensureChannels() }
     }
 
-    private fun createNotificationChannel(type: NotificationType) {
-        if (notificationManager.getNotificationChannel(type.channelId) != null) return
+    /** Creates the service channel under the app label if it is missing; [ensureChannels] later gives it its name. */
+    private fun ensureServiceChannel() {
+        if (notificationManager.getNotificationChannel(NotificationChannelSpec.Service.id) != null) return
+        // The platform throws for a channel whose group does not exist yet, and this runs before ensureChannels.
+        notificationManager.createNotificationChannelGroup(
+            NotificationChannelSpec.Service.group.toGroup(applicationLabel),
+        )
+        notificationManager.createNotificationChannel(
+            NotificationChannelSpec.Service.toChannel(context, name = applicationLabel, description = ""),
+        )
+    }
 
-        val channelName = getString(type.channelNameRes)
-        val channel =
-            NotificationChannel(type.channelId, channelName, type.importance).apply {
-                lightColor = NOTIFICATION_COLOR
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC // Default, can be overridden
+    private val channelsMutex = Mutex()
+    private var channelsReady = false
 
-                // Type-specific configurations
-                when (type) {
-                    NotificationType.ServiceState -> {
-                        lockscreenVisibility = Notification.VISIBILITY_PRIVATE
-                    }
+    private class ChannelLabels(
+        val groups: Map<NotificationChannelGroupSpec, String>,
+        val names: Map<NotificationChannelSpec, String>,
+        val descriptions: Map<NotificationChannelSpec, String>,
+    )
 
-                    NotificationType.DirectMessage,
-                    NotificationType.BroadcastMessage,
-                    NotificationType.Waypoint,
-                    NotificationType.NewNode,
-                    NotificationType.LowBatteryLocal,
-                    NotificationType.LowBatteryRemote,
-                    -> {
-                        setShowBadge(true)
-                        setSound(
-                            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                            AudioAttributes.Builder()
-                                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                                .build(),
-                        )
-                        if (type == NotificationType.LowBatteryRemote) enableVibration(true)
-                    }
+    private suspend fun resolveChannelLabels() = ChannelLabels(
+        groups = NotificationChannelGroupSpec.entries.associateWith { getStringSuspend(it.nameRes) },
+        names = NotificationChannelSpec.entries.associateWith { getStringSuspend(it.nameRes) },
+        descriptions = NotificationChannelSpec.entries.associateWith { getStringSuspend(it.descriptionRes) },
+    )
 
-                    NotificationType.Alert -> {
-                        setShowBadge(true)
-                        enableLights(true)
-                        enableVibration(true)
-                        setBypassDnd(true)
-                        val alertSoundUri =
-                            "${SCHEME_ANDROID_RESOURCE}://${context.packageName}/${raw.meshtastic_alert}".toUri()
-                        setSound(
-                            alertSoundUri,
-                            AudioAttributes.Builder()
-                                .setUsage(AudioAttributes.USAGE_ALARM) // More appropriate for an alert
-                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                                .build(),
-                        )
-                    }
-
-                    NotificationType.Client -> {
-                        setShowBadge(true)
-                    }
-                }
+    /**
+     * Creates every channel group and channel, once per process. Re-creating an existing channel only refreshes its
+     * name, description and (if it had none) group, so this also carries a locale change and the grouping onto installs
+     * whose channels predate them.
+     *
+     * Label loading is bounded: a boot broadcast posts through here with seconds to live, and a channel under the app
+     * label beats no notification. Such a pass does not count as done, so the next post puts the real labels on.
+     */
+    internal suspend fun ensureChannels() = channelsMutex.withLock {
+        if (channelsReady) return@withLock
+        val labels = withTimeoutOrNull(CHANNEL_LABEL_TIMEOUT) { safeCatching { resolveChannelLabels() }.getOrNull() }
+        val groups =
+            NotificationChannelGroupSpec.entries.map { it.toGroup(labels?.groups?.get(it) ?: applicationLabel) }
+        notificationManager.createNotificationChannelGroups(groups)
+        val channels =
+            NotificationChannelSpec.entries.map { spec ->
+                spec.toChannel(
+                    context,
+                    name = labels?.names?.get(spec) ?: applicationLabel,
+                    description = labels?.descriptions?.get(spec).orEmpty(),
+                )
             }
-        notificationManager.createNotificationChannel(channel)
+        notificationManager.createNotificationChannels(channels)
+        channelsReady = labels != null
     }
+
+    /** Whether a post on [spec] would reach the user: app notifications on, and the channel not blocked. */
+    private fun canPost(spec: NotificationChannelSpec): Boolean =
+        NotificationManagerCompat.from(context).areNotificationsEnabled() &&
+            notificationManager.getNotificationChannel(spec.id)?.importance != NotificationManager.IMPORTANCE_NONE
 
     private val serviceNotificationLock = Any()
+    private val lowBatteryLock = Any()
+
+    /** Per node, how many times its low-battery warning was cancelled; guarded by [lowBatteryLock]. */
+    private val lowBatteryCancellations = mutableMapOf<Int, Int>()
     private val applicationLabel: String by lazy {
         context.applicationInfo.loadLabel(context.packageManager).toString().ifBlank { context.packageName }
     }
@@ -386,6 +306,14 @@ class MeshNotificationManagerImpl(
                 }
             }
         }
+        scope.launch {
+            firmwareUpdateStatusRepository.progress.collect { progress ->
+                synchronized(serviceNotificationLock) {
+                    val last = serviceNotificationSnapshots.replayCache.lastOrNull() ?: return@synchronized
+                    serviceNotificationSnapshots.tryEmit(last.copy(firmwareProgress = progress))
+                }
+            }
+        }
     }
 
     /**
@@ -394,6 +322,7 @@ class MeshNotificationManagerImpl(
      * Multiplatform resource loading.
      */
     fun getServiceNotification(): Notification {
+        ensureServiceChannel()
         val cached = synchronized(serviceNotificationLock) { cachedServiceNotification }
         return cached ?: createServiceStateNotification(name = applicationLabel, message = null, nextUpdateAt = 0)
     }
@@ -468,10 +397,20 @@ class MeshNotificationManagerImpl(
             previousMessage = cachedMessage,
             nextUpdateAt = nextStatsUpdateMillis,
             activeOperations = radioOperationLock.activeOperations,
+            firmwareProgress = firmwareUpdateStatusRepository.progress.value,
         )
     }
 
     private suspend fun renderServiceNotification(snapshot: ServiceNotificationSnapshot): RenderedServiceNotification {
+        snapshot.firmwareProgress?.let { progress ->
+            val notification =
+                createFirmwareProgressNotification(
+                    title = getStringSuspend(Res.string.firmware_update_in_progress),
+                    text = progress.message.resolve(),
+                    percent = progress.percent,
+                )
+            return RenderedServiceNotification(notification, message = snapshot.previousMessage)
+        }
         // A held operation outranks the connection state. During a firmware update the device is deliberately
         // deselected, so the state alone would report "Disconnected" over a flash that is running perfectly.
         val title =
@@ -522,7 +461,16 @@ class MeshNotificationManagerImpl(
         channelName: String?,
         isSilent: Boolean,
     ) {
-        showConversationNotification(contactKey, isBroadcast, channelName, conversationName = name, isSilent = isSilent)
+        ensureChannels()
+        val builder =
+            commonBuilder(NotificationChannelSpec.Reactions, createOpenMessageIntent(contactKey))
+                .setContentTitle(name)
+                .setContentText(emoji)
+                .setCategory(Notification.CATEGORY_MESSAGE)
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .setAutoCancel(true)
+        if (isSilent) builder.setSilent(true)
+        notificationManager.notify(TAG_REACTION, contactKey.hashCode(), builder.build())
     }
 
     override suspend fun updateWaypointNotification(
@@ -532,6 +480,7 @@ class MeshNotificationManagerImpl(
         waypointId: Int,
         isSilent: Boolean,
     ) {
+        ensureChannels()
         val notification = createWaypointNotification(name, message, waypointId, isSilent)
         notificationManager.notify(TAG_WAYPOINT, contactKey.hashCode(), notification)
     }
@@ -543,6 +492,7 @@ class MeshNotificationManagerImpl(
         conversationName: String,
         isSilent: Boolean = false,
     ) {
+        ensureChannels()
         // Publish (or refresh) a long-lived conversation shortcut before the notification references it, so Android can
         // rank the notification in the shade's Conversations section and expose it to Android Auto/Wear. A channel name
         // labels a broadcast conversation; a direct message is labelled by the other participant's name.
@@ -606,48 +556,36 @@ class MeshNotificationManagerImpl(
             return
         }
 
-        val ourNode = nodeRepository.value.ourNodeInfo.value
-        val meName = ourNode?.user?.long_name ?: getStringSuspend(Res.string.you)
-        val me =
-            Person.Builder()
-                .setName(meName)
-                .setKey(ourNode?.user?.id ?: NodeAddress.ID_LOCAL)
-                .apply {
-                    ourNode?.let {
-                        setIcon(cachedPersonIcon(it.user.id, it.user.short_name, it.colors.second, it.colors.first))
-                    }
-                }
-                .build()
-
-        val messagingStyle =
-            NotificationCompat.MessagingStyle(me)
-                .setGroupConversation(true)
-                .setConversationTitle(getStringSuspend(Res.string.meshtastic_app_name))
-
-        activeNotifications.forEach { sbn ->
-            // Prefer the child's real MessagingStyle: its latest message carries the actual sender (Person, icon) and
-            // timestamp, so the summary line reads "Hawk Ridge: …" rather than the conversation title.
+        // InboxStyle, not MessagingStyle: the summary has no reply or mark-as-read actions, and Android Auto takes a
+        // MessagingStyle notification for a conversation it can answer.
+        val you = getStringSuspend(Res.string.you)
+        val lines = activeNotifications.mapNotNull { sbn ->
+            // Prefer the child's real MessagingStyle: its latest message carries the actual sender, so the line
+            // reads "Hawk Ridge: …" rather than the conversation title.
             val latest =
                 NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(sbn.notification)
                     ?.messages
                     ?.lastOrNull()
-            if (latest?.text != null) {
-                val senderPerson = latest.person ?: Person.Builder().setName(getStringSuspend(Res.string.you)).build()
-                messagingStyle.addMessage(latest.text, latest.timestamp, senderPerson)
+            val sender = latest?.person?.name ?: latest?.let { you }
+            val text = latest?.text
+            if (sender != null && text != null) {
+                "$sender: $text"
             } else {
-                // Fallback for children without an extractable style: rebuild a generic line from the extras.
                 val senderTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
                 val messageText = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
-                if (senderTitle != null && messageText != null) {
-                    messagingStyle.addMessage(messageText, sbn.postTime, Person.Builder().setName(senderTitle).build())
-                }
+                if (senderTitle != null && messageText != null) "$senderTitle: $messageText" else null
             }
         }
+        val appName = getStringSuspend(Res.string.meshtastic_app_name)
+        val inboxStyle = NotificationCompat.InboxStyle().setBigContentTitle(appName)
+        lines.forEach { inboxStyle.addLine(it) }
 
         val summaryNotification =
-            commonBuilder(NotificationType.DirectMessage)
+            commonBuilder(NotificationChannelSpec.DirectMessages)
                 .setSmallIcon(drawable.meshtastic_ic_notification)
-                .setStyle(messagingStyle)
+                .setContentTitle(appName)
+                .setContentText(lines.lastOrNull())
+                .setStyle(inboxStyle)
                 .setGroup(GROUP_KEY_MESSAGES)
                 .setGroupSummary(true)
                 // Only the child conversation notifications alert; without this the summary (posted on a HIGH channel)
@@ -659,31 +597,131 @@ class MeshNotificationManagerImpl(
         notificationManager.notify(TAG_MESSAGE_SUMMARY, SUMMARY_ID, summaryNotification)
     }
 
-    override fun showAlertNotification(contactKey: String, name: String, alert: String) {
-        val notification = createAlertNotification(contactKey, name, alert)
-        // Use a consistent, unique ID for each alert source.
-        notificationManager.notify(TAG_ALERT, name.hashCode(), notification)
+    override suspend fun showAlertNotification(contactKey: String, name: String, alert: String) {
+        ensureChannels()
+        notificationManager.notify(TAG_ALERT, contactKey.hashCode(), createAlertNotification(contactKey, name, alert))
     }
 
-    override fun showNewNodeSeenNotification(node: Node) {
-        val notification = createNewNodeSeenNotification(node.user.short_name, node.user.long_name, node.num)
-        notificationManager.notify(TAG_NEW_NODE, node.num, notification)
-    }
-
-    override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {
-        val notification = createLowBatteryNotification(node, isRemote)
-        notificationManager.notify(TAG_LOW_BATTERY, node.num, notification)
-    }
-
-    override fun showClientNotification(clientNotification: ClientNotification) {
+    override suspend fun showMeshBeaconNotification(offer: MeshBeaconOffer) {
+        ensureChannels()
+        val title = getStringSuspend(Res.string.mesh_beacon_notification_title)
+        val message = offer.message.ifBlank { getStringSuspend(Res.string.mesh_beacon_notification_body) }
         val notification =
-            createClientNotification(getString(Res.string.client_notification), clientNotification.message)
-        notificationManager.notify(TAG_CLIENT, clientNotification.toString().hashCode(), notification)
+            commonBuilder(NotificationChannelSpec.MeshBeacon, createDeepLinkIntent("discovery", offer.fromNodeNum))
+                .setCategory(Notification.CATEGORY_RECOMMENDATION)
+                .setAutoCancel(true)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .build()
+        notificationManager.notify(TAG_MESH_BEACON, offer.fromNodeNum, notification)
+    }
+
+    override suspend fun showNewNodeSeenNotification(node: Node, title: String) {
+        ensureChannels()
+        notificationManager.notify(TAG_NEW_NODE, node.num, createNewNodeSeenNotification(title, node))
+    }
+
+    override fun cancelNewNodeNotification(nodeNum: Int) = notificationManager.cancel(TAG_NEW_NODE, nodeNum)
+
+    override suspend fun showLowBatteryNotification(node: Node, isRemote: Boolean) =
+        postLowBattery(node, isRemote, onlyIfShowing = false)
+
+    override suspend fun updateLowBatteryNotification(node: Node, isRemote: Boolean) =
+        postLowBattery(node, isRemote, onlyIfShowing = true)
+
+    /**
+     * Recovery cancels from separate work, so a post that was already resolving its text when the battery recovered
+     * must not land afterwards: it notes the node's cancellation count before building and posts only if it is
+     * unchanged.
+     */
+    private suspend fun postLowBattery(node: Node, isRemote: Boolean, onlyIfShowing: Boolean) {
+        val cancellationsBefore = synchronized(lowBatteryLock) { lowBatteryCancellations[node.num] ?: 0 }
+        ensureChannels()
+        val notification = createLowBatteryNotification(node, isRemote)
+        beforeLowBatteryPost?.invoke()
+        synchronized(lowBatteryLock) {
+            if ((lowBatteryCancellations[node.num] ?: 0) != cancellationsBefore) return
+            val showing = notificationManager.activeNotifications.any { it.tag == TAG_LOW_BATTERY && it.id == node.num }
+            if (!onlyIfShowing || showing) notificationManager.notify(TAG_LOW_BATTERY, node.num, notification)
+        }
+    }
+
+    /** Test seam run between building a low-battery notification and posting it, to race a recovery in. */
+    internal var beforeLowBatteryPost: (() -> Unit)? = null
+
+    override suspend fun showClientNotification(
+        clientNotification: ClientNotification,
+        title: String,
+        severity: MeshNotification.Type,
+    ) {
+        ensureChannels()
+        val message = clientNotification.message
+        val warning = severity == MeshNotification.Type.Warning || severity == MeshNotification.Type.Error
+        val notification =
+            commonBuilder(NotificationChannelSpec.Client)
+                .setCategory(if (warning) Notification.CATEGORY_ERROR else Notification.CATEGORY_STATUS)
+                .setAutoCancel(true)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                // The firmware repeats this advisory on every position request; the tray slot is stable across
+                // repeats (see notificationId), so only the first one should sound.
+                .setOnlyAlertOnce(clientNotification.isProtectedPositionAdvisory())
+                .build()
+        notificationManager.notify(TAG_CLIENT, clientNotification.notificationId(), notification)
+    }
+
+    override fun clearClientNotification(clientNotification: ClientNotification) =
+        notificationManager.cancel(TAG_CLIENT, clientNotification.notificationId())
+
+    override fun suppressClientNotificationModal(clientNotification: ClientNotification): Boolean =
+        clientNotification.isProtectedPositionAdvisory()
+
+    override suspend fun showFirmwareUpdateNotification(notice: FirmwareUpdateNotice): Boolean {
+        ensureChannels()
+        if (!canPost(NotificationChannelSpec.DeviceStatus)) return false
+        val message =
+            getStringSuspend(
+                Res.string.firmware_update_notification_android,
+                notice.currentVersion,
+                notice.stableVersion,
+            )
+        val id = notice.notificationKey.hashCode()
+        val notification =
+            commonBuilder(NotificationChannelSpec.DeviceStatus, createDeepLinkIntent("firmware/update", id))
+                .setCategory(Notification.CATEGORY_RECOMMENDATION)
+                .setAutoCancel(true)
+                .setContentTitle(getStringSuspend(Res.string.firmware_update_available))
+                .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .build()
+        notificationManager.notify(TAG_FIRMWARE_UPDATE, id, notification)
+        return true
+    }
+
+    override suspend fun showReconnectBlockedNotification(title: String, message: String): Boolean {
+        ensureChannels()
+        if (!canPost(NotificationChannelSpec.DeviceStatus)) return false
+        val notification =
+            commonBuilder(
+                NotificationChannelSpec.DeviceStatus,
+                createDeepLinkIntent("connections", RECONNECT_BLOCKED_ID),
+            )
+                .setCategory(Notification.CATEGORY_ERROR)
+                .setAutoCancel(true)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .build()
+        notificationManager.notify(TAG_RECONNECT_BLOCKED, RECONNECT_BLOCKED_ID, notification)
+        return true
     }
 
     override suspend fun cancelMessageNotification(contactKey: String) {
         val id = contactKey.hashCode()
         notificationManager.cancel(TAG_MESSAGE, id)
+        notificationManager.cancel(TAG_REACTION, id)
         // Rebuild (or clear) the group summary so it doesn't keep showing the dismissed conversation in Android Auto.
         // Pass the id we just cancelled so a stale activeNotifications snapshot doesn't keep the summary alive.
         showGroupSummary(justCancelledId = id)
@@ -716,18 +754,17 @@ class MeshNotificationManagerImpl(
         showConversationNotification(contactKey, isBroadcast, channelName, conversationName, isSilent = true)
     }
 
-    override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(TAG_LOW_BATTERY, node.num)
-
-    override fun clearClientNotification(notification: ClientNotification) =
-        notificationManager.cancel(TAG_CLIENT, notification.toString().hashCode())
+    override fun cancelLowBatteryNotification(node: Node) = synchronized(lowBatteryLock) {
+        lowBatteryCancellations[node.num] = (lowBatteryCancellations[node.num] ?: 0) + 1
+        notificationManager.cancel(TAG_LOW_BATTERY, node.num)
+    }
 
     // endregion
 
     // region Notification Creation
     private fun createServiceStateNotification(name: String, message: String?, nextUpdateAt: Long?): Notification {
         val builder =
-            commonBuilder(NotificationType.ServiceState)
-                .setPriority(NotificationCompat.PRIORITY_MIN)
+            commonBuilder(NotificationChannelSpec.Service)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .setOngoing(true)
                 // Android 12+ may defer FGS notifications ~10s; show immediately so the user watching a
@@ -753,6 +790,27 @@ class MeshNotificationManagerImpl(
         return builder.build()
     }
 
+    /**
+     * A flash is a start-to-end journey the user may background, so the service notification asks to be promoted to a
+     * Live Update while one runs. The platform grants it only on a channel above MIN and with
+     * POST_PROMOTED_NOTIFICATIONS; elsewhere this is an ordinary ongoing progress notification.
+     */
+    private fun createFirmwareProgressNotification(title: String, text: String, percent: Int?): Notification {
+        val style = NotificationCompat.ProgressStyle().setProgressIndeterminate(percent == null)
+        percent?.let { style.setProgress(it) }
+        return commonBuilder(NotificationChannelSpec.Service)
+            .setCategory(Notification.CATEGORY_PROGRESS)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setStyle(style)
+            .setRequestPromotedOngoing(true)
+            .apply { percent?.let { setShortCriticalText(MetricFormatter.percent(it)) } }
+            .build()
+    }
+
     @Suppress("LongMethod")
     private suspend fun createConversationNotification(
         contactKey: String,
@@ -761,7 +819,7 @@ class MeshNotificationManagerImpl(
         history: List<Message>,
         isSilent: Boolean = false,
     ): Notification {
-        val type = if (isBroadcast) NotificationType.BroadcastMessage else NotificationType.DirectMessage
+        val type = if (isBroadcast) NotificationChannelSpec.Broadcasts else NotificationChannelSpec.DirectMessages
         val builder = commonBuilder(type, createOpenMessageIntent(contactKey))
 
         if (isSilent) {
@@ -813,7 +871,7 @@ class MeshNotificationManagerImpl(
 
             val text =
                 msg.originalMessage?.let { original ->
-                    "↩️ \"${original.node.user.short_name}: ${original.text.take(SNIPPET_LENGTH)}...\": ${msg.text}"
+                    "↩️ \"${original.node.user.short_name}: ${snippet(original.text)}\": ${msg.text}"
                 } ?: msg.text
 
             if (msg.read && (anyUnread || index != lastIndex)) {
@@ -839,17 +897,18 @@ class MeshNotificationManagerImpl(
                         )
                         .build()
                 style.addMessage(
-                    "${reaction.emoji} to \"${msg.text.take(SNIPPET_LENGTH)}...\"",
+                    getStringSuspend(Res.string.notification_reaction_to, reaction.emoji, snippet(msg.text)),
                     reaction.timestamp,
                     reactor,
                 )
             }
         }
         val lastMessage = history.last()
-        // The bubble wears the other party's avatar, not ours — a bubble is recognised by who is in it.
-        val bubbleNode = lastMessage.node
+        // The bubble wears the other party's avatar, not ours — a bubble is recognised by who is in it. After a reply
+        // the newest message is our own, so look back for the newest one someone else sent.
+        val bubbleNode = history.lastOrNull { !it.fromLocal }?.node ?: lastMessage.node
         val bubbleIcon =
-            cachedRoundedPersonIcon(
+            cachedBubblePersonIcon(
                 bubbleNode.user.id,
                 bubbleNode.user.short_name,
                 bubbleNode.colors.second,
@@ -871,6 +930,19 @@ class MeshNotificationManagerImpl(
                     .build(),
             )
             .setBubbleMetadata(createBubbleMetadata(contactKey, bubbleIcon))
+            .apply {
+                // Android Auto shows the large icon as the conversation image; a channel keeps the car's default.
+                if (!isBroadcast) {
+                    val avatar =
+                        cachedPersonIcon(
+                            bubbleNode.user.id,
+                            bubbleNode.user.short_name,
+                            bubbleNode.colors.second,
+                            bubbleNode.colors.first,
+                        )
+                    setLargeIcon(avatar.toIcon(context))
+                }
+            }
             .setAutoCancel(true)
             .setStyle(style)
             .setGroup(GROUP_KEY_MESSAGES)
@@ -879,14 +951,7 @@ class MeshNotificationManagerImpl(
             .setShowWhen(true)
             .addAction(createReplyAction(contactKey))
             .addAction(createMarkAsReadAction(contactKey))
-            .addAction(
-                createReactionAction(
-                    contactKey = contactKey,
-                    packetId = lastMessage.packetId,
-                    toId = lastMessage.node.user.id,
-                    channelIndex = lastMessage.node.channel,
-                ),
-            )
+            .addAction(createReactionAction(contactKey = contactKey, packetId = lastMessage.packetId))
 
         return builder.build()
     }
@@ -897,15 +962,17 @@ class MeshNotificationManagerImpl(
         waypointId: Int,
         isSilent: Boolean,
     ): Notification {
-        val person = Person.Builder().setName(name).build()
-        val style = NotificationCompat.MessagingStyle(person).addMessage(message, nowMillis, person)
-
+        // Not MessagingStyle: only a conversation that can be replied to may look like one to Android Auto.
         val builder =
-            commonBuilder(NotificationType.Waypoint, createOpenWaypointIntent(waypointId))
-                .setCategory(Notification.CATEGORY_MESSAGE)
+            commonBuilder(
+                NotificationChannelSpec.Waypoints,
+                createDeepLinkIntent("map?waypointId=$waypointId", waypointId),
+            )
+                .setCategory(Notification.CATEGORY_STATUS)
                 .setAutoCancel(true)
-                .setStyle(style)
-                .setGroup(GROUP_KEY_MESSAGES)
+                .setContentTitle(name)
+                .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                 .setWhen(nowMillis)
                 .setShowWhen(true)
@@ -917,42 +984,38 @@ class MeshNotificationManagerImpl(
         return builder.build()
     }
 
-    private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {
-        val person = Person.Builder().setName(name).build()
-        val style = NotificationCompat.MessagingStyle(person).addMessage(alert, nowMillis, person)
-
-        return commonBuilder(NotificationType.Alert, createOpenMessageIntent(contactKey))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+    private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification =
+        commonBuilder(NotificationChannelSpec.Alerts, createOpenMessageIntent(contactKey))
             .setCategory(Notification.CATEGORY_ALARM)
             .setAutoCancel(true)
-            .setStyle(style)
+            .setContentTitle(name)
+            .setContentText(alert)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(alert))
+            .build()
+
+    private fun createNewNodeSeenNotification(title: String, node: Node): Notification {
+        val message = node.user.long_name
+        return commonBuilder(NotificationChannelSpec.NewNodes, createOpenNodeDetailIntent(node.num))
+            .setCategory(Notification.CATEGORY_STATUS)
+            .setAutoCancel(true)
+            .setContentTitle(title)
+            .setWhen(nowMillis)
+            .setShowWhen(true)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .build()
     }
 
-    private fun createNewNodeSeenNotification(name: String, message: String, nodeNum: Int): Notification {
-        val title = getString(Res.string.new_node_seen, name)
-        val builder =
-            commonBuilder(NotificationType.NewNode, createOpenNodeDetailIntent(nodeNum))
-                .setCategory(Notification.CATEGORY_STATUS)
-                .setAutoCancel(true)
-                .setContentTitle(title)
-                .setWhen(nowMillis)
-                .setShowWhen(true)
-                .setContentText(message)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-
-        return builder.build()
-    }
-
-    private fun createLowBatteryNotification(node: Node, isRemote: Boolean): Notification {
-        val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
-        val title = getString(Res.string.low_battery_title, node.user.short_name)
+    private suspend fun createLowBatteryNotification(node: Node, isRemote: Boolean): Notification {
+        val type = if (isRemote) NotificationChannelSpec.LowBatteryRemote else NotificationChannelSpec.LowBattery
+        val title = getStringSuspend(Res.string.low_battery_title, node.user.short_name)
         val batteryLevel = node.deviceMetrics.battery_level ?: 0
-        val message = getString(Res.string.low_battery_message, node.user.long_name, batteryLevel)
+        val message = getStringSuspend(Res.string.low_battery_message, node.user.long_name, batteryLevel)
 
+        // Not ongoing: an ongoing notification never bridges to a watch, and recovery cancels this one anyway.
         return commonBuilder(type, createOpenNodeDetailIntent(node.num))
             .setCategory(Notification.CATEGORY_STATUS)
-            .setOngoing(true)
+            .setAutoCancel(true)
             .setOnlyAlertOnce(true)
             .setProgress(MAX_BATTERY_LEVEL, batteryLevel, false)
             .setContentTitle(title)
@@ -963,38 +1026,37 @@ class MeshNotificationManagerImpl(
             .build()
     }
 
-    private fun createClientNotification(name: String, message: String): Notification =
-        commonBuilder(NotificationType.Client)
-            .setCategory(Notification.CATEGORY_ERROR)
-            .setAutoCancel(true)
-            .setContentTitle(name)
-            .setContentText(message)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            .build()
-
     // endregion
 
     // region Helper/Builder Methods
     private val openAppIntent: PendingIntent by lazy {
         val intent =
-            Intent(context, Class.forName("org.meshtastic.app.MainActivity")).apply {
+            Intent(context, Class.forName(MAIN_ACTIVITY_CLASS)).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
         PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
-    private fun createOpenMessageIntent(contactKey: String): PendingIntent {
-        val deepLinkUri = "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri()
+    /**
+     * Opens `meshtastic://meshtastic/[path]` in MainActivity, whose deep-link router synthesizes the backstack. Each
+     * link is its own PendingIntent because the URI takes part in intent equality; [requestCode] only has to be stable.
+     */
+    private fun createDeepLinkIntent(path: String, requestCode: Int): PendingIntent {
         val deepLinkIntent =
-            Intent(Intent.ACTION_VIEW, deepLinkUri, context, Class.forName("org.meshtastic.app.MainActivity")).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            }
-
+            Intent(Intent.ACTION_VIEW, "$DEEP_LINK_BASE_URI/$path".toUri(), context, Class.forName(MAIN_ACTIVITY_CLASS))
+                .apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP }
         return TaskStackBuilder.create(context).run {
             addNextIntentWithParentStack(deepLinkIntent)
-            getPendingIntent(contactKey.hashCode(), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            checkNotNull(
+                getPendingIntent(requestCode, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT),
+            )
         }
     }
+
+    private fun createOpenMessageIntent(contactKey: String) =
+        createDeepLinkIntent("messages/$contactKey", contactKey.hashCode())
+
+    private fun createOpenNodeDetailIntent(nodeNum: Int) = createDeepLinkIntent("nodes/$nodeNum", nodeNum)
 
     /**
      * Bubble target: [org.meshtastic.app.BubbleActivity], not the launcher activity. A bubble's activity must be
@@ -1027,46 +1089,30 @@ class MeshNotificationManagerImpl(
             .build()
     }
 
-    private fun createOpenWaypointIntent(waypointId: Int): PendingIntent {
-        val deepLinkUri = "$DEEP_LINK_BASE_URI/map?waypointId=$waypointId".toUri()
-        val deepLinkIntent =
-            Intent(Intent.ACTION_VIEW, deepLinkUri, context, Class.forName("org.meshtastic.app.MainActivity")).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+    /**
+     * An explicit intent for [ConversationActionService]. The conversation rides in the data URI, which takes part in
+     * PendingIntent identity, so two conversations never share one even if their request codes collide.
+     */
+    private fun conversationActionIntent(action: String, contactKey: String, packetId: Int? = null): Intent {
+        val data =
+            "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri().buildUpon().apply {
+                packetId?.let { appendQueryParameter("packet", it.toString()) }
             }
-
-        return TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(deepLinkIntent)
-            getPendingIntent(waypointId, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        }
-    }
-
-    private fun createOpenNodeDetailIntent(nodeNum: Int): PendingIntent {
-        val deepLinkUri = "$DEEP_LINK_BASE_URI/nodes/$nodeNum".toUri()
-        val deepLinkIntent =
-            Intent(Intent.ACTION_VIEW, deepLinkUri, context, Class.forName("org.meshtastic.app.MainActivity")).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            }
-
-        return TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(deepLinkIntent)
-            getPendingIntent(nodeNum, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        }
+        return Intent(action, data.build(), context, ConversationActionService::class.java)
+            .putExtra(ConversationActionService.EXTRA_CONTACT_KEY, contactKey)
     }
 
     private suspend fun createReplyAction(contactKey: String): NotificationCompat.Action {
         val replyLabel = getStringSuspend(Res.string.reply)
-        val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(replyLabel).build()
+        val remoteInput = RemoteInput.Builder(ConversationActionService.KEY_TEXT_REPLY).setLabel(replyLabel).build()
 
-        val replyIntent =
-            Intent(context, ReplyReceiver::class.java).apply {
-                action = ReplyReceiver.REPLY_ACTION
-                putExtra(ReplyReceiver.CONTACT_KEY, contactKey)
-            }
+        // Mutable so Android Auto and Wear can fill in the RemoteInput text; the intent is explicit, which a mutable
+        // PendingIntent must be.
         val replyPendingIntent =
-            PendingIntent.getBroadcast(
+            PendingIntent.getService(
                 context,
                 contactKey.hashCode(),
-                replyIntent,
+                conversationActionIntent(ConversationActionService.ACTION_REPLY, contactKey),
                 PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
 
@@ -1075,21 +1121,18 @@ class MeshNotificationManagerImpl(
             // Required for Android Auto to drive reply hands-free without opening any UI.
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
             .setShowsUserInterface(false)
+            // Offers Smart Reply suggestions when the notification is bridged to a Wear OS watch.
+            .setAllowGeneratedReplies(true)
             .build()
     }
 
     private suspend fun createMarkAsReadAction(contactKey: String): NotificationCompat.Action {
         val label = getStringSuspend(Res.string.mark_as_read)
-        val intent =
-            Intent(context, MarkAsReadReceiver::class.java).apply {
-                action = MARK_AS_READ_ACTION
-                putExtra(MarkAsReadReceiver.CONTACT_KEY, contactKey)
-            }
         val pendingIntent =
-            PendingIntent.getBroadcast(
+            PendingIntent.getService(
                 context,
                 contactKey.hashCode(),
-                intent,
+                conversationActionIntent(ConversationActionService.ACTION_MARK_AS_READ, contactKey),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
@@ -1100,40 +1143,36 @@ class MeshNotificationManagerImpl(
             .build()
     }
 
-    private fun createReactionAction(
-        contactKey: String,
-        packetId: Int,
-        toId: String,
-        channelIndex: Int,
-    ): NotificationCompat.Action {
-        val label = "👍"
+    private fun createReactionAction(contactKey: String, packetId: Int): NotificationCompat.Action {
+        val label = THUMBS_UP
         val intent =
-            Intent(context, ReactionReceiver::class.java).apply {
-                action = REACT_ACTION
-                putExtra(ReactionReceiver.EXTRA_CONTACT_KEY, contactKey)
-                putExtra(ReactionReceiver.EXTRA_REPLY_ID, packetId)
-                putExtra(ReactionReceiver.EXTRA_TO_ID, toId)
-                putExtra(ReactionReceiver.EXTRA_CHANNEL_INDEX, channelIndex)
-                putExtra(ReactionReceiver.EXTRA_EMOJI, "👍")
-            }
+            conversationActionIntent(ConversationActionService.ACTION_REACT, contactKey, packetId)
+                .putExtra(ConversationActionService.EXTRA_REPLY_ID, packetId)
+                .putExtra(ConversationActionService.EXTRA_EMOJI, THUMBS_UP)
         val pendingIntent =
-            PendingIntent.getBroadcast(
+            PendingIntent.getService(
                 context,
                 packetId,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
-        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_add, label, pendingIntent).build()
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_add, label, pendingIntent)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_THUMBS_UP)
+            .setShowsUserInterface(false)
+            .build()
     }
 
+    private fun snippet(text: String): String =
+        if (text.length > SNIPPET_LENGTH) text.take(SNIPPET_LENGTH).trimEnd() + "…" else text
+
     private fun commonBuilder(
-        type: NotificationType,
+        type: NotificationChannelSpec,
         contentIntent: PendingIntent? = null,
     ): NotificationCompat.Builder {
         val smallIcon = drawable.meshtastic_ic_notification
 
-        return NotificationCompat.Builder(context, type.channelId)
+        return NotificationCompat.Builder(context, type.id)
             .setSmallIcon(smallIcon)
             .setColor(NOTIFICATION_COLOR)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -1154,7 +1193,8 @@ class MeshNotificationManagerImpl(
             }
         }
         parts.add(BULLET + getStringSuspend(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
-        parts.add(BULLET + getStringSuspend(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
+        val uptime = formatDurationSuspend(uptime_seconds.toLong())
+        parts.add(BULLET + getStringSuspend(Res.string.local_stats_uptime, uptime))
         parts.add(
             BULLET +
                 getStringSuspend(
@@ -1205,7 +1245,9 @@ class MeshNotificationManagerImpl(
     private suspend fun DeviceMetrics.formatToStringSuspend(): String {
         val parts = mutableListOf<String>()
         battery_level?.let { parts.add(BULLET + getStringSuspend(Res.string.local_stats_battery, it)) }
-        uptime_seconds?.let { parts.add(BULLET + getStringSuspend(Res.string.local_stats_uptime, formatUptime(it))) }
+        uptime_seconds?.let {
+            parts.add(BULLET + getStringSuspend(Res.string.local_stats_uptime, formatDurationSuspend(it.toLong())))
+        }
         if (channel_utilization != null || air_util_tx != null) {
             parts.add(
                 BULLET +

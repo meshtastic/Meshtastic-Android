@@ -40,6 +40,3 @@ class FakeLocationRepository : LocationRepository {
         _locations.emit(location)
     }
 }
-
-/** Platform-specific factory for creating [Location] objects in tests. */
-expect fun createLocation(latitude: Double, longitude: Double, altitude: Double = 0.0): Location

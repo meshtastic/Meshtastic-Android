@@ -65,8 +65,11 @@ class MeshConfigHandlerImpl(
     private fun runForSession(session: RadioSessionContext, block: () -> Unit): Boolean =
         radioInterfaceService.runIfSessionActive(session, block)
 
-    private suspend fun runWhileForSession(session: RadioSessionContext, block: suspend () -> Unit): Boolean =
-        radioInterfaceService.runWhileSessionActive(session, block)
+    private suspend fun runWhileForSession(
+        session: RadioSessionContext,
+        label: String,
+        block: suspend () -> Unit,
+    ): Boolean = radioInterfaceService.runWhileSessionActive(session, label, block)
 
     override fun handleDeviceConfig(config: Config, session: RadioSessionContext): Boolean {
         val admitted =
@@ -76,7 +79,9 @@ class MeshConfigHandlerImpl(
                 connectionManager.value.onHandshakeProgress()
             }
         if (admitted) {
-            launchPersistenceForSession(session) { radioConfigRepository.setLocalConfig(config) }
+            launchPersistenceForSession(session, "config ${config.summarize()} persist") {
+                radioConfigRepository.setLocalConfig(config)
+            }
         }
         if (!admitted) Logger.d { "Discarding device config from stale transport session" }
         return admitted
@@ -95,7 +100,7 @@ class MeshConfigHandlerImpl(
                 connectionManager.value.onHandshakeProgress()
             }
         if (admitted) {
-            launchPersistenceForSession(session) {
+            launchPersistenceForSession(session, "moduleConfig ${config.summarize()} persist") {
                 radioConfigRepository.setLocalModuleConfig(config)
                 statusUpdate?.let { (nodeNum, status) ->
                     try {
@@ -127,7 +132,9 @@ class MeshConfigHandlerImpl(
             }
         if (admitted) {
             // We always want to save channel settings we receive from the radio.
-            launchPersistenceForSession(session) { radioConfigRepository.updateChannelSettings(channel) }
+            launchPersistenceForSession(session, "channel persist") {
+                radioConfigRepository.updateChannelSettings(channel)
+            }
         }
         if (!admitted) Logger.d { "Discarding channel config from stale transport session" }
         return admitted
@@ -143,7 +150,9 @@ class MeshConfigHandlerImpl(
                 connectionManager.value.onHandshakeProgress()
             }
         if (admitted) {
-            launchPersistenceForSession(session) { radioConfigRepository.setDeviceUIConfig(config) }
+            launchPersistenceForSession(session, "deviceuiConfig persist") {
+                radioConfigRepository.setDeviceUIConfig(config)
+            }
         }
         if (!admitted) Logger.d { "Discarding DeviceUI config from stale transport session" }
         return admitted
@@ -156,7 +165,9 @@ class MeshConfigHandlerImpl(
                 connectionManager.value.onHandshakeProgress()
             }
         if (admitted) {
-            launchPersistenceForSession(session) { radioConfigRepository.setLoraRegionPresetMap(map) }
+            launchPersistenceForSession(session, "region_presets persist") {
+                radioConfigRepository.setLoraRegionPresetMap(map)
+            }
         }
         if (!admitted) Logger.d { "Discarding region presets from stale transport session" }
         return admitted
@@ -166,13 +177,13 @@ class MeshConfigHandlerImpl(
      * Queues handshake persistence on the serialized session-operation lane before the FIFO consumer admits the next
      * packet.
      */
-    private fun launchPersistenceForSession(session: RadioSessionContext, block: suspend () -> Unit) {
-        scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) { runWhileForSession(session, block) }
+    private fun launchPersistenceForSession(session: RadioSessionContext, label: String, block: suspend () -> Unit) {
+        scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) { runWhileForSession(session, label, block) }
     }
 }
 
 /** Returns a short summary of which Config variant is set. */
-private fun Config.summarize(): String = when {
+internal fun Config.summarize(): String = when {
     device != null -> "device"
     position != null -> "position"
     power != null -> "power"
@@ -181,12 +192,14 @@ private fun Config.summarize(): String = when {
     lora != null -> "lora"
     bluetooth != null -> "bluetooth"
     security != null -> "security"
+    sessionkey != null -> "sessionkey"
+    device_ui != null -> "device_ui"
     else -> "unknown"
 }
 
 /** Returns a short summary of which ModuleConfig variant is set. */
 @Suppress("CyclomaticComplexMethod")
-private fun ModuleConfig.summarize(): String = when {
+internal fun ModuleConfig.summarize(): String = when {
     mqtt != null -> "mqtt"
     serial != null -> "serial"
     external_notification != null -> "external_notification"
@@ -201,6 +214,8 @@ private fun ModuleConfig.summarize(): String = when {
     detection_sensor != null -> "detection_sensor"
     paxcounter != null -> "paxcounter"
     statusmessage != null -> "statusmessage"
+    traffic_management != null -> "traffic_management"
     tak != null -> "tak"
+    mesh_beacon != null -> "mesh_beacon"
     else -> "unknown"
 }

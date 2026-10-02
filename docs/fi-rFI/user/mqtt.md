@@ -1,8 +1,7 @@
 ---
 title: MQTT
-parent: Käyttöopas
 nav_order: 11
-last_updated: 2026-09-11
+last_updated: 2026-09-19
 description: Siltaa mesh-verkko internetiin — MQTT-välityspalvelimen käyttöönotto, salauskerrokset ja karttadatan välitys.
 aliases:
   - mqtt
@@ -49,31 +48,29 @@ Internet-yhteydellä varustettu yhdyskäytäväradio (WiFi tai Ethernet) julkais
 | **JSON output enabled**     | Julkaise ja vastaanota myös `/2/json/`-aihetta. Merkitty protobuf-rakenteessa vanhentuneeksi, mutta tämä on edelleen ainoa asetus tähän toimintaan — ja sovelluksen oma välityspalvelin käyttää sitä | Ei käytössä                                                             |
 | **TLS enabled**             | Yhteyden suojaaminen välityspalvelimeen                                                                                                                                                                              | Ei käytössä                                                             |
 | **Map reporting**           | Sijainnin julkaisu julkiselle kartalle                                                                                                                                                                               | Ei käytössä                                                             |
-| **Proxy to client enabled** | Relay MQTT through the connected phone                                                                                                                                                                               | Ei käytössä                                                             |
+| **Proxy to client enabled** | Relay MQTT through the connected app                                                                                                                                                                                 | Ei käytössä                                                             |
 
 ### Yhteyden tila ja testaa yhteys
 
-The top of the MQTT settings screen shows the status of the relay this phone runs —
+The top of the MQTT settings screen shows the status of the relay this app runs:
 **Connected**, **Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**. It reads
-**Inactive** whenever the phone is not relaying, which includes the normal case of a radio
+**Inactive** whenever the app is not relaying, which includes the normal case of a radio
 reaching the broker over its own Wi-Fi or Ethernet. The radio's own connection to the broker is
 not reported here.
 
 **Testaa yhteys** tarkistaa välityspalvelimen ennen asetusten tallentamista radioon ja erottaa eri virhetilanteet: palvelinnimen selvitys epäonnistui, TCP-yhteys hylättiin, TLS epäonnistui, yritys aikakatkaistiin tai välityspalvelin hylkäsi tunnistetietosi syyn kera.
 
-### MQTT-välityspalvelin tässä puhelimessa
+### MQTT Proxy in This App
 
-Jos radiollasi ei ole omaa internetyhteyttä, se voi käyttää yhdistettyä puhelinta MQTT-yhdyskäytävänään: ota moduulin asetuksista käyttöön **MQTT** ja **Välityspalvelin käytössä**, jolloin sovellus välittää MQTT-liikenteen radion ja välityspalvelimen välillä puhelimesi internetyhteyden kautta.
+If your radio has no internet access of its own, it can use the app as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's or computer's internet connection.
 
-> ℹ️ **Huomautus:** MQTT-välitys toimii vain mobiilisovelluksessa. Työpöytäsovelluksessa MQTT-asetukset ovat käytettävissä, mutta niiden taustalla ei ole välityspalvelua.
-
-MQTT-asetusten yläreunassa oleva **MQTT-välityspalvelin tällä puhelimella** -kytkin näyttää, onko tämä välitys käytössä, ja sen avulla voit pysäyttää sen (tai käynnistää sen uudelleen) heti ilman, että radion MQTT-asetuksia tarvitsee muokata tai tallentaa uudelleen.
+The **MQTT proxy in this app** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately, without editing and re-saving the radio's MQTT configuration.
 
 ### Oletus Meshtastic-välityspalvelin
 
 Yhteisö ylläpitää julkista välityspalvelinta osoitteessa `mqtt.meshtastic.org`. Tämä on tarkoitettu yleiseen käyttöön ja testaukseen.
 
-When this phone relays MQTT for the radio, connections to that broker always use TLS on port 8883 even if **TLS enabled** is off — the app forces the switch on and grays it out. A radio that reaches the broker over its own Wi-Fi or Ethernet forces nothing: turn **TLS enabled** on yourself, or it connects in the clear on port 1883. For any other broker the toggle decides in both cases (port 8883 with TLS, 1883 without).
+When this app relays MQTT for the radio, connections to that broker always use TLS on port 8883 even if **TLS enabled** is off. That upgrade is the app's own, and the switch says so. A radio that reaches the broker over its own Wi-Fi or Ethernet forces nothing: it uses **TLS enabled** as stored, so turn it on yourself or the radio connects in the clear on port 1883. For any other broker the toggle decides in both cases (port 8883 with TLS, 1883 without).
 
 > 🔒 **Tietosuoja:** Julkisen välityspalvelimen viestit ovat kaikkien tilaajien luettavissa. Käytä aina kanavasalausta yksityiseen viestintään.
 
@@ -91,7 +88,7 @@ Määritä radiosi osoittamaan omaan välityspalvelimeesi oikeilla tunnistetiedo
 
 When **Map reporting** is on, your node periodically publishes a map report to the broker. The report goes out unencrypted, whatever keys your channels use, and carries your node id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset, and primary channel name.
 
-Turning it on opens a consent card. Turn on **I agree.** and choose a **Map reporting interval (seconds)** of one hour or more — the screen will not save until you do. A slider sets the position precision, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
+Turning it on opens a consent card. Turn on **I agree.** and choose a **Map Publish Interval** of one hour or more — the screen will not save until you do. A slider sets the position precision, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
 
 Reports appear at [meshmap.net](https://meshmap.net) and similar community map services.
 

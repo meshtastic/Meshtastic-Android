@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Laige</string>
+    <string name="a11y_temperature">Teocht</string>
     <string name="about">Maidir le</string>
     <string name="accept">Glac</string>
     <!-- ACTION -->
@@ -27,7 +29,6 @@
     <string name="administration">Rialachas</string>
     <!-- AIR -->
     <string name="air_util_definition">Céatadán de na hamaitear úsáideach atá in úsáid laistigh de uair an chloig atá caite.</string>
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Nuashonrú feidhmchláir riachtanach</string>
     <string name="apply">Cuir i bhfeidhm</string>
@@ -35,7 +36,6 @@
     <string name="aqi_good">Maith</string>
     <string name="are_you_sure_change_default">An bhfuil tú cinnte gur mhaith leat an cainéal réamhshocraithe a athrú?</string>
     <string name="bad">Go dona</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Cúis leictreachais</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Á ríomh…</string>
@@ -46,7 +46,6 @@
     <string name="ch_util_definition">Úsáid na cainéil reatha, lena n-áirítear TX ceartaithe, RX agus RX mícheart (anáilís ar na fuaimeanna).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Tá an URL Cainéil seo neamhdhleathach agus ní féidir é a úsáid</string>
-    <string name="channel_label">Cainéal</string>
     <string name="channel_name">Ainm Cainéal</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Roghnaigh téama</string>
@@ -80,17 +79,15 @@
     <string name="disconnected">Na ceangailte</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Direach</string>
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Sáth</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Cuir in eagar</string>
     <string name="eight_hours">8 Uair an chloig</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Mícomhoiriúnacht na heochrach phoiblí</string>
     <string name="encryption_pkc">Cóid Poiblí Eochair</string>
-    <!-- ENVIRONMENT -->
     <string name="error">Earráid</string>
     <string name="error_duty_cycle">Teorainn na Ciorcad Oibre bainte. Ní féidir teachtaireachtaí a sheoladh faoi láthair, déan iarracht arís níos déanaí.</string>
     <!-- EXPORT -->
@@ -105,11 +102,9 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Maith</string>
-    <!-- GPIO -->
     <string name="hops_away">Céimeanna uaidh</string>
     <string name="iaq">QAÍ (Cáilíocht Aeir Inmheánach)</string>
     <string name="iaq_definition">(Cáilíocht Aeir Inmheánach) scála ábhartha den luach QAÍ a thomhas ag Bosch BME680. Scála Luach 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignóra</string>
     <string name="ignore_add">Cuir ‘%1$s’ leis an liosta ignorálacha?</string>
     <string name="ignore_remove">Bain ‘%1$s’ ón liosta ignorálacha?</string>
@@ -130,7 +125,6 @@
     <!-- LOG -->
     <string name="logs">Lógáil</string>
     <!-- MAP -->
-    <string name="map_cache_info">Cumas an Cásla: %1$d MB\nÚsáid an Cásla: %2$d MB</string>
     <string name="map_cache_manager">Bainisteoir Cásla</string>
     <string name="map_cache_size">Méid na Cásla Reatha</string>
     <string name="map_cache_tiles">%1$d tíleanna</string>
@@ -188,19 +182,19 @@
     <string name="none">Ní aon (diúscairt)</string>
     <string name="none_quality">Ní dhéanfaidh sé</string>
     <string name="not_connected">Ní ceangailte</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Ceadaigh</string>
     <!-- ONE -->
     <string name="one_day">24 Uair an chloig</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
+    <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Teanga</string>
     <string name="preferences_system_default">Réamhshocrú córas</string>
     <!-- PREVIEW -->
@@ -214,13 +208,6 @@
     <string name="quick_chat_new">Comhrá tapa nua</string>
     <string name="radio_configuration">Cumraíocht raidió</string>
     <string name="reboot">Athmhaoinigh</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Athsheoladh aon teachtaireacht i ndáiríre má bhí sí oiriúnach le do cheist go léannais foghlamhrúcháin.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Ceim misniúla thosaí go lucht shnaithte!</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Cuireann sé bac ar phacáistí ó phortníomhaíochtaí neamhchaighdeánacha mar: TAK, RangeTest, PaxCounter, srl. Ní athdháileann ach pacáistí le portníomhaíochtaí caighdeánacha: NodeInfo, Text, Position, Telemetry, agus Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Cuireann sé bac ar theachtaireachtaí a fhaightear ó mhóilíní seachtracha cosúil le LOCAL ONLY, ach téann sé céim níos faide trí theachtaireachtaí ó nóid nach bhfuil sa liosta aitheanta ag an nóid a chosc freisin.</string>
-    <string name="rebroadcast_mode_none_desc">Ceadaítear é seo ach amháin do na róil SENSOR, TRACKER agus TAK_TRACKER, agus cuirfidh sé bac ar gach athdháileadh, cosúil leis an róil CLIENT_MUTE.</string>
-    <string name="region_frequency_plan">Réigiún</string>
     <!-- REMOTE -->
     <string name="remote_admin">Rialú iargúlta</string>
     <!-- REMOVE -->
@@ -233,23 +220,12 @@
     <string name="reset">Athshocraigh</string>
     <string name="reset_to_defaults">Athshocrú go dtí na réamhshocruithe</string>
     <!-- ROLE -->
-    <string name="role_client_desc">Feiste nascaithe nó feiste teachtaireachtaí standálaí.</string>
-    <string name="role_client_hidden_desc">Feiste a seolann ach nuair is gá, chun éalú nó do chumas cothromóige.</string>
-    <string name="role_client_mute_desc">Feiste nach dtarchuir pacáistí ó ghléasanna eile.</string>
-    <string name="role_repeater_desc">Ceannaire infreastruchtúrtha chun clúdach líonra a leathnú trí theachtaireachtaí a athsheoladh le níos lú romha.</string>
-    <string name="role_router_client_desc">Comhcheangail de dhá ról ROUTER agus CLIENT. Ní do ghléasanna soghluaiste.</string>
-    <string name="role_router_desc">Ceannaire infreastruchtúrtha chun clúdach líonra a leathnú trí theachtaireachtaí a athsheoladh. Infheicthe i liosta na nóid.</string>
-    <string name="role_sensor_desc">Bíonn sé ag seoladh pacáistí teiliméadair mar thosaíocht.</string>
-    <string name="role_tak_desc">Optamaithe le haghaidh cumarsáide ATAK, laghdaíonn sé cainéil seirbhíse beacht.</string>
-    <string name="role_tak_tracker_desc">Ceadaíonn fadhb beathú do bhoganna PLI i sórtú  PLI i feidhm reatha.</string>
-    <string name="role_tracker_desc">Bíonn sé ag seoladh pacáistí suíomh GPS mar thosaíocht.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Fáilte atá faighte le haghaidh niúúáil</string>
     <string name="routing_error_no_route">Gan route</string>
     <string name="routing_error_none">Faighte</string>
     <string name="routing_error_timeout">Am tráth</string>
     <string name="rssi_definition">Táscaire Cumhachta Athnuachana Aithint an Aoise, tomhas a úsáidtear chun leibhéal cumhachta atá faighte ag an antsnáithe a mheas. Léiríonn RSSI níos airde gnóthachtáil níos laige atá i gceangal seasmhach agus níos láidre.</string>
-    <!-- SAVE -->
     <string name="save">Sábháil</string>
     <string name="save_changes">Sábháil</string>
     <!-- SCAN -->
@@ -257,7 +233,6 @@
     <!-- SECURITY -->
     <string name="select_all">Roghnaigh go léir</string>
     <string name="send">Seol</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Roinn</string>
     <!-- SHOW -->
@@ -296,7 +271,6 @@
     <string name="unknown_username">Ainm Úsáideora Anaithnid</string>
     <string name="unrecognized">Neamh-aithnidiúil</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">trí MQTT</string>
     <string name="waypoint_delete">Scrios an pointe bealach?</string>

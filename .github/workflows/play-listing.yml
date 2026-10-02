@@ -1,10 +1,11 @@
 name: Play Store Listing
 
 # Uploads fastlane/metadata/android - every locale's title, descriptions,
-# feature graphic, icon and screenshots - to the Google Play listing. Manual
-# only: a listing commit is a Play submission, and a submission sent for review
-# cancels and restarts any release review in flight. Nothing here touches a
-# build or a track.
+# feature graphic, icon and screenshots - to the Google Play listing from the
+# committed tree. Every promotion does this from the tag (promote.yml), so this
+# is the hand path for a listing change between releases. A listing commit is a
+# Play submission, and a submission sent for review cancels and restarts any
+# release review in flight. Nothing here touches a build or a track.
 #
 # The default is a dry run. Play validates the whole edit (unknown locales,
 # overlength text, bad image dimensions) and discards it; tick `publish` to
@@ -43,13 +44,14 @@ jobs:
         run: python3 scripts/check-store-metadata.py
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
+        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
         with:
-          ruby-version: '4.0.7'
           bundler-cache: true
 
       - name: Decode Play Store credentials
-        run: echo '${{ secrets.GOOGLE_PLAY_JSON_KEY }}' > fastlane/play-store-credentials.json
+        env:
+          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+        run: printf '%s\n' "$GOOGLE_PLAY_JSON_KEY" > fastlane/play-store-credentials.json
 
       - name: Upload listing
         env:

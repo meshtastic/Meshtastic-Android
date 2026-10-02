@@ -18,18 +18,15 @@
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
+    // No withHostTest: commonTest holds Compose UI tests, which NPE on the host-test stubs' null Build.FINGERPRINT.
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
-            implementation(projects.core.data)
-            implementation(projects.core.database)
-            implementation(projects.core.domain)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
-            implementation(projects.core.prefs)
             implementation(libs.meshtastic.protobufs)
+            implementation(projects.core.repository)
             implementation(projects.core.resources)
-            implementation(projects.core.service)
             implementation(projects.core.ui)
 
             implementation(libs.androidx.paging.common)

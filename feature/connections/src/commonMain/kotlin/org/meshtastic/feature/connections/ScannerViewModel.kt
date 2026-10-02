@@ -51,6 +51,7 @@ import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.RadioController
@@ -125,6 +126,9 @@ private fun untranslatedScanStartFailureMessage(reason: BleScanStartFailureReaso
         -> BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK
     }
 
+private fun isBleAddress(address: String?): Boolean =
+    address?.firstOrNull().let { it == InterfaceId.BLUETOOTH.id || it == '!' }
+
 private fun Duration.roundedUpWholeSeconds(): Long {
     val completeSeconds = inWholeSeconds
     return completeSeconds + if (this > completeSeconds.seconds) 1 else 0
@@ -150,6 +154,10 @@ open class ScannerViewModel(
     private val uiPrefs: UiPrefs,
     private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
     private val bleScanner: BleScanner? = null,
+    /** False on hardware with no Bluetooth LE: the BLE pane is hidden and never selected or scanned. */
+    val bluetoothSupported: Boolean = true,
+    /** False on hardware with no USB host: the USB pane is hidden and never selected. */
+    val usbSupported: Boolean = true,
 ) : ViewModel() {
 
     // ── Mock / demo transport ─────────────────────────────────────────────────────────────────
@@ -331,6 +339,10 @@ open class ScannerViewModel(
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow.map { it.usbDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
 
+    /** Demo Mode entries, listed under whichever transport pane is showing. */
+    val virtualDevicesForUi: StateFlow<List<DeviceListEntry>> =
+        discoveredDevicesFlow.map { it.virtualDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
+
     /** Discovered (NSD) TCP devices for the Connections device list, gated by the network-scan flag. */
     val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow.map { it.discoveredTcpDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
@@ -348,8 +360,28 @@ open class ScannerViewModel(
 
     // ── Current selection ────────────────────────────────────────────────────────────────────
 
-    /** The currently-selected device address, or `null` when nothing is selected. */
-    val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
+    /**
+     * The currently-selected device address, or `null` when nothing is selected. A BLE address on hardware without
+     * Bluetooth LE, or a serial address on hardware without USB host, reads as `null`: the radio service keeps it saved
+     * but it can never connect.
+     */
+    val selectedAddressFlow: StateFlow<String?> =
+        if (bluetoothSupported && usbSupported) {
+            radioInterfaceService.currentDeviceAddressFlow
+        } else {
+            // Eager so the auto-scan checks that read `.value` see the masked address without a subscriber.
+            radioInterfaceService.currentDeviceAddressFlow
+                .map { it.takeUnless(::isUnsupportedAddress) }
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue =
+                    radioInterfaceService.currentDeviceAddressFlow.value.takeUnless(::isUnsupportedAddress),
+                )
+        }
+
+    private fun isUnsupportedAddress(address: String?): Boolean = (!bluetoothSupported && isBleAddress(address)) ||
+        (!usbSupported && address?.firstOrNull() == InterfaceId.SERIAL.id)
 
     /** The persisted device name from the last selection, for use as a UI fallback. */
     val persistedDeviceName: StateFlow<String?> = radioPrefs.devName
@@ -364,25 +396,34 @@ open class ScannerViewModel(
 
     /** The single transport pane currently rendered by the Connections screen. */
     val activeTransport: StateFlow<DeviceType> =
-        combine(uiPrefs.selectedConnectionTransport, selectedAddressFlow) { preferred, selectedAddress ->
-            resolveActiveTransport(preferred, selectedAddress)
-        }
+        // The unmasked address, so a restored serial address still resolves to Network rather than the BLE default.
+        combine(
+            uiPrefs.selectedConnectionTransport,
+            radioInterfaceService.currentDeviceAddressFlow,
+            ::resolveActiveTransport,
+        )
             .distinctUntilChanged()
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Eagerly,
                 initialValue =
-                resolveActiveTransport(uiPrefs.selectedConnectionTransport.value, selectedAddressFlow.value),
+                resolveActiveTransport(
+                    uiPrefs.selectedConnectionTransport.value,
+                    radioInterfaceService.currentDeviceAddressFlow.value,
+                ),
             )
 
     /** Selects one Connections transport pane and stops scans that cannot belong to that pane. */
     fun selectTransport(type: DeviceType) {
+        if (type == DeviceType.BLE && !bluetoothSupported) return
+        if (type == DeviceType.USB && !usbSupported) return
         when (type) {
             DeviceType.BLE -> stopNetworkScan()
             DeviceType.TCP -> stopBleScan()
             DeviceType.USB -> stopAllScans()
         }
-        if (activeTransport.value != type) uiPrefs.setSelectedConnectionTransport(type)
+        // Compared with the preference, not the pane: a fallback pane is shown without being persisted.
+        if (uiPrefs.selectedConnectionTransport.value != type) uiPrefs.setSelectedConnectionTransport(type)
     }
 
     // ── Scan commands ────────────────────────────────────────────────────────────────────────
@@ -395,7 +436,9 @@ open class ScannerViewModel(
      * prior scan cannot reset the flag on this new scan's state.
      */
     fun startBleScan() {
-        if (_isBleScanning.value || bleScanner == null || scanStartFailureCooldownActive.value) return
+        if (_isBleScanning.value || bleScanner == null || !bluetoothSupported || scanStartFailureCooldownActive.value) {
+            return
+        }
         // Cancel the other scan first so only one flag is ever true. Both stop methods are idempotent.
         stopNetworkScan()
 
@@ -759,8 +802,15 @@ open class ScannerViewModel(
         }
     }
 
-    private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType =
-        preferred ?: selectedAddress?.let(DeviceType::fromAddress) ?: DeviceType.BLE
+    private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType {
+        // A persisted pane or a restored address can still name a transport this hardware lacks; Network always works.
+        val resolved = preferred ?: selectedAddress?.let(DeviceType::fromAddress) ?: DeviceType.BLE
+        return when {
+            resolved == DeviceType.BLE && !bluetoothSupported -> DeviceType.TCP
+            resolved == DeviceType.USB && !usbSupported -> DeviceType.TCP
+            else -> resolved
+        }
+    }
 
     private fun recordSelectedTransport(fullAddress: String) {
         DeviceType.fromAddress(fullAddress)?.let(uiPrefs::setSelectedConnectionTransport)

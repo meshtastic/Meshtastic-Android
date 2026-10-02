@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues/>
+  <CurrentIssues>
+    <ID>UseOrEmpty:KableBleConnection.kt:KableBleService$peripheral.services.value ?.find { it.serviceUuid == serviceUuid } ?.characteristics ?.map { it.characteristicUuid } ?: emptyList()</ID>
+  </CurrentIssues>
 </SmellBaseline>

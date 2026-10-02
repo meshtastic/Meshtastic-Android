@@ -37,7 +37,6 @@ import kotlin.test.assertNull
  * [MeshPacket.fullRouteDiscovery] prepends the destination and appends the source to produce the full route. For
  * `route_back` to be wrapped with endpoints, `hop_start > 0` and `snr_back` must be non-empty.
  */
-@Suppress("MagicNumber")
 class TracerouteChartTest {
 
     companion object {

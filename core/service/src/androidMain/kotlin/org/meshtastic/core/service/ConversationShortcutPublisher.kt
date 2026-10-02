@@ -31,7 +31,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -44,7 +43,6 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.proto.ChannelSet
@@ -133,7 +131,7 @@ class ConversationShortcutPublisher(
         observeJob = null
     }
 
-    private fun publishShortcuts(conversations: List<Conversation>) {
+    private suspend fun publishShortcuts(conversations: List<Conversation>) {
         val limit = ShortcutManagerCompat.getMaxShortcutCountPerActivity(context)
         // rank == list position, so the most recent conversation is rank 0 and shown first.
         val shortcuts =
@@ -166,28 +164,26 @@ class ConversationShortcutPublisher(
         }
     }
 
-    private fun buildDmShortcut(dm: Conversation.Dm, rank: Int): ShortcutInfoCompat? {
+    private suspend fun buildDmShortcut(dm: Conversation.Dm, rank: Int): ShortcutInfoCompat? {
         val node = nodeRepository.nodeDBbyNum.value.values.find { it.user.id == dm.userId }
-        // shortLabel is the compact 4-char short name; longLabel the full node name. Fall back to a localized generic
-        // name when node metadata is missing: the raw contactKey is a user-traceable identifier and must stay confined
-        // to internal ids and deep-link metadata (privacy-first convention).
+        // Android Auto and the shade title a conversation by its shortLabel, so both labels carry the full node name
+        // and the short name goes on the avatar. Fall back to a localized generic name when node metadata is missing:
+        // the raw contactKey is a user-traceable identifier and must stay confined to internal ids and deep-link
+        // metadata (privacy-first convention).
         val shortName = node?.user?.short_name?.takeIf { it.isNotBlank() }
         val longName = node?.user?.long_name?.takeIf { it.isNotBlank() }
-        val fallbackName by lazy { getString(Res.string.unknown_username) }
-        val shortLabel = shortName ?: longName ?: fallbackName
-        val longLabel = longName ?: shortName ?: fallbackName
+        val label = longName ?: shortName ?: getStringSuspend(Res.string.unknown_username)
 
         // A node-colored pill avatar showing the short name identifies the person and matches the in-app node chip.
         // Set it on the shortcut itself (not just the Person) so launchers/Android Auto render it instead of a generic
         // head silhouette.
-        val icon =
-            node?.let {
-                val (foregroundColor, backgroundColor) = nodeColorsFromNum(it.num)
-                PersonIconFactory.createLabel(shortLabel, backgroundColor, foregroundColor, rounded = false)
-            }
+        val icon = node?.let {
+            val (foregroundColor, backgroundColor) = nodeColorsFromNum(it.num)
+            PersonIconFactory.createLabel(shortName ?: label, backgroundColor, foregroundColor, rounded = false)
+        }
         val person =
             Person.Builder()
-                .setName(longLabel)
+                .setName(label)
                 .setKey(dm.contactKey)
                 // Favorite nodes feed the system's conversation-priority ranking.
                 .setImportant(node?.isFavorite == true)
@@ -195,8 +191,8 @@ class ConversationShortcutPublisher(
                 .build()
 
         return ShortcutInfoCompat.Builder(context, dm.contactKey)
-            .setShortLabel(shortLabel)
-            .setLongLabel(longLabel)
+            .setShortLabel(label)
+            .setLongLabel(label)
             .setRank(rank)
             .setLocusId(LocusIdCompat(dm.contactKey))
             .setPerson(person)

@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.handledLaunch
@@ -39,7 +40,6 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.FromRadio
-import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.Neighbor
@@ -54,7 +54,6 @@ import org.meshtastic.proto.ToRadio
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Channel as ProtoChannel
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
-import org.meshtastic.proto.Position as ProtoPosition
 
 private val defaultLoRaConfig =
     Config.LoRaConfig.Builder()
@@ -98,6 +97,9 @@ class MockRadioTransport(
     private val scope: CoroutineScope,
     val address: String,
 ) : RadioTransport {
+
+    /** The mesh this transport plays, picked by the address suffix; see [MockScenario.forAddress]. */
+    private val scenario = MockScenario.forAddress(address)
 
     /**
      * Hands out packet ids.
@@ -167,7 +169,7 @@ class MockRadioTransport(
             }
 
             data != null && data.portnum == PortNum.TEXT_MESSAGE_APP -> {
-                if (packet?.want_ack == true) sendFakeAck(pr)
+                if (packet.want_ack) sendFakeAck(pr)
                 sendSimulatedReply(packet)
             }
 
@@ -219,7 +221,7 @@ class MockRadioTransport(
                                     .also { wb ->
                                         wb.statusmessage =
                                             ModuleConfig.StatusMessageConfig.Builder()
-                                                .also { wb -> wb.node_status = MY_NODE_STATUS }
+                                                .also { wb -> wb.node_status = scenario.nodeStatus }
                                                 .build()
                                     }
                                     .build()
@@ -248,8 +250,8 @@ class MockRadioTransport(
         val metadata =
             DeviceMetadata.Builder()
                 .also { wb ->
-                    wb.firmware_version = FIRMWARE_VERSION
-                    wb.hw_model = HardwareModel.ANDROID_SIM
+                    wb.firmware_version = scenario.firmwareVersion
+                    wb.hw_model = scenario.hwModel
                 }
                 .build()
         val frames =
@@ -259,7 +261,7 @@ class MockRadioTransport(
                         wb.my_info =
                             ProtoMyNodeInfo.Builder()
                                 .also { wb ->
-                                    wb.my_node_num = MY_NODE
+                                    wb.my_node_num = scenario.myNode
                                     wb.reboot_count = 3
                                 }
                                 .build()
@@ -307,9 +309,9 @@ class MockRadioTransport(
 
     /** Stage 2: the node database. This is the only window in which the app accepts `node_info`. */
     private fun sendNodeInfoStage() {
-        Logger.d { "Mock transport answering node-info stage with ${SIM_PEERS.size + 1} nodes" }
+        Logger.d { "Mock transport answering node-info stage with ${scenario.peers.size + 1} nodes" }
         callback.handleFromRadio(FromRadio.Builder().also { wb -> wb.node_info = localNodeInfo() }.build().encode())
-        SIM_PEERS.forEach { peer ->
+        scenario.peers.forEach { peer ->
             callback.handleFromRadio(
                 FromRadio.Builder().also { wb -> wb.node_info = peer.toNodeInfo() }.build().encode(),
             )
@@ -328,24 +330,24 @@ class MockRadioTransport(
 
     private fun localNodeInfo() = NodeInfo.Builder()
         .also { wb ->
-            wb.num = MY_NODE
+            wb.num = scenario.myNode
             wb.last_heard = nowSeconds.toInt()
             wb.user =
                 User.Builder()
                     .also { wb ->
-                        wb.id = NodeAddress.numToDefaultId(MY_NODE)
-                        wb.long_name = "Demo Handset"
-                        wb.short_name = "DEMO"
-                        wb.hw_model = HardwareModel.ANDROID_SIM
+                        wb.id = NodeAddress.numToDefaultId(scenario.myNode)
+                        wb.long_name = scenario.longName
+                        wb.short_name = scenario.shortName
+                        wb.hw_model = scenario.hwModel
                         wb.role = Config.DeviceConfig.Role.CLIENT
                     }
                     .build()
-            wb.position = MY_POSITION.toProto()
+            wb.position = scenario.position.toProto()
             wb.device_metrics =
                 DeviceMetrics.Builder()
                     .also { wb ->
-                        wb.battery_level = 78
-                        wb.voltage = 3.98f
+                        wb.battery_level = scenario.myBatteryLevel
+                        wb.voltage = scenario.myVoltage
                         wb.channel_utilization = 8.4f
                         wb.air_util_tx = 1.9f
                         wb.uptime_seconds = 7_240
@@ -370,6 +372,7 @@ class MockRadioTransport(
                         wb.short_name = shortName
                         wb.hw_model = hwModel
                         wb.role = role
+                        publicKey?.let { wb.public_key = it.decodeHex() }
                     }
                     .build()
             wb.position = SimPosition(latitude, longitude, altitude).toProto()
@@ -378,12 +381,15 @@ class MockRadioTransport(
                     .also { wb ->
                         wb.battery_level = batteryLevel
                         wb.voltage = voltage
+                        wb.channel_utilization = channelUtilization
+                        wb.air_util_tx = airUtilTx
                         wb.uptime_seconds = uptimeSeconds
                     }
                     .build()
             wb.snr = snr
             wb.hops_away = hops
             wb.channel = 0
+            wb.is_favorite = favorite
         }
         .build()
 
@@ -397,35 +403,62 @@ class MockRadioTransport(
      * points and messages.
      */
     private suspend fun seedTraffic() {
-        SIM_PEERS.forEach { peer ->
-            lifecycle.runIfOpen { callback.handleFromRadio(peer.positionPacket(nextPacketId()).encode()) }
-            delay(SEED_SPACING_MS)
-        }
-
-        SIM_PEERS.take(TELEMETRY_PEER_COUNT).forEach { peer ->
+        scenario.peers.forEach { peer ->
             lifecycle.runIfOpen {
-                callback.handleFromRadio(peer.deviceTelemetryPacket(nextPacketId(), tick = 0).encode())
+                callback.handleFromRadio(peer.positionPacket(nextPacketId(), peer.secondsSinceHeard).encode())
             }
             delay(SEED_SPACING_MS)
         }
 
-        WEATHER_PEER_INDEXES.forEach { index ->
-            val peer = SIM_PEERS[index]
+        scenario.peers.take(scenario.telemetryPeerCount).forEach { peer ->
             lifecycle.runIfOpen {
-                callback.handleFromRadio(peer.environmentTelemetryPacket(nextPacketId(), tick = 0).encode())
+                callback.handleFromRadio(
+                    peer.deviceTelemetryPacket(nextPacketId(), tick = 0, ageSeconds = peer.secondsSinceHeard).encode(),
+                )
             }
             delay(SEED_SPACING_MS)
         }
 
-        lifecycle.runIfOpen { callback.handleFromRadio(SIM_PEERS[0].neighborInfoPacket(nextPacketId()).encode()) }
-        delay(SEED_SPACING_MS)
-        lifecycle.runIfOpen { callback.handleFromRadio(SIM_PEERS[1].nodeStatusPacket(nextPacketId()).encode()) }
-        delay(SEED_SPACING_MS)
+        scenario.peers.forEach { peer ->
+            val environment = peer.environment ?: return@forEach
+            lifecycle.runIfOpen {
+                callback.handleFromRadio(
+                    peer
+                        .environmentTelemetryPacket(nextPacketId(), environment, tick = 0, peer.secondsSinceHeard)
+                        .encode(),
+                )
+            }
+            delay(SEED_SPACING_MS)
+        }
 
+        lifecycle.runIfOpen {
+            callback.handleFromRadio(
+                scenario.peers[0].let { it.neighborInfoPacket(nextPacketId(), it.secondsSinceHeard) }.encode(),
+            )
+        }
+        delay(SEED_SPACING_MS)
+        scenario.peers.forEach { peer ->
+            val status = peer.status ?: return@forEach
+            lifecycle.runIfOpen {
+                callback.handleFromRadio(peer.nodeStatusPacket(nextPacketId(), status, peer.secondsSinceHeard).encode())
+            }
+            delay(SEED_SPACING_MS)
+        }
+
+        seedConversations()
+
+        if (scenario.liveTelemetry) streamLiveTelemetry()
+    }
+
+    /**
+     * Seeded last: the app takes a node's last-heard time from the latest packet it processes, so a peer that spoke
+     * reads as heard when it last spoke.
+     */
+    private suspend fun seedConversations() {
         // Each message is stamped progressively closer to now, so the thread reads as a conversation that unfolded over
         // the last while rather than a block of messages that all arrived in the same second.
-        CHANNEL_CONVERSATION.forEachIndexed { index, (peerIndex, text) ->
-            val peer = SIM_PEERS[peerIndex]
+        scenario.channelConversation.forEachIndexed { index, (peerIndex, text) ->
+            val peer = scenario.peers[peerIndex]
             lifecycle.runIfOpen {
                 callback.handleFromRadio(
                     peer
@@ -433,7 +466,7 @@ class MockRadioTransport(
                             id = nextPacketId(),
                             to = BROADCAST_ADDR,
                             text = text,
-                            ageSeconds = messageAgeSeconds(CHANNEL_CONVERSATION.size, index),
+                            ageSeconds = messageAgeSeconds(scenario.channelConversation.size, index),
                         )
                         .encode(),
                 )
@@ -441,22 +474,21 @@ class MockRadioTransport(
             delay(SEED_SPACING_MS)
         }
 
-        DIRECT_CONVERSATION.forEachIndexed { index, text ->
+        scenario.directConversation.forEachIndexed { index, text ->
             lifecycle.runIfOpen {
                 callback.handleFromRadio(
-                    SIM_PEERS[DIRECT_PEER_INDEX].textPacket(
-                        id = nextPacketId(),
-                        to = MY_NODE,
-                        text = text,
-                        ageSeconds = messageAgeSeconds(DIRECT_CONVERSATION.size, index),
-                    )
+                    scenario.peers[scenario.directPeerIndex]
+                        .textPacket(
+                            id = nextPacketId(),
+                            to = scenario.myNode,
+                            text = text,
+                            ageSeconds = messageAgeSeconds(scenario.directConversation.size, index),
+                        )
                         .encode(),
                 )
             }
             delay(SEED_SPACING_MS)
         }
-
-        streamLiveTelemetry()
     }
 
     /** How long ago the message at [index] of a [count]-message seeded thread was "received". Oldest first. */
@@ -470,12 +502,15 @@ class MockRadioTransport(
         var tick = 1
         while (true) {
             delay(LIVE_TICK_MS)
-            val peer = SIM_PEERS[tick % TELEMETRY_PEER_COUNT]
+            val peer = scenario.peers[tick % scenario.telemetryPeerCount]
             lifecycle.runIfOpen { callback.handleFromRadio(peer.deviceTelemetryPacket(nextPacketId(), tick).encode()) }
-            if (tick % WEATHER_TICK_INTERVAL == 0) {
-                val weatherPeer = SIM_PEERS[WEATHER_PEER_INDEXES.first()]
+            val weatherPeer = scenario.peers.firstOrNull { it.environment != null }
+            val environment = weatherPeer?.environment
+            if (tick % WEATHER_TICK_INTERVAL == 0 && environment != null) {
                 lifecycle.runIfOpen {
-                    callback.handleFromRadio(weatherPeer.environmentTelemetryPacket(nextPacketId(), tick).encode())
+                    callback.handleFromRadio(
+                        weatherPeer.environmentTelemetryPacket(nextPacketId(), environment, tick).encode(),
+                    )
                 }
             }
             tick++
@@ -491,11 +526,11 @@ class MockRadioTransport(
         val isBroadcast = packet.to == BROADCAST_ADDR
         val responder =
             if (isBroadcast) {
-                SIM_PEERS[DIRECT_PEER_INDEX]
+                scenario.peers[scenario.directPeerIndex]
             } else {
-                SIM_PEERS.firstOrNull { it.num == packet.to } ?: return
+                scenario.peers.firstOrNull { it.num == packet.to } ?: return
             }
-        val replyTo = if (isBroadcast) BROADCAST_ADDR else MY_NODE
+        val replyTo = if (isBroadcast) BROADCAST_ADDR else scenario.myNode
 
         transportScope.handledLaunch {
             delay(REPLY_DELAY_MS)
@@ -551,13 +586,13 @@ class MockRadioTransport(
         }
         .build()
 
-    private fun SimPeer.positionPacket(id: Int) = FromRadio.Builder()
+    private fun SimPeer.positionPacket(id: Int, ageSeconds: Int = 0) = FromRadio.Builder()
         .also { wb ->
             wb.packet =
                 packet(
                     id = id,
                     to = BROADCAST_ADDR,
-                    ageSeconds = 0,
+                    ageSeconds = ageSeconds,
                     data =
                     Data.Builder()
                         .also { wb ->
@@ -577,16 +612,24 @@ class MockRadioTransport(
      * takes the voltage through 0V inside a couple of hours and the battery and telemetry views then render a cell that
      * cannot physically exist.
      */
-    private fun SimPeer.deviceTelemetryPacket(id: Int, tick: Int): FromRadio {
-        val driftedBattery = (batteryLevel - tick).coerceIn(MIN_BATTERY_PERCENT, MAX_BATTERY_PERCENT)
-        val driftedVoltage = (voltage - tick * VOLTAGE_DRIFT_PER_TICK).coerceAtLeast(MIN_CELL_VOLTAGE)
+    private fun SimPeer.deviceTelemetryPacket(id: Int, tick: Int, ageSeconds: Int = 0): FromRadio {
+        // Above 100 is no battery or charging, neither of which drains.
+        val powered = batteryLevel > MAX_BATTERY_PERCENT
+        val driftedBattery =
+            if (powered) batteryLevel else (batteryLevel - tick).coerceIn(MIN_BATTERY_PERCENT, MAX_BATTERY_PERCENT)
+        val driftedVoltage =
+            if (powered) {
+                voltage
+            } else {
+                voltage?.let { (it - tick * VOLTAGE_DRIFT_PER_TICK).coerceAtLeast(MIN_CELL_VOLTAGE) }
+            }
         return FromRadio.Builder()
             .also { wb ->
                 wb.packet =
                     packet(
                         id = id,
                         to = BROADCAST_ADDR,
-                        ageSeconds = 0,
+                        ageSeconds = ageSeconds,
                         data =
                         Data.Builder()
                             .also { wb ->
@@ -599,8 +642,9 @@ class MockRadioTransport(
                                                     .also { wb ->
                                                         wb.battery_level = driftedBattery
                                                         wb.voltage = driftedVoltage
-                                                        wb.channel_utilization = 6f + (tick % 5) * 1.5f
-                                                        wb.air_util_tx = 1.2f + (tick % 4) * 0.4f
+                                                        wb.channel_utilization =
+                                                            (channelUtilization ?: 6f) + (tick % 5) * 1.5f
+                                                        wb.air_util_tx = (airUtilTx ?: 1.2f) + (tick % 4) * 0.4f
                                                         wb.uptime_seconds =
                                                             uptimeSeconds + tick * (LIVE_TICK_MS / 1000).toInt()
                                                     }
@@ -616,13 +660,18 @@ class MockRadioTransport(
             .build()
     }
 
-    private fun SimPeer.environmentTelemetryPacket(id: Int, tick: Int) = FromRadio.Builder()
+    private fun SimPeer.environmentTelemetryPacket(
+        id: Int,
+        environment: SimEnvironment,
+        tick: Int,
+        ageSeconds: Int = 0,
+    ) = FromRadio.Builder()
         .also { wb ->
             wb.packet =
                 packet(
                     id = id,
                     to = BROADCAST_ADDR,
-                    ageSeconds = 0,
+                    ageSeconds = ageSeconds,
                     data =
                     Data.Builder()
                         .also { wb ->
@@ -636,9 +685,14 @@ class MockRadioTransport(
                                                     // Temperature AND humidity must both be present or the
                                                     // Environment tab
                                                     // stays empty.
-                                                    wb.temperature = 18.5f + (tick % 7) * 0.4f
-                                                    wb.relative_humidity = 47f + (tick % 5) * 1.5f
-                                                    wb.barometric_pressure = 1013.2f + (tick % 3) * 0.3f
+                                                    wb.temperature = environment.temperature + (tick % 7) * 0.4f
+                                                    wb.relative_humidity =
+                                                        environment.relativeHumidity + (tick % 5) * 1.5f
+                                                    wb.barometric_pressure =
+                                                        environment.barometricPressure + (tick % 3) * 0.3f
+                                                    wb.iaq = environment.iaq
+                                                    wb.voltage = environment.voltage
+                                                    wb.current = environment.current
                                                 }
                                                 .build()
                                     }
@@ -651,13 +705,13 @@ class MockRadioTransport(
         }
         .build()
 
-    private fun SimPeer.neighborInfoPacket(id: Int) = FromRadio.Builder()
+    private fun SimPeer.neighborInfoPacket(id: Int, ageSeconds: Int = 0) = FromRadio.Builder()
         .also { wb ->
             wb.packet =
                 packet(
                     id = id,
                     to = BROADCAST_ADDR,
-                    ageSeconds = 0,
+                    ageSeconds = ageSeconds,
                     data =
                     Data.Builder()
                         .also { wb ->
@@ -669,7 +723,7 @@ class MockRadioTransport(
                                         wb.last_sent_by_id = num
                                         wb.node_broadcast_interval_secs = 900
                                         wb.neighbors =
-                                            SIM_PEERS.drop(1).take(3).map { neighbor ->
+                                            scenario.peers.drop(1).take(3).map { neighbor ->
                                                 Neighbor.Builder()
                                                     .also { wb ->
                                                         wb.node_id = neighbor.num
@@ -689,20 +743,20 @@ class MockRadioTransport(
         }
         .build()
 
-    private fun SimPeer.nodeStatusPacket(id: Int) = FromRadio.Builder()
+    private fun SimPeer.nodeStatusPacket(id: Int, status: String, ageSeconds: Int = 0) = FromRadio.Builder()
         .also { wb ->
             wb.packet =
                 packet(
                     id = id,
                     to = BROADCAST_ADDR,
-                    ageSeconds = 0,
+                    ageSeconds = ageSeconds,
                     data =
                     Data.Builder()
                         .also { wb ->
                             wb.portnum = PortNum.NODE_STATUS_APP
                             wb.payload =
                                 StatusMessage.Builder()
-                                    .also { wb -> wb.status = PEER_NODE_STATUS }
+                                    .also { wb -> wb.status = status }
                                     .build()
                                     .encode()
                                     .toByteString()
@@ -787,54 +841,14 @@ class MockRadioTransport(
         transportScope.handledLaunch {
             delay(ACK_DELAY_MS)
             lifecycle.runIfOpen {
-                callback.handleFromRadio(makeAck(SIM_PEERS[DIRECT_PEER_INDEX].num, packet.from, packet.id).encode())
+                val directPeer = scenario.peers[scenario.directPeerIndex]
+                callback.handleFromRadio(makeAck(directPeer.num, packet.from, packet.id).encode())
             }
         }
     }
 
-    /** One simulated peer in the demo mesh. */
-    private data class SimPeer(
-        val num: Int,
-        val longName: String,
-        val shortName: String,
-        val hwModel: HardwareModel,
-        val role: Config.DeviceConfig.Role,
-        val latitude: Double,
-        val longitude: Double,
-        val altitude: Int,
-        val batteryLevel: Int,
-        val voltage: Float,
-        val snr: Float,
-        val rssi: Int,
-        val hops: Int,
-        val secondsSinceHeard: Int,
-        val uptimeSeconds: Int,
-    )
-
-    /** Latitude/longitude/altitude triple, converted to the proto's scaled-integer representation on demand. */
-    private data class SimPosition(val latitude: Double, val longitude: Double, val altitude: Int) {
-        fun toProto() = ProtoPosition.Builder()
-            .also { wb ->
-                wb.latitude_i = org.meshtastic.core.model.Position.degI(latitude)
-                wb.longitude_i = org.meshtastic.core.model.Position.degI(longitude)
-                wb.altitude = altitude
-                wb.time = nowSeconds.toInt()
-                // 32 bits is "full precision"; the coarse end of the scale draws a large uncertainty circle instead
-                // of
-                // placing the node where it actually is.
-                wb.precision_bits = 32
-                wb.sats_in_view = 9
-                wb.location_source = ProtoPosition.LocSource.LOC_INTERNAL
-            }
-            .build()
-    }
-
     private companion object {
-        const val MY_NODE = 0x42424242
         const val BROADCAST_ADDR = -1 // 0xffffffff
-        const val FIRMWARE_VERSION = "9.9.9.abcdefg"
-        const val MY_NODE_STATUS = "Running Demo Mode — no radio attached."
-        const val PEER_NODE_STATUS = "Solar powered, up on the ridge."
         const val AUTO_REPLY_TEXT = "Got it, thanks! Message received on the demo mesh."
 
         /** First packet id handed out; low enough to stay clear of ids the app generates for its own sends. */
@@ -851,9 +865,6 @@ class MockRadioTransport(
 
         /** Hop budget the simulated nodes transmit with; `hop_limit` is derived so the app can infer hop distance. */
         const val DEFAULT_HOP_START = 3
-        const val DIRECT_PEER_INDEX = 0
-        const val TELEMETRY_PEER_COUNT = 4
-        val WEATHER_PEER_INDEXES = listOf(4)
 
         /** Spacing between seeded frames; the app timestamps rows on persist, so a burst would collapse together. */
         const val SEED_SPACING_MS = 120L
@@ -864,168 +875,5 @@ class MockRadioTransport(
         const val ACK_DELAY_MS = 2_000L
 
         val FAKE_SESSION_PASSKEY: okio.ByteString = okio.ByteString.of(0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77)
-
-        val MY_POSITION = SimPosition(latitude = 32.776665, longitude = -96.796989, altitude = 138)
-
-        /**
-         * The demo mesh. Deterministic on purpose — the same mesh every launch makes the demo reproducible for
-         * screenshots, support requests and store reviews. Spread over ~15 km so the map has something to fit.
-         */
-        val SIM_PEERS =
-            listOf(
-                SimPeer(
-                    num = MY_NODE + 1,
-                    longName = "Riverside Base",
-                    shortName = "RVSD",
-                    hwModel = HardwareModel.HELTEC_V3,
-                    role = Config.DeviceConfig.Role.CLIENT,
-                    latitude = 32.802,
-                    longitude = -96.769,
-                    altitude = 152,
-                    batteryLevel = 92,
-                    voltage = 4.09f,
-                    snr = 11.5f,
-                    rssi = -62,
-                    hops = 0,
-                    secondsSinceHeard = 45,
-                    uptimeSeconds = 128_400,
-                ),
-                SimPeer(
-                    num = MY_NODE + 2,
-                    longName = "Trail Runner",
-                    shortName = "TRLR",
-                    hwModel = HardwareModel.TRACKER_T1000_E,
-                    role = Config.DeviceConfig.Role.TRACKER,
-                    latitude = 32.7605,
-                    longitude = -96.8305,
-                    altitude = 145,
-                    batteryLevel = 64,
-                    voltage = 3.87f,
-                    snr = 6.25f,
-                    rssi = -84,
-                    hops = 0,
-                    secondsSinceHeard = 130,
-                    uptimeSeconds = 41_900,
-                ),
-                SimPeer(
-                    num = MY_NODE + 3,
-                    longName = "Oak Cliff Repeater",
-                    shortName = "OAKR",
-                    hwModel = HardwareModel.RAK4631,
-                    role = Config.DeviceConfig.Role.ROUTER,
-                    latitude = 32.7395,
-                    longitude = -96.8215,
-                    altitude = 189,
-                    batteryLevel = 100,
-                    voltage = 4.14f,
-                    snr = 9.0f,
-                    rssi = -71,
-                    hops = 0,
-                    secondsSinceHeard = 20,
-                    uptimeSeconds = 903_600,
-                ),
-                SimPeer(
-                    num = MY_NODE + 4,
-                    longName = "Deep Ellum Handheld",
-                    shortName = "DEEP",
-                    hwModel = HardwareModel.T_DECK,
-                    role = Config.DeviceConfig.Role.CLIENT,
-                    latitude = 32.7842,
-                    longitude = -96.7845,
-                    altitude = 141,
-                    batteryLevel = 47,
-                    voltage = 3.74f,
-                    snr = -2.5f,
-                    rssi = -103,
-                    hops = 1,
-                    secondsSinceHeard = 320,
-                    uptimeSeconds = 9_800,
-                ),
-                SimPeer(
-                    num = MY_NODE + 5,
-                    longName = "Rooftop Weather",
-                    shortName = "WTHR",
-                    hwModel = HardwareModel.HELTEC_MESH_NODE_T114,
-                    role = Config.DeviceConfig.Role.SENSOR,
-                    latitude = 32.8145,
-                    longitude = -96.8055,
-                    altitude = 205,
-                    batteryLevel = 88,
-                    voltage = 4.02f,
-                    snr = 4.75f,
-                    rssi = -91,
-                    hops = 1,
-                    secondsSinceHeard = 210,
-                    uptimeSeconds = 512_000,
-                ),
-                SimPeer(
-                    num = MY_NODE + 6,
-                    longName = "Lakeside Solar",
-                    shortName = "LAKE",
-                    hwModel = HardwareModel.STATION_G2,
-                    role = Config.DeviceConfig.Role.CLIENT,
-                    latitude = 32.8365,
-                    longitude = -96.7325,
-                    altitude = 167,
-                    batteryLevel = 73,
-                    voltage = 3.94f,
-                    snr = 1.5f,
-                    rssi = -98,
-                    hops = 2,
-                    secondsSinceHeard = 640,
-                    uptimeSeconds = 254_300,
-                ),
-                SimPeer(
-                    num = MY_NODE + 7,
-                    longName = "Bike Courier",
-                    shortName = "BIKE",
-                    hwModel = HardwareModel.TBEAM,
-                    role = Config.DeviceConfig.Role.TRACKER,
-                    latitude = 32.7688,
-                    longitude = -96.7492,
-                    altitude = 134,
-                    batteryLevel = 31,
-                    voltage = 3.62f,
-                    snr = -6.5f,
-                    rssi = -112,
-                    hops = 2,
-                    secondsSinceHeard = 1_180,
-                    uptimeSeconds = 3_600,
-                ),
-                SimPeer(
-                    num = MY_NODE + 8,
-                    longName = "Field Kit Echo",
-                    shortName = "ECHO",
-                    hwModel = HardwareModel.T_ECHO,
-                    role = Config.DeviceConfig.Role.CLIENT_MUTE,
-                    latitude = 32.7215,
-                    longitude = -96.7738,
-                    altitude = 158,
-                    batteryLevel = 56,
-                    voltage = 3.81f,
-                    snr = 3.25f,
-                    rssi = -95,
-                    hops = 1,
-                    secondsSinceHeard = 2_400,
-                    uptimeSeconds = 76_500,
-                ),
-            )
-
-        /** Seeded channel conversation, as (peer index, text) pairs. Oldest first. */
-        val CHANNEL_CONVERSATION =
-            listOf(
-                0 to "Morning all — base station is back online after the power cut.",
-                2 to "Copy that. Repeater on Oak Cliff is holding steady, 100% battery.",
-                1 to "Out on the trail loop, signal is solid the whole way today.",
-                4 to "Rooftop sensor reading 18.5C and 47% humidity if anyone cares.",
-                0 to "Nice. Net check complete, everyone reporting in.",
-            )
-
-        /** Seeded direct-message thread from [DIRECT_PEER_INDEX]. Oldest first. */
-        val DIRECT_CONVERSATION =
-            listOf(
-                "Hey, are you still planning to bring the spare antenna tomorrow?",
-                "No rush — just let me know before you set off.",
-            )
     }
 }

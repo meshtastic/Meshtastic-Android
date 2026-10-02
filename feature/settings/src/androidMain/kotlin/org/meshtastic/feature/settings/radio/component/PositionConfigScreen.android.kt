@@ -17,12 +17,10 @@
 package org.meshtastic.feature.settings.radio.component
 
 import android.annotation.SuppressLint
-import android.os.Build
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.core.location.LocationCompat
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Position
@@ -49,14 +47,7 @@ actual fun DeviceLocationButton(
                         Position(
                             latitude = phoneLoc.latitude,
                             longitude = phoneLoc.longitude,
-                            altitude =
-                            LocationCompat.hasMslAltitude(phoneLoc).let {
-                                if (it && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                                    phoneLoc.mslAltitudeMeters.toInt()
-                                } else {
-                                    phoneLoc.altitude.toInt()
-                                }
-                            },
+                            altitude = (phoneLoc.mslAltitudeMeters ?: phoneLoc.altitudeMeters ?: 0.0).toInt(),
                         )
                     onLocationReceived(locationInput)
                 }

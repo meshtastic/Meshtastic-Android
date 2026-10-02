@@ -4,7 +4,7 @@
 # Step 6 itself only runs in the merge queue and needs two full release builds, so the
 # classification it depends on would otherwise ship unexercised: a typo in the allowlist
 # silently brings the noise back, and a broken dedup silently restores per-ABI repeats.
-# This runs in lint-check on every PR instead.
+# This runs in pull-request.yml's check-metadata job on every PR instead.
 #
 # readelf is stubbed: the fixture writes the literal STRIPPED into a lib to mean "no
 # .symtab", anything else means the symbol table survived.

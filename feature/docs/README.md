@@ -134,8 +134,7 @@ feature:docs
   ├── core:common, core:navigation, core:resources, core:ui, core:di
   ├── coil                      (image loading in Markdown)
   ├── markdown-renderer-m3      (Compose Markdown rendering)
-  ├── compose.material3.adaptive, compose.material3.adaptive.navigation3
-  └── kotlinx.collections.immutable
+  └── compose.material3.adaptive, compose.material3.adaptive.navigation3
 ```
 
 <!--region graph-->

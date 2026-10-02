@@ -80,7 +80,7 @@ private fun List<GeoPosition>.isCounterClockwise(): Boolean {
  */
 private fun List<GeoPosition>.splitAtAntimeridian(): List<List<GeoPosition>> {
     val segments = mutableListOf<List<GeoPosition>>()
-    var current = mutableListOf(first())
+    val current = mutableListOf(first())
 
     for (next in drop(1)) {
         val previous = current.last()
@@ -89,8 +89,9 @@ private fun List<GeoPosition>.splitAtAntimeridian(): List<List<GeoPosition>> {
             val exit = if (delta > 0) -HALF_TURN else HALF_TURN
             val latitude = crossingLatitude(previous, next, exit)
             current += GeoPosition(exit, latitude)
-            segments += current
-            current = mutableListOf(GeoPosition(-exit, latitude))
+            segments += current.toList()
+            current.clear()
+            current += GeoPosition(-exit, latitude)
         }
         current += next
     }

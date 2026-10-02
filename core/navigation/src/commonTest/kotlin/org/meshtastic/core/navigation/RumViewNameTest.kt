@@ -16,25 +16,40 @@
  */
 package org.meshtastic.core.navigation
 
+import androidx.navigation3.runtime.NavKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/**
- * Guards the RUM view-name convention consumed by the analytics layer. View names must be the route's fully-qualified
- * class name so per-screen RUM data lines up with historical Datadog dashboards. A rename of a route interface or the
- * package would break cross-platform data continuity, so this test pins the format.
- */
+/** Pins the RUM view-name format that Datadog dashboards and monitors filter `@view.name` on. */
 class RumViewNameTest {
 
     @Test
-    fun `rumViewName is the fully qualified route name for data objects`() {
-        assertEquals("org.meshtastic.core.navigation.NodesRoute.Nodes", NodesRoute.Nodes.rumViewName())
+    fun `rumViewName drops the package and keeps the enclosing route`() {
+        assertEquals("NodesRoute.Nodes", NodesRoute.Nodes.rumViewName())
+        assertEquals("SettingsRoute.Bluetooth", SettingsRoute.Bluetooth.rumViewName())
     }
 
     @Test
     fun `rumViewName is stable across argument values for data classes`() {
-        val expected = "org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics"
+        val expected = "NodeDetailRoute.DeviceMetrics"
         assertEquals(expected, NodeDetailRoute.DeviceMetrics(destNum = 1).rumViewName())
         assertEquals(expected, NodeDetailRoute.DeviceMetrics(destNum = 2).rumViewName())
     }
+
+    @Test
+    fun `rumViewName of a top level key is its simple name`() {
+        assertEquals("TopLevelKey", TopLevelKey.rumViewName())
+    }
+
+    @Test
+    fun `binary names from minified builds match the qualified form`() {
+        assertEquals("NodesRoute.Nodes", rumViewName("org.meshtastic.core.navigation.NodesRoute\$Nodes"))
+    }
+
+    @Test
+    fun `a name with no uppercase segment is kept whole`() {
+        assertEquals("a.b", rumViewName("a.b"))
+    }
 }
+
+private data object TopLevelKey : NavKey

@@ -17,6 +17,8 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Imidite</string>
+    <string name="a11y_temperature">Tanperati</string>
     <string name="about">Sou</string>
     <string name="accept">Aksepte</string>
     <!-- ACTION -->
@@ -27,7 +29,6 @@
     <string name="administration">Administrasyon</string>
     <!-- AIR -->
     <string name="air_util_definition">Pousantaj tan lè transmisyon te itilize nan dènye èdtan an.</string>
-    <!-- ALERT -->
     <!-- APP -->
     <string name="app_too_old">Aplikasyon twò ansyen</string>
     <string name="apply">Aplike</string>
@@ -35,7 +36,6 @@
     <string name="aqi_good">Bon</string>
     <string name="are_you_sure_change_default">Eske ou sèten ou vle chanje pou kanal default la?</string>
     <string name="bad">Move</string>
-    <!-- BANDWIDTH -->
     <string name="battery">Batri</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Ap kalkile…</string>
@@ -46,7 +46,6 @@
     <string name="ch_util_definition">Itilizasyon pou kanal aktyèl la, ki enkli TX, RX byen fòme ak RX mal fòme (sa yo rele bri).</string>
     <!-- CHANNEL -->
     <string name="channel_invalid">Kanal URL sa a pa valab e yo pa kapab itilize li</string>
-    <string name="channel_label">kanal</string>
     <string name="channel_name">Non kanal</string>
     <!-- CHIRPY -->
     <string name="choose_theme">Chwazi tèm</string>
@@ -77,17 +76,15 @@
     <string name="disconnected">Dekonekte</string>
     <!-- DISCOVERY -->
     <string name="discovery_stat_direct">Direk</string>
-    <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distans</string>
     <!-- DOC -->
+    <!-- DURATION -->
     <string name="edit">Modifye</string>
     <string name="eight_hours">8 Èdtan</string>
     <!-- EMOJI -->
-    <!-- ENCRYPTION -->
     <string name="encryption_error">Pa matche kle piblik</string>
     <string name="encryption_pkc">Chifreman Kle Piblik</string>
-    <!-- ENVIRONMENT -->
     <string name="error">Erè</string>
     <string name="error_duty_cycle">Limit sik devwa rive. Pa ka voye mesaj kounye a, tanpri eseye ankò pita.</string>
     <!-- EXPORT -->
@@ -102,10 +99,8 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Bon</string>
-    <!-- GPIO -->
     <string name="hops_away">Hops Lwen</string>
     <string name="iaq_definition">(Kalite Lèy Entèryè) echèl relatif valè IAQ jan li mezire pa Bosch BME680. Ranje valè 0–500.</string>
-    <!-- IGNORE -->
     <string name="ignore">Ignoré</string>
     <string name="ignore_add">Ajoute '%1$s' nan lis ignòre?</string>
     <string name="ignore_remove">Retire '%1$s' nan lis ignòre?</string>
@@ -126,7 +121,6 @@
     <!-- LOG -->
     <string name="logs">Jounal</string>
     <!-- MAP -->
-    <string name="map_cache_info">Kapasite Kach: %1$d MB\nItilizasyon Kach: %2$d MB</string>
     <string name="map_cache_manager">Manadjè Kach</string>
     <string name="map_cache_size">Gwosè Kach aktyèl</string>
     <string name="map_cache_tiles">%1$d tèk</string>
@@ -184,19 +178,19 @@
     <string name="none">Okenn (enfim)</string>
     <string name="none_quality">Pa gen</string>
     <string name="not_connected">Pa konekte</string>
+    <!-- NOTIFICATION -->
     <!-- NOTIFICATIONS -->
     <!-- OFFLINE -->
     <string name="okay">Dakò</string>
     <!-- ONE -->
     <string name="one_day">24 Èdtan</string>
     <!-- OPEN -->
-    <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
     <!-- PERMISSION -->
     <!-- PERMISSIONS -->
+    <!-- PM -->
     <!-- POSITION -->
-    <!-- POWER -->
     <string name="preferences_language">Lang</string>
     <string name="preferences_system_default">Sistèm default</string>
     <!-- PREVIEW -->
@@ -210,14 +204,6 @@
     <string name="quick_chat_new">Nouvo chat rapid</string>
     <string name="radio_configuration">Konfigirasyon radyo</string>
     <string name="reboot">Rekòmanse</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode_all_desc">Rebroadcast nenpòt mesaj obsève, si li te sou kanal prive nou oswa soti nan yon lòt mesh ak menm paramèt lora.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Menm jan ak konpòtman kòm "ALL" men sote dekodaj pakè yo epi senpleman rebroadcast yo. Disponib sèlman nan wòl Repeater. Mete sa sou nenpòt lòt wòl ap bay konpòtman "ALL".</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Ignoré pakè soti nan portnum ki pa estanda tankou: TAK, RangeTest, PaxCounter, elatriye. Sèlman rebroadcast pakè ak portnum estanda: NodeInfo, Tèks, Pozisyon, Telemetri, ak Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignoré mesaj obsève soti nan meshes etranje tankou "LOCAL ONLY", men ale yon etap pi lwen pa tou ignorer mesaj ki soti nan nœud ki poko nan lis konnen nœud la.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignoré mesaj obsève soti nan meshes etranje ki louvri oswa sa yo li pa ka dekripte. Sèlman rebroadcast mesaj sou kanal prensipal / segondè lokal nœud.</string>
-    <string name="rebroadcast_mode_none_desc">Sèlman pèmèt pou wòl SENSOR, TRACKER ak TAK_TRACKER, sa a ap entèdi tout rebroadcasts, pa diferan de wòl CLIENT_MUTE.</string>
-    <string name="region_frequency_plan">Rejyon</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administrasyon Remote</string>
     <!-- REMOVE -->
@@ -230,23 +216,12 @@
     <string name="reset">Reyajiste</string>
     <string name="reset_to_defaults">Reyajiste nan paramèt default yo</string>
     <!-- ROLE -->
-    <string name="role_client_desc">Aplikasyon konekte oswa aparèy mesaj endepandan.</string>
-    <string name="role_client_hidden_desc">Aparèy ki sèlman voye kòm sa nesesè pou kachèt oswa ekonomi pouvwa.</string>
-    <string name="role_client_mute_desc">Aparèy ki pa voye pake soti nan lòt aparèy.</string>
-    <string name="role_repeater_desc">Nœud enfrastrikti pou elaji kouvèti rezo pa relaye mesaj avèk ti overhead. Pa vizib nan lis nœud.</string>
-    <string name="role_router_client_desc">Kombinasyon de toude ROUTER ak CLIENT. Pa pou aparèy mobil.</string>
-    <string name="role_router_desc">Nœud enfrastrikti pou elaji kouvèti rezo pa relaye mesaj. Vizyèl nan lis nœud.</string>
-    <string name="role_sensor_desc">Voye pakè telemetri kòm priyorite.</string>
-    <string name="role_tak_desc">Optimizé pou kominikasyon sistèm ATAK, redwi emisyon regilye.</string>
-    <string name="role_tak_tracker_desc">Pèmèt emisyon TAK PLI otomatik epi redwi emisyon regilye.</string>
-    <string name="role_tracker_desc">Voye pakè pozisyon GPS kòm priyorite.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Rekòmanse avèk yon refi negatif</string>
     <string name="routing_error_no_route">Pa gen wout</string>
     <string name="routing_error_none">Rekonekte</string>
     <string name="routing_error_timeout">Tan pase</string>
     <string name="rssi_definition">Endikatè Fòs Siynal Resevwa, yon mezi ki itilize pou detèmine nivo pouvwa siynal ki resevwa pa antèn nan. Yon RSSI pi wo jeneralman endike yon koneksyon pi fò ak plis estab.</string>
-    <!-- SAVE -->
     <string name="save">Sove</string>
     <string name="save_changes">Sove</string>
     <!-- SCAN -->
@@ -254,7 +229,6 @@
     <!-- SECURITY -->
     <string name="select_all">Chwazi tout</string>
     <string name="send">Voye</string>
-    <!-- SERIAL -->
     <!-- SHARE -->
     <string name="share">Pataje</string>
     <!-- SHOW -->
@@ -284,7 +258,6 @@
     <string name="unknown_username">Non itilizatè enkoni</string>
     <string name="unrecognized">Inkonu</string>
     <!-- URL -->
-    <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">atravè MQTT</string>
     <string name="waypoint_delete">Efase pwen?</string>

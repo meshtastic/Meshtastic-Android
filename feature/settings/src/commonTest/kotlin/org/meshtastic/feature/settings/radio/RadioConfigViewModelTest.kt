@@ -37,6 +37,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -55,11 +56,13 @@ import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.repository.AnalyticsPrefs
+import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
@@ -87,7 +90,9 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
+import org.meshtastic.proto.ExcludedModules
 import org.meshtastic.proto.HamParameters
+import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LoRaPresetGroup
 import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
@@ -149,7 +154,7 @@ class RadioConfigViewModelTest {
             Node(
                 num = 123,
                 user = User.Builder().also { wb -> wb.id = "!123" }.build(),
-                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.21" }.build(),
+                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.19" }.build(),
             )
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel(destNum = 123)
@@ -157,6 +162,26 @@ class RadioConfigViewModelTest {
         viewModel.setResponseStateLoading(ConfigRoute.USER)
         advanceUntilIdle()
 
+        verifySuspend(exactly(0)) { radioConfigUseCase.getModuleConfig(any(), any(), any()) }
+    }
+
+    @Test
+    fun `USER route skips the status message config when the firmware compiled the module out`() = runTest {
+        val metadata =
+            DeviceMetadata.Builder()
+                .also { wb ->
+                    wb.firmware_version = "2.8.0"
+                    wb.excluded_modules = ExcludedModules.STATUSMESSAGE_CONFIG.value
+                }
+                .build()
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build(), metadata = metadata)
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel(destNum = 123)
+
+        viewModel.setResponseStateLoading(ConfigRoute.USER)
+        advanceUntilIdle()
+
+        verifySuspend { radioConfigUseCase.getOwner(123, any()) }
         verifySuspend(exactly(0)) { radioConfigUseCase.getModuleConfig(any(), any(), any()) }
     }
 
@@ -196,7 +221,7 @@ class RadioConfigViewModelTest {
                 Node(
                     num = 456,
                     user = User.Builder().also { wb -> wb.id = "!456" }.build(),
-                    metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.21" }.build(),
+                    metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.19" }.build(),
                 )
             nodeRepository.setNodes(listOf(localNode, remoteNode))
             nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
@@ -378,6 +403,7 @@ class RadioConfigViewModelTest {
     private val installProfileUseCase: InstallProfileUseCase = mock(MockMode.autofill)
     private val radioConfigUseCase: RadioConfigUseCase = mock(MockMode.autofill)
     private val adminActionsUseCase: AdminActionsUseCase = mock(MockMode.autofill)
+    private val deviceHardwareRepository: DeviceHardwareRepository = mock(MockMode.autofill)
     private val processRadioResponseUseCase: ProcessRadioResponseUseCase = mock(MockMode.autofill)
     private val locationService: LocationService = mock(MockMode.autofill)
     private val fileService: FileService = mock(MockMode.autofill)
@@ -422,6 +448,7 @@ class RadioConfigViewModelTest {
         every { mqttManager.proxyActive } returns MutableStateFlow(false)
 
         every { uiPrefs.showQuickChat } returns MutableStateFlow(false)
+        every { deviceHardwareRepository.observeDeviceHardware(any(), any()) } returns flowOf(null)
 
         viewModel = createViewModel()
     }
@@ -447,6 +474,7 @@ class RadioConfigViewModelTest {
         radioConfigRepository = radioConfigRepository,
         serviceRepository = serviceRepository,
         nodeRepository = nodeRepository,
+        deviceHardwareRepository = deviceHardwareRepository,
         locationRepository = locationRepository,
         mapConsentPrefs = mapConsentPrefs,
         analyticsPrefs = analyticsPrefs,
@@ -621,23 +649,21 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `toggleAnalyticsAllowed calls prefs`() {
-        every { analyticsPrefs.analyticsAllowed } returns MutableStateFlow(true)
-        every { analyticsPrefs.setAnalyticsAllowed(false) } returns Unit
+    fun `toggleAnalyticsAllowed delegates to the prefs toggle`() {
+        every { analyticsPrefs.toggleAnalyticsAllowed() } returns Unit
 
         viewModel.toggleAnalyticsAllowed()
 
-        verify { analyticsPrefs.setAnalyticsAllowed(false) }
+        verify { analyticsPrefs.toggleAnalyticsAllowed() }
     }
 
     @Test
-    fun `toggleHomoglyphCharactersEncodingEnabled calls prefs`() {
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(true)
-        every { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) } returns Unit
+    fun `toggleHomoglyphCharactersEncodingEnabled delegates to the prefs toggle`() {
+        every { homoglyphEncodingPrefs.toggleHomoglyphEncodingEnabled() } returns Unit
 
         viewModel.toggleHomoglyphCharactersEncodingEnabled()
 
-        verify { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) }
+        verify { homoglyphEncodingPrefs.toggleHomoglyphEncodingEnabled() }
     }
 
     @Test
@@ -1106,7 +1132,7 @@ class RadioConfigViewModelTest {
             }
         every { processRadioResponseUseCase(any(), 123, any()) } calls
             {
-                val pendingRequestIds = it.args[2] as Set<Int>
+                val pendingRequestIds = it.arg<Set<Int>>(2)
                 if (42 in pendingRequestIds) RadioResponseResult.Owner(owner) else null
             }
 
@@ -1268,8 +1294,8 @@ class RadioConfigViewModelTest {
         // Channel A (index 1) completed before channel B (index 2) threw.
         assertEquals(listOf(1, 2), writtenIndexes)
         assertNotNull(interrupted)
-        assertEquals(1, interrupted!!.appliedWriteCount)
-        assertEquals("A", interrupted!!.appliedSettings[1].name)
+        assertEquals(1, interrupted.appliedWriteCount)
+        assertEquals("A", interrupted.appliedSettings[1].name)
     }
 
     @Test
@@ -1294,6 +1320,85 @@ class RadioConfigViewModelTest {
         packetFlow.emit(MeshPacket.Builder().build())
 
         verifySuspend { adminActionsUseCase.reboot(123, any()) }
+    }
+
+    @Test
+    fun `setResponseStateLoading for REBOOT_DFU calls useCase after config response`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), any(), any()) } returns
+            RadioResponseResult.ConfigResponse(Config.Builder().build())
+
+        viewModel = createViewModel()
+
+        everySuspend { adminActionsUseCase.rebootToDfu(any(), any()) } returns 42
+
+        viewModel.setResponseStateLoading(AdminRoute.REBOOT_DFU)
+        packetFlow.emit(MeshPacket.Builder().build())
+
+        verifySuspend { adminActionsUseCase.rebootToDfu(123, any()) }
+    }
+
+    @Test
+    fun `an unacknowledged DFU request settles as success instead of a timeout error`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), any(), any()) } returns
+            RadioResponseResult.ConfigResponse(Config.Builder().build())
+
+        viewModel = createViewModel()
+
+        everySuspend { adminActionsUseCase.rebootToDfu(any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(42)
+                42
+            }
+
+        viewModel.setResponseStateLoading(AdminRoute.REBOOT_DFU)
+        packetFlow.emit(MeshPacket.Builder().build())
+        runCurrent()
+        verifySuspend { adminActionsUseCase.rebootToDfu(123, any()) }
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    @Test
+    fun `canRebootToDfu is true only for nRF52 hardware`() = runTest {
+        val node =
+            Node(
+                num = 123,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!123"
+                        wb.hw_model = HardwareModel.RAK4631
+                    }
+                    .build(),
+            )
+        nodeRepository.setNodes(listOf(node))
+        every { deviceHardwareRepository.observeDeviceHardware(HardwareModel.RAK4631.value, any()) } returns
+            flowOf(DeviceHardware(architecture = "nrf52840"))
+
+        viewModel = createViewModel(destNum = 123)
+        advanceUntilIdle()
+        assertTrue(viewModel.radioConfigState.value.canRebootToDfu)
+
+        every { deviceHardwareRepository.observeDeviceHardware(HardwareModel.RAK4631.value, any()) } returns
+            flowOf(DeviceHardware(architecture = "esp32-s3"))
+
+        viewModel = createViewModel(destNum = 123)
+        advanceUntilIdle()
+        assertFalse(viewModel.radioConfigState.value.canRebootToDfu)
     }
 
     @Test
@@ -1919,7 +2024,7 @@ class RadioConfigViewModelTest {
         var response: RadioResponseResult = RadioResponseResult.Error(maxRetransmit, Routing.Error.MAX_RETRANSMIT)
         every { processRadioResponseUseCase(any(), 456, any()) } calls
             {
-                val pendingRequestIds = it.args[2] as Set<Int>
+                val pendingRequestIds = it.arg<Set<Int>>(2)
                 if (42 in pendingRequestIds) response else null
             }
         nodeRepository.setNodes(listOf(localNode, remoteNode))
@@ -2035,7 +2140,7 @@ class RadioConfigViewModelTest {
             Node(
                 num = 456,
                 user = User.Builder().also { wb -> wb.id = "!456" }.build(),
-                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.21" }.build(),
+                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.19" }.build(),
             )
         val packetFlow = MutableSharedFlow<MeshPacket>()
         val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
@@ -2776,6 +2881,48 @@ class RadioConfigViewModelTest {
             Config.Builder()
                 .also { wb ->
                     wb.network = Config.NetworkConfig.Builder().also { wb -> wb.wifi_enabled = true }.build()
+                }
+                .build(),
+        )
+        runCurrent()
+
+        assertFalse(nodeRestartTracker.restartExpected.value)
+    }
+
+    @Test
+    fun `local module save that reboots opens the restart window`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+        runCurrent()
+        everySuspend { radioConfigUseCase.setModuleConfig(any(), any(), any()) } returns 42
+
+        nodeRestartTracker.onConnected()
+        viewModel.setModuleConfig(
+            ModuleConfig.Builder()
+                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build(),
+        )
+        runCurrent()
+
+        assertTrue(nodeRestartTracker.restartExpected.value)
+    }
+
+    @Test
+    fun `local Mesh Beacon save does not open the restart window`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+        runCurrent()
+        everySuspend { radioConfigUseCase.setModuleConfig(any(), any(), any()) } returns 42
+
+        nodeRestartTracker.onConnected()
+        viewModel.setModuleConfig(
+            ModuleConfig.Builder()
+                .also { wb ->
+                    wb.mesh_beacon = MeshBeaconConfig.Builder().also { wb -> wb.broadcast_message = "hi" }.build()
                 }
                 .build(),
         )

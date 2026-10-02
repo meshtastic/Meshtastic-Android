@@ -19,6 +19,7 @@ package org.meshtastic.feature.settings.radio
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -45,6 +47,7 @@ import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.AnalyticsPrefs
+import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
@@ -87,6 +90,7 @@ class ProfileRoundTripTest {
     private val importSecurityConfigUseCase: ImportSecurityConfigUseCase = mock(MockMode.autofill)
     private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
+    private val deviceHardwareRepository: DeviceHardwareRepository = mock(MockMode.autofill)
     private val nodeRestartTracker = NodeRestartTracker(CoroutineScope(SupervisorJob()))
     private val installProfileUseCase: InstallProfileUseCase = mock(MockMode.autofill)
     private val radioConfigUseCase: RadioConfigUseCase = mock(MockMode.autofill)
@@ -115,6 +119,7 @@ class ProfileRoundTripTest {
 
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow<MeshPacket>()
         every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Connected)
+        every { deviceHardwareRepository.observeDeviceHardware(any(), any()) } returns flowOf(null)
         every { mqttManager.mqttConnectionState } returns
             MutableStateFlow(org.meshtastic.core.model.MqttConnectionState.Inactive)
 
@@ -124,6 +129,7 @@ class ProfileRoundTripTest {
                 radioConfigRepository = radioConfigRepository,
                 serviceRepository = serviceRepository,
                 nodeRepository = nodeRepository,
+                deviceHardwareRepository = deviceHardwareRepository,
                 locationRepository = locationRepository,
                 mapConsentPrefs = mapConsentPrefs,
                 analyticsPrefs = analyticsPrefs,

@@ -40,8 +40,10 @@ import androidx.compose.material3.adaptive.layout.ThreePaneScaffoldValue
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -58,8 +60,8 @@ import org.meshtastic.core.ui.theme.AppTheme
  * ([MeshtasticNavDisplay]) use, so both surfaces flip to two panes at the same breakpoint.
  *
  * When split, the panes are hosted in a [SupportingPaneScaffold] so the divider is a draggable [VerticalDragHandle],
- * giving parity with the list-detail / supporting-pane scenes elsewhere in the app. Both slots keep their [ColumnScope]
- * receiver, so callers are unchanged.
+ * giving parity with the list-detail scenes elsewhere in the app. Both slots keep their [ColumnScope] receiver, so
+ * callers are unchanged.
  *
  * The scaffold reports its incoming max height as its own size, so a height-unbounded host (a LazyColumn item, a
  * scrollable column) would make it echo Constraints.Infinity and crash; a plain [Row] split is used there instead.
@@ -76,8 +78,12 @@ fun AdaptiveTwoPane(
     // Wrap the slots in movable content so their internal state survives when the layout flips between the stacked
     // column and the two-pane scaffold (e.g. on resize / fold), and so neither slot is emitted directly from two
     // branches. The ColumnScope is passed through, so the compact branch keeps the shared-column behaviour.
-    val firstPane = remember { movableContentOf<ColumnScope>(first) }
-    val secondPane = remember { movableContentOf<ColumnScope>(second) }
+    // The movable content is created once, so it calls the slots through state to follow a caller that passes a
+    // different lambda instance.
+    val currentFirst by rememberUpdatedState(first)
+    val currentSecond by rememberUpdatedState(second)
+    val firstPane = remember { movableContentOf<ColumnScope> { currentFirst(it) } }
+    val secondPane = remember { movableContentOf<ColumnScope> { currentSecond(it) } }
 
     // Hoisted above the height branch so a dragged divider survives the host flipping between bounded and
     // unbounded constraints (the scaffold branch below leaves composition on that flip).

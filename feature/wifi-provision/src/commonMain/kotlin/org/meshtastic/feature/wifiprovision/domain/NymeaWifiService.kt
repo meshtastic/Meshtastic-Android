@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
-import kotlinx.serialization.encodeToString
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
@@ -117,7 +116,7 @@ class NymeaWifiService(
                 .onEach { bytes ->
                     val message = reassembler.feed(bytes)
                     if (message != null) {
-                        Logger.d { "$TAG: ← $message" }
+                        Logger.d { "$TAG: ← response (${message.length} chars)" }
                         responseChannel.trySend(message)
                     }
                     if (!subscribed.isCompleted) subscribed.complete(Unit)
@@ -145,14 +144,14 @@ class NymeaWifiService(
      */
     suspend fun scanNetworks(): Result<List<WifiNetwork>> = safeCatching {
         // Trigger scan
-        sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_SCAN)))
+        sendCommand(CMD_SCAN, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_SCAN)))
         val scanAck = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse())
         if (scanAck.responseCode != RESPONSE_SUCCESS) {
             error("Scan command failed: ${nymeaErrorMessage(scanAck.responseCode)}")
         }
 
         // Fetch results
-        sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_NETWORKS)))
+        sendCommand(CMD_GET_NETWORKS, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_NETWORKS)))
         val networksResponse = NymeaJson.decodeFromString<NymeaNetworksResponse>(waitForResponse())
         if (networksResponse.responseCode != RESPONSE_SUCCESS) {
             error("GetNetworks failed: ${nymeaErrorMessage(networksResponse.responseCode)}")
@@ -186,7 +185,7 @@ class NymeaWifiService(
             )
 
         return safeCatching {
-            sendCommand(json)
+            sendCommand(cmd, json)
             val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse())
             if (response.responseCode == RESPONSE_SUCCESS) {
                 val ipAddress =
@@ -202,31 +201,27 @@ class NymeaWifiService(
             }
     }
 
-    /** Disconnect and cancel the service scope. */
+    /** Disconnect, which releases the BLE peripheral, then cancel the service scope. */
     suspend fun close() {
-        bleConnection.disconnect()
-        reassembler.reset()
-        serviceScope.cancel()
-    }
-
-    /**
-     * Synchronous teardown — cancels the service scope (and its child BLE connection) without suspending.
-     *
-     * Use this from `ViewModel.onCleared()` where `viewModelScope` is already cancelled and launching a new coroutine
-     * is not possible.
-     */
-    fun cancel() {
-        reassembler.reset()
-        serviceScope.cancel()
+        try {
+            bleConnection.disconnect()
+        } finally {
+            reassembler.reset()
+            serviceScope.cancel()
+        }
     }
 
     // endregion
 
     // region Internal helpers
 
-    /** Encode [json] into ≤20-byte packets and write each one WITH_RESPONSE to the commander characteristic. */
-    private suspend fun sendCommand(json: String) {
-        Logger.d { "$TAG: → $json" }
+    /**
+     * Encode [json] into ≤20-byte packets and write each one WITH_RESPONSE to the commander characteristic. Only the
+     * [command] code is logged: a Connect payload carries the WiFi password, and even its length gives away the SSID
+     * and password lengths.
+     */
+    private suspend fun sendCommand(command: Int, json: String) {
+        Logger.d { "$TAG: → command=$command" }
         val packets = NymeaPacketCodec.encode(json)
         bleConnection.profile(WIRELESS_SERVICE_UUID) { service ->
             for (packet in packets) {
@@ -245,9 +240,8 @@ class NymeaWifiService(
      * Uses a short timeout because this is an optional enrichment for UX, not a provisioning success criterion.
      */
     private suspend fun fetchConnectionIpAddress(): String? = safeCatching {
-        sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
-        val response =
-            NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = CONNECTION_INFO_TIMEOUT))
+        sendCommand(CMD_GET_CONNECTION, NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
+        val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = CONNECTION_INFO_TIMEOUT))
         if (response.responseCode == RESPONSE_SUCCESS) {
             response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() }
         } else {

@@ -14,14 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MatchingDeclarationName")
+
 package org.meshtastic.core.common.util
 
 /** No-op stubs for iOS target in core:common. */
-actual object BuildUtils {
-    actual val isEmulator: Boolean = false
-    actual val sdkInt: Int = 0
-}
-
 actual object DateFormatter {
     actual fun formatRelativeTime(timestampMillis: Long): String = ""
 

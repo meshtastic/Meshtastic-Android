@@ -219,16 +219,8 @@ class MeshServiceOrchestratorTest {
         val takEnabledFlow = MutableStateFlow(false)
         val takRunningFlow = MutableStateFlow(false)
         val lifecycleEvents = mutableListOf<String>()
-        every { takServerManager.start(any()) } calls
-            {
-                lifecycleEvents += "start"
-                Unit
-            }
-        every { takServerManager.stop() } calls
-            {
-                lifecycleEvents += "stop"
-                Unit
-            }
+        every { takServerManager.start(any()) } calls { lifecycleEvents += "start" }
+        every { takServerManager.stop() } calls { lifecycleEvents += "stop" }
         val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
 
         orchestrator.start()
@@ -248,16 +240,8 @@ class MeshServiceOrchestratorTest {
         val takEnabledFlow = MutableStateFlow(true)
         val takRunningFlow = MutableStateFlow(false)
         val lifecycleEvents = mutableListOf<String>()
-        every { takServerManager.start(any()) } calls
-            {
-                lifecycleEvents += "start"
-                Unit
-            }
-        every { takServerManager.stop() } calls
-            {
-                lifecycleEvents += "stop"
-                Unit
-            }
+        every { takServerManager.start(any()) } calls { lifecycleEvents += "start" }
+        every { takServerManager.stop() } calls { lifecycleEvents += "stop" }
         val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
 
         orchestrator.start()

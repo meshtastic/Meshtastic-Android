@@ -43,9 +43,15 @@ data class CustomTileProviderConfig(
  * A private/link-local host blocklist is intentionally omitted: the user supplies the tile endpoint, requests carry no
  * Meshtastic-held credentials, and client-side tile GETs make that SSRF shape an accepted low-risk case.
  */
-fun String.isValidTileUrlTemplate(requireHttps: Boolean): Boolean {
+fun String.isValidTileUrlTemplate(cleartextPermitted: (host: String) -> Boolean = ::isCleartextPermitted): Boolean {
     val resolved = resolvedForValidation() ?: return false
-    return resolved.hasAcceptedScheme(requireHttps) && resolved.hasUsableAuthority()
+    return resolved.hasUsableAuthority() && resolved.hasAcceptedScheme(cleartextPermitted)
+}
+
+/** Whether this is an otherwise usable http template whose host the platform refuses plain http to. */
+fun String.isRefusedCleartextTileUrl(cleartextPermitted: (host: String) -> Boolean = ::isCleartextPermitted): Boolean {
+    val resolved = resolvedForValidation() ?: return false
+    return resolved.scheme() == "http" && resolved.hasUsableAuthority() && !cleartextPermitted(resolved.host())
 }
 
 /**
@@ -66,16 +72,30 @@ private fun String.resolvedForValidation(): String? {
     return resolved.takeIf { hasPlaceholders && '{' !in it && '}' !in it && it.none(Char::isWhitespace) }
 }
 
-private fun String.hasAcceptedScheme(requireHttps: Boolean): Boolean {
-    val scheme = substringBefore(SCHEME_SEPARATOR, missingDelimiterValue = "").lowercase()
-    return if (requireHttps) scheme == "https" else scheme == "http" || scheme == "https"
+private fun String.hasAcceptedScheme(cleartextPermitted: (host: String) -> Boolean): Boolean = when (scheme()) {
+    "https" -> true
+    "http" -> cleartextPermitted(host())
+    else -> false
 }
 
 /** A host, no fragment, and no credentials — those would be persisted in the clear and sent with every tile. */
 private fun String.hasUsableAuthority(): Boolean {
-    val afterScheme = substringAfter(SCHEME_SEPARATOR)
-    val authority = afterScheme.substringBefore('/').substringBefore('?')
-    return '#' !in afterScheme && '@' !in authority && authority.substringBefore(':').isNotBlank()
+    val authority = authority()
+    return '#' !in substringAfter(SCHEME_SEPARATOR) && '@' !in authority && host().isNotBlank()
+}
+
+private fun String.scheme(): String = substringBefore(SCHEME_SEPARATOR, missingDelimiterValue = "").lowercase()
+
+private fun String.authority(): String = substringAfter(SCHEME_SEPARATOR).substringBefore('/').substringBefore('?')
+
+/** The authority without its port; an IPv6 literal loses its brackets, and an unterminated one has no host. */
+private fun String.host(): String {
+    val authority = authority()
+    return if (authority.startsWith('[')) {
+        if (']' !in authority) "" else authority.substringAfter('[').substringBefore(']')
+    } else {
+        authority.substringBefore(':')
+    }
 }
 
 private const val SCHEME_SEPARATOR = "://"

@@ -285,7 +285,7 @@ private fun ScannerReticule() {
     }
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "InjectDispatcher") // CameraX analysis wants an Executor; the default pool backs it
 @Composable
 private fun ScannerView(onResult: (String) -> Unit, onCameraReady: (Boolean) -> Unit, onCameraError: () -> Unit) {
     val context = LocalContext.current

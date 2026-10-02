@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-09-19
+last_updated: 2026-09-28
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -30,7 +30,7 @@ Module settings use a card-based layout with toggle switches, dropdowns, text fi
 
 Every module lives under **Settings → Module configuration**.
 
-> ⚠️ **Important:** Saving a module screen restarts the node — the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**, and the node may still restart for some changes.
+> ⚠️ **Important:** Saving a module screen restarts the node: the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**. External Notification may still restart the node for some changes, while a Mesh Beacon change applies without a restart.
 
 ### MQTT module
 
@@ -46,8 +46,8 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | JSON output enabled | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
 | TLS enabled | Use secure connection |
 | Root topic | Base MQTT topic path |
-| Proxy to client enabled | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself |
-| MQTT proxy on this phone | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt) |
+| Proxy to client enabled | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself |
+| MQTT proxy in this app | The app-side half of **Proxy to client enabled**: whether this app acts as that relay. See [MQTT](mqtt) |
 | Map reporting | Publish position to the public map — see the Map reporting group that follows |
 
 Turning **Map reporting** on reveals a consent card headed *Consent to Share Unencrypted Node Data
@@ -58,7 +58,7 @@ until you agree:
 |---------|-------------|
 | I agree. | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it |
 | Precision slider | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads *±* the resulting distance, in your own units |
-| Map reporting interval (seconds) | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered |
+| Map Publish Interval | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered |
 
 See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and broker setup.
 
@@ -94,8 +94,8 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 | Output vibra (GPIO) | Pin the vibration motor is wired to |
 | Use PWM buzzer | Drive the buzzer with PWM, which allows tones rather than a single pitch |
 | Use I2S as buzzer | Send the alert through an I2S audio output instead |
-| Output duration (milliseconds) | How long a single alert lasts |
-| Nag timeout (seconds) | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+| GPIO Output Duration | How long a single alert lasts |
+| Nag Timeout | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
 | Ringtone | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file |
 
 ### Store & Forward module
@@ -125,7 +125,7 @@ Automated range testing tool for evaluating link quality between nodes. When ena
 | Setting | Description |
 |---------|-------------|
 | Range test enabled | Activate range testing |
-| Sender message interval (seconds) | Time between test transmissions, chosen from a dropdown of fixed intervals |
+| Sender Interval | Time between test transmissions, chosen from a dropdown of fixed intervals |
 | Save .CSV in storage (ESP32 only) | Log received test data to the node's own filesystem. ESP32 hardware only |
 
 ### Telemetry module
@@ -201,7 +201,7 @@ Broadcasts information about directly heard neighbors, enabling mesh topology ma
 | Setting | Description |
 |---------|-------------|
 | Neighbor Info enabled | Activate neighbor broadcasting |
-| Update interval (seconds) | How often to broadcast neighbor list |
+| Update Interval | How often to broadcast neighbor list |
 | Transmit over LoRa | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
@@ -226,8 +226,8 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 | GPIO pin to monitor | GPIO pin connected to sensor |
 | Detection trigger type | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
 | Use INPUT_PULLUP mode | Enable the pin's internal pull-up resistor |
-| Minimum broadcast (seconds) | Minimum time between alert broadcasts |
-| State broadcast (seconds) | Periodic state broadcast interval |
+| Minimum time between detection broadcasts | Minimum time between alert broadcasts |
+| State Broadcast Interval | Periodic state broadcast interval |
 | Send bell with alert message | Include bell character in alerts |
 | Friendly name | Custom name for this sensor |
 
@@ -238,9 +238,9 @@ People counter using Wi-Fi and BLE probe requests. Counts nearby devices by pass
 | Setting | Description |
 |---------|-------------|
 | Paxcounter enabled | Activate people counting |
-| Update interval (seconds) | How often to report counts |
-| Wi-Fi RSSI threshold | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
-| BLE RSSI threshold | The same cut-off for BLE advertisements (defaults to −80 dBm) |
+| Update Interval | How often to report counts |
+| WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
+| BLE Threshold (dBm) | The same cut-off for BLE advertisements (defaults to −80 dBm) |
 
 > 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
 
@@ -292,8 +292,9 @@ Remotely configure nodes that share your admin key:
 ### Backup & Restore
 
 **Settings → Backup & Restore** writes the connected node's whole configuration to a file with
-**Export configuration**, and reads a saved file back in with **Import configuration**. Export
-before a factory reset, or to copy one node's setup onto another. The section is shown for your
+**Export configuration**, and reads a saved file back in with **Import configuration**.
+Traffic Management settings are exported but not applied on import. Export before a factory
+reset, or to copy one node's setup onto another. The section is shown for your
 own node only, not over remote admin.
 
 ### Advanced
@@ -331,6 +332,7 @@ appears only when your own node is selected. It is grouped rather than flat:
 
 - **Allow analytics and crash reporting** — opt in or out of diagnostics.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
+  It needs precise location: with approximate location allowed, turning it on asks for precise.
 - **Homoglyph encoding** — how look-alike characters in names are handled.
 
 **Appearance**

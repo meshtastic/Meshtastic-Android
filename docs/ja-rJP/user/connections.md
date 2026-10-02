@@ -1,8 +1,7 @@
 ---
 title: コネクション
-parent: User Guide
 nav_order: 2
-last_updated: 2026-08-30
+last_updated: 2026-09-29
 description: スマートフォンやデスクトップを、Bluetooth・USB・TCP/IP で Meshtastic 無線機に接続します。
 aliases:
   - bluetooth
@@ -39,12 +38,12 @@ You can change the pairing method, or turn Bluetooth on for a radio that ships w
 
 The screen names anything on the app's side that is blocking a scan, with the fix attached:
 
-| What you see                                        | 意味                                                                                                                                                                         |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A card asking for **Nearby devices**                | The permission has not been granted. **Grant permission** requests it; once Android stops prompting, the button becomes **Open settings**. |
-| **Bluetooth is off**                                | The adapter is disabled — the card opens Bluetooth settings.                                                                                               |
-| **Bluetooth scanning also needs location services** | Android 11 and older only: the permission is held but the system location toggle is off.                                                   |
-| No card, empty list                                 | Nothing on this side is blocking the scan — the radio is out of range, off, or already connected elsewhere.                                                |
+| What you see                                                | 意味                                                                                                                                                                         |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A card asking for **Nearby devices**                        | The permission has not been granted. **Grant permission** requests it; once Android stops prompting, the button becomes **Open settings**. |
+| **Bluetooth is off**                                        | The adapter is disabled — the card opens Bluetooth settings.                                                                                               |
+| **Bluetooth scanning also needs location services**         | Android 11 and older only: the permission is held but the system location toggle is off.                                                   |
+| No card, and **No Bluetooth devices seen** under the header | Nothing on this side is blocking the scan. The radio is out of range, off, or already connected elsewhere.                                 |
 
 The explanation lives in that card, not in the scan control: tapping **Scan for Bluetooth devices** after you have declined once asks Android again directly.
 
@@ -63,9 +62,13 @@ When connecting, a status indicator shows the current connection state — tap *
 
 ![接続中のステータス](../../assets/screenshots/connections_connecting.png)
 
-デバイスが見つからない場合、アプリは操作手順とともに空の状態を表示します：
+With no radio chosen yet, the connection card reads **No device selected**. A pane with nothing to list says so under its header, with a hint:
 
-![デバイスが見つからない状態](../../assets/screenshots/connections_empty_state.png)
+| Pane      | What it shows                                                                                                                                                                                                                                                                |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bluetooth | **No Bluetooth devices seen**, and "Ensure you're within range of the device." Start a scan from the header.                                                                                                                                 |
+| ネットワーク    | **No network devices seen**, and "Ensure you're connected to the same network as the device." Shown only while nothing has been discovered and **Recent Network Devices** is empty. **Add device manually…** stays below it. |
+| USB       | **No USB devices detected**, and "Connect a device with a USB data cable to use serial."                                                                                                                                                                     |
 
 ### Bluetooth のトラブルシューティング
 
@@ -102,7 +105,7 @@ Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based c
 1. 無線機がスマートフォン／デスクトップと同じローカルネットワーク上にあることを確認します。
 2. On the **Connect** tab, select **Network** in the transport selector.
 3. 無線機は次の 2 通りの方法で選べます：
-   - **ネットワークデバイスをスキャン**：これをオンにすると、ローカルネットワーク上で自身を告知している無線機（mDNS ／ `_meshtastic._tcp`）を自動的に探索します。 見つかったデバイスがリストに表示されるので、タップして接続します。
+   - **ネットワークデバイスをスキャン**：これをオンにすると、ローカルネットワーク上で自身を告知している無線機（mDNS ／ `_meshtastic._tcp`）を自動的に探索します。見つかったデバイスがリストに表示されるので、タップして接続します。
    - **デバイスを手動で追加…**：無線機の IP アドレス（またはホスト名）とポート（既定：`4403`）を入力します。
 4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (touch & hold to remove one).
 

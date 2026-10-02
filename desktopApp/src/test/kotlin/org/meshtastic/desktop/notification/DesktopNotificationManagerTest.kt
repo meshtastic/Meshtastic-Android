@@ -94,7 +94,7 @@ class DesktopNotificationManagerTest {
 
         assertTrue(dispatched, "Tray fallback acceptance should count as delivery-accepted")
         assertNotNull(fallback, "Expected fallback notification to be emitted")
-        assertEquals("Fallback", fallback!!.title)
+        assertEquals("Fallback", fallback.title)
     }
 
     @Test

@@ -181,6 +181,7 @@ class FakeBleConnection :
         onDisconnect?.invoke()
     }
 
+    @Suppress("InjectDispatcher") // test double: Unconfined delivers notifications synchronously, see below
     override suspend fun <T> profile(
         serviceUuid: Uuid,
         timeout: Duration,
@@ -358,10 +359,14 @@ class FakeBluetoothRepository :
     /** Every device passed to [bond], in call order — lets tests assert that bonding was (or was not) attempted. */
     val bondCalls = mutableListOf<BleDevice>()
 
+    /** Set false to model hardware with no Bluetooth LE, such as an Android XR headset. */
+    override var isSupported: Boolean = true
+
     init {
         registerResetAction {
             bondOutcome = BondOutcome.Success
             bondCalls.clear()
+            isSupported = true
         }
     }
 

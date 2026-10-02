@@ -17,18 +17,20 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_humidity">Влажность</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">От %1$s: %2$s</string>
     <string name="a11y_node_battery">заряд батареи %1$d</string>
+    <string name="a11y_node_channel">Канал %1$d</string>
     <string name="a11y_node_distance_away">%1$s отсюда</string>
     <string name="a11y_node_favorite">избранный</string>
-    <string name="a11y_node_hops_away">%1$d hops away</string>
     <string name="a11y_node_last_heard">последний раз услышан %1$s</string>
     <string name="a11y_node_offline">оффлайн</string>
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роль %1$s</string>
     <string name="a11y_node_signal">сигнал %1$s</string>
     <string name="a11y_nodes_at_hop">Хоп %1$d: %2$d нод</string>
+    <string name="a11y_temperature">Температура</string>
     <string name="about">О приложении</string>
     <string name="accept">Принять</string>
     <string name="acknowledgements">Благодарности</string>
@@ -46,7 +48,6 @@
     <string name="action_translate_message">Перевести сообщение</string>
     <string name="actions">Действия</string>
     <string name="adc_multiplier_override">Коэффициент переопределения ADC</string>
-    <string name="adc_multiplier_override_ratio">Коэффициент переопределения ADC</string>
     <string name="adc_voltage">Напряжение АЦП</string>
     <!-- ADD -->
     <string name="add">Добавить</string>
@@ -60,7 +61,6 @@
     <string name="add_network_device_manually">Добавить устройство вручную…</string>
     <string name="add_network_layer">Добавить сетевой уровень</string>
     <string name="address">Адрес</string>
-    <string name="admin_key">Ключ администратора</string>
     <string name="admin_keys">Ключи администратора</string>
     <string name="administration">Администрирование</string>
     <string name="advanced">Расширенные</string>
@@ -70,26 +70,17 @@
     <string name="air_quality">Качество воздуха</string>
     <string name="air_quality_icon">Значок качества воздуха</string>
     <string name="air_quality_metrics_log">Журнал метрик качества воздуха</string>
-    <string name="air_quality_metrics_module_enabled">Модуль измерения качества воздуха включен</string>
-    <string name="air_quality_metrics_update_interval_seconds">Интервал обновления данных качества воздуха</string>
     <string name="air_util_definition">Процент времени эфира для передачи в течение последнего часа.</string>
     <string name="air_utilization">AirUtil</string>
-    <!-- ALERT -->
-    <string name="alert_bell_buzzer">Бузер оповещений</string>
-    <string name="alert_bell_led">Светодиодный индикатор</string>
     <string name="alert_bell_text">Символ колокольчика оповещения!</string>
-    <string name="alert_bell_vibra">Вибросигнал</string>
-    <string name="alert_message_buzzer">Звуковой уведомитель сообщений</string>
-    <string name="alert_message_led">LED-индикатор уведомлений</string>
-    <string name="alert_message_vibra">Вибрация при уведомлении</string>
     <string name="all_time">Всё</string>
     <string name="allow_input_source">Разрешить источник ввода</string>
     <string name="allow_undefined_pin_access">Разрешить неопределённый контакт</string>
     <string name="alt">Уровень моря</string>
     <string name="altitude">Высота</string>
-    <string name="always_point_north">Всегда указывать на север</string>
     <string name="ambient_lighting">Фоновое освещение</string>
     <string name="ambient_lighting_config">Настройки Ambient Lighting</string>
+    <string name="ammonium">Аммоний</string>
     <string name="analytics_notice">Аналитика помогает нам улучшить Android приложение (спасибо), мы будем получать анонимизированную информацию о поведении пользователя. В частности: отчеты о сбоях, используемые экраны и пр.</string>
     <string name="analytics_okay">Разрешить аналитику и отчеты о сбоях.</string>
     <string name="analytics_platforms">Платформы для аналитики:</string>
@@ -126,6 +117,7 @@
     <string name="aqi_value_with_severity">%1$d (%2$s)</string>
     <string name="aqi_very_unhealthy">Очень вредный</string>
     <string name="archived_channel">Архивный канал</string>
+    <string name="archived_channel_read_only">Этот канал больше не настроен на твоём радио. Его сообщения сохранены здесь, но ты не можешь отправлять их или реагировать.</string>
     <string name="are_you_sure">Вы уверены?</string>
     <string name="are_you_sure_change_default">Вы уверены, что хотите перейти на канал по умолчанию?</string>
     <string name="audio">Звук</string>
@@ -136,8 +128,6 @@
     <string name="backup_keys_confirmation">Сохранить публичные и приватные ключи в безопасном зашифрованном хранилище на этом устройстве.</string>
     <string name="backup_restore">Резервная копия и восстановление</string>
     <string name="bad">Плохой</string>
-    <!-- BANDWIDTH -->
-    <string name="bandwidth">Ширина канала</string>
     <string name="bandwidth_default">По умолчанию (%1$s кГц)</string>
     <string name="bandwidth_option_khz">%1$s кГц</string>
     <string name="bandwidth_unsupported">Неподдерживаемый (%1$s)</string>
@@ -145,16 +135,14 @@
     <string name="baro_pressure">Давл</string>
     <string name="battery">Батарея</string>
     <string name="battery_ina_2xx_i2c_address">I2C-адрес INA_2XX батареи</string>
+    <string name="biochemical_oxygen_demand">БПК</string>
     <string name="ble_devices">Устройства Bluetooth</string>
-    <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI порог (по умолчанию -80)</string>
     <string name="ble_scan_needs_location_services">Для сканирования через Bluetooth на этой версии Android тоже нужно включить определение местоположения. Твоё местоположение не используется.</string>
-    <string name="blue">Синий</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_available_devices">Доступные Bluetooth-устройства</string>
     <string name="bluetooth_config">Настройка Bluetooth</string>
     <string name="bluetooth_disabled">Bluetooth выключен. Включи его, чтобы искать находящиеся рядом устройства.</string>
-    <string name="bluetooth_enabled">Bluetooth включен</string>
     <string name="bluetooth_feature_config">Настройки</string>
     <string name="bluetooth_feature_config_description">Беспроводное управление настройками устройства и каналами.</string>
     <string name="bluetooth_feature_discovery">Обнаружение</string>
@@ -177,16 +165,12 @@
         <item quantity="many">Достигнут предел сканирования Bluetooth. Попробуйте снова через %1$d секунд.</item>
         <item quantity="other">Достигнут предел сканирования Bluetooth. Попробуйте снова через %1$d секунд.</item>
     </plurals>
-    <string name="bold_heading">Выделять заголовок жирным</string>
     <string name="bonding_failed_permissions">Сопряжение не удалось. Дай соседнему устройству разрешения и попробуй снова.</string>
     <string name="bonding_failed_retry">Сопряжение не завершилось. Попробуй снова.</string>
     <string name="boot_reconnect_blocked_message">Разрешение на доступ к ближайшим устройствам выключено, поэтому к твоему радио нельзя подключиться через Bluetooth. Нажми, чтобы включить его снова.</string>
     <string name="boot_reconnect_blocked_title">Meshtastic не может переподключиться</string>
     <string name="bottom_nav_settings">Настройки</string>
-    <string name="broadcast_interval">Период рассылки</string>
     <string name="busy_noise_floor">Busy floor</string>
-    <string name="button_gpio">Кнопка GPIO</string>
-    <string name="buzzer_gpio">Зуммер GPIO</string>
     <plurals name="cache_limit_eviction_warning">
         <item quantity="one">Снижение этого параметра навсегда удалит сохранённую историю для %1$d устройства.</item>
         <item quantity="few">Снижение этого параметра навсегда удалит сохранённую историю для %1$d устройств.</item>
@@ -206,7 +190,6 @@
     <string name="canned_message_enabled">Шаблонные сообщения включены</string>
     <string name="cant_change_no_radio">Не удалось сменить канал, поскольку радиостанция еще не подключена. Пожалуйста, попробуйте еще раз.</string>
     <string name="cant_shutdown">Выключение не поддерживается на этом устройстве</string>
-    <string name="carousel_interval">Интервал карусели</string>
     <string name="ch_util_definition">Использование для текущего канала, включая хорошо сформированный TX, RX и неправильно сформированный RX (так называемый шум).</string>
     <!-- CHANNEL -->
     <string name="channel">Кнл</string>
@@ -220,11 +203,11 @@
     <string name="channel_8">Канал 8</string>
     <string name="channel_features">Особенности канала</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
-    <string name="channel_label">Канал</string>
     <string name="channel_name">Имя канала</string>
     <string name="channel_url">URL канала</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Каналы</string>
+    <string name="chemical_oxygen_demand">ХПК</string>
     <!-- CHIRPY -->
     <string name="chirpy">Щебетун</string>
     <string name="chirpy_assistant_title">Весёлый помощник</string>
@@ -265,9 +248,6 @@
     <string name="co2">CO₂</string>
     <string name="co2_humidity">Влажн CO₂</string>
     <string name="co2_temperature">Темп CO₂</string>
-    <string name="codec_2_enabled">CODEC 2 включен</string>
-    <string name="codec2_sample_rate">Частота дискретизации CODEC2</string>
-    <string name="coding_rate">Частота кодирования</string>
     <string name="collapse_chart">Свернуть диаграмму</string>
     <string name="collapsed">Развален</string>
     <string name="communicate_off_the_grid">Общайтесь вне сети со своими друзьями и сообществом без использования сотовой связи.</string>
@@ -280,49 +260,28 @@
     <string name="compass_no_location_permission">Для отображения расстояния и азимута требуется разрешение на определение местоположения.</string>
     <string name="compass_no_magnetometer">Это устройство не оснащено датчиком компаса. Курс недоступен.</string>
     <string name="compass_north_top">Север компаса в верх</string>
-    <string name="compass_orientation">Направление компаса</string>
     <string name="compass_title">Компас</string>
     <string name="compass_uncertainty">Предполагаемая площадь: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Предполагаемая площадь: точность неизвестна</string>
     <string name="compromised_keys">Обнаружены скомпрометированные ключи, нажмите OK для пересоздания.</string>
     <!-- CONFIG -->
-    <string name="config_device_doubleTapAsButtonPress_summary">Рассматривать двойное нажатие на поддерживаемых акселерометрах как нажатие пользовательской кнопки.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Управляет мигающим светодиодом на устройстве. Для большинства устройств это будет управлять одним из до 4 светодиодов, зарядное устройство и GPS светодиоды не управляются.</string>
-    <string name="config_device_transmitOverLora_summary">В дополнение к отправке на MQTT и PhoneAPI, наши NeighborInfo должны быть переданы через LoRa. Недоступно на канале с ключом и именем по умолчанию.</string>
     <string name="config_device_tripleClickAsAdHocPing_summary">Отправлять позицию на основной канал по тройному нажатию кнопки.</string>
     <string name="config_device_tzdef_summary">Часовой пояс дат на экране и журнале устройства.</string>
     <string name="config_device_use_phone_tz">Использовать часовой пояс телефона</string>
-    <string name="config_display_auto_screen_carousel_secs_summary">Автоматически переключает на следующую страницу на экране как карусель, основываясь на заданном интервале.</string>
-    <string name="config_display_compass_north_top_summary">Стрелка компаса на экране за пределами круга всегда указывает на север.</string>
-    <string name="config_display_displaymode_summary">Переопределить макет экрана по умолчанию.</string>
-    <string name="config_display_flip_screen_summary">Отразить экран по вертикали.</string>
-    <string name="config_display_heading_bold_summary">Жирный шрифт заголовка на экране.</string>
-    <string name="config_display_oled_summary">Переопределить автоматическое распознавание экрана OLED.</string>
-    <string name="config_display_screen_on_secs_summary">Как долго экран остается включенным после нажатия пользовательской кнопки или получения сообщений.</string>
-    <string name="config_display_units_summary">Единицы измерения, отображаемые на экране устройства.</string>
-    <string name="config_display_wake_on_tap_or_motion_summary">Необходимо наличие акселерометра на вашем устройстве.</string>
-    <string name="config_lora_frequency_slot_summary">Рабочая частота вашей ноды рассчитывается на основе региона, настроек модема и этого поля. При значении 0 интервал автоматически рассчитывается на основе названия основного канала и изменяется с публичного интервала по умолчанию. Вернитесь к публичному интервалу по умолчанию, если настроены частный основной и общедоступный дополнительный каналы.</string>
-    <string name="config_lora_hop_limit_summary">Задает максимальное количество прыжков, по умолчанию - 3. Увеличение количества также увеличивает перегрузку и должно использоваться с осторожностью. Сообщения с 0 прыжков не будут получать подтверждения.</string>
+    <string name="config_lora_coding_rate_fraction">4/%1$d</string>
+    <string name="config_lora_coding_rate_override">Переопределение скорости кодирования</string>
+    <string name="config_lora_coding_rate_override_max_summary">В этом пресете уже используется максимальная скорость кодирования.</string>
+    <string name="config_lora_coding_rate_override_summary">Добавляет коррекцию ошибок поверх пресета. Более высокая скорость кодирования увеличивает длительность передачи каждого пакета и расходует больше рабочего цикла и ресурсов канала.</string>
+    <string name="config_lora_coding_rate_preset_default">Пресет по умолчанию (%1$s)</string>
     <string name="config_lora_modem_preset_licensed_summary">Пресеты этого региона предназначены только для лицензированных операторов (любительское радио). Включи «Лицензированный радиолюбитель (Ham)» в настройках пользователя, чтобы выбрать их.</string>
     <string name="config_lora_modem_preset_summary">Доступные пресеты модема, по умолчанию - Long Fast.</string>
     <string name="config_lora_region_summary">Регион, в котором вы будете использовать ваше радио.</string>
-    <string name="config_network_eth_enabled_summary">Включение Ethernet отключит Bluetooth-соединение с приложением. TCP-соединения не доступны на устройствах Apple.</string>
     <string name="config_network_udp_enabled_summary">Включить вещание пакетов через UDP в локальной сети.</string>
-    <string name="config_network_wifi_enabled_summary">Включение WiFi отключит Bluetooth-подключение к приложению.</string>
-    <string name="config_position_broadcast_secs_summary">Максимальное время между передачами позиции нодой.</string>
-    <string name="config_position_broadcast_smart_minimum_distance_summary">Минимальное расстояние для умной рассылки координаты.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Чем меньше расстояние, тем быстрее будет отправляться обновление позицию.</string>
-    <string name="config_position_flags_summary">Необязательные поля в сообщении о местоположении. Чем больше полей включено, тем больше сообщение, а значит больше время передачи и риск потери пакетов.</string>
-    <string name="config_position_gps_update_interval_summary">Как часто запрашивать координаты GPS (&lt;10 секунд держит GPS включенным постоянно).</string>
-    <string name="config_power_is_power_saving_summary">Все компоненты устройства будут  засыпать, насколько возможно. Для ролей TRACKER или SENSOR также будет засыпать радиопередатчик. Не включай режим, если используешь ноду с телефоном или у ноды нет кнопки для пробуждения.</string>
     <string name="config_saved_restarting">Нода перезапускается и будет недоступна короткое время.</string>
-    <string name="config_security_admin_key">Открытый ключ для администрирования данной ноды</string>
-    <string name="config_security_debug_log_api_enabled">Вывод журнала отладки по последовательному каналу, просматривайте и выгружайте журналы устройства с измененным местоположением по Bluetooth.</string>
-    <string name="config_security_is_managed">Устройство управляется сетевым администратором, пользователь не может изменять настройки устройства.</string>
     <string name="config_security_private_key">Используется для создания общего ключа с удаленным устройством.</string>
     <string name="config_security_private_key_remote">Устройство не передаёт свой приватный ключ через удалённое администрирование. Вы можете задать новый ключ, но его невозможно будет прочитать обратно.</string>
     <string name="config_security_public_key">Сгенерировано из твоего приватного ключа и отправлено другим нодам сети, чтобы они могли вычислить совместный секретный ключ.</string>
-    <string name="config_security_serial_enabled">Последовательная консоль через Stream API.</string>
     <string name="configuration">Настройки</string>
     <string name="configure_bluetooth_permissions">Настроить разрешения Bluetooth</string>
     <string name="configure_critical_alerts">Настроить критические оповещения</string>
@@ -374,7 +333,6 @@
     <string name="debug_filter_included">Фильтр включен</string>
     <string name="debug_filter_preset_title">Готовые фильтры</string>
     <string name="debug_filters">Фильтры</string>
-    <string name="debug_log_api_enabled">API журнала отладки включен</string>
     <string name="debug_logcat_empty">Нет журналов приложения</string>
     <string name="debug_logcat_refresh">Обновить</string>
     <string name="debug_logs_export">Выгрузить логи</string>
@@ -425,8 +383,6 @@
     <string name="details">Подробности</string>
     <string name="detection_sensor">Датчик обнаружения</string>
     <string name="detection_sensor_config">Настройка датчика обнаружения</string>
-    <string name="detection_sensor_enabled">Датчик определения включен</string>
-    <string name="detection_trigger_type">Тип триггера обнаружения</string>
     <!-- DEVICE -->
     <string name="device">Устройство</string>
     <string name="device_configuration">Настройки устройства</string>
@@ -441,17 +397,15 @@
     <string name="device_metrics_log">Интервал передачи</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
-    <string name="device_metrics_update_interval_seconds">Интервал обновления метрик устройства</string>
     <string name="device_metrics_voltage_value">%1$s: %2$s В</string>
     <string name="device_sleeping">Устройство спит</string>
     <string name="device_storage_ui_title">Хранилище устройства и UI (только для чтения)</string>
-    <string name="device_telemetry_enabled">Отправлять телеметрию устройства</string>
-    <string name="device_telemetry_enabled_summary">Включите/выключите модуль телеметрии устройства, чтобы отправлять показатели в сеть. Это номинальные значения. Перегруженные сети будут автоматически масштабироваться на более длительные интервалы в зависимости от количества подключенных нод.</string>
     <string name="device_theme_language">Тема: %1$s, Язык: %2$s</string>
     <string name="dew_point">Точка росы</string>
     <string name="direct_message">Прямое сообщение</string>
     <string name="direct_message_key">Ключ прямого сообщения</string>
     <string name="direct_messages">Личные сообщения</string>
+    <string name="disabled">Включено</string>
     <string name="discard_changes">Отмена</string>
     <string name="disconnect">Отключиться</string>
     <string name="disconnected">Отключено</string>
@@ -486,6 +440,7 @@
     <string name="discovery_scan_complete">Сессия завершена</string>
     <string name="discovery_scan_failed">Сканирование не удалось: %1$s</string>
     <string name="discovery_scan_history">История сканирования</string>
+    <string name="discovery_scan_in_progress">Сканирование пресетов LoRa…</string>
     <string name="discovery_scan_incomplete">Сессия не завершена</string>
     <string name="discovery_scan_progress">Прогресс сканирования</string>
     <string name="discovery_scan_summary">Суммарный скан</string>
@@ -528,22 +483,17 @@
     <string name="discovery_stop_scan">Остановить сканирование</string>
     <string name="discovery_summary_not_available">Анализ ИИ недоступен</string>
     <string name="discovery_time_remaining">Осталось %1$s</string>
-    <string name="discovery_unique_nodes">%1$d уникальных нод</string>
     <string name="discovery_view_map">Посмотреть карту</string>
     <string name="disk_free_indexed">Свободно на диске %1$d</string>
-    <!-- DISPLAY -->
     <string name="display">Дисплей</string>
     <string name="display_config">Дисплей устройства</string>
-    <string name="display_mode">Режим экрана</string>
-    <string name="display_time_in_12h_format">Если включено, устройство будет отображать время на экране в 12-часовом формате.</string>
-    <string name="display_units">Система измерения</string>
+    <string name="dissolved_oxygen">Растворённый O₂</string>
     <!-- DISTANCE -->
     <string name="distance">Расстояние</string>
     <string name="distance_filters">Фильтр Расстояния</string>
     <string name="distance_filters_description">Фильтровать список нод и сеть на основе близости к вашему телефону.</string>
     <string name="distance_measurements">Измерения расстояния</string>
     <string name="distance_measurements_description">Показать расстояния между вашим телефоном и другими нодами Meshstatic с позициями.</string>
-    <string name="dns">Служба доменных имен (DNS)</string>
     <!-- DOC -->
     <string name="doc_clear_search">Очистить условия поиска</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
@@ -559,6 +509,7 @@
     <string name="doc_keywords_mqtt">mqtt,broker,internet,bridge,uplink,downlink</string>
     <string name="doc_keywords_node_metrics">metrics,telemetry,signal,snr,rssi,battery,traceroute</string>
     <string name="doc_keywords_nodes">node,mesh,list,role,status,favorite,filter</string>
+    <string name="doc_keywords_notifications">notification,alert,sound,mute,reply,watch,wear os</string>
     <string name="doc_keywords_onboarding">setup,welcome,permissions,first-launch</string>
     <string name="doc_keywords_settings_module">module,serial,telemetry,canned,store-forward,administration</string>
     <string name="doc_keywords_settings_radio">settings,radio,lora,region,modem,device,power,security</string>
@@ -587,6 +538,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_node_metrics">Метрики ноды</string>
     <string name="doc_title_nodes">Ноды</string>
+    <string name="doc_title_notifications">Уведомления</string>
     <string name="doc_title_onboarding">Начало работы</string>
     <string name="doc_title_settings_module">Настройки - Модули и администрирование</string>
     <string name="doc_title_settings_radio">Настройки - Радио и пользователь</string>
@@ -599,18 +551,18 @@
     <string name="documentation">Документалка</string>
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Больше не показывать для этого устройства</string>
-    <string name="double_tap_as_button_press">Двойное нажатие как кнопка</string>
     <string name="downlink_enabled">MQTT Downlink включён</string>
     <string name="downlink_feature_description">Сообщения от публичного интернет шлюза пересылаются в локальную сетку. Из-за политики нулевого хоста, трафик сервера MQTT по умолчанию не будет распространяться дальше, чем это устройство.</string>
     <string name="download">Скачать</string>
     <string name="download_this_area">Загрузить этот регион</string>
     <string name="duplicated_public_key_title">Обнаружен дубликат открытого ключа</string>
+    <!-- DURATION -->
     <string name="dynamic">Динамический</string>
     <string name="easily_set_up_private_mesh_networks">Легко создать частные сети для защищённой и надежной связи в удаленных районах.</string>
-    <string name="echo_enabled">Echo включен</string>
     <string name="edit">Редактировать</string>
     <string name="edit_custom_tile_source">Редактировать источник сетевых плиток</string>
     <string name="eight_hours">8 часов</string>
+    <string name="electrical_conductivity">Электропроводность</string>
     <!-- EMOJI -->
     <string name="emoji_category_activities">Активности</string>
     <string name="emoji_category_animals_nature">Животные и природа</string>
@@ -624,28 +576,19 @@
     <string name="emoji_load_error">Не удалось загрузить эмодзи</string>
     <string name="emoji_no_results">Эмодзи не найдены</string>
     <string name="emoji_recently_used">Недавно использованные</string>
-    <string name="enable_power_saving_mode">Включить режим энергосбережения</string>
     <string name="enabled">Включено</string>
-    <!-- ENCRYPTION -->
-    <string name="encryption_enabled">Шифрование включено</string>
     <string name="encryption_error">Несоответствие публичного ключа</string>
     <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить ноду и позволить ей снова обменяться ключами, но это может указывать на серьезную проблему с безопасностью. Свяжитесь с пользователем по другому надежному каналу чтобы определить, произошла ли смена ключа в результате сброса настроек или другого преднамеренного действия.</string>
     <string name="encryption_pkc">Общий ключ шифрования</string>
     <string name="encryption_pkc_text">Для этой ноды есть открытый ключ, поэтому взаимодействие с ним происходит с использованием шифрования с открытым ключом.</string>
     <string name="env_metrics_log">Метрики окружения</string>
-    <!-- ENVIRONMENT -->
     <string name="environment">Окружающая среда</string>
-    <string name="environment_metrics_module_enabled">Модуль метрик окружения включен</string>
-    <string name="environment_metrics_on_screen_enabled">Показатели окружения на экране включены</string>
-    <string name="environment_metrics_update_interval_seconds">Интервал обновления метрик среды</string>
-    <string name="environment_metrics_use_fahrenheit">Использовать метрику окружения в Fahrenheit</string>
     <string name="error">Ошибка</string>
     <string name="error_duty_cycle">Достигнут лимит отправки сообщений в единицу времени. Не удается отправить сообщения прямо сейчас, пожалуйста, повторите попытку позже.</string>
     <string name="error_recovery_exhausted">Не удалось установить стабильное соединение после нескольких попыток. Пожалуйста, выберите ноду снова, чтобы попробовать ещё раз.</string>
     <string name="establish_session">Подключение и управление</string>
     <string name="establishing_session">Установка удалённой сессии…</string>
     <string name="ethernet_config">Настройки Ethernet</string>
-    <string name="ethernet_enabled">Ethernet включен</string>
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="event_firmware_running">Работает событийная прошивка</string>
     <string name="event_use_event_theme">Использовать тему событий</string>
@@ -661,7 +604,6 @@
     <string name="export_tak_data_package">Экспорт пакета данных TAK</string>
     <string name="external_notification">Внешние уведомления</string>
     <string name="external_notification_config">Настройка внешнего уведомления</string>
-    <string name="external_notification_enabled">Внешние уведомления включены</string>
     <string name="factory_reset">Сброс до заводских настроек</string>
     <string name="fair">Средний</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
@@ -673,9 +615,9 @@
     <!-- FILTER -->
     <string name="filter_add_placeholder">Добавьте слово или регулярное выражение:шаблон</string>
     <string name="filter_disable_for_contact">Отключить фильтрацию</string>
-    <string name="filter_enable">Включить фильтрацию</string>
+    <string name="filter_enable">Фильтровать все диалоги</string>
     <string name="filter_enable_for_contact">Включить фильтрацию</string>
-    <string name="filter_enable_summary">Скрывать сообщения, содержащие слова-фильтры</string>
+    <string name="filter_enable_summary">Скрывать сообщения, содержащие фильтры в каждом канале и ЛС. Выключает их для одного разговора из меню.</string>
     <string name="filter_hide_count">Скрыть %1$d отфильтрованных</string>
     <string name="filter_icon">Фильтр</string>
     <string name="filter_message_label">Отфильтрованные</string>
@@ -691,6 +633,11 @@
     <string name="firmware_edition">Версия прошивки</string>
     <string name="firmware_event_ended_banner">%1$s завершен. Вернитесь к стандартной Meshtastic прошивке, чтобы восстановить нормальные функции.</string>
     <string name="firmware_event_ended_button">Обновление прошивки</string>
+    <string name="firmware_maintenance_bootloader_available">Последнее: %1$s</string>
+    <string name="firmware_maintenance_bootloader_installed">Установлено: %1$s</string>
+    <string name="firmware_maintenance_bootloader_latest_hint">Последняя версия: %1$s. Установленная версия отображается после перезагрузки устройства в режиме обновления.</string>
+    <string name="firmware_maintenance_bootloader_up_to_date">Загрузчик обновлён</string>
+    <string name="firmware_maintenance_bootloader_up_to_date_hint">Обновлять нечего. Далее переустанавливается прошивка, что приведёт к перезагрузке устройства.</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Файл стирания был скопирован, но устройство не начало стирание. Пока ничего не изменилось. Отключи устройство, дважды нажми кнопку сброса и повтори попытку.</string>
     <string name="firmware_maintenance_copy_failed">Не удалось скопировать файл на диск устройства. Убедите, что диск всё ещё подключён, и повтори попытку.</string>
     <string name="firmware_maintenance_data_unavailable">Список образов для стирания сейчас недоступен. Проверь подключение и повтори попытку или используй веб-флешер на flasher.meshtastic.org.</string>
@@ -742,6 +689,7 @@
     <string name="firmware_update_flashing">Прошивка устройства, подождите...</string>
     <string name="firmware_update_hang_tight">Держитесь крепче, работаем...</string>
     <string name="firmware_update_hash_rejected">Хэш прошивки отклонен. Устройство может потребовать подготовки хэша или обновления загрузчика.</string>
+    <string name="firmware_update_in_progress">Обновление прошивки…</string>
     <string name="firmware_update_invalid_local_file_detail">Выбранный файл "%1$s" не соответствует %2$s (%3$s). Выберите файл прошивки для этой цели.</string>
     <string name="firmware_update_keep_device_close">Держите устройство поближе к телефону.</string>
     <string name="firmware_update_latest">Обновить до: %1$s</string>
@@ -784,6 +732,7 @@
     <string name="firmware_update_taking_a_while">Это может занять минутку...</string>
     <string name="firmware_update_target">Целевое устройство: %1$s</string>
     <string name="firmware_update_title">Обновление прошивки</string>
+    <string name="firmware_update_transfer_percent">%1$d%</string>
     <string name="firmware_update_unknown_error">Неизвестная ошибка</string>
     <string name="firmware_update_unknown_hardware">Неизвестная модель оборудования: %1$d</string>
     <string name="firmware_update_unknown_release">Неизвестная внешняя версия</string>
@@ -804,9 +753,7 @@
     <string name="firmware_update_wipe_label">Очистить устройство при обновлении</string>
     <string name="firmware_update_wipe_usb_detail">Полностью стирает флэш-память устройства, а затем устанавливает выбранную прошивку с нуля.</string>
     <string name="firmware_version">Версия прошивки: %1$s</string>
-    <string name="fixed_pin">Фиксированный PIN-код</string>
     <string name="fixed_position">Фиксированная позиция</string>
-    <string name="flip_screen">Повернуть экран</string>
     <string name="for_more_information_see_our_privacy_policy">Дополнительная информация доступна в нашей политике конфиденциальности.</string>
     <!-- FORMAT -->
     <string name="format_bold">Полужирный</string>
@@ -817,13 +764,7 @@
     <string name="free_memory">Свободная память</string>
     <string name="free_memory_description">Доступная оперативная память в байтах</string>
     <string name="freq">Частота</string>
-    <string name="frequency_slot">Частота слота</string>
-    <string name="friendly_name">Понятное имя</string>
     <string name="gas_resistance">Сопротивление газа</string>
-    <string name="gateway">Шлюз</string>
-    <string name="generate_input_event_on_ccw">Создать событие ввода для CCW</string>
-    <string name="generate_input_event_on_cw">Создать событие ввода для CW</string>
-    <string name="generate_input_event_on_press">Создать событие ввода при нажатии</string>
     <string name="generate_qr_code">Сгенерировать QR-код</string>
     <!-- GEOFENCE -->
     <string name="geofence">Геозона</string>
@@ -848,32 +789,18 @@
     <string name="get_started">Начать работу</string>
     <string name="github_repository">Репозиторий GitHub</string>
     <string name="good">Хороший</string>
-    <!-- GPIO -->
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">Контакт GPIO</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">Контакт GPIO для порта A поворотного энкодера</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">Контакт GPIO для порта B поворотного энкодера</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">Контакт GPIO для порта Press поворотного энкодера</string>
-    <string name="gpio_pin_to_monitor">GPIO контакт для мониторинга</string>
-    <string name="gps_en_gpio">GPIO EN GPS</string>
-    <string name="gps_mode">Режим GPS (физическое оборудование)</string>
-    <string name="gps_receive_gpio">GPIO приёма GPS</string>
-    <string name="gps_transmit_gpio">GPIO передачи GPS</string>
     <string name="grant_permission">Дать разрешение</string>
-    <string name="green">Зеленый</string>
     <string name="ham_long_name_summary">Необязательно. Добавляется к твоему позывному, например, KD2ABC//Attic Heltec</string>
     <string name="hardware">Оборудование</string>
     <string name="hardware_model">Модель оборудования</string>
     <string name="heading">Курс</string>
-    <string name="heartbeat">Heartbeat</string>
     <string name="help_and_documentation">Справка и документация</string>
     <string name="hide_layer">Скрыть слой</string>
     <string name="hide_password">Скрыть пароль</string>
-    <string name="history_return_max">Макс возврат истории</string>
-    <string name="history_return_window">Окно возврата истории</string>
     <string name="hop_histogram_empty">В этом окне нет нод</string>
     <string name="hop_histogram_title">Нод на хоп</string>
-    <string name="hop_limit">Количество прыжков</string>
     <string name="hops_away">Прыжков</string>
     <string name="host">Хост</string>
     <string name="host_metrics_log">Метрики хоста</string>
@@ -881,18 +808,12 @@
     <string name="i_agree">Я согласен.</string>
     <string name="i_agree_to_share_my_location">Я прочитал и понял вышеописанное. Я добровольно даю согласие на незашифрованную передачу данных моей ноды через MQTT</string>
     <string name="i_know_what_i_m_doing">Я знаю, что делаю.</string>
-    <string name="i2s_clock">I2S Clock</string>
-    <string name="i2s_data_in">I2S Data In</string>
-    <string name="i2s_data_out">I2S Data Out</string>
-    <string name="i2s_word_select">I2S Word Select</string>
     <string name="iaq">Относительное качество воздуха в помещении</string>
     <string name="iaq_definition">(Качество воздуха в помещении) Относительная шкала IAQ, измеренная Bosch BME680. Диапазон значений 0–500.</string>
     <string name="icon_meanings">Обозначение значков</string>
-    <!-- IGNORE -->
     <string name="ignore">Игнорировать</string>
     <string name="ignore_add">Добавить '%1$s' в список игнорируемых?</string>
     <string name="ignore_incoming">Игнорировать входящие</string>
-    <string name="ignore_mqtt">Игнорировать MQTT</string>
     <string name="ignore_remove">Удалить '%1$s' из списка игнорируемых?</string>
     <!-- IMPORT -->
     <string name="import_configuration">Импорт настроек</string>
@@ -920,7 +841,6 @@
     <string name="ip">IP-адрес</string>
     <string name="ip_address">IP-адрес:</string>
     <string name="ip_port">Порт:</string>
-    <string name="ipv4_mode">Режим IPv4</string>
     <string name="json_output_enabled">Вывод JSON включен</string>
     <string name="jump_to_latest_from">%1$s</string>
     <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
@@ -933,6 +853,7 @@
     <string name="key_verification_final_title">Проверка ключа завершена</string>
     <string name="key_verification_request_title">Запрос проверки ключа</string>
     <string name="key_verification_title">Проверка ключа</string>
+    <string name="label_with_unit">%1$s (%2$s)</string>
     <string name="last_heard_filter_label">Фильтр по времени последнего сообщения: %1$s</string>
     <string name="last_position_update">Обновление последнего местоположения</string>
     <string name="latest_alpha_firmware">Последняя альфа</string>
@@ -943,10 +864,10 @@
     <string name="layer_type_coverage">Оценка покрытия</string>
     <string name="layer_type_network">Сетевой уровень</string>
     <string name="learn_more">Подробности</string>
-    <string name="led_heartbeat">Сердцебиение светодиодом</string>
-    <string name="led_state">Состояние LED</string>
     <string name="legacy_admin_channel">Устаревший канал Администратора</string>
     <string name="library_count">%1$d библиотек</string>
+    <string name="license">Лицензия</string>
+    <string name="license_notice">Свободное программное обеспечение под лицензией GNU General Public License v3, без каких-либо гарантий. Ты можешь распространять его на условиях той же лицензии.</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Лицензия радиолюбителя (HAM)</string>
     <string name="licensed_amateur_radio_text">Включение данной опции отключает шифрование и несовместимо с основной сетью Meshtastic.</string>
@@ -954,6 +875,8 @@
     <string name="licensed_mode_enable_title">Включить лицензированный (радиолюбительский) режим?</string>
     <string name="licensed_mode_enable_warning">Лицензированный режим удаляет ключи шифрования каналов и отключает канал администратора, поэтому весь трафик передаётся в открытом виде, который может прочитать кто угодно, а эта прошивка не может его подписывать, поэтому другие ноды не смогут подтвердить, что сообщение исходит от тебя. Это несовместимо со стандартной сетью Meshtastic, и вы остаётесь ответственны за соблюдение требований вашей радиолюбительской лицензии и местных нормативов.</string>
     <string name="licensed_mode_enable_warning_signed">Лицензированный режим удаляет ключи шифрования каналов и отключает канал администратора, поэтому весь трафик передаётся в открытом виде, который может прочитать кто угодно, но он имеет цифровую подпись, позволяя другим нодам убедиться, что сообщение исходит от тебя. Номер вашей ноды может однократно измениться, чтобы совпасть с твоим ключом идентификации, поэтому избранное, история сообщений, удалённое администрирование и другие ноды могут поначалу воспринять её как новую; вы остаётесь ответственны за соблюдение требований вашей радиолюбительской лицензии и местных нормативов.</string>
+    <string name="lightning_distance">Расстояние до грозы</string>
+    <string name="lightning_strikes_1h">Молнии (за 1 ч)</string>
     <!-- LOAD -->
     <string name="load">Загрузка</string>
     <string name="load_15_min">Загрузка 15 мин</string>
@@ -999,6 +922,7 @@
     <string name="lockdown_disable_message">Введи пароль для отключения блокировки. Устройство расшифрует хранилище и перезагрузится.</string>
     <string name="lockdown_enable">Включить блокировку</string>
     <string name="lockdown_enable_ack">Понимаю</string>
+    <string name="lockdown_enable_warning">Включение блокировки запирает отладочный порт (SWD) на оборудовании, где эта блокировка действует. Последующее отключение блокировки расшифровывает твои данные, но порт остаётся запертым. Чтобы снова открыть его, потребуется полное стирание чипа с помощью отладочного программатора, что уничтожит всё на устройстве.</string>
     <string name="lockdown_enter_passphrase">Введи парольную фразу</string>
     <string name="lockdown_hide_passphrase">Скрыть</string>
     <string name="lockdown_hours_until_expiry">Часов до истечения</string>
@@ -1049,13 +973,10 @@
     <string name="lux">Освещённость</string>
     <string name="manage_custom_tile_sources">Управление собственными источниками плиток</string>
     <string name="manage_map_layers">Управление Слоями Карты</string>
-    <string name="managed_mode">Управляемый режим</string>
     <string name="manual_position_request">Требуется запрос позиции вручную</string>
     <!-- MAP -->
     <string name="map">Карта сети</string>
-    <string name="map_cache_info">Емкость кэша: %1$d MB\nИспользование кэша: %2$d MB</string>
     <string name="map_cache_manager">Менеджер кэша</string>
-    <string name="map_cache_megabytes">%1$s МБ</string>
     <string name="map_cache_size">Текущий размер кэша</string>
     <string name="map_cache_tiles">%1$d файла</string>
     <string name="map_clear_tiles">Очистить загруженные файлы</string>
@@ -1098,11 +1019,8 @@
     <string name="map_overlay_weather_radar">Метеорадары</string>
     <string name="map_purge_fail">Ошибка очистки кэша SQL, подробности в logcat</string>
     <string name="map_purge_success">Кэш SQL очищен для %1$s</string>
-    <string name="map_reporting">Отчёты по карте</string>
     <string name="map_reporting_consent_header">Согласие на передачу незашифрованных данных ноды через MQTT</string>
     <string name="map_reporting_consent_text">Включая данную функцию, вы подтверждаете и прямо соглашаетесь на передачу географического местоположения вашего устройства в реальном времени через протокол MQTT без шифрования. Эти данные о местоположении могут быть использованы для таких целей, как отчёты карты в реальном времени, отслеживание устройства и подобные функции телеметрии.</string>
-    <string name="map_reporting_interval_seconds">Интервал отчета карты (в секундах)</string>
-    <string name="map_reporting_summary">Ваша нода будет периодически отправлять незашифрованный пакет отчёта карты на настроенный MQTT-сервер, что включает ID, полное и краткое имя, примерное местоположение, модель аппаратного обеспечения, роль, версию прошивки, регион LoRa, режим работы передатчика и имя основного канала.</string>
     <string name="map_select_download_region">Выберите регион загрузки</string>
     <string name="map_start_download">Начать скачивание</string>
     <string name="map_style_selection">Выбор стиля карты</string>
@@ -1123,6 +1041,7 @@
     <!-- MESH -->
     <string name="mesh_beacon">Маяк сети</string>
     <string name="mesh_beacon_broadcast">Трансляция маяка</string>
+    <string name="mesh_beacon_broadcast_requires_preset">Трансляция маяка объявляет пресет модема, чтобы другие могли присоединиться. Это радио использует собственные настройки LoRa вместо стандартного пресета, поэтому маяк может пригласить людей на настройки, которые они не смогут услышать. Здесь можно отключить трансляцию, но не включить её, пока радио не начнёт использовать стандартный пресет модема.</string>
     <string name="mesh_beacon_broadcast_summary">Периодически рекламировать эту сеть на близлежащие ноды</string>
     <string name="mesh_beacon_channel_number">Канал %1$d</string>
     <string name="mesh_beacon_channels_title">Каналы маяка</string>
@@ -1131,7 +1050,6 @@
     <string name="mesh_beacon_invitations_title">Приглашения в сеть</string>
     <string name="mesh_beacon_listen">Слушать маяки</string>
     <string name="mesh_beacon_listen_summary">Захват приглашений, рекламируемых ближайшими сетями</string>
-    <string name="mesh_beacon_message">Сообщение маяка</string>
     <string name="mesh_beacon_message_error">Максимум %1$d байт</string>
     <string name="mesh_beacon_no_channels">Нет доступных каналов</string>
     <string name="mesh_beacon_notification_body">Ближайшая сеть пригласила тебя присоединиться</string>
@@ -1151,6 +1069,7 @@
     <string name="mesh_beacon_preset_indicator">Рекламируется ближайшим маяком</string>
     <string name="mesh_beacon_preset_none">Отсутствует</string>
     <string name="mesh_beacon_region_label">Регион / Страна</string>
+    <string name="mesh_beacon_region_required">Укажите регион твоего радио перед настройкой маяка.</string>
     <string name="mesh_beacon_target">Цель %1$d</string>
     <string name="mesh_beacon_target_add">Добавить цель</string>
     <string name="mesh_beacon_target_channel_index">Канал</string>
@@ -1162,8 +1081,11 @@
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Служебные уведомления</string>
+    <string name="meshtastic_alerts_notifications_description">Критические оповещения, отправляемые нодами в сеть.</string>
     <string name="meshtastic_app_name">Meshtastic</string>
     <string name="meshtastic_broadcast_notifications">Уведомления о сообщениях в общем чате</string>
+    <string name="meshtastic_broadcast_notifications_description">Сообщения, отправляемые в ваши каналы.</string>
+    <string name="meshtastic_client_notifications">Уведомления по радио</string>
     <string name="meshtastic_low_battery_notifications">Уведомление о низком уровне заряда</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Уведомления о низком заряде батареи (избранные ноды)</string>
     <string name="meshtastic_mesh_beacon_notifications">Уведомления о приглашениях в сеть</string>
@@ -1207,10 +1129,12 @@
     <string name="message_routing_error_timeout_detail">Подтверждение не было получено вовремя. Повтори попытку, когда улучшится сигнал или покрытие mesh-сети.</string>
     <string name="message_routing_error_too_large">Слишком большое сообщение для отправки</string>
     <string name="message_routing_error_too_large_detail">Сократи сообщение и отправь его снова.</string>
+    <string name="message_status_ack_proof_invalid">Сбой проверки доставки</string>
     <string name="message_status_delivered">Отправлено в сеть</string>
     <string name="message_status_enroute">Отправка...</string>
     <string name="message_status_queued">В очереди на отправку</string>
     <string name="message_status_recipient_delivered">Доставлено получателю</string>
+    <string name="message_status_recipient_delivered_proven">Доставлено получателю - доказано</string>
     <string name="message_status_relayed_not_confirmed">Передано, не подтверждено получателем</string>
     <string name="message_status_sfpp_confirmed">Подтверждено в цепочке SF++</string>
     <string name="message_status_sfpp_routing">Маршрутизация по SF++ цепочке…</string>
@@ -1220,9 +1144,6 @@
     <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
-    <string name="minimum_broadcast_seconds">Минимальная трансляция (в секундах)</string>
-    <string name="minimum_distance">Умное расстояние</string>
-    <string name="minimum_interval">Умный интервал</string>
     <string name="minimum_wake_time_seconds">Минимальное время бодрствования</string>
     <string name="modem_preset">Шаблоны</string>
     <string name="module_settings">Настройки модуля</string>
@@ -1232,7 +1153,6 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">Настройка MQTT</string>
-    <string name="mqtt_enabled">MQTT включен</string>
     <string name="mqtt_error_connection_lost">MQTT: соединение потеряно</string>
     <string name="mqtt_error_credentials_rejected">MQTT: соединение отклонено (проверьте учетные данные)</string>
     <string name="mqtt_error_proxy_failed">Сбой MQTT-прокси: %1$s</string>
@@ -1246,8 +1166,6 @@
     <string name="mqtt_probe_tcp_failure">Не удается подключиться к брокеру (TCP)</string>
     <string name="mqtt_probe_timeout">Тайм-аут после %1$d мс</string>
     <string name="mqtt_probe_tls_failure">Ошибка TLS-рукопожатия: %1$s</string>
-    <string name="mqtt_proxy_local">MQTT-прокси на этом телефоне</string>
-    <string name="mqtt_proxy_local_summary">Этот телефон передаёт MQTT-трафик для подключённого устройства. Выключите, чтобы сразу прекратить передачу, не изменяя настройки MQTT устройства — полезно, когда трафик MQTT перегружает соединение. Включите обратно, чтобы продолжить передачу.</string>
     <string name="mqtt_status_connected">Подключено</string>
     <string name="mqtt_status_connecting">Подключение…</string>
     <string name="mqtt_status_disconnected">Отключено</string>
@@ -1255,6 +1173,8 @@
     <string name="mqtt_status_inactive">Неактивно</string>
     <string name="mqtt_status_reconnecting">Восстановление связи…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Восстановление (попытка %1$d) — %2$s</string>
+    <string name="mqtt_status_topics_refused_all">Подключено, но брокер отклонил все темы: %1$s</string>
+    <string name="mqtt_status_topics_refused_some">Подключено, но брокер отказал %1$s</string>
     <string name="mqtt_test_connection">Проверить соединение</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="must_update">Вам необходимо обновить данное приложение в магазине приложений (или с Github). Оно слишком старо для взаимодействия с прошивкой радиостанции. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
@@ -1270,7 +1190,6 @@
     <string name="mute_status_muted_for_days">Обеззвучен на %1$d дней, %2$s часов</string>
     <string name="mute_status_muted_for_hours">Обеззвучен на %1$s часов</string>
     <string name="mute_status_unmuted">Не заглушен</string>
-    <string name="nag_timeout_seconds">Таймаут Nag (в секундах)</string>
     <string name="name">Имя</string>
     <string name="name_cannot_be_empty">Имя не может быть пустым.</string>
     <string name="navigate_back">Вернуться</string>
@@ -1280,7 +1199,6 @@
     <string name="need_hardware_description">Meshtastic требует совместимое устройство. Наши спонсоры и партнёры предлагают готовое к использованию оборудование. Вот некоторые из самых популярных вариантов тут.</string>
     <string name="neighbor_info">Информация об окружении</string>
     <string name="neighbor_info_config">Настройки соседей</string>
-    <string name="neighbor_info_enabled">Информация о соседях включена</string>
     <string name="network">Сеть</string>
     <string name="new_channel_rcvd">Получен URL нового канала</string>
     <string name="new_messages_below">Новые сообщения ниже</string>
@@ -1288,12 +1206,13 @@
     <string name="new_nodes">Новые ноды</string>
     <string name="next">Далее</string>
     <string name="nfc_disabled">NFC отключен. Пожалуйста, включите его в настройках вашего устройства.</string>
+    <string name="nitrate">Нитрат</string>
+    <string name="nitrogen">Азот</string>
     <!-- NO -->
     <string name="no_bluetooth_devices_hint">Убедитесь, что вы находитесь в зоне действия устройства.</string>
     <string name="no_bluetooth_devices_seen">Bluetooth-устройства не обнаружены</string>
     <string name="no_custom_tile_sources_found">Источники пользовательских плиток не найдены.</string>
     <string name="no_device_selected">Устройство не выбрано</string>
-    <string name="no_devices_found">Устройства не найдены</string>
     <string name="no_files_manifested">Файлы не отобразились.</string>
     <string name="no_local_stats">Статистика недоступна</string>
     <string name="no_map_layers_loaded">Слои карты не загружены.</string>
@@ -1302,6 +1221,7 @@
     <string name="no_network_devices_seen">Сетевые устройства не обнаружены</string>
     <string name="no_pax_metrics_logs">Метрики прохожих недоступны</string>
     <string name="no_public_key">Нет открытого ключа</string>
+    <string name="no_public_key_text">Эта нода не передала открытый ключ, поэтому зашифрованное взаимодействие с ней невозможно. Запроси информацию о пользователе, чтобы запросить ключ.</string>
     <string name="no_usb_devices_found">Устройства USB не найдены</string>
     <string name="no_usb_devices_hint">Подключи устройство с помощью USB-кабеля для передачи данных, чтобы использовать последовательное соединение.</string>
     <string name="no_usb_devices_seen">USB-устройства не обнаружены</string>
@@ -1312,10 +1232,13 @@
     <string name="node_count_total">%1$d всего</string>
     <string name="node_filter_exclude_infrastructure">Исключить инфраструктуру</string>
     <string name="node_filter_exclude_mqtt">Исключить MQTT</string>
+    <string name="node_filter_exclude_unheard">Скрыть ноды без сигнала</string>
     <string name="node_filter_ignored">Вы просматриваете игнорируемые ноды,\nНажмите, чтобы вернуться к списку всех нод.</string>
     <string name="node_filter_include_unknown">Включить неизвестные</string>
     <string name="node_filter_only_direct">Отображать только слышимые ноды</string>
+    <string name="node_filter_only_encrypted">Только зашифрованные</string>
     <string name="node_filter_only_online">Скрыть ноды офлайн</string>
+    <string name="node_filter_only_signed">Только подписанные</string>
     <string name="node_filter_placeholder">Фильтр</string>
     <string name="node_filter_show_ignored">Показать только игнорируемые ноды</string>
     <string name="node_filter_title">Фильтр по</string>
@@ -1329,6 +1252,11 @@
     <string name="node_layout_complete_description">Полная схема отображает все доступные данные нод. Поля без данных автоматически скрываются.</string>
     <string name="node_layout_device_role">Роль устройства</string>
     <string name="node_layout_distance_and_bearing">Расстояние и азимут</string>
+    <string name="node_layout_help_signal_bad">Сигнал слабый. SNR на 5,5–7,5 дБ ниже предела SNR пресета.</string>
+    <string name="node_layout_help_signal_fair">Сигнал средний. SNR менее чем на 5,5 дБ ниже предела SNR пресета.</string>
+    <string name="node_layout_help_signal_good">Сигнал сильный. SNR выше предела SNR вашего пресета модема.</string>
+    <string name="node_layout_help_signal_indicator">Оценивает SNR относительно предела SNR твоего пресета модема и показывает результат в виде цветного значка с подписью. RSSI отображается, но не влияет на оценку.</string>
+    <string name="node_layout_help_signal_none">Сигнал непригоден. SNR более чем на 7,5 дБ ниже предела SNR пресета.</string>
     <string name="node_layout_hops_away">Прыжков</string>
     <string name="node_layout_last_heard_time">Время последнего вещания</string>
     <string name="node_layout_log_icons">Метрики окружения</string>
@@ -1343,6 +1271,7 @@
     <string name="node_list_help_node_details">Детали ноды</string>
     <string name="node_list_help_title">Справка по списку нод</string>
     <string name="node_list_long_click_label">Параметры ноды</string>
+    <string name="node_not_heard_on_current_lora">Не слышно на твоих текущих настройках LoRa</string>
     <string name="node_number">Номер ноды</string>
     <string name="node_request_send_failed">Не удалось отправить запрос. Повторите попытку.</string>
     <string name="node_restarting">Перезапуск…</string>
@@ -1356,7 +1285,6 @@
     <string name="node_sort_via_favorite">по избранным</string>
     <string name="node_sort_via_mqtt">через MQTT</string>
     <string name="nodedb_reset">Очистка списка нод сети</string>
-    <string name="nodeinfo_broadcast_interval">Интервал вещания передачи информации об узле</string>
     <!-- NODES -->
     <string name="nodes">Ноды</string>
     <string name="nodes_at_this_location">Ноды в этом месте</string>
@@ -1365,6 +1293,9 @@
     <string name="nodes_empty_searching_hint">Ближайшие узлы будут появляться здесь по мере их обнаружения.</string>
     <string name="nodes_empty_searching_title">Поиск узлоов</string>
     <string name="nodes_queued_for_deletion">%1$d нод в очереди для удаления:</string>
+    <string name="nodes_unheard_banner">%1$d нод не слышно твоих текущих настройках LoRa</string>
+    <string name="nodes_unheard_banner_one">1 нода не слышна на твоих текущих настройках LoRa</string>
+    <string name="nodes_unheard_keep">Оставить</string>
     <string name="nodes_unheard_remove">Удалить</string>
     <string name="noise_floor">Уровень шума</string>
     <string name="noise_floor_definition">Фоновый радиошум, измеряемый радиоприемником. Более низкие значения обычно указывают на более тихое окружение для приемника; -85 дБм — это ориентировочная отметка загруженности, а не жесткий порог отказа.</string>
@@ -1375,6 +1306,11 @@
     <string name="not_now">Не сейчас</string>
     <string name="note">Примечание</string>
     <string name="notes">Заметки</string>
+    <!-- NOTIFICATION -->
+    <string name="notification_group_mesh">Меш</string>
+    <string name="notification_permission_blocked_notice">Уведомления отключены, и Android больше не будет спрашивать. Включи их в настройках приложения, чтобы получать оповещения о новых сообщениях и тревогах.</string>
+    <string name="notification_permission_denied_notice">Без уведомлений Meshtastic не сможет оповещать тебя о новых сообщениях, новых нодах или низком заряде батареи, когда приложение работает в фоновом режиме.</string>
+    <string name="notification_permission_rationale">Уведомления — это способ, которым Meshtastic связывается с тобой, когда приложение закрыто(в фоне): новые сообщения, обнаруженные ноды и низкий заряд батареи радио. Если ты откажешься, больше ничего не изменится.</string>
     <string name="notification_permissions_description">Meshtastic использует уведомления, чтобы держать вас в курсе новых сообщений и других важных событий. Вы можете обновить разрешения уведомлений в любое время из настроек.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Уведомления для каналов и личных сообщений.</string>
@@ -1383,13 +1319,14 @@
     <string name="notifications_on_alert_bell_receipt">Уведомления при получении оповещения/звонка</string>
     <string name="notifications_on_message_receipt">Уведомления о получении сообщения</string>
     <string name="now">Только что</string>
-    <string name="ntp_server">NTP-сервер</string>
-    <string name="number_of_records">Количество записей</string>
     <!-- OFFLINE -->
     <string name="offline_maps">Офлайн-карты</string>
-    <string name="ok_to_mqtt">ОК в MQTT</string>
+    <string name="offline_maps_empty">Карты ещё не загружены</string>
+    <string name="offline_terrain_cache_detail">%1$s: %2$s · %3$s</string>
+    <string name="offline_terrain_empty">Рельеф ещё не загружен</string>
+    <string name="offline_terrain_manager">Офлайн-рельеф</string>
+    <string name="offline_terrain_regional_detail">Включает детализированный рельеф региона</string>
     <string name="okay">Лады</string>
-    <string name="oled_type">Тип OLED</string>
     <!-- ONE -->
     <string name="one_day">24 часа</string>
     <string name="one_hour">1 час</string>
@@ -1408,23 +1345,15 @@
     <string name="open_wifi_settings">Открыть настройки Wi-Fi</string>
     <string name="options">Опции</string>
     <string name="orient_north">Ориентация на север</string>
-    <!-- OUTPUT -->
-    <string name="output_buzzer_gpio">Выход Буззера (GPIO)</string>
-    <string name="output_duration_milliseconds">Продолжительность вывода (миллисекунды)</string>
-    <string name="output_led_active_high">Вывод светодиода активный высокий</string>
-    <string name="output_led_gpio">Выход LED (GPIO)</string>
-    <string name="output_vibra_gpio">Вибросигнал (GPIO)</string>
+    <string name="orp">ОВП</string>
     <string name="overflow_menu">Переполнение меню</string>
     <string name="override_console_serial_port">Переопределить COM-порт консоли</string>
-    <string name="override_duty_cycle">Переопределить рабочий цикл</string>
-    <string name="override_frequency_mhz">Переопределить частоту</string>
-    <string name="pa_fan_disabled">PA вентилятор выключен</string>
     <!-- PACKET -->
     <string name="packet_authenticity">Подлинность пакета</string>
     <string name="packet_authenticity_balanced">Сбалансировано — предпочтительно аутентифицировать</string>
     <string name="packet_authenticity_balanced_summary">Рекомендуется. Отклонять неподписанные попытки понижения от нод, которые, как известно, подписывают.</string>
     <string name="packet_authenticity_compatible">Совместимо — принять не подписано</string>
-    <string name="packet_authenticity_compatible_summary">Аутентифицировать пакеты по возможности, но принимать неподписанный трафик для максимальной совместимости.</string>
+    <string name="packet_authenticity_compatible_summary">Для максимальной совместимости принимать трафик без цифровой подписи. Пакет все равно будет отброшен, если подпись неверна и ее возможно проверить.</string>
     <string name="packet_authenticity_level">Уровень защиты</string>
     <string name="packet_authenticity_strict">Строгий — требуется аутентификация</string>
     <string name="packet_authenticity_strict_confirm">Включить строгий</string>
@@ -1432,7 +1361,6 @@
     <string name="packet_authenticity_strict_summary">Показывать и обрабатывать только криптографически аутентифицированные mesh-пакеты. Старые ноды и слишком большие пакеты могут исчезнуть.</string>
     <string name="packet_authenticity_strict_title">Включить строгую аутентификацию?</string>
     <string name="packet_authenticity_unsupported">Это подключенное устройство не поддерживает верификацию подписи пакетов.</string>
-    <string name="pairing_mode">Режим сопряжения</string>
     <string name="password">Пароль</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
@@ -1445,9 +1373,12 @@
     <string name="pax_wifi_marker">Wi-Fi: %1$s</string>
     <string name="paxcounter">Счётчик прохожих</string>
     <string name="paxcounter_config">Настройки Paxcounter</string>
-    <string name="paxcounter_enabled">Paxcounter включен</string>
     <string name="periodic_position_broadcast">Периодическое вещание позиции</string>
     <!-- PERMISSION -->
+    <string name="permission_camera_summary">Сканирование QR-кодов каналов и контактов</string>
+    <string name="permission_local_network_summary">Поиск радиоустройств в твоей сети Wi-Fi</string>
+    <string name="permission_location_summary">Показывать твоё местоположение на карте и делиться им с mesh-сетью</string>
+    <string name="permission_location_summary_pre31">Найди своё радио по Bluetooth, отметь себя на карте и поделите своим местоположением с mesh-сетью</string>
     <string name="permission_missing_31">Meshtastic требует разрешение на поиск и подключение к устройствам через Bluetooth. Вы можете отключить его, когда он не используется.</string>
     <string name="permission_missing_pre31">В этой версии Android одно разрешение на местоположение охватывает две вещи: оно позволяет сканировать Bluetooth и отображает тебя на карте. Совместное использование твоей позиции остаётся выключенным, пока ты сам его не включишь.</string>
     <string name="permission_nearby_devices_summary">Найти и подключиться к ноде через Bluetooth</string>
@@ -1471,6 +1402,7 @@
     <string name="permissions_show">Показать разрешения</string>
     <string name="phone_location">Местоположение телефона</string>
     <string name="phone_location_description">Meshtastic использует местоположение вашего телефона, чтобы включить ряд функций. Вы можете обновить права доступа к вашему местоположению в любое время из настроек.</string>
+    <string name="phosphorus">Фосфор</string>
     <string name="pin_selected">PIN-код</string>
     <string name="play">Воспроизвести</string>
     <plurals name="plurals_hours">
@@ -1478,6 +1410,12 @@
         <item quantity="few">%1$d часов</item>
         <item quantity="many">%1$d часа</item>
         <item quantity="other">%1$d часы</item>
+    </plurals>
+    <plurals name="plurals_milliseconds">
+        <item quantity="one">%1$d миллисекунда</item>
+        <item quantity="few">%1$d миллисекунды</item>
+        <item quantity="many">%1$d миллисекунд</item>
+        <item quantity="other">%1$d миллисекунд</item>
     </plurals>
     <plurals name="plurals_minutes">
         <item quantity="one">%1$d минута</item>
@@ -1491,6 +1429,16 @@
         <item quantity="many">%1$d секунд</item>
         <item quantity="other">%1$d секунд</item>
     </plurals>
+    <!-- PM -->
+    <string name="pm_sensor_status">Состояние датчиков</string>
+    <string name="pm_status_co2_error">Ошибка CO₂</string>
+    <string name="pm_status_fan_error">Ошибка вентилятора</string>
+    <string name="pm_status_fan_speed_warning">Предупреждение о скорости вентилятора</string>
+    <string name="pm_status_gas_error">Ошибка датчика газа</string>
+    <string name="pm_status_hcho_error">Ошибка HCHO</string>
+    <string name="pm_status_pm_error">Ошибка датчика PM</string>
+    <string name="pm_status_rht_error">Ошибка RH&amp;T</string>
+    <string name="pm_status_unknown_flags">Неизвестные флаги 0x%1$s</string>
     <string name="pm1_0">PM1.0</string>
     <string name="pm10">PM10</string>
     <string name="pm2_5">PM2.5</string>
@@ -1498,16 +1446,12 @@
     <string name="position">Местоположение</string>
     <string name="position_config_set_fixed_from_phone">Установить местоположение с телефона</string>
     <string name="position_enabled">Местоположение включено</string>
-    <string name="position_flags">Флаги позиции</string>
     <string name="position_log">Местоположение</string>
     <string name="position_packet">Пакет позиции</string>
-    <!-- POWER -->
+    <string name="potassium">Калий</string>
     <string name="power">Питание</string>
     <string name="power_config">Настройка питания</string>
     <string name="power_metrics_log">Метрики питания</string>
-    <string name="power_metrics_module_enabled">Модуль метрик питания включен</string>
-    <string name="power_metrics_on_screen_enabled">Включить метрики питания на экране</string>
-    <string name="power_metrics_update_interval_seconds">Интервал обновления метрик электропитания</string>
     <string name="powered">Питание</string>
     <string name="ppm">ppm</string>
     <string name="precise_location">Точность местоположения</string>
@@ -1529,13 +1473,10 @@
     <string name="preview_text">Текст</string>
     <string name="primary">Первичный</string>
     <string name="primary_channel_feature">Периодическая трансляция местоположения и телеметрии</string>
-    <string name="private_key">Приватный ключ</string>
     <string name="project_information">Информация о проекте</string>
     <string name="provide_location_to_mesh">Предоставление местоположения для сети</string>
     <string name="provider_name_exists">Имя провайдера уже существует.</string>
-    <string name="proxy_to_client_enabled">Прокси клиенту включен</string>
     <string name="psk">Пароль</string>
-    <string name="ptt_pin">Контакт PTT</string>
     <string name="public_key">Публичный ключ</string>
     <string name="public_key_changed">Публичный ключ изменён</string>
     <string name="qr_code">QR-код</string>
@@ -1553,25 +1494,14 @@
     <string name="rainfall_24h">Дождь (24ч)</string>
     <string name="range_test">Проверка дальности</string>
     <string name="range_test_config">Настройка проверки дальности</string>
-    <string name="range_test_enabled">Проверка дальности включена</string>
     <string name="react">Среагировать</string>
     <string name="reboot">Перезагрузка</string>
-    <!-- REBROADCAST -->
-    <string name="rebroadcast_mode">Режим ретрансляции</string>
-    <string name="rebroadcast_mode_all_desc">Ретранслировать замеченное сообщение, если оно было на нашем частном канале или из другой сетки с теми же параметрами lora.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Так же, как и ALL, но пропускает декодирование пакетов и просто ретранслирует их. Доступно только в роли Repeater. Установка этого параметра для любых других ролей приведет к изменению поведения ALL.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">Игнорирует пакеты из нестандартных портов, таких как: TAK, RangeTest, PaxCounter и т. д. Только ретранслирует пакеты со стандартными номерами портов: NodeInfo, Text, Position, Telemetry, Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Игнорируемые сообщения из других сетей, таких как LOCAL ONLY, но так же, и игнорирует сообщения от узлов, которые еще не включены в известный список узлов.</string>
-    <string name="rebroadcast_mode_local_only_desc">Игнорирует обнаруженные сообщения из чужих mesh-сетей, которые открыты или не могут быть расшифрованы. Ретранслирует сообщение только на локальных основных / дополнительных каналах нод.</string>
-    <string name="rebroadcast_mode_none_desc">Разрешено только для ролей SENSOR, TRACKER и TAK_TRACKER, это запретит все ретрансляции, не похожие на роль CLIENT_MUTE.</string>
     <string name="recent_network_devices">Недавние сетевые устройства</string>
     <string name="reconnecting">Восстановление связи…</string>
-    <string name="red">Красный</string>
     <string name="refresh">Обновить</string>
     <string name="refresh_metadata">Обновить метаданные</string>
     <string name="regenerate_keys_confirmation">Вы уверены, что хотите пересоздать свой приватный ключ?\n\nНоды, которые ранее обменивались ключами с этой нодой, должны будут удалить её и повторно обменяться ключами для того, чтобы возобновить защищённую связь.</string>
     <string name="regenerate_private_key">Пересоздать приватный ключ</string>
-    <string name="region_frequency_plan">Регион / Страна</string>
     <plurals name="relays">
         <item quantity="one">Услышано %1$d ретранслятором</item>
         <item quantity="few">Услышано %1$d ретрансляторами</item>
@@ -1625,32 +1555,17 @@
     <string name="role">Роль устройства</string>
     <string name="role_client">Client</string>
     <string name="role_client_base">Client Base</string>
-    <string name="role_client_base_desc">Обрабатывает пакеты от избранных нод как ROUTER_LATE, а все остальные пакеты - как от CLIENT.</string>
-    <string name="role_client_desc">Приложение подключено или автономное устройство обмена сообщениями.</string>
     <string name="role_client_hidden">Client Hidden</string>
-    <string name="role_client_hidden_desc">Устройство, которое передает сигнал только при необходимости для скрытности или экономии энергии.</string>
     <string name="role_client_mute">Client Mute</string>
-    <string name="role_client_mute_desc">Устройство, которое не пересылает пакеты с других устройств.</string>
     <string name="role_lost_and_found">Lost and Found</string>
-    <string name="role_lost_and_found_desc">Регулярно отправляет местоположение в виде сообщения в основной канал, чтобы помочь с восстановлением устройства.</string>
     <string name="role_repeater">Repeater</string>
-    <string name="role_repeater_desc">Инфраструктурная нода для расширения покрытия сети путем передачи сообщений с минимальными накладными расходами. Не видна в списке нод.</string>
     <string name="role_router">Router</string>
     <string name="role_router_client">Router Client</string>
-    <string name="role_router_client_desc">Сочетание ROUTER и CLIENT. Не для носимых устройств.</string>
-    <string name="role_router_desc">Инфраструктурная нода для расширения охвата сети путем передачи сообщений. Видима в списке нод.</string>
     <string name="role_router_late">Router Late</string>
-    <string name="role_router_late_desc">Инфраструктурная нода, которая всегда ретранслирует пакеты один раз, но только после всех остальных режимов, обеспечивая дополнительное покрытие для локальных кластеров. Видима в списке.</string>
     <string name="role_sensor">Sensor</string>
-    <string name="role_sensor_desc">Транслирует пакеты телеметрии в приоритетном порядке.</string>
     <string name="role_tak">Тактический</string>
-    <string name="role_tak_desc">Оптимизировано для связи с системой ATAK, сокращает текущие передачи.</string>
     <string name="role_tak_tracker">TAK Tracker</string>
-    <string name="role_tak_tracker_desc">Включает автоматические трансляции TAK PLI и сокращает рутинные трансляции.</string>
     <string name="role_tracker">Tracker</string>
-    <string name="role_tracker_desc">Транслирует пакеты местоположения GPS в приоритетном порядке.</string>
-    <string name="root_topic">Корневая тема</string>
-    <string name="rotary_encoder_1_enabled">Поворотный энкодер #1 включен</string>
     <string name="router_role_confirmation_text">Я прочитал &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Документацию по роли устройств&lt;/a&gt; и пост в блоге о &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Выборе верной роли устройства&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Сеанс администратора истёк</string>
@@ -1673,13 +1588,11 @@
     <string name="routing_error_too_large">Слишком большое сообщение для отправки</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор уровня принимаемого сигнала, измерение, используемое для определения уровня мощности, принимаемой антенной. Более высокое значение RSSI обычно указывает на более сильное и стабильное соединение.</string>
-    <string name="rsyslog_server">Сервер rsyslog</string>
+    <string name="salinity">Солёность</string>
     <string name="sats">Количество спутников</string>
-    <!-- SAVE -->
     <string name="save">Сохранить</string>
     <string name="save_and_restart">Сохранить и перезапустить</string>
     <string name="save_changes">Сохранить</string>
-    <string name="save_csv_in_storage_esp32_only">Сохранить .CSV в хранилище (только ESP32)</string>
     <string name="save_rangetest">Экспортировать пакеты для проверки дальности</string>
     <!-- SCAN -->
     <string name="scan">Сканирования</string>
@@ -1693,7 +1606,6 @@
     <string name="scan_shared_contact_qr">Сканировать QR-код контакта</string>
     <string name="scanning_bluetooth">Поиск...</string>
     <string name="scanning_network">Поиск...</string>
-    <string name="screen_on_for">Включать экран на</string>
     <string name="scroll_to_bottom">Прокрутить вниз</string>
     <string name="search_emoji">Поиск эмодзи...</string>
     <string name="search_messages">Поиск сообщений…</string>
@@ -1702,6 +1614,12 @@
     <string name="secondary_no_telemetry">Нет периодической телеметрической передачи</string>
     <!-- SECURITY -->
     <string name="security">Безопасность</string>
+    <string name="security_ack_proof_failed">Сбой проверки доставки</string>
+    <string name="security_ack_proof_failed_info">Что-то признало это сообщение без ключа, только зацепки получателя.</string>
+    <string name="security_ack_proof_no_key">Доказательство доставки не проверено</string>
+    <string name="security_ack_proof_no_key_info">Доказательство доставки прибыло, но не было ключа для его проверки.</string>
+    <string name="security_ack_proof_verified">Доставка проверена</string>
+    <string name="security_ack_proof_verified_info">Упомянутая вами нода подтвердила, что она получил это сообщение.</string>
     <string name="security_icon_badge_warning_description">Предупреждающий Знак</string>
     <string name="security_icon_description">Статус безопасности</string>
     <string name="security_icon_help_dismiss">Отменить</string>
@@ -1726,36 +1644,33 @@
     <string name="security_signed_node_help">Радио проверило подписанные трансляции этой ноды с помощью её ключа идентификации, так что его личность постоянна, но ты сам её не проверял. Каждая нода с прошивкой 2.8 или выше подписывает свои трансляции.</string>
     <string name="security_signed_verified">Подписано · проверено</string>
     <string name="security_verified_contact">Подтверждённый контакт</string>
+    <string name="security_verified_contact_help">Ты лично подтвердил ключ этой ноды, обменявшись QR-кодами контактов, поэтому её подлинность подтверждена. Это наивысший уровень доверия, отображаемый в списке, и он показывается на любой версии прошивки.</string>
     <string name="select">Выбрать</string>
     <string name="select_all">Выбрать все</string>
     <string name="selected">Выбрано</string>
     <string name="selected_map_type">Выбранный тип карты</string>
     <string name="send">Отправить</string>
-    <string name="send_bell">Отправить колокольчик</string>
-    <string name="send_bell_with_alert_message">Отправить колокол с уведомлением</string>
-    <string name="sender_message_interval_seconds">Интервал сообщений отправителя (в секундах)</string>
-    <!-- SERIAL -->
     <string name="serial">COM-порт</string>
-    <string name="serial_baud_rate">Скорость COM-порта</string>
     <string name="serial_config">Настройка COM-порта</string>
-    <string name="serial_console">Консоль COM-порта</string>
-    <string name="serial_enabled">COM-порт включен</string>
-    <string name="serial_mode">Режим COM-порта</string>
-    <string name="serial_rx_pin">RX</string>
-    <string name="serial_tx_pin">TX</string>
-    <string name="server">Сервер</string>
     <string name="session_active">Сессия активна</string>
     <string name="session_refresh_required">Требуется обновление</string>
     <string name="set_time">Установить время</string>
     <string name="set_up_connection">Настроить соединение</string>
     <string name="set_your_region">Установите ваш регион</string>
     <string name="settings">настройки</string>
+    <string name="settings_search_no_results">Нет настроек, соответствующих этой</string>
+    <string name="settings_search_placeholder">Настройки поиска</string>
     <!-- SHARE -->
     <string name="share">Поделиться</string>
     <string name="share_action">Поделиться ссылкой</string>
+    <string name="share_by_tap_subtext">Пока это открыто, другой телефон также может принять приглашение, коснувшись твоего.</string>
     <string name="share_channels">Поделиться каналами</string>
+    <string name="share_channels_add_hint">Добавление сохраняет каналы, которые у них уже есть, и добавляет твои.</string>
+    <string name="share_channels_replace_hint">Замена перезаписывает все каналы на их радио твоими.</string>
+    <string name="share_channels_subject">Каналы Meshtastic</string>
     <string name="share_connected_node">Поделиться подключенной нодой</string>
     <string name="share_contact">Отправить контакт</string>
+    <string name="share_contact_subject">Контакт Meshtastic</string>
     <string name="share_location">Поделиться геопозицией</string>
     <string name="share_location_description">Используй GPS твоего телефона для отправки координат на твою ноду вместо аппаратного GPS на самой ноде.</string>
     <string name="share_qr_subtext">Отсканируй этот код с помощью приложения Meshtastic на другом устройстве, чтобы добавить его туда.</string>
@@ -1778,7 +1693,6 @@
     <string name="show_waypoints">Показать путевые точки</string>
     <string name="shutdown">Выключение</string>
     <string name="shutdown_node_name">Узел: %1$s</string>
-    <string name="shutdown_on_power_loss">Выключение при потере мощности</string>
     <string name="shutdown_warning">⚠️ Эта нода будет ВЫКЛЮЧЕНА. Для её включения потребуется физическое взаимодействие.</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество сигнала</string>
@@ -1812,47 +1726,34 @@
     <string name="site_planner_webview_updating">Системный WebView обновляется. Повтори попытку через мгновение.</string>
     <string name="skip">Пропустить</string>
     <string name="slot">Слот</string>
-    <string name="smart_position">Умная позиция</string>
     <string name="snr">Сигнал/шум</string>
     <string name="snr_definition">Соотношение сигнал/шум, мера, используемая в коммуникациях для количественной оценки уровня желаемого сигнала по отношению к уровню фонового шума. В Meshtastic и других беспроводных системах более высокий SNR указывает на более четкий сигнал, который может повысить надежность и качество передачи данных.</string>
     <string name="soil_moisture">Влажн почвы</string>
+    <string name="soil_ph">pH почвы</string>
     <string name="soil_temperature">Темп почвы</string>
+    <string name="soil_water_metrics">Почва и вода</string>
+    <string name="solar_irradiance">Солнечная облучённость</string>
     <string name="speed">Скорость</string>
     <string name="speed_kmh">%1$d км/ч</string>
     <string name="speed_mph">%1$d миль/ч</string>
-    <string name="spread_factor">Коэффициент распространения</string>
-    <string name="ssid">Название сети</string>
-    <string name="state_broadcast_seconds">Трансляция состояния (в секундах)</string>
     <string name="status_message">Состояние сообщения</string>
     <string name="status_message_summary">Публичное сообщение о статусе, которое отправляется в сеть при изменении и каждые 12 часов.</string>
     <string name="stay_connected_anywhere">Оставайтесь на связи везде</string>
     <string name="stop_connecting">Остановить подключение</string>
     <string name="store_forward">Store &amp; Forward</string>
     <string name="store_forward_config">Настройка Store &amp; Forward</string>
-    <string name="store_forward_enabled">Store &amp; Forward включена</string>
-    <string name="subnet">Подсеть</string>
     <string name="success">Успешно</string>
     <string name="super_deep_sleep_duration_seconds">Длительность супер-глубокого сна</string>
     <string name="supported">Поддерживается</string>
     <string name="supported_by_community">Поддерживается Meshtastic Community</string>
+    <string name="supported_by_maker">Оборудование независимых производителей</string>
     <string name="swipe_action_delete">Удалить</string>
     <string name="swipe_action_mute">Заглушить</string>
     <string name="swipe_action_unmute">Включить микрофон</string>
-    <string name="sx126x_rx_boosted_gain">Усиление RX</string>
     <string name="system_settings">Настройка системы</string>
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Настройка TAK</string>
-    <string name="tak_role">Роль участника</string>
-    <string name="tak_role_forwardobserver">Вперёдсмотрящий</string>
-    <string name="tak_role_hq">Штаб-квартира</string>
-    <string name="tak_role_k9">Собака (К9)</string>
-    <string name="tak_role_medic">Санитар</string>
-    <string name="tak_role_rto">Оператор радиотелефона</string>
-    <string name="tak_role_sniper">Снайпер</string>
-    <string name="tak_role_teamlead">Руководитель команды</string>
-    <string name="tak_role_teammember">Участник команды</string>
-    <string name="tak_role_unspecified">Не определена</string>
     <string name="tak_server">Сервер TAK</string>
     <string name="tak_server_channel">Меш-канал TAK</string>
     <string name="tak_server_channel_desc">Канал Meshtastic используется для исходящего трафика TAK</string>
@@ -1889,22 +1790,6 @@
     <string name="tak_server_test_run">Запустить</string>
     <string name="tak_server_test_running">Запущено: %1$s</string>
     <string name="tak_server_v1_fallback_notice">Прошивка подключённой ноды не поддерживает полную интеграцию с TAK — в ATAK будут передаваться только сообщения о местоположении и чате. Маркеры и другие типы событий требуют прошивки 2.8.0 или новее.</string>
-    <string name="tak_team">Цвет команды</string>
-    <string name="tak_team_blue">Синий</string>
-    <string name="tak_team_brown">Коричневый</string>
-    <string name="tak_team_cyan">Голубой</string>
-    <string name="tak_team_dark_blue">Тёмно-синий</string>
-    <string name="tak_team_dark_green">Тёмно-зеленый</string>
-    <string name="tak_team_green">Зеленый</string>
-    <string name="tak_team_magenta">Пурпурный</string>
-    <string name="tak_team_maroon">Бордовый</string>
-    <string name="tak_team_orange">Оранжевый</string>
-    <string name="tak_team_purple">Фиолетовый</string>
-    <string name="tak_team_red">Красный</string>
-    <string name="tak_team_teal">Бирюзовый</string>
-    <string name="tak_team_unspecified_color">Не указан</string>
-    <string name="tak_team_white">Белый</string>
-    <string name="tak_team_yellow">Жёлтый</string>
     <string name="telemetry">Телеметрия</string>
     <string name="telemetry_config">Настройка телеметрии</string>
     <string name="temperature">Темп</string>
@@ -1913,10 +1798,8 @@
     <string name="theme_light">Светлая</string>
     <string name="theme_system">По умолчанию</string>
     <string name="time">Время</string>
-    <string name="time_zone">Часовой пояс</string>
     <string name="timeout">Время ожидания истекло</string>
     <string name="timestamp">Отметка времени</string>
-    <string name="tls_enabled">TLS включен</string>
     <string name="toggle_my_position">Переключить мою позицию</string>
     <string name="trace_route">Трассировка маршрута</string>
     <!-- TRACEROUTE -->
@@ -1970,7 +1853,6 @@
     <string name="translation_not_required">Сообщение уже на вашем языке</string>
     <string name="transmit_disabled">Передача отключена</string>
     <string name="transmit_disabled_summary">Это устройство может принимать данные, но ничего не отправляет через LoRa.</string>
-    <string name="transmit_over_lora">Передать через LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Транспорт</string>
     <string name="transport_api">API</string>
@@ -1981,15 +1863,17 @@
     <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Маякнуть при тройном нажатии</string>
+    <string name="turbidity">Мутность</string>
     <string name="twenty_four_hours">24ч</string>
     <string name="two_days">48 часов</string>
     <string name="two_weeks">2нед</string>
-    <string name="tx_enabled">Передача включена</string>
-    <string name="tx_power_dbm">Мощность передатчика</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Написать сообщение</string>
     <string name="udp_enabled">UDP трансляция</string>
     <string name="undo">Отменить</string>
+    <string name="unit_dbm">дБм</string>
+    <string name="unit_khz">кГц</string>
+    <string name="unit_meters">м</string>
     <!-- UNITS -->
     <string name="units">Единицы измерения</string>
     <string name="units_follow_system">По умолчанию</string>
@@ -2010,9 +1894,6 @@
     <string name="unpin_selected">Открепить</string>
     <string name="unrecognized">Нераспознанный</string>
     <string name="unset">Не задано - 0</string>
-    <string name="up_down_select_input_enabled">Вверх/Вниз/Выбирать включён</string>
-    <string name="update_interval">Интервал опроса GPS</string>
-    <string name="update_interval_seconds">Интервал обновления (в секундах)</string>
     <string name="update_status">Обновить статус</string>
     <string name="updated">Обновлено</string>
     <string name="uplink_enabled">MQTT Uplink включён</string>
@@ -2026,13 +1907,7 @@
     <string name="url_template">Шаблон URL</string>
     <string name="usb">USB</string>
     <string name="usb_permission_denied">Доступ к USB запрещён. Подключи устройство снова, чтобы попробовать ещё раз.</string>
-    <!-- USE -->
-    <string name="use_12h_format">Использовать 12-часовой формат времени</string>
     <string name="use_homoglyph_characters_encoding">Компактная кодировка кириллицы</string>
-    <string name="use_i2s_as_buzzer">Использовать I2S как буззер</string>
-    <string name="use_input_pullup_mode">Использовать режим INPUT_PULLUP</string>
-    <string name="use_modem_preset">Использовать шаблон</string>
-    <string name="use_pwm_buzzer">Использовать PWM-звукоизлучатель</string>
     <!-- USER -->
     <string name="user">Пользователь</string>
     <string name="user_config">Настройки пользователя</string>
@@ -2040,7 +1915,6 @@
     <string name="user_info">Пользовательская информация</string>
     <string name="user_string">Строка пользователя</string>
     <string name="userinfo">Пользовательская информация</string>
-    <string name="username">Имя пользователя</string>
     <string name="uv_lux">УФ Люкс</string>
     <string name="via_api">через API</string>
     <string name="via_mqtt">через MQTT</string>
@@ -2048,9 +1922,8 @@
     <string name="view_on_map">Показать на карте</string>
     <string name="view_release">Просмотреть релиз</string>
     <string name="voltage">Напряжение</string>
-    <string name="wait_for_bluetooth_duration_seconds">Длительность ожидания Bluetooth</string>
-    <string name="wake_on_tap_or_motion">Включать экран при касании или движении</string>
     <string name="warning">Предупреждение</string>
+    <string name="water_ph">pH воды</string>
     <string name="waypoint_delete">Удалить путевую точку?</string>
     <string name="waypoint_edit">Редактировать путевую точку</string>
     <string name="waypoint_new">Установить путевую точку</string>
@@ -2062,7 +1935,6 @@
     <!-- WIFI -->
     <string name="wifi_config">Параметры Wi-Fi</string>
     <string name="wifi_devices">Настройка Wi-Fi для mPWRD-OS</string>
-    <string name="wifi_enabled">Wi-Fi включен</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Доступные сети</string>
     <string name="wifi_provision_connect_failed">Не удалось подключиться: %1$s</string>
@@ -2098,7 +1970,6 @@
     <string name="wifi_provisioning">Настройка Wi-Fi для mPWRD-OS</string>
     <string name="wifi_qr_code_error">Неверный формат QR-кода Wi-Fi</string>
     <string name="wifi_qr_code_scan">Сканировать QR-код WiFi</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">Порог WiFi RSSI (по умолчанию -80)</string>
     <string name="wifi_unavailable">Нет подключения к Wi-Fi. Сканирование сети может не обнаружить ближайшие устройства.</string>
     <!-- WIND -->
     <string name="wind">Ветер</string>

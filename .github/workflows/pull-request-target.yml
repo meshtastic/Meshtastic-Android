@@ -5,9 +5,10 @@ on:
 # Do not execute arbitrary code on this workflow.
 # See warnings at https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+# No concurrency group. Renovate labels its PR right after opening it, so a cancelling group left a cancelled
+# `labeler` check run on the head commit, and Renovate reads any cancelled check run as a pending branch it never
+# automerges. A non-cancelling group still cancels a queued run when a third event arrives. The job is idempotent
+# and seconds on ubuntu-slim, so every run can simply finish.
 
 jobs:
   labeler:
@@ -117,7 +118,7 @@ jobs:
           const author = context.payload.pull_request.user.login;
           const headRef = context.payload.pull_request.head.ref;
           const skipAuthors = ['renovate[bot]', 'github-actions[bot]', 'dependabot[bot]'];
-          const skipRefs = ['scheduled-updates', 'l10n_main'];
+          const skipRefs = ['scheduled-updates'];
           if (!skipAuthors.includes(author) && !skipRefs.includes(headRef)) {
             const requiredLabels = ['bugfix', 'enhancement', 'automation', 'dependencies', 'repo', 'release', 'refactor', 'desktop', 'chore', 'ci', 'build', 'testing', 'documentation'];
             const effectiveLabels = new Set([

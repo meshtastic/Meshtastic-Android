@@ -42,6 +42,7 @@ import kotlinx.serialization.json.put
 import org.jetbrains.compose.resources.stringResource
 import org.maplibre.compose.camera.CameraAnimation
 import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.expressions.dsl.asBoolean
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.feature
@@ -117,10 +118,7 @@ fun MapLibreInlineMap(
     // first composition does not animate to where the camera already is.
     LaunchedEffect(target) {
         if (mapState.cameraPosition.target != target) {
-            mapState.animateCameraPosition(
-                mapState.cameraPosition.copy(target = target),
-                animation = CameraAnimation.Ease(),
-            )
+            mapState.animateCamera(CameraUpdate(target = target), CameraAnimation.Ease())
         }
     }
 
@@ -132,7 +130,12 @@ fun MapLibreInlineMap(
     // The same control every other map uses, at the same size. A shrunken variant was tried and looked out of place
     // against the rest of the map chrome for the ~25% of height it saved.
     Box(modifier = modifier) {
-        SecondaryMapSurface(mapState = mapState, basemaps = basemaps, uiOptions = InlineMapUiOptions)
+        SecondaryMapSurface(
+            mapState = mapState,
+            basemaps = basemaps,
+            uiOptions = InlineMapUiOptions,
+            showAttribution = false,
+        )
 
         MapZoom(mapState = mapState, basemap = basemaps.current)
     }
@@ -168,7 +171,7 @@ fun MapLibreTracerouteMap(
     FitBoundsOnceVisible(mapState = mapState, key = hops) { nodesBoundingBox(hops) }
 
     Box(modifier = modifier) {
-        SecondaryMapSurface(mapState = mapState, basemaps = basemaps)
+        SecondaryMapSurface(mapState = mapState, basemaps = basemaps, showAttribution = false)
         SecondaryMapChrome(mapState = mapState, basemaps = basemaps)
     }
 }
@@ -228,7 +231,7 @@ fun MapLibreDiscoveryMap(
         // snippet, so the tapped node's numbers go at the foot of the map.
         DiscoveryNodeCard(
             node = selectedNode,
-            // Clear of the logo and attribution row, which the styles are licensed on condition of showing.
+            // Clear of the wordmark and attribution button along the bottom edge, which every map shows.
             modifier =
             Modifier.align(Alignment.BottomStart)
                 .padding(start = CARD_INSET.dp, end = CARD_INSET.dp, bottom = ORNAMENT_CLEARANCE.dp),
@@ -444,7 +447,7 @@ internal val SecondaryMapFitPadding = PaddingValues(start = 48.dp, top = 64.dp, 
 internal const val CARD_INSET = 8
 
 /**
- * Height to leave for the map's logo and attribution row, which the styles are licensed on condition of showing.
+ * Height to leave for the map's wordmark and attribution button, which every map shows.
  *
  * See [org.meshtastic.feature.map.maplibre.component.MeshMapOrnaments].
  */

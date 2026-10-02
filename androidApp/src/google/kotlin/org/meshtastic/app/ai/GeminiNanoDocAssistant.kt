@@ -28,6 +28,7 @@ import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.PublicPreviewAPI
 import com.google.firebase.ai.type.content
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -149,8 +150,9 @@ class GeminiNanoDocAssistant(
                 false
             }
         }
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
-        if (e is kotlinx.coroutines.CancellationException) throw e
         Logger.w(tag = TAG) { "isSupported() check failed: ${e.message}" }
         _modelStatus.value = ModelReadiness.Unavailable(e.message)
         false
@@ -160,8 +162,9 @@ class GeminiNanoDocAssistant(
         try {
             ext.warmUp()
             Logger.i(tag = TAG) { "Model warmed up successfully" }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            if (e is kotlinx.coroutines.CancellationException) throw e
             Logger.w(tag = TAG) { "Warmup failed (non-fatal): ${e.message}" }
         }
     }
@@ -278,8 +281,9 @@ class GeminiNanoDocAssistant(
                     ),
                 )
                 return@flow // Success — exit retry loop
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                if (e is kotlinx.coroutines.CancellationException) throw e
                 lastError = e
                 val isBusy =
                     e.message?.contains("BUSY", ignoreCase = true) == true ||
@@ -392,12 +396,11 @@ class GeminiNanoDocAssistant(
         val paragraphs = plainText.split(Regex("\n{2,}")).map { it.trim() }.filter { it.length >= MIN_PARAGRAPH_LEN }
 
         // Score each paragraph by how many query terms it contains.
-        val scored =
-            paragraphs.map { paragraph ->
-                val lower = paragraph.lowercase()
-                val hits = queryTerms.count { term -> lower.contains(term) }
-                paragraph to hits
-            }
+        val scored = paragraphs.map { paragraph ->
+            val lower = paragraph.lowercase()
+            val hits = queryTerms.count { term -> lower.contains(term) }
+            paragraph to hits
+        }
 
         // Take paragraphs with hits first (sorted by hits desc), then fill with top paragraphs for context.
         val withHits = scored.filter { it.second > 0 }.sortedByDescending { it.second }

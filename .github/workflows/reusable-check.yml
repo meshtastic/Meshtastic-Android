@@ -58,9 +58,9 @@ jobs:
   # jobs could even enter the queue. Its two outputs are now sourced without a
   # job: cache writability is the pure expression above, and the versionCode
   # comes from one of two places:
-  #   - Jobs whose artifacts ship (android-check, build-desktop,
-  #     build-flatpak-src) check out full — blob-less — history so the build's
-  #     GitVersionValueSource derives the real commit-count versionCode.
+  #   - Jobs whose artifacts ship (android-check, build-desktop) check out full,
+  #     blob-less history so the build's GitVersionValueSource derives the real
+  #     commit-count versionCode.
   #   - Validation-only jobs (lint, screenshot, test shards) pin VERSION_CODE
   #     to a constant instead: their outputs are never shipped, and the real
   #     value changes on every commit, which poisons the versionCode-dependent
@@ -96,17 +96,11 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          # Disabled on Gradle 9.7.1: restoring an entry written by another runner crashes
-          # fingerprint deserialization (IsInIdeaSyncValueSource CNFE, settings-plugin
-          # classloader scope) and the job dies in ~10s before any test. A cross-machine
-          # restore is the only thing that triggers it, so it is 100% red in CI and not
-          # reproducible from a local store/reuse pair. Re-enable when that is fixed
-          # upstream; VERSION_CODE is still pinned above so entries would reuse.
-          cache_configuration_cache: 'false'
-          install_jetbrains_jdk: 'true'
 
-      - name: Lint, Analysis & KMP Smoke Compile
-        run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true --continue
+      - name: Spotless, Detekt & Android Lint
+        # The root spotlessCheck and detekt do not reach the included build-logic build.
+        # detektTypeResolved runs the rules that need a classpath, which plain detekt skips.
+        run: ./gradlew spotlessCheck detekt detektTypeResolved :build-logic:convention:spotlessCheck :build-logic:convention:detekt :build-logic:convention:validatePlugins androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --continue
 
   # ── Screenshot Test Validation ──────────────────────────────────────
   screenshot-check:
@@ -133,18 +127,11 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          # Disabled on Gradle 9.7.1: restoring an entry written by another runner crashes
-          # fingerprint deserialization (IsInIdeaSyncValueSource CNFE, settings-plugin
-          # classloader scope) and the job dies in ~10s before any test. A cross-machine
-          # restore is the only thing that triggers it, so it is 100% red in CI and not
-          # reproducible from a local store/reuse pair. Re-enable when that is fixed
-          # upstream; VERSION_CODE is still pinned above so entries would reuse.
-          cache_configuration_cache: 'false'
 
       - name: Screenshot Test Validation
         # -Dorg.gradle.isolated-projects=false: AGP's screenshot plugin iterates BuildServicesRegistry at
         # execution time, which Isolated Projects forbids (fatal since Gradle 9.7).
-        run: ./gradlew :screenshot-tests:validateDebugScreenshotTest -Pci=true -Dorg.gradle.isolated-projects=false
+        run: ./gradlew :screenshot-tests:validateDebugScreenshotTest -Pci=true -Pkotlin.daemon.useFallbackStrategy=false -Dorg.gradle.isolated-projects=false
 
       - name: Upload screenshot diff report
         if: failure()
@@ -198,8 +185,8 @@ jobs:
   # guards them against drift (every module in settings.gradle.kts with test
   # sources must appear here or be explicitly exempted).
   #   shard-core:    remaining core:* KMP module tests (allTests), plus kmpSmokeCompile,
-  #                  which is the only iOS compile :core:di, :core:nfc and :core:resources
-  #                  get. It lived in lint-check until a cold build there blew the 30m budget.
+  #                  which is the only iOS compile :core:di and :core:resources get.
+  #                  It lived in lint-check until a cold build there blew the 30m budget.
   #   shard-feature: feature:* KMP module tests + :core:service
   #   shard-app:     Pure-Android/JVM tests (androidApp, desktopApp,
   #                  core:barcode, feature:widget)
@@ -209,7 +196,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    timeout-minutes: 45
+    timeout-minutes: 35
     if: inputs.run_unit_tests == true
     env:
       VERSION_CODE: 30000000 # pinned for cache stability -- see comment above
@@ -286,6 +273,7 @@ jobs:
               :core:database:allTests
               :core:network:allTests
               :feature:widget:testDebugUnitTest
+              :schema-strings:test
             kover: >-
               :androidApp:koverXmlReportFdroidDebug
               :androidApp:koverXmlReportGoogleDebug
@@ -310,15 +298,7 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          # Disabled on Gradle 9.7.1: restoring an entry written by another runner crashes
-          # fingerprint deserialization (IsInIdeaSyncValueSource CNFE, settings-plugin
-          # classloader scope) and the job dies in ~10s before any test. A cross-machine
-          # restore is the only thing that triggers it, so it is 100% red in CI and not
-          # reproducible from a local store/reuse pair. Re-enable when that is fixed
-          # upstream; VERSION_CODE is still pinned above so entries would reuse.
-          cache_configuration_cache: 'false'
-          # Shards run different task graphs; kover flips the graph again.
-          cache_key_suffix: ${{ matrix.shard.name }}${{ inputs.run_coverage && '-kover' || '' }}
+          cache_konan: 'true'
 
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
         run: |
@@ -329,7 +309,9 @@ jobs:
           # CCUD tags every shard with the same `CI job=test-shards`, which is the largest
           # single CI cost bucket and therefore the one worth splitting. Shard identity is
           # otherwise only recoverable by parsing the requested task list.
-          ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true --continue \
+          # -PwarningsAsErrors: together the shards compile every main and test source set, so a new Kotlin
+          # compiler warning fails here.
+          ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true -Pkotlin.daemon.useFallbackStrategy=false -PwarningsAsErrors=true --continue \
             "-Dscan.value.CI shard=${{ matrix.shard.name }}"
 
       # A test fork that dies in native code (exit 134) names no test, and the JVM's crash report is the
@@ -455,12 +437,13 @@ jobs:
           retention-days: 7
 
   # ── Android Build ────────────────────────────────────────────────────
-  # Also generates the dependency graph — assembling both flavors resolves the widest set.
+  # On main it also submits the dependency graph, since assembling both flavors resolves
+  # the widest set.
   android-check:
     runs-on: ubuntu-26.04
     # No permissions block on purpose: inherits the caller's. main grants contents: write
-    # (graph submit); PRs grant read (upload only).
-    timeout-minutes: 60
+    # for the graph submit.
+    timeout-minutes: 30
     if: inputs.run_android_build == true
 
     steps:
@@ -478,8 +461,7 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          # main submits; PRs upload (no contents: write), dependency-graph-submit.yml finishes.
-          dependency_graph: ${{ github.event_name == 'pull_request' && 'generate-and-upload' || (github.ref == 'refs/heads/main' && 'generate-and-submit' || 'disabled') }}
+          dependency_graph: ${{ github.ref == 'refs/heads/main' && 'generate-and-submit' || 'disabled' }}
 
       - name: Tag main-branch builds as -SNAPSHOT
         if: github.event_name == 'push'
@@ -569,7 +551,7 @@ jobs:
         # via allprojects{}, which Isolated Projects forbids (fatal since Gradle 9.7). The property form is
         # used everywhere instead of --no-isolated-projects: that flag only exists on 9.7+, so the property
         # survives a pin-back below 9.7 without editing this line.
-        run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true --parallel --configuration-cache -Dorg.gradle.isolated-projects=false --continue
+        run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true -Pkotlin.daemon.useFallbackStrategy=false --parallel --configuration-cache -Dorg.gradle.isolated-projects=false --continue
 
       # A dependency published for only some of our ABIs builds and installs cleanly and then
       # crashes with UnsatisfiedLinkError on the others (#7001). Compare the splits here, where
@@ -603,7 +585,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    timeout-minutes: 60
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
@@ -624,7 +606,6 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          install_jetbrains_jdk: 'true'
 
       - name: Install dependencies for AppImage
         if: runner.os == 'Linux'
@@ -652,8 +633,9 @@ jobs:
         # --no-configuration-cache while IP is still on. Flags, not -D properties —
         # -Dorg.gradle.isolated-projects=false is inert on windows-latest. --no-isolated-projects
         # needs Gradle 9.7+, so a pin-back below 9.7 has to revert this line with it.
+        # The daemon flag is quoted because PowerShell splits an unquoted -P argument at its first dot.
         run: >
-          ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true
+          ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true "-Pkotlin.daemon.useFallbackStrategy=false"
           ${{ runner.os == 'Windows' && '--no-isolated-projects --no-configuration-cache' || '' }}
 
       # CMP's TargetFormat.AppImage is jpackage's "app-image" — an unpacked directory, not

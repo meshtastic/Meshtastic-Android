@@ -115,8 +115,11 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         }
     }
 
-    override suspend fun runWhileSessionActive(session: RadioSessionContext, block: suspend () -> Unit): Boolean =
-        sessionOperationMutex.withLock { runWithSessionLease(session) { block() } }
+    override suspend fun runWhileSessionActive(
+        session: RadioSessionContext,
+        label: String,
+        block: suspend () -> Unit,
+    ): Boolean = sessionOperationMutex.withLock { runWithSessionLease(session) { block() } }
 
     // Use an unbounded Channel to mirror SharedRadioInterfaceService semantics. A MutableSharedFlow would
     // hide the stop/start backlog bug that motivated the resetReceivedBuffer() API.

@@ -91,7 +91,8 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         useCase.invoke(showMock = true, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
-            result.usbDevices.map { it::class } shouldBe listOf(DeviceListEntry.Mock::class)
+            result.virtualDevices.map { it::class } shouldBe listOf(DeviceListEntry.Mock::class)
+            assertTrue(result.usbDevices.isEmpty(), "Demo Mode is not a USB device")
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -101,7 +102,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         useCase.invoke(showMock = true, showReplay = true, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
-            result.usbDevices.map { it::class } shouldBe
+            result.virtualDevices.map { it::class } shouldBe
                 listOf(DeviceListEntry.Mock::class, DeviceListEntry.Replay::class)
             cancelAndIgnoreRemainingEvents()
         }
@@ -113,7 +114,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         useCase.invoke(showMock = false, showReplay = true, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
-            assertTrue(result.usbDevices.isEmpty(), "No replay device when showMock=false")
+            assertTrue(result.virtualDevices.isEmpty(), "No replay device when showMock=false")
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -123,7 +124,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
-            assertTrue(result.usbDevices.isEmpty(), "No mock device when showMock=false")
+            assertTrue(result.virtualDevices.isEmpty(), "No mock device when showMock=false")
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -262,7 +263,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         useCase.invoke(showMock = true, showReplay = true, resolvedList = flowOf(emptyList())).test {
             val result = awaitItem()
-            result.usbDevices.map { it::class } shouldBe
+            result.virtualDevices.map { it::class } shouldBe
                 listOf(DeviceListEntry.Mock::class, DeviceListEntry.Replay::class)
             cancelAndIgnoreRemainingEvents()
         }

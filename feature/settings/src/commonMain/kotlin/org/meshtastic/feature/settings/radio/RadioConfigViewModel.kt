@@ -64,8 +64,10 @@ import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.excludes
 import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.repository.AnalyticsPrefs
+import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
@@ -105,6 +107,7 @@ import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.ExcludedModules
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.HardwareModel
@@ -147,6 +150,7 @@ data class RadioConfigState(
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = true,
     val nodeDbResetPreserveFavorites: Boolean = false,
+    val canRebootToDfu: Boolean = false,
 )
 
 @KoinViewModel
@@ -156,6 +160,7 @@ open class RadioConfigViewModel(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
+    private val deviceHardwareRepository: DeviceHardwareRepository,
     private val locationRepository: LocationRepository,
     private val mapConsentPrefs: MapConsentPrefs,
     private val analyticsPrefs: AnalyticsPrefs,
@@ -209,13 +214,13 @@ open class RadioConfigViewModel(
     val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
     fun toggleAnalyticsAllowed() {
-        analyticsPrefs.setAnalyticsAllowed(!analyticsPrefs.analyticsAllowed.value)
+        analyticsPrefs.toggleAnalyticsAllowed()
     }
 
     val homoglyphEncodingEnabledFlow = homoglyphEncodingPrefs.homoglyphEncodingEnabled
 
     fun toggleHomoglyphCharactersEncodingEnabled() {
-        homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(!homoglyphEncodingPrefs.homoglyphEncodingEnabled.value)
+        homoglyphEncodingPrefs.toggleHomoglyphEncodingEnabled()
     }
 
     /** MQTT proxy connection state for the settings UI. */
@@ -253,6 +258,7 @@ open class RadioConfigViewModel(
     private val manualChannelBatchJobs = mutableSetOf<Job>()
     private var manualChannelBatchEnqueueing = false
     private val manualChannelBatchRequestIds = mutableSetOf<Int>()
+    private val dfuRequestIds = mutableSetOf<Int>()
 
     /**
      * Run a one-shot reachability/credentials probe against an MQTT broker. Cancels any in-flight probe before starting
@@ -261,16 +267,16 @@ open class RadioConfigViewModel(
     fun probeMqttConnection(address: String, tlsEnabled: Boolean, username: String?, password: String?) {
         probeJob?.cancel()
         _mqttProbeStatus.value = MqttProbeStatus.Probing
-        probeJob =
-            viewModelScope.launch {
-                val result =
-                    safeCatching { mqttManager.probe(address, tlsEnabled, username, password) }
-                        .getOrElse { e ->
-                            Logger.w(e) { "MQTT probe threw" }
-                            MqttProbeStatus.Other(message = e.message)
-                        }
-                _mqttProbeStatus.value = result
+        probeJob = viewModelScope.launch {
+            val result = safeCatching {
+                mqttManager.probe(address, tlsEnabled, username, password)
             }
+                .getOrElse { e ->
+                    Logger.w(e) { "MQTT probe threw" }
+                    MqttProbeStatus.Other(message = e.message)
+                }
+            _mqttProbeStatus.value = result
+        }
     }
 
     /** Clear the latest probe result (e.g. when the user edits the address). */
@@ -323,6 +329,19 @@ open class RadioConfigViewModel(
                     state.copy(metadata = it?.metadata, localIsLicensed = it?.user?.is_licensed == true)
                 }
             }
+            .launchIn(viewModelScope)
+
+        _destNode
+            .map { it?.user?.hw_model?.value }
+            .distinctUntilChanged()
+            .flatMapLatest { hwModel ->
+                if (hwModel == null) {
+                    flowOf(false)
+                } else {
+                    deviceHardwareRepository.observeDeviceHardware(hwModel).map { it?.isNrf52Arc == true }
+                }
+            }
+            .onEach { canDfu -> _radioConfigState.update { it.copy(canRebootToDfu = canDfu) } }
             .launchIn(viewModelScope)
 
         radioConfigRepository.deviceProfileFlow.onEach { _currentDeviceProfile.value = it }.launchIn(viewModelScope)
@@ -530,11 +549,13 @@ open class RadioConfigViewModel(
                     } catch (e: CancellationException) {
                         abortManualChannelBatch(batchRequestIds)
                         throw e
-                    } catch (e: Throwable) {
+                    } catch (e: Exception) {
                         abortManualChannelBatch(batchRequestIds)
-                        if (e !is Exception) throw e
                         Logger.w(e) { "Manual channel update failed after enqueue" }
                         e.message?.let(::sendError) ?: sendError(Res.string.unknown_error)
+                    } catch (e: Throwable) {
+                        abortManualChannelBatch(batchRequestIds)
+                        throw e
                     }
                 }
             } finally {
@@ -597,37 +618,10 @@ open class RadioConfigViewModel(
         }
     }
 
-    @Suppress("CyclomaticComplexMethod")
     fun setModuleConfig(config: ModuleConfig) {
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setModuleConfig") {
-            _radioConfigState.update { state ->
-                state.copy(
-                    moduleConfig =
-                    state.moduleConfig
-                        .newBuilder()
-                        .also { wb ->
-                            wb.mqtt = config.mqtt ?: state.moduleConfig.mqtt
-                            wb.serial = config.serial ?: state.moduleConfig.serial
-                            wb.external_notification =
-                                config.external_notification ?: state.moduleConfig.external_notification
-                            wb.store_forward = config.store_forward ?: state.moduleConfig.store_forward
-                            wb.range_test = config.range_test ?: state.moduleConfig.range_test
-                            wb.telemetry = config.telemetry ?: state.moduleConfig.telemetry
-                            wb.canned_message = config.canned_message ?: state.moduleConfig.canned_message
-                            wb.audio = config.audio ?: state.moduleConfig.audio
-                            wb.remote_hardware = config.remote_hardware ?: state.moduleConfig.remote_hardware
-                            wb.neighbor_info = config.neighbor_info ?: state.moduleConfig.neighbor_info
-                            wb.ambient_lighting = config.ambient_lighting ?: state.moduleConfig.ambient_lighting
-                            wb.detection_sensor = config.detection_sensor ?: state.moduleConfig.detection_sensor
-                            wb.paxcounter = config.paxcounter ?: state.moduleConfig.paxcounter
-                            wb.statusmessage = config.statusmessage ?: state.moduleConfig.statusmessage
-                            wb.tak = config.tak ?: state.moduleConfig.tak
-                            wb.mesh_beacon = config.mesh_beacon ?: state.moduleConfig.mesh_beacon
-                        }
-                        .build(),
-                )
-            }
+            _radioConfigState.update { state -> state.copy(moduleConfig = state.moduleConfig.mergedWith(config)) }
             expectRestartIfLocal(config.saveRebootBehavior())
             radioConfigUseCase.setModuleConfig(destNum, config, onRequestId = ::registerWriteRequestId)
         }
@@ -669,6 +663,16 @@ open class RadioConfigViewModel(
                 safeLaunch(tag = "reboot") {
                     expectRestartIfLocal(RebootBehavior.ALWAYS)
                     adminActionsUseCase.reboot(destNum, onRequestId = ::registerRequestId)
+                    trackAdminAction()
+                }
+
+            AdminRoute.REBOOT_DFU.name ->
+                safeLaunch(tag = "rebootToDfu") {
+                    if (isLocal) nodeRestartTracker.expectRestart()
+                    adminActionsUseCase.rebootToDfu(destNum) { packetId ->
+                        registerRequestId(packetId)
+                        dfuRequestIds.add(packetId)
+                    }
                     trackAdminAction()
                 }
 
@@ -849,10 +853,12 @@ open class RadioConfigViewModel(
                 safeLaunch(tag = "getOwner") {
                     radioConfigUseCase.getOwner(destNum, onRequestId = ::registerReadRequestId)
                 }
-                // The status message is edited on the user screen, so it is read with the owner. Gated on the
-                // capability: firmware without the module never answers the get, leaving the overlay waiting.
+                // The status message is edited on the user screen, so it is read with the owner. Gated like the
+                // editor: firmware without the module never answers the get, leaving the overlay waiting.
+                val metadata = radioConfigState.value.metadata
                 val readsStatusMessage =
-                    Capabilities(radioConfigState.value.metadata?.firmware_version).supportsStatusMessage
+                    Capabilities(metadata?.firmware_version).supportsStatusMessage &&
+                        !metadata.excludes(ExcludedModules.STATUSMESSAGE_CONFIG)
                 loadFanOut = ConfigRoute.USER.name to readsStatusMessage
                 if (readsStatusMessage) {
                     safeLaunch(tag = "getStatusMessageConfig") {
@@ -1082,6 +1088,7 @@ open class RadioConfigViewModel(
                 if (requestIds.value.contains(packetId)) {
                     // Capture batch membership before removeRequestId drops the last id and empties the batch set.
                     val timedOutBatchRequest = packetId in manualChannelBatchRequestIds
+                    val timedOutDfuRequest = packetId in dfuRequestIds
                     val requestRoute = readRequestRoutes[packetId].orEmpty()
                     val deferredRemoteReadError = deferredRemoteReadErrors[packetId]
                     removeRequestId(packetId)
@@ -1092,12 +1099,12 @@ open class RadioConfigViewModel(
                         // A save that reboots the node races the reboot against its ACK; a timeout here during an
                         // expected restart means the reboot won — treat it as the restarting-success, not an error.
                         // A manual channel batch never reboots, so exclude it even inside a stale restart window.
-                        if (
+                        // nRF52 firmware jumps to its bootloader without acking, so a DFU request only fails loudly.
+                        val restartWon =
                             nodeRestartTracker.restartExpected.value &&
-                            !timedOutBatchRequest &&
-                            !manualChannelBatchInFlight() &&
-                            radioConfigState.value.route.isEmpty()
-                        ) {
+                                !timedOutBatchRequest &&
+                                !manualChannelBatchInFlight()
+                        if ((restartWon || timedOutDfuRequest) && radioConfigState.value.route.isEmpty()) {
                             setResponseStateSuccess()
                         } else {
                             deferredRemoteReadError?.let(::sendError) ?: sendError(Res.string.timeout)
@@ -1154,6 +1161,7 @@ open class RadioConfigViewModel(
         readRequestRoutes.remove(packetId)
         deferredRemoteReadErrors.remove(packetId)
         manualChannelBatchRequestIds.remove(packetId)
+        dfuRequestIds.remove(packetId)
         requestIds.update { it.withoutPacketId(packetId) }
     }
 
@@ -1165,6 +1173,7 @@ open class RadioConfigViewModel(
             removeLateRemoteRead(it)
         }
         manualChannelBatchRequestIds.removeAll(packetIds)
+        dfuRequestIds.removeAll(packetIds)
         requestIds.update { ids -> ids.withoutPacketIds(packetIds) }
     }
 
@@ -1338,35 +1347,8 @@ open class RadioConfigViewModel(
             }
 
             is RadioResponseResult.ModuleConfigResponse -> {
-                val response = result.config
                 _radioConfigState.update { state ->
-                    state.copy(
-                        moduleConfig =
-                        state.moduleConfig
-                            .newBuilder()
-                            .also { wb ->
-                                wb.mqtt = response.mqtt ?: state.moduleConfig.mqtt
-                                wb.serial = response.serial ?: state.moduleConfig.serial
-                                wb.external_notification =
-                                    response.external_notification ?: state.moduleConfig.external_notification
-                                wb.store_forward = response.store_forward ?: state.moduleConfig.store_forward
-                                wb.range_test = response.range_test ?: state.moduleConfig.range_test
-                                wb.telemetry = response.telemetry ?: state.moduleConfig.telemetry
-                                wb.canned_message = response.canned_message ?: state.moduleConfig.canned_message
-                                wb.audio = response.audio ?: state.moduleConfig.audio
-                                wb.remote_hardware = response.remote_hardware ?: state.moduleConfig.remote_hardware
-                                wb.neighbor_info = response.neighbor_info ?: state.moduleConfig.neighbor_info
-                                wb.ambient_lighting =
-                                    response.ambient_lighting ?: state.moduleConfig.ambient_lighting
-                                wb.detection_sensor =
-                                    response.detection_sensor ?: state.moduleConfig.detection_sensor
-                                wb.paxcounter = response.paxcounter ?: state.moduleConfig.paxcounter
-                                wb.statusmessage = response.statusmessage ?: state.moduleConfig.statusmessage
-                                wb.tak = response.tak ?: state.moduleConfig.tak
-                                wb.mesh_beacon = response.mesh_beacon ?: state.moduleConfig.mesh_beacon
-                            }
-                            .build(),
-                    )
+                    state.copy(moduleConfig = state.moduleConfig.mergedWith(result.config))
                 }
                 if (!isLateRemoteRead) incrementCompleted()
             }
@@ -1532,6 +1514,8 @@ internal fun Config.saveRebootBehavior(): RebootBehavior = when {
     else -> RebootBehavior.MAY_RESTART
 }
 
-/** Firmware `AdminModule::handleSetModuleConfig` reboots for every module section except status message. */
+/**
+ * Firmware `AdminModule::handleSetModuleConfig` reboots for every module section except status message and Mesh Beacon.
+ */
 internal fun ModuleConfig.saveRebootBehavior(): RebootBehavior =
-    if (statusmessage != null) RebootBehavior.NEVER else RebootBehavior.ALWAYS
+    if (statusmessage != null || mesh_beacon != null) RebootBehavior.NEVER else RebootBehavior.ALWAYS

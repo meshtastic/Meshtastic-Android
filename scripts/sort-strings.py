@@ -6,7 +6,7 @@ import re
 # Usage: python3 scripts/sort-strings.py
 # This script alphabetizes strings.xml, adds prefix markers, and regenerates strings-index.txt.
 
-def sort_strings(xml_path, index_path):
+def sort_strings(xml_path, index_path, schema_xml_path=None):
     print(f"Reading {xml_path}...")
     with open(xml_path, 'r', encoding='utf-8', newline='\n') as f:
         content = f.read()
@@ -83,6 +83,13 @@ def sort_strings(xml_path, index_path):
         f.write(final_content)
     print(f"Successfully sorted {xml_path}")
 
+    # Index the generated schema strings too, so a lookup finds every resource the app has. That file is written
+    # by ./gradlew :schema-strings:sync and is already sorted, so it is only read here.
+    if schema_xml_path and os.path.exists(schema_xml_path):
+        schema_names = [n for n in (child.get('name') for child in ET.parse(schema_xml_path).getroot()) if n]
+        index_lines.append("### SCHEMA (generated, values/schema_strings.xml) ###")
+        index_lines.extend(sorted(schema_names))
+
     # Write Index
     with open(index_path, 'w', encoding='utf-8', newline='\n') as f:
         f.write('\n'.join(index_lines) + '\n')
@@ -90,9 +97,10 @@ def sort_strings(xml_path, index_path):
 
 if __name__ == "__main__":
     xml_file = 'core/resources/src/commonMain/composeResources/values/strings.xml'
+    schema_xml_file = 'core/resources/src/commonMain/composeResources/values/schema_strings.xml'
     index_file = '.skills/compose-ui/strings-index.txt'
 
     if os.path.exists(xml_file):
-        sort_strings(xml_file, index_file)
+        sort_strings(xml_file, index_file, schema_xml_file)
     else:
         print(f"Error: {xml_file} not found.")

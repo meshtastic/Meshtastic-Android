@@ -1,3 +1,8 @@
+---
+name: design-standards
+description: Apply the Meshtastic design standards on Android - brand colours, Material 3 tokens, MeshtasticIcons and accessibility - with the upstream `meshtastic/design` standards as the source of truth. Use this whenever you choose a colour, icon, spacing value or contrast level, and before claiming a screen matches the design.
+---
+
 # Skill: Meshtastic Design Standards
 
 ## Description

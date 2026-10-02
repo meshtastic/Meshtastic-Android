@@ -15,6 +15,7 @@
 .cxx
 /app/release
 **/debug/**
+!/androidApp/src/debug/**
 **/release/**
 
 # Java KeyStore certificates
@@ -53,7 +54,6 @@ wireless-install.sh
 docs/_site/
 docs/.jekyll-cache/
 docs/.jekyll-metadata
-docs/Gemfile.lock
 
 # Git worktrees
 .worktrees/
@@ -70,6 +70,9 @@ hs_err_pid*.log
 replay_pid*.log
 .attach_pid*
 
+# Local build output redirected to a file
+/build.log
+
 # Local library development clones
 /coil/
 /kable/
@@ -82,8 +85,6 @@ feature/docs/src/commonMain/composeResources/files/*/docs/
 /desktop/bin/
 /build-logic/convention/bin/
 /.specify/extensions/.cache/
-# Jekyll local config (comments out remote_theme for local builds)
-docs/_config_local.yml
 
 # Flatpak source manifests and repositories
 flatpak-sources-*.json

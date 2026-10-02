@@ -42,6 +42,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.qualifier.named
 import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
 import org.meshtastic.core.common.util.UnitsOverride
@@ -61,10 +62,8 @@ import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.resources.preferences_language
-import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.FilterList
@@ -73,12 +72,14 @@ import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SettingsRemote
 import org.meshtastic.core.ui.icon.Wifi
+import org.meshtastic.core.ui.util.isBluetoothSupported
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSettingsContent
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.PermissionsSettingsContent
 import org.meshtastic.feature.settings.component.PersistenceSettingsContent
 import org.meshtastic.feature.settings.component.PrivacySettingsContent
+import org.meshtastic.feature.settings.component.RadioAdminAppBar
 import org.meshtastic.feature.settings.component.ThemePickerDialog
 import org.meshtastic.feature.settings.component.UnitsOption
 import org.meshtastic.feature.settings.component.UnitsPickerDialog
@@ -87,6 +88,8 @@ import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
+import org.meshtastic.feature.settings.search.SettingsSearchBar
+import org.meshtastic.feature.settings.search.SettingsSearchViewModel
 import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
 import org.meshtastic.feature.settings.util.deviceProfileExportFileName
@@ -128,7 +131,9 @@ fun SettingsScreen(
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportProfile(uri.toKmpUri(), deviceProfile!!) }
+                val profile = deviceProfile
+                val uri = it.data?.data
+                if (uri != null && profile != null) viewModel.exportProfile(uri.toKmpUri(), profile)
             }
         }
 
@@ -203,21 +208,16 @@ fun SettingsScreen(
         topBar = {
             // Show back arrow when remotely administering (caller supplies onBack and we're not on the local node).
             val showBack = onBack != null && !state.isLocal
-            MainAppBar(
+            RadioAdminAppBar(
                 title = stringResource(Res.string.bottom_nav_settings),
-                subtitle =
-                if (state.isLocal) {
-                    ourNode?.user?.long_name
-                } else {
-                    val remoteName = destNode?.user?.long_name ?: ""
-                    stringResource(Res.string.remotely_administrating, remoteName)
-                },
+                isLocal = state.isLocal,
+                destNode = destNode,
+                onNavigateUp = { onBack?.invoke() },
+                localSubtitle = ourNode?.user?.long_name,
                 ourNode = ourNode,
+                onClickChip = { node -> onClickNodeChip(node.num) },
                 showNodeChip = ourNode != null && isConnected && state.isLocal,
                 canNavigateUp = showBack,
-                onNavigateUp = { onBack?.invoke() },
-                actions = {},
-                onClickChip = { node -> onClickNodeChip(node.num) },
             )
         },
     ) { paddingValues ->
@@ -225,6 +225,13 @@ fun SettingsScreen(
             modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            SettingsSearchBar(
+                viewModel = koinViewModel<SettingsSearchViewModel>(),
+                onNavigate = onNavigate,
+                // This phone's own settings are hidden below while administering another node; search hides them too.
+                includeAppLocal = state.isLocal,
+            )
+
             RadioConfigItemList(
                 state = state,
                 isManaged = localConfig.security?.is_managed ?: false,
@@ -258,16 +265,17 @@ fun SettingsScreen(
 
             // App-local settings are only relevant when configuring the local node
             if (state.isLocal) {
+                val provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value
                 // Ahead of the app settings block: onboarding runs once, so this is the only place a user who skipped
                 // or declined a permission can find their way back to it.
-                PermissionsSettingsContent()
+                PermissionsSettingsContent(needsPreciseLocation = provideLocation)
 
                 ExpressiveSection(title = stringResource(Res.string.app_settings)) {
                     PrivacySettingsContent(
                         analyticsAvailable = appFunctionsAvailable,
                         analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
                         onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
-                        provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
+                        provideLocation = provideLocation,
                         onToggleLocation = { settingsViewModel.setProvideLocation(it) },
                         homoglyphEnabled =
                         viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
@@ -297,8 +305,11 @@ fun SettingsScreen(
                     ) {
                         onNavigate(SettingsRoute.NodeList)
                     }
-                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
-                        onNavigate(WifiProvisionRoute.WifiProvision())
+                    // Wi-Fi provisioning reaches the device over BLE.
+                    if (isBluetoothSupported()) {
+                        ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
+                            onNavigate(WifiProvisionRoute.WifiProvision())
+                        }
                     }
                     ListItem(
                         text = stringResource(Res.string.filter_settings),

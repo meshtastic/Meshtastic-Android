@@ -17,6 +17,7 @@
 package org.meshtastic.core.database.entity
 
 import androidx.room3.ColumnInfo
+import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
@@ -43,7 +44,10 @@ import org.meshtastic.core.model.MeshLog as ExternalMeshLog
  * @property fromRadio The decoded [FromRadio] protobuf object.
  */
 @Suppress("EmptyCatchBlock", "SwallowedException", "ConstructorParameterNaming")
-@Entity(tableName = "log", indices = [Index(value = ["from_num"]), Index(value = ["port_num"])])
+@Entity(
+    tableName = "log",
+    indices = [Index(value = ["from_num"]), Index(value = ["port_num"]), Index(value = ["received_date"])],
+)
 data class MeshLog(
     @PrimaryKey val uuid: String,
     @ColumnInfo(name = "type") val message_type: String,
@@ -84,6 +88,9 @@ data class MeshLog(
         const val NODE_NUM_LOCAL = 0
     }
 }
+
+/** A [MeshLog] with its rowid, the cursor that continues a receive-order page read. */
+data class MeshLogRow(@ColumnInfo(name = "log_rowid") val rowId: Long, @Embedded val log: MeshLog)
 
 fun MeshLog.asExternalModel() = ExternalMeshLog(
     uuid = uuid,

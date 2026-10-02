@@ -188,16 +188,15 @@ private fun TemperatureDisplay(
 
 @Composable
 private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
-    val hasHumidity = envMetrics.relative_humidity?.let { !it.isNaN() } == true
-    val hasPressure = envMetrics.barometric_pressure?.let { !it.isNaN() && it > 0 } == true
+    val humidity = envMetrics.relative_humidity?.takeUnless { it.isNaN() }
+    val pressure = envMetrics.barometric_pressure?.takeIf { !it.isNaN() && it > 0 }
 
-    if (hasHumidity || hasPressure) {
+    if (humidity != null || pressure != null) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 0.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            if (hasHumidity) {
-                val humidity = envMetrics.relative_humidity!!
+            if (humidity != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricIndicator(Environment.HUMIDITY.color)
                     Spacer(Modifier.width(4.dp))
@@ -212,8 +211,7 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
                     )
                 }
             }
-            if (hasPressure) {
-                val pressure = envMetrics.barometric_pressure!!
+            if (pressure != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricIndicator(Environment.BAROMETRIC_PRESSURE.color)
                     Spacer(Modifier.width(4.dp))
@@ -285,13 +283,12 @@ private fun SoilMetricsDisplay(
 
 @Composable
 private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
-    val hasLux = envMetrics.lux != null && !envMetrics.lux!!.isNaN()
-    val hasUvLux = envMetrics.uv_lux != null && !envMetrics.uv_lux!!.isNaN()
+    val luxValue = envMetrics.lux?.takeUnless { it.isNaN() }
+    val uvLuxValue = envMetrics.uv_lux?.takeUnless { it.isNaN() }
 
-    if (hasLux || hasUvLux) {
+    if (luxValue != null || uvLuxValue != null) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            if (hasLux) {
-                val luxValue = envMetrics.lux!!
+            if (luxValue != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricIndicator(Environment.LUX.color)
                     Spacer(Modifier.width(4.dp))
@@ -302,8 +299,7 @@ private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
                     )
                 }
             }
-            if (hasUvLux) {
-                val uvLuxValue = envMetrics.uv_lux!!
+            if (uvLuxValue != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricIndicator(Environment.UV_LUX.color)
                     Spacer(Modifier.width(4.dp))
@@ -320,21 +316,19 @@ private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
 
 @Composable
 private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
-    val hasVoltage = envMetrics.voltage != null && !envMetrics.voltage!!.isNaN()
-    val hasCurrent = envMetrics.current != null && !envMetrics.current!!.isNaN()
+    val voltage = envMetrics.voltage?.takeUnless { it.isNaN() }
+    val currentValue = envMetrics.current?.takeUnless { it.isNaN() }
 
-    if (hasVoltage || hasCurrent) {
+    if (voltage != null || currentValue != null) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            if (hasVoltage) {
-                val voltage = envMetrics.voltage!!
+            if (voltage != null) {
                 Text(
                     text = "${stringResource(Res.string.voltage)} ${MetricFormatter.voltage(voltage)}",
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
-            if (hasCurrent) {
-                val currentValue = envMetrics.current!!
+            if (currentValue != null) {
                 Text(
                     text =
                     "${stringResource(
@@ -404,38 +398,38 @@ private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics
 
 @Composable
 private fun WindDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics, isImperial: Boolean) {
-    val hasSpeed = envMetrics.wind_speed != null && !envMetrics.wind_speed!!.isNaN()
-    val hasGust = envMetrics.wind_gust != null && !envMetrics.wind_gust!!.isNaN()
-    val hasLull = envMetrics.wind_lull != null && !envMetrics.wind_lull!!.isNaN()
+    val speed = envMetrics.wind_speed?.takeUnless { it.isNaN() }
+    val gust = envMetrics.wind_gust?.takeUnless { it.isNaN() }
+    val lull = envMetrics.wind_lull?.takeUnless { it.isNaN() }
 
-    if (hasSpeed || hasGust || hasLull) {
+    if (speed != null || gust != null || lull != null) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            if (hasSpeed) WindSpeedRow(envMetrics, isImperial)
-            if (hasGust || hasLull) WindGustLullRow(envMetrics, isImperial, hasGust, hasLull)
+            if (speed != null) WindSpeedRow(speed, envMetrics.wind_direction, isImperial)
+            if (gust != null || lull != null) WindGustLullRow(gust, lull, isImperial)
         }
     }
 }
 
 @Composable
-private fun WindSpeedRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics, isImperial: Boolean) {
+private fun WindSpeedRow(speed: Float, direction: Int?, isImperial: Boolean) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             MetricIndicator(Environment.WIND_SPEED.color)
             Spacer(Modifier.width(4.dp))
             val dirText =
-                if (envMetrics.wind_direction != null) {
+                if (direction != null) {
                     formatString(
                         "%s %s (%s %d°)",
                         stringResource(Res.string.wind_speed),
-                        MetricFormatter.windSpeed(envMetrics.wind_speed!!, isImperial),
+                        MetricFormatter.windSpeed(speed, isImperial),
                         stringResource(Res.string.wind_direction),
-                        envMetrics.wind_direction!!,
+                        direction,
                     )
                 } else {
                     formatString(
                         "%s %s",
                         stringResource(Res.string.wind_speed),
-                        MetricFormatter.windSpeed(envMetrics.wind_speed!!, isImperial),
+                        MetricFormatter.windSpeed(speed, isImperial),
                     )
                 }
             Text(
@@ -448,28 +442,23 @@ private fun WindSpeedRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics, is
 }
 
 @Composable
-private fun WindGustLullRow(
-    envMetrics: org.meshtastic.proto.EnvironmentMetrics,
-    isImperial: Boolean,
-    hasGust: Boolean,
-    hasLull: Boolean,
-) {
+private fun WindGustLullRow(gust: Float?, lull: Float?, isImperial: Boolean) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        if (hasGust) {
+        if (gust != null) {
             Text(
                 text =
                 "${stringResource(Res.string.wind_gust)} ${
-                    MetricFormatter.windSpeed(envMetrics.wind_gust!!, isImperial)
+                    MetricFormatter.windSpeed(gust, isImperial)
                 }",
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.labelLarge,
             )
         }
-        if (hasLull) {
+        if (lull != null) {
             Text(
                 text =
                 "${stringResource(Res.string.wind_lull)} ${
-                    MetricFormatter.windSpeed(envMetrics.wind_lull!!, isImperial)
+                    MetricFormatter.windSpeed(lull, isImperial)
                 }",
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.labelLarge,
@@ -480,27 +469,27 @@ private fun WindGustLullRow(
 
 @Composable
 private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics, isImperial: Boolean) {
-    val has1h = envMetrics.rainfall_1h != null && !envMetrics.rainfall_1h!!.isNaN()
-    val has24h = envMetrics.rainfall_24h != null && !envMetrics.rainfall_24h!!.isNaN()
+    val rainfall1h = envMetrics.rainfall_1h?.takeUnless { it.isNaN() }
+    val rainfall24h = envMetrics.rainfall_24h?.takeUnless { it.isNaN() }
 
-    if (has1h || has24h) {
+    if (rainfall1h != null || rainfall24h != null) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            if (has1h) {
+            if (rainfall1h != null) {
                 Text(
                     text =
                     "${stringResource(
                         Res.string.rainfall_1h,
-                    )} ${MetricFormatter.rainfall(envMetrics.rainfall_1h!!, isImperial)}",
+                    )} ${MetricFormatter.rainfall(rainfall1h, isImperial)}",
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
-            if (has24h) {
+            if (rainfall24h != null) {
                 Text(
                     text =
                     "${stringResource(
                         Res.string.rainfall_24h,
-                    )} ${MetricFormatter.rainfall(envMetrics.rainfall_24h!!, isImperial)}",
+                    )} ${MetricFormatter.rainfall(rainfall24h, isImperial)}",
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelLarge,
                 )

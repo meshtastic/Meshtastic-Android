@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import okio.BufferedSink
@@ -38,12 +37,6 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val meshLogRepository: MeshLogRepository,
 ) {
-    companion object {
-        private const val BYTE_MASK = 0xFF
-        private const val HEX_PAD_WIDTH = 2
-        private const val HEX_RADIX = 16
-    }
-
     /**
      * Writes all persisted packet data to the provided [BufferedSink].
      *
@@ -65,7 +58,7 @@ constructor(
             "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance(m)\",\"hop limit\",\"hop start\",\"relay node\",\"payload\"\n",
         )
 
-        meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
+        meshLogRepository.readAllLogsInReceiveOrder().collect { packet ->
             packet.nodeInfo?.let { nodeInfo ->
                 positionToPos.invoke(nodeInfo.position)?.let { nodePositions[nodeInfo.num] = nodeInfo.position }
             }
@@ -104,10 +97,10 @@ constructor(
                     val rxSnr = rxSnrOrNull
 
                     val dist =
-                        if (senderPos == null || rxPos == null) {
+                        if (senderPosition == null || rxPosition == null || senderPos == null || rxPos == null) {
                             ""
                         } else {
-                            positionToMeter(Position(rxPosition!!), Position(senderPosition!!)).roundToInt().toString()
+                            positionToMeter(Position(rxPosition), Position(senderPosition)).roundToInt().toString()
                         }
 
                     val hopLimit = proto.hop_limit
@@ -116,10 +109,7 @@ constructor(
                     // relay_node carries only the last byte of the relaying node's NodeNum (0 means unset).
                     // Emit it as a hex byte so it can be matched against the tail of a node id (e.g. !a1b2c3d4 ->
                     // "d4").
-                    val relayNode =
-                        proto.relay_node
-                            .takeIf { it != 0 }
-                            ?.let { (it and BYTE_MASK).toString(HEX_RADIX).padStart(HEX_PAD_WIDTH, '0') } ?: ""
+                    val relayNode = proto.relay_node.takeIf { it != 0 }?.let { it.toByte().toHexString() } ?: ""
                     val decoded = proto.decoded
                     val encrypted = proto.encrypted
                     val payload =

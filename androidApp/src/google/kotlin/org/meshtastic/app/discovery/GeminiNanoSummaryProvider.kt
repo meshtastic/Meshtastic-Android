@@ -21,6 +21,7 @@ import com.google.mlkit.genai.prompt.Generation
 import com.google.mlkit.genai.prompt.GenerativeModel
 import com.google.mlkit.genai.prompt.TextPart
 import com.google.mlkit.genai.prompt.generateContentRequest
+import kotlinx.coroutines.CancellationException
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.feature.discovery.DiscoverySummaryGenerator
@@ -94,6 +95,8 @@ class GeminiNanoSummaryProvider(private val generator: DiscoverySummaryGenerator
             } else {
                 text
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             log.w(e) { "Gemini Nano generation failed, using fallback" }
             fallback()

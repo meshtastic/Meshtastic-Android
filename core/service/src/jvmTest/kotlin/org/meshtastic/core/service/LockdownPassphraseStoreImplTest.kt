@@ -21,29 +21,27 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 class LockdownPassphraseStoreImplTest {
-    private lateinit var tempHome: java.nio.file.Path
-    private lateinit var originalUserHome: String
+    private lateinit var dataDir: File
 
     @BeforeTest
     fun setUp() {
-        originalUserHome = System.getProperty("user.home")
-        tempHome = Files.createTempDirectory("lockdown-passphrase-store-test")
-        System.setProperty("user.home", tempHome.toString())
+        dataDir = Files.createTempDirectory("lockdown-passphrase-store-test").toFile()
     }
 
     @AfterTest
     fun tearDown() {
-        System.setProperty("user.home", originalUserHome)
-        File(tempHome.toString()).deleteRecursively()
+        dataDir.deleteRecursively()
     }
 
     @Test
     fun `save get and clear passphrase round trips on jvm`() {
-        val store = LockdownPassphraseStoreImpl()
+        val store = LockdownPassphraseStoreImpl(dataDir)
 
         store.savePassphrase(deviceAddress = "AA:BB:CC:DD", passphrase = "secret", boots = 10, hours = 24)
 
@@ -55,5 +53,21 @@ class LockdownPassphraseStoreImplTest {
         store.clearPassphrase("AA:BB:CC:DD")
 
         assertNull(store.getPassphrase("AA:BB:CC:DD"))
+    }
+
+    @Test
+    fun `a keystore missing its master key is never overwritten`() {
+        LockdownPassphraseStoreImpl(dataDir).savePassphrase("AA:BB:CC:DD", "secret", boots = 10, hours = 24)
+        val storeDir = File(dataDir, "lockdown")
+        removeKeystoreEntry(storeDir, alias = "lockdown_master", password = "meshtastic-lockdown")
+        val keystoreBefore = File(storeDir, "keystore.p12").readBytes()
+        val entryBefore = File(storeDir, "AA_BB_CC_DD.enc").readBytes()
+
+        val reopened = LockdownPassphraseStoreImpl(dataDir)
+
+        assertNull(reopened.getPassphrase("AA:BB:CC:DD"))
+        assertFailsWith<IllegalStateException> { reopened.savePassphrase("EE:FF", "other", boots = 1, hours = 1) }
+        assertContentEquals(keystoreBefore, File(storeDir, "keystore.p12").readBytes())
+        assertContentEquals(entryBefore, File(storeDir, "AA_BB_CC_DD.enc").readBytes())
     }
 }

@@ -18,8 +18,11 @@ package org.meshtastic.feature.settings.tak
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 
 @Composable
 actual fun TakPermissionHandler(isTakServerEnabled: Boolean, onPermissionResult: (Boolean) -> Unit) {
-    LaunchedEffect(isTakServerEnabled) { onPermissionResult(true) }
+    val currentOnPermissionResult by rememberUpdatedState(onPermissionResult)
+    LaunchedEffect(isTakServerEnabled) { currentOnPermissionResult(true) }
 }

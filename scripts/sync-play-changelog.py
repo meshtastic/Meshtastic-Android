@@ -12,7 +12,8 @@ source file every internal build. Play falls back to it for any build without a
 version-specific file, which is all of them here.
 
 Run it in the PR that bumps VERSION_NAME_BASE, so Crowdin has the whole internal
-cycle to translate before a production promotion uploads anything.
+cycle to translate. Every promotion (closed, open, production) uploads the file for
+each locale onto the promoted release.
 
     python3 scripts/sync-play-changelog.py [--check]
 """
