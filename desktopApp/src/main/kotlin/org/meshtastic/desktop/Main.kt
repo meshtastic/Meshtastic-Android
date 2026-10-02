@@ -119,6 +119,7 @@ import org.meshtastic.desktop.map.DesktopTracerouteMap
 import org.meshtastic.desktop.map.desktopMapViewProvider
 import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.notification.NativeNotificationSender
+import org.meshtastic.desktop.tray.canHideToTray
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
@@ -319,10 +320,10 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
         // Hide via `visible` rather than dropping the Window from composition so the UI tree
         // (navigation backstack, scroll positions) survives a hide-to-tray round trip.
         MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState, visible = isAppVisible) {
-            // Minimize to the tray on close — but only where a tray exists. On platforms without a
-            // system tray (e.g. some Linux desktop environments) there's nowhere to minimize to, so
-            // quit instead; otherwise the process would be stranded with no window and no tray icon.
-            if (isTraySupported) {
+            // Minimize to the tray on close — but only where the tray icon can actually be clicked
+            // back. Where it cannot, there is nowhere to minimize to, so quit instead; otherwise the
+            // process is stranded with no window, no reachable tray menu and no key handler either.
+            if (canHideToTray(awtTraySupported = isTraySupported)) {
                 isAppVisible = false
             } else {
                 exitApplication()
