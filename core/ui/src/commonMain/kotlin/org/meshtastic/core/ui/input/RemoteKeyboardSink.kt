@@ -108,15 +108,19 @@ class RemoteKeyHandler(
 /** What the keyboard sink always holds between edits. */
 private const val SINK_SENTINEL = " "
 
-/** Hands typed text over in runs, splitting it at line breaks so each one becomes an Enter. */
+/** Hands typed text over in runs, splitting it at line breaks so each one, `\r\n` included, becomes one Enter. */
 internal fun deliverText(text: String, handler: RemoteKeyHandler) {
     var start = 0
-    for (i in text.indices) {
-        if (text[i] == '\n' || text[i] == '\r') {
+    var i = 0
+    while (i < text.length) {
+        val c = text[i]
+        if (c == '\n' || c == '\r') {
             if (i > start) handler.onText(text.substring(start, i))
             handler.onEnter()
+            if (c == '\r' && i + 1 < text.length && text[i + 1] == '\n') i++
             start = i + 1
         }
+        i++
     }
     if (start < text.length) handler.onText(text.substring(start))
 }

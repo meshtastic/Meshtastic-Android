@@ -49,9 +49,16 @@ class RemoteKeyboardSinkTest {
     }
 
     @Test
-    fun eachLineBreakCharacterIsItsOwnEnter() {
-        assertEquals(listOf("text:a", "enter", "enter", "text:b"), delivered("a\r\nb"))
+    fun aCrlfPairIsOneEnter() {
+        assertEquals(listOf("text:a", "enter", "text:b"), delivered("a\r\nb"))
+        assertEquals(listOf("enter"), delivered("\r\n"))
+    }
+
+    @Test
+    fun loneLineBreaksAreEachAnEnter() {
         assertEquals(listOf("enter"), delivered("\n"))
+        assertEquals(listOf("text:a", "enter", "enter", "text:b"), delivered("a\n\rb"))
+        assertEquals(listOf("enter", "enter"), delivered("\r\r"))
     }
 
     private fun delivered(text: String): List<String> {
