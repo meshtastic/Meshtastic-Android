@@ -427,6 +427,11 @@ dependencies {
 
     implementation(libs.jna)
 
+    // The Linux system tray talks StatusNotifierItem over D-Bus; AWT's tray is XEmbed, which GNOME and
+    // Plasma only surface through a proxy that drops clicks. See tray/SniTray.kt.
+    implementation(libs.dbus.java.core)
+    runtimeOnly(libs.dbus.java.transport.native.unixsocket)
+
     testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(projects.core.testing)
     testImplementation(libs.koin.test)

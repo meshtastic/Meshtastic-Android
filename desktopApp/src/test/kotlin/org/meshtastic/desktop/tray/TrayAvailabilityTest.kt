@@ -25,23 +25,31 @@ class TrayAvailabilityTest {
 
     @Test
     fun `hides to tray on macOS when AWT reports a tray`() {
-        assertTrue(canHideToTray(awtTraySupported = true, os = DesktopOS.MacOS))
+        assertTrue(canHideToTray(awtTraySupported = true, sniTrayRegistered = false, os = DesktopOS.MacOS))
     }
 
     @Test
     fun `hides to tray on Windows when AWT reports a tray`() {
-        assertTrue(canHideToTray(awtTraySupported = true, os = DesktopOS.Windows))
+        assertTrue(canHideToTray(awtTraySupported = true, sniTrayRegistered = false, os = DesktopOS.Windows))
     }
 
     @Test
-    fun `quits rather than hiding on Linux even though AWT reports a tray`() {
-        // The regression this guards: GNOME and Plasma render AWT's icon through a proxy that swallows clicks, so a
-        // reported tray is not a reachable one and hiding into it leaves the process unquittable.
-        assertFalse(canHideToTray(awtTraySupported = true, os = DesktopOS.Linux))
+    fun `quits rather than hiding on Linux when only AWT reports a tray`() {
+        // The regression this guards: GNOME and Plasma render AWT's icon through a proxy that swallows
+        // clicks, so a reported tray is not a reachable one and hiding into it leaves the app unquittable.
+        assertFalse(canHideToTray(awtTraySupported = true, sniTrayRegistered = false, os = DesktopOS.Linux))
     }
 
     @Test
-    fun `never hides to tray when AWT reports no tray`() {
-        DesktopOS.entries.forEach { os -> assertFalse(canHideToTray(awtTraySupported = false, os = os)) }
+    fun `hides to tray on Linux once the StatusNotifierItem registered`() {
+        // SniTray owns the icon over D-Bus here, so Activate and the dbusmenu actually arrive.
+        assertTrue(canHideToTray(awtTraySupported = false, sniTrayRegistered = true, os = DesktopOS.Linux))
+    }
+
+    @Test
+    fun `never hides to tray on macOS or Windows when AWT reports no tray`() {
+        listOf(DesktopOS.MacOS, DesktopOS.Windows).forEach { os ->
+            assertFalse(canHideToTray(awtTraySupported = false, sniTrayRegistered = true, os = os))
+        }
     }
 }
