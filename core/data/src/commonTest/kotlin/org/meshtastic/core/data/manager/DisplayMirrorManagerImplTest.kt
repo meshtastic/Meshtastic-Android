@@ -52,15 +52,19 @@ class DisplayMirrorManagerImplTest {
 
     private fun bytes(size: Int, fill: Int) = ByteArray(size) { fill.toByte() }
 
-    private fun palette(signature: Int, regionOffset: Int, regionTotal: Int, regions: List<DisplayPalette.ColorRegion>) =
-        DisplayPalette.Builder()
-            .also { wb ->
-                wb.signature = signature
-                wb.region_offset = regionOffset
-                wb.region_total = regionTotal
-                wb.regions = regions
-            }
-            .build()
+    private fun palette(
+        signature: Int,
+        regionOffset: Int,
+        regionTotal: Int,
+        regions: List<DisplayPalette.ColorRegion>,
+    ) = DisplayPalette.Builder()
+        .also { wb ->
+            wb.signature = signature
+            wb.region_offset = regionOffset
+            wb.region_total = regionTotal
+            wb.regions = regions
+        }
+        .build()
 
     @Test
     fun `reassembles a three-chunk frame in order`() {
@@ -206,9 +210,7 @@ class DisplayMirrorManagerImplTest {
     @Test
     fun `reset clears frames palettes and partial state`() {
         manager.handleIncomingFrame(chunk(width = 64, height = 32, total = 256, data = bytes(256, 7)))
-        manager.handleIncomingPalette(
-            palette(signature = 9, regionOffset = 0, regionTotal = 0, regions = emptyList()),
-        )
+        manager.handleIncomingPalette(palette(signature = 9, regionOffset = 0, regionTotal = 0, regions = emptyList()))
 
         manager.reset()
 
