@@ -130,7 +130,7 @@ class LocalCoverage(private val elevation: ElevationSource, private val atmosphe
                 txHeightM = site.txHeightM,
                 rxHeightM = site.rxHeightM,
                 timePercent = site.timePercent,
-                pathCentreLatitudeDeg = (site.latitude + rxLat) / 2.0,
+                pathCenterLatitudeDeg = (site.latitude + rxLat) / 2.0,
                 polarization = Polarization.VERTICAL,
                 atmosphere = atmosphere,
             )
@@ -168,7 +168,7 @@ class LocalCoverage(private val elevation: ElevationSource, private val atmosphe
                 txHeightM = site.txHeightM,
                 rxHeightM = site.rxHeightM,
                 timePercent = site.timePercent,
-                pathCentreLatitudeDeg = (site.latitude + rxLat) / 2.0,
+                pathCenterLatitudeDeg = (site.latitude + rxLat) / 2.0,
                 polarization = Polarization.VERTICAL,
                 atmosphere = atmosphere,
             )
