@@ -290,7 +290,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 CoreRes.string.doc_keywords_nodes,
                 "en/user/nodes.html",
                 4,
-                listOf("node-list", "mesh-nodes", "peers", "hop-histogram"),
+                listOf("node-list", "mesh-nodes", "peers", "hop-histogram", "remote-shell", "terminal"),
                 3800,
                 "nodes",
             ),
