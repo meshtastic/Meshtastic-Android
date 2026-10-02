@@ -64,14 +64,15 @@ internal class MapterhornTiles(
      */
     private suspend fun download(zoom: Int, x: Int, y: Int): ByteArray? = gate.withPermit {
         val url = MapterhornEndpoints.tileUrl(zoom, x, y)
-        val response =
-            runCatching { http.get(url) }
-                .getOrElse {
-                    // One retry: a sweep asks for its whole disc at once, and losing an estimate to a single
-                    // transient blip is worse than the second the retry costs.
-                    delay(RETRY_DELAY_MS)
-                    http.get(url)
-                }
+        val response = runCatching {
+            http.get(url)
+        }
+            .getOrElse {
+                // One retry: a sweep asks for its whole disc at once, and losing an estimate to a single
+                // transient blip is worse than the second the retry costs.
+                delay(RETRY_DELAY_MS)
+                http.get(url)
+            }
         when {
             response.status.isSuccess() -> response.bodyAsBytes()
             response.status == HttpStatusCode.NotFound -> null
