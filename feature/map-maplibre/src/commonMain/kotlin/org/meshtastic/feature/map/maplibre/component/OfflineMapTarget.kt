@@ -44,6 +44,7 @@ import org.maplibre.compose.map.DefaultMapRuntime
 import org.maplibre.compose.offline.DownloadProgress
 import org.maplibre.compose.offline.DownloadStatus
 import org.maplibre.compose.offline.OfflineManager
+import org.maplibre.compose.offline.OfflineManagerState
 import org.maplibre.compose.offline.OfflinePack
 import org.maplibre.compose.offline.OfflinePackDefinition
 import org.maplibre.spatialk.geojson.BoundingBox
@@ -90,7 +91,8 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
     // the one every map here uses, so its packs are the ones the user sees on the map.
     val manager = DefaultMapRuntime.instance.offlineManager
     val scope = rememberCoroutineScope()
-    val packs by manager.packs.collectAsStateWithLifecycle()
+    val managerState by manager.state.collectAsStateWithLifecycle()
+    val packs = (managerState as? OfflineManagerState.Ready)?.packs.orEmpty()
     // A pack definition now carries the pixel ratio it was downloaded at, so the tiles match this display.
     val pixelRatio = LocalDensity.current.density
 

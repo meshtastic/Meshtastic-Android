@@ -22,7 +22,6 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -59,6 +58,7 @@ import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.sources.rememberImageSource
 import org.maplibre.compose.util.PositionQuad
+import org.maplibre.compose.util.PreparedImage
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.safeCatching
@@ -206,13 +206,14 @@ private fun GroundOverlayLayer(layerId: String, index: Int, overlay: LayerGround
     // Decoded off the composition thread: an ESRI export's tile is routinely multi-megapixel, and a synchronous
     // decode in `remember` would hitch the map for every overlay on every first composition.
     val image by
-        produceState<ImageBitmap?>(initialValue = null, overlay.imagePath) {
+        produceState<PreparedImage?>(initialValue = null, overlay.imagePath) {
             value =
                 withContext(ioDispatcher) {
                     safeCatching {
                         mapLayerFileSystem()
                             .read(overlay.imagePath.toLocalPath()) { readByteArray() }
                             .decodeToImageBitmap()
+                            .let(PreparedImage::fromBitmap)
                     }
                         .onFailure {
                             Logger.withTag("CustomLayers").w(it) { "Could not decode a ground overlay image" }
