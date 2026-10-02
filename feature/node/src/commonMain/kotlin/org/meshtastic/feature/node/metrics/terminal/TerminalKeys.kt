@@ -16,20 +16,7 @@
  */
 package org.meshtastic.feature.node.metrics.terminal
 
-/** Keys a soft keyboard lacks and a shell needs. */
-enum class TerminalKey {
-    ESCAPE,
-    TAB,
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    HOME,
-    END,
-    PAGE_UP,
-    PAGE_DOWN,
-    DELETE,
-}
+import org.meshtastic.core.ui.input.RemoteKey
 
 /** Sticky modifiers from the extra-keys row: each applies to the next key, then releases unless locked. */
 data class Modifiers(val ctrl: ModifierState = ModifierState.OFF, val alt: ModifierState = ModifierState.OFF) {
@@ -60,41 +47,21 @@ private const val ESC = "\u001b"
 private const val CTRL_MASK = 0x1f
 private const val DEL = '\u007f'
 
-/** What one edit to the keyboard sink typed: [deleted] backspaces, then [inserted] text. */
-internal data class SinkEdit(val deleted: Int, val inserted: String)
-
-/** One changed range of the keyboard sink: [replacedLength] characters of the old text gave way to [inserted]. */
-internal class SinkChange(val replacedLength: Int, val inserted: String)
-
-/**
- * The input a set of sink changes amounts to. A change that only removes text is a backspace; one that inserts text
- * types exactly what it inserted, so an IME replacing the sentinel, or a paste over it, sends no stray backspace and
- * keeps a leading space.
- */
-internal fun sinkEdit(changes: List<SinkChange>): SinkEdit {
-    var deleted = 0
-    val inserted = StringBuilder()
-    for (change in changes) {
-        if (change.inserted.isEmpty()) deleted += change.replacedLength else inserted.append(change.inserted)
-    }
-    return SinkEdit(deleted, inserted.toString())
-}
-
 /** The bytes a VT100-family terminal sends for a key, honouring DECCKM for the cursor keys. */
-internal fun TerminalKey.sequence(applicationCursorKeys: Boolean): String {
+internal fun RemoteKey.sequence(applicationCursorKeys: Boolean): String {
     val cursorPrefix = if (applicationCursorKeys) "${ESC}O" else "$ESC["
     return when (this) {
-        TerminalKey.ESCAPE -> ESC
-        TerminalKey.TAB -> "\t"
-        TerminalKey.UP -> "${cursorPrefix}A"
-        TerminalKey.DOWN -> "${cursorPrefix}B"
-        TerminalKey.RIGHT -> "${cursorPrefix}C"
-        TerminalKey.LEFT -> "${cursorPrefix}D"
-        TerminalKey.HOME -> "${cursorPrefix}H"
-        TerminalKey.END -> "${cursorPrefix}F"
-        TerminalKey.PAGE_UP -> "$ESC[5~"
-        TerminalKey.PAGE_DOWN -> "$ESC[6~"
-        TerminalKey.DELETE -> "$ESC[3~"
+        RemoteKey.ESCAPE -> ESC
+        RemoteKey.TAB -> "\t"
+        RemoteKey.UP -> "${cursorPrefix}A"
+        RemoteKey.DOWN -> "${cursorPrefix}B"
+        RemoteKey.RIGHT -> "${cursorPrefix}C"
+        RemoteKey.LEFT -> "${cursorPrefix}D"
+        RemoteKey.HOME -> "${cursorPrefix}H"
+        RemoteKey.END -> "${cursorPrefix}F"
+        RemoteKey.PAGE_UP -> "$ESC[5~"
+        RemoteKey.PAGE_DOWN -> "$ESC[6~"
+        RemoteKey.DELETE -> "$ESC[3~"
     }
 }
 

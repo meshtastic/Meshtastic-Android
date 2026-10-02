@@ -54,6 +54,7 @@ import org.meshtastic.core.resources.remote_shell_no_reply
 import org.meshtastic.core.resources.remote_shell_no_reply_reason
 import org.meshtastic.core.resources.remote_shell_session_closed
 import org.meshtastic.core.resources.remote_shell_session_closed_reason
+import org.meshtastic.core.ui.input.RemoteKey
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.RemoteShell
@@ -261,7 +262,7 @@ class RemoteShellViewModel(
     }
 
     /** An extra-keys or hardware key. Pending typing goes first so the bytes reach the PTY in the order pressed. */
-    fun sendKey(key: TerminalKey) {
+    fun sendKey(key: RemoteKey) {
         val mods = _modifiers.value
         _modifiers.value = mods.consumed()
         val sequence = key.sequence(screenState.value.applicationCursorKeys)

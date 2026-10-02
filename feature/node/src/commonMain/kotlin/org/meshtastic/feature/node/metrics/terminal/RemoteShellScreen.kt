@@ -110,6 +110,9 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.More
 import org.meshtastic.core.ui.icon.Remove
 import org.meshtastic.core.ui.icon.Send
+import org.meshtastic.core.ui.input.RemoteKey
+import org.meshtastic.core.ui.input.RemoteKeyHandler
+import org.meshtastic.core.ui.input.RemoteKeyboardSink
 import org.meshtastic.core.ui.util.plainText
 import org.meshtastic.feature.node.metrics.terminal.RemoteShellViewModel.InputMode
 import org.meshtastic.feature.node.metrics.terminal.RemoteShellViewModel.SessionState
@@ -221,11 +224,11 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
                     onTap = { if (inputMode == InputMode.CHARACTER) focusRequester.requestFocus() },
                 )
                 if (inputMode == InputMode.CHARACTER) {
-                    KeyboardSink(
+                    RemoteKeyboardSink(
                         focusRequester = focusRequester,
                         handler =
-                        TerminalKeyHandler(
-                            onChar = viewModel::typeKey,
+                        RemoteKeyHandler(
+                            onText = { text -> text.forEach(viewModel::typeKey) },
                             onEnter = viewModel::typeEnter,
                             onBackspace = viewModel::typeBackspace,
                             onKey = viewModel::sendKey,
@@ -259,8 +262,8 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
                 modifiers = modifiers,
                 onKey = { key ->
                     when {
-                        inputMode == InputMode.LINE && key == TerminalKey.UP -> viewModel.recallHistory(older = true)
-                        inputMode == InputMode.LINE && key == TerminalKey.DOWN -> viewModel.recallHistory(older = false)
+                        inputMode == InputMode.LINE && key == RemoteKey.UP -> viewModel.recallHistory(older = true)
+                        inputMode == InputMode.LINE && key == RemoteKey.DOWN -> viewModel.recallHistory(older = false)
                         else -> viewModel.sendKey(key)
                     }
                     refocus()

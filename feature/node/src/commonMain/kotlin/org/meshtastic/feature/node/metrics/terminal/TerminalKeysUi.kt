@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.node.metrics.terminal
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -26,40 +25,18 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.InputTransformation
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.isAltPressed
-import androidx.compose.ui.input.key.isCtrlPressed
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.StringResource
@@ -79,16 +56,14 @@ import org.meshtastic.core.resources.remote_shell_key_tab
 import org.meshtastic.core.resources.remote_shell_key_up
 import org.meshtastic.core.resources.remote_shell_modifier_locked
 import org.meshtastic.core.resources.remote_shell_modifier_once
+import org.meshtastic.core.ui.input.RemoteKey
 
 private val KEY_HEIGHT = 48.dp
 private val KEY_SPACING = 2.dp
 private val KEY_LABEL_SIZE = 13.sp
 
-/** What the keyboard sink always holds between edits. */
-private const val SINK_SENTINEL = " "
-
 private sealed interface ExtraKey {
-    data class Special(val key: TerminalKey, val label: String, val description: StringResource) : ExtraKey
+    data class Special(val key: RemoteKey, val label: String, val description: StringResource) : ExtraKey
 
     data class Typed(val char: Char) : ExtraKey
 
@@ -101,22 +76,22 @@ private sealed interface ExtraKey {
 private val EXTRA_KEY_ROWS: List<List<ExtraKey>> =
     listOf(
         listOf(
-            ExtraKey.Special(TerminalKey.ESCAPE, "ESC", Res.string.remote_shell_key_escape),
+            ExtraKey.Special(RemoteKey.ESCAPE, "ESC", Res.string.remote_shell_key_escape),
             ExtraKey.Typed('/'),
             ExtraKey.Typed('-'),
-            ExtraKey.Special(TerminalKey.HOME, "HOME", Res.string.remote_shell_key_home),
-            ExtraKey.Special(TerminalKey.UP, "↑", Res.string.remote_shell_key_up),
-            ExtraKey.Special(TerminalKey.END, "END", Res.string.remote_shell_key_end),
-            ExtraKey.Special(TerminalKey.PAGE_UP, "PGUP", Res.string.remote_shell_key_page_up),
+            ExtraKey.Special(RemoteKey.HOME, "HOME", Res.string.remote_shell_key_home),
+            ExtraKey.Special(RemoteKey.UP, "↑", Res.string.remote_shell_key_up),
+            ExtraKey.Special(RemoteKey.END, "END", Res.string.remote_shell_key_end),
+            ExtraKey.Special(RemoteKey.PAGE_UP, "PGUP", Res.string.remote_shell_key_page_up),
         ),
         listOf(
-            ExtraKey.Special(TerminalKey.TAB, "TAB", Res.string.remote_shell_key_tab),
+            ExtraKey.Special(RemoteKey.TAB, "TAB", Res.string.remote_shell_key_tab),
             ExtraKey.Ctrl,
             ExtraKey.Alt,
-            ExtraKey.Special(TerminalKey.LEFT, "←", Res.string.remote_shell_key_left),
-            ExtraKey.Special(TerminalKey.DOWN, "↓", Res.string.remote_shell_key_down),
-            ExtraKey.Special(TerminalKey.RIGHT, "→", Res.string.remote_shell_key_right),
-            ExtraKey.Special(TerminalKey.PAGE_DOWN, "PGDN", Res.string.remote_shell_key_page_down),
+            ExtraKey.Special(RemoteKey.LEFT, "←", Res.string.remote_shell_key_left),
+            ExtraKey.Special(RemoteKey.DOWN, "↓", Res.string.remote_shell_key_down),
+            ExtraKey.Special(RemoteKey.RIGHT, "→", Res.string.remote_shell_key_right),
+            ExtraKey.Special(RemoteKey.PAGE_DOWN, "PGDN", Res.string.remote_shell_key_page_down),
         ),
     )
 
@@ -127,7 +102,7 @@ private val EXTRA_KEY_ROWS: List<List<ExtraKey>> =
 @Composable
 internal fun ExtraKeysBar(
     modifiers: Modifiers,
-    onKey: (TerminalKey) -> Unit,
+    onKey: (RemoteKey) -> Unit,
     onChar: (Char) -> Unit,
     onToggleCtrl: () -> Unit,
     onToggleAlt: () -> Unit,
@@ -204,131 +179,3 @@ private fun RowScope.KeyCap(label: String, description: String?, state: Modifier
         )
     }
 }
-
-/** Hardware keys a terminal must send itself, rather than let the text field interpret. */
-private val NAVIGATION_KEYS =
-    mapOf(
-        Key.DirectionUp to TerminalKey.UP,
-        Key.DirectionDown to TerminalKey.DOWN,
-        Key.DirectionLeft to TerminalKey.LEFT,
-        Key.DirectionRight to TerminalKey.RIGHT,
-        Key.MoveHome to TerminalKey.HOME,
-        Key.MoveEnd to TerminalKey.END,
-        Key.PageUp to TerminalKey.PAGE_UP,
-        Key.PageDown to TerminalKey.PAGE_DOWN,
-        Key.Escape to TerminalKey.ESCAPE,
-        Key.Delete to TerminalKey.DELETE,
-    )
-
-private val LETTER_KEYS =
-    listOf(
-        Key.A,
-        Key.B,
-        Key.C,
-        Key.D,
-        Key.E,
-        Key.F,
-        Key.G,
-        Key.H,
-        Key.I,
-        Key.J,
-        Key.K,
-        Key.L,
-        Key.M,
-        Key.N,
-        Key.O,
-        Key.P,
-        Key.Q,
-        Key.R,
-        Key.S,
-        Key.T,
-        Key.U,
-        Key.V,
-        Key.W,
-        Key.X,
-        Key.Y,
-        Key.Z,
-    )
-        .mapIndexed { i, key -> key to ('a' + i) }
-        .toMap()
-
-/** Callbacks from the keyboard sink, grouped so the composable stays readable. */
-internal class TerminalKeyHandler(
-    val onChar: (Char) -> Unit,
-    val onEnter: () -> Unit,
-    val onBackspace: () -> Unit,
-    val onKey: (TerminalKey) -> Unit,
-    val onChord: (Char, ctrl: Boolean, alt: Boolean) -> Unit,
-)
-
-/**
- * Zero-size field that holds keyboard focus so both hardware keys and the soft keyboard reach the session.
- *
- * It never holds what was typed. Each edit - a typed character, an IME commit, a soft-keyboard backspace, a paste - is
- * read as terminal input and reverted in the same transformation, so the field stays at [SINK_SENTINEL] with the caret
- * at its end; the sentinel is there so a soft backspace has something to delete. Keys the terminal sends itself are
- * taken in the preview pass, before the field could move its caret or edit with them.
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-internal fun KeyboardSink(focusRequester: FocusRequester, handler: TerminalKeyHandler) {
-    val state = rememberTextFieldState(SINK_SENTINEL)
-    val currentHandler by rememberUpdatedState(handler)
-    val transformation = remember {
-        InputTransformation {
-            val text = asCharSequence()
-            val edit =
-                sinkEdit(
-                    (0 until changes.changeCount).map { i ->
-                        val range = changes.getRange(i)
-                        SinkChange(
-                            changes.getOriginalRange(i).length,
-                            text.subSequence(range.min, range.max).toString(),
-                        )
-                    },
-                )
-            revertAllChanges()
-            repeat(edit.deleted) { currentHandler.onBackspace() }
-            edit.inserted.forEach { c ->
-                if (c == '\n' || c == '\r') currentHandler.onEnter() else currentHandler.onChar(c)
-            }
-        }
-    }
-    BasicTextField(
-        state = state,
-        inputTransformation = transformation,
-        modifier =
-        Modifier.size(1.dp).focusRequester(focusRequester).onPreviewKeyEvent { handleKey(it, currentHandler) },
-        textStyle = TextStyle(color = Color.Transparent, fontSize = 1.sp),
-        cursorBrush = SolidColor(Color.Transparent),
-        // No suggestions or composing: an IME rewriting a word in place would replay it as keystrokes.
-        keyboardOptions =
-        KeyboardOptions(
-            capitalization = KeyboardCapitalization.None,
-            autoCorrectEnabled = false,
-            keyboardType = KeyboardType.Password,
-        ),
-    )
-}
-
-/** Handles the key if it is one the terminal sends itself; returns whether it did. */
-private fun handleKey(event: KeyEvent, handler: TerminalKeyHandler): Boolean {
-    val navigation = NAVIGATION_KEYS[event.key]
-    val chordLetter = LETTER_KEYS[event.key]?.takeIf { event.isCtrlPressed || event.isAltPressed }
-    val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
-    val handled =
-        event.type == KeyEventType.KeyDown &&
-            (navigation != null || chordLetter != null || isEnter || event.key in SINK_EDIT_KEYS)
-    if (handled) {
-        when {
-            navigation != null -> handler.onKey(navigation)
-            chordLetter != null -> handler.onChord(chordLetter, event.isCtrlPressed, event.isAltPressed)
-            isEnter -> handler.onEnter()
-            event.key == Key.Tab -> handler.onKey(TerminalKey.TAB)
-            else -> handler.onBackspace()
-        }
-    }
-    return handled
-}
-
-private val SINK_EDIT_KEYS = setOf(Key.Tab, Key.Backspace)

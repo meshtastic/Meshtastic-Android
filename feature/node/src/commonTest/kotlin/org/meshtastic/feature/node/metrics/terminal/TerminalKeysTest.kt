@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.node.metrics.terminal
 
+import org.meshtastic.core.ui.input.RemoteKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -23,9 +24,9 @@ class TerminalKeysTest {
 
     @Test
     fun cursorKeysFollowTheApplicationCursorMode() {
-        assertEquals("\u001b[A", TerminalKey.UP.sequence(applicationCursorKeys = false))
-        assertEquals("\u001bOA", TerminalKey.UP.sequence(applicationCursorKeys = true))
-        assertEquals("\u001b[5~", TerminalKey.PAGE_UP.sequence(applicationCursorKeys = true))
+        assertEquals("\u001b[A", RemoteKey.UP.sequence(applicationCursorKeys = false))
+        assertEquals("\u001bOA", RemoteKey.UP.sequence(applicationCursorKeys = true))
+        assertEquals("\u001b[5~", RemoteKey.PAGE_UP.sequence(applicationCursorKeys = true))
     }
 
     @Test
@@ -48,28 +49,6 @@ class TerminalKeysTest {
     fun aOneShotModifierReleasesAndALockedOneStays() {
         val mods = Modifiers(ctrl = ModifierState.ONCE, alt = ModifierState.LOCKED).consumed()
         assertEquals(Modifiers(ctrl = ModifierState.OFF, alt = ModifierState.LOCKED), mods)
-    }
-
-    @Test
-    fun aTypedCharacterIsInsertedText() {
-        assertEquals(SinkEdit(deleted = 0, inserted = "a"), sinkEdit(listOf(SinkChange(0, "a"))))
-        assertEquals(SinkEdit(deleted = 0, inserted = "ls -l\n"), sinkEdit(listOf(SinkChange(0, "ls -l\n"))))
-    }
-
-    @Test
-    fun aDeletionWithNothingInsertedIsABackspace() {
-        assertEquals(SinkEdit(deleted = 1, inserted = ""), sinkEdit(listOf(SinkChange(1, ""))))
-    }
-
-    @Test
-    fun replacingTheSentinelSendsNoBackspaceAndKeepsALeadingSpace() {
-        assertEquals(SinkEdit(deleted = 0, inserted = "x"), sinkEdit(listOf(SinkChange(1, "x"))))
-        assertEquals(SinkEdit(deleted = 0, inserted = " foo"), sinkEdit(listOf(SinkChange(1, " foo"))))
-    }
-
-    @Test
-    fun noChangesTypeNothing() {
-        assertEquals(SinkEdit(deleted = 0, inserted = ""), sinkEdit(emptyList()))
     }
 
     @Test
