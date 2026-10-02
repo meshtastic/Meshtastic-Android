@@ -63,12 +63,21 @@ private const val DEL = '\u007f'
 /** What one edit to the keyboard sink typed: [deleted] backspaces, then [inserted] text. */
 internal data class SinkEdit(val deleted: Int, val inserted: String)
 
-/** The edit that turned [before] into [after]: everything past their common prefix is deleted, then inserted. */
-internal fun sinkEdit(before: CharSequence, after: CharSequence): SinkEdit {
-    val shared = minOf(before.length, after.length)
-    var prefix = 0
-    while (prefix < shared && before[prefix] == after[prefix]) prefix++
-    return SinkEdit(deleted = before.length - prefix, inserted = after.subSequence(prefix, after.length).toString())
+/** One changed range of the keyboard sink: [replacedLength] characters of the old text gave way to [inserted]. */
+internal class SinkChange(val replacedLength: Int, val inserted: String)
+
+/**
+ * The input a set of sink changes amounts to. A change that only removes text is a backspace; one that inserts text
+ * types exactly what it inserted, so an IME replacing the sentinel, or a paste over it, sends no stray backspace and
+ * keeps a leading space.
+ */
+internal fun sinkEdit(changes: List<SinkChange>): SinkEdit {
+    var deleted = 0
+    val inserted = StringBuilder()
+    for (change in changes) {
+        if (change.inserted.isEmpty()) deleted += change.replacedLength else inserted.append(change.inserted)
+    }
+    return SinkEdit(deleted, inserted.toString())
 }
 
 /** The bytes a VT100-family terminal sends for a key, honouring DECCKM for the cursor keys. */

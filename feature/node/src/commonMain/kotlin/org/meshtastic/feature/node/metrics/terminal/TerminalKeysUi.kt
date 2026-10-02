@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.node.metrics.terminal
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -268,13 +269,24 @@ internal class TerminalKeyHandler(
  * at its end; the sentinel is there so a soft backspace has something to delete. Keys the terminal sends itself are
  * taken in the preview pass, before the field could move its caret or edit with them.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun KeyboardSink(focusRequester: FocusRequester, handler: TerminalKeyHandler) {
     val state = rememberTextFieldState(SINK_SENTINEL)
     val currentHandler by rememberUpdatedState(handler)
     val transformation = remember {
         InputTransformation {
-            val edit = sinkEdit(originalText, asCharSequence())
+            val text = asCharSequence()
+            val edit =
+                sinkEdit(
+                    (0 until changes.changeCount).map { i ->
+                        val range = changes.getRange(i)
+                        SinkChange(
+                            changes.getOriginalRange(i).length,
+                            text.subSequence(range.min, range.max).toString(),
+                        )
+                    },
+                )
             revertAllChanges()
             repeat(edit.deleted) { currentHandler.onBackspace() }
             edit.inserted.forEach { c ->

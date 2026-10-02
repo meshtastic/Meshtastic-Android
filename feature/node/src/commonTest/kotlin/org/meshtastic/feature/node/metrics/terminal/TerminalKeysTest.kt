@@ -51,12 +51,25 @@ class TerminalKeysTest {
     }
 
     @Test
-    fun aSinkEditIsTheDeletionThenInsertionPastTheCommonPrefix() {
-        assertEquals(SinkEdit(deleted = 0, inserted = "a"), sinkEdit(" ", " a"))
-        assertEquals(SinkEdit(deleted = 1, inserted = ""), sinkEdit(" ", ""))
-        assertEquals(SinkEdit(deleted = 0, inserted = "ls -l\n"), sinkEdit(" ", " ls -l\n"))
-        assertEquals(SinkEdit(deleted = 1, inserted = "x"), sinkEdit(" ", "x"))
-        assertEquals(SinkEdit(deleted = 0, inserted = ""), sinkEdit(" ", " "))
+    fun aTypedCharacterIsInsertedText() {
+        assertEquals(SinkEdit(deleted = 0, inserted = "a"), sinkEdit(listOf(SinkChange(0, "a"))))
+        assertEquals(SinkEdit(deleted = 0, inserted = "ls -l\n"), sinkEdit(listOf(SinkChange(0, "ls -l\n"))))
+    }
+
+    @Test
+    fun aDeletionWithNothingInsertedIsABackspace() {
+        assertEquals(SinkEdit(deleted = 1, inserted = ""), sinkEdit(listOf(SinkChange(1, ""))))
+    }
+
+    @Test
+    fun replacingTheSentinelSendsNoBackspaceAndKeepsALeadingSpace() {
+        assertEquals(SinkEdit(deleted = 0, inserted = "x"), sinkEdit(listOf(SinkChange(1, "x"))))
+        assertEquals(SinkEdit(deleted = 0, inserted = " foo"), sinkEdit(listOf(SinkChange(1, " foo"))))
+    }
+
+    @Test
+    fun noChangesTypeNothing() {
+        assertEquals(SinkEdit(deleted = 0, inserted = ""), sinkEdit(emptyList()))
     }
 
     @Test

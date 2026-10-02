@@ -150,6 +150,29 @@ class TerminalOutputTest {
     }
 
     @Test
+    fun aHugeCursorMoveIsClampedToTheLineWidth() {
+        val out = TerminalOutput(maxLines = 10)
+        out.feed("$E[999999999Cx")
+        val line = out.lines().last()
+        assertEquals(MAX_LINE_WIDTH, line.text.length)
+        assertEquals('x', line.text.last())
+    }
+
+    @Test
+    fun printingPastTheLineWidthWraps() {
+        val out = TerminalOutput(maxLines = 10)
+        out.feed("$E[${MAX_LINE_WIDTH}Gab")
+        assertEquals(listOf(MAX_LINE_WIDTH, 1), out.lines().map { it.text.length })
+    }
+
+    @Test
+    fun aHugeInsertCountIsClampedToTheLineWidth() {
+        val out = TerminalOutput(maxLines = 10)
+        out.feed("abc\r$E[999999999@")
+        assertEquals(MAX_LINE_WIDTH, out.lines().last().text.length)
+    }
+
+    @Test
     fun printedCharactersAreReportedForEchoMatching() {
         val out = TerminalOutput(maxLines = 10)
         val echo = out.feed("ab\b \b").echo

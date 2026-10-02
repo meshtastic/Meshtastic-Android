@@ -62,6 +62,12 @@ private const val TAB_STOP = 8
 
 /** Longest parameter string kept for one CSI sequence; a hostile or broken stream cannot grow it past this. */
 private const val MAX_CSI_LENGTH = 64
+
+/**
+ * Widest a line may grow. Cursor and insert parameters come from the remote, so `ESC[999999999C` must not be able to
+ * pad a line with a billion cells; printing past it wraps to a new line.
+ */
+internal const val MAX_LINE_WIDTH = 1024
 private const val SGR_TRUECOLOR = 2
 private const val SGR_PALETTE = 5
 private const val SGR_RGB_ARGS = 3
@@ -406,6 +412,7 @@ internal class TerminalOutput(private val maxLines: Int) {
     private fun current(): Row = rows.last()
 
     private fun put(c: Char) {
+        if (cursorColumn >= MAX_LINE_WIDTH) newLine()
         val row = current()
         padTo(row, cursorColumn)
         if (cursorColumn < row.chars.length) {
@@ -427,7 +434,7 @@ internal class TerminalOutput(private val maxLines: Int) {
     }
 
     private fun moveCursor(column: Int) {
-        cursorColumn = column.coerceAtLeast(0)
+        cursorColumn = column.coerceIn(0, MAX_LINE_WIDTH - 1)
     }
 
     private fun eraseInLine(mode: Int) {
@@ -466,9 +473,10 @@ internal class TerminalOutput(private val maxLines: Int) {
 
     private fun insertBlanks(count: Int) {
         val row = current()
-        if (cursorColumn >= row.chars.length) return
-        row.chars.insert(cursorColumn, " ".repeat(count))
-        repeat(count) { row.styles.add(cursorColumn, CellStyle.Plain) }
+        val blanks = count.coerceAtMost(MAX_LINE_WIDTH - row.chars.length)
+        if (cursorColumn >= row.chars.length || blanks <= 0) return
+        row.chars.insert(cursorColumn, " ".repeat(blanks))
+        repeat(blanks) { row.styles.add(cursorColumn, CellStyle.Plain) }
         row.snapshot = null
     }
 

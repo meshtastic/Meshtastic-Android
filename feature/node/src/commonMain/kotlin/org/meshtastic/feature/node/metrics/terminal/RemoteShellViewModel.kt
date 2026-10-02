@@ -470,8 +470,12 @@ class RemoteShellViewModel(
     override fun onCleared() {
         super.onCleared()
         tickJob?.cancel()
-        // viewModelScope is already cancelled here, so close the link synchronously and send what it produced.
-        link?.takeIf { !it.isClosed }?.close()?.send?.forEach(::transmit)
+        // viewModelScope is already cancelled, and a step already running on it is not interrupted by that, so the
+        // close takes linkMutex on applicationScope like every other caller of the link.
+        applicationScope.launch(dispatchers.io) {
+            val frames = linkMutex.withLock { link?.takeIf { !it.isClosed }?.close()?.send.orEmpty() }
+            frames.forEach(::transmit)
+        }
         Logger.d { "RemoteShellViewModel cleared for destNum=$destNum" }
     }
 
