@@ -68,10 +68,10 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsQrCodeSharing = atLeast(V2_6_8)
 
     /**
-     * Support for the RemoteShell module (PTY-over-mesh, REMOTE_SHELL_APP portnum). The proto is upstream but no
-     * firmware release ships the module, so it stays gated to [UNRELEASED].
+     * Support for the DMShell module (a PTY over the mesh, REMOTE_SHELL_APP). Firmware v2.8.2 is the first to carry it,
+     * and only Linux `meshtasticd` builds compile it in, which the version alone cannot tell.
      */
-    val supportsRemoteShell = atLeast(UNRELEASED)
+    val supportsRemoteShell = atLeast(V2_8_2)
 
     /** Support for the Status Message module, from the `since_firmware` its `ModuleConfig` field declares. */
     val supportsStatusMessage = offers(ModuleConfig.statusmessage)
@@ -155,6 +155,7 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_7_12 = DeviceVersion("2.7.12")
         private val V2_7_18 = DeviceVersion("2.7.18")
         private val V2_8_0 = DeviceVersion("2.8.0")
+        private val V2_8_2 = DeviceVersion("2.8.2")
         private val UNRELEASED = DeviceVersion("9.9.9")
     }
 }

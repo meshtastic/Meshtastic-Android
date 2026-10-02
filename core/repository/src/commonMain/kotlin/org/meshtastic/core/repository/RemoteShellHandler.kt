@@ -31,8 +31,8 @@ data class ReceivedShellFrame(val from: Int, val frame: RemoteShell)
 /**
  * Interface for handling RemoteShell packets (REMOTE_SHELL_APP portnum = 13).
  *
- * RemoteShell is a PTY-over-mesh feature that relays a shell session across the mesh network. The firmware-side
- * implementation is currently unreleased (gated to [Capabilities.supportsRemoteShell]).
+ * RemoteShell is a PTY-over-mesh feature that relays a shell session across the mesh network, served by the firmware's
+ * DMShell module (see [Capabilities.supportsRemoteShell]).
  */
 interface RemoteShellHandler {
     /**

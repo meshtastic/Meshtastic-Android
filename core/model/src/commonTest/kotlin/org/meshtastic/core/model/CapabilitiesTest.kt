@@ -128,9 +128,10 @@ class CapabilitiesTest {
     }
 
     @Test
-    fun supportsRemoteShell_is_currently_unreleased() {
-        assertFalse(caps("2.7.22").supportsRemoteShell)
-        assertFalse(caps("3.0.0").supportsRemoteShell)
+    fun supportsRemoteShell_requires_V2_8_2() {
+        assertFalse(caps("2.8.1").supportsRemoteShell)
+        assertTrue(caps("2.8.2").supportsRemoteShell)
+        assertTrue(caps("2.8.2.977b1d7").supportsRemoteShell)
     }
 
     @Test

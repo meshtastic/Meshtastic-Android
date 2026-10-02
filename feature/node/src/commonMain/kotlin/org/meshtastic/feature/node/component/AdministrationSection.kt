@@ -70,6 +70,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.proto.FirmwareEdition
+import org.meshtastic.proto.HardwareModel
 
 @Composable
 fun AdministrationSection(
@@ -108,8 +109,9 @@ fun AdministrationSection(
                     )
 
                     // The node gates the shell on the same admin_key list as remote admin, so the row
-                    // establishes that session first, as the remote-admin row does.
-                    if (node.capabilities.supportsRemoteShell) {
+                    // establishes that session first, as the remote-admin row does. Only meshtasticd builds the
+                    // module, and the firmware advertises it nowhere else.
+                    if (node.capabilities.supportsRemoteShell && node.user.hw_model == HardwareModel.PORTDUINO) {
                         SectionDivider()
 
                         ListItem(
