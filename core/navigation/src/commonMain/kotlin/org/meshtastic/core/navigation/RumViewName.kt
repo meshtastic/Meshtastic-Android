@@ -19,11 +19,19 @@ package org.meshtastic.core.navigation
 import androidx.navigation3.runtime.NavKey
 
 /**
- * Derives the analytics view name for a navigation destination.
- *
- * The name is the route's fully-qualified class name (e.g. `org.meshtastic.core.navigation.NodesRoute.Nodes`), matching
- * the convention historically recorded by Datadog RUM before the Navigation 3 migration, so new per-screen data lines
- * up with existing dashboards. Falls back to the simple name (and finally `toString()`) on the rare platform where
- * [kotlin.reflect.KClass.qualifiedName] is unavailable.
+ * Derives the analytics view name for a navigation destination: the route's class name without its package, keeping the
+ * enclosing route interface so leaf names stay unique (e.g. `NodesRoute.Nodes`, `SettingsRoute.Bluetooth`).
  */
-fun NavKey.rumViewName(): String = this::class.qualifiedName ?: this::class.simpleName ?: toString()
+fun NavKey.rumViewName(): String = rumViewName(this::class.qualifiedName ?: this::class.simpleName ?: toString())
+
+/**
+ * Strips the package from [className], treating leading lowercase segments as the package. Minified builds can report
+ * the JVM binary name (`NodesRoute$Nodes`), so `$` is normalised to `.` to give every build type the same name.
+ */
+internal fun rumViewName(className: String): String = className
+    .split('.', '$')
+    .dropWhile { it.firstOrNull()?.isLowerCase() == true }
+    .joinToString(".")
+    .ifEmpty {
+        className
+    }
