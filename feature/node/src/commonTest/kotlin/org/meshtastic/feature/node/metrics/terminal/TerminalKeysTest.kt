@@ -51,6 +51,15 @@ class TerminalKeysTest {
     }
 
     @Test
+    fun aSinkEditIsTheDeletionThenInsertionPastTheCommonPrefix() {
+        assertEquals(SinkEdit(deleted = 0, inserted = "a"), sinkEdit(" ", " a"))
+        assertEquals(SinkEdit(deleted = 1, inserted = ""), sinkEdit(" ", ""))
+        assertEquals(SinkEdit(deleted = 0, inserted = "ls -l\n"), sinkEdit(" ", " ls -l\n"))
+        assertEquals(SinkEdit(deleted = 1, inserted = "x"), sinkEdit(" ", "x"))
+        assertEquals(SinkEdit(deleted = 0, inserted = ""), sinkEdit(" ", " "))
+    }
+
+    @Test
     fun aTapCyclesOffOnceLocked() {
         assertEquals(ModifierState.ONCE, ModifierState.OFF.next())
         assertEquals(ModifierState.LOCKED, ModifierState.ONCE.next())

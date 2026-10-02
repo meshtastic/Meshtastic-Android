@@ -27,13 +27,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -46,7 +48,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -55,6 +57,8 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.StringResource
@@ -79,8 +83,8 @@ private val KEY_HEIGHT = 48.dp
 private val KEY_SPACING = 2.dp
 private val KEY_LABEL_SIZE = 13.sp
 
-/** Reset the invisible sink past this length so it does not accumulate a whole session of keystrokes. */
-private const val SINK_TRIM_LENGTH = 256
+/** What the keyboard sink always holds between edits. */
+private const val SINK_SENTINEL = " "
 
 private sealed interface ExtraKey {
     data class Special(val key: TerminalKey, val label: String, val description: StringResource) : ExtraKey
@@ -259,28 +263,39 @@ internal class TerminalKeyHandler(
 /**
  * Zero-size field that holds keyboard focus so both hardware keys and the soft keyboard reach the session.
  *
- * The value is state-backed and never cleared outright: Compose hands back the field's whole content, and a reset only
- * lands on the next recomposition, so a callback arriving first would re-deliver characters already sent. We track what
- * we consumed and forward the delta, mapping a shrinking field to backspaces.
+ * It never holds what was typed. Each edit - a typed character, an IME commit, a soft-keyboard backspace, a paste - is
+ * read as terminal input and reverted in the same transformation, so the field stays at [SINK_SENTINEL] with the caret
+ * at its end; the sentinel is there so a soft backspace has something to delete. Keys the terminal sends itself are
+ * taken in the preview pass, before the field could move its caret or edit with them.
  */
 @Composable
 internal fun KeyboardSink(focusRequester: FocusRequester, handler: TerminalKeyHandler) {
-    var sinkText by remember { mutableStateOf("") }
-    BasicTextField(
-        value = sinkText,
-        onValueChange = { newText ->
-            val consumed = sinkText
-            if (newText.length < consumed.length && consumed.startsWith(newText)) {
-                repeat(consumed.length - newText.length) { handler.onBackspace() }
-            } else {
-                val fresh = if (newText.startsWith(consumed)) newText.substring(consumed.length) else newText
-                fresh.forEach { c -> if (c == '\n' || c == '\r') handler.onEnter() else handler.onChar(c) }
+    val state = rememberTextFieldState(SINK_SENTINEL)
+    val currentHandler by rememberUpdatedState(handler)
+    val transformation = remember {
+        InputTransformation {
+            val edit = sinkEdit(originalText, asCharSequence())
+            revertAllChanges()
+            repeat(edit.deleted) { currentHandler.onBackspace() }
+            edit.inserted.forEach { c ->
+                if (c == '\n' || c == '\r') currentHandler.onEnter() else currentHandler.onChar(c)
             }
-            sinkText = if (newText.length > SINK_TRIM_LENGTH) "" else newText
-        },
-        modifier = Modifier.size(1.dp).focusRequester(focusRequester).onKeyEvent { handleKey(it, handler) },
+        }
+    }
+    BasicTextField(
+        state = state,
+        inputTransformation = transformation,
+        modifier =
+        Modifier.size(1.dp).focusRequester(focusRequester).onPreviewKeyEvent { handleKey(it, currentHandler) },
         textStyle = TextStyle(color = Color.Transparent, fontSize = 1.sp),
         cursorBrush = SolidColor(Color.Transparent),
+        // No suggestions or composing: an IME rewriting a word in place would replay it as keystrokes.
+        keyboardOptions =
+        KeyboardOptions(
+            capitalization = KeyboardCapitalization.None,
+            autoCorrectEnabled = false,
+            keyboardType = KeyboardType.Password,
+        ),
     )
 }
 

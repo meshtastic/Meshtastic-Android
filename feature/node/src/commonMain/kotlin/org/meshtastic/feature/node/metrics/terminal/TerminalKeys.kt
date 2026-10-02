@@ -60,6 +60,17 @@ private const val ESC = "\u001b"
 private const val CTRL_MASK = 0x1f
 private const val DEL = '\u007f'
 
+/** What one edit to the keyboard sink typed: [deleted] backspaces, then [inserted] text. */
+internal data class SinkEdit(val deleted: Int, val inserted: String)
+
+/** The edit that turned [before] into [after]: everything past their common prefix is deleted, then inserted. */
+internal fun sinkEdit(before: CharSequence, after: CharSequence): SinkEdit {
+    val shared = minOf(before.length, after.length)
+    var prefix = 0
+    while (prefix < shared && before[prefix] == after[prefix]) prefix++
+    return SinkEdit(deleted = before.length - prefix, inserted = after.subSequence(prefix, after.length).toString())
+}
+
 /** The bytes a VT100-family terminal sends for a key, honouring DECCKM for the cursor keys. */
 internal fun TerminalKey.sequence(applicationCursorKeys: Boolean): String {
     val cursorPrefix = if (applicationCursorKeys) "${ESC}O" else "$ESC["

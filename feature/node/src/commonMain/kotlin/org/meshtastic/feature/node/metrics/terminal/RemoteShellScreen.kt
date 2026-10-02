@@ -253,6 +253,8 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
                 )
             }
 
+            // A tapped key cap can take keyboard focus, after which typing would reach nothing; give it straight back.
+            val refocus = { if (inputMode == InputMode.CHARACTER) focusRequester.requestFocus() }
             ExtraKeysBar(
                 modifiers = modifiers,
                 onKey = { key ->
@@ -261,6 +263,7 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
                         inputMode == InputMode.LINE && key == TerminalKey.DOWN -> viewModel.recallHistory(older = false)
                         else -> viewModel.sendKey(key)
                     }
+                    refocus()
                 },
                 onChar = { c ->
                     if (inputMode == InputMode.LINE && modifiers.isEmpty) {
@@ -268,9 +271,16 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
                     } else {
                         viewModel.typeKey(c)
                     }
+                    refocus()
                 },
-                onToggleCtrl = viewModel::toggleCtrl,
-                onToggleAlt = viewModel::toggleAlt,
+                onToggleCtrl = {
+                    viewModel.toggleCtrl()
+                    refocus()
+                },
+                onToggleAlt = {
+                    viewModel.toggleAlt()
+                    refocus()
+                },
             )
         }
     }
