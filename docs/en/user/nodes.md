@@ -217,11 +217,11 @@ Some of these are affiliate links. Both places say so above the links: product l
 
 ### Remote shell
 
-**Open terminal**, in the node's **Administration** card, opens a shell on a Linux node running `meshtasticd` 2.8.2 or later, carried over the mesh. The node accepts it only from a radio whose public key is in its **Security → Admin key** list, the same list remote administration uses; the app starts that admin session first if there isn't one, and the card's title shows whether it is active. If the node never answers, the screen says so after a minute.
+**Open terminal**, in the node's **Administration** card, opens a shell on a Linux node running `meshtasticd` 2.8.2 or later, carried over the mesh. The node accepts it only from a radio whose public key is in its **Security → Admin key** list, the same list remote administration uses; the app starts that admin session first if there isn't one, and the card's title shows whether it is active. The terminal takes the whole window. If the node never answers, the screen says so after a minute.
 
 The mesh carries a few hundred bytes a second, and the terminal is built around that:
 
-- What you type appears **underlined** at the cursor until the node echoes it back. At a prompt that doesn't echo, such as a password, the underlined text clears after a few seconds and stays off until you press Enter.
+- Once the node has echoed the first character of a line, what you type appears **underlined** at the cursor until the node echoes it back. At a prompt that doesn't echo, such as a password, nothing you type is shown; in line mode the command box masks its text and keeps it out of history.
 - The subtitle shows the measured round trip. When the node stops answering, a line at the top of the terminal says how long ago it was last heard.
 - The two rows of extra keys give **ESC**, **TAB**, arrows, **HOME**, **END**, **PGUP** and **PGDN**. **CTRL** and **ALT** are sticky: tap once to apply to the next key, twice to lock, a third time to release. **CTRL** then **c** interrupts a running command. A hardware keyboard's Ctrl and Alt work as usual.
 - **Line mode**, in the **⋮** menu, gives you a command box: each command goes out in one transmission, **↑** and **↓** recall earlier commands without asking the node, and chips offer common commands for a `meshtasticd` host. It is the cheapest way to use the shell on a busy mesh.

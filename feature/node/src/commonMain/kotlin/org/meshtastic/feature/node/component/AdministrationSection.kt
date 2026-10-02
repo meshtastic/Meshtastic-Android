@@ -110,8 +110,11 @@ fun AdministrationSection(
 
                     // The node gates the shell on the same admin_key list as remote admin, so the row
                     // establishes that session first, as the remote-admin row does. Only meshtasticd builds the
-                    // module, and the firmware advertises it nowhere else.
-                    if (node.capabilities.supportsRemoteShell && node.user.hw_model == HardwareModel.PORTDUINO) {
+                    // module, and the firmware advertises it nowhere else. A node not yet asked for its metadata
+                    // still gets the row: the tap's session check fetches it, and an older node says so on OPEN.
+                    val firmwareKnown = !node.metadata?.firmware_version.isNullOrEmpty()
+                    val offersShell = !firmwareKnown || node.capabilities.supportsRemoteShell
+                    if (node.user.hw_model == HardwareModel.PORTDUINO && offersShell) {
                         SectionDivider()
 
                         ListItem(

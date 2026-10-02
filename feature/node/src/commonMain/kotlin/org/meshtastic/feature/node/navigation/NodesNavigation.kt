@@ -144,8 +144,9 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) 
         )
     }
 
-    // RemoteShell uses its own ViewModel and is wired up separately from the MetricsViewModel-based screens.
-    entry<NodeDetailRoute.RemoteShell>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
+    // RemoteShell uses its own ViewModel and is wired up separately from the MetricsViewModel-based screens. No pane
+    // metadata: a terminal wants the whole window, so it takes the single-pane fallback instead of the extra pane.
+    entry<NodeDetailRoute.RemoteShell> { args ->
         val remoteShellViewModel = koinViewModel<RemoteShellViewModel> { parametersOf(args.destNum) }
         RemoteShellScreen(
             viewModel = remoteShellViewModel,

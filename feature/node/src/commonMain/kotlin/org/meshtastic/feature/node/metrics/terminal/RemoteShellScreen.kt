@@ -72,6 +72,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -239,6 +242,7 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
                 CommandComposer(
                     composer = composer,
                     history = history,
+                    masked = screen.secretPrompt,
                     actions =
                     ComposerActions(
                         onChange = viewModel::setComposer,
@@ -295,7 +299,13 @@ private fun TerminalPane(screen: TerminalScreenState, fontSizeSp: Int, showCurso
             itemsIndexed(screen.lines) { index, line ->
                 val text =
                     if (index == last) {
-                        line.withCursor(screen.cursorColumn, screen.predicted, screen.unsent, showCursor, palette)
+                        line.withCursor(
+                            cursorColumn = screen.cursorColumn,
+                            predicted = screen.predicted,
+                            unsent = if (screen.typingVisible) screen.unsent else "",
+                            showCursor = showCursor,
+                            palette = palette,
+                        )
                     } else {
                         line.toAnnotatedString(palette)
                     }
@@ -314,7 +324,7 @@ private class ComposerActions(
 )
 
 @Composable
-private fun CommandComposer(composer: String, history: List<String>, actions: ComposerActions) {
+private fun CommandComposer(composer: String, history: List<String>, masked: Boolean, actions: ComposerActions) {
     val chips = remember(history) { (history.take(RECENT_HISTORY_CHIPS) + QUICK_COMMANDS).distinct() }
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -341,7 +351,14 @@ private fun CommandComposer(composer: String, history: List<String>, actions: Co
                 placeholder = { Text(stringResource(Res.string.remote_shell_command_hint)) },
                 textStyle = TextStyle(fontFamily = FontFamily.Monospace),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Send),
+                // At a password prompt the answer must not be readable, nor offered to the keyboard's suggestions.
+                visualTransformation = if (masked) PasswordVisualTransformation() else VisualTransformation.None,
+                keyboardOptions =
+                KeyboardOptions(
+                    autoCorrectEnabled = false,
+                    keyboardType = if (masked) KeyboardType.Password else KeyboardType.Text,
+                    imeAction = ImeAction.Send,
+                ),
                 keyboardActions = KeyboardActions(onSend = { actions.onSubmit() }),
             )
             IconButton(onClick = actions.onSubmit) {

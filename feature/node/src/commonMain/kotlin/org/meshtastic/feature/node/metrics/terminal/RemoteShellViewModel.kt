@@ -352,7 +352,8 @@ class RemoteShellViewModel(
         val line = _composer.value
         _composer.value = ""
         historyCursor = -1
-        if (line.isNotBlank()) {
+        // An answer to a password prompt is not a command, and history would keep it on screen as a chip.
+        if (line.isNotBlank() && !screenState.value.secretPrompt) {
             _history.update { (listOf(line) + it.filterNot { old -> old == line }).take(MAX_HISTORY) }
         }
         sendNow(line + "\r")
@@ -430,12 +431,16 @@ class RemoteShellViewModel(
 
     /** Caller holds [linkMutex]. */
     private fun publishScreen() {
+        val lines = output.lines()
+        val secret = looksLikeSecretPrompt(lines.last().text.take(output.cursorColumn))
         screenState.update {
             it.copy(
-                lines = output.lines(),
+                lines = lines,
                 cursorColumn = output.cursorColumn,
                 applicationCursorKeys = output.applicationCursorKeys,
-                predicted = echo.pending,
+                predicted = if (secret) "" else echo.pending,
+                typingVisible = echo.showsTyping && !secret,
+                secretPrompt = secret,
             )
         }
     }
@@ -475,11 +480,16 @@ class RemoteShellViewModel(
     }
 }
 
-/** Everything the terminal pane draws. [predicted] was sent and awaits echo; [unsent] is still in the debounce. */
+/**
+ * Everything the terminal pane draws. [predicted] was sent and awaits echo; [unsent] is still in the debounce. Neither
+ * is drawn unless [typingVisible]: the line has confirmed that the remote echoes, and is not a [secretPrompt].
+ */
 internal data class TerminalScreenState(
     val lines: List<TerminalLine> = listOf(TerminalLine.Empty),
     val cursorColumn: Int = 0,
     val applicationCursorKeys: Boolean = false,
     val predicted: String = "",
     val unsent: String = "",
+    val typingVisible: Boolean = false,
+    val secretPrompt: Boolean = false,
 )
