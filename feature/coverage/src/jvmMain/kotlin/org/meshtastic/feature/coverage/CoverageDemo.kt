@@ -22,6 +22,7 @@ import okio.Path.Companion.toOkioPath
 import org.meshtastic.feature.map.terrain.TerrainTileStore
 import java.awt.image.BufferedImage
 import java.io.File
+import java.util.Locale
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
 import kotlin.system.measureTimeMillis
@@ -86,9 +87,12 @@ object CoverageDemo {
                     "profile step ${profileStepKm * 1000} m), cores ${Runtime.getRuntime().availableProcessors()}",
             )
             println("reachable: ${(coverage.reachableFraction * 100).roundToInt()}%")
-            println("max range: ${"%.1f".format(coverage.maxRangeKm)} km")
+            println("max range: ${"%.1f".format(Locale.ROOT, coverage.maxRangeKm)} km")
             val finite = coverage.dbm.filter { !it.isNaN() }
-            println("rx dBm range: ${"%.1f".format(finite.min())} .. ${"%.1f".format(finite.max())}")
+            println(
+                "rx dBm range: ${"%.1f".format(Locale.ROOT, finite.min())} .. " +
+                    "%.1f".format(Locale.ROOT, finite.max()),
+            )
 
             reportWarmSweeps(elevation, store, site, radials, rings, profileStepKm)
 

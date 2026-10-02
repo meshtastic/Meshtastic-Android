@@ -25,6 +25,7 @@ package org.meshtastic.feature.coverage
  *
  * `NaN` marks a cell that was not computed.
  */
+@Suppress("LongParameterList") // a grid is its site, shape, bounds and samples; none of them groups
 class CoverageGrid(
     val site: Site,
     val width: Int,

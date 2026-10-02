@@ -43,12 +43,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import okio.FileSystem
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.spatialk.geojson.Position
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.feature.coverage.CoverageGrid
 import org.meshtastic.feature.coverage.CoverageStyle
 import org.meshtastic.feature.coverage.LocalCoverage
@@ -84,6 +85,7 @@ import kotlin.math.roundToInt
 fun DesktopSitePlannerSlot(session: SitePlannerSession) {
     val sharedViewModel: SharedMapViewModel = koinViewModel()
     val layersManager: MapLayersManager = koinInject()
+    val dispatchers: CoroutineDispatchers = koinInject()
 
     val ourNode by sharedViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val channelSet by sharedViewModel.channelSet.collectAsStateWithLifecycle()
@@ -116,25 +118,15 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
                 session.onDismiss()
             }
             LaunchedEffect(current) {
-                runCatching {
-                    withContext(Dispatchers.Default) {
-                        // A fresh source per estimate is free: decoded terrain lives in a shared
-                        // cache, on disk under the store, and the HTTP client is shared too.
-                        MapterhornElevation(store = terrainStore).use { source ->
-                            source.prefetch(current.toSite())
-                            LocalCoverage(source).sweepGrid(current.toSite(), resolution = GRID)
-                        }
-                    }
+                val swept = estimateCoverage(current, terrainStore, dispatchers) { failure = it }
+                if (swept != null) {
+                    // Persist and draw it on the map, the same path the F-Droid flavour uses for
+                    // the WebView's GeoJSON — so the coverage survives the dialog closing and
+                    // shows up in the layers list like any other import.
+                    layersManager.addGeoJsonLayer(current.name, swept.toGeoJson(current.toCoverageStyle()))
+                    session.moveTo(Position(longitude = current.longitude, latitude = current.latitude))
+                    result = swept
                 }
-                    .onSuccess { swept ->
-                        // Persist and draw it on the map, the same path the F-Droid flavour uses for
-                        // the WebView's GeoJSON — so the coverage survives the dialog closing and
-                        // shows up in the layers list like any other import.
-                        layersManager.addGeoJsonLayer(current.name, swept.toGeoJson(current.toCoverageStyle()))
-                        session.moveTo(Position(longitude = current.longitude, latitude = current.latitude))
-                        result = swept
-                    }
-                    .onFailure { failure = it.message ?: it::class.simpleName }
                 running = null
             }
         }
@@ -268,12 +260,31 @@ private fun signalColor(dbm: Double, sensitivity: Double, strongest: Double): Co
     return Color(r, g, GREEN_FLOOR)
 }
 
+/** Null when the estimate failed, with the reason passed to [onFailure]; cancellation propagates. */
+private suspend fun estimateCoverage(
+    params: SitePlannerParams,
+    store: TerrainTileStore,
+    dispatchers: CoroutineDispatchers,
+    onFailure: (String?) -> Unit,
+): CoverageGrid? = try {
+    withContext(dispatchers.default) {
+        // A fresh source per estimate is free: decoded terrain lives in a shared
+        // cache, on disk under the store, and the HTTP client is shared too.
+        MapterhornElevation(store = store).use { source ->
+            source.prefetch(params.toSite())
+            LocalCoverage(source).sweepGrid(params.toSite(), resolution = GRID)
+        }
+    }
+} catch (e: CancellationException) {
+    throw e
+} catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+    onFailure(e.message ?: e::class.simpleName)
+    null
+}
+
 private const val GRID = 256
 private const val MILLIWATTS_PER_WATT = 1000.0
 private const val PERCENT = 100
-private const val DEG_TO_RAD = 0.017453292519943295
-private const val DOT_RADIUS = 2.5f
-private const val TX_RADIUS = 5f
 private const val HALF = 0.5f
 private const val GREEN_FLOOR = 0.24f
 

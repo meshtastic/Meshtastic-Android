@@ -53,7 +53,7 @@ class MapterhornElevation(
     /** The area the caller will sample, which is what [prefetch] warms when given no box of its own. */
     private val bounds: GeoBounds? = null,
     /** Where to keep tiles between launches. Without one, every launch re-downloads its terrain. */
-    private val store: TerrainTileStore? = null,
+    store: TerrainTileStore? = null,
     zoom: Int = DEFAULT_ZOOM,
     http: HttpClient? = null,
 ) : ElevationSource,
@@ -64,6 +64,7 @@ class MapterhornElevation(
     // Shared, and never closed here: a caller's client is theirs, and the shared one outlives us.
     private val tiles = MapterhornTiles(http ?: SharedTerrain.http, store)
 
+    @Suppress("InjectDispatcher") // tile decoding is CPU work, and callers build this outside DI
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     // Decoded terrain outlives this instance - see TerrainCache. Memoised after the first suspend

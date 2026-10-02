@@ -84,6 +84,7 @@ suspend fun LocalCoverage.sweepPolar(
     // scales with cores. Each writes its own disjoint slice of `out`, so there is nothing to guard.
     // The dispatcher is explicit: a caller on runBlocking or the main thread would otherwise hand
     // every radial to that one confined thread and the sweep would stay serial.
+    @Suppress("InjectDispatcher")
     coroutineScope {
         (0 until radials)
             .map { b ->

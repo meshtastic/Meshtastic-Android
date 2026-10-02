@@ -62,6 +62,7 @@ internal class MapterhornTiles(
      * returned null would quietly turn a mountain into sea level, so it throws and the caller surfaces a failed
      * estimate instead.
      */
+    @Suppress("SuspendFunSwallowedCancellation") // the retry's delay() rethrows a cancellation the first get swallowed
     private suspend fun download(zoom: Int, x: Int, y: Int): ByteArray? = gate.withPermit {
         val url = MapterhornEndpoints.tileUrl(zoom, x, y)
         val response = runCatching {
