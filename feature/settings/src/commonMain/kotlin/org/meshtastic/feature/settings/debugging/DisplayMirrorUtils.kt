@@ -18,6 +18,7 @@ package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import org.meshtastic.core.repository.MirrorFrame
@@ -87,5 +88,6 @@ private const val LOW_SURROGATE_BASE = 0xDC00
 private const val SURROGATE_SHIFT = 10
 
 @Composable
+@ReadOnlyComposable
 internal fun dpadContentColor(enabled: Boolean): Color =
     if (enabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
