@@ -20,8 +20,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
 import org.meshtastic.core.repository.MirrorFrame
+import org.meshtastic.core.ui.input.RemoteKey
 
 // Firmware input_broker_event codes (src/input/InputBroker.h). USER_PRESS is
 // what physical touch drivers emit for a tap, with touch coordinates attached.
@@ -41,8 +41,8 @@ internal const val INPUT_ANYKEY = 0xFF
 // rather than navigating back (which is what Esc is for).
 internal const val CHAR_BACKSPACE = 8
 
-// Below this, key events are control codes rather than typable text.
-internal const val FIRST_PRINTABLE_CHAR = 32
+// LVGL's next-focus key value, typed as a character like Backspace.
+internal const val CHAR_TAB = 9
 
 /** Scales a tap position on the scaled-up mirror image back to panel pixel coordinates. */
 internal fun Offset.toDeviceX(boxWidthPx: Int, frame: MirrorFrame): Int =
@@ -51,24 +51,36 @@ internal fun Offset.toDeviceX(boxWidthPx: Int, frame: MirrorFrame): Int =
 internal fun Offset.toDeviceY(boxHeightPx: Int, frame: MirrorFrame): Int =
     (y / boxHeightPx * frame.height).toInt().coerceIn(0, frame.height - 1)
 
-internal fun keyToInputEvent(key: Key): Int? = when (key) {
-    Key.DirectionUp -> INPUT_UP
-
-    Key.DirectionDown -> INPUT_DOWN
-
-    Key.DirectionLeft -> INPUT_LEFT
-
-    Key.DirectionRight -> INPUT_RIGHT
-
-    Key.Enter,
-    Key.NumPadEnter,
-    Key.Spacebar,
-    -> INPUT_SELECT
-
-    Key.Escape -> INPUT_BACK
-
+/** The device navigation event for a key the mirror forwards; null for keys a device UI has no use for. */
+internal fun RemoteKey.toInputEvent(): Int? = when (this) {
+    RemoteKey.UP -> INPUT_UP
+    RemoteKey.DOWN -> INPUT_DOWN
+    RemoteKey.LEFT -> INPUT_LEFT
+    RemoteKey.RIGHT -> INPUT_RIGHT
+    RemoteKey.ESCAPE -> INPUT_BACK
     else -> null
 }
+
+/** Calls [action] with each Unicode code point of [text], joining surrogate pairs so one character is one kb_char. */
+internal fun forEachCodePoint(text: String, action: (Int) -> Unit) {
+    var i = 0
+    while (i < text.length) {
+        val c = text[i]
+        val next = text.getOrNull(i + 1)
+        if (c.isHighSurrogate() && next != null && next.isLowSurrogate()) {
+            action(SUPPLEMENTARY_BASE + ((c.code - HIGH_SURROGATE_BASE) shl SURROGATE_SHIFT) + (next.code - LOW_SURROGATE_BASE))
+            i += 2
+        } else {
+            action(c.code)
+            i++
+        }
+    }
+}
+
+private const val SUPPLEMENTARY_BASE = 0x10000
+private const val HIGH_SURROGATE_BASE = 0xD800
+private const val LOW_SURROGATE_BASE = 0xDC00
+private const val SURROGATE_SHIFT = 10
 
 @Composable
 internal fun dpadContentColor(enabled: Boolean): Color =
