@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.coverage
 
+import org.meshtastic.feature.map.kml.jsonString
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -132,7 +133,7 @@ fun CoverageGrid.toGeoJson(style: CoverageStyle = CoverageStyle(), bandCount: In
 
     return """{
   "type": "FeatureCollection",
-  "properties": {"generator": "meshtastic-kp1812", "name": "${site.name}", "model": "ITU-R P.1812",
+  "properties": {"generator": "meshtastic-kp1812", "name": ${site.name.jsonString()}, "model": "ITU-R P.1812",
     "palette": "${style.palette.key}", "min_dbm": ${style.minDbm.toFixed1()}, "max_dbm": ${style.maxDbm.toFixed1()}},
   "features": [
 $features

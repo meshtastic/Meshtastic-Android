@@ -65,7 +65,9 @@ fun SitePlannerHost(
     onUseNodeLocation: (() -> Pair<Double, Double>)? = null,
     onUseMapCenter: (() -> Pair<Double, Double>)? = null,
 ) {
-    var params by remember(initialParams) { mutableStateOf(initialParams) }
+    // Seeded once per launch: hosts recompute initialParams on every node update, and a position fix must not
+    // overwrite what the user has typed or submitted.
+    var params by remember { mutableStateOf(initialParams) }
     var running by remember { mutableStateOf<SitePlannerParams?>(null) }
     var failed by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()

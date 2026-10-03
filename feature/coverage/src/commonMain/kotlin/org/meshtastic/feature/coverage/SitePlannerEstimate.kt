@@ -87,7 +87,10 @@ internal fun SitePlannerParams.toCoverageStyle(): CoverageStyle = CoverageStyle.
     transparencyPercent = overlayTransparency,
 )
 
-internal fun wattsToDbm(watts: Double): Double = DBM_PER_DECADE * log10(watts * MILLIWATTS_PER_WATT)
+internal fun wattsToDbm(watts: Double): Double {
+    require(watts > 0.0) { "transmit power must be positive, got $watts W" }
+    return DBM_PER_DECADE * log10(watts * MILLIWATTS_PER_WATT)
+}
 
 private const val DBM_PER_DECADE = 10.0
 private const val MILLIWATTS_PER_WATT = 1000.0

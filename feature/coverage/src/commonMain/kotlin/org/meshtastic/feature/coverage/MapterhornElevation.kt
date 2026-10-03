@@ -138,8 +138,13 @@ class MapterhornElevation(
     private suspend fun awaitTile(key: Long, x: Int, y: Int): ElevationTile? =
         cache().getOrFetch(key) { scope.async { decode(x, y) } }
 
-    private suspend fun decode(x: Int, y: Int): ElevationTile? =
-        tiles.bytes(zoom, x, y)?.let { runCatching { decodeTerrariumTile(it) }.getOrNull() }
+    // Null means the endpoint has no tile there, so it must never stand in for a failed decode: a corrupt cached
+    // tile gets one fresh download, and bytes that still don't decode fail the estimate.
+    private suspend fun decode(x: Int, y: Int): ElevationTile? {
+        val cached = tiles.bytes(zoom, x, y) ?: return null
+        return runCatching { decodeTerrariumTile(cached) }.getOrNull()
+            ?: tiles.bytes(zoom, x, y, fresh = true)?.let { decodeTerrariumTile(it) }
+    }
 
     override fun close() = scope.cancel()
 

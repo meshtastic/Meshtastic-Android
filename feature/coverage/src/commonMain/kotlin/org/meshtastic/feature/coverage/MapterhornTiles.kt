@@ -49,11 +49,15 @@ internal class MapterhornTiles(
 ) {
     private val gate = Semaphore(concurrency)
 
-    /** Raw Terrarium WebP for one tile, or null where the endpoint has no data (ocean, out of range). */
-    suspend fun bytes(zoom: Int, x: Int, y: Int): ByteArray? {
+    /**
+     * Raw Terrarium WebP for one tile, or null where the endpoint has no data (ocean, out of range). [fresh] skips the
+     * stored copy and overwrites it, for a stored tile that didn't decode.
+     */
+    suspend fun bytes(zoom: Int, x: Int, y: Int, fresh: Boolean = false): ByteArray? {
         val tile = TileIndex(zoom, x, y)
         val source = sourceFor(zoom)
-        return readLocal(source, tile) ?: download(zoom, x, y)?.also { writeLocal(source, tile, it) }
+        val stored = if (fresh) null else readLocal(source, tile)
+        return stored ?: download(zoom, x, y)?.also { writeLocal(source, tile, it) }
     }
 
     /**

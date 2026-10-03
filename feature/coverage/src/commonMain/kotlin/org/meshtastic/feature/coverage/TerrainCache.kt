@@ -17,7 +17,10 @@
 package org.meshtastic.feature.coverage
 
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.meshtastic.feature.map.terrain.ElevationTile
@@ -65,16 +68,34 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
      * [produce] returns a [Deferred] rather than the tile so that the caller owns the scope the fetch runs in. The
      * cache outlives any one [MapterhornElevation] and must not hold its scope.
      */
+    @Suppress("SuspendFunSwallowedCancellation") // ensureActive() rethrows this caller's own cancellation
     suspend fun getOrFetch(key: Long, produce: () -> Deferred<ElevationTile?>): ElevationTile? {
-        // A canceled fetch must not be handed to the next caller: the scope producing it belongs to
-        // one MapterhornElevation, and canceling that (the planner sheet being dismissed mid-run)
-        // would otherwise leave a dead Deferred that fails every later sweep touching this tile.
-        val pending = lock.withLock {
-            inFlight[key]?.takeUnless { it.isCancelled } ?: produce().also { inFlight[key] = it }
+        while (true) {
+            // A canceled fetch must not be handed to the next caller: the scope producing it belongs to
+            // one MapterhornElevation, and canceling that (the planner sheet being dismissed mid-run)
+            // would otherwise leave a dead Deferred that fails every later sweep touching this tile.
+            var started = false
+            val pending = lock.withLock {
+                inFlight[key]?.takeUnless { it.isCancelled }
+                    ?: produce().also {
+                        inFlight[key] = it
+                        started = true
+                    }
+            }
+            val tile =
+                try {
+                    pending.await()
+                } catch (e: CancellationException) {
+                    // Another instance's fetch can be canceled under a caller that is still running; that caller
+                    // starts its own. Its own cancellation, or its own fetch being canceled, still ends the wait.
+                    currentCoroutineContext().ensureActive()
+                    if (started) throw e
+                    lock.withLock { if (inFlight[key] === pending) inFlight.remove(key) }
+                    continue
+                }
+            publish(listOf(key to tile))
+            return tile
         }
-        val tile = pending.await()
-        publish(listOf(key to tile))
-        return tile
     }
 
     /** Record tiles fetched in bulk, as a prefetch does. */
