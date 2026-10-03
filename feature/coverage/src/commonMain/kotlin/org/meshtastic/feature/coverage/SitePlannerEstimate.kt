@@ -40,7 +40,8 @@ suspend fun estimateCoverageGeoJson(
     dispatcher: CoroutineDispatcher,
 ): String = withContext(dispatcher) {
     val site = params.toSite()
-    MapterhornElevation(store = store).use { source ->
+    // The bounds let the zoom drop for a wide disc, so its tiles fit the decoded cache.
+    MapterhornElevation(bounds = site.coverageBounds(), store = store).use { source ->
         source.prefetch(site)
         LocalCoverage(source).sweepGrid(site).toGeoJson(params.toCoverageStyle())
     }
