@@ -842,6 +842,7 @@ class NodeManagerImpl(
             isIgnored = info.is_ignored,
             isMuted = info.is_muted,
             signsPackets = info.has_xeddsa_signed,
+            manuallyVerified = next.manuallyVerified || info.is_key_manually_verified,
         )
     }
 
@@ -1157,8 +1158,10 @@ class NodeManagerImpl(
      */
     private fun transformUserNode(node: Node, p: User, channel: Int, manuallyVerified: Boolean): Node {
         val shouldPreserve = shouldPreserveExistingUser(node.user, p)
+        // A mesh NodeInfo carries no verification, so it never clears one an import set.
+        val verified = node.manuallyVerified || manuallyVerified
         return if (shouldPreserve) {
-            node.copy(channel = channel, manuallyVerified = manuallyVerified)
+            node.copy(channel = channel, manuallyVerified = verified)
         } else {
             val incomingKey = resolveValidatedPublicKeyHint(p.public_key)
             // Prefer node.publicKey when valid (the authoritative stored key); fall back to node.user.public_key.
@@ -1177,7 +1180,7 @@ class NodeManagerImpl(
                 keyMatch = node.keyMatch && !keyMismatch,
                 newPublicKey = if (keyMismatch) incomingKey else node.newPublicKey,
                 channel = channel,
-                manuallyVerified = manuallyVerified,
+                manuallyVerified = verified,
             )
         }
     }
