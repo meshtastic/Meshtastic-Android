@@ -68,7 +68,11 @@ internal fun forEachCodePoint(text: String, action: (Int) -> Unit) {
         val c = text[i]
         val next = text.getOrNull(i + 1)
         if (c.isHighSurrogate() && next != null && next.isLowSurrogate()) {
-            action(SUPPLEMENTARY_BASE + ((c.code - HIGH_SURROGATE_BASE) shl SURROGATE_SHIFT) + (next.code - LOW_SURROGATE_BASE))
+            action(
+                SUPPLEMENTARY_BASE +
+                    ((c.code - HIGH_SURROGATE_BASE) shl SURROGATE_SHIFT) +
+                    (next.code - LOW_SURROGATE_BASE),
+            )
             i += 2
         } else {
             action(c.code)
