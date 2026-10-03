@@ -1034,7 +1034,6 @@
     <string name="site_planner_color_scale">Färgpalett</string>
     <string name="site_planner_estimate">Uppskatta täckning</string>
     <string name="site_planner_estimating">Uppskattar täckning…</string>
-    <string name="site_planner_failed">Uppskattning av täckning misslyckades</string>
     <string name="site_planner_frequency_mhz">Frekvens (MHz)</string>
     <string name="site_planner_invalid_positive">Måste vara större än 0</string>
     <string name="site_planner_max_range_km">Maximal räckvidd (km)</string>

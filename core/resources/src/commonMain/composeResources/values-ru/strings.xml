@@ -1705,13 +1705,10 @@
     <string name="site_planner">Планировщик места</string>
     <string name="site_planner_antenna_gain_dbi">Усиление антенны (dBi)</string>
     <string name="site_planner_antenna_height_meters">Высота антенны (м)</string>
-    <string name="site_planner_browser_note">Смета откроется в твоем браузере. Чтобы добавить её на эту карту, кликни по значку передатчика там, выбери Экспорт › GeoJSON, а затем добавь скачанный файл через Управление слоями карты › Добавить слой. Используй экспорт в GeoJSON — KML создаёт наложение изображения на землю, которое эта карта не может отобразить.</string>
     <string name="site_planner_color_scale">Цветовая палитра</string>
     <string name="site_planner_estimate">Оценка покрытия</string>
     <string name="site_planner_estimating">Оценка покрытия…</string>
-    <string name="site_planner_failed">Оценка покрытия не удалась</string>
     <string name="site_planner_frequency_mhz">Частота (МГц)</string>
-    <string name="site_planner_high_resolution">Местность с высоким разрешением</string>
     <string name="site_planner_invalid_latitude">Введите от -90 до 90</string>
     <string name="site_planner_invalid_longitude">Введите от −180 до 180</string>
     <string name="site_planner_invalid_positive">Должно быть больше 0</string>
@@ -1728,7 +1725,6 @@
     <string name="site_planner_use_current_location">Использовать текущее местоположение</string>
     <string name="site_planner_use_map_center">Использовать центр карты</string>
     <string name="site_planner_use_node_location">Использовать текущее местоположение</string>
-    <string name="site_planner_webview_updating">Системный WebView обновляется. Повтори попытку через мгновение.</string>
     <string name="skip">Пропустить</string>
     <string name="slot">Слот</string>
     <string name="snr">Сигнал/шум</string>

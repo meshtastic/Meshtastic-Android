@@ -1476,9 +1476,7 @@
     <string name="site_planner_color_scale">Paleta barev</string>
     <string name="site_planner_estimate">Odhadované pokrytí</string>
     <string name="site_planner_estimating">Odhaduji pokrytí…</string>
-    <string name="site_planner_failed">Odhad pokrytí selhal</string>
     <string name="site_planner_frequency_mhz">Frekvence (MHz)</string>
-    <string name="site_planner_high_resolution">Terén s vysokým rozlišení</string>
     <string name="site_planner_max_range_km">Maximální dosah (km)</string>
     <string name="site_planner_rx_height_meters">Výška přijímače (m)</string>
     <string name="site_planner_rx_sensitivity_dbm">Citlivost přijímače (dBm)</string>
@@ -1490,7 +1488,6 @@
     <string name="site_planner_use_current_location">Použít aktuální polohu</string>
     <string name="site_planner_use_map_center">Použít střed mapy</string>
     <string name="site_planner_use_node_location">Použít aktuální polohu uzlu</string>
-    <string name="site_planner_webview_updating">Systémový WebView se aktualizuje. Zkuste to za chvíli znovu.</string>
     <string name="skip">Přeskočit</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Poměr signálu k šumu (SNR) je veličina používaná k vyjádření poměru mezi úrovní požadovaného signálu a úrovní šumu na pozadí. V Meshtastic a dalších bezdrátových systémech vyšší hodnota SNR značí čistší signál, což může zvýšit spolehlivost a kvalitu přenosu dat.</string>

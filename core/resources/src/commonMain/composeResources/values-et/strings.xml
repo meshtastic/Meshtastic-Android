@@ -1517,13 +1517,10 @@
     <string name="site_planner">Saidi planeerija</string>
     <string name="site_planner_antenna_gain_dbi">Antenni võimendus (dBi)</string>
     <string name="site_planner_antenna_height_meters">Antenni kõrgus (m)</string>
-    <string name="site_planner_browser_note">Hindamine avatakse brauseris. Selle kaardile toomiseks klõpsake seal saatja nööpnõelal, valige Ekspordi › GeoJSON ja seejärel lisage allalaaditud fail jaotisse Kaardikihtide haldamine › Lisa kiht. Kasutage GeoJSON eksporti – KML fail on maapinna peal olev pilt, mida see kaart ei saa joonistada.</string>
     <string name="site_planner_color_scale">Värvipalett</string>
     <string name="site_planner_estimate">Hinnanguline katvus</string>
     <string name="site_planner_estimating">Katvuse hindamine…</string>
-    <string name="site_planner_failed">Katvuse hindamine ebaõnnestus</string>
     <string name="site_planner_frequency_mhz">Sagedus (MHz)</string>
-    <string name="site_planner_high_resolution">Kõrg-haljastusega maastik</string>
     <string name="site_planner_invalid_latitude">Sisesta −90 kuni 90</string>
     <string name="site_planner_invalid_longitude">Sisesta −180 to 180</string>
     <string name="site_planner_invalid_positive">Peab olema suurem kui 0</string>
@@ -1540,7 +1537,6 @@
     <string name="site_planner_use_current_location">Kasuta praegust asukohta</string>
     <string name="site_planner_use_map_center">Kasuta kaardi keskpunkti</string>
     <string name="site_planner_use_node_location">Kasuta praegust sõlme asukohta</string>
-    <string name="site_planner_webview_updating">Süsteemi WebView värskendatakse. Palun proovi hetke pärast uuesti.</string>
     <string name="skip">Jäta vahele</string>
     <string name="slot">Pesa</string>
     <string name="snr">SNR</string>

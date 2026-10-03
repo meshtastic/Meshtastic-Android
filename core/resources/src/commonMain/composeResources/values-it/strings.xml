@@ -1367,9 +1367,7 @@
     <string name="site_planner_color_scale">Palette di colori</string>
     <string name="site_planner_estimate">Stima la copertura</string>
     <string name="site_planner_estimating">Stima della copertura…</string>
-    <string name="site_planner_failed">Stima della copertura non riuscita</string>
     <string name="site_planner_frequency_mhz">Frequenza (MHz)</string>
-    <string name="site_planner_high_resolution">Terreno ad alta risoluzione</string>
     <string name="site_planner_invalid_latitude">Inserisci da −90 a 90</string>
     <string name="site_planner_invalid_longitude">Inserisci da −180 a 180</string>
     <string name="site_planner_invalid_positive">Deve essere maggiore di 0</string>
