@@ -322,6 +322,8 @@ jobs:
         if: runner.os == 'Linux'
         env:
           APP_VERSION_NAME: ${{ inputs.version_name }}
+          # GitHub's `latest` skips prereleases, so internal builds also update to the newest production release.
+          UPDATE_RELEASE_TAG: latest
         run: scripts/build-appimage.sh
 
       - name: List Desktop Binaries
@@ -340,6 +342,7 @@ jobs:
             desktopApp/build/compose/binaries/main-release/*/*.deb
             desktopApp/build/compose/binaries/main-release/*/*.rpm
             desktopApp/build/compose/binaries/main-release/*/*.AppImage
+            desktopApp/build/compose/binaries/main-release/*/*.AppImage.zsync
             desktopApp/build/compose/jars/*-release.jar
           retention-days: 1
           if-no-files-found: ignore
@@ -355,6 +358,7 @@ jobs:
             desktopApp/build/compose/binaries/main-release/*/*.deb
             desktopApp/build/compose/binaries/main-release/*/*.rpm
             desktopApp/build/compose/binaries/main-release/*/*.AppImage
+            desktopApp/build/compose/binaries/main-release/*/*.AppImage.zsync
             desktopApp/build/compose/jars/*-release.jar
 
   create-flatpak-src:

@@ -7,8 +7,8 @@
 # AppImage bundle format. This script builds the AppDir scaffolding (AppRun,
 # .desktop entry, icon) around that directory and packs it with appimagetool.
 #
-# The output lands in main-release/appimage/ so the existing release upload
-# and attestation globs (main-release/*/*.AppImage) pick it up unchanged.
+# The .AppImage (and its .zsync when UPDATE_RELEASE_TAG is set) land in
+# <BINARIES_DIR>/appimage/, where the upload and attestation globs pick them up.
 #
 # Expects to run on a Linux host of the target architecture (x86_64/aarch64)
 # with APP_VERSION_NAME set (e.g. 2.8.0). appimagetool and the AppImage
@@ -111,15 +111,35 @@ curl -fsSL --retry 5 --retry-delay 10 --connect-timeout 10 --max-time 300 -o "${
   "https://github.com/AppImage/type2-runtime/releases/download/${RUNTIME_VERSION}/runtime-${ARCH}"
 echo "${RUNTIME_SHA256}  ${tools_dir}/runtime" | sha256sum -c -
 
-output="${out_dir}/${app_name// /_}-${VERSION}-${ARCH}.AppImage"
+asset_prefix="${app_name// /_}"
+output="${out_dir}/${asset_prefix}-${VERSION}-${ARCH}.AppImage"
+
+# UPDATE_RELEASE_TAG (e.g. `latest`) embeds AppImageUpdate information pointing at that
+# release's .zsync. appimagetool's bundled zsyncmake writes the .zsync into the working
+# directory, so pack from inside out_dir to keep it beside the .AppImage.
+update_args=()
+if [ -n "${UPDATE_RELEASE_TAG:-}" ]; then
+  repo="${GITHUB_REPOSITORY:-meshtastic/Meshtastic-Android}"
+  update_args=(-u "gh-releases-zsync|${repo%%/*}|${repo#*/}|${UPDATE_RELEASE_TAG}|${asset_prefix}-*-${ARCH}.AppImage.zsync")
+fi
+
 # APPIMAGE_EXTRACT_AND_RUN: run appimagetool itself without FUSE.
 # --runtime-file: embed the pinned runtime instead of downloading `continuous`.
 # --no-appstream: we ship no AppStream metadata, skip that validation.
-ARCH="$ARCH" APPIMAGE_EXTRACT_AND_RUN=1 "${tools_dir}/appimagetool" \
-  --no-appstream --runtime-file "${tools_dir}/runtime" \
-  "$appdir" "$output"
+(
+  cd "$out_dir"
+  ARCH="$ARCH" APPIMAGE_EXTRACT_AND_RUN=1 "${tools_dir}/appimagetool" \
+    --no-appstream --runtime-file "${tools_dir}/runtime" \
+    "${update_args[@]}" \
+    "$(basename "$appdir")" "$(basename "$output")"
+)
 
-# Drop the AppDir so only the .AppImage remains for upload/attestation globs.
+if [ -n "${UPDATE_RELEASE_TAG:-}" ] && [ ! -f "${output}.zsync" ]; then
+  echo "::error::appimagetool did not write ${output}.zsync" >&2
+  exit 1
+fi
+
+# Drop the AppDir so only the packed outputs remain for upload/attestation globs.
 rm -rf "$appdir"
 
 echo "Built $(du -h "$output" | cut -f1) AppImage: ${output}"
