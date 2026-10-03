@@ -162,13 +162,16 @@ class NodeManagerImplTest {
     fun `eviction never drops user-marked nodes`() {
         val favourite = 5150
         val ignored = 5151
+        val verified = 5152
         nodeManager.updateNode(favourite) { it.copy(isFavorite = true) }
         nodeManager.updateNode(ignored) { it.copy(isIgnored = true) }
+        nodeManager.updateNode(verified) { it.copy(manuallyVerified = true) }
 
         floodPastCapAndAssertEvicted()
 
         assertNotNull(nodeManager.nodeDBbyNodeNum[favourite], "a favourite must never be evicted")
         assertNotNull(nodeManager.nodeDBbyNodeNum[ignored], "an ignored node must never be evicted")
+        assertNotNull(nodeManager.nodeDBbyNodeNum[verified], "a verified contact must never be evicted")
     }
 
     @Test
@@ -932,6 +935,27 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedUser(nodeNum, defaultUser)
 
         assertTrue(nodeManager.nodeDBbyNodeNum[nodeNum]!!.manuallyVerified)
+    }
+
+    @Test
+    fun `a verified contact stays verified on its own key when a different key arrives`() {
+        val nodeNum = 1234
+        val verifiedUser = verifiedContactUser("Contact")
+        nodeManager.updateNode(nodeNum) {
+            it.copy(user = verifiedUser, publicKey = verifiedUser.public_key, manuallyVerified = true)
+        }
+
+        val substitute =
+            verifiedUser
+                .newBuilder()
+                .also { wb -> wb.public_key = ByteArray(32) { (it + 10).toByte() }.toByteString() }
+                .build()
+        nodeManager.handleReceivedUser(nodeNum, substitute)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        assertEquals(verifiedUser.public_key, result.user.public_key)
+        assertTrue(result.manuallyVerified)
+        assertTrue(result.mismatchKey)
     }
 
     @Test

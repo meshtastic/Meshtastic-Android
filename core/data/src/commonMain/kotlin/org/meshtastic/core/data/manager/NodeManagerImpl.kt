@@ -176,18 +176,18 @@ class NodeManagerImpl(
          * map read Room, not this index, so eviction is not visible in the UI.
          *
          * Eviction order is least-valuable-first: bare-packet placeholders before nodes that have sent a real NodeInfo,
-         * and within each group the least recently heard. Nodes the user has marked (favourite, ignored) are never
-         * evicted, since that is user data rather than observed mesh state.
+         * and within each group the least recently heard. Nodes the user has marked (favourite, ignored, verified) are
+         * never evicted, since that is user data rather than observed mesh state.
          *
          * The cap is therefore best-effort rather than absolute: if protected entries alone exceed [maxNodes] the index
-         * stays above it. That is deliberate — favourite and ignored are set only by the local user, so no remote party
-         * can inflate them, and silently discarding user data to satisfy a memory bound would be the worse trade.
+         * stays above it. That is deliberate — these marks are set only by the local user, so no remote party can
+         * inflate them, and silently discarding user data to satisfy a memory bound would be the worse trade.
          */
         fun evictedToFit(maxNodes: Int, keep: Set<Int>): NodeIndex {
             if (byNum.size <= maxNodes) return this
             val evictable =
                 byNum.values
-                    .filterNot { it.num in keep || it.isFavorite || it.isIgnored }
+                    .filterNot { it.num in keep || it.isFavorite || it.isIgnored || it.manuallyVerified }
                     // Placeholders first, then oldest-heard, then node num so the outcome is deterministic.
                     .sortedWith(
                         compareByDescending<Node> { isDefaultIdentityPlaceholder(it) }

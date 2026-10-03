@@ -117,6 +117,27 @@ abstract class CommonNodeInfoDaoTest {
     }
 
     @Test
+    fun `an update that does not carry verification keeps a stored verified contact verified`() = runTest {
+        createDb()
+        val user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!1"
+                    wb.long_name = "Contact"
+                    wb.hw_model = org.meshtastic.proto.HardwareModel.TBEAM
+                    wb.public_key = ByteArray(32) { 1 }.toByteString()
+                }
+                .build()
+        dao.upsert(NodeEntity(num = 1, user = user, manuallyVerified = true))
+
+        dao.upsert(NodeEntity(num = 1, user = user.newBuilder().also { wb -> wb.long_name = "Renamed" }.build()))
+
+        val stored = dao.getNodeByNum(1)?.node
+        assertEquals("Renamed", stored?.longName)
+        assertTrue(stored?.manuallyVerified ?: false)
+    }
+
+    @Test
     fun `a remote node changing its key keeps the stored key and records the refusal`() = runTest {
         createDb()
         val trusted = ByteArray(32) { 1 }.toByteString()

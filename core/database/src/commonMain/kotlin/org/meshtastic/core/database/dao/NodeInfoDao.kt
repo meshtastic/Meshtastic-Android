@@ -266,6 +266,7 @@ interface NodeInfoDao {
             publicKey = resolved.key,
             keyMatch = resolved.keyMatch,
             newPublicKey = resolved.newPublicKey,
+            manuallyVerified = incomingNode.manuallyVerified || existingNode.manuallyVerified,
             notes = resolvedNotes,
             powerChannelLabels = resolvedPowerChannelLabels,
         )
