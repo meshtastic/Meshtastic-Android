@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-19T12:33:23.000Z",
+  "generatedAt": "2026-10-03T04:34:51.000Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -3952,11 +3952,47 @@
       "description": "Seeed Mesh Tracker X1",
       "type": "vendor",
       "targets": [
-        "seeed_mesh_tracker_x1"
+        "seeed_mesh_tracker_X1"
       ],
-      "hwModels": [],
+      "hwModels": [
+        128
+      ],
       "marketplace": null,
       "regions": null
+    },
+    {
+      "shortCode": "rokland-rak3401-high-power",
+      "url": "https://msh.to/rokland-rak3401-high-power",
+      "description": "RAK3401 High Power Starter Kit (Rokland)",
+      "type": "marketplace",
+      "targets": [
+        "rak3401-1watt"
+      ],
+      "hwModels": [
+        117
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
     }
   ]
 }
