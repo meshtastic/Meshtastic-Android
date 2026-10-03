@@ -52,7 +52,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
 
     private val rects = MirrorRectCompositor()
 
-    private var paletteRegions = mutableListOf<DisplayPalette.ColorRegion>()
+    private val paletteRegions = mutableListOf<DisplayPalette.ColorRegion>()
     private var paletteSignature = 0
     private var paletteReceived = 0
     private var paletteDefaultOn = 0
@@ -106,7 +106,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
 
     override fun handleIncomingPalette(chunk: DisplayPalette) {
         if (chunk.region_offset == 0) {
-            paletteRegions = mutableListOf()
+            paletteRegions.clear()
             paletteSignature = chunk.signature
             paletteReceived = 0
             // Defaults are authoritative on the first chunk; later chunks may omit them.
@@ -192,7 +192,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         buffer = null
         received = 0
         rects.reset()
-        paletteRegions = mutableListOf()
+        paletteRegions.clear()
         paletteReceived = 0
         paletteSignature = 0
         _frame.value = null
