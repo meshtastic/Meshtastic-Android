@@ -57,6 +57,7 @@ import org.meshtastic.core.resources.mesh_beacon_target
 import org.meshtastic.core.resources.mesh_beacon_target_add
 import org.meshtastic.core.resources.mesh_beacon_target_channel_index
 import org.meshtastic.core.resources.mesh_beacon_target_default
+import org.meshtastic.core.resources.mesh_beacon_target_frequency_slot
 import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.mesh_beacon_targets
 import org.meshtastic.core.resources.plurals_seconds
@@ -321,6 +322,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                     enabled = broadcastGate.sectionsEnabled,
                     channelItems = channelItems,
                     currentPreset = radioLora.modem_preset,
+                    region = radioLora.region,
                     presetConstraint = presetConstraint,
                     presetsGated = presetsGated,
                     capabilities = capabilities,
@@ -388,10 +390,10 @@ internal fun OfferChannelPreference(
 
 /**
  * Editor for the repeated `broadcast_targets` list: the beacon's actual TX destinations (design#140 behavior 6). Each
- * row picks one of the radio's own channels ([channelItems]) or the "Default" sentinel, and a preset filtered by
- * [presetConstraint] (design#140 behaviors 2 and 7) or "Default"; region is no longer a row concept (behavior 1), the
- * radio's own region applies to every target. Internal (not private): unit-testable directly, mirroring
- * [OfferChannelPreference].
+ * row picks one of the radio's own channels ([channelItems]) or the "Default" sentinel, a preset filtered by
+ * [presetConstraint] (design#140 behaviors 2 and 7) or "Default", and, where [Capabilities] allows it, a frequency slot
+ * or "Default"; region is no longer a row concept (behavior 1), the radio's own [region] applies to every target.
+ * Internal (not private): unit-testable directly, mirroring [OfferChannelPreference].
  */
 @Composable
 internal fun BroadcastTargetsCard(
@@ -399,6 +401,7 @@ internal fun BroadcastTargetsCard(
     enabled: Boolean,
     channelItems: List<DropDownItem<Int>>,
     currentPreset: ModemPreset,
+    region: RegionCode,
     presetConstraint: RegionPresetConstraint,
     presetsGated: Boolean,
     capabilities: Capabilities,
@@ -413,6 +416,7 @@ internal fun BroadcastTargetsCard(
                 enabled = enabled,
                 channelItems = channelItems,
                 currentPreset = currentPreset,
+                region = region,
                 presetConstraint = presetConstraint,
                 presetsGated = presetsGated,
                 capabilities = capabilities,
@@ -431,7 +435,8 @@ internal fun BroadcastTargetsCard(
 }
 
 /**
- * One row of [BroadcastTargetsCard]: a channel picker (fallback-safe, design#140 Q2) and a constrained preset picker.
+ * One row of [BroadcastTargetsCard]: a channel picker (fallback-safe, design#140 Q2), a constrained preset picker and,
+ * when [Capabilities.supportsBeaconTargetFrequencySlot], a frequency slot picker.
  */
 @Composable
 private fun BroadcastTargetRow(
@@ -440,6 +445,7 @@ private fun BroadcastTargetRow(
     enabled: Boolean,
     channelItems: List<DropDownItem<Int>>,
     currentPreset: ModemPreset,
+    region: RegionCode,
     presetConstraint: RegionPresetConstraint,
     presetsGated: Boolean,
     capabilities: Capabilities,
@@ -494,7 +500,46 @@ private fun BroadcastTargetRow(
         items = nullablePresetItems,
         selectedItem = rowPreset,
         enabled = enabled,
-        onItemSelected = { sel -> onChange { it.newBuilder().also { wb -> wb.preset = sel }.build() } },
+        onItemSelected = { sel -> onChange { selectBeaconTargetPreset(it, sel, currentPreset, region) } },
     )
+    if (capabilities.supportsBeaconTargetFrequencySlot) {
+        val slotCount =
+            remember(region, rowPreset, currentPreset) { beaconTargetSlotCount(region, rowPreset ?: currentPreset) }
+        BroadcastTargetSlotPreference(
+            slot = target.frequency_slot,
+            slotCount = slotCount,
+            defaultLabel = defaultLabel,
+            enabled = enabled,
+            onSlotSelect = { sel -> onChange { it.newBuilder().also { wb -> wb.frequency_slot = sel }.build() } },
+        )
+    }
     TextButton(onClick = onRemove, enabled = enabled) { Text(stringResource(Res.string.mesh_beacon_target_remove)) }
+}
+
+/**
+ * A broadcast target's `frequency_slot`: "Default" leaves it unset so firmware derives the slot from the target's
+ * channel name, and 1..[slotCount] pin it. A stored slot outside that range stays selected as a disabled item.
+ */
+@Composable
+private fun BroadcastTargetSlotPreference(
+    slot: Int?,
+    slotCount: Int,
+    defaultLabel: String,
+    enabled: Boolean,
+    onSlotSelect: (Int?) -> Unit,
+) {
+    val fallback = beaconTargetSlotFallback(slot, slotCount)
+    val items =
+        remember(slotCount, fallback, defaultLabel) {
+            listOf(DropDownItem<Int?>(value = null, label = defaultLabel)) +
+                (1..slotCount).map { DropDownItem<Int?>(value = it, label = it.toString()) } +
+                listOfNotNull(fallback?.let { DropDownItem<Int?>(value = it, label = it.toString(), enabled = false) })
+        }
+    DropDownPreference(
+        title = stringResource(Res.string.mesh_beacon_target_frequency_slot),
+        items = items,
+        selectedItem = slot,
+        enabled = enabled,
+        onItemSelected = onSlotSelect,
+    )
 }
