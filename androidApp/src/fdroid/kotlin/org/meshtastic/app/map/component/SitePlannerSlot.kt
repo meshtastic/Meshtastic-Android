@@ -22,19 +22,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.app.map.MapViewModel
-import org.meshtastic.app.map.SitePlannerHost
+import org.meshtastic.feature.coverage.rememberCoverageEstimate
 import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.component.SitePlannerHost
 import org.meshtastic.feature.map.component.toSitePlannerParams
 import org.meshtastic.feature.map.maplibre.SitePlannerSession
 
 /**
- * Runs the hosted Site Planner for the F-Droid map.
- *
- * The planner lives in `androidApp`, so the flavor supplies it rather than the shared map module. Imported coverage
- * becomes a GeoJSON map layer (see #6138) and the map recentres on the transmitter so it is on screen.
+ * Runs the Site Planner for the F-Droid map. The estimate becomes a GeoJSON map layer and the map moves to the
+ * transmitter so it's on screen.
  *
  * No phone-GPS shortcut is offered: the Google flavor fills that from Play Services' fused location, which must not
- * enter an F-Droid build. The coordinate fields stay manual, with the map centre and the node's own position as
+ * enter an F-Droid build. The coordinate fields stay manual, with the map center and the node's own position as
  * shortcuts.
  */
 @Composable
@@ -51,6 +50,7 @@ fun SitePlannerSlot(session: SitePlannerSession) {
 
     SitePlannerHost(
         initialParams = subject.toSitePlannerParams(channelSet),
+        estimate = rememberCoverageEstimate(),
         onDismiss = session.onDismiss,
         onImport = { name, geoJson, latitude, longitude ->
             mapViewModel.addGeoJsonLayer(name, geoJson)

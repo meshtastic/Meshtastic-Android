@@ -14,17 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
-// SPIKE: local RF coverage, replacing the headless-WebView hand-off to the hosted Site Planner.
-// Pure computation over org.meshtastic:kp1812 (ITU-R P.1812) and an ElevationSource — no Compose
-// UI, no rendering, no network. The app supplies elevation from feature/map-terrain's Mapterhorn
-// tiles; tests supply a lambda.
+// Site Planner coverage computed on the device with org.meshtastic:kp1812 (ITU-R P.1812) over
+// Mapterhorn terrain, returned as GeoJSON for the map's layer list.
 kotlin {
     jvm()
 
-    // kp1812 publishes no androidTarget - Android resolves its jvm artifact, the same way this
-    // repo already consumes takpacket-sdk-jvm.
+    // kp1812 has no Android target; Android resolves its jvm artifact.
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.coverage"
@@ -35,14 +33,11 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.kp1812)
             implementation(libs.kotlinx.coroutines.core)
-            // Elevation comes from the same Mapterhorn archives the map already uses for hillshade
-            // and contours. Over flat synthetic ground a coverage plot is a bullseye and proves
-            // nothing; against real terrain it has to show ridges shadowing valleys.
+            implementation(projects.feature.map)
             implementation(projects.feature.mapTerrain)
             implementation(projects.core.common)
+            implementation(projects.core.di)
             implementation(libs.okio)
-            // Terrain comes over plain XYZ requests now; ktor suspends rather than blocking, so a
-            // sweep's fetches never occupy the compute dispatcher.
             implementation(libs.ktor.client.core)
         }
 
@@ -54,7 +49,7 @@ kotlin {
     }
 }
 
-// SPIKE: run a real prediction and write a PNG + GeoJSON, so the replacement can be *seen*.
+// Runs a real prediction against Mapterhorn terrain and writes a PNG and the GeoJSON.
 //   ./gradlew :feature:coverage:coverageDemo -PuseMavenLocal
 tasks.register<JavaExec>("coverageDemo") {
     group = "verification"

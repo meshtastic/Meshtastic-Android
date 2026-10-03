@@ -240,6 +240,7 @@ dependencies {
     implementation(projects.feature.messaging)
     implementation(projects.feature.connections)
     implementation(projects.feature.map)
+    implementation(projects.feature.coverage)
     implementation(projects.feature.node)
     implementation(projects.feature.settings)
     implementation(projects.feature.discovery)

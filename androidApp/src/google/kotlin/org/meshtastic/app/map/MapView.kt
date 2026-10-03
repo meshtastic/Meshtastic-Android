@@ -202,6 +202,7 @@ import org.meshtastic.feature.map.component.ClusterMembersDialog
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
+import org.meshtastic.feature.coverage.rememberCoverageEstimate
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterSheet
@@ -209,6 +210,7 @@ import org.meshtastic.feature.map.component.MeshMapFitPadding
 import org.meshtastic.feature.map.component.NodeTrackFilterMenu
 import org.meshtastic.feature.map.component.OfflineStatusBanner
 import org.meshtastic.feature.map.component.RasterOverlayToggles
+import org.meshtastic.feature.map.component.SitePlannerHost
 import org.meshtastic.feature.map.component.SitePlannerLaunch
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.component.mapFilterActions
@@ -1233,6 +1235,7 @@ fun MapView(
             launch.nodeLocation(ourNodeInfo)?.let { location -> { location } }
         SitePlannerHost(
             initialParams = launch.initialParams,
+            estimate = rememberCoverageEstimate(),
             onDismiss = { sitePlannerLaunch = null },
             onImport = { name, geoJson, latitude, longitude ->
                 mapViewModel.addGeoJsonLayer(name, geoJson)
