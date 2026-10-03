@@ -238,6 +238,7 @@ jobs:
             tasks: >-
               :core:service:allTests
               :feature:connections:allTests
+              :feature:coverage:allTests
               :feature:discovery:allTests
               :feature:docs:allTests
               :feature:firmware:allTests
@@ -252,6 +253,7 @@ jobs:
             kover: >-
               :core:service:koverXmlReport
               :feature:connections:koverXmlReport
+              :feature:coverage:koverXmlReport
               :feature:discovery:koverXmlReport
               :feature:docs:koverXmlReport
               :feature:firmware:koverXmlReport
