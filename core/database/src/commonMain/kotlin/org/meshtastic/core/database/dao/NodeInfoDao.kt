@@ -246,7 +246,7 @@ interface NodeInfoDao {
                 newPublicKey = existingNode.newPublicKey,
                 longName = existingNode.longName,
                 shortName = existingNode.shortName,
-                manuallyVerified = existingNode.manuallyVerified,
+                manuallyVerified = incomingNode.manuallyVerified || existingNode.manuallyVerified,
                 notes = resolvedNotes,
                 powerChannelLabels = resolvedPowerChannelLabels,
             )
@@ -266,6 +266,7 @@ interface NodeInfoDao {
             publicKey = resolved.key,
             keyMatch = resolved.keyMatch,
             newPublicKey = resolved.newPublicKey,
+            manuallyVerified = incomingNode.manuallyVerified || existingNode.manuallyVerified,
             notes = resolvedNotes,
             powerChannelLabels = resolvedPowerChannelLabels,
         )
