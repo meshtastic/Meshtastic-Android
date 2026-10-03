@@ -69,7 +69,7 @@ enum class CoveragePalette(val key: String, private val anchors: List<Int>) {
     }
 
     companion object {
-        /** The palette the planner names, or [PLASMA] — its own default — when the name is unknown. */
+        /** The palette the planner names, or [PLASMA] (its own default) when the name is unknown. */
         fun forKey(key: String?): CoveragePalette =
             entries.firstOrNull { it.key.equals(key, ignoreCase = true) } ?: PLASMA
 
@@ -93,7 +93,7 @@ class CoverageStyle(
     val palette: CoveragePalette = CoveragePalette.PLASMA,
     val minDbm: Double = DEFAULT_MIN_DBM,
     val maxDbm: Double = DEFAULT_MAX_DBM,
-    /** 0 is invisible, 1 is solid — the planner's transparency percentage inverted. */
+    /** 0 is invisible, 1 is solid: the planner's transparency percentage inverted. */
     val opacity: Double = DEFAULT_OPACITY,
 ) {
     init {

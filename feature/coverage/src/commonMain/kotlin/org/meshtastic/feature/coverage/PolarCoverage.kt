@@ -27,8 +27,8 @@ import kotlin.math.floor
  * Received power on a polar lattice centered on the site: [radials] bearings by [rings] ranges.
  *
  * Coverage is computed in polar and only then rasterised, because a receiver's prediction needs the whole terrain
- * profile back to the transmitter. On a radial every receiver shares one profile — the far one is the near one plus a
- * few points — so a bearing's worth of predictions costs a single walk. Sampling the cartesian grid directly re-walks a
+ * profile back to the transmitter. On a radial every receiver shares one profile (the far one is the near one plus a
+ * few points), so a bearing's worth of predictions costs a single walk. Sampling the cartesian grid directly re-walks a
  * profile per cell and re-reads the same terrain thousands of times over.
  *
  * `dbm` is indexed `bearing * rings + ring`; ring `r` sits at `firstKm + r * ringStepKm`.
@@ -60,7 +60,7 @@ class PolarCoverage(
  *
  * [profileStepKm] is the terrain sampling interval and should track the elevation source's own resolution; [rings] is
  * how many of those steps carry a receiver. They are independent because the cost is the [P1812.predict] calls, not the
- * profile length — a dense profile with sparse receivers is both cheaper and more accurate than matching the two.
+ * profile length: a dense profile with sparse receivers is both cheaper and more accurate than matching the two.
  */
 suspend fun LocalCoverage.sweepPolar(
     site: Site,
@@ -120,8 +120,8 @@ suspend fun LocalCoverage.sweepPolar(
  * Resample the polar lattice onto the regular grid the contour tracer needs.
  *
  * Bilinear in (bearing, range), so the grid is smooth rather than showing the lattice's own spokes. The grid can be far
- * finer than the lattice for free — it costs no predictions — which is what lets the bands follow terrain instead of
- * the sampling pattern.
+ * finer than the lattice for free (it costs no predictions), which is what lets the bands follow terrain instead of the
+ * sampling pattern.
  */
 fun PolarCoverage.toGrid(resolution: Int = DEFAULT_GRID): CoverageGrid {
     require(resolution >= MIN_GRID) { "resolution must be >= $MIN_GRID, got $resolution" }

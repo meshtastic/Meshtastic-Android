@@ -33,7 +33,7 @@ object MapterhornEndpoints {
      *
      * Probed 2026-09-16 at Seattle: z0–16 all 200 (~56–95 KB each, ~130 ms, Cloudflare-cached for a week,
      * `access-control-allow-origin: *`), z17+ 404. So it serves the regional detail the per-z6-tile archives were meant
-     * to, and does it as independent cacheable requests rather than range reads into one seekable channel — which is
+     * to, and does it as independent cacheable requests rather than range reads into one seekable channel, which is
      * what made bulk terrain sampling serial.
      */
     fun tileUrl(zoom: Int, x: Int, y: Int): String = "https://tiles.mapterhorn.com/$zoom/$x/$y.webp"

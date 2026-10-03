@@ -39,7 +39,7 @@ class LocalCoverage(private val elevation: ElevationSource, private val atmosphe
      *
      * Terrain profile resolution and receiver spacing are deliberately **decoupled**. P.1812 evaluates diffraction
      * across the whole profile between transmitter and receiver, so the profile has to be sampled near the terrain's
-     * own resolution — Mapterhorn at z11 is ~75 m/px. Sampling it at the receiver spacing instead (900 m over a 30 km
+     * own resolution (Mapterhorn at z11 is ~75 m/px). Sampling it at the receiver spacing instead (900 m over a 30 km
      * radius) makes the model see a jagged, aliased profile and invent diffraction loss that is not there: visible as
      * spurious rings and spokes in the plot, and a badly depressed reachable fraction.
      *
@@ -216,7 +216,7 @@ data class CoveragePoint(val latitude: Double, val longitude: Double, val rxDbm:
 
 /** The result of a sweep. */
 data class Coverage(val site: Site, val points: List<CoveragePoint>) {
-    /** Points at or above the receiver's sensitivity — where a node would actually hear this site. */
+    /** Points at or above the receiver's sensitivity: where a node would actually hear this site. */
     val reachable: List<CoveragePoint>
         get() = points.filter { it.rxDbm >= site.rxSensitivityDbm }
 

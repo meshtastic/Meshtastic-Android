@@ -21,7 +21,7 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 /**
- * Turns a [CoverageGrid] into filled iso-bands — "signal ≥ X dBm" polygons — as GeoJSON.
+ * Turns a [CoverageGrid] into filled iso-bands ("signal ≥ X dBm" polygons) as GeoJSON.
  *
  * This is the shape a map can actually draw coverage with, and the shape the hosted Site Planner exports. Emitting the
  * sample points instead produces a swarm of markers that the map clusters, which is what the first version did.
@@ -89,7 +89,7 @@ private fun CoverageGrid.inBand(x: Int, y: Int, range: ClosedFloatingPointRange<
 internal class CoverageBand(val thresholdDbm: Double, val rings: List<List<Pair<Double, Double>>>)
 
 /**
- * The coverage as GeoJSON polygons with simplestyle-spec fills — what the map draws as a layer.
+ * The coverage as GeoJSON polygons with simplestyle-spec fills: what the map draws as a layer.
  *
  * Bands run from the receiver's sensitivity upward, so the outermost polygon is "a node here can hear this site at all"
  * and the inner ones are progressively stronger signal.
@@ -145,10 +145,7 @@ private const val DEFAULT_BANDS = 6
 private const val EMPTY_FEATURE_COLLECTION =
     """{"type":"FeatureCollection","properties":{"generator":"meshtastic-kp1812"},"features":[]}"""
 
-/**
- * One decimal place, without `String.format` — which is JVM-only and does not exist on Kotlin/Native or wasm. Adding
- * the native targets is what surfaced that.
- */
+/** One decimal place, without `String.format`, which is JVM-only and does not exist on Kotlin/Native or wasm. */
 internal fun Double.toFixed1(): String {
     val scaled = (this * TENTHS).roundToLong()
     val sign = if (scaled < 0) "-" else ""

@@ -103,7 +103,7 @@ object CoverageDemo {
     }
 
     /**
-     * What a repeat estimate costs once terrain is decoded — the number that decides whether the planner can update
+     * What a repeat estimate costs once terrain is decoded: the number that decides whether the planner can update
      * interactively.
      *
      * The second run builds a *fresh* source, because that is the app's real shape: the planner's composable is
@@ -176,7 +176,7 @@ object CoverageDemo {
         return java.awt.Color(r, gc, 60)
     }
 
-    private const val DEFAULT_LAT = 47.6062 // Seattle — real relief nearby
+    private const val DEFAULT_LAT = 47.6062 // Seattle, real relief nearby
     private const val DEFAULT_LON = -122.3321
     private const val GRID = 256
 }

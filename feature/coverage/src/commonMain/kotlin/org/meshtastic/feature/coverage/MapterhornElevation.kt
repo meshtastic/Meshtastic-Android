@@ -81,7 +81,7 @@ class MapterhornElevation(
         val tile = TerrainTileMath.tileAt(zoom, latitude, longitude)
         val key = tileKey(tile.x, tile.y)
         val snapshot = cache().snapshot()
-        // Ocean, or outside the endpoint's data, decodes to null — sea level, as the planner assumes too.
+        // Ocean, or outside the endpoint's data, decodes to null: sea level, as the planner assumes too.
         val decoded = (if (snapshot.containsKey(key)) snapshot[key] else awaitTile(key, tile.x, tile.y)) ?: return 0.0
 
         // Fractional position of this coordinate within its tile.
@@ -100,7 +100,7 @@ class MapterhornElevation(
     /**
      * Warm every tile inside [area] before anything asks for one, many at a time.
      *
-     * Optional — sampling fetches on demand without it — and returns how many tiles it warmed. Worth calling anyway:
+     * Optional (sampling fetches on demand without it), and returns how many tiles it warmed. Worth calling anyway:
      * on-demand misses arrive one radial at a time, while this issues the whole disc at once and lets the requests
      * overlap.
      */
@@ -131,7 +131,7 @@ class MapterhornElevation(
         return warmed.size
     }
 
-    /** How many tiles are decoded and resident — useful when reporting a run. */
+    /** How many tiles are decoded and resident, useful when reporting a run. */
     val tilesResident: Int
         get() = cache?.size ?: 0
 
@@ -154,7 +154,7 @@ class MapterhornElevation(
          * ~37 m per pixel at mid latitudes, which matches the 50 m terrain profile step.
          *
          * Measured against z13 on the Seattle demo: identical reachable fraction and max range, and an rx range of
-         * -147.8..-41.3 against -148.2..-41.3 — for 72 tiles instead of 256. The extra detail lands below the step the
+         * -147.8..-41.3 against -148.2..-41.3, for 72 tiles instead of 256. The extra detail lands below the step the
          * model samples at. The endpoint serves up to [MapterhornEndpoints.TILES_MAX_ZOOM] for anyone who wants it.
          */
         const val DEFAULT_ZOOM = 12
@@ -194,12 +194,12 @@ private const val DEG_TO_RAD = 0.017453292519943295
  * The deepest zoom at or below [wanted] whose tiles for [bounds] still fit the shared cache.
  *
  * Tiles scale with the square of the sampled radius and with 1/cos(latitude), so a fixed zoom is only ever right for
- * one area. At z12 a 30 km disc is ~120 tiles at mid latitudes but ~360 above 65°N, and the radius is a free-text field
- * — 70 km asks for 500 to 1800. Past the cache's capacity the failure is not graceful: eviction is insertion order, so
- * the sweep evicts the very tiles it is about to read and re-decodes the whole disc on every pass. Measured once at
- * ~1800 tiles: 133 MB downloaded and seconds per estimate instead of hundreds of milliseconds.
+ * one area. At z12 a 30 km disc is ~120 tiles at mid latitudes but ~360 above 65°N, and the radius is a free-text
+ * field: 70 km asks for 500 to 1800. Past the cache's capacity the failure is not graceful: eviction is insertion
+ * order, so the sweep evicts the very tiles it is about to read and re-decodes the whole disc on every pass. Measured
+ * once at ~1800 tiles: 133 MB downloaded and seconds per estimate instead of hundreds of milliseconds.
  *
- * Dropping a zoom quarters the tile count, so this converges immediately and leaves the common case untouched — a 30 km
+ * Dropping a zoom quarters the tile count, so this converges immediately and leaves the common case untouched: a 30 km
  * disc at mid latitudes still samples at z12.
  */
 internal fun zoomFitting(wanted: Int, bounds: GeoBounds?): Int {

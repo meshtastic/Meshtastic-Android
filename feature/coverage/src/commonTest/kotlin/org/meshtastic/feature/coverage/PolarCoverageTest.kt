@@ -93,8 +93,8 @@ class PolarCoverageTest {
 
     @Test
     fun resamplingFinerDoesNotMoveThePrediction() = runTest {
-        // The grid is free of the prediction budget, so a finer one has to show the same coverage —
-        // if it did not, the extra cells would be the resampler inventing detail.
+        // The grid is free of the prediction budget, so a finer one has to show the same coverage.
+        // If it did not, the extra cells would be the resampler inventing detail.
         val polar = LocalCoverage(flat).sweepPolar(site(), radials = 32, rings = 16)
         val coarse = polar.toGrid(resolution = 32).reachableFraction
         val fine = polar.toGrid(resolution = 192).reachableFraction

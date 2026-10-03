@@ -35,12 +35,12 @@ import org.meshtastic.feature.map.terrain.TileIndex
  * Terrarium tile bytes, from local storage if they are there and from Mapterhorn's XYZ endpoint if they are not.
  *
  * Plain per-tile requests rather than range reads into `planet.pmtiles`. The archive is one seekable channel, so its
- * tiles come back strictly one at a time — measured at ~300 ms each, which for a 25 km disc was the whole cost of a
+ * tiles come back strictly one at a time, measured at ~300 ms each, which for a 25 km disc was the whole cost of a
  * coverage sweep. These are independent, Cloudflare-cached, and suspend rather than block, so the only limit is how
  * many we choose to have in flight.
  *
- * Anything fetched is written back to [store] when there is one, so the next run — or the next launch — pays nothing
- * for the same ground.
+ * Anything fetched is written back to [store] when there is one, so the next run (or the next launch) pays nothing for
+ * the same ground.
  */
 internal class MapterhornTiles(
     private val http: HttpClient,
@@ -57,7 +57,7 @@ internal class MapterhornTiles(
     }
 
     /**
-     * Only 404 means "no tile here" — ocean, or past the endpoint's deepest zoom — and only 404 is allowed to return
+     * Only 404 means "no tile here" (ocean, or past the endpoint's deepest zoom), and only 404 is allowed to return
      * null, because null is cached as flat ground for the rest of the process. A throttled or failed request that
      * returned null would quietly turn a mountain into sea level, so it throws and the caller surfaces a failed
      * estimate instead.
