@@ -16,7 +16,7 @@ GQ="$HOME/.claude/bin/gradle-queue"
 if [ -x "$GQ" ]; then BUILD=("$GQ" --); else BUILD=(./gradlew); fi
 cd "$(git rev-parse --show-toplevel)" && pwd && export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}" && "${BUILD[@]}" <tasks>
 ```
-Keep `BUILD` an array and invoke it as `"${BUILD[@]}"` — a plain string would word-split on a `$HOME` containing spaces or glob characters. If a build complains `local.properties` is missing (Google-flavor tasks), `cp secrets.defaults.properties local.properties` first — it's git-ignored. Do not `cd` elsewhere mid-command.
+Keep `BUILD` an array and invoke it as `"${BUILD[@]}"` — a plain string would word-split on a `$HOME` containing spaces or glob characters. Do not `cd` elsewhere mid-command.
 
 ## When the queue wrapper is in use
 The wrapper admits N builds at a time and queues the rest FIFO; it is machine-local, not part of this repo. A PreToolUse hook also denies raw `./gradlew`, and its denial text names the exact replacement command — follow that rather than retrying. Then:
@@ -26,10 +26,10 @@ The wrapper admits N builds at a time and queues the rest FIFO; it is machine-lo
 - `--version`/`--status` pass through. `./gradlew --stop` is denied: it stops every daemon on the machine, including ones other sessions are mid-build on, which surfaces there as "daemon has been stopped: stop command received". Use `GRADLE_QUEUE_BYPASS=1` only if the caller explicitly asked.
 
 ## Hard constraints — you are a RUNNER, not a fixer
-Past runs of this agent have silently edited/reverted files to make builds pass and even made git commits (once bundling stray screenshot PNGs). Never again:
+An edit, revert or commit made to get a green build hides the real failure from the caller and can land stray files (such as regenerated screenshot PNGs) in their commit:
 - NEVER modify the working tree: no creating/editing/deleting/reverting files, no `sed -i`, no redirecting output into tracked files.
 - NEVER run git write commands: no `commit`, `add`, `checkout --`, `restore`, `stash`, `clean`, `reset`. Read-only git (`status`, `diff`, `log`) is fine.
-- The ONLY permitted writes are bootstrap: `export ANDROID_HOME=...` and `cp secrets.defaults.properties local.properties` (git-ignored).
+- The ONLY permitted write is bootstrap: `export ANDROID_HOME=...`.
 - If the build fails, REPORT it — do not attempt any fix, however trivial.
 - If a Gradle task itself dirties tracked files (e.g. `allTests` regenerates `docs/assets/screenshots/*.png` on this machine), leave them dirty and say so in NOTES — do not revert.
 

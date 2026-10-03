@@ -22,18 +22,17 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 </context_and_memory>
 
 <process_essentials>
-- **Think First:** Read only what you need. Consult indices (like `strings-index.txt`) before reading large files.
+- **Indices First:** Read only what you need. Consult indices (like `strings-index.txt`) before reading large files.
 - **Hygiene:** Run `python3 scripts/sort-strings.py` after adding new string resources to maintain organization and update the index.
 - **Memory Persistence:** Add a new entry to the TOP of `.agent_memory/session_context.md` at the end of every session or major task. Keep it capped at ~5 entries — move anything older to `session_context.archive.md`.
 - **Bootstrap First:** Run the mandatory bootstrap steps in `.skills/project-overview/SKILL.md` before any build.
-- **Plan Before Execution:** Use `.agent_plans/` (git-ignored) for complex refactors.
+- **Plans:** Plans for complex refactors go in `.agent_plans/` (git-ignored).
 - **Baseline Verification:** Always run: `./gradlew spotlessApply spotlessCheck detekt detektTypeResolved assembleDebug test allTests`
 </process_essentials>
 
 <rules>
 - **Token Hygiene:** NEVER read binary files (PNG, MP3, etc.) or large non-code resources unless essential. Use file paths to reason about assets.
 - **Context Discipline:** Limit your context to relevant modules. Do not "vacuum" the entire codebase for localized fixes.
-- **No Lazy Coding:** DO NOT use placeholders like `// ... existing code ...`. Provide complete, valid code blocks.
 - **No Framework Bleed:** NEVER import `java.*` or `android.*` in `commonMain`. Use KMP equivalents (Okio, Mutex, atomicfu).
 - **CMP Over Android:** Use `compose-multiplatform` constraints. Pre-format floats with `NumberFormatter.format()`. Use `MeshtasticNavDisplay` and `NavigationBackHandler`.
 - **Zero Lint Tolerance:** Task is incomplete if `detekt` or `spotlessCheck` fails.

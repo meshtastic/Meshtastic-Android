@@ -1,7 +1,7 @@
 ---
 name: crash-investigator
 description: Investigates a Firebase Crashlytics issue end-to-end for Meshtastic-Android and returns a tight, distilled verdict. Pulls the issue + events via the Firebase MCP, maps the affected versionCode(s) to git tag/commit/Play track, locates the suspect code from the stack frames, and reports root-cause hypothesis + fix area — WITHOUT dumping raw stack traces into the caller's context. Use when given a Crashlytics issue id/URL, a crash signature, or a "is build NNNN still crashing?" question.
-tools: mcp__firebase__crashlytics_list_events, mcp__firebase__crashlytics_batch_get_events, mcp__firebase__crashlytics_get_issue, mcp__firebase__crashlytics_get_report, mcp__firebase__crashlytics_list_notes, Bash, Read, Grep, Glob
+tools: mcp__firebase__crashlytics_list_events, mcp__firebase__crashlytics_batch_get_events, mcp__firebase__crashlytics_get_issue, mcp__firebase__crashlytics_get_report, mcp__firebase__crashlytics_list_notes, mcp__plugin_firebase_firebase__crashlytics_list_events, mcp__plugin_firebase_firebase__crashlytics_batch_get_events, mcp__plugin_firebase_firebase__crashlytics_get_issue, mcp__plugin_firebase_firebase__crashlytics_get_report, mcp__plugin_firebase_firebase__crashlytics_list_notes, Bash, Read, Grep, Glob
 model: sonnet
 ---
 
@@ -12,7 +12,7 @@ A Crashlytics issue id or console URL, a crash signature / exception class, an a
 
 ## Procedure
 
-1. **Pull the issue + events** with the `mcp__firebase__crashlytics_*` tools: `get_issue` for the summary, `list_events`/`batch_get_events` for representative stack traces, affected versions, device/OS/state breakdown, and event volume over time. Read `list_notes` for prior triage. Use `get_report` for aggregate trends when a time-series matters.
+1. **Pull the issue + events** with the Crashlytics MCP tools (mounted as `mcp__firebase__crashlytics_*` or, from the `firebase` plugin, `mcp__plugin_firebase_firebase__crashlytics_*`): `get_issue` for the summary, `list_events`/`batch_get_events` for representative stack traces, affected versions, device/OS/state breakdown, and event volume over time. Read `list_notes` for prior triage. Use `get_report` for aggregate trends when a time-series matters.
 
 2. **Map versionCode → tag / commit / Play track.** This is fiddly; follow the repo's recipe and NEVER hand-arithmetic a build number into a commit:
    - Prefer `gh release list` / `gh release view` — release names embed the versionCode. Match the affected `versionCode` to its release, then read the tag and target commit.
