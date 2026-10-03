@@ -378,6 +378,10 @@
     <string name="remote_hardware">원격 하드웨어</string>
     <string name="remote_hardware_config">원격 하드웨어 설정</string>
     <string name="remote_hardware_enabled">원격 하드웨어 활성화</string>
+    <string name="remote_shell_key_alt">고도</string>
+    <string name="remote_shell_modifier_locked">잠김</string>
+    <string name="remote_shell_send">보내기</string>
+    <string name="remote_shell_status_not_connected">연결되지 않음</string>
     <!-- REMOVE -->
     <string name="remove">지우기</string>
     <string name="remove_node_text">이 노드는 당신의 노드에서 데이터를 수신할 때 까지 목록에서 삭제됩니다.</string>

@@ -422,7 +422,6 @@
     <string name="doc_keywords_messages">Nachricht, Kanal, Verschlüsselung, direkt, Broadcast, Schnellchat</string>
     <string name="doc_keywords_mqtt">MQTT, Broker, Internet, Bridge, Uplink, Downlink</string>
     <string name="doc_keywords_node_metrics">Metriken, Telemetrie, Signal, SNR, RSSI, Batterie, Traceroute</string>
-    <string name="doc_keywords_nodes">Knoten, Netz, Liste, Rolle, Status, Favorit, Filter</string>
     <string name="doc_keywords_onboarding">Einrichtung, Begrüßung, Berechtigungen, erster Start</string>
     <string name="doc_keywords_settings_module">Modul, seriell, Telemetrie, vorgefertigt, Speichern-und-Weiterleiten, Administration</string>
     <string name="doc_keywords_settings_radio">Einstellungen, Funk, LoRa, Region, Modem, Gerät, Leistung, Sicherheit</string>
@@ -1116,6 +1115,11 @@
     <string name="remote_hardware">Entfernte Hardware</string>
     <string name="remote_hardware_config">Einstellung entfernte Hardware</string>
     <string name="remote_hardware_enabled">Einstellung entfernte Hardware</string>
+    <string name="remote_shell_key_alt">Höhe</string>
+    <string name="remote_shell_key_home">Startseite</string>
+    <string name="remote_shell_modifier_locked">Gesperrt</string>
+    <string name="remote_shell_send">Senden</string>
+    <string name="remote_shell_status_not_connected">Nicht verbunden</string>
     <string name="remotely_administrating">"[Entfernt] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Entfernen</string>

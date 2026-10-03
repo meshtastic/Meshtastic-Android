@@ -192,6 +192,9 @@
     <string name="radio_configuration">Konfiguracija uređaja</string>
     <string name="reboot">Ponovno pokreni</string>
     <!-- REMOTE -->
+    <string name="remote_shell_modifier_locked">Zaključano</string>
+    <string name="remote_shell_send">Potvrdi</string>
+    <string name="remote_shell_status_not_connected">Nije povezano</string>
     <!-- REMOVE -->
     <string name="remove">Ukloni</string>
     <string name="remove_node_text">Ovaj će čvor biti uklonjen s vašeg popisa sve dok vaš čvor ponovno ne primi podatke s njega.</string>

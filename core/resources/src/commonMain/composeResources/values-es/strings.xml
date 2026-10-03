@@ -567,6 +567,10 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="remote_hardware">Hardware Remoto</string>
     <string name="remote_hardware_config">Configuración del hardware remotamente</string>
     <string name="remote_hardware_enabled">Hardware remoto activado</string>
+    <string name="remote_shell_key_alt">Altitud</string>
+    <string name="remote_shell_modifier_locked">Bloqueado</string>
+    <string name="remote_shell_send">Enviar</string>
+    <string name="remote_shell_status_not_connected">No conectado</string>
     <string name="remotely_administrating">"[Remoto] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Quitar</string>

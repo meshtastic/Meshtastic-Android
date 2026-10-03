@@ -159,6 +159,9 @@
     <string name="radio_configuration">Stillingar radíós</string>
     <string name="reboot">Endurræsa</string>
     <!-- REMOTE -->
+    <string name="remote_shell_modifier_locked">Læst</string>
+    <string name="remote_shell_send">Senda</string>
+    <string name="remote_shell_status_not_connected">Ekki tengdur</string>
     <!-- REMOVE -->
     <string name="report">Tilkynna</string>
     <!-- REQUEST -->

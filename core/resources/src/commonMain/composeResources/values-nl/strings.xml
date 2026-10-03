@@ -315,6 +315,10 @@
     <string name="remote_hardware">Externe Hardware</string>
     <string name="remote_hardware_config">Externe hardwareconfiguratie</string>
     <string name="remote_hardware_enabled">Externe hardware ingeschakeld</string>
+    <string name="remote_shell_key_alt">Alt</string>
+    <string name="remote_shell_modifier_locked">Vergrendeld</string>
+    <string name="remote_shell_send">Verzend</string>
+    <string name="remote_shell_status_not_connected">Niet verbonden</string>
     <!-- REMOVE -->
     <string name="remove">Verwijder</string>
     <string name="remove_node_text">Deze node zal worden verwijderd uit jouw lijst totdat je node hier opnieuw gegevens van ontvangt.</string>

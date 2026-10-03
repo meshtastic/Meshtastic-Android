@@ -556,6 +556,10 @@
     <string name="remote_hardware">Távoli hardver</string>
     <string name="remote_hardware_config">Távoli hardver beállításai</string>
     <string name="remote_hardware_enabled">Távoli hardver engedélyezve</string>
+    <string name="remote_shell_key_alt">Magasság</string>
+    <string name="remote_shell_modifier_locked">Zárolt</string>
+    <string name="remote_shell_send">Küldeni</string>
+    <string name="remote_shell_status_not_connected">Nincs csatlakoztatva</string>
     <string name="remotely_administrating">"[Távoli] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Törlés</string>

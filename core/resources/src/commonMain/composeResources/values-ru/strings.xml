@@ -508,7 +508,6 @@
     <string name="doc_keywords_messages">message,channel,encryption,direct,broadcast,quick-chat</string>
     <string name="doc_keywords_mqtt">mqtt,broker,internet,bridge,uplink,downlink</string>
     <string name="doc_keywords_node_metrics">metrics,telemetry,signal,snr,rssi,battery,traceroute</string>
-    <string name="doc_keywords_nodes">node,mesh,list,role,status,favorite,filter</string>
     <string name="doc_keywords_notifications">notification,alert,sound,mute,reply,watch,wear os</string>
     <string name="doc_keywords_onboarding">setup,welcome,permissions,first-launch</string>
     <string name="doc_keywords_settings_module">module,serial,telemetry,canned,store-forward,administration</string>
@@ -1515,6 +1514,12 @@
     <string name="remote_hardware">Удаленное устройство</string>
     <string name="remote_hardware_config">Настройка удаленного оборудования</string>
     <string name="remote_hardware_enabled">Удаленное оборудование включено</string>
+    <string name="remote_shell_key_alt">Уровень моря</string>
+    <string name="remote_shell_key_ctrl">Управление</string>
+    <string name="remote_shell_key_home">Начало начал</string>
+    <string name="remote_shell_modifier_locked">Заблокировано</string>
+    <string name="remote_shell_send">Отправить</string>
+    <string name="remote_shell_status_not_connected">Связь не установлена</string>
     <string name="remotely_administrating">"[Удалённо] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Удалить</string>

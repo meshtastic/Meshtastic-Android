@@ -210,6 +210,9 @@
     <string name="reboot">Athmhaoinigh</string>
     <!-- REMOTE -->
     <string name="remote_admin">Rialú iargúlta</string>
+    <string name="remote_shell_modifier_locked">Ceangailte</string>
+    <string name="remote_shell_send">Seol</string>
+    <string name="remote_shell_status_not_connected">Ní ceangailte</string>
     <!-- REMOVE -->
     <string name="remove">Bain</string>
     <string name="remove_node_text">Bainfear an nod seo ón liosta go dtí go bhfaighidh do nod sonraí uaidh arís.</string>

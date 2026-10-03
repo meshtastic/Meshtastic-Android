@@ -216,6 +216,9 @@
     <string name="reboot">Ponovni zagon</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administracija na daljavo</string>
+    <string name="remote_shell_modifier_locked">Zaklenjeno</string>
+    <string name="remote_shell_send">Pošlji</string>
+    <string name="remote_shell_status_not_connected">Ni povezano</string>
     <!-- REMOVE -->
     <string name="remove">Odstrani</string>
     <string name="remove_node_text">To vozlišče bo odstranjeno z vašega seznama, dokler vaše vozlišče znova ne prejme njegovih podatkov.</string>

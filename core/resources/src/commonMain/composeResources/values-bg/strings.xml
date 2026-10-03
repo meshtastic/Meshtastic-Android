@@ -981,6 +981,11 @@
     <string name="remote_hardware">Отдалечен хардуер</string>
     <string name="remote_hardware_config">Конфигуриране на отдалечения хардуер</string>
     <string name="remote_hardware_enabled">Отдалечен хардуер е активиран</string>
+    <string name="remote_shell_key_alt">н.в.</string>
+    <string name="remote_shell_key_ctrl">Контрол</string>
+    <string name="remote_shell_modifier_locked">Заключен</string>
+    <string name="remote_shell_send">Изпрати</string>
+    <string name="remote_shell_status_not_connected">Няма връзка</string>
     <string name="remotely_administrating">"[Отдалечен] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Изтрий</string>

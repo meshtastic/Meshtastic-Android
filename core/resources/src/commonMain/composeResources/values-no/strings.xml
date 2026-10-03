@@ -214,6 +214,9 @@
     <string name="reboot">Omstart</string>
     <!-- REMOTE -->
     <string name="remote_admin">Fjernadministrasjon</string>
+    <string name="remote_shell_modifier_locked">Låst</string>
+    <string name="remote_shell_send">Send</string>
+    <string name="remote_shell_status_not_connected">Ikke tilkoblet</string>
     <!-- REMOVE -->
     <string name="remove">Fjern</string>
     <string name="remove_node_text">Denne noden vil bli fjernet fra listen din helt til din node mottar data fra den igjen.</string>

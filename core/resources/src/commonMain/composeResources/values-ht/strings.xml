@@ -206,6 +206,9 @@
     <string name="reboot">Rekòmanse</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administrasyon Remote</string>
+    <string name="remote_shell_modifier_locked">Loken</string>
+    <string name="remote_shell_send">Voye</string>
+    <string name="remote_shell_status_not_connected">Pa konekte</string>
     <!-- REMOVE -->
     <string name="remove">Retire</string>
     <string name="remove_node_text">Pwen sa a ap retire nan lis ou jiskaske nœud ou a resevwa done soti nan li ankò.</string>

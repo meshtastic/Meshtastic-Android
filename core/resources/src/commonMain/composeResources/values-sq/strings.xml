@@ -213,6 +213,8 @@
     <string name="reboot">Rindiz</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administratë e Largët</string>
+    <string name="remote_shell_modifier_locked">I bllokuar</string>
+    <string name="remote_shell_send">Dërgo</string>
     <!-- REMOVE -->
     <string name="remove">Hiq</string>
     <string name="remove_node_text">Ky node do të hiqet nga lista juaj derisa pajisja juaj të marrë të dhëna prej tij përsëri.</string>

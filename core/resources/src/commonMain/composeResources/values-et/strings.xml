@@ -478,7 +478,6 @@
     <string name="doc_keywords_messages">sõnum,kanal,krüpteerimine,otseülekanne,levitamine,kiirvestlus</string>
     <string name="doc_keywords_mqtt">mqtt,maakler,internet,sild,üleslink,allalink</string>
     <string name="doc_keywords_node_metrics">mõõdikud,telemeetria,signaal,snr,rssi,aku,traceroute</string>
-    <string name="doc_keywords_nodes">sõlm,võrk,loend,roll,olek,lemmik,filter</string>
     <string name="doc_keywords_onboarding">seadistamine,tere tulemast,õigused,esimene käivitamine</string>
     <string name="doc_keywords_settings_module">moodul,jadaühendus,telemeetria,konserveeritud,edasisaatmine,administreerimine</string>
     <string name="doc_keywords_settings_radio">seaded,raadio,lora,piirkond,modem,seade,toide,turvalisus</string>
@@ -1353,6 +1352,11 @@
     <string name="remote_hardware">Kaugriistvara</string>
     <string name="remote_hardware_config">Kaug riistvara sätted</string>
     <string name="remote_hardware_enabled">Kaug riistvara lubatud</string>
+    <string name="remote_shell_key_alt">Kõrgus</string>
+    <string name="remote_shell_key_home">Kodu</string>
+    <string name="remote_shell_modifier_locked">Lukustatud</string>
+    <string name="remote_shell_send">Saada</string>
+    <string name="remote_shell_status_not_connected">Pole ühendatud</string>
     <string name="remotely_administrating">"[Kaugjuhtimine] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Eemalda</string>

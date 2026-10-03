@@ -489,7 +489,6 @@
     <string name="doc_keywords_messages">message, kanava, salaus, suora, yleislähetys, pikakeskustelu</string>
     <string name="doc_keywords_mqtt">mqtt, välityspalvelin, internet, silta, lähetys, vastaanotto</string>
     <string name="doc_keywords_node_metrics">mittarit, telemetria, signaali, snr, rssi, akku, reitinselvitys</string>
-    <string name="doc_keywords_nodes">radio, mesh, lista, rooli, tila, suosikki, suodatin</string>
     <string name="doc_keywords_onboarding">määritys, tervetuloa, käyttöoikeudet, ensimmäinen käynnistys</string>
     <string name="doc_keywords_settings_module">moduuli, sarjaportti, telemetria, valmiit viestit, varastoi &amp; välitä, ylläpito</string>
     <string name="doc_keywords_settings_radio">asetukset, radio, lora, alue, modeemi, laite, virta, tietoturva</string>
@@ -1396,6 +1395,12 @@
     <string name="remote_hardware">Etälaitteisto</string>
     <string name="remote_hardware_config">Etälaitteen asetukset</string>
     <string name="remote_hardware_enabled">Etälaitteen ohjaus käytössä</string>
+    <string name="remote_shell_key_alt">Korkeus </string>
+    <string name="remote_shell_key_ctrl">Säädin</string>
+    <string name="remote_shell_key_home">Etusivu</string>
+    <string name="remote_shell_modifier_locked">Lukittu</string>
+    <string name="remote_shell_send">Lähetä</string>
+    <string name="remote_shell_status_not_connected">Ei yhdistetty</string>
     <string name="remotely_administrating">"[Etälaite] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Poista</string>

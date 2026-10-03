@@ -214,6 +214,9 @@
     <string name="reboot">Perkrauti</string>
     <!-- REMOTE -->
     <string name="remote_admin">Nuotolinis administravimas</string>
+    <string name="remote_shell_modifier_locked">Užrakintas</string>
+    <string name="remote_shell_send">Siųsti</string>
+    <string name="remote_shell_status_not_connected">Neprijungtas</string>
     <!-- REMOVE -->
     <string name="remove">Pašalinti</string>
     <string name="remove_node_text">Šis įtaisas bus pašalintas iš jūsų sąrašo iki tol kol vėl iš jo gausite žinutę / duomenų paketą.</string>

@@ -322,7 +322,6 @@
     <string name="doc_keywords_messages">訊息,頻道,加密,直接,廣播,快速對話</string>
     <string name="doc_keywords_mqtt">mqtt,代理,網際網路,橋接,上行,下行</string>
     <string name="doc_keywords_node_metrics">指標,遙測,訊號,snr,rssi,電池,路由追蹤</string>
-    <string name="doc_keywords_nodes">節點,mesh,清單,角色,狀態,最愛,篩選</string>
     <string name="doc_keywords_onboarding">設定,歡迎,權限,首次啟動</string>
     <string name="doc_keywords_settings_module">模組,序列,遙測,罐頭訊息,儲存轉發,管理</string>
     <string name="doc_keywords_settings_radio">設定,無線電,lora,地區,數據機,裝置,電源,安全性</string>
@@ -912,6 +911,11 @@
     <string name="remote_hardware">遠程硬件</string>
     <string name="remote_hardware_config">遠端硬體設定</string>
     <string name="remote_hardware_enabled">啟動遠端硬體</string>
+    <string name="remote_shell_key_alt">海拔</string>
+    <string name="remote_shell_key_home">主頁</string>
+    <string name="remote_shell_modifier_locked">鎖定</string>
+    <string name="remote_shell_send">傳送</string>
+    <string name="remote_shell_status_not_connected">未連線</string>
     <string name="remotely_administrating">"[遠端] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">移除</string>
