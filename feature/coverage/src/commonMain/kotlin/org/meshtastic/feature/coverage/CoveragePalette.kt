@@ -84,8 +84,7 @@ enum class CoveragePalette(val key: String, private val anchors: List<Int>) {
 }
 
 /**
- * How a [CoverageGrid] is drawn — the planner's Display section, which the local engine used to ignore entirely while
- * the sheet still offered it.
+ * How a [CoverageGrid] is drawn: the form's Display section.
  *
  * [minDbm] and [maxDbm] fix the ends of the ramp rather than letting the strongest cell define them, so two sites are
  * comparable and the picker means what it says.

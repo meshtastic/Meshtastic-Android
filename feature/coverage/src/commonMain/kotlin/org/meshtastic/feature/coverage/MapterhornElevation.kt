@@ -161,7 +161,7 @@ class MapterhornElevation(
     }
 }
 
-/** One endpoint now, but the cache is keyed by it so a second source would not collide. */
+/** The cache is keyed by endpoint, so a second terrain source wouldn't collide with this one. */
 private const val ARCHIVE = "tiles.mapterhorn.com"
 
 /** Pack a tile's coordinates into one cache key. */

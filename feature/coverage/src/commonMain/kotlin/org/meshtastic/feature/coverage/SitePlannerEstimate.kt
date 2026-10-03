@@ -29,8 +29,8 @@ import org.meshtastic.feature.map.terrain.TerrainTileStore
 import kotlin.math.log10
 
 /**
- * Computes a Site Planner estimate on this device: Mapterhorn terrain for the coverage disc, cached under [store],
- * then the ITU-R P.1812 sweep, returned as the styled GeoJSON iso-bands a map layer takes.
+ * Computes a Site Planner estimate on this device: Mapterhorn terrain for the coverage disc, cached under [store], then
+ * the ITU-R P.1812 sweep, returned as the styled GeoJSON iso-bands a map layer takes.
  *
  * Throws when terrain can't be fetched or a value is outside what P.1812 accepts. Cancellation propagates.
  */

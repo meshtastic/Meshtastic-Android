@@ -23,8 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Spike verification: the local model behaves the way a coverage prediction must, without needing a network, a WebView
- * or a terrain download.
+ * The local model behaves the way a coverage prediction must, without a network or a terrain download.
  *
  * These are behavioral assertions, not conformance ones: `kp1812`'s own suite checks the model against the ITU
  * reference. What matters here is that this module drives it correctly.

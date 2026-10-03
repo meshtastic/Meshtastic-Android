@@ -28,16 +28,9 @@ import kotlin.math.max
 import kotlin.math.sin
 
 /**
- * Spike: compute RF coverage locally, replacing the headless-WebView hand-off to the hosted Site Planner.
- *
- * Today `SitePlannerRunner` loads site.meshtastic.org in a hidden WebView, waits up to 45 s for a JavaScript bridge to
- * hand back GeoJSON, and needs the network. Desktop cannot even do that — it opens a browser and asks the user to
- * export and re-import a file by hand.
- *
- * This computes the same answer in-process from `org.meshtastic:kp1812` and an [ElevationSource], so it works offline
- * once terrain is cached and produces a result on every platform the app runs on. The propagation model is ITU-R P.1812
- * rather than the planner's SPLAT!/ITM — a different model, so predictions will not match the hosted planner pixel for
- * pixel.
+ * RF coverage computed on the device from `org.meshtastic:kp1812` (ITU-R P.1812) and an [ElevationSource]. It works
+ * offline once terrain is cached. P.1812 is a different model from the hosted planner's SPLAT! ITM, so predictions
+ * don't match it pixel for pixel.
  */
 class LocalCoverage(private val elevation: ElevationSource, private val atmosphere: Atmosphere = Atmosphere()) {
 

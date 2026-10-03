@@ -48,8 +48,8 @@ import org.meshtastic.core.resources.site_planner_failed
 
 /**
  * The Site Planner flow every map host shares: the [SitePlannerSheet] form, then [estimate] behind a progress dialog,
- * then [onImport] with the estimate's GeoJSON and the transmitter position so the host can add a map layer and move
- * the camera to it.
+ * then [onImport] with the estimate's GeoJSON and the transmitter position so the host can add a map layer and move the
+ * camera to it.
  *
  * Canceling the progress dialog stops the estimate and returns to the form with the same values. A failed estimate
  * returns there too, with an error note. The location shortcuts re-seed the coordinates from the device

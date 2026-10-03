@@ -19,9 +19,8 @@ package org.meshtastic.feature.coverage
 /**
  * Received signal strength on a regular lat/lon grid.
  *
- * A grid, not the polar sweep the first version produced, because coverage has to be drawn as **filled iso-bands** —
- * the hosted planner runs marching squares over exactly this shape. Polar samples exported as GeoJSON `Point` features
- * get clustered by the map and render as a swarm of identical node markers, which is what they are.
+ * Coverage is drawn as **filled iso-bands**, which need a regular grid. Polar samples exported as GeoJSON `Point`
+ * features would be clustered by the map and render as a swarm of identical node markers.
  *
  * `NaN` marks a cell that was not computed.
  */

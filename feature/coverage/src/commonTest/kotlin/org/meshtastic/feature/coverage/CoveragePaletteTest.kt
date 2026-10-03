@@ -22,8 +22,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 /**
- * The Display section's palette picker, which the local engine ignored entirely while the sheet went on offering it —
- * every estimate came out in the same hardcoded red-amber-green whatever was chosen.
+ * The Display section's palette picker: every palette the form offers resolves, and the chosen one colors the bands.
  */
 class CoveragePaletteTest {
 

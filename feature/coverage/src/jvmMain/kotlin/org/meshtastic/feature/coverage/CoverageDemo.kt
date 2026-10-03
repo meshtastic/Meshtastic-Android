@@ -30,9 +30,8 @@ import kotlin.system.measureTimeMillis
 /**
  * Runs a real coverage prediction end to end and writes a PNG plus the GeoJSON the app imports.
  *
- * This exists so the spike can be *seen* rather than only asserted: real Mapterhorn terrain, the ITU-R P.1812 model
- * from `org.meshtastic:kp1812`, no network call to site.meshtastic.org, no WebView, no browser. The same
- * `LocalCoverage` the desktop app would call.
+ * It runs the same `LocalCoverage` the apps call, over real Mapterhorn terrain, so a change can be seen rather than
+ * only asserted.
  *
  * `./gradlew :feature:coverage:coverageDemo -PuseMavenLocal`
  */
