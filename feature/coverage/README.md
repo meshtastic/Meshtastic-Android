@@ -1,52 +1,41 @@
-# feature:coverage — SPIKE
+# feature:coverage
 
-Local RF coverage, replacing the headless-WebView hand-off to the hosted Site Planner.
+Computes RF coverage in-process with
+[`org.meshtastic:kp1812`](https://github.com/meshtastic/kp1812), an implementation of
+Recommendation ITU-R P.1812, over Mapterhorn terrain. It works offline once the terrain is
+cached.
 
-## What it replaces
+## Where it runs
 
-| Host | Today | With this |
-| --- | --- | --- |
-| Android | 319-line hidden `WebView` loading site.meshtastic.org, JS bridge, 45 s timeout, needs network | in-process, offline once terrain is cached |
-| Desktop | opens a browser; user **exports a `.geojson` and re-imports it by hand** | in-process |
-
-`SitePlannerRunner.kt` is load-bearing in ways that read as a warning: the WebView must be
-`alpha(0)` *but still attached and 280 dp* or WebGL never gets a context; it carries a deferred
-retry for the system-WebView provider-update race; and `shouldOverrideUrlLoading` locks
-navigation to the planner's origin so nothing else can reach `onCoverage`. All of that exists to
-work around running a browser to do arithmetic.
+| Host | Coverage |
+| --- | --- |
+| Desktop | `DesktopSitePlannerSlot` runs `LocalCoverage` and adds the result to the map as a GeoJSON layer |
+| Android | Not wired. Both flavors still drive the hosted Site Planner in a hidden `WebView` (`SitePlannerRunner`) |
 
 ## Shape
 
+```text
+Site + ElevationSource -> LocalCoverage.sweepGrid() -> CoverageGrid -> toGeoJson(CoverageStyle)
+                                  |
+                                  +-- org.meshtastic:kp1812 (ITU-R P.1812)
 ```
-Site + ElevationSource ──► LocalCoverage.sweep() ──► Coverage(points: List<CoveragePoint>)
-                                  │
-                                  └─ org.meshtastic:kp1812 (ITU-R P.1812)
-```
 
-`ElevationSource` is a single suspend method. The app backs it with `feature/map-terrain`'s
-Mapterhorn tiles; tests back it with a lambda, which is why the suite needs no network, no
-WebView and no terrain download.
+The model, the `ElevationSource` seam, and the GeoJSON export live in `commonMain`. Only the
+`java.awt` demo renderer is in `jvmMain`. `ElevationSource` is a single suspend method: the app
+backs it with Mapterhorn tiles, and tests back it with a lambda, so the suite needs no network,
+`WebView`, or terrain download.
 
-## Scope and caveats
-
-- **`jvm()` only.** `kp1812` publishes no `androidTarget` — Android is meant to consume its `jvm`
-  artifact, the same choice `kzstd` makes — and proving that resolution path is a separate
-  question from proving the model works. Desktop is also where the current experience is worst.
-- **Different model.** P.1812 is not ITM. Predictions will not match the hosted planner pixel for
-  pixel, and that is expected rather than a defect.
-- **No UI wiring.** This is computation plus tests. Replacing `DesktopSitePlannerSlot` is the next
-  step and needs the full android baseline run.
-- **`kp1812` is unpublished**, so the spike resolves it from `mavenLocal` via the repo's existing
-  `-PuseMavenLocal` flag. Publish it with `./gradlew publishJvmPublicationToMavenLocal
-  publishKotlinMultiplatformPublicationToMavenLocal` from the sibling checkout.
+P.1812 is a different model from the hosted planner's SPLAT! ITM, so predictions don't match it
+pixel for pixel.
 
 ## Tests
 
-Behavioural, not conformance — `kp1812` already checks itself against the ITU reference:
+The tests are behavioral. `kp1812` checks the model against the ITU reference itself, so these
+check that this module drives it correctly:
 
-- signal decays with distance over flat ground
-- a 400 m ridge measurably shadows what is behind it
-- more transmit power reaches at least as far
-- `reachable` agrees with the receiver sensitivity
-- the sweep covers every bearing
-- the geodesy round-trips
+- Signal decays with distance over flat ground.
+- A 400 m ridge shadows what's behind it.
+- More transmit power reaches at least as far.
+- `reachable` agrees with the receiver sensitivity.
+- Every bearing contributes equally to the sweep.
+- The geodesy round-trips.

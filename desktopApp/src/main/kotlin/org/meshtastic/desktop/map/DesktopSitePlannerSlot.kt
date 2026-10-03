@@ -226,7 +226,7 @@ private fun CoverageResultDialog(coverage: CoverageGrid, onDismiss: () -> Unit) 
     }
 }
 
-/** Top-down preview of the grid, coloured by predicted signal. */
+/** Top-down preview of the grid, colored by predicted signal. */
 @Composable
 private fun CoveragePlot(coverage: CoverageGrid, modifier: Modifier = Modifier) {
     val sensitivity = coverage.site.rxSensitivityDbm

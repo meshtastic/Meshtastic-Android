@@ -44,7 +44,7 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
     private val inFlight = LinkedHashMap<Long, Deferred<ElevationTile?>>()
 
     // A read-only snapshot of what has decoded. Sampling is overwhelmingly hits, and taking the
-    // mutex for each would serialise a parallel sweep on this one lock.
+    // mutex for each would serialize a parallel sweep on this one lock.
     @Volatile private var resolved: Map<Long, ElevationTile?> = emptyMap()
 
     /** How many tiles are decoded and resident. */
@@ -66,8 +66,8 @@ internal class TerrainCache(private val capacity: Int = DEFAULT_CAPACITY) {
      * cache outlives any one [MapterhornElevation] and must not hold its scope.
      */
     suspend fun getOrFetch(key: Long, produce: () -> Deferred<ElevationTile?>): ElevationTile? {
-        // A cancelled fetch must not be handed to the next caller: the scope producing it belongs to
-        // one MapterhornElevation, and cancelling that (the planner sheet being dismissed mid-run)
+        // A canceled fetch must not be handed to the next caller: the scope producing it belongs to
+        // one MapterhornElevation, and canceling that (the planner sheet being dismissed mid-run)
         // would otherwise leave a dead Deferred that fails every later sweep touching this tile.
         val pending = lock.withLock {
             inFlight[key]?.takeUnless { it.isCancelled } ?: produce().also { inFlight[key] = it }

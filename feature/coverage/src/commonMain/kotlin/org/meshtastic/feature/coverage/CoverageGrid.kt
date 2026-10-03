@@ -78,7 +78,7 @@ class CoverageGrid(
 }
 
 /**
- * Compute coverage onto a regular grid centred on [site].
+ * Compute coverage onto a regular grid centered on [site].
  *
  * Swept in polar and resampled: see [sweepPolar]. The grid resolution is therefore free of the prediction budget, so it
  * can be fine enough for the contour tracer without costing anything.

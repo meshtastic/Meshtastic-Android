@@ -104,7 +104,7 @@ class PolarCoverageTest {
     @Test
     fun gridIsSymmetricAboutTheSiteOverFlatGround() = runTest {
         val grid = LocalCoverage(flat).sweepPolar(site(), radials = 32, rings = 16).toGrid(resolution = 65)
-        val mid = 32 // the centre cell of an odd-sized grid sits on the site
+        val mid = 32 // the center cell of an odd-sized grid sits on the site
         for (d in 1..mid) {
             val west = grid.at(mid - d, mid)
             val east = grid.at(mid + d, mid)

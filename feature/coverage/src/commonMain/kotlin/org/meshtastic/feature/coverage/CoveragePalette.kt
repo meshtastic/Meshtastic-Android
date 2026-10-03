@@ -19,14 +19,14 @@ package org.meshtastic.feature.coverage
 import kotlin.math.roundToInt
 
 /**
- * The colour ramps the Site Planner's Display section offers, by the names it uses.
+ * The color ramps the Site Planner's Display section offers, by the names it uses.
  *
- * These are the matplotlib colormaps the hosted planner renders with, carried here so the local engine honours the same
- * picker rather than inventing its own colours. Each is stored as evenly spaced anchors and interpolated between: a
+ * These are the matplotlib colormaps the hosted planner renders with, carried here so the local engine honors the same
+ * picker rather than inventing its own colors. Each is stored as evenly spaced anchors and interpolated between: a
  * handful of stops per ramp reproduces the perceptual shape closely enough for six discrete coverage bands, without
  * embedding a 256-entry table each.
  */
-@Suppress("MagicNumber") // Colour anchors are data; naming forty hex literals would obscure the ramps.
+@Suppress("MagicNumber") // Color anchors are data; naming forty hex literals would obscure the ramps.
 enum class CoveragePalette(val key: String, private val anchors: List<Int>) {
     PLASMA("plasma", listOf(0x0D0887, 0x6A00A8, 0xB12A90, 0xE16462, 0xFCA636, 0xF0F921)),
     VIRIDIS("viridis", listOf(0x440154, 0x414487, 0x2A788E, 0x22A884, 0x7AD151, 0xFDE725)),

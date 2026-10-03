@@ -26,8 +26,8 @@ import kotlin.test.assertTrue
  * Spike verification: the local model behaves the way a coverage prediction must, without needing a network, a WebView
  * or a terrain download.
  *
- * These are behavioural assertions, not conformance ones — `kp1812`'s own suite already checks the model against the
- * ITU reference. What matters here is that this module drives it correctly.
+ * These are behavioral assertions, not conformance ones: `kp1812`'s own suite checks the model against the ITU
+ * reference. What matters here is that this module drives it correctly.
  */
 class LocalCoverageTest {
 
@@ -123,7 +123,7 @@ class LocalCoverageTest {
  * Exact halves are deliberately not asserted: `roundToLong` breaks ties toward positive infinity, and whether a decimal
  * like -76.15 even *is* a tie depends on its binary representation (-76.15 * 10 is -761.4999999999999, so it rounds to
  * -76.1). Immaterial for displaying dBm, and a test that pinned it would be asserting floating-point trivia rather than
- * behaviour.
+ * behavior.
  */
 class ToFixed1Test {
     @Test

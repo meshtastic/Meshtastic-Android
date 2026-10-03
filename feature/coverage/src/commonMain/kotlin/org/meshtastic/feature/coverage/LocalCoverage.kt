@@ -195,7 +195,7 @@ class LocalCoverage(private val elevation: ElevationSource, private val atmosphe
     }
 }
 
-/** Elevation above mean sea level, metres. Backed by Mapterhorn tiles in the app; trivially fakeable in tests. */
+/** Elevation above mean sea level, meters. Backed by Mapterhorn tiles in the app; trivially fakeable in tests. */
 fun interface ElevationSource {
     suspend fun elevationMeters(latitude: Double, longitude: Double): Double
 }

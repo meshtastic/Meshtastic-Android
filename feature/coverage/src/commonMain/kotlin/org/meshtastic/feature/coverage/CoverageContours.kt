@@ -77,18 +77,15 @@ internal fun CoverageGrid.bands(ranges: List<ClosedFloatingPointRange<Double>>):
     .filter { it.rings.isNotEmpty() }
 
 /**
- * Bands do not overlap — each cell belongs to exactly one.
- *
- * They used to nest ("everything at or above this"), which only worked because the fill was a fixed three-colour ramp
- * at low opacity. With a palette, six nested fills paint over each other and the chosen colours never appear; and a
- * single overlay transparency is only meaningful when each pixel is painted once.
+ * Bands do not overlap: each cell belongs to exactly one. Nested fills would paint over each other and hide the chosen
+ * colors, and a single overlay transparency is only meaningful when each pixel is painted once.
  */
 private fun CoverageGrid.inBand(x: Int, y: Int, range: ClosedFloatingPointRange<Double>): Boolean {
     val v = at(x, y)
     return !v.isNaN() && v >= range.start && v < range.endInclusive
 }
 
-/** One iso-band, labelled by the weakest signal it contains. */
+/** One iso-band, labeled by the weakest signal it contains. */
 internal class CoverageBand(val thresholdDbm: Double, val rings: List<List<Pair<Double, Double>>>)
 
 /**
@@ -111,9 +108,8 @@ fun CoverageGrid.toGeoJson(style: CoverageStyle = CoverageStyle(), bandCount: In
     val features =
         bands(ranges)
             .map { band ->
-                // Spread across the band INDEX, not its lower bound. Colouring a band by where its
-                // floor sits means the last one samples at 5/6 and the palette's brightest end never
-                // appears at all — plasma stopped at orange and never reached its yellow.
+                // Spread across the band INDEX, not its lower bound. Coloring a band by where its
+                // floor sits samples the last one at 5/6, so the palette's brightest end never appears.
                 val index = ((band.thresholdDbm - style.minDbm) / step).roundToInt()
                 val t = (index.toDouble() / (bandCount - 1).coerceAtLeast(1)).coerceIn(0.0, 1.0)
                 val color = style.palette.colorAt(t)

@@ -140,7 +140,7 @@ object CoverageDemo {
         println("re-swept through a brand new elevation source in ${fresh}ms")
     }
 
-    /** Plot the grid as a top-down image, coloured by signal strength. */
+    /** Plot the grid as a top-down image, colored by signal strength. */
     @Suppress("MagicNumber")
     private fun renderPng(coverage: CoverageGrid, dest: File) {
         val size = 700

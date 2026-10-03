@@ -24,7 +24,7 @@ import kotlin.math.cos
 import kotlin.math.floor
 
 /**
- * Received power on a polar lattice centred on the site: [radials] bearings by [rings] ranges.
+ * Received power on a polar lattice centered on the site: [radials] bearings by [rings] ranges.
  *
  * Coverage is computed in polar and only then rasterised, because a receiver's prediction needs the whole terrain
  * profile back to the transmitter. On a radial every receiver shares one profile — the far one is the near one plus a
@@ -142,7 +142,7 @@ fun PolarCoverage.toGrid(resolution: Int = DEFAULT_GRID): CoverageGrid {
             if (km > site.radiusKm) continue
 
             // Inside the innermost ring and outside the outermost one both clamp: the lattice covers
-            // the whole disc, and clamping is a nearer neighbour than any extrapolation would be.
+            // the whole disc, and clamping is a nearer neighbor than any extrapolation would be.
             val rPos = ((km - firstKm) / ringStepKm).coerceIn(0.0, (rings - 1).toDouble())
             val r0 = floor(rPos).toInt().coerceAtMost(rings - 1)
             val r1 = (r0 + 1).coerceAtMost(rings - 1)

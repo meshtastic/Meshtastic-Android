@@ -51,7 +51,7 @@ class CoveragePaletteTest {
             assertNotEquals(
                 palette.colorAt(0.0),
                 palette.colorAt(1.0),
-                "${palette.key} should not start and end on the same colour",
+                "${palette.key} should not start and end on the same color",
             )
         }
     }
@@ -94,14 +94,14 @@ class CoveragePaletteTest {
 
     @Test
     fun bandsSpanTheWholeRampIncludingItsBrightestEnd() {
-        // Colouring each band by its lower bound leaves the top band at (n-1)/n, so the palette's
-        // final colour is never drawn - plasma stopped at orange and never reached its yellow.
+        // Coloring each band by its lower bound leaves the top band at (n-1)/n, so the palette's
+        // final color is never drawn and plasma never reaches its yellow.
         val bandCount = 6
         val palette = CoveragePalette.PLASMA
         val colors = (0 until bandCount).map { index -> palette.colorAt(index.toDouble() / (bandCount - 1)) }
 
         assertEquals(palette.colorAt(0.0), colors.first())
         assertEquals(palette.colorAt(1.0), colors.last())
-        assertEquals(bandCount, colors.distinct().size, "each band should get its own colour: $colors")
+        assertEquals(bandCount, colors.distinct().size, "each band should get its own color: $colors")
     }
 }
