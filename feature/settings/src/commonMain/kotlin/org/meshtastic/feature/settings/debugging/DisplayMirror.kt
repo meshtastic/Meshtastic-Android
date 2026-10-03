@@ -27,8 +27,8 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -251,31 +251,31 @@ private fun MirrorSurface(
         Box(
             modifier =
             Modifier.pointerInput(hasTouch) {
-                    detectTapGestures(
-                        onTap = { offset ->
-                            if (hasTouch) {
-                                onTouch(
-                                    INPUT_USER_PRESS,
-                                    offset.toDeviceX(size.width, currentFrame),
-                                    offset.toDeviceY(size.height, currentFrame),
-                                )
-                            } else {
-                                // Tap toggles keyboard control so there is always a way out of capture.
-                                toggleKeyboard()
-                            }
-                        },
-                        onLongPress = { offset ->
-                            // Physical touch drivers map a long-press to SELECT with coordinates.
-                            if (hasTouch) {
-                                onTouch(
-                                    INPUT_SELECT,
-                                    offset.toDeviceX(size.width, currentFrame),
-                                    offset.toDeviceY(size.height, currentFrame),
-                                )
-                            }
-                        },
-                    )
-                }
+                detectTapGestures(
+                    onTap = { offset ->
+                        if (hasTouch) {
+                            onTouch(
+                                INPUT_USER_PRESS,
+                                offset.toDeviceX(size.width, currentFrame),
+                                offset.toDeviceY(size.height, currentFrame),
+                            )
+                        } else {
+                            // Tap toggles keyboard control so there is always a way out of capture.
+                            toggleKeyboard()
+                        }
+                    },
+                    onLongPress = { offset ->
+                        // Physical touch drivers map a long-press to SELECT with coordinates.
+                        if (hasTouch) {
+                            onTouch(
+                                INPUT_SELECT,
+                                offset.toDeviceX(size.width, currentFrame),
+                                offset.toDeviceY(size.height, currentFrame),
+                            )
+                        }
+                    },
+                )
+            }
                 .swipeToDirection(onEvent)
                 .border(width = 2.dp, color = if (focused) focusColor else Color.Transparent),
         ) {
