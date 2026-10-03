@@ -40,7 +40,6 @@ configuration settings screen. Constraints are sourced from two layers:
   - [Detection Sensor](#detection-sensor-moduleconfigdetectionsensorconfig)
   - [Paxcounter](#paxcounter-moduleconfigpaxcounterconfig)
   - [Status Message](#status-message-moduleconfigstatusmessageconfig)
-  - [Traffic Management](#traffic-management-moduleconfigtrafficmanagementconfig)
   - [TAK](#tak-moduleconfigtakconfig)
   - [Mesh Beacon](#mesh-beacon-moduleconfigmeshbeaconconfig)
 - [Channel Config](#channel-config)
@@ -350,25 +349,6 @@ configuration settings screen. Constraints are sourced from two layers:
 | Field | Type | Validation | Notes |
 |-------|------|------------|-------|
 | `node_status` | String | maxSize: 80 bytes | Clearable; requires `supportsStatusMessage` capability. Edited on the User screen, not a module screen |
-
-### Traffic Management (`ModuleConfig.TrafficManagementConfig`)
-
-| Field | Type | Validation | Notes |
-|-------|------|------------|-------|
-| `enabled` | Boolean | Toggle | Requires `supportsTrafficManagementConfig` capability |
-| `position_dedup_enabled` | Boolean | Toggle | — |
-| `position_precision_bits` | Integer | Numeric input | — |
-| `position_min_interval_secs` | Integer | Numeric input (seconds) | — |
-| `nodeinfo_direct_response` | Boolean | Toggle | — |
-| `nodeinfo_direct_response_max_hops` | Integer | Numeric input | — |
-| `rate_limit_enabled` | Boolean | Toggle | — |
-| `rate_limit_window_secs` | Integer | Numeric input (seconds) | — |
-| `rate_limit_max_packets` | Integer | Numeric input | — |
-| `drop_unknown_enabled` | Boolean | Toggle | — |
-| `unknown_packet_threshold` | Integer | Numeric input | — |
-| `exhaust_hop_telemetry` | Boolean | Toggle | — |
-| `exhaust_hop_position` | Boolean | Toggle | — |
-| `router_preserve_hops` | Boolean | Toggle | — |
 
 ### TAK (`ModuleConfig.TAKConfig`)
 
