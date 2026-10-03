@@ -51,7 +51,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -84,9 +83,10 @@ import org.meshtastic.core.resources.site_planner_antenna_height_meters
 import org.meshtastic.core.resources.site_planner_color_scale
 import org.meshtastic.core.resources.site_planner_estimate
 import org.meshtastic.core.resources.site_planner_frequency_mhz
-import org.meshtastic.core.resources.site_planner_high_resolution
+import org.meshtastic.core.resources.site_planner_invalid_frequency
 import org.meshtastic.core.resources.site_planner_invalid_latitude
 import org.meshtastic.core.resources.site_planner_invalid_longitude
+import org.meshtastic.core.resources.site_planner_invalid_max_range
 import org.meshtastic.core.resources.site_planner_invalid_positive
 import org.meshtastic.core.resources.site_planner_invalid_rx_sensitivity
 import org.meshtastic.core.resources.site_planner_max_range_km
@@ -129,7 +129,6 @@ private class SiteFormState(initial: SitePlannerParams) {
     var rxSensitivity by mutableStateOf(initial.rxSensitivityDbm.toString())
     var rxHeight by mutableStateOf(initial.rxHeightMeters.toString())
     var maxRange by mutableStateOf(initial.maxRangeKm.toString())
-    var highResolution by mutableStateOf(initial.highResolution)
 
     // Validation — computed from the (observable) string fields, so callers just read the booleans.
     private val latValue
@@ -148,7 +147,16 @@ private class SiteFormState(initial: SitePlannerParams) {
         get() = (NumberFormatter.parseDecimalOrNull(power) ?: 0.0) <= 0.0
 
     val freqBad
-        get() = (NumberFormatter.parseDecimalOrNull(freq) ?: 0.0) <= 0.0
+        get() =
+            NumberFormatter.parseDecimalOrNull(freq).let {
+                it == null || it !in SitePlannerParams.MIN_FREQ_MHZ..SitePlannerParams.MAX_FREQ_MHZ
+            }
+
+    val maxRangeBad
+        get() =
+            NumberFormatter.parseDecimalOrNull(maxRange).let {
+                it == null || it !in SitePlannerParams.MIN_RANGE_KM..SitePlannerParams.MAX_RANGE_KM
+            }
 
     val rxSensBad
         get() =
@@ -158,7 +166,14 @@ private class SiteFormState(initial: SitePlannerParams) {
 
     // Guard the null-island (0,0) case so an empty ocean run can't be submitted.
     val canSubmit
-        get() = !latBad && !lonBad && !powerBad && !freqBad && !rxSensBad && (latValue != 0.0 || lonValue != 0.0)
+        get() =
+            !latBad &&
+                !lonBad &&
+                !powerBad &&
+                !freqBad &&
+                !rxSensBad &&
+                !maxRangeBad &&
+                (latValue != 0.0 || lonValue != 0.0)
 }
 
 /**
@@ -166,8 +181,7 @@ private class SiteFormState(initial: SitePlannerParams) {
  * params once they validate. Location shortcut chips ([onUseCurrentLocation]/[onUseNodeLocation]/[onUseMapCenter])
  * re-seed the coordinate fields when provided, preserving edits to the other fields.
  *
- * [note] is shown above the submit button. A host whose planner runs somewhere this app cannot read the result back
- * from uses it to say so, and to say what the user should do instead.
+ * [note] is shown above the submit button, such as the reason the last estimate didn't complete.
  */
 @Composable
 fun SitePlannerSheet(
@@ -286,7 +300,7 @@ private fun TransmitterSection(
             latError = if (state.latBad) stringResource(Res.string.site_planner_invalid_latitude) else null,
             lonError = if (state.lonBad) stringResource(Res.string.site_planner_invalid_longitude) else null,
             powerError = if (state.powerBad) posMsg else null,
-            freqError = if (state.freqBad) posMsg else null,
+            freqError = if (state.freqBad) stringResource(Res.string.site_planner_invalid_frequency) else null,
         )
     }
 }
@@ -309,15 +323,12 @@ private fun ReceiverSection(state: SiteFormState) {
 @Composable
 private fun SimulationSection(state: SiteFormState) {
     FormSection(stringResource(Res.string.site_planner_section_simulation), defaultExpanded = false) {
-        SiteField(state.maxRange, { state.maxRange = it }, Res.string.site_planner_max_range_km)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(stringResource(Res.string.site_planner_high_resolution))
-            Switch(checked = state.highResolution, onCheckedChange = { state.highResolution = it })
-        }
+        SiteField(
+            state.maxRange,
+            { state.maxRange = it },
+            Res.string.site_planner_max_range_km,
+            error = if (state.maxRangeBad) stringResource(Res.string.site_planner_invalid_max_range) else null,
+        )
     }
 }
 
@@ -478,7 +489,6 @@ private fun buildSubmitParams(state: SiteFormState, initial: SitePlannerParams):
     rxSensitivityDbm = NumberFormatter.parseDecimalOrNull(state.rxSensitivity) ?: initial.rxSensitivityDbm,
     rxHeightMeters = NumberFormatter.parseDecimalOrNull(state.rxHeight) ?: initial.rxHeightMeters,
     maxRangeKm = NumberFormatter.parseDecimalOrNull(state.maxRange) ?: initial.maxRangeKm,
-    highResolution = state.highResolution,
     minDbm = initial.minDbm,
     maxDbm = initial.maxDbm,
     overlayTransparency = initial.overlayTransparency,

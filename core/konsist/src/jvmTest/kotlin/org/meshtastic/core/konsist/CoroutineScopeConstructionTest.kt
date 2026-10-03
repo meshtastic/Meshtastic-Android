@@ -74,6 +74,7 @@ class CoroutineScopeConstructionTest {
             "desktopApp/main/DesktopMessageQueue.kt",
             "desktopApp/main/DesktopPreferencesDataSource.kt",
             "desktopApp/main/NoopStubs.kt",
+            "feature/coverage/commonMain/MapterhornElevation.kt",
             "feature/discovery/commonMain/DiscoveryScanEngine.kt",
             "feature/docs/commonMain/ChirpySessionHolder.kt",
             "feature/firmware/commonMain/BleOtaTransport.kt",

@@ -72,7 +72,7 @@ internal fun String.toCssColor(): Pair<String, String>? {
 }
 
 /** Minimal JSON string escaping — KML descriptions routinely carry quotes, newlines and CDATA-wrapped HTML. */
-internal fun String.jsonString(): String {
+fun String.jsonString(): String {
     val escaped = StringBuilder("\"")
     forEach { character ->
         when {
