@@ -19,7 +19,6 @@ package org.meshtastic.feature.settings.debugging
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +27,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -50,20 +50,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.isAltPressed
-import androidx.compose.ui.input.key.isCtrlPressed
-import androidx.compose.ui.input.key.isMetaPressed
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -86,6 +76,9 @@ import org.meshtastic.core.resources.mirror_no_frame
 import org.meshtastic.core.resources.mirror_not_connected
 import org.meshtastic.core.resources.mirror_off
 import org.meshtastic.core.resources.refresh
+import org.meshtastic.core.ui.input.RemoteKey
+import org.meshtastic.core.ui.input.RemoteKeyHandler
+import org.meshtastic.core.ui.input.RemoteKeyboardSink
 import org.meshtastic.proto.DisplayInfo
 
 // M3 comfortable target for remote-control keys (48dp minimum + breathing room).
@@ -140,7 +133,7 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
     DisposableEffect(Unit) { onDispose { viewModel.stopMirroring() } }
 
     Column(
-        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        modifier = modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -226,9 +219,10 @@ private fun MirrorWithControls(
 }
 
 /**
- * The live mirror plus its direct input affordances: a Keyboard chip toggles key capture (arrows, Enter/Space = OK,
- * Esc/Backspace = Back), swiping in a cardinal direction sends one direction event, and on touch-capable devices
- * tapping or long-pressing the image forwards real touch coordinates; elsewhere a tap toggles capture.
+ * The live mirror plus its direct input affordances: a Keyboard chip toggles key capture, which raises the soft
+ * keyboard (arrows navigate, Enter = OK, Esc = Back, typed text reaches the device as characters), swiping in a
+ * cardinal direction sends one direction event, and on touch-capable devices tapping or long-pressing the image
+ * forwards real touch coordinates; elsewhere a tap toggles capture.
  */
 @Composable
 @Suppress("LongParameterList")
@@ -256,11 +250,7 @@ private fun MirrorSurface(
     ) {
         Box(
             modifier =
-            Modifier.focusRequester(focusRequester)
-                .onFocusChanged { focused = it.isFocused }
-                .focusable()
-                .remoteKeyInput(onEvent, onChar)
-                .pointerInput(hasTouch) {
+            Modifier.pointerInput(hasTouch) {
                     detectTapGestures(
                         onTap = { offset ->
                             if (hasTouch) {
@@ -290,6 +280,11 @@ private fun MirrorSurface(
                 .border(width = 2.dp, color = if (focused) focusColor else Color.Transparent),
         ) {
             MirrorFrameImage(frame, palette)
+            RemoteKeyboardSink(
+                focusRequester = focusRequester,
+                handler = mirrorKeyHandler(onEvent, onChar),
+                modifier = Modifier.onFocusChanged { focused = it.isFocused },
+            )
         }
         MirrorControlHints(focused = focused, hasTouch = hasTouch, onToggleKeyboard = { toggleKeyboard() })
     }
@@ -318,36 +313,20 @@ private fun MirrorControlHints(focused: Boolean, hasTouch: Boolean, onToggleKeyb
 }
 
 /**
- * Sends captured key presses to the device: mapped navigation keys as input events, Backspace and printable characters
- * as typed characters. Handled keys are consumed on both down and up so nothing leaks into the surrounding scroll
- * container.
+ * Maps the keyboard sink onto device input: navigation keys become input events, typed text and Backspace/Tab become
+ * characters. Ctrl/Alt chords are left to the host, so desktop shortcuts never reach the device.
  */
-private fun Modifier.remoteKeyInput(onEvent: (Int) -> Unit, onChar: (Int) -> Unit): Modifier =
-    onPreviewKeyEvent { event ->
-        // Never swallow host shortcuts (Cmd+Q, Ctrl+C, Alt+Tab): those belong to
-        // the desktop, not the mirrored device.
-        if (event.isCtrlPressed || event.isMetaPressed || event.isAltPressed) return@onPreviewKeyEvent false
-        val down = event.type == KeyEventType.KeyDown
-        val mapped = keyToInputEvent(event.key)
-        when {
-            mapped != null -> {
-                if (down) onEvent(mapped)
-                true
-            }
-
-            event.key == Key.Backspace -> {
-                if (down) onChar(CHAR_BACKSPACE)
-                true
-            }
-
-            event.utf16CodePoint >= FIRST_PRINTABLE_CHAR -> {
-                if (down) onChar(event.utf16CodePoint)
-                true
-            }
-
-            else -> false
+private fun mirrorKeyHandler(onEvent: (Int) -> Unit, onChar: (Int) -> Unit) = RemoteKeyHandler(
+    onText = { text -> forEachCodePoint(text, onChar) },
+    onEnter = { onEvent(INPUT_SELECT) },
+    onBackspace = { onChar(CHAR_BACKSPACE) },
+    onKey = { key ->
+        when (key) {
+            RemoteKey.TAB -> onChar(CHAR_TAB)
+            else -> key.toInputEvent()?.let(onEvent)
         }
-    }
+    },
+)
 
 /** Converts a completed drag into one direction event along its dominant axis, ignoring short accidental swipes. */
 private fun Modifier.swipeToDirection(onEvent: (Int) -> Unit): Modifier = pointerInput(Unit) {
