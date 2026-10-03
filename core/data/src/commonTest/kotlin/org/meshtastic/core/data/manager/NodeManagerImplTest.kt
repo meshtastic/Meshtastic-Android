@@ -889,6 +889,99 @@ class NodeManagerImplTest {
         assertTrue(result.mismatchKey)
     }
 
+    private fun verifiedContactUser(longName: String) = User.Builder()
+        .also { wb ->
+            wb.id = "!12345678"
+            wb.long_name = longName
+            wb.short_name = "VC"
+            wb.hw_model = HardwareModel.HELTEC_V3
+            wb.public_key = ByteArray(32) { (it + 1).toByte() }.toByteString()
+        }
+        .build()
+
+    @Test
+    fun `a NodeInfo heard over the mesh keeps a manually verified contact verified`() {
+        val nodeNum = 1234
+        nodeManager.updateNode(nodeNum) {
+            it.copy(user = verifiedContactUser("Before"), manuallyVerified = true)
+        }
+
+        nodeManager.handleReceivedUser(nodeNum, verifiedContactUser("After"))
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        assertEquals("After", result.user.long_name)
+        assertTrue(result.manuallyVerified)
+    }
+
+    @Test
+    fun `a default-name NodeInfo heard over the mesh keeps a manually verified contact verified`() {
+        val nodeNum = 1234
+        nodeManager.updateNode(nodeNum) {
+            it.copy(user = verifiedContactUser("Custom"), manuallyVerified = true)
+        }
+
+        val defaultUser =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!12345678"
+                    wb.long_name = "Meshtastic 5678"
+                    wb.short_name = "5678"
+                    wb.hw_model = HardwareModel.UNSET
+                }
+                .build()
+        nodeManager.handleReceivedUser(nodeNum, defaultUser)
+
+        assertTrue(nodeManager.nodeDBbyNodeNum[nodeNum]!!.manuallyVerified)
+    }
+
+    @Test
+    fun `importing a verified contact marks it verified`() {
+        val nodeNum = 1234
+        nodeManager.updateNode(nodeNum) { it.copy(user = verifiedContactUser("Contact")) }
+
+        nodeManager.handleReceivedUser(nodeNum, verifiedContactUser("Contact"), manuallyVerified = true)
+
+        assertTrue(nodeManager.nodeDBbyNodeNum[nodeNum]!!.manuallyVerified)
+    }
+
+    @Test
+    fun `installNodeInfo takes the manually verified flag from the radio`() {
+        val nodeNum = 5678
+        val info =
+            ProtoNodeInfo.Builder()
+                .also { wb ->
+                    wb.num = nodeNum
+                    wb.user = verifiedContactUser("Remote")
+                    wb.last_heard = 1000
+                    wb.is_key_manually_verified = true
+                }
+                .build()
+
+        nodeManager.installNodeInfo(info)
+
+        assertTrue(nodeManager.nodeDBbyNodeNum[nodeNum]!!.manuallyVerified)
+    }
+
+    @Test
+    fun `installNodeInfo keeps a contact verified when the radio has not recorded it`() {
+        val nodeNum = 5678
+        nodeManager.updateNode(nodeNum) {
+            it.copy(user = verifiedContactUser("Remote"), manuallyVerified = true)
+        }
+        val info =
+            ProtoNodeInfo.Builder()
+                .also { wb ->
+                    wb.num = nodeNum
+                    wb.user = verifiedContactUser("Remote")
+                    wb.last_heard = 1000
+                }
+                .build()
+
+        nodeManager.installNodeInfo(info)
+
+        assertTrue(nodeManager.nodeDBbyNodeNum[nodeNum]!!.manuallyVerified)
+    }
+
     @Test
     fun `installNodeInfo sets publicKey from user public_key`() {
         val nodeNum = 5678
