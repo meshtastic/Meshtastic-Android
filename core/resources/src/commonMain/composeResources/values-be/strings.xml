@@ -225,6 +225,8 @@
     <string name="quick_chat_instant">Імгненна даслаць</string>
     <string name="reboot">Перазагрузіць</string>
     <!-- REMOTE -->
+    <string name="remote_shell_send">Адправіць</string>
+    <string name="remote_shell_status_not_connected">Не злучана</string>
     <!-- REMOVE -->
     <string name="remove">Прыбраць</string>
     <string name="replace">Замяніць</string>

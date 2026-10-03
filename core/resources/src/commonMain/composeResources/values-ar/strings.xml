@@ -192,6 +192,9 @@
     <string name="radio_configuration">إعدادات الراديو</string>
     <string name="reboot">إعادة التشغيل</string>
     <!-- REMOTE -->
+    <string name="remote_shell_modifier_locked">مقفل</string>
+    <string name="remote_shell_send">ارسل</string>
+    <string name="remote_shell_status_not_connected">غير متصل</string>
     <!-- REMOVE -->
     <string name="replace">استبدال</string>
     <string name="report">إبلاغ</string>

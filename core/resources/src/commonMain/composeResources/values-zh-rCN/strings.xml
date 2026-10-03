@@ -460,7 +460,6 @@
     <string name="doc_keywords_messages">消息,频道,加密,直接通信,广播,即时通讯,</string>
     <string name="doc_keywords_mqtt">mqtt,代理服务器,互联网,网桥.上行链路,下行链路</string>
     <string name="doc_keywords_node_metrics">指标,遥测,信号,信噪比,接收信号强度指示,电池,路由追踪,</string>
-    <string name="doc_keywords_nodes">节点,网状网络,列表,角色,状态,收藏,滤波器</string>
     <string name="doc_keywords_onboarding">配置,欢迎界面,权限,首次启动</string>
     <string name="doc_keywords_settings_module">模块,串行通信,遥测,预录制,存储转发,管理</string>
     <string name="doc_keywords_settings_radio">配置,无线电,长距离低功耗无线技术,地区,调制解调器,设备,电力,安全</string>
@@ -1227,6 +1226,10 @@
     <string name="remote_hardware">远程硬件</string>
     <string name="remote_hardware_config">远程硬件设置</string>
     <string name="remote_hardware_enabled">启用远程硬件</string>
+    <string name="remote_shell_key_alt">海拔</string>
+    <string name="remote_shell_modifier_locked">锁定</string>
+    <string name="remote_shell_send">传送</string>
+    <string name="remote_shell_status_not_connected">未连接</string>
     <string name="remotely_administrating">"[远端] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">移除</string>

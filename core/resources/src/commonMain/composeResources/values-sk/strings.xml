@@ -345,6 +345,9 @@
     <!-- REMOTE -->
     <string name="remote_admin">Administrácia na diaľku</string>
     <string name="remote_hardware">Vzdialený hardvér</string>
+    <string name="remote_shell_modifier_locked">Zamknuté</string>
+    <string name="remote_shell_send">Odoslať</string>
+    <string name="remote_shell_status_not_connected">Nepripojené</string>
     <!-- REMOVE -->
     <string name="remove">Odstrániť</string>
     <string name="remove_node_text">Tento uzol bude odstránený z vášho zoznamu, kým váš uzol opäť príjme jeho údaje.</string>

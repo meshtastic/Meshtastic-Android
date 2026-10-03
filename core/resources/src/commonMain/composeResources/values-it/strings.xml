@@ -453,7 +453,6 @@
     <string name="doc_keywords_messages">messaggio,canale,crittografia,diretto,broadcast,chat-rapida</string>
     <string name="doc_keywords_mqtt">mqtt,broker,internet,bridge,uplink,downlink</string>
     <string name="doc_keywords_node_metrics">metriche,telemetria,segnale,snr,rssi,batteria,traceroute</string>
-    <string name="doc_keywords_nodes">nodo,mesh,elenco,ruolo,stato,preferito,filtro</string>
     <string name="doc_keywords_onboarding">configurazione,benvenuto,permessi,primo-avvio</string>
     <string name="doc_keywords_settings_module">modulo,seriale,telemetria,canned,store-forward,amministrazione</string>
     <string name="doc_keywords_settings_radio">impostazioni,radio,lora,regione,modem,dispositivo,alimentazione,sicurezza</string>
@@ -1213,6 +1212,10 @@
     <string name="remote_hardware">Hardware Remoto</string>
     <string name="remote_hardware_config">Configurazione Hardware Remoto</string>
     <string name="remote_hardware_enabled">Hardware Remoto abilitato</string>
+    <string name="remote_shell_key_alt">Alt</string>
+    <string name="remote_shell_modifier_locked">Bloccato</string>
+    <string name="remote_shell_send">Invia</string>
+    <string name="remote_shell_status_not_connected">Non connesso</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Elimina</string>

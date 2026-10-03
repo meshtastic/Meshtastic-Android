@@ -212,6 +212,9 @@
     <string name="reboot">Επανεκκίνηση</string>
     <!-- REMOTE -->
     <string name="remote_admin">Απομακρυσμένη Διαχείριση</string>
+    <string name="remote_shell_modifier_locked">Κλειδωμένο</string>
+    <string name="remote_shell_send">Αποστολή</string>
+    <string name="remote_shell_status_not_connected">Αποσυνδεδεμένο</string>
     <!-- REMOVE -->
     <string name="remove">Διαγραφή</string>
     <string name="remove_node_text">Αυτός ο κόμβος θα αφαιρεθεί από τη λίστα σας έως ότου ο κόμβος σας λάβει εκ νέου δεδομένα από αυτόν.</string>

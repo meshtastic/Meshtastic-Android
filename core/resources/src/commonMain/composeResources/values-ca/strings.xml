@@ -192,6 +192,9 @@
     <string name="radio_configuration">Configuració de ràdio</string>
     <string name="reboot">Reiniciar</string>
     <!-- REMOTE -->
+    <string name="remote_shell_modifier_locked">Bloquejat</string>
+    <string name="remote_shell_send">Enviar</string>
+    <string name="remote_shell_status_not_connected">No connectat</string>
     <!-- REMOVE -->
     <string name="remove">Eliminar</string>
     <string name="remove_node_text">Aquest node serà eliminat de la teva llista fins que rebi dades un altre cop.</string>

@@ -1,13 +1,15 @@
 ---
 title: 노드
 nav_order: 4
-last_updated: 2026-09-19
+last_updated: 2026-10-02
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
   - mesh-nodes
   - peers
   - hop-histogram
+  - remote-shell
+  - terminal
 ---
 
 # 노드
@@ -213,6 +215,20 @@ When a node's hardware is recognized, the detail view shows a collapsible **"I w
 A full, browsable directory of every link is also available at **Settings → Device Links**. The item is hidden while you have Settings open for a remote node.
 
 Some of these are affiliate links. Both places say so above the links: product links may be affiliate links, and purchases may earn Meshtastic a commission.
+
+### Remote shell
+
+**Open terminal**, in the node's **Administration** card, opens a shell on a Linux node running `meshtasticd` 2.8.2 or later, carried over the mesh. The node accepts it only from a radio whose public key is in its **Security → Admin key** list, the same list remote administration uses; the app starts that admin session first if there isn't one, and the card's title shows whether it is active. The terminal takes the whole window. If the node never answers, the screen says so after a minute.
+
+The mesh carries a few hundred bytes a second, and the terminal is built around that:
+
+- Once the node has echoed the first character of a line, what you type appears **underlined** at the cursor until the node echoes it back. At a prompt that doesn't echo, such as a password, nothing you type is shown; in line mode the command box masks its text and keeps it out of history.
+- The subtitle shows the measured round trip. When the node stops answering, a line at the top of the terminal says how long ago it was last heard.
+- The two rows of extra keys give **ESC**, **TAB**, arrows, **HOME**, **END**, **PGUP** and **PGDN**. **CTRL** and **ALT** are sticky: tap once to apply to the next key, twice to lock, a third time to release. **CTRL** then **c** interrupts a running command. A hardware keyboard's Ctrl and Alt work as usual.
+- **Line mode**, in the **⋮** menu, gives you a command box: each command goes out in one transmission, **↑** and **↓** recall earlier commands without asking the node, and chips offer common commands for a `meshtasticd` host. It is the cheapest way to use the shell on a busy mesh.
+- The **⋮** menu also pastes from the clipboard and changes the text size.
+
+Colour, progress lines and `clear` display as they would in a desktop terminal. Full-screen programs such as `vi` or `top` redraw the whole screen for each key, which the mesh cannot carry; the terminal shows a notice instead.
 
 ## When no nodes appear
 

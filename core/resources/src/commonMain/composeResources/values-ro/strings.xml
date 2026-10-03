@@ -749,6 +749,10 @@
     <string name="remote_hardware">Hardware la distanță</string>
     <string name="remote_hardware_config">Configurare hardware la distanță</string>
     <string name="remote_hardware_enabled">Hardware extern activat</string>
+    <string name="remote_shell_key_alt">Alt</string>
+    <string name="remote_shell_modifier_locked">Blocat</string>
+    <string name="remote_shell_send">Trimite</string>
+    <string name="remote_shell_status_not_connected">Neconectat</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Eliminare</string>

@@ -892,6 +892,10 @@
     <string name="remote_hardware">Fjärrstyrd hårdvara</string>
     <string name="remote_hardware_config">Konfiguration av fjärrhårdvara</string>
     <string name="remote_hardware_enabled">Fjärrhårdvara aktiverad</string>
+    <string name="remote_shell_key_alt">Höjd</string>
+    <string name="remote_shell_modifier_locked">Låst</string>
+    <string name="remote_shell_send">Skicka</string>
+    <string name="remote_shell_status_not_connected">Ej ansluten</string>
     <string name="remotely_administrating">"[Fjärr] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Ta bort</string>

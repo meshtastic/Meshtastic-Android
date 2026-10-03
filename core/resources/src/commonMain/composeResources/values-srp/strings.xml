@@ -343,6 +343,10 @@
     <string name="reboot">Поново покрени</string>
     <!-- REMOTE -->
     <string name="remote_admin">Удаљена администрација</string>
+    <string name="remote_shell_key_alt">Висина</string>
+    <string name="remote_shell_modifier_locked">Закључан</string>
+    <string name="remote_shell_send">Пошаљи</string>
+    <string name="remote_shell_status_not_connected">Није повезан</string>
     <!-- REMOVE -->
     <string name="remove">Уклони</string>
     <string name="remove_favorite">Уклони из омиљених</string>

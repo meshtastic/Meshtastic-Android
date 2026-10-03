@@ -360,6 +360,10 @@
     <string name="remote_hardware">Equipamento remoto</string>
     <string name="remote_hardware_config">Configuração de Hardware Remoto</string>
     <string name="remote_hardware_enabled">Hardware Remoto ativado</string>
+    <string name="remote_shell_key_alt">Alt</string>
+    <string name="remote_shell_modifier_locked">Bloqueado</string>
+    <string name="remote_shell_send">Enviar</string>
+    <string name="remote_shell_status_not_connected">Desligado</string>
     <!-- REMOVE -->
     <string name="remove">Remover</string>
     <string name="remove_node_text">Este node será removido da sua lista até que o seu node receba dados dele novamente.</string>

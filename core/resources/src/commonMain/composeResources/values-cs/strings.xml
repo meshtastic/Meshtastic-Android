@@ -1319,6 +1319,10 @@
     <string name="remote_hardware">Vzdálený hardware</string>
     <string name="remote_hardware_config">Konfigurace vzdáleného modulu</string>
     <string name="remote_hardware_enabled">Vzdálený modul povolen</string>
+    <string name="remote_shell_key_alt">Výška</string>
+    <string name="remote_shell_modifier_locked">Uzamknout</string>
+    <string name="remote_shell_send">Odeslat</string>
+    <string name="remote_shell_status_not_connected">Nepřipojeno</string>
     <string name="remotely_administrating">"[Vzdálený] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Odstranit</string>

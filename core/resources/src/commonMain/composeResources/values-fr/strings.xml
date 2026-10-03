@@ -1085,6 +1085,11 @@
     <string name="remote_hardware">Matériel télécommande</string>
     <string name="remote_hardware_config">Configuration du matériel distant</string>
     <string name="remote_hardware_enabled">Matériel distant activé</string>
+    <string name="remote_shell_key_alt">Alt</string>
+    <string name="remote_shell_key_home">Accueil</string>
+    <string name="remote_shell_modifier_locked">Verrouillé</string>
+    <string name="remote_shell_send">Envoyer</string>
+    <string name="remote_shell_status_not_connected">Non connecté</string>
     <string name="remotely_administrating">"[Distant] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Supprimer</string>

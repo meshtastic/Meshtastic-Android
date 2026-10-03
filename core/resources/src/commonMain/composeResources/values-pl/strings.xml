@@ -541,6 +541,9 @@
     <string name="reboot">Restart</string>
     <!-- REMOTE -->
     <string name="remote_admin">Zdalne zarządzanie</string>
+    <string name="remote_shell_modifier_locked">Zablokowany</string>
+    <string name="remote_shell_send">Wyślij</string>
+    <string name="remote_shell_status_not_connected">Rozłączony</string>
     <!-- REMOVE -->
     <string name="remove">Usuń</string>
     <string name="remove_favorite">Usuń z ulubionych</string>

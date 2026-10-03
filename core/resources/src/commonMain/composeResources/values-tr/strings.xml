@@ -389,6 +389,10 @@
     <string name="remote_hardware">Uzaktan Donanım</string>
     <string name="remote_hardware_config">Uzak Donanım Ayarı</string>
     <string name="remote_hardware_enabled">Uzak Donanım etkin</string>
+    <string name="remote_shell_key_alt">Yükseklik</string>
+    <string name="remote_shell_modifier_locked">Kilitli</string>
+    <string name="remote_shell_send">Gönder</string>
+    <string name="remote_shell_status_not_connected">Bağlı Değil</string>
     <!-- REMOVE -->
     <string name="remove">Kaldır</string>
     <string name="remove_node_text">Bu node, kendisinden yeniden paket alınana kadar listenizden kaldırılacaktır.</string>

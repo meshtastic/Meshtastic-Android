@@ -186,6 +186,9 @@
     <string name="radio_configuration">Configuración de radio</string>
     <string name="reboot">Reiniciar</string>
     <!-- REMOTE -->
+    <string name="remote_shell_modifier_locked">Bloqueado</string>
+    <string name="remote_shell_send">Enviar</string>
+    <string name="remote_shell_status_not_connected">Non conectado</string>
     <!-- REMOVE -->
     <string name="remove">Eliminar</string>
     <string name="remove_node_text">Este nodo será retirado da túa lista ata que o teu nodo reciba datos seus de novo.</string>
