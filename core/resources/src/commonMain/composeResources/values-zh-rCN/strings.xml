@@ -1116,7 +1116,6 @@
     <!-- PACKET -->
     <string name="packet_authenticity">数据包身份验证</string>
     <string name="packet_authenticity_balanced">平衡模式 —优先验证身份</string>
-    <string name="packet_authenticity_balanced_summary">推荐设置拒绝来自已知签名节点的未签名降级尝试。</string>
     <string name="packet_authenticity_compatible">兼容模式 —接受未签名消息</string>
     <string name="packet_authenticity_level">安全等级</string>
     <string name="packet_authenticity_strict">严格模式 —强制要求身份验证</string>
