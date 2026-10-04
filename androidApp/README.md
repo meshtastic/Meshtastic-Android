@@ -48,6 +48,7 @@ graph TB
   :androidApp -.-> :feature:messaging
   :androidApp -.-> :feature:connections
   :androidApp -.-> :feature:map
+  :androidApp -.-> :feature:coverage
   :androidApp -.-> :feature:node
   :androidApp -.-> :feature:settings
   :androidApp -.-> :feature:discovery
