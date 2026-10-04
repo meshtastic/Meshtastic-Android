@@ -1184,7 +1184,6 @@
     <!-- PACKET -->
     <string name="packet_authenticity">Pravost paketu</string>
     <string name="packet_authenticity_balanced">Vyvážená — upřednostňovat ověřené</string>
-    <string name="packet_authenticity_balanced_summary">Doporučeno. Odmítat pokusy o přechod na nepodepsaný provoz u uzlů, o kterých je známo, že používají podpisy.</string>
     <string name="packet_authenticity_compatible">Kompatibilní — přijímat nepodepsané</string>
     <string name="packet_authenticity_compatible_summary">Přijímat nepodepsaný provoz pro maximální kompatibilitu. Pokud lze podpis ověřit a je neplatný, paket se přesto zahodí.</string>
     <string name="packet_authenticity_level">Úroveň ochrany</string>

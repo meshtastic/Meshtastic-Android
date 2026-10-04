@@ -1102,7 +1102,6 @@
     <!-- PACKET -->
     <string name="packet_authenticity">パケットの真正性</string>
     <string name="packet_authenticity_balanced">バランス：認証済みを優先</string>
-    <string name="packet_authenticity_balanced_summary">推奨。署名することが分かっているノードからの、署名なしへのダウングレードを拒否します。</string>
     <string name="packet_authenticity_compatible">互換：署名なしを許可</string>
     <string name="packet_authenticity_level">保護レベル</string>
     <string name="packet_authenticity_strict">厳格：認証を必須にする</string>

@@ -1007,7 +1007,6 @@
     <string name="override_console_serial_port">Seriellen Anschluss der Konsole überschreiben</string>
     <!-- PACKET -->
     <string name="packet_authenticity">Paket Authentizität</string>
-    <string name="packet_authenticity_balanced_summary">Empfohlen. Lehne unsignierte downgrade-Versuche von Knoten ab, von denen bekannt ist, dass sie signieren.</string>
     <string name="packet_authenticity_level">Schutzstufe</string>
     <string name="packet_authenticity_strict_summary">Zeige und verarbeite nur kryptografisch authentisierte Mesh-Pakete. Ältere Knoten und übergroße Pakete könnten verschwinden.</string>
     <string name="packet_authenticity_unsupported">Dieses verbundene Gerät unterstützt keine Überprüfung der Paketsignatur.</string>

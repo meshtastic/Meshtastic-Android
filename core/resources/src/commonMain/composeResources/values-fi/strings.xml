@@ -1259,7 +1259,6 @@
     <!-- PACKET -->
     <string name="packet_authenticity">Pakettien aitous</string>
     <string name="packet_authenticity_balanced">Tasapainoinen – Suosi todennettuja paketteja</string>
-    <string name="packet_authenticity_balanced_summary">Suositeltu. Hylkää allekirjoittamattomat tason alentamisyritykset radioilta, joiden tiedetään allekirjoittavan paketit.</string>
     <string name="packet_authenticity_compatible">Yhteensopiva – Hyväksy allekirjoittamattomat paketit</string>
     <string name="packet_authenticity_level">Suojaustaso</string>
     <string name="packet_authenticity_strict">Tiukka – Vaadi pakettien todentamista</string>
