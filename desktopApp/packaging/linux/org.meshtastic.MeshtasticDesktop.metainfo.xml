@@ -98,7 +98,7 @@
   <releases>
     <release version="2.8.3" date="2026-09-30">
       <description>
-        <p>Message notifications on Android Auto. Firmware updates show the installed and latest bootloader. A coding rate override on top of the modem preset. The MQTT proxy works on desktop, and so does the traceroute map. Tabs keep their state when you switch. Every notification gets its own channel. Many stability, privacy and data-correctness fixes.</p>
+        <p>Message notifications on Android Auto. Site Planner coverage is computed on the device. A terminal for meshtasticd nodes. Reboot nRF52 nodes into DFU mode. Firmware updates show the installed and latest bootloader. A coding rate override on top of the modem preset. Reactions get their own notification channel. Many stability, privacy and data-correctness fixes.</p>
       </description>
     </release>
     <release version="2.8.2" date="2026-09-25">
