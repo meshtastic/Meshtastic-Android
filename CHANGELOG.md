@@ -8,7 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.3-internal.5)
+### Internal (v2.8.3-internal.6)
 Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2):
 
 #### 🏗️ Features
@@ -64,6 +64,7 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(metrics): break power chart lines across gaps in readings by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7505
 * fix(analytics): drop the package from RUM view names by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7525
 * fix(node): keep verified contacts verified by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7531
+* fix(settings): stop calling Balanced packet authenticity recommended by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7535
 #### 📝 Other Changes
 * refactor(data): page the log export, remove dedupe leftovers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7449
 * refactor(map): share the Web Mercator projection with node clustering by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7483
