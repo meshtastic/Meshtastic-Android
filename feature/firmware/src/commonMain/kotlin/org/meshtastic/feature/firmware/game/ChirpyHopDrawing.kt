@@ -26,8 +26,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import kotlin.math.roundToInt
@@ -47,7 +45,6 @@ private const val GROUND_LINE_DP = 3f
 private const val MARK_SPACING_DP = 68f
 private const val MARK_WRAP_DP = 24f
 private const val MIN_MARKS = 6
-private const val CLOUD_WRAP_DP = 60f
 
 // The UFO hovers relative to Chirpy's drawn size: clear of his antenna when he ducks, level with his head when he
 // stands.
@@ -58,17 +55,12 @@ private const val UFO_LIGHT_RATE = 6.0
 private const val SIGNAL_PULSE_RATE = 4.0
 
 private val GroundMarkColor = Color(0xB37A7A7A)
-private val CloudColor = Color(0xA6A8A8A8)
-
-private class Cloud(val xFraction: Float, val heightFraction: Float, val scale: Float, val parallax: Float)
-
-private val clouds = listOf(Cloud(0.3f, 0.72f, 0.82f, 0.015f), Cloud(0.78f, 0.58f, 0.62f, 0.02f))
 
 internal fun DrawScope.drawChirpyWorld(engine: ChirpyHopEngine, world: ChirpyWorld, sprites: ChirpySprites) {
     drawRect(ChirpyPaper)
     val groundY = size.height * (1 - GROUND_FRACTION)
     val shiftPx = (world.groundShift * size.width).toFloat()
-    drawClouds(shiftPx)
+    drawChirpyBackdrop(groundY, shiftPx, world.sceneSeconds)
     drawGround(groundY, shiftPx)
     if (engine.phase != ChirpyHopPhase.Ready) {
         world.departing?.let { drawObstacle(it.kind, it.x, world, groundY) }
@@ -78,29 +70,7 @@ internal fun DrawScope.drawChirpyWorld(engine: ChirpyHopEngine, world: ChirpyWor
 }
 
 /** Wraps [x] into [start, start + span), so scenery that scrolls off the left re-enters on the right. */
-private fun wrap(x: Float, start: Float, span: Float): Float = ((x - start) % span + span) % span + start
-
-private fun DrawScope.drawClouds(shiftPx: Float) {
-    val margin = CLOUD_WRAP_DP * density
-    clouds.forEach { cloud ->
-        val x = wrap(size.width * cloud.xFraction - shiftPx * cloud.parallax, -margin, size.width + 2 * margin)
-        val y = size.height * (1 - cloud.heightFraction)
-        translate(x, y) { scale(cloud.scale * density, pivot = Offset.Zero) { drawCloudOutline() } }
-    }
-}
-
-@Suppress("MagicNumber")
-private fun DrawScope.drawCloudOutline() {
-    val path =
-        Path().apply {
-            moveTo(-38f, 0f)
-            cubicTo(-38f, -17f, -23f, -19f, -14f, -2f)
-            cubicTo(-8f, -25f, 7f, -25f, 10f, -8f)
-            cubicTo(23f, -17f, 38f, -12f, 38f, 0f)
-            close()
-        }
-    drawPath(path, CloudColor, style = Stroke(width = 3f, cap = StrokeCap.Round))
-}
+internal fun wrap(x: Float, start: Float, span: Float): Float = ((x - start) % span + span) % span + start
 
 @Suppress("MagicNumber")
 private fun DrawScope.drawGround(groundY: Float, shiftPx: Float) {
