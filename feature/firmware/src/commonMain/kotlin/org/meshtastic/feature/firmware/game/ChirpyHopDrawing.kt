@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import kotlin.math.roundToInt
@@ -57,6 +58,10 @@ private const val UFO_HOVER_DP = 2f
 private const val UFO_LIGHT_RATE = 6.0
 private const val SIGNAL_PULSE_RATE = 4.0
 private const val DISH_TILT_DEGREES = -35f
+private const val IMPACT_X_OF_SPRITE = 0.22f
+private const val IMPACT_Y_OF_SPRITE = 0.4f
+private const val DIZZY_HEIGHT_OF_SPRITE = 0.78f
+private const val DIZZY_WIDTH_OF_SPRITE = 0.24f
 
 private val GroundMarkColor = Color(0xB37A7A7A)
 
@@ -64,13 +69,21 @@ internal fun DrawScope.drawChirpyWorld(engine: ChirpyHopEngine, world: ChirpyWor
     drawRect(ChirpyPaper)
     val groundY = size.height * (1 - GROUND_FRACTION)
     val shiftPx = (world.groundShift * size.width).toFloat()
-    drawChirpyBackdrop(groundY, shiftPx, world.sceneSeconds)
-    drawGround(groundY, shiftPx)
-    if (engine.phase != ChirpyHopPhase.Ready) {
-        world.departing?.let { drawObstacle(it.kind, it.x, world, groundY) }
+    val knockout =
+        world.knockedOutFor
+            ?.takeIf { engine.phase == ChirpyHopPhase.GameOver }
+            ?.let { elapsed ->
+                deathPose(elapsed, startHeightDp = world.knockedOutHeight * size.height * JUMP_SCALE / density)
+            }
+    translate(left = (knockout?.shakeDp ?: 0f) * density) {
+        drawChirpyBackdrop(groundY, shiftPx, world.sceneSeconds)
+        drawGround(groundY, shiftPx)
+        if (engine.phase != ChirpyHopPhase.Ready) {
+            world.departing?.let { drawObstacle(it.kind, it.x, world, groundY) }
+        }
+        drawObstacle(engine.obstacleKind, engine.obstacleX, world, groundY)
+        drawChirpy(engine, world, sprites, groundY, knockout)
     }
-    drawObstacle(engine.obstacleKind, engine.obstacleX, world, groundY)
-    drawChirpy(engine, world, sprites, groundY)
 }
 
 /** Wraps [x] into [start, start + span), so scenery that scrolls off the left re-enters on the right. */
@@ -226,11 +239,25 @@ private fun DrawScope.drawUfo(center: Offset, litLight: Int) {
 private val DrawScope.chirpySpriteHeight: Float
     get() = minOf(SPRITE_HEIGHT_DP * density, size.height * SPRITE_MAX_FIELD_FRACTION)
 
-private fun DrawScope.drawChirpy(engine: ChirpyHopEngine, world: ChirpyWorld, sprites: ChirpySprites, groundY: Float) {
+/** Chirpy running, jumping or ducking, or, given a [knockout] pose, thrown back and lying where he fell. */
+@Suppress("LongParameterList")
+private fun DrawScope.drawChirpy(
+    engine: ChirpyHopEngine,
+    world: ChirpyWorld,
+    sprites: ChirpySprites,
+    groundY: Float,
+    knockout: DeathPose?,
+) {
     val spriteHeight = chirpySpriteHeight
     val spriteWidth = spriteHeight * SPRITE_WIDTH_DP / SPRITE_HEIGHT_DP
-    val anchorX = (size.width * ChirpyHopEngine.PLAYER_X).toFloat()
-    val anchorY = groundY - (engine.playerY * size.height * JUMP_SCALE).toFloat()
+    var anchorX = (size.width * ChirpyHopEngine.PLAYER_X).toFloat()
+    var anchorY = groundY - (engine.playerY * size.height * JUMP_SCALE).toFloat()
+    if (knockout != null) {
+        val hitAt = Offset(anchorX + spriteWidth * IMPACT_X_OF_SPRITE, anchorY - spriteHeight * IMPACT_Y_OF_SPRITE)
+        anchorX += knockout.knockbackDp * density
+        anchorY = groundY - knockout.heightDp * density
+        knockout.burst?.let { drawImpactBurst(hitAt, it) }
+    }
 
     val image: ImageBitmap =
         when {
@@ -245,14 +272,25 @@ private fun DrawScope.drawChirpy(engine: ChirpyHopEngine, world: ChirpyWorld, sp
                 sprites.run[(world.sceneSeconds * cadence).toInt() % sprites.run.size]
             }
         }
-    drawImage(
-        image = image,
-        dstOffset =
-        IntOffset(
-            (anchorX - spriteWidth / 2).roundToInt(),
-            (anchorY - spriteHeight * (1 - SPRITE_ANCHOR_Y)).roundToInt(),
-        ),
-        dstSize = IntSize(spriteWidth.roundToInt(), spriteHeight.roundToInt()),
-        filterQuality = FilterQuality.Medium,
-    )
+    val feet = Offset(anchorX, anchorY)
+    withTransform({
+        rotate(knockout?.rotationDegrees ?: 0f, pivot = feet)
+        scale(knockout?.scaleX ?: 1f, knockout?.scaleY ?: 1f, pivot = feet)
+    }) {
+        drawImage(
+            image = image,
+            dstOffset =
+            IntOffset(
+                (anchorX - spriteWidth / 2).roundToInt(),
+                (anchorY - spriteHeight * (1 - SPRITE_ANCHOR_Y)).roundToInt(),
+            ),
+            dstSize = IntSize(spriteWidth.roundToInt(), spriteHeight.roundToInt()),
+            alpha = knockout?.alpha ?: 1f,
+            filterQuality = FilterQuality.Medium,
+        )
+    }
+    knockout?.dizzyRadians?.let { angle ->
+        val headTop = anchorY - spriteHeight * DIZZY_HEIGHT_OF_SPRITE * knockout.scaleY
+        drawDizzyStars(Offset(anchorX, headTop), radiusX = spriteWidth * DIZZY_WIDTH_OF_SPRITE, angle = angle)
+    }
 }

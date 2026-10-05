@@ -141,7 +141,11 @@ internal fun ChirpyHopPlayfield(
     var phase by remember { mutableStateOf(engine.phase) }
     var score by remember { mutableIntStateOf(engine.score) }
 
-    val primaryAction = {
+    // False while the knockout plays: GAME OVER waits for it, and taps are ignored so a panicked one can't restart.
+    var knockoutDone by remember { mutableStateOf(true) }
+
+    val primaryAction: () -> Unit = action@{
+        if (engine.phase == ChirpyHopPhase.GameOver && !knockoutDone) return@action
         engine.primaryAction()
         phase = engine.phase
         score = engine.score
@@ -149,10 +153,27 @@ internal fun ChirpyHopPlayfield(
         if (engine.phase == ChirpyHopPhase.Running) haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
     }
 
-    // Frames are only requested during a run, so a waiting or finished game costs nothing.
-    LaunchedEffect(running, phase == ChirpyHopPhase.Running) {
-        if (!running) engine.setCrouching(false)
-        if (!running || phase != ChirpyHopPhase.Running) return@LaunchedEffect
+    // Frames are only requested during a run or its knockout, so a waiting or finished game costs nothing.
+    LaunchedEffect(running, phase) {
+        if (!running) {
+            engine.setCrouching(false)
+            knockoutDone = true
+            return@LaunchedEffect
+        }
+        if (phase == ChirpyHopPhase.GameOver && !knockoutDone) {
+            var lastNanos = 0L
+            while (isActive && !knockoutDone) {
+                withFrameNanos { now ->
+                    val delta = if (lastNanos == 0L) FIRST_FRAME_SECONDS else (now - lastNanos) / NANOS_PER_SECOND
+                    lastNanos = now
+                    world.advance(delta, engine)
+                    val elapsed = world.knockedOutFor ?: DEATH_ANIMATION_SECONDS
+                    if (elapsed >= DEATH_ANIMATION_SECONDS) knockoutDone = true
+                    frame++
+                }
+            }
+        }
+        if (phase != ChirpyHopPhase.Running) return@LaunchedEffect
         var lastNanos = 0L
         while (isActive) {
             withFrameNanos { now ->
@@ -168,6 +189,7 @@ internal fun ChirpyHopPlayfield(
                 }
                 if (engine.phase != phase) {
                     if (engine.phase == ChirpyHopPhase.GameOver) {
+                        knockoutDone = false
                         haptics.performHapticFeedback(HapticFeedbackType.Reject)
                     }
                     phase = engine.phase
@@ -214,7 +236,11 @@ internal fun ChirpyHopPlayfield(
             frame
             drawChirpyWorld(engine, world, sprites)
         }
-        ChirpyHud(phase = phase, score = score, bestScore = maxOf(bestScore, score))
+        ChirpyHud(
+            phase = if (phase == ChirpyHopPhase.GameOver && !knockoutDone) ChirpyHopPhase.Running else phase,
+            score = score,
+            bestScore = maxOf(bestScore, score),
+        )
     }
 }
 
@@ -291,6 +317,16 @@ internal class ChirpyWorld {
     var departing: DepartingObstacle? = null
         private set
 
+    /** Scene time when Chirpy was knocked out, and how high he was, or null while the run is alive. */
+    private var knockedOutAt: Double? = null
+
+    /** Chirpy's height above the ground when he was hit, in the engine's units. */
+    var knockedOutHeight = 0.0
+        private set
+
+    val knockedOutFor: Double?
+        get() = knockedOutAt?.let { sceneSeconds - it }
+
     private var observedScore = 0
     private var observedKind = ChirpyObstacleKind.Antenna
     private var observedX = 0.0
@@ -306,6 +342,17 @@ internal class ChirpyWorld {
     fun advance(deltaSeconds: Double, engine: ChirpyHopEngine) {
         val delta = min(deltaSeconds, MAX_SCENE_STEP)
         sceneSeconds += delta
+        when (engine.phase) {
+            ChirpyHopPhase.Running -> knockedOutAt = null
+
+            ChirpyHopPhase.GameOver ->
+                if (knockedOutAt == null) {
+                    knockedOutAt = sceneSeconds
+                    knockedOutHeight = engine.playerY
+                }
+
+            ChirpyHopPhase.Ready -> Unit
+        }
         if (engine.phase != ChirpyHopPhase.Running) return
         val shift = ChirpyHopEngine.speed(engine.score) * delta
         groundShift += shift

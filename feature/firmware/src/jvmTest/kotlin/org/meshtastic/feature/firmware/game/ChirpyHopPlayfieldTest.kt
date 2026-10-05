@@ -90,6 +90,37 @@ class ChirpyHopPlayfieldTest {
     }
 
     @Test
+    fun `GAME OVER waits for the knockout and ignores taps until then`() = runComposeUiTest {
+        mainClock.autoAdvance = false
+        val engine = ChirpyHopEngine(obstacleX = 1.0)
+        setContent {
+            if (shown) {
+                ChirpyHopPlayfield(
+                    running = true,
+                    bestScore = 0,
+                    onScore = {},
+                    modifier = Modifier.size(400.dp, 600.dp),
+                    engine = engine,
+                )
+            }
+        }
+        onNodeWithContentDescription("Chirpy Hop").performClick()
+        while (engine.phase != ChirpyHopPhase.GameOver) mainClock.advanceTimeByFrame()
+
+        mainClock.advanceTimeBy(300)
+        onNodeWithText("GAME OVER").assertDoesNotExist()
+        onNodeWithContentDescription("Chirpy Hop").performClick()
+        assertEquals(ChirpyHopPhase.GameOver, engine.phase)
+
+        mainClock.advanceTimeBy(1_000)
+        onNodeWithText("GAME OVER").assertExists()
+        onNodeWithContentDescription("Chirpy Hop").performClick()
+        mainClock.advanceTimeByFrame()
+        onNodeWithText("TAP TO START").assertExists()
+        closePlayfield()
+    }
+
+    @Test
     fun `taps are ignored once the update has stopped`() = runComposeUiTest {
         showPlayfield(running = false)
 
