@@ -26,6 +26,9 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import kotlin.math.roundToInt
@@ -53,6 +56,7 @@ private const val UFO_HOVER_RATE = 3.0
 private const val UFO_HOVER_DP = 2f
 private const val UFO_LIGHT_RATE = 6.0
 private const val SIGNAL_PULSE_RATE = 4.0
+private const val DISH_TILT_DEGREES = -35f
 
 private val GroundMarkColor = Color(0xB37A7A7A)
 
@@ -96,7 +100,7 @@ private fun DrawScope.drawObstacle(kind: ChirpyObstacleKind, xFraction: Double, 
         ChirpyObstacleKind.Antenna -> drawAntenna(Offset(x, groundY), heightDp = 98f, pulse = pulse)
 
         ChirpyObstacleKind.AntennaPair -> {
-            drawAntenna(Offset(x - 25 * density, groundY), heightDp = 68f, pulse = pulse)
+            drawDish(Offset(x - 25 * density, groundY))
             drawAntenna(Offset(x + 18 * density, groundY), heightDp = 84f, pulse = 1 - pulse)
         }
 
@@ -152,6 +156,29 @@ private fun DrawScope.upPath(origin: Offset, vararg points: Pair<Float, Float>):
         if (index == 0) moveTo(x, y) else lineTo(x, y)
     }
     close()
+}
+
+/** A satellite dish on a short post, tilted to look up and back along the run, with its feed held over the bowl. */
+@Suppress("MagicNumber")
+private fun DrawScope.drawDish(base: Offset) {
+    val postHeight = 34f
+    drawPath(upPath(base, -12f to 0f, 12f to 0f, 5f to 9f, -5f to 9f), ChirpyInk)
+    inkRect(base, 0f, postHeight / 2, 6f, postHeight, 3f)
+    val pivot = Offset(base.x, base.y - postHeight * density)
+    rotate(DISH_TILT_DEGREES, pivot = pivot) {
+        translate(pivot.x, pivot.y) {
+            scale(density, pivot = Offset.Zero) {
+                val bowl = Size(44f, 26f)
+                drawArc(ChirpyInk, 0f, 180f, useCenter = true, topLeft = Offset(-22f, -19f), size = bowl)
+                drawLine(ChirpyInk, Offset(0f, -2f), Offset(0f, 6f), strokeWidth = 5f)
+                val feed = Offset(0f, -24f)
+                drawLine(ChirpyInk, Offset(-20f, -6f), feed, strokeWidth = 1.5f)
+                drawLine(ChirpyInk, Offset(20f, -6f), feed, strokeWidth = 1.5f)
+                drawLine(ChirpyInk, Offset(0f, -6f), feed, strokeWidth = 2f)
+                drawRoundRect(ChirpyInk, Offset(-3.5f, -30f), Size(7f, 7f), CornerRadius(1.5f))
+            }
+        }
+    }
 }
 
 /** A flying saucer: glass dome over a disc whose rim lights chase round, [litLight] picking the bright one. */

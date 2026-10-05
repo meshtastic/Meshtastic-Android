@@ -45,12 +45,15 @@ private const val NODE_BLINK_RATE = 2.5
 private const val PACKET_RATE = 0.45
 
 // The hang glider flies its own course across a stretch of sky wider than the screen, so it is only sometimes in view.
-private const val GLIDER_PARALLAX = 0.08f
-private const val GLIDER_DRIFT_WIDTHS_PER_SECOND = 0.025
-private const val GLIDER_SKY_WIDTHS = 2.6f
-private const val GLIDER_HEIGHT_FRACTION = 0.64f
+private const val GLIDER_PARALLAX = 0.04f
+private const val GLIDER_DRIFT_WIDTHS_PER_SECOND = 0.015
+private const val GLIDER_SKY_WIDTHS = 2.2f
+private const val GLIDER_HEIGHT_FRACTION = 0.72f
+
+/** Drawn small and pale so it reads as far off, behind the clouds' depth. */
+private const val GLIDER_SCALE = 0.55f
 private const val GLIDER_WRAP_DP = 80f
-private const val GLIDER_BOB_DP = 6f
+private const val GLIDER_BOB_DP = 3f
 private const val GLIDER_BOB_RATE = 0.8
 private const val GLIDER_SWAY_RATE = 0.6
 private const val GLIDER_SWAY_DEGREES = 4f
@@ -64,7 +67,7 @@ private val HillFill = Color(0xFFE8E8E8)
 private val HillLine = Color(0x66A0A0A0)
 private val NodeColor = Color(0x99909090)
 private val CloudColor = Color(0xA6A8A8A8)
-private val GliderColor = Color(0xB3808080)
+private val GliderColor = Color(0x66909090)
 
 private class Cloud(val xFraction: Float, val heightFraction: Float, val scale: Float, val parallax: Float)
 
@@ -97,9 +100,9 @@ private val mountainPeaks =
 private val hillCrests = listOf(0.1f to 0.055f, 0.32f to 0.075f, 0.55f to 0.05f, 0.78f to 0.07f)
 
 internal fun DrawScope.drawChirpyBackdrop(groundY: Float, shiftPx: Float, sceneSeconds: Double) {
+    drawHangGlider(shiftPx, sceneSeconds)
     drawClouds(shiftPx)
     drawMountains(groundY, shiftPx * MOUNTAIN_PARALLAX)
-    drawHangGlider(shiftPx, sceneSeconds)
     drawHills(groundY, shiftPx * HILL_PARALLAX, sceneSeconds)
 }
 
@@ -141,7 +144,9 @@ private fun DrawScope.drawHangGlider(shiftPx: Float, sceneSeconds: Double) {
     val y = size.height * (1 - GLIDER_HEIGHT_FRACTION) + bob
     val sway = GLIDER_BANK_DEGREES + sin(sceneSeconds * GLIDER_SWAY_RATE).toFloat() * GLIDER_SWAY_DEGREES
     translate(x, y) {
-        rotate(sway, pivot = Offset.Zero) { scale(density, pivot = Offset.Zero) { drawHangGliderShape() } }
+        rotate(sway, pivot = Offset.Zero) {
+            scale(GLIDER_SCALE * density, pivot = Offset.Zero) { drawHangGliderShape() }
+        }
     }
 }
 
