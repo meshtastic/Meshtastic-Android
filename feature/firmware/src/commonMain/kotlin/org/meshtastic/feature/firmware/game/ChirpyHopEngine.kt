@@ -27,19 +27,22 @@ enum class ChirpyHopPhase {
 }
 
 enum class ChirpyObstacleKind {
-    TallCactus,
-    CactusCluster,
-    FlyingBird,
+    Antenna,
+    AntennaPair,
+    Ufo,
 }
 
 /**
  * Chirpy Hop's rules, free of any drawing. Positions are fractions of the play field: x runs 0..1 left to right and y
  * is height above the ground, so the same state renders at any size. Physics advances in fixed steps, so the outcome of
  * a run does not depend on the frame rate.
+ *
+ * Difficulty rises with the score: the run speeds up, the spare gap between obstacles closes, and harder obstacles join
+ * the mix in stages. Every combination stays clearable at the top speed.
  */
 class ChirpyHopEngine(
     obstacleX: Double = INITIAL_OBSTACLE_X,
-    obstacleKind: ChirpyObstacleKind = ChirpyObstacleKind.TallCactus,
+    obstacleKind: ChirpyObstacleKind = ChirpyObstacleKind.Antenna,
 ) {
     var phase: ChirpyHopPhase = ChirpyHopPhase.Ready
         private set
@@ -100,7 +103,7 @@ class ChirpyHopEngine(
         isCrouching = false
         score = 0
         obstacleX = INITIAL_OBSTACLE_X
-        obstacleKind = ChirpyObstacleKind.TallCactus
+        obstacleKind = ChirpyObstacleKind.Antenna
     }
 
     private fun advanceStep(delta: Double) {
@@ -122,7 +125,7 @@ class ChirpyHopEngine(
         val playerLeft = PLAYER_X - PLAYER_WIDTH / 2
         if (obstacleRight < playerLeft) {
             score += 1
-            obstacleX = RESPAWN_X + (score % CADENCE_STEPS) * CADENCE_SPACING
+            obstacleX = respawnX(score)
             obstacleKind = obstacleKind(score)
         }
     }
@@ -135,9 +138,9 @@ class ChirpyHopEngine(
     private fun collidesWithObstacle(): Boolean {
         val obstacleWidth =
             when (obstacleKind) {
-                ChirpyObstacleKind.TallCactus -> OBSTACLE_WIDTH
-                ChirpyObstacleKind.CactusCluster -> CLUSTER_WIDTH
-                ChirpyObstacleKind.FlyingBird -> BIRD_WIDTH
+                ChirpyObstacleKind.Antenna -> OBSTACLE_WIDTH
+                ChirpyObstacleKind.AntennaPair -> PAIR_WIDTH
+                ChirpyObstacleKind.Ufo -> UFO_WIDTH
             }
         val horizontalRange = (PLAYER_WIDTH + obstacleWidth) * HORIZONTAL_HITBOX_SCALE
         if (abs(obstacleX - PLAYER_X) >= horizontalRange) return false
@@ -147,9 +150,9 @@ class ChirpyHopEngine(
         val playerTop = playerY + playerHeight * VERTICAL_HITBOX_SCALE
         val obstacleRange =
             when (obstacleKind) {
-                ChirpyObstacleKind.TallCactus -> 0.0..OBSTACLE_HEIGHT * VERTICAL_HITBOX_SCALE
-                ChirpyObstacleKind.CactusCluster -> 0.0..CLUSTER_HEIGHT
-                ChirpyObstacleKind.FlyingBird -> BIRD_BOTTOM..BIRD_TOP
+                ChirpyObstacleKind.Antenna -> 0.0..OBSTACLE_HEIGHT * VERTICAL_HITBOX_SCALE
+                ChirpyObstacleKind.AntennaPair -> 0.0..PAIR_HEIGHT
+                ChirpyObstacleKind.Ufo -> UFO_BOTTOM..UFO_TOP
             }
         return playerTop > obstacleRange.start && playerBottom < obstacleRange.endInclusive
     }
@@ -172,30 +175,69 @@ class ChirpyHopEngine(
         private const val HORIZONTAL_HITBOX_SCALE = 0.38
         private const val VERTICAL_HITBOX_SCALE = 0.88
         private const val PLAYER_FOOT_INSET = 0.01
-        private const val CLUSTER_WIDTH = 0.115
-        private const val CLUSTER_HEIGHT = 0.132
-        private const val BIRD_WIDTH = 0.1
-        private const val BIRD_BOTTOM = 0.115
-        private const val BIRD_TOP = 0.195
+        private const val PAIR_WIDTH = 0.115
+        private const val PAIR_HEIGHT = 0.132
+        private const val UFO_WIDTH = 0.1
+        private const val UFO_BOTTOM = 0.115
+        private const val UFO_TOP = 0.195
         private const val RESPAWN_X = 1.04
         private const val CADENCE_STEPS = 4
         private const val CADENCE_SPACING = 0.055
         private const val BASE_SPEED = 0.5
-        private const val SPEED_PER_POINT = 0.019
-        private const val MAX_SPEED = 0.88
+        private const val SPEED_PER_POINT = 0.011
+        private const val MAX_SPEED = 1.05
 
-        /** The obstacle sequence repeats every five points. */
-        private val OBSTACLE_CYCLE =
+        /** Extra lead-in before each obstacle at the start of a run, closing by one step per point. */
+        private const val SPARE_GAP = 0.35
+        private const val SPARE_GAP_PER_POINT = 0.01
+
+        const val PAIRS_FROM = 5
+        const val UFOS_FROM = 12
+        const val DENSE_FROM = 25
+
+        /** Score at which each obstacle mix takes over, with the mix it brings. Each repeats until the next. */
+        private val STAGES =
             listOf(
-                ChirpyObstacleKind.TallCactus,
-                ChirpyObstacleKind.CactusCluster,
-                ChirpyObstacleKind.TallCactus,
-                ChirpyObstacleKind.FlyingBird,
-                ChirpyObstacleKind.CactusCluster,
+                0 to listOf(ChirpyObstacleKind.Antenna),
+                PAIRS_FROM to
+                    listOf(
+                        ChirpyObstacleKind.Antenna,
+                        ChirpyObstacleKind.AntennaPair,
+                        ChirpyObstacleKind.Antenna,
+                        ChirpyObstacleKind.Antenna,
+                        ChirpyObstacleKind.AntennaPair,
+                    ),
+                UFOS_FROM to
+                    listOf(
+                        ChirpyObstacleKind.Antenna,
+                        ChirpyObstacleKind.AntennaPair,
+                        ChirpyObstacleKind.Antenna,
+                        ChirpyObstacleKind.Ufo,
+                        ChirpyObstacleKind.AntennaPair,
+                    ),
+                DENSE_FROM to
+                    listOf(
+                        ChirpyObstacleKind.AntennaPair,
+                        ChirpyObstacleKind.Ufo,
+                        ChirpyObstacleKind.Antenna,
+                        ChirpyObstacleKind.Ufo,
+                        ChirpyObstacleKind.AntennaPair,
+                    ),
             )
 
         fun speed(score: Int): Double = min(BASE_SPEED + max(score, 0) * SPEED_PER_POINT, MAX_SPEED)
 
-        fun obstacleKind(score: Int): ChirpyObstacleKind = OBSTACLE_CYCLE[max(score, 0) % OBSTACLE_CYCLE.size]
+        fun obstacleKind(score: Int): ChirpyObstacleKind {
+            val points = max(score, 0)
+            val mix = STAGES.last { (from, _) -> points >= from }.second
+            return mix[points % mix.size]
+        }
+
+        /** Where the next obstacle appears, off the right edge: further out early on, closer as the score rises. */
+        fun respawnX(score: Int): Double {
+            val points = max(score, 0)
+            val spare = max(SPARE_GAP - points * SPARE_GAP_PER_POINT, 0.0)
+            return RESPAWN_X + (points % CADENCE_STEPS) * CADENCE_SPACING + spare
+        }
     }
 }

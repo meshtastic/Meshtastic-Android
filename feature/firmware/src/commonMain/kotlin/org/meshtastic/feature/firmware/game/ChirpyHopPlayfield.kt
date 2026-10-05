@@ -129,8 +129,8 @@ internal fun ChirpyHopPlayfield(
     bestScore: Int,
     onScore: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    engine: ChirpyHopEngine = remember { ChirpyHopEngine() },
 ) {
-    val engine = remember { ChirpyHopEngine() }
     val world = remember { ChirpyWorld() }
     val sprites = rememberChirpySprites()
     val haptics = LocalHapticFeedback.current

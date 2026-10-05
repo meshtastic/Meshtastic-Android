@@ -26,12 +26,10 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotateRad
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
@@ -50,10 +48,11 @@ private const val MARK_SPACING_DP = 68f
 private const val MARK_WRAP_DP = 24f
 private const val MIN_MARKS = 6
 private const val CLOUD_WRAP_DP = 60f
-private const val BIRD_HEIGHT_FRACTION = 0.145f
-private const val WING_FLAP_RATE = 12.0
-private const val WING_SWING_RAD = 0.32f
-private const val WING_MIN_SCALE = 0.82f
+private const val UFO_HEIGHT_FRACTION = 0.145f
+private const val UFO_HOVER_RATE = 3.0
+private const val UFO_HOVER_DP = 2f
+private const val UFO_LIGHT_RATE = 6.0
+private const val SIGNAL_PULSE_RATE = 4.0
 
 private val GroundMarkColor = Color(0xB37A7A7A)
 private val CloudColor = Color(0xA6A8A8A8)
@@ -116,17 +115,19 @@ private fun DrawScope.drawGround(groundY: Float, shiftPx: Float) {
 @Suppress("MagicNumber")
 private fun DrawScope.drawObstacle(engine: ChirpyHopEngine, world: ChirpyWorld, groundY: Float) {
     val x = (size.width * engine.obstacleX).toFloat()
+    val pulse = ((sin(world.sceneSeconds * SIGNAL_PULSE_RATE) + 1) / 2).toFloat()
     when (engine.obstacleKind) {
-        ChirpyObstacleKind.TallCactus -> drawSaguaro(x, groundY, heightDp = 98f)
+        ChirpyObstacleKind.Antenna -> drawAntenna(Offset(x, groundY), heightDp = 98f, pulse = pulse)
 
-        ChirpyObstacleKind.CactusCluster -> {
-            drawSaguaro(x - 25 * density, groundY, heightDp = 68f)
-            drawSaguaro(x + 18 * density, groundY, heightDp = 84f)
+        ChirpyObstacleKind.AntennaPair -> {
+            drawAntenna(Offset(x - 25 * density, groundY), heightDp = 68f, pulse = pulse)
+            drawAntenna(Offset(x + 18 * density, groundY), heightDp = 84f, pulse = 1 - pulse)
         }
 
-        ChirpyObstacleKind.FlyingBird -> {
-            val flap = sin(world.sceneSeconds * WING_FLAP_RATE).toFloat()
-            drawBird(Offset(x, groundY - size.height * BIRD_HEIGHT_FRACTION), flap)
+        ChirpyObstacleKind.Ufo -> {
+            val hover = sin(world.sceneSeconds * UFO_HOVER_RATE).toFloat() * UFO_HOVER_DP * density
+            val center = Offset(x, groundY - size.height * UFO_HEIGHT_FRACTION + hover)
+            drawUfo(center, litLight = (world.sceneSeconds * UFO_LIGHT_RATE).toInt())
         }
     }
 }
@@ -141,15 +142,29 @@ private fun DrawScope.inkRect(base: Offset, cx: Float, cy: Float, width: Float, 
     )
 }
 
+/** A mesh node's antenna: a guyed mast with yagi elements, sending out signal arcs that fade with [pulse]. */
 @Suppress("MagicNumber")
-private fun DrawScope.drawSaguaro(x: Float, groundY: Float, heightDp: Float) {
-    val base = Offset(x, groundY)
-    inkRect(base, 0f, heightDp / 2, 22f, heightDp, 8f)
-    for ((side, baseFraction, armFraction) in listOf(Triple(-1, 0.38f, 0.34f), Triple(1, 0.57f, 0.27f))) {
-        val armBase = heightDp * baseFraction
-        val armHeight = heightDp * armFraction
-        inkRect(base, side * 15f, armBase, 34f, 14f, 7f)
-        inkRect(base, side * 28f, armBase + armHeight / 2 - 3, 16f, armHeight, 7f)
+private fun DrawScope.drawAntenna(base: Offset, heightDp: Float, pulse: Float) {
+    val wire = Stroke(width = 2 * density, cap = StrokeCap.Round)
+    val anchor = Offset(base.x, base.y - heightDp * 0.55f * density)
+    for (side in listOf(-1, 1)) {
+        drawLine(ChirpyInk, anchor, Offset(base.x + side * 20 * density, base.y), wire.width, StrokeCap.Round)
+    }
+    drawPath(upPath(base, -14f to 0f, 14f to 0f, 6f to 10f, -6f to 10f), ChirpyInk)
+    inkRect(base, 0f, heightDp / 2, 6f, heightDp, 3f)
+    listOf(30f, 24f, 18f).forEachIndexed { index, width ->
+        inkRect(base, 0f, heightDp - 14 - index * 12, width, 4f, 2f)
+    }
+
+    val tip = Offset(base.x, base.y - (heightDp + 4) * density)
+    drawCircle(ChirpyInk, radius = 4 * density, center = tip)
+    val signal = ChirpyInk.copy(alpha = 0.25f + 0.6f * pulse)
+    for (radius in listOf(10f, 17f)) {
+        val r = radius * density
+        val topLeft = Offset(tip.x - r, tip.y - r)
+        val arc = Size(2 * r, 2 * r)
+        drawArc(signal, -40f, 80f, useCenter = false, topLeft = topLeft, size = arc, style = wire)
+        drawArc(signal, 140f, 80f, useCenter = false, topLeft = topLeft, size = arc, style = wire)
     }
 }
 
@@ -163,38 +178,46 @@ private fun DrawScope.upPath(origin: Offset, vararg points: Pair<Float, Float>):
     close()
 }
 
+/** A flying saucer: glass dome over a disc whose rim lights chase round, [litLight] picking the bright one. */
 @Suppress("MagicNumber")
-private fun DrawScope.drawBird(center: Offset, flap: Float) {
+private fun DrawScope.drawUfo(center: Offset, litLight: Int) {
+    val domeRadius = 15 * density
+    drawArc(
+        color = ChirpyInk,
+        startAngle = 180f,
+        sweepAngle = 180f,
+        useCenter = true,
+        topLeft = Offset(center.x - domeRadius, center.y - 4 * density - domeRadius),
+        size = Size(2 * domeRadius, 2 * domeRadius),
+    )
+    val glint = 9 * density
+    drawArc(
+        color = ChirpyPaper,
+        startAngle = 200f,
+        sweepAngle = 50f,
+        useCenter = false,
+        topLeft = Offset(center.x - glint, center.y - 4 * density - glint),
+        size = Size(2 * glint, 2 * glint),
+        style = Stroke(width = 2.5f * density, cap = StrokeCap.Round),
+    )
     drawOval(
         ChirpyInk,
-        topLeft = Offset(center.x - 31 * density, center.y - 16 * density),
-        size = Size(62 * density, 32 * density),
+        topLeft = Offset(center.x - 15 * density, center.y + 2 * density),
+        size = Size(30 * density, 10 * density),
     )
-    drawCircle(ChirpyInk, radius = 14 * density, center = Offset(center.x - 29 * density, center.y - 7 * density))
-    drawPath(upPath(center, -40f to 13f, -64f to 5f, -40f to 1f), ChirpyInk)
-    drawPath(upPath(center, 27f to 8f, 51f to 21f, 42f to 3f, 54f to -10f, 26f to -5f), ChirpyInk)
-
-    val wingOrigin = Offset(center.x + 2 * density, center.y - 5 * density)
-    rotateRad(-flap * WING_SWING_RAD, pivot = wingOrigin) {
-        scale(scaleX = 1f, scaleY = WING_MIN_SCALE + abs(flap) * (1 - WING_MIN_SCALE), pivot = wingOrigin) {
-            val wing =
-                Path().apply {
-                    moveTo(wingOrigin.x - 10 * density, wingOrigin.y - 5 * density)
-                    cubicTo(
-                        wingOrigin.x - 3 * density,
-                        wingOrigin.y - 35 * density,
-                        wingOrigin.x + 13 * density,
-                        wingOrigin.y - 42 * density,
-                        wingOrigin.x + 18 * density,
-                        wingOrigin.y - 8 * density,
-                    )
-                    lineTo(wingOrigin.x + 9 * density, wingOrigin.y + 4 * density)
-                    close()
-                }
-            drawPath(wing, ChirpyInk)
-        }
+    drawOval(
+        ChirpyInk,
+        topLeft = Offset(center.x - 38 * density, center.y - 8 * density),
+        size = Size(76 * density, 18 * density),
+    )
+    listOf(-22f, 0f, 22f).forEachIndexed { index, offset ->
+        val lit = index == litLight % 3
+        drawCircle(
+            color = ChirpyPaper,
+            radius = (if (lit) 3.5f else 2f) * density,
+            center = Offset(center.x + offset * density, center.y + density),
+        )
     }
-    drawCircle(ChirpyPaper, radius = 3 * density, center = Offset(center.x - 33 * density, center.y - 11 * density))
 }
 
 private fun DrawScope.drawChirpy(engine: ChirpyHopEngine, world: ChirpyWorld, sprites: ChirpySprites, groundY: Float) {

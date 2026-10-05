@@ -18,6 +18,7 @@ package org.meshtastic.feature.firmware.game
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ChirpyHopEngineTest {
@@ -51,7 +52,7 @@ class ChirpyHopEngineTest {
     }
 
     @Test
-    fun `the opening jump clears the first cactus and scores`() {
+    fun `the opening jump clears the first antenna and scores`() {
         val engine = ChirpyHopEngine()
 
         engine.primaryAction()
@@ -59,11 +60,11 @@ class ChirpyHopEngineTest {
 
         assertEquals(ChirpyHopPhase.Running, engine.phase)
         assertEquals(1, engine.score)
-        assertEquals(ChirpyObstacleKind.CactusCluster, engine.obstacleKind)
+        assertEquals(ChirpyObstacleKind.Antenna, engine.obstacleKind)
     }
 
     @Test
-    fun `running into a cactus ends the game`() {
+    fun `running into an antenna ends the game`() {
         val engine = ChirpyHopEngine(obstacleX = 1.0)
         engine.primaryAction()
 
@@ -74,8 +75,8 @@ class ChirpyHopEngineTest {
     }
 
     @Test
-    fun `crouching ducks under a bird`() {
-        val engine = ChirpyHopEngine(obstacleX = 1.0, obstacleKind = ChirpyObstacleKind.FlyingBird)
+    fun `crouching ducks under a UFO`() {
+        val engine = ChirpyHopEngine(obstacleX = 1.0, obstacleKind = ChirpyObstacleKind.Ufo)
         engine.primaryAction()
         engine.run(seconds = 0.75)
 
@@ -87,8 +88,8 @@ class ChirpyHopEngineTest {
     }
 
     @Test
-    fun `standing under a bird ends the game`() {
-        val engine = ChirpyHopEngine(obstacleX = 1.0, obstacleKind = ChirpyObstacleKind.FlyingBird)
+    fun `standing under a UFO ends the game`() {
+        val engine = ChirpyHopEngine(obstacleX = 1.0, obstacleKind = ChirpyObstacleKind.Ufo)
         engine.primaryAction()
 
         engine.run(seconds = 2.0)
@@ -146,24 +147,55 @@ class ChirpyHopEngineTest {
     fun `speed rises with score up to a cap`() {
         assertEquals(0.5, ChirpyHopEngine.speed(0))
         assertEquals(0.5, ChirpyHopEngine.speed(-3))
-        assertEquals(0.88, ChirpyHopEngine.speed(1000))
-        assertTrue(ChirpyHopEngine.speed(10) > ChirpyHopEngine.speed(5))
+        assertEquals(1.05, ChirpyHopEngine.speed(1000))
+        assertTrue(ChirpyHopEngine.speed(40) > ChirpyHopEngine.speed(20))
     }
 
     @Test
-    fun `obstacles follow a five step pattern`() {
-        val pattern = (0 until 5).map { ChirpyHopEngine.obstacleKind(it) }
+    fun `a run opens with single antennas only`() {
+        val opening = (0 until ChirpyHopEngine.PAIRS_FROM).map { ChirpyHopEngine.obstacleKind(it) }
 
-        assertEquals(
-            listOf(
-                ChirpyObstacleKind.TallCactus,
-                ChirpyObstacleKind.CactusCluster,
-                ChirpyObstacleKind.TallCactus,
-                ChirpyObstacleKind.FlyingBird,
-                ChirpyObstacleKind.CactusCluster,
-            ),
-            pattern,
-        )
-        assertEquals(ChirpyObstacleKind.CactusCluster, ChirpyHopEngine.obstacleKind(6))
+        assertEquals(List(ChirpyHopEngine.PAIRS_FROM) { ChirpyObstacleKind.Antenna }, opening)
+    }
+
+    @Test
+    fun `UFOs only join once the score reaches their stage`() {
+        val beforeUfos = (0 until ChirpyHopEngine.UFOS_FROM).map { ChirpyHopEngine.obstacleKind(it) }
+        val withUfos =
+            (ChirpyHopEngine.UFOS_FROM until ChirpyHopEngine.DENSE_FROM).map { ChirpyHopEngine.obstacleKind(it) }
+
+        assertFalse(ChirpyObstacleKind.Ufo in beforeUfos)
+        assertTrue(ChirpyObstacleKind.AntennaPair in beforeUfos)
+        assertTrue(ChirpyObstacleKind.Ufo in withUfos)
+    }
+
+    @Test
+    fun `the dense stage brings more UFOs than the stage before it`() {
+        fun ufos(from: Int) =
+            (from until from + 10).count { ChirpyHopEngine.obstacleKind(it) == ChirpyObstacleKind.Ufo }
+
+        assertTrue(ufos(ChirpyHopEngine.DENSE_FROM) > ufos(ChirpyHopEngine.UFOS_FROM))
+    }
+
+    @Test
+    fun `the spare gap before each obstacle closes as the score rises`() {
+        assertTrue(ChirpyHopEngine.respawnX(0) > ChirpyHopEngine.respawnX(4))
+        assertTrue(ChirpyHopEngine.respawnX(4) > ChirpyHopEngine.respawnX(40))
+        assertEquals(ChirpyHopEngine.respawnX(40), ChirpyHopEngine.respawnX(80))
+    }
+
+    @Test
+    fun `a perfect player survives past top speed and into the dense stage`() {
+        val engine = ChirpyHopEngine()
+        engine.primaryAction()
+        var steps = 0
+        while (engine.phase == ChirpyHopPhase.Running && engine.score < 60 && steps < 200_000) {
+            ChirpyHopAutopilot.steer(engine)
+            engine.advance(1.0 / 120.0)
+            steps++
+        }
+
+        assertEquals(ChirpyHopPhase.Running, engine.phase, "died at score ${engine.score}")
+        assertEquals(60, engine.score)
     }
 }
