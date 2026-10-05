@@ -33,15 +33,24 @@ class ChirpyHopDeathTest {
     }
 
     @Test
-    fun `Chirpy lands squashed on the ground close to where he was hit`() {
+    fun `Chirpy lands on his feet close to where he was hit`() {
         for (startHeight in listOf(0.0, 60.0, 400.0)) {
             val pose = deathPose(elapsed = DEATH_ANIMATION_SECONDS, startHeightDp = startHeight)
 
             assertEquals(0f, pose.heightDp, absoluteTolerance = 0.001f, message = "from $startHeight dp")
-            assertTrue(pose.scaleY < 1f && pose.scaleX > 1f)
             assertTrue(pose.knockbackDp in -30f..-1f)
             assertEquals(1f, pose.alpha)
         }
+    }
+
+    @Test
+    fun `a dazed Chirpy keeps swaying on wobbly knees long after GAME OVER`() {
+        val poses = (0 until 40).map { deathPose(elapsed = 5.0 + it * 0.05, startHeightDp = 0.0) }
+
+        assertTrue(poses.all { it.heightDp == 0f })
+        assertTrue(poses.maxOf { it.rotationDegrees } > 3f && poses.minOf { it.rotationDegrees } < -3f)
+        assertTrue(poses.maxOf { it.kneeBend } > 0.5f && poses.minOf { it.kneeBend } < -0.5f)
+        assertTrue(poses.all { it.dizzyRadians != null })
     }
 
     @Test

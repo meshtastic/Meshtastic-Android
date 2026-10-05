@@ -29,9 +29,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
@@ -60,8 +61,14 @@ private const val SIGNAL_PULSE_RATE = 4.0
 private const val DISH_TILT_DEGREES = -35f
 private const val IMPACT_X_OF_SPRITE = 0.22f
 private const val IMPACT_Y_OF_SPRITE = 0.4f
-private const val DIZZY_HEIGHT_OF_SPRITE = 0.78f
+private const val DIZZY_HEIGHT_OF_SPRITE = 0.74f
+
+// Where the design vector stands in for the idle sprite: the share of the sprite its character fills, and its feet.
+private const val DAZED_HEIGHT_OF_SPRITE = 0.774f
+private const val DAZED_FEET_OF_SPRITE = 0.027f
+private const val DAZED_X_OF_SPRITE = 0.06f
 private const val DIZZY_WIDTH_OF_SPRITE = 0.24f
+private const val DEGREES_PER_HALF_TURN = 180f
 
 private val GroundMarkColor = Color(0xB37A7A7A)
 
@@ -273,24 +280,33 @@ private fun DrawScope.drawChirpy(
             }
         }
     val feet = Offset(anchorX, anchorY)
-    withTransform({
-        rotate(knockout?.rotationDegrees ?: 0f, pivot = feet)
-        scale(knockout?.scaleX ?: 1f, knockout?.scaleY ?: 1f, pivot = feet)
-    }) {
-        drawImage(
-            image = image,
-            dstOffset =
-            IntOffset(
-                (anchorX - spriteWidth / 2).roundToInt(),
-                (anchorY - spriteHeight * (1 - SPRITE_ANCHOR_Y)).roundToInt(),
-            ),
-            dstSize = IntSize(spriteWidth.roundToInt(), spriteHeight.roundToInt()),
-            alpha = knockout?.alpha ?: 1f,
-            filterQuality = FilterQuality.Medium,
-        )
+    rotate(knockout?.rotationDegrees ?: 0f, pivot = feet) {
+        if (knockout != null) {
+            drawDazedChirpy(
+                vector = sprites.dazed,
+                feet = Offset(anchorX + spriteWidth * DAZED_X_OF_SPRITE, anchorY - spriteHeight * DAZED_FEET_OF_SPRITE),
+                height = spriteHeight * DAZED_HEIGHT_OF_SPRITE,
+                kneeBend = knockout.kneeBend,
+                alpha = knockout.alpha,
+            )
+        } else {
+            drawImage(
+                image = image,
+                dstOffset =
+                IntOffset(
+                    (anchorX - spriteWidth / 2).roundToInt(),
+                    (anchorY - spriteHeight * (1 - SPRITE_ANCHOR_Y)).roundToInt(),
+                ),
+                dstSize = IntSize(spriteWidth.roundToInt(), spriteHeight.roundToInt()),
+                filterQuality = FilterQuality.Medium,
+            )
+        }
     }
     knockout?.dizzyRadians?.let { angle ->
-        val headTop = anchorY - spriteHeight * DIZZY_HEIGHT_OF_SPRITE * knockout.scaleY
-        drawDizzyStars(Offset(anchorX, headTop), radiusX = spriteWidth * DIZZY_WIDTH_OF_SPRITE, angle = angle)
+        // Follow his head as he sways by rotating the point above his feet.
+        val rise = spriteHeight * DIZZY_HEIGHT_OF_SPRITE
+        val tilt = knockout.rotationDegrees * PI.toFloat() / DEGREES_PER_HALF_TURN
+        val head = Offset(anchorX + rise * sin(tilt), anchorY - rise * cos(tilt))
+        drawDizzyStars(head, radiusX = spriteWidth * DIZZY_WIDTH_OF_SPRITE, angle = angle)
     }
 }

@@ -41,6 +41,8 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -56,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.chirpy_hop
 import org.meshtastic.core.resources.chirpy_hop_best
@@ -63,6 +66,7 @@ import org.meshtastic.core.resources.chirpy_hop_controls
 import org.meshtastic.core.resources.chirpy_hop_game_over
 import org.meshtastic.core.resources.chirpy_hop_play_again
 import org.meshtastic.core.resources.chirpy_hop_tap_to_start
+import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.resources.img_chirpy_hop_crouch
 import org.meshtastic.core.resources.img_chirpy_hop_idle
 import org.meshtastic.core.resources.img_chirpy_hop_jump
@@ -93,6 +97,7 @@ private const val SCORE_DIGITS = 5
 private val PromptAlignment = BiasAlignment(0f, -0.04f)
 
 internal class ChirpySprites(
+    val dazed: Painter,
     val run: List<ImageBitmap>,
     val jump: ImageBitmap,
     val idle: ImageBitmap,
@@ -115,7 +120,8 @@ private fun rememberChirpySprites(): ChirpySprites {
     val jump = imageResource(Res.drawable.img_chirpy_hop_jump)
     val idle = imageResource(Res.drawable.img_chirpy_hop_idle)
     val crouch = imageResource(Res.drawable.img_chirpy_hop_crouch)
-    return remember(run, jump, idle, crouch) { ChirpySprites(run, jump, idle, crouch) }
+    val dazed = rememberVectorPainter(vectorResource(Res.drawable.img_chirpy))
+    return remember(run, jump, idle, crouch, dazed) { ChirpySprites(dazed, run, jump, idle, crouch) }
 }
 
 /**
@@ -153,16 +159,17 @@ internal fun ChirpyHopPlayfield(
         if (engine.phase == ChirpyHopPhase.Running) haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
     }
 
-    // Frames are only requested during a run or its knockout, so a waiting or finished game costs nothing.
+    // Frames are only requested during a run or after a knockout, so a waiting game costs nothing.
     LaunchedEffect(running, phase) {
         if (!running) {
             engine.setCrouching(false)
             knockoutDone = true
             return@LaunchedEffect
         }
-        if (phase == ChirpyHopPhase.GameOver && !knockoutDone) {
+        // A knocked-out Chirpy keeps swaying with stars round his head until the next run, so frames keep coming.
+        if (phase == ChirpyHopPhase.GameOver) {
             var lastNanos = 0L
-            while (isActive && !knockoutDone) {
+            while (isActive) {
                 withFrameNanos { now ->
                     val delta = if (lastNanos == 0L) FIRST_FRAME_SECONDS else (now - lastNanos) / NANOS_PER_SECOND
                     lastNanos = now
