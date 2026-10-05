@@ -28,11 +28,13 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_version
+import org.meshtastic.core.resources.chirpy_hop
 import org.meshtastic.core.resources.modules_already_unlocked
 import org.meshtastic.core.resources.modules_unlocked
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.icon.Memory
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PlayArrow
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import kotlin.time.Duration.Companion.seconds
 
@@ -78,5 +80,27 @@ internal fun AppVersionButton(
                 scope.launch { showToast(Res.string.modules_unlocked) }
             }
         }
+    }
+}
+
+/** The version row, followed by Chirpy Hop once the version row's taps have unlocked hidden features. */
+@Composable
+internal fun AppVersionRows(
+    hiddenFeaturesUnlocked: Boolean,
+    appVersionName: String,
+    onUnlockHiddenFeatures: () -> Unit,
+    onPlayChirpyHop: () -> Unit,
+) {
+    AppVersionButton(
+        hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
+        appVersionName = appVersionName,
+        onUnlockHiddenFeatures = onUnlockHiddenFeatures,
+    )
+    if (hiddenFeaturesUnlocked) {
+        ListItem(
+            text = stringResource(Res.string.chirpy_hop),
+            leadingIcon = MeshtasticIcons.PlayArrow,
+            onClick = onPlayChirpyHop,
+        )
     }
 }

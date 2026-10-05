@@ -201,6 +201,9 @@ sealed interface FirmwareRoute : Route {
     @Serializable data object FirmwareGraph : FirmwareRoute, Graph
 
     @Serializable data object FirmwareUpdate : FirmwareRoute
+
+    /** Chirpy Hop on its own, reached from Settings once the version-row easter egg is unlocked. */
+    @Serializable data object ChirpyHop : FirmwareRoute
 }
 
 @Serializable

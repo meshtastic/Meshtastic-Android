@@ -36,6 +36,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.common.util.UnitsOverride
 import org.meshtastic.core.navigation.DiscoveryRoute
+import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
@@ -65,7 +66,7 @@ import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Wifi
-import org.meshtastic.feature.settings.component.AppVersionButton
+import org.meshtastic.feature.settings.component.AppVersionRows
 import org.meshtastic.feature.settings.component.CacheLimitPreference
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.FullMessageTimestampsSetting
@@ -274,6 +275,7 @@ fun DesktopSettingsScreen(
                     hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
                     onUnlockHiddenFeatures = { settingsViewModel.unlockHiddenFeatures() },
                     onNavigateToAbout = { onNavigate(SettingsRoute.About) },
+                    onPlayChirpyHop = { onNavigate(FirmwareRoute.ChirpyHop) },
                 )
             }
         }
@@ -287,6 +289,7 @@ private fun DesktopAppInfoSection(
     hiddenFeaturesUnlocked: Boolean,
     onUnlockHiddenFeatures: () -> Unit,
     onNavigateToAbout: () -> Unit,
+    onPlayChirpyHop: () -> Unit,
 ) {
     ExpressiveSection(title = stringResource(Res.string.info)) {
         ListItem(
@@ -297,10 +300,11 @@ private fun DesktopAppInfoSection(
             onNavigateToAbout()
         }
 
-        AppVersionButton(
+        AppVersionRows(
             hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
             appVersionName = appVersionName,
             onUnlockHiddenFeatures = onUnlockHiddenFeatures,
+            onPlayChirpyHop = onPlayChirpyHop,
         )
     }
 }
