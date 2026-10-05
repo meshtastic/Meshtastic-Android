@@ -16,11 +16,11 @@
  */
 package org.meshtastic.feature.firmware.game
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,16 +29,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
@@ -80,12 +77,7 @@ import org.meshtastic.core.resources.img_chirpy_hop_run_7
 import org.meshtastic.core.resources.img_chirpy_hop_run_8
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
-import kotlin.math.min
 
-// The play field keeps a fixed light palette in both themes: the sprites are drawn with black linework that vanishes
-// on a dark surface.
-internal val ChirpyPaper = Color(0xFFF7F7F7)
-internal val ChirpyInk = Color(0xFF454545)
 private val ChirpyMutedInk = Color(0xFF7A7A7A)
 
 private const val CROUCH_DRAG_DP = 18
@@ -96,16 +88,17 @@ private const val SCORE_DIGITS = 5
 // Just above centre, where the iOS scene puts its prompts.
 private val PromptAlignment = BiasAlignment(0f, -0.04f)
 
-internal class ChirpySprites(
-    val dazed: Painter,
+/** Chirpy's art: the raster sprites he runs with, and the design vector he is drawn from once knocked out. */
+internal class ChirpyHopSprites(
     val run: List<ImageBitmap>,
     val jump: ImageBitmap,
     val idle: ImageBitmap,
     val crouch: ImageBitmap,
+    val dazed: Painter,
 )
 
 @Composable
-private fun rememberChirpySprites(): ChirpySprites {
+private fun rememberChirpyHopSprites(): ChirpyHopSprites {
     val run =
         listOf(
             imageResource(Res.drawable.img_chirpy_hop_run_1),
@@ -121,14 +114,13 @@ private fun rememberChirpySprites(): ChirpySprites {
     val idle = imageResource(Res.drawable.img_chirpy_hop_idle)
     val crouch = imageResource(Res.drawable.img_chirpy_hop_crouch)
     val dazed = rememberVectorPainter(vectorResource(Res.drawable.img_chirpy))
-    return remember(run, jump, idle, crouch, dazed) { ChirpySprites(dazed, run, jump, idle, crouch) }
+    return remember(run, jump, idle, crouch, dazed) { ChirpyHopSprites(run, jump, idle, crouch, dazed) }
 }
 
 /**
  * The game surface: tap to jump, drag down to crouch. [running] is false once the update stops, which freezes the run
  * in place and ignores input. [onScore] reports every point so the caller can keep the best score.
  */
-@Suppress("LongMethod")
 @Composable
 internal fun ChirpyHopPlayfield(
     running: Boolean,
@@ -137,119 +129,101 @@ internal fun ChirpyHopPlayfield(
     modifier: Modifier = Modifier,
     engine: ChirpyHopEngine = remember { ChirpyHopEngine() },
 ) {
-    val world = remember { ChirpyWorld() }
-    val sprites = rememberChirpySprites()
+    val state = remember(engine) { ChirpyHopState(engine) }
+    val sprites = rememberChirpyHopSprites()
     val haptics = LocalHapticFeedback.current
     val currentOnScore by rememberUpdatedState(onScore)
 
-    // The engine is plain state; these mirror what the HUD and the canvas read so Compose knows when to redraw.
-    var frame by remember { mutableLongStateOf(0L) }
-    var phase by remember { mutableStateOf(engine.phase) }
-    var score by remember { mutableIntStateOf(engine.score) }
-
-    // False while the knockout plays: GAME OVER waits for it, and taps are ignored so a panicked one can't restart.
-    var knockoutDone by remember { mutableStateOf(true) }
-
-    val primaryAction: () -> Unit = action@{
-        if (engine.phase == ChirpyHopPhase.GameOver && !knockoutDone) return@action
-        engine.primaryAction()
-        phase = engine.phase
-        score = engine.score
-        frame++
-        if (engine.phase == ChirpyHopPhase.Running) haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
-    }
-
-    // Frames are only requested during a run or after a knockout, so a waiting game costs nothing.
-    LaunchedEffect(running, phase) {
+    // Frames are requested only while something moves: during a run, and after a knockout while Chirpy sways. A game
+    // waiting for its first tap draws once and costs nothing.
+    LaunchedEffect(state, running, state.animating) {
         if (!running) {
-            engine.setCrouching(false)
-            knockoutDone = true
+            state.freeze()
             return@LaunchedEffect
         }
-        // A knocked-out Chirpy keeps swaying with stars round his head until the next run, so frames keep coming.
-        if (phase == ChirpyHopPhase.GameOver) {
-            var lastNanos = 0L
-            while (isActive) {
-                withFrameNanos { now ->
-                    val delta = if (lastNanos == 0L) FIRST_FRAME_SECONDS else (now - lastNanos) / NANOS_PER_SECOND
-                    lastNanos = now
-                    world.advance(delta, engine)
-                    val elapsed = world.knockedOutFor ?: DEATH_ANIMATION_SECONDS
-                    if (elapsed >= DEATH_ANIMATION_SECONDS) knockoutDone = true
-                    frame++
-                }
-            }
-        }
-        if (phase != ChirpyHopPhase.Running) return@LaunchedEffect
+        if (!state.animating) return@LaunchedEffect
         var lastNanos = 0L
         while (isActive) {
             withFrameNanos { now ->
                 val delta = if (lastNanos == 0L) FIRST_FRAME_SECONDS else (now - lastNanos) / NANOS_PER_SECOND
                 lastNanos = now
-                world.observe(engine)
-                engine.advance(delta)
-                world.advance(delta, engine)
-                if (engine.score != score) {
-                    score = engine.score
-                    currentOnScore(score)
-                    haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                }
-                if (engine.phase != phase) {
-                    if (engine.phase == ChirpyHopPhase.GameOver) {
-                        knockoutDone = false
-                        haptics.performHapticFeedback(HapticFeedbackType.Reject)
+                when (state.step(delta)) {
+                    ChirpyHopEvent.Scored -> {
+                        currentOnScore(state.score)
+                        haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
                     }
-                    phase = engine.phase
+
+                    ChirpyHopEvent.KnockedOut -> haptics.performHapticFeedback(HapticFeedbackType.Reject)
+
+                    ChirpyHopEvent.None -> Unit
                 }
-                frame++
             }
         }
     }
 
-    val label = stringResource(Res.string.chirpy_hop)
-    val controls = stringResource(Res.string.chirpy_hop_controls)
-    Box(
-        modifier =
-        modifier
-            .semantics {
-                role = Role.Button
-                contentDescription = label
-                onClick(label = controls) {
-                    if (running) primaryAction()
-                    running
+    // Remembered so recomposition (a new score, say) keeps the cached scene; it is rebuilt only when the size changes.
+    val sceneModifier =
+        remember(state, sprites) {
+            Modifier.fillMaxSize().drawWithCache {
+                val scene = ChirpyHopScene(size, this)
+                onDrawBehind {
+                    // Reading the tick here invalidates only the draw phase on every frame, never composition.
+                    state.frameTick.longValue
+                    with(scene) { drawScene(state.engine, state.world, sprites) }
                 }
             }
-            .pointerInput(running) {
-                if (!running) return@pointerInput
-                val crouchThreshold = CROUCH_DRAG_DP.dp.toPx()
-                awaitEachGesture {
-                    val down = awaitFirstDown()
-                    var crouching = false
-                    var change = down
-                    while (change.pressed) {
-                        change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
-                        val shouldCrouch = change.position.y - down.position.y > crouchThreshold
-                        if (shouldCrouch != crouching) {
-                            crouching = shouldCrouch
-                            engine.setCrouching(shouldCrouch)
-                        }
-                    }
-                    if (crouching) engine.setCrouching(false) else primaryAction()
-                }
-            },
-    ) {
-        Canvas(Modifier.fillMaxSize()) {
-            // Reading the frame counter here invalidates only the draw phase, not composition, on every tick.
-            frame
-            drawChirpyWorld(engine, world, sprites)
         }
-        ChirpyHud(
-            phase = if (phase == ChirpyHopPhase.GameOver && !knockoutDone) ChirpyHopPhase.Running else phase,
-            score = score,
-            bestScore = maxOf(bestScore, score),
+
+    val controls =
+        Modifier.chirpyHopControls(
+            running = running,
+            label = stringResource(Res.string.chirpy_hop),
+            controls = stringResource(Res.string.chirpy_hop_controls),
+            onCrouch = state::setCrouching,
+            onTap = { if (state.tap()) haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap) },
         )
+    Box(modifier = modifier.then(controls)) {
+        Spacer(sceneModifier)
+        ChirpyHud(phase = state.hudPhase, score = state.score, bestScore = maxOf(bestScore, state.score))
     }
 }
+
+/**
+ * Tap to jump, drag down to crouch, and an accessibility action that taps. Input is ignored once the update has
+ * stopped, since the run is frozen then.
+ */
+private fun Modifier.chirpyHopControls(
+    running: Boolean,
+    label: String,
+    controls: String,
+    onCrouch: (Boolean) -> Unit,
+    onTap: () -> Unit,
+): Modifier = semantics {
+    role = Role.Button
+    contentDescription = label
+    onClick(label = controls) {
+        if (running) onTap()
+        running
+    }
+}
+    .pointerInput(running) {
+        if (!running) return@pointerInput
+        val crouchThreshold = CROUCH_DRAG_DP.dp.toPx()
+        awaitEachGesture {
+            val down = awaitFirstDown()
+            var crouching = false
+            var change = down
+            while (change.pressed) {
+                change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                val shouldCrouch = change.position.y - down.position.y > crouchThreshold
+                if (shouldCrouch != crouching) {
+                    crouching = shouldCrouch
+                    onCrouch(shouldCrouch)
+                }
+            }
+            if (crouching) onCrouch(false) else onTap()
+        }
+    }
 
 @Composable
 private fun ChirpyHud(phase: ChirpyHopPhase, score: Int, bestScore: Int) {
@@ -302,77 +276,5 @@ private fun ChirpyHud(phase: ChirpyHopPhase, score: Int, bestScore: Int) {
 
             ChirpyHopPhase.Running -> Unit
         }
-    }
-}
-
-/** An obstacle Chirpy has already cleared, still scrolling off the left edge. */
-internal data class DepartingObstacle(val kind: ChirpyObstacleKind, val x: Double)
-
-/** Scenery that scrolls with the run but has no effect on it. */
-internal class ChirpyWorld {
-    /** Distance the ground has scrolled, in play-field widths. */
-    var groundShift = 0.0
-        private set
-
-    var sceneSeconds = 0.0
-        private set
-
-    /**
-     * The engine respawns an obstacle off the right edge the moment Chirpy clears it, so the cleared one is kept here
-     * to finish scrolling off the left rather than vanishing mid-screen.
-     */
-    var departing: DepartingObstacle? = null
-        private set
-
-    /** Scene time when Chirpy was knocked out, and how high he was, or null while the run is alive. */
-    private var knockedOutAt: Double? = null
-
-    /** Chirpy's height above the ground when he was hit, in the engine's units. */
-    var knockedOutHeight = 0.0
-        private set
-
-    val knockedOutFor: Double?
-        get() = knockedOutAt?.let { sceneSeconds - it }
-
-    private var observedScore = 0
-    private var observedKind = ChirpyObstacleKind.Antenna
-    private var observedX = 0.0
-
-    /** Notes where the obstacle is before the engine steps, so a respawn can be told from movement. */
-    fun observe(engine: ChirpyHopEngine) {
-        if (engine.phase == ChirpyHopPhase.Ready || engine.score < observedScore) departing = null
-        observedScore = engine.score
-        observedKind = engine.obstacleKind
-        observedX = engine.obstacleX
-    }
-
-    fun advance(deltaSeconds: Double, engine: ChirpyHopEngine) {
-        val delta = min(deltaSeconds, MAX_SCENE_STEP)
-        sceneSeconds += delta
-        when (engine.phase) {
-            ChirpyHopPhase.Running -> knockedOutAt = null
-
-            ChirpyHopPhase.GameOver ->
-                if (knockedOutAt == null) {
-                    knockedOutAt = sceneSeconds
-                    knockedOutHeight = engine.playerY
-                }
-
-            ChirpyHopPhase.Ready -> Unit
-        }
-        if (engine.phase != ChirpyHopPhase.Running) return
-        val shift = ChirpyHopEngine.speed(engine.score) * delta
-        groundShift += shift
-        departing = departing?.let { it.copy(x = it.x - shift) }?.takeIf { it.x > OFF_LEFT_EDGE }
-        if (engine.score > observedScore) {
-            departing = DepartingObstacle(observedKind, observedX - ChirpyHopEngine.speed(observedScore) * delta)
-        }
-    }
-
-    private companion object {
-        const val MAX_SCENE_STEP = 1.0 / 30.0
-
-        /** Far enough left that the widest obstacle has fully left any field this game is drawn in. */
-        const val OFF_LEFT_EDGE = -0.4
     }
 }

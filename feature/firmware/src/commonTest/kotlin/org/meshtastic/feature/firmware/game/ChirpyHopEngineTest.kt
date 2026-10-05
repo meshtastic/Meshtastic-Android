@@ -19,6 +19,7 @@ package org.meshtastic.feature.firmware.game
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ChirpyHopEngineTest {
@@ -209,5 +210,36 @@ class ChirpyHopEngineTest {
 
         assertEquals(ChirpyHopPhase.Running, engine.phase, "died at score ${engine.score}")
         assertEquals(60, engine.score)
+    }
+
+    @Test
+    fun `a cleared obstacle keeps scrolling until it is off the left edge`() {
+        val engine = ChirpyHopEngine()
+        engine.primaryAction()
+        while (engine.score == 0) engine.run(seconds = 1.0 / 60.0)
+
+        assertEquals(ChirpyObstacleKind.Antenna, engine.departingKind)
+        val clearedAt = engine.departingX
+        assertTrue(clearedAt > 0, "vanished on screen at $clearedAt")
+
+        engine.run(seconds = 0.3)
+        assertTrue(engine.departingX < clearedAt)
+
+        while (engine.departingKind != null) {
+            ChirpyHopAutopilot.steer(engine)
+            engine.advance(1.0 / 60.0)
+        }
+        assertEquals(1, engine.score)
+    }
+
+    @Test
+    fun `a reset forgets the departing obstacle`() {
+        val engine = ChirpyHopEngine()
+        engine.primaryAction()
+        while (engine.score == 0) engine.run(seconds = 1.0 / 60.0)
+
+        engine.reset()
+
+        assertNull(engine.departingKind)
     }
 }

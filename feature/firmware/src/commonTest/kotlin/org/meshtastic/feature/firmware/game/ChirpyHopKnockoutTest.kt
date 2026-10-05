@@ -21,11 +21,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class ChirpyHopDeathTest {
+class ChirpyHopKnockoutTest {
 
     @Test
     fun `the knockout starts where Chirpy was hit`() {
-        val pose = deathPose(elapsed = 0.0, startHeightDp = 40.0)
+        val pose = knockoutPose(elapsed = 0.0, startHeightDp = 40.0)
 
         assertEquals(40f, pose.heightDp, absoluteTolerance = 0.001f)
         assertEquals(0f, pose.knockbackDp, absoluteTolerance = 0.001f)
@@ -35,7 +35,7 @@ class ChirpyHopDeathTest {
     @Test
     fun `Chirpy lands on his feet close to where he was hit`() {
         for (startHeight in listOf(0.0, 60.0, 400.0)) {
-            val pose = deathPose(elapsed = DEATH_ANIMATION_SECONDS, startHeightDp = startHeight)
+            val pose = knockoutPose(elapsed = KNOCKOUT_SECONDS, startHeightDp = startHeight)
 
             assertEquals(0f, pose.heightDp, absoluteTolerance = 0.001f, message = "from $startHeight dp")
             assertTrue(pose.knockbackDp in -30f..-1f)
@@ -45,7 +45,7 @@ class ChirpyHopDeathTest {
 
     @Test
     fun `a dazed Chirpy keeps swaying on wobbly knees long after GAME OVER`() {
-        val poses = (0 until 40).map { deathPose(elapsed = 5.0 + it * 0.05, startHeightDp = 0.0) }
+        val poses = (0 until 40).map { knockoutPose(elapsed = 5.0 + it * 0.05, startHeightDp = 0.0) }
 
         assertTrue(poses.all { it.heightDp == 0f })
         assertTrue(poses.maxOf { it.rotationDegrees } > 3f && poses.minOf { it.rotationDegrees } < -3f)
@@ -55,22 +55,22 @@ class ChirpyHopDeathTest {
 
     @Test
     fun `stars circle his head once he has landed`() {
-        assertNull(deathPose(elapsed = 0.1, startHeightDp = 0.0).dizzyRadians)
-        val first = deathPose(elapsed = 0.6, startHeightDp = 0.0).dizzyRadians
-        val later = deathPose(elapsed = 0.8, startHeightDp = 0.0).dizzyRadians
+        assertNull(knockoutPose(elapsed = 0.1, startHeightDp = 0.0).dizzyRadians)
+        val first = knockoutPose(elapsed = 0.6, startHeightDp = 0.0).dizzyRadians
+        val later = knockoutPose(elapsed = 0.8, startHeightDp = 0.0).dizzyRadians
 
         assertTrue(first != null && later != null && later > first)
     }
 
     @Test
     fun `a hit on the ground still throws Chirpy into the air`() {
-        assertTrue(deathPose(elapsed = 0.2, startHeightDp = 0.0).heightDp > 10f)
+        assertTrue(knockoutPose(elapsed = 0.2, startHeightDp = 0.0).heightDp > 10f)
     }
 
     @Test
     fun `the flash and shake and sparks are over before GAME OVER shows`() {
-        val early = (0 until 10).map { deathPose(elapsed = it * 0.03, startHeightDp = 0.0) }
-        val end = deathPose(elapsed = DEATH_ANIMATION_SECONDS, startHeightDp = 0.0)
+        val early = (0 until 10).map { knockoutPose(elapsed = it * 0.03, startHeightDp = 0.0) }
+        val end = knockoutPose(elapsed = KNOCKOUT_SECONDS, startHeightDp = 0.0)
 
         assertTrue(early.any { it.alpha < 1f })
         assertTrue(early.any { it.shakeDp != 0f })

@@ -65,6 +65,16 @@ class ChirpyHopEngine(
     var obstacleKind: ChirpyObstacleKind = obstacleKind
         private set
 
+    /**
+     * The obstacle Chirpy cleared last, still scrolling off the left edge, or null once it has gone. It has no effect
+     * on the run; it is kept so a cleared obstacle leaves the screen instead of vanishing when the next one spawns.
+     */
+    var departingKind: ChirpyObstacleKind? = null
+        private set
+
+    var departingX: Double = 0.0
+        private set
+
     val isAirborne: Boolean
         get() = playerY > JUMP_TOLERANCE
 
@@ -104,6 +114,7 @@ class ChirpyHopEngine(
         score = 0
         obstacleX = INITIAL_OBSTACLE_X
         obstacleKind = ChirpyObstacleKind.Antenna
+        departingKind = null
     }
 
     private fun advanceStep(delta: Double) {
@@ -115,7 +126,12 @@ class ChirpyHopEngine(
             verticalVelocity = 0.0
         }
 
-        obstacleX -= speed(score) * delta
+        val shift = speed(score) * delta
+        obstacleX -= shift
+        if (departingKind != null) {
+            departingX -= shift
+            if (departingX < OFF_LEFT_EDGE) departingKind = null
+        }
         if (collidesWithObstacle()) {
             phase = ChirpyHopPhase.GameOver
             return
@@ -124,6 +140,8 @@ class ChirpyHopEngine(
         val obstacleRight = obstacleX + OBSTACLE_WIDTH / 2
         val playerLeft = PLAYER_X - PLAYER_WIDTH / 2
         if (obstacleRight < playerLeft) {
+            departingKind = obstacleKind
+            departingX = obstacleX
             score += 1
             obstacleX = respawnX(score)
             obstacleKind = obstacleKind(score)
@@ -183,6 +201,9 @@ class ChirpyHopEngine(
         /** Above the top of a jump, so a UFO can only be ducked, matching how it is drawn level with Chirpy's head. */
         private const val UFO_TOP = 0.5
         private const val RESPAWN_X = 1.04
+
+        /** Far enough left that the widest obstacle has left any field this game is drawn in. */
+        private const val OFF_LEFT_EDGE = -0.4
         private const val CADENCE_STEPS = 4
         private const val CADENCE_SPACING = 0.055
         private const val BASE_SPEED = 0.5
