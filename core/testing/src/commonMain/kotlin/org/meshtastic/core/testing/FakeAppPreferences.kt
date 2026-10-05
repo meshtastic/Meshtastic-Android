@@ -238,6 +238,12 @@ class FakeUiPrefs : UiPrefs {
     override fun setShouldShowTelemetry(value: Boolean) {
         shouldShowTelemetry.value = value
     }
+
+    override val chirpyHopBestScore = MutableStateFlow(0)
+
+    override fun recordChirpyHopScore(score: Int) {
+        chirpyHopBestScore.update { maxOf(it, score) }
+    }
 }
 
 @Suppress("TooManyFunctions")

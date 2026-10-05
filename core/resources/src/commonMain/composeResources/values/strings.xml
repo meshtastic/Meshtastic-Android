@@ -222,6 +222,16 @@
     <string name="chirpy_error_unsupported_flavor">I'm operating on a limited frequency on this app flavor! 🔌 Try using a version with full AI Core integration.</string>
     <string name="chirpy_error_unsupported_platform">Oh no! My antenna can't seem to establish a connection on this platform. 📡 Please double-check your hardware compatibility!</string>
     <string name="chirpy_fallback_unavailable">AI assistant is not available on this platform. Here are pages that may help:</string>
+    <string name="chirpy_hop">Chirpy Hop</string>
+    <string name="chirpy_hop_back_to_update">Back to update</string>
+    <string name="chirpy_hop_best">HI %1$s</string>
+    <string name="chirpy_hop_controls">Tap to jump, swipe down to crouch</string>
+    <string name="chirpy_hop_game_over">GAME OVER</string>
+    <string name="chirpy_hop_play">Play Chirpy Hop</string>
+    <string name="chirpy_hop_play_again">Play again</string>
+    <string name="chirpy_hop_tap_to_start">TAP TO START</string>
+    <string name="chirpy_hop_update_complete">Update complete</string>
+    <string name="chirpy_hop_update_interrupted">Update interrupted</string>
     <string name="chirpy_intro">Hey there! 📡 I'm Chirpy, your on-device Meshtastic assistant! I can help with setup, configuration, troubleshooting, and mesh networking tips. What can I help you with?</string>
     <string name="chirpy_ready">Ask Chirpy</string>
     <string name="chirpy_search_placeholder">Ask about Meshtastic…</string>

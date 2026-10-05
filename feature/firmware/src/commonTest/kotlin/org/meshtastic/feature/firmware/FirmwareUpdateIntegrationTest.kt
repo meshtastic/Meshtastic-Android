@@ -49,6 +49,7 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.core.testing.TestDataFactory
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -134,6 +135,7 @@ class FirmwareUpdateIntegrationTest {
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
         FakeBluetoothRepository(),
         FirmwareUpdateStatusRepository(),
+        FakeUiPrefs(),
     )
 
     @Test

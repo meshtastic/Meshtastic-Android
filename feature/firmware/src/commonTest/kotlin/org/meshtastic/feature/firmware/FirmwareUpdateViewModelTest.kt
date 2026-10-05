@@ -64,6 +64,7 @@ import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.core.testing.TestDataFactory
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -167,6 +168,7 @@ class FirmwareUpdateViewModelTest {
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
         bluetoothRepository,
         firmwareUpdateStatusRepository,
+        FakeUiPrefs(),
     )
 
     private val firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()

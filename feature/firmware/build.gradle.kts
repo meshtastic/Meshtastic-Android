@@ -60,6 +60,7 @@ kotlin {
         jvmTest.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.ktor.client.mock)
+            implementation(libs.compose.multiplatform.ui.test)
         }
     }
 }
