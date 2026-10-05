@@ -16,13 +16,16 @@
  */
 package org.meshtastic.feature.firmware.game
 
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import kotlin.math.ceil
@@ -34,11 +37,25 @@ private const val MOUNTAIN_PARALLAX = 0.06f
 private const val MOUNTAIN_TILE_WIDTHS = 1.7f
 private const val HILL_PARALLAX = 0.25f
 private const val HILL_TILE_WIDTHS = 1.25f
-private const val HILL_VALLEY_FRACTION = 0.025f
+private const val HILL_VALLEY_FRACTION = 0.018f
 private const val CLOUD_WRAP_DP = 60f
 private const val NODE_MAST_DP = 16f
 private const val NODE_BLINK_RATE = 2.5
 private const val PACKET_RATE = 0.45
+
+// The paraglider flies its own course across a stretch of sky wider than the screen, so it is only sometimes in view.
+private const val GLIDER_PARALLAX = 0.08f
+private const val GLIDER_DRIFT_WIDTHS_PER_SECOND = 0.025
+private const val GLIDER_SKY_WIDTHS = 2.6f
+private const val GLIDER_HEIGHT_FRACTION = 0.64f
+private const val GLIDER_WRAP_DP = 80f
+private const val GLIDER_BOB_DP = 6f
+private const val GLIDER_BOB_RATE = 0.8
+private const val GLIDER_SWAY_RATE = 0.6
+private const val GLIDER_SWAY_DEGREES = 4f
+
+/** Banked slightly into its turn, nose down toward the direction of flight. */
+private const val GLIDER_BANK_DEGREES = -6f
 
 private val MountainFill = Color(0xFFEEEEEE)
 private val MountainLine = Color(0x40A0A0A0)
@@ -46,6 +63,7 @@ private val HillFill = Color(0xFFE8E8E8)
 private val HillLine = Color(0x66A0A0A0)
 private val NodeColor = Color(0x99909090)
 private val CloudColor = Color(0xA6A8A8A8)
+private val GliderColor = Color(0xB3808080)
 
 private class Cloud(val xFraction: Float, val heightFraction: Float, val scale: Float, val parallax: Float)
 
@@ -75,11 +93,12 @@ private val mountainPeaks =
     )
 
 /** Hill crests as (fraction of the tile's width, crest height as a fraction of the field's height). */
-private val hillCrests = listOf(0.1f to 0.09f, 0.32f to 0.13f, 0.55f to 0.08f, 0.78f to 0.12f)
+private val hillCrests = listOf(0.1f to 0.055f, 0.32f to 0.075f, 0.55f to 0.05f, 0.78f to 0.07f)
 
 internal fun DrawScope.drawChirpyBackdrop(groundY: Float, shiftPx: Float, sceneSeconds: Double) {
     drawClouds(shiftPx)
     drawMountains(groundY, shiftPx * MOUNTAIN_PARALLAX)
+    drawParaglider(shiftPx, sceneSeconds)
     drawHills(groundY, shiftPx * HILL_PARALLAX, sceneSeconds)
 }
 
@@ -110,6 +129,46 @@ private fun DrawScope.drawCloudOutline() {
             close()
         }
     drawPath(path, CloudColor, style = Stroke(width = 3f, cap = StrokeCap.Round))
+}
+
+private fun DrawScope.drawParaglider(shiftPx: Float, sceneSeconds: Double) {
+    val margin = GLIDER_WRAP_DP * density
+    val drift = (sceneSeconds * GLIDER_DRIFT_WIDTHS_PER_SECOND).toFloat() * size.width
+    val x = wrap(size.width - shiftPx * GLIDER_PARALLAX - drift, -margin, size.width * GLIDER_SKY_WIDTHS + 2 * margin)
+    if (x > size.width + margin) return
+    val bob = sin(sceneSeconds * GLIDER_BOB_RATE).toFloat() * GLIDER_BOB_DP * density
+    val y = size.height * (1 - GLIDER_HEIGHT_FRACTION) + bob
+    val sway = GLIDER_BANK_DEGREES + sin(sceneSeconds * GLIDER_SWAY_RATE).toFloat() * GLIDER_SWAY_DEGREES
+    translate(x, y) {
+        rotate(sway, pivot = Offset.Zero) { scale(density, pivot = Offset.Zero) { drawParagliderShape() } }
+    }
+}
+
+/**
+ * A paraglider in dp around its canopy's centre, flying left: a long, thin, cambered wing with its cell ribs, the lines
+ * fanning down to a pilot sitting in the harness with legs out in front.
+ */
+@Suppress("MagicNumber")
+private fun DrawScope.drawParagliderShape() {
+    val wing =
+        Path().apply {
+            moveTo(-40f, 6f)
+            cubicTo(-30f, -12f, 30f, -12f, 40f, 6f)
+            cubicTo(30f, -4f, -30f, -4f, -40f, 6f)
+            close()
+        }
+    drawPath(wing, GliderColor)
+    val rib = Stroke(width = 1f)
+    for (x in listOf(-26f, -13f, 0f, 13f, 26f)) {
+        drawLine(ChirpyPaper, Offset(x, -7.5f), Offset(x, -3.5f), strokeWidth = rib.width)
+    }
+    val harness = Offset(2f, 38f)
+    listOf(-38f to 5f, -24f to -2f, -9f to -4f, 9f to -4f, 24f to -2f, 38f to 5f).forEach { (x, y) ->
+        drawLine(GliderColor, Offset(x, y), harness, strokeWidth = 0.6f)
+    }
+    drawCircle(GliderColor, radius = 3f, center = Offset(0f, 36f))
+    drawRoundRect(GliderColor, topLeft = Offset(-1f, 38.5f), size = Size(7f, 6f), cornerRadius = CornerRadius(2.5f))
+    drawLine(GliderColor, Offset(1f, 43f), Offset(-7f, 45f), strokeWidth = 2f, cap = StrokeCap.Round)
 }
 
 private fun DrawScope.drawMountains(groundY: Float, shift: Float) {
