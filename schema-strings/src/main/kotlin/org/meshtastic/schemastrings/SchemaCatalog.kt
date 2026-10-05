@@ -26,17 +26,19 @@ import java.util.TreeMap
 import java.util.zip.ZipFile
 
 /**
- * Every label and description the field-metadata registry carries, keyed by a name derived from the schema path, so the
- * code that shows a field names the resource and nothing else has to.
+ * Every label, description and search keyword list the field-metadata registry carries, keyed by a name derived from
+ * the schema path, so the code that shows a field names the resource and nothing else has to.
  *
  * `Config.LoRaConfig.hop_limit` becomes `schema_lora_hop_limit`; its description `schema_lora_hop_limit_description`;
- * the enum value `Config.PositionConfig.PositionFlags.DOP` becomes `schema_position_positionflags_dop`.
+ * its `|`-separated search terms `schema_lora_hop_limit_keywords`; the enum value
+ * `Config.PositionConfig.PositionFlags.DOP` becomes `schema_position_positionflags_dop`.
  */
 object SchemaCatalog {
     private const val PROTO_PACKAGE = "meshtastic."
     private const val GENERATED_PACKAGE = "org.meshtastic.proto."
     private const val PREFIX = "schema_"
     private const val DESCRIPTION_SUFFIX = "_description"
+    private const val KEYWORDS_SUFFIX = "_keywords"
     private val topLevelContainers = setOf("Config", "ModuleConfig")
 
     /** `resource -> English`, sorted by resource, for every annotated field and enum value on the classpath. */
@@ -67,6 +69,7 @@ object SchemaCatalog {
                     val origin = "$path.${property.name}"
                     put(key, meta?.label, "$origin.label")
                     put(key + DESCRIPTION_SUFFIX, meta?.description, "$origin.description")
+                    put(key + KEYWORDS_SUFFIX, meta?.keywords, "$origin.keywords")
                 }
             }
         }

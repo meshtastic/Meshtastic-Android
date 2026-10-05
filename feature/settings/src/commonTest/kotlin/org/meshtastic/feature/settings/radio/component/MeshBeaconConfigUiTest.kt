@@ -42,6 +42,7 @@ import org.meshtastic.core.resources.mesh_beacon_target
 import org.meshtastic.core.resources.mesh_beacon_target_default
 import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.save_changes
+import org.meshtastic.core.resources.schema_lora_modempreset_long_fast
 import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -540,8 +541,8 @@ class MeshBeaconConfigUiTest {
             }
         }
 
-        // Opens the preset picker (currently showing the concrete preset "LONG_FAST") and picks "Default".
-        onNodeWithText(ModemPreset.LONG_FAST.name).performClick()
+        // Opens the preset picker (currently showing the concrete preset "Long Range - Fast") and picks "Default".
+        onNodeWithText(getString(Res.string.schema_lora_modempreset_long_fast)).performClick()
         onNodeWithText(getString(Res.string.mesh_beacon_target_default)).performClick()
 
         runOnIdle {

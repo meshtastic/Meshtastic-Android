@@ -26,6 +26,8 @@ data class ResolvedSettingsEntry(
     val description: String?,
     val screenTitle: String,
     val route: Route,
+    /** Extra terms the entry answers to, such as "ttl" for the hop limit. See [SettingsSearchEntry.keywords]. */
+    val keywords: List<String> = emptyList(),
     /** True for settings that belong to this phone rather than to a radio. See [SettingsSearchEntry.isAppLocal]. */
     val isAppLocal: Boolean = false,
 )
@@ -42,6 +44,7 @@ object SettingsSearchMatcher {
     private const val EXACT_TITLE = 100
     private const val TITLE_PREFIX = 75
     private const val TITLE_CONTAINS = 50
+    private const val KEYWORD_CONTAINS = 40
     private const val DESCRIPTION_CONTAINS = 25
     private const val SCREEN_CONTAINS = 10
 
@@ -66,6 +69,7 @@ object SettingsSearchMatcher {
                 else -> 0
             }
         // A hit in the explanation and a hit in the name add, so an entry matching both outranks one matching either.
+        if (entry.keywords.any { it.lowercase().contains(needle) }) score += KEYWORD_CONTAINS
         if (entry.description?.lowercase()?.contains(needle) == true) score += DESCRIPTION_CONTAINS
         if (entry.screenTitle.lowercase().contains(needle)) score += SCREEN_CONTAINS
         return score

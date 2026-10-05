@@ -36,6 +36,7 @@ import org.meshtastic.core.model.constraintFor
 import org.meshtastic.core.model.normalizeCodingRateOverride
 import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.presetForRegionChange
+import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.bandwidth_default
@@ -107,18 +108,20 @@ internal fun buildPresetItems(
     presetsGated: Boolean,
     selectedPreset: ModemPreset,
     capabilities: Capabilities,
+    labels: Map<ModemPreset, String>,
 ): List<DropDownItem<ModemPreset>> {
+    fun labelOf(preset: ModemPreset) = labels[preset] ?: preset.name
     val items =
         ChannelOption.entries
             .filter { option -> capabilities.supportsPreset(option) }
             .filter { option -> presetConstraint == null || option.modemPreset in presetConstraint.presets }
             .map { option ->
-                DropDownItem(value = option.modemPreset, label = option.modemPreset.name, enabled = !presetsGated)
+                DropDownItem(value = option.modemPreset, label = labelOf(option.modemPreset), enabled = !presetsGated)
             }
     return if (items.any { it.value == selectedPreset }) {
         items
     } else {
-        items + DropDownItem(value = selectedPreset, label = selectedPreset.name, enabled = false)
+        items + DropDownItem(value = selectedPreset, label = labelOf(selectedPreset), enabled = false)
     }
 }
 
@@ -126,10 +129,22 @@ internal fun buildPresetItems(
  * Builds the region dropdown items: hide regions the target firmware's region table doesn't have yet
  * ([Capabilities.supportsRegion]), but never hide the device's current selection.
  */
-private fun buildRegionItems(capabilities: Capabilities, selectedRegion: RegionCode): List<Pair<RegionCode, String>> =
-    RegionInfo.entries
-        .filter { capabilities.supportsRegion(it) || it.regionCode == selectedRegion }
-        .map { it.regionCode to it.description }
+private fun buildRegionItems(
+    capabilities: Capabilities,
+    selectedRegion: RegionCode,
+    labels: Map<RegionCode, String>,
+): List<Pair<RegionCode, String>> = RegionInfo.entries
+    .filter { capabilities.supportsRegion(it) || it.regionCode == selectedRegion }
+    .map { it.regionCode to (labels[it.regionCode] ?: it.description) }
+
+/** Each preset's schema label in the user's language. A preset the schema does not label is absent. */
+@Composable
+internal fun presetLabels(): Map<ModemPreset, String> =
+    ModemPreset.entries.mapNotNull { preset -> preset.schemaLabelRes()?.let { preset to stringResource(it) } }.toMap()
+
+@Composable
+private fun regionLabels(): Map<RegionCode, String> =
+    RegionCode.entries.mapNotNull { region -> region.schemaLabelRes()?.let { region to stringResource(it) } }.toMap()
 
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -198,8 +213,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     summary = stringResource(Res.string.config_lora_region_summary),
                     enabled = state.connected,
                     items =
-                    remember(capabilities, formState.value.region) {
-                        buildRegionItems(capabilities, formState.value.region)
+                    regionLabels().let { labels ->
+                        remember(capabilities, formState.value.region, labels) {
+                            buildRegionItems(capabilities, formState.value.region, labels)
+                        }
                     },
                     selectedItem = formState.value.region,
                     onItemSelected = { region ->
@@ -239,9 +256,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     // unconstrained, so show every preset. Licensed-only regions disable their presets unless the
                     // device is flagged as a licensed operator (R8).
                     val selectedPreset = formState.value.modem_preset
+                    val labels = presetLabels()
                     val presetItems =
-                        remember(presetConstraint, presetsGated, selectedPreset, capabilities) {
-                            buildPresetItems(presetConstraint, presetsGated, selectedPreset, capabilities)
+                        remember(presetConstraint, presetsGated, selectedPreset, capabilities, labels) {
+                            buildPresetItems(presetConstraint, presetsGated, selectedPreset, capabilities, labels)
                         }
                     DropDownPreference(
                         title = stringResource(Res.string.schema_lora_modem_preset),

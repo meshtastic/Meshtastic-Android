@@ -47,6 +47,11 @@ class SchemaStringsTest {
     }
 
     @Test
+    fun `a field's search keywords are emitted beside its label`() {
+        assertEquals(Config.LoRaConfig.hop_limit.keywords, catalog["schema_lora_hop_limit_keywords"])
+    }
+
+    @Test
     fun `an enum value with a label is emitted and one without is not`() {
         assertEquals("DOP", catalog["schema_position_positionflags_dop"])
         assertFalse("schema_position_positionflags_unset" in catalog, "UNSET carries no label")
