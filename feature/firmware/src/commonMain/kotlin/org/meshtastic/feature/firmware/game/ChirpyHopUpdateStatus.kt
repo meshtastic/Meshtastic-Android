@@ -57,12 +57,21 @@ fun FirmwareUpdateState.toChirpyHopStatus(): ChirpyHopUpdateStatus? = when (this
             null,
         )
 
+    // A transfer handler reports Success when the flash is done, before verification; only a verified one is final.
     is FirmwareUpdateState.Success ->
-        ChirpyHopUpdateStatus(
-            ChirpyHopUpdatePhase.Complete,
-            UiText.Resource(Res.string.firmware_update_success),
-            1f,
-        )
+        if (verified) {
+            ChirpyHopUpdateStatus(
+                ChirpyHopUpdatePhase.Complete,
+                UiText.Resource(Res.string.firmware_update_success),
+                1f,
+            )
+        } else {
+            ChirpyHopUpdateStatus(
+                ChirpyHopUpdatePhase.Active,
+                UiText.Resource(Res.string.firmware_update_verifying),
+                null,
+            )
+        }
 
     is FirmwareUpdateState.Error -> ChirpyHopUpdateStatus(ChirpyHopUpdatePhase.Failed, error, null)
 

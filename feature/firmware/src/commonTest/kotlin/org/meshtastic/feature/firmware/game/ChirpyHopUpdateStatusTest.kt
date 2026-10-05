@@ -62,7 +62,10 @@ class ChirpyHopUpdateStatusTest {
     fun `success completes and errors fail`() {
         val error = UiText.DynamicString("Connection lost")
 
-        assertEquals(ChirpyHopUpdatePhase.Complete, FirmwareUpdateState.Success().toChirpyHopStatus()?.phase)
+        assertEquals(
+            ChirpyHopUpdatePhase.Complete,
+            FirmwareUpdateState.Success(verified = true).toChirpyHopStatus()?.phase,
+        )
         assertEquals(
             ChirpyHopUpdateStatus(ChirpyHopUpdatePhase.Failed, error, null),
             FirmwareUpdateState.Error(error).toChirpyHopStatus(),
@@ -78,5 +81,13 @@ class ChirpyHopUpdateStatusTest {
         assertNull(FirmwareUpdateState.Idle.toChirpyHopStatus())
         assertNull(FirmwareUpdateState.Checking.toChirpyHopStatus())
         assertNull(FirmwareUpdateState.AwaitingFileSave(uf2Artifact = null, fileName = null).toChirpyHopStatus())
+    }
+
+    @Test
+    fun `a flash reported done before verification keeps the game going`() {
+        val status = FirmwareUpdateState.Success(verified = false).toChirpyHopStatus()
+
+        assertEquals(ChirpyHopUpdatePhase.Active, status?.phase)
+        assertNull(status?.progress)
     }
 }

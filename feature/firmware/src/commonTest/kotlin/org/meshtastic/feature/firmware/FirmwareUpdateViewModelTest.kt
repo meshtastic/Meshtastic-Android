@@ -325,6 +325,7 @@ class FirmwareUpdateViewModelTest {
         val state = viewModel.state.value
         assertIs<FirmwareUpdateState.Success>(state)
         assertTrue(state.deviceWasWiped, "Success must report the wipe it performed")
+        assertTrue(state.verified, "The Success published after reconnecting is the final, verified one")
         assertEquals(listOf(123), radioController.factoryResetCalls)
     }
 

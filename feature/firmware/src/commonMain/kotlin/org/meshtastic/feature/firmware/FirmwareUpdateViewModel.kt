@@ -1295,7 +1295,7 @@ class FirmwareUpdateViewModel(
             pendingRecovery = null
             firmwareRecoveryDataSource.clear()
             val wiped = factoryResetAfterVerify && sendPostUpdateFactoryReset()
-            _state.value = FirmwareUpdateState.Success(wasLowSpeedTransfer, deviceWasWiped = wiped)
+            _state.value = FirmwareUpdateState.Success(wasLowSpeedTransfer, deviceWasWiped = wiped, verified = true)
         }
     }
 
