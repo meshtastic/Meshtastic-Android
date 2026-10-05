@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -43,7 +44,7 @@ private const val NODE_MAST_DP = 16f
 private const val NODE_BLINK_RATE = 2.5
 private const val PACKET_RATE = 0.45
 
-// The paraglider flies its own course across a stretch of sky wider than the screen, so it is only sometimes in view.
+// The hang glider flies its own course across a stretch of sky wider than the screen, so it is only sometimes in view.
 private const val GLIDER_PARALLAX = 0.08f
 private const val GLIDER_DRIFT_WIDTHS_PER_SECOND = 0.025
 private const val GLIDER_SKY_WIDTHS = 2.6f
@@ -54,8 +55,8 @@ private const val GLIDER_BOB_RATE = 0.8
 private const val GLIDER_SWAY_RATE = 0.6
 private const val GLIDER_SWAY_DEGREES = 4f
 
-/** Banked slightly into its turn, nose down toward the direction of flight. */
-private const val GLIDER_BANK_DEGREES = -6f
+/** Nose a touch down, gliding toward the direction of flight. */
+private const val GLIDER_BANK_DEGREES = -4f
 
 private val MountainFill = Color(0xFFEEEEEE)
 private val MountainLine = Color(0x40A0A0A0)
@@ -98,7 +99,7 @@ private val hillCrests = listOf(0.1f to 0.055f, 0.32f to 0.075f, 0.55f to 0.05f,
 internal fun DrawScope.drawChirpyBackdrop(groundY: Float, shiftPx: Float, sceneSeconds: Double) {
     drawClouds(shiftPx)
     drawMountains(groundY, shiftPx * MOUNTAIN_PARALLAX)
-    drawParaglider(shiftPx, sceneSeconds)
+    drawHangGlider(shiftPx, sceneSeconds)
     drawHills(groundY, shiftPx * HILL_PARALLAX, sceneSeconds)
 }
 
@@ -131,7 +132,7 @@ private fun DrawScope.drawCloudOutline() {
     drawPath(path, CloudColor, style = Stroke(width = 3f, cap = StrokeCap.Round))
 }
 
-private fun DrawScope.drawParaglider(shiftPx: Float, sceneSeconds: Double) {
+private fun DrawScope.drawHangGlider(shiftPx: Float, sceneSeconds: Double) {
     val margin = GLIDER_WRAP_DP * density
     val drift = (sceneSeconds * GLIDER_DRIFT_WIDTHS_PER_SECOND).toFloat() * size.width
     val x = wrap(size.width - shiftPx * GLIDER_PARALLAX - drift, -margin, size.width * GLIDER_SKY_WIDTHS + 2 * margin)
@@ -140,35 +141,48 @@ private fun DrawScope.drawParaglider(shiftPx: Float, sceneSeconds: Double) {
     val y = size.height * (1 - GLIDER_HEIGHT_FRACTION) + bob
     val sway = GLIDER_BANK_DEGREES + sin(sceneSeconds * GLIDER_SWAY_RATE).toFloat() * GLIDER_SWAY_DEGREES
     translate(x, y) {
-        rotate(sway, pivot = Offset.Zero) { scale(density, pivot = Offset.Zero) { drawParagliderShape() } }
+        rotate(sway, pivot = Offset.Zero) { scale(density, pivot = Offset.Zero) { drawHangGliderShape() } }
     }
 }
 
 /**
- * A paraglider in dp around its canopy's centre, flying left: a long, thin, cambered wing with its cell ribs, the lines
- * fanning down to a pilot sitting in the harness with legs out in front.
+ * A hang glider seen three-quarters on in dp around its keel, flying left: a delta sail with a notched trailing edge,
+ * the keel and kingpost, and the pilot lying prone in the triangular control frame below.
  */
 @Suppress("MagicNumber")
-private fun DrawScope.drawParagliderShape() {
-    val wing =
+private fun DrawScope.drawHangGliderShape() {
+    val nose = Offset(-36f, 0f)
+    val farTip = Offset(24f, -12f)
+    val nearTip = Offset(30f, 10f)
+    val tail = Offset(20f, 0f)
+    val sail =
         Path().apply {
-            moveTo(-40f, 6f)
-            cubicTo(-30f, -12f, 30f, -12f, 40f, 6f)
-            cubicTo(30f, -4f, -30f, -4f, -40f, 6f)
+            moveTo(nose.x, nose.y)
+            lineTo(farTip.x, farTip.y)
+            lineTo(tail.x, tail.y)
+            lineTo(nearTip.x, nearTip.y)
             close()
         }
-    drawPath(wing, GliderColor)
-    val rib = Stroke(width = 1f)
-    for (x in listOf(-26f, -13f, 0f, 13f, 26f)) {
-        drawLine(ChirpyPaper, Offset(x, -7.5f), Offset(x, -3.5f), strokeWidth = rib.width)
-    }
-    val harness = Offset(2f, 38f)
-    listOf(-38f to 5f, -24f to -2f, -9f to -4f, 9f to -4f, 24f to -2f, 38f to 5f).forEach { (x, y) ->
-        drawLine(GliderColor, Offset(x, y), harness, strokeWidth = 0.6f)
-    }
-    drawCircle(GliderColor, radius = 3f, center = Offset(0f, 36f))
-    drawRoundRect(GliderColor, topLeft = Offset(-1f, 38.5f), size = Size(7f, 6f), cornerRadius = CornerRadius(2.5f))
-    drawLine(GliderColor, Offset(1f, 43f), Offset(-7f, 45f), strokeWidth = 2f, cap = StrokeCap.Round)
+    drawPath(sail, GliderColor.copy(alpha = GliderColor.alpha * 0.55f))
+    drawPath(sail, GliderColor, style = Stroke(width = 1.2f, join = StrokeJoin.Round))
+    drawLine(GliderColor, nose, tail, strokeWidth = 1.2f)
+
+    val kingpostTop = Offset(-4f, -11f)
+    drawLine(GliderColor, Offset(-4f, 0f), kingpostTop, strokeWidth = 1.2f)
+    drawLine(GliderColor, kingpostTop, nose, strokeWidth = 0.5f)
+    drawLine(GliderColor, kingpostTop, tail, strokeWidth = 0.5f)
+
+    val keel = Offset(-4f, 0f)
+    val frontOfBar = Offset(-14f, 24f)
+    val backOfBar = Offset(4f, 24f)
+    drawLine(GliderColor, keel, frontOfBar, strokeWidth = 1.2f)
+    drawLine(GliderColor, keel, backOfBar, strokeWidth = 1.2f)
+    drawLine(GliderColor, frontOfBar, backOfBar, strokeWidth = 1.5f)
+
+    drawLine(GliderColor, Offset(0f, 0f), Offset(2f, 14f), strokeWidth = 0.8f)
+    drawRoundRect(GliderColor, topLeft = Offset(-8f, 13f), size = Size(26f, 5.5f), cornerRadius = CornerRadius(2.75f))
+    drawCircle(GliderColor, radius = 3.5f, center = Offset(-11f, 14.5f))
+    drawLine(GliderColor, Offset(-6f, 16f), Offset(-12f, 24f), strokeWidth = 1.4f, cap = StrokeCap.Round)
 }
 
 private fun DrawScope.drawMountains(groundY: Float, shift: Float) {
