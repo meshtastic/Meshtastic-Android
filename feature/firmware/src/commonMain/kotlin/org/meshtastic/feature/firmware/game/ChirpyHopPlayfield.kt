@@ -158,6 +158,7 @@ internal fun ChirpyHopPlayfield(
             withFrameNanos { now ->
                 val delta = if (lastNanos == 0L) FIRST_FRAME_SECONDS else (now - lastNanos) / NANOS_PER_SECOND
                 lastNanos = now
+                world.observe(engine)
                 engine.advance(delta)
                 world.advance(delta, engine)
                 if (engine.score != score) {
@@ -271,6 +272,9 @@ private fun ChirpyHud(phase: ChirpyHopPhase, score: Int, bestScore: Int) {
     }
 }
 
+/** An obstacle Chirpy has already cleared, still scrolling off the left edge. */
+internal data class DepartingObstacle(val kind: ChirpyObstacleKind, val x: Double)
+
 /** Scenery that scrolls with the run but has no effect on it. */
 internal class ChirpyWorld {
     /** Distance the ground has scrolled, in play-field widths. */
@@ -280,13 +284,41 @@ internal class ChirpyWorld {
     var sceneSeconds = 0.0
         private set
 
+    /**
+     * The engine respawns an obstacle off the right edge the moment Chirpy clears it, so the cleared one is kept here
+     * to finish scrolling off the left rather than vanishing mid-screen.
+     */
+    var departing: DepartingObstacle? = null
+        private set
+
+    private var observedScore = 0
+    private var observedKind = ChirpyObstacleKind.Antenna
+    private var observedX = 0.0
+
+    /** Notes where the obstacle is before the engine steps, so a respawn can be told from movement. */
+    fun observe(engine: ChirpyHopEngine) {
+        if (engine.phase == ChirpyHopPhase.Ready || engine.score < observedScore) departing = null
+        observedScore = engine.score
+        observedKind = engine.obstacleKind
+        observedX = engine.obstacleX
+    }
+
     fun advance(deltaSeconds: Double, engine: ChirpyHopEngine) {
         val delta = min(deltaSeconds, MAX_SCENE_STEP)
         sceneSeconds += delta
-        if (engine.phase == ChirpyHopPhase.Running) groundShift += ChirpyHopEngine.speed(engine.score) * delta
+        if (engine.phase != ChirpyHopPhase.Running) return
+        val shift = ChirpyHopEngine.speed(engine.score) * delta
+        groundShift += shift
+        departing = departing?.let { it.copy(x = it.x - shift) }?.takeIf { it.x > OFF_LEFT_EDGE }
+        if (engine.score > observedScore) {
+            departing = DepartingObstacle(observedKind, observedX - ChirpyHopEngine.speed(observedScore) * delta)
+        }
     }
 
     private companion object {
         const val MAX_SCENE_STEP = 1.0 / 30.0
+
+        /** Far enough left that the widest obstacle has fully left any field this game is drawn in. */
+        const val OFF_LEFT_EDGE = -0.4
     }
 }

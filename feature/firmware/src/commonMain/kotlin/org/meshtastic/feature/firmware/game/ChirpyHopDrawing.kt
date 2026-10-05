@@ -48,7 +48,10 @@ private const val MARK_SPACING_DP = 68f
 private const val MARK_WRAP_DP = 24f
 private const val MIN_MARKS = 6
 private const val CLOUD_WRAP_DP = 60f
-private const val UFO_HEIGHT_FRACTION = 0.145f
+
+// The UFO hovers relative to Chirpy's drawn size: clear of his antenna when he ducks, level with his head when he
+// stands.
+private const val UFO_HEIGHT_OF_SPRITE = 0.73f
 private const val UFO_HOVER_RATE = 3.0
 private const val UFO_HOVER_DP = 2f
 private const val UFO_LIGHT_RATE = 6.0
@@ -67,7 +70,10 @@ internal fun DrawScope.drawChirpyWorld(engine: ChirpyHopEngine, world: ChirpyWor
     val shiftPx = (world.groundShift * size.width).toFloat()
     drawClouds(shiftPx)
     drawGround(groundY, shiftPx)
-    drawObstacle(engine, world, groundY)
+    if (engine.phase != ChirpyHopPhase.Ready) {
+        world.departing?.let { drawObstacle(it.kind, it.x, world, groundY) }
+    }
+    drawObstacle(engine.obstacleKind, engine.obstacleX, world, groundY)
     drawChirpy(engine, world, sprites, groundY)
 }
 
@@ -113,10 +119,10 @@ private fun DrawScope.drawGround(groundY: Float, shiftPx: Float) {
 }
 
 @Suppress("MagicNumber")
-private fun DrawScope.drawObstacle(engine: ChirpyHopEngine, world: ChirpyWorld, groundY: Float) {
-    val x = (size.width * engine.obstacleX).toFloat()
+private fun DrawScope.drawObstacle(kind: ChirpyObstacleKind, xFraction: Double, world: ChirpyWorld, groundY: Float) {
+    val x = (size.width * xFraction).toFloat()
     val pulse = ((sin(world.sceneSeconds * SIGNAL_PULSE_RATE) + 1) / 2).toFloat()
-    when (engine.obstacleKind) {
+    when (kind) {
         ChirpyObstacleKind.Antenna -> drawAntenna(Offset(x, groundY), heightDp = 98f, pulse = pulse)
 
         ChirpyObstacleKind.AntennaPair -> {
@@ -126,7 +132,7 @@ private fun DrawScope.drawObstacle(engine: ChirpyHopEngine, world: ChirpyWorld, 
 
         ChirpyObstacleKind.Ufo -> {
             val hover = sin(world.sceneSeconds * UFO_HOVER_RATE).toFloat() * UFO_HOVER_DP * density
-            val center = Offset(x, groundY - size.height * UFO_HEIGHT_FRACTION + hover)
+            val center = Offset(x, groundY - chirpySpriteHeight * UFO_HEIGHT_OF_SPRITE + hover)
             drawUfo(center, litLight = (world.sceneSeconds * UFO_LIGHT_RATE).toInt())
         }
     }
@@ -220,8 +226,11 @@ private fun DrawScope.drawUfo(center: Offset, litLight: Int) {
     }
 }
 
+private val DrawScope.chirpySpriteHeight: Float
+    get() = minOf(SPRITE_HEIGHT_DP * density, size.height * SPRITE_MAX_FIELD_FRACTION)
+
 private fun DrawScope.drawChirpy(engine: ChirpyHopEngine, world: ChirpyWorld, sprites: ChirpySprites, groundY: Float) {
-    val spriteHeight = minOf(SPRITE_HEIGHT_DP * density, size.height * SPRITE_MAX_FIELD_FRACTION)
+    val spriteHeight = chirpySpriteHeight
     val spriteWidth = spriteHeight * SPRITE_WIDTH_DP / SPRITE_HEIGHT_DP
     val anchorX = (size.width * ChirpyHopEngine.PLAYER_X).toFloat()
     val anchorY = groundY - (engine.playerY * size.height * JUMP_SCALE).toFloat()

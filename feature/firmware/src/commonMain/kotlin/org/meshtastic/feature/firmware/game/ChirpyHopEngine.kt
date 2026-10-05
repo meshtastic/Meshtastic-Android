@@ -179,7 +179,9 @@ class ChirpyHopEngine(
         private const val PAIR_HEIGHT = 0.132
         private const val UFO_WIDTH = 0.1
         private const val UFO_BOTTOM = 0.115
-        private const val UFO_TOP = 0.195
+
+        /** Above the top of a jump, so a UFO can only be ducked, matching how it is drawn level with Chirpy's head. */
+        private const val UFO_TOP = 0.5
         private const val RESPAWN_X = 1.04
         private const val CADENCE_STEPS = 4
         private const val CADENCE_SPACING = 0.055

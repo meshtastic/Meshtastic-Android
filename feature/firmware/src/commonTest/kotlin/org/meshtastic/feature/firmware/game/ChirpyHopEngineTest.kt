@@ -98,6 +98,18 @@ class ChirpyHopEngineTest {
     }
 
     @Test
+    fun `a UFO cannot be jumped`() {
+        val engine = ChirpyHopEngine(obstacleX = 0.6, obstacleKind = ChirpyObstacleKind.Ufo)
+        engine.primaryAction()
+        engine.run(seconds = 0.2)
+        engine.primaryAction()
+
+        engine.run(seconds = 2.0)
+
+        assertEquals(ChirpyHopPhase.GameOver, engine.phase)
+    }
+
+    @Test
     fun `a tap in mid air does not jump again`() {
         val engine = ChirpyHopEngine()
         engine.primaryAction()
