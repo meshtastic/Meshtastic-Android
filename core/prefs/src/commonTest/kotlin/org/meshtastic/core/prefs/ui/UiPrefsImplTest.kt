@@ -93,8 +93,9 @@ class UiPrefsImplTest {
     }
 
     @Test
-    fun `selected connection transport is null when no legacy transport keys exist`() =
-        testScope.runTest { assertNull(prefs.selectedConnectionTransport.value) }
+    fun `selected connection transport is null when no legacy transport keys exist`() = testScope.runTest {
+        assertNull(prefs.selectedConnectionTransport.value)
+    }
 
     @Test
     fun `legacy selected connection transport defaults to BLE when all transports are visible`() = testScope.runTest {
@@ -130,8 +131,9 @@ class UiPrefsImplTest {
     }
 
     @Test
-    fun `full message timestamps default to false`() =
-        testScope.runTest { assertFalse(prefs.showFullMessageTimestamps.value) }
+    fun `full message timestamps default to false`() = testScope.runTest {
+        assertFalse(prefs.showFullMessageTimestamps.value)
+    }
 
     @Test
     fun `full message timestamps persist when enabled`() = testScope.runTest {
@@ -152,5 +154,17 @@ class UiPrefsImplTest {
             setOf("firmware-update-notified:node:target:2.8.0", "firmware-update-notified:node:target:2.9.0"),
             prefs.firmwareUpdateNotificationKeys.value,
         )
+    }
+
+    @Test
+    fun `chirpy hop best score keeps the highest score recorded`() = testScope.runTest {
+        assertEquals(0, prefs.chirpyHopBestScore.value)
+
+        prefs.recordChirpyHopScore(12)
+        prefs.recordChirpyHopScore(7)
+
+        val stored = dataStore.data.first()
+        assertEquals(12, stored[UiPrefsImpl.KEY_CHIRPY_HOP_BEST_SCORE])
+        assertEquals(12, prefs.chirpyHopBestScore.value)
     }
 }

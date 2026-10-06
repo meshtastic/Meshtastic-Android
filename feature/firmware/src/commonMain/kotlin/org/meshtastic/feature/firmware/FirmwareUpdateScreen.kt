@@ -177,6 +177,10 @@ import org.meshtastic.core.ui.util.rememberOpenDocumentTreeLauncher
 import org.meshtastic.core.ui.util.rememberOpenFileLauncher
 import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
+import org.meshtastic.feature.firmware.game.ChirpyHopDialog
+import org.meshtastic.feature.firmware.game.ChirpyHopPlayButton
+import org.meshtastic.feature.firmware.game.ChirpyHopUpdatePhase
+import org.meshtastic.feature.firmware.game.toChirpyHopStatus
 
 private const val CYCLE_DELAY_MS = 4500L
 
@@ -200,6 +204,8 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
     val nightlyUnlocked by viewModel.nightlyUnlocked.collectAsStateWithLifecycle()
 
     var showExitConfirmation by remember { mutableStateOf(false) }
+    var showChirpyHop by rememberSaveable { mutableStateOf(false) }
+    val chirpyHopBestScore by viewModel.chirpyHopBestScore.collectAsStateWithLifecycle()
 
     val filePickerLauncher = rememberOpenFileLauncher { uri: CommonUri? ->
         uri?.let { viewModel.prepareLocalFirmwareFile(it) }
@@ -232,6 +238,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                 onDismissLocalFile = viewModel::dismissLocalFirmwareFile,
                 onRetry = viewModel::checkForUpdates,
                 onCancel = { showExitConfirmation = true },
+                onPlayChirpyHop = { showChirpyHop = true },
                 onDone = { onNavigateUp() },
                 onDismissBootloaderWarning = viewModel::dismissBootloaderWarningForCurrentDevice,
             )
@@ -267,6 +274,20 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
             onConfirm = actions.onConfirmLocalFile,
             onDismiss = actions.onDismissLocalFile,
         )
+    }
+
+    val chirpyHopStatus = state.toChirpyHopStatus()
+    if (showChirpyHop) {
+        if (chirpyHopStatus == null) {
+            LaunchedEffect(Unit) { showChirpyHop = false }
+        } else {
+            ChirpyHopDialog(
+                status = chirpyHopStatus,
+                bestScore = chirpyHopBestScore,
+                onScore = viewModel::recordChirpyHopScore,
+                onClose = { showChirpyHop = false },
+            )
+        }
     }
 
     FirmwareUpdateScaffold(
@@ -421,6 +442,8 @@ private fun FirmwareUpdateContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
     ) {
+        val onPlayChirpyHop =
+            actions.onPlayChirpyHop.takeIf { state.toChirpyHopStatus()?.phase == ChirpyHopUpdatePhase.Active }
         when (state) {
             is FirmwareUpdateState.Idle,
             FirmwareUpdateState.Checking,
@@ -430,14 +453,25 @@ private fun FirmwareUpdateContent(
                 ReadyState(state = state, selectedReleaseType = selectedReleaseType, actions = actions)
 
             is FirmwareUpdateState.Downloading ->
-                ProgressContent(state.progressState, onCancel = actions.onCancel, isDownloading = true)
+                ProgressContent(
+                    state.progressState,
+                    onCancel = actions.onCancel,
+                    onPlayChirpyHop = onPlayChirpyHop,
+                    isDownloading = true,
+                )
 
-            is FirmwareUpdateState.Processing -> ProgressContent(state.progressState, onCancel = actions.onCancel)
+            is FirmwareUpdateState.Processing ->
+                ProgressContent(state.progressState, onCancel = actions.onCancel, onPlayChirpyHop = onPlayChirpyHop)
 
             is FirmwareUpdateState.Updating ->
-                ProgressContent(state.progressState, onCancel = actions.onCancel, isUpdating = true)
+                ProgressContent(
+                    state.progressState,
+                    onCancel = actions.onCancel,
+                    onPlayChirpyHop = onPlayChirpyHop,
+                    isUpdating = true,
+                )
 
-            is FirmwareUpdateState.Verifying -> VerifyingState()
+            is FirmwareUpdateState.Verifying -> VerifyingState(onPlayChirpyHop = onPlayChirpyHop)
 
             is FirmwareUpdateState.VerificationFailed ->
                 VerificationFailedState(onRetry = { actions.onStartUpdate(false) }, onIgnore = actions.onDone)
@@ -469,7 +503,7 @@ private fun FirmwareUpdateContent(
 }
 
 @Composable
-internal fun VerifyingState() {
+internal fun VerifyingState(onPlayChirpyHop: (() -> Unit)? = null) {
     CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_verifying), style = MaterialTheme.typography.titleMedium)
@@ -481,6 +515,10 @@ internal fun VerifyingState() {
     )
     Spacer(Modifier.height(16.dp))
     CyclingMessages()
+    if (onPlayChirpyHop != null) {
+        Spacer(Modifier.height(16.dp))
+        ChirpyHopPlayButton(onClick = onPlayChirpyHop)
+    }
 }
 
 @Composable
@@ -1094,6 +1132,7 @@ private fun ReleaseTypeSelector(
 private fun ProgressContent(
     progressState: ProgressState,
     onCancel: () -> Unit,
+    onPlayChirpyHop: (() -> Unit)?,
     isDownloading: Boolean = false,
     isUpdating: Boolean = false,
 ) {
@@ -1157,6 +1196,10 @@ private fun ProgressContent(
 
         Spacer(Modifier.height(16.dp))
         CyclingMessages()
+        if (onPlayChirpyHop != null) {
+            Spacer(Modifier.height(16.dp))
+            ChirpyHopPlayButton(onClick = onPlayChirpyHop)
+        }
         Spacer(Modifier.height(24.dp))
         OutlinedButton(onClick = onCancel) { Text(stringResource(Res.string.cancel)) }
     }

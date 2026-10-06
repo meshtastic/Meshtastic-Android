@@ -67,6 +67,7 @@ import org.meshtastic.core.resources.firmware_update_extracting
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.core.testing.runUntilSettled
 import kotlin.test.AfterTest
@@ -187,6 +188,7 @@ class FirmwareUpdateViewModelFileTest {
         NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
         FakeBluetoothRepository(),
         firmwareUpdateStatusRepository,
+        FakeUiPrefs(),
     )
 
     private fun firmwareUri(fileName: String): CommonUri = CommonUri.parse("file:///downloads/$fileName")

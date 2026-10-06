@@ -25,6 +25,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.feature.firmware.FirmwareUpdateScreen
 import org.meshtastic.feature.firmware.FirmwareUpdateViewModel
+import org.meshtastic.feature.firmware.game.ChirpyHopScreen
+import org.meshtastic.feature.firmware.game.ChirpyHopViewModel
 
 /** Registers the firmware update screen entries into the Navigation 3 entry provider. */
 fun EntryProviderScope<NavKey>.firmwareGraph(backStack: NavBackStack<NavKey>) {
@@ -33,6 +35,12 @@ fun EntryProviderScope<NavKey>.firmwareGraph(backStack: NavBackStack<NavKey>) {
     }
     entry<FirmwareRoute.FirmwareUpdate> {
         FirmwareScreen(onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() })
+    }
+    entry<FirmwareRoute.ChirpyHop> {
+        ChirpyHopScreen(
+            viewModel = koinViewModel<ChirpyHopViewModel>(),
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
+        )
     }
 }
 

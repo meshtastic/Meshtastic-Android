@@ -48,6 +48,7 @@ fun AppInfoSection(
     onUnlockHiddenFeatures: () -> Unit,
     onShowAppIntro: () -> Unit,
     onNavigateToAbout: () -> Unit,
+    onPlayChirpyHop: () -> Unit,
 ) {
     val context = LocalContext.current
     val settingsLauncher =
@@ -92,10 +93,11 @@ fun AppInfoSection(
             onNavigateToAbout()
         }
 
-        AppVersionButton(
+        AppVersionRows(
             hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
             appVersionName = appVersionName,
             onUnlockHiddenFeatures = onUnlockHiddenFeatures,
+            onPlayChirpyHop = onPlayChirpyHop,
         )
     }
 }
@@ -110,6 +112,7 @@ fun AppInfoSectionPreview() {
             onUnlockHiddenFeatures = {},
             onShowAppIntro = {},
             onNavigateToAbout = {},
+            onPlayChirpyHop = {},
         )
     }
 }

@@ -208,6 +208,12 @@ interface UiPrefs {
     val shouldShowTelemetry: StateFlow<Boolean>
 
     fun setShouldShowTelemetry(value: Boolean)
+
+    /** Highest Chirpy Hop score reached on this device. */
+    val chirpyHopBestScore: StateFlow<Int>
+
+    /** Stores [score] if it beats [chirpyHopBestScore]; lower scores are ignored. */
+    fun recordChirpyHopScore(score: Int)
 }
 
 /** Reactive interface for notification preferences. */

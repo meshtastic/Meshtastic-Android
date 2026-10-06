@@ -68,6 +68,7 @@ import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
@@ -140,6 +141,7 @@ class FirmwareUpdateViewModel(
     private val nodeRestartTracker: NodeRestartTracker,
     private val bluetoothRepository: BluetoothRepository,
     private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
+    private val uiPrefs: UiPrefs,
 ) : ViewModel() {
 
     /** The USB maintenance sequence's hold on the radio. Spans several passes, so it cannot use `withOperation`. */
@@ -152,6 +154,10 @@ class FirmwareUpdateViewModel(
 
     /** The version-row easter egg also unlocks the nightly preview channel, like the web flasher's konami code. */
     val nightlyUnlocked: StateFlow<Boolean> = hiddenFeaturesUnlock.unlocked
+
+    val chirpyHopBestScore: StateFlow<Int> = uiPrefs.chirpyHopBestScore
+
+    fun recordChirpyHopScore(score: Int) = uiPrefs.recordChirpyHopScore(score)
 
     private val _selectedReleaseType = MutableStateFlow(FirmwareReleaseType.STABLE)
     val selectedReleaseType: StateFlow<FirmwareReleaseType> = _selectedReleaseType.asStateFlow()
@@ -1289,7 +1295,7 @@ class FirmwareUpdateViewModel(
             pendingRecovery = null
             firmwareRecoveryDataSource.clear()
             val wiped = factoryResetAfterVerify && sendPostUpdateFactoryReset()
-            _state.value = FirmwareUpdateState.Success(wasLowSpeedTransfer, deviceWasWiped = wiped)
+            _state.value = FirmwareUpdateState.Success(wasLowSpeedTransfer, deviceWasWiped = wiped, verified = true)
         }
     }
 

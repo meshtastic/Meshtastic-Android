@@ -195,6 +195,16 @@ chirpy_error_unknown
 chirpy_error_unsupported_flavor
 chirpy_error_unsupported_platform
 chirpy_fallback_unavailable
+chirpy_hop
+chirpy_hop_back_to_update
+chirpy_hop_best
+chirpy_hop_controls
+chirpy_hop_game_over
+chirpy_hop_play
+chirpy_hop_play_again
+chirpy_hop_tap_to_start
+chirpy_hop_update_complete
+chirpy_hop_update_interrupted
 chirpy_intro
 chirpy_ready
 chirpy_search_placeholder

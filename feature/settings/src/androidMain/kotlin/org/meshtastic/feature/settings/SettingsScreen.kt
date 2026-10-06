@@ -47,6 +47,7 @@ import org.koin.core.qualifier.named
 import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
 import org.meshtastic.core.common.util.UnitsOverride
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
@@ -334,6 +335,7 @@ fun SettingsScreen(
                     onUnlockHiddenFeatures = { settingsViewModel.unlockHiddenFeatures() },
                     onShowAppIntro = { settingsViewModel.showAppIntro() },
                     onNavigateToAbout = { onNavigate(SettingsRoute.About) },
+                    onPlayChirpyHop = { onNavigate(FirmwareRoute.ChirpyHop) },
                 )
             }
 

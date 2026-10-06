@@ -28,6 +28,9 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_maintenance_wrong_destination
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.firmware.game.ChirpyHopContent
+import org.meshtastic.feature.firmware.game.ChirpyHopUpdatePhase
+import org.meshtastic.feature.firmware.game.ChirpyHopUpdateStatus
 
 // These previews intentionally wrap-content (no fillMaxSize) so the generated reference images are tight crops of
 // the status block — the docs reference the status component itself, not the whole screen. See docs/assets/screenshots.
@@ -170,5 +173,33 @@ internal fun AwaitingEraseFileSavePreview() {
                 )
             }
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ChirpyHopPreview() {
+    AppTheme {
+        ChirpyHopContent(
+            status =
+            ChirpyHopUpdateStatus(ChirpyHopUpdatePhase.Active, UiText.DynamicString("Uploading firmware"), 0.42f),
+            bestScore = 27,
+            onScore = {},
+            onClose = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ChirpyHopFinishedPreview() {
+    AppTheme {
+        ChirpyHopContent(
+            status =
+            ChirpyHopUpdateStatus(ChirpyHopUpdatePhase.Complete, UiText.DynamicString("Update Successful!"), 1f),
+            bestScore = 27,
+            onScore = {},
+            onClose = {},
+        )
     }
 }

@@ -34,6 +34,8 @@ data class FirmwareUpdateActions(
     val onDismissLocalFile: () -> Unit,
     val onRetry: () -> Unit,
     val onCancel: () -> Unit,
+    /** Opens Chirpy Hop over the screen while an update runs. */
+    val onPlayChirpyHop: () -> Unit,
     val onDone: () -> Unit,
     val onDismissBootloaderWarning: () -> Unit,
 )
