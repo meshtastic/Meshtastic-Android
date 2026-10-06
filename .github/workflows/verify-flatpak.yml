@@ -88,9 +88,9 @@ jobs:
           java-version: 25
           token: ${{ github.token }}
 
-      - name: JBR setup failed — Gradle will auto-provision via Foojay
+      - name: JBR setup failed, Gradle needs it from the toolchain cache
         if: steps.setup-jbr.outcome == 'failure'
-        run: echo "::warning::JBR setup-java failed; falling back to Foojay toolchain provisioning."
+        run: echo "::warning::JBR setup-java failed. foojay lists no JBR 25, so Gradle only finds one in a restored toolchain cache."
 
       - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
         with:
