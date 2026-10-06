@@ -1,7 +1,7 @@
 ---
 title: 韌體更新
 nav_order: 13
-last_updated: 2026-09-06
+last_updated: 2026-10-05
 description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - 韌體
@@ -33,6 +33,8 @@ Android 使用者最常用的更新方式：
 3. 選取所需的韌體版本。
 4. Tap **Update**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. 請等待更新完成 — 更新期間請勿中斷連線。
+
+While the update downloads, uploads or verifies, you can tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
 
 ![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
 

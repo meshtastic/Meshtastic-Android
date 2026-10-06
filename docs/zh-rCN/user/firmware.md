@@ -1,7 +1,7 @@
 ---
 title: 固件升级
 nav_order: 13
-last_updated: 2026-09-06
+last_updated: 2026-10-05
 description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - firmware
@@ -33,6 +33,8 @@ The most common update method for Android users:
 3. Select the desired firmware version.
 4. Tap **Update**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Wait for the update to complete — **do not disconnect** during the update.
+
+While the update downloads, uploads or verifies, you can tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
 
 ![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
 
