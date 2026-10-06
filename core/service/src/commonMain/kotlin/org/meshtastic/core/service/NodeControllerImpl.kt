@@ -53,7 +53,7 @@ internal class NodeControllerImpl(
                 }
             }
             nodeManager.updateNode(node.num) { it.copy(isFavorite = favorite) }
-            // Only favourites are warned about, so a warning left on an unfavourited node would never clear.
+            // Only favorites are warned about, so a warning left on an unfavorited node would never clear.
             if (!favorite && node.num != myNum) serviceNotifications.cancelLowBatteryNotification(node.num)
         }
     }

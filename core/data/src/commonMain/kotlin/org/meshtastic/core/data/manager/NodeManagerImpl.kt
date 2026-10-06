@@ -809,7 +809,7 @@ class NodeManagerImpl(
         updateNodeAndPersist(info.num) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 
-    /** Only favourites are warned about, and one unfavourited from another client arrives here, not via setFavorite. */
+    /** Only favorites are warned about, and one unfavorited from another client arrives here, not via setFavorite. */
     private fun cancelLowBatteryIfUnfavorited(info: ProtoNodeInfo) {
         val state = nodeState.value
         if (info.is_favorite || info.num == state.localNodeNum) return
