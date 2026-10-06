@@ -1,7 +1,7 @@
 ---
 title: Обновления прошивки
 nav_order: 13
-last_updated: 2026-09-06
+last_updated: 2026-10-05
 description: Обновляйте прошивку своего радио по Bluetooth или USB — процесс OTA, каналы версий, предполётные проверки и восстановление.
 aliases:
   - firmware
@@ -33,6 +33,8 @@ aliases:
 3. Выберите нужную версию прошивки.
 4. Нажмите **Обновить**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Дождитесь завершения обновления — **не отключайте устройство** во время обновления.
+
+While the update downloads, uploads or verifies, you can tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
 
 ![Проверка обновлений прошивки](../../assets/screenshots/firmware_checking.png)
 

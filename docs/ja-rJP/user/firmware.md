@@ -1,7 +1,7 @@
 ---
 title: ファームウェア更新
 nav_order: 13
-last_updated: 2026-09-06
+last_updated: 2026-10-05
 description: 無線機のファームウェアを Bluetooth または USB で更新します。OTA の手順、バージョンチャンネル、事前チェック、復旧について説明します。
 aliases:
   - firmware
@@ -33,6 +33,8 @@ Android ユーザーにとって最も一般的な更新方法です：
 3. 希望するファームウェアバージョンを選択します。
 4. Tap **Update**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. 更新が完了するまで待ちます。更新中は**接続を切断しないでください**。
+
+While the update downloads, uploads or verifies, you can tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
 
 ![ファームウェアの更新を確認中](../../assets/screenshots/firmware_checking.png)
 

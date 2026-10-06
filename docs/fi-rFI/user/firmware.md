@@ -1,7 +1,7 @@
 ---
 title: Laiteohjelmiston päivitykset
 nav_order: 13
-last_updated: 2026-09-06
+last_updated: 2026-10-05
 description: Päivitä radiosi laiteohjelmisto bluetoothin tai USB:n kautta — OTA-päivitys, versiokanavat, tarkistukset ennen päivitystä ja palautus.
 aliases:
   - firmware
@@ -33,6 +33,8 @@ Yleisin päivitystapa Android-käyttäjille:
 3. Valitse haluamasi firmware-versio.
 4. Napauta **Päivitä**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Odota, että päivitys valmistuu — älä katkaise yhteyttä päivityksen aikana.
+
+While the update downloads, uploads or verifies, you can tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
 
 ![Päivitysten tarkistaminen](../../assets/screenshots/firmware_checking.png)
 
