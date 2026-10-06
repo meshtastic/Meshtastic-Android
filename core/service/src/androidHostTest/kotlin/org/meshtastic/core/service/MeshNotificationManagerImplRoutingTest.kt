@@ -96,7 +96,7 @@ class MeshNotificationManagerImplRoutingTest {
             MeshBeaconOffer(fromNodeNum = 7, beacon = MeshBeacon.Builder().also { wb -> wb.message = "Join" }.build()),
         )
         manager.showNewNodeSeenNotification(Node(num = 101), "New node seen: N101")
-        manager.showLowBatteryNotification(Node(num = 2), isRemote = true)
+        manager.notifyLowBattery(Node(num = 2), isRemote = true)
         manager.showClientNotification(
             ClientNotification.Builder().also { wb -> wb.message = "Duplicate key" }.build(),
             "Radio notice",
@@ -185,8 +185,8 @@ class MeshNotificationManagerImplRoutingTest {
     fun `low battery posts on the channel for whose battery it is`() = runWithRenderScope { scope ->
         val manager = createManager(scope)
 
-        manager.showLowBatteryNotification(Node(num = 1), isRemote = false)
-        manager.showLowBatteryNotification(Node(num = 2), isRemote = true)
+        manager.notifyLowBattery(Node(num = 1), isRemote = false)
+        manager.notifyLowBattery(Node(num = 2), isRemote = true)
 
         val byNode = activeByTag("low_battery").associateBy { it.id }
         assertEquals(NotificationChannels.LOW_BATTERY, byNode.getValue(1).notification.channelId)
@@ -197,24 +197,59 @@ class MeshNotificationManagerImplRoutingTest {
     }
 
     @Test
-    fun `a low-battery refresh never brings back a dismissed warning`() = runWithRenderScope { scope ->
+    fun `a dismissed warning stays dismissed for the rest of its episode`() = runWithRenderScope { scope ->
         val manager = createManager(scope)
         val node = Node(num = 3)
 
-        manager.showLowBatteryNotification(node, isRemote = false)
-        manager.cancelLowBatteryNotification(node)
-        manager.updateLowBatteryNotification(node, isRemote = false)
+        manager.notifyLowBattery(node, isRemote = false)
+        systemNotificationManager.cancel("low_battery", node.num)
+        manager.notifyLowBattery(node, isRemote = false)
 
         assertTrue(activeByTag("low_battery").isEmpty())
+    }
+
+    @Test
+    fun `a low battery warns again once recovery ends its episode`() = runWithRenderScope { scope ->
+        val manager = createManager(scope)
+        val node = Node(num = 5)
+
+        manager.notifyLowBattery(node, isRemote = false)
+        systemNotificationManager.cancel("low_battery", node.num)
+        manager.cancelLowBatteryNotification(node.num)
+        manager.notifyLowBattery(node, isRemote = false)
+
+        assertEquals(listOf(node.num), activeByTag("low_battery").map { it.id })
+    }
+
+    @Test
+    fun `a battery still low after a device switch warns again`() = runWithRenderScope { scope ->
+        val manager = createManager(scope)
+        val node = Node(num = 6)
+
+        manager.notifyLowBattery(node, isRemote = false)
+        manager.clearNotifications()
+        manager.notifyLowBattery(node, isRemote = false)
+
+        assertEquals(listOf(node.num), activeByTag("low_battery").map { it.id })
     }
 
     @Test
     fun `a warning still building when the battery recovers is never posted`() = runWithRenderScope { scope ->
         val manager = createManager(scope)
         val node = Node(num = 4)
-        manager.beforeLowBatteryPost = { manager.cancelLowBatteryNotification(node) }
+        manager.beforeLowBatteryPost = { manager.cancelLowBatteryNotification(node.num) }
 
-        manager.showLowBatteryNotification(node, isRemote = false)
+        manager.notifyLowBattery(node, isRemote = false)
+
+        assertTrue(activeByTag("low_battery").isEmpty())
+    }
+
+    @Test
+    fun `a warning still building across a device switch is never posted`() = runWithRenderScope { scope ->
+        val manager = createManager(scope)
+        manager.beforeLowBatteryPost = { manager.clearNotifications() }
+
+        manager.notifyLowBattery(Node(num = 7), isRemote = false)
 
         assertTrue(activeByTag("low_battery").isEmpty())
     }

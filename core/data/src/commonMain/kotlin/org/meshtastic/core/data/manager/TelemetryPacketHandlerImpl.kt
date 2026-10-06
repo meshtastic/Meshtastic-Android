@@ -17,8 +17,6 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.clampTimestampToNow
@@ -37,8 +35,8 @@ import org.meshtastic.proto.Telemetry
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Implementation of [TelemetryPacketHandler] that processes telemetry packets and manages battery-level notifications
- * with cooldown logic.
+ * Implementation of [TelemetryPacketHandler] that processes telemetry packets and raises or clears low-battery
+ * warnings.
  */
 @Single
 class TelemetryPacketHandlerImpl(
@@ -48,9 +46,6 @@ class TelemetryPacketHandlerImpl(
     private val radioInterfaceService: RadioInterfaceService,
     private val scope: ServiceScope,
 ) : TelemetryPacketHandler {
-
-    private val batteryMutex = Mutex()
-    private val notifiedNodes = mutableSetOf<Int>()
 
     @Suppress("LongMethod", "CyclomaticComplexMethod", "ReturnCount")
     override fun handleTelemetry(
@@ -97,17 +92,11 @@ class TelemetryPacketHandlerImpl(
         val hasBattery = (metrics.voltage ?: 0f) > 0f
         if (hasBattery && batteryLevel <= BATTERY_PERCENT_LOW_THRESHOLD) {
             radioInterfaceService.launchSessionWork(scope, session) {
-                val firstLowReading = batteryMutex.withLock { notifiedNodes.add(fromNum) }
-                if (firstLowReading) {
-                    serviceNotifications.showLowBatteryNotification(updatedNode, isRemote)
-                } else {
-                    serviceNotifications.updateLowBatteryNotification(updatedNode, isRemote)
-                }
+                serviceNotifications.notifyLowBattery(updatedNode, isRemote)
             }
         } else {
             radioInterfaceService.launchSessionWork(scope, session) {
-                batteryMutex.withLock { notifiedNodes.remove(fromNum) }
-                serviceNotifications.cancelLowBatteryNotification(updatedNode)
+                serviceNotifications.cancelLowBatteryNotification(fromNum)
             }
         }
     }

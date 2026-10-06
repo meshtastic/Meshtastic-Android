@@ -550,6 +550,7 @@ class NodeManagerImpl(
 
     override fun removeByNodenum(nodeNum: Int) {
         nodeState.update { state -> state.copy(index = state.index.remove(nodeNum), revision = state.revision + 1) }
+        serviceNotifications.cancelLowBatteryNotification(nodeNum)
     }
 
     override fun applyTrustedIdentityMigrations(removedNums: Collection<Int>) {
@@ -797,13 +798,22 @@ class NodeManagerImpl(
 
     override fun installNodeInfo(info: ProtoNodeInfo) {
         val reportsHeard = reportsHeardOnCurrentLora.value
+        cancelLowBatteryIfUnfavorited(info)
         // Stage-2 configuration installation persists the complete node snapshot through installConfig.
         updateNodeState(info.num, channel = 0) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 
     override suspend fun installNodeInfoAndPersist(info: ProtoNodeInfo) {
         val reportsHeard = reportsHeardOnCurrentLora.value
+        cancelLowBatteryIfUnfavorited(info)
         updateNodeAndPersist(info.num) { node -> applyNodeInfo(node, info, reportsHeard) }
+    }
+
+    /** Only favourites are warned about, and one unfavourited from another client arrives here, not via setFavorite. */
+    private fun cancelLowBatteryIfUnfavorited(info: ProtoNodeInfo) {
+        val state = nodeState.value
+        if (info.is_favorite || info.num == state.localNodeNum) return
+        if (state.index.byNum[info.num]?.isFavorite == true) serviceNotifications.cancelLowBatteryNotification(info.num)
     }
 
     private fun applyNodeInfo(node: Node, info: ProtoNodeInfo, reportsHeard: Boolean): Node {

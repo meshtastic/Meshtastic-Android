@@ -206,7 +206,8 @@ class MeshNotificationManagerImpl(
             PersonIconFactory.createLabel(shortName, backgroundColor, foregroundColor, rounded = false)
         }
 
-    override fun clearNotifications() {
+    override fun clearNotifications() = synchronized(lowBatteryLock) {
+        lowBatteryEpisodes.clear()
         notificationManager.cancelAll()
     }
 
@@ -281,8 +282,8 @@ class MeshNotificationManagerImpl(
     private val serviceNotificationLock = Any()
     private val lowBatteryLock = Any()
 
-    /** Per node, how many times its low-battery warning was cancelled; guarded by [lowBatteryLock]. */
-    private val lowBatteryCancellations = mutableMapOf<Int, Int>()
+    /** Each node in a low-battery episode, mapped to that episode's identity; guarded by [lowBatteryLock]. */
+    private val lowBatteryEpisodes = mutableMapOf<Int, Any>()
     private val applicationLabel: String by lazy {
         context.applicationInfo.loadLabel(context.packageManager).toString().ifBlank { context.packageName }
     }
@@ -624,26 +625,23 @@ class MeshNotificationManagerImpl(
 
     override fun cancelNewNodeNotification(nodeNum: Int) = notificationManager.cancel(TAG_NEW_NODE, nodeNum)
 
-    override suspend fun showLowBatteryNotification(node: Node, isRemote: Boolean) =
-        postLowBattery(node, isRemote, onlyIfShowing = false)
-
-    override suspend fun updateLowBatteryNotification(node: Node, isRemote: Boolean) =
-        postLowBattery(node, isRemote, onlyIfShowing = true)
-
     /**
-     * Recovery cancels from separate work, so a post that was already resolving its text when the battery recovered
-     * must not land afterwards: it notes the node's cancellation count before building and posts only if it is
-     * unchanged.
+     * Recovery and device switches end an episode from separate work, so a post that was still resolving its text when
+     * its episode ended must not land afterwards: it posts only while the episode it started in is current.
      */
-    private suspend fun postLowBattery(node: Node, isRemote: Boolean, onlyIfShowing: Boolean) {
-        val cancellationsBefore = synchronized(lowBatteryLock) { lowBatteryCancellations[node.num] ?: 0 }
+    override suspend fun notifyLowBattery(node: Node, isRemote: Boolean) {
+        val (episode, firstReading) =
+            synchronized(lowBatteryLock) {
+                lowBatteryEpisodes[node.num]?.let { it to false }
+                    ?: Any().also { lowBatteryEpisodes[node.num] = it }.let { it to true }
+            }
         ensureChannels()
         val notification = createLowBatteryNotification(node, isRemote)
         beforeLowBatteryPost?.invoke()
         synchronized(lowBatteryLock) {
-            if ((lowBatteryCancellations[node.num] ?: 0) != cancellationsBefore) return
+            if (lowBatteryEpisodes[node.num] !== episode) return
             val showing = notificationManager.activeNotifications.any { it.tag == TAG_LOW_BATTERY && it.id == node.num }
-            if (!onlyIfShowing || showing) notificationManager.notify(TAG_LOW_BATTERY, node.num, notification)
+            if (firstReading || showing) notificationManager.notify(TAG_LOW_BATTERY, node.num, notification)
         }
     }
 
@@ -754,9 +752,9 @@ class MeshNotificationManagerImpl(
         showConversationNotification(contactKey, isBroadcast, channelName, conversationName, isSilent = true)
     }
 
-    override fun cancelLowBatteryNotification(node: Node) = synchronized(lowBatteryLock) {
-        lowBatteryCancellations[node.num] = (lowBatteryCancellations[node.num] ?: 0) + 1
-        notificationManager.cancel(TAG_LOW_BATTERY, node.num)
+    override fun cancelLowBatteryNotification(nodeNum: Int) = synchronized(lowBatteryLock) {
+        lowBatteryEpisodes.remove(nodeNum)
+        notificationManager.cancel(TAG_LOW_BATTERY, nodeNum)
     }
 
     // endregion

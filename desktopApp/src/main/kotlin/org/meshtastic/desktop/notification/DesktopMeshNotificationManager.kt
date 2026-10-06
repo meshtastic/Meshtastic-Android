@@ -48,7 +48,10 @@ import org.meshtastic.proto.Telemetry
 @Suppress("TooManyFunctions")
 class DesktopMeshNotificationManager(private val notificationManager: NotificationManager) : MeshNotificationManager {
 
+    private val lowBatteryEpisodes = mutableSetOf<Int>()
+
     override fun clearNotifications() {
+        synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.clear() }
         notificationManager.cancelAll()
     }
 
@@ -133,7 +136,10 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         notificationManager.cancel(nodeNum)
     }
 
-    override suspend fun showLowBatteryNotification(node: Node, isRemote: Boolean) {
+    // An OS notification cannot be refreshed in place, and re-posting would alert again, so only an episode's first
+    // reading shows.
+    override suspend fun notifyLowBattery(node: Node, isRemote: Boolean) {
+        if (!synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.add(node.num) }) return
         notificationManager.dispatch(
             Notification(
                 title = getStringSuspend(Res.string.low_battery_title, node.user.short_name),
@@ -144,12 +150,9 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         )
     }
 
-    override suspend fun updateLowBatteryNotification(node: Node, isRemote: Boolean) {
-        // No-op: an OS notification cannot be refreshed in place, and re-posting would alert again.
-    }
-
-    override fun cancelLowBatteryNotification(node: Node) {
-        notificationManager.cancel(node.num)
+    override fun cancelLowBatteryNotification(nodeNum: Int) {
+        synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.remove(nodeNum) }
+        notificationManager.cancel(nodeNum)
     }
 
     override suspend fun showClientNotification(

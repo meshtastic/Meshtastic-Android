@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
@@ -35,6 +36,7 @@ import org.meshtastic.proto.AdminMessage
 internal class NodeControllerImpl(
     private val commandSender: CommandSender,
     private val nodeManager: NodeManager,
+    private val serviceNotifications: MeshNotificationManager,
     private val packetRepository: Lazy<PacketRepository>,
     private val scope: CoroutineScope,
 ) : NodeController {
@@ -51,6 +53,8 @@ internal class NodeControllerImpl(
                 }
             }
             nodeManager.updateNode(node.num) { it.copy(isFavorite = favorite) }
+            // Only favourites are warned about, so a warning left on an unfavourited node would never clear.
+            if (!favorite && node.num != myNum) serviceNotifications.cancelLowBatteryNotification(node.num)
         }
     }
 

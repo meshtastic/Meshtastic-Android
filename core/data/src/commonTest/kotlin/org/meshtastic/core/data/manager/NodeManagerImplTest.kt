@@ -817,6 +817,41 @@ class NodeManagerImplTest {
 
         assertTrue(!nodeManager.nodeDBbyNodeNum.containsKey(nodeNum))
         assertNull(nodeManager.getNodeById("!testnode"))
+        verify { serviceNotifications.cancelLowBatteryNotification(nodeNum) }
+    }
+
+    @Test
+    fun `a favorite unfavorited on the radio loses its low-battery warning`() {
+        val nodeNum = 5678
+        nodeManager.updateNode(nodeNum) { Node(num = nodeNum, isFavorite = true) }
+
+        nodeManager.installNodeInfo(
+            ProtoNodeInfo.Builder()
+                .also { wb ->
+                    wb.num = nodeNum
+                    wb.is_favorite = false
+                }
+                .build(),
+        )
+
+        verify { serviceNotifications.cancelLowBatteryNotification(nodeNum) }
+    }
+
+    @Test
+    fun `a node that stays a favorite keeps its low-battery warning`() {
+        val nodeNum = 5678
+        nodeManager.updateNode(nodeNum) { Node(num = nodeNum, isFavorite = true) }
+
+        nodeManager.installNodeInfo(
+            ProtoNodeInfo.Builder()
+                .also { wb ->
+                    wb.num = nodeNum
+                    wb.is_favorite = true
+                }
+                .build(),
+        )
+
+        verify(VerifyMode.not) { serviceNotifications.cancelLowBatteryNotification(any()) }
     }
 
     @Test

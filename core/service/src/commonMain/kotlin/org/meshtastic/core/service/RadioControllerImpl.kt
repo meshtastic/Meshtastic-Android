@@ -141,7 +141,7 @@ class RadioControllerImpl(
         analytics,
         packetRepository,
     ),
-    NodeController by NodeControllerImpl(commandSender, nodeManager, packetRepository, scope),
+    NodeController by NodeControllerImpl(commandSender, nodeManager, serviceNotifications, packetRepository, scope),
     QueryController by QueryControllerImpl(commandSender, nodeManager, uiPrefs) {
 
     private val deviceSwitchMutex = Mutex()

@@ -340,8 +340,8 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum, radioSession)
         advanceUntilIdle()
 
-        verifySuspend(VerifyMode.not) { serviceNotifications.showLowBatteryNotification(any(), any()) }
-        verify { serviceNotifications.cancelLowBatteryNotification(Node(num = myNodeNum)) }
+        verifySuspend(VerifyMode.not) { serviceNotifications.notifyLowBattery(any(), any()) }
+        verify { serviceNotifications.cancelLowBatteryNotification(myNodeNum) }
     }
 
     @Test
@@ -354,11 +354,11 @@ class TelemetryPacketHandlerImplTest {
         )
         advanceUntilIdle()
 
-        verifySuspend { serviceNotifications.showLowBatteryNotification(Node(num = myNodeNum), isRemote = false) }
+        verifySuspend { serviceNotifications.notifyLowBattery(Node(num = myNodeNum), isRemote = false) }
     }
 
     @Test
-    fun `later low readings refresh the warning instead of alerting again`() = testScope.runTest {
+    fun `every low reading reaches the notification manager`() = testScope.runTest {
         repeat(2) {
             handler.handleTelemetry(
                 makeTelemetryPacket(myNodeNum, lowBatteryTelemetry()),
@@ -369,8 +369,46 @@ class TelemetryPacketHandlerImplTest {
             advanceUntilIdle()
         }
 
-        verifySuspend(VerifyMode.exactly(1)) { serviceNotifications.showLowBatteryNotification(any(), any()) }
-        verifySuspend(VerifyMode.exactly(1)) { serviceNotifications.updateLowBatteryNotification(any(), any()) }
+        verifySuspend(VerifyMode.exactly(2)) { serviceNotifications.notifyLowBattery(any(), any()) }
+    }
+
+    @Test
+    fun `external power ends the low-battery episode`() = testScope.runTest {
+        val powered =
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 101 }.build()
+                }
+                .build()
+
+        handler.handleTelemetry(
+            makeTelemetryPacket(myNodeNum, powered),
+            makeDataPacket(myNodeNum),
+            myNodeNum,
+            radioSession,
+        )
+        advanceUntilIdle()
+
+        verifySuspend(VerifyMode.not) { serviceNotifications.notifyLowBattery(any(), any()) }
+        verify { serviceNotifications.cancelLowBatteryNotification(myNodeNum) }
+    }
+
+    @Test
+    fun `low battery on a remote node that is not a favorite is ignored`() = testScope.runTest {
+        every { nodeManager.nodeDBbyNodeNum } returns
+            mapOf(myNodeNum to Node(num = myNodeNum), remoteNodeNum to Node(num = remoteNodeNum))
+
+        handler.handleTelemetry(
+            makeTelemetryPacket(remoteNodeNum, lowBatteryTelemetry()),
+            makeDataPacket(remoteNodeNum),
+            myNodeNum,
+            radioSession,
+        )
+        advanceUntilIdle()
+
+        verifySuspend(VerifyMode.not) { serviceNotifications.notifyLowBattery(any(), any()) }
+        verify(VerifyMode.not) { serviceNotifications.cancelLowBatteryNotification(any()) }
     }
 
     @Test
@@ -391,7 +429,7 @@ class TelemetryPacketHandlerImplTest {
         )
         advanceUntilIdle()
 
-        verifySuspend(VerifyMode.not) { serviceNotifications.showLowBatteryNotification(any(), any()) }
+        verifySuspend(VerifyMode.not) { serviceNotifications.notifyLowBattery(any(), any()) }
         verify(VerifyMode.not) { serviceNotifications.cancelLowBatteryNotification(any()) }
     }
 
@@ -409,7 +447,7 @@ class TelemetryPacketHandlerImplTest {
         )
         advanceUntilIdle()
 
-        verifySuspend { serviceNotifications.showLowBatteryNotification(favorite, isRemote = true) }
+        verifySuspend { serviceNotifications.notifyLowBattery(favorite, isRemote = true) }
     }
 
     private fun lowBatteryTelemetry() = Telemetry.Builder()

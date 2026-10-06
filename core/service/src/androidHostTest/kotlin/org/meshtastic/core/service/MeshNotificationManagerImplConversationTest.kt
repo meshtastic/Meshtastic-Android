@@ -408,7 +408,7 @@ class MeshNotificationManagerImplConversationTest {
             val manager = createManager(scope).also { it.initChannels() }
             // SERVICE_NOTIFY_ID is 101; a node whose num is also 101 used to overwrite the foreground notification.
             manager.updateServiceStateNotification(ConnectionState.Connected, telemetry = null)
-            manager.showLowBatteryNotification(Node(num = 101), isRemote = false)
+            manager.notifyLowBattery(Node(num = 101), isRemote = false)
             runUntilSettled {
                 systemNotificationManager.activeNotifications.any { it.id == 101 && it.tag == null } &&
                     activeByTag("low_battery").any { it.id == 101 }
