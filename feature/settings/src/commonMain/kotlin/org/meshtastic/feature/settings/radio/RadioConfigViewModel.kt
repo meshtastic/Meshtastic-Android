@@ -151,6 +151,8 @@ data class RadioConfigState(
     val analyticsEnabled: Boolean = true,
     val nodeDbResetPreserveFavorites: Boolean = false,
     val canRebootToDfu: Boolean = false,
+    /** Whether the hardware registry tags the board DIY; null when the registry does not know the board. */
+    val isDiyHardware: Boolean? = null,
 )
 
 @KoinViewModel
@@ -336,12 +338,19 @@ open class RadioConfigViewModel(
             .distinctUntilChanged()
             .flatMapLatest { hwModel ->
                 if (hwModel == null) {
-                    flowOf(false)
+                    flowOf(null)
                 } else {
-                    deviceHardwareRepository.observeDeviceHardware(hwModel).map { it?.isNrf52Arc == true }
+                    deviceHardwareRepository.observeDeviceHardware(hwModel)
                 }
             }
-            .onEach { canDfu -> _radioConfigState.update { it.copy(canRebootToDfu = canDfu) } }
+            .onEach { hardware ->
+                _radioConfigState.update {
+                    it.copy(
+                        canRebootToDfu = hardware?.isNrf52Arc == true,
+                        isDiyHardware = hardware?.isDiy,
+                    )
+                }
+            }
             .launchIn(viewModelScope)
 
         radioConfigRepository.deviceProfileFlow.onEach { _currentDeviceProfile.value = it }.launchIn(viewModelScope)

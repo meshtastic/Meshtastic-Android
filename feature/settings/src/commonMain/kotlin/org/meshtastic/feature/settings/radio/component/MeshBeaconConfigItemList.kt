@@ -37,6 +37,7 @@ import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.RegionPresetConstraint
+import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.config_lora_modem_preset_licensed_summary
 import org.meshtastic.core.resources.mesh_beacon
@@ -195,7 +196,8 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                 RegularPreference(
                     title = stringResource(Res.string.mesh_beacon_region_label),
                     subtitle =
-                    RegionInfo.fromRegionCode(radioLora.region)?.description
+                    radioLora.region.schemaLabelRes()?.let { stringResource(it) }
+                        ?: RegionInfo.fromRegionCode(radioLora.region)?.description
                         ?: radioLora.region.name.replace('_', ' '),
                     onClick = {},
                     enabled = false,
@@ -478,9 +480,16 @@ private fun BroadcastTargetRow(
         onItemSelected = { channelIndex -> onChange { selectBeaconTargetChannel(it, channelIndex, currentPreset) } },
     )
     val rowPreset = target.preset
+    val labels = presetLabels()
     val presetItems =
-        remember(presetConstraint, presetsGated, rowPreset, capabilities) {
-            buildPresetItems(presetConstraint, presetsGated, rowPreset ?: presetConstraint.defaultPreset, capabilities)
+        remember(presetConstraint, presetsGated, rowPreset, capabilities, labels) {
+            buildPresetItems(
+                presetConstraint,
+                presetsGated,
+                rowPreset ?: presetConstraint.defaultPreset,
+                capabilities,
+                labels,
+            )
         }
     val nullablePresetItems: List<DropDownItem<ModemPreset?>> =
         listOf(DropDownItem<ModemPreset?>(value = null, label = defaultLabel)) +

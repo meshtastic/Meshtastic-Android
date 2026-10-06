@@ -28,8 +28,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced_device_gps
 import org.meshtastic.core.resources.altitude
@@ -68,9 +70,14 @@ import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.fieldTitle
+import org.meshtastic.feature.settings.util.offeredOn
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.FieldMetadata
 import org.meshtastic.proto.broadcast_smart_minimum_distance
+import org.meshtastic.proto.gps_en_gpio
+import org.meshtastic.proto.rx_gpio
+import org.meshtastic.proto.tx_gpio
 
 @Composable
 expect fun DeviceLocationButton(
@@ -349,49 +356,72 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     items =
                     Config.PositionConfig.PositionFlags.entries
                         .filter { it != Config.PositionConfig.PositionFlags.UNSET }
-                        .map { it.value to it.name },
+                        .map { flag ->
+                            flag.value to (flag.schemaLabelRes()?.let { stringResource(it) } ?: flag.name)
+                        },
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.position_flags = it }.build()
                     },
                 )
             }
         }
-        item {
-            TitledCard(title = stringResource(Res.string.advanced_device_gps)) {
-                val pins = remember { org.meshtastic.feature.settings.util.gpioPins }
-                DropDownPreference(
-                    title = stringResource(Res.string.schema_position_rx_gpio),
-                    summary = stringResource(Res.string.schema_position_rx_gpio_description),
-                    enabled = state.connected,
-                    items = pins,
-                    selectedItem = formState.value.rx_gpio,
-                    onItemSelected = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.rx_gpio = it }.build()
-                    },
-                )
-                HorizontalDivider()
-                DropDownPreference(
-                    title = stringResource(Res.string.schema_position_tx_gpio),
-                    summary = stringResource(Res.string.schema_position_tx_gpio_description),
-                    enabled = state.connected,
-                    items = pins,
-                    selectedItem = formState.value.tx_gpio,
-                    onItemSelected = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.tx_gpio = it }.build()
-                    },
-                )
-                HorizontalDivider()
-                DropDownPreference(
-                    title = stringResource(Res.string.schema_position_gps_en_gpio),
-                    summary = stringResource(Res.string.schema_position_gps_en_gpio_description),
-                    enabled = state.connected,
-                    items = pins,
-                    selectedItem = formState.value.gps_en_gpio,
-                    onItemSelected = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.gps_en_gpio = it }.build()
-                    },
-                )
+        val config = formState.value
+        val pinRows =
+            listOf(
+                GpioPinRow(
+                    Config.PositionConfig.rx_gpio,
+                    Res.string.schema_position_rx_gpio,
+                    Res.string.schema_position_rx_gpio_description,
+                    config.rx_gpio,
+                ) { wb, pin ->
+                    wb.rx_gpio = pin
+                },
+                GpioPinRow(
+                    Config.PositionConfig.tx_gpio,
+                    Res.string.schema_position_tx_gpio,
+                    Res.string.schema_position_tx_gpio_description,
+                    config.tx_gpio,
+                ) { wb, pin ->
+                    wb.tx_gpio = pin
+                },
+                GpioPinRow(
+                    Config.PositionConfig.gps_en_gpio,
+                    Res.string.schema_position_gps_en_gpio,
+                    Res.string.schema_position_gps_en_gpio_description,
+                    config.gps_en_gpio,
+                ) { wb, pin ->
+                    wb.gps_en_gpio = pin
+                },
+            )
+                .filter { it.metadata.offeredOn(state.isDiyHardware, holdsValue = it.value != 0) }
+        if (pinRows.isNotEmpty()) {
+            item {
+                TitledCard(title = stringResource(Res.string.advanced_device_gps)) {
+                    val pins = remember { org.meshtastic.feature.settings.util.gpioPins }
+                    pinRows.forEachIndexed { index, row ->
+                        if (index > 0) HorizontalDivider()
+                        DropDownPreference(
+                            title = stringResource(row.title),
+                            summary = stringResource(row.description),
+                            enabled = state.connected,
+                            items = pins,
+                            selectedItem = row.value,
+                            onItemSelected = { pin ->
+                                formState.value = formState.value.newBuilder().also { wb -> row.set(wb, pin) }.build()
+                            },
+                        )
+                    }
+                }
             }
         }
     }
 }
+
+/** One of the board-wiring pin pickers, with the schema metadata that decides whether this board is offered it. */
+private class GpioPinRow(
+    val metadata: FieldMetadata,
+    val title: StringResource,
+    val description: StringResource,
+    val value: Int,
+    val set: (Config.PositionConfig.Builder, Int) -> Unit,
+)

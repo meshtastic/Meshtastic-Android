@@ -65,4 +65,8 @@ data class DeviceHardware(
     /** Returns true if the device architecture is RP2040-based. */
     val isRp2040Arc: Boolean
         get() = architecture.startsWith("rp2040", ignoreCase = true)
+
+    /** Returns true if the registry tags the board as a DIY build, the audience of `diy_only` schema fields. */
+    val isDiy: Boolean
+        get() = tags.orEmpty().contains("DIY")
 }
