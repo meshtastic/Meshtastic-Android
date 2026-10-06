@@ -608,6 +608,8 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
+          # foojay lists no JBR 25, so without this an evicted toolchain cache leaves Gradle with no JDK.
+          install_jetbrains_jdk: 'true'
 
       - name: Install dependencies for AppImage
         if: runner.os == 'Linux'
