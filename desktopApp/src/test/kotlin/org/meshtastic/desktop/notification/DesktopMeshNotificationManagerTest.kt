@@ -89,6 +89,17 @@ class DesktopMeshNotificationManagerTest {
     }
 
     @Test
+    fun `a low-battery warning that was not shown is tried again`() = runTest {
+        notificationManager.accepts = false
+        manager.notifyLowBattery(Node(num = 7), isRemote = false)
+
+        notificationManager.accepts = true
+        manager.notifyLowBattery(Node(num = 7), isRemote = false)
+
+        assertEquals(1, notificationManager.dispatched.size)
+    }
+
+    @Test
     fun `new-node notifications cancel by node number`() = runTest {
         manager.showNewNodeSeenNotification(Node(num = 7), title = "New node seen: N7")
         manager.cancelNewNodeNotification(7)

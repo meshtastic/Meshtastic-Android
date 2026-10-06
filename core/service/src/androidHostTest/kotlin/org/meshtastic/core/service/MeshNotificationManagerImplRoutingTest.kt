@@ -255,6 +255,19 @@ class MeshNotificationManagerImplRoutingTest {
     }
 
     @Test
+    fun `a first warning that fails to post lets the next low reading warn`() = runWithRenderScope { scope ->
+        val manager = createManager(scope)
+        val node = Node(num = 8)
+        manager.beforeLowBatteryPost = { error("post failed") }
+        runCatching { manager.notifyLowBattery(node, isRemote = false) }
+
+        manager.beforeLowBatteryPost = null
+        manager.notifyLowBattery(node, isRemote = false)
+
+        assertEquals(listOf(node.num), activeByTag("low_battery").map { it.id })
+    }
+
+    @Test
     fun `radio notices post on their own channel and clear by identity`() = runWithRenderScope { scope ->
         val manager = createManager(scope)
         val notice = ClientNotification.Builder().also { wb -> wb.message = "Generic warning" }.build()

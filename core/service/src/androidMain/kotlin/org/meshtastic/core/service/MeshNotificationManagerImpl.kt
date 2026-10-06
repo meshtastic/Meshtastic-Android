@@ -635,13 +635,21 @@ class MeshNotificationManagerImpl(
                 lowBatteryEpisodes[node.num]?.let { it to false }
                     ?: Any().also { lowBatteryEpisodes[node.num] = it }.let { it to true }
             }
-        ensureChannels()
-        val notification = createLowBatteryNotification(node, isRemote)
-        beforeLowBatteryPost?.invoke()
-        synchronized(lowBatteryLock) {
-            if (lowBatteryEpisodes[node.num] !== episode) return
-            val showing = notificationManager.activeNotifications.any { it.tag == TAG_LOW_BATTERY && it.id == node.num }
-            if (firstReading || showing) notificationManager.notify(TAG_LOW_BATTERY, node.num, notification)
+        var posted = false
+        try {
+            ensureChannels()
+            val notification = createLowBatteryNotification(node, isRemote)
+            beforeLowBatteryPost?.invoke()
+            synchronized(lowBatteryLock) {
+                if (lowBatteryEpisodes[node.num] !== episode) return
+                val showing =
+                    notificationManager.activeNotifications.any { it.tag == TAG_LOW_BATTERY && it.id == node.num }
+                if (firstReading || showing) notificationManager.notify(TAG_LOW_BATTERY, node.num, notification)
+                posted = true
+            }
+        } finally {
+            // A first reading that failed before posting ends its own episode, so the next low reading tries again.
+            if (firstReading && !posted) synchronized(lowBatteryLock) { lowBatteryEpisodes.remove(node.num, episode) }
         }
     }
 

@@ -48,7 +48,7 @@ import org.meshtastic.proto.Telemetry
 @Suppress("TooManyFunctions")
 class DesktopMeshNotificationManager(private val notificationManager: NotificationManager) : MeshNotificationManager {
 
-    private val lowBatteryEpisodes = mutableSetOf<Int>()
+    private val lowBatteryEpisodes = mutableMapOf<Int, Any>()
 
     override fun clearNotifications() {
         synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.clear() }
@@ -139,15 +139,25 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
     // An OS notification cannot be refreshed in place, and re-posting would alert again, so only an episode's first
     // reading shows.
     override suspend fun notifyLowBattery(node: Node, isRemote: Boolean) {
-        if (!synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.add(node.num) }) return
-        notificationManager.dispatch(
-            Notification(
-                title = getStringSuspend(Res.string.low_battery_title, node.user.short_name),
-                message = getStringSuspend(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
-                category = Notification.Category.Battery,
-                id = node.num,
-            ),
-        )
+        val episode = Any()
+        if (synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.putIfAbsent(node.num, episode) } != null) return
+        var shown = false
+        try {
+            val notification =
+                Notification(
+                    title = getStringSuspend(Res.string.low_battery_title, node.user.short_name),
+                    message =
+                    getStringSuspend(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
+                    category = Notification.Category.Battery,
+                    id = node.num,
+                )
+            // Recovery may have ended this episode while its text was resolving.
+            if (synchronized(lowBatteryEpisodes) { lowBatteryEpisodes[node.num] !== episode }) return
+            shown = notificationManager.dispatch(notification)
+        } finally {
+            // A warning that never showed ends its own episode, so the next low reading tries again.
+            if (!shown) synchronized(lowBatteryEpisodes) { lowBatteryEpisodes.remove(node.num, episode) }
+        }
     }
 
     override fun cancelLowBatteryNotification(nodeNum: Int) {
