@@ -78,6 +78,8 @@ jobs:
               - 'config.properties'
               - 'gradlew'
               - 'gradlew.bat'
+              # Line-ending rules change every file the Windows leg checks out.
+              - '.gitattributes'
               - '.github/workflows/reusable-check.yml'
               - '.github/actions/gradle-setup/**'
             android:

@@ -1,3 +1,8 @@
+# LF everywhere, Windows included: the Windows desktop leg otherwise generates Compose resource accessors that hash
+# differently from the Linux legs' on the same commit, and misses the build cache for every module above them.
+* text=auto eol=lf
+*.bat -text
+
 # Mark only generated/derived XML as linguist-generated to reduce Copilot PR summary costs.
 # Hand-edited resources (layouts, string values) are intentionally excluded so they remain
 # visible in diffs and code review.
