@@ -84,6 +84,7 @@ jobs:
         with:
           distribution: jetbrains
           java-version: 25
+          set-default: false
           token: ${{ github.token }}
 
       # The build below uses its own Gradle user home, so a cache here is never read.

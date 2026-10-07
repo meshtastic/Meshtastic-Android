@@ -8,8 +8,8 @@ inputs:
     description: 'Cache ~/.konan. Only jobs that run Kotlin/Native tasks read it.'
     default: 'false'
   cache_robolectric:
-    description: 'Cache the Robolectric android-all jars in ~/.m2'
-    default: 'true'
+    description: 'Cache the Robolectric android-all jars in ~/.m2. Only jobs that run Robolectric tests read it.'
+    default: 'false'
   jdk_distribution:
     description: 'JDK distribution (temurin or jetbrains)'
     default: 'temurin'

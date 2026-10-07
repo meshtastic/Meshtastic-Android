@@ -51,6 +51,11 @@ def main() -> None:
     shards = '\n'.join(re.sub(r'(^|\s)#.*$', '', line) for line in shards.splitlines())
 
     problems = []
+    # Codecov uploads are gated on matrix.shard.flags, so a shard without it uploads nothing.
+    matrix = shards.split('shard:', 1)[1].split('steps:', 1)[0]
+    for entry in re.split(r'\n\s*- name: ', matrix)[1:]:
+        if not re.search(r'^\s*flags: \S', entry, re.MULTILINE):
+            problems.append(f'shard {entry.split()[0]} has no flags: line -- its Codecov uploads would all be skipped')
     for m in sorted(modules):
         if m in COVERED_ELSEWHERE:
             continue
