@@ -28,10 +28,7 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
-        vendor.set(JvmVendorSpec.JETBRAINS)
-    }
+    jvmToolchain(25)
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_25)
         allWarningsAsErrors.set(kotlinWarningsAsErrors)
