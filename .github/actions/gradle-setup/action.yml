@@ -50,21 +50,17 @@ runs:
         distribution: ${{ inputs.jdk_distribution }}
         token: ${{ github.token }}
 
+    # Fatal: no build can configure without JBR. set-default: false keeps the Temurin above as the JVM
+    # running Gradle; toolchains.xml still lists JBR.
     - name: Set up JetBrains JDK 25
       if: inputs.install_jetbrains_jdk == 'true'
-      id: setup-jbr
-      continue-on-error: true
       uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
       with:
         java-version: '25'
         distribution: 'jetbrains'
         check-latest: false
+        set-default: false
         token: ${{ github.token }}
-
-    - name: JBR setup failed, Gradle needs it from the toolchain cache
-      if: inputs.install_jetbrains_jdk == 'true' && steps.setup-jbr.outcome == 'failure'
-      shell: bash
-      run: echo "::warning::JBR setup-java failed (likely GitHub API rate limit). foojay lists no JBR 25, so Gradle only finds one in a restored toolchain cache."
 
     # ~/.konan and ~/.m2 sit outside the Gradle User Home, so setup-gradle does not cache them.
     # A save step here would run before ./gradlew, so writers rely on actions/cache's end-of-job save.

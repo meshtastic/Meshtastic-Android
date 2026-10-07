@@ -103,6 +103,19 @@ jobs:
             fi
           fi
 
+      # The generator's test results, logcat and additional output are the only record of why a
+      # run wrote no rules.
+      - name: Upload baseline generation outputs
+        if: steps.baseline.outputs.status == 'error'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: baseline-generation-outputs
+          path: |
+            baselineprofile/build/outputs/
+            baselineprofile/build/reports/
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Build PR body
         id: pr_body
         run: |
