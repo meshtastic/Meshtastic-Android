@@ -329,7 +329,12 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
             tooltip = trayTooltip,
             menuItems = trayMenuItems,
             onActivate = { isAppVisible = true },
-            onRegistrationChange = { isSniTrayRegistered = it },
+            onRegistrationChange = { registered ->
+                isSniTrayRegistered = registered
+                // Losing the tray while hidden strands the window just as hiding into no tray would — a panel
+                // crash or a disabled extension gets there after the fact. Bring the window back so close quits.
+                if (!registered) isAppVisible = true
+            },
         )
     } else {
         Tray(

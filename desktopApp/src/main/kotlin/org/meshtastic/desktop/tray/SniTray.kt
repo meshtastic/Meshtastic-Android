@@ -123,7 +123,7 @@ internal class SniTrayItem(
 internal class SniTray
 private constructor(
     private val connection: DBusConnection,
-    private val busName: String,
+    private val ownedBusName: String?,
     private val watcherSubscription: AutoCloseable?,
     private val reregisterExecutor: ExecutorService,
 ) : AutoCloseable {
@@ -136,8 +136,10 @@ private constructor(
             .onFailure { Logger.w(it) { "Failed to drop the StatusNotifierWatcher subscription" } }
         runCatching { reregisterExecutor.shutdownNow() }
             .onFailure { Logger.w(it) { "Failed to stop the tray re-registration executor" } }
-        runCatching { connection.releaseBusName(busName) }
-            .onFailure { Logger.w(it) { "Failed to release the tray bus name $busName" } }
+        ownedBusName?.let { name ->
+            runCatching { connection.releaseBusName(name) }
+                .onFailure { Logger.w(it) { "Failed to release the tray bus name $name" } }
+        }
         runCatching { connection.close() }.onFailure { Logger.w(it) { "Failed to close the tray D-Bus connection" } }
     }
 
@@ -170,10 +172,10 @@ private constructor(
             }
             var connection: DBusConnection? = null
             return runCatching {
-                val busName = "org.kde.StatusNotifierItem-${ProcessHandle.current().pid()}-1"
                 val opened = DBusConnectionBuilder.forSessionBus().withShared(false).build()
                 connection = opened
-                opened.requestBusName(busName)
+                val ownedBusName = requestItemBusName(opened)
+                val busName = ownedBusName ?: opened.uniqueName
                 opened.exportObject(ITEM_PATH, SniTrayItem(appId, title, tooltip, iconRasters, onActivate))
                 opened.exportObject(MENU_PATH, DbusMenuExport(MENU_PATH, menuProvider, onItemClicked))
 
@@ -184,7 +186,7 @@ private constructor(
                 val subscription = subscribeToWatcher(opened, busName, executor, onRegistrationChange)
                 val registered = registerIfWatcherPresent(opened, busName)
                 onRegistrationChange(registered)
-                SniTray(opened, busName, subscription, executor)
+                SniTray(opened, ownedBusName, subscription, executor)
             }
                 .getOrElse { error ->
                     Logger.i(error) { "Could not export the StatusNotifierItem tray" }
@@ -192,6 +194,22 @@ private constructor(
                     onRegistrationChange(false)
                     null
                 }
+        }
+
+        /**
+         * Claims the conventional `org.kde.StatusNotifierItem-<pid>-1` name, or returns `null` when the bus refuses it.
+         *
+         * A Flatpak sandbox refuses it twice over: the manifest grants `--talk-name` for the watcher but no
+         * `--own-name`, and every sandboxed process sees itself as a low pid, so the name would collide across apps
+         * anyway. The watcher also accepts the connection's unique name, with the item at the standard path, so the
+         * caller registers under that instead — the same fallback Electron uses (electron/electron#53641).
+         */
+        private fun requestItemBusName(connection: DBusConnection): String? {
+            val name = "org.kde.StatusNotifierItem-${ProcessHandle.current().pid()}-1"
+            return runCatching { connection.requestBusName(name) }
+                .onFailure { Logger.i(it) { "Could not own $name; registering the tray by unique name instead" } }
+                .map { name }
+                .getOrNull()
         }
 
         /**
