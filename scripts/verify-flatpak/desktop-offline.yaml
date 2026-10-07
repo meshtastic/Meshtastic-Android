@@ -102,7 +102,7 @@ modules:
         # alongside wrapper bumps (custom manager in renovate.json) but the sha256 must be
         # copied from distributionSha256Sum by hand; CI fails fast on any mismatch.
         url: https://services.gradle.org/distributions/gradle-9.8.1-bin.zip
-        sha256: bafd5ce9cfaea0fbccfdc8439a1ac42fbd4cd9c89dc9a988228d8a2639a58e6c
+        sha256: dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f
         dest: "gradle/wrapper"
         dest-filename: "gradle-bin.zip"
       - flatpak-sources.json
