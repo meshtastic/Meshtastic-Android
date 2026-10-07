@@ -27,11 +27,7 @@ actual fun currentLocaleCode(): String = Locale.getDefault().language
 
 actual fun currentRegionCode(): String = Locale.getDefault().country
 
-actual fun currentLocaleQualifier(): String {
-    val locale = Locale.getDefault()
-    val country = locale.country
-    return if (country.isNotEmpty()) "${locale.language}-r$country" else locale.language
-}
+actual fun currentLocaleTag(): String = Locale.getDefault().toLanguageTag()
 
 actual fun getSystemMeasurementSystem(): MeasurementSystem {
     val locale = Locale.getDefault()

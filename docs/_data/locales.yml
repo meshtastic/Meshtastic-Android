@@ -3,103 +3,103 @@
 # Pages land at docs/{code}/user/*.md via Crowdin sync.
 # Synced with Android app locales (values-* resource dirs).
 
-ar-rSA:
+ar:
   name: "العربية"
   dir: rtl
-be-rBY:
+be:
   name: "Беларуская"
   dir: ltr
-bg-rBG:
+bg:
   name: "Български"
   dir: ltr
-ca-rES:
+ca:
   name: "Català"
   dir: ltr
-cs-rCZ:
+cs:
   name: "Čeština"
   dir: ltr
-de-rDE:
+de:
   name: "Deutsch"
   dir: ltr
-el-rGR:
+el:
   name: "Ελληνικά"
   dir: ltr
-es-rES:
+es:
   name: "Español"
   dir: ltr
-et-rEE:
+et:
   name: "Eesti"
   dir: ltr
-fi-rFI:
+fi:
   name: "Suomi"
   dir: ltr
 fr-rCA:
   name: "Français (Canada)"
   dir: ltr
-fr-rFR:
+fr:
   name: "Français"
   dir: ltr
-ga-rIE:
+ga:
   name: "Gaeilge"
   dir: ltr
-gl-rES:
+gl:
   name: "Galego"
   dir: ltr
-iw-rIL:
+he:
   name: "עברית"
   dir: rtl
-hr-rHR:
+hr:
   name: "Hrvatski"
   dir: ltr
-ht-rHT:
+ht:
   name: "Kreyòl Ayisyen"
   dir: ltr
-hu-rHU:
+hu:
   name: "Magyar"
   dir: ltr
-is-rIS:
+is:
   name: "Íslenska"
   dir: ltr
-it-rIT:
+it:
   name: "Italiano"
   dir: ltr
-ja-rJP:
+ja:
   name: "日本語"
   dir: ltr
-ko-rKR:
+ko:
   name: "한국어"
   dir: ltr
-lt-rLT:
+lt:
   name: "Lietuvių"
   dir: ltr
-nl-rNL:
+nl:
   name: "Nederlands"
   dir: ltr
-no-rNO:
+"no":
   name: "Norsk"
   dir: ltr
-pl-rPL:
+pl:
   name: "Polski"
   dir: ltr
 pt-rBR:
   name: "Português (Brasil)"
   dir: ltr
-pt-rPT:
+pt:
   name: "Português"
   dir: ltr
-ro-rRO:
+ro:
   name: "Română"
   dir: ltr
-ru-rRU:
+ru:
   name: "Русский"
   dir: ltr
-sk-rSK:
+sk:
   name: "Slovenčina"
   dir: ltr
-sl-rSI:
+sl:
   name: "Slovenščina"
   dir: ltr
-sq-rAL:
+sq:
   name: "Shqip"
   dir: ltr
 b+sr+Latn:
@@ -108,13 +108,13 @@ b+sr+Latn:
 sr:
   name: "Српски (ћирилица)"
   dir: ltr
-sv-rSE:
+sv:
   name: "Svenska"
   dir: ltr
-tr-rTR:
+tr:
   name: "Türkçe"
   dir: ltr
-uk-rUA:
+uk:
   name: "Українська"
   dir: ltr
 zh-rCN:

@@ -104,7 +104,7 @@ val syncTranslatedDocsToComposeResources =
         val targetBase = layout.projectDirectory.dir("src/commonMain/composeResources/files")
 
         from(docsDir) {
-            // Crowdin outputs dirs in Android qualifier format (fr, pt-rBR, zh-rCN)
+            // Crowdin names these like the values-* dirs (fr, pt-rBR, b+sr+Latn)
             include("*/user/**/*.md")
             exclude("en/**")
             exclude("_*/**")
@@ -114,7 +114,6 @@ val syncTranslatedDocsToComposeResources =
 
         into(targetBase)
 
-        // Crowdin %android_code% already outputs CMP qualifier format (pt-rBR).
         // Locale goes as a subdirectory *inside* files/ (CMP doesn't support qualifiers on files/).
         eachFile {
             val segments = relativePath.segments

@@ -21,7 +21,7 @@ import meshtasticandroid.feature.docs.generated.resources.Res
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.currentLocaleQualifier
+import org.meshtastic.core.common.util.currentLocaleTag
 import org.meshtastic.core.resources.doc_keywords_app_functions
 import org.meshtastic.core.resources.doc_keywords_connections
 import org.meshtastic.core.resources.doc_keywords_debug_logs
@@ -150,8 +150,6 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 DocSection.UserGuide -> "user"
                 DocSection.DeveloperGuide -> "developer"
             }
-        // Try qualifiers in specificity order (mirrors Android resource resolution):
-        // "pt-rBR" → "pt" → give up
         for (qualifier in localeQualifiers(locale)) {
             val localePath = "files/$qualifier/docs/$section/${page.id}.md"
             try {
@@ -187,17 +185,8 @@ class DefaultDocBundleLoader : DocBundleLoader {
         }
     }
 
-    /**
-     * Produces CMP resource qualifier candidates in specificity order. Tries region-qualified first (e.g. "pt-rBR"),
-     * then language-only ("pt"). Deduplicates when device has no region (both would be "fr").
-     */
-    private fun localeQualifiers(language: String): List<String> {
-        val fullQualifier = currentLocaleQualifier()
-        return buildList {
-            if (fullQualifier != language) add(fullQualifier)
-            add(language)
-        }
-    }
+    private fun localeQualifiers(language: String): List<String> =
+        (docLocaleCandidates(currentLocaleTag()) + docLocaleCandidates(language)).distinct()
 
     private suspend fun loadMarkdownContent(page: DocPage): String {
         val section =
@@ -639,3 +628,26 @@ class DefaultDocBundleLoader : DocBundleLoader {
         iconId = iconId,
     )
 }
+
+/**
+ * The docs directories a BCP 47 [tag] can read, most specific first: `b+sr+Latn`, then `sr-rRS`, then `sr`. Directory
+ * names follow the `values-*` ones Crowdin writes, so the language-only entry is what most locales resolve to.
+ */
+internal fun docLocaleCandidates(tag: String): List<String> {
+    val subtags = tag.split('-', '_').filter { it.isNotEmpty() }
+    val language = subtags.firstOrNull()?.lowercase()?.let { LEGACY_LANGUAGE_CODES[it] ?: it } ?: return emptyList()
+    val rest = subtags.drop(1)
+    val script = rest.firstOrNull { it.length == SCRIPT_LENGTH && it.all(Char::isLetter) }
+    val region = rest.firstOrNull { it.length == REGION_LENGTH && it.all(Char::isLetter) }
+    return buildList {
+        if (script != null) add("b+$language+${script.lowercase().replaceFirstChar(Char::uppercaseChar)}")
+        if (region != null) add("$language-r${region.uppercase()}")
+        add(language)
+    }
+}
+
+private const val SCRIPT_LENGTH = 4
+private const val REGION_LENGTH = 2
+
+// Older Android and JDK builds report these retired ISO 639 codes; the directories use the current ones.
+private val LEGACY_LANGUAGE_CODES = mapOf("iw" to "he", "in" to "id", "ji" to "yi")
