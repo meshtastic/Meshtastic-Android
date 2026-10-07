@@ -15,10 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.meshtastic.buildlogic.GenerateSupportedLocalesTask
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.library.compose)
 }
+
+val generateSupportedLocales =
+    tasks.register<GenerateSupportedLocalesTask>("generateSupportedLocales") {
+        description = "Generates supportedLocaleTags from the values-* directories Crowdin writes."
+        resourcesDir.set(layout.projectDirectory.dir("src/commonMain/composeResources"))
+        outputDir.set(layout.buildDirectory.dir("generated/supportedLocales/commonMain/kotlin"))
+    }
 
 kotlin {
     android {
@@ -29,7 +38,12 @@ kotlin {
         withHostTest { isIncludeAndroidResources = true }
     }
 
-    sourceSets { commonMain.dependencies { implementation(projects.core.common) } }
+    sourceSets {
+        commonMain {
+            kotlin.srcDir(generateSupportedLocales.flatMap { it.outputDir })
+            dependencies { implementation(projects.core.common) }
+        }
+    }
 }
 
 compose.resources {

@@ -25,6 +25,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.fr_HT
 import org.meshtastic.core.resources.preferences_system_default
 import org.meshtastic.core.resources.pt_BR
+import org.meshtastic.core.resources.supportedLocaleTags
 import org.meshtastic.core.resources.zh_CN
 import org.meshtastic.core.resources.zh_TW
 import java.util.Locale
@@ -47,54 +48,10 @@ object LanguageUtils {
         )
     }
 
-    /** Using a hardcoded list, maps language tags to their localized language names (e.g.: "en" -> "English") */
-    @Suppress("CyclomaticComplexMethod", "LongMethod")
+    /** Maps the system default and every shipped locale tag to its name in that locale (e.g.: "de" -> "Deutsch") */
     @Composable
     fun languageMap(): Map<String, String> {
-        val languageTags = remember {
-            listOf(
-                SYSTEM_DEFAULT,
-                "en",
-                "ar",
-                "bg",
-                "ca",
-                "cs",
-                "de",
-                "el",
-                "es",
-                "et",
-                "fi",
-                "fr",
-                "ga",
-                "gl",
-                "hr",
-                "ht",
-                "hu",
-                "is",
-                "it",
-                "iw",
-                "ja",
-                "ko",
-                "lt",
-                "nl",
-                "nb",
-                "pl",
-                "pt",
-                "pt-BR",
-                "ro",
-                "ru",
-                "sk",
-                "sl",
-                "sq",
-                "sr",
-                "sr-Latn",
-                "sv",
-                "tr",
-                "uk",
-                "zh-CN",
-                "zh-TW",
-            )
-        }
+        val languageTags = remember { listOf(SYSTEM_DEFAULT) + supportedLocaleTags }
 
         return languageTags.associateWith { languageTag ->
             when (languageTag) {
@@ -110,7 +67,7 @@ object LanguageUtils {
 
                 else -> {
                     Locale.forLanguageTag(languageTag).let { locale ->
-                        locale.getDisplayLanguage(locale).replaceFirstChar { char ->
+                        locale.getDisplayName(locale).replaceFirstChar { char ->
                             if (char.isLowerCase()) char.titlecase(locale) else char.toString()
                         }
                     }
