@@ -47,7 +47,8 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
 
             pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
                 extensions.configure<KotlinMultiplatformExtension> {
-                    sourceSets.getByName("commonMain").dependencies { implementation(roomRuntime) }
+                    // api: the generated database's public supertype is RoomDatabase.
+                    sourceSets.getByName("commonMain").dependencies { api(roomRuntime) }
                 }
                 dependencies { add("kspAndroid", roomCompiler) }
                 dependencies { add("kspJvm", roomCompiler) }
