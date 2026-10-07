@@ -101,7 +101,7 @@ modules:
         # flavor); distributionSha256Sum verifies this file. Renovate bumps the version here
         # alongside wrapper bumps (custom manager in renovate.json) but the sha256 must be
         # copied from distributionSha256Sum by hand; CI fails fast on any mismatch.
-        url: https://services.gradle.org/distributions/gradle-9.8.0-bin.zip
+        url: https://services.gradle.org/distributions/gradle-9.8.1-bin.zip
         sha256: bafd5ce9cfaea0fbccfdc8439a1ac42fbd4cd9c89dc9a988228d8a2639a58e6c
         dest: "gradle/wrapper"
         dest-filename: "gradle-bin.zip"
