@@ -79,22 +79,19 @@ jobs:
 
       # JBR resolves its version list via the GitHub API — unauthenticated requests
       # rate-limit on the shared runner IPs, so the token is required, not optional.
-      # Non-fatal, matching .github/actions/gradle-setup: Gradle falls back to Foojay.
+      # Fatal: foojay lists no JBR 25, so the build cannot configure without it.
       - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
-        id: setup-jbr
-        continue-on-error: true
         with:
           distribution: jetbrains
           java-version: 25
+          set-default: false
           token: ${{ github.token }}
 
-      - name: JBR setup failed, Gradle needs it from the toolchain cache
-        if: steps.setup-jbr.outcome == 'failure'
-        run: echo "::warning::JBR setup-java failed. foojay lists no JBR 25, so Gradle only finds one in a restored toolchain cache."
-
+      # The build below uses its own Gradle user home, so a cache here is never read.
       - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          cache-disabled: true
 
       # Isolated Gradle user home (rationale in release.yml): capture only sees cache
       # MISSES, so caching this directory would empty the manifest, not speed it up.

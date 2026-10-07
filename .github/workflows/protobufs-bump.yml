@@ -59,7 +59,6 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: 'never'
           cache_read_only: 'true'
-          cache_robolectric: 'false'
 
       # The sync is run to see what it would change; the result is not committed here.
       - name: Preview the schema strings at the new pin

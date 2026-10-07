@@ -50,7 +50,6 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           # Dokka runs commonizeNativeDistribution, which reads ~/.konan.
           cache_konan: 'true'
-          cache_robolectric: 'false'
 
       - name: Setup Ruby
         if: env.BUILD_SITE == 'true'

@@ -205,6 +205,7 @@ jobs:
       matrix:
         shard:
           - name: shard-core
+            flags: core
             tasks: >-
               :core:ble:allTests
               :core:common:allTests
@@ -235,6 +236,7 @@ jobs:
               :core:testing:koverXmlReport
               :core:ui:koverXmlReport
           - name: shard-feature
+            flags: core feature
             tasks: >-
               :core:service:allTests
               :feature:connections:allTests
@@ -266,6 +268,7 @@ jobs:
               :feature:settings:koverXmlReport
               :feature:wifi-provision:koverXmlReport
           - name: shard-app
+            flags: core feature app desktop
             tasks: >-
               :androidApp:testFdroidDebugUnitTest
               :androidApp:testGoogleDebugUnitTest
@@ -301,6 +304,7 @@ jobs:
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
           cache_konan: 'true'
+          cache_robolectric: 'true'
 
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
         run: |
@@ -333,9 +337,10 @@ jobs:
       # Flags are tagged by logical module group (core/feature/app/desktop), matching
       # codecov.yml's flags/component_management — NOT by shard name. Shards are a CI
       # load-balancing detail; which shard happens to run a module must not change
-      # which Codecov flag its coverage lands under.
+      # which Codecov flag its coverage lands under. matrix.shard.flags lists the groups a
+      # shard has reports for, so a shard skips the uploads that would find nothing.
       - name: Upload test results to Codecov (core)
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && contains(matrix.shard.flags, 'core') }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -347,7 +352,7 @@ jobs:
           files: "core/**/build/test-results/**/*.xml"
 
       - name: Upload test results to Codecov (feature)
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && contains(matrix.shard.flags, 'feature') }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -359,7 +364,7 @@ jobs:
           files: "feature/**/build/test-results/**/*.xml"
 
       - name: Upload test results to Codecov (app)
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && contains(matrix.shard.flags, 'app') }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -371,7 +376,7 @@ jobs:
           files: "androidApp/build/test-results/**/*.xml"
 
       - name: Upload test results to Codecov (desktop)
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && contains(matrix.shard.flags, 'desktop') }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -383,7 +388,7 @@ jobs:
           files: "desktopApp/build/test-results/**/*.xml"
 
       - name: Upload coverage to Codecov (core)
-        if: ${{ !cancelled() && inputs.run_coverage }}
+        if: ${{ !cancelled() && contains(matrix.shard.flags, 'core') && inputs.run_coverage }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -394,7 +399,7 @@ jobs:
           files: "core/**/build/reports/kover/report*.xml"
 
       - name: Upload coverage to Codecov (feature)
-        if: ${{ !cancelled() && inputs.run_coverage }}
+        if: ${{ !cancelled() && contains(matrix.shard.flags, 'feature') && inputs.run_coverage }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -405,7 +410,7 @@ jobs:
           files: "feature/**/build/reports/kover/report*.xml"
 
       - name: Upload coverage to Codecov (app)
-        if: ${{ !cancelled() && inputs.run_coverage }}
+        if: ${{ !cancelled() && contains(matrix.shard.flags, 'app') && inputs.run_coverage }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -416,7 +421,7 @@ jobs:
           files: "androidApp/build/reports/kover/report*.xml"
 
       - name: Upload coverage to Codecov (desktop)
-        if: ${{ !cancelled() && inputs.run_coverage }}
+        if: ${{ !cancelled() && contains(matrix.shard.flags, 'desktop') && inputs.run_coverage }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
