@@ -18,9 +18,9 @@ docs/
 │   ├── index.md                              ← Site home page
 │   ├── user.md                               ← User Guide nav parent
 │   └── developer.md                          ← Developer Guide nav parent
-├── fr-rFR/                                   ← French (Crowdin-generated)
+├── fr/                                       ← French (Crowdin-generated)
 │   └── user/                                 ← Translated user guide
-├── de-rDE/                                   ← German (Crowdin-generated)
+├── de/                                       ← German (Crowdin-generated)
 │   └── user/
 └── ...                                       ← Other locales
 ```
@@ -45,7 +45,8 @@ docs/
 
 1. English source files (`docs/en/user/*.md`) are uploaded to Crowdin as translation sources
 2. Volunteers translate via the Crowdin web UI
-3. Crowdin PRs land translated files at `docs/{android_code}/user/*.md` (e.g., `fr-rFR`, `pt-rBR`)
+3. Crowdin PRs land translated files at `docs/{locale}/user/*.md`, named like the app's `values-*` directories
+   (`fr`, `pt-rBR`, `b+sr+Latn`)
 4. At build time, the Gradle `syncTranslatedDocsToComposeResources` task bundles them into
    locale-qualified Compose Resources for the in-app reader
 5. The in-app `DocBundleLoader` tries the user's locale first, then falls back to English

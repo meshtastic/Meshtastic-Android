@@ -35,64 +35,64 @@ defaults:
   # They use a dedicated locale layout with a back-link to the English version.
   # Auto-generated from Android app locales (values-* resource dirs).
   - scope:
-      path: "ar-rSA"
+      path: "ar"
     values:
       layout: locale_page
-      locale: ar-rSA
+      locale: ar
       nav_exclude: true
   - scope:
-      path: "be-rBY"
+      path: "be"
     values:
       layout: locale_page
-      locale: be-rBY
+      locale: be
       nav_exclude: true
   - scope:
-      path: "bg-rBG"
+      path: "bg"
     values:
       layout: locale_page
-      locale: bg-rBG
+      locale: bg
       nav_exclude: true
   - scope:
-      path: "ca-rES"
+      path: "ca"
     values:
       layout: locale_page
-      locale: ca-rES
+      locale: ca
       nav_exclude: true
   - scope:
-      path: "cs-rCZ"
+      path: "cs"
     values:
       layout: locale_page
-      locale: cs-rCZ
+      locale: cs
       nav_exclude: true
   - scope:
-      path: "de-rDE"
+      path: "de"
     values:
       layout: locale_page
-      locale: de-rDE
+      locale: de
       nav_exclude: true
   - scope:
-      path: "el-rGR"
+      path: "el"
     values:
       layout: locale_page
-      locale: el-rGR
+      locale: el
       nav_exclude: true
   - scope:
-      path: "es-rES"
+      path: "es"
     values:
       layout: locale_page
-      locale: es-rES
+      locale: es
       nav_exclude: true
   - scope:
-      path: "et-rEE"
+      path: "et"
     values:
       layout: locale_page
-      locale: et-rEE
+      locale: et
       nav_exclude: true
   - scope:
-      path: "fi-rFI"
+      path: "fi"
     values:
       layout: locale_page
-      locale: fi-rFI
+      locale: fi
       nav_exclude: true
   - scope:
       path: "fr-rCA"
@@ -101,100 +101,100 @@ defaults:
       locale: fr-rCA
       nav_exclude: true
   - scope:
-      path: "fr-rFR"
+      path: "fr"
     values:
       layout: locale_page
-      locale: fr-rFR
+      locale: fr
       nav_exclude: true
   - scope:
-      path: "ga-rIE"
+      path: "ga"
     values:
       layout: locale_page
-      locale: ga-rIE
+      locale: ga
       nav_exclude: true
   - scope:
-      path: "gl-rES"
+      path: "gl"
     values:
       layout: locale_page
-      locale: gl-rES
+      locale: gl
       nav_exclude: true
   - scope:
-      path: "iw-rIL"
+      path: "he"
     values:
       layout: locale_page
-      locale: iw-rIL
+      locale: he
       nav_exclude: true
   - scope:
-      path: "hr-rHR"
+      path: "hr"
     values:
       layout: locale_page
-      locale: hr-rHR
+      locale: hr
       nav_exclude: true
   - scope:
-      path: "ht-rHT"
+      path: "ht"
     values:
       layout: locale_page
-      locale: ht-rHT
+      locale: ht
       nav_exclude: true
   - scope:
-      path: "hu-rHU"
+      path: "hu"
     values:
       layout: locale_page
-      locale: hu-rHU
+      locale: hu
       nav_exclude: true
   - scope:
-      path: "is-rIS"
+      path: "is"
     values:
       layout: locale_page
-      locale: is-rIS
+      locale: is
       nav_exclude: true
   - scope:
-      path: "it-rIT"
+      path: "it"
     values:
       layout: locale_page
-      locale: it-rIT
+      locale: it
       nav_exclude: true
   - scope:
-      path: "ja-rJP"
+      path: "ja"
     values:
       layout: locale_page
-      locale: ja-rJP
+      locale: ja
       nav_exclude: true
   - scope:
-      path: "ko-rKR"
+      path: "ko"
     values:
       layout: locale_page
-      locale: ko-rKR
+      locale: ko
       nav_exclude: true
   - scope:
-      path: "lt-rLT"
+      path: "lt"
     values:
       layout: locale_page
-      locale: lt-rLT
+      locale: lt
       nav_exclude: true
   - scope:
-      path: "nl-rNL"
+      path: "nl"
     values:
       layout: locale_page
-      locale: nl-rNL
+      locale: nl
       nav_exclude: true
   - scope:
-      path: "no-rNO"
+      path: "nb"
     values:
       layout: locale_page
-      locale: no-rNO
+      locale: nb
       nav_exclude: true
   - scope:
-      path: "pl-rPL"
+      path: "pl"
     values:
       layout: locale_page
-      locale: pl-rPL
+      locale: pl
       nav_exclude: true
   - scope:
-      path: "pt-rPT"
+      path: "pt"
     values:
       layout: locale_page
-      locale: pt-rPT
+      locale: pt
       nav_exclude: true
   - scope:
       path: "pt-rBR"
@@ -203,64 +203,64 @@ defaults:
       locale: pt-rBR
       nav_exclude: true
   - scope:
-      path: "ro-rRO"
+      path: "ro"
     values:
       layout: locale_page
-      locale: ro-rRO
+      locale: ro
       nav_exclude: true
   - scope:
-      path: "ru-rRU"
+      path: "ru"
     values:
       layout: locale_page
-      locale: ru-rRU
+      locale: ru
       nav_exclude: true
   - scope:
-      path: "sk-rSK"
+      path: "sk"
     values:
       layout: locale_page
-      locale: sk-rSK
+      locale: sk
       nav_exclude: true
   - scope:
-      path: "sl-rSI"
+      path: "sl"
     values:
       layout: locale_page
-      locale: sl-rSI
+      locale: sl
       nav_exclude: true
   - scope:
-      path: "sq-rAL"
+      path: "sq"
     values:
       layout: locale_page
-      locale: sq-rAL
+      locale: sq
       nav_exclude: true
   - scope:
-      path: "sr-rLatn"
+      path: "b+sr+Latn"
     values:
       layout: locale_page
-      locale: sr-rLatn
+      locale: b+sr+Latn
       nav_exclude: true
   - scope:
-      path: "srp"
+      path: "sr"
     values:
       layout: locale_page
-      locale: srp
+      locale: sr
       nav_exclude: true
   - scope:
-      path: "sv-rSE"
+      path: "sv"
     values:
       layout: locale_page
-      locale: sv-rSE
+      locale: sv
       nav_exclude: true
   - scope:
-      path: "tr-rTR"
+      path: "tr"
     values:
       layout: locale_page
-      locale: tr-rTR
+      locale: tr
       nav_exclude: true
   - scope:
-      path: "uk-rUA"
+      path: "uk"
     values:
       layout: locale_page
-      locale: uk-rUA
+      locale: uk
       nav_exclude: true
   - scope:
       path: "zh-rCN"

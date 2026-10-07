@@ -43,6 +43,6 @@ actual fun currentLocaleCode(): String = "en"
 
 actual fun currentRegionCode(): String = ""
 
-actual fun currentLocaleQualifier(): String = "en"
+actual fun currentLocaleTag(): String = "en"
 
 actual fun String?.isValidAddress(): Boolean = false

@@ -16,8 +16,12 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
+import org.meshtastic.buildlogic.DEFAULT_LOCALE_TAG
+import org.meshtastic.buildlogic.GenerateLocaleConfigTask
+import org.meshtastic.buildlogic.LocaleQualifiersValueSource
 import org.meshtastic.buildlogic.configProperties
 import org.meshtastic.buildlogic.resolveVersionInfo
+import org.meshtastic.buildlogic.resourceLocaleFilters
 import java.util.Properties
 
 val versionInfo = resolveVersionInfo()
@@ -45,6 +49,9 @@ if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
+// The values-* directories Crowdin writes are the one list of shipped locales.
+val appResourcesDir = isolated.rootProject.projectDirectory.dir("core/resources/src/commonMain/composeResources")
+
 configure<ApplicationExtension> {
     namespace = "org.meshtastic.app"
 
@@ -71,57 +78,16 @@ configure<ApplicationExtension> {
         versionName = versionInfo.versionName
         buildConfigField("String", "MIN_FW_VERSION", "\"${versionInfo.minFwVersion}\"")
         buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${versionInfo.absMinFwVersion}\"")
-        // We have to list all translated languages here,
-        // because some of our libs have bogus languages that google play
-        // doesn't like and we need to strip them (gr)
+        // Filter library resources to the translated languages, because some libs ship bogus languages that Google
+        // Play rejects (gr).
         val ci = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
         if (ci) {
             logger.lifecycle("CI build detected - limiting locale filters for faster packaging")
-            androidResources.localeFilters.addAll(listOf("en"))
+            androidResources.localeFilters.addAll(listOf(DEFAULT_LOCALE_TAG))
         } else {
-            androidResources.localeFilters.addAll(
-                listOf(
-                    "en",
-                    "ar",
-                    "bg",
-                    "ca",
-                    "cs",
-                    "de",
-                    "el",
-                    "es",
-                    "et",
-                    "fi",
-                    "fr",
-                    "ga",
-                    "gl",
-                    "hr",
-                    "ht",
-                    "hu",
-                    "is",
-                    "it",
-                    "iw",
-                    "ja",
-                    "ko",
-                    "lt",
-                    "nl",
-                    "no",
-                    "pl",
-                    "pt",
-                    "pt-rBR",
-                    "ro",
-                    "ru",
-                    "sk",
-                    "sl",
-                    "sq",
-                    "sr",
-                    "srp",
-                    "sv",
-                    "tr",
-                    "uk",
-                    "zh-rCN",
-                    "zh-rTW",
-                ),
-            )
+            val qualifiers =
+                providers.of(LocaleQualifiersValueSource::class) { parameters.resourcesDir.set(appResourcesDir) }.get()
+            androidResources.localeFilters.addAll(resourceLocaleFilters(qualifiers))
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") }
     }
@@ -213,6 +179,15 @@ configurations
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
         variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
+    }
+    onVariants { variant ->
+        val generateLocaleConfig =
+            tasks.register<GenerateLocaleConfigTask>(
+                "generate${variant.name.replaceFirstChar { it.uppercase() }}LocaleConfig",
+            ) {
+                resourcesDir.set(appResourcesDir)
+            }
+        variant.sources.res?.addGeneratedSourceDirectory(generateLocaleConfig, GenerateLocaleConfigTask::outputDir)
     }
 }
 

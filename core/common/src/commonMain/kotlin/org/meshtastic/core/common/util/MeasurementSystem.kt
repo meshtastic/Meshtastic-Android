@@ -50,11 +50,8 @@ expect fun currentLocaleCode(): String
  */
 expect fun currentRegionCode(): String
 
-/**
- * Returns the device locale as a CMP resource qualifier string. Examples: "pt-rBR", "zh-rCN", "fr" (no region when not
- * specified). Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".
- */
-expect fun currentLocaleQualifier(): String
+/** Returns the device locale as a BCP 47 language tag, script and region included: "sr-Latn-RS", "pt-BR", "fr". */
+expect fun currentLocaleTag(): String
 
 /**
  * The Unicode locale extension key carrying the user's measurement-system override.
