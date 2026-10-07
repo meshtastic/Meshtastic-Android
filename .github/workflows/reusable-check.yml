@@ -307,7 +307,6 @@ jobs:
           # restored, and the shards race to save the same konan key. PR shards already restore shard-feature's.
           cache_read_only: ${{ (env.GRADLE_CACHE_READ_ONLY == 'true' || matrix.shard.name != 'shard-feature') && 'true' || 'false' }}
           cache_konan: 'true'
-          cache_robolectric: 'true'
 
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
         run: |
@@ -639,14 +638,14 @@ jobs:
         # running this exact task list unflagged on all four runners. Keep the escape
         # pinned to the one OS that needs it, and drop it when CMP stops reaching for
         # the root project.
-        # Both flags go together: IP implies the configuration cache, and Gradle refuses
-        # --no-configuration-cache while IP is still on. Flags, not -D properties —
+        # The configuration cache stays on: without it Gradle runs :desktopApp's tasks one at a
+        # time, and ProGuard alone added 130-160 s after packaging. Flags, not -D properties —
         # -Dorg.gradle.isolated-projects=false is inert on windows-latest. --no-isolated-projects
         # needs Gradle 9.7+, so a pin-back below 9.7 has to revert this line with it.
         # The daemon flag is quoted because PowerShell splits an unquoted -P argument at its first dot.
         run: >
           ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true "-Pkotlin.daemon.useFallbackStrategy=false"
-          ${{ runner.os == 'Windows' && '--no-isolated-projects --no-configuration-cache' || '' }}
+          ${{ runner.os == 'Windows' && '--no-isolated-projects' || '' }}
 
       # CMP's TargetFormat.AppImage is jpackage's "app-image" — an unpacked directory, not
       # a Linux .AppImage. Wrap it into a real AppImage, same as the release workflow.
