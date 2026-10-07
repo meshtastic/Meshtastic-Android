@@ -52,7 +52,7 @@ suspend fun estimateCoverageGeoJson(
 fun rememberCoverageEstimate(): suspend (SitePlannerParams) -> String {
     val dispatchers: CoroutineDispatchers = koinInject()
     return remember(dispatchers) {
-        val store = TerrainTileStore(FileSystem.SYSTEM, coverageTerrainDirectory())
+        val store = TerrainTileStore(coverageFileSystem(), coverageTerrainDirectory())
         val estimate: suspend (SitePlannerParams) -> String = { params ->
             estimateCoverageGeoJson(params, store, dispatchers.default)
         }
@@ -65,6 +65,9 @@ fun rememberCoverageEstimate(): suspend (SitePlannerParams) -> String {
  * estimate never changes the size and tile count a region reports.
  */
 internal expect fun coverageTerrainDirectory(): Path
+
+/** The platform file system the terrain cache lives on; common okio has no `FileSystem.SYSTEM`. */
+internal expect fun coverageFileSystem(): FileSystem
 
 /** The planner form's transmitter as the coverage model's site. */
 internal fun SitePlannerParams.toSite(): Site = Site(

@@ -16,9 +16,12 @@
  */
 package org.meshtastic.feature.coverage
 
+import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 
 /** Beside the desktop's offline terrain in `~/.meshtastic/terrain`. */
 internal actual fun coverageTerrainDirectory(): Path =
     "${System.getProperty("user.home")}/.meshtastic/terrain/coverage".toPath()
+
+internal actual fun coverageFileSystem(): FileSystem = FileSystem.SYSTEM

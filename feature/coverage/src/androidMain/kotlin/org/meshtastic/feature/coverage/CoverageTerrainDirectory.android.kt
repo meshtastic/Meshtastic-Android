@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.coverage
 
+import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import org.meshtastic.core.common.ContextServices
@@ -24,3 +25,5 @@ import java.io.File
 /** App-internal storage, so cached terrain is private to the app and removed with it. */
 internal actual fun coverageTerrainDirectory(): Path =
     File(ContextServices.app.filesDir, "terrain/coverage").absolutePath.toPath()
+
+internal actual fun coverageFileSystem(): FileSystem = FileSystem.SYSTEM
