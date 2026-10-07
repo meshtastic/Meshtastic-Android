@@ -52,8 +52,8 @@ class RootConventionPlugin : Plugin<Project> {
 }
 
 /**
- * Registers a `kmpSmokeCompile` lifecycle task that depends on `compileKotlinJvm` and `compileKotlinIosSimulatorArm64`
- * tasks from all KMP modules, plus `assembleAndroidDeviceTest` for [DEVICE_TEST_MODULES], using task path strings.
+ * Registers a `kmpSmokeCompile` lifecycle task that depends on the common metadata, JVM, iOS Simulator ARM64 and iOS
+ * test compiles of all KMP modules, plus `assembleAndroidDeviceTest` for [DEVICE_TEST_MODULES], by task path.
  *
  * Non-KMP modules simply won't have these tasks, so the path-based dependencies will be silently ignored.
  */
@@ -61,11 +61,16 @@ private fun Project.registerKmpSmokeCompileTask() {
     val kmp = kmpModules()
     tasks.register("kmpSmokeCompile") {
         group = "verification"
-        description = "Compile all KMP modules for JVM and iOS Simulator ARM64, and assemble the device-test APKs."
+        description = "Compile all KMP modules' common metadata, JVM, iOS and iOS tests, and assemble device-test APKs."
 
         kmp.forEach { path ->
+            // Dokka and the IDE compile commonMain alone, where platform-only APIs (okio's FileSystem.SYSTEM,
+            // MatchGroup.range) don't resolve even though every target compiles.
+            dependsOn("$path:compileCommonMainKotlinMetadata")
             dependsOn("$path:compileKotlinJvm")
             dependsOn("$path:compileKotlinIosSimulatorArm64")
+            // Kotlin/Native rejects backtick test names that JVM accepts, so commonTest also compiles for iOS.
+            dependsOn("$path:compileTestKotlinIosSimulatorArm64")
         }
 
         // Assemble, not just compile, the androidDeviceTest APKs: dexing and packaging failures only show up there.

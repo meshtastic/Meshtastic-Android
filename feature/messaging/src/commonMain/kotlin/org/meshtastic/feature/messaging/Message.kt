@@ -651,6 +651,9 @@ private val LIVE_CODE = Regex("`([^`]+)`")
 
 internal data class LiveStyleSpan(val range: IntRange, val style: InlineStyle)
 
+// Common Kotlin has no MatchGroup.range; every LIVE_* match is its group wrapped in fixed-width delimiters.
+private fun MatchResult.innerRange(delimiterWidth: Int) = (range.first + delimiterWidth)..(range.last - delimiterWidth)
+
 /**
  * Detects live-markdown spans in [source] using simple regex patterns instead of a full GFM AST parser.
  *
@@ -667,19 +670,16 @@ internal fun liveInlineMarkdownStyleRanges(source: String): List<LiveStyleSpan> 
         codeMatches.any { codeMatch -> match.range.first in codeMatch.range || match.range.last in codeMatch.range }
     }
     return buildList {
-        LIVE_BOLD.findAll(source)
-            .filterNot(isBlockedByCodeSpan)
-            .mapNotNull { it.groups[1] }
-            .forEach { add(LiveStyleSpan(it.range, InlineStyle.Bold)) }
-        LIVE_ITALIC.findAll(source)
-            .filterNot(isBlockedByCodeSpan)
-            .mapNotNull { it.groups[1] }
-            .forEach { add(LiveStyleSpan(it.range, InlineStyle.Italic)) }
-        LIVE_STRIKE.findAll(source)
-            .filterNot(isBlockedByCodeSpan)
-            .mapNotNull { it.groups[1] }
-            .forEach { add(LiveStyleSpan(it.range, InlineStyle.Strikethrough)) }
-        codeMatches.mapNotNull { it.groups[1] }.forEach { add(LiveStyleSpan(it.range, InlineStyle.Code)) }
+        LIVE_BOLD.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
+            add(LiveStyleSpan(it.innerRange(2), InlineStyle.Bold))
+        }
+        LIVE_ITALIC.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
+            add(LiveStyleSpan(it.innerRange(1), InlineStyle.Italic))
+        }
+        LIVE_STRIKE.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
+            add(LiveStyleSpan(it.innerRange(2), InlineStyle.Strikethrough))
+        }
+        codeMatches.forEach { add(LiveStyleSpan(it.innerRange(1), InlineStyle.Code)) }
     }
         .sortedWith(compareBy<LiveStyleSpan>({ it.range.first }, { it.range.last }, { it.style.ordinal }))
 }

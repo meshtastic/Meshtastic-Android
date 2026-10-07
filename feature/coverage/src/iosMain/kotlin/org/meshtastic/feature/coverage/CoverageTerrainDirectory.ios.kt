@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.coverage
 
+import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import platform.Foundation.NSDocumentDirectory
@@ -27,3 +28,5 @@ internal actual fun coverageTerrainDirectory(): Path {
     val documents = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).first() as String
     return "$documents/terrain/coverage".toPath()
 }
+
+internal actual fun coverageFileSystem(): FileSystem = FileSystem.SYSTEM
