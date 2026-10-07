@@ -778,6 +778,17 @@ class RadioControllerImplTest {
     }
 
     @Test
+    fun unfavoritingClearsTheNodesLowBatteryWarning() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val node = Node(num = 99, user = User.Builder().also { wb -> wb.id = "!node99" }.build(), isFavorite = true)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
+
+        controller.setFavorite(99, favorite = false)
+
+        verify { serviceNotifications.cancelLowBatteryNotification(99) }
+    }
+
+    @Test
     fun setFavoriteIsNoOpWhenAlreadyInRequestedState() = runTest {
         val controller = createController(scope = backgroundScope)
         val node = Node(num = 99, user = User.Builder().also { wb -> wb.id = "!node99" }.build(), isFavorite = true)

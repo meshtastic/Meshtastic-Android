@@ -32,6 +32,7 @@ const val SERVICE_NOTIFY_ID = 101
  */
 @Suppress("TooManyFunctions")
 interface MeshNotificationManager {
+    /** Removes every notification and ends every low-battery episode, so the next low reading warns again. */
     fun clearNotifications()
 
     fun initChannels()
@@ -73,13 +74,15 @@ interface MeshNotificationManager {
 
     fun cancelNewNodeNotification(nodeNum: Int)
 
-    /** Posts the low-battery warning for [node], alerting once. */
-    suspend fun showLowBatteryNotification(node: Node, isRemote: Boolean)
+    /**
+     * Warns that [node]'s battery is low. The first reading of an episode posts and alerts; later ones only refresh a
+     * warning still showing, so a dismissed one stays dismissed until [cancelLowBatteryNotification] or
+     * [clearNotifications] ends the episode.
+     */
+    suspend fun notifyLowBattery(node: Node, isRemote: Boolean)
 
-    /** Refreshes a still-showing low-battery warning with [node]'s current level; never re-posts a dismissed one. */
-    suspend fun updateLowBatteryNotification(node: Node, isRemote: Boolean)
-
-    fun cancelLowBatteryNotification(node: Node)
+    /** Ends [nodeNum]'s low-battery episode and removes its warning. */
+    fun cancelLowBatteryNotification(nodeNum: Int)
 
     /**
      * [title] and [severity] come from the notification's kind, which shared code classifies once for every platform.
