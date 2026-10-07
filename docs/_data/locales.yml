@@ -75,7 +75,7 @@ lt:
 nl:
   name: "Nederlands"
   dir: ltr
-"no":
+nb:
   name: "Norsk"
   dir: ltr
 pl:

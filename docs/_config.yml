@@ -179,10 +179,10 @@ defaults:
       locale: nl
       nav_exclude: true
   - scope:
-      path: "no"
+      path: "nb"
     values:
       layout: locale_page
-      locale: "no"
+      locale: nb
       nav_exclude: true
   - scope:
       path: "pl"

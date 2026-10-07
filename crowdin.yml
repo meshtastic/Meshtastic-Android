@@ -19,6 +19,8 @@ files:
         sr: sr
         sr-Latn: b+sr+Latn
         fr-CA: fr-rCA
+        # Devices report Norwegian Bokmål as `nb`, which CMP never matches to `no`.
+        "no": nb
         # Pinned so the md docs render what the android strings already do.
         pt-BR: pt-rBR
         zh-CN: zh-rCN
