@@ -38,6 +38,11 @@ class ResolveLocaleTest {
     }
 
     @Test
+    fun `a script in the preference survives taking the system region`() {
+        assertEquals(Locale.forLanguageTag("sr-Latn-RS"), resolveLocale("sr-Latn", Locale.forLanguageTag("sr-RS")))
+    }
+
+    @Test
     fun `no preference leaves the system locale untouched`() {
         val system = Locale.forLanguageTag("fr-FR")
         assertEquals(system, resolveLocale("", system))

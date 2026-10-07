@@ -114,7 +114,7 @@ configure<ApplicationExtension> {
                     "sl",
                     "sq",
                     "sr",
-                    "srp",
+                    "b+sr+Latn",
                     "sv",
                     "tr",
                     "uk",

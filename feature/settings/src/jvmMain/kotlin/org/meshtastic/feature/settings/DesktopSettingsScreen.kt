@@ -350,6 +350,7 @@ private val SUPPORTED_LANGUAGES =
         "sl" to "Slovenščina",
         "sq" to "Shqip",
         "sr" to "Српски",
+        "sr-Latn" to "Srpski (latinica)",
         "sv" to "Svenska",
         "tr" to "Türkçe",
         "uk" to "Українська",

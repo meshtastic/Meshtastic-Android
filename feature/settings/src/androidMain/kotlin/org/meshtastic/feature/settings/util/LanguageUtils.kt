@@ -87,7 +87,7 @@ object LanguageUtils {
                 "sl",
                 "sq",
                 "sr",
-                "srp",
+                "sr-Latn",
                 "sv",
                 "tr",
                 "uk",

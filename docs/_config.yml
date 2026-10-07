@@ -233,16 +233,16 @@ defaults:
       locale: sq-rAL
       nav_exclude: true
   - scope:
-      path: "sr-rLatn"
+      path: "b+sr+Latn"
     values:
       layout: locale_page
-      locale: sr-rLatn
+      locale: b+sr+Latn
       nav_exclude: true
   - scope:
-      path: "srp"
+      path: "sr"
     values:
       layout: locale_page
-      locale: srp
+      locale: sr
       nav_exclude: true
   - scope:
       path: "sv-rSE"

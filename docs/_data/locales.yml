@@ -102,11 +102,11 @@ sl-rSI:
 sq-rAL:
   name: "Shqip"
   dir: ltr
-sr-rLatn:
-  name: "Српски (Latinica)"
+b+sr+Latn:
+  name: "Srpski (latinica)"
   dir: ltr
-srp:
-  name: "Српски (Ћирилица)"
+sr:
+  name: "Српски (ћирилица)"
   dir: ltr
 sv-rSE:
   name: "Svenska"
