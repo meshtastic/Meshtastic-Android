@@ -18,7 +18,7 @@ package org.meshtastic.app.ai.appfunctions
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.appfunctions.AppFunction
+import androidx.appfunctions.AppFunctionDeclaration
 import androidx.appfunctions.AppFunctionIntValueConstraint
 import androidx.appfunctions.AppFunctionService
 import androidx.appfunctions.AppFunctionServiceEntryPoint
@@ -54,7 +54,7 @@ abstract class BaseMeshtasticAppFunctionService : AppFunctionService() {
      *   recipientName is specified.
      * @return A [SendMessageResponse] with the message ID, channel, and timestamp.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun sendMessage(
         text: String,
         recipientName: String? = null,
@@ -69,7 +69,7 @@ abstract class BaseMeshtasticAppFunctionService : AppFunctionService() {
      *
      * @return A [MeshStatusResponse] with the current mesh network status.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getMeshStatus(): MeshStatusResponse = appFunctions.getMeshStatus()
 
     /**
@@ -80,7 +80,7 @@ abstract class BaseMeshtasticAppFunctionService : AppFunctionService() {
      *
      * @return A list of nodes with their current status and metrics.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getNodeList(): GetNodeListResponse = appFunctions.getNodeList()
 
     /**
@@ -90,7 +90,7 @@ abstract class BaseMeshtasticAppFunctionService : AppFunctionService() {
      *
      * @return A list of channels with their current configuration.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getChannelInfo(): GetChannelInfoResponse = appFunctions.getChannelInfo()
 
     /**
@@ -100,7 +100,7 @@ abstract class BaseMeshtasticAppFunctionService : AppFunctionService() {
      *
      * @return Device status with current metrics and configuration.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getDeviceStatus(): GetDeviceStatusResponse = appFunctions.getDeviceStatus()
 
     /**
@@ -111,7 +111,7 @@ abstract class BaseMeshtasticAppFunctionService : AppFunctionService() {
      * @param nodeId The target node ID (e.g., '!abc12345' or user ID).
      * @return A [GetNodeDetailsResponse] with detailed node information.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getNodeDetails(nodeId: String): GetNodeDetailsResponse = appFunctions.getNodeDetails(nodeId)
 
     /**
@@ -121,7 +121,7 @@ abstract class BaseMeshtasticAppFunctionService : AppFunctionService() {
      *
      * @return A [GetMeshMetricsResponse] with mesh-wide statistics.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getMeshMetrics(): GetMeshMetricsResponse = appFunctions.getMeshMetrics()
 
     /**
@@ -135,7 +135,7 @@ abstract class BaseMeshtasticAppFunctionService : AppFunctionService() {
      * @param limit Maximum number of messages to return: 1, 5, 10, 20 or 50. Defaults to 20.
      * @return A [GetRecentMessagesResponse] containing the list of recent messages.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getRecentMessages(
         contactName: String? = null,
         @AppFunctionIntValueConstraint(enumValues = [1, 5, 10, 20, 50])
@@ -150,6 +150,6 @@ abstract class BaseMeshtasticAppFunctionService : AppFunctionService() {
      *
      * @return A [GetUnreadSummaryResponse] with the total unread count and per-contact details.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getUnreadSummary(): GetUnreadSummaryResponse = appFunctions.getUnreadSummary()
 }
