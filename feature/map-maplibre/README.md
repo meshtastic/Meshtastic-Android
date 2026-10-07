@@ -54,9 +54,8 @@ custom tile-source store and editor.
   list it, and never fetch a tile — hence `offlineMapsSupported`, off by default.
 - **`mbtiles://` needs a file that exists.** Pointing the native MBTiles source at a missing path aborts the process
   from a native thread, with no Kotlin frame to catch.
-- **`maplibre-compose` 0.15.0's `drawAsSdf` is broken.** `ImageManager.acquirePainter` computes `toSdf()`, stores it
-  where nothing reads it, and uploads the unconverted bitmap while telling MapLibre to read it as an SDF. Nothing
-  here uses it; `NodeChipLayer` says so too.
+- **Node chips are rasterized, not drawn as text.** The basemap glyphs have no emoji, and a short name can be one, so
+  a text layer over a tinted `drawAsSdf` sprite would drop those labels. `NodeChipLayer` explains the rest.
 
 ## Testing
 

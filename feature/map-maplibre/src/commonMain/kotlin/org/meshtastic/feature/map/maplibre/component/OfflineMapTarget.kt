@@ -30,6 +30,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -58,6 +60,8 @@ import org.meshtastic.core.resources.map_cache_tiles
 import org.meshtastic.core.resources.map_download_status_complete
 import org.meshtastic.core.resources.map_download_status_downloading
 import org.meshtastic.core.resources.map_download_status_paused
+import org.meshtastic.core.resources.map_offline_create_failed
+import org.meshtastic.core.resources.map_offline_unavailable
 import org.meshtastic.core.resources.map_select_download_region
 import org.meshtastic.core.resources.map_start_download
 import org.meshtastic.core.resources.map_tile_download_estimate
@@ -91,8 +95,9 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
     // the one every map here uses, so its packs are the ones the user sees on the map.
     val manager = DefaultMapRuntime.instance.offlineManager
     val scope = rememberCoroutineScope()
-    val managerState by manager.state.collectAsStateWithLifecycle()
+    val managerState = manager.state.collectAsStateWithLifecycle().value
     val packs = (managerState as? OfflineManagerState.Ready)?.packs.orEmpty()
+    var createFailed by remember { mutableStateOf(false) }
     // A pack definition now carries the pixel ratio it was downloaded at, so the tiles match this display.
     val pixelRatio = LocalDensity.current.density
 
@@ -107,31 +112,63 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
         DownloadEstimateLines(estimate = estimate, range = range)
 
         Button(
-            onClick = { scope.launch { manager.downloadVisibleArea(target, pixelRatio) } },
-            enabled = target.styleUrl != null && estimate > 0L,
+            onClick = {
+                createFailed = false
+                scope.launch { createFailed = !manager.downloadVisibleArea(target, pixelRatio) }
+            },
+            enabled = canDownloadOfflinePack(managerState, target.styleUrl, estimate),
             modifier = Modifier.padding(vertical = 8.dp),
         ) {
             Text(text = stringResource(Res.string.map_start_download))
         }
 
-        if (packs.isEmpty()) {
+        if (createFailed) {
             Text(
-                text = stringResource(Res.string.offline_maps_empty),
+                text = stringResource(Res.string.map_offline_create_failed),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.error,
             )
-        } else {
-            packs.forEach { pack ->
-                OfflinePackRow(
-                    pack = pack,
-                    onShow = { bounds -> onShowRegion(bounds) },
-                    // Hygiene, not an ANR fix: `resume` only posts onto the offline runtime's owner thread,
-                    // taking its lock just long enough to enqueue — this dispatch merely keeps that acquisition
-                    // off the frame path.
-                    onToggle = { scope.launch(ioDispatcher) { manager.resume(pack) } },
-                    onDelete = { scope.launch { manager.delete(pack) } },
+        }
+
+        when {
+            managerState is OfflineManagerState.Loading ->
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
+
+            managerState is OfflineManagerState.Failed -> {
+                Text(
+                    text = stringResource(Res.string.map_offline_unavailable),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
                 )
+                // Upstream's message, which is not ours to localise.
+                managerState.cause.message?.let { detail ->
+                    Text(
+                        text = detail,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
+
+            packs.isEmpty() ->
+                Text(
+                    text = stringResource(Res.string.offline_maps_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+            else ->
+                packs.forEach { pack ->
+                    OfflinePackRow(
+                        pack = pack,
+                        onShow = { bounds -> onShowRegion(bounds) },
+                        // Hygiene, not an ANR fix: `resume` only posts onto the offline runtime's owner thread,
+                        // taking its lock just long enough to enqueue — this dispatch merely keeps that acquisition
+                        // off the frame path.
+                        onToggle = { scope.launch(ioDispatcher) { manager.resume(pack) } },
+                        onDelete = { scope.launch { manager.delete(pack) } },
+                    )
+                }
         }
     }
 }
