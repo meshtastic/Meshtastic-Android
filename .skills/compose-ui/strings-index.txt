@@ -994,6 +994,7 @@ map_layer_open_failed
 map_layer_too_large
 map_node_popup_details
 map_offline_banner
+map_offline_create_failed
 map_offline_download_failed_build
 map_offline_download_failed_io
 map_offline_download_failed_region_limit
@@ -1009,6 +1010,7 @@ map_offline_terrain_download_complete
 map_offline_terrain_download_failed_io
 map_offline_terrain_download_failed_tile_limit
 map_offline_terrain_downloading_progress
+map_offline_unavailable
 map_overlay_hillshade
 map_overlay_precipitation
 map_overlay_weather_radar

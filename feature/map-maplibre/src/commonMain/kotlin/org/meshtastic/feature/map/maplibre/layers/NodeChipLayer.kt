@@ -75,11 +75,8 @@ import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
  * [org.meshtastic.core.ui.component.NodeChip] renders everywhere else in the app, and that the Google and OSMdroid maps
  * both put on the map.
  *
- * MapLibre cannot lay out a chip: `iconTextFit` sizes a sprite around a text layer, but the sprite it stretches can
- * only be tinted per feature if it is a signed distance field — and maplibre-compose's `drawAsSdf` uploads the
- * *unconverted* bitmap while telling MapLibre to read it as an SDF, so that route renders garbage (`ImageManager`
- * computes `toSdf()`, stores it in a map nothing reads, and passes the raw bitmap to `addImage`). Present on upstream
- * main as of 2026-08-26 and not yet reported; do not reach for `drawAsSdf` here until it is.
+ * A MapLibre text layer cannot draw a chip's label: a short name can be emoji, which the basemap glyphs lack, and it
+ * has no strikethrough or minimum width. So a tinted SDF sprite under `iconTextFit` is no substitute.
  *
  * So the whole chip is rasterized instead, exactly as the Google flavor rasterizes a `NodeChip` per marker. One image
  * per *distinct* chip, and a single layer that picks between them with a `match` on the chip key the feature carries —
