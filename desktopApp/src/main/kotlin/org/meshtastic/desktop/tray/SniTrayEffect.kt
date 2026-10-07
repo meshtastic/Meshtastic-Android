@@ -23,8 +23,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
@@ -81,6 +83,11 @@ internal fun SniTrayEffect(
     val uiScope = rememberCoroutineScope()
 
     DisposableEffect(isDarkTheme, title, tooltip) {
+        // Registration reports run through a scope this effect owns, so one cannot outlive it. uiScope
+        // survives a keyed re-run, so without this an install still in flight could land
+        // `registered = true` after onDispose had already reported false — leaving the close button
+        // trusting a tray that was queued for teardown while its replacement was not up yet.
+        val registrationScope = CoroutineScope(uiScope.coroutineContext + Job())
         // Written and read only on trayDispatcher's single thread, which is what makes it safe without
         // synchronisation: the dispose below queues behind the install, whether or not it has finished.
         var tray: SniTray? = null
@@ -95,14 +102,16 @@ internal fun SniTrayEffect(
                     onActivate = { uiScope.launch { currentActivate() } },
                     onItemClicked = { item -> uiScope.launch { item.onClick() } },
                     onRegistrationChange = { registered ->
-                        uiScope.launch { currentRegistrationChange(registered) }
+                        registrationScope.launch { currentRegistrationChange(registered) }
                     },
                 )
             if (tray == null) Logger.i { "Linux tray unavailable; the close button will quit instead" }
         }
         onDispose {
-            // Report immediately so the close button stops trusting a tray that is being torn down, then
-            // let the tray thread do the blocking teardown in order behind any in-flight install.
+            // Silence this effect's registration reports before saying false, so a late `true` from an
+            // install still in flight cannot overwrite it. Activation and menu clicks deliberately stay on
+            // uiScope: those are user intent and should not be dropped mid theme-change.
+            registrationScope.cancel()
             currentRegistrationChange(false)
             trayScope.launch {
                 tray?.close()
