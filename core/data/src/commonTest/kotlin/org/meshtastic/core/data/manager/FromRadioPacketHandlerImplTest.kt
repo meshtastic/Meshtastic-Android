@@ -221,12 +221,21 @@ class FromRadioPacketHandlerImplTest {
         val xmodemPacket = XModem.Builder().build()
         val lockdownStatus = LockdownStatus.Builder().also { wb -> wb.state = LockdownStatus.State.LOCKED }.build()
 
+        val displayFrame =
+            DisplayFrame.Builder()
+                .also { wb ->
+                    wb.width = 128
+                    wb.height = 64
+                }
+                .build()
+        val displayPalette = DisplayPalette.Builder().also { wb -> wb.signature = 1 }.build()
+
         handle(FromRadio.Builder().also { wb -> wb.mqttClientProxyMessage = proxyMessage }.build())
         handle(FromRadio.Builder().also { wb -> wb.queueStatus = queueStatus }.build())
         handle(FromRadio.Builder().also { wb -> wb.xmodemPacket = xmodemPacket }.build())
         handle(FromRadio.Builder().also { wb -> wb.lockdown_status = lockdownStatus }.build())
-        handle(FromRadio(display_frame = DisplayFrame(width = 128, height = 64)))
-        handle(FromRadio(display_palette = DisplayPalette(signature = 1)))
+        handle(FromRadio.Builder().also { wb -> wb.display_frame = displayFrame }.build())
+        handle(FromRadio.Builder().also { wb -> wb.display_palette = displayPalette }.build())
 
         verify(mode = VerifyMode.exactly(0)) { mqttManager.handleMqttProxyMessage(any()) }
         verify(mode = VerifyMode.exactly(0)) { packetHandler.handleQueueStatus(any()) }
@@ -238,18 +247,32 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `handleFromRadio routes DISPLAY_FRAME to displayMirrorManager`() {
-        val frame = DisplayFrame(width = 128, height = 64, frame_id = 1, total_size = 1024)
+        val frame =
+            DisplayFrame.Builder()
+                .also { wb ->
+                    wb.width = 128
+                    wb.height = 64
+                    wb.frame_id = 1
+                    wb.total_size = 1024
+                }
+                .build()
 
-        handle(FromRadio(display_frame = frame))
+        handle(FromRadio.Builder().also { wb -> wb.display_frame = frame }.build())
 
         verify { displayMirrorManager.handleIncomingFrame(frame) }
     }
 
     @Test
     fun `handleFromRadio routes DISPLAY_PALETTE to displayMirrorManager`() {
-        val palette = DisplayPalette(signature = 7, region_total = 0)
+        val palette =
+            DisplayPalette.Builder()
+                .also { wb ->
+                    wb.signature = 7
+                    wb.region_total = 0
+                }
+                .build()
 
-        handle(FromRadio(display_palette = palette))
+        handle(FromRadio.Builder().also { wb -> wb.display_palette = palette }.build())
 
         verify { displayMirrorManager.handleIncomingPalette(palette) }
     }
