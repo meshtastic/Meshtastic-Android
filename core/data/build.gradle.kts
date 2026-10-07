@@ -44,15 +44,9 @@ kotlin {
             implementation(libs.kermit)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.collections.immutable)
-        }
-
-        // Room / SQLite runtime shared between Android and Desktop JVM targets
-        getByName("jvmAndroidMain") {
-            dependencies {
-                implementation(libs.androidx.room.runtime)
-                implementation(libs.androidx.room.paging)
-                implementation(libs.androidx.sqlite.bundled)
-            }
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.room.paging)
+            implementation(libs.androidx.sqlite.bundled)
         }
 
         androidMain.dependencies {
