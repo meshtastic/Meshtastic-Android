@@ -135,7 +135,7 @@ jobs:
 
       - name: Upload screenshot diff report
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: screenshot-diff-report
           path: screenshot-tests/build/reports/screenshotTest/
@@ -327,7 +327,7 @@ jobs:
       # ejection has to be diagnosed twice.
       - name: Upload JVM crash reports (${{ matrix.shard.name }})
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: jvm-crash-${{ matrix.shard.name }}
           path: |
@@ -437,7 +437,7 @@ jobs:
         # !cancelled(), not always(): a shard cancelled before Gradle ran has no
         # reports, and the upload warns "No files were found" on the way out.
         if: ${{ !cancelled() && inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: reports-${{ matrix.shard.name }}
           path: |
@@ -570,7 +570,7 @@ jobs:
 
       - name: Upload debug artifact
         if: ${{ inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: app-debug-apks
           path: androidApp/build/outputs/apk/*/debug/*.apk
@@ -658,7 +658,7 @@ jobs:
 
       - name: Upload Desktop artifact
         if: ${{ inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: desktop-app-${{ runner.os }}-${{ runner.arch }}
           path: |
