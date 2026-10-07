@@ -19,16 +19,14 @@ package org.meshtastic.desktop.tray
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 /** Light-on-dark tray glyph, used when the system theme is dark. */
 internal const val TRAY_ICON_LIGHT = "tray_icon_white.svg"
@@ -42,17 +40,17 @@ private const val SNI_TRAY_APP_ID = "meshtastic-desktop"
 /**
  * The one thread every blocking D-Bus call is confined to.
  *
- * Two reasons it is single-threaded rather than a pool. It keeps this work off the composition thread: opening the
- * connection, claiming the bus name and registering are each a round trip, and a desktop with no watcher could
- * otherwise stall the UI. And because the thread runs one task at a time, an install and the close that follows it are
- * strictly ordered without any handshake — which is what makes disposal safe while an install is still in flight.
+ * Two reasons it is single-threaded. It keeps this work off the composition thread: opening the connection, claiming
+ * the bus name and registering are each a round trip, and a desktop with no watcher could otherwise stall the UI. And
+ * because it runs one task at a time, an install and the close that follows it are strictly ordered without any
+ * handshake — which is what makes disposal safe while an install is still in flight.
+ *
+ * A bare executor rather than a CoroutineScope: ordered blocking work on one thread is all this needs, and
+ * `CoroutineScopeConstructionTest` rightly forbids production code from minting its own scopes.
  */
-private val trayDispatcher =
-    Executors.newSingleThreadExecutor { runnable -> Thread(runnable, "sni-tray").apply { isDaemon = true } }
-        .asCoroutineDispatcher()
-
-/** Scope for that thread. Deliberately process-lived: a close must still run after its effect is gone. */
-private val trayScope = CoroutineScope(SupervisorJob() + trayDispatcher)
+private val trayExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
+    Thread(runnable, "sni-tray").apply { isDaemon = true }
+}
 
 /**
  * Installs the Linux StatusNotifierItem tray for as long as this composition lives.
@@ -82,38 +80,48 @@ internal fun SniTrayEffect(
     val currentRegistrationChange by rememberUpdatedState(onRegistrationChange)
     val uiScope = rememberCoroutineScope()
 
-    DisposableEffect(isDarkTheme, title, tooltip) {
-        // Registration reports run through a scope this effect owns, so one cannot outlive it. uiScope
-        // survives a keyed re-run, so without this an install still in flight could land
-        // `registered = true` after onDispose had already reported false — leaving the close button
-        // trusting a tray that was queued for teardown while its replacement was not up yet.
-        val registrationScope = CoroutineScope(uiScope.coroutineContext + Job())
-        // Written and read only on trayDispatcher's single thread, which is what makes it safe without
+    // Rasterized on the composition thread, deliberately, and handed to the background install already
+    // done. Skia must be initialised from the UI thread: doing it first from the tray thread left the
+    // EDT spinning forever inside FontMgr.<clinit> -> _nDefault, so the window never appeared and no
+    // queued UI work ever ran. Only D-Bus belongs off this thread; this is pure CPU over two small SVGs.
+    val iconRasters =
+        remember(isDarkTheme) { loadTrayIconRasters(if (isDarkTheme) TRAY_ICON_LIGHT else TRAY_ICON_DARK) }
+
+    DisposableEffect(isDarkTheme, title, tooltip, iconRasters) {
+        // Gates this effect's registration reports. uiScope outlives a keyed re-run, so without it an
+        // install still in flight could land `registered = true` after onDispose had reported false,
+        // leaving the close button trusting a tray already queued for teardown while its replacement was
+        // not up yet. Checked twice: once where the report originates on a D-Bus thread, and again on the
+        // UI thread, since the hop can be queued before disposal and run after it.
+        val reporting = AtomicBoolean(true)
+        // Written and read only on trayExecutor's single thread, which is what makes it safe without
         // synchronisation: the dispose below queues behind the install, whether or not it has finished.
         var tray: SniTray? = null
-        trayScope.launch {
+        trayExecutor.execute {
             tray =
                 SniTray.install(
                     appId = SNI_TRAY_APP_ID,
                     title = title,
                     tooltip = tooltip,
-                    iconRasters = loadTrayIconRasters(if (isDarkTheme) TRAY_ICON_LIGHT else TRAY_ICON_DARK),
+                    iconRasters = iconRasters,
                     menuProvider = { currentMenu },
                     onActivate = { uiScope.launch { currentActivate() } },
                     onItemClicked = { item -> uiScope.launch { item.onClick() } },
                     onRegistrationChange = { registered ->
-                        registrationScope.launch { currentRegistrationChange(registered) }
+                        if (reporting.get()) {
+                            uiScope.launch { if (reporting.get()) currentRegistrationChange(registered) }
+                        }
                     },
                 )
             if (tray == null) Logger.i { "Linux tray unavailable; the close button will quit instead" }
         }
         onDispose {
-            // Silence this effect's registration reports before saying false, so a late `true` from an
-            // install still in flight cannot overwrite it. Activation and menu clicks deliberately stay on
-            // uiScope: those are user intent and should not be dropped mid theme-change.
-            registrationScope.cancel()
+            // Silence this effect's reports before saying false, so a late `true` cannot overwrite it.
+            // Activation and menu clicks deliberately stay ungated: those are user intent and should not
+            // be dropped mid theme-change.
+            reporting.set(false)
             currentRegistrationChange(false)
-            trayScope.launch {
+            trayExecutor.execute {
                 tray?.close()
                 tray = null
             }
