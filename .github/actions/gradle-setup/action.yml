@@ -2,13 +2,10 @@ name: Gradle Setup
 description: Setup Java and Gradle for KMP builds
 inputs:
   cache_read_only:
-    description: 'Whether the Gradle, Kotlin/Native and Robolectric caches are read-only'
+    description: 'Whether the Gradle and Kotlin/Native caches are read-only'
     default: 'true'
   cache_konan:
     description: 'Cache ~/.konan. Only jobs that run Kotlin/Native tasks read it.'
-    default: 'false'
-  cache_robolectric:
-    description: 'Cache the Robolectric android-all jars in ~/.m2. Only jobs that run Robolectric tests read it.'
     default: 'false'
   jdk_distribution:
     description: 'JDK distribution (temurin or jetbrains)'
@@ -104,24 +101,6 @@ runs:
       run: |
         [ -d ~/.konan ] || exit 0
         find ~/.konan -mindepth 1 -maxdepth 1 -name 'kotlin-native-prebuilt-*' ! -name "kotlin-native-prebuilt-*-${KOTLIN_VERSION}" -print -exec rm -rf {} +
-
-    - name: Restore the Robolectric android-all jars
-      if: inputs.cache_robolectric == 'true' && inputs.cache_read_only == 'true'
-      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: ~/.m2/repository/org/robolectric
-        key: robolectric-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml') }}
-        restore-keys: |
-          robolectric-${{ runner.os }}-${{ runner.arch }}-
-
-    - name: Cache the Robolectric android-all jars
-      if: inputs.cache_robolectric == 'true' && inputs.cache_read_only != 'true'
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: ~/.m2/repository/org/robolectric
-        key: robolectric-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml') }}
-        restore-keys: |
-          robolectric-${{ runner.os }}-${{ runner.arch }}-
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
