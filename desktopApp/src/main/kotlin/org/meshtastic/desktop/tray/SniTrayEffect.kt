@@ -21,7 +21,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import java.util.concurrent.Executors
 
 /** Light-on-dark tray glyph, used when the system theme is dark. */
 internal const val TRAY_ICON_LIGHT = "tray_icon_white.svg"
@@ -33,17 +38,33 @@ internal const val TRAY_ICON_DARK = "tray_icon_black.svg"
 private const val SNI_TRAY_APP_ID = "meshtastic-desktop"
 
 /**
+ * The one thread every blocking D-Bus call is confined to.
+ *
+ * Two reasons it is single-threaded rather than a pool. It keeps this work off the composition thread: opening the
+ * connection, claiming the bus name and registering are each a round trip, and a desktop with no watcher could
+ * otherwise stall the UI. And because the thread runs one task at a time, an install and the close that follows it are
+ * strictly ordered without any handshake — which is what makes disposal safe while an install is still in flight.
+ */
+private val trayDispatcher =
+    Executors.newSingleThreadExecutor { runnable -> Thread(runnable, "sni-tray").apply { isDaemon = true } }
+        .asCoroutineDispatcher()
+
+/** Scope for that thread. Deliberately process-lived: a close must still run after its effect is gone. */
+private val trayScope = CoroutineScope(SupervisorJob() + trayDispatcher)
+
+/**
  * Installs the Linux StatusNotifierItem tray for as long as this composition lives.
  *
- * [onRegistrationChange] reports whether a host actually accepted the item, which is what decides whether the close
- * button may hide the window rather than quit — see [canHideToTray].
+ * [onRegistrationChange] reports whether a host is actually showing the item, and can fire more than once: a watcher
+ * may be absent at startup and appear later, or restart and lose its registry. It decides whether the close button may
+ * hide the window rather than quit — see [canHideToTray].
  *
  * Keying on [isDarkTheme] re-registers the item with a freshly rasterized icon when the system theme flips. That is
  * coarser than emitting SNI's `NewIcon` signal, but it keeps the icon correct without hand-rolling signal plumbing, and
  * the item is cheap to republish.
  *
- * Menu clicks and activations arrive on dbus-java reader threads, so both hop onto the composition's dispatcher before
- * touching any Compose state.
+ * Callbacks arrive on D-Bus threads, so each hops onto the composition's dispatcher before touching Compose state; the
+ * D-Bus work itself never runs on the composition thread.
  */
 @Composable
 internal fun SniTrayEffect(
@@ -57,23 +78,36 @@ internal fun SniTrayEffect(
     val currentMenu by rememberUpdatedState(menuItems)
     val currentActivate by rememberUpdatedState(onActivate)
     val currentRegistrationChange by rememberUpdatedState(onRegistrationChange)
-    val scope = rememberCoroutineScope()
+    val uiScope = rememberCoroutineScope()
 
     DisposableEffect(isDarkTheme, title, tooltip) {
-        val tray =
-            SniTray.install(
-                appId = SNI_TRAY_APP_ID,
-                title = title,
-                tooltip = tooltip,
-                iconRasters = loadTrayIconRasters(if (isDarkTheme) TRAY_ICON_LIGHT else TRAY_ICON_DARK),
-                menuProvider = { currentMenu },
-                onActivate = { scope.launch { currentActivate() } },
-                onItemClicked = { item -> scope.launch { item.onClick() } },
-            )
-        currentRegistrationChange(tray != null)
+        // Written and read only on trayDispatcher's single thread, which is what makes it safe without
+        // synchronisation: the dispose below queues behind the install, whether or not it has finished.
+        var tray: SniTray? = null
+        trayScope.launch {
+            tray =
+                SniTray.install(
+                    appId = SNI_TRAY_APP_ID,
+                    title = title,
+                    tooltip = tooltip,
+                    iconRasters = loadTrayIconRasters(if (isDarkTheme) TRAY_ICON_LIGHT else TRAY_ICON_DARK),
+                    menuProvider = { currentMenu },
+                    onActivate = { uiScope.launch { currentActivate() } },
+                    onItemClicked = { item -> uiScope.launch { item.onClick() } },
+                    onRegistrationChange = { registered ->
+                        uiScope.launch { currentRegistrationChange(registered) }
+                    },
+                )
+            if (tray == null) Logger.i { "Linux tray unavailable; the close button will quit instead" }
+        }
         onDispose {
-            tray?.close()
+            // Report immediately so the close button stops trusting a tray that is being torn down, then
+            // let the tray thread do the blocking teardown in order behind any in-flight install.
             currentRegistrationChange(false)
+            trayScope.launch {
+                tray?.close()
+                tray = null
+            }
         }
     }
 }

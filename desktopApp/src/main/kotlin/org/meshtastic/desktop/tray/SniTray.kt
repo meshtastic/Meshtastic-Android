@@ -22,13 +22,18 @@ import co.touchlab.kermit.Logger
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
+import org.freedesktop.dbus.interfaces.DBus
 import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.dbus.types.Variant
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 private const val ITEM_PATH = "/StatusNotifierItem"
 private const val MENU_PATH = "/MenuBar"
 private const val WATCHER_BUS_NAME = "org.kde.StatusNotifierWatcher"
 private const val WATCHER_PATH = "/StatusNotifierWatcher"
+private const val DBUS_BUS_NAME = "org.freedesktop.DBus"
+private const val DBUS_PATH = "/org/freedesktop/DBus"
 
 /** D-Bus signatures the host is strict about; an unannotated variant would marshal as the wrong type. */
 private const val PIXMAP_ARRAY_SIGNATURE = "a(iiay)"
@@ -100,34 +105,55 @@ internal class SniTrayItem(
 }
 
 /**
- * A registered StatusNotifierItem, owning the D-Bus connection it lives on.
+ * A StatusNotifierItem exported on the session bus, owning the connection it lives on.
  *
  * This exists because AWT's tray is XEmbed, and both GNOME and KDE Plasma dropped XEmbed: they surface AWT's icon
  * through an XEmbed-to-SNI proxy (`xembedsniproxy`) that renders it but never delivers clicks back to `TrayIcon`.
- * Speaking SNI directly is what makes the icon clickable — see [canHideToTray], which only permits hide-to-tray on
- * Linux once an item here has actually registered.
+ * Speaking SNI directly is what makes the icon clickable.
+ *
+ * Registration is *not* a one-time fact. A watcher (kded6 under Plasma, the AppIndicator extension under GNOME) can be
+ * absent at startup and appear later, or restart and lose its registry. So the item tracks `NameOwnerChanged` for the
+ * watcher name, re-registers whenever a new owner appears, and reports every transition through `onRegistrationChange`.
+ * [canHideToTray] consumes that, which is what stops the close button from hiding the window into a tray that is no
+ * longer there.
+ *
+ * Every method here blocks on D-Bus round trips. Callers must keep it off the composition thread — see [SniTrayEffect],
+ * which confines all of it to a single dedicated thread.
  */
-internal class SniTray private constructor(private val connection: DBusConnection, private val busName: String) :
-    AutoCloseable {
+internal class SniTray
+private constructor(
+    private val connection: DBusConnection,
+    private val busName: String,
+    private val watcherSubscription: AutoCloseable?,
+    private val reregisterExecutor: ExecutorService,
+) : AutoCloseable {
 
     override fun close() {
-        // Closing the connection unexports both objects and drops the bus name, which is the whole teardown;
-        // dbus-java has no per-object unexport.
-        runCatching {
-            connection.releaseBusName(busName)
-            connection.close()
-        }
-            .onFailure { Logger.w(it) { "Error while tearing down the StatusNotifierItem tray" } }
+        // Each step gets its own guard. Sharing one runCatching meant a failing releaseBusName — a lost
+        // connection, say — skipped close(), leaking the connection and its reader threads, and the leak
+        // repeated on every re-registration.
+        runCatching { watcherSubscription?.close() }
+            .onFailure { Logger.w(it) { "Failed to drop the StatusNotifierWatcher subscription" } }
+        runCatching { reregisterExecutor.shutdownNow() }
+            .onFailure { Logger.w(it) { "Failed to stop the tray re-registration executor" } }
+        runCatching { connection.releaseBusName(busName) }
+            .onFailure { Logger.w(it) { "Failed to release the tray bus name $busName" } }
+        runCatching { connection.close() }.onFailure { Logger.w(it) { "Failed to close the tray D-Bus connection" } }
     }
 
     companion object {
         /**
-         * Registers a tray item, or returns `null` when the desktop cannot host one.
+         * Exports a tray item, or returns `null` when the session has no D-Bus to export onto.
          *
          * Returning `null` rather than throwing is load-bearing: the caller treats it as "no tray", which keeps the
          * close button quitting instead of hiding into something unreachable. That is also what makes this safe in CI
-         * and under a bare window manager, where there is no session bus or no watcher at all.
+         * and under a bare window manager.
+         *
+         * A successful return does **not** mean a host is showing the icon — that is reported through
+         * [onRegistrationChange], which fires with the state at install time and again on every watcher change. Blocks
+         * on several D-Bus round trips; call it off the UI thread.
          */
+        @Suppress("LongParameterList")
         fun install(
             appId: String,
             title: String,
@@ -136,6 +162,7 @@ internal class SniTray private constructor(private val connection: DBusConnectio
             menuProvider: () -> List<TrayMenuItem>,
             onActivate: () -> Unit,
             onItemClicked: (TrayMenuItem) -> Unit,
+            onRegistrationChange: (Boolean) -> Unit,
         ): SniTray? {
             if (System.getenv("DBUS_SESSION_BUS_ADDRESS").isNullOrBlank()) {
                 Logger.i { "No DBUS_SESSION_BUS_ADDRESS; skipping the StatusNotifierItem tray" }
@@ -149,17 +176,74 @@ internal class SniTray private constructor(private val connection: DBusConnectio
                 opened.requestBusName(busName)
                 opened.exportObject(ITEM_PATH, SniTrayItem(appId, title, tooltip, iconRasters, onActivate))
                 opened.exportObject(MENU_PATH, DbusMenuExport(MENU_PATH, menuProvider, onItemClicked))
-                opened
-                    .getRemoteObject(WATCHER_BUS_NAME, WATCHER_PATH, StatusNotifierWatcher::class.java, true)
-                    .RegisterStatusNotifierItem(busName)
-                Logger.i { "Registered StatusNotifierItem tray as $busName" }
-                SniTray(opened, busName)
+
+                val executor = Executors.newSingleThreadExecutor { runnable ->
+                    Thread(runnable, "sni-tray-reregister").apply { isDaemon = true }
+                }
+                // Subscribe before the first check, so a watcher that appears in between is not missed.
+                val subscription = subscribeToWatcher(opened, busName, executor, onRegistrationChange)
+                val registered = registerIfWatcherPresent(opened, busName)
+                onRegistrationChange(registered)
+                SniTray(opened, busName, subscription, executor)
             }
                 .getOrElse { error ->
-                    Logger.i(error) { "No StatusNotifierItem host available; the tray will be unavailable" }
+                    Logger.i(error) { "Could not export the StatusNotifierItem tray" }
                     runCatching { connection?.close() }
+                    onRegistrationChange(false)
                     null
                 }
+        }
+
+        /**
+         * Registers with the watcher if one currently owns the name, reporting whether it did.
+         *
+         * `NameHasOwner` first, and `getRemoteObject` with autostart disabled, so a desktop with no watcher at all
+         * answers immediately instead of waiting out a bus activation attempt.
+         */
+        private fun registerIfWatcherPresent(connection: DBusConnection, busName: String): Boolean {
+            val daemon = connection.getRemoteObject(DBUS_BUS_NAME, DBUS_PATH, DBus::class.java, false)
+            if (!daemon.NameHasOwner(WATCHER_BUS_NAME)) {
+                Logger.i { "No $WATCHER_BUS_NAME on the bus; the tray icon will appear if one starts later" }
+                return false
+            }
+            return runCatching { registerWithWatcher(connection, busName) }
+                .onFailure { Logger.i(it) { "A StatusNotifierWatcher is present but refused the item" } }
+                .isSuccess
+        }
+
+        private fun registerWithWatcher(connection: DBusConnection, busName: String) {
+            connection
+                .getRemoteObject(WATCHER_BUS_NAME, WATCHER_PATH, StatusNotifierWatcher::class.java, false)
+                .RegisterStatusNotifierItem(busName)
+            Logger.i { "Registered StatusNotifierItem tray as $busName" }
+        }
+
+        /**
+         * Watches the watcher: re-registers when a new one takes the name, and reports its disappearance.
+         *
+         * The re-registration is handed to [executor] rather than run inline, because the handler runs on a dbus-java
+         * delivery thread and a blocking outbound call from there can wedge that thread.
+         */
+        private fun subscribeToWatcher(
+            connection: DBusConnection,
+            busName: String,
+            executor: ExecutorService,
+            onRegistrationChange: (Boolean) -> Unit,
+        ): AutoCloseable = connection.addSigHandler(DBus.NameOwnerChanged::class.java) { signal ->
+            if (signal.name != WATCHER_BUS_NAME) return@addSigHandler
+            if (signal.newOwner.isNullOrEmpty()) {
+                Logger.i { "$WATCHER_BUS_NAME went away; the tray icon is gone until one returns" }
+                onRegistrationChange(false)
+                return@addSigHandler
+            }
+            executor.execute {
+                val registered = runCatching {
+                    registerWithWatcher(connection, busName)
+                }
+                    .onFailure { Logger.i(it) { "A new StatusNotifierWatcher refused the item" } }
+                    .isSuccess
+                onRegistrationChange(registered)
+            }
         }
     }
 }
