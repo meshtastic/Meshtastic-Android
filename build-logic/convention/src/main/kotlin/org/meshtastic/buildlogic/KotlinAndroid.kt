@@ -41,12 +41,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /** Configure base Kotlin with Android options */
 internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
-    val compileSdkVersion = configProperties.getProperty("COMPILE_SDK").toInt()
     val minSdkVersion = configProperties.getProperty("MIN_SDK").toInt()
     val targetSdkVersion = configProperties.getProperty("TARGET_SDK").toInt()
 
     commonExtension.apply {
-        compileSdk = compileSdkVersion
+        compileSdk = compileSdkMajor
+        compileSdkMinor = compileSdkMinorLevel
 
         defaultConfig.minSdk = minSdkVersion
 
@@ -71,7 +71,8 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
 /** Configure SDK and JVM levels for `com.android.test` modules; each module keeps its own minSdk. */
 internal fun Project.configureKotlinAndroidTest(testExtension: TestExtension) {
     testExtension.apply {
-        compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+        compileSdk = compileSdkMajor
+        compileSdkMinor = compileSdkMinorLevel
         defaultConfig.targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
 
         compileOptions.sourceCompatibility = JavaVersion.VERSION_21
@@ -125,7 +126,8 @@ internal fun Project.configureKotlinMultiplatform() {
         // Configure the Android target if the plugin is applied
         pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
             extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
-                compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+                // This extension has no compileSdkMinor, and release() returns the version rather than applying it.
+                compileSdk { version = release(compileSdkMajor) { minorApiLevel = compileSdkMinorLevel } }
                 minSdk = configProperties.getProperty("MIN_SDK").toInt()
 
                 // Default: disable Android resources for most KMP modules.

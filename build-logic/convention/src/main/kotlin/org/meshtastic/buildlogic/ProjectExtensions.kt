@@ -63,6 +63,12 @@ val Project.configProperties: Properties
         return properties
     }
 
+internal val Project.compileSdkMajor: Int
+    get() = configProperties.getProperty("COMPILE_SDK").toInt()
+
+internal val Project.compileSdkMinorLevel: Int
+    get() = configProperties.getProperty("COMPILE_SDK_MINOR", "0").toInt()
+
 /** Configure common test options like parallel execution and logging. */
 internal fun Project.configureTestOptions() {
     // Only JUnit Platform test tasks need the launcher. Instrumented test APKs run under AndroidJUnitRunner, and a KMP
