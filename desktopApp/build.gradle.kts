@@ -190,6 +190,12 @@ compose.desktop {
                 "jdk.unsupported", // sun.misc.Unsafe used by Coroutines & Okio
                 "java.sql", // Sometimes required by SQLite JNI
                 "java.naming", // Required by Ktor for DNS resolution
+                // dbus-java's SASL EXTERNAL handshake resolves the caller's uid through
+                // com.sun.security.auth.module.UnixSystem on every connect (SASL.java: `new
+                // UnixSystem().getUid()`), and that class lives here. Without it the jlink image has no
+                // such class, the handshake throws, and the Linux tray silently never appears in a
+                // packaged build while working fine in dev. Found in review of #7569 by @jamesarich.
+                "jdk.security.auth", // dbus-java SASL uid lookup for the Linux tray
             )
 
             // Default JVM arguments for the packaged application
@@ -426,6 +432,11 @@ dependencies {
     implementation(libs.androidx.sqlite.bundled)
 
     implementation(libs.jna)
+
+    // The Linux system tray talks StatusNotifierItem over D-Bus; AWT's tray is XEmbed, which GNOME and
+    // Plasma only surface through a proxy that drops clicks. See tray/SniTray.kt.
+    implementation(libs.dbus.java.core)
+    runtimeOnly(libs.dbus.java.transport.native.unixsocket)
 
     testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(projects.core.testing)

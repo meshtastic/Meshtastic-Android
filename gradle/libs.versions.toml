@@ -105,6 +105,8 @@ vico = "3.3.1"
 kable = "0.45.0"
 mqttastic = "0.9.0"
 jmdns = "3.6.3"
+# Desktop-only: speaks StatusNotifierItem over D-Bus so the Linux tray icon is clickable (MIT).
+dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.9.3"
 meshtastic-protobufs = "2.8.1"
@@ -355,6 +357,11 @@ aboutlibraries-gradlePlugin = { module = "com.mikepenz.aboutlibraries.plugin:abo
 
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
 jna = { module = "net.java.dev.jna:jna", version = "5.19.1" }
+
+# D-Bus client for the desktop app's Linux system tray. Pure Java — the native-unixsocket transport
+# uses the JDK's own Unix domain sockets — so it adds no GTK main loop to compete with Skiko.
+dbus-java-core = { module = "com.github.hypfvieh:dbus-java-core", version.ref = "dbus-java" }
+dbus-java-transport-native-unixsocket = { module = "com.github.hypfvieh:dbus-java-transport-native-unixsocket", version.ref = "dbus-java" }
 
 # TAK
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }

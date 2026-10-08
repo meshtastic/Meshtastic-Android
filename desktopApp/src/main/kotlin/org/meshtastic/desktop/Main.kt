@@ -119,6 +119,11 @@ import org.meshtastic.desktop.map.DesktopTracerouteMap
 import org.meshtastic.desktop.map.desktopMapViewProvider
 import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.notification.NativeNotificationSender
+import org.meshtastic.desktop.tray.SniTrayEffect
+import org.meshtastic.desktop.tray.TRAY_ICON_DARK
+import org.meshtastic.desktop.tray.TRAY_ICON_LIGHT
+import org.meshtastic.desktop.tray.TrayMenuItem
+import org.meshtastic.desktop.tray.canHideToTray
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
@@ -136,6 +141,9 @@ private const val DISK_CACHE_MAX_BYTES = 32L * 1024L * 1024L // 32 MiB
 
 /** Debug builds only: apply a `connections` deep link from the command line without the trust dialog. */
 private const val SKIP_CONNECT_CONFIRM_ARG = "--skip-connect-confirm"
+
+/** The window title, and the title the Linux tray item reports to its host. */
+private const val APP_WINDOW_TITLE = "Meshtastic Desktop"
 
 /**
  * Loads an SVG from JVM classpath resources and returns a [Painter].
@@ -280,10 +288,9 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
     var isWindowReady by remember { mutableStateOf(false) }
     val trayState = rememberTrayState()
     val density = LocalDensity.current
-    val appIcon = svgPainterResource("tray_icon_black.svg", density)
+    val appIcon = svgPainterResource(TRAY_ICON_DARK, density)
 
-    val trayIcon =
-        svgPainterResource(if (isSystemInDarkTheme()) "tray_icon_white.svg" else "tray_icon_black.svg", density)
+    val trayIcon = svgPainterResource(if (isSystemInDarkTheme()) TRAY_ICON_LIGHT else TRAY_ICON_DARK, density)
 
     val notificationManager = koinInject<DesktopNotificationManager>()
     val desktopPrefs = koinInject<DesktopPreferencesDataSource>()
@@ -298,31 +305,55 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
 
     WindowBoundsManager(desktopPrefs, windowState) { isWindowReady = true }
 
-    Tray(
-        state = trayState,
-        icon = trayIcon,
-        tooltip = stringResource(Res.string.desktop_tray_tooltip),
-        onAction = { isAppVisible = true },
-        menu = {
-            updateInfo?.let { update ->
-                Item(
-                    stringResource(Res.string.desktop_update_download, update.versionName),
-                    onClick = { openUrl(update.releaseUrl) },
-                )
-            }
-            Item(stringResource(Res.string.desktop_tray_show), onClick = { isAppVisible = true })
-            Item(stringResource(Res.string.desktop_tray_quit), onClick = ::exitApplication)
-        },
-    )
+    // One menu model for both tray backends, so the rows cannot drift apart between platforms.
+    val trayTooltip = stringResource(Res.string.desktop_tray_tooltip)
+    val updateLabel = updateInfo?.let { stringResource(Res.string.desktop_update_download, it.versionName) }
+    val showLabel = stringResource(Res.string.desktop_tray_show)
+    val quitLabel = stringResource(Res.string.desktop_tray_quit)
+    val trayMenuItems = buildList {
+        if (updateInfo != null && updateLabel != null) {
+            add(TrayMenuItem(updateLabel) { openUrl(updateInfo.releaseUrl) })
+        }
+        add(TrayMenuItem(showLabel) { isAppVisible = true })
+        add(TrayMenuItem(quitLabel) { exitApplication() })
+    }
+
+    var isSniTrayRegistered by remember { mutableStateOf(false) }
+
+    if (DesktopOS.current() == DesktopOS.Linux) {
+        // AWT's tray is XEmbed, which GNOME and Plasma only proxy — and the proxy drops clicks. Speak
+        // StatusNotifierItem directly instead; Compose's Tray would just plant an inert icon here.
+        SniTrayEffect(
+            isDarkTheme = isSystemInDarkTheme(),
+            title = APP_WINDOW_TITLE,
+            tooltip = trayTooltip,
+            menuItems = trayMenuItems,
+            onActivate = { isAppVisible = true },
+            onRegistrationChange = { registered ->
+                isSniTrayRegistered = registered
+                // Losing the tray while hidden strands the window just as hiding into no tray would — a panel
+                // crash or a disabled extension gets there after the fact. Bring the window back so close quits.
+                if (!registered) isAppVisible = true
+            },
+        )
+    } else {
+        Tray(
+            state = trayState,
+            icon = trayIcon,
+            tooltip = trayTooltip,
+            onAction = { isAppVisible = true },
+            menu = { trayMenuItems.forEach { item -> Item(item.label, onClick = item.onClick) } },
+        )
+    }
 
     if (isWindowReady) {
         // Hide via `visible` rather than dropping the Window from composition so the UI tree
         // (navigation backstack, scroll positions) survives a hide-to-tray round trip.
         MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState, visible = isAppVisible) {
-            // Minimize to the tray on close — but only where a tray exists. On platforms without a
-            // system tray (e.g. some Linux desktop environments) there's nowhere to minimize to, so
-            // quit instead; otherwise the process would be stranded with no window and no tray icon.
-            if (isTraySupported) {
+            // Minimize to the tray on close — but only where the tray icon can actually be clicked
+            // back. Where it cannot, there is nowhere to minimize to, so quit instead; otherwise the
+            // process is stranded with no window, no reachable tray menu and no key handler either.
+            if (canHideToTray(awtTraySupported = isTraySupported, sniTrayRegistered = isSniTrayRegistered)) {
                 isAppVisible = false
             } else {
                 exitApplication()
@@ -427,7 +458,7 @@ private fun ApplicationScope.MeshtasticWindow(
 
     Window(
         onCloseRequest = onCloseRequest,
-        title = "Meshtastic Desktop",
+        title = APP_WINDOW_TITLE,
         icon = appIcon,
         state = windowState,
         visible = visible,
