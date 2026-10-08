@@ -44,6 +44,7 @@
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:map-terrain/androidMain">android</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map-terrain/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:map-terrain/jvmAndroidMain">jvmAndroid</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:map-terrain/jvmMain">jvm</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
@@ -65,6 +66,13 @@
                                 <input type="checkbox" class="checkbox--input" id=":feature:map-terrain/commonMain" data-filter=":feature:map-terrain/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map-terrain/jvmAndroidMain" data-filter=":feature:map-terrain/jvmAndroidMain">
+                                <span class="checkbox--icon"></span>
+                                jvmAndroid
                             </label>
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
@@ -105,19 +113,19 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" id="content" pageids="feature-map-terrain::////PointingToDeclaration//-1930647499">
+<div class="main-content" id="content" pageids="feature-map-terrain::////PointingToDeclaration//1549232822">
   <div class="breadcrumbs"></div>
   <div class="cover ">
     <h1 class="cover"><span><span>feature-map-terrain</span></span></h1>
   </div>
   <h2 class="">Packages</h2>
-  <div class="table"><a data-name="-1994384450%2FPackages%2F-1930647499" anchor-label="org.meshtastic.feature.map.terrain" id="-1994384450%2FPackages%2F-1930647499" data-filterable-set=":feature:map-terrain/commonMain,:feature:map-terrain/androidMain,:feature:map-terrain/jvmMain"></a>
-    <div class="table-row table-row_platform-tagged" data-filterable-current=":feature:map-terrain/commonMain,:feature:map-terrain/androidMain,:feature:map-terrain/jvmMain" data-filterable-set=":feature:map-terrain/commonMain,:feature:map-terrain/androidMain,:feature:map-terrain/jvmMain">
+  <div class="table"><a data-name="-1994384450%2FPackages%2F1549232822" anchor-label="org.meshtastic.feature.map.terrain" id="-1994384450%2FPackages%2F1549232822" data-filterable-set=":feature:map-terrain/androidMain,:feature:map-terrain/commonMain,:feature:map-terrain/jvmAndroidMain,:feature:map-terrain/jvmMain"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":feature:map-terrain/androidMain,:feature:map-terrain/commonMain,:feature:map-terrain/jvmAndroidMain,:feature:map-terrain/jvmMain" data-filterable-set=":feature:map-terrain/androidMain,:feature:map-terrain/commonMain,:feature:map-terrain/jvmAndroidMain,:feature:map-terrain/jvmMain">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="org.meshtastic.feature.map.terrain/index.html">org.meshtastic.feature.map.terrain</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1994384450%2FPackages%2F-1930647499"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1994384450%2FPackages%2F1549232822"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
           <div class="pull-right platform-tags--wrapper">
@@ -125,6 +133,7 @@
               <div class="platform-tag jvm-like">android</div>
               <div class="platform-tag common-like">common</div>
               <div class="platform-tag jvm-like">jvm</div>
+              <div class="platform-tag jvm-like">jvmAndroid</div>
             </div>
           </div>
         </div>

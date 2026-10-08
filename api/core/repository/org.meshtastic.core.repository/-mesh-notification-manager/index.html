@@ -100,17 +100,17 @@
     <div class="tabs-section-body">
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="126384441%2FFunctions%2F-1238997634" anchor-label="cancelLowBatteryNotification" id="126384441%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+        <div class="table"><a data-name="1452241694%2FFunctions%2F-1238997634" anchor-label="cancelLowBatteryNotification" id="1452241694%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="cancel-low-battery-notification.html"><span>cancel</span><wbr><span>Low</span><wbr><span>Battery</span><wbr><span><span>Notification</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="126384441%2FFunctions%2F-1238997634"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1452241694%2FFunctions%2F-1238997634"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="cancel-low-battery-notification.html"><span class="token function">cancelLowBatteryNotification</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">node<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="cancel-low-battery-notification.html"><span class="token function">cancelLowBatteryNotification</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Ends <a href="cancel-low-battery-notification.html">nodeNum</a>'s low-battery episode and removes its warning.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -170,7 +170,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="clear-notifications.html"><span class="token function">clearNotifications</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="clear-notifications.html"><span class="token function">clearNotifications</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Removes every notification and ends every low-battery episode, so the next low reading warns again.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -186,6 +186,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="init-channels.html"><span class="token function">initChannels</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1621496273%2FFunctions%2F-1238997634" anchor-label="notifyLowBattery" id="-1621496273%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="notify-low-battery.html"><span>notify</span><wbr><span>Low</span><wbr><span><span>Battery</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1621496273%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="notify-low-battery.html"><span class="token function">notifyLowBattery</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">node<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token punctuation">, </span></span><span class="parameter ">isRemote<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Warns that <a href="notify-low-battery.html">node</a>'s battery is low. The first reading of an episode posts and alerts; later ones only refresh a warning still showing, so a dismissed one stays dismissed until <a href="cancel-low-battery-notification.html">cancelLowBatteryNotification</a> or <a href="clear-notifications.html">clearNotifications</a> ends the episode.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -250,21 +265,6 @@
               </div>
             </div>
           </div>
-<a data-name="1892191982%2FFunctions%2F-1238997634" anchor-label="showLowBatteryNotification" id="1892191982%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="show-low-battery-notification.html"><span>show</span><wbr><span>Low</span><wbr><span>Battery</span><wbr><span><span>Notification</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1892191982%2FFunctions%2F-1238997634"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="show-low-battery-notification.html"><span class="token function">showLowBatteryNotification</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">node<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token punctuation">, </span></span><span class="parameter ">isRemote<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Posts the low-battery warning for <a href="show-low-battery-notification.html">node</a>, alerting once.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
 <a data-name="-1769215625%2FFunctions%2F-1238997634" anchor-label="showMeshBeaconNotification" id="-1769215625%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
             <div class="main-subrow keyValue ">
@@ -321,21 +321,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="suppress-client-notification-modal.html"><span class="token function">suppressClientNotificationModal</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientNotification<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ClientNotification///PointingToDeclaration/">ClientNotification</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True when the platform presents <a href="suppress-client-notification-modal.html">clientNotification</a> natively, so the in-app modal must not show it too.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-1607338246%2FFunctions%2F-1238997634" anchor-label="updateLowBatteryNotification" id="-1607338246%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="update-low-battery-notification.html"><span>update</span><wbr><span>Low</span><wbr><span>Battery</span><wbr><span><span>Notification</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1607338246%2FFunctions%2F-1238997634"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="update-low-battery-notification.html"><span class="token function">updateLowBatteryNotification</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">node<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token punctuation">, </span></span><span class="parameter ">isRemote<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Refreshes a still-showing low-battery warning with <a href="update-low-battery-notification.html">node</a>'s current level; never re-posts a dismissed one.</p></div></div></div>
                 </div>
               </div>
             </div>

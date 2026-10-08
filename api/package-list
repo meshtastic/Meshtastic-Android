@@ -1,14 +1,14 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
 $dokka.location:org.meshtastic.core.service/LockdownPassphraseStoreImpl///PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-lockdown-passphrase-store-impl/index.html
-$dokka.location:org.meshtastic.core.service/LockdownPassphraseStoreImpl/LockdownPassphraseStoreImpl/#/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-lockdown-passphrase-store-impl/-lockdown-passphrase-store-impl.html
 $dokka.location:org.meshtastic.core.service/LockdownPassphraseStoreImpl/LockdownPassphraseStoreImpl/#android.app.Application/PointingToDeclaration/core-service/org.meshtastic.core.service/[android]-lockdown-passphrase-store-impl/-lockdown-passphrase-store-impl.html
+$dokka.location:org.meshtastic.core.service/LockdownPassphraseStoreImpl/LockdownPassphraseStoreImpl/#java.io.File/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-lockdown-passphrase-store-impl/-lockdown-passphrase-store-impl.html
 $dokka.location:org.meshtastic.core.service/LockdownPassphraseStoreImpl/clearPassphrase/#kotlin.String/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-lockdown-passphrase-store-impl/clear-passphrase.html
 $dokka.location:org.meshtastic.core.service/LockdownPassphraseStoreImpl/getPassphrase/#kotlin.String/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-lockdown-passphrase-store-impl/get-passphrase.html
 $dokka.location:org.meshtastic.core.service/LockdownPassphraseStoreImpl/savePassphrase/#kotlin.String#kotlin.String#kotlin.Int#kotlin.Int#kotlin.Int/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-lockdown-passphrase-store-impl/save-passphrase.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl///PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/index.html
-$dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/SecurityKeyBackupStoreImpl/#/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/-security-key-backup-store-impl.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/SecurityKeyBackupStoreImpl/#android.app.Application/PointingToDeclaration/core-service/org.meshtastic.core.service/[android]-security-key-backup-store-impl/-security-key-backup-store-impl.html
+$dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/SecurityKeyBackupStoreImpl/#java.io.File/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/-security-key-backup-store-impl.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/delete/#kotlin.Int/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/delete.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/get/#kotlin.Int/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/get.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/save/#kotlin.Int#kotlin.String#kotlin.String#kotlin.Long/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/save.html
@@ -95,6 +95,7 @@ org.meshtastic.core.ui.component.preview
 org.meshtastic.core.ui.di
 org.meshtastic.core.ui.emoji
 org.meshtastic.core.ui.icon
+org.meshtastic.core.ui.input
 org.meshtastic.core.ui.navigation
 org.meshtastic.core.ui.qr
 org.meshtastic.core.ui.share
@@ -110,6 +111,8 @@ org.meshtastic.feature.connections.model
 org.meshtastic.feature.connections.navigation
 org.meshtastic.feature.connections.ui
 org.meshtastic.feature.connections.ui.components
+module:feature-coverage
+org.meshtastic.feature.coverage
 module:feature-discovery
 org.meshtastic.feature.discovery
 org.meshtastic.feature.discovery.ai
@@ -130,6 +133,7 @@ org.meshtastic.feature.docs.ui
 module:feature-firmware
 org.meshtastic.feature.firmware
 org.meshtastic.feature.firmware.di
+org.meshtastic.feature.firmware.game
 org.meshtastic.feature.firmware.navigation
 org.meshtastic.feature.firmware.ota
 org.meshtastic.feature.firmware.ota.dfu
@@ -172,6 +176,7 @@ org.meshtastic.feature.node.di
 org.meshtastic.feature.node.domain.usecase
 org.meshtastic.feature.node.list
 org.meshtastic.feature.node.metrics
+org.meshtastic.feature.node.metrics.terminal
 org.meshtastic.feature.node.model
 org.meshtastic.feature.node.navigation
 module:feature-settings

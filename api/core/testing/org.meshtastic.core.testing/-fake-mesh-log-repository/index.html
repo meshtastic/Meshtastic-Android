@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core-testing</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.testing</a><span class="delimiter">/</span><span class="current">FakeMeshLogRepository</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Fake</span><wbr><span>Mesh</span><wbr><span>Log</span><wbr><span><span>Repository</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">FakeMeshLogRepository</a> : <a href="../-base-fake/index.html">BaseFake</a>, <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/testing/src/commonMain/kotlin/org/meshtastic/core/testing/FakeMeshLogRepository.kt#L33">source</a>)</span></span></div><p class="paragraph">A test double for <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a> that provides in-memory log storage.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">FakeMeshLogRepository</a> : <a href="../-base-fake/index.html">BaseFake</a>, <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/testing/src/commonMain/kotlin/org/meshtastic/core/testing/FakeMeshLogRepository.kt#L34">source</a>)</span></span></div><p class="paragraph">A test double for <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a> that provides in-memory log storage.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -119,7 +119,22 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="2072928791%2FProperties%2F1783121280" anchor-label="currentLogs" id="2072928791%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+        <div class="table"><a data-name="-115333661%2FProperties%2F1783121280" anchor-label="beforeDeleteLogsOlderThan" id="-115333661%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="before-delete-logs-older-than.html"><span>before</span><wbr><span>Delete</span><wbr><span>Logs</span><wbr><span>Older</span><wbr><span><span>Than</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-115333661%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="before-delete-logs-older-than.html">beforeDeleteLogsOlderThan</a><span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div><div class="brief "><p class="paragraph">Runs at the start of every <a href="delete-logs-older-than.html">deleteLogsOlderThan</a>, so a test can hold a prune open or make it fail.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2072928791%2FProperties%2F1783121280" anchor-label="currentLogs" id="2072928791%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -145,6 +160,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="delete-all-called.html">deleteAllCalled</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-433974911%2FProperties%2F1783121280" anchor-label="deleteLogsOlderThanCalls" id="-433974911%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-logs-older-than-calls.html"><span>delete</span><wbr><span>Logs</span><wbr><span>Older</span><wbr><span>Than</span><wbr><span><span>Calls</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-433974911%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="delete-logs-older-than-calls.html">deleteLogsOlderThanCalls</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -273,21 +303,6 @@
               </div>
             </div>
           </div>
-<a data-name="-1004054225%2FFunctions%2F1783121280" anchor-label="getAllLogsInReceiveOrder" id="-1004054225%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="get-all-logs-in-receive-order.html"><span>get</span><wbr><span>All</span><wbr><span>Logs</span><wbr><span>In</span><wbr><span>Receive</span><wbr><span><span>Order</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1004054225%2FFunctions%2F1783121280"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-all-logs-in-receive-order.html"><span class="token function">getAllLogsInReceiveOrder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">maxItem<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
 <a data-name="971721941%2FFunctions%2F1783121280" anchor-label="getAllLogsUnbounded" id="971721941%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
             <div class="main-subrow keyValue ">
@@ -389,6 +404,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="insert.html"><span class="token function">insert</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">log<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="796319893%2FFunctions%2F1783121280" anchor-label="readAllLogsInReceiveOrder" id="796319893%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read-all-logs-in-receive-order.html"><span>read</span><wbr><span>All</span><wbr><span>Logs</span><wbr><span>In</span><wbr><span>Receive</span><wbr><span><span>Order</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="796319893%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="read-all-logs-in-receive-order.html"><span class="token function">readAllLogsInReceiveOrder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>

@@ -42,7 +42,9 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:map/androidMain">android</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:map/jvmMain">jvm</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -51,11 +53,25 @@
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map/androidMain" data-filter=":feature:map/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":feature:map/commonMain" data-filter=":feature:map/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map/jvmMain" data-filter=":feature:map/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
                             </label>
                         </li>
                 </ul>
@@ -89,7 +105,7 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="package" id="content" pageids="feature-map::org.meshtastic.feature.map.tiles////PointingToDeclaration//-1707802287">
+<div class="main-content" data-page-type="package" id="content" pageids="feature-map::org.meshtastic.feature.map.tiles////PointingToDeclaration//326004429">
   <div class="breadcrumbs"><a href="../index.html">feature-map</a><span class="delimiter">/</span><span class="current">org.meshtastic.feature.map.tiles</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -268,17 +284,49 @@
               </div>
             </div>
           </div>
-<a data-name="1939548023%2FFunctions%2F-1707802287" anchor-label="isValidTileUrlTemplate" id="1939548023%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
-          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+<a data-name="-1996295365%2FFunctions%2F326004429" anchor-label="isCleartextPermitted" id="-1996295365%2FFunctions%2F326004429" data-filterable-set=":feature:map/commonMain,:feature:map/androidMain,:feature:map/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain,:feature:map/androidMain,:feature:map/jvmMain" data-filterable-set=":feature:map/commonMain,:feature:map/androidMain,:feature:map/jvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="is-valid-tile-url-template.html"><span>is</span><wbr><span>Valid</span><wbr><span>Tile</span><wbr><span>Url</span><wbr><span><span>Template</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1939548023%2FFunctions%2F-1707802287"></span>
+                  <div><a href="is-cleartext-permitted.html"><span>is</span><wbr><span>Cleartext</span><wbr><span><span>Permitted</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1996295365%2FFunctions%2F326004429"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">.</span><a href="is-valid-tile-url-template.html"><span class="token function">isValidTileUrlTemplate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requireHttps<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether a tile URL template is one we are willing to request.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:map/androidMain" data-filterable-set=":feature:map/androidMain" data-active="" data-toggle=":feature:map/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain" data-toggle=":feature:map/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":feature:map/jvmMain" data-filterable-set=":feature:map/jvmMain" data-toggle=":feature:map/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":feature:map/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="is-cleartext-permitted.html"><span class="token function">isCleartextPermitted</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">host<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Answers from the app's network security config, the same check the HTTP stacks apply when they connect.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="is-cleartext-permitted.html"><span class="token function">isCleartextPermitted</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">host<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether this platform will open a plain http connection to <a href="is-cleartext-permitted.html">host</a>. A URL validator that accepts http where this is false saves a tile source or layer that can never load.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":feature:map/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="is-cleartext-permitted.html"><span class="token function">isCleartextPermitted</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">host<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether this platform will open a plain http connection to <a href="is-cleartext-permitted.html">host</a>. A URL validator that accepts http where this is false saves a tile source or layer that can never load.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="124095545%2FFunctions%2F-1707802287" anchor-label="isRefusedCleartextTileUrl" id="124095545%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-refused-cleartext-tile-url.html"><span>is</span><wbr><span>Refused</span><wbr><span>Cleartext</span><wbr><span>Tile</span><wbr><span><span>Url</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="124095545%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">.</span><a href="is-refused-cleartext-tile-url.html"><span class="token function">isRefusedCleartextTileUrl</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cleartextPermitted<span class="token operator">: </span><span class="token punctuation">(</span>host<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span>::isCleartextPermitted</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether this is an otherwise usable http template whose host the platform refuses plain http to.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-445914739%2FFunctions%2F-1707802287" anchor-label="isValidTileUrlTemplate" id="-445914739%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-valid-tile-url-template.html"><span>is</span><wbr><span>Valid</span><wbr><span>Tile</span><wbr><span>Url</span><wbr><span><span>Template</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-445914739%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">.</span><a href="is-valid-tile-url-template.html"><span class="token function">isValidTileUrlTemplate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cleartextPermitted<span class="token operator">: </span><span class="token punctuation">(</span>host<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span>::isCleartextPermitted</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether a tile URL template is one we are willing to request.</p></div></div></div>
                 </div>
               </div>
             </div>

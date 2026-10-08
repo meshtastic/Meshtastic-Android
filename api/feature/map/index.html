@@ -44,6 +44,7 @@
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:map/androidMain">android</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:map/jvmAndroidMain">jvmAndroid</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:map/jvmMain">jvm</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
@@ -65,6 +66,13 @@
                                 <input type="checkbox" class="checkbox--input" id=":feature:map/commonMain" data-filter=":feature:map/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map/jvmAndroidMain" data-filter=":feature:map/jvmAndroidMain">
+                                <span class="checkbox--icon"></span>
+                                jvmAndroid
                             </label>
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
@@ -105,7 +113,7 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" id="content" pageids="feature-map::////PointingToDeclaration//326004429">
+<div class="main-content" id="content" pageids="feature-map::////PointingToDeclaration//488195766">
   <div class="breadcrumbs"></div>
   <div class="cover ">
     <h1 class="cover"><span><span>feature-map</span></span></h1>
@@ -184,20 +192,19 @@
         <div></div>
       </div>
     </div>
-<a data-name="1324815123%2FPackages%2F326004429" anchor-label="org.meshtastic.feature.map.kml" id="1324815123%2FPackages%2F326004429" data-filterable-set=":feature:map/commonMain,:feature:map/androidMain,:feature:map/jvmMain"></a>
-    <div class="table-row table-row_platform-tagged" data-filterable-current=":feature:map/commonMain,:feature:map/androidMain,:feature:map/jvmMain" data-filterable-set=":feature:map/commonMain,:feature:map/androidMain,:feature:map/jvmMain">
+<a data-name="1324815123%2FPackages%2F707270522" anchor-label="org.meshtastic.feature.map.kml" id="1324815123%2FPackages%2F707270522" data-filterable-set=":feature:map/commonMain,:feature:map/jvmAndroidMain"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":feature:map/commonMain,:feature:map/jvmAndroidMain" data-filterable-set=":feature:map/commonMain,:feature:map/jvmAndroidMain">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="org.meshtastic.feature.map.kml/index.html">org.meshtastic.feature.map.kml</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1324815123%2FPackages%2F326004429"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1324815123%2FPackages%2F707270522"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
           <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
-              <div class="platform-tag jvm-like">android</div>
               <div class="platform-tag common-like">common</div>
-              <div class="platform-tag jvm-like">jvm</div>
+              <div class="platform-tag jvm-like">jvmAndroid</div>
             </div>
           </div>
         </div>
@@ -260,18 +267,20 @@
         <div></div>
       </div>
     </div>
-<a data-name="-627042866%2FPackages%2F-1707802287" anchor-label="org.meshtastic.feature.map.tiles" id="-627042866%2FPackages%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
-    <div class="table-row table-row_platform-tagged" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+<a data-name="-627042866%2FPackages%2F326004429" anchor-label="org.meshtastic.feature.map.tiles" id="-627042866%2FPackages%2F326004429" data-filterable-set=":feature:map/commonMain,:feature:map/androidMain,:feature:map/jvmMain"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":feature:map/commonMain,:feature:map/androidMain,:feature:map/jvmMain" data-filterable-set=":feature:map/commonMain,:feature:map/androidMain,:feature:map/jvmMain">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="org.meshtastic.feature.map.tiles/index.html">org.meshtastic.feature.map.tiles</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-627042866%2FPackages%2F-1707802287"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-627042866%2FPackages%2F326004429"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
           <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
+              <div class="platform-tag jvm-like">android</div>
               <div class="platform-tag common-like">common</div>
+              <div class="platform-tag jvm-like">jvm</div>
             </div>
           </div>
         </div>

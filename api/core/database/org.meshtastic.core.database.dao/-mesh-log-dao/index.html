@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core-database</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.database.dao</a><span class="delimiter">/</span><span class="current">MeshLogDao</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Mesh</span><wbr><span>Log</span><wbr><span><span>Dao</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">MeshLogDao</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/database/src/commonMain/kotlin/org/meshtastic/core/database/dao/MeshLogDao.kt#L30">source</a>)</span></span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">MeshLogDao</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/database/src/commonMain/kotlin/org/meshtastic/core/database/dao/MeshLogDao.kt#L31">source</a>)</span></span></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -194,17 +194,17 @@
               </div>
             </div>
           </div>
-<a data-name="-557868830%2FFunctions%2F-475033937" anchor-label="deleteOlderThan" id="-557868830%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+<a data-name="1828848443%2FFunctions%2F-475033937" anchor-label="deleteOlderThan" id="1828848443%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="delete-older-than.html"><span>delete</span><wbr><span>Older</span><wbr><span><span>Than</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-557868830%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1828848443%2FFunctions%2F-475033937"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="delete-older-than.html"><span class="token function">deleteOlderThan</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cutoffTimestamp<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="delete-older-than.html"><span class="token function">deleteOlderThan</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cutoffTimestamp<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">limit<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Deletes at most <a href="delete-older-than.html">limit</a> logs received before <a href="delete-older-than.html">cutoffTimestamp</a> and returns how many it removed. Callers repeat it until it removes fewer than <a href="delete-older-than.html">limit</a>, so a retention pass never holds the write lock for the whole backlog.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -220,21 +220,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-all-logs.html"><span class="token function">getAllLogs</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">maxItem<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-1799845203%2FFunctions%2F-475033937" anchor-label="getAllLogsInReceiveOrder" id="-1799845203%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="get-all-logs-in-receive-order.html"><span>get</span><wbr><span>All</span><wbr><span>Logs</span><wbr><span>In</span><wbr><span>Receive</span><wbr><span><span>Order</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1799845203%2FFunctions%2F-475033937"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-all-logs-in-receive-order.html"><span class="token function">getAllLogsInReceiveOrder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">maxItem<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -265,6 +250,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-logs-from.html"><span class="token function">getLogsFrom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fromNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">portNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">maxItem<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Retrieves <a href="../../org.meshtastic.core.database.entity/-mesh-log/index.html">MeshLog</a>s matching 'from_num' (nodeNum) and 'port_num' (PortNum).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="610531644%2FFunctions%2F-475033937" anchor-label="getLogsInReceiveOrderAfter" id="610531644%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-logs-in-receive-order-after.html"><span>get</span><wbr><span>Logs</span><wbr><span>In</span><wbr><span>Receive</span><wbr><span>Order</span><wbr><span><span>After</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="610531644%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-logs-in-receive-order-after.html"><span class="token function">getLogsInReceiveOrderAfter</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">afterReceivedDate<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">afterRowId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">pageSize<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-mesh-log-row/index.html">MeshLogRow</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns up to <a href="get-logs-in-receive-order-after.html">pageSize</a> logs after (<a href="get-logs-in-receive-order-after.html">afterReceivedDate</a>, <a href="get-logs-in-receive-order-after.html">afterRowId</a>), oldest first. Equal received dates stay in rowid order, which is the order a scan of the received_date index returns. Start from <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/-companion/-m-i-n_-v-a-l-u-e.html">Long.MIN_VALUE</a> for both and continue from the last row returned.</p></div></div></div>
                 </div>
               </div>
             </div>
