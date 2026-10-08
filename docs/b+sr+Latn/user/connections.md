@@ -1,5 +1,6 @@
 ---
 title: Connections
+parent: User Guide
 nav_order: 2
 last_updated: 2026-09-29
 description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.

@@ -1,7 +1,7 @@
 ---
 title: マップとウェイポイント
 nav_order: 6
-last_updated: 2026-09-28
+last_updated: 2026-10-07
 description: マップ上でノードの位置を確認し、ウェイポイントの作成・共有、マップレイヤーとサイトプランナーの管理、位置共有とプライバシーの制御を行います。
 aliases:
   - map
@@ -169,7 +169,8 @@ On **Android**, the same screen also imports a local `.mbtiles` archive for full
 On **F-Droid**, select a vector base map first — Liberty, Positron, or Dark — since a download is defined
 against a vector style and **Start Download** stays disabled over a raster one. Frame the area you want on
 screen, then tap **Start Download** in the layers sheet: that creates a paused pack covering the current zoom
-plus two levels deeper. Press play on the pack's row to actually download it.
+plus two levels deeper. Press play on the pack's row to actually download it. If the offline database
+cannot be opened, the section says offline maps are unavailable and **Start Download** stays disabled.
 
 On **Google Play**, the layers sheet's **Offline Manager** section downloads its own offline regions instead
 — water, roads and administrative boundaries extracted from the public Protomaps basemap dataset, drawn
