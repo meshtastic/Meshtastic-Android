@@ -1,5 +1,6 @@
 ---
 title: Translate the App
+parent: User Guide
 nav_order: 17
 last_updated: 2026-09-11
 description: How the app and its documentation are translated via Crowdin, and guidelines for contributing translations.
