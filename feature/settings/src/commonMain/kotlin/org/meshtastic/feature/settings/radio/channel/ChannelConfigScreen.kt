@@ -124,7 +124,7 @@ private fun ChannelConfigScreen(
 ) {
     val primarySettings = settingsList.getOrNull(0) ?: return
     val modemPresetName = remember(loraConfig) { Channel(loraConfig = loraConfig).name }
-    val primaryChannel = remember(loraConfig) { Channel(primarySettings, loraConfig) }
+    val primaryChannel = remember(primarySettings, loraConfig) { Channel(primarySettings, loraConfig) }
     val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
 
     val focusManager = LocalFocusManager.current
@@ -221,18 +221,14 @@ private fun ChannelConfigScreen(
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             Column {
                 ChannelConfigHeader(
-                    frequency =
-                    if (loraConfig.override_frequency != 0f) {
-                        loraConfig.override_frequency
-                    } else {
-                        primaryChannel.radioFreq
-                    },
+                    frequency = primaryChannel.radioFreq,
                     slot =
                     if (loraConfig.channel_num != 0) {
                         loraConfig.channel_num
                     } else {
                         primaryChannel.channelNum
                     },
+                    isAutoSlot = loraConfig.channel_num == 0 && loraConfig.override_frequency == 0f,
                 )
                 Text(
                     text = stringResource(Res.string.press_and_drag),

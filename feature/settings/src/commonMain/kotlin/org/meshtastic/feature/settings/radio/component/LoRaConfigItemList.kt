@@ -19,6 +19,7 @@ package org.meshtastic.feature.settings.radio.component
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,6 +78,7 @@ import org.meshtastic.core.resources.schema_lora_tx_power
 import org.meshtastic.core.resources.schema_lora_tx_power_description
 import org.meshtastic.core.resources.schema_lora_use_preset
 import org.meshtastic.core.resources.schema_lora_use_preset_description
+import org.meshtastic.core.resources.slot_auto
 import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -168,7 +170,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val formState = rememberConfigState(initialValue = loraConfig)
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
 
-    val primaryChannel = remember(formState.value) { Channel(primarySettings, formState.value) }
+    val primaryChannel = remember(primarySettings, formState.value) { Channel(primarySettings, formState.value) }
     val focusManager = LocalFocusManager.current
     val bandwidthSelection =
         loRaBandwidthSelection(
@@ -374,6 +376,16 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onFocusChanged = { isFocusedSlot = it.isFocused },
+                    trailingIcon =
+                    if (
+                        !isFocusedSlot &&
+                        formState.value.channel_num == 0 &&
+                        formState.value.override_frequency == 0f
+                    ) {
+                        { Text(stringResource(Res.string.slot_auto)) }
+                    } else {
+                        null
+                    },
                     onValueChanged = {
                         if (it <= formState.value.numChannels) { // total num of LoRa channels
                             formState.value = formState.value.newBuilder().also { wb -> wb.channel_num = it }.build()
@@ -405,6 +417,12 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onFocusChanged = { isFocusedOverride = it.isFocused },
+                    trailingIcon =
+                    if (!isFocusedOverride && formState.value.override_frequency == 0f) {
+                        { Text(stringResource(Res.string.slot_auto)) }
+                    } else {
+                        null
+                    },
                     onValueChanged = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.override_frequency = it }.build()
                     },

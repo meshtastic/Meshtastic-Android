@@ -159,6 +159,21 @@ class RegionInfoTest {
         val us = lora(RegionCode.US, ModemPreset.LONG_FAST)
         assertEquals(104, us.numChannels)
         assertEquals(906.875f, us.radioFreq(20), 0.001f)
+
+        // Firmware adds frequency_offset to the slot frequency as well as to an override.
+        val offset = us.newBuilder().also { wb -> wb.frequency_offset = 0.01f }.build()
+        assertEquals(906.885f, offset.radioFreq(20), 0.001f)
+
+        // KZ_863: 863-868 MHz, standard (not wide) LoRa like firmware's RDEF -> 20 slots.
+        assertEquals(20, lora(RegionCode.KZ_863, ModemPreset.LONG_FAST).numChannels)
+    }
+
+    @Test
+    fun non_ascii_channel_names_hash_their_utf8_bytes_like_firmware() {
+        val us = lora(RegionCode.US, ModemPreset.LONG_FAST)
+        assertEquals(20, us.channelNum("LongFast"))
+        assertEquals(23, us.channelNum("Häme"))
+        assertEquals(93, us.channelNum("Mesh🙂"))
     }
 
     @Test
