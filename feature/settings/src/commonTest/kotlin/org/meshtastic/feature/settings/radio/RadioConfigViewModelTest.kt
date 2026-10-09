@@ -2725,12 +2725,22 @@ class RadioConfigViewModelTest {
         // restoring it would wipe the device's real keys with blanks.
         viewModel.backupSecurityKeys(Config.SecurityConfig.Builder().build())
 
-        verify(exactly(0)) { securityKeyBackupStore.save(any(), any(), any(), any()) }
+        verify(exactly(0)) { securityKeyBackupStore.save(any(), any(), any(), any(), any()) }
     }
 
     @Test
-    fun `backupSecurityKeys persists real keys`() = runTest {
-        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+    fun `backupSecurityKeys persists real keys and the node's long name`() = runTest {
+        val node =
+            Node(
+                num = 123,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!123"
+                        wb.long_name = "Base Station"
+                    }
+                    .build(),
+            )
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
@@ -2744,7 +2754,7 @@ class RadioConfigViewModelTest {
         viewModel.backupSecurityKeys(config)
 
         // Pin the exact base64 so a public/private swap or encoding change is caught.
-        verify { securityKeyBackupStore.save(123, "cHVi", "cHJpdg==", any()) }
+        verify { securityKeyBackupStore.save(123, "cHVi", "cHJpdg==", any(), "Base Station") }
     }
 
     @Test
@@ -2782,6 +2792,70 @@ class RadioConfigViewModelTest {
         verifySuspend {
             radioConfigUseCase.setConfig(123, Config.Builder().also { wb -> wb.security = decoded }.build(), any())
         }
+    }
+
+    @Test
+    fun `restoreSecurityKeys from another node number pushes those keys to this node`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val stored = StoredSecurityKeys(publicKeyBase64 = "cHVi", privateKeyBase64 = "cHJpdg==", timestamp = 1L)
+        val decoded = Config.SecurityConfig.Builder().also { wb -> wb.public_key = "pub".encodeUtf8() }.build()
+        every { securityKeyBackupStore.get(456) } returns stored
+        every { importSecurityConfigUseCase(stored) } returns Result.success(decoded)
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
+
+        viewModel.restoreSecurityKeys(fromNodeNum = 456)
+
+        verifySuspend {
+            radioConfigUseCase.setConfig(123, Config.Builder().also { wb -> wb.security = decoded }.build(), any())
+        }
+    }
+
+    @Test
+    fun `securityKeyBackups lists this node first then newest first with known names`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        val oldSelf =
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!456"
+                        wb.long_name = "Old Self"
+                    }
+                    .build(),
+            )
+        nodeRepository.setNodes(listOf(node, oldSelf))
+        viewModel = createViewModel()
+        every { securityKeyBackupStore.all() } returns
+            mapOf(
+                456 to StoredSecurityKeys("a", "b", timestamp = 3L),
+                789 to StoredSecurityKeys("c", "d", timestamp = 5L, longName = "Saved Name"),
+                321 to StoredSecurityKeys("g", "h", timestamp = 2L),
+                123 to StoredSecurityKeys("e", "f", timestamp = 1L),
+            )
+
+        val backups = viewModel.securityKeyBackups()
+
+        assertEquals(listOf(123, 789, 456, 321), backups.map { it.nodeNum })
+        assertEquals(listOf(true, false, false, false), backups.map { it.isCurrentNode })
+        assertEquals("Saved Name", backups[1].longName)
+        assertEquals("Old Self", backups[2].longName)
+        assertNull(backups[3].longName)
+    }
+
+    @Test
+    fun `deleteSecurityKeyBackup removes the backup under the picked node number`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        viewModel.deleteSecurityKeyBackup(backupNodeNum = 456)
+
+        verify { securityKeyBackupStore.delete(456) }
+        verify(exactly(0)) { securityKeyBackupStore.delete(123) }
     }
 
     private fun fourChannelFixture() = listOf(

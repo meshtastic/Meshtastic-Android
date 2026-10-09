@@ -341,6 +341,7 @@ delete_for_everyone
 delete_for_me
 delete_key_backup
 delete_key_backup_confirmation
+delete_key_backup_pick
 delete_messages
 delete_messages_title
 delete_selection
@@ -842,6 +843,7 @@ json_output_enabled
 jump_to_latest_from
 jump_to_latest_from_and_more
 ### KEY ###
+key_backup_choice
 key_backup_deleted
 key_backup_not_found
 key_backup_restore_failed
@@ -1576,6 +1578,7 @@ reset
 reset_to_defaults
 restore_keys
 restore_keys_confirmation
+restore_keys_pick_backup
 retry
 ringtone
 ringtone_file_empty

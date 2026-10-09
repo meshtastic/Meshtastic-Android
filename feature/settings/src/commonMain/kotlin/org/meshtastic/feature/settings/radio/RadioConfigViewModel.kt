@@ -125,6 +125,14 @@ import kotlin.time.Duration.Companion.seconds
 internal val MANUAL_CHANNEL_WRITE_DELAY: Duration = 1.seconds
 private val REMOTE_READ_LATE_RESPONSE_GRACE: Duration = 2.minutes
 
+/** One stored key backup offered for restore; [longName] is null when the node DB no longer knows [nodeNum]. */
+data class SecurityKeyBackupOption(
+    val nodeNum: Int,
+    val longName: String?,
+    val timestamp: Long,
+    val isCurrentNode: Boolean,
+)
+
 /** Data class that represents the current RadioConfig state. */
 data class RadioConfigState(
     val isLocal: Boolean = false,
@@ -745,12 +753,6 @@ open class RadioConfigViewModel(
         }
     }
 
-    /** Whether an encrypted key backup exists for the node currently being configured. */
-    fun securityKeyBackupExists(): Boolean {
-        val nodeNum = destNum ?: destNode.value?.num ?: return false
-        return securityKeyBackupStore.get(nodeNum) != null
-    }
-
     /** Saves the node's current public/private keys to OS-backed encrypted storage, keyed by node number. */
     fun backupSecurityKeys(securityConfig: Config.SecurityConfig, onComplete: () -> Unit = {}) {
         val nodeNum = destNum ?: destNode.value?.num ?: return
@@ -766,17 +768,40 @@ open class RadioConfigViewModel(
                 publicKeyBase64 = securityConfig.public_key.base64(),
                 privateKeyBase64 = securityConfig.private_key.base64(),
                 timestamp = nowMillis,
+                longName = nodeRepository.nodeDBbyNum.value[nodeNum]?.user?.long_name?.takeIf { it.isNotBlank() },
             )
             snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_saved).resolve())
             onComplete()
         }
     }
 
-    /** Restores the previously backed-up keys for this node and pushes them to the device via admin config. */
-    fun restoreSecurityKeys() {
+    /** Every stored key backup, this node's own first, then newest first. */
+    fun securityKeyBackups(): List<SecurityKeyBackupOption> {
+        val nodeNum = destNum ?: destNode.value?.num
+        val nodes = nodeRepository.nodeDBbyNum.value
+        return securityKeyBackupStore
+            .all()
+            .map { (num, keys) ->
+                SecurityKeyBackupOption(
+                    nodeNum = num,
+                    longName = keys.longName ?: nodes[num]?.user?.long_name?.takeIf { it.isNotBlank() },
+                    timestamp = keys.timestamp,
+                    isCurrentNode = num == nodeNum,
+                )
+            }
+            .sortedWith(
+                compareByDescending<SecurityKeyBackupOption> { it.isCurrentNode }.thenByDescending { it.timestamp },
+            )
+    }
+
+    /**
+     * Restores the keys backed up under [fromNodeNum] (default: this node) and pushes them to the device via admin
+     * config.
+     */
+    fun restoreSecurityKeys(fromNodeNum: Int? = null) {
         val nodeNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "restoreSecurityKeys") {
-            val stored = securityKeyBackupStore.get(nodeNum)
+            val stored = securityKeyBackupStore.get(fromNodeNum ?: nodeNum)
             if (stored == null) {
                 snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_not_found).resolve())
                 return@safeLaunch
@@ -794,9 +819,9 @@ open class RadioConfigViewModel(
         }
     }
 
-    /** Deletes the encrypted key backup for this node, if any. */
-    fun deleteSecurityKeyBackup(onComplete: () -> Unit = {}) {
-        val nodeNum = destNum ?: destNode.value?.num ?: return
+    /** Deletes the encrypted key backup stored under [backupNodeNum] (default: this node), if any. */
+    fun deleteSecurityKeyBackup(backupNodeNum: Int? = null, onComplete: () -> Unit = {}) {
+        val nodeNum = backupNodeNum ?: destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "deleteSecurityKeyBackup") {
             securityKeyBackupStore.delete(nodeNum)
             snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_deleted).resolve())
