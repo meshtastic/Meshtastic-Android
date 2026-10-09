@@ -133,6 +133,7 @@ fun EditTextPreference(
     modifier: Modifier = Modifier,
     summary: String? = null,
     onFocusChanged: (FocusState) -> Unit = {},
+    trailingIcon: (@Composable () -> Unit)? = null,
 ) {
     var valueState by remember(value) { mutableStateOf(value.toString()) }
 
@@ -158,6 +159,7 @@ fun EditTextPreference(
         },
         onFocusChanged = onFocusChanged,
         modifier = modifier,
+        trailingIcon = trailingIcon,
     )
 }
 

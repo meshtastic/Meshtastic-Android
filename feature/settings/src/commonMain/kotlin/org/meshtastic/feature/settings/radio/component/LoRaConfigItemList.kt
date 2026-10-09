@@ -170,7 +170,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val formState = rememberConfigState(initialValue = loraConfig)
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
 
-    val primaryChannel = remember(formState.value) { Channel(primarySettings, formState.value) }
+    val primaryChannel = remember(primarySettings, formState.value) { Channel(primarySettings, formState.value) }
     val focusManager = LocalFocusManager.current
     val bandwidthSelection =
         loRaBandwidthSelection(
@@ -377,7 +377,11 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onFocusChanged = { isFocusedSlot = it.isFocused },
                     trailingIcon =
-                    if (!isFocusedSlot && formState.value.channel_num == 0) {
+                    if (
+                        !isFocusedSlot &&
+                        formState.value.channel_num == 0 &&
+                        formState.value.override_frequency == 0f
+                    ) {
                         { Text(stringResource(Res.string.slot_auto)) }
                     } else {
                         null
@@ -413,6 +417,12 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onFocusChanged = { isFocusedOverride = it.isFocused },
+                    trailingIcon =
+                    if (!isFocusedOverride && formState.value.override_frequency == 0f) {
+                        { Text(stringResource(Res.string.slot_auto)) }
+                    } else {
+                        null
+                    },
                     onValueChanged = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.override_frequency = it }.build()
                     },
