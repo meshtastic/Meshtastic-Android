@@ -842,6 +842,7 @@ json_output_enabled
 jump_to_latest_from
 jump_to_latest_from_and_more
 ### KEY ###
+key_backup_choice
 key_backup_deleted
 key_backup_not_found
 key_backup_restore_failed
@@ -1576,6 +1577,7 @@ reset
 reset_to_defaults
 restore_keys
 restore_keys_confirmation
+restore_keys_pick_backup
 retry
 ringtone
 ringtone_file_empty

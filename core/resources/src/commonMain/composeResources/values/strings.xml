@@ -878,6 +878,7 @@
     <string name="jump_to_latest_from">%1$s</string>
     <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
     <!-- KEY -->
+    <string name="key_backup_choice">%1$s, backed up %2$s</string>
     <string name="key_backup_deleted">Key backup deleted</string>
     <string name="key_backup_not_found">No key backup found for this node</string>
     <string name="key_backup_restore_failed">Failed to restore keys from backup</string>
@@ -1636,6 +1637,7 @@
     <string name="reset_to_defaults">Reset to defaults</string>
     <string name="restore_keys">Restore Keys</string>
     <string name="restore_keys_confirmation">Restores the backed-up public and private keys to this node.</string>
+    <string name="restore_keys_pick_backup">No backup matches this node's current ID. A factory reset or a new key changes the ID. Pick the backup to restore to this node:</string>
     <string name="retry">Retry</string>
     <string name="ringtone">Ringtone</string>
     <string name="ringtone_file_empty">File is empty</string>

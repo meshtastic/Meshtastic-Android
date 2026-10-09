@@ -40,6 +40,15 @@ class SecurityKeyBackupStoreImpl(app: Application) : SecurityKeyBackupStore {
         return StoredSecurityKeys(publicKey, privateKey, timestamp)
     }
 
+    override fun all(): Map<Int, StoredSecurityKeys> {
+        val p = prefs ?: return emptyMap()
+        return p.all.keys
+            .filter { it.endsWith(PUBLIC_SUFFIX) }
+            .mapNotNull { it.removeSuffix(PUBLIC_SUFFIX).toIntOrNull() }
+            .mapNotNull { num -> get(num)?.let { num to it } }
+            .toMap()
+    }
+
     override fun save(nodeNum: Int, publicKeyBase64: String, privateKeyBase64: String, timestamp: Long) {
         val p = prefs ?: error("Encrypted security key backup store unavailable")
         p.edit()
@@ -56,5 +65,6 @@ class SecurityKeyBackupStoreImpl(app: Application) : SecurityKeyBackupStore {
 
     private companion object {
         private const val PREFS_FILE_NAME = "security_key_backup_store"
+        private const val PUBLIC_SUFFIX = "_public"
     }
 }

@@ -29,6 +29,12 @@ interface SecurityKeyBackupStore {
     /** Retrieves the stored key backup for the given node number, or null if none is stored. */
     fun get(nodeNum: Int): StoredSecurityKeys?
 
+    /**
+     * Every stored backup by the node number it was saved under. Firmware 2.8 derives the node number from the public
+     * key, so a reset or regenerated key moves a node to a number with no backup.
+     */
+    fun all(): Map<Int, StoredSecurityKeys>
+
     /** Saves (overwriting any existing) key backup for the given node number. */
     fun save(nodeNum: Int, publicKeyBase64: String, privateKeyBase64: String, timestamp: Long)
 

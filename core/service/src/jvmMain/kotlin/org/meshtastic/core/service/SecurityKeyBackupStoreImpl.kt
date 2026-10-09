@@ -60,6 +60,13 @@ class SecurityKeyBackupStoreImpl(dataDir: File = File(desktopDataDir())) : Secur
         }
     }
 
+    override fun all(): Map<Int, StoredSecurityKeys> = storeDir
+        .listFiles { file -> file.name.endsWith(ENTRY_SUFFIX) }
+        .orEmpty()
+        .mapNotNull { it.name.removeSuffix(ENTRY_SUFFIX).toIntOrNull() }
+        .mapNotNull { num -> get(num)?.let { num to it } }
+        .toMap()
+
     override fun save(nodeNum: Int, publicKeyBase64: String, privateKeyBase64: String, timestamp: Long) {
         val key = masterKey ?: error("SecurityKeyBackup: Cannot save keys - keystore unavailable")
         val plaintext = "$timestamp\n$publicKeyBase64\n$privateKeyBase64".encodeToByteArray()
@@ -73,7 +80,7 @@ class SecurityKeyBackupStoreImpl(dataDir: File = File(desktopDataDir())) : Secur
         }
     }
 
-    private fun entryFile(nodeNum: Int): File = File(storeDir, "$nodeNum.enc")
+    private fun entryFile(nodeNum: Int): File = File(storeDir, "$nodeNum$ENTRY_SUFFIX")
 
     @Suppress("ReturnCount")
     private fun deserialize(plaintext: ByteArray): StoredSecurityKeys? {
@@ -93,5 +100,6 @@ class SecurityKeyBackupStoreImpl(dataDir: File = File(desktopDataDir())) : Secur
         // Intentional: mirrors LockdownPassphraseStoreImpl's documented desktop threat model.
         private val KEYSTORE_PASSWORD = "meshtastic-security-keys".toCharArray()
         private const val SERIALIZED_LINE_COUNT = 3
+        private const val ENTRY_SUFFIX = ".enc"
     }
 }

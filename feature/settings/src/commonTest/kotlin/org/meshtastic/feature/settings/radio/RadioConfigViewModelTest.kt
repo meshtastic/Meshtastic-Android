@@ -2784,6 +2784,56 @@ class RadioConfigViewModelTest {
         }
     }
 
+    @Test
+    fun `restoreSecurityKeys from another node number pushes those keys to this node`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val stored = StoredSecurityKeys(publicKeyBase64 = "cHVi", privateKeyBase64 = "cHJpdg==", timestamp = 1L)
+        val decoded = Config.SecurityConfig.Builder().also { wb -> wb.public_key = "pub".encodeUtf8() }.build()
+        every { securityKeyBackupStore.get(456) } returns stored
+        every { importSecurityConfigUseCase(stored) } returns Result.success(decoded)
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
+
+        viewModel.restoreSecurityKeys(fromNodeNum = 456)
+
+        verifySuspend {
+            radioConfigUseCase.setConfig(123, Config.Builder().also { wb -> wb.security = decoded }.build(), any())
+        }
+    }
+
+    @Test
+    fun `securityKeyBackups lists this node first then newest first with known names`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        val oldSelf =
+            Node(
+                num = 456,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!456"
+                        wb.long_name = "Old Self"
+                    }
+                    .build(),
+            )
+        nodeRepository.setNodes(listOf(node, oldSelf))
+        viewModel = createViewModel()
+        every { securityKeyBackupStore.all() } returns
+            mapOf(
+                456 to StoredSecurityKeys("a", "b", timestamp = 3L),
+                789 to StoredSecurityKeys("c", "d", timestamp = 5L),
+                123 to StoredSecurityKeys("e", "f", timestamp = 1L),
+            )
+
+        val backups = viewModel.securityKeyBackups()
+
+        assertEquals(listOf(123, 789, 456), backups.map { it.nodeNum })
+        assertEquals(listOf(true, false, false), backups.map { it.isCurrentNode })
+        assertEquals("Old Self", backups.last().longName)
+        assertNull(backups[1].longName)
+    }
+
     private fun fourChannelFixture() = listOf(
         ChannelSettings.Builder().also { wb -> wb.name = "A" }.build(),
         ChannelSettings.Builder().also { wb -> wb.name = "B" }.build(),
