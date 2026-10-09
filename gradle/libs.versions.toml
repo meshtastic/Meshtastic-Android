@@ -25,7 +25,7 @@ koin = "4.2.2"
 koin-plugin = "1.2.1"
 
 # Kotlin
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 kotlinx-coroutines-android = "1.11.0"
 kotlinx-datetime = "0.8.0-0.6.x-compat"
 kotlinx-serialization = "1.11.0"
@@ -36,7 +36,7 @@ mokkery = "3.5.1"
 junit5 = "6.1.3"
 junit-platform = "6.1.3" # JUnit Platform shares the junit5 version since JUnit 6
 kotest = "6.2.5"
-konsist = "0.17.3"
+konsist = "0.18.0"
 turbine = "1.2.1"
 
 # Compose Screenshot Testing
@@ -337,7 +337,7 @@ compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version.ref = "datadog-gradle" }
 compose-screenshot-gradlePlugin = { module = "com.android.compose.screenshot:screenshot-test-gradle-plugin", version.ref = "compose-screenshot" }
-detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.6.7" }
+detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.6.8" }
 detekt-formatting = { module = "dev.detekt:detekt-rules-ktlint-wrapper", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
