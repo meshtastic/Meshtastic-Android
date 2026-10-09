@@ -162,6 +162,14 @@ class RegionInfoTest {
     }
 
     @Test
+    fun non_ascii_channel_names_hash_their_utf8_bytes_like_firmware() {
+        val us = lora(RegionCode.US, ModemPreset.LONG_FAST)
+        assertEquals(20, us.channelNum("LongFast"))
+        assertEquals(23, us.channelNum("Häme"))
+        assertEquals(93, us.channelNum("Mesh🙂"))
+    }
+
+    @Test
     fun explicit_channel_num_wins_over_override_slot() {
         val itu1 = lora(RegionCode.ITU1_2M, ModemPreset.TINY_FAST, channelNum = 5)
         assertEquals(5, itu1.channelNum("TinyFast"))

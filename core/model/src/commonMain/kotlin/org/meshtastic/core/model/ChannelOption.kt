@@ -23,11 +23,14 @@ import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import kotlin.math.round
 
-/** hash a string into an integer using the djb2 algorithm by Dan Bernstein http://www.cse.yorku.ca/~oz/hash.html */
-private fun hash(name: String): UInt { // using UInt instead of Long to match RadioInterface.cpp results
+/**
+ * djb2 over the name's UTF-8 bytes, matching firmware `RadioInterface.cpp` `hash()`; hashing UTF-16 chars gives a
+ * different slot for any non-ASCII name.
+ */
+private fun hash(name: String): UInt {
     var hash = 5381u
-    for (c in name) {
-        hash += (hash shl 5) + c.code.toUInt()
+    for (b in name.encodeToByteArray()) {
+        hash += (hash shl 5) + b.toUByte().toUInt()
     }
     return hash
 }
