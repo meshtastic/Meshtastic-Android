@@ -19,6 +19,7 @@ package org.meshtastic.feature.settings.radio.component
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,6 +78,7 @@ import org.meshtastic.core.resources.schema_lora_tx_power
 import org.meshtastic.core.resources.schema_lora_tx_power_description
 import org.meshtastic.core.resources.schema_lora_use_preset
 import org.meshtastic.core.resources.schema_lora_use_preset_description
+import org.meshtastic.core.resources.slot_auto
 import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -374,6 +376,12 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onFocusChanged = { isFocusedSlot = it.isFocused },
+                    trailingIcon =
+                    if (!isFocusedSlot && formState.value.channel_num == 0) {
+                        { Text(stringResource(Res.string.slot_auto)) }
+                    } else {
+                        null
+                    },
                     onValueChanged = {
                         if (it <= formState.value.numChannels) { // total num of LoRa channels
                             formState.value = formState.value.newBuilder().also { wb -> wb.channel_num = it }.build()

@@ -233,6 +233,7 @@ private fun ChannelConfigScreen(
                     } else {
                         primaryChannel.channelNum
                     },
+                    isAutoSlot = loraConfig.channel_num == 0 && loraConfig.override_frequency == 0f,
                 )
                 Text(
                     text = stringResource(Res.string.press_and_drag),

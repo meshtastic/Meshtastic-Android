@@ -30,10 +30,11 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channels
 import org.meshtastic.core.resources.freq
 import org.meshtastic.core.resources.slot
+import org.meshtastic.core.resources.slot_auto
 import org.meshtastic.core.ui.component.PreferenceCategory
 
 @Composable
-internal fun ChannelConfigHeader(frequency: Float, slot: Int) {
+internal fun ChannelConfigHeader(frequency: Float, slot: Int, isAutoSlot: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -42,7 +43,8 @@ internal fun ChannelConfigHeader(frequency: Float, slot: Int) {
         PreferenceCategory(text = stringResource(Res.string.channels))
         Column {
             Text(text = "${stringResource(Res.string.freq)}: ${frequency}MHz", fontSize = 11.sp)
-            Text(text = "${stringResource(Res.string.slot)}: $slot", fontSize = 11.sp)
+            val auto = if (isAutoSlot) " (${stringResource(Res.string.slot_auto)})" else ""
+            Text(text = "${stringResource(Res.string.slot)}: $slot$auto", fontSize = 11.sp)
         }
     }
 }
