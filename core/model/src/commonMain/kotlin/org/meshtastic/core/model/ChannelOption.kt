@@ -326,7 +326,7 @@ enum class RegionInfo(
      *
      * @see [Firmware Issue #7204](https://github.com/meshtastic/firmware/issues/7204)
      */
-    KZ_863(RegionCode.KZ_863, "Kazakhstan 863MHz", 863.0f, 868.0f, wideLora = true),
+    KZ_863(RegionCode.KZ_863, "Kazakhstan 863MHz", 863.0f, 868.0f),
 
     /**
      * Nepal 865Mhz 865 - 868 Mhz

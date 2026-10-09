@@ -159,6 +159,9 @@ class RegionInfoTest {
         val us = lora(RegionCode.US, ModemPreset.LONG_FAST)
         assertEquals(104, us.numChannels)
         assertEquals(906.875f, us.radioFreq(20), 0.001f)
+
+        // KZ_863: 863-868 MHz, standard (not wide) LoRa like firmware's RDEF -> 20 slots.
+        assertEquals(20, lora(RegionCode.KZ_863, ModemPreset.LONG_FAST).numChannels)
     }
 
     @Test
