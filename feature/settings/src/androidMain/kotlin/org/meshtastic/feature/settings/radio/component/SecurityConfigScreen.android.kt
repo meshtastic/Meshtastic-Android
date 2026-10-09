@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.NodeAddress
@@ -36,6 +37,7 @@ import org.meshtastic.core.resources.backup_keys
 import org.meshtastic.core.resources.backup_keys_confirmation
 import org.meshtastic.core.resources.delete_key_backup
 import org.meshtastic.core.resources.delete_key_backup_confirmation
+import org.meshtastic.core.resources.delete_key_backup_pick
 import org.meshtastic.core.resources.key_backup_choice
 import org.meshtastic.core.resources.restore_keys
 import org.meshtastic.core.resources.restore_keys_confirmation
@@ -59,7 +61,6 @@ actual fun SecurityKeyBackupActions(
     var refreshTrigger by remember { mutableIntStateOf(0) }
     val destNodeNum = viewModel.destNode.collectAsStateWithLifecycle().value?.num
     val backups = remember(refreshTrigger, destNodeNum) { viewModel.securityKeyBackups() }
-    val hasBackup = backups.any { it.isCurrentNode }
 
     var showBackupDialog by rememberSaveable { mutableStateOf(false) }
     var showRestoreDialog by rememberSaveable { mutableStateOf(false) }
@@ -77,17 +78,23 @@ actual fun SecurityKeyBackupActions(
         )
     }
     if (showRestoreDialog) {
-        RestoreKeyBackupDialog(backups, viewModel::restoreSecurityKeys) { showRestoreDialog = false }
+        KeyBackupDialog(
+            backups = backups,
+            titleRes = Res.string.restore_keys,
+            confirmRes = Res.string.restore_keys_confirmation,
+            pickRes = Res.string.restore_keys_pick_backup,
+            onPick = { viewModel.restoreSecurityKeys(it) },
+            onDismiss = { showRestoreDialog = false },
+        )
     }
     if (showDeleteDialog) {
-        MeshtasticResourceDialog(
+        KeyBackupDialog(
+            backups = backups,
             titleRes = Res.string.delete_key_backup,
-            messageRes = Res.string.delete_key_backup_confirmation,
+            confirmRes = Res.string.delete_key_backup_confirmation,
+            pickRes = Res.string.delete_key_backup_pick,
+            onPick = { viewModel.deleteSecurityKeyBackup(it) { refreshTrigger++ } },
             onDismiss = { showDeleteDialog = false },
-            onConfirm = {
-                showDeleteDialog = false
-                viewModel.deleteSecurityKeyBackup { refreshTrigger++ }
-            },
         )
     }
 
@@ -111,27 +118,34 @@ actual fun SecurityKeyBackupActions(
     NodeActionButton(
         modifier = Modifier.padding(horizontal = 8.dp),
         title = stringResource(Res.string.delete_key_backup),
-        enabled = enabled && hasBackup,
+        enabled = enabled && backups.isNotEmpty(),
         icon = MeshtasticIcons.Delete,
         onClick = { showDeleteDialog = true },
     )
 }
 
-/** Confirms restoring this node's own backup, or, when it has none, offers every stored backup to pick from. */
+/**
+ * Confirms acting on this node's own backup when it is the only one stored; otherwise offers every backup to pick from,
+ * since a reset or new key leaves the node's older backups under its old number.
+ */
 @Composable
-private fun RestoreKeyBackupDialog(
+private fun KeyBackupDialog(
     backups: List<SecurityKeyBackupOption>,
-    onRestore: (Int?) -> Unit,
+    titleRes: StringResource,
+    confirmRes: StringResource,
+    pickRes: StringResource,
+    onPick: (Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    if (backups.any { it.isCurrentNode }) {
+    val only = backups.singleOrNull()
+    if (only != null && only.isCurrentNode) {
         MeshtasticResourceDialog(
-            titleRes = Res.string.restore_keys,
-            messageRes = Res.string.restore_keys_confirmation,
+            titleRes = titleRes,
+            messageRes = confirmRes,
             onDismiss = onDismiss,
             onConfirm = {
                 onDismiss()
-                onRestore(null)
+                onPick(only.nodeNum)
             },
         )
         return
@@ -141,13 +155,8 @@ private fun RestoreKeyBackupDialog(
         val name = backup.longName?.let { "$it ($id)" } ?: id
         stringResource(Res.string.key_backup_choice, name, DateFormatter.formatDateTimeShort(backup.timestamp)) to
             {
-                onRestore(backup.nodeNum)
+                onPick(backup.nodeNum)
             }
     }
-    MeshtasticDialog(
-        titleRes = Res.string.restore_keys,
-        messageRes = Res.string.restore_keys_pick_backup,
-        choices = choices,
-        onDismiss = onDismiss,
-    )
+    MeshtasticDialog(titleRes = titleRes, messageRes = pickRes, choices = choices, onDismiss = onDismiss)
 }

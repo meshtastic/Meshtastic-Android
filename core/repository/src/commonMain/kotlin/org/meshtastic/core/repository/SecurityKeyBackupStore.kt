@@ -16,8 +16,16 @@
  */
 package org.meshtastic.core.repository
 
-/** A public/private key pair backed up for a single node, plus when it was saved. */
-data class StoredSecurityKeys(val publicKeyBase64: String, val privateKeyBase64: String, val timestamp: Long)
+/**
+ * A public/private key pair backed up for a single node, plus when it was saved and the node's long name at the time
+ * (null for backups saved before names were recorded).
+ */
+data class StoredSecurityKeys(
+    val publicKeyBase64: String,
+    val privateKeyBase64: String,
+    val timestamp: Long,
+    val longName: String? = null,
+)
 
 /**
  * Encrypted per-node storage for security (public/private) key backups.
@@ -36,7 +44,13 @@ interface SecurityKeyBackupStore {
     fun all(): Map<Int, StoredSecurityKeys>
 
     /** Saves (overwriting any existing) key backup for the given node number. */
-    fun save(nodeNum: Int, publicKeyBase64: String, privateKeyBase64: String, timestamp: Long)
+    fun save(
+        nodeNum: Int,
+        publicKeyBase64: String,
+        privateKeyBase64: String,
+        timestamp: Long,
+        longName: String? = null,
+    )
 
     /** Clears the stored key backup for the given node number. */
     fun delete(nodeNum: Int)

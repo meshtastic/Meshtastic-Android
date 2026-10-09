@@ -371,6 +371,7 @@
     <string name="delete_for_me">Delete for me</string>
     <string name="delete_key_backup">Delete Key Backup</string>
     <string name="delete_key_backup_confirmation">Deletes the encrypted key backup stored on this device. This cannot be undone.</string>
+    <string name="delete_key_backup_pick">Pick the encrypted key backup to delete from this device. This cannot be undone.</string>
     <plurals name="delete_messages">
         <item quantity="one">Delete message?</item>
         <item quantity="other">Delete %1$s messages?</item>
@@ -1637,7 +1638,7 @@
     <string name="reset_to_defaults">Reset to defaults</string>
     <string name="restore_keys">Restore Keys</string>
     <string name="restore_keys_confirmation">Restores the backed-up public and private keys to this node.</string>
-    <string name="restore_keys_pick_backup">No backup matches this node's current ID. A factory reset or a new key changes the ID. Pick the backup to restore to this node:</string>
+    <string name="restore_keys_pick_backup">Pick the backup to restore to this node. A factory reset or a new key changes the node's ID, so older backups stay under the old ID. Only restore a backup taken from this same radio: another radio's key gives both radios the same identity.</string>
     <string name="retry">Retry</string>
     <string name="ringtone">Ringtone</string>
     <string name="ringtone_file_empty">File is empty</string>

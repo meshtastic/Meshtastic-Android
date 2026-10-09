@@ -58,13 +58,21 @@ class SecurityKeyBackupStoreImplTest {
     @Test
     fun `all lists every backup by node number including negative ones`() {
         val store = SecurityKeyBackupStoreImpl(dataDir)
-        store.save(nodeNum = 42, publicKeyBase64 = "pub", privateKeyBase64 = "priv", timestamp = 1L)
-        store.save(nodeNum = -7, publicKeyBase64 = "pub7", privateKeyBase64 = "priv7", timestamp = 2L)
+        store.save(nodeNum = 42, publicKeyBase64 = "pub", privateKeyBase64 = "priv", timestamp = 1L, longName = null)
+        store.save(
+            nodeNum = -7,
+            publicKeyBase64 = "pub7",
+            privateKeyBase64 = "priv7",
+            timestamp = 2L,
+            longName = "Seven",
+        )
 
         val all = store.all()
 
         assertEquals(setOf(42, -7), all.keys)
         assertEquals("pub7", all[-7]?.publicKeyBase64)
+        assertEquals("Seven", all[-7]?.longName)
+        assertNull(all[42]?.longName)
     }
 
     @Test

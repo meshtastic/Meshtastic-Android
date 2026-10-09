@@ -37,7 +37,7 @@ class SecurityKeyBackupStoreImpl(app: Application) : SecurityKeyBackupStore {
         val publicKey = p.getString("${nodeNum}_public", null) ?: return null
         val privateKey = p.getString("${nodeNum}_private", null) ?: return null
         val timestamp = p.getLong("${nodeNum}_timestamp", 0L)
-        return StoredSecurityKeys(publicKey, privateKey, timestamp)
+        return StoredSecurityKeys(publicKey, privateKey, timestamp, p.getString("${nodeNum}_name", null))
     }
 
     override fun all(): Map<Int, StoredSecurityKeys> {
@@ -49,18 +49,30 @@ class SecurityKeyBackupStoreImpl(app: Application) : SecurityKeyBackupStore {
             .toMap()
     }
 
-    override fun save(nodeNum: Int, publicKeyBase64: String, privateKeyBase64: String, timestamp: Long) {
+    override fun save(
+        nodeNum: Int,
+        publicKeyBase64: String,
+        privateKeyBase64: String,
+        timestamp: Long,
+        longName: String?,
+    ) {
         val p = prefs ?: error("Encrypted security key backup store unavailable")
         p.edit()
             .putString("${nodeNum}_public", publicKeyBase64)
             .putString("${nodeNum}_private", privateKeyBase64)
             .putLong("${nodeNum}_timestamp", timestamp)
+            .putString("${nodeNum}_name", longName)
             .apply()
     }
 
     override fun delete(nodeNum: Int) {
         val p = prefs ?: return
-        p.edit().remove("${nodeNum}_public").remove("${nodeNum}_private").remove("${nodeNum}_timestamp").apply()
+        p.edit()
+            .remove("${nodeNum}_public")
+            .remove("${nodeNum}_private")
+            .remove("${nodeNum}_timestamp")
+            .remove("${nodeNum}_name")
+            .apply()
     }
 
     private companion object {

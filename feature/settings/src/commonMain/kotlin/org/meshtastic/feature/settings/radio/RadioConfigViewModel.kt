@@ -768,6 +768,7 @@ open class RadioConfigViewModel(
                 publicKeyBase64 = securityConfig.public_key.base64(),
                 privateKeyBase64 = securityConfig.private_key.base64(),
                 timestamp = nowMillis,
+                longName = nodeRepository.nodeDBbyNum.value[nodeNum]?.user?.long_name?.takeIf { it.isNotBlank() },
             )
             snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_saved).resolve())
             onComplete()
@@ -783,7 +784,7 @@ open class RadioConfigViewModel(
             .map { (num, keys) ->
                 SecurityKeyBackupOption(
                     nodeNum = num,
-                    longName = nodes[num]?.user?.long_name?.takeIf { it.isNotBlank() },
+                    longName = keys.longName ?: nodes[num]?.user?.long_name?.takeIf { it.isNotBlank() },
                     timestamp = keys.timestamp,
                     isCurrentNode = num == nodeNum,
                 )
@@ -818,9 +819,9 @@ open class RadioConfigViewModel(
         }
     }
 
-    /** Deletes the encrypted key backup for this node, if any. */
-    fun deleteSecurityKeyBackup(onComplete: () -> Unit = {}) {
-        val nodeNum = destNum ?: destNode.value?.num ?: return
+    /** Deletes the encrypted key backup stored under [backupNodeNum] (default: this node), if any. */
+    fun deleteSecurityKeyBackup(backupNodeNum: Int? = null, onComplete: () -> Unit = {}) {
+        val nodeNum = backupNodeNum ?: destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "deleteSecurityKeyBackup") {
             securityKeyBackupStore.delete(nodeNum)
             snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_deleted).resolve())

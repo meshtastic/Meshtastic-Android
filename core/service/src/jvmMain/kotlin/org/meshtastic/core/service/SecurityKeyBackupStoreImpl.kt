@@ -67,9 +67,16 @@ class SecurityKeyBackupStoreImpl(dataDir: File = File(desktopDataDir())) : Secur
         .mapNotNull { num -> get(num)?.let { num to it } }
         .toMap()
 
-    override fun save(nodeNum: Int, publicKeyBase64: String, privateKeyBase64: String, timestamp: Long) {
+    override fun save(
+        nodeNum: Int,
+        publicKeyBase64: String,
+        privateKeyBase64: String,
+        timestamp: Long,
+        longName: String?,
+    ) {
         val key = masterKey ?: error("SecurityKeyBackup: Cannot save keys - keystore unavailable")
-        val plaintext = "$timestamp\n$publicKeyBase64\n$privateKeyBase64".encodeToByteArray()
+        val nameLine = longName?.let { "\n$it" }.orEmpty()
+        val plaintext = "$timestamp\n$publicKeyBase64\n$privateKeyBase64$nameLine".encodeToByteArray()
         entryFile(nodeNum).writeBytes(cipher.encrypt(key, plaintext))
     }
 
@@ -84,13 +91,19 @@ class SecurityKeyBackupStoreImpl(dataDir: File = File(desktopDataDir())) : Secur
 
     @Suppress("ReturnCount")
     private fun deserialize(plaintext: ByteArray): StoredSecurityKeys? {
-        val parts = plaintext.decodeToString().split("\n", limit = 3)
-        if (parts.size != SERIALIZED_LINE_COUNT) {
+        // The optional fourth line is the long name, absent from backups saved before names were recorded.
+        val parts = plaintext.decodeToString().split("\n", limit = SERIALIZED_LINE_COUNT + 1)
+        if (parts.size < SERIALIZED_LINE_COUNT) {
             Logger.w { "SecurityKeyBackup: Invalid key backup entry format" }
             return null
         }
         val timestamp = parts[0].toLongOrNull() ?: return null
-        return StoredSecurityKeys(publicKeyBase64 = parts[1], privateKeyBase64 = parts[2], timestamp = timestamp)
+        return StoredSecurityKeys(
+            publicKeyBase64 = parts[1],
+            privateKeyBase64 = parts[2],
+            timestamp = timestamp,
+            longName = parts.getOrNull(SERIALIZED_LINE_COUNT),
+        )
     }
 
     private companion object {
