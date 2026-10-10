@@ -26,6 +26,7 @@ import org.meshtastic.core.resources.doc_keywords_app_functions
 import org.meshtastic.core.resources.doc_keywords_connections
 import org.meshtastic.core.resources.doc_keywords_debug_logs
 import org.meshtastic.core.resources.doc_keywords_desktop
+import org.meshtastic.core.resources.doc_keywords_phone_node
 import org.meshtastic.core.resources.doc_keywords_discovery
 import org.meshtastic.core.resources.doc_keywords_firmware
 import org.meshtastic.core.resources.doc_keywords_help
@@ -48,6 +49,7 @@ import org.meshtastic.core.resources.doc_title_app_functions
 import org.meshtastic.core.resources.doc_title_connections
 import org.meshtastic.core.resources.doc_title_debug_logs
 import org.meshtastic.core.resources.doc_title_desktop
+import org.meshtastic.core.resources.doc_title_phone_node
 import org.meshtastic.core.resources.doc_title_discovery
 import org.meshtastic.core.resources.doc_title_firmware
 import org.meshtastic.core.resources.doc_title_help
