@@ -1889,6 +1889,7 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_light">Light</string>
     <string name="theme_system">System default</string>
+    <string name="this_device">This device</string>
     <string name="time">Time</string>
     <string name="timeout">Timeout</string>
     <string name="timestamp">Timestamp</string>

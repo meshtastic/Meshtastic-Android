@@ -71,6 +71,7 @@ open class CommonGetDiscoveredDevicesUseCase(
                 recentTcpDevices = recentTcpForUi,
                 usbDevices = usbList,
                 virtualDevices = virtualDeviceEntries(showMock, showReplay),
+                localNode = localNodeEntry(),
             )
         }
     }

@@ -322,7 +322,9 @@ private fun InterfaceId.toFirmwareUpdateTransport(): FirmwareUpdateTransport? = 
 
     InterfaceId.TCP -> FirmwareUpdateTransport.Tcp
 
+    // An in-process node has no firmware to update.
     InterfaceId.MOCK,
+    InterfaceId.NODE,
     InterfaceId.NOP,
     InterfaceId.REPLAY,
     -> null

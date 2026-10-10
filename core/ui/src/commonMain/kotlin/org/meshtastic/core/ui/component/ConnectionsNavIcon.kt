@@ -36,6 +36,7 @@ import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.Reconnecting
+import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
@@ -98,6 +99,7 @@ fun getIconPair(connectionState: ConnectionState, deviceType: DeviceType? = null
                     DeviceType.BLE -> MeshtasticIcons.Bluetooth
                     DeviceType.TCP -> MeshtasticIcons.Wifi
                     DeviceType.USB -> MeshtasticIcons.Usb
+                    DeviceType.NODE -> MeshtasticIcons.PhoneAndroid
                     else -> null
                 }
     }

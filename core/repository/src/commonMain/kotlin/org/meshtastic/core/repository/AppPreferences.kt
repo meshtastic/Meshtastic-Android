@@ -365,6 +365,8 @@ fun RadioPrefs.isMock() = selectedDevice?.interfaceId == InterfaceId.MOCK
 
 fun RadioPrefs.isTcp() = selectedDevice?.interfaceId == InterfaceId.TCP
 
+fun RadioPrefs.isNode() = selectedDevice?.interfaceId == InterfaceId.NODE
+
 /** Reactive interface for mesh connection settings. */
 interface MeshPrefs {
     val deviceAddress: StateFlow<String?>

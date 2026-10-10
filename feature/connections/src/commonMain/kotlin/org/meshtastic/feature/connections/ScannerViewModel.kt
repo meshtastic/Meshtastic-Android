@@ -343,6 +343,10 @@ open class ScannerViewModel(
     val virtualDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow.map { it.virtualDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
 
+    /** This device as a mesh node, the one entry of the This device pane. */
+    val localNodeForUi: StateFlow<DeviceListEntry?> =
+        discoveredDevicesFlow.map { it.localNode }.distinctUntilChanged().stateInWhileSubscribed(null)
+
     /** Discovered (NSD) TCP devices for the Connections device list, gated by the network-scan flag. */
     val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow.map { it.discoveredTcpDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
@@ -420,7 +424,9 @@ open class ScannerViewModel(
         when (type) {
             DeviceType.BLE -> stopNetworkScan()
             DeviceType.TCP -> stopBleScan()
-            DeviceType.USB -> stopAllScans()
+            DeviceType.USB,
+            DeviceType.NODE,
+            -> stopAllScans()
         }
         // Compared with the preference, not the pane: a fallback pane is shown without being persisted.
         if (uiPrefs.selectedConnectionTransport.value != type) uiPrefs.setSelectedConnectionTransport(type)
@@ -753,6 +759,11 @@ open class ScannerViewModel(
             }
 
             is DeviceListEntry.Replay -> {
+                changeDeviceAddress(entry.fullAddress)
+                true
+            }
+
+            is DeviceListEntry.LocalNode -> {
                 changeDeviceAddress(entry.fullAddress)
                 true
             }

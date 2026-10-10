@@ -25,6 +25,7 @@ import org.meshtastic.core.network.repository.NetworkRepository.Companion.toAddr
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.demo_mode
 import org.meshtastic.core.resources.demo_mode_replay
+import org.meshtastic.core.resources.this_device
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
@@ -130,6 +131,10 @@ internal fun findNodeByNameSuffix(
  * additionally requires the build to carry the capture asset (`RadioTransportFactory.isReplayTransportAvailable`) —
  * without it the replay transport falls back to the plain mock, so the entry would advertise something it cannot do.
  */
+/** This device as a mesh node: always offered, on every platform, since the node runs in-process. */
+internal suspend fun localNodeEntry(): DeviceListEntry.LocalNode =
+    DeviceListEntry.LocalNode(safeCatchingAll { getStringSuspend(Res.string.this_device) }.getOrDefault("This device"))
+
 internal suspend fun virtualDeviceEntries(showMock: Boolean, showReplay: Boolean): List<DeviceListEntry> {
     if (!showMock) return emptyList()
     val mock =

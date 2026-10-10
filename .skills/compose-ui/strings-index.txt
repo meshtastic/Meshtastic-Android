@@ -1826,6 +1826,7 @@ theme
 theme_dark
 theme_light
 theme_system
+this_device
 time
 timeout
 timestamp

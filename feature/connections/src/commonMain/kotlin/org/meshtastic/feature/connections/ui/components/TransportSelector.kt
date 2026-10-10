@@ -34,9 +34,11 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.network
+import org.meshtastic.core.resources.this_device
 import org.meshtastic.core.resources.usb
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 
@@ -82,6 +84,7 @@ private val DeviceType.label: StringResource
             DeviceType.BLE -> Res.string.bluetooth
             DeviceType.TCP -> Res.string.network
             DeviceType.USB -> Res.string.usb
+            DeviceType.NODE -> Res.string.this_device
         }
 
 private val DeviceType.icon: ImageVector
@@ -91,6 +94,7 @@ private val DeviceType.icon: ImageVector
             DeviceType.BLE -> MeshtasticIcons.Bluetooth
             DeviceType.TCP -> MeshtasticIcons.Wifi
             DeviceType.USB -> MeshtasticIcons.Usb
+            DeviceType.NODE -> MeshtasticIcons.PhoneAndroid
         }
 
 /**

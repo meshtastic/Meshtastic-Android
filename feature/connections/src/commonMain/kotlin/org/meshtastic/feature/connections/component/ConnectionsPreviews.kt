@@ -294,6 +294,30 @@ fun DemoModeSectionPreview() {
     }
 }
 
+@PreviewLightDark
+@Composable
+fun NodePanePreview() {
+    AppTheme {
+        DeviceList(
+            connectionState = ConnectionState.Disconnected,
+            selectedDevice = "",
+            bleDevices = emptyList(),
+            usbDevices = emptyList(),
+            discoveredTcpDevices = emptyList(),
+            recentTcpDevices = emptyList(),
+            isBleScanning = false,
+            isNetworkScanning = false,
+            activeTransport = DeviceType.NODE,
+            onSelectDevice = {},
+            onToggleBleScan = {},
+            onToggleNetworkScan = {},
+            onAddManualAddress = { _, _ -> },
+            onRemoveRecentAddress = {},
+            localNode = DeviceListEntry.LocalNode("This device"),
+        )
+    }
+}
+
 private class PreviewBleDevice(
     override val address: String,
     override val name: String?,

@@ -55,9 +55,11 @@ import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.serial
+import org.meshtastic.core.resources.this_device
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.icon.Add
+import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.BluetoothConnected
 import org.meshtastic.core.ui.icon.BluetoothSearching
@@ -109,6 +111,8 @@ fun DeviceListItem(
             is DeviceListEntry.Mock -> MeshtasticIcons.Add
 
             is DeviceListEntry.Replay -> MeshtasticIcons.Add
+
+            is DeviceListEntry.LocalNode -> MeshtasticIcons.PhoneAndroid
         }
 
     val contentDescription =
@@ -118,6 +122,7 @@ fun DeviceListItem(
             is DeviceListEntry.Tcp -> stringResource(Res.string.network)
             is DeviceListEntry.Mock -> stringResource(Res.string.add)
             is DeviceListEntry.Replay -> stringResource(Res.string.add)
+            is DeviceListEntry.LocalNode -> stringResource(Res.string.this_device)
         }
 
     val selectLabel = stringResource(Res.string.action_select_device)

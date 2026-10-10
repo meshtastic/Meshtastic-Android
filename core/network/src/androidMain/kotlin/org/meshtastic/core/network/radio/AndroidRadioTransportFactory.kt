@@ -115,6 +115,10 @@ class AndroidRadioTransportFactory(
                     address = rest,
                 )
 
+            // The in-process node transport lands with the node-kmp dependency; until then the address is not
+            // admitted (isPlatformAddressValid), so this arm is unreachable.
+            InterfaceId.NODE -> error("node transport not wired yet")
+
             InterfaceId.NOP,
             null,
             -> NopRadioTransport(rest)

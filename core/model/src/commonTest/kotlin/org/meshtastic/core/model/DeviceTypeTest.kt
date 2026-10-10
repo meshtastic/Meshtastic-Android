@@ -27,6 +27,14 @@ class DeviceTypeTest {
         assertEquals("BLE", DeviceType.fromAddress("x123")?.name)
         assertEquals("USB", DeviceType.fromAddress("s/dev/bus/usb/001/002")?.name)
         assertEquals("TCP", DeviceType.fromAddress("t192.0.2.1")?.name)
+        assertEquals("NODE", DeviceType.fromAddress("p")?.name)
+    }
+
+    @Test
+    fun the_node_address_is_a_real_connection_type_not_a_virtual_one() {
+        assertEquals(InterfaceId.NODE, InterfaceId.forIdChar('p'))
+        assertEquals(false, InterfaceId.NODE.isVirtual)
+        assertEquals("", DeviceAddress.parse("p")?.identity)
     }
 
     @Test

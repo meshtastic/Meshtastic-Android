@@ -72,6 +72,7 @@ import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.demo_mode
 import org.meshtastic.core.resources.ip_port
 import org.meshtastic.core.resources.network
+import org.meshtastic.core.resources.this_device
 import org.meshtastic.core.resources.no_bluetooth_devices_hint
 import org.meshtastic.core.resources.no_bluetooth_devices_seen
 import org.meshtastic.core.resources.no_network_devices_hint
@@ -122,6 +123,7 @@ fun DeviceList(
     onRemoveRecentAddress: (DeviceListEntry) -> Unit,
     modifier: Modifier = Modifier,
     virtualDevices: List<DeviceListEntry> = emptyList(),
+    localNode: DeviceListEntry? = null,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val sheetState =
@@ -178,6 +180,14 @@ fun DeviceList(
                     selectedDevice = selectedDevice,
                     onSelectDevice = onSelectDevice,
                 )
+
+            DeviceType.NODE ->
+                nodeSection(
+                    localNode = localNode,
+                    connectionState = connectionState,
+                    selectedDevice = selectedDevice,
+                    onSelectDevice = onSelectDevice,
+                )
         }
         if (virtualDevices.isNotEmpty()) {
             virtualSection(
@@ -185,6 +195,27 @@ fun DeviceList(
                 connectionState = connectionState,
                 selectedDevice = selectedDevice,
                 onSelectDevice = onSelectDevice,
+            )
+        }
+    }
+}
+
+private fun LazyListScope.nodeSection(
+    localNode: DeviceListEntry?,
+    connectionState: ConnectionState,
+    selectedDevice: String,
+    onSelectDevice: (DeviceListEntry) -> Unit,
+) {
+    item(key = "header:node", contentType = "header") {
+        DeviceSectionHeader(title = stringResource(Res.string.this_device))
+    }
+    if (localNode != null) {
+        item(key = "node:${localNode.fullAddress}", contentType = "device") {
+            DeviceCard(
+                device = localNode,
+                connectionState = connectionState,
+                selectedDevice = selectedDevice,
+                onSelect = onSelectDevice,
             )
         }
     }

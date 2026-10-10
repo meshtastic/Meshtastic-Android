@@ -581,6 +581,35 @@ class ScannerViewModelTest {
     }
 
     @Test
+    fun `selecting this device connects to the node address and records its pane`() = runTest {
+        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
+        val subject = harness.buildBase()
+        try {
+            assertEquals(true, subject.onSelected(DeviceListEntry.LocalNode("This device")))
+            testScheduler.advanceUntilIdle()
+
+            assertEquals("p", harness.radioController.lastSetDeviceAddress)
+            assertEquals(DeviceType.NODE, harness.uiPrefs.selectedConnectionTransport.value)
+        } finally {
+            harness.clearViewModel(subject)
+        }
+    }
+
+    @Test
+    fun `the local node entry is exposed for its pane`() = runTest {
+        baseDevicesFlow.value = DiscoveredDevices(localNode = DeviceListEntry.LocalNode("This device"))
+        val subject = harness.buildBase()
+        try {
+            subject.localNodeForUi.test {
+                assertEquals(DeviceListEntry.LocalNode("This device"), expectMostRecentItem())
+                cancelAndIgnoreRemainingEvents()
+            }
+        } finally {
+            harness.clearViewModel(subject)
+        }
+    }
+
+    @Test
     fun `startBleScan never scans on hardware without Bluetooth`() {
         val noBluetooth = harness.buildBase(bluetoothSupported = false)
         try {
