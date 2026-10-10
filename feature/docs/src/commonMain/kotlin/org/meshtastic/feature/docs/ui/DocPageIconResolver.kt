@@ -22,7 +22,6 @@ import org.meshtastic.core.ui.icon.Altitude
 import org.meshtastic.core.ui.icon.Antenna
 import org.meshtastic.core.ui.icon.Api
 import org.meshtastic.core.ui.icon.BluetoothConnected
-import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.Chart
 import org.meshtastic.core.ui.icon.ConfigChannels
@@ -37,6 +36,7 @@ import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Notifications
 import org.meshtastic.core.ui.icon.PersonSearch
+import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.core.ui.icon.Rssi
 import org.meshtastic.core.ui.icon.Settings
