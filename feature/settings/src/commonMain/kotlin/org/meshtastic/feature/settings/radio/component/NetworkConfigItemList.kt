@@ -41,6 +41,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.extractWifiCredentials
 import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.model.util.handleMeshtasticUri
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
@@ -307,27 +308,27 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                 )
                 HorizontalDivider()
                 if (capabilities.offers(Config.NetworkConfig.enabled_protocols)) {
-                    SwitchPreference(
-                        title = stringResource(Res.string.udp_enabled),
-                        summary = stringResource(Res.string.config_network_udp_enabled_summary),
-                        checked =
-                        formState.value.enabled_protocols and
-                            Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value != 0,
-                        onCheckedChange = { enabled ->
-                            val flags =
-                                if (enabled) {
-                                    formState.value.enabled_protocols or
-                                        Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value
-                                } else {
-                                    formState.value.enabled_protocols and
-                                        Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value.inv()
-                                }
-                            formState.value =
-                                formState.value.newBuilder().also { wb -> wb.enabled_protocols = flags }.build()
-                        },
-                        enabled = state.connected,
-                    )
-                    HorizontalDivider()
+                    // One switch per bearer bit, so a firmware or node that carries more bits shows more switches.
+                    protocolFlagSwitches(formState.value.enabled_protocols).forEach { flagSwitch ->
+                        val isUdp = flagSwitch.flag == Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST
+                        SwitchPreference(
+                            title =
+                            if (isUdp) {
+                                stringResource(Res.string.udp_enabled)
+                            } else {
+                                flagSwitch.flag.schemaLabelRes()?.let { stringResource(it) } ?: flagSwitch.flag.name
+                            },
+                            summary = if (isUdp) stringResource(Res.string.config_network_udp_enabled_summary) else "",
+                            checked = flagSwitch.checked,
+                            onCheckedChange = { on ->
+                                val flags = toggleFlag(formState.value.enabled_protocols, flagSwitch.flag, on)
+                                formState.value =
+                                    formState.value.newBuilder().also { wb -> wb.enabled_protocols = flags }.build()
+                            },
+                            enabled = state.connected,
+                        )
+                        HorizontalDivider()
+                    }
                 }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_network_address_mode),
