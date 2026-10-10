@@ -270,8 +270,8 @@ class DeviceHardwareRepositoryImpl(
     }
 
     /**
-     * The app itself as a node (node-kmp in-process) has no catalog entry: there is no board, firmware or image
-     * behind it. Synthesize a name so the node list and details read as a device rather than an unknown model.
+     * The app itself as a node (node-kmp in-process) has no catalog entry: there is no board, firmware or image behind
+     * it. Synthesize a name so the node list and details read as a device rather than an unknown model.
      */
     private fun appNodeHardware(): DeviceHardware = DeviceHardware(
         activelySupported = false,
