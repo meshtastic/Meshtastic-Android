@@ -72,7 +72,6 @@ import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.demo_mode
 import org.meshtastic.core.resources.ip_port
 import org.meshtastic.core.resources.network
-import org.meshtastic.core.resources.this_device
 import org.meshtastic.core.resources.no_bluetooth_devices_hint
 import org.meshtastic.core.resources.no_bluetooth_devices_seen
 import org.meshtastic.core.resources.no_network_devices_hint
@@ -84,6 +83,7 @@ import org.meshtastic.core.resources.scan_bluetooth_devices
 import org.meshtastic.core.resources.scan_network_devices
 import org.meshtastic.core.resources.scanning_bluetooth
 import org.meshtastic.core.resources.scanning_network
+import org.meshtastic.core.resources.this_device
 import org.meshtastic.core.resources.usb
 import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.Bluetooth

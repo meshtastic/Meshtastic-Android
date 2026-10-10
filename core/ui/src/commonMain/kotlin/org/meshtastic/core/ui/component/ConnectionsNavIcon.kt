@@ -35,8 +35,8 @@ import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
-import org.meshtastic.core.ui.icon.Reconnecting
 import org.meshtastic.core.ui.icon.PhoneAndroid
+import org.meshtastic.core.ui.icon.Reconnecting
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen

@@ -25,8 +25,8 @@ import org.meshtastic.core.network.repository.NetworkRepository.Companion.toAddr
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.demo_mode
 import org.meshtastic.core.resources.demo_mode_replay
-import org.meshtastic.core.resources.this_device
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.this_device
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
 private const val SUFFIX_LENGTH = 4
@@ -139,8 +139,10 @@ internal suspend fun virtualDeviceEntries(showMock: Boolean, showReplay: Boolean
         DeviceListEntry.Mock(safeCatchingAll { getStringSuspend(Res.string.demo_mode) }.getOrDefault("Demo Mode"))
     val replay =
         if (showReplay) {
-            val label =
-                safeCatchingAll { getStringSuspend(Res.string.demo_mode_replay) }.getOrDefault("Demo Mode (Replay)")
+            val label = safeCatchingAll {
+                getStringSuspend(Res.string.demo_mode_replay)
+            }
+                .getOrDefault("Demo Mode (Replay)")
             DeviceListEntry.Replay(label)
         } else {
             null

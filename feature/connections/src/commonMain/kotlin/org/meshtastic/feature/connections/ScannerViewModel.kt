@@ -247,10 +247,9 @@ open class ScannerViewModel(
      * `NsdManager.discoverServices()` is never triggered. Android 15+ shows a system consent dialog the first time
      * `resolvedList` is subscribed, so the gate ensures NSD only runs when the user explicitly requests it.
      */
-    private val gatedResolvedList =
-        _isNetworkScanning.flatMapLatest { scanning ->
-            if (scanning) networkRepository.resolvedList else flowOf(emptyList())
-        }
+    private val gatedResolvedList = _isNetworkScanning.flatMapLatest { scanning ->
+        if (scanning) networkRepository.resolvedList else flowOf(emptyList())
+    }
 
     private val discoveredDevicesFlow: StateFlow<DiscoveredDevices> =
         combine(showMockTransport, showReplayTransport, ::Pair)
@@ -423,7 +422,9 @@ open class ScannerViewModel(
         if (type == DeviceType.USB && !usbSupported) return
         when (type) {
             DeviceType.BLE -> stopNetworkScan()
+
             DeviceType.TCP -> stopBleScan()
+
             DeviceType.USB,
             DeviceType.NODE,
             -> stopAllScans()
@@ -594,17 +595,16 @@ open class ScannerViewModel(
         val generation = ++scanStartFailureCooldownGeneration
         scanStartFailureCooldownActive.value = true
         scanStartFailureCooldownJob?.cancel()
-        scanStartFailureCooldownJob =
-            viewModelScope.launch {
-                try {
-                    delay(cooldown)
-                } finally {
-                    if (scanStartFailureCooldownGeneration == generation) {
-                        scanStartFailureCooldownActive.value = false
-                        scanStartFailureCooldownJob = null
-                    }
+        scanStartFailureCooldownJob = viewModelScope.launch {
+            try {
+                delay(cooldown)
+            } finally {
+                if (scanStartFailureCooldownGeneration == generation) {
+                    scanStartFailureCooldownActive.value = false
+                    scanStartFailureCooldownJob = null
                 }
             }
+        }
     }
 
     /**
