@@ -31,10 +31,8 @@ import org.meshtastic.feature.connections.model.DeviceListEntry
 
 private const val SUFFIX_LENGTH = 4
 
-/**
- * Shared helpers for TCP device discovery logic used by both [CommonGetDiscoveredDevicesUseCase] and the
- * Android-specific variant.
- */
+// Shared helpers for TCP device discovery logic used by both CommonGetDiscoveredDevicesUseCase and the
+// Android-specific variant.
 
 /** Converts a list of [DiscoveredService] into [DeviceListEntry.Tcp] with display names derived from TXT records. */
 internal fun processTcpServices(
@@ -123,6 +121,10 @@ internal fun findNodeByNameSuffix(
     }
 }
 
+/** This device as a mesh node: always offered, on every platform, since the node runs in-process. */
+internal suspend fun localNodeEntry(): DeviceListEntry.LocalNode =
+    DeviceListEntry.LocalNode(safeCatchingAll { getStringSuspend(Res.string.this_device) }.getOrDefault("This device"))
+
 /**
  * The virtual devices offered behind the Demo Mode gate, shared so the common and Android discovery paths cannot
  * diverge on visibility policy.
@@ -131,10 +133,6 @@ internal fun findNodeByNameSuffix(
  * additionally requires the build to carry the capture asset (`RadioTransportFactory.isReplayTransportAvailable`) —
  * without it the replay transport falls back to the plain mock, so the entry would advertise something it cannot do.
  */
-/** This device as a mesh node: always offered, on every platform, since the node runs in-process. */
-internal suspend fun localNodeEntry(): DeviceListEntry.LocalNode =
-    DeviceListEntry.LocalNode(safeCatchingAll { getStringSuspend(Res.string.this_device) }.getOrDefault("This device"))
-
 internal suspend fun virtualDeviceEntries(showMock: Boolean, showReplay: Boolean): List<DeviceListEntry> {
     if (!showMock) return emptyList()
     val mock =
