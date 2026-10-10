@@ -22,6 +22,7 @@ import org.meshtastic.core.ui.icon.Altitude
 import org.meshtastic.core.ui.icon.Antenna
 import org.meshtastic.core.ui.icon.Api
 import org.meshtastic.core.ui.icon.BluetoothConnected
+import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.Chart
 import org.meshtastic.core.ui.icon.ConfigChannels
@@ -52,6 +53,8 @@ internal fun DocPage.resolveIcon(): ImageVector = when (iconId) {
     "onboarding" -> MeshtasticIcons.WavingHand
 
     "connections" -> MeshtasticIcons.BluetoothConnected
+
+    "phone-node" -> MeshtasticIcons.PhoneAndroid
 
     "messages" -> MeshtasticIcons.Message
 

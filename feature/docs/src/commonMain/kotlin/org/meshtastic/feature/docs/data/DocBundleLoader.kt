@@ -264,6 +264,16 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 "connections",
             ),
             UserPageDef(
+                "phone-node",
+                CoreRes.string.doc_title_phone_node,
+                CoreRes.string.doc_keywords_phone_node,
+                "en/user/phone-node.html",
+                23,
+                listOf("node", "phone node", "in-process", "bearers", "this device"),
+                4900,
+                "phone-node",
+            ),
+            UserPageDef(
                 "messages-and-channels",
                 CoreRes.string.doc_title_messages,
                 CoreRes.string.doc_keywords_messages,

@@ -31,7 +31,7 @@ Bluetooth Low Energy is the default and most common connection method on Android
 
 You can change the pairing method, or turn Bluetooth on for a radio that ships with it off, under **Settings → Device configuration → Bluetooth** — see [Settings — Radio & User](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
 
-Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
+Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, USB and This device transports (one is active at a time). This device runs the mesh node on your phone or desktop itself, with no radio; see [This Device as a Node](phone-node).
 
 ![Connections screen with the transport selector showing Bluetooth, Network, and USB](../../assets/screenshots/connections_transport_filters.png)
 
