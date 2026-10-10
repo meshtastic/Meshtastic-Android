@@ -193,6 +193,7 @@ class DeviceHardwareRepositoryImpl(
         entities: List<DeviceHardwareEntity>,
         target: String?,
     ): DeviceHardware? {
+        if (entities.isEmpty() && hwModel == APP_NODE_HW_MODEL) return appNodeHardware()
         val matched = disambiguate(entities, target)
         val snapshot = bootloaderOtaQuirksRepository.getSnapshot()
         val withQuirk = applyBootloaderQuirk(hwModel, matched?.asExternalModel(), snapshot.devices, target)
@@ -268,7 +269,22 @@ class DeviceHardwareRepositoryImpl(
         reportedTarget?.let { withQuirk.copy(platformioTarget = it) } ?: withQuirk
     }
 
+    /**
+     * The app itself as a node (node-kmp in-process) has no catalog entry: there is no board, firmware or image
+     * behind it. Synthesize a name so the node list and details read as a device rather than an unknown model.
+     */
+    private fun appNodeHardware(): DeviceHardware = DeviceHardware(
+        activelySupported = false,
+        architecture = "kmp",
+        displayName = "Meshtastic app node",
+        hwModel = APP_NODE_HW_MODEL,
+        hwModelSlug = "NODE_KMP",
+    )
+
     companion object {
+        /** `HardwareModel.NODE_KMP`; a literal until the protobufs pin carries the value (protobufs #1126). */
+        internal const val APP_NODE_HW_MODEL = 151
+
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
         private val FAILED_REFRESH_RETRY_INTERVAL_MS = 15.minutes.inWholeMilliseconds
 

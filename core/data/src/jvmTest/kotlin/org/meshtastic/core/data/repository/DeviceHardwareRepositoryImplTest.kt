@@ -184,6 +184,16 @@ class DeviceHardwareRepositoryImplTest {
     }
 
     @Test
+    fun theAppNodeHardwareIsSynthesizedWithoutACatalogEntry() = runBlocking {
+        val hardware =
+            repository.getDeviceHardwareByModel(hwModel = DeviceHardwareRepositoryImpl.APP_NODE_HW_MODEL).getOrThrow()
+
+        assertEquals("Meshtastic app node", hardware?.displayName)
+        assertEquals("NODE_KMP", hardware?.hwModelSlug)
+        assertEquals(false, hardware?.activelySupported)
+    }
+
+    @Test
     fun forceRefreshBypassesRecentSuccessfulCatalogRefresh() = runBlocking {
         repository.getDeviceHardwareByModel(hwModel = 37).getOrThrow()
         repository.getDeviceHardwareByModel(hwModel = 37, forceRefresh = true).getOrThrow()
