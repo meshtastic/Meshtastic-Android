@@ -93,14 +93,29 @@
   <div class="breadcrumbs"><a href="../../index.html">core-repository</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.repository</a><span class="delimiter">/</span><span class="current">SecurityKeyBackupStore</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Security</span><wbr><span>Key</span><wbr><span>Backup</span><wbr><span><span>Store</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">SecurityKeyBackupStore</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/repository/src/commonMain/kotlin/org/meshtastic/core/repository/SecurityKeyBackupStore.kt#L28">source</a>)</span></span></div><p class="paragraph">Encrypted per-node storage for security (public/private) key backups.</p><p class="paragraph">Platform implementations should use secure storage (e.g., EncryptedSharedPreferences on Android), keyed by node number, mirroring iOS's per-node Keychain entries ("PrivateKeyNode<nodenum>").</nodenum></p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">SecurityKeyBackupStore</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/repository/src/commonMain/kotlin/org/meshtastic/core/repository/SecurityKeyBackupStore.kt#L36">source</a>)</span></span></div><p class="paragraph">Encrypted per-node storage for security (public/private) key backups.</p><p class="paragraph">Platform implementations should use secure storage (e.g., EncryptedSharedPreferences on Android), keyed by node number, mirroring iOS's per-node Keychain entries ("PrivateKeyNode<nodenum>").</nodenum></p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="-1651347482%2FFunctions%2F-1238997634" anchor-label="delete" id="-1651347482%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+        <div class="table"><a data-name="-1587534554%2FFunctions%2F-1238997634" anchor-label="all" id="-1587534554%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="all.html"><span><span>all</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1587534554%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="all.html"><span class="token function">all</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><a href="../-stored-security-keys/index.html">StoredSecurityKeys</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Every stored backup by the node number it was saved under. Firmware 2.8 derives the node number from the public key, so a reset or regenerated key moves a node to a number with no backup.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1651347482%2FFunctions%2F-1238997634" anchor-label="delete" id="-1651347482%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -130,17 +145,17 @@
               </div>
             </div>
           </div>
-<a data-name="-269055560%2FFunctions%2F-1238997634" anchor-label="save" id="-269055560%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+<a data-name="1564320230%2FFunctions%2F-1238997634" anchor-label="save" id="1564320230%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="save.html"><span><span>save</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-269055560%2FFunctions%2F-1238997634"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1564320230%2FFunctions%2F-1238997634"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="save.html"><span class="token function">save</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">publicKeyBase64<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">privateKeyBase64<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">timestamp<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Saves (overwriting any existing) key backup for the given node number.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="save.html"><span class="token function">save</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">publicKeyBase64<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">privateKeyBase64<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">timestamp<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">longName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Saves (overwriting any existing) key backup for the given node number.</p></div></div></div>
                 </div>
               </div>
             </div>

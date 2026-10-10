@@ -9,9 +9,10 @@ $dokka.location:org.meshtastic.core.service/LockdownPassphraseStoreImpl/savePass
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl///PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/index.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/SecurityKeyBackupStoreImpl/#android.app.Application/PointingToDeclaration/core-service/org.meshtastic.core.service/[android]-security-key-backup-store-impl/-security-key-backup-store-impl.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/SecurityKeyBackupStoreImpl/#java.io.File/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/-security-key-backup-store-impl.html
+$dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/all/#/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/all.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/delete/#kotlin.Int/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/delete.html
 $dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/get/#kotlin.Int/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/get.html
-$dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/save/#kotlin.Int#kotlin.String#kotlin.String#kotlin.Long/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/save.html
+$dokka.location:org.meshtastic.core.service/SecurityKeyBackupStoreImpl/save/#kotlin.Int#kotlin.String#kotlin.String#kotlin.Long#kotlin.String?/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-security-key-backup-store-impl/save.html
 module:core-ble
 org.meshtastic.core.ble
 org.meshtastic.core.ble.di
