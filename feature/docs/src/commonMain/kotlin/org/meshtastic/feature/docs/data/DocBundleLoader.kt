@@ -25,7 +25,6 @@ import org.meshtastic.core.resources.doc_keywords_app_functions
 import org.meshtastic.core.resources.doc_keywords_connections
 import org.meshtastic.core.resources.doc_keywords_debug_logs
 import org.meshtastic.core.resources.doc_keywords_desktop
-import org.meshtastic.core.resources.doc_keywords_phone_node
 import org.meshtastic.core.resources.doc_keywords_discovery
 import org.meshtastic.core.resources.doc_keywords_firmware
 import org.meshtastic.core.resources.doc_keywords_help
@@ -36,6 +35,7 @@ import org.meshtastic.core.resources.doc_keywords_node_metrics
 import org.meshtastic.core.resources.doc_keywords_nodes
 import org.meshtastic.core.resources.doc_keywords_notifications
 import org.meshtastic.core.resources.doc_keywords_onboarding
+import org.meshtastic.core.resources.doc_keywords_phone_node
 import org.meshtastic.core.resources.doc_keywords_settings_module
 import org.meshtastic.core.resources.doc_keywords_settings_radio
 import org.meshtastic.core.resources.doc_keywords_signal_meter
@@ -48,7 +48,6 @@ import org.meshtastic.core.resources.doc_title_app_functions
 import org.meshtastic.core.resources.doc_title_connections
 import org.meshtastic.core.resources.doc_title_debug_logs
 import org.meshtastic.core.resources.doc_title_desktop
-import org.meshtastic.core.resources.doc_title_phone_node
 import org.meshtastic.core.resources.doc_title_discovery
 import org.meshtastic.core.resources.doc_title_firmware
 import org.meshtastic.core.resources.doc_title_help
@@ -59,6 +58,7 @@ import org.meshtastic.core.resources.doc_title_node_metrics
 import org.meshtastic.core.resources.doc_title_nodes
 import org.meshtastic.core.resources.doc_title_notifications
 import org.meshtastic.core.resources.doc_title_onboarding
+import org.meshtastic.core.resources.doc_title_phone_node
 import org.meshtastic.core.resources.doc_title_settings_module
 import org.meshtastic.core.resources.doc_title_settings_radio
 import org.meshtastic.core.resources.doc_title_signal_meter
