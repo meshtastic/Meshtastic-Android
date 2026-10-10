@@ -37,7 +37,7 @@ A scanned code that isn't a Meshtastic connect code, or one with an address the 
 
 To change the pairing method, or to turn Bluetooth on for a node that ships with it off, open **Settings → Device configuration → Bluetooth**. See [Settings — Radio & User](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
 
-Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
+Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, USB and This device transports (one is active at a time). This device runs the mesh node on your phone or desktop itself, with no radio; see [This Device as a Node](phone-node).
 
 ![Connections screen with the transport selector showing Bluetooth, Network, and USB](../../assets/screenshots/connections_transport_filters.png)
 

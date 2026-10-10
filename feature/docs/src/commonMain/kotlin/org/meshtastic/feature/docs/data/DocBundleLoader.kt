@@ -25,6 +25,7 @@ import org.meshtastic.core.resources.doc_keywords_app_functions
 import org.meshtastic.core.resources.doc_keywords_connections
 import org.meshtastic.core.resources.doc_keywords_debug_logs
 import org.meshtastic.core.resources.doc_keywords_desktop
+import org.meshtastic.core.resources.doc_keywords_phone_node
 import org.meshtastic.core.resources.doc_keywords_discovery
 import org.meshtastic.core.resources.doc_keywords_firmware
 import org.meshtastic.core.resources.doc_keywords_help
@@ -47,6 +48,7 @@ import org.meshtastic.core.resources.doc_title_app_functions
 import org.meshtastic.core.resources.doc_title_connections
 import org.meshtastic.core.resources.doc_title_debug_logs
 import org.meshtastic.core.resources.doc_title_desktop
+import org.meshtastic.core.resources.doc_title_phone_node
 import org.meshtastic.core.resources.doc_title_discovery
 import org.meshtastic.core.resources.doc_title_firmware
 import org.meshtastic.core.resources.doc_title_help
@@ -262,6 +264,16 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("bluetooth", "usb", "tcp", "pairing"),
                 4100,
                 "connections",
+            ),
+            UserPageDef(
+                "phone-node",
+                CoreRes.string.doc_title_phone_node,
+                CoreRes.string.doc_keywords_phone_node,
+                "en/user/phone-node.html",
+                23,
+                listOf("node", "phone node", "in-process", "bearers", "this device"),
+                4900,
+                "phone-node",
             ),
             UserPageDef(
                 "messages-and-channels",

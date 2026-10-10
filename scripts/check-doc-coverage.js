@@ -17,7 +17,7 @@ const DOCS_DIR = path.join(REPO_ROOT, "docs", "en");
 // Map of feature module directory names to expected doc page slugs.
 // Modules not listed here are considered internal (no user-facing docs required).
 const MODULE_TO_DOCS = {
-    "feature/connections":    { pages: ["connections"], section: "user" },
+    "feature/connections":    { pages: ["connections", "phone-node"], section: "user" },
     // Site Planner's on-device coverage estimate, documented in map-and-waypoints.md.
     "feature/coverage":       { pages: ["map-and-waypoints"], section: "user" },
     "feature/discovery":      { pages: ["discovery"], section: "user" },
