@@ -293,6 +293,7 @@ fun ConnectionsScreen(
     val isNetworkScanning by scanModel.isNetworkScanning.collectAsStateWithLifecycle()
     val activeTransport by scanModel.activeTransport.collectAsStateWithLifecycle()
     val virtualDevices by scanModel.virtualDevicesForUi.collectAsStateWithLifecycle()
+    val localNode by scanModel.localNodeForUi.collectAsStateWithLifecycle()
     val blePermissionRefusal by scanModel.blePermissionRefusal.collectAsStateWithLifecycle()
     val bleAutoScan by scanModel.bleAutoScan.collectAsStateWithLifecycle()
     val networkAutoScan by scanModel.networkAutoScan.collectAsStateWithLifecycle()
@@ -572,6 +573,7 @@ fun ConnectionsScreen(
                                     recentTcpDevices = recentTcpDevices,
                                     usbDevices = usbDevices,
                                     virtualDevices = virtualDevices,
+                                    localNode = localNode,
                                     connectionStatus = connectionStatus,
                                     connectionProgress = connectionProgress,
                                     transportStatus = transportStatus,
@@ -775,6 +777,7 @@ fun ConnectionsScreen(
                     bleDevices = bleDevices,
                     usbDevices = usbDevices,
                     virtualDevices = virtualDevices,
+                    localNode = localNode,
                     discoveredTcpDevices = discoveredTcpDevices,
                     recentTcpDevices = recentTcpDevices,
                     isBleScanning = isBleScanning,
@@ -1015,6 +1018,7 @@ private fun ConnectingDeviceContent(
     recentTcpDevices: List<DeviceListEntry>,
     usbDevices: List<DeviceListEntry>,
     virtualDevices: List<DeviceListEntry>,
+    localNode: DeviceListEntry?,
     connectionStatus: ConnectionStatus,
     connectionProgress: String?,
     transportStatus: TransportStatus?,
@@ -1026,6 +1030,7 @@ private fun ConnectingDeviceContent(
             ?: recentTcpDevices.find { it.fullAddress == selectedDevice }
             ?: usbDevices.find { it.fullAddress == selectedDevice }
             ?: virtualDevices.find { it.fullAddress == selectedDevice }
+            ?: localNode?.takeIf { it.fullAddress == selectedDevice }
 
     // Use the entry name if found in scan lists, otherwise fall back to the persisted name
     // from the last successful selection, and only show "Unknown Device" as a last resort.

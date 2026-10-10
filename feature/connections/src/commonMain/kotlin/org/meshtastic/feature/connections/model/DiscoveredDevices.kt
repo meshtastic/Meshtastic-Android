@@ -26,6 +26,8 @@ data class DiscoveredDevices(
     val recentTcpDevices: List<DeviceListEntry> = emptyList(),
     /** Demo Mode entries, offered under every transport pane because they belong to none of them. */
     val virtualDevices: List<DeviceListEntry> = emptyList(),
+    /** This device as a mesh node, the one entry of the [org.meshtastic.core.model.DeviceType.NODE] pane. */
+    val localNode: DeviceListEntry? = null,
 )
 
 interface GetDiscoveredDevicesUseCase {

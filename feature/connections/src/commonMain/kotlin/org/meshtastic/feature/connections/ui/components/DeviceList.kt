@@ -72,6 +72,7 @@ import org.meshtastic.core.resources.scan_network_devices
 import org.meshtastic.core.resources.scanning_bluetooth
 import org.meshtastic.core.resources.scanning_network
 import org.meshtastic.core.resources.show_all_serial_ports
+import org.meshtastic.core.resources.this_device
 import org.meshtastic.core.resources.usb
 import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.Bluetooth
@@ -81,6 +82,10 @@ import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.connections.model.DeviceListEntry
+
+// The add-device sheet opens full height and has no partial stop.
+@OptIn(ExperimentalMaterial3Api::class)
+private val ADD_SHEET_VALUES = setOf(SheetValue.Hidden, SheetValue.Expanded)
 
 /**
  * Unified device list: one selected BLE / Network / USB pane rendered as a scrollable [LazyColumn].
@@ -114,17 +119,14 @@ fun DeviceList(
     onRemoveRecentAddress: (DeviceListEntry) -> Unit,
     modifier: Modifier = Modifier,
     virtualDevices: List<DeviceListEntry> = emptyList(),
+    localNode: DeviceListEntry? = null,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: (@Composable () -> Unit)? = null,
     onRequestUsbDevice: ((showAll: Boolean) -> Unit)? = null,
     showTransportPane: Boolean = true,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
-    val sheetState =
-        rememberBottomSheetState(
-            initialValue = SheetValue.Hidden,
-            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-        )
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = ADD_SHEET_VALUES)
     val scope = rememberCoroutineScope()
 
     val hideAndDismiss: () -> Unit = {
@@ -182,6 +184,14 @@ fun DeviceList(
                         onSelectDevice = onSelectDevice,
                         onRequestUsbDevice = onRequestUsbDevice,
                     )
+
+                DeviceType.NODE ->
+                    nodeSection(
+                        localNode = localNode,
+                        connectionState = connectionState,
+                        selectedDevice = selectedDevice,
+                        onSelectDevice = onSelectDevice,
+                    )
             }
         }
         if (virtualDevices.isNotEmpty()) {
@@ -190,6 +200,27 @@ fun DeviceList(
                 connectionState = connectionState,
                 selectedDevice = selectedDevice,
                 onSelectDevice = onSelectDevice,
+            )
+        }
+    }
+}
+
+private fun LazyListScope.nodeSection(
+    localNode: DeviceListEntry?,
+    connectionState: ConnectionState,
+    selectedDevice: String,
+    onSelectDevice: (DeviceListEntry) -> Unit,
+) {
+    item(key = "header:node", contentType = "header") {
+        DeviceSectionHeader(title = stringResource(Res.string.this_device))
+    }
+    if (localNode != null) {
+        item(key = "node:${localNode.fullAddress}", contentType = "device") {
+            DeviceCard(
+                device = localNode,
+                connectionState = connectionState,
+                selectedDevice = selectedDevice,
+                onSelect = onSelectDevice,
             )
         }
     }

@@ -60,6 +60,7 @@ import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.serial
+import org.meshtastic.core.resources.this_device
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.icon.Add
@@ -67,6 +68,7 @@ import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.BluetoothConnected
 import org.meshtastic.core.ui.icon.BluetoothSearching
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -114,6 +116,8 @@ fun DeviceListItem(
             is DeviceListEntry.Mock -> MeshtasticIcons.Add
 
             is DeviceListEntry.Replay -> MeshtasticIcons.Add
+
+            is DeviceListEntry.LocalNode -> MeshtasticIcons.PhoneAndroid
         }
 
     // getStringSuspend, as in ConnectionsScreen, so composition never blocks on the resource cache.
@@ -125,6 +129,7 @@ fun DeviceListItem(
             is DeviceListEntry.Tcp -> Res.string.network
             is DeviceListEntry.Mock -> Res.string.add
             is DeviceListEntry.Replay -> Res.string.add
+            is DeviceListEntry.LocalNode -> stringResource(Res.string.this_device)
         }
     val contentDescription by
         produceState<String?>(null, descriptionRes, resourceEnvironment) {

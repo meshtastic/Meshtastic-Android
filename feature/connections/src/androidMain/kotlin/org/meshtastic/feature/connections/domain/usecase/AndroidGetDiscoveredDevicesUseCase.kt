@@ -123,6 +123,7 @@ class AndroidGetDiscoveredDevicesUseCase(
             val bleForUi = matchBleNodes(bondedBle, db)
             val usbForUi = matchNodesByName(usbDevices, db)
             val virtualForUi = matchNodesByName(virtualDeviceEntries(showMock, showReplay), db)
+            val localNodeForUi = matchNodesByName(listOf(localNodeEntry()), db).single()
 
             val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager)
             val discoveredTcpAddresses = processedTcp.map { it.fullAddress }.toSet()
@@ -134,6 +135,7 @@ class AndroidGetDiscoveredDevicesUseCase(
                 discoveredTcpDevices = discoveredTcpForUi,
                 recentTcpDevices = recentTcpForUi,
                 virtualDevices = virtualForUi,
+                localNode = localNodeForUi,
             )
         }
     }

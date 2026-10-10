@@ -16,11 +16,15 @@
  */
 package org.meshtastic.core.model
 
-/** The physical transports a radio can be reached over. Demo Mode reaches no radio and has no [DeviceType]. */
+/**
+ * The transports a radio can be reached over, one pane each in Connections. [NODE] is this device running as the mesh
+ * node itself. Demo Mode reaches no radio and has no [DeviceType].
+ */
 enum class DeviceType {
     BLE,
     TCP,
     USB,
+    NODE,
     ;
 
     companion object {
@@ -33,6 +37,8 @@ enum class DeviceType {
 
                 // A WebSocket is another route to the same device a TCP address reaches.
                 interfaceId?.isNetwork == true -> TCP
+
+                interfaceId == InterfaceId.NODE -> NODE
 
                 else -> null
             }

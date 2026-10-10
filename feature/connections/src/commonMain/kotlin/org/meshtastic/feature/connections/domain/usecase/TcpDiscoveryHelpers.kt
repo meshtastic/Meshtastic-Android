@@ -26,14 +26,13 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.demo_mode
 import org.meshtastic.core.resources.demo_mode_replay
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.this_device
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
 private const val SUFFIX_LENGTH = 4
 
-/**
- * Shared helpers for TCP device discovery logic used by both [CommonGetDiscoveredDevicesUseCase] and the
- * Android-specific variant.
- */
+// Shared helpers for TCP device discovery logic used by both CommonGetDiscoveredDevicesUseCase and the
+// Android-specific variant.
 
 /** Converts a list of [DiscoveredService] into [DeviceListEntry.Tcp] with display names derived from TXT records. */
 internal fun processTcpServices(
@@ -122,6 +121,10 @@ internal fun findNodeByNameSuffix(
     }
 }
 
+/** This device as a mesh node: always offered, on every platform, since the node runs in-process. */
+internal suspend fun localNodeEntry(): DeviceListEntry.LocalNode =
+    DeviceListEntry.LocalNode(safeCatchingAll { getStringSuspend(Res.string.this_device) }.getOrDefault("This device"))
+
 /**
  * The virtual devices offered behind the Demo Mode gate, shared so the common and Android discovery paths cannot
  * diverge on visibility policy.
@@ -136,8 +139,10 @@ internal suspend fun virtualDeviceEntries(showMock: Boolean, showReplay: Boolean
         DeviceListEntry.Mock(safeCatchingAll { getStringSuspend(Res.string.demo_mode) }.getOrDefault("Demo Mode"))
     val replay =
         if (showReplay) {
-            val label =
-                safeCatchingAll { getStringSuspend(Res.string.demo_mode_replay) }.getOrDefault("Demo Mode (Replay)")
+            val label = safeCatchingAll {
+                getStringSuspend(Res.string.demo_mode_replay)
+            }
+                .getOrDefault("Demo Mode (Replay)")
             DeviceListEntry.Replay(label)
         } else {
             null

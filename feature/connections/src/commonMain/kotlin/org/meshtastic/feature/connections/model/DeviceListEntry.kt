@@ -79,6 +79,12 @@ sealed class DeviceListEntry(
         DeviceListEntry(name, InterfaceId.REPLAY.id.toString(), true, node) {
         override fun copy(node: Node?): Replay = copy(name = name, node = node)
     }
+
+    /** This device running as the mesh node itself (see `NodeRadioTransport`); one per host, address `p`. */
+    data class LocalNode(override val name: String, override val node: Node? = null) :
+        DeviceListEntry(name, InterfaceId.NODE.id.toString(), true, node) {
+        override fun copy(node: Node?): LocalNode = copy(name = name, node = node)
+    }
 }
 
 /** Matches names like Meshtastic_1234. */
