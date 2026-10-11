@@ -42,41 +42,6 @@ plugins {
     id("org.meshtastic.flatpak.sources.settings") version "0.2.2"
 }
 
-// Demo path on a Linux checkout. node-host's JVM variant links the macOS BLE bearer, which only a Mac can
-// publish; the latest Linux publish of node-kmp left it at an older local version. The JVM factory loads
-// that jar's native library lazily and never on Linux, and the three members it calls are unchanged, so
-// the older jar satisfies the link. That jar asks for its node-* siblings at its own version, and Gradle
-// sorts a bare SNAPSHOT above the catalog's qualifier, so every other node-* edge is held at the catalog
-// version. Drop this block once a Mac publishes it at the pinned node-kmp version.
-if (providers.gradleProperty("useMavenLocal").isPresent) {
-    val nodeKmpVersion =
-        Regex("""meshtastic-node-kmp = "([^"]+)"""")
-            .find(providers.fileContents(layout.rootDirectory.file("gradle/libs.versions.toml")).asText.get())
-            ?.groupValues
-            ?.get(1)
-            ?: error("gradle/libs.versions.toml has no meshtastic-node-kmp version")
-    val staleMacosBle = "0.1.0-SNAPSHOT"
-    gradle.lifecycle.beforeProject {
-        configurations.configureEach {
-            resolutionStrategy {
-                force(
-                    "org.meshtastic:node-desktop-ble-macos:$staleMacosBle",
-                    "org.meshtastic:node-desktop-ble-macos-jvm:$staleMacosBle",
-                )
-                eachDependency {
-                    if (
-                        requested.group == "org.meshtastic" &&
-                        requested.name.startsWith("node-") &&
-                        !requested.name.startsWith("node-desktop-ble-macos")
-                    ) {
-                        useVersion(nodeKmpVersion)
-                    }
-                }
-            }
-        }
-    }
-}
-
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
