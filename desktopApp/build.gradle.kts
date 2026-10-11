@@ -364,6 +364,7 @@ dependencies {
     implementation(projects.core.datastore)
     implementation(projects.core.prefs)
     implementation(projects.core.network)
+    implementation(libs.meshtastic.node.host) // JvmBearerFactory for the in-process node on desktop
     implementation(projects.core.takserver)
     implementation(projects.core.resources)
     implementation(projects.core.service)

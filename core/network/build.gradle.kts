@@ -44,6 +44,10 @@ kotlin {
             api(libs.meshtastic.mqtt.client.core)
             api(libs.meshtastic.mqtt.client.transport.tcp)
             api(libs.meshtastic.mqtt.client.transport.ws)
+            // The in-process mesh node (NodeRadioTransport): node-host is the facade every platform embeds,
+            // its platform factory comes from androidMain (node-android) or the desktop app (JvmBearerFactory).
+            api(project.dependencies.platform(libs.meshtastic.node.bom))
+            api(libs.meshtastic.node.host)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.ktor.client.core)
@@ -63,10 +67,14 @@ kotlin {
             }
         }
 
-        androidMain.dependencies { implementation(libs.usb.serial.android) }
+        androidMain.dependencies {
+            implementation(libs.usb.serial.android)
+            implementation(libs.meshtastic.node.android)
+        }
 
         commonTest.dependencies {
             implementation(projects.core.testing)
+            implementation(libs.meshtastic.node.testing) // FakeBearerFactory for NodeRadioTransport tests
             implementation(libs.kable.core) // Kable exception types for BLE failure-injection tests
             implementation(libs.ktor.client.mock)
         }

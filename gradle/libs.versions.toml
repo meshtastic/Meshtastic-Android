@@ -113,6 +113,9 @@ takpacket-sdk = "0.9.3"
 # -PuseMavenLocal=1. Wire types link only at an exact match, so node-kmp is published against this same string.
 # Merge path: the protobufs tag that carries both.
 meshtastic-protobufs = "2.8.1-nodekmp-SNAPSHOT"
+# node-kmp, from ~/.m2 (-PuseMavenLocal=1), published with -PprotobufsVersion=2.8.1-nodekmp-SNAPSHOT so its
+# Wire types match the pin above. Central publication is the merge gate.
+meshtastic-node-kmp = "0.1.0-pb2.8.1-nodekmp-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
@@ -311,6 +314,10 @@ kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 # versions, so core/transport stay versionless. Both transports are wired: transport-tcp (tcp://-/ssl://,
 # the default) and transport-ws (for user-entered ws://-/wss:// broker addresses).
 meshtastic-mqtt-client-bom = { module = "org.meshtastic:mqtt-client-bom", version.ref = "mqttastic" }
+meshtastic-node-bom = { module = "org.meshtastic:node-bom", version.ref = "meshtastic-node-kmp" }
+meshtastic-node-host = { module = "org.meshtastic:node-host" }
+meshtastic-node-android = { module = "org.meshtastic:node-android" }
+meshtastic-node-testing = { module = "org.meshtastic:node-testing" }
 meshtastic-mqtt-client-core = { module = "org.meshtastic:mqtt-client-core" }
 meshtastic-mqtt-client-transport-tcp = { module = "org.meshtastic:mqtt-client-transport-tcp" }
 meshtastic-mqtt-client-transport-ws = { module = "org.meshtastic:mqtt-client-transport-ws" }
