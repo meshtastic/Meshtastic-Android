@@ -42,9 +42,9 @@ import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.common.hasRecordAudioPermission
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.isValidDeviceAddress
-import org.meshtastic.core.network.radio.NodeStatusRepository
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.network.radio.NodeStatusRepository
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
