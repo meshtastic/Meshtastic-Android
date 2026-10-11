@@ -16,7 +16,6 @@
  */
 package org.meshtastic.desktop.radio
 
-import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.database.desktopDataDir
@@ -26,13 +25,14 @@ import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
 import org.meshtastic.node.host.JvmBearerFactory
 import org.meshtastic.node.store.file.AtomicFileStore
+import java.io.File
 
 /**
  * The desktop half of the in-process node. Each data directory is its own node, so two app instances on separate
  * `MESHTASTIC_DATA_DIR`s are two nodes. The window is always considered visible and the host always in front.
  *
- * Registered in [org.meshtastic.desktop.di.DesktopRuntimeModule]; no `@Single` here, to avoid double registration
- * with the desktop component scan.
+ * Registered in [org.meshtastic.desktop.di.DesktopRuntimeModule]; no `@Single` here, to avoid double registration with
+ * the desktop component scan.
  */
 class DesktopNodeBearers : NodeBearers {
     private val nodeDir: File

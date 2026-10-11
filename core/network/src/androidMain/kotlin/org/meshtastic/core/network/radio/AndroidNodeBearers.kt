@@ -17,7 +17,6 @@
 package org.meshtastic.core.network.radio
 
 import android.content.Context
-import java.io.File
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.node.BytesStore
@@ -26,6 +25,7 @@ import org.meshtastic.node.android.androidHostState
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.HostState
 import org.meshtastic.node.store.file.AtomicFileStore
+import java.io.File
 
 /** The Android half of the in-process node: Context-bound bearers, and the node's files under no-backup storage. */
 @Single(binds = [NodeBearers::class])

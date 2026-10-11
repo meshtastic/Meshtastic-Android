@@ -41,9 +41,9 @@ import org.meshtastic.proto.HardwareModel
  * This device as the radio: an in-process node-kmp node ([EmbeddedNode]) serving the app's own phone API.
  *
  * ToRadio bytes queue into a bounded channel drained by one coroutine, the single writer the session needs. FromRadio
- * bytes flow back under the lifecycle gate. The facade's phases map onto the callback: Running connects once,
- * Rebooting (a LoRa retune, a rename, a license change, a reset) is a non-permanent disconnect the app treats as a
- * reboot, Failed and a shutdown verb are permanent.
+ * bytes flow back under the lifecycle gate. The facade's phases map onto the callback: Running connects once, Rebooting
+ * (a LoRa retune, a rename, a license change, a reset) is a non-permanent disconnect the app treats as a reboot, Failed
+ * and a shutdown verb are permanent.
  */
 class NodeRadioTransport(
     private val callback: RadioTransportCallback,
@@ -77,15 +77,17 @@ class NodeRadioTransport(
 
     private fun onPhase(status: NodeStatus) {
         when (status.phase) {
-            NodePhase.Running -> if (!connected) {
-                connected = true
-                callback.onConnect()
-            }
+            NodePhase.Running ->
+                if (!connected) {
+                    connected = true
+                    callback.onConnect()
+                }
 
-            NodePhase.Rebooting -> if (connected) {
-                connected = false
-                callback.onDisconnect(isPermanent = false)
-            }
+            NodePhase.Rebooting ->
+                if (connected) {
+                    connected = false
+                    callback.onDisconnect(isPermanent = false)
+                }
 
             NodePhase.Failed -> {
                 connected = false
@@ -93,17 +95,19 @@ class NodeRadioTransport(
             }
 
             // A shutdown verb from the admin screen; the service's own close reports its disconnect itself.
-            NodePhase.Stopped -> if (connected && !closing) {
-                connected = false
-                callback.onDisconnect(isPermanent = true)
-            }
+            NodePhase.Stopped ->
+                if (connected && !closing) {
+                    connected = false
+                    callback.onDisconnect(isPermanent = true)
+                }
 
             NodePhase.Starting -> Unit
         }
     }
 
     /** False when the inbound buffer is full: the caller treats it as back-pressure, as the contract says. */
-    override fun handleSendToRadio(p: ByteArray): Boolean = lifecycle.runIfOpen { inbound.trySend(p).isSuccess } ?: false
+    override fun handleSendToRadio(p: ByteArray): Boolean =
+        lifecycle.runIfOpen { inbound.trySend(p).isSuccess } ?: false
 
     override suspend fun close() {
         closing = true

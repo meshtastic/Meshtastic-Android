@@ -16,13 +16,6 @@
  */
 package org.meshtastic.core.network.radio
 
-import java.nio.file.Files
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +32,13 @@ import org.meshtastic.node.host.HostState
 import org.meshtastic.node.testing.FakeBearerFactory
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.ToRadio
+import java.nio.file.Files
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * Drives [NodeRadioTransport] over a real [org.meshtastic.node.host.EmbeddedNode] on fake bearers, the way the service

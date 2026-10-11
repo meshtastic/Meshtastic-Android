@@ -36,10 +36,9 @@ import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.HttpClientDefaults
-import org.meshtastic.core.network.radio.NodeBearers
-import org.meshtastic.desktop.radio.DesktopNodeBearers
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
+import org.meshtastic.core.network.radio.NodeBearers
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
 import org.meshtastic.core.repository.ConnectionStateProvider
@@ -64,6 +63,7 @@ import org.meshtastic.desktop.notification.MacOSNotificationSender
 import org.meshtastic.desktop.notification.NativeNotificationSender
 import org.meshtastic.desktop.notification.WindowsNotificationSender
 import org.meshtastic.desktop.radio.DesktopMessageQueue
+import org.meshtastic.desktop.radio.DesktopNodeBearers
 import org.meshtastic.desktop.radio.DesktopRadioTransportFactory
 
 /**
@@ -100,8 +100,7 @@ class DesktopRuntimeModule {
     )
 
     /** The in-process node's platform half: the JVM bearer factory and the node's files under the data directory. */
-    @Single
-    fun nodeBearers(): NodeBearers = DesktopNodeBearers()
+    @Single fun nodeBearers(): NodeBearers = DesktopNodeBearers()
 
     /**
      * Only the Linux sender holds a native handle; the others are stateless. `Main.kt` closes it explicitly during

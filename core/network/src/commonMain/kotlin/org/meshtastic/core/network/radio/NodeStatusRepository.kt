@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.network.radio
 
-import kotlin.concurrent.Volatile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +27,7 @@ import org.meshtastic.node.host.Bearer
 import org.meshtastic.node.host.BearerFactory
 import org.meshtastic.node.host.EmbeddedNode
 import org.meshtastic.node.host.NodeStatus
+import kotlin.concurrent.Volatile
 
 /**
  * The in-process node as the UI sees it: null while no node transport runs, otherwise the facade's status model. The
