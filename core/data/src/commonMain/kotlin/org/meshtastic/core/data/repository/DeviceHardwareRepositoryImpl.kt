@@ -34,7 +34,6 @@ import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.proto.HardwareModel
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.model.SoftDeviceVariantEntry
@@ -43,6 +42,7 @@ import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.BootloaderOtaQuirksRepository
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.DeviceLinkRepository
+import org.meshtastic.proto.HardwareModel
 import kotlin.time.Duration.Companion.minutes
 
 /**
