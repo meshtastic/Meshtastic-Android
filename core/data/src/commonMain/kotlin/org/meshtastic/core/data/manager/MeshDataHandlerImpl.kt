@@ -430,7 +430,12 @@ class MeshDataHandlerImpl(
                     isAck -> MessageStatus.DELIVERED
                     else -> MessageStatus.ERROR
                 }
-            if (p != null && p.status != MessageStatus.RECEIVED) {
+            // A relay's ack already proved the packet reached the mesh; running out of retries afterwards says
+            // nothing new, so it must not flip Delivered back to failed. Other NAKs (a PKI or channel error from
+            // the destination) still do.
+            val exhausted = routingError == Routing.Error.MAX_RETRANSMIT.value
+            val keepsDelivery = exhausted && p?.status == MessageStatus.DELIVERED
+            if (p != null && p.status != MessageStatus.RECEIVED && !keepsDelivery) {
                 val updatedPacket =
                     p.copy(
                         status = m,
@@ -453,7 +458,7 @@ class MeshDataHandlerImpl(
                 }
             }
 
-            if (reaction != null) {
+            if (reaction != null && !(exhausted && reaction.status == MessageStatus.DELIVERED)) {
                 var updated =
                     reaction.copy(
                         status = m,

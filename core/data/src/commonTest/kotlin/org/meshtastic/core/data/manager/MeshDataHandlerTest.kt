@@ -87,6 +87,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MeshDataHandlerTest {
@@ -814,6 +815,44 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_INVALID.value, updates.single().ackProofStatus)
+    }
+
+    @Test
+    fun `running out of retries after a relay acked keeps the packet delivered`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        val delivered = sentPacket().copy(status = MessageStatus.DELIVERED)
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(delivered)
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(routingPacket(Routing.Error.MAX_RETRANSMIT), 123)
+        advanceUntilIdle()
+
+        assertTrue(updates.isEmpty())
+    }
+
+    @Test
+    fun `a destination error after a relay acked still marks the packet failed`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        val delivered = sentPacket().copy(status = MessageStatus.DELIVERED)
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(delivered)
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(routingPacket(Routing.Error.PKI_UNKNOWN_PUBKEY), 123)
+        advanceUntilIdle()
+
+        assertEquals(MessageStatus.ERROR, updates.single().status)
+    }
+
+    @Test
+    fun `running out of retries with no ack marks the packet failed`() = testScope.runTest {
+        val updates = mutableListOf<DataPacket>()
+        everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
+        everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
+
+        handler.handleReceivedData(routingPacket(Routing.Error.MAX_RETRANSMIT), 123)
+        advanceUntilIdle()
+
+        assertEquals(MessageStatus.ERROR, updates.single().status)
     }
 
     @Test
