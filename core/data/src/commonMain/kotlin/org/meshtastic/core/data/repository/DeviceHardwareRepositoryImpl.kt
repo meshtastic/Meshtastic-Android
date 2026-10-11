@@ -34,6 +34,7 @@ import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.proto.HardwareModel
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.model.SoftDeviceVariantEntry
@@ -282,8 +283,8 @@ class DeviceHardwareRepositoryImpl(
     )
 
     companion object {
-        /** `HardwareModel.NODE_KMP`; a literal until the protobufs pin carries the value (protobufs #1126). */
-        internal const val APP_NODE_HW_MODEL = 151
+        /** The app itself as a node, from protobufs #1126. */
+        internal val APP_NODE_HW_MODEL: Int = HardwareModel.NODE_KMP.value
 
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
         private val FAILED_REFRESH_RETRY_INTERVAL_MS = 15.minutes.inWholeMilliseconds

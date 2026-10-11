@@ -109,7 +109,10 @@ jmdns = "3.6.3"
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.9.3"
-meshtastic-protobufs = "2.8.1"
+# Demo path: protobufs master plus #1111 (BLE protocol flags) and #1126 (NODE_KMP), built to ~/.m2 with
+# -PuseMavenLocal=1. Wire types link only at an exact match, so node-kmp is published against this same string.
+# Merge path: the protobufs tag that carries both.
+meshtastic-protobufs = "2.8.1-nodekmp-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
