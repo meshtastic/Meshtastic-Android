@@ -42,6 +42,21 @@ plugins {
     id("org.meshtastic.flatpak.sources.settings") version "0.2.2"
 }
 
+// Demo path on a Linux checkout. node-host's JVM variant links the macOS BLE bearer, which only a Mac can
+// publish; the latest Linux publish of node-kmp left it at an older local version. The JVM factory loads
+// that jar's native library lazily and never on Linux, and the three members it calls are unchanged, so
+// the older jar satisfies the link. Drop this block once a Mac publishes it at the pinned node-kmp version.
+if (providers.gradleProperty("useMavenLocal").isPresent) {
+    gradle.lifecycle.beforeProject {
+        configurations.configureEach {
+            resolutionStrategy.force(
+                "org.meshtastic:node-desktop-ble-macos:0.1.0-SNAPSHOT",
+                "org.meshtastic:node-desktop-ble-macos-jvm:0.1.0-SNAPSHOT",
+            )
+        }
+    }
+}
+
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
