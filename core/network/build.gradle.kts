@@ -74,7 +74,11 @@ kotlin {
 
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation(libs.meshtastic.node.testing) // FakeBearerFactory for NodeRadioTransport tests
+            // FakeBearerFactory for NodeRadioTransport tests. node-testing carries kotlin-test's JUnit 4 flavor
+            // transitively; this module tests on JUnit 5, and both claim the same capability.
+            implementation(libs.meshtastic.node.testing.get().toString()) {
+                exclude(group = "org.jetbrains.kotlin", module = "kotlin-test-junit")
+            }
             implementation(libs.kable.core) // Kable exception types for BLE failure-injection tests
             implementation(libs.ktor.client.mock)
         }
