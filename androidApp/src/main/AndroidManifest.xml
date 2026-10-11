@@ -236,6 +236,11 @@
             android:foregroundServiceType="connectedDevice|location|microphone"
             android:exported="false" />
 
+        <!-- node-android ships a service for hosts that have none; this app runs its node inside MeshService -->
+        <service
+            android:name="org.meshtastic.node.android.NodeForegroundService"
+            tools:node="remove" />
+
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"

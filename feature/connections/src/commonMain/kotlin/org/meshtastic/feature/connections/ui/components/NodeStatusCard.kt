@@ -27,7 +27,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -189,8 +189,10 @@ private fun BearerRow(
 private fun GrantPermissionButton(permission: String, onGrant: () -> Unit) {
     val permissionState = rememberPermissionState(permission)
     val currentOnGrant by rememberUpdatedState(onGrant)
-    LaunchedEffect(permissionState.status) {
+    // Once per status change, not per recomposition: the node re-reads its requirements after the grant.
+    DisposableEffect(permissionState.status) {
         if (permissionState.status == PermissionStatus.GRANTED) currentOnGrant()
+        onDispose {}
     }
     TextButton(
         onClick = {

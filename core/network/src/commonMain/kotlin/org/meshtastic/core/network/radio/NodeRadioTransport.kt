@@ -47,7 +47,7 @@ import org.meshtastic.proto.HardwareModel
  */
 class NodeRadioTransport(
     private val callback: RadioTransportCallback,
-    private val scope: CoroutineScope,
+    scope: CoroutineScope,
     private val bearers: NodeBearers,
     private val statusRepository: NodeStatusRepositoryImpl,
     private val isDebug: Boolean,
