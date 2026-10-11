@@ -166,11 +166,13 @@ internal fun firstRunDefaults(): BackupPreferences = nodeDefaults {
 }
 
 /** The library's diagnostics onto the app's logger; its per-frame debug lines only in a debug build. */
-internal class KermitMeshLogger(private val debug: Boolean) : MeshLogger {
+internal class KermitMeshLogger(debug: Boolean) : MeshLogger {
+    override val level: MeshLogLevel = if (debug) MeshLogLevel.DEBUG else MeshLogLevel.INFO
+
     override fun log(level: MeshLogLevel, tag: String, message: String) {
         val logger = Logger.withTag(tag)
         when (level) {
-            MeshLogLevel.DEBUG -> if (debug) logger.d { message }
+            MeshLogLevel.DEBUG -> logger.d { message }
             MeshLogLevel.INFO -> logger.i { message }
             MeshLogLevel.WARN -> logger.w { message }
             MeshLogLevel.ERROR -> logger.e { message }
