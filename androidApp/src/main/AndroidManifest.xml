@@ -51,6 +51,9 @@
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation"
         tools:targetApi="s" />
+    <!-- This device as a node: its Bluetooth bearers advertise and serve GATT -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"
+        tools:targetApi="s" />
 
     <!-- API 33+ Notification runtime permissions -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -86,6 +89,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
+    <!-- This device as a node: the Wi-Fi Aware bearer, and the audio bearer with the service type that covers it -->
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="tiramisu" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+
     <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -97,6 +107,17 @@
 
     <uses-feature
         android:name="android.hardware.camera"
+        android:required="false" />
+
+    <!-- This device as a node uses these when present; none is required to install -->
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi.aware"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.usb.host"
         android:required="false" />
 
     <!-- The legacy BLUETOOTH permissions imply this feature as required, which hides the app on Android XR. -->
@@ -224,7 +245,7 @@
         <service
             android:name="org.meshtastic.core.service.MeshService"
             android:enabled="true"
-            android:foregroundServiceType="connectedDevice|location"
+            android:foregroundServiceType="connectedDevice|location|microphone"
             android:exported="false" />
 
         <!-- Quick Settings tile for the radio connection; BIND_QUICK_SETTINGS_TILE limits binding to SystemUI -->
