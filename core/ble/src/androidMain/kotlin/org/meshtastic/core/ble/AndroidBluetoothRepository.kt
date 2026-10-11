@@ -151,10 +151,8 @@ class AndroidBluetoothRepository(
                 } else if (remoteDevice.createBond()) {
                     start = BondWaitStart(createdBond = true)
                 } else {
-                    // createBond() returns false when a bond is already in flight, triggered by a GATT
-                    // operation hitting a secured characteristic, or already established.
-                    // ACTION_BOND_STATE_CHANGED is unreliable on some devices (see Kable #111), so
-                    // re-check bondState directly rather than failing the whole flow.
+                    // createBond() returns false when a bond is already in flight (a GATT operation on a
+                    // secured characteristic starts one) or already established, so bondState decides.
                     when (remoteDevice.bondState) {
                         android.bluetooth.BluetoothDevice.BOND_BONDED -> {
                             result.complete(Unit)
@@ -189,8 +187,9 @@ class AndroidBluetoothRepository(
         start: BondWaitStart,
     ) {
         var bondingWasInFlight = start.bondingObserved
-        // createBond() can return true before Android reports BOND_BONDING. Tolerate two polled
-        // BOND_NONE samples (polls 1-2), then fail on the third persistent BOND_NONE.
+        // createBond() returning true only queues the request: BOND_BONDING can lag it, and a request the
+        // stack then fails stays BOND_NONE with no broadcast. Tolerate two polled BOND_NONE samples
+        // (polls 1-2), then fail on the third persistent BOND_NONE.
         var createdBondNoneGraceRemaining =
             if (start.createdBond) {
                 CREATED_BOND_NONE_GRACE
