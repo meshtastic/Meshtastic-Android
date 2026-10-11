@@ -1440,8 +1440,8 @@ class SharedRadioInterfaceServiceLivenessTest {
     // ─── The in-process node transport is left alone by every environmental listener ─────────
 
     /**
-     * The node's own bearers react to Bluetooth going away; the transport between the app and its in-process node
-     * does not run over Bluetooth, so the BLE-disabled listener must not tear it down.
+     * The node's own bearers react to Bluetooth going away; the transport between the app and its in-process node does
+     * not run over Bluetooth, so the BLE-disabled listener must not tear it down.
      */
     @Test
     fun `Bluetooth disabled leaves the node transport running`() = runTest(testDispatcher) {
