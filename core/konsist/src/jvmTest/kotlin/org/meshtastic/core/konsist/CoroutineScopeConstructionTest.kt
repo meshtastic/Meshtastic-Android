@@ -44,6 +44,7 @@ class CoroutineScopeConstructionTest {
             "core/network/commonMain/BleRadioTransport.kt",
             "core/network/commonMain/MQTTRepositoryImpl.kt",
             "core/network/commonMain/MockRadioTransport.kt",
+            "core/network/commonMain/NodeRadioTransport.kt",
             "core/network/commonMain/ReplayRadioTransport.kt",
             "core/prefs/androidMain/CorePrefsAndroidModule.kt",
             "core/prefs/commonMain/AnalyticsPrefsImpl.kt",
