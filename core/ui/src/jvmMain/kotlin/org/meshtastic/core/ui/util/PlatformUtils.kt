@@ -163,3 +163,6 @@ actual fun rememberOpenAppSettings(): () -> Unit = { Logger.w { "App settings no
 
 /** JVM — Desktop does not gate the camera behind a runtime permission. */
 @Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+/** JVM — Desktop has no runtime permissions to request. */
+@Composable actual fun rememberPermissionState(permission: String): PermissionUiState = grantedPermissionUiState()

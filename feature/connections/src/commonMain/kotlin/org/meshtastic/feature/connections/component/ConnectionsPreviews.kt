@@ -36,14 +36,20 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
+import org.meshtastic.feature.connections.model.BearerRowState
+import org.meshtastic.feature.connections.model.BearerRowUi
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.feature.connections.model.NodeStatusUi
 import org.meshtastic.feature.connections.model.UsbDeviceData
 import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
 import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.DeviceListItem
 import org.meshtastic.feature.connections.ui.components.DeviceSectionHeader
 import org.meshtastic.feature.connections.ui.components.DisconnectButton
+import org.meshtastic.feature.connections.ui.components.NodeStatusCard
 import org.meshtastic.feature.connections.ui.components.TransportSelector
+import org.meshtastic.node.host.Bearer
+import org.meshtastic.node.host.NodePhase
 import org.meshtastic.proto.User
 
 private const val PREVIEW_BLE_RSSI = -60
@@ -317,6 +323,50 @@ fun NodePanePreview() {
         )
     }
 }
+
+@PreviewLightDark
+@Composable
+fun NodeStatusCardPreview() {
+    AppTheme {
+        NodeStatusCard(
+            status =
+            NodeStatusUi(
+                phase = NodePhase.Running,
+                nodeId = "!3a5806be",
+                longName = "Meshtastic 06be",
+                shortName = "06be",
+                peerCount = PREVIEW_NODE_PEERS,
+                failure = null,
+                settingsReset = false,
+                bearers =
+                listOf(
+                    BearerRowUi(Bearer.UDP, true, false, BearerRowState.Active, PREVIEW_RX, PREVIEW_TX, 0),
+                    BearerRowUi(Bearer.BLE_ADV, true, false, BearerRowState.Ready, 0, 0, 0),
+                    BearerRowUi(Bearer.GATT, true, false, BearerRowState.Active, 2, 1, 0),
+                    BearerRowUi(Bearer.LORA, false, false, BearerRowState.NeedsUsbPermission("CH341"), 0, 0, 0),
+                    BearerRowUi(Bearer.WIFI_AWARE, false, true, BearerRowState.Off, 0, 0, 0),
+                    BearerRowUi(
+                        Bearer.AUDIO,
+                        false,
+                        true,
+                        BearerRowState.NeedsPermission("android.permission.RECORD_AUDIO"),
+                        0,
+                        0,
+                        0,
+                    ),
+                    BearerRowUi(Bearer.VIDEO, false, true, BearerRowState.Off, 0, 0, 0),
+                ),
+            ),
+            onSetHostBearer = { _, _ -> },
+            onRefreshRequirements = {},
+            onRequestUsbPermission = {},
+        )
+    }
+}
+
+private const val PREVIEW_NODE_PEERS = 3
+private const val PREVIEW_RX = 42L
+private const val PREVIEW_TX = 7L
 
 private class PreviewBleDevice(
     override val address: String,

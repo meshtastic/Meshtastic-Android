@@ -1244,6 +1244,22 @@ no_usb_devices_found
 no_usb_devices_hint
 no_usb_devices_seen
 ### NODE ###
+node_bearer_active
+node_bearer_audio
+node_bearer_ble_adv
+node_bearer_counters
+node_bearer_gatt
+node_bearer_lora
+node_bearer_mqtt
+node_bearer_needs_hardware
+node_bearer_needs_permission
+node_bearer_needs_usb
+node_bearer_off
+node_bearer_ready
+node_bearer_udp
+node_bearer_unsupported
+node_bearer_video
+node_bearer_wifi_aware
 node_count_online
 node_count_shown
 node_count_template
@@ -1302,6 +1318,14 @@ node_sort_last_heard
 node_sort_title
 node_sort_via_favorite
 node_sort_via_mqtt
+node_status_peers
+node_status_phase_failed
+node_status_phase_rebooting
+node_status_phase_running
+node_status_phase_starting
+node_status_phase_stopped
+node_status_settings_reset
+node_status_title
 nodedb_reset
 ### NODES ###
 nodes
@@ -2375,6 +2399,8 @@ schema_network_ipv4_ip
 schema_network_ipv4_subnet
 schema_network_ntp_server
 schema_network_ntp_server_description
+schema_network_protocolflags_ble_broadcast
+schema_network_protocolflags_ble_gatt_peer
 schema_network_protocolflags_no_broadcast
 schema_network_protocolflags_udp_broadcast
 schema_network_rsyslog_server

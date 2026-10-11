@@ -1286,6 +1286,22 @@
     <string name="no_usb_devices_hint">Connect a device with a USB data cable to use serial.</string>
     <string name="no_usb_devices_seen">No USB devices detected</string>
     <!-- NODE -->
+    <string name="node_bearer_active">Active</string>
+    <string name="node_bearer_audio">Audio</string>
+    <string name="node_bearer_ble_adv">Bluetooth advertisements</string>
+    <string name="node_bearer_counters">%1$d received · %2$d sent · %3$d relayed</string>
+    <string name="node_bearer_gatt">Bluetooth connection</string>
+    <string name="node_bearer_lora">LoRa stick</string>
+    <string name="node_bearer_mqtt">MQTT</string>
+    <string name="node_bearer_needs_hardware">Needs %1$s</string>
+    <string name="node_bearer_needs_permission">Needs a permission</string>
+    <string name="node_bearer_needs_usb">Needs USB access to %1$s</string>
+    <string name="node_bearer_off">Off</string>
+    <string name="node_bearer_ready">Ready</string>
+    <string name="node_bearer_udp">UDP broadcast</string>
+    <string name="node_bearer_unsupported">Unavailable: %1$s</string>
+    <string name="node_bearer_video">Video</string>
+    <string name="node_bearer_wifi_aware">Wi-Fi Aware</string>
     <string name="node_count_online">%1$d online</string>
     <string name="node_count_shown">%1$d shown</string>
     <string name="node_count_template">(%1$d online / %2$d shown / %3$d total)</string>
@@ -1344,6 +1360,17 @@
     <string name="node_sort_title">Sort by</string>
     <string name="node_sort_via_favorite">via Favorite</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <plurals name="node_status_peers">
+        <item quantity="one">%1$d node heard</item>
+        <item quantity="other">%1$d nodes heard</item>
+    </plurals>
+    <string name="node_status_phase_failed">Failed</string>
+    <string name="node_status_phase_rebooting">Restarting</string>
+    <string name="node_status_phase_running">Running</string>
+    <string name="node_status_phase_starting">Starting</string>
+    <string name="node_status_phase_stopped">Stopped</string>
+    <string name="node_status_settings_reset">Stored settings could not be read and were reset</string>
+    <string name="node_status_title">This device as a node</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <!-- NODES -->
     <string name="nodes">Nodes</string>

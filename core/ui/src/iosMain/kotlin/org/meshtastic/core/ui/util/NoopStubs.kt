@@ -93,4 +93,6 @@ actual fun SetScreenBrightness(brightness: Float) {
 
 @Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionUiState()
 
+@Composable actual fun rememberPermissionState(permission: String): PermissionUiState = grantedPermissionUiState()
+
 actual fun KeyEvent.isFromSoftKeyboard(): Boolean = false

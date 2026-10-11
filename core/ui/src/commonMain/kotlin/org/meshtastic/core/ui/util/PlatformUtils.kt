@@ -147,3 +147,10 @@ expect val bleScanRequiresLocationServices: Boolean
  * that don't require a runtime camera permission.
  */
 @Composable expect fun rememberCameraPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for one runtime [permission] named by the platform, for a permission a
+ * library reports at runtime rather than one this app knows up front. [PermissionStatus.GRANTED] where permissions are
+ * not gated at runtime.
+ */
+@Composable expect fun rememberPermissionState(permission: String): PermissionUiState
