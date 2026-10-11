@@ -46,8 +46,17 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories {
-        // Only enable mavenLocal for local JitPack testing; never in CI.
-        if (providers.gradleProperty("useMavenLocal").isPresent) mavenLocal()
+        // Only enable mavenLocal for local testing; never in CI. Scoped to the artifacts a local build
+        // publishes on purpose (protobufs snapshots, node-kmp), so a stale ~/.m2 copy of a released
+        // library (kp1812, TAK, MQTTastic) never shadows Central.
+        if (providers.gradleProperty("useMavenLocal").isPresent) {
+            mavenLocal {
+                content {
+                    includeModuleByRegex("org\\.meshtastic", "protobufs.*|node-.*|curve25519.*")
+                    includeGroupByRegex("com\\.github\\..*")
+                }
+            }
+        }
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
