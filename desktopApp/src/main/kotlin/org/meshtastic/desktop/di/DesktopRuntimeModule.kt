@@ -36,6 +36,8 @@ import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.HttpClientDefaults
+import org.meshtastic.core.network.radio.NodeBearers
+import org.meshtastic.desktop.radio.DesktopNodeBearers
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
 import org.meshtastic.core.network.service.ApiService
@@ -96,6 +98,10 @@ class DesktopRuntimeModule {
         bluetoothRepository = bluetoothRepository,
         connectionFactory = connectionFactory,
     )
+
+    /** The in-process node's platform half: the JVM bearer factory and the node's files under the data directory. */
+    @Single
+    fun nodeBearers(): NodeBearers = DesktopNodeBearers()
 
     /**
      * Only the Linux sender holds a native handle; the others are stateless. `Main.kt` closes it explicitly during
