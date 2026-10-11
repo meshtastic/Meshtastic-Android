@@ -102,3 +102,7 @@ fun Context.hasLocationPermission(precise: Boolean): Boolean {
     return granted(Manifest.permission.ACCESS_FINE_LOCATION) ||
         (!precise && granted(Manifest.permission.ACCESS_COARSE_LOCATION))
 }
+
+/** Whether the microphone may be opened: the node's audio bearer needs it, as does the service type that covers it. */
+fun Context.hasRecordAudioPermission(): Boolean =
+    ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED

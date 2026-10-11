@@ -40,6 +40,7 @@ class ForegroundStartPolicyTest {
 
         const val CONNECTED_DEVICE = ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
         const val LOCATION = ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+        const val MICROPHONE = ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
 
         /** Platform levels that enforce the background foreground-service-start restriction. */
         val RESTRICTED_LEVELS = listOf(ANDROID_12, ANDROID_13, ANDROID_14, ANDROID_17)
@@ -227,6 +228,78 @@ class ForegroundStartPolicyTest {
         }
     }
 
+    @Test
+    fun `microphone is claimed for a foreground start with the audio bearer on and the permission held`() {
+        listOf(ANDROID_11, ANDROID_13, ANDROID_14, ANDROID_17).forEach { sdk ->
+            assertEquals(
+                CONNECTED_DEVICE or MICROPHONE,
+                ForegroundStartPolicy.foregroundServiceType(
+                    hasLocationPermission = false,
+                    appInForeground = true,
+                    micBearerEnabled = true,
+                    hasRecordAudioPermission = true,
+                    sdkInt = sdk,
+                ),
+                "microphone should be claimed on API $sdk",
+            )
+        }
+    }
+
+    @Test
+    fun `microphone is not claimed without the audio bearer or without the permission`() {
+        assertEquals(
+            CONNECTED_DEVICE,
+            ForegroundStartPolicy.foregroundServiceType(
+                hasLocationPermission = false,
+                appInForeground = true,
+                micBearerEnabled = false,
+                hasRecordAudioPermission = true,
+                sdkInt = ANDROID_14,
+            ),
+        )
+        assertEquals(
+            CONNECTED_DEVICE,
+            ForegroundStartPolicy.foregroundServiceType(
+                hasLocationPermission = false,
+                appInForeground = true,
+                micBearerEnabled = true,
+                hasRecordAudioPermission = false,
+                sdkInt = ANDROID_14,
+            ),
+        )
+    }
+
+    @Test
+    fun `microphone is never claimed for a background start`() {
+        listOf(ANDROID_11, ANDROID_13, ANDROID_14, ANDROID_17).forEach { sdk ->
+            assertEquals(
+                0,
+                ForegroundStartPolicy.foregroundServiceType(
+                    hasLocationPermission = false,
+                    appInForeground = false,
+                    micBearerEnabled = true,
+                    hasRecordAudioPermission = true,
+                    sdkInt = sdk,
+                ) and MICROPHONE,
+                "microphone must not be claimed in the background on API $sdk",
+            )
+        }
+    }
+
+    @Test
+    fun `microphone is not a type before Android 11`() {
+        assertEquals(
+            CONNECTED_DEVICE,
+            ForegroundStartPolicy.foregroundServiceType(
+                hasLocationPermission = false,
+                appInForeground = true,
+                micBearerEnabled = true,
+                hasRecordAudioPermission = true,
+                sdkInt = ANDROID_10,
+            ),
+        )
+    }
+
     // endregion
 
     /**
@@ -244,6 +317,8 @@ class ForegroundStartPolicyTest {
                         ForegroundStartPolicy.foregroundServiceType(
                             hasLocationPermission = true,
                             appInForeground = false,
+                            micBearerEnabled = true,
+                            hasRecordAudioPermission = true,
                             sdkInt = sdk,
                         )
                     if (sdk >= ANDROID_14) {
@@ -253,6 +328,11 @@ class ForegroundStartPolicyTest {
                             "$trigger on API $sdk is permitted in the background but claims location",
                         )
                     }
+                    assertEquals(
+                        0,
+                        types and MICROPHONE,
+                        "$trigger on API $sdk is permitted in the background but claims microphone",
+                    )
                 }
         }
     }

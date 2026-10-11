@@ -45,6 +45,8 @@ object ForegroundStartPolicy {
     /** Android 14 (API 34) began enforcing while-in-use restrictions on the `location` type at start time. */
     private const val SDK_WHILE_IN_USE_ENFORCED = Build.VERSION_CODES.UPSIDE_DOWN_CAKE
 
+    private const val SDK_MICROPHONE_TYPE = Build.VERSION_CODES.R
+
     /**
      * Returns true when `Context.startForegroundService()` is expected to succeed for [trigger].
      *
@@ -82,13 +84,21 @@ object ForegroundStartPolicy {
      * claimed only when it can be held legally, because requesting it in a state the platform forbids throws
      * `SecurityException` and takes the whole start down with it.
      *
+     * `microphone` is likewise additive: the in-process node's audio bearer records, and from Android 11 a foreground
+     * service may hold the microphone only under that type. It is while-in-use restricted from the start, so only a
+     * foreground start with `RECORD_AUDIO` granted and the bearer switched on claims it.
+     *
      * @param hasLocationPermission whether `ACCESS_FINE_LOCATION` is granted.
      * @param appInForeground whether this process currently holds a user-visible component.
+     * @param micBearerEnabled whether the node's audio bearer is switched on.
+     * @param hasRecordAudioPermission whether `RECORD_AUDIO` is granted.
      * @param sdkInt the running platform API level.
      */
     fun foregroundServiceType(
         hasLocationPermission: Boolean,
         appInForeground: Boolean,
+        micBearerEnabled: Boolean = false,
+        hasRecordAudioPermission: Boolean = false,
         sdkInt: Int = Build.VERSION.SDK_INT,
     ): Int {
         if (sdkInt < SDK_SERVICE_TYPES) return 0
@@ -98,12 +108,13 @@ object ForegroundStartPolicy {
                 // From Android 14 the location type is while-in-use restricted at start time. The app does not declare
                 // ACCESS_BACKGROUND_LOCATION, so a background start can never hold it.
                 (sdkInt < SDK_WHILE_IN_USE_ENFORCED || appInForeground)
+        val canClaimMicrophone =
+            micBearerEnabled && hasRecordAudioPermission && appInForeground && sdkInt >= SDK_MICROPHONE_TYPE
 
-        return if (canClaimLocation) {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-        } else {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
-        }
+        var types = ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+        if (canClaimLocation) types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+        if (canClaimMicrophone) types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+        return types
     }
 
     /**

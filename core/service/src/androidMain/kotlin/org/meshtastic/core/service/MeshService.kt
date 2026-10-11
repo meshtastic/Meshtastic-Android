@@ -30,19 +30,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.android.ext.android.inject
 import org.meshtastic.core.common.hasLocationPermission
+import org.meshtastic.core.common.hasRecordAudioPermission
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.isValidDeviceAddress
+import org.meshtastic.core.network.radio.NodeStatusRepository
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransportFactory
+import org.meshtastic.node.host.Bearer
 
 /**
  * Android foreground service that hosts the Meshtastic mesh radio connection.
@@ -70,6 +77,8 @@ class MeshService : Service() {
     private val conversationShortcutPublisher: ConversationShortcutPublisher by inject()
 
     private val radioOperationLock: RadioOperationLock by inject()
+
+    private val nodeStatusRepository: NodeStatusRepository by inject()
 
     private var isServiceInitialized = false
 
@@ -135,7 +144,29 @@ class MeshService : Service() {
                 if (holders.isEmpty()) operationWakeLock.stop() else operationWakeLock.start()
             }
         }
+
+        // The node's audio bearer records through this service, which from Android 11 needs the microphone type.
+        // The type is fixed at startForeground, so a switch flipped on while running re-promotes the service; a flip
+        // while the app is in the background waits for the next start command, as the type is while-in-use.
+        serviceScope.launch {
+            nodeStatusRepository.status
+                .map { it?.bearers?.get(Bearer.AUDIO)?.enabled == true }
+                .distinctUntilChanged()
+                .drop(1)
+                .filter { it }
+                .collect {
+                    startForegroundSafely(androidNotifications.getServiceNotification(), currentForegroundServiceType())
+                }
+        }
     }
+
+    /** Recomputed at every promotion; see [ForegroundStartPolicy.foregroundServiceType]. */
+    private fun currentForegroundServiceType(): Int = ForegroundStartPolicy.foregroundServiceType(
+        hasLocationPermission = hasLocationPermission(precise = true),
+        appInForeground = isAppInForeground(),
+        micBearerEnabled = nodeStatusRepository.status.value?.bearers?.get(Bearer.AUDIO)?.enabled == true,
+        hasRecordAudioPermission = hasRecordAudioPermission(),
+    )
 
     @Suppress("ReturnCount")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -154,11 +185,7 @@ class MeshService : Service() {
         // Recomputed on every start command, which is load-bearing: MainActivity.onStart() re-issues startService()
         // on each app open, so a service that began in the background with connectedDevice only (location is
         // while-in-use restricted there) upgrades to connectedDevice|location the next time the user opens the app.
-        val foregroundServiceType =
-            ForegroundStartPolicy.foregroundServiceType(
-                hasLocationPermission = hasLocationPermission(precise = true),
-                appInForeground = isAppInForeground(),
-            )
+        val foregroundServiceType = currentForegroundServiceType()
 
         // Start foreground FIRST. Android requires startForeground() within ~5s of onStartCommand and before any
         // potentially-blocking work. We never defer this — even when the selected-device address is not yet loaded.
