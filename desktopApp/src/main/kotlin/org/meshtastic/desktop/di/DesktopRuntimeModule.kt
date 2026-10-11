@@ -39,6 +39,7 @@ import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
 import org.meshtastic.core.network.radio.NodeBearers
+import org.meshtastic.core.network.radio.NodeStatusRepositoryImpl
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
 import org.meshtastic.core.repository.ConnectionStateProvider
@@ -92,11 +93,15 @@ class DesktopRuntimeModule {
         scanner: BleScanner,
         bluetoothRepository: BluetoothRepository,
         connectionFactory: BleConnectionFactory,
+        nodeBearers: NodeBearers,
+        nodeStatusRepository: NodeStatusRepositoryImpl,
     ): RadioTransportFactory = DesktopRadioTransportFactory(
         dispatchers = dispatchers,
         scanner = scanner,
         bluetoothRepository = bluetoothRepository,
         connectionFactory = connectionFactory,
+        nodeBearers = nodeBearers,
+        nodeStatusRepository = nodeStatusRepository,
     )
 
     /** The in-process node's platform half: the JVM bearer factory and the node's files under the data directory. */

@@ -61,6 +61,9 @@ abstract class BaseRadioTransportFactory(
             InterfaceId.REPLAY.id,
             -> mockTransportEnabled.value
 
+            // This device as the node needs no radio and no permission to start; its bearers degrade on their own.
+            InterfaceId.NODE.id -> true
+
             else -> isPlatformAddressValid(address)
         }
     }

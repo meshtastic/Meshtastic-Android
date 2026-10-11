@@ -1437,6 +1437,68 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
     }
 
+    // ─── The in-process node transport is left alone by every environmental listener ─────────
+
+    /**
+     * The node's own bearers react to Bluetooth going away; the transport between the app and its in-process node
+     * does not run over Bluetooth, so the BLE-disabled listener must not tear it down.
+     */
+    @Test
+    fun `Bluetooth disabled leaves the node transport running`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("p")
+        try {
+            bluetoothRepository.setBluetoothEnabled(false)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertFalse(createdTransports.first().closeCalled, "BLE-disabled must not close the node transport")
+            assertEquals(1, createdTransports.size)
+            assertEquals(ConnectionState.Connected, service.connectionState.value)
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    @Test
+    fun `network loss leaves the node transport running`() = runTest(testDispatcher) {
+        clock = 0L
+        val networkAvailability = MutableStateFlow<Boolean>(true)
+        val service = createConnectedService("p", networkAvailability = networkAvailability)
+        try {
+            networkAvailability.value = false
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertFalse(createdTransports.first().closeCalled, "network loss must not close the node transport")
+            assertEquals(1, createdTransports.size)
+            assertEquals(ConnectionState.Connected, service.connectionState.value)
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    @Test
+    fun `node transport liveness timeout does not restart it`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("p")
+        try {
+            clock = 65_000L
+            service.checkLiveness()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertFalse(createdTransports.first().closeCalled, "a quiet node is not a zombie session")
+            assertEquals(1, createdTransports.size)
+            assertEquals(ConnectionState.Connected, service.connectionState.value)
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
     // ─── connectionRequested gate: setDeviceAddress(null)/("n") deselect ────────────────────
 
     /**

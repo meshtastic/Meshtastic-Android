@@ -73,4 +73,10 @@ class BootReconnectDecisionTest {
             bootReconnectDecision("s/dev/ttyUSB0", hasBluetoothPermission = false),
         )
     }
+
+    @Test
+    fun `the in-process node reconnects regardless of the Bluetooth permission`() {
+        // Its BLE bearers degrade to off on their own; the node itself needs no permission to run.
+        assertEquals(BootReconnectDecision.START_SERVICE, bootReconnectDecision("p", hasBluetoothPermission = false))
+    }
 }

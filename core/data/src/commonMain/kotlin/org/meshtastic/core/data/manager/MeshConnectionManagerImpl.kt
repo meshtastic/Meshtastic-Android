@@ -796,10 +796,10 @@ class MeshConnectionManagerImpl(
     }
 
     /**
-     * True when the active transport is a TCP or USB serial connection, or the Demo Mode mock — i.e. one whose
-     * handshake reliably completes in roughly 1s when healthy and therefore benefits from aggressive silent-restart on
-     * stall. BLE is excluded because its GATT latency budget is high and variable enough that the long-and-retry
-     * stall-guard budgets remain the right trade-off.
+     * True when the active transport is a TCP or USB serial connection, the in-process node, or the Demo Mode mock —
+     * i.e. one whose handshake reliably completes in roughly 1s when healthy and therefore benefits from aggressive
+     * silent-restart on stall. BLE is excluded because its GATT latency budget is high and variable enough that the
+     * long-and-retry stall-guard budgets remain the right trade-off.
      */
     private fun isFastRecoveryTransport(): Boolean =
         currentDeviceType() in FAST_RECOVERY_TYPES || currentVirtualInterface() == InterfaceId.MOCK
@@ -872,7 +872,7 @@ class MeshConnectionManagerImpl(
     companion object {
         // Hoisted constant — used on every meaningful handshake packet via
         // isFastRecoveryTransport(); avoids allocating a fresh Set per packet.
-        private val FAST_RECOVERY_TYPES = setOf(DeviceType.TCP, DeviceType.USB)
+        private val FAST_RECOVERY_TYPES = setOf(DeviceType.TCP, DeviceType.USB, DeviceType.NODE)
 
         private const val UNKNOWN_TRANSPORT_LABEL = "unknown transport"
 

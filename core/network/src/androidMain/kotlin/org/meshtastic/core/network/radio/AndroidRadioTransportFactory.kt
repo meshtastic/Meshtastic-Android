@@ -45,6 +45,8 @@ class AndroidRadioTransportFactory(
     private val context: Context,
     private val buildConfigProvider: BuildConfigProvider,
     private val usbRepository: UsbRepository,
+    private val nodeBearers: NodeBearers,
+    private val nodeStatusRepository: NodeStatusRepositoryImpl,
     hiddenFeaturesUnlock: HiddenFeaturesUnlock,
     scanner: BleScanner,
     bluetoothRepository: BluetoothRepository,
@@ -52,7 +54,8 @@ class AndroidRadioTransportFactory(
     dispatchers: CoroutineDispatchers,
 ) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
 
-    override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
+    override val supportedDeviceTypes: List<DeviceType> =
+        listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB, DeviceType.NODE)
 
     /**
      * Demo Mode gate.
@@ -115,9 +118,14 @@ class AndroidRadioTransportFactory(
                     address = rest,
                 )
 
-            // The in-process node transport lands with the node-kmp dependency; until then the address is not
-            // admitted (isPlatformAddressValid), so this arm is unreachable.
-            InterfaceId.NODE -> error("node transport not wired yet")
+            InterfaceId.NODE ->
+                NodeRadioTransport(
+                    callback = service,
+                    scope = service.serviceScope,
+                    bearers = nodeBearers,
+                    statusRepository = nodeStatusRepository,
+                    isDebug = buildConfigProvider.isDebug,
+                )
 
             InterfaceId.NOP,
             null,
