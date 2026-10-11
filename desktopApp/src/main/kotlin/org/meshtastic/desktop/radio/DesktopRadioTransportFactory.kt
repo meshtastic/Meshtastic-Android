@@ -28,6 +28,9 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.SerialTransport
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
 import org.meshtastic.core.network.radio.MockRadioTransport
+import org.meshtastic.core.network.radio.NodeBearers
+import org.meshtastic.core.network.radio.NodeRadioTransport
+import org.meshtastic.core.network.radio.NodeStatusRepositoryImpl
 import org.meshtastic.core.network.radio.TcpRadioTransport
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
@@ -46,9 +49,12 @@ class DesktopRadioTransportFactory(
     bluetoothRepository: BluetoothRepository,
     connectionFactory: BleConnectionFactory,
     dispatchers: CoroutineDispatchers,
+    private val nodeBearers: NodeBearers,
+    private val nodeStatusRepository: NodeStatusRepositoryImpl,
 ) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
 
-    override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP, DeviceType.BLE, DeviceType.USB)
+    override val supportedDeviceTypes: List<DeviceType> =
+        listOf(DeviceType.TCP, DeviceType.BLE, DeviceType.USB, DeviceType.NODE)
 
     // Desktop has no unlock gesture, so Demo Mode is a debug-build feature: it admits the `m` addresses, including
     // the hidden showcase, and offers the demo entry in the picker.
@@ -81,6 +87,16 @@ class DesktopRadioTransportFactory(
                 callback = service,
                 scope = service.serviceScope,
                 dispatchers = dispatchers,
+            )
+        }
+
+        address.startsWith(InterfaceId.NODE.id) -> {
+            NodeRadioTransport(
+                callback = service,
+                scope = service.serviceScope,
+                bearers = nodeBearers,
+                statusRepository = nodeStatusRepository,
+                isDebug = DesktopBuildConfig.IS_DEBUG,
             )
         }
 

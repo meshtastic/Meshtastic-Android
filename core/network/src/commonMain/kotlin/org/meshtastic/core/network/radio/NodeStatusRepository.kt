@@ -49,23 +49,29 @@ interface NodeStatusRepository {
 /** Holds the live node the running [NodeRadioTransport] registers, and nothing while none runs. */
 @Single(binds = [NodeStatusRepository::class, NodeStatusRepositoryImpl::class])
 class NodeStatusRepositoryImpl : NodeStatusRepository {
-    private class Live(val node: EmbeddedNode, val factory: BearerFactory)
+    private class Live(val node: EmbeddedNode, val factory: BearerFactory) {
+        var mirror: Job? = null
+    }
 
     @Volatile private var live: Live? = null
     private val statusState = MutableStateFlow<NodeStatus?>(null)
 
     override val status: StateFlow<NodeStatus?> = statusState.asStateFlow()
 
-    /** The transport calls this once its node exists; the returned job mirrors the node's status until cancelled. */
-    internal fun attach(node: EmbeddedNode, factory: BearerFactory, scope: CoroutineScope): Job {
-        live = Live(node, factory)
-        return scope.launch { node.status.collect { statusState.value = it } }
+    /** The transport calls this once its node exists; the node's status is mirrored until [detach]. */
+    internal fun attach(node: EmbeddedNode, factory: BearerFactory, scope: CoroutineScope) {
+        val next = Live(node, factory)
+        live = next
+        // A value already in flight when detach runs must not land on an emptied repository.
+        next.mirror = scope.launch { node.status.collect { if (live === next) statusState.value = it } }
     }
 
     /** The transport calls this on close. A stale call for a node that was already replaced changes nothing. */
     internal fun detach(node: EmbeddedNode) {
-        if (live?.node === node) {
+        val current = live ?: return
+        if (current.node === node) {
             live = null
+            current.mirror?.cancel()
             statusState.value = null
         }
     }
