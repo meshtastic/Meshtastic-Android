@@ -241,6 +241,7 @@ private fun Bearer.label(): StringResource = when (this) {
     Bearer.VIDEO -> Res.string.node_bearer_video
 }
 
+@Composable
 private fun Bearer.icon(): ImageVector = when (this) {
     Bearer.UDP -> MeshtasticIcons.Udp
     Bearer.BLE_ADV -> MeshtasticIcons.BluetoothSearching
