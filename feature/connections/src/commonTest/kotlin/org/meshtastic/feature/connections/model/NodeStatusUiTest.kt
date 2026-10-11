@@ -52,7 +52,10 @@ class NodeStatusUiTest {
             BearerRowState.NeedsUsbPermission("CH341"),
             row(requirement = Requirement.NeedsUsbPermission("CH341")).state,
         )
-        assertEquals(BearerRowState.NeedsHardware("camera"), row(requirement = Requirement.NeedsHardware("camera")).state)
+        assertEquals(
+            BearerRowState.NeedsHardware("camera"),
+            row(requirement = Requirement.NeedsHardware("camera")).state,
+        )
         assertEquals(BearerRowState.Unsupported("no wifi"), row(requirement = Requirement.Unsupported("no wifi")).state)
     }
 

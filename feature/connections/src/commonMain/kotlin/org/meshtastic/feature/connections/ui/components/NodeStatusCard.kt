@@ -28,6 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -62,7 +64,15 @@ import org.meshtastic.core.resources.node_status_phase_stopped
 import org.meshtastic.core.resources.node_status_settings_reset
 import org.meshtastic.core.resources.node_status_title
 import org.meshtastic.core.ui.component.BasicListItem
+import org.meshtastic.core.ui.icon.Antenna
+import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.BluetoothSearching
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MqttConnected
+import org.meshtastic.core.ui.icon.QrCodeScanner
+import org.meshtastic.core.ui.icon.Speaker
+import org.meshtastic.core.ui.icon.Udp
+import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.rememberPermissionState
 import org.meshtastic.feature.connections.model.BearerRowState
@@ -72,8 +82,8 @@ import org.meshtastic.node.host.Bearer
 import org.meshtastic.node.host.NodePhase
 
 /**
- * This device as the node: its phase, identity and one row per bearer. Host bearers (Wi-Fi Aware, audio, video) carry
- * a switch; the config bearers follow the Network settings. A bearer waiting on a permission offers the grant.
+ * This device as the node: its phase, identity and one row per bearer. Host bearers (Wi-Fi Aware, audio, video) carry a
+ * switch; the config bearers follow the Network settings. A bearer waiting on a permission offers the grant.
  */
 @Composable
 fun NodeStatusCard(
@@ -153,11 +163,15 @@ private fun BearerRow(
         trailingContent =
         when {
             state is BearerRowState.NeedsPermission -> {
-                { GrantPermissionButton(permission = state.permission, onGranted = onRefreshRequirements) }
+                { GrantPermissionButton(permission = state.permission, onGrant = onRefreshRequirements) }
             }
 
             state is BearerRowState.NeedsUsbPermission -> {
-                { TextButton(onClick = onRequestUsbPermission) { Text(stringResource(Res.string.grant_permission)) } }
+                {
+                    TextButton(onClick = onRequestUsbPermission) {
+                        Text(stringResource(Res.string.grant_permission))
+                    }
+                }
             }
 
             row.switchable -> {
@@ -172,10 +186,11 @@ private fun BearerRow(
 
 /** Requests the permission the library named; once granted, the node re-reads its requirements. */
 @Composable
-private fun GrantPermissionButton(permission: String, onGranted: () -> Unit) {
+private fun GrantPermissionButton(permission: String, onGrant: () -> Unit) {
     val permissionState = rememberPermissionState(permission)
+    val currentOnGrant by rememberUpdatedState(onGrant)
     LaunchedEffect(permissionState.status) {
-        if (permissionState.status == PermissionStatus.GRANTED) onGranted()
+        if (permissionState.status == PermissionStatus.GRANTED) currentOnGrant()
     }
     TextButton(
         onClick = {

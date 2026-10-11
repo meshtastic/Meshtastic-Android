@@ -103,16 +103,25 @@ internal fun bearerRow(
     state =
     when (requirement) {
         is Requirement.NeedsPermission -> BearerRowState.NeedsPermission(requirement.permission)
+
         is Requirement.NeedsUsbPermission -> BearerRowState.NeedsUsbPermission(requirement.device)
+
         is Requirement.NeedsHardware -> BearerRowState.NeedsHardware(requirement.what)
+
         is Requirement.Unsupported -> BearerRowState.Unsupported(requirement.reason)
+
         Requirement.Ready ->
             when {
                 !enabled -> BearerRowState.Off
+
                 availability is TransportAvailability.Active -> BearerRowState.Active
-                availability is TransportAvailability.Unavailable -> BearerRowState.Unavailable(availability.reason)
+
+                availability is TransportAvailability.Unavailable ->
+                    BearerRowState.Unavailable(availability.reason)
+
                 availability is TransportAvailability.NeedsPermission ->
                     BearerRowState.NeedsPermission(availability.permission)
+
                 else -> BearerRowState.Ready
             }
     },
@@ -122,5 +131,6 @@ internal fun bearerRow(
 )
 
 private const val NODE_ID_DIGITS = 8
+private const val HEX = 16
 
-private fun nodeId(nodeNum: Long): String = "!" + nodeNum.toString(16).padStart(NODE_ID_DIGITS, '0')
+private fun nodeId(nodeNum: Long): String = "!" + nodeNum.toString(HEX).padStart(NODE_ID_DIGITS, '0')
