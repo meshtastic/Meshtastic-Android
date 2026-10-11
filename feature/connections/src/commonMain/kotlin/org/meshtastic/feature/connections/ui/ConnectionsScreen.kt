@@ -154,6 +154,7 @@ import org.meshtastic.core.ui.util.shouldShowWifiUnavailableBanner
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.core.ui.viewmodel.ConnectionsViewModel
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
+import org.meshtastic.feature.connections.NodeStatusViewModel
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
@@ -162,6 +163,7 @@ import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedText
 import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.EventFirmwareCard
 import org.meshtastic.feature.connections.ui.components.LiveUpdateSection
+import org.meshtastic.feature.connections.ui.components.NodeStatusCard
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.connections.ui.components.TransportUnsupportedCard
 import org.meshtastic.feature.connections.ui.components.loraSummary
@@ -262,6 +264,7 @@ internal fun ConfigurationWarningCards(
 fun ConnectionsScreen(
     connectionsViewModel: ConnectionsViewModel = koinViewModel(),
     scanModel: ScannerViewModel = koinViewModel(),
+    nodeStatusViewModel: NodeStatusViewModel = koinViewModel(),
     onClickNodeChip: (Int) -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
@@ -269,6 +272,7 @@ fun ConnectionsScreen(
 ) {
     val connectionProgress by scanModel.connectionProgressText.collectAsStateWithLifecycle()
     val transportStatus by scanModel.transportStatus.collectAsStateWithLifecycle()
+    val nodeStatus by nodeStatusViewModel.status.collectAsStateWithLifecycle()
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
@@ -659,6 +663,18 @@ fun ConnectionsScreen(
             )
 
             LiveUpdateSection(connected = uiState == ConnectionUiState.CONNECTED_WITH_NODE)
+
+            // The node card exists only while this device runs as the node; the connection card above it
+            // still speaks for the mesh node the app talks to, which is the same node.
+            nodeStatus?.let { status ->
+                Spacer(modifier = Modifier.height(8.dp))
+                NodeStatusCard(
+                    status = status,
+                    onSetHostBearer = nodeStatusViewModel::setHostBearer,
+                    onRefreshRequirements = nodeStatusViewModel::refreshRequirements,
+                    onRequestUsbPermission = nodeStatusViewModel::requestUsbPermission,
+                )
+            }
 
             // Transport selector sits between the connection card and device list; it controls only the
             // visible discovery pane, not the globally selected/connected device shown above.
