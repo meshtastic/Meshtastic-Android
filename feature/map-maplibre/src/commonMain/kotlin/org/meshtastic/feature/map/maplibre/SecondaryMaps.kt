@@ -105,7 +105,7 @@ fun MapLibreInlineMap(
     val basemaps = rememberBasemapSelection(customBasemaps()) ?: return
     val target = GeoPosition(longitude = node.longitude, latitude = node.latitude)
     val mapState =
-        rememberSecondaryMapState(basemaps, CameraPosition(target = target, zoom = INLINE_ZOOM)) {
+        rememberSecondaryMapState(basemaps, CameraPosition(center = target, zoom = INLINE_ZOOM)) {
             val source = rememberFeatureSource(node) { nodesToFeatureCollection(listOf(node)) }
 
             // The node-detail sheet is where a degraded position matters most — it is the screen a user opens to ask
@@ -117,8 +117,8 @@ fun MapLibreInlineMap(
     // Follows the node as fresh positions arrive, as the Google mini-map does. Guarded on the current target so the
     // first composition does not animate to where the camera already is.
     LaunchedEffect(target) {
-        if (mapState.cameraPosition.target != target) {
-            mapState.animateCamera(CameraUpdate(target = target), CameraAnimation.Ease())
+        if (mapState.cameraPosition.center != target) {
+            mapState.animateCamera(CameraUpdate(center = target), CameraAnimation.Ease.Standard)
         }
     }
 
@@ -212,7 +212,7 @@ fun MapLibreDiscoveryMap(
     val located = remember(nodes) { nodes.filter { it.latitude != 0.0 || it.longitude != 0.0 } }
 
     val mapState =
-        rememberSecondaryMapState(basemaps, CameraPosition(target = scanner, zoom = DETAIL_ZOOM)) {
+        rememberSecondaryMapState(basemaps, CameraPosition(center = scanner, zoom = DETAIL_ZOOM)) {
             DiscoveryTopologyLayer(scanner = scanner, nodes = located)
             DiscoveredNodeLayers(nodes = located, onNodeClick = { selectedNode = located.getOrNull(it) })
             ScannerLayer(scanner = scanner, label = stringResource(Res.string.you))
@@ -401,7 +401,7 @@ private fun ScannerLayer(scanner: GeoPosition, label: String) {
  * `isDragRotateTiltEnabled = false` had bundled rotation in with tilt, so a mouse drag could not rotate these maps
  * either despite the intent above. It can now.
  */
-internal val SecondaryMapInteractions = MapInteractions { camera { tilt { enabled = false } } }
+internal val SecondaryMapInteractions = MapInteractions { camera { pitch { enabled = false } } }
 
 /**
  * Gestures off entirely, for the mini-map embedded in the node detail sheet.
@@ -422,7 +422,7 @@ internal val InlineMapUiOptions = MapUiOptions {
             pan { enabled = false }
             zoom { enabled = false }
             rotate { enabled = false }
-            tilt { enabled = false }
+            pitch { enabled = false }
         }
         scroll { enabled = false }
         doubleTap { enabled = false }

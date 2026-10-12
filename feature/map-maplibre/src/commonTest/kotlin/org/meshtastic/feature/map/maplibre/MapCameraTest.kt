@@ -23,14 +23,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 class MapCameraTest {
-    private val fit = CameraPosition(target = Position(longitude = -122.0, latitude = 45.0), zoom = FRAME_MAX_ZOOM)
+    private val fit = CameraPosition(center = Position(longitude = -122.0, latitude = 45.0), zoom = FRAME_MAX_ZOOM)
 
     @Test
     fun `a fit tighter than the framing ceiling is zoomed out to it`() {
         val tight = fit.copy(zoom = FRAME_MAX_ZOOM + 4)
         val capped = tight.cappedTo(FRAME_MAX_ZOOM)
         assertEquals(FRAME_MAX_ZOOM, capped.zoom)
-        assertEquals(tight.target, capped.target)
+        assertEquals(tight.center, capped.center)
     }
 
     @Test

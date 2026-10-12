@@ -341,9 +341,9 @@ private fun SitePlannerSlot(
     planner(
         SitePlannerSession(
             nodeNum = nodeNum,
-            mapCenter = { mapState.cameraPosition.target },
+            mapCenter = { mapState.cameraPosition.center },
             moveTo = { target ->
-                scope.launch { mapState.animateCamera(CameraUpdate(target = target), CameraAnimation.Ease()) }
+                scope.launch { mapState.animateCamera(CameraUpdate(center = target), CameraAnimation.Ease.Standard) }
             },
             onDismiss = onDismiss,
         ),
@@ -390,7 +390,7 @@ private fun BoxScope.MapToolbar(
             if (location.following) {
                 location.onToggleBearingLock()
             } else {
-                scope.launch { mapState.animateCamera(CameraUpdate(bearing = 0.0), CameraAnimation.Ease()) }
+                scope.launch { mapState.animateCamera(CameraUpdate(bearing = 0.0), CameraAnimation.Ease.Standard) }
             }
         },
         filterDropdownContent = {
@@ -434,7 +434,7 @@ private class LocationControls(
     val onToggleBearingLock: () -> Unit,
 ) {
     val bearingUpdate: BearingUpdate
-        get() = if (followingBearing) BearingUpdate.TRACK_HEADING else BearingUpdate.IGNORE
+        get() = if (followingBearing) BearingUpdate.TrackHeading else BearingUpdate.Ignore
 }
 
 /**

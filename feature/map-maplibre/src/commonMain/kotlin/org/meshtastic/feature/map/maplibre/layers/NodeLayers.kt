@@ -55,8 +55,8 @@ import org.meshtastic.feature.map.maplibre.unclusteredNodes
 // GeoJsonSource.NO_EXPANSION_ZOOM says the same thing, but its companion is private. A cluster that cannot be
 // expanded answers with a sentinel: 0 on Android and desktop, -1 on iOS.
 private const val NO_EXPANSION_ZOOM = 0.0
-private const val CLUSTER_LEAF_LIMIT = 100L
-private const val CLUSTER_LEAF_OFFSET = 0L
+private const val CLUSTER_LEAF_LIMIT = 100
+private const val CLUSTER_LEAF_OFFSET = 0
 private const val CLUSTER_RADIUS = 50
 
 /**
@@ -145,12 +145,12 @@ fun NodeLayers(
             nodes,
             myNodeNum,
             options =
-            GeoJsonOptions(
-                cluster = true,
-                clusterRadius = CLUSTER_RADIUS,
-                clusterMaxZoom = CLUSTER_MAX_ZOOM,
-                clusterMinPoints = CLUSTER_MIN_POINTS,
-            ),
+            GeoJsonOptions {
+                cluster = true
+                clusterRadius = CLUSTER_RADIUS
+                clusterMaxZoom = CLUSTER_MAX_ZOOM
+                clusterMinPoints = CLUSTER_MIN_POINTS
+            },
         ) {
             nodesToFeatureCollection(nodes, myNodeNum)
         }
@@ -184,13 +184,13 @@ fun NodeLayers(
                             val handle = mapState.style.sources[nodeSource] ?: return@launch
                             // A cluster that can still be broken apart is worth zooming into. One that cannot is
                             // nodes sitting on the same spot, so zooming would do nothing — list them instead.
-                            val expansionZoom = handle.getClusterExpansionZoom(clusterFeature)
+                            // Null is a query that lost a race with a style change; the handle is stale, so stop.
+                            val expansionZoom = handle.getClusterExpansionZoom(clusterFeature) ?: return@launch
                             if (expansionZoom <= NO_EXPANSION_ZOOM) {
-                                onClusterMembers(
-                                    handle
-                                        .getClusterLeaves(clusterFeature, CLUSTER_LEAF_LIMIT, CLUSTER_LEAF_OFFSET)
-                                        .toClusterMembers(),
-                                )
+                                val leaves =
+                                    handle.getClusterLeaves(clusterFeature, CLUSTER_LEAF_LIMIT, CLUSTER_LEAF_OFFSET)
+                                        ?: return@launch
+                                onClusterMembers(leaves.toClusterMembers())
                             } else {
                                 onClusterZoom(centre, expansionZoom)
                             }

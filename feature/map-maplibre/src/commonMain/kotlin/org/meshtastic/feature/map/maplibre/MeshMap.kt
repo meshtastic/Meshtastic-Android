@@ -131,8 +131,8 @@ fun rememberMeshMapState(
      * no stale dot behind — and matches the Google flavor, which shows the dot only while tracking.
      */
     followLocation: Boolean = false,
-    /** How a location update should affect camera bearing. [BearingUpdate.IGNORE] follows position only. */
-    bearingUpdate: BearingUpdate = BearingUpdate.IGNORE,
+    /** How a location update should affect camera bearing. [BearingUpdate.Ignore] follows position only. */
+    bearingUpdate: BearingUpdate = BearingUpdate.Ignore,
     /**
      * Whether to frame the mesh once positions arrive. False when the caller has restored a remembered camera, so the
      * user's own view is not yanked away from them.
@@ -245,7 +245,10 @@ fun MeshMap(
         state = mapState,
         // Honour what the source can actually serve, as the OSMdroid map did.
         cameraConstraints =
-        CameraConstraints(minZoom = zoomRange.start.toDouble(), maxZoom = zoomRange.endInclusive.toDouble()),
+        CameraConstraints {
+            minZoom = zoomRange.start.toDouble()
+            maxZoom = zoomRange.endInclusive.toDouble()
+        },
         interactions =
         MapInteractions {
             callbacks {
@@ -299,8 +302,8 @@ private fun MeshMapNodeLayers(
                 // A cluster that cannot report an expansion zoom answers with a sentinel (0 on
                 // Android and desktop, -1 on iOS), so clamp — never zoom out on a tap.
                 mapState.animateCamera(
-                    CameraUpdate(target = centre, zoom = maxOf(expansionZoom, current.zoom)),
-                    CameraAnimation.Ease(),
+                    CameraUpdate(center = centre, zoom = maxOf(expansionZoom, current.zoom)),
+                    CameraAnimation.Ease.Standard,
                 )
             }
         },
@@ -351,7 +354,7 @@ private fun FollowUserLocation(
     LocationTrackingEffect(
         locationState = locationState,
         enabled = followLocation,
-        trackBearing = bearingUpdate != BearingUpdate.IGNORE,
+        trackBearing = bearingUpdate != BearingUpdate.Ignore,
     ) {
         updateCamera(mapState = mapState, updateBearing = bearingUpdate)
     }

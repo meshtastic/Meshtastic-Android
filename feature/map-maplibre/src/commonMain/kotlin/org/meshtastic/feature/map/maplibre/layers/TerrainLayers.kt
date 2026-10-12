@@ -120,10 +120,12 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
     val globalSource =
         rememberRasterDemTileSource(
             tiles = listOf(repository.tileUrlTemplate(TerrainSource.GLOBAL)),
-            options =
-            TileSetOptions(minZoom = 0, maxZoom = globalMaxZoom, attributionHtml = MAPTERHORN_ATTRIBUTION_HTML),
             encoding = RasterDemEncoding.Terrarium,
-        )
+        ) {
+            minZoom = 0
+            maxZoom = globalMaxZoom
+            attributionHtml = MAPTERHORN_ATTRIBUTION_HTML
+        }
 
     if (region.hasRegionalDetail) {
         HillshadeLayer(
@@ -139,14 +141,12 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
         val regionalSource =
             rememberRasterDemTileSource(
                 tiles = listOf(repository.tileUrlTemplate(TerrainSource.REGIONAL)),
-                options =
-                TileSetOptions(
-                    minZoom = MapterhornEndpoints.REGIONAL_MIN_ZOOM,
-                    maxZoom = regionalMaxZoom,
-                    attributionHtml = MAPTERHORN_ATTRIBUTION_HTML,
-                ),
                 encoding = RasterDemEncoding.Terrarium,
-            )
+            ) {
+                minZoom = MapterhornEndpoints.REGIONAL_MIN_ZOOM
+                maxZoom = regionalMaxZoom
+                attributionHtml = MAPTERHORN_ATTRIBUTION_HTML
+            }
         HillshadeLayer(
             id = "offline-terrain-hillshade-regional",
             source = regionalSource,
