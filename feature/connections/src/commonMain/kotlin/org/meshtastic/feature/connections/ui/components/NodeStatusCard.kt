@@ -82,13 +82,13 @@ import org.meshtastic.node.host.Bearer
 import org.meshtastic.node.host.NodePhase
 
 /**
- * This device as the node: its phase, identity and one row per bearer. Host bearers (Wi-Fi Aware, audio, video) carry a
- * switch; the config bearers follow the Network settings. A bearer waiting on a permission offers the grant.
+ * This device as the node: its phase, identity and one row per bearer. Every bearer but LoRa carries a switch; one
+ * driven by the Network settings writes them, so both places agree. A bearer waiting on a permission offers the grant.
  */
 @Composable
 fun NodeStatusCard(
     status: NodeStatusUi,
-    onSetHostBearer: (Bearer, Boolean) -> Unit,
+    onSetBearer: (Bearer, Boolean) -> Unit,
     onRefreshRequirements: () -> Unit,
     onRequestUsbPermission: () -> Unit,
     modifier: Modifier = Modifier,
@@ -99,7 +99,7 @@ fun NodeStatusCard(
             status.bearers.forEach { row ->
                 BearerRow(
                     row = row,
-                    onSetHostBearer = onSetHostBearer,
+                    onSetBearer = onSetBearer,
                     onRefreshRequirements = onRefreshRequirements,
                     onRequestUsbPermission = onRequestUsbPermission,
                 )
@@ -151,7 +151,7 @@ private fun NodeStatusHeader(status: NodeStatusUi, modifier: Modifier = Modifier
 @Composable
 private fun BearerRow(
     row: BearerRowUi,
-    onSetHostBearer: (Bearer, Boolean) -> Unit,
+    onSetBearer: (Bearer, Boolean) -> Unit,
     onRefreshRequirements: () -> Unit,
     onRequestUsbPermission: () -> Unit,
 ) {
@@ -180,7 +180,7 @@ private fun BearerRow(
 
             else -> null
         },
-        onClick = if (row.switchable) ({ onSetHostBearer(row.bearer, !row.enabled) }) else null,
+        onClick = if (row.switchable) ({ onSetBearer(row.bearer, !row.enabled) }) else null,
     )
 }
 

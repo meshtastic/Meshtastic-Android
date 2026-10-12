@@ -31,7 +31,7 @@ import kotlin.concurrent.Volatile
 
 /**
  * The in-process node as the UI sees it: null while no node transport runs, otherwise the facade's status model. The
- * host bearers are the switches a user flips on the node card; the config bearers go through the Network screen.
+ * host bearers are switched here; a config bearer's card switch writes its config, as the Network screen does.
  */
 interface NodeStatusRepository {
     val status: StateFlow<NodeStatus?>

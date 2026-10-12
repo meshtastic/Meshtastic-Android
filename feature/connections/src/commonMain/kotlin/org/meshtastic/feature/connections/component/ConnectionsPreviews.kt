@@ -340,9 +340,9 @@ fun NodeStatusCardPreview() {
                 settingsReset = false,
                 bearers =
                 listOf(
-                    BearerRowUi(Bearer.UDP, true, false, BearerRowState.Active, PREVIEW_RX, PREVIEW_TX, 0),
-                    BearerRowUi(Bearer.BLE_ADV, true, false, BearerRowState.Ready, 0, 0, 0),
-                    BearerRowUi(Bearer.GATT, true, false, BearerRowState.Active, 2, 1, 0),
+                    BearerRowUi(Bearer.UDP, true, true, BearerRowState.Active, PREVIEW_RX, PREVIEW_TX, 0),
+                    BearerRowUi(Bearer.BLE_ADV, true, true, BearerRowState.Ready, 0, 0, 0),
+                    BearerRowUi(Bearer.GATT, true, true, BearerRowState.Active, 2, 1, 0),
                     BearerRowUi(Bearer.LORA, false, false, BearerRowState.NeedsUsbPermission("CH341"), 0, 0, 0),
                     BearerRowUi(Bearer.WIFI_AWARE, false, true, BearerRowState.Off, 0, 0, 0),
                     BearerRowUi(
@@ -357,7 +357,7 @@ fun NodeStatusCardPreview() {
                     BearerRowUi(Bearer.VIDEO, false, true, BearerRowState.Off, 0, 0, 0),
                 ),
             ),
-            onSetHostBearer = { _, _ -> },
+            onSetBearer = { _, _ -> },
             onRefreshRequirements = {},
             onRequestUsbPermission = {},
         )
