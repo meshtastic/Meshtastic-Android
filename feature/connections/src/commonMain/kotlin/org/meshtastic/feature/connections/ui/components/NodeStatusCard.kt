@@ -51,6 +51,7 @@ import org.meshtastic.core.resources.node_bearer_needs_permission
 import org.meshtastic.core.resources.node_bearer_needs_usb
 import org.meshtastic.core.resources.node_bearer_off
 import org.meshtastic.core.resources.node_bearer_ready
+import org.meshtastic.core.resources.node_bearer_region_unset
 import org.meshtastic.core.resources.node_bearer_udp
 import org.meshtastic.core.resources.node_bearer_unsupported
 import org.meshtastic.core.resources.node_bearer_video
@@ -212,6 +213,7 @@ private fun BearerRowUi.supportingText(): String {
     val stateText =
         when (val s = state) {
             BearerRowState.Off -> stringResource(Res.string.node_bearer_off)
+            BearerRowState.RegionUnset -> stringResource(Res.string.node_bearer_region_unset)
             BearerRowState.Ready -> stringResource(Res.string.node_bearer_ready)
             BearerRowState.Active -> stringResource(Res.string.node_bearer_active)
             is BearerRowState.Unavailable -> s.reason

@@ -48,6 +48,9 @@ data class BearerRowUi(
 sealed interface BearerRowState {
     data object Off : BearerRowState
 
+    /** LoRa with its device ready and no region set: the region is what turns it on. */
+    data object RegionUnset : BearerRowState
+
     data object Ready : BearerRowState
 
     data object Active : BearerRowState
@@ -72,18 +75,20 @@ fun NodeStatus.toUi(): NodeStatusUi = NodeStatusUi(
     failure = failure,
     settingsReset = settingsReset,
     bearers =
-    Bearer.entries.filter { it.onCard }.mapNotNull { bearer ->
-        val status = bearers[bearer] ?: return@mapNotNull null
-        bearerRow(
-            bearer = bearer,
-            enabled = status.enabled,
-            availability = status.availability,
-            requirement = status.requirement,
-            received = status.counters.rx,
-            sent = status.counters.tx,
-            relayed = status.counters.relayed,
-        )
-    },
+    Bearer.entries
+        .filter { it.onCard }
+        .mapNotNull { bearer ->
+            val status = bearers[bearer] ?: return@mapNotNull null
+            bearerRow(
+                bearer = bearer,
+                enabled = status.enabled,
+                availability = status.availability,
+                requirement = status.requirement,
+                received = status.counters.rx,
+                sent = status.counters.tx,
+                relayed = status.counters.relayed,
+            )
+        },
 )
 
 /** A requirement outranks the availability: the user can act on it, while availability only reports. */
@@ -112,6 +117,8 @@ internal fun bearerRow(
 
         Requirement.Ready ->
             when {
+                !enabled && bearer == Bearer.LORA -> BearerRowState.RegionUnset
+
                 !enabled -> BearerRowState.Off
 
                 availability is TransportAvailability.Active -> BearerRowState.Active
