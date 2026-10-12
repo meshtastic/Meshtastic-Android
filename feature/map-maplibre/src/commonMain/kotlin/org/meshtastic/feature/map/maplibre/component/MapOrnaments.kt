@@ -85,7 +85,7 @@ internal val MeshMapOrnaments: MaplibreOverlay = MaplibreOverlay {
             .padding(MaplibreOverlay.Spacing),
     ) {
         DisappearingScaleBar(
-            metersPerDp = { mapState.viewport?.metersPerDpAtTarget ?: 0.0 },
+            metersPerDp = { mapState.viewport?.metersPerDpAtCenter ?: 0.0 },
             zoom = { mapState.cameraPosition.zoom },
             modifier = Modifier.align(Alignment.TopStart),
         )
@@ -114,7 +114,7 @@ internal val CollapsedAttributionOrnaments: MaplibreOverlay = MaplibreOverlay {
             .padding(MaplibreOverlay.Spacing),
     ) {
         DisappearingScaleBar(
-            metersPerDp = { mapState.viewport?.metersPerDpAtTarget ?: 0.0 },
+            metersPerDp = { mapState.viewport?.metersPerDpAtCenter ?: 0.0 },
             zoom = { mapState.cameraPosition.zoom },
             modifier = Modifier.align(Alignment.TopStart),
         )
@@ -150,7 +150,7 @@ private fun CollapsedAttributionButton(modifier: Modifier = Modifier) {
     // As the library's button: a gesture closes the credit, so it does not sit over a short map after a pan. Narrowed
     // to gestures, or the programmatic moves our own zoom controls make would fold it away mid-animation.
     LaunchedEffect(mapState) {
-        snapshotFlow { mapState.isCameraMoving && mapState.cameraMoveReason == CameraMoveReason.GESTURE }
+        snapshotFlow { mapState.isCameraMoving && mapState.cameraMoveReason == CameraMoveReason.Gesture }
             .filter { it }
             .collect { expanded = false }
     }

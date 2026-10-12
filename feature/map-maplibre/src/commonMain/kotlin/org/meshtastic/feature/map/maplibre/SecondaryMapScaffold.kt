@@ -109,7 +109,10 @@ internal fun SecondaryMapSurface(
         state = mapState,
         // Honour what the source can actually serve, as the OSMdroid map did.
         cameraConstraints =
-        CameraConstraints(minZoom = zoomRange.start.toDouble(), maxZoom = zoomRange.endInclusive.toDouble()),
+        CameraConstraints {
+            minZoom = zoomRange.start.toDouble()
+            maxZoom = zoomRange.endInclusive.toDouble()
+        },
         interactions = interactions,
         uiOptions = uiOptions,
         // The library's default, spelled out so the collapsed branch stays a narrowing of it.

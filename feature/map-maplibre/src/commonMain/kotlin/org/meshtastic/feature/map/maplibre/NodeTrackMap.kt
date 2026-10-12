@@ -223,7 +223,7 @@ private fun pointFeatures(points: List<TrackPoint>) = FeatureCollection(
 @Composable
 private fun TrackLineLayer(points: List<TrackPoint>, color: Color) {
     val source =
-        rememberFeatureSource(points, options = GeoJsonOptions(lineMetrics = true)) {
+        rememberFeatureSource(points, options = GeoJsonOptions { lineMetrics = true }) {
             FeatureCollection(
                 listOf(
                     Feature<LineString, JsonObject?>(geometry = LineString(points.map { it.first }), properties = null),

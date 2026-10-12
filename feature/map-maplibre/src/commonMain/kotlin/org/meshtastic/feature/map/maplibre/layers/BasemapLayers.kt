@@ -31,8 +31,14 @@ import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.tiles.DemEncoding
 import org.meshtastic.feature.map.tiles.RasterTileSpec
 
-internal fun RasterTileSpec.toTileSetOptions(): TileSetOptions =
-    TileSetOptions(minZoom = minZoom, maxZoom = maxZoom, attributionHtml = attributionHtml)
+internal fun RasterTileSpec.toTileSetOptions(): TileSetOptions {
+    val spec = this
+    return TileSetOptions {
+        minZoom = spec.minZoom
+        maxZoom = spec.maxZoom
+        attributionHtml = spec.attributionHtml
+    }
+}
 
 /**
  * Renders a raster basemap.
@@ -42,7 +48,7 @@ internal fun RasterTileSpec.toTileSetOptions(): TileSetOptions =
  */
 @Composable
 internal fun RasterBasemapLayer(basemap: Basemap.Raster) {
-    val source = rememberRasterTileSource(tiles = basemap.spec.tiles, options = basemap.spec.toTileSetOptions())
+    val source = rememberRasterTileSource(tiles = basemap.spec.tiles, from = basemap.spec.toTileSetOptions())
     RasterLayer(id = "basemap-${basemap.id}", source = source)
 }
 
@@ -61,7 +67,7 @@ internal fun MapOverlayLayers(overlays: List<MapOverlay>, opacity: Map<String, F
 
             is MapOverlay.Raster -> {
                 val source =
-                    rememberRasterTileSource(tiles = overlay.spec.tiles, options = overlay.spec.toTileSetOptions())
+                    rememberRasterTileSource(tiles = overlay.spec.tiles, from = overlay.spec.toTileSetOptions())
                 RasterLayer(id = "overlay-${overlay.id}", source = source, opacity = const(layerOpacity))
             }
         }
@@ -80,7 +86,7 @@ private fun HillshadeOverlayLayer(overlay: MapOverlay.Hillshade, opacity: Float)
     val source =
         rememberRasterDemTileSource(
             tiles = overlay.spec.tiles,
-            options = overlay.spec.toTileSetOptions(),
+            from = overlay.spec.toTileSetOptions(),
             // Not the default. MapLibre assumes Mapbox Terrain-RGB; every keyless public DEM is
             // Terrarium, and the mismatch is silent — shading looks plausible but is wrong.
             encoding =
