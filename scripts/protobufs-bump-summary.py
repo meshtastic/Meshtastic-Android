@@ -14,6 +14,7 @@ import re
 import subprocess
 import sys
 
+UPSTREAM = "meshtastic/protobufs"
 SNAPSHOT = re.compile(r"^\d+\.\d+\.\d+\.\d+-g([0-9a-f]+)-SNAPSHOT$")
 RELEASE = re.compile(r"^\d+\.\d+\.\d+$")
 STRING = re.compile(r'<string name="([^"]+)"[^>]*>(.*?)</string>', re.S)
@@ -48,10 +49,10 @@ def merged_prs(repo, old, new):
         m = re.match(r"Merge pull request #(\d+) from \S+", subject)
         if m:
             title = body.strip().splitlines()[0] if body.strip() else ""
-            out.append(f"- #{m.group(1)} {title}".rstrip())
+            out.append(f"- {UPSTREAM}#{m.group(1)} {title}".rstrip())
             continue
         m = re.search(r"\(#(\d+)\)$", subject)
-        out.append(f"- #{m.group(1)} {subject[: m.start()].strip()}" if m else f"- {subject}")
+        out.append(f"- {UPSTREAM}#{m.group(1)} {subject[: m.start()].strip()}" if m else f"- {subject}")
     return out
 
 
@@ -96,7 +97,7 @@ def main():
     old, new = ref(args.old), ref(args.new)
 
     out = ["<!-- protobufs-bump-summary -->", f"## protobufs `{args.old}` → `{args.new}`", ""]
-    out.append(f"Compare: https://github.com/meshtastic/protobufs/compare/{old}...{new}")
+    out.append(f"Compare: https://github.com/{UPSTREAM}/compare/{old}...{new}")
     out.append("")
     prs = merged_prs(args.protobufs, old, new)
     out.append("### Merged upstream")
