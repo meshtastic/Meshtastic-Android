@@ -38,7 +38,7 @@ Bearers that firmware also has are switched under **Settings → Network configu
 | **BLE Broadcast** | Carries packets in Bluetooth advertisements. Works between phones and desktops, and with radios running firmware that carries it. |
 | **BLE GATT Peer** | Connects to nearby nodes over Bluetooth as a mesh peer, in both directions. |
 
-**LoRa** follows the LoRa region, as on a radio, and has no switch on the card: set a region under **Settings → LoRa configuration** with a supported LoRa stick plugged in and the node is on the air. With no region set, the stick is idle in both directions. Transmit power is held low because the stick is powered by the device.
+**LoRa** follows the LoRa region, as on a radio, and has no switch on the card: set a region under **Settings → LoRa configuration** with a supported LoRa stick plugged in and the node is on the air. With no region set, the stick is idle in both directions, and the card's LoRa row reads **Region unset** once a stick is ready. Transmit power is held low because the stick is powered by the device.
 
 Bearers that only this device has are switched only on the **This device** card:
 

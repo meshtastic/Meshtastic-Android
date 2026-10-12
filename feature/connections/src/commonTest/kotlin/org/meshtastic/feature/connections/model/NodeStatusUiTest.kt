@@ -102,6 +102,23 @@ class NodeStatusUiTest {
     }
 
     @Test
+    fun `LoRa with a ready device and no region reads region unset`() {
+        assertEquals(BearerRowState.RegionUnset, row(Bearer.LORA, enabled = false, availability = null).state)
+    }
+
+    @Test
+    fun `LoRa with no device asks for one whatever the region`() {
+        assertEquals(
+            BearerRowState.NeedsHardware("CH341A stick"),
+            row(Bearer.LORA, enabled = false, requirement = Requirement.NeedsHardware("CH341A stick")).state,
+        )
+        assertEquals(
+            BearerRowState.NeedsUsbPermission("CH341"),
+            row(Bearer.LORA, enabled = false, requirement = Requirement.NeedsUsbPermission("CH341")).state,
+        )
+    }
+
+    @Test
     fun `an enabled bearer reports what the transport sees`() {
         assertEquals(BearerRowState.Active, row(availability = TransportAvailability.Active).state)
         assertEquals(BearerRowState.Ready, row(availability = TransportAvailability.Ready).state)

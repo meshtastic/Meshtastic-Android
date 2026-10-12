@@ -1298,6 +1298,7 @@
     <string name="node_bearer_needs_usb">Needs USB access to %1$s</string>
     <string name="node_bearer_off">Off</string>
     <string name="node_bearer_ready">Ready</string>
+    <string name="node_bearer_region_unset">Region unset</string>
     <string name="node_bearer_udp">UDP broadcast</string>
     <string name="node_bearer_unsupported">Unavailable: %1$s</string>
     <string name="node_bearer_video">Video</string>

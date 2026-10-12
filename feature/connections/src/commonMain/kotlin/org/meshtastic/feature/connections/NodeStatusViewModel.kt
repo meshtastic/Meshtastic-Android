@@ -52,8 +52,8 @@ class NodeStatusViewModel(
     private var lastWrite: Pair<Config.NetworkConfig, Config.NetworkConfig>? = null
 
     /**
-     * A host bearer is persisted by the node. A config bearer flips its `enabled_protocols` bit through the same
-     * local `set_config` the Network screen sends, so the screen and the card show one state.
+     * A host bearer is persisted by the node. A config bearer flips its `enabled_protocols` bit through the same local
+     * `set_config` the Network screen sends, so the screen and the card show one state.
      */
     fun setBearer(bearer: Bearer, on: Boolean) {
         safeLaunch(tag = "setBearer") {
@@ -63,7 +63,8 @@ class NodeStatusViewModel(
             }
             val flag = bearer.protocolFlag ?: return@safeLaunch
             networkWrites.withLock {
-                val cached = radioConfigRepository.localConfigFlow.first().network ?: Config.NetworkConfig.Builder().build()
+                val cached =
+                    radioConfigRepository.localConfigFlow.first().network ?: Config.NetworkConfig.Builder().build()
                 // The cache is persisted after the send, so a second switch can read it before the first lands.
                 val base = lastWrite?.takeIf { (seen, _) -> seen == cached }?.second ?: cached
                 val next = base.withProtocol(flag, on)

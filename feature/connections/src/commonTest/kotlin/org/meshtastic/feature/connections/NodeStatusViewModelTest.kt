@@ -124,7 +124,10 @@ class NodeStatusViewModelTest {
         cacheNetwork(allFlags, ntpServer = "pool.example")
         viewModel().setBearer(Bearer.UDP, false)
         val network = radioController.localConfigs.single().network
-        assertEquals(ProtocolFlags.BLE_BROADCAST.value or ProtocolFlags.BLE_GATT_PEER.value, network?.enabled_protocols)
+        assertEquals(
+            ProtocolFlags.BLE_BROADCAST.value or ProtocolFlags.BLE_GATT_PEER.value,
+            network?.enabled_protocols,
+        )
         assertEquals("pool.example", network?.ntp_server)
         assertTrue(repository.hostBearerWrites.isEmpty())
     }

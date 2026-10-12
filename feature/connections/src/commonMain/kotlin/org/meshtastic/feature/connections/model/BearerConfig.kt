@@ -42,9 +42,8 @@ internal val Bearer.switchable: Boolean
     get() = !fromConfig || protocolFlag != null
 
 /** This network section with [flag] set or cleared and every other bit and field untouched. */
-internal fun Config.NetworkConfig.withProtocol(flag: ProtocolFlags, on: Boolean): Config.NetworkConfig =
-    newBuilder()
-        .also { wb ->
-            wb.enabled_protocols = if (on) enabled_protocols or flag.value else enabled_protocols and flag.value.inv()
-        }
-        .build()
+internal fun Config.NetworkConfig.withProtocol(flag: ProtocolFlags, on: Boolean): Config.NetworkConfig = newBuilder()
+    .also { wb ->
+        wb.enabled_protocols = if (on) enabled_protocols or flag.value else enabled_protocols and flag.value.inv()
+    }
+    .build()

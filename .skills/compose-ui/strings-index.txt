@@ -1256,6 +1256,7 @@ node_bearer_needs_permission
 node_bearer_needs_usb
 node_bearer_off
 node_bearer_ready
+node_bearer_region_unset
 node_bearer_udp
 node_bearer_unsupported
 node_bearer_video
