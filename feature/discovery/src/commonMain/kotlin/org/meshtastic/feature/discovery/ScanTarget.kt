@@ -22,10 +22,11 @@ import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 
 /**
- * One entry in the discovery scan queue. A [channel] of `null` is a public-preset target (the original scan behavior —
- * dwell on [preset] using the radio's existing primary channel). A non-null [channel] is a beacon-advertised custom
- * channel: during its dwell the engine tunes the radio's primary channel to that name+PSK (and [region]) so nodes on
- * that mesh are heard, then restores the original primary channel afterwards (Apple 014-mesh-beacons FR-005).
+ * One entry in the discovery scan queue. A [channel] of `null` is a public-preset target: dwell on [preset] on the
+ * default frequency slot with the primary channel on the default public channel, swapping a custom primary out for the
+ * scan. A non-null [channel] is a beacon-advertised custom channel: during its dwell the engine tunes the radio's
+ * primary channel to that name+PSK (and [region]) so nodes on that mesh are heard. Either way the original primary
+ * channel is restored afterwards (Apple 014-mesh-beacons FR-005).
  *
  * @param label Result label persisted with the dwell (e.g. `"LONG_FAST"` or `"LONG_FAST · PartyNet"`), so a custom
  *   channel's results never collide with the same preset's public results.

@@ -10,7 +10,7 @@ The `:feature:discovery` module implements **Local Mesh Discovery**: the app cyc
 
 - `DiscoveryScanEngine` — core scan engine. Cycles through a queue of `ScanTarget`s, dwells on each while collecting packets, and persists aggregated results via `DiscoveryDao`.
 - `DiscoveryScanState` — state machine for the scan lifecycle: `Idle → Preparing → Shifting → [Reconnecting] → Dwell → … → Analysis → Complete`, with `Cancelling`/`Restoring`/`Failed` side paths.
-- `ScanTarget` — one queue entry. `channel == null` is a public-preset target; a non-null channel is a beacon-advertised custom channel: the engine tunes the radio's primary channel to that name+PSK (and region) for the dwell, then restores it.
+- `ScanTarget` — one queue entry. `channel == null` is a public-preset target, scanned on the default frequency slot with the primary channel on the default public channel (a custom primary is swapped out for the scan); a non-null channel is a beacon-advertised custom channel: the engine tunes the radio's primary channel to that name+PSK (and region) for the dwell. The original primary channel and LoRa config are restored afterward.
 - `DiscoveryRankingEngine` (`scan/`) — ranks preset results by unique node count, neighbor diversity, non-duplicate packet count, and SNR.
 - `Check24GhzCapability` (`scan/`) — layered heuristic that determines whether the connected radio supports 2.4 GHz LoRa (SX1280), returning `Supported` / `Unsupported` / `Unknown`.
 
