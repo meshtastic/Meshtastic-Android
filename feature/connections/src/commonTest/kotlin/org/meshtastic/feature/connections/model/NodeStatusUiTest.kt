@@ -21,9 +21,12 @@ import org.meshtastic.node.host.NodePhase
 import org.meshtastic.node.host.NodeStatus
 import org.meshtastic.node.host.Requirement
 import org.meshtastic.node.transport.TransportAvailability
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.Config.NetworkConfig.ProtocolFlags
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class NodeStatusUiTest {
@@ -36,12 +39,46 @@ class NodeStatusUiTest {
     ) = bearerRow(bearer, enabled, availability, requirement, received = 1, sent = 2, relayed = 3)
 
     @Test
-    fun `only host bearers carry a switch`() {
-        assertFalse(row(Bearer.UDP).switchable)
-        assertFalse(row(Bearer.LORA).switchable)
+    fun `every bearer but LoRa and MQTT carries a switch`() {
+        assertTrue(row(Bearer.UDP).switchable)
+        assertTrue(row(Bearer.BLE_ADV).switchable)
+        assertTrue(row(Bearer.GATT).switchable)
         assertTrue(row(Bearer.WIFI_AWARE).switchable)
         assertTrue(row(Bearer.AUDIO).switchable)
         assertTrue(row(Bearer.VIDEO).switchable)
+        assertFalse(row(Bearer.LORA).switchable)
+        assertFalse(row(Bearer.MQTT).switchable)
+    }
+
+    @Test
+    fun `MQTT stays off the card`() {
+        assertEquals(Bearer.entries - Bearer.MQTT, Bearer.entries.filter { it.onCard })
+    }
+
+    @Test
+    fun `a config bearer maps to its enabled_protocols bit and nothing else does`() {
+        assertEquals(ProtocolFlags.UDP_BROADCAST, Bearer.UDP.protocolFlag)
+        assertEquals(ProtocolFlags.BLE_BROADCAST, Bearer.BLE_ADV.protocolFlag)
+        assertEquals(ProtocolFlags.BLE_GATT_PEER, Bearer.GATT.protocolFlag)
+        assertNull(Bearer.LORA.protocolFlag)
+        assertNull(Bearer.MQTT.protocolFlag)
+        assertNull(Bearer.WIFI_AWARE.protocolFlag)
+    }
+
+    @Test
+    fun `toggling one protocol leaves the other bits and fields alone`() {
+        val network =
+            Config.NetworkConfig.Builder()
+                .also { wb ->
+                    wb.enabled_protocols = ProtocolFlags.UDP_BROADCAST.value or ProtocolFlags.BLE_GATT_PEER.value
+                    wb.ntp_server = "pool.example"
+                }
+                .build()
+        val udpOff = network.withProtocol(ProtocolFlags.UDP_BROADCAST, on = false)
+        assertEquals(ProtocolFlags.BLE_GATT_PEER.value, udpOff.enabled_protocols)
+        assertEquals("pool.example", udpOff.ntp_server)
+        val advOn = udpOff.withProtocol(ProtocolFlags.BLE_BROADCAST, on = true)
+        assertEquals(ProtocolFlags.BLE_GATT_PEER.value or ProtocolFlags.BLE_BROADCAST.value, advOn.enabled_protocols)
     }
 
     @Test

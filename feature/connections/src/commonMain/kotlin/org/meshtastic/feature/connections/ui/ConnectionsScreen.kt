@@ -670,7 +670,7 @@ fun ConnectionsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 NodeStatusCard(
                     status = status,
-                    onSetHostBearer = nodeStatusViewModel::setHostBearer,
+                    onSetBearer = nodeStatusViewModel::setBearer,
                     onRefreshRequirements = nodeStatusViewModel::refreshRequirements,
                     onRequestUsbPermission = nodeStatusViewModel::requestUsbPermission,
                 )

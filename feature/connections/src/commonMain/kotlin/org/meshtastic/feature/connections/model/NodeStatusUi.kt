@@ -34,7 +34,7 @@ data class NodeStatusUi(
     val bearers: List<BearerRowUi>,
 )
 
-/** One bearer row: a switch only for the host bearers, the config bearers follow the Network settings. */
+/** One bearer row; [switchable] says whether the card offers it a switch (see [Bearer.switchable]). */
 data class BearerRowUi(
     val bearer: Bearer,
     val enabled: Boolean,
@@ -72,7 +72,7 @@ fun NodeStatus.toUi(): NodeStatusUi = NodeStatusUi(
     failure = failure,
     settingsReset = settingsReset,
     bearers =
-    Bearer.entries.mapNotNull { bearer ->
+    Bearer.entries.filter { it.onCard }.mapNotNull { bearer ->
         val status = bearers[bearer] ?: return@mapNotNull null
         bearerRow(
             bearer = bearer,
@@ -99,7 +99,7 @@ internal fun bearerRow(
 ): BearerRowUi = BearerRowUi(
     bearer = bearer,
     enabled = enabled,
-    switchable = !bearer.fromConfig,
+    switchable = bearer.switchable,
     state =
     when (requirement) {
         is Requirement.NeedsPermission -> BearerRowState.NeedsPermission(requirement.permission)
