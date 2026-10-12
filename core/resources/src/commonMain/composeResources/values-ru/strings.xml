@@ -222,6 +222,14 @@
     <string name="chirpy_error_unsupported_flavor">Я работаю на ограниченной частоте в этой версии приложения! 🔌 Попробуй использовать версию с полной интеграцией ИИ-ядра.</string>
     <string name="chirpy_error_unsupported_platform">О нет! Похоже, моя антенна не может установить соединение на этой платформе. 📡 Пожалуйста, дважды проверь совместимость своего оборудования!</string>
     <string name="chirpy_fallback_unavailable">ИИ-помощник недоступен на этой платформе. Вот страницы, которые могут помочь:</string>
+    <string name="chirpy_hop_back_to_update">Вернуться к обновлению</string>
+    <string name="chirpy_hop_best">HI %1$s</string>
+    <string name="chirpy_hop_controls">Коснитесь, чтобы прыгнуть, проведите вниз для прокрутки</string>
+    <string name="chirpy_hop_game_over">ИГРА ОКОНЧЕНА</string>
+    <string name="chirpy_hop_play_again">Играть снова</string>
+    <string name="chirpy_hop_tap_to_start">НАЖМИТЕ ДЛЯ НАЧАЛА</string>
+    <string name="chirpy_hop_update_complete">Обновление завершено</string>
+    <string name="chirpy_hop_update_interrupted">Обновление прервано</string>
     <string name="chirpy_intro">Привет! 📡 Я Chirpy - твой помощник по Meshtastic на устройстве! Я могу помочь с настройкой, конфигурацией, устранением неполадок и советами по mesh-сетям. Чем я могу тебе помочь?</string>
     <string name="chirpy_ready">Спроси Chirpy</string>
     <string name="chirpy_search_placeholder">Спроси о Meshtastic…</string>
@@ -359,6 +367,7 @@
     <string name="delete_for_me">Удалить у меня</string>
     <string name="delete_key_backup">Удалить резервную копию ключа</string>
     <string name="delete_key_backup_confirmation">Удалить зашифрованную резервную копию ключа, хранящуюся на этом устройстве. Это нельзя отменить.</string>
+    <string name="delete_key_backup_pick">Выбери резервную копию зашифрованного ключа для удаления с этого устройства. Это не может быть отменено.</string>
     <plurals name="delete_messages">
         <item quantity="one">Удалить сообщение?</item>
         <item quantity="few">Удалить %1$s сообщения?</item>
@@ -527,6 +536,9 @@
     <string name="doc_no_content">Содержимое недоступно</string>
     <string name="doc_no_documentation">Документация недоступна</string>
     <string name="doc_no_results">Ничего не найдено</string>
+    <string name="doc_open_page">Открыть %1$s</string>
+    <string name="doc_page_not_found">Страница не найдена: %1$s</string>
+    <string name="doc_page_not_found_detail">Возможно, эта страница была перемещена или удалена.</string>
     <string name="doc_search_placeholder">Поиск по документации…</string>
     <string name="doc_section_developer">Руководство разработчика</string>
     <string name="doc_section_user">Руководство пользователя</string>
@@ -614,6 +626,7 @@
     <string name="export_tak_data_package">Экспорт пакета данных TAK</string>
     <string name="external_notification">Внешние уведомления</string>
     <string name="external_notification_config">Настройка внешнего уведомления</string>
+    <string name="external_power_short">PWR</string>
     <string name="factory_reset">Сброс до заводских настроек</string>
     <string name="fair">Средний</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
@@ -743,6 +756,7 @@
     <string name="firmware_update_target">Целевое устройство: %1$s</string>
     <string name="firmware_update_title">Обновление прошивки</string>
     <string name="firmware_update_transfer_percent">%1$d%</string>
+    <string name="firmware_update_transfer_progress">%1$d% (%2$s/s, ETA: %3$ds)</string>
     <string name="firmware_update_unknown_error">Неизвестная ошибка</string>
     <string name="firmware_update_unknown_hardware">Неизвестная модель оборудования: %1$d</string>
     <string name="firmware_update_unknown_release">Неизвестная внешняя версия</string>
@@ -820,6 +834,7 @@
     <string name="i_know_what_i_m_doing">Я знаю, что делаю.</string>
     <string name="iaq">Относительное качество воздуха в помещении</string>
     <string name="iaq_definition">(Качество воздуха в помещении) Относительная шкала IAQ, измеренная Bosch BME680. Диапазон значений 0–500.</string>
+    <string name="iaq_value">IAQ %1$d</string>
     <string name="icon_meanings">Обозначение значков</string>
     <string name="ignore">Игнорировать</string>
     <string name="ignore_add">Добавить '%1$s' в список игнорируемых?</string>
@@ -855,6 +870,7 @@
     <string name="jump_to_latest_from">%1$s</string>
     <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
     <!-- KEY -->
+    <string name="key_backup_choice">%1$s, резервное копирование %2$s</string>
     <string name="key_backup_deleted">Резервная копия ключа удалена</string>
     <string name="key_backup_not_found">Для этой ноды не найдено резервной копии ключа</string>
     <string name="key_backup_restore_failed">Не удалось восстановить ключи из резервной копии</string>
@@ -924,6 +940,7 @@
     <string name="location_permission_denied_notice">Без доступа к местоположению карта не покажет где ты находишься, и Meshtastic не сможет делиться твоей позицией в сети. Всё остальное будет работать, и ты сможешь включить это позже.</string>
     <string name="location_permission_rationale">Meshtastic использует твоё местоположение, чтобы показать тебя на карте, измерять расстояние до нод и — только если ты включишь эту функцию — делиться своим местоположением с сетью. Отказ от этого ничего другого не ломает.</string>
     <string name="location_precise_blocked_toast">Точное местоположение отключено. Включи точное местоположение в настройках приложения, чтобы поделиться им.</string>
+    <string name="location_precise_rationale">Распространение твоей позиции в сети требует точного расположения, поэтому другие ноды видят, где ты находишься вместо сплошной площади. Когда Android спрашивает, выбери точность. Карта и все остальное продолжают работать с приблизительным местоположением.</string>
     <string name="location_sharing">Поделиться местоположением</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Попробуй снова через %1$d секунд.</string>
@@ -1011,8 +1028,10 @@
     <string name="map_layer_formats">Слои карты поддерживают форматы .kml, .kmz или GeoJSON.</string>
     <string name="map_layer_opacity">Прозрачность: %1$d%</string>
     <string name="map_layer_open_failed">Не удалось открыть файл карты.</string>
+    <string name="map_layer_too_large">Файлы карт более %1$d МБ не могут быть импортированы.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Последняя активность: %2$s&lt;br&gt;Последняя позиция: %3$s&lt;br&gt;Заряд: %4$s</string>
     <string name="map_offline_banner">Оффлайн — отображение кэшированных данных</string>
+    <string name="map_offline_create_failed">Не удалось сохранить эту область для использования оффлайн</string>
     <string name="map_offline_download_failed_build">Сейчас нет данных офлайн-карты — попробуй позже</string>
     <string name="map_offline_download_failed_io">Ошибка загрузки — проверь соединение и попробуй снова</string>
     <string name="map_offline_download_failed_region_limit">Слишком много офлайн-районов уже загружено — сначала удали один</string>
@@ -1028,6 +1047,7 @@
     <string name="map_offline_terrain_download_failed_io">Загрузка местности не удалась — проверь подключение и попробуй снова</string>
     <string name="map_offline_terrain_download_failed_tile_limit">Выбранная область слишком большая для местности — увеличь масштаб или выбери меньший участок</string>
     <string name="map_offline_terrain_downloading_progress">Загрузка местности… %1$d / %2$d плиток</string>
+    <string name="map_offline_unavailable">Оффлайн карты недоступны на этом устройстве</string>
     <string name="map_overlay_hillshade">Тень на склоне</string>
     <string name="map_overlay_precipitation">Осадки</string>
     <string name="map_overlay_weather_radar">Метеорадары</string>
@@ -1100,10 +1120,17 @@
     <string name="meshtastic_broadcast_notifications">Уведомления о сообщениях в общем чате</string>
     <string name="meshtastic_broadcast_notifications_description">Сообщения, отправляемые в ваши каналы.</string>
     <string name="meshtastic_client_notifications">Уведомления по радио</string>
+    <string name="meshtastic_client_notifications_description">Уведомления от вашего радио, такие как запросы на верификацию ключей и предупреждения о безопасности.</string>
+    <string name="meshtastic_device_status_notifications">Уведомления об обновлении и подключении</string>
+    <string name="meshtastic_device_status_notifications_description">Обновление прошивки твоего радиоустройства и повторное подключение к нему.</string>
     <string name="meshtastic_low_battery_notifications">Уведомление о низком уровне заряда</string>
+    <string name="meshtastic_low_battery_notifications_description">Аккумулятор твоего радио разряжен.</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Уведомления о низком заряде батареи (избранные ноды)</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications_description">Аккумулятор избранной ноды разряжен.</string>
     <string name="meshtastic_mesh_beacon_notifications">Уведомления о приглашениях в сеть</string>
+    <string name="meshtastic_mesh_beacon_notifications_description">Приглашения присоединиться к ближайшей сети.</string>
     <string name="meshtastic_messages_notifications">Уведомления о личных сообщениях</string>
+    <string name="meshtastic_messages_notifications_description">Сообщения, отправленные тебе напрямую.</string>
     <string name="meshtastic_new_nodes_notifications">Уведомления о новых нодах</string>
     <string name="meshtastic_service_notifications">Служебные уведомления</string>
     <string name="meshtastic_waypoints_notifications">Уведомления о путевых точках</string>
@@ -1326,6 +1353,7 @@
     <string name="notification_permission_denied_notice">Без уведомлений Meshtastic не сможет оповещать тебя о новых сообщениях, новых нодах или низком заряде батареи, когда приложение работает в фоновом режиме.</string>
     <string name="notification_permission_rationale">Уведомления — это способ, которым Meshtastic связывается с тобой, когда приложение закрыто(в фоне): новые сообщения, обнаруженные ноды и низкий заряд батареи радио. Если ты откажешься, больше ничего не изменится.</string>
     <string name="notification_permissions_description">Meshtastic использует уведомления, чтобы держать вас в курсе новых сообщений и других важных событий. Вы можете обновить разрешения уведомлений в любое время из настроек.</string>
+    <string name="notification_reaction_to">%1$s к %2$s”</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Уведомления для каналов и личных сообщений.</string>
     <string name="notifications_for_low_battery_alerts">Уведомления о низком заряде батареи для подключенного устройства.</string>
@@ -1535,20 +1563,34 @@
     <string name="remote_shell_key_alt">Уровень моря</string>
     <string name="remote_shell_key_ctrl">Управление</string>
     <string name="remote_shell_key_down">Стрелка вниз</string>
+    <string name="remote_shell_key_end">В конец</string>
     <string name="remote_shell_key_home">Начало начал</string>
     <string name="remote_shell_key_left">Стрелка влево</string>
+    <string name="remote_shell_key_page_down">На страницу вниз</string>
+    <string name="remote_shell_key_page_up">На страницу вверх</string>
     <string name="remote_shell_key_right">Стрелка вправо</string>
+    <string name="remote_shell_key_tab">Табуляция</string>
     <string name="remote_shell_key_up">Стрелка вверх</string>
     <string name="remote_shell_menu_line_mode">Вид линий</string>
     <string name="remote_shell_menu_paste">Вставить</string>
     <string name="remote_shell_menu_text_larger">Увеличить текст</string>
     <string name="remote_shell_menu_text_smaller">Уменьшить текст</string>
     <string name="remote_shell_modifier_locked">Заблокировано</string>
+    <string name="remote_shell_modifier_once">Применить к следующей клавише</string>
     <string name="remote_shell_more_options">Больше параметров</string>
+    <string name="remote_shell_no_reply">Нет ответа от ноды. Она должна указывать открытый ключ вашего радио в качестве ключа администратора и находиться в зоне доступа.</string>
+    <string name="remote_shell_no_reply_reason">Не удалось открыть сессию (%1$s). Нода должна указать публичный ключ вашего радиоканала в качестве ключа администратора и находиться в зоне доступа.</string>
     <string name="remote_shell_open">Открыть терминал</string>
+    <string name="remote_shell_open_description">Открыть терминал на этой ноде, при необходимости запустить удаленный сеанс администратора</string>
     <string name="remote_shell_reconnect">Переподключение</string>
     <string name="remote_shell_send">Отправить</string>
+    <string name="remote_shell_session_closed">Сеанс закрыт</string>
+    <string name="remote_shell_session_closed_reason">Сеанс закрыт: %1$s</string>
+    <string name="remote_shell_status_closed">Сеанс закрыт</string>
+    <string name="remote_shell_status_closing">Закрытие…</string>
+    <string name="remote_shell_status_failed">Сеанс завершился с ошибкой</string>
     <string name="remote_shell_status_not_connected">Связь не установлена</string>
+    <string name="remote_shell_status_opening">Открытие сеанса…</string>
     <string name="remotely_administrating">"[Удалённо] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Удалить</string>
@@ -1580,6 +1622,7 @@
     <string name="reset_to_defaults">Сброс значений по умолчанию</string>
     <string name="restore_keys">Восстановить ключи</string>
     <string name="restore_keys_confirmation">Восстановить сохранённые публичные и приватные ключи на этой ноде.</string>
+    <string name="restore_keys_pick_backup">Выбери резервную копию для восстановления этой ноды. Сброс настроек или новый ключ меняет ID узла, поэтому старые резервные копии остаются под старым ID. Восстанавливай только резервную копию, взятую с этого же устройства: другой ключ дает обеим радиоустройствам одинаковый идентификатор.</string>
     <string name="retry">Повторить</string>
     <string name="ringtone">Рингтон</string>
     <string name="ringtone_file_empty">Файл пуст</string>
@@ -1737,9 +1780,12 @@
     <string name="site_planner_color_scale">Цветовая палитра</string>
     <string name="site_planner_estimate">Оценка покрытия</string>
     <string name="site_planner_estimating">Оценка покрытия…</string>
+    <string name="site_planner_failed">Не удалось оценить покрытие. Возможно, местность не загружена, поэтому проверь подключение и повтори попытку.</string>
     <string name="site_planner_frequency_mhz">Частота (МГц)</string>
+    <string name="site_planner_invalid_frequency">Введи от 30 до 6000 МГц</string>
     <string name="site_planner_invalid_latitude">Введите от -90 до 90</string>
     <string name="site_planner_invalid_longitude">Введите от −180 до 180</string>
+    <string name="site_planner_invalid_max_range">Введи от 1 до 150 км</string>
     <string name="site_planner_invalid_positive">Должно быть больше 0</string>
     <string name="site_planner_invalid_rx_sensitivity">Введите от -150 до -30 дБм</string>
     <string name="site_planner_max_range_km">Дальнобойность (км)</string>
@@ -1756,6 +1802,7 @@
     <string name="site_planner_use_node_location">Использовать текущее местоположение</string>
     <string name="skip">Пропустить</string>
     <string name="slot">Слот</string>
+    <string name="slot_auto">Авто</string>
     <string name="snr">Сигнал/шум</string>
     <string name="snr_definition">Соотношение сигнал/шум, мера, используемая в коммуникациях для количественной оценки уровня желаемого сигнала по отношению к уровню фонового шума. В Meshtastic и других беспроводных системах более высокий SNR указывает на более четкий сигнал, который может повысить надежность и качество передачи данных.</string>
     <string name="soil_moisture">Влажн почвы</string>
@@ -1830,6 +1877,7 @@
     <string name="time">Время</string>
     <string name="timeout">Время ожидания истекло</string>
     <string name="timestamp">Отметка времени</string>
+    <string name="tls_enabled_public_broker_summary">Когда это приложение ретранслирует MQTT, оно всегда подключается к mqtt.meshtastic.org через TLS. Этот параметр применяется, когда радио достигает брокера через свой Wi-Fi или Ethernet.</string>
     <string name="toggle_my_position">Переключить мою позицию</string>
     <string name="trace_route">Трассировка маршрута</string>
     <!-- TRACEROUTE -->
@@ -1924,6 +1972,7 @@
     <string name="unpin_selected">Открепить</string>
     <string name="unrecognized">Нераспознанный</string>
     <string name="unset">Не задано - 0</string>
+    <string name="unsupported_device">Данное устройство не поддерживается</string>
     <string name="update_status">Обновить статус</string>
     <string name="updated">Обновлено</string>
     <string name="uplink_enabled">MQTT Uplink включён</string>
@@ -1932,6 +1981,7 @@
     <!-- URL -->
     <string name="url">URL-адрес</string>
     <string name="url_cannot_be_empty">URL не может быть пустым.</string>
+    <string name="url_http_localhost_only">Используй здесь https://. Простой http:// работает только для localhost.</string>
     <string name="url_must_be_http">URL-адрес должен начинаться с http:// или https://</string>
     <string name="url_must_contain_placeholders">URL должен содержать placeholders.</string>
     <string name="url_template">Шаблон URL</string>
