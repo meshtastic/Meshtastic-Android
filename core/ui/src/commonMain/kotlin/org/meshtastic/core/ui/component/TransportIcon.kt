@@ -25,16 +25,26 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.internal
+import org.meshtastic.core.resources.node_bearer_audio
+import org.meshtastic.core.resources.node_bearer_ble_adv
+import org.meshtastic.core.resources.node_bearer_gatt
+import org.meshtastic.core.resources.node_bearer_video
+import org.meshtastic.core.resources.node_bearer_wifi_aware
 import org.meshtastic.core.resources.transport_api
 import org.meshtastic.core.resources.transport_lora
 import org.meshtastic.core.resources.transport_mqtt
 import org.meshtastic.core.resources.transport_udp
 import org.meshtastic.core.ui.icon.Antenna
 import org.meshtastic.core.ui.icon.Api
+import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.BluetoothSearching
 import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttConnected
+import org.meshtastic.core.ui.icon.QrCodeScanner
+import org.meshtastic.core.ui.icon.Speaker
 import org.meshtastic.core.ui.icon.Udp
+import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.proto.MeshPacket.TransportMechanism
 
 /** Icon + short label for a [TransportMechanism] value, or `null` if unknown. Single source for transport badging. */
@@ -58,6 +68,21 @@ fun transportInfo(transport: Int, viaMqtt: Boolean): Pair<ImageVector, String>? 
 
     transport == TransportMechanism.TRANSPORT_INTERNAL.value ->
         MeshtasticIcons.Device to stringResource(Res.string.internal)
+
+    transport == TransportMechanism.TRANSPORT_BLE_ADV.value ->
+        MeshtasticIcons.BluetoothSearching to stringResource(Res.string.node_bearer_ble_adv)
+
+    transport == TransportMechanism.TRANSPORT_BLE_GATT.value ->
+        MeshtasticIcons.Bluetooth to stringResource(Res.string.node_bearer_gatt)
+
+    transport == TransportMechanism.TRANSPORT_AUDIO.value ->
+        MeshtasticIcons.Speaker to stringResource(Res.string.node_bearer_audio)
+
+    transport == TransportMechanism.TRANSPORT_VIDEO.value ->
+        MeshtasticIcons.QrCodeScanner to stringResource(Res.string.node_bearer_video)
+
+    transport == TransportMechanism.TRANSPORT_WIFI_AWARE.value ->
+        MeshtasticIcons.Wifi to stringResource(Res.string.node_bearer_wifi_aware)
 
     else -> null
 }
