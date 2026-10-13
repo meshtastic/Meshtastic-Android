@@ -238,7 +238,7 @@ mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version
 mlkit-genai-prompt = { module = "com.google.mlkit:genai-prompt", version.ref = "mlkit-genai-prompt" }
 mlkit-language-id = { module = "com.google.mlkit:language-id", version.ref = "mlkit-language-id" }
 mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkit-translate" }
-play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.1.0" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
 qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcode-kotlin" }
 
