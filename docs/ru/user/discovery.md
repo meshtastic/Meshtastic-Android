@@ -1,7 +1,7 @@
 ---
 title: Локальное обнаружение сети
 nav_order: 12
-last_updated: 2026-09-19
+last_updated: 2026-10-12
 description: Исследуйте свою mesh-сеть — сканер локального обнаружения mesh-сети, трассировка путей, карты соседей и инструменты обнаружения нодов.
 aliases:
   - discovery
@@ -30,6 +30,8 @@ Connect your node, then open **Settings → Advanced → Local Mesh Discovery**.
 
 > ℹ️ **Note:** Discovery temporarily changes your node's LoRa settings while it scans, then restores your original configuration when it finishes.
 
+Each preset is scanned on the public mesh: the default frequency slot for that preset, decoded with the default public channel. If your node uses a custom frequency slot, the scan uses the default slot and puts your slot back when it finishes. If your primary channel has a custom name or key, the scan switches it to the default public channel before the first preset change and restores your channel when the scan ends, whether it completes, you stop it, or it fails. Channel changes don't reboot the node, so this happens at once at the start and end of the scan. You no longer need to put your primary channel on the default key before scanning.
+
 ### Setting up a scan
 
 Перед началом, настройте эти параметры:
@@ -52,7 +54,7 @@ The **Start Scan** button stays disabled — with an explanation of why — unti
 
 | Этап                                                                   | Что происходит                                                                                                                                                                                                                    |
 | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Preparing scan**                                                     | Сохранение твоей текущей конфигурации и подготовка к сканированию.                                                                                                                                                |
+| **Preparing scan**                                                     | Saving your current LoRa configuration and primary channel and getting ready to scan.                                                                                                                             |
 | **Переключение на \<preset\>**              | Switching the node to the next preset to test.                                                                                                                                                                    |
 | **Reconnecting on \<preset\>**              | Восстановление соединения после смены пресета.                                                                                                                                                                    |
 | **Dwelling on \<preset\>**                  | Прослушивание текущего пресета для сбора пакетов с обратным отсчётом до следующего шага.                                                                                                                          |
@@ -63,7 +65,7 @@ The **Start Scan** button stays disabled — with an explanation of why — unti
 
 ![Обратный отсчёт времени прослушивания, показывающий оставшееся время на текущем пресете](../../assets/screenshots/discovery_dwell_progress.png)
 
-If a scan is interrupted — the app is closed, or the node goes away — the app restores your original preset the next time it reconnects to that node, and tells you it has done so. Reconnect the same node to let that happen; until you do, the node stays on whichever preset the scan left it on.
+If a scan is interrupted — the app is closed, or the node goes away — the app restores your original preset and primary channel the next time it reconnects to that node, and tells you it has done so. Reconnect the same node to let that happen; until you do, the node stays on whichever preset and channel the scan left it on.
 
 ### Reading the results
 
