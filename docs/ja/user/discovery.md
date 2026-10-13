@@ -1,7 +1,7 @@
 ---
 title: ローカルメッシュ探索
 nav_order: 12
-last_updated: 2026-09-19
+last_updated: 2026-10-12
 description: メッシュネットワークを探索します。ローカルメッシュ探索スキャナー、ルート追跡の経路、隣接ノードのマップ、ノード探索ツールを説明します。
 aliases:
   - discovery
@@ -30,6 +30,8 @@ Connect your node, then open **Settings → Advanced → Local Mesh Discovery**.
 
 > ℹ️ **Note:** Discovery temporarily changes your node's LoRa settings while it scans, then restores your original configuration when it finishes.
 
+Each preset is scanned on the public mesh: the default frequency slot for that preset, decoded with the default public channel. If your node uses a custom frequency slot, the scan uses the default slot and puts your slot back when it finishes. If your primary channel has a custom name or key, the scan switches it to the default public channel before the first preset change and restores your channel when the scan ends, whether it completes, you stop it, or it fails. Channel changes don't reboot the node, so this happens at once at the start and end of the scan. You no longer need to put your primary channel on the default key before scanning.
+
 ### Setting up a scan
 
 開始する前に、次のコントロールを設定します：
@@ -52,7 +54,7 @@ The **Start Scan** button stays disabled — with an explanation of why — unti
 
 | 段階                                                                     | 実行中の内容                                                                                                                                                                                                                            |
 | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Preparing scan**                                                     | 現在の構成を保存し、スキャンの準備をしています。                                                                                                                                                                                                          |
+| **Preparing scan**                                                     | Saving your current LoRa configuration and primary channel and getting ready to scan.                                                                                                                             |
 | **\<preset\> に切り替え中**                       | Switching the node to the next preset to test.                                                                                                                                                                    |
 | **Reconnecting on \<preset\>**              | プリセット変更後に接続を再確立しています。                                                                                                                                                                                                             |
 | **Dwelling on \<preset\>**                  | 現在のプリセットで受信してパケットを収集しており、次のステップまでのカウントダウンが表示されます。                                                                                                                                                                                 |
@@ -63,7 +65,7 @@ The **Start Scan** button stays disabled — with an explanation of why — unti
 
 ![現在のプリセットの残り時間を示す滞在のカウントダウン](../../assets/screenshots/discovery_dwell_progress.png)
 
-If a scan is interrupted — the app is closed, or the node goes away — the app restores your original preset the next time it reconnects to that node, and tells you it has done so. Reconnect the same node to let that happen; until you do, the node stays on whichever preset the scan left it on.
+If a scan is interrupted — the app is closed, or the node goes away — the app restores your original preset and primary channel the next time it reconnects to that node, and tells you it has done so. Reconnect the same node to let that happen; until you do, the node stays on whichever preset and channel the scan left it on.
 
 ### Reading the results
 

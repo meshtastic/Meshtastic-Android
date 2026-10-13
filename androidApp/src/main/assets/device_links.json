@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-03T04:34:51.000Z",
+  "generatedAt": "2026-10-12T20:36:53.000Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -3970,6 +3970,54 @@
       ],
       "hwModels": [
         117
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "seeed-wio-tracker-l2",
+      "url": "https://msh.to/seeed-wio-tracker-l2",
+      "description": "Seeed Wio Tracker L2 Pro",
+      "type": "vendor",
+      "targets": [
+        "seeed-wio-tracker-l2"
+      ],
+      "hwModels": [
+        137
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-wismesh-pocket-v3",
+      "url": "https://msh.to/rokland-wismesh-pocket-v3",
+      "description": "RAKwireless WisMesh Pocket V3",
+      "type": "marketplace",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
       ],
       "marketplace": "rokland",
       "regions": [
