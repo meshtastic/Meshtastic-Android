@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-12T20:36:53.000Z",
+  "generatedAt": "2026-10-13T12:44:03.000Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -3993,6 +3993,66 @@
         "GB",
         "US"
       ]
+    },
+    {
+      "shortCode": "x",
+      "url": "https://msh.to/x",
+      "description": "Meshtastic on X",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "facebook",
+      "url": "https://msh.to/facebook",
+      "description": "Meshtastic Facebook Page",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "bluesky",
+      "url": "https://msh.to/bluesky",
+      "description": "Meshtastic on Bluesky",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "mastodon",
+      "url": "https://msh.to/mastodon",
+      "description": "Meshtastic on Mastodon",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "linkedin",
+      "url": "https://msh.to/linkedin",
+      "description": "Meshtastic LinkedIn Page",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "telegram",
+      "url": "https://msh.to/telegram",
+      "description": "Meshtastic Telegram Group",
+      "type": "internal",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
     },
     {
       "shortCode": "seeed-wio-tracker-l2",
