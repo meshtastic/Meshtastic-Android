@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-13T12:44:03.000Z",
+  "generatedAt": "2026-10-14T00:56:18.000Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -4055,12 +4055,12 @@
       "regions": null
     },
     {
-      "shortCode": "seeed-wio-tracker-l2",
-      "url": "https://msh.to/seeed-wio-tracker-l2",
+      "shortCode": "seeed_wio_tracker_L2-tft",
+      "url": "https://msh.to/seeed_wio_tracker_L2-tft",
       "description": "Seeed Wio Tracker L2 Pro",
       "type": "vendor",
       "targets": [
-        "seeed-wio-tracker-l2"
+        "seeed_wio_tracker_L2-tft"
       ],
       "hwModels": [
         137

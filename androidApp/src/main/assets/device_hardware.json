@@ -1758,7 +1758,7 @@
     "hwModelSlug": "RAK4631",
     "platformioTarget": "rak_wismesh_pocket",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "RAK WisMesh Pocket V3",
     "tags": [
@@ -1804,9 +1804,9 @@
   {
     "hwModel": 137,
     "hwModelSlug": "SEEED_WIO_TRACKER_L2",
-    "platformioTarget": "seeed-wio-tracker-l2",
+    "platformioTarget": "seeed_wio_tracker_L2-tft",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Seeed Wio Tracker L2 Pro",
     "tags": [
@@ -1816,6 +1816,7 @@
       "seeed_wio_tracker_l2.svg"
     ],
     "requiresDfu": true,
+    "hasMui": true,
     "partitionScheme": "16MB"
   },
   {
