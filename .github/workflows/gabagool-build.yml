@@ -26,8 +26,11 @@ jobs:
         run: test -d "$ANDROID_HOME" && echo "SDK available at $ANDROID_HOME"
       - name: Build Android F-Droid debug APK
         run: ./gradlew :androidApp:assembleFdroidDebug --stacktrace
+      - name: Verify Android APK exists
+        run: |
+          find androidApp/build/outputs/apk/fdroid/debug -name '*.apk' -type f -size +1M | grep -q .
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: success()
         with:
           name: gabagool-android-debug
           path: androidApp/build/outputs/apk/fdroid/debug/*.apk
@@ -44,8 +47,11 @@ jobs:
           java-version: '25'
       - name: Build Intel macOS DMG
         run: ./gradlew :desktopApp:packageDmg --stacktrace
+      - name: Verify Intel macOS DMG exists
+        run: |
+          find desktopApp/build/compose/binaries/main/dmg -name '*.dmg' -type f -size +1M | grep -q .
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: success()
         with:
           name: gabagool-macos-intel-dmg
           path: desktopApp/build/compose/binaries/main/dmg/*.dmg
