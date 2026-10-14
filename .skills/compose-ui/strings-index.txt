@@ -234,6 +234,8 @@ co2_humidity
 co2_temperature
 collapse_chart
 collapsed
+color_picker_presets
+color_rgb_description
 communicate_off_the_grid
 ### COMPASS ###
 compass_bearing

@@ -261,6 +261,8 @@
     <string name="co2_temperature">CO₂ Temp</string>
     <string name="collapse_chart">Collapse chart</string>
     <string name="collapsed">Collapsed</string>
+    <string name="color_picker_presets">Preset colors</string>
+    <string name="color_rgb_description">Red %1$d, green %2$d, blue %3$d</string>
     <string name="communicate_off_the_grid">Communicate off-the-grid with your friends and community without cell service.</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Bearing: %1$s</string>
