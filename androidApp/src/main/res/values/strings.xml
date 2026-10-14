@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="app_name">Meshtastic</string>
-    <string name="app_description">Off-grid mesh networking for secure, long-range communications via LoRa radio.</string>
-    <string name="nfc_tag_emulation_service">Meshtastic contact and channel sharing</string>
+    <string name="app_name">GABAGOOL RADIO</string>
+    <string name="app_description">What Exit? What Node? Off-grid mesh radio communications, Jersey style.</string>
+    <string name="nfc_tag_emulation_service">Gabagool Radio contact and channel sharing</string>
 </resources>
