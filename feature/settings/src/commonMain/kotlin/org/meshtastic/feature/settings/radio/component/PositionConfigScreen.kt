@@ -65,8 +65,10 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.fieldTitle
@@ -189,7 +191,17 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             viewModel.setConfig(config)
         },
     ) {
-        item {
+        val cards =
+            ArrayDeque(
+                partitionFieldKeys(
+                    SettingsSearchCatalog.fieldKeys(ConfigRoute.POSITION.route),
+                    "schema_position_",
+                    listOf("fixed_position", "gps_mode", "gps_update_interval"),
+                    listOf("position_flags"),
+                    listOf("rx_gpio", "tx_gpio", "gps_en_gpio"),
+                ),
+            )
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.position_packet)) {
                 val items = remember { IntervalConfiguration.POSITION_BROADCAST.allowedIntervals }
                 DropDownPreference(
@@ -265,7 +277,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 }
             }
         }
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.device_gps)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_position_fixed_position),
@@ -347,7 +359,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 }
             }
         }
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.schema_position_position_flags)) {
                 BitwisePreference(
                     title = stringResource(Res.string.schema_position_position_flags),
@@ -396,7 +408,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             )
                 .filter { it.metadata.offeredOn(state.isDiyHardware, holdsValue = it.value != 0) }
         if (pinRows.isNotEmpty()) {
-            item {
+            fieldItem(cards.removeFirst()) {
                 TitledCard(title = stringResource(Res.string.advanced_device_gps)) {
                     val pins = remember { org.meshtastic.feature.settings.util.gpioPins }
                     pinRows.forEachIndexed { index, row ->

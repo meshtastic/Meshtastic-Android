@@ -130,6 +130,15 @@ internal fun LazyListScope.fieldItem(fieldKeys: Collection<String>, content: @Co
 internal fun splitFieldKeys(keys: Set<String>, first: (String) -> Boolean): Pair<Set<String>, Set<String>> =
     keys.filter(first).toSet().let { it to (keys - it) }
 
+/**
+ * Splits [keys] across a screen's cards. Each of [claims] names the fields, without [prefix], that one later card
+ * holds; the first group is every key no claim names, so a field the schema gains lands on the first card.
+ */
+internal fun partitionFieldKeys(keys: Set<String>, prefix: String, vararg claims: List<String>): List<Set<String>> {
+    val claimed = claims.map { names -> names.map { prefix + it }.filter { it in keys }.toSet() }
+    return listOf(keys - claimed.flatten().toSet()) + claimed
+}
+
 @Composable
 private fun Highlighted(active: Boolean, content: @Composable () -> Unit) {
     val tint by

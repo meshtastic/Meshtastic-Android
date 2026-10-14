@@ -66,13 +66,17 @@ class FieldKeyIndexTest {
         val covered =
             listOf(
                 ConfigRoute.BLUETOOTH.route,
+                ConfigRoute.DEVICE.route,
                 ConfigRoute.DISPLAY.route,
                 ConfigRoute.NETWORK.route,
+                ConfigRoute.POSITION.route,
                 ConfigRoute.POWER.route,
+                ConfigRoute.SECURITY.route,
                 ModuleRoute.AMBIENT_LIGHTING.route,
                 ModuleRoute.AUDIO.route,
                 ModuleRoute.CANNED_MESSAGE.route,
                 ModuleRoute.DETECTION_SENSOR.route,
+                ModuleRoute.EXT_NOTIFICATION.route,
                 ModuleRoute.MESH_BEACON.route,
                 ModuleRoute.MQTT.route,
                 ModuleRoute.NEIGHBOR_INFO.route,
@@ -101,5 +105,13 @@ class FieldKeyIndexTest {
         assertEquals(keys, map + rest)
         assertTrue(map.isNotEmpty() && rest.isNotEmpty())
         assertTrue(map.intersect(rest).isEmpty())
+    }
+
+    @Test
+    fun partitionFieldKeysPutsUnclaimedKeysOnTheFirstCard() {
+        val keys = setOf("p_a", "p_b", "p_c", "p_new")
+        val groups = partitionFieldKeys(keys, "p_", listOf("b"), listOf("c", "absent"))
+
+        assertEquals(listOf(setOf("p_a", "p_new"), setOf("p_b"), setOf("p_c")), groups)
     }
 }
