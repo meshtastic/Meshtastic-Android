@@ -67,12 +67,36 @@ class NotificationPrefsTest {
     fun `messagesEnabled defaults to true`() = testScope.runTest { assertTrue(notificationPrefs.messagesEnabled.value) }
 
     @Test
-    fun `nodeEventsEnabled defaults to true`() =
-        testScope.runTest { assertTrue(notificationPrefs.nodeEventsEnabled.value) }
+    fun `nodeEventsEnabled defaults to true`() = testScope.runTest {
+        assertTrue(notificationPrefs.nodeEventsEnabled.value)
+    }
 
     @Test
-    fun `lowBatteryEnabled defaults to true`() =
-        testScope.runTest { assertTrue(notificationPrefs.lowBatteryEnabled.value) }
+    fun `lowBatteryEnabled defaults to true`() = testScope.runTest {
+        assertTrue(notificationPrefs.lowBatteryEnabled.value)
+    }
+
+    @Test
+    fun `reactionsEnabled defaults to true`() = testScope.runTest {
+        assertTrue(notificationPrefs.reactionsEnabled.value)
+    }
+
+    @Test
+    fun `newWaypointsEnabled defaults to true`() = testScope.runTest {
+        assertTrue(notificationPrefs.newWaypointsEnabled.value)
+    }
+
+    @Test
+    fun `setting reactionsEnabled updates preference`() = testScope.runTest {
+        notificationPrefs.setReactionsEnabled(false)
+        assertFalse(notificationPrefs.reactionsEnabled.value)
+    }
+
+    @Test
+    fun `setting newWaypointsEnabled updates preference`() = testScope.runTest {
+        notificationPrefs.setNewWaypointsEnabled(false)
+        assertFalse(notificationPrefs.newWaypointsEnabled.value)
+    }
 
     @Test
     fun `setting messagesEnabled updates preference`() = testScope.runTest {
@@ -149,8 +173,9 @@ class NotificationPrefsTest {
     }
 
     @Test
-    fun `geofenceAlertOptIns defaults to empty`() =
-        testScope.runTest { assertTrue(notificationPrefs.geofenceAlertOptIns.value.isEmpty()) }
+    fun `geofenceAlertOptIns defaults to empty`() = testScope.runTest {
+        assertTrue(notificationPrefs.geofenceAlertOptIns.value.isEmpty())
+    }
 
     @Test
     fun `geofenceAlertOptIns adds and removes waypoint ids`() = testScope.runTest {

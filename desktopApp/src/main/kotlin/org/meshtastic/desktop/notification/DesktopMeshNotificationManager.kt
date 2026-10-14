@@ -89,7 +89,14 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         waypointId: Int,
         isSilent: Boolean,
     ) {
-        notificationManager.dispatch(Notification(title = name, message = message, isSilent = isSilent))
+        notificationManager.dispatch(
+            Notification(
+                title = name,
+                message = message,
+                category = Notification.Category.Waypoint,
+                isSilent = isSilent,
+            ),
+        )
     }
 
     override suspend fun updateReactionNotification(
@@ -101,7 +108,7 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
         isSilent: Boolean,
     ) {
         notificationManager.dispatch(
-            Notification(title = name, message = emoji, category = Notification.Category.Message, isSilent = isSilent),
+            Notification(title = name, message = emoji, category = Notification.Category.Reaction, isSilent = isSilent),
         )
     }
 

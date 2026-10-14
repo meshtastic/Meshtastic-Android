@@ -67,6 +67,44 @@ class DesktopNotificationManagerTest {
     }
 
     @Test
+    fun `reaction notifications are suppressed when reactions are off and messages stay on`() = runTest {
+        val sender = FakeNativeSender()
+        val manager = DesktopNotificationManager(FakeNotificationPrefs().apply { setReactionsEnabled(false) }, sender)
+
+        val reaction =
+            manager.dispatch(Notification(title = "A", message = "x", category = Notification.Category.Reaction))
+        val message =
+            manager.dispatch(Notification(title = "B", message = "y", category = Notification.Category.Message))
+
+        assertFalse(reaction)
+        assertTrue(message)
+        assertEquals(listOf("B"), sender.sent.map { it.title })
+    }
+
+    @Test
+    fun `waypoint notifications are suppressed when new waypoints are off`() = runTest {
+        val sender = FakeNativeSender()
+        val manager =
+            DesktopNotificationManager(FakeNotificationPrefs().apply { setNewWaypointsEnabled(false) }, sender)
+
+        val dispatched =
+            manager.dispatch(Notification(title = "W", message = "pin", category = Notification.Category.Waypoint))
+
+        assertFalse(dispatched)
+        assertEquals(0, sender.sent.size)
+    }
+
+    @Test
+    fun `reaction and waypoint notifications dispatch by default`() = runTest {
+        val sender = FakeNativeSender()
+        val manager = DesktopNotificationManager(FakeNotificationPrefs(), sender)
+
+        assertTrue(manager.dispatch(Notification("A", "x", category = Notification.Category.Reaction)))
+        assertTrue(manager.dispatch(Notification("B", "y", category = Notification.Category.Waypoint)))
+        assertEquals(2, sender.sent.size)
+    }
+
+    @Test
     fun `alerts are always dispatched even when messages disabled`() = runTest {
         val sender = FakeNativeSender()
         val manager = DesktopNotificationManager(FakeNotificationPrefs().apply { setMessagesEnabled(false) }, sender)

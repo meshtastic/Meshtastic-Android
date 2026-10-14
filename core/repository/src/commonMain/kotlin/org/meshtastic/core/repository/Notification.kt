@@ -34,6 +34,12 @@ data class Notification(
 
     enum class Category {
         Message,
+
+        /** Emoji reactions to messages. */
+        Reaction,
+
+        /** Waypoints received from the mesh. */
+        Waypoint,
         NodeEvent,
         Battery,
         Alert,

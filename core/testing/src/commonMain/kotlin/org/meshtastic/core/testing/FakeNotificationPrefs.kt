@@ -58,6 +58,18 @@ class FakeNotificationPrefs : NotificationPrefs {
         lowBatteryEnabled.value = enabled
     }
 
+    override val reactionsEnabled = MutableStateFlow(true)
+
+    override fun setReactionsEnabled(enabled: Boolean) {
+        reactionsEnabled.value = enabled
+    }
+
+    override val newWaypointsEnabled = MutableStateFlow(true)
+
+    override fun setNewWaypointsEnabled(enabled: Boolean) {
+        newWaypointsEnabled.value = enabled
+    }
+
     override val geofenceAlertOptIns = MutableStateFlow<Set<Int>>(emptySet())
 
     override fun setGeofenceAlertOptIn(waypointId: Int, enabled: Boolean) {
