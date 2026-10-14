@@ -22,11 +22,15 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.nowInstant
 import org.meshtastic.core.database.DatabaseBackup
-import org.meshtastic.core.database.DatabaseBackupService
+import org.meshtastic.core.database.DatabaseBackupOperations
 import org.meshtastic.core.database.RestoreStageResult
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.app_database_backup_disconnect_confirmation
 import org.meshtastic.core.resources.app_database_backup_failed
 import org.meshtastic.core.resources.app_database_backup_saved
 import org.meshtastic.core.resources.app_database_restore_confirmation
@@ -35,6 +39,7 @@ import org.meshtastic.core.resources.app_database_restore_not_backup
 import org.meshtastic.core.resources.app_database_restore_staged
 import org.meshtastic.core.resources.app_database_restore_wrong_version
 import org.meshtastic.core.resources.are_you_sure
+import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.resources.restore_app_database
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
@@ -42,14 +47,39 @@ import org.meshtastic.core.ui.viewmodel.safeLaunch
 /** Backs up the app database for the connected device, and stages a restore that applies on the next launch. */
 @KoinViewModel
 class DatabaseBackupViewModel(
-    private val backupService: DatabaseBackupService,
+    private val backupService: DatabaseBackupOperations,
     private val fileService: FileService,
     private val nodeRepository: NodeRepository,
+    private val radioController: RadioController,
+    private val radioPrefs: RadioPrefs,
     private val alertManager: AlertManager,
 ) : ViewModel() {
 
     /** File name offered by the save picker: device id and today's date. */
     fun suggestedFileName(): String = DatabaseBackup.fileName(nodeRepository.myNodeInfo.value?.deviceId, nowInstant)
+
+    /**
+     * Runs [onReady] now when no radio is connected. Otherwise asks first and, once confirmed, disconnects the radio
+     * the same way the Connections screen does, then runs [onReady].
+     */
+    fun runWhenDisconnected(onReady: () -> Unit) {
+        if (radioController.connectionState.value !is ConnectionState.Connected) {
+            onReady()
+            return
+        }
+        alertManager.showAlert(
+            titleRes = Res.string.are_you_sure,
+            messageRes = Res.string.app_database_backup_disconnect_confirmation,
+            confirmTextRes = Res.string.disconnect,
+            onConfirm = {
+                safeLaunch(tag = "databaseBackupDisconnect") {
+                    radioPrefs.setDevName(null)
+                    radioController.setDeviceAddress(NO_DEVICE_SELECTED)
+                    onReady()
+                }
+            },
+        )
+    }
 
     fun backup(uri: CommonUri) {
         safeLaunch(tag = "databaseBackup") {
@@ -94,3 +124,6 @@ class DatabaseBackupViewModel(
             }
     }
 }
+
+/** The device address that means "no radio selected"; the same value `ScannerViewModel.disconnect` persists. */
+private const val NO_DEVICE_SELECTED = "n"

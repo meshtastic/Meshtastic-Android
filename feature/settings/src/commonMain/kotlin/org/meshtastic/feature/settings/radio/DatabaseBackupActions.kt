@@ -33,8 +33,12 @@ fun rememberDatabaseBackupActions(): DatabaseBackupActions {
     val openFile = rememberOpenFileLauncher { uri -> if (uri != null) viewModel.restore(uri) }
     return remember(viewModel, saveFile, openFile) {
         DatabaseBackupActions(
-            onBackup = { saveFile(viewModel.suggestedFileName(), DatabaseBackup.MIME_TYPE) },
-            onRestore = { viewModel.confirmRestore { openFile(DatabaseBackup.MIME_TYPE) } },
+            onBackup = {
+                viewModel.runWhenDisconnected { saveFile(viewModel.suggestedFileName(), DatabaseBackup.MIME_TYPE) }
+            },
+            onRestore = {
+                viewModel.runWhenDisconnected { viewModel.confirmRestore { openFile(DatabaseBackup.MIME_TYPE) } }
+            },
         )
     }
 }

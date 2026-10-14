@@ -20,6 +20,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import okio.BufferedSource
 import okio.Path
+import okio.Path.Companion.toPath
 import kotlin.time.Instant
 
 /** Pure rules for backing up and restoring the app database: file naming, header validation and staging paths. */
@@ -86,7 +87,13 @@ object DatabaseBackup {
     }
 
     /** Where a validated restore for the database at [dbFile] waits until that database is next opened. */
-    fun stagedPath(dbFile: Path): Path = dbFile.parent!! / (dbFile.name + STAGED_SUFFIX)
+    fun stagedPath(dbFile: Path): Path = sibling(dbFile, STAGED_SUFFIX)
 
-    internal fun stagingTempPath(dbFile: Path): Path = dbFile.parent!! / (dbFile.name + STAGING_TEMP_SUFFIX)
+    internal fun stagingTempPath(dbFile: Path): Path = sibling(dbFile, STAGING_TEMP_SUFFIX)
+
+    /** The file next to [dbFile] named after it plus [suffix]; a parentless path resolves in the working directory. */
+    internal fun sibling(dbFile: Path, suffix: String): Path {
+        val name = dbFile.name + suffix
+        return dbFile.parent?.div(name) ?: name.toPath()
+    }
 }

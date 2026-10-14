@@ -36,16 +36,24 @@ sealed interface RestoreStageResult {
     data class Failed(val cause: Throwable) : RestoreStageResult
 }
 
+/** What the settings screen needs from a database backup, so a test can stand in for the file-backed service. */
+interface DatabaseBackupOperations {
+    suspend fun export(sink: BufferedSink): Long
+
+    suspend fun stageRestore(source: BufferedSource): RestoreStageResult
+}
+
 /**
  * Copies the active device database out to a user-chosen sink, and stages a validated backup to replace it on the next
  * launch. A restore is never applied to an open database.
  */
 @Single
-class DatabaseBackupService(private val manager: DatabaseManager, private val dispatchers: CoroutineDispatchers) {
+class DatabaseBackupService(private val manager: DatabaseManager, private val dispatchers: CoroutineDispatchers) :
+    DatabaseBackupOperations {
     private val fileSystem: FileSystem = getFileSystem()
 
     /** Checkpoints the WAL into the main file, then streams that file into [sink]. Returns the bytes written. */
-    suspend fun export(sink: BufferedSink): Long {
+    override suspend fun export(sink: BufferedSink): Long {
         val dbName = manager.checkpointActiveDatabase()
         return withContext(dispatchers.io) {
             fileSystem.read(getDatabaseFile(dbName)) { sink.writeAll(this) }
@@ -56,7 +64,7 @@ class DatabaseBackupService(private val manager: DatabaseManager, private val di
      * Validates the header of [source], streams it beside the active database, then atomically renames it into place as
      * the staged restore. Nothing the live database reads changes.
      */
-    suspend fun stageRestore(source: BufferedSource): RestoreStageResult = withContext(dispatchers.io) {
+    override suspend fun stageRestore(source: BufferedSource): RestoreStageResult = withContext(dispatchers.io) {
         val dbFile = getDatabaseFile(manager.activeDatabaseName)
         val temp = DatabaseBackup.stagingTempPath(dbFile)
         try {
@@ -86,8 +94,8 @@ internal fun applyStagedRestore(dbName: String, dbFile: Path, fileSystem: FileSy
     try {
         val header = fileSystem.read(staged) { DatabaseBackup.readHeader(this) }
         if (DatabaseBackup.validateHeader(header) == DatabaseBackup.Validation.Valid) {
-            fileSystem.delete(dbFile.parent!! / (dbFile.name + "-wal"))
-            fileSystem.delete(dbFile.parent!! / (dbFile.name + "-shm"))
+            fileSystem.delete(DatabaseBackup.sibling(dbFile, "-wal"))
+            fileSystem.delete(DatabaseBackup.sibling(dbFile, "-shm"))
             fileSystem.delete(dbFile)
             fileSystem.atomicMove(staged, dbFile)
             Logger.i { "Applied staged restore to ${anonymizeDbName(dbName)}" }

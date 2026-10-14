@@ -90,7 +90,7 @@
     <string name="analytics_platforms">Analytics platforms:</string>
     <string name="any">Any</string>
     <!-- APP -->
-    <string name="app_database_backup_disconnect_first">Disconnect from the radio to back up or restore app data.</string>
+    <string name="app_database_backup_disconnect_confirmation">The radio will be disconnected first. Reconnect from the Connections screen when you are done.</string>
     <string name="app_database_backup_failed">Could not write the backup.</string>
     <string name="app_database_backup_saved">Backup saved.</string>
     <string name="app_database_restore_confirmation">Restoring replaces this radio's messages and nodes stored in the app with the contents of the backup. The change takes effect the next time the app starts.</string>
