@@ -44,7 +44,7 @@ These are **planned brand colors**; the application UI has not yet been fully re
 GABAGOOL RADIO is an **independent community fork**, not an official Meshtastic product and not endorsed by Meshtastic LLC. Original source code, documentation, and copyrights belong to their respective contributors. Preserve the repository's GPL-3.0 licensing, notices, and upstream attribution. Review [fork and rebrand guidance](CONTRIBUTING.md#forks-and-rebrands) before distributing builds.
 
 **Original upstream:** [meshtastic/Meshtastic-Android](https://github.com/meshtastic/Meshtastic-Android)  
-**This fork:** [BaconDisk22/Meshtastic-Android](https://github.com/BaconDisk22/Meshtastic-Android) (repository rename to `GABAGOOL-RADIO` planned)
+**This fork:** [BaconDisk22/GABAGOOL-RADIO](https://github.com/BaconDisk22/GABAGOOL-RADIO)
 
 ---
 
