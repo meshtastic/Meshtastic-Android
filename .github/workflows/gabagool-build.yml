@@ -34,7 +34,7 @@ jobs:
         with:
           name: gabagool-android-debug
           path: androidApp/build/outputs/apk/fdroid/debug/*.apk
-          if-no-files-found: warn
+          if-no-files-found: error
 
   macos-intel:
     runs-on: macos-15-intel
@@ -55,4 +55,4 @@ jobs:
         with:
           name: gabagool-macos-intel-dmg
           path: desktopApp/build/compose/binaries/main/dmg/*.dmg
-          if-no-files-found: warn
+          if-no-files-found: error
