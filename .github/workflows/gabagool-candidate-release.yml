@@ -1,0 +1,87 @@
+name: Gabagool Candidate Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Prerelease tag (e.g. gabagool-v0.1.0-rc1)"
+        required: true
+        type: string
+      confirm:
+        description: "Type PUBLISH-PRERELEASE to publish unsigned test installers"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    if: github.repository == 'BaconDisk22/GABAGOOL-RADIO' && github.ref == 'refs/heads/main' && inputs.confirm == 'PUBLISH-PRERELEASE'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.validate.outputs.tag }}
+    steps:
+      - name: Validate candidate tag
+        id: validate
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          [[ "$TAG" =~ ^gabagool-v[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+$ ]] || exit 1
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+  android:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - run: ./gradlew :androidApp:assembleFdroidDebug --stacktrace
+      - name: Verify APK
+        run: find androidApp/build/outputs/apk/fdroid/debug -type f -name '*.apk' -size +1M | grep -q .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: candidate-android
+          path: androidApp/build/outputs/apk/fdroid/debug/*.apk
+          if-no-files-found: error
+  mac:
+    needs: validate
+    runs-on: macos-15-intel
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - run: ./gradlew :desktopApp:packageDmg --stacktrace
+      - name: Verify DMG
+        run: find desktopApp/build/compose/binaries/main/dmg -type f -name '*.dmg' -size +1M | grep -q .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: candidate-macos-intel
+          path: desktopApp/build/compose/binaries/main/dmg/*.dmg
+          if-no-files-found: error
+  publish:
+    needs: [validate, android, mac]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: candidate-*
+          path: dist
+          merge-multiple: true
+      - name: Verify both installer types
+        run: |
+          find dist -type f -name '*.apk' | grep -q .
+          find dist -type f -name '*.dmg' | grep -q .
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+      - name: Publish unsigned test prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: |
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title "GABAGOOL RADIO $TAG" --notes "Unsigned development builds for testing only. macOS may require manual security approval. Android debug APK is not a production-signed release. No hardware compatibility guarantee."
