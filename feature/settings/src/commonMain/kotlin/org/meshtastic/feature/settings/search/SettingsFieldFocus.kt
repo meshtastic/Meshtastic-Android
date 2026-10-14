@@ -49,4 +49,5 @@ class SettingsFieldFocus {
 }
 
 /** Provided around each config screen; null where no search can have named a control, such as previews. */
+@Suppress("CompositionLocalAllowlist")
 val LocalSettingsFieldFocus = compositionLocalOf<SettingsFieldFocus?> { null }
