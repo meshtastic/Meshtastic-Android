@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.connections.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,6 +56,7 @@ import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.User
@@ -75,7 +77,16 @@ data class CurrentlyConnectedText(
     val rssiLabel: String,
     val disconnectLabel: String,
     val firmwareVersion: String?,
+    val loraSummary: String? = null,
 )
+
+/** Preset and region for the connected card; null until the LoRa config is known. */
+fun loraSummary(lora: Config.LoRaConfig?, presetLabel: String?, regionLabel: String?, customLabel: String): String? {
+    if (lora == null) return null
+    val preset = if (lora.use_preset) presetLabel ?: lora.modem_preset.name else customLabel
+    val region = if (lora.region == Config.LoRaConfig.RegionCode.UNSET) null else regionLabel ?: lora.region.name
+    return listOfNotNull(preset, region).joinToString(" · ")
+}
 
 @Suppress("LoopWithTooManyJumpStatements", "TooGenericExceptionCaught")
 @Composable
@@ -86,6 +97,7 @@ fun CurrentlyConnectedInfo(
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
     bleDevice: DeviceListEntry.Ble? = null,
+    onClickLora: () -> Unit = {},
 ) {
     // Null until the first successful read: 0 dBm is the strongest value on this scale, not "unknown".
     var rssi by remember(bleDevice?.device?.address) { mutableStateOf<Int?>(null) }
@@ -137,6 +149,16 @@ fun CurrentlyConnectedInfo(
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                    )
+                }
+
+                text.loraSummary?.let { summary ->
+                    Text(
+                        text = summary,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.clickable(onClick = onClickLora),
                     )
                 }
             }

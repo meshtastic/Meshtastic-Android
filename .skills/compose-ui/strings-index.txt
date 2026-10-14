@@ -957,10 +957,12 @@ log_retention_never
 logs
 long_name
 longitude
+### LORA ###
 lora
 lora_config
 lora_config_change_value
 lora_config_changes
+lora_preset_custom
 low_battery
 low_battery_message
 low_battery_title
