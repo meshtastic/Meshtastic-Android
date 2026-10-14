@@ -92,6 +92,7 @@ import org.meshtastic.core.resources.local_network_permission
 import org.meshtastic.core.resources.local_network_permission_blocked_rationale
 import org.meshtastic.core.resources.local_network_permission_rationale
 import org.meshtastic.core.resources.lora_preset_custom
+import org.meshtastic.core.resources.lora_preset_region
 import org.meshtastic.core.resources.no_device_selected
 import org.meshtastic.core.resources.open_bluetooth_settings
 import org.meshtastic.core.resources.open_location_settings
@@ -423,6 +424,9 @@ fun ConnectionsScreen(
             regionLabel = lora?.region?.schemaLabelRes()?.let { stringResource(it) },
             customLabel = stringResource(Res.string.lora_preset_custom),
         )
+            ?.let { parts ->
+                parts.region?.let { stringResource(Res.string.lora_preset_region, parts.preset, it) } ?: parts.preset
+            }
     val currentlyConnectedText =
         CurrentlyConnectedText(
             unknownLabel = stringResource(Res.string.unknown),

@@ -1005,6 +1005,7 @@
     <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
     <string name="lora_config_changes">LoRa Configuration Changes:</string>
     <string name="lora_preset_custom">Custom</string>
+    <string name="lora_preset_region">%1$s · %2$s</string>
     <string name="low_battery">Low Battery</string>
     <string name="low_battery_message">Node %1$s has a low battery (%2$d%)</string>
     <string name="low_battery_title">Low battery: %1$s</string>

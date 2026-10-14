@@ -38,26 +38,32 @@ class LoraSummaryTest {
     }
 
     @Test
-    fun `summary joins the preset label and region label`() {
+    fun `summary carries the preset label and region label`() {
         val config = lora(true, LoRaConfig.ModemPreset.LONG_FAST, LoRaConfig.RegionCode.US)
-        assertEquals("Long Fast · United States", loraSummary(config, "Long Fast", "United States", "Custom"))
+        assertEquals(
+            LoraSummary("Long Fast", "United States"),
+            loraSummary(config, "Long Fast", "United States", "Custom"),
+        )
     }
 
     @Test
     fun `summary shows custom when no preset is in use`() {
         val config = lora(false, LoRaConfig.ModemPreset.LONG_FAST, LoRaConfig.RegionCode.US)
-        assertEquals("Custom · United States", loraSummary(config, "Long Fast", "United States", "Custom"))
+        assertEquals(
+            LoraSummary("Custom", "United States"),
+            loraSummary(config, "Long Fast", "United States", "Custom"),
+        )
     }
 
     @Test
     fun `summary omits an unset region`() {
         val config = lora(true, LoRaConfig.ModemPreset.LONG_FAST, LoRaConfig.RegionCode.UNSET)
-        assertEquals("Long Fast", loraSummary(config, "Long Fast", "Unset", "Custom"))
+        assertEquals(LoraSummary("Long Fast", null), loraSummary(config, "Long Fast", "Unset", "Custom"))
     }
 
     @Test
     fun `summary falls back to enum names when the schema has no label`() {
         val config = lora(true, LoRaConfig.ModemPreset.SHORT_FAST, LoRaConfig.RegionCode.EU_868)
-        assertEquals("SHORT_FAST · EU_868", loraSummary(config, null, null, "Custom"))
+        assertEquals(LoraSummary("SHORT_FAST", "EU_868"), loraSummary(config, null, null, "Custom"))
     }
 }

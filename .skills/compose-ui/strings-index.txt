@@ -963,6 +963,7 @@ lora_config
 lora_config_change_value
 lora_config_changes
 lora_preset_custom
+lora_preset_region
 low_battery
 low_battery_message
 low_battery_title
