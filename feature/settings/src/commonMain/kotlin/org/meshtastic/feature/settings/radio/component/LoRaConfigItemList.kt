@@ -439,7 +439,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     autoFrequency = primaryChannel.radioFreq,
                     enabled = state.connected,
                     focusManager = focusManager,
-                    onValueChanged = {
+                    onValueChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.override_frequency = it }.build()
                     },
                 )
@@ -487,7 +487,7 @@ private fun FrequencyOverridePreference(
     autoFrequency: Float,
     enabled: Boolean,
     focusManager: androidx.compose.ui.focus.FocusManager,
-    onValueChanged: (Float) -> Unit,
+    onValueChange: (Float) -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
     var typed by remember { mutableStateOf<String?>(null) }
@@ -514,7 +514,7 @@ private fun FrequencyOverridePreference(
             val parsed = NumberFormatter.parseDecimalOrNull(text)?.toFloat()
             if (parsed != null) {
                 typed = text
-                onValueChanged(parsed)
+                onValueChange(parsed)
             } else if (NumberFormatter.isPartialDecimal(text)) {
                 typed = text
             }
