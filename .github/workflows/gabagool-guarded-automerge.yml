@@ -1,0 +1,72 @@
+name: Gabagool Guarded Auto Merge
+
+# Only repository metadata is read. Never check out or execute PR code here.
+on:
+  workflow_run:
+    workflows: ["Gabagool Radio Build Candidates"]
+    types: [completed]
+  pull_request:
+    types: [labeled, synchronize, reopened, ready_for_review]
+
+permissions:
+  actions: read
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: gabagool-automerge-${{ github.event.pull_request.number || github.event.workflow_run.head_branch || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  guarded-merge:
+    if: github.repository == 'BaconDisk22/GABAGOOL-RADIO'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Verify fork, approval label, branch and completed build gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            SHA="${{ github.event.workflow_run.head_sha }}"
+          else
+            SHA="${{ github.event.pull_request.head.sha }}"
+          fi
+          echo "Candidate head: $SHA"
+          prs=$(gh api "repos/$GH_REPO/pulls?state=open&per_page=100")
+          candidates=$(jq -r --arg sha "$SHA" '.[] | select(.head.sha == $sha and .base.ref == "main" and .head.repo.full_name == "BaconDisk22/GABAGOOL-RADIO" and .draft == false) | .number' <<< "$prs")
+          for number in $candidates; do
+            echo "Checking PR #$number"
+            labels=$(gh api "repos/$GH_REPO/issues/$number/labels" --jq '.[].name')
+            if ! grep -Fxq 'safe-automerge' <<< "$labels"; then
+              echo "PR #$number not opted in (requires safe-automerge label)"
+              continue
+            fi
+            pr=$(gh api "repos/$GH_REPO/pulls/$number")
+            mergeable=$(jq -r '.mergeable // "unknown"' <<< "$pr")
+            if [[ "$mergeable" != "true" ]]; then
+              echo "PR #$number not mergeable: $mergeable"
+              continue
+            fi
+            # Verify exact-head successful Android AND Intel macOS jobs from one completed run.
+            runs=$(gh api "repos/$GH_REPO/actions/runs?head_sha=$SHA&per_page=100")
+            success=false
+            while read -r run_id; do
+              [[ -n "$run_id" ]] || continue
+              jobs=$(gh api "repos/$GH_REPO/actions/runs/$run_id/jobs?per_page=100")
+              if jq -e '[.jobs[] | select(.name == "android-debug" and .conclusion == "success")] | length == 1' <<< "$jobs" >/dev/null &&
+                 jq -e '[.jobs[] | select(.name == "macos-intel" and .conclusion == "success")] | length == 1' <<< "$jobs" >/dev/null; then
+                success=true
+                break
+              fi
+            done < <(jq -r '.workflow_runs[] | select(.name == "Gabagool Radio Build Candidates" and .event == "pull_request" and .status == "completed" and .conclusion == "success") | .id' <<< "$runs")
+            if [[ "$success" != true ]]; then
+              echo "PR #$number has not passed both exact-head build jobs"
+              continue
+            fi
+            echo "Both builds passed; attempting guarded squash merge of PR #$number"
+            gh pr merge "$number" --repo "$GH_REPO" --squash --match-head-commit "$SHA"
+          done
