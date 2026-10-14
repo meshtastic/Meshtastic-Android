@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -42,6 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
@@ -75,6 +77,7 @@ import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
@@ -124,6 +127,7 @@ import kotlin.time.Duration.Companion.seconds
 
 internal val MANUAL_CHANNEL_WRITE_DELAY: Duration = 1.seconds
 private val REMOTE_READ_LATE_RESPONSE_GRACE: Duration = 2.minutes
+private val LIVE_SAVE_REBOOT_WINDOW: Duration = 8.seconds
 
 /** One stored key backup offered for restore; [longName] is null when the node DB no longer knows [nodeNum]. */
 data class SecurityKeyBackupOption(
@@ -190,6 +194,7 @@ open class RadioConfigViewModel(
     private val snackbarManager: SnackbarManager,
     private val nodeRestartTracker: NodeRestartTracker,
     private val connectionManager: MeshConnectionManager,
+    private val meshConfigFlowManager: MeshConfigFlowManager,
     private val analytics: PlatformAnalytics,
 ) : ViewModel() {
 
@@ -269,6 +274,7 @@ open class RadioConfigViewModel(
     private var manualChannelBatchEnqueueing = false
     private val manualChannelBatchRequestIds = mutableSetOf<Int>()
     private val dfuRequestIds = mutableSetOf<Int>()
+    private val liveLoraSaveRequestIds = mutableSetOf<Int>()
 
     /**
      * Run a one-shot reachability/credentials probe against an MQTT broker. Cancels any in-flight probe before starting
@@ -631,7 +637,28 @@ open class RadioConfigViewModel(
                 )
             }
             expectRestartIfLocal(config.saveRebootBehavior())
-            radioConfigUseCase.setConfig(destNum, config, onRequestId = ::registerWriteRequestId)
+            val refreshNodeInfoAfterAck = config.lora != null && destNum == myNodeNum && reportsHeardOnCurrentLora()
+            radioConfigUseCase.setConfig(destNum, config) { packetId ->
+                registerWriteRequestId(packetId)
+                if (refreshNodeInfoAfterAck) liveLoraSaveRequestIds.add(packetId)
+            }
+        }
+    }
+
+    private fun reportsHeardOnCurrentLora() = Capabilities(myNodeInfo.value?.firmwareVersion).supportsHeardOnCurrentLora
+
+    /**
+     * Firmware applies a LoRa save without a reboot and reports `heard_on_current_lora` only during the node-info stage
+     * of the handshake, so the node DB is re-requested unless the transport drops inside [LIVE_SAVE_REBOOT_WINDOW].
+     * Runs past [onCleared] so leaving the screen right after the save does not strand stale flags.
+     */
+    private fun refreshNodeInfoUnlessRebooting() {
+        viewModelScope.launch(NonCancellable) {
+            val dropped =
+                withTimeoutOrNull(LIVE_SAVE_REBOOT_WINDOW) {
+                    serviceRepository.connectionState.first { it != ConnectionState.Connected }
+                }
+            if (dropped == null) meshConfigFlowManager.refreshNodeInfo()
         }
     }
 
@@ -1287,6 +1314,7 @@ open class RadioConfigViewModel(
 
             is RadioResponseResult.Success -> {
                 if (requestId != null && !isLateRemoteRead && route.isEmpty() && requestId !in readRequestRoutes) {
+                    if (liveLoraSaveRequestIds.remove(requestId)) refreshNodeInfoUnlessRebooting()
                     removeRequestId(requestId)
                     if (!hasPendingRequestsForRoute(route)) {
                         completeSetRequestOrProgressBatch()
@@ -1305,6 +1333,7 @@ open class RadioConfigViewModel(
                 // (route empty, isLocal): a remote admin target legitimately answers from a different node.
                 if (requestId != null && !isLateRemoteRead && route.isEmpty() && radioConfigState.value.isLocal) {
                     clearRequestIds()
+                    liveLoraSaveRequestIds.remove(requestId)
                     // A session opened on the connected node by number would otherwise keep addressing the old
                     // number (and stop counting as local) once the handshake reports the new one.
                     activeDestNum.value = null

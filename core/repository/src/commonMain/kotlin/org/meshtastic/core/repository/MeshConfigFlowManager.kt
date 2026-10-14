@@ -48,4 +48,11 @@ interface MeshConfigFlowManager {
 
     /** Triggers a request for the full device configuration when [session] still owns admission. */
     fun triggerWantConfig(session: RadioSessionContext): Boolean
+
+    /**
+     * Re-requests the node database on the live transport after a config change the firmware applied without a reboot,
+     * so per-node flags it only reports during the handshake are re-delivered. Leaves config, channels and the
+     * connection state untouched. Returns false when no completed handshake owns the active session.
+     */
+    fun refreshNodeInfo(): Boolean
 }

@@ -150,6 +150,7 @@ class ProfileRoundTripTest {
                 snackbarManager = snackbarManager,
                 nodeRestartTracker = nodeRestartTracker,
                 connectionManager = mock(MockMode.autofill),
+                meshConfigFlowManager = mock(MockMode.autofill),
             )
     }
 
