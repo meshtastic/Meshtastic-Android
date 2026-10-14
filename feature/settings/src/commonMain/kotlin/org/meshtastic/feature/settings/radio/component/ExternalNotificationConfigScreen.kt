@@ -106,6 +106,7 @@ fun ExternalNotificationConfigScreenCommon(
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         additionalDirtyCheck = { ringtoneInput != ringtone },
         onDiscard = { ringtoneInput = ringtone },
