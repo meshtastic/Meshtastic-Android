@@ -2472,6 +2472,21 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `loadConfigRoute skips the fetch for local settings while disconnected`() = runTest {
+        val localNode = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(localNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
+        viewModel = createViewModel(destNum = null)
+
+        viewModel.loadConfigRoute(ConfigRoute.USER)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Empty)
+        verifySuspend(exactly(0)) { radioConfigUseCase.getOwner(any(), any()) }
+    }
+
+    @Test
     fun `loadConfigRoute shows progress overlay for remote settings refresh`() = runTest {
         val localNode = Node(num = 100, user = User.Builder().also { wb -> wb.id = "!100" }.build())
         val remoteNode = Node(num = 456, user = User.Builder().also { wb -> wb.id = "!456" }.build())

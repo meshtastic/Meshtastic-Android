@@ -273,6 +273,7 @@ configure_location_permissions
 configure_notification_permissions
 connect
 connect_radio_for_remote_admin
+connect_radio_to_change_settings
 connected
 connected_device
 connected_sleeping

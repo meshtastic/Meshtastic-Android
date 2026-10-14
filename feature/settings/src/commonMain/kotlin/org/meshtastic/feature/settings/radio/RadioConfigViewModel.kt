@@ -867,6 +867,7 @@ open class RadioConfigViewModel(
 
     /** Refreshes a config route while keeping the connect-time local snapshot visible. */
     fun loadConfigRoute(route: Enum<*>) {
+        if (destNum == null && serviceRepository.connectionState.value != ConnectionState.Connected) return
         setResponseStateLoading(route = route, showOverlay = destNum != null)
     }
 
