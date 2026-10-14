@@ -45,6 +45,12 @@ internal class FieldKeyIndex {
         count++
     }
 
+    /** Records one item that several fields share, such as a card holding a screen's rows. */
+    fun recordFields(keys: Collection<String>) {
+        keys.forEach { indices.getOrPut(it) { count } }
+        count++
+    }
+
     fun recordItems(size: Int, key: ((Int) -> Any)?) {
         if (key != null) repeat(size) { indices.getOrPut(key(it)) { count + it } }
         count += size
@@ -61,6 +67,20 @@ internal class FieldKeyRecordingScope(
     private val highlightKey: String?,
     private val highlightActive: Boolean,
 ) : LazyListScope by delegate {
+
+    /** A card standing for [fieldKeys]: search scrolls to it and tints it for any of them. */
+    fun fieldItem(fieldKeys: Collection<String>, content: @Composable LazyItemScope.() -> Unit) {
+        index.recordFields(fieldKeys)
+        val highlighted = highlightKey != null && highlightKey in fieldKeys
+        val active = highlightActive
+        delegate.item(key = fieldKeys.firstOrNull()) {
+            if (highlighted) {
+                Highlighted(active) { content() }
+            } else {
+                content()
+            }
+        }
+    }
 
     override fun item(key: Any?, contentType: Any?, content: @Composable LazyItemScope.() -> Unit) {
         index.recordItem(key)
@@ -93,6 +113,22 @@ internal class FieldKeyRecordingScope(
         }
     }
 }
+
+/**
+ * An item that holds the controls [fieldKeys] name. Config screens use it so a search result can scroll to, and tint,
+ * the card carrying its control; outside the list host it is a plain item.
+ */
+internal fun LazyListScope.fieldItem(fieldKeys: Collection<String>, content: @Composable LazyItemScope.() -> Unit) {
+    if (this is FieldKeyRecordingScope) {
+        fieldItem(fieldKeys, content)
+    } else {
+        item(content = content)
+    }
+}
+
+/** Splits [keys] into those [first] claims and the rest, for a screen whose controls span two cards. */
+internal fun splitFieldKeys(keys: Set<String>, first: (String) -> Boolean): Pair<Set<String>, Set<String>> =
+    keys.filter(first).toSet().let { it to (keys - it) }
 
 @Composable
 private fun Highlighted(active: Boolean, content: @Composable () -> Unit) {

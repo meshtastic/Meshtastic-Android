@@ -53,7 +53,9 @@ import org.meshtastic.core.resources.schema_display_wake_on_tap_or_motion_descri
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
@@ -82,7 +84,17 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             viewModel.setConfig(config)
         },
     ) {
-        item {
+        val displayKeys =
+            splitFieldKeys(SettingsSearchCatalog.fieldKeys(ConfigRoute.DISPLAY.route)) {
+                it in
+                    setOf(
+                        "schema_display_compass_north_top",
+                        "schema_display_use_12h_clock",
+                        "schema_display_heading_bold",
+                        "schema_display_units",
+                    )
+            }
+        fieldItem(displayKeys.first) {
             TitledCard(title = stringResource(Res.string.display_config)) {
                 if (
                     capabilities.offers(
@@ -138,7 +150,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
             }
         }
-        item {
+        fieldItem(displayKeys.second) {
             TitledCard(title = stringResource(Res.string.advanced)) {
                 val screenOnIntervals = remember { IntervalConfiguration.DISPLAY_SCREEN_ON.allowedIntervals }
                 val carouselIntervals = remember { IntervalConfiguration.DISPLAY_CAROUSEL.allowedIntervals }

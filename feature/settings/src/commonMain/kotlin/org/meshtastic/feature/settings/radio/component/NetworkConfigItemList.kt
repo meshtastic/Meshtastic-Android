@@ -85,8 +85,10 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.enabled_protocols
 
@@ -207,7 +209,11 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
             }
         }
 
-        item {
+        val networkKeys =
+            splitFieldKeys(SettingsSearchCatalog.fieldKeys(ConfigRoute.NETWORK.route)) {
+                it.startsWith("schema_network_wifi_") || it == "schema_network_eth_enabled"
+            }
+        fieldItem(networkKeys.first) {
             TitledCard(title = stringResource(Res.string.wifi_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_network_wifi_enabled),
@@ -276,7 +282,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                 }
             }
         }
-        item {
+        fieldItem(networkKeys.second) {
             TitledCard(title = stringResource(Res.string.advanced)) {
                 EditTextPreference(
                     title = stringResource(Res.string.schema_network_ntp_server),

@@ -68,8 +68,10 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.RegularPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
@@ -193,7 +195,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
             viewModel.setModuleConfig(ModuleConfig.Builder().also { wb -> wb.mesh_beacon = stamped }.build())
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ModuleRoute.MESH_BEACON.route)) {
             TitledCard(title = stringResource(Res.string.mesh_beacon)) {
                 RegularPreference(
                     title = stringResource(Res.string.mesh_beacon_region_label),

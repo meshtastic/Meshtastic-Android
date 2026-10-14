@@ -200,6 +200,13 @@ object SettingsSearchCatalog {
         }
     }
 
+    /** The schema keys of the controls [route] owns, which its list items carry so search can land on them. */
+    fun fieldKeys(route: Route): Set<String> = fieldKeysByRoute[route].orEmpty()
+
+    private val fieldKeysByRoute: Map<Route, Set<String>> by lazy {
+        schemaEntries().groupBy({ it.route }, { it.fieldKey }).mapValues { (_, keys) -> keys.filterNotNull().toSet() }
+    }
+
     /** Everything searchable, screens before the controls on them. */
     fun entries(): List<SettingsSearchEntry> = screenEntries() + appEntries() + schemaEntries()
 

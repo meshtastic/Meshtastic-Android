@@ -114,17 +114,16 @@ fun <T : Message<T, *>> RadioConfigScreenList(
             // A request for a key no item carries stays pending until the screen closes, and the screen just opens.
             LaunchedEffect(requestedField, fieldFocus) {
                 val key = requestedField ?: return@LaunchedEffect
-                snapshotFlow { listState.layoutInfo.totalItemsCount }
-                    .map { keyIndex.indexOf(key) }
-                    .first { it != null }
-                    ?.let { target ->
-                        listState.animateScrollToItem(target)
-                        fieldFocus?.consume(key)
-                        highlightKey = key
-                        highlightActive = true
-                        delay(HIGHLIGHT_HOLD_MILLIS)
-                        highlightActive = false
-                    }
+                val target =
+                    snapshotFlow { listState.layoutInfo.totalItemsCount }
+                        .map { keyIndex.indexOf(key) }
+                        .first { it != null } ?: return@LaunchedEffect
+                listState.animateScrollToItem(target)
+                fieldFocus.consume(key)
+                highlightKey = key
+                highlightActive = true
+                delay(HIGHLIGHT_HOLD_MILLIS)
+                highlightActive = false
             }
             DisposableEffect(fieldFocus) { onDispose { fieldFocus?.clear() } }
 

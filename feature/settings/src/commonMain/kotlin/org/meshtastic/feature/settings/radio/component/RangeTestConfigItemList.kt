@@ -35,8 +35,10 @@ import org.meshtastic.core.resources.schema_rangetest_sender_description
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfig
@@ -66,7 +68,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             viewModel.setModuleConfig(config)
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ModuleRoute.RANGE_TEST.route)) {
             TitledCard(title = stringResource(Res.string.range_test_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_rangetest_enabled),

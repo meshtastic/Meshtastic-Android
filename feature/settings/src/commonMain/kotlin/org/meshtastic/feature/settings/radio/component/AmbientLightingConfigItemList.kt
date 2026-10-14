@@ -40,8 +40,10 @@ import org.meshtastic.core.resources.schema_ambientlighting_red
 import org.meshtastic.core.resources.schema_ambientlighting_red_description
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.blue
 import org.meshtastic.proto.current
@@ -70,7 +72,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
             viewModel.setModuleConfig(config)
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ModuleRoute.AMBIENT_LIGHTING.route)) {
             TitledCard(title = stringResource(Res.string.ambient_lighting_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_ambientlighting_led_state),
