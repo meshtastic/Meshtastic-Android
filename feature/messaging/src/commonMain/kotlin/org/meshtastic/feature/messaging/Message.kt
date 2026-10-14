@@ -555,7 +555,7 @@ fun MessageScreen(
                     onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
                     onDeleteMessages = { viewModel.deleteMessages(it) },
                     onResendMessage = { message ->
-                        viewModel.resendMessage(message.uuid, message.text, contactKey)
+                        viewModel.resendMessage(message.uuid, message.text, contactKey, message.replyId)
                     },
                     onReply = { message -> if (!isRetiredChannel) replyingToPacketId = message?.packetId },
                     onTranslate = { onEvent(MessageScreenEvent.TranslateMessage(it)) },

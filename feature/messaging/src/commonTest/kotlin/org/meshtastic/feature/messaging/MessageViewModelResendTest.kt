@@ -142,6 +142,26 @@ class MessageViewModelResendTest {
     }
 
     @Test
+    fun `resend keeps the reply link of the original message`() = runTest {
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.Queued(1)
+
+        viewModel.resendMessage(uuid = 42L, text = "Hello", contactKey = LIVE_CONTACT, replyId = 777)
+        advanceUntilIdle()
+
+        verifySuspend { sendMessageUseCase.invoke("Hello", LIVE_CONTACT, 777) }
+    }
+
+    @Test
+    fun `resend whose send throws does not delete the original`() = runTest {
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } calls { error("queue refused the message") }
+
+        viewModel.resendMessage(uuid = 42L, text = "Hello", contactKey = LIVE_CONTACT, replyId = 777)
+        advanceUntilIdle()
+
+        verifySuspend(VerifyMode.not) { packetRepository.deleteMessages(any()) }
+    }
+
+    @Test
     fun `resend into a retired conversation neither sends nor deletes`() = runTest {
         val retired = ContactKey.retiredBroadcast("a1b2c3d4").value
 

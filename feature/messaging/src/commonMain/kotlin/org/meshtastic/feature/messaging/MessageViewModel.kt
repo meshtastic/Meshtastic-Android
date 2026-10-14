@@ -409,11 +409,11 @@ class MessageViewModel(
      * Replaces message [uuid] with a fresh send of [text]. The original row is deleted only after the new one is
      * queued, so a refused or failed send leaves it in place rather than losing the message.
      */
-    fun resendMessage(uuid: Long, text: String, contactKey: String) {
+    fun resendMessage(uuid: Long, text: String, contactKey: String, replyId: Int? = null) {
         // A retired conversation has no channel to send on; refuse here, where the delete would otherwise follow.
         if (ContactKey(contactKey).isRetired) return
         safeLaunch(errorEvents = sendErrorEvents, tag = "resendMessage") {
-            packetRepository.replaceMessage(uuid) { sendMessageUseCase.invoke(text, contactKey, null) }
+            packetRepository.replaceMessage(uuid) { sendMessageUseCase.invoke(text, contactKey, replyId) }
         }
     }
 
