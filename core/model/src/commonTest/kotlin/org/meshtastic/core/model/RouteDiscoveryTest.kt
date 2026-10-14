@@ -16,6 +16,9 @@
  */
 package org.meshtastic.core.model
 
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.RouteDiscovery
+import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -117,6 +120,64 @@ class RouteDiscoveryTest {
         val result = evaluateTracerouteMapAvailability(forward, back, positioned)
 
         assertEquals(TracerouteMapAvailability.Ok, result)
+    }
+
+    private fun user(id: String, longName: String, shortName: String, hw: HardwareModel = HardwareModel.UNSET) =
+        User.Builder()
+            .also { b ->
+                b.id = id
+                b.long_name = longName
+                b.short_name = shortName
+                b.hw_model = hw
+            }
+            .build()
+
+    @Test
+    fun hopName_usesFullNodeId_whenNodeIsNotInDatabase() {
+        val placeholder = user("!a1b2c3d4", "Meshtastic c3d4", "c3d4")
+
+        assertEquals("!a1b2c3d4", tracerouteHopName(0xa1b2c3d4.toInt(), placeholder))
+    }
+
+    @Test
+    fun hopName_padsNodeIdToEightDigits() {
+        val placeholder = user("!0000002a", "Meshtastic 002a", "002a")
+
+        assertEquals("!0000002a", tracerouteHopName(0x2a, placeholder))
+    }
+
+    @Test
+    fun hopName_keepsNames_whenNodeIsKnown() {
+        val known = user("!a1b2c3d4", "Base Station", "BASE", HardwareModel.TBEAM)
+
+        assertEquals("Base Station (BASE)", tracerouteHopName(0xa1b2c3d4.toInt(), known))
+    }
+
+    @Test
+    fun tracerouteResponse_namesUnknownHopById_andKnownHopByName() {
+        val users =
+            mapOf(
+                1 to user("!00000001", "Alpha", "ALP", HardwareModel.TBEAM),
+                0xa1b2c3d4.toInt() to user("!a1b2c3d4", "Meshtastic c3d4", "c3d4"),
+            )
+        val route =
+            RouteDiscovery.Builder()
+                .also { b ->
+                    b.route = listOf(1, 0xa1b2c3d4.toInt())
+                    b.snr_towards = listOf(8)
+                }
+                .build()
+
+        val text = route.getTracerouteResponse(getUser = { num -> tracerouteHopName(num, users.getValue(num)) })
+
+        assertEquals("Route traced toward destination:\n\n■ Alpha (ALP)\n⇊ 2.0 dB\n■ !a1b2c3d4", text)
+    }
+
+    @Test
+    fun formatTraceroutePath_joinsHopsWithSnr() {
+        val text = formatTraceroutePath(listOf("A", "!a1b2c3d4"), listOf(-128))
+
+        assertEquals("■ A\n⇊ ? dB\n■ !a1b2c3d4", text)
     }
 
     @Test
