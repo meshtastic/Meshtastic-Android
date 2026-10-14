@@ -102,6 +102,16 @@ class SettingsSearchCatalogTest {
     }
 
     @Test
+    fun aSchemaControlNamesItsOwnFieldAndAScreenNamesNone() {
+        val entries = SettingsSearchCatalog.entries()
+        val hopLimit = entries.single { keyOf(it.title) == "schema_lora_hop_limit" }
+
+        assertEquals("schema_lora_hop_limit", hopLimit.fieldKey)
+        assertTrue(entries.filter { it.fieldKey != null }.all { it.fieldKey == keyOf(it.title) })
+        assertTrue(entries.filter { it.title == it.screenTitle }.all { it.fieldKey == null })
+    }
+
+    @Test
     fun everyEntryHasADistinctId() {
         val duplicates =
             SettingsSearchCatalog.entries().groupingBy { it.id }.eachCount().filterValues { it > 1 }.keys.sorted()

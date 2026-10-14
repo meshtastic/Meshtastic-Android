@@ -30,6 +30,8 @@ data class ResolvedSettingsEntry(
     val keywords: List<String> = emptyList(),
     /** True for settings that belong to this phone rather than to a radio. See [SettingsSearchEntry.isAppLocal]. */
     val isAppLocal: Boolean = false,
+    /** Where on the destination to land. See [SettingsSearchEntry.fieldKey]. */
+    val fieldKey: String? = null,
 )
 
 /**
