@@ -64,9 +64,11 @@ internal class FieldKeyRecordingScope(
 
     override fun item(key: Any?, contentType: Any?, content: @Composable LazyItemScope.() -> Unit) {
         index.recordItem(key)
+        val highlighted = key != null && key == highlightKey
+        val active = highlightActive
         delegate.item(key, contentType) {
-            if (key != null && key == highlightKey) {
-                Highlighted(highlightActive) { content() }
+            if (highlighted) {
+                Highlighted(active) { content() }
             } else {
                 content()
             }
@@ -80,9 +82,11 @@ internal class FieldKeyRecordingScope(
         itemContent: @Composable LazyItemScope.(Int) -> Unit,
     ) {
         index.recordItems(count, key)
+        val target = highlightKey
+        val active = highlightActive
         delegate.items(count, key, contentType) { i ->
-            if (key != null && key(i) == highlightKey) {
-                Highlighted(highlightActive) { itemContent(i) }
+            if (key != null && key(i) == target) {
+                Highlighted(active) { itemContent(i) }
             } else {
                 itemContent(i)
             }
