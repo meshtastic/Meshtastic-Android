@@ -57,6 +57,9 @@ actual fun getDatabaseDirectory(): Path {
     return app.getDatabasePath("dummy.db").parentFile!!.absolutePath.toPath()
 }
 
+/** Returns the Android path of the main database file for [dbName]. */
+actual fun getDatabaseFile(dbName: String): Path = ContextServices.app.getDatabasePath(dbName).absolutePath.toPath()
+
 /** Deletes the Android database using the platform-specific deleteDatabase helper. */
 actual fun deleteDatabase(dbName: String) {
     ContextServices.app.deleteDatabase(dbName)

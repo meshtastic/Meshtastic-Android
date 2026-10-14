@@ -542,7 +542,28 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * Builds a new [MeshtasticDatabase] for [dbName]. Tests override this to control file placement (temp directory
      * instead of the platform data dir). Production delegates to the platform-specific [getDatabaseBuilder].
      */
-    protected open fun buildDatabase(dbName: String): MeshtasticDatabase = getDatabaseBuilder(dbName).build()
+    protected open fun buildDatabase(dbName: String): MeshtasticDatabase {
+        applyStagedRestore(dbName, getDatabaseFile(dbName), getFileSystem())
+        return getDatabaseBuilder(dbName).build()
+    }
+
+    /** File name of the database currently active, the one a backup export or staged restore targets. */
+    val activeDatabaseName: String
+        get() = currentDbName
+
+    /**
+     * Folds the active database's WAL into its main file so a plain file copy is a complete, consistent snapshot, and
+     * returns that database's name. Goes through [withDb] so it queues behind the same writer admission as any write.
+     */
+    suspend fun checkpointActiveDatabase(): String {
+        val name = currentDbName
+        withDb { database ->
+            database.useWriterConnection { connection ->
+                connection.usePrepared("PRAGMA wal_checkpoint(TRUNCATE)") { statement -> statement.step() }
+            }
+        }
+        return name
+    }
 
     /**
      * Resolves the DB name to use for [address], honoring a cross-transport alias when one exists. A secondary

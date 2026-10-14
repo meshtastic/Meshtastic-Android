@@ -57,6 +57,9 @@ actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase
 /** Returns the iOS directory where database files are stored. */
 actual fun getDatabaseDirectory(): Path = documentDirectory().toPath()
 
+/** Returns the iOS path of the main database file for [dbName]. */
+actual fun getDatabaseFile(dbName: String): Path = (documentDirectory() + "/$dbName.db").toPath()
+
 /** Deletes the database and its Room-associated files on iOS. */
 @OptIn(ExperimentalForeignApi::class)
 actual fun deleteDatabase(dbName: String) {

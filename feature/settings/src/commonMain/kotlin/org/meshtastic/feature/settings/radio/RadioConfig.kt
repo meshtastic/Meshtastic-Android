@@ -36,6 +36,8 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.advanced_title
+import org.meshtastic.core.resources.app_database_backup_disconnect_first
+import org.meshtastic.core.resources.backup_app_database
 import org.meshtastic.core.resources.backup_restore
 import org.meshtastic.core.resources.clean_node_database_title
 import org.meshtastic.core.resources.configuration
@@ -58,6 +60,7 @@ import org.meshtastic.core.resources.module_settings
 import org.meshtastic.core.resources.nodedb_reset
 import org.meshtastic.core.resources.reboot
 import org.meshtastic.core.resources.reboot_into_dfu
+import org.meshtastic.core.resources.restore_app_database
 import org.meshtastic.core.resources.set_time
 import org.meshtastic.core.resources.shutdown
 import org.meshtastic.core.resources.tak_server
@@ -84,6 +87,8 @@ fun RadioConfigItemList(
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
+    onBackupDatabase: () -> Unit = {},
+    onRestoreDatabase: () -> Unit = {},
     onNavigate: (Route) -> Unit,
 ) {
     val waiting = state.responseState.isWaiting()
@@ -108,7 +113,15 @@ fun RadioConfigItemList(
         }
 
         if (state.isLocal) {
-            BackupRestoreSection(isManaged, enabled, onImport, onExport)
+            BackupRestoreSection(
+                isManaged = isManaged,
+                enabled = enabled,
+                databaseBackupEnabled = !state.connected,
+                onImport = onImport,
+                onExport = onExport,
+                onBackupDatabase = onBackupDatabase,
+                onRestoreDatabase = onRestoreDatabase,
+            )
             AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate)
         }
     }
@@ -160,7 +173,15 @@ private fun ColumnScope.ModuleSettingsContent(enabled: Boolean, onNavigate: (Rou
 }
 
 @Composable
-private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport: () -> Unit, onExport: () -> Unit) {
+private fun BackupRestoreSection(
+    isManaged: Boolean,
+    enabled: Boolean,
+    databaseBackupEnabled: Boolean,
+    onImport: () -> Unit,
+    onExport: () -> Unit,
+    onBackupDatabase: () -> Unit,
+    onRestoreDatabase: () -> Unit,
+) {
     ExpressiveSection(title = stringResource(Res.string.backup_restore)) {
         if (isManaged) {
             ManagedMessage()
@@ -177,6 +198,22 @@ private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport:
             leadingIcon = MeshtasticIcons.Upload,
             enabled = enabled,
             onClick = onExport,
+        )
+        val databaseSupportingText =
+            if (databaseBackupEnabled) null else stringResource(Res.string.app_database_backup_disconnect_first)
+        ListItem(
+            text = stringResource(Res.string.backup_app_database),
+            supportingText = databaseSupportingText,
+            leadingIcon = MeshtasticIcons.Upload,
+            enabled = databaseBackupEnabled,
+            onClick = onBackupDatabase,
+        )
+        ListItem(
+            text = stringResource(Res.string.restore_app_database),
+            supportingText = databaseSupportingText,
+            leadingIcon = MeshtasticIcons.Download,
+            enabled = databaseBackupEnabled,
+            onClick = onRestoreDatabase,
         )
     }
 }
