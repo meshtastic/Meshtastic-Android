@@ -20,7 +20,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-      - uses: android-actions/setup-android@v3
+      # Use the Android SDK already installed on GitHub's Ubuntu image.
+      # setup-android@v3 currently fails while installing the obsolete 'tools' package.
+      - name: Confirm Android SDK
+        run: test -d "$ANDROID_HOME" && echo "SDK available at $ANDROID_HOME"
       - name: Build Android F-Droid debug APK
         run: ./gradlew :androidApp:assembleFdroidDebug --stacktrace
       - uses: actions/upload-artifact@v4
