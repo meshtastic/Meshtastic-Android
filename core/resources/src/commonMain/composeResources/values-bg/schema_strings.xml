@@ -55,7 +55,8 @@
     <string name="schema_cannedmessage_inputeventchar_select">Изберете</string>
     <string name="schema_cannedmessage_rotary1_enabled">Ротационен енкодер #1 е активиран</string>
     <string name="schema_detectionsensor_name">Име</string>
-    <string name="schema_detectionsensor_triggertype_logic_high">Висок</string>
+    <string name="schema_detectionsensor_triggertype_logic_high">Високо</string>
+    <string name="schema_detectionsensor_triggertype_logic_low">Ниско</string>
     <string name="schema_detectionsensor_use_pullup">Използване на режим INPUT_PULLUP</string>
     <string name="schema_device_button_gpio">GPIO за бутон</string>
     <string name="schema_device_buzzer_gpio">GPIO за зумер</string>
@@ -108,6 +109,7 @@
     <string name="schema_display_oledtype_oled_sh1106">SH 1106</string>
     <string name="schema_display_oledtype_oled_sh1107">SH 1107</string>
     <string name="schema_display_oledtype_oled_sh1107_128_128">SH 1107 128x128</string>
+    <string name="schema_display_oledtype_oled_sh1107_rotated">SH 1107 завъртян</string>
     <string name="schema_display_oledtype_oled_ssd1306">SSD 1306</string>
     <string name="schema_display_screen_on_secs">Екранът е включен за</string>
     <string name="schema_display_screen_on_secs_description">Колко дълго екранът остава включен след натискане на потребителския бутон или получаване на съобщения.</string>
@@ -128,10 +130,16 @@
     <string name="schema_lora_modem_preset">Предварително зададени</string>
     <string name="schema_lora_region">Регион</string>
     <string name="schema_lora_region_description">Регионът, където ще използвате радиостанциите си.</string>
+    <string name="schema_lora_regioncode_anz">Австралия / Нова Зеландия</string>
+    <string name="schema_lora_regioncode_anz_433">Австралия / Нова Зеландия 433 MHz</string>
     <string name="schema_lora_regioncode_br_902">Бразилия 902 MHz</string>
     <string name="schema_lora_regioncode_cn">Китай</string>
     <string name="schema_lora_regioncode_eu_433">Европейски съюз 433MHz</string>
+    <string name="schema_lora_regioncode_eu_866">Европейски съюз 866MHz</string>
     <string name="schema_lora_regioncode_eu_868">Европейски съюз 868MHz</string>
+    <string name="schema_lora_regioncode_eu_874">Европейски съюз 874MHz</string>
+    <string name="schema_lora_regioncode_eu_917">Европейски съюз 917MHz</string>
+    <string name="schema_lora_regioncode_eu_n_868">Европейски съюз 868MHz (теснолентов)</string>
     <string name="schema_lora_regioncode_in">Индия</string>
     <string name="schema_lora_regioncode_jp">Япония</string>
     <string name="schema_lora_regioncode_kr">Корея</string>
