@@ -156,6 +156,8 @@
     <!-- CHIRPY -->
     <string name="chirpy">Чирпи</string>
     <string name="chirpy_downloading_subtitle">Това се случва само веднъж. Chirpy скоро ще е готов!</string>
+    <string name="chirpy_hop_update_complete">Актуализацията е завършена</string>
+    <string name="chirpy_hop_update_interrupted">Актуализацията е прекъсната</string>
     <string name="chirpy_ready">Попитайте Chirpy</string>
     <string name="chirpy_search_placeholder">Попитайте за Meshtastic…</string>
     <string name="chirpy_suggested_pages_help">Ето някои страници с документация, които биха могли да помогнат:</string>
@@ -327,6 +329,10 @@
     <string name="discovery_stat_total_unique_nodes">Общо уникални възли</string>
     <string name="discovery_stat_unique_nodes">Уникални възли</string>
     <string name="discovery_time_remaining">Остават %1$s</string>
+    <plurals name="discovery_unique_nodes_count">
+        <item quantity="one">%1$d уникален възел</item>
+        <item quantity="other">%1$d уникални възела</item>
+    </plurals>
     <string name="discovery_view_map">Вижте картата</string>
     <string name="disk_free_indexed">Свободен диск %1$d</string>
     <string name="display">Дисплей</string>
@@ -337,6 +343,7 @@
     <!-- DOC -->
     <string name="doc_clear_search">Изчистване на търсенето</string>
     <string name="doc_loading">Зареждане на документацията…</string>
+    <string name="doc_no_content">Няма налично съдържание.</string>
     <string name="doc_no_documentation">Няма налична документация</string>
     <string name="doc_no_results">Няма намерени резултати</string>
     <string name="doc_open_page">Отваряне на %1$s</string>
@@ -368,9 +375,14 @@
     <string name="dont_show_again_for_device">Да не се показва отново за това устройство</string>
     <string name="downlink_feature_description">Съобщенията от шлюза към публичния интернет се препращат към локалната mesh мрежа. Поради политиката за нулев отскок, трафикът от MQTT сървъра по подразбиране няма да се разпространява по-далеч от това устройство.</string>
     <string name="download">Изтегляне</string>
+    <string name="download_this_area">Изтегляне на тази област</string>
     <string name="duplicated_public_key_title">Открит е дублиран публичен ключ</string>
     <!-- DURATION -->
     <string name="duration_ago">Преди %1$s</string>
+    <string name="duration_days_short">%1$dд</string>
+    <string name="duration_hours_short">%1$dч</string>
+    <string name="duration_minutes_short">%1$dм</string>
+    <string name="duration_seconds_short">%1$dс</string>
     <string name="dynamic">Динамична</string>
     <string name="easily_set_up_private_mesh_networks">Настройте лесно частни mesh мрежи за сигурна и надеждна комуникация в отдалечени райони.</string>
     <string name="edit">Редактирай</string>
@@ -434,6 +446,7 @@
     <string name="firmware_maintenance_bootloader_up_to_date">Буутлоудърът е актуален</string>
     <string name="firmware_maintenance_no_release">Първо изберете версия на фърмуера, за да може устройството да бъде преинсталирано след изтриване.</string>
     <string name="firmware_maintenance_unsupported_device">Това устройство не поддържа изтриване от приложението.</string>
+    <string name="firmware_maintenance_upgrade_bootloader_action">Надграждане на буутлоудъра</string>
     <string name="firmware_old">Фърмуерът на радиото е твърде стар, за да общува с това приложение. За повече информация относно това вижте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашето ръководство за инсталиране на фърмуер</a>.</string>
     <string name="firmware_recovery_button">Възобновяване на актуализацията на фърмуера</string>
     <string name="firmware_too_old">Необходима е актуализация на фърмуера.</string>
@@ -492,6 +505,7 @@
     <string name="firmware_update_target">Цел: %1$s</string>
     <string name="firmware_update_title">Актуализация на фърмуера</string>
     <string name="firmware_update_transfer_percent">%1$d%</string>
+    <string name="firmware_update_transfer_progress">%1$d% (%2$s/s, ETA: %3$ds)</string>
     <string name="firmware_update_unknown_error">Неизвестна грешка</string>
     <string name="firmware_update_unknown_hardware">Неизвестен модел хардуер: %1$d</string>
     <string name="firmware_update_uploading">Качване на фърмуера...</string>
@@ -591,6 +605,7 @@
     <string name="licensed_mode_enable_confirm">Активиране на лицензиран режим</string>
     <string name="licensed_mode_enable_title">Да се ​​активира лицензиран (Радиолюбителски) режим?</string>
     <!-- LOAD -->
+    <string name="load">Натоварване</string>
     <string name="load_15_min">Натоварване 15m</string>
     <string name="load_15_min_description">Средно натоварване на системата за петнадесет минути</string>
     <string name="load_1_min">Натоварване 1m</string>
@@ -663,6 +678,7 @@
     <string name="map_layer_formats">Слоевете на картата поддържат формати .kml, .kmz или GeoJSON.</string>
     <string name="map_layer_opacity">Непрозрачност: %1$d%</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Последно чут: %2$s&lt;br&gt;Последна позиция: %3$s&lt;br&gt;Батерия: %4$s</string>
+    <string name="map_offline_create_failed">Тази област не можа да бъде запазена за използване офлайн.</string>
     <string name="map_offline_download_failed_io">Изтеглянето е неуспешно – проверете връзката си и опитайте отново</string>
     <string name="map_offline_download_failed_region_limit">Вече са изтеглени твърде много офлайн региони – първо изтрийте един</string>
     <string name="map_offline_download_failed_storage">Изтеглените региони използват твърде много място за съхранение — първо изтрийте един</string>
@@ -701,6 +717,7 @@
     <!-- MESH -->
     <string name="mesh_beacon_channel_number">Канал %1$d</string>
     <string name="mesh_beacon_listen">Слушане за маяци</string>
+    <string name="mesh_beacon_no_channels">Няма налични канали</string>
     <string name="mesh_beacon_offer_add">Добавяне на канал</string>
     <string name="mesh_beacon_offer_channel">Канал: %1$s</string>
     <string name="mesh_beacon_offer_dismiss">Отхвърляне</string>
@@ -723,6 +740,7 @@
     <string name="meshtastic_low_battery_notifications">Известия за изтощена батерия</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Известия за изтощена батерия (любими възли)</string>
     <string name="meshtastic_messages_notifications">Известия за директни съобщения</string>
+    <string name="meshtastic_messages_notifications_description">Съобщения, изпратени директно до вас.</string>
     <string name="meshtastic_new_nodes_notifications">Известия за нови възли</string>
     <string name="meshtastic_service_notifications">Сервизни известия</string>
     <!-- MESSAGE -->
@@ -806,6 +824,7 @@
     <string name="no_network_devices_hint">Уверете се, че сте свързани към същата мрежа като устройството.</string>
     <string name="no_network_devices_seen">Не се виждат мрежови устройства</string>
     <string name="no_pax_metrics_logs">Няма налични показатели PAX</string>
+    <string name="no_public_key">Няма публичен ключ</string>
     <string name="no_usb_devices_found">Няма намерени USB устройства</string>
     <string name="no_usb_devices_seen">Не са открити USB устройства</string>
     <!-- NODE -->
@@ -817,7 +836,9 @@
     <string name="node_filter_ignored">Преглеждате игнорирани възли.\nНатиснете, за да се върнете към списъка с възли.</string>
     <string name="node_filter_include_unknown">Включително неизвестните</string>
     <string name="node_filter_only_direct">Показване само на директни възли</string>
+    <string name="node_filter_only_encrypted">Само криптирани</string>
     <string name="node_filter_only_online">Скриване на офлайн възлите</string>
+    <string name="node_filter_only_signed">Само подписани</string>
     <string name="node_filter_placeholder">Филтър</string>
     <string name="node_filter_show_ignored">Показване само на игнорираните възли</string>
     <string name="node_filter_title">Филтриране по</string>
@@ -863,11 +884,13 @@
     <string name="none">Няма (деактивирано)</string>
     <string name="none_quality">Няма</string>
     <string name="not_connected">Няма връзка</string>
+    <string name="not_now">Не сега</string>
     <string name="note">Забележка</string>
     <string name="notes">Бележки</string>
     <!-- NOTIFICATION -->
     <string name="notification_group_mesh">Mesh</string>
     <string name="notification_permissions_description">Meshtastic използва известия, за да ви държи в течение за нови съобщения и други важни събития. Можете да актуализирате разрешенията си за известия по всяко време от настройките.</string>
+    <string name="notification_reaction_to">%1$s към “%2$s”</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Известия за канал и директни съобщения.</string>
     <string name="notifications_for_low_battery_alerts">Известия за изтощена батерия на свързаното устройство.</string>
@@ -876,6 +899,12 @@
     <string name="notifications_on_message_receipt">Известия за получаване на съобщение</string>
     <string name="now">Сега</string>
     <!-- OFFLINE -->
+    <string name="offline_maps">Офлайн карти</string>
+    <string name="offline_maps_empty">Все още няма изтеглени зони</string>
+    <string name="offline_terrain_cache_detail">%1$s: %2$s · %3$s</string>
+    <string name="offline_terrain_empty">Все още няма изтеглен терен</string>
+    <string name="offline_terrain_manager">Офлайн терен</string>
+    <string name="offline_terrain_regional_detail">Включва високодетайлен регионален терен</string>
     <string name="okay">Добре</string>
     <!-- ONE -->
     <string name="one_day">24 часа</string>
@@ -902,10 +931,12 @@
     <string name="pax_total_format">PAX: %1$d</string>
     <string name="pax_total_marker">PAX: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
+    <string name="pax_wifi_marker">Wi-Fi: %1$s</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Конфигуриране на Paxcounter</string>
     <string name="periodic_position_broadcast">Периодично излъчване на позиция</string>
     <!-- PERMISSION -->
+    <string name="permission_location_summary">Покажете местоположението си на картата и го споделете с mesh</string>
     <string name="permission_missing_31">Meshtastic се нуждае от активирани разрешения за "Устройства наблизо", за да намира и да се свързва с устройства чрез Bluetooth. Можете да ги дезактивирате, когато не се използват.</string>
     <!-- PERMISSIONS -->
     <string name="phone_location">Местоположение на телефона</string>
