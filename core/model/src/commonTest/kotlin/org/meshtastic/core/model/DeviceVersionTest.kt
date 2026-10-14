@@ -68,4 +68,22 @@ class DeviceVersionTest {
         assertEquals(FirmwareCheckStatus.OK, DeviceVersion(DeviceVersion.MIN_FW_VERSION).checkStatus)
         assertEquals(FirmwareCheckStatus.SHOULD_UPDATE, DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION).checkStatus)
     }
+
+    @Test
+    fun gate_belowMinimumKeepsRadioConnectedAndRequiresUpdate() {
+        assertEquals(FirmwareGate.REQUIRE_UPDATE, DeviceVersion("2.5.13").checkStatus.gate)
+        assertEquals(FirmwareGate.REQUIRE_UPDATE, DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION).checkStatus.gate)
+    }
+
+    @Test
+    fun gate_belowAbsoluteMinimumDisconnects() {
+        assertEquals(FirmwareGate.DISCONNECT, DeviceVersion("2.3.14").checkStatus.gate)
+    }
+
+    @Test
+    fun gate_atOrAboveMinimumAndUnparseableDoNotGate() {
+        assertEquals(FirmwareGate.NONE, DeviceVersion(DeviceVersion.MIN_FW_VERSION).checkStatus.gate)
+        assertEquals(FirmwareGate.NONE, DeviceVersion("2.7.0").checkStatus.gate)
+        assertEquals(FirmwareGate.NONE, DeviceVersion("garbage").checkStatus.gate)
+    }
 }

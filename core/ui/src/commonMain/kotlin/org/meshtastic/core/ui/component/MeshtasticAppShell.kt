@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.koin.compose.koinInject
 import org.meshtastic.core.model.noiseFloorOrNull
+import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.NodesRoute
@@ -43,6 +44,7 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
  * This component handles deep linking, shared dialogs (via [MeshtasticCommonAppSetup]), and provides the global
  * [MeshtasticSnackbarProvider]. Platform entry points should wrap their navigation layout inside this shell.
  */
+@Suppress("ViewModelForwarding")
 @Composable
 fun MeshtasticAppShell(
     multiBackstack: MultiBackstack,
@@ -59,6 +61,8 @@ fun MeshtasticAppShell(
 
     MeshtasticCommonAppSetup(
         uiViewModel = uiViewModel,
+        isFirmwareUpdateOpen = multiBackstack.activeBackStack.lastOrNull() is FirmwareRoute,
+        onUpdateFirmware = { multiBackstack.handleDeepLink(listOf(FirmwareRoute.FirmwareGraph)) },
         onNavigateToTracerouteMap = { destNum, requestId, logUuid ->
             multiBackstack.handleDeepLink(
                 listOf(

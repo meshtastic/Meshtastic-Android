@@ -33,6 +33,27 @@ enum class FirmwareCheckStatus {
     UNKNOWN,
 }
 
+/** What the app does about a connected radio's [FirmwareCheckStatus]. */
+enum class FirmwareGate {
+    /** Nothing to do. */
+    NONE,
+
+    /** Stay connected and block the app behind the firmware update flow. */
+    REQUIRE_UPDATE,
+
+    /** Too old to talk to: disconnect. */
+    DISCONNECT,
+}
+
+/** Maps a [FirmwareCheckStatus] to the gate the app applies. */
+val FirmwareCheckStatus.gate: FirmwareGate
+    get() =
+        when (this) {
+            FirmwareCheckStatus.SHOULD_UPDATE -> FirmwareGate.REQUIRE_UPDATE
+            FirmwareCheckStatus.TOO_OLD -> FirmwareGate.DISCONNECT
+            else -> FirmwareGate.NONE
+        }
+
 /** Zero-overhead wrapper providing structured access to parse and compare device version strings. */
 @JvmInline
 value class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
