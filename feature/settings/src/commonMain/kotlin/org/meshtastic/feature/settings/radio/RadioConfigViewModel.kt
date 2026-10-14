@@ -47,6 +47,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
@@ -196,6 +197,7 @@ open class RadioConfigViewModel(
     private val connectionManager: MeshConnectionManager,
     private val meshConfigFlowManager: MeshConfigFlowManager,
     private val analytics: PlatformAnalytics,
+    private val applicationScope: ApplicationCoroutineScope,
 ) : ViewModel() {
 
     /**
@@ -650,10 +652,10 @@ open class RadioConfigViewModel(
     /**
      * Firmware applies a LoRa save without a reboot and reports `heard_on_current_lora` only during the node-info stage
      * of the handshake, so the node DB is re-requested unless the transport drops inside [LIVE_SAVE_REBOOT_WINDOW].
-     * Runs past [onCleared] so leaving the screen right after the save does not strand stale flags.
+     * Runs on the application scope so leaving the screen right after the save does not strand stale flags.
      */
     private fun refreshNodeInfoUnlessRebooting() {
-        viewModelScope.launch(NonCancellable) {
+        applicationScope.launch {
             val dropped =
                 withTimeoutOrNull(LIVE_SAVE_REBOOT_WINDOW) {
                     serviceRepository.connectionState.first { it != ConnectionState.Connected }

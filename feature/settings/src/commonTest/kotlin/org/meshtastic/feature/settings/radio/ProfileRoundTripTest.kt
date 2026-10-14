@@ -58,6 +58,7 @@ import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.testing.FakeApplicationCoroutineScope
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -151,6 +152,7 @@ class ProfileRoundTripTest {
                 nodeRestartTracker = nodeRestartTracker,
                 connectionManager = mock(MockMode.autofill),
                 meshConfigFlowManager = mock(MockMode.autofill),
+                applicationScope = FakeApplicationCoroutineScope(testDispatcher),
             )
     }
 
