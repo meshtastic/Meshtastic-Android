@@ -1,3 +1,56 @@
+<div align="center">
+
+# 🤌🍕 GABAGOOL RADIO 🇺🇸
+
+### *What Exit? What Node? Fuggedaboutit!*
+
+**The Garden State's most aggressively Jersey-flavored mesh radio experience.**
+
+🟢 Garden State Green · 🟡 Turnpike Gold · ⚫ Parkway Black · 🔵 Shore Blue
+
+</div>
+
+> **AYYY, HOW YOU DOIN'?** Welcome to GABAGOOL RADIO, a New Jersey-themed independent fork of the Meshtastic Android and Compose Desktop client. Same goal: communicating over mesh radios. Different attitude: straight from the Parkway.
+
+## 🍝 Welcome to the crew
+
+- **Who's Around, Wiseguy?** — discover nodes on the mesh.
+- **Talk to Me** — channels and direct messages.
+- **What Exit You At?** — maps, locations and waypoints.
+- **Check Under the Hood** — radio status and diagnostics.
+- **Down the Shore** — a little Jersey flavor wherever the mesh takes you.
+
+*“No nodes? Everybody must be down the Shore.”* — just one of the Jersey-style messages planned for the rebrand.
+
+## 🖥️ Android + Intel Mac plans
+
+The upstream project includes Android and Compose Desktop code. Our goal is to ship GABAGOOL RADIO for Android and a double-clickable **macOS Intel (x86_64) .app/.dmg**. Packaging, USB/Bluetooth support, and desktop feature parity still need to be tested; **no Mac installer or rebranded APK is released yet**.
+
+## 🎨 The Jersey paint job
+
+| Theme token | Hex |
+| --- | --- |
+| Parkway Black | `#101820` |
+| Garden State Green | `#24834B` |
+| Turnpike Gold | `#F5B335` |
+| Shore Blue | `#168DB0` |
+| Taylor Ham Red | `#C83C40` |
+| Diner White | `#F5F3EA` |
+
+These are **planned brand colors**; the application UI has not yet been fully recolored.
+
+## ⚖️ Credits, licenses, and the family business
+
+GABAGOOL RADIO is an **independent community fork**, not an official Meshtastic product and not endorsed by Meshtastic LLC. Original source code, documentation, and copyrights belong to their respective contributors. Preserve the repository's GPL-3.0 licensing, notices, and upstream attribution. Review [fork and rebrand guidance](CONTRIBUTING.md#forks-and-rebrands) before distributing builds.
+
+**Original upstream:** [meshtastic/Meshtastic-Android](https://github.com/meshtastic/Meshtastic-Android)  
+**This fork:** [BaconDisk22/Meshtastic-Android](https://github.com/BaconDisk22/Meshtastic-Android) (repository rename to `GABAGOOL-RADIO` planned)
+
+---
+
+<details>
+<summary><strong>📚 Original upstream documentation — click to expand, capisce?</strong></summary>
+
 <p align="center">
   <img src=".github/meshtastic_logo.png" alt="Meshtastic Logo" width="200"/>
 </p>
@@ -190,3 +243,5 @@ Forking or rebranding the app? Read [Forks and rebrands](CONTRIBUTING.md#forks-a
 ![Alt](https://repobeats.axiom.co/api/embed/1d75239069a6d671fe0b8f80b2e1bf590a98f0eb.svg "Repobeats analytics image")
 
 Copyright 2025-2026, Meshtastic LLC. GPL-3.0 license
+
+</details>
