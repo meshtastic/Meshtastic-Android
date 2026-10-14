@@ -17,6 +17,7 @@
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -26,14 +27,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.model.constraintFor
+import org.meshtastic.core.model.isLegalInRegionWithoutMap
 import org.meshtastic.core.model.normalizeCodingRateOverride
 import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.presetForRegionChange
@@ -103,6 +108,9 @@ private val CODING_RATE_RANGE = 5..8
  * ([Capabilities.supportsPreset]), restrict to the region's legal presets (R7), then always keep the current selection
  * present (disabled) so the field is never blank when the device's preset is illegal for the region.
  *
+ * With no [presetConstraint], a non-null [unmappedRegion] applies the static Lite/Narrow/Tiny fallback for a radio that
+ * sent no region preset map ([isLegalInRegionWithoutMap]).
+ *
  * Internal (not private): reused by the Mesh Beacon config editor's target-row preset pickers (design#140).
  */
 internal fun buildPresetItems(
@@ -111,12 +119,18 @@ internal fun buildPresetItems(
     selectedPreset: ModemPreset,
     capabilities: Capabilities,
     labels: Map<ModemPreset, String>,
+    unmappedRegion: RegionCode? = null,
 ): List<DropDownItem<ModemPreset>> {
     fun labelOf(preset: ModemPreset) = labels[preset] ?: preset.name
     val items =
         ChannelOption.entries
             .filter { option -> capabilities.supportsPreset(option) }
             .filter { option -> presetConstraint == null || option.modemPreset in presetConstraint.presets }
+            .filter { option ->
+                presetConstraint != null ||
+                    unmappedRegion == null ||
+                    option.modemPreset.isLegalInRegionWithoutMap(unmappedRegion)
+            }
             .map { option ->
                 DropDownItem(value = option.modemPreset, label = labelOf(option.modemPreset), enabled = !presetsGated)
             }
@@ -260,8 +274,23 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     val selectedPreset = formState.value.modem_preset
                     val labels = presetLabels()
                     val presetItems =
-                        remember(presetConstraint, presetsGated, selectedPreset, capabilities, labels) {
-                            buildPresetItems(presetConstraint, presetsGated, selectedPreset, capabilities, labels)
+                        remember(
+                            presetConstraint,
+                            presetsGated,
+                            selectedPreset,
+                            capabilities,
+                            labels,
+                            regionPresetMap,
+                            formState.value.region,
+                        ) {
+                            buildPresetItems(
+                                presetConstraint,
+                                presetsGated,
+                                selectedPreset,
+                                capabilities,
+                                labels,
+                                unmappedRegion = formState.value.region.takeIf { regionPresetMap == null },
+                            )
                         }
                     DropDownPreference(
                         title = stringResource(Res.string.schema_lora_modem_preset),
@@ -405,24 +434,11 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                var isFocusedOverride by remember { mutableStateOf(false) }
-                EditTextPreference(
-                    title = stringResource(Res.string.schema_lora_override_frequency),
-                    value =
-                    if (isFocusedOverride || formState.value.override_frequency != 0f) {
-                        formState.value.override_frequency
-                    } else {
-                        primaryChannel.radioFreq
-                    },
+                FrequencyOverridePreference(
+                    overrideFrequency = formState.value.override_frequency,
+                    autoFrequency = primaryChannel.radioFreq,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onFocusChanged = { isFocusedOverride = it.isFocused },
-                    trailingIcon =
-                    if (!isFocusedOverride && formState.value.override_frequency == 0f) {
-                        { Text(stringResource(Res.string.slot_auto)) }
-                    } else {
-                        null
-                    },
+                    focusManager = focusManager,
                     onValueChanged = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.override_frequency = it }.build()
                     },
@@ -454,6 +470,56 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             }
         }
     }
+}
+
+/** [mhz] as the override frequency field shows it: fixed three decimals, a dot separator, no grouping. */
+internal fun formatFrequencyMhz(mhz: Float): String = NumberFormatter.formatInvariant(mhz, FREQUENCY_DECIMALS)
+
+private const val FREQUENCY_DECIMALS = 3
+
+/**
+ * Frequency override in MHz. Unfocused it shows [formatFrequencyMhz] (or the auto slot's frequency with the auto label
+ * while unset); focused it keeps whatever the user types.
+ */
+@Composable
+private fun FrequencyOverridePreference(
+    overrideFrequency: Float,
+    autoFrequency: Float,
+    enabled: Boolean,
+    focusManager: androidx.compose.ui.focus.FocusManager,
+    onValueChanged: (Float) -> Unit,
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    var typed by remember { mutableStateOf<String?>(null) }
+    val shown = typed ?: formatFrequencyMhz(if (overrideFrequency != 0f) overrideFrequency else autoFrequency)
+    EditTextPreference(
+        title = stringResource(Res.string.schema_lora_override_frequency),
+        value = shown,
+        enabled = enabled,
+        isError = NumberFormatter.parseDecimalOrNull(shown) == null,
+        keyboardOptions =
+        KeyboardOptions.Default.copy(keyboardType = KeyboardType.DecimalSigned, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        onFocusChanged = {
+            isFocused = it.isFocused
+            if (!it.isFocused) typed = null
+        },
+        trailingIcon =
+        if (!isFocused && overrideFrequency == 0f) {
+            { Text(stringResource(Res.string.slot_auto)) }
+        } else {
+            null
+        },
+        onValueChanged = { text ->
+            val parsed = NumberFormatter.parseDecimalOrNull(text)?.toFloat()
+            if (parsed != null) {
+                typed = text
+                onValueChanged(parsed)
+            } else if (NumberFormatter.isPartialDecimal(text)) {
+                typed = text
+            }
+        },
+    )
 }
 
 private fun Config.LoRaConfig.withCodingRateOverrideFor(capabilities: Capabilities): Config.LoRaConfig =
