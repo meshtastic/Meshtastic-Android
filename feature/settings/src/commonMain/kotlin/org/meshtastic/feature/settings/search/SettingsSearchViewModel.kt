@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.getStringSuspend
 
 /**
@@ -35,7 +36,7 @@ import org.meshtastic.core.resources.getStringSuspend
  * hundred of them. Matching then runs over the resolved copy.
  */
 @KoinViewModel
-class SettingsSearchViewModel : ViewModel() {
+class SettingsSearchViewModel(private val fieldFocus: SettingsFieldFocus) : ViewModel() {
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
@@ -65,6 +66,7 @@ class SettingsSearchViewModel : ViewModel() {
                         screenTitle = getStringSuspend(entry.screenTitle),
                         route = entry.route,
                         isAppLocal = entry.isAppLocal,
+                        fieldKey = entry.fieldKey,
                         keywords = entry.keywords?.let { splitKeywords(getStringSuspend(it)) }.orEmpty(),
                     )
                 }
@@ -73,6 +75,12 @@ class SettingsSearchViewModel : ViewModel() {
 
     fun setQuery(query: String) {
         _query.value = query
+    }
+
+    /** Records the control the chosen result names, so the screen it opens can scroll to it. Returns the screen. */
+    fun select(entry: ResolvedSettingsEntry): Route {
+        fieldFocus.request(entry.fieldKey)
+        return entry.route
     }
 
     fun setIncludeAppLocal(include: Boolean) {

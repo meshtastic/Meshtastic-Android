@@ -97,7 +97,9 @@ import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.link
 import org.meshtastic.core.ui.util.annotatedStringFromHtml
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
@@ -139,7 +141,17 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             viewModel.setConfig(config)
         },
     ) {
-        item {
+        val cards =
+            ArrayDeque(
+                partitionFieldKeys(
+                    SettingsSearchCatalog.fieldKeys(ConfigRoute.DEVICE.route),
+                    "schema_device_",
+                    listOf("double_tap_as_button_press", "led_heartbeat_disabled", "disable_triple_click"),
+                    listOf("tzdef"),
+                    listOf("button_gpio", "buzzer_gpio"),
+                ),
+            )
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.options)) {
                 val currentRole = formState.value.role
                 DropDownPreference(
@@ -181,7 +193,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             }
         }
 
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.hardware)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_device_double_tap_as_button_press),
@@ -224,7 +236,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 )
             }
         }
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.schema_device_tzdef)) {
                 val appTzPosixString = rememberSystemTimeZonePosixString()
 
@@ -278,7 +290,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             }
         }
 
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.gpio)) {
                 EditTextPreference(
                     title = stringResource(Res.string.schema_device_button_gpio),

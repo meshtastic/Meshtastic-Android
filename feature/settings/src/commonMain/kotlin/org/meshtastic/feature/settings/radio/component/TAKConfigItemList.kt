@@ -109,9 +109,11 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PlayArrow
 import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.tak.TakPermissionHandler
 import org.meshtastic.feature.settings.tak.rememberDataPackageExporter
 import org.meshtastic.proto.ChannelSet
@@ -148,7 +150,7 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             viewModel.setModuleConfig(config)
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ModuleRoute.TAK.route)) {
             TakConfigCard(
                 team = formState.value.team,
                 role = formState.value.role,

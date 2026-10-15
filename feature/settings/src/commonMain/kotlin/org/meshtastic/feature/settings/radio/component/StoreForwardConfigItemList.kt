@@ -39,8 +39,10 @@ import org.meshtastic.core.resources.store_forward_config
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.ModuleConfig
 
 @Composable
@@ -64,7 +66,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
             viewModel.setModuleConfig(config)
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ModuleRoute.STORE_FORWARD.route)) {
             TitledCard(title = stringResource(Res.string.store_forward_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_storeforward_enabled),

@@ -49,10 +49,8 @@ const val SETTINGS_SEARCH_BAR_INPUT_FIELD_TAG = "SettingsSearchBarInputField"
 
 /**
  * The search field at the top of Settings. Typing expands the bar over the screen and lists matching settings; choosing
- * one navigates to the screen that holds it.
- *
- * Results route to the destination, not to the individual control: android lays its settings screens out by hand, so
- * there is no anchor to scroll to. Meshtastic-Apple lands on the control because its forms are generated.
+ * one navigates to the screen that holds it and asks that screen to scroll to the control. A screen whose list items
+ * carry no key for the control opens at the top.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +71,13 @@ fun SettingsSearchBar(
         placeholder = stringResource(Res.string.settings_search_placeholder),
         modifier = modifier,
         inputFieldTag = SETTINGS_SEARCH_BAR_INPUT_FIELD_TAG,
-        expandedContent = { SettingsSearchResults(results = results, query = query, onSelect = onNavigate) },
+        expandedContent = {
+            SettingsSearchResults(
+                results = results,
+                query = query,
+                onSelect = { entry -> onNavigate(viewModel.select(entry)) },
+            )
+        },
     )
 }
 
@@ -82,7 +86,7 @@ fun SettingsSearchBar(
 internal fun SettingsSearchResults(
     results: List<ResolvedSettingsEntry>,
     query: String,
-    onSelect: (Route) -> Unit,
+    onSelect: (ResolvedSettingsEntry) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (query.isNotBlank() && results.isEmpty()) {
@@ -102,7 +106,7 @@ internal fun SettingsSearchResults(
         // called "Enabled"), and a duplicate key crashes the list.
         LazyColumn(modifier = modifier.fillMaxSize()) {
             items(results, key = { it.id }) { entry ->
-                SettingsSearchResult(entry = entry, onClick = { onSelect(entry.route) })
+                SettingsSearchResult(entry = entry, onClick = { onSelect(entry) })
                 HorizontalDivider()
             }
         }

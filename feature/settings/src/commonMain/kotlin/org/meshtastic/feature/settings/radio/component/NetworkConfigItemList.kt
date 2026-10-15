@@ -85,10 +85,15 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.enabled_protocols
+
+/** The one network field the Ethernet card renders; every other non-Wi-Fi field lives in the advanced card. */
+internal const val ETHERNET_ENABLED_KEY = "schema_network_eth_enabled"
 
 @Composable
 private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
@@ -207,7 +212,12 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
             }
         }
 
-        item {
+        val (wifiKeys, otherKeys) =
+            splitFieldKeys(SettingsSearchCatalog.fieldKeys(ConfigRoute.NETWORK.route)) {
+                it.startsWith("schema_network_wifi_")
+            }
+        val (ethernetKeys, advancedKeys) = splitFieldKeys(otherKeys) { it == ETHERNET_ENABLED_KEY }
+        fieldItem(wifiKeys) {
             TitledCard(title = stringResource(Res.string.wifi_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_network_wifi_enabled),
@@ -262,7 +272,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
             }
         }
         if (state.metadata?.hasEthernet == true) {
-            item {
+            fieldItem(ethernetKeys) {
                 TitledCard(title = stringResource(Res.string.ethernet_config)) {
                     SwitchPreference(
                         title = stringResource(Res.string.schema_network_eth_enabled),
@@ -276,7 +286,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                 }
             }
         }
-        item {
+        fieldItem(advancedKeys) {
             TitledCard(title = stringResource(Res.string.advanced)) {
                 EditTextPreference(
                     title = stringResource(Res.string.schema_network_ntp_server),

@@ -36,8 +36,10 @@ import org.meshtastic.core.resources.schema_neighborinfo_update_interval_descrip
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.ModuleConfig
 
 @Composable
@@ -61,7 +63,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
             viewModel.setModuleConfig(config)
         },
     ) {
-        item {
+        fieldItem(SettingsSearchCatalog.fieldKeys(ModuleRoute.NEIGHBOR_INFO.route)) {
             TitledCard(title = stringResource(Res.string.neighbor_info_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_neighborinfo_enabled),

@@ -98,8 +98,10 @@ import org.meshtastic.core.ui.component.EditPasswordPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.json_enabled
 
@@ -175,7 +177,11 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             }
         }
 
-        item {
+        val mqttKeys =
+            splitFieldKeys(SettingsSearchCatalog.fieldKeys(ModuleRoute.MQTT.route)) {
+                it != "schema_mqtt_map_reporting_enabled" && !it.startsWith("schema_mapreportsettings_")
+            }
+        fieldItem(mqttKeys.first) {
             TitledCard(title = stringResource(Res.string.mqtt_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_mqtt_enabled),
@@ -284,7 +290,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             }
         }
 
-        item {
+        fieldItem(mqttKeys.second) {
             TitledCard(title = stringResource(Res.string.schema_mqtt_map_reporting_enabled)) {
                 val mapReportSettings =
                     formState.value.map_report_settings ?: ModuleConfig.MapReportSettings.Builder().build()

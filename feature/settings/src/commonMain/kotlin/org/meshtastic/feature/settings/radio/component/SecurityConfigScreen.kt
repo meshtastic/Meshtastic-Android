@@ -69,8 +69,10 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.feature.settings.lockdown.LockdownModeSetting
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.proto.Config
 
 @Composable
@@ -127,7 +129,17 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 },
             )
         }
-        item {
+        val cards =
+            ArrayDeque(
+                partitionFieldKeys(
+                    SettingsSearchCatalog.fieldKeys(ConfigRoute.SECURITY.route),
+                    "schema_security_",
+                    listOf("admin_key"),
+                    listOf("serial_enabled", "debug_log_api_enabled"),
+                    listOf("is_managed"),
+                ),
+            )
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.direct_message_key)) {
                 SecurityPublicKeyPreference(
                     securityConfig = securityConfig,
@@ -160,7 +172,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 }
             }
         }
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.admin_keys)) {
                 EditListPreference(
                     title = stringResource(Res.string.schema_security_admin_key),
@@ -175,7 +187,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 )
             }
         }
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.logs)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_security_serial_enabled),
@@ -201,7 +213,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 )
             }
         }
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.administration)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_security_is_managed),

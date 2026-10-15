@@ -73,7 +73,9 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.search.SettingsSearchCatalog
 import org.meshtastic.feature.settings.util.FixedOutputDurations
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
@@ -120,7 +122,26 @@ fun ExternalNotificationConfigScreenCommon(
             }
         },
     ) {
-        item {
+        val cards =
+            ArrayDeque(
+                partitionFieldKeys(
+                    SettingsSearchCatalog.fieldKeys(ModuleRoute.EXT_NOTIFICATION.route),
+                    "schema_externalnotification_",
+                    listOf("alert_message", "alert_message_buzzer", "alert_message_vibra"),
+                    listOf("alert_bell", "alert_bell_buzzer", "alert_bell_vibra"),
+                    listOf(
+                        "output",
+                        "active",
+                        "output_buzzer",
+                        "use_pwm",
+                        "output_vibra",
+                        "output_ms",
+                        "nag_timeout",
+                        "use_i2s_as_buzzer",
+                    ),
+                ),
+            )
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.external_notification_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_enabled),
@@ -135,7 +156,7 @@ fun ExternalNotificationConfigScreenCommon(
             }
         }
 
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.notifications_on_message_receipt)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_alert_message),
@@ -174,7 +195,7 @@ fun ExternalNotificationConfigScreenCommon(
             }
         }
 
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.notifications_on_alert_bell_receipt)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_alert_bell),
@@ -211,7 +232,7 @@ fun ExternalNotificationConfigScreenCommon(
             }
         }
 
-        item {
+        fieldItem(cards.removeFirst()) {
             TitledCard(title = stringResource(Res.string.advanced)) {
                 val gpio = remember { org.meshtastic.feature.settings.util.gpioPins }
                 DropDownPreference(
