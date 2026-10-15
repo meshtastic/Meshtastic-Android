@@ -44,6 +44,7 @@ import org.meshtastic.core.resources.requesting_from
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.user_info
 import org.meshtastic.core.ui.util.SnackbarManager
+import org.meshtastic.feature.node.component.COOL_DOWN_TIME_MS
 
 @Single(binds = [NodeRequestActions::class])
 class CommonNodeRequestActions
@@ -122,11 +123,28 @@ constructor(
     }
 
     override suspend fun requestTraceroute(destNum: Int, longName: String) = runRequest {
+        // Firmware allows one traceroute per 30 s window per app connection, whatever the destination.
+        // The window is claimed before the suspending send so concurrent callers cannot both pass the guard.
+        val claimed = nowMillis
+        var previous: Long?
+        do {
+            previous = _lastTracerouteTime.value
+            if (previous != null && claimed - previous < COOL_DOWN_TIME_MS) {
+                Logger.d { "Traceroute for '$destNum' skipped, cooldown running" }
+                return@runRequest
+            }
+        } while (!_lastTracerouteTime.compareAndSet(previous, claimed))
         Logger.i { "Requesting traceroute for '$destNum'" }
-        val packetId = radioController.generatePacketId()
-        radioController.requestTraceroute(packetId, destNum)
+        var sent = false
+        try {
+            val packetId = radioController.generatePacketId()
+            radioController.requestTraceroute(packetId, destNum)
+            sent = true
+        } finally {
+            // A failed or canceled send must not start the cooldown; only undo our own claim.
+            if (!sent) _lastTracerouteTime.compareAndSet(claimed, previous)
+        }
         analytics.trackAction("traceroute_request")
-        _lastTracerouteTime.value = nowMillis
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName))
     }
 }

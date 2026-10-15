@@ -1869,6 +1869,7 @@ traceroute_round_trip
 traceroute_route_back_to_us
 traceroute_route_towards_dest
 traceroute_showing_nodes
+traceroute_unknown_hop
 track_and_share_locations
 track_point
 ### TRAFFIC ###

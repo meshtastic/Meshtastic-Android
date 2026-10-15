@@ -34,6 +34,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.traceroute_route_back_to_us
 import org.meshtastic.core.resources.traceroute_route_towards_dest
+import org.meshtastic.core.resources.traceroute_unknown_hop
 import org.meshtastic.proto.MeshPacket
 
 @Single
@@ -66,9 +67,10 @@ class TracerouteHandlerImpl(
             session = session,
             onRejected = { Logger.d { "Dropped traceroute work from a retired transport session" } },
         ) {
+            val unknownHopLabel = getStringSuspend(Res.string.traceroute_unknown_hop)
             val full =
                 routeDiscovery.getTracerouteResponse(
-                    getUser = { num -> tracerouteHopName(num, nodeRepository.getUser(num)) },
+                    getUser = { num -> tracerouteHopName(num, nodeRepository.getUser(num), unknownHopLabel) },
                     headerTowards = getStringSuspend(Res.string.traceroute_route_towards_dest),
                     headerBack = getStringSuspend(Res.string.traceroute_route_back_to_us),
                 )
