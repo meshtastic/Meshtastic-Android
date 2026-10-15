@@ -16,11 +16,14 @@
  */
 package org.meshtastic.feature.connections.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -53,8 +57,11 @@ import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
+import org.meshtastic.core.ui.icon.ChevronRight
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.User
@@ -75,7 +82,24 @@ data class CurrentlyConnectedText(
     val rssiLabel: String,
     val disconnectLabel: String,
     val firmwareVersion: String?,
+    val loraSummary: String? = null,
 )
+
+/** Preset and region labels for the connected card; [region] is null while the region is unset. */
+data class LoraSummary(val preset: String, val region: String?)
+
+/** Null until the LoRa config is known. */
+fun loraSummary(
+    lora: Config.LoRaConfig?,
+    presetLabel: String?,
+    regionLabel: String?,
+    customLabel: String,
+): LoraSummary? {
+    if (lora == null) return null
+    val preset = if (lora.use_preset) presetLabel ?: lora.modem_preset.name else customLabel
+    val region = if (lora.region == Config.LoRaConfig.RegionCode.UNSET) null else regionLabel ?: lora.region.name
+    return LoraSummary(preset, region)
+}
 
 @Suppress("LoopWithTooManyJumpStatements", "TooGenericExceptionCaught")
 @Composable
@@ -86,6 +110,7 @@ fun CurrentlyConnectedInfo(
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
     bleDevice: DeviceListEntry.Ble? = null,
+    onClickLora: () -> Unit = {},
 ) {
     // Null until the first successful read: 0 dBm is the strongest value on this scale, not "unknown".
     var rssi by remember(bleDevice?.device?.address) { mutableStateOf<Int?>(null) }
@@ -142,7 +167,27 @@ fun CurrentlyConnectedInfo(
             }
         }
 
+        text.loraSummary?.let { LoraRow(summary = it, onClick = onClickLora) }
+
         DisconnectButton(onClick = onClickDisconnect, label = text.disconnectLabel)
+    }
+}
+
+@Composable
+private fun LoraRow(summary: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = summary,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        Icon(imageVector = MeshtasticIcons.ChevronRight, contentDescription = null)
     }
 }
 

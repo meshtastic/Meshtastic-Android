@@ -61,6 +61,7 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.FirmwareUpdateDestination
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
@@ -90,6 +91,8 @@ import org.meshtastic.core.resources.firmware_version
 import org.meshtastic.core.resources.local_network_permission
 import org.meshtastic.core.resources.local_network_permission_blocked_rationale
 import org.meshtastic.core.resources.local_network_permission_rationale
+import org.meshtastic.core.resources.lora_preset_custom
+import org.meshtastic.core.resources.lora_preset_region
 import org.meshtastic.core.resources.no_device_selected
 import org.meshtastic.core.resources.open_bluetooth_settings
 import org.meshtastic.core.resources.open_location_settings
@@ -141,6 +144,7 @@ import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedText
 import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.EventFirmwareCard
 import org.meshtastic.feature.connections.ui.components.TransportSelector
+import org.meshtastic.feature.connections.ui.components.loraSummary
 
 /**
  * Fixed minimum height for the "connected device" card at the top of the Connections screen. Shared across the three UI
@@ -412,12 +416,24 @@ fun ConnectionsScreen(
             ?.firmware_version
             ?.takeIf { it.isNotBlank() }
             ?.let { stringResource(Res.string.firmware_version, it) }
+    val lora = localConfig.lora
+    val loraSummaryText =
+        loraSummary(
+            lora = lora,
+            presetLabel = lora?.modem_preset?.schemaLabelRes()?.let { stringResource(it) },
+            regionLabel = lora?.region?.schemaLabelRes()?.let { stringResource(it) },
+            customLabel = stringResource(Res.string.lora_preset_custom),
+        )
+            ?.let { parts ->
+                parts.region?.let { stringResource(Res.string.lora_preset_region, parts.preset, it) } ?: parts.preset
+            }
     val currentlyConnectedText =
         CurrentlyConnectedText(
             unknownLabel = stringResource(Res.string.unknown),
             rssiLabel = stringResource(Res.string.rssi),
             disconnectLabel = stringResource(Res.string.disconnect),
             firmwareVersion = firmwareVersion,
+            loraSummary = loraSummaryText,
         )
 
     Scaffold(
@@ -478,6 +494,7 @@ fun ConnectionsScreen(
                                                 text = currentlyConnectedText,
                                                 onNavigateToNodeDetails = onNavigateToNodeDetails,
                                                 onClickDisconnect = { scanModel.disconnect() },
+                                                onClickLora = { onConfigNavigate(SettingsRoute.LoRa) },
                                             )
 
                                         ConnectionUiState.CONNECTING ->
@@ -863,11 +880,13 @@ private fun ConnectedDeviceContent(
     text: CurrentlyConnectedText,
     onNavigateToNodeDetails: (Int) -> Unit,
     onClickDisconnect: () -> Unit,
+    onClickLora: () -> Unit,
 ) {
     ourNode?.let { node ->
         CurrentlyConnectedInfo(
             node = node,
             text = text,
+            onClickLora = onClickLora,
             bleDevice = bleDevices.find { it.fullAddress == selectedDevice } as DeviceListEntry.Ble?,
             onNavigateToNodeDetails = onNavigateToNodeDetails,
             onClickDisconnect = onClickDisconnect,
