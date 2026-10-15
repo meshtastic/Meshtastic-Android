@@ -18,6 +18,7 @@ package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
@@ -25,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -34,45 +37,68 @@ import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.search.LocalSettingsFieldFocus
 import org.meshtastic.feature.settings.search.SettingsFieldFocus
 import org.meshtastic.proto.Config
+import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class SettingsFieldAnchorTest {
 
     private val rowKeys = (0 until ROWS).map { "field_$it" }
 
-    @Test
-    fun searchScrollsARowDeepInsideASingleCardIntoView() = runComposeUiTest {
-        val focus = SettingsFieldFocus()
-        focus.request("field_${ROWS - 2}")
-
-        setContent {
-            AppTheme {
-                CompositionLocalProvider(LocalSettingsFieldFocus provides focus) {
-                    RadioConfigScreenList(
-                        title = "Telemetry",
-                        onBack = {},
-                        responseState = ResponseState.Empty,
-                        onDismissPacketResponse = {},
-                        configState = rememberConfigState(Config.LoRaConfig.Builder().build()),
-                        enabled = true,
-                        onSave = {},
-                    ) {
-                        fieldItem(rowKeys.toSet()) {
-                            TitledCard(title = "Card") {
-                                rowKeys.forEachIndexed { i, key ->
-                                    Text("Row $i", Modifier.settingsField(key).height(ROW_HEIGHT.dp))
-                                }
+    @Composable
+    private fun LongCardScreen(focus: SettingsFieldFocus) {
+        AppTheme {
+            CompositionLocalProvider(LocalSettingsFieldFocus provides focus) {
+                RadioConfigScreenList(
+                    title = "Telemetry",
+                    onBack = {},
+                    responseState = ResponseState.Empty,
+                    onDismissPacketResponse = {},
+                    configState = rememberConfigState(Config.LoRaConfig.Builder().build()),
+                    enabled = true,
+                    onSave = {},
+                ) {
+                    fieldItem(rowKeys.toSet()) {
+                        TitledCard(title = "Card") {
+                            rowKeys.forEachIndexed { i, key ->
+                                Text("Row $i", Modifier.settingsField(key).height(ROW_HEIGHT.dp))
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    @Test
+    fun searchCentersARowDeepInsideASingleCard() = runComposeUiTest {
+        val focus = SettingsFieldFocus()
+        focus.request("field_$MID_ROW")
+
+        setContent { LongCardScreen(focus) }
         waitForIdle()
 
-        onNodeWithText("Row ${ROWS - 2}").assertIsDisplayed()
+        onNodeWithText("Row $MID_ROW").assertIsDisplayed()
+        onNodeWithText("Row 0").assertIsNotDisplayed()
+        val row = onNodeWithText("Row $MID_ROW").getBoundsInRoot()
+        val list = onNode(hasScrollAction()).getBoundsInRoot()
+        val rowCenter = (row.top + row.bottom) / 2
+        val listCenter = (list.top + list.bottom) / 2
+        assertTrue(abs((rowCenter - listCenter).value) <= CENTER_TOLERANCE_DP, "row at $rowCenter, list at $listCenter")
+        runOnIdle { assertEquals(null, focus.pending.value) }
+    }
+
+    @Test
+    fun searchForTheLastRowScrollsOnlyAsFarAsTheListAllows() = runComposeUiTest {
+        val focus = SettingsFieldFocus()
+        focus.request("field_${ROWS - 1}")
+
+        setContent { LongCardScreen(focus) }
+        waitForIdle()
+
+        onNodeWithText("Row ${ROWS - 1}").assertIsDisplayed()
         onNodeWithText("Row 0").assertIsNotDisplayed()
         runOnIdle { assertEquals(null, focus.pending.value) }
     }
@@ -98,5 +124,7 @@ class SettingsFieldAnchorTest {
     private companion object {
         const val ROWS = 40
         const val ROW_HEIGHT = 56
+        const val MID_ROW = 20
+        const val CENTER_TOLERANCE_DP = 8f
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -47,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.squareup.wire.Message
@@ -125,7 +127,8 @@ fun <T : Message<T, *>> RadioConfigScreenList(
             val highlight = remember(tint) { FieldHighlight(tint) }
 
             // A request for a key no item carries stays pending until the screen closes, and the screen just opens.
-            // The card scroll composes the row; the row then brings itself into view, however deep in the card it sits.
+            // The card scroll composes the row; a second scroll then centers the row, however deep in the card it sits.
+            // Scrolling clamps at the list ends, so a row near the top or bottom goes only as far as the list allows.
             // Consuming must not cancel the landing, so only a newer request restarts it.
             LaunchedEffect(fieldFocus) {
                 val focus = fieldFocus ?: return@LaunchedEffect
@@ -139,7 +142,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
                     focus.consume(request)
                     highlight.key = key
                     highlightActive = true
-                    highlight.bringIntoView(key)
+                    highlight.offsetToCenter(key)?.let { listState.animateScrollBy(it) }
                     delay(HIGHLIGHT_HOLD_MILLIS)
                     highlightActive = false
                 }
@@ -152,7 +155,10 @@ fun <T : Message<T, *>> RadioConfigScreenList(
             CompositionLocalProvider(LocalFieldHighlight provides highlight) {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.padding(innerPadding).fillMaxSize(),
+                    modifier =
+                    Modifier.padding(innerPadding).fillMaxSize().onGloballyPositioned {
+                        highlight.listCoordinates = it
+                    },
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {

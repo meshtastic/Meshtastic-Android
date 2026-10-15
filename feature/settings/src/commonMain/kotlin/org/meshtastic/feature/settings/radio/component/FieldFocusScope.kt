@@ -29,15 +29,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.requireLayoutCoordinates
 import androidx.compose.ui.platform.InspectorInfo
-import androidx.compose.ui.relocation.bringIntoView
 import org.jetbrains.compose.resources.StringResource
 
 /**
@@ -67,11 +69,20 @@ internal class FieldHighlight(private val tint: State<Color>) {
     fun fallbackTintFor(keys: Collection<String>): Color =
         key?.takeIf { it in keys && it !in anchors }?.let { tint.value } ?: Color.Transparent
 
-    /** Scrolls the row carrying [fieldKey] fully into view; false when no attached row carries it. */
-    suspend fun bringIntoView(fieldKey: String): Boolean {
-        val node = anchors[fieldKey]?.takeIf { it.node.isAttached } ?: return false
-        node.bringIntoView()
-        return true
+    /** The list's own layout, set by the host so a row can be measured against the viewport. */
+    var listCoordinates: LayoutCoordinates? = null
+
+    /**
+     * How far the list must scroll for the row carrying [fieldKey] to sit at the viewport's center; null when no
+     * attached, laid-out row carries it.
+     */
+    fun offsetToCenter(fieldKey: String): Float? {
+        val node = anchors[fieldKey]?.takeIf { it.node.isAttached }
+        val list = listCoordinates?.takeIf { it.isAttached }
+        val row = node?.requireLayoutCoordinates()?.takeIf { it.isAttached }
+        if (list == null || row == null) return null
+        val rowCenter = list.localPositionOf(row, Offset.Zero).y + row.size.height / 2f
+        return rowCenter - list.size.height / 2f
     }
 
     fun register(keys: Collection<String>, node: DelegatableNode) {
