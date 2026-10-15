@@ -24,6 +24,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -34,11 +35,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
-import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.LayoutAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.currentValueOf
-import androidx.compose.ui.node.requireLayoutCoordinates
 import androidx.compose.ui.platform.InspectorInfo
 import org.jetbrains.compose.resources.StringResource
 
@@ -60,7 +60,11 @@ internal fun Modifier.settingsField(vararg keys: String): Modifier = this then S
 internal class FieldHighlight(private val tint: State<Color>) {
     var key: String? by mutableStateOf(null)
 
-    private val anchors = mutableStateMapOf<String, DelegatableNode>()
+    private val anchors = mutableStateMapOf<String, FieldAnchor>()
+
+    /** Bumped when a row is first placed, so a host waiting to center a row can re-measure. */
+    var placements by mutableIntStateOf(0)
+        private set
 
     /** The tint for a row carrying [keys]: transparent unless one of them is the target. */
     fun tintFor(keys: Collection<String>): Color = key?.takeIf { it in keys }?.let { tint.value } ?: Color.Transparent
@@ -70,28 +74,36 @@ internal class FieldHighlight(private val tint: State<Color>) {
         key?.takeIf { it in keys && it !in anchors }?.let { tint.value } ?: Color.Transparent
 
     /** The list's own layout, set by the host so a row can be measured against the viewport. */
-    var listCoordinates: LayoutCoordinates? = null
+    var listCoordinates: LayoutCoordinates? by mutableStateOf(null)
 
     /**
-     * How far the list must scroll for the row carrying [fieldKey] to sit at the viewport's center; null when no
-     * attached, laid-out row carries it.
+     * How far the list must scroll for the row carrying [fieldKey] to sit at the viewport's center; null until that row
+     * and the list have both been placed.
      */
     fun offsetToCenter(fieldKey: String): Float? {
-        val node = anchors[fieldKey]?.takeIf { it.node.isAttached }
         val list = listCoordinates?.takeIf { it.isAttached }
-        val row = node?.requireLayoutCoordinates()?.takeIf { it.isAttached }
+        val row = anchors[fieldKey]?.placedCoordinates?.takeIf { it.isAttached }
         if (list == null || row == null) return null
         val rowCenter = list.localPositionOf(row, Offset.Zero).y + row.size.height / 2f
         return rowCenter - list.size.height / 2f
     }
 
-    fun register(keys: Collection<String>, node: DelegatableNode) {
-        keys.forEach { anchors[it] = node }
+    fun register(keys: Collection<String>, anchor: FieldAnchor) {
+        keys.forEach { anchors[it] = anchor }
     }
 
-    fun unregister(keys: Collection<String>, node: DelegatableNode) {
-        keys.forEach { if (anchors[it] === node) anchors.remove(it) }
+    fun unregister(keys: Collection<String>, anchor: FieldAnchor) {
+        keys.forEach { if (anchors[it] === anchor) anchors.remove(it) }
     }
+
+    fun onAnchorPlaced() {
+        placements++
+    }
+}
+
+/** A row marked with [settingsField]: its coordinates once placed, null before. */
+internal interface FieldAnchor {
+    val placedCoordinates: LayoutCoordinates?
 }
 
 @Suppress("CompositionLocalAllowlist")
@@ -111,9 +123,14 @@ private data class SettingsFieldElement(val keys: Set<String>) : ModifierNodeEle
 private class SettingsFieldNode(private var keys: Set<String>) :
     Modifier.Node(),
     CompositionLocalConsumerModifierNode,
-    DrawModifierNode {
+    DrawModifierNode,
+    LayoutAwareModifierNode,
+    FieldAnchor {
 
     private var highlight: FieldHighlight? = null
+
+    override var placedCoordinates: LayoutCoordinates? = null
+        private set
 
     override fun onAttach() {
         highlight = currentValueOf(LocalFieldHighlight)?.also { it.register(keys, this) }
@@ -122,6 +139,13 @@ private class SettingsFieldNode(private var keys: Set<String>) :
     override fun onDetach() {
         highlight?.unregister(keys, this)
         highlight = null
+        placedCoordinates = null
+    }
+
+    override fun onPlaced(coordinates: LayoutCoordinates) {
+        if (coordinates === placedCoordinates) return
+        placedCoordinates = coordinates
+        highlight?.onAnchorPlaced()
     }
 
     fun update(newKeys: Set<String>) {
@@ -258,3 +282,6 @@ private fun Tinted(tint: () -> Color, content: @Composable () -> Unit) {
 internal const val HIGHLIGHT_ALPHA = 0.24f
 internal const val HIGHLIGHT_FADE_MILLIS = 300
 internal const val HIGHLIGHT_HOLD_MILLIS = 1_800L
+
+/** How long the host waits for the named row to be placed before it skips centering. */
+internal const val PLACEMENT_WAIT_MILLIS = 1_000L

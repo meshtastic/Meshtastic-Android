@@ -57,6 +57,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connect_radio_to_change_settings
@@ -142,7 +143,14 @@ fun <T : Message<T, *>> RadioConfigScreenList(
                     focus.consume(request)
                     highlight.key = key
                     highlightActive = true
-                    highlight.offsetToCenter(key)?.let { listState.animateScrollBy(it) }
+                    val offset =
+                        withTimeoutOrNull(PLACEMENT_WAIT_MILLIS) {
+                            snapshotFlow { highlight.placements to highlight.offsetToCenter(key) }
+                                .map { it.second }
+                                .filterNotNull()
+                                .first()
+                        }
+                    offset?.let { listState.animateScrollBy(it) }
                     delay(HIGHLIGHT_HOLD_MILLIS)
                     highlightActive = false
                 }

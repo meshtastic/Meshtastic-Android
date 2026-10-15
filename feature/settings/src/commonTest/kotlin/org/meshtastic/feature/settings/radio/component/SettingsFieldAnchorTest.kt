@@ -20,9 +20,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -40,6 +45,7 @@ import org.meshtastic.proto.Config
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
@@ -48,7 +54,7 @@ class SettingsFieldAnchorTest {
     private val rowKeys = (0 until ROWS).map { "field_$it" }
 
     @Composable
-    private fun LongCardScreen(focus: SettingsFieldFocus) {
+    private fun LongCardScreen(focus: SettingsFieldFocus, midRowPlaced: () -> Boolean = { true }) {
         AppTheme {
             CompositionLocalProvider(LocalSettingsFieldFocus provides focus) {
                 RadioConfigScreenList(
@@ -63,7 +69,11 @@ class SettingsFieldAnchorTest {
                     fieldItem(rowKeys.toSet()) {
                         TitledCard(title = "Card") {
                             rowKeys.forEachIndexed { i, key ->
-                                Text("Row $i", Modifier.settingsField(key).height(ROW_HEIGHT.dp))
+                                val row =
+                                    @Composable {
+                                        Text("Row $i", Modifier.settingsField(key).height(ROW_HEIGHT.dp))
+                                    }
+                                if (i == MID_ROW) PlacementGate(midRowPlaced, row) else row()
                             }
                         }
                     }
@@ -80,6 +90,28 @@ class SettingsFieldAnchorTest {
         setContent { LongCardScreen(focus) }
         waitForIdle()
 
+        assertMidRowCentered()
+        runOnIdle { assertEquals(null, focus.pending.value) }
+    }
+
+    @Test
+    fun aRowComposedBeforeItIsPlacedIsCenteredOncePlaced() = runComposeUiTest {
+        val focus = SettingsFieldFocus()
+        focus.request("field_$MID_ROW")
+        var placed by mutableStateOf(false)
+        mainClock.autoAdvance = false
+
+        setContent { LongCardScreen(focus, midRowPlaced = { placed }) }
+        repeat(UNPLACED_FRAMES) { mainClock.advanceTimeByFrame() }
+        runOnIdle { assertEquals(null, focus.pending.value) }
+
+        placed = true
+        repeat(SETTLE_FRAMES) { mainClock.advanceTimeByFrame() }
+
+        assertMidRowCentered()
+    }
+
+    private fun ComposeUiTest.assertMidRowCentered() {
         onNodeWithText("Row $MID_ROW").assertIsDisplayed()
         onNodeWithText("Row 0").assertIsNotDisplayed()
         val row = onNodeWithText("Row $MID_ROW").getBoundsInRoot()
@@ -87,7 +119,20 @@ class SettingsFieldAnchorTest {
         val rowCenter = (row.top + row.bottom) / 2
         val listCenter = (list.top + list.bottom) / 2
         assertTrue(abs((rowCenter - listCenter).value) <= CENTER_TOLERANCE_DP, "row at $rowCenter, list at $listCenter")
-        runOnIdle { assertEquals(null, focus.pending.value) }
+    }
+
+    @Test
+    fun aRowNotYetPlacedHasNoOffset() {
+        val highlight = FieldHighlight(mutableStateOf(Color.Red))
+        highlight.register(
+            setOf("a"),
+            object : FieldAnchor {
+                override val placedCoordinates: LayoutCoordinates? = null
+            },
+        )
+
+        assertNull(highlight.offsetToCenter("a"))
+        assertNull(highlight.offsetToCenter("missing"))
     }
 
     @Test
@@ -126,5 +171,18 @@ class SettingsFieldAnchorTest {
         const val ROW_HEIGHT = 56
         const val MID_ROW = 20
         const val CENTER_TOLERANCE_DP = 8f
+        const val UNPLACED_FRAMES = 20
+        const val SETTLE_FRAMES = 60
+    }
+}
+
+/** Measures [content] but places it only once [placed], so a row can be composed and laid out yet unplaced. */
+@Composable
+private fun PlacementGate(placed: () -> Boolean, content: @Composable () -> Unit) {
+    Layout(content = content) { measurables, constraints ->
+        val placeables = measurables.map { it.measure(constraints) }
+        layout(placeables.maxOfOrNull { it.width } ?: 0, placeables.sumOf { it.height }) {
+            if (placed()) placeables.forEach { it.place(0, 0) }
+        }
     }
 }
