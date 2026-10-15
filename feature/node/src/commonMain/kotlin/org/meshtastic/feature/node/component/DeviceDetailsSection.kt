@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -47,8 +49,10 @@ import coil3.request.ImageRequest
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.HardwareSupportTier
+import org.meshtastic.core.model.heroImageFile
 import org.meshtastic.core.model.supportTier
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.device_model_view
 import org.meshtastic.core.resources.ic_unverified
 import org.meshtastic.core.resources.img_hw_unknown
 import org.meshtastic.core.resources.supported
@@ -56,6 +60,7 @@ import org.meshtastic.core.resources.supported_by_community
 import org.meshtastic.core.resources.supported_by_maker
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Verified
+import org.meshtastic.core.ui.icon.ViewInAr
 import org.meshtastic.core.ui.icon.Wrench
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -71,12 +76,13 @@ internal fun DeviceHeroSection(
     deviceHardware: DeviceHardware,
     reportedTarget: String?,
     modifier: Modifier = Modifier,
+    onOpenDeviceModel: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        DeviceAvatar(bgColor, deviceHardware, size = 80)
+        DeviceAvatar(bgColor, deviceHardware, size = 80, onOpenDeviceModel = onOpenDeviceModel)
 
         Spacer(Modifier.width(16.dp))
 
@@ -94,16 +100,44 @@ internal fun DeviceHeroSection(
     }
 }
 
+/** The illustration, and when a 3D model exists a tap target for it with a corner badge saying so. */
 @Composable
-private fun DeviceAvatar(bgColor: Long, deviceHardware: DeviceHardware, size: Int = 64) {
-    Box(
-        modifier =
-        Modifier.size(size.dp)
-            .clip(CircleShape)
-            .background(color = Color(bgColor).copy(alpha = .5f), shape = CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
+private fun DeviceAvatar(
+    bgColor: Long,
+    deviceHardware: DeviceHardware,
+    size: Int = 64,
+    onOpenDeviceModel: (() -> Unit)? = null,
+) {
+    val label = stringResource(Res.string.device_model_view)
+    Box(modifier = Modifier.size(size.dp)) {
+        Box(
+            modifier =
+            Modifier.fillMaxSize()
+                .clip(CircleShape)
+                .background(color = Color(bgColor).copy(alpha = .5f), shape = CircleShape)
+                .then(
+                    if (onOpenDeviceModel != null) {
+                        Modifier.clickable(onClickLabel = label, role = Role.Button, onClick = onOpenDeviceModel)
+                    } else {
+                        Modifier
+                    },
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
+        }
+        if (onOpenDeviceModel != null) {
+            Icon(
+                imageVector = MeshtasticIcons.ViewInAr,
+                contentDescription = null,
+                tint = colorScheme.onPrimaryContainer,
+                modifier =
+                Modifier.align(Alignment.BottomEnd)
+                    .size(24.dp)
+                    .background(colorScheme.primaryContainer, CircleShape)
+                    .padding(4.dp),
+            )
+        }
     }
 }
 
@@ -149,7 +183,7 @@ private fun SupportStatusBadge(tier: HardwareSupportTier) {
 
 @Composable
 internal fun DeviceHardwareImage(deviceHardware: DeviceHardware, modifier: Modifier = Modifier) {
-    val hwImg = deviceHardware.images?.getOrNull(1) ?: deviceHardware.images?.getOrNull(0) ?: "unknown.svg"
+    val hwImg = deviceHardware.heroImageFile ?: "unknown.svg"
     val imageUrl = "https://flasher.meshtastic.org/img/devices/$hwImg"
     val fallbackPainter = org.jetbrains.compose.resources.painterResource(Res.drawable.img_hw_unknown)
     AsyncImage(

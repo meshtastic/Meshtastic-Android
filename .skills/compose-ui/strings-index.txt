@@ -391,6 +391,9 @@ device_metrics_log
 device_metrics_numeric_value
 device_metrics_percent_value
 device_metrics_voltage_value
+device_model_load_failed
+device_model_view
+device_model_view_in_space
 device_sleeping
 device_storage_ui_title
 device_theme_language

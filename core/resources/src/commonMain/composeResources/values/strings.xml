@@ -424,6 +424,9 @@
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
     <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
+    <string name="device_model_load_failed">Couldn't load the 3D model</string>
+    <string name="device_model_view">View 3D model</string>
+    <string name="device_model_view_in_space">View in your space</string>
     <string name="device_sleeping">Device sleeping</string>
     <string name="device_storage_ui_title">Device Storage &amp; UI (Read-Only)</string>
     <string name="device_theme_language">Theme: %1$s, Language: %2$s</string>
