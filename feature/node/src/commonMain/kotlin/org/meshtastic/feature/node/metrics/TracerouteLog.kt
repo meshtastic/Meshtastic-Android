@@ -62,6 +62,7 @@ import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
+import org.meshtastic.core.model.tracerouteHopName
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.traceroute_diff
@@ -110,7 +111,7 @@ fun TracerouteLogScreen(
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val lastTracerouteTime by viewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
 
-    fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$long_name ($short_name)" }
+    fun getUsername(nodeNum: Int): String = tracerouteHopName(nodeNum, viewModel.getUser(nodeNum))
 
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
@@ -361,14 +362,13 @@ private fun showTracerouteDetail(
                 ?.let { AnnotatedString(it) } ?: return
         }
 
-    val overlay =
-        route?.let {
-            TracerouteOverlay(
-                requestId = point.request.fromRadio.packet?.id ?: 0,
-                forwardRoute = it.route,
-                returnRoute = it.route_back,
-            )
-        }
+    val overlay = route?.let {
+        TracerouteOverlay(
+            requestId = point.request.fromRadio.packet?.id ?: 0,
+            forwardRoute = it.route,
+            returnRoute = it.route_back,
+        )
+    }
 
     viewModel.showTracerouteDetail(
         annotatedMessage = annotated,

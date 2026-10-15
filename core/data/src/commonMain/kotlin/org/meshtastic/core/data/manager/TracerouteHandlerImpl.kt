@@ -23,6 +23,7 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.model.tracerouteHopName
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
@@ -67,10 +68,7 @@ class TracerouteHandlerImpl(
         ) {
             val full =
                 routeDiscovery.getTracerouteResponse(
-                    getUser = { num ->
-                        val user = nodeRepository.getUser(num)
-                        "${user.long_name} (${user.short_name})"
-                    },
+                    getUser = { num -> tracerouteHopName(num, nodeRepository.getUser(num)) },
                     headerTowards = getStringSuspend(Res.string.traceroute_route_towards_dest),
                     headerBack = getStringSuspend(Res.string.traceroute_route_back_to_us),
                 )

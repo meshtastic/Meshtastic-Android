@@ -18,9 +18,11 @@ package org.meshtastic.core.model
 
 import co.touchlab.kermit.Logger
 import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.RouteDiscovery
+import org.meshtastic.proto.User
 
 val MeshPacket.fullRouteDiscovery: RouteDiscovery?
     get() {
@@ -57,8 +59,22 @@ val MeshPacket.fullRouteDiscovery: RouteDiscovery?
         return null
     }
 
+/**
+ * Display name for a traceroute hop. A node missing from the node DB comes back from the repository as a placeholder
+ * user with no hardware model and a generated "Meshtastic xxxx" name; that case is named by its full node id.
+ */
+fun tracerouteHopName(nodeNum: Int, user: User): String {
+    val id = NodeAddress.numToDefaultId(nodeNum)
+    val placeholder =
+        user.hw_model == HardwareModel.UNSET &&
+            (user.long_name.isBlank() || user.long_name == "Meshtastic ${id.takeLast(PLACEHOLDER_SUFFIX_LENGTH)}")
+    return if (placeholder) id else "${user.long_name} (${user.short_name})"
+}
+
+private const val PLACEHOLDER_SUFFIX_LENGTH = 4
+
 @Suppress("MagicNumber")
-private fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): String {
+internal fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): String {
     // nodesList should include both origin and destination nodes
     // origin will not have an SNR value, but destination should
     val snrStr =
