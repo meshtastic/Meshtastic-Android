@@ -34,6 +34,7 @@ import org.meshtastic.core.resources.app_database_backup_disconnect_confirmation
 import org.meshtastic.core.resources.app_database_backup_failed
 import org.meshtastic.core.resources.app_database_backup_saved
 import org.meshtastic.core.resources.app_database_restore_confirmation
+import org.meshtastic.core.resources.app_database_restore_corrupt
 import org.meshtastic.core.resources.app_database_restore_failed
 import org.meshtastic.core.resources.app_database_restore_not_backup
 import org.meshtastic.core.resources.app_database_restore_staged
@@ -55,15 +56,28 @@ class DatabaseBackupViewModel(
     private val alertManager: AlertManager,
 ) : ViewModel() {
 
+    /** The database and device a backup or restore acts on, captured before disconnecting switches databases. */
+    private class Target(val dbName: String, val deviceId: String?)
+
+    private var target: Target? = null
+
+    private fun captureTarget() = Target(backupService.activeDatabaseName, nodeRepository.myNodeInfo.value?.deviceId)
+
+    private fun targetDbName(): String = target?.dbName ?: backupService.activeDatabaseName
+
     /** File name offered by the save picker: device id and today's date. */
-    fun suggestedFileName(): String = DatabaseBackup.fileName(nodeRepository.myNodeInfo.value?.deviceId, nowInstant)
+    fun suggestedFileName(): String =
+        DatabaseBackup.fileName(target?.deviceId ?: nodeRepository.myNodeInfo.value?.deviceId, nowInstant)
 
     /**
-     * Runs [onReady] now when no radio is connected. Otherwise asks first and, once confirmed, disconnects the radio
-     * the same way the Connections screen does, then runs [onReady].
+     * Runs [onReady] now when the radio is disconnected. Otherwise, including while it sleeps or connects, asks first
+     * and, once confirmed, disconnects the radio the same way the Connections screen does, then runs [onReady]. Either
+     * way the backup or restore stays bound to the database that was active when this was called.
      */
     fun runWhenDisconnected(onReady: () -> Unit) {
-        if (radioController.connectionState.value !is ConnectionState.Connected) {
+        val captured = captureTarget()
+        if (radioController.connectionState.value is ConnectionState.Disconnected) {
+            target = captured
             onReady()
             return
         }
@@ -73,6 +87,7 @@ class DatabaseBackupViewModel(
             confirmTextRes = Res.string.disconnect,
             onConfirm = {
                 safeLaunch(tag = "databaseBackupDisconnect") {
+                    target = captured
                     radioPrefs.setDevName(null)
                     radioController.setDeviceAddress(NO_DEVICE_SELECTED)
                     onReady()
@@ -82,8 +97,9 @@ class DatabaseBackupViewModel(
     }
 
     fun backup(uri: CommonUri) {
+        val dbName = targetDbName()
         safeLaunch(tag = "databaseBackup") {
-            val written = fileService.write(uri) { sink -> backupService.export(sink) }
+            val written = fileService.write(uri) { sink -> backupService.export(dbName, sink) }
             val message =
                 getString(if (written) Res.string.app_database_backup_saved else Res.string.app_database_backup_failed)
             alertManager.showAlert(message = message)
@@ -103,9 +119,10 @@ class DatabaseBackupViewModel(
     }
 
     fun restore(uri: CommonUri) {
+        val dbName = targetDbName()
         safeLaunch(tag = "databaseRestore") {
             var result: RestoreStageResult = RestoreStageResult.Failed(IllegalStateException("file not readable"))
-            fileService.read(uri) { source -> result = backupService.stageRestore(source) }
+            fileService.read(uri) { source -> result = backupService.stageRestore(dbName, source) }
             alertManager.showAlert(message = restoreMessage(result))
         }
     }
@@ -119,6 +136,8 @@ class DatabaseBackupViewModel(
             when (val reason = result.reason) {
                 is DatabaseBackup.Validation.SchemaMismatch ->
                     getString(Res.string.app_database_restore_wrong_version, reason.found, reason.expected)
+
+                DatabaseBackup.Validation.Corrupt -> getString(Res.string.app_database_restore_corrupt)
 
                 else -> getString(Res.string.app_database_restore_not_backup)
             }

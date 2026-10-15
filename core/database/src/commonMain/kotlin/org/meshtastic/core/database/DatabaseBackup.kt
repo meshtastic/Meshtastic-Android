@@ -33,6 +33,8 @@ object DatabaseBackup {
     const val MIME_TYPE: String = "application/octet-stream"
     const val STAGED_SUFFIX: String = ".restore"
     const val STAGING_TEMP_SUFFIX: String = ".restore.tmp"
+    const val EXPORT_TEMP_SUFFIX: String = ".export.tmp"
+    const val BACKUP_SUFFIX: String = ".bak"
 
     private const val UNKNOWN_DEVICE: String = "device"
     private const val SQLITE_MAGIC: String = "SQLite format 3\u0000"
@@ -51,6 +53,9 @@ object DatabaseBackup {
         data object NotSqlite : Validation
 
         data class SchemaMismatch(val found: Int, val expected: Int) : Validation
+
+        /** SQLite cannot open the file, or `PRAGMA integrity_check` reports damage such as a truncated file. */
+        data object Corrupt : Validation
     }
 
     /**
@@ -90,6 +95,15 @@ object DatabaseBackup {
     fun stagedPath(dbFile: Path): Path = sibling(dbFile, STAGED_SUFFIX)
 
     internal fun stagingTempPath(dbFile: Path): Path = sibling(dbFile, STAGING_TEMP_SUFFIX)
+
+    internal fun exportTempPath(dbFile: Path): Path = sibling(dbFile, EXPORT_TEMP_SUFFIX)
+
+    /** The main, `-wal` and `-shm` files of the database at [dbFile], the set a restore moves as one. */
+    internal fun databaseFiles(dbFile: Path): List<Path> =
+        listOf(dbFile, sibling(dbFile, "-wal"), sibling(dbFile, "-shm"))
+
+    /** Where [file] is kept while a staged restore replaces it. */
+    internal fun backupPath(file: Path): Path = sibling(file, BACKUP_SUFFIX)
 
     /** The file next to [dbFile] named after it plus [suffix]; a parentless path resolves in the working directory. */
     internal fun sibling(dbFile: Path, suffix: String): Path {

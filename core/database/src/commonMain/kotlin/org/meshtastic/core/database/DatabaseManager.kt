@@ -552,20 +552,6 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         get() = currentDbName
 
     /**
-     * Folds the active database's WAL into its main file so a plain file copy is a complete, consistent snapshot, and
-     * returns that database's name. Goes through [withDb] so it queues behind the same writer admission as any write.
-     */
-    suspend fun checkpointActiveDatabase(): String {
-        val name = currentDbName
-        withDb { database ->
-            database.useWriterConnection { connection ->
-                connection.usePrepared("PRAGMA wal_checkpoint(TRUNCATE)") { statement -> statement.step() }
-            }
-        }
-        return name
-    }
-
-    /**
      * Resolves the DB name to use for [address], honoring a cross-transport alias when one exists. A secondary
      * transport (e.g. TCP) that has been unified with a node points at the DB the first transport (e.g. BLE) claimed;
      * without an alias this falls back to the address-hashed name — today's default — for a first-time or primary

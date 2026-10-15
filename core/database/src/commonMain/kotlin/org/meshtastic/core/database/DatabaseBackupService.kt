@@ -16,6 +16,12 @@
  */
 package org.meshtastic.core.database
 
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.SQLiteException
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.driver.bundled.SQLITE_OPEN_READONLY
+import androidx.sqlite.driver.bundled.SQLITE_OPEN_READWRITE
+import androidx.sqlite.execSQL
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
 import okio.BufferedSink
@@ -24,6 +30,7 @@ import okio.FileSystem
 import okio.IOException
 import okio.Path
 import org.koin.core.annotation.Single
+import org.meshtastic.core.database.DatabaseBackup.Validation
 import org.meshtastic.core.di.CoroutineDispatchers
 
 /** Outcome of [DatabaseBackupService.stageRestore]. */
@@ -31,73 +38,133 @@ sealed interface RestoreStageResult {
     /** The file is staged and replaces the device database the next time that database is opened. */
     data object Staged : RestoreStageResult
 
-    data class Invalid(val reason: DatabaseBackup.Validation) : RestoreStageResult
+    data class Invalid(val reason: Validation) : RestoreStageResult
 
     data class Failed(val cause: Throwable) : RestoreStageResult
 }
 
 /** What the settings screen needs from a database backup, so a test can stand in for the file-backed service. */
 interface DatabaseBackupOperations {
-    suspend fun export(sink: BufferedSink): Long
+    /** File name of the database active now; capture it before anything switches databases. */
+    val activeDatabaseName: String
 
-    suspend fun stageRestore(source: BufferedSource): RestoreStageResult
+    suspend fun export(dbName: String, sink: BufferedSink): Long
+
+    suspend fun stageRestore(dbName: String, source: BufferedSource): RestoreStageResult
 }
 
 /**
- * Copies the active device database out to a user-chosen sink, and stages a validated backup to replace it on the next
- * launch. A restore is never applied to an open database.
+ * Copies a device database out to a user-chosen sink, and stages a validated backup to replace it the next time that
+ * database is opened. A restore is never applied to an open database.
  */
 @Single
 class DatabaseBackupService(private val manager: DatabaseManager, private val dispatchers: CoroutineDispatchers) :
     DatabaseBackupOperations {
     private val fileSystem: FileSystem = getFileSystem()
 
-    /** Checkpoints the WAL into the main file, then streams that file into [sink]. Returns the bytes written. */
-    override suspend fun export(sink: BufferedSink): Long {
-        val dbName = manager.checkpointActiveDatabase()
-        return withContext(dispatchers.io) {
-            fileSystem.read(getDatabaseFile(dbName)) { sink.writeAll(this) }
+    override val activeDatabaseName: String
+        get() = manager.activeDatabaseName
+
+    /** Snapshots [dbName] with `VACUUM INTO`, then streams the snapshot into [sink]. Returns the bytes written. */
+    override suspend fun export(dbName: String, sink: BufferedSink): Long = withContext(dispatchers.io) {
+        val dbFile = getDatabaseFile(dbName)
+        val snapshot = DatabaseBackup.exportTempPath(dbFile)
+        fileSystem.delete(snapshot)
+        try {
+            vacuumInto(dbFile, snapshot)
+            fileSystem.read(snapshot) { sink.writeAll(this) }
+        } finally {
+            fileSystem.delete(snapshot)
         }
     }
 
     /**
-     * Validates the header of [source], streams it beside the active database, then atomically renames it into place as
+     * Streams [source] beside the database [dbName], checks it with SQLite, then atomically renames it into place as
      * the staged restore. Nothing the live database reads changes.
      */
-    override suspend fun stageRestore(source: BufferedSource): RestoreStageResult = withContext(dispatchers.io) {
-        val dbFile = getDatabaseFile(manager.activeDatabaseName)
-        val temp = DatabaseBackup.stagingTempPath(dbFile)
-        try {
-            val header = DatabaseBackup.readHeader(source)
-            val verdict = DatabaseBackup.validateHeader(header)
-            if (verdict != DatabaseBackup.Validation.Valid) return@withContext RestoreStageResult.Invalid(verdict)
-            fileSystem.write(temp) { writeAll(source) }
-            val staged = DatabaseBackup.stagedPath(dbFile)
-            fileSystem.delete(staged)
-            fileSystem.atomicMove(temp, staged)
-            RestoreStageResult.Staged
-        } catch (e: IOException) {
-            Logger.w(e) { "Staging database restore failed" }
-            fileSystem.delete(temp)
-            RestoreStageResult.Failed(e)
+    override suspend fun stageRestore(dbName: String, source: BufferedSource): RestoreStageResult =
+        withContext(dispatchers.io) {
+            val dbFile = getDatabaseFile(dbName)
+            val temp = DatabaseBackup.stagingTempPath(dbFile)
+            try {
+                val headerVerdict = DatabaseBackup.validateHeader(DatabaseBackup.readHeader(source))
+                if (headerVerdict != Validation.Valid) return@withContext RestoreStageResult.Invalid(headerVerdict)
+                fileSystem.write(temp) { writeAll(source) }
+                val verdict = validateBackupFile(temp, fileSystem)
+                if (verdict != Validation.Valid) {
+                    fileSystem.delete(temp)
+                    return@withContext RestoreStageResult.Invalid(verdict)
+                }
+                val staged = DatabaseBackup.stagedPath(dbFile)
+                fileSystem.delete(staged)
+                fileSystem.atomicMove(temp, staged)
+                RestoreStageResult.Staged
+            } catch (e: IOException) {
+                Logger.w(e) { "Staging database restore failed" }
+                fileSystem.delete(temp)
+                RestoreStageResult.Failed(e)
+            }
+        }
+}
+
+/**
+ * Writes a consistent single-file snapshot of the database at [dbFile], committed WAL frames included, to [target].
+ * Uses a connection of its own, so the snapshot does not depend on which database is active.
+ */
+internal fun vacuumInto(dbFile: Path, target: Path) {
+    BundledSQLiteDriver().open(dbFile.toString(), SQLITE_OPEN_READWRITE).use { connection ->
+        connection.execSQL("PRAGMA busy_timeout = ${BusyTimeoutSQLiteDriver.DEFAULT_BUSY_TIMEOUT_MS}")
+        connection.prepare("VACUUM INTO ?").use { statement ->
+            statement.bindText(1, target.toString())
+            statement.step()
         }
     }
 }
 
 /**
+ * Checks that [file] is a whole, undamaged SQLite database at exactly [expectedVersion]. An older version is rejected
+ * too: Room's destructive fallback would empty it on open wherever a migration is missing.
+ */
+internal fun validateBackupFile(
+    file: Path,
+    fileSystem: FileSystem,
+    expectedVersion: Int = DatabaseBackup.SCHEMA_VERSION,
+): Validation {
+    val headerVerdict = DatabaseBackup.validateHeader(fileSystem.read(file) { DatabaseBackup.readHeader(this) })
+    if (headerVerdict != Validation.Valid) return headerVerdict
+    return try {
+        BundledSQLiteDriver().open(file.toString(), SQLITE_OPEN_READONLY).use { connection ->
+            val version = connection.firstColumn("PRAGMA user_version")?.toIntOrNull()
+            when {
+                version != expectedVersion -> Validation.SchemaMismatch(version ?: -1, expectedVersion)
+                connection.firstColumn("PRAGMA integrity_check") == "ok" -> Validation.Valid
+                else -> Validation.Corrupt
+            }
+        }
+    } catch (e: SQLiteException) {
+        Logger.w(e) { "Backup file failed to open as SQLite" }
+        Validation.Corrupt
+    } finally {
+        fileSystem.delete(DatabaseBackup.sibling(file, "-wal"))
+        fileSystem.delete(DatabaseBackup.sibling(file, "-shm"))
+    }
+}
+
+private fun SQLiteConnection.firstColumn(sql: String): String? =
+    prepare(sql).use { statement -> if (statement.step()) statement.getText(0) else null }
+
+/**
  * Replaces the database file for [dbName] with its staged restore, if one exists and still validates. Runs before the
- * database is opened, so no connection holds the old file or its `-wal`/`-shm` companions.
+ * database is opened, so no connection holds the old file or its `-wal`/`-shm` companions. The old files move aside to
+ * `.bak` and come back if the staged file cannot take their place.
  */
 internal fun applyStagedRestore(dbName: String, dbFile: Path, fileSystem: FileSystem) {
-    val staged = DatabaseBackup.stagedPath(dbFile)
-    if (!fileSystem.exists(staged)) return
     try {
-        val header = fileSystem.read(staged) { DatabaseBackup.readHeader(this) }
-        if (DatabaseBackup.validateHeader(header) == DatabaseBackup.Validation.Valid) {
-            fileSystem.delete(DatabaseBackup.sibling(dbFile, "-wal"))
-            fileSystem.delete(DatabaseBackup.sibling(dbFile, "-shm"))
-            fileSystem.delete(dbFile)
-            fileSystem.atomicMove(staged, dbFile)
+        recoverInterruptedRestore(dbFile, fileSystem)
+        val staged = DatabaseBackup.stagedPath(dbFile)
+        if (!fileSystem.exists(staged)) return
+        if (validateBackupFile(staged, fileSystem) == Validation.Valid) {
+            swapInStagedRestore(staged, dbFile, fileSystem)
             Logger.i { "Applied staged restore to ${anonymizeDbName(dbName)}" }
         } else {
             fileSystem.delete(staged)
@@ -105,5 +172,35 @@ internal fun applyStagedRestore(dbName: String, dbFile: Path, fileSystem: FileSy
         }
     } catch (e: IOException) {
         Logger.w(e) { "Applying staged restore failed for ${anonymizeDbName(dbName)}" }
+    }
+}
+
+private fun swapInStagedRestore(staged: Path, dbFile: Path, fileSystem: FileSystem) {
+    val movedAside = mutableListOf<Path>()
+    try {
+        for (file in DatabaseBackup.databaseFiles(dbFile)) {
+            if (fileSystem.exists(file)) {
+                fileSystem.atomicMove(file, DatabaseBackup.backupPath(file))
+                movedAside += file
+            }
+        }
+        fileSystem.atomicMove(staged, dbFile)
+    } catch (e: IOException) {
+        for (file in movedAside.asReversed()) fileSystem.atomicMove(DatabaseBackup.backupPath(file), file)
+        throw e
+    }
+    for (file in movedAside) fileSystem.delete(DatabaseBackup.backupPath(file))
+}
+
+/**
+ * Finishes a swap a crash interrupted: with the main file missing its `.bak` set goes back, otherwise the swap
+ * completed and the `.bak` set is stale.
+ */
+private fun recoverInterruptedRestore(dbFile: Path, fileSystem: FileSystem) {
+    val putBack = !fileSystem.exists(dbFile) && fileSystem.exists(DatabaseBackup.backupPath(dbFile))
+    for (file in DatabaseBackup.databaseFiles(dbFile)) {
+        val aside = DatabaseBackup.backupPath(file)
+        if (!fileSystem.exists(aside)) continue
+        if (putBack) fileSystem.atomicMove(aside, file) else fileSystem.delete(aside)
     }
 }
