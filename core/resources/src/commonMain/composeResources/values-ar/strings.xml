@@ -97,6 +97,7 @@
     <!-- FILTER -->
     <string name="filter_icon">عربي</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">يجب عليك التحديث</string>
     <string name="firmware_too_old">يجب عليك التحديث.</string>
     <string name="firmware_update_failed">التحديث فشل</string>
     <!-- FORMAT -->
@@ -121,6 +122,7 @@
     <string name="locked">مقفل</string>
     <!-- LOG -->
     <string name="logs">سجلات</string>
+    <!-- LORA -->
     <string name="lora">إعدادات لورا</string>
     <string name="lora_config">إعدادات لورا</string>
     <string name="low_battery_title">البطارية منخفضه: %1$s</string>

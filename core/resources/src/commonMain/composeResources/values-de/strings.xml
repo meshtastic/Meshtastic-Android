@@ -514,6 +514,8 @@
     <string name="firmware_edition">Firmware-Version</string>
     <string name="firmware_event_ended_banner">%1$s ist vorbei. Kehre zur standard Meshtastic Firmware zurück, um die normalen Funktionen wiederherzustellen.</string>
     <string name="firmware_event_ended_button">Firmware updaten</string>
+    <string name="firmware_gate_title">Firmware-Aktualisierung erforderlich</string>
+    <string name="firmware_gate_update">Firmware updaten</string>
     <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a>.</string>
     <string name="firmware_recovery_ble_failed">Das Update konnte nicht über Bluetooth abgeschlossen werden. Der Standard-Bootloader dieses Geräts kann ein unterbrochenes Over-the-Air-Update nicht zuverlässig zu Ende führen. Schließen Sie das Gerät per USB an einen Computer an und flashen Sie es neu mit dem seriellen DFU-Tool des Herstellers (z. B. adafruit-nrfutil), um es wiederherzustellen.</string>
     <string name="firmware_recovery_button">Firmware-Update fortführen</string>
@@ -736,6 +738,7 @@
     <string name="logs">Protokolle</string>
     <string name="long_name">Langer Name</string>
     <string name="longitude">Längengrad</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Niedriger Akkustand</string>
@@ -1238,8 +1241,6 @@
     <string name="share_to">Teile mit…</string>
     <string name="share_your_location_in_real_time">Teilen Sie Ihren Standort in Echtzeit und koordinieren Sie Ihre Gruppe mit integrierten GPS Funktionen.</string>
     <string name="short_name">Kurzname</string>
-    <string name="should_update">Um von den neuesten Fehlerkorrekturen und Funktionen zu profitieren, aktualisieren Sie bitte Ihre Node-Firmware.\n\nneueste stabile Firmware-Version: %1$s</string>
-    <string name="should_update_firmware">Firmware-Update empfohlen.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Bedeutung der Verschlüsselung</string>
     <string name="show_iaq_legend">Legende für Luftqualität anzeigen</string>

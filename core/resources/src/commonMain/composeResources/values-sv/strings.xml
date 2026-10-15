@@ -403,6 +403,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Fast programvaruversion</string>
+    <string name="firmware_gate_title">Uppdatering av firmware krävs</string>
     <string name="firmware_old">Radiomodulens firmware är för gammal för att prata med denna applikation. För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för Firmware</a>.</string>
     <string name="firmware_recovery_banner">Uppdatering slutförd %1$s</string>
     <string name="firmware_too_old">Uppdatering av fast programvara krävs.</string>
@@ -578,6 +579,7 @@
     <string name="logs">Loggar</string>
     <string name="long_name">Långt namn</string>
     <string name="longitude">Longitud</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Lågt batteri</string>
@@ -1013,8 +1015,6 @@
     <string name="share_to">Dela med…</string>
     <string name="share_your_location_in_real_time">Dela din plats i realtid och håll din grupp samordnad med integrerade GPS-funktioner.</string>
     <string name="short_name">Kort namn</string>
-    <string name="should_update">För att dra nytta av de senaste rättelserna och funktionerna, vänligen uppdatera din nods fasta programvara.\n\nSenaste stabila fasta programvaruversion: %1$s</string>
-    <string name="should_update_firmware">Uppdatering av fast programvara rekommenderas.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Krypteringsnycklars betydelser</string>
     <string name="show_layer">Visa lager</string>

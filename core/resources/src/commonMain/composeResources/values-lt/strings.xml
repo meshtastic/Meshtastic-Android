@@ -97,6 +97,7 @@
     <!-- FILTER -->
     <string name="filter_icon">Filtras</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Reikalingas įrangos Firmware atnaujinimas</string>
     <string name="firmware_old">Radijo įrangos pfirmware yra per sena, kad galėtų bendrauti su šia programa. Daugiau informacijos apie tai rasite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">mūsų firmware diegimo vadove</a>.</string>
     <string name="firmware_too_old">Reikalingas įrangos Firmware atnaujinimas.</string>
     <string name="firmware_update_failed">Atnaujinti nepavyko</string>
@@ -123,6 +124,7 @@
     <string name="locked">Užrakintas</string>
     <!-- LOG -->
     <string name="logs">Log`ai</string>
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Talpyklos valdymas</string>
     <string name="map_cache_size">Dabartinis talpyklos dydis</string>

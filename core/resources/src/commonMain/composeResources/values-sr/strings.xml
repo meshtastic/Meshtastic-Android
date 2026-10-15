@@ -170,6 +170,7 @@
     <string name="filter_icon">Филтер</string>
     <!-- FIRMWARE -->
     <string name="firmware">Фирмвер</string>
+    <string name="firmware_gate_title">Ажурирање фирмвера је неопходно</string>
     <string name="firmware_old">Радио фирмвер је превише стар да би комуницирао са овом апликацијом. За више информација о овоме погледајте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш водич за инсталацију фирмвера</a>.</string>
     <string name="firmware_too_old">Ажурирање фирмвера је неопходно.</string>
     <string name="firmware_update_error">Грешка: %1$s</string>
@@ -213,6 +214,7 @@
     <string name="logs">Дневници</string>
     <string name="long_name">Дуго име</string>
     <string name="longitude">Дужина</string>
+    <!-- LORA -->
     <string name="lora">LoRA</string>
     <string name="lora_config">LoRA</string>
     <string name="low_battery_message">Чвор %1$s има низак ниво батерије (%2$d%)</string>

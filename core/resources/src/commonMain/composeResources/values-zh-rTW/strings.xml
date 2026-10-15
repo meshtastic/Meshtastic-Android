@@ -407,6 +407,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">韌體</string>
     <string name="firmware_edition">韌體版本</string>
+    <string name="firmware_gate_title">需要更新韌體</string>
     <string name="firmware_old">無法與此應用程式通訊，無線電韌體太舊。有關詳細信息，請參閱<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">我們的韌體安裝指南</a>。</string>
     <string name="firmware_too_old">韌體太舊，需要更新。</string>
     <string name="firmware_update_almost_there">即將完成⋯⋯</string>
@@ -585,6 +586,7 @@
     <string name="logs">系統記錄</string>
     <string name="long_name">裝置長名稱</string>
     <string name="longitude">經度</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">電量不足</string>
@@ -1027,8 +1029,6 @@
     <string name="share_to">分享至…</string>
     <string name="share_your_location_in_real_time">透過整合的 GPS 功能，即時分享你的位置，並保持團隊協調一致。</string>
     <string name="short_name">裝置短名稱</string>
-    <string name="should_update">為享受最新功能及所修復的問題，請更新您的節點韌體。\n\n最新穩定韌體版本為：%1$s</string>
-    <string name="should_update_firmware">建議更新韌體。</string>
     <!-- SHOW -->
     <string name="show_all_key_title">加密金鑰說明</string>
     <string name="show_iaq_legend">顯示空氣品質圖例</string>

@@ -143,6 +143,7 @@
     <string name="filter_icon">Filter</string>
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
+    <string name="firmware_gate_title">Firmware-update vereist</string>
     <string name="firmware_old">De radio firmware is te oud om met deze applicatie te praten. Voor meer informatie over deze zaak, zie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">onze Firmware Installation gids</a>.</string>
     <string name="firmware_too_old">Firmware-update vereist.</string>
     <string name="firmware_update_failed">Bijwerken mislukt</string>
@@ -188,6 +189,7 @@
     <!-- LOG -->
     <string name="logs">Logs</string>
     <string name="longitude">Lengtegraad</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery_title">Batterij bijna leeg: %1$s</string>

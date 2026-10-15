@@ -603,6 +603,8 @@
     <string name="firmware_edition">Laiteohjelmistoversio</string>
     <string name="firmware_event_ended_banner">%1$s on päättynyt. Palaa tavalliseen Meshtastic-laiteohjelmistoon palauttaaksesi normaalit ominaisuudet.</string>
     <string name="firmware_event_ended_button">Päivitä laiteohjelmisto</string>
+    <string name="firmware_gate_title">Laiteohjelmistopäivitys vaaditaan</string>
+    <string name="firmware_gate_update">Päivitä laiteohjelmisto</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Poistotiedosto kopioitiin, mutta laite ei aloittanut poistamista. Mitään ei ole vielä muutettu. Irrota laite, paina sen nollauspainiketta kahdesti ja yritä uudelleen.</string>
     <string name="firmware_maintenance_copy_failed">Tiedostoa ei voitu kopioida laitteen asemalle. Varmista, että asema on edelleen yhdistetty ja yritä uudelleen.</string>
     <string name="firmware_maintenance_data_unavailable">Laitteen tyhjennystiedostoja ei ole tällä hetkellä saatavilla. Tarkista yhteytesi ja yritä uudelleen tai käytä Web Flasheria osoitteessa flasher.meshtastic.org</string>
@@ -918,6 +920,7 @@
     <string name="logs">Lokitiedot</string>
     <string name="long_name">Pitkä nimi</string>
     <string name="longitude">Pituuspiiri</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Akku lähes tyhjä</string>
@@ -1538,8 +1541,6 @@
     <string name="share_to">Jaa…</string>
     <string name="share_your_location_in_real_time">Jaa sijaintisi reaaliaikaisesti ja varmista ryhmäsi yhteistoiminta GPS-toimintojen avulla.</string>
     <string name="short_name">Lyhytnimi</string>
-    <string name="should_update">Hyötyäksesi uusimmista korjauksista ja ominaisuuksista, päivitä firmware laiteohjelmistosi.\n\nUusin vakaa laiteohjelmistoversio: %1$s</string>
-    <string name="should_update_firmware">Laiteohjelmistopäivitystä suositellaan.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Salausavainten merkitykset</string>
     <string name="show_full_message_timestamps">Näytä viestien täydelliset aikaleimat</string>

@@ -241,6 +241,7 @@
     <string name="filter_words">Filtruj słowa</string>
     <!-- FIRMWARE -->
     <string name="firmware">Oprogramowanie</string>
+    <string name="firmware_gate_title">Wymagana aktualizacja firmware'u</string>
     <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby komunikować się z tą aplikacją. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nasz przewodnik instalacji oprogramowania układowego</a>.</string>
     <string name="firmware_too_old">Wymagana aktualizacja firmware'u.</string>
     <string name="firmware_update_almost_there">Prawie gotowe...</string>
@@ -347,6 +348,7 @@
     <string name="log_retention_never">Nigdy nie usuwaj logów</string>
     <string name="logs">Rejestry zdarzeń (logs)</string>
     <string name="long_name">Długa nazwa</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Słaba bateria</string>
@@ -616,7 +618,6 @@
     <string name="share_to">Udostępnij…</string>
     <string name="share_your_location_in_real_time">Udostępniaj swoją lokalizację w czasie rzeczywistym i koordynuj działania swojej grupy dzięki zintegrowanym funkcjom GPS.</string>
     <string name="short_name">Krótka nazwa</string>
-    <string name="should_update_firmware">Zalecana aktualizacja.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Znaczenie klucza szyfrowania</string>
     <string name="show_layer">Pokaż warstwę</string>

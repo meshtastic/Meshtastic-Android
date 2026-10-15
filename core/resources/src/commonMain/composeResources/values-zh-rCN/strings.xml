@@ -557,6 +557,8 @@
     <string name="firmware_edition">固件版本</string>
     <string name="firmware_event_ended_banner">%1$s 活动已结束请刷回标准的 Meshtastic 固件以恢复正常功能。</string>
     <string name="firmware_event_ended_button">更新固件</string>
+    <string name="firmware_gate_title">需要更新固件</string>
+    <string name="firmware_gate_update">更新固件</string>
     <string name="firmware_old">版本过旧，无法与此应用程序通讯。欲了解更多信息，请参阅 Meshtastic 网站上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
     <string name="firmware_recovery_banner">完成更新 %1$s</string>
     <string name="firmware_recovery_ble_failed">无法通过蓝牙完成更新该设备的原生引导程序无法可靠地完成被中断的无线更新。请使用 USB 数据线将其连接到电脑，并使用厂商提供的串口 DFU 工具（例如 adafruit-nrfutil）重新刷入固件，以恢复设备。</string>
@@ -833,6 +835,7 @@
     <string name="logs">日志</string>
     <string name="long_name">长名称</string>
     <string name="longitude">经度</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">电池电量低</string>
@@ -1358,8 +1361,6 @@
     <string name="share_to">分享到…</string>
     <string name="share_your_location_in_real_time">实时分享您的位置，并通过集成的GPS功能保持团队的协调一致。</string>
     <string name="short_name">短名称</string>
-    <string name="should_update">为了获得最新的修复和功能，请更新您的节点固件。\n\n最新稳定固件版本：%1$s</string>
-    <string name="should_update_firmware">推荐固件更新。</string>
     <!-- SHOW -->
     <string name="show_all_key_title">加密密钥</string>
     <string name="show_iaq_legend">显示空气质量图例</string>

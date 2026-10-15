@@ -160,6 +160,7 @@
     <string name="filter_icon">Filtrar</string>
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
+    <string name="firmware_gate_title">Atualização do firmware necessária</string>
     <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo. Para mais informações consultar <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Nosso guia de instalação de firmware</a>.</string>
     <string name="firmware_too_old">Necessário atualização de firmware.</string>
     <string name="firmware_update_failed">Atualização falhou</string>
@@ -212,6 +213,7 @@
     <!-- LOG -->
     <string name="logs">Registo de eventos</string>
     <string name="longitude">Longitude</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery_message">O node %1$s tem a bateria fraca (%2$d%)</string>
@@ -412,8 +414,6 @@
     <string name="share">Partilha</string>
     <string name="share_contact">Partilhar Contacto</string>
     <string name="share_to">Partilhar para…</string>
-    <string name="should_update">Para beneficiar das últimas correções e funcionalidades, por favor, atualize o firmware do node.\n\nÚltima versão estável do firmware: %1$s</string>
-    <string name="should_update_firmware">Atualização de firmware recomendada.</string>
     <!-- SHOW -->
     <string name="show_password">Mostrar palavra-passe</string>
     <string name="shutdown">Desligar</string>

@@ -82,6 +82,7 @@
     <!-- FILTER -->
     <string name="filter_icon">Filtre</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Actualització de firmware necessària</string>
     <string name="firmware_old">El firmware de la ràdio és massa antic per comunicar-se amb aquesta aplicació. Per a més informació sobre això veure <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="firmware_too_old">Actualització de firmware necessària.</string>
     <string name="firmware_update_failed">Actualització fallida</string>
@@ -104,6 +105,7 @@
     <!-- LOCKDOWN -->
     <string name="locked">Bloquejat</string>
     <!-- LOG -->
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Director de la memòria cau</string>
     <string name="map_cache_size">Mida actual de la memòria cau</string>

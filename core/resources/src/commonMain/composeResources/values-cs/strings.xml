@@ -553,6 +553,8 @@
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Firmware edice</string>
     <string name="firmware_event_ended_button">Aktualizovat firmware</string>
+    <string name="firmware_gate_title">Vyžadována aktualizace firmwaru</string>
+    <string name="firmware_gate_update">Aktualizovat firmware</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Soubor byl zkopírován, ale zařízení nezačalo s mazáním. Zatím se nic nezměnilo. Odpojte zařízení, dvakrát stiskněte jeho resetovací tlačítko a zkuste to znovu.</string>
     <string name="firmware_maintenance_copy_failed">Soubor se nepodařilo zkopírovat na disk zařízení. Zkontrolujte, zda je disk stále připojený, a zkuste to znovu.</string>
     <string name="firmware_maintenance_data_unavailable">Seznam obrazů pro vymazání není momentálně k dispozici. Zkontrolujte připojení a zkuste to znovu, nebo použijte nástroj pro nahrání firmwaru na flasher.meshtastic.org.</string>
@@ -849,6 +851,7 @@
     <string name="logs">Logy</string>
     <string name="long_name">Dlouhé jméno</string>
     <string name="longitude">Zeměpisná délka</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Nízký stav baterie</string>
@@ -1451,8 +1454,6 @@
     <string name="share_your_location_in_real_time">Sdílejte svou polohu v reálném čase a udržujte svou skupinu koordinovanou díky integrovaným funkcím GPS.</string>
     <string name="shared_contact_no_public_key">Tento kontakt nemá žádný veřejný klíč, takže jej nelze importovat. Kontakt bez něj vymaže všechny klíče, které vaše rádio již pro daný uzel drží. Požádejte odesílatele, aby jej znovu sdílel, jakmile si jeho uzel vymění klíče.</string>
     <string name="short_name">Krátké jméno</string>
-    <string name="should_update">Chcete-li využít nejnovějších oprav a funkcí, aktualizujte firmware vašeho uzlu.\n\nPoslední stabilní verze firmwaru: %1$s</string>
-    <string name="should_update_firmware">Doporučena aktualizace firmwaru.</string>
     <!-- SHOW -->
     <string name="show_full_message_timestamps">Zobrazovat úplná časová razítka zpráv</string>
     <string name="show_full_message_timestamps_summary">Vždy zobrazovat datum a čas v záhlaví konverzací a při akcích se zprávami</string>

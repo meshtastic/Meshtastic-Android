@@ -96,6 +96,7 @@
     <!-- FILTER -->
     <string name="filter_icon">Scagaire</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">Nuashonrú teastaíonn ar an gcórais</string>
     <string name="firmware_old">Tá an firmware raidió ró-aoiseach chun cumarsáid a dhéanamh leis an aip seo. Chun tuilleadh eolais a fháil, féach <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ár gCúnamh Suiteála Firmware</a>.</string>
     <string name="firmware_too_old">Nuashonrú teastaíonn ar an gcórais.</string>
     <string name="firmware_update_failed">Nuacht nuashonraithe</string>
@@ -124,6 +125,7 @@
     <string name="locked">Ceangailte</string>
     <!-- LOG -->
     <string name="logs">Lógáil</string>
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">Bainisteoir Cásla</string>
     <string name="map_cache_size">Méid na Cásla Reatha</string>

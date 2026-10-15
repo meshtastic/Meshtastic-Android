@@ -361,6 +361,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">Прошивка</string>
     <string name="firmware_edition">Тип прошивки</string>
+    <string name="firmware_gate_title">Потрібне оновлення прошивки</string>
     <string name="firmware_old">Прошивка радіо застаріла для зв’язку з цією програмою. Для отримання додаткової інформації дивіться <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш посібник із встановлення мікропрограми</a>.</string>
     <string name="firmware_too_old">Потрібне оновлення прошивки.</string>
     <string name="firmware_update_almost_there">Майже готово...</string>
@@ -541,6 +542,7 @@
     <string name="logs">Журнали подій</string>
     <string name="long_name">Довга назва</string>
     <string name="longitude">Довгота</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Низький заряд батареї</string>
@@ -970,8 +972,6 @@
     <string name="share_to">Поділитися з…</string>
     <string name="share_your_location_in_real_time">Діліться своїм місцезнаходженням у реальному часі та координуйте групу завдяки вбудованим функціям GPS.</string>
     <string name="short_name">Коротка назва</string>
-    <string name="should_update">Щоб скористатися найновішими виправленнями помилок та функціями, оновіть прошивку вашого вузла.\n\nОстання стабільна версія прошивки: %1$s</string>
-    <string name="should_update_firmware">Рекомендується оновлення прошивки.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Значення ключа шифрування</string>
     <string name="show_layer">Показати шар</string>
