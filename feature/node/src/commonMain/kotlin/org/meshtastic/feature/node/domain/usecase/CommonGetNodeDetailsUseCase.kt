@@ -49,6 +49,8 @@ import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.feature.node.detail.NodeDetailUiState
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsState
+import org.meshtastic.feature.node.metrics.observedTracerouteResponses
+import org.meshtastic.feature.node.metrics.tracedByTracerouteRequests
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.proto.DeviceProfile
@@ -224,6 +226,8 @@ constructor(
                     paxMetrics = logs.pax,
                     tracerouteRequests = trReqs,
                     tracerouteResults = logs.trRes,
+                    tracerouteObserved = observedTracerouteResponses(trReqs, logs.trRes),
+                    tracerouteTracedBy = tracedByTracerouteRequests(logs.trRes, identity.ourNode?.num),
                     neighborInfoRequests = niReqs,
                     neighborInfoResults = logs.niRes,
                     firmwareEdition = metadata.edition,

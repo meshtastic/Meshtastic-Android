@@ -1928,6 +1928,7 @@
     <string name="traceroute_log">Traceroute</string>
     <string name="traceroute_map_no_data">This traceroute does not have any mappable nodes yet.</string>
     <string name="traceroute_no_response">No Response</string>
+    <string name="traceroute_observed">Observed</string>
     <string name="traceroute_outgoing_route">Outgoing route</string>
     <string name="traceroute_return_hops">Return Hops</string>
     <string name="traceroute_return_route">Return route</string>
@@ -1935,6 +1936,7 @@
     <string name="traceroute_route_back_to_us">Route traced back to us:\n\n</string>
     <string name="traceroute_route_towards_dest">Route traced toward destination:\n\n</string>
     <string name="traceroute_showing_nodes">Showing %1$d/%2$d nodes</string>
+    <string name="traceroute_traced_by">Traced by %1$s</string>
     <string name="traceroute_unknown_hop">Unknown hop</string>
     <string name="track_and_share_locations">Track and Share Locations</string>
     <string name="track_point">track point</string>

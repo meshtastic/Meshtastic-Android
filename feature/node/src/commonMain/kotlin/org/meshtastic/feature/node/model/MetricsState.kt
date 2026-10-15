@@ -41,6 +41,10 @@ data class MetricsState(
     val hostMetrics: List<Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshLog> = emptyList(),
+    /** Responses from this node to traces our radio sent without this app asking. */
+    val tracerouteObserved: List<MeshLog> = emptyList(),
+    /** Traceroute requests this node sent to us, each carrying its inbound route. */
+    val tracerouteTracedBy: List<MeshLog> = emptyList(),
     val neighborInfoRequests: List<MeshLog> = emptyList(),
     val neighborInfoResults: List<MeshLog> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
@@ -63,7 +67,8 @@ data class MetricsState(
 
     fun hasPowerMetrics() = powerMetrics.isNotEmpty()
 
-    fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
+    fun hasTracerouteLogs() =
+        tracerouteRequests.isNotEmpty() || tracerouteObserved.isNotEmpty() || tracerouteTracedBy.isNotEmpty()
 
     fun hasNeighborInfoLogs() = neighborInfoRequests.isNotEmpty()
 

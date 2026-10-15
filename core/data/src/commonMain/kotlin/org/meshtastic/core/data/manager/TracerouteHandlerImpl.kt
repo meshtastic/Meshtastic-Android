@@ -18,12 +18,14 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.tracerouteHopName
+import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
@@ -36,6 +38,8 @@ import org.meshtastic.core.resources.traceroute_route_back_to_us
 import org.meshtastic.core.resources.traceroute_route_towards_dest
 import org.meshtastic.core.resources.traceroute_unknown_hop
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.RouteDiscovery
 
 @Single
 class TracerouteHandlerImpl(
@@ -43,10 +47,21 @@ class TracerouteHandlerImpl(
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRepository: NodeRepository,
     private val radioInterfaceService: RadioInterfaceService,
+    private val meshLogRepository: Lazy<MeshLogRepository>,
     private val scope: ServiceScope,
 ) : TracerouteHandler {
 
     private val requestTimer = RequestTimer()
+
+    /** Renders the alert text. Replaced in unit tests, where Compose resources cannot load. */
+    internal var renderResponse: suspend (RouteDiscovery) -> String = { routeDiscovery ->
+        val unknownHopLabel = getStringSuspend(Res.string.traceroute_unknown_hop)
+        routeDiscovery.getTracerouteResponse(
+            getUser = { num -> tracerouteHopName(num, nodeRepository.getUser(num), unknownHopLabel) },
+            headerTowards = getStringSuspend(Res.string.traceroute_route_towards_dest),
+            headerBack = getStringSuspend(Res.string.traceroute_route_back_to_us),
+        )
+    }
 
     override fun recordStartTime(requestId: Int) = requestTimer.start(requestId)
 
@@ -67,13 +82,6 @@ class TracerouteHandlerImpl(
             session = session,
             onRejected = { Logger.d { "Dropped traceroute work from a retired transport session" } },
         ) {
-            val unknownHopLabel = getStringSuspend(Res.string.traceroute_unknown_hop)
-            val full =
-                routeDiscovery.getTracerouteResponse(
-                    getUser = { num -> tracerouteHopName(num, nodeRepository.getUser(num), unknownHopLabel) },
-                    headerTowards = getStringSuspend(Res.string.traceroute_route_towards_dest),
-                    headerBack = getStringSuspend(Res.string.traceroute_route_back_to_us),
-                )
             val requestId = packet.decoded?.request_id ?: 0
 
             if (logUuid != null) {
@@ -85,7 +93,14 @@ class TracerouteHandlerImpl(
                 tracerouteSnapshotRepository.upsertSnapshotPositions(logUuid, requestId, snapshotPositions)
             }
 
-            val responseText = requestTimer.appendDuration(requestId, full, "Traceroute")
+            // A response we did not ask for (a trace started on the radio's screen, another client) is recorded in
+            // history as observed and raises no alert.
+            if (!isOurRequest(requestId, packet.from)) {
+                Logger.d { "Traceroute response $requestId was not requested by this app; recorded as observed" }
+                return@launchSessionWork
+            }
+
+            val responseText = requestTimer.appendDuration(requestId, renderResponse(routeDiscovery), "Traceroute")
             val destination = forwardRoute.firstOrNull() ?: returnRoute.lastOrNull() ?: 0
             serviceStateWriter.setTracerouteResponse(
                 TracerouteResponse(
@@ -99,4 +114,16 @@ class TracerouteHandlerImpl(
             )
         }
     }
+
+    /**
+     * The in-memory timer covers requests sent since this process started; the request's MeshLog row covers one sent
+     * before a restart.
+     */
+    private suspend fun isOurRequest(requestId: Int, responder: Int): Boolean = requestId != 0 &&
+        (
+            requestTimer.has(requestId) ||
+                meshLogRepository.value.getRequestLogs(responder, PortNum.TRACEROUTE_APP).first().any {
+                    it.fromRadio.packet?.id == requestId
+                }
+            )
 }

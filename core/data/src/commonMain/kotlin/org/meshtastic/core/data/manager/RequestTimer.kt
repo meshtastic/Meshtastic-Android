@@ -40,6 +40,9 @@ internal class RequestTimer {
         startTimes.update { it.putting(requestId, nowMillis) }
     }
 
+    /** Whether a start time is still recorded for [requestId], i.e. this process sent it and no response has landed. */
+    fun has(requestId: Int): Boolean = startTimes.value.containsKey(requestId)
+
     /**
      * Consumes the start time recorded for [requestId] and appends a `Duration: N s` line to [text], logging completion
      * under [logLabel]. Returns [text] unchanged when no start time was recorded for the id.

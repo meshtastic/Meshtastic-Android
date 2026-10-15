@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class RequestTimerTest {
@@ -59,5 +60,17 @@ class RequestTimerTest {
         // Consuming one id must not affect the other.
         timer.appendDuration(requestId = 1, text = "a", logLabel = "Test")
         assertTrue(timer.appendDuration(requestId = 2, text = "b", logLabel = "Test").contains("Duration: "))
+    }
+
+    @Test
+    fun has_isTrueOnlyBetweenStartAndResponse() {
+        val timer = RequestTimer()
+        assertFalse(timer.has(requestId = 3))
+
+        timer.start(requestId = 3)
+        assertTrue(timer.has(requestId = 3))
+
+        timer.appendDuration(requestId = 3, text = "a", logLabel = "Test")
+        assertFalse(timer.has(requestId = 3))
     }
 }
