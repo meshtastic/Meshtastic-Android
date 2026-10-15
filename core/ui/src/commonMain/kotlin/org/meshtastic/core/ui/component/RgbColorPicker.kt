@@ -127,6 +127,7 @@ private fun ChannelSlider(label: String, value: Int, enabled: Boolean, onValueCh
             Text(text = value.toString(), style = MaterialTheme.typography.bodyMedium)
         }
         Slider(
+            modifier = Modifier.semantics { contentDescription = label },
             value = value.toFloat(),
             onValueChange = { onValueChange(it.roundToInt().coerceIn(0, RGB_CHANNEL_MAX)) },
             valueRange = 0f..RGB_CHANNEL_MAX.toFloat(),
