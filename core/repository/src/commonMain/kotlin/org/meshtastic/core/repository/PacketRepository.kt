@@ -207,11 +207,16 @@ interface PacketRepository {
     suspend fun deleteMessages(uuidList: List<Long>)
 
     /**
-     * Runs [send], then deletes message [uuid] from the database that was active when [send] started. Nothing is
-     * deleted if [send] throws or another database has become active meanwhile, since UUIDs are only unique within one
-     * database. Once [send] returns, cancelling the caller no longer stops the delete.
+     * Requeues message [uuid] in place: the row keeps its uuid and timestamp and takes the fresh [packetId] with a
+     * QUEUED status, then [enqueue] hands it to the send queue. If [enqueue] throws, the row is restored exactly as it
+     * was and the exception propagates. Returns the row's id, or null when it no longer exists (or the active database
+     * changed meanwhile, since uuids are only unique within one database).
      */
-    suspend fun replaceMessage(uuid: Long, send: suspend () -> Unit)
+    suspend fun resendMessage(
+        uuid: Long,
+        packetId: Int,
+        enqueue: suspend (PersistedPacketId) -> Unit,
+    ): PersistedPacketId?
 
     /** Deletes all messages and settings for the given contacts. */
     suspend fun deleteContacts(contactList: List<String>)

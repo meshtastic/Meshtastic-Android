@@ -34,7 +34,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.repository.ActiveConversationTracker
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.CustomEmojiPrefs
@@ -92,13 +91,6 @@ class MessageViewModelResendTest {
         every { packetRepository.getUnreadCountFlow(any<String>()) } returns MutableStateFlow(0)
         every { packetRepository.getFilteredCountFlow(any<String>()) } returns MutableStateFlow(0)
         every { quickChatActionRepository.getAllActions() } returns MutableStateFlow(emptyList())
-        everySuspend { packetRepository.replaceMessage(any(), any()) } calls
-            {
-                calls += "replace:${it.args[0]}"
-                @Suppress("UNCHECKED_CAST")
-                val send = it.args[1] as suspend () -> Unit
-                send()
-            }
 
         viewModel =
             MessageViewModel(
@@ -127,29 +119,30 @@ class MessageViewModelResendTest {
     }
 
     @Test
-    fun `resend sends the new message inside the replacement of the original`() = runTest {
-        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } calls
+    fun `resend asks the use case to resend the stored row in place`() = runTest {
+        everySuspend { sendMessageUseCase.resend(any(), any()) } calls
             {
-                calls += "send"
+                calls += "resend:${it.args[0]}"
                 SendMessageOutcome.Queued(1)
             }
 
-        viewModel.resendMessage(uuid = 42L, text = "Hello", contactKey = LIVE_CONTACT)
+        viewModel.resendMessage(uuid = 42L, contactKey = LIVE_CONTACT)
         advanceUntilIdle()
 
-        assertEquals(listOf("replace:42", "send"), calls)
-        verifySuspend { sendMessageUseCase.invoke("Hello", LIVE_CONTACT, null) }
+        assertEquals(listOf("resend:42"), calls)
+        verifySuspend { sendMessageUseCase.resend(42L, LIVE_CONTACT) }
+        verifySuspend(VerifyMode.not) { sendMessageUseCase.invoke(any(), any(), any()) }
+        verifySuspend(VerifyMode.not) { packetRepository.deleteMessages(any()) }
     }
 
     @Test
-    fun `resend into a retired conversation neither sends nor deletes`() = runTest {
-        val retired = ContactKey.retiredBroadcast("a1b2c3d4").value
+    fun `resend whose use case throws does not delete the original`() = runTest {
+        everySuspend { sendMessageUseCase.resend(any(), any()) } calls { error("queue refused the message") }
 
-        viewModel.resendMessage(uuid = 42L, text = "Hello", contactKey = retired)
+        viewModel.resendMessage(uuid = 42L, contactKey = LIVE_CONTACT)
         advanceUntilIdle()
 
-        verifySuspend(VerifyMode.not) { sendMessageUseCase.invoke(any(), any(), any()) }
-        verifySuspend(VerifyMode.not) { packetRepository.replaceMessage(any(), any()) }
+        verifySuspend(VerifyMode.not) { packetRepository.deleteMessages(any()) }
     }
 
     private companion object {

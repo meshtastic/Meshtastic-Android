@@ -41,7 +41,6 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.common.util.ioDispatcher
-import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
@@ -406,14 +405,12 @@ class MessageViewModel(
         safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }
 
     /**
-     * Replaces message [uuid] with a fresh send of [text]. The original row is deleted only after the new one is
-     * queued, so a refused or failed send leaves it in place rather than losing the message.
+     * Sends message [uuid] again in place: it keeps its position and reply link, and a refused or failed send leaves
+     * the row as it was.
      */
-    fun resendMessage(uuid: Long, text: String, contactKey: String) {
-        // A retired conversation has no channel to send on; refuse here, where the delete would otherwise follow.
-        if (ContactKey(contactKey).isRetired) return
+    fun resendMessage(uuid: Long, contactKey: String) {
         safeLaunch(errorEvents = sendErrorEvents, tag = "resendMessage") {
-            packetRepository.replaceMessage(uuid) { sendMessageUseCase.invoke(text, contactKey, null) }
+            sendMessageUseCase.resend(uuid, contactKey)
         }
     }
 

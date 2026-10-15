@@ -431,6 +431,25 @@ interface PacketDao {
     )
     suspend fun getPacketsByPacketIdAndContact(packetId: Int, contactKey: String): List<PacketEntity>
 
+    @Query("SELECT * FROM packet WHERE uuid = :uuid LIMIT 1")
+    suspend fun getPacketByUuid(uuid: Long): Packet?
+
+    /**
+     * Gives message [uuid] a fresh [packetId] and a QUEUED status without touching its uuid or timestamp, and returns
+     * the row as it was, or null when there is none.
+     */
+    @Transaction
+    suspend fun requeueMessage(uuid: Long, packetId: Int): Packet? = getPacketByUuid(uuid)?.also {
+        update(
+            it.copy(
+                packetId = packetId,
+                data = it.data.copy(id = packetId, status = MessageStatus.QUEUED),
+                routingError = -1,
+                sfpp_hash = null,
+            ),
+        )
+    }
+
     @Query(
         """
         SELECT * FROM packet

@@ -21,11 +21,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
@@ -430,52 +427,73 @@ abstract class CommonPacketRepositoryTest {
     }
 
     @Test
-    fun `replaceMessage deletes the original only after the send returns`() = runTest(testDispatcher) {
-        val original = repository.savePacket(0, "0^all", textPacket(id = 1, text = "original"), 1L)
-        var presentDuringSend = false
+    fun `resendMessage keeps the row's uuid and timestamp and queues it under a fresh packet id`() =
+        runTest(testDispatcher) {
+            val failed = textPacket(id = 1, text = "original").copy(status = MessageStatus.ERROR)
+            val original = repository.savePacket(0, "0^all", failed, 1_000L)
+            val queued = mutableListOf<PersistedPacketId>()
 
-        repository.replaceMessage(original.uuid) {
-            presentDuringSend = repository.getPacketByPersistedId(original) != null
+            val id = repository.resendMessage(original.uuid, packetId = 2) { queued += it }
+
+            assertEquals(original, id)
+            assertEquals(listOf(original), queued)
+            val row = assertNotNull(dbProvider.currentDb.value.packetDao().getPacketByUuid(original.uuid))
+            assertEquals(1_000L, row.received_time)
+            assertEquals(2, row.packetId)
+            assertEquals(2, row.data.id)
+            assertEquals(MessageStatus.QUEUED, row.data.status)
+            assertEquals("original", row.data.text)
         }
 
-        assertTrue(presentDuringSend)
-        assertNull(repository.getPacketByPersistedId(original))
+    @Test
+    fun `resendMessage keeps the reply link`() = runTest(testDispatcher) {
+        val reply = textPacket(id = 1, text = "reply").copy(replyId = 777, status = MessageStatus.ERROR)
+        val original = repository.savePacket(0, "0^all", reply, 1_000L)
+
+        repository.resendMessage(original.uuid, packetId = 2) {}
+
+        assertEquals(777, repository.getPacketByPersistedId(original)?.replyId)
     }
 
     @Test
-    fun `replaceMessage keeps the original when the send fails`() = runTest(testDispatcher) {
-        val original = repository.savePacket(0, "0^all", textPacket(id = 1, text = "original"), 1L)
+    fun `resendMessage keeps the original row exactly as it was when the enqueue throws`() = runTest(testDispatcher) {
+        val failed = textPacket(id = 1, text = "original").copy(status = MessageStatus.ERROR)
+        val original = repository.savePacket(0, "0^all", failed, 1_000L)
+        val before = assertNotNull(dbProvider.currentDb.value.packetDao().getPacketByUuid(original.uuid))
 
         assertFailsWith<IllegalStateException> {
-            repository.replaceMessage(original.uuid) { error("queue refused the message") }
+            repository.resendMessage(original.uuid, packetId = 2) { error("queue refused the message") }
         }
 
-        assertNotNull(repository.getPacketByPersistedId(original))
+        assertEquals(before, dbProvider.currentDb.value.packetDao().getPacketByUuid(original.uuid))
     }
 
     @Test
-    fun `replaceMessage still deletes the original when the caller is cancelled after the send`() =
-        runTest(testDispatcher) {
-            val original = repository.savePacket(0, "0^all", textPacket(id = 1, text = "original"), 1L)
+    fun `resendMessage returns null and enqueues nothing for a missing row`() = runTest(testDispatcher) {
+        var enqueued = false
 
-            launch { repository.replaceMessage(original.uuid) { currentCoroutineContext().cancel() } }.join()
+        val id = repository.resendMessage(uuid = 12345L, packetId = 2) { enqueued = true }
 
-            assertNull(repository.getPacketByPersistedId(original))
-        }
+        assertNull(id)
+        assertFalse(enqueued)
+    }
 
     @Test
-    fun `replaceMessage leaves the newly active database alone`() = runTest(testDispatcher) {
+    fun `resendMessage leaves the newly active database alone when the enqueue fails`() = runTest(testDispatcher) {
         val original = repository.savePacket(0, "0^all", textPacket(id = 1, text = "device A"), 1L)
         var unrelated: PersistedPacketId? = null
 
-        repository.replaceMessage(original.uuid) {
-            dbProvider.switchToNewDatabase()
-            unrelated = repository.savePacket(0, "0^all", textPacket(id = 2, text = "device B"), 2L)
+        assertFailsWith<IllegalStateException> {
+            repository.resendMessage(original.uuid, packetId = 2) {
+                dbProvider.switchToNewDatabase()
+                unrelated = repository.savePacket(0, "0^all", textPacket(id = 3, text = "device B"), 2L)
+                error("queue refused the message")
+            }
         }
 
         val survivor = assertNotNull(unrelated)
-        assertEquals(original.uuid, survivor.uuid, "the new database reuses the original's UUID")
-        assertNotNull(repository.getPacketByPersistedId(survivor))
+        assertEquals("device B", repository.getPacketByPersistedId(survivor)?.text)
+        assertEquals(MessageStatus.RECEIVED, repository.getPacketByPersistedId(survivor)?.status)
     }
 
     private fun textPacket(id: Int, text: String) = DataPacket(

@@ -187,6 +187,58 @@ class SendMessageUseCaseTest {
         verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
     }
 
+    @Test
+    fun `resend requeues the stored row through the repository and enqueues it`() = runTest {
+        val persistedId = PersistedPacketId(myNodeNum = 1, uuid = 77L)
+        everySuspend { packetRepository.resendMessage(any(), any(), any()) } calls
+            { call ->
+                val enqueue = call.arg<suspend (PersistedPacketId) -> Unit>(2)
+                enqueue(persistedId)
+                persistedId
+            }
+
+        val outcome = useCase.resend(77L, "0${NodeAddress.ID_BROADCAST}")
+
+        assertIs<SendMessageOutcome.Queued>(outcome)
+        verifySuspend { packetRepository.resendMessage(77L, any(), any()) }
+        verifySuspend { messageQueue.enqueue(persistedId) }
+        verifySuspend(VerifyMode.exactly(0)) { packetRepository.savePacket(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `resend of a row that no longer exists is refused`() = runTest {
+        everySuspend { packetRepository.resendMessage(any(), any(), any()) } returns null
+
+        useCase.resend(77L, "0${NodeAddress.ID_BROADCAST}") shouldBe SendMessageOutcome.Refused
+    }
+
+    @Test
+    fun `resend of a missing direct message runs no side effects`() = runTest {
+        setUpDirectMessage(firmwareVersion = "2.7.12")
+        everySuspend { packetRepository.resendMessage(any(), any(), any()) } returns null
+
+        useCase.resend(77L, "!dest") shouldBe SendMessageOutcome.Refused
+
+        radioController.sentSharedContacts.size shouldBe 0
+        radioController.favoritedNodes.size shouldBe 0
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    @Test
+    fun `resend into a retired conversation is refused without touching the row`() = runTest {
+        useCase.resend(77L, ContactKey.retiredBroadcast("token").value) shouldBe SendMessageOutcome.Refused
+
+        verifySuspend(VerifyMode.exactly(0)) { packetRepository.resendMessage(any(), any(), any()) }
+    }
+
+    @Test
+    fun `resend propagates a repository failure`() = runTest {
+        everySuspend { packetRepository.resendMessage(any(), any(), any()) } throws
+            IllegalStateException("queue refused")
+
+        assertFailsWith<IllegalStateException> { useCase.resend(77L, "0${NodeAddress.ID_BROADCAST}") }
+    }
+
     private suspend fun setUpDirectMessage(firmwareVersion: String) {
         nodeRepository.setOurNode(
             Node(
