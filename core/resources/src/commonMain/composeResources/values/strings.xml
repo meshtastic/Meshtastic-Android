@@ -665,6 +665,9 @@
     <string name="firmware_edition">Firmware Edition</string>
     <string name="firmware_event_ended_banner">%1$s has ended. Return to standard Meshtastic firmware to restore normal features.</string>
     <string name="firmware_event_ended_button">Update firmware</string>
+    <string name="firmware_gate_message">This radio's firmware (%1$s) is older than the minimum this app supports (%2$s). Update the firmware to keep using the app. Latest stable firmware version: %3$s</string>
+    <string name="firmware_gate_title">Firmware update required</string>
+    <string name="firmware_gate_update">Update firmware</string>
     <string name="firmware_maintenance_bootloader_available">Latest: %1$s</string>
     <string name="firmware_maintenance_bootloader_installed">Installed: %1$s</string>
     <string name="firmware_maintenance_bootloader_latest_hint">Latest version: %1$s. The installed version is shown once the device restarts into update mode.</string>
@@ -1773,8 +1776,6 @@
     <string name="share_your_location_in_real_time">Share your location in real-time and keep your group coordinated with integrated GPS features.</string>
     <string name="shared_contact_no_public_key">This contact has no public key, so it cannot be imported. A contact without one clears any key your radio already holds for that node. Ask the sender to share it again once their node has exchanged keys.</string>
     <string name="short_name">Short Name</string>
-    <string name="should_update">To benefit from the latest fixes and features, please update your node firmware.\n\nLatest stable firmware version: %1$s</string>
-    <string name="should_update_firmware">Firmware Update Recommended.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="show_full_message_timestamps">Show full message timestamps</string>

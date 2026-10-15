@@ -629,6 +629,9 @@ firmware
 firmware_edition
 firmware_event_ended_banner
 firmware_event_ended_button
+firmware_gate_message
+firmware_gate_title
+firmware_gate_update
 firmware_maintenance_bootloader_available
 firmware_maintenance_bootloader_installed
 firmware_maintenance_bootloader_latest_hint
@@ -1713,8 +1716,6 @@ share_to
 share_your_location_in_real_time
 shared_contact_no_public_key
 short_name
-should_update
-should_update_firmware
 ### SHOW ###
 show_all_key_title
 show_full_message_timestamps
