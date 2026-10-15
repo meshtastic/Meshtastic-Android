@@ -41,6 +41,7 @@ import org.meshtastic.core.resources.traceroute_return_hops
 import org.meshtastic.core.resources.traceroute_return_route
 import org.meshtastic.core.resources.traceroute_round_trip
 import org.meshtastic.core.ui.theme.GraphColors
+import org.meshtastic.core.ui.theme.TracerouteColors
 
 /** Resolved traceroute data point pairing a request with its optional response. */
 internal data class TraceroutePoint(
@@ -56,11 +57,14 @@ internal data class TraceroutePoint(
     val roundTripSeconds: Double?,
 )
 
-/** Chart series colours for the three traceroute metrics. */
+/**
+ * Chart series colours for the three traceroute metrics. Forward and return use the same colours as the routes on the
+ * traceroute map, and the round trip is purple so it isn't mistaken for either direction.
+ */
 private enum class TracerouteMetric(val color: Color) {
-    FORWARD_HOPS(GraphColors.Blue),
-    RETURN_HOPS(GraphColors.Green),
-    ROUND_TRIP(GraphColors.Orange),
+    FORWARD_HOPS(TracerouteColors.OutgoingRoute),
+    RETURN_HOPS(TracerouteColors.ReturnRoute),
+    ROUND_TRIP(GraphColors.Purple),
 }
 
 /** Legend entries for the traceroute chart — forward hops, return hops, and round-trip duration. */
