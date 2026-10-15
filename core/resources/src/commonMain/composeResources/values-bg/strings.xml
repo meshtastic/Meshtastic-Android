@@ -503,6 +503,7 @@
     <string name="firmware_update_starting_dfu">Стартиране на DFU...</string>
     <string name="firmware_update_starting_ota">Стартиране на OTA актуализация...</string>
     <string name="firmware_update_success">Актуализацията е успешна!</string>
+    <string name="firmware_update_success_wiped">Устройството е върнато към фабричните настройки и трябва да бъде конфигурирано (и сдвоено) отново.</string>
     <string name="firmware_update_taking_a_while">Това може да отнеме минута...</string>
     <string name="firmware_update_target">Цел: %1$s</string>
     <string name="firmware_update_title">Актуализация на фърмуера</string>
@@ -510,6 +511,8 @@
     <string name="firmware_update_transfer_progress">%1$d% (%2$s/s, ETA: %3$ds)</string>
     <string name="firmware_update_unknown_error">Неизвестна грешка</string>
     <string name="firmware_update_unknown_hardware">Неизвестен модел хардуер: %1$d</string>
+    <string name="firmware_update_unsupported_transport">Актуализациите на фърмуера не се поддържат чрез тази връзка за това устройство. За да извършите актуализация, използвайте друг начин на свързване (напр. Bluetooth).</string>
+    <string name="firmware_update_unsupported_update_method">Локални файлове с фърмуер не се поддържат за този метод на актуализация.</string>
     <string name="firmware_update_uploading">Качване на фърмуера...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s обикновено се доставя с буутлоудър, който не поддържа OTA актуализации. Може да се наложи да флашнете OTA - съвместим буутлоудър през USB, преди да флашнете OTA.</string>
     <string name="firmware_update_usb_failed">Актуализацията през USB не е успешна</string>
@@ -519,6 +522,7 @@
     <string name="firmware_update_verifying">Проверка на актуализацията...</string>
     <string name="firmware_update_waiting_reboot">Изчаква се устройството да се рестартира в режим OTA...</string>
     <string name="firmware_update_waiting_reconnect">Чака се устройството да се свърже отново...</string>
+    <string name="firmware_update_wipe_label">Изтриване на устройството по време на актуализацията</string>
     <string name="firmware_version">Версия на фърмуера: %1$s</string>
     <string name="fixed_position">Фиксирана позиция</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
@@ -655,6 +659,7 @@
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
+    <string name="lora_preset_region">%1$s · %2$s</string>
     <string name="low_battery">Изтощена батерия</string>
     <string name="low_battery_message">%1$sВъзела %1$s има слаба батерия (%2$d%)</string>
     <string name="low_battery_title">Батерията е изтощена: %1$s</string>
@@ -781,6 +786,7 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">Конфигуриране на MQTT</string>
+    <string name="mqtt_error_connection_lost">MQTT: връзката е загубена</string>
     <string name="mqtt_probe_dns_failure">Хостът не е намерен</string>
     <string name="mqtt_probe_other_failure">Връзката е неуспешна</string>
     <string name="mqtt_probe_success">Достъпен. Брокерът е приел идентификационните данни.</string>
@@ -941,7 +947,12 @@
     <!-- PERMISSION -->
     <string name="permission_location_summary">Покажете местоположението си на картата и го споделете с mesh</string>
     <string name="permission_missing_31">Meshtastic се нуждае от активирани разрешения за "Устройства наблизо", за да намира и да се свързва с устройства чрез Bluetooth. Можете да ги дезактивирате, когато не се използват.</string>
+    <string name="permission_state_not_applicable">Не се изисква в тази версия на Android</string>
     <!-- PERMISSIONS -->
+    <string name="permissions">Разрешения</string>
+    <string name="permissions_all_allowed">Всичко е позволено</string>
+    <string name="permissions_hide">Скриване на разрешенията</string>
+    <string name="permissions_show">Показване на разрешенията</string>
     <string name="phone_location">Местоположение на телефона</string>
     <string name="phone_location_description">Meshtastic използва местоположението на телефона ви, за да активира редица функции. Можете да актуализирате разрешенията си за местоположение по всяко време от настройките.</string>
     <string name="pin_selected">ПИН</string>
@@ -969,6 +980,7 @@
     <string name="power">Захранване</string>
     <string name="power_config">Конфигуриране на захранването</string>
     <string name="power_metrics_log">Показатели на мощност</string>
+    <string name="powered">Външно захранване</string>
     <string name="ppm">ppm</string>
     <string name="precise_location">Точно местоположение</string>
     <string name="preferences_language">Език</string>
@@ -1003,6 +1015,7 @@
     <string name="range_test">Тест на обхвата</string>
     <string name="range_test_config">Конфигуриране на Тест на обхвата</string>
     <string name="reboot">Рестартиране</string>
+    <string name="reboot_into_dfu">Рестартиране в режим DFU</string>
     <string name="recent_network_devices">Скорошни мрежови устройства</string>
     <string name="reconnecting">Повторно свързване…</string>
     <string name="refresh">Опресняване</string>
@@ -1015,6 +1028,7 @@
     <string name="remote_hardware">Отдалечен хардуер</string>
     <string name="remote_hardware_config">Конфигуриране на отдалечения хардуер</string>
     <string name="remote_hardware_enabled">Отдалечен хардуер е активиран</string>
+    <string name="remote_shell_command_hint">Команда</string>
     <string name="remote_shell_key_alt">н.в.</string>
     <string name="remote_shell_key_ctrl">Контрол</string>
     <string name="remote_shell_modifier_locked">Заключен</string>
