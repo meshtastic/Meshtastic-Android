@@ -1,0 +1,102 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.feature.settings.radio.component
+
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.feature.settings.search.LocalSettingsFieldFocus
+import org.meshtastic.feature.settings.search.SettingsFieldFocus
+import org.meshtastic.proto.Config
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+@OptIn(ExperimentalTestApi::class)
+class SettingsFieldAnchorTest {
+
+    private val rowKeys = (0 until ROWS).map { "field_$it" }
+
+    @Test
+    fun searchScrollsARowDeepInsideASingleCardIntoView() = runComposeUiTest {
+        val focus = SettingsFieldFocus()
+        focus.request("field_${ROWS - 2}")
+
+        setContent {
+            AppTheme {
+                CompositionLocalProvider(LocalSettingsFieldFocus provides focus) {
+                    RadioConfigScreenList(
+                        title = "Telemetry",
+                        onBack = {},
+                        responseState = ResponseState.Empty,
+                        onDismissPacketResponse = {},
+                        configState = rememberConfigState(Config.LoRaConfig.Builder().build()),
+                        enabled = true,
+                        onSave = {},
+                    ) {
+                        fieldItem(rowKeys.toSet()) {
+                            TitledCard(title = "Card") {
+                                rowKeys.forEachIndexed { i, key ->
+                                    Text("Row $i", Modifier.settingsField(key).height(ROW_HEIGHT.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        onNodeWithText("Row ${ROWS - 2}").assertIsDisplayed()
+        onNodeWithText("Row 0").assertIsNotDisplayed()
+        runOnIdle { assertEquals(null, focus.pending.value) }
+    }
+
+    @Test
+    fun onlyTheTargetRowTakesTheTint() {
+        val highlight = FieldHighlight(mutableStateOf(Color.Red))
+        highlight.key = "b"
+
+        assertEquals(Color.Red, highlight.tintFor(setOf("a", "b")))
+        assertEquals(Color.Transparent, highlight.tintFor(setOf("a")))
+    }
+
+    @Test
+    fun aCardTintsOnlyWhenNoRowClaimsTheTarget() {
+        val highlight = FieldHighlight(mutableStateOf(Color.Red))
+        highlight.key = "b"
+
+        assertEquals(Color.Red, highlight.fallbackTintFor(setOf("a", "b")))
+        assertEquals(Color.Transparent, highlight.fallbackTintFor(setOf("a")))
+    }
+
+    private companion object {
+        const val ROWS = 40
+        const val ROW_HEIGHT = 56
+    }
+}

@@ -21,6 +21,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -67,6 +68,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
             TitledCard(title = stringResource(Res.string.neighbor_info_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_neighborinfo_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_neighborinfo_enabled),
                     summary = stringResource(Res.string.schema_neighborinfo_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
@@ -78,6 +80,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_neighborinfo_update_interval),
+                    modifier = Modifier.settingsField(Res.string.schema_neighborinfo_update_interval),
                     summary = stringResource(Res.string.schema_neighborinfo_update_interval_description),
                     value = formState.value.update_interval,
                     enabled = state.connected,
@@ -89,6 +92,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_neighborinfo_transmit_over_lora),
+                    modifier = Modifier.settingsField(Res.string.schema_neighborinfo_transmit_over_lora),
                     summary = stringResource(Res.string.schema_neighborinfo_transmit_over_lora_description),
                     checked = formState.value.transmit_over_lora,
                     enabled = state.connected,

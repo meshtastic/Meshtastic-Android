@@ -176,6 +176,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             TitledCard(title = stringResource(Res.string.admin_keys)) {
                 EditListPreference(
                     title = stringResource(Res.string.schema_security_admin_key),
+                    modifier = Modifier.settingsField(Res.string.schema_security_admin_key),
                     summary = stringResource(Res.string.schema_security_admin_key_description),
                     list = formState.value.admin_key,
                     maxCount = 3,
@@ -191,6 +192,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             TitledCard(title = stringResource(Res.string.logs)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_security_serial_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_security_serial_enabled),
                     summary = stringResource(Res.string.schema_security_serial_enabled_description),
                     checked = formState.value.serial_enabled,
                     enabled = state.connected,
@@ -202,6 +204,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_security_debug_log_api_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_security_debug_log_api_enabled),
                     summary = stringResource(Res.string.schema_security_debug_log_api_enabled_description),
                     checked = formState.value.debug_log_api_enabled,
                     enabled = state.connected,
@@ -217,6 +220,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             TitledCard(title = stringResource(Res.string.administration)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_security_is_managed),
+                    modifier = Modifier.settingsField(Res.string.schema_security_is_managed),
                     summary = stringResource(Res.string.schema_security_is_managed_description),
                     checked = formState.value.is_managed,
                     enabled = state.connected && formState.value.admin_key.isNotEmpty(),
@@ -278,6 +282,7 @@ internal fun SecurityPublicKeyPreference(
 
     EditBase64Preference(
         title = stringResource(Res.string.schema_security_public_key),
+        modifier = Modifier.settingsField(Res.string.schema_security_public_key),
         summary = stringResource(Res.string.schema_security_public_key_description),
         value = publicKey,
         enabled = enabled,
@@ -312,6 +317,7 @@ internal fun SecurityPrivateKeyPreference(
 
     EditBase64Preference(
         title = stringResource(Res.string.schema_security_private_key),
+        modifier = Modifier.settingsField(Res.string.schema_security_private_key),
         summary =
         if (redacted) {
             stringResource(Res.string.config_security_private_key_remote)

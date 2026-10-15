@@ -61,6 +61,7 @@ import org.meshtastic.core.resources.mesh_beacon_target_default
 import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.mesh_beacon_targets
 import org.meshtastic.core.resources.plurals_seconds
+import org.meshtastic.core.resources.schema_meshbeacon_broadcast_interval_secs
 import org.meshtastic.core.resources.schema_meshbeacon_broadcast_message
 import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -248,6 +249,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(Res.string.schema_meshbeacon_broadcast_message),
+                        modifier = Modifier.settingsField(Res.string.schema_meshbeacon_broadcast_message),
                         value = formState.value.broadcast_message,
                         maxSize = MESSAGE_MAX_BYTES,
                         enabled = broadcastGate.sectionsEnabled,
@@ -284,6 +286,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                             )
                     DropDownPreference(
                         title = stringResource(Res.string.mesh_beacon_interval),
+                        modifier = Modifier.settingsField(Res.string.schema_meshbeacon_broadcast_interval_secs),
                         summary =
                         if (intervalValid) {
                             null

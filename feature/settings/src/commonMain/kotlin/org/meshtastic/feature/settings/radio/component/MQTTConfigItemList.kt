@@ -185,6 +185,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.mqtt_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_mqtt_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_mqtt_enabled),
                     summary = stringResource(Res.string.schema_mqtt_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
@@ -205,6 +206,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_mqtt_username),
+                    modifier = Modifier.settingsField(Res.string.schema_mqtt_username),
                     summary = stringResource(Res.string.schema_mqtt_username_description),
                     value = formState.value.username,
                     maxSize = 63, // username max_size:64
@@ -220,6 +222,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditPasswordPreference(
                     title = stringResource(Res.string.schema_mqtt_password),
+                    modifier = Modifier.settingsField(Res.string.schema_mqtt_password),
                     value = formState.value.password,
                     maxSize = 63, // password max_size:64
                     enabled = state.connected,
@@ -231,6 +234,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_mqtt_encryption_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_mqtt_encryption_enabled),
                     summary = stringResource(Res.string.schema_mqtt_encryption_enabled_description),
                     checked = formState.value.encryption_enabled,
                     enabled = state.connected,
@@ -263,6 +267,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_mqtt_root),
+                    modifier = Modifier.settingsField(Res.string.schema_mqtt_root),
                     summary = stringResource(Res.string.schema_mqtt_root_description),
                     value = formState.value.root,
                     maxSize = 31, // root max_size:32
@@ -278,6 +283,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_mqtt_proxy_to_client_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_mqtt_proxy_to_client_enabled),
                     summary = stringResource(Res.string.schema_mqtt_proxy_to_client_enabled_description),
                     checked = formState.value.proxy_to_client_enabled,
                     enabled = state.connected,
@@ -354,7 +360,7 @@ internal fun MqttTlsPreference(
         summary = if (relayForcesTls) stringResource(Res.string.tls_enabled_public_broker_summary) else "",
         checked = tlsEnabled,
         enabled = enabled,
-        modifier = Modifier.testTag(MQTT_TLS_SWITCH_TEST_TAG),
+        modifier = Modifier.settingsField(Res.string.schema_mqtt_tls_enabled).testTag(MQTT_TLS_SWITCH_TEST_TAG),
         onCheckedChange = onCheckedChange,
         containerColor = CardDefaults.cardColors().containerColor,
     )
@@ -426,6 +432,7 @@ private fun MqttAddressAndProbe(
 ) {
     EditTextPreference(
         title = stringResource(Res.string.schema_mqtt_address),
+        modifier = Modifier.settingsField(Res.string.schema_mqtt_address),
         summary = stringResource(Res.string.schema_mqtt_address_description),
         value = formState.value.address,
         maxSize = 63, // address max_size:64

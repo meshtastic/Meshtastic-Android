@@ -23,6 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -86,6 +87,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
             TitledCard(title = stringResource(Res.string.detection_sensor_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_detectionsensor_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_detectionsensor_enabled),
                     summary = stringResource(Res.string.schema_detectionsensor_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
@@ -100,6 +102,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_detectionsensor_minimum_broadcast_secs),
+                    modifier = Modifier.settingsField(Res.string.schema_detectionsensor_minimum_broadcast_secs),
                     summary = stringResource(Res.string.schema_detectionsensor_minimum_broadcast_secs_description),
                     selectedItem = formState.value.minimum_broadcast_secs.toLong(),
                     enabled = state.connected,
@@ -113,6 +116,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 val stateBroadcastIntervals = remember { IntervalConfiguration.DETECTION_SENSOR_STATE.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_detectionsensor_state_broadcast_secs),
+                    modifier = Modifier.settingsField(Res.string.schema_detectionsensor_state_broadcast_secs),
                     summary = stringResource(Res.string.schema_detectionsensor_state_broadcast_secs_description),
                     selectedItem = formState.value.state_broadcast_secs.toLong(),
                     enabled = state.connected,
@@ -125,6 +129,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_detectionsensor_send_bell),
+                    modifier = Modifier.settingsField(Res.string.schema_detectionsensor_send_bell),
                     summary = stringResource(Res.string.schema_detectionsensor_send_bell_description),
                     checked = formState.value.send_bell,
                     enabled = state.connected,
@@ -136,6 +141,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_detectionsensor_name),
+                    modifier = Modifier.settingsField(Res.string.schema_detectionsensor_name),
                     summary = stringResource(Res.string.schema_detectionsensor_name_description),
                     value = formState.value.name,
                     maxSize = 19, // name max_size:20
@@ -152,6 +158,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 val pins = remember { gpioPins }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_detectionsensor_monitor_pin),
+                    modifier = Modifier.settingsField(Res.string.schema_detectionsensor_monitor_pin),
                     summary = stringResource(Res.string.schema_detectionsensor_monitor_pin_description),
                     items = pins,
                     selectedItem = formState.value.monitor_pin,
@@ -163,6 +170,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_detectionsensor_detection_trigger_type),
+                    modifier = Modifier.settingsField(Res.string.schema_detectionsensor_detection_trigger_type),
                     summary = stringResource(Res.string.schema_detectionsensor_detection_trigger_type_description),
                     enabled = state.connected,
                     selectedItem = formState.value.detection_trigger_type,
@@ -174,6 +182,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_detectionsensor_use_pullup),
+                    modifier = Modifier.settingsField(Res.string.schema_detectionsensor_use_pullup),
                     summary = stringResource(Res.string.schema_detectionsensor_use_pullup_description),
                     checked = formState.value.use_pullup,
                     enabled = state.connected,

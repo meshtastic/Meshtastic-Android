@@ -21,6 +21,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -70,6 +71,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
             TitledCard(title = stringResource(Res.string.store_forward_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_storeforward_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_storeforward_enabled),
                     summary = stringResource(Res.string.schema_storeforward_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
@@ -81,6 +83,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_storeforward_heartbeat),
+                    modifier = Modifier.settingsField(Res.string.schema_storeforward_heartbeat),
                     summary = stringResource(Res.string.schema_storeforward_heartbeat_description),
                     checked = formState.value.heartbeat,
                     enabled = state.connected,
@@ -92,6 +95,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_storeforward_records),
+                    modifier = Modifier.settingsField(Res.string.schema_storeforward_records),
                     value = formState.value.records,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -102,6 +106,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_storeforward_history_return_max),
+                    modifier = Modifier.settingsField(Res.string.schema_storeforward_history_return_max),
                     value = formState.value.history_return_max,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -112,6 +117,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_storeforward_history_return_window),
+                    modifier = Modifier.settingsField(Res.string.schema_storeforward_history_return_window),
                     value = formState.value.history_return_window,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -123,6 +129,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_storeforward_is_server),
+                    modifier = Modifier.settingsField(Res.string.schema_storeforward_is_server),
                     summary = stringResource(Res.string.schema_storeforward_is_server_description),
                     checked = formState.value.is_server,
                     enabled = state.connected,

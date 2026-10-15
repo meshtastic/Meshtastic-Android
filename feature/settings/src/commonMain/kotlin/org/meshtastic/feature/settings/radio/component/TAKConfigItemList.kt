@@ -174,6 +174,7 @@ internal fun TakConfigCard(
     TitledCard(title = stringResource(Res.string.tak_config)) {
         DropDownPreference(
             title = stringResource(Res.string.schema_tak_team),
+            modifier = Modifier.settingsField(Res.string.schema_tak_team),
             enabled = enabled,
             selectedItem = team,
             itemColor = { Color(getColorFrom(it)) },
@@ -182,6 +183,7 @@ internal fun TakConfigCard(
         HorizontalDivider()
         DropDownPreference(
             title = stringResource(Res.string.schema_tak_role),
+            modifier = Modifier.settingsField(Res.string.schema_tak_role),
             enabled = enabled,
             selectedItem = role,
             onItemSelected = onRoleSelected,
