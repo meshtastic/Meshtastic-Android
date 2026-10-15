@@ -16,11 +16,15 @@
  */
 package org.meshtastic.feature.node.detail
 
+import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify.VerifyMode.Companion.exactly
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
@@ -29,6 +33,7 @@ import org.meshtastic.core.repository.RadioController
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class CommonNodeRequestActionsTest {
@@ -78,5 +83,38 @@ class CommonNodeRequestActionsTest {
 
         assertEquals(emptyMap(), actions.lastRequestNeighborTimes.value)
         assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
+    }
+
+    private fun sendingActions() = CommonNodeRequestActions(
+        radioController = radioController,
+        snackbarManager = snackbarManager,
+        analytics = mock<PlatformAnalytics>(MockMode.autofill),
+        resolveUiText = { "feedback" },
+    )
+
+    @Test
+    fun `traceroute request stamps the shared cooldown`() = runTest {
+        every { radioController.generatePacketId() } returns 42
+        everySuspend { radioController.requestTraceroute(any(), any()) } returns Unit
+        val sending = sendingActions()
+
+        sending.requestTraceroute(destNum = 1234, longName = "Test Node")
+
+        assertNotNull(sending.lastTracerouteTime.value)
+        verifySuspend(exactly(1)) { radioController.requestTraceroute(42, 1234) }
+    }
+
+    @Test
+    fun `second traceroute request inside the cooldown is not sent`() = runTest {
+        every { radioController.generatePacketId() } returns 42
+        everySuspend { radioController.requestTraceroute(any(), any()) } returns Unit
+        val sending = sendingActions()
+
+        sending.requestTraceroute(destNum = 1234, longName = "Test Node")
+        val stamped = sending.lastTracerouteTime.value
+        sending.requestTraceroute(destNum = 5678, longName = "Other Node")
+
+        assertEquals(stamped, sending.lastTracerouteTime.value)
+        verifySuspend(exactly(1)) { radioController.requestTraceroute(any(), any()) }
     }
 }

@@ -228,6 +228,9 @@ class NodeListViewModel(
         return "${channel}${node.user.id}"
     }
 
+    /** Start time of the last traceroute, shared with the detail buttons: firmware allows one per 30 s window. */
+    val lastTracerouteTime: StateFlow<Long?> = nodeRequestActions.lastTracerouteTime
+
     /** Initiates a trace route request to the specified node. */
     fun traceRoute(node: Node) {
         safeLaunch(tag = "requestTraceroute") { nodeRequestActions.requestTraceroute(node.num, node.user.long_name) }

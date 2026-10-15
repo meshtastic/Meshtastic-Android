@@ -44,6 +44,7 @@ import org.meshtastic.core.resources.requesting_from
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.user_info
 import org.meshtastic.core.ui.util.SnackbarManager
+import org.meshtastic.feature.node.component.COOL_DOWN_TIME_MS
 
 @Single(binds = [NodeRequestActions::class])
 class CommonNodeRequestActions
@@ -122,6 +123,12 @@ constructor(
     }
 
     override suspend fun requestTraceroute(destNum: Int, longName: String) = runRequest {
+        // Firmware allows one traceroute per 30 s window per app connection, whatever the destination.
+        val last = _lastTracerouteTime.value
+        if (last != null && nowMillis - last < COOL_DOWN_TIME_MS) {
+            Logger.d { "Traceroute for '$destNum' skipped, cooldown running" }
+            return@runRequest
+        }
         Logger.i { "Requesting traceroute for '$destNum'" }
         val packetId = radioController.generatePacketId()
         radioController.requestTraceroute(packetId, destNum)

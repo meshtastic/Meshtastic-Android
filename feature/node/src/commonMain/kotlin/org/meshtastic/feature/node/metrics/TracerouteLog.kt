@@ -76,6 +76,7 @@ import org.meshtastic.core.resources.traceroute_return_hops
 import org.meshtastic.core.resources.traceroute_round_trip
 import org.meshtastic.core.resources.traceroute_route_back_to_us
 import org.meshtastic.core.resources.traceroute_route_towards_dest
+import org.meshtastic.core.resources.traceroute_unknown_hop
 import org.meshtastic.core.ui.icon.Group
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PersonOff
@@ -111,7 +112,9 @@ fun TracerouteLogScreen(
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val lastTracerouteTime by viewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
 
-    fun getUsername(nodeNum: Int): String = tracerouteHopName(nodeNum, viewModel.getUser(nodeNum))
+    val unknownHopLabel = stringResource(Res.string.traceroute_unknown_hop)
+
+    fun getUsername(nodeNum: Int): String = tracerouteHopName(nodeNum, viewModel.getUser(nodeNum), unknownHopLabel)
 
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow

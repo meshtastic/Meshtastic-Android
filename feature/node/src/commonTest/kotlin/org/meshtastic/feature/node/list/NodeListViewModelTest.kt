@@ -81,6 +81,7 @@ class NodeListViewModelTest {
         every { nodeManager.isNodeDbReady } returns MutableStateFlow(true)
 
         every { getFilteredNodesUseCase(any(), any()) } returns MutableStateFlow(emptyList())
+        every { nodeRequestActions.lastTracerouteTime } returns MutableStateFlow(null)
 
         viewModel = createViewModel()
     }

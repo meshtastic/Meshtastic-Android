@@ -134,6 +134,7 @@ fun NodeListScreen(
     val showToast = org.meshtastic.core.ui.util.rememberShowToastResource()
     val scope = rememberCoroutineScope()
     val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
+    val lastTracerouteTime by viewModel.lastTracerouteTime.collectAsStateWithLifecycle()
 
     // Dedup by num: it's the LazyColumn key (must be unique) but the upstream flow can momentarily emit
     // two entries with the same num (a num=0 unknown-node placeholder, or a brief double-emission during
@@ -273,6 +274,7 @@ fun NodeListScreen(
                         navigateToMessages(route)
                     },
                     onTraceRoute = { viewModel.traceRoute(node) },
+                    lastTracerouteTime = lastTracerouteTime,
                     onIgnore = { viewModel.ignoreNode(node) },
                     onRemove = { viewModel.removeNode(node) },
                     onDismiss = { expanded = false },
