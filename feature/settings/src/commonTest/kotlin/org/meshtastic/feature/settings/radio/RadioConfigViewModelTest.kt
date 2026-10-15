@@ -2896,6 +2896,8 @@ class RadioConfigViewModelTest {
         connFlow: MutableStateFlow<ConnectionState>,
         firmwareVersion: String?,
         config: Config = loraSave(),
+        clearViewModelBeforeAck: Boolean = false,
+        ack: Boolean = true,
     ) {
         nodeRepository.setNodes(listOf(Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123, firmwareVersion = firmwareVersion))
@@ -2912,14 +2914,15 @@ class RadioConfigViewModelTest {
 
         viewModel.setConfig(config)
         runCurrent()
-        packetFlow.emit(routingAck(requestId = 77, from = 123))
+        if (clearViewModelBeforeAck) viewModel.viewModelScope.cancel()
+        if (ack) packetFlow.emit(routingAck(requestId = 77, from = 123))
         runCurrent()
     }
 
     @Test
     fun `acked local LoRa save that does not reboot refreshes the node info exactly once`() = runTest {
         val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
-        saveLoraAndAck(connFlow, firmwareVersion = "9.9.9")
+        saveLoraAndAck(connFlow, firmwareVersion = "2.8.1")
 
         advanceTimeBy(30_000)
         runCurrent()
@@ -2929,9 +2932,31 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `LoRa save acked after the ViewModel is cleared still refreshes the node info exactly once`() = runTest {
+        val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
+        saveLoraAndAck(connFlow, firmwareVersion = "2.8.1", clearViewModelBeforeAck = true)
+
+        advanceTimeBy(30_000)
+        runCurrent()
+
+        verify(exactly(1)) { meshConfigFlowManager.refreshNodeInfo() }
+    }
+
+    @Test
+    fun `LoRa save never acked does not refresh the node info`() = runTest {
+        val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
+        saveLoraAndAck(connFlow, firmwareVersion = "2.8.1", clearViewModelBeforeAck = true, ack = false)
+
+        advanceTimeBy(10 * 60_000L)
+        runCurrent()
+
+        verify(exactly(0)) { meshConfigFlowManager.refreshNodeInfo() }
+    }
+
+    @Test
     fun `acked local LoRa save followed by a reboot does not refresh the node info`() = runTest {
         val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
-        saveLoraAndAck(connFlow, firmwareVersion = "9.9.9")
+        saveLoraAndAck(connFlow, firmwareVersion = "2.8.1")
 
         advanceTimeBy(2_000)
         connFlow.value = ConnectionState.Disconnected
@@ -2944,7 +2969,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `LoRa save on firmware that does not report heard flags does not refresh the node info`() = runTest {
         val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
-        saveLoraAndAck(connFlow, firmwareVersion = "2.7.0")
+        saveLoraAndAck(connFlow, firmwareVersion = "2.8.0")
 
         advanceTimeBy(30_000)
         runCurrent()
@@ -2957,7 +2982,7 @@ class RadioConfigViewModelTest {
         val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
         saveLoraAndAck(
             connFlow,
-            firmwareVersion = "9.9.9",
+            firmwareVersion = "2.8.1",
             config =
             Config.Builder()
                 .also { wb ->
