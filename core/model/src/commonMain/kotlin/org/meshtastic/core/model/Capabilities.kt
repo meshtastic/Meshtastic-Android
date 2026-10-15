@@ -128,13 +128,13 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
 
     /**
      * Whether the node reports [NodeInfo.heard_on_current_lora] - whether it has heard each node over RF on the LoRa
-     * configuration it is using now. Gated to [UNRELEASED] until the firmware side ships. Older firmware never sends
-     * the field, and a proto3 bool defaults to false, so an ungated read marks every node as unheard.
+     * configuration it is using now, from 2.8.1. Older firmware never sends the field, and a proto3 bool defaults to
+     * false, so an ungated read marks every node as unheard.
      *
      * Deliberately outside [forceEnableAll]: every other capability being wrong in a debug build shows a UI the
      * firmware ignores, but this one being wrong persists false into the node DB and offers real nodes for removal.
      */
-    val supportsHeardOnCurrentLora = version != null && version >= UNRELEASED
+    val supportsHeardOnCurrentLora = version != null && version >= V2_8_1
 
     /**
      * Whether this firmware's region table contains [region]. Regions declare the release that introduced them via
@@ -155,6 +155,7 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_7_12 = DeviceVersion("2.7.12")
         private val V2_7_18 = DeviceVersion("2.7.18")
         private val V2_8_0 = DeviceVersion("2.8.0")
+        private val V2_8_1 = DeviceVersion("2.8.1")
         private val V2_8_2 = DeviceVersion("2.8.2")
         private val UNRELEASED = DeviceVersion("9.9.9")
     }

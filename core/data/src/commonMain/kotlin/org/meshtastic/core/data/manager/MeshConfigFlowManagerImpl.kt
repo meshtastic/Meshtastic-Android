@@ -103,6 +103,7 @@ class MeshConfigFlowManagerImpl(
             val session: RadioSessionContext,
             val myNodeInfo: SharedMyNodeInfo,
             val nodes: List<NodeInfo> = emptyList(),
+            val refresh: Boolean = false,
         ) : HandshakeState()
 
         /** Both stages finished. The app is fully connected. */
@@ -310,6 +311,8 @@ class MeshConfigFlowManagerImpl(
             nodeManager.applyTrustedIdentityMigrations(removedNums)
         }
 
+        if (state.refresh) return
+
         val published =
             runForSession(session) {
                 nodeManager.setNodeDbReady(true)
@@ -469,6 +472,25 @@ class MeshConfigFlowManagerImpl(
         val admitted = runForSession(session) { connectionManager.value.startConfigOnly() }
         if (!admitted) Logger.d { "Discarding reboot handshake trigger from stale transport session" }
         return admitted
+    }
+
+    override fun refreshNodeInfo(): Boolean {
+        val session = radioInterfaceService.activeSession.value ?: return false
+        var requested = false
+        runForSession(session) {
+            val state = handshakeState.value
+            if (state is HandshakeState.Complete && state.belongsTo(session)) {
+                handshakeState.value =
+                    HandshakeState.ReceivingNodeInfo(
+                        session = session,
+                        myNodeInfo = state.myNodeInfo,
+                        refresh = true,
+                    )
+                connectionManager.value.startNodeInfoOnly()
+                requested = true
+            }
+        }
+        return requested
     }
 
     /**

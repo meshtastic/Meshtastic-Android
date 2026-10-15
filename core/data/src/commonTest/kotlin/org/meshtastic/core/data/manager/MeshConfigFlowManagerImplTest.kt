@@ -786,6 +786,60 @@ class MeshConfigFlowManagerImplTest {
         verify { connectionManager.startConfigOnly() }
     }
 
+    // ---------- refreshNodeInfo ----------
+
+    private fun TestScope.completeHandshake() {
+        handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `refreshNodeInfo after a completed handshake requests only the node info stage`() = testScope.runTest {
+        completeHandshake()
+
+        assertTrue(manager.refreshNodeInfo())
+
+        verify(VerifyMode.exactly(2)) { connectionManager.startNodeInfoOnly() }
+        verify(VerifyMode.not) { connectionManager.startConfigOnly() }
+    }
+
+    @Test
+    fun `refreshNodeInfo before a handshake completes does nothing`() = testScope.runTest {
+        assertFalse(manager.refreshNodeInfo())
+
+        verify(VerifyMode.not) { connectionManager.startNodeInfoOnly() }
+    }
+
+    @Test
+    fun `refreshNodeInfo reinstalls nodes without clearing config or republishing connection state`() =
+        testScope.runTest {
+            completeHandshake()
+            manager.refreshNodeInfo()
+            manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build())
+            manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+            advanceUntilIdle()
+
+            verify(VerifyMode.exactly(1)) { nodeManager.installNodeInfo(any()) }
+            verifySuspend(VerifyMode.exactly(1)) { connectionManager.onNodeDbReady() }
+            verifySuspend(VerifyMode.exactly(1)) { radioConfigRepository.clearLocalConfig() }
+            verifySuspend(VerifyMode.exactly(1)) { radioConfigRepository.clearLoraRegionPresetMap() }
+        }
+
+    @Test
+    fun `refreshNodeInfo is ignored when the session is no longer active`() = testScope.runTest {
+        completeHandshake()
+        activeSessionFlow.value = null
+
+        assertFalse(manager.refreshNodeInfo())
+    }
+
     // ---------- Full handshake flow ----------
 
     @Test

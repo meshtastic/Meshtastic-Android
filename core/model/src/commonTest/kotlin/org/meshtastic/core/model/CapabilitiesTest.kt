@@ -47,6 +47,14 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun supportsHeardOnCurrentLora_requires_V2_8_1_even_with_forceEnableAll() {
+        assertFalse(caps("2.8.0").supportsHeardOnCurrentLora)
+        assertTrue(caps("2.8.1").supportsHeardOnCurrentLora)
+        assertFalse(caps(null).supportsHeardOnCurrentLora)
+        assertFalse(Capabilities("2.8.0", forceEnableAll = true).supportsHeardOnCurrentLora)
+    }
+
+    @Test
     fun supportsLockdown_requires_V2_8_0() {
         assertFalse(caps("2.7.21").supportsLockdown)
         assertTrue(caps("2.8.0").supportsLockdown)
