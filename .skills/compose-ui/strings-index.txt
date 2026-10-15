@@ -69,6 +69,16 @@ analytics_okay
 analytics_platforms
 any
 ### APP ###
+app_database_backup_disconnect_confirmation
+app_database_backup_failed
+app_database_backup_no_device
+app_database_backup_saved
+app_database_restore_confirmation
+app_database_restore_corrupt
+app_database_restore_failed
+app_database_restore_not_backup
+app_database_restore_staged
+app_database_restore_wrong_version
 app_functions_get_channel_info
 app_functions_get_device_status
 app_functions_get_mesh_metrics
@@ -107,6 +117,7 @@ audio
 audio_config
 available_pins
 back
+backup_app_database
 backup_keys
 backup_keys_confirmation
 backup_restore
@@ -1585,6 +1596,7 @@ requesting_from
 resend
 reset
 reset_to_defaults
+restore_app_database
 restore_keys
 restore_keys_confirmation
 restore_keys_pick_backup

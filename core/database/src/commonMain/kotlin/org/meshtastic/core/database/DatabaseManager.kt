@@ -542,7 +542,23 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * Builds a new [MeshtasticDatabase] for [dbName]. Tests override this to control file placement (temp directory
      * instead of the platform data dir). Production delegates to the platform-specific [getDatabaseBuilder].
      */
-    protected open fun buildDatabase(dbName: String): MeshtasticDatabase = getDatabaseBuilder(dbName).build()
+    protected open fun buildDatabase(dbName: String): MeshtasticDatabase {
+        applyStagedRestore(dbName, getDatabaseFile(dbName), getFileSystem())
+        return getDatabaseBuilder(dbName).build()
+    }
+
+    /**
+     * The device database a backup or restore acts on: the active one, or with no device selected the most recently
+     * used device database. Null when no device database exists yet.
+     */
+    suspend fun backupTargetDatabaseName(): String? = withManagerOperation {
+        withContext(dispatchers.io) {
+            mutex.withLock {
+                currentDbName.takeIf { it != DatabaseConstants.DEFAULT_DB_NAME }
+                    ?: deviceDbNamesLocked().maxByOrNull { lastUsed(it) }
+            }
+        }
+    }
 
     /**
      * Resolves the DB name to use for [address], honoring a cross-transport alias when one exists. A secondary

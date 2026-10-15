@@ -90,6 +90,16 @@
     <string name="analytics_platforms">Analytics platforms:</string>
     <string name="any">Any</string>
     <!-- APP -->
+    <string name="app_database_backup_disconnect_confirmation">The radio will be disconnected first. Reconnect from the Connections screen when you are done.</string>
+    <string name="app_database_backup_failed">Could not write the backup.</string>
+    <string name="app_database_backup_no_device">Connect to a radio first. There is no app data to back up or restore yet.</string>
+    <string name="app_database_backup_saved">Backup saved.</string>
+    <string name="app_database_restore_confirmation">Restoring replaces this radio's messages and nodes stored in the app with the contents of the backup. The change takes effect after you restart the app and reconnect to this radio.</string>
+    <string name="app_database_restore_corrupt">That backup is damaged or incomplete.</string>
+    <string name="app_database_restore_failed">Could not read the backup.</string>
+    <string name="app_database_restore_not_backup">That file is not an app data backup.</string>
+    <string name="app_database_restore_staged">Backup accepted. Restart the app and reconnect to this radio to finish restoring.</string>
+    <string name="app_database_restore_wrong_version">That backup is from a different app version (database version %1$d, this app uses %2$d).</string>
     <string name="app_functions_get_channel_info">Get channel info</string>
     <string name="app_functions_get_device_status">Get device status</string>
     <string name="app_functions_get_mesh_metrics">Get mesh metrics</string>
@@ -128,6 +138,7 @@
     <string name="audio_config">Audio Config</string>
     <string name="available_pins">Available pins</string>
     <string name="back">Back</string>
+    <string name="backup_app_database">Back up app data</string>
     <string name="backup_keys">Backup Keys</string>
     <string name="backup_keys_confirmation">Saves the public and private keys to secure, encrypted storage on this device.</string>
     <string name="backup_restore">Backup &amp; Restore</string>
@@ -1645,6 +1656,7 @@
     <string name="resend">Resend</string>
     <string name="reset">Reset</string>
     <string name="reset_to_defaults">Reset to defaults</string>
+    <string name="restore_app_database">Restore app data</string>
     <string name="restore_keys">Restore Keys</string>
     <string name="restore_keys_confirmation">Restores the backed-up public and private keys to this node.</string>
     <string name="restore_keys_pick_backup">Pick the backup to restore to this node. A factory reset or a new key changes the node's ID, so older backups stay under the old ID. Only restore a backup taken from this same radio: another radio's key gives both radios the same identity.</string>

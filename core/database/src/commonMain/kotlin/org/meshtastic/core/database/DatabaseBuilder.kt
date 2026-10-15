@@ -31,6 +31,9 @@ expect fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase
 /** Returns the platform-specific directory where database files are stored. */
 expect fun getDatabaseDirectory(): Path
 
+/** Returns the path of the main database file for [dbName]; its `-wal` and `-shm` files sit beside it. */
+expect fun getDatabaseFile(dbName: String): Path
+
 /** Deletes the database with the given [dbName] and its associated files (e.g., -wal, -shm). */
 expect fun deleteDatabase(dbName: String)
 
