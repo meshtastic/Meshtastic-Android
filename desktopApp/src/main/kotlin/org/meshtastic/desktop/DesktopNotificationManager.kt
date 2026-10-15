@@ -64,8 +64,8 @@ class DesktopNotificationManager(
         val enabled =
             when (notification.category) {
                 Notification.Category.Message -> prefs.messagesEnabled.value
-                Notification.Category.Reaction -> prefs.reactionsEnabled.value
-                Notification.Category.Waypoint -> prefs.newWaypointsEnabled.value
+                Notification.Category.Reaction -> prefs.loadReactionsEnabled()
+                Notification.Category.Waypoint -> prefs.loadNewWaypointsEnabled()
                 Notification.Category.NodeEvent -> prefs.nodeEventsEnabled.value
                 Notification.Category.MeshBeacon -> prefs.nodeEventsEnabled.value
                 Notification.Category.Battery -> prefs.lowBatteryEnabled.value

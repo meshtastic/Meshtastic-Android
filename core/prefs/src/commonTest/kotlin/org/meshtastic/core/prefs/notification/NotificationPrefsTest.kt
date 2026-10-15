@@ -93,6 +93,18 @@ class NotificationPrefsTest {
     }
 
     @Test
+    fun `load reflects stored false and defaults to true`() = testScope.runTest {
+        assertTrue(notificationPrefs.loadReactionsEnabled())
+        assertTrue(notificationPrefs.loadNewWaypointsEnabled())
+
+        notificationPrefs.setReactionsEnabled(false)
+        notificationPrefs.setNewWaypointsEnabled(false)
+
+        assertFalse(notificationPrefs.loadReactionsEnabled())
+        assertFalse(notificationPrefs.loadNewWaypointsEnabled())
+    }
+
+    @Test
     fun `setting newWaypointsEnabled updates preference`() = testScope.runTest {
         notificationPrefs.setNewWaypointsEnabled(false)
         assertFalse(notificationPrefs.newWaypointsEnabled.value)
