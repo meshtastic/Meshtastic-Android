@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -486,7 +487,7 @@ private fun FrequencyOverridePreference(
     overrideFrequency: Float,
     autoFrequency: Float,
     enabled: Boolean,
-    focusManager: androidx.compose.ui.focus.FocusManager,
+    focusManager: FocusManager,
     onValueChange: (Float) -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -496,7 +497,7 @@ private fun FrequencyOverridePreference(
         title = stringResource(Res.string.schema_lora_override_frequency),
         value = shown,
         enabled = enabled,
-        isError = NumberFormatter.parseDecimalOrNull(shown) == null,
+        isError = parseFrequencyOverride(shown) == null,
         keyboardOptions =
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.DecimalSigned, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -511,7 +512,7 @@ private fun FrequencyOverridePreference(
             null
         },
         onValueChanged = { text ->
-            val parsed = NumberFormatter.parseDecimalOrNull(text)?.toFloat()
+            val parsed = parseFrequencyOverride(text)
             if (parsed != null) {
                 typed = text
                 onValueChange(parsed)
@@ -567,7 +568,7 @@ private fun ManualModemSettings(
     config: Config.LoRaConfig,
     bandwidthSelection: LoRaBandwidthSelection,
     enabled: Boolean,
-    focusManager: androidx.compose.ui.focus.FocusManager,
+    focusManager: FocusManager,
     onConfigChange: (Config.LoRaConfig) -> Unit,
 ) {
     androidx.compose.foundation.layout.Column {
@@ -613,7 +614,7 @@ internal fun LoRaBandwidthPreference(
     config: Config.LoRaConfig,
     selection: LoRaBandwidthSelection,
     enabled: Boolean,
-    focusManager: androidx.compose.ui.focus.FocusManager,
+    focusManager: FocusManager,
     onConfigChange: (Config.LoRaConfig) -> Unit,
 ) {
     val options = selection.options
