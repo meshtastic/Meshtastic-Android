@@ -61,6 +61,13 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun maxLongNameBytes_drops_to_24_at_V2_8_0() {
+        assertEquals(39, caps("2.7.21").maxLongNameBytes)
+        assertEquals(24, caps("2.8.0").maxLongNameBytes)
+        assertEquals(39, caps(null).maxLongNameBytes)
+    }
+
+    @Test
     fun canSendVerifiedContacts_requires_V2_7_12() {
         assertFalse(caps("2.7.11").canSendVerifiedContacts)
         assertTrue(caps("2.7.12").canSendVerifiedContacts)

@@ -120,6 +120,12 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsLockdown = atLeast(V2_8_0)
 
     /**
+     * Bytes of owner long name the node keeps. Firmware v2.8.0 truncates every name it stores or sends to 24 bytes;
+     * `User.long_name` stays 40 wide on the wire only so older senders still decode. Earlier firmware keeps 39.
+     */
+    val maxLongNameBytes = if (atLeast(V2_8_0)) LONG_NAME_BYTES else LEGACY_LONG_NAME_BYTES
+
+    /**
      * Support for the Mesh Beacon module (`ModuleConfig.MeshBeaconConfig` broadcast/listen), from the `since_firmware`
      * its `ModuleConfig` field declares. The proto is upstream but the firmware module traces to a community fork, so
      * an older radio would silently ignore the config the editor writes.
@@ -158,5 +164,8 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_8_1 = DeviceVersion("2.8.1")
         private val V2_8_2 = DeviceVersion("2.8.2")
         private val UNRELEASED = DeviceVersion("9.9.9")
+
+        private const val LONG_NAME_BYTES = 24 // firmware MAX_LONG_NAME_BYTES
+        private const val LEGACY_LONG_NAME_BYTES = 39 // User.long_name max_size:40
     }
 }
