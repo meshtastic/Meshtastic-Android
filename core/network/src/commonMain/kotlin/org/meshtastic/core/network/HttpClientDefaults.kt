@@ -66,6 +66,9 @@ object HttpClientDefaults {
      * those fall back to the release zip named by the API's `zip_url`, which is a GitHub release asset and unaffected.
      */
     const val RELEASE_BASE_URL = "https://release.meshtastic.org"
+
+    /** The flasher's device models, `<name>.glb` beside the `img/devices/<name>.svg` illustrations the apps show. */
+    const val DEVICE_MODEL_BASE_URL = "https://flasher.meshtastic.org/models/devices"
 }
 
 /**

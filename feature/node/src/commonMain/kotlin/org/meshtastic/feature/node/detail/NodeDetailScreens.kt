@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.navigation.Route
@@ -47,6 +48,7 @@ import org.meshtastic.core.ui.util.ActiveWhileStarted
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.component.CompassSheetContent
+import org.meshtastic.feature.node.component.DeviceModelDialog
 import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -57,6 +59,8 @@ private sealed interface NodeDetailOverlay {
     data class FirmwareReleaseInfo(val release: FirmwareRelease) : NodeDetailOverlay
 
     data class Compass(val nodeNum: Int, val displayUnits: MeasurementSystem) : NodeDetailOverlay
+
+    data class DeviceModel(val deviceHardware: DeviceHardware) : NodeDetailOverlay
 }
 
 @Composable
@@ -128,6 +132,9 @@ private fun NodeDetailScaffold(
                     is NodeDetailAction.OpenCompass ->
                         activeOverlay = NodeDetailOverlay.Compass(action.node.num, action.displayUnits)
 
+                    is NodeDetailAction.OpenDeviceModel ->
+                        activeOverlay = NodeDetailOverlay.DeviceModel(action.deviceHardware)
+
                     else ->
                         handleNodeAction(
                             action = action,
@@ -192,6 +199,8 @@ private fun NodeDetailOverlays(
 
     when (overlay) {
         is NodeDetailOverlay.SharedContact -> node?.let { ShareContactDialog(it, onDismiss, isOwnContact = isLocal) }
+
+        is NodeDetailOverlay.DeviceModel -> DeviceModelDialog(overlay.deviceHardware, onDismiss)
 
         is NodeDetailOverlay.FirmwareReleaseInfo ->
             NodeDetailBottomSheet(onDismiss) { FirmwareReleaseSheetContent(firmwareRelease = overlay.release) }

@@ -51,6 +51,8 @@ data class MetricsState(
     val deviceHardware: DeviceHardware? = null,
     /** msh.to vendor/marketplace links for this device's hardware, region-filtered and sorted (vendor first). */
     val deviceLinks: List<DeviceLink> = emptyList(),
+    /** Whether the flasher serves a 3D model for [deviceHardware]'s hero illustration. */
+    val hasDeviceModel: Boolean = false,
     val firmwareEdition: FirmwareEdition? = null,
     val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
     val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
