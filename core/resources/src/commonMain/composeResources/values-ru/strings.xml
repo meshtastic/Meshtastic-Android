@@ -656,6 +656,8 @@
     <string name="firmware_edition">Версия прошивки</string>
     <string name="firmware_event_ended_banner">%1$s завершен. Вернитесь к стандартной Meshtastic прошивке, чтобы восстановить нормальные функции.</string>
     <string name="firmware_event_ended_button">Обновление прошивки</string>
+    <string name="firmware_gate_title">Требуется обновление прошивки</string>
+    <string name="firmware_gate_update">Обновление прошивки</string>
     <string name="firmware_maintenance_bootloader_available">Последнее: %1$s</string>
     <string name="firmware_maintenance_bootloader_installed">Установлено: %1$s</string>
     <string name="firmware_maintenance_bootloader_latest_hint">Последняя версия: %1$s. Установленная версия отображается после перезагрузки устройства в режиме обновления.</string>
@@ -992,6 +994,7 @@
     <string name="logs">Журналы</string>
     <string name="long_name">Полное имя</string>
     <string name="longitude">Долгота</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="lora_config_change_value">%1$s: %2$s → %3$s</string>
@@ -1755,8 +1758,6 @@
     <string name="share_your_location_in_real_time">Делитесь своим местоположением в режиме реального времени и поддерживайте работу группы с функциями GPS.</string>
     <string name="shared_contact_no_public_key">У этого контакта нет публичного ключа, поэтому его нельзя импортировать. Контакт без ключа стирает любой ключ, который твоя радиостанция уже хранит для этой ноды. Попроси отправителя снова поделиться им, когда его нода обменяется ключами.</string>
     <string name="short_name">Короткое имя</string>
-    <string name="should_update">Чтобы использовать последние исправления и функции, обновите прошивку вашей ноды. \n\nПоследняя стабильная версия прошивки: %1$s</string>
-    <string name="should_update_firmware">Рекомендуется обновление прошивки.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Ключ шифрования</string>
     <string name="show_full_message_timestamps">Показывать полные метки времени сообщений</string>

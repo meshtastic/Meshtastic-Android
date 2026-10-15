@@ -591,6 +591,8 @@
     <string name="firmware_edition">Püsivara versioon</string>
     <string name="firmware_event_ended_banner">%1$s on lõppenud. Tavapäraste funktsioonide taastamiseks naaske standardse Meshtastic püsivara juurde.</string>
     <string name="firmware_event_ended_button">Värskenda püsivara</string>
+    <string name="firmware_gate_title">Püsivara värskendus on vajalik</string>
+    <string name="firmware_gate_update">Värskenda püsivara</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Kustutusfail kopeeriti, kuid seade ei alustanud kustutamist. Midagi pole veel muutunud. Eemaldage seade vooluvõrgust, vajutage kaks korda lähtestamisnuppu ja proovige uuesti.</string>
     <string name="firmware_maintenance_copy_failed">Faili ei õnnestunud seadme kettale kopeerida. Veendu, et ketas on endiselt ühendatud ja proovi uuesti.</string>
     <string name="firmware_maintenance_data_unavailable">Kustutatavate piltide loend pole praegu saadaval. Kontrolli oma ühendust ja proovi uuesti või kasuta veebipõhist paigaldust aadressil flasher.meshtastic.org.</string>
@@ -899,6 +901,7 @@
     <string name="logs">Logi kirjet</string>
     <string name="long_name">Täis nimi</string>
     <string name="longitude">Pikkuskraad</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Madal akutase</string>
@@ -1494,8 +1497,6 @@
     <string name="share_to">Jaga…</string>
     <string name="share_your_location_in_real_time">Jaga reaalajas oma asukohta ja hoia oma grupp ühtsena integreeritud GPS funktsioonide abil.</string>
     <string name="short_name">Lühi nimi</string>
-    <string name="should_update">Uusimate paranduste ja funktsioonide kasutamiseks värskendage oma sõlme püsivara.\n\nUusim stabiilne püsivara versioon: %1$s</string>
-    <string name="should_update_firmware">Soovitatav püsivara värskendamine.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Krüpteerimisvõtmete nimed</string>
     <string name="show_full_message_timestamps">Kuva täieliku sõnumi ajatemplid</string>

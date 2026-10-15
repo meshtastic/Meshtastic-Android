@@ -551,6 +551,8 @@
     <string name="firmware_edition">ファームウェアエディション</string>
     <string name="firmware_event_ended_banner">%1$s は終了しました。通常の機能に戻すには、標準の Meshtastic ファームウェアに戻してください。</string>
     <string name="firmware_event_ended_button">ファームウェアを更新</string>
+    <string name="firmware_gate_title">ファームウェアの更新が必要です。</string>
+    <string name="firmware_gate_update">ファームウェアを更新</string>
     <string name="firmware_old">デバイスのファームウェアが古く、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されています。</string>
     <string name="firmware_recovery_banner">%1$s の更新を完了</string>
     <string name="firmware_recovery_ble_failed">Bluetooth 経由で更新を完了できませんでした。このデバイスの標準ブートローダーは、中断された更新を OTA で確実に完了できません。デバイスを復旧するには、USB でコンピューターに接続し、ベンダーのシリアル DFU ツール（例：adafruit-nrfutil）を使って再書き込みしてください。</string>
@@ -819,6 +821,7 @@
     <string name="logs">ログ</string>
     <string name="long_name">正式名称</string>
     <string name="longitude">経度</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">バッテリー残量低下</string>
@@ -1345,8 +1348,6 @@
     <string name="share_to">共有…</string>
     <string name="share_your_location_in_real_time">統合された GPS 機能で位置情報をリアルタイムに共有し、グループの連携を保ちます。</string>
     <string name="short_name">短縮名</string>
-    <string name="should_update">最新の修正や機能をご利用いただくために、お使いのノードのファームウェアをアップデートしてください。\n\n最新の安定ファームウェアバージョン: %1$s</string>
-    <string name="should_update_firmware">ファームウェアの更新を推奨します。</string>
     <!-- SHOW -->
     <string name="show_all_key_title">暗号鍵の意味</string>
     <string name="show_iaq_legend">空気品質の凡例を表示</string>

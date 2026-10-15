@@ -245,6 +245,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Edição do Firmware</string>
+    <string name="firmware_gate_title">Atualização do firmware necessária</string>
     <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo. Para mais informações consultar <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Nosso guia de instalação de firmware</a>.</string>
     <string name="firmware_too_old">Atualização do firmware necessária.</string>
     <string name="firmware_update_done">Concluído</string>
@@ -311,6 +312,7 @@
     <!-- LOG -->
     <string name="logs">Logs</string>
     <string name="longitude">Longitude</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Bateria Fraca</string>
@@ -568,8 +570,6 @@
     <string name="share_location">Compartilhar Localização</string>
     <string name="share_to">Compartilhar com…</string>
     <string name="share_your_location_in_real_time">Compartilhe sua localização em tempo real e mantenha seu grupo coordenado com recursos integrados de GPS.</string>
-    <string name="should_update">Para se beneficiar das últimas correções e recursos, por favor, atualize o seu firmware de nó.\n\nÚltima versão de firmwares estáveis: %1$s</string>
-    <string name="should_update_firmware">Atualização de Firmware recomendada.</string>
     <!-- SHOW -->
     <string name="show_layer">Mostrar Camada</string>
     <string name="show_password">Mostrar senha</string>

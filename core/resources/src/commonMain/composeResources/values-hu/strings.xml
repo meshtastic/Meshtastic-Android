@@ -251,6 +251,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Firmware kiadás</string>
+    <string name="firmware_gate_title">Firmware frissítés szükséges</string>
     <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon. További tudnivalókat a <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">firmware frissítés leírásában</a> talál, a Github-on.</string>
     <string name="firmware_too_old">Firmware frissítés szükséges.</string>
     <string name="firmware_update_failed">A frissítés sikertelen</string>
@@ -334,6 +335,7 @@
     <string name="logs">Naplók</string>
     <string name="long_name">Hosszú név</string>
     <string name="longitude">Hosszúság</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Alacsony töltöttség</string>
@@ -647,8 +649,6 @@
     <string name="share_to">Megosztás…</string>
     <string name="share_your_location_in_real_time">Oszd meg a helyzeted valós időben, és tartsd összehangoltan a csoportot a beépített GPS-funkciókkal.</string>
     <string name="short_name">Rövid név</string>
-    <string name="should_update">A legújabb javítások és funkciók eléréséhez frissítsd a csomópont firmware-jét.\n\nLegújabb stabil firmware-verzió: %1$s</string>
-    <string name="should_update_firmware">Firmware-frissítés javasolt.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Titkosítási kulcsok jelentése</string>
     <string name="show_layer">Réteg megjelenítése</string>

@@ -549,6 +549,8 @@
     <string name="firmware_edition">Edizione Firmware</string>
     <string name="firmware_event_ended_banner">%1$s è terminato. Torna al firmware Meshtastic standard per ripristinare le funzioni normali.</string>
     <string name="firmware_event_ended_button">Aggiorna il firmware</string>
+    <string name="firmware_gate_title">Aggiornamento del firmware necessario</string>
+    <string name="firmware_gate_update">Aggiorna il firmware</string>
     <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione. Per ulteriori informazioni su questo vedi <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">la nostra guida all'installazione del firmware</a>.</string>
     <string name="firmware_recovery_banner">Completa l'aggiornamento di %1$s</string>
     <string name="firmware_recovery_ble_failed">Impossibile completare l'aggiornamento via Bluetooth. Il bootloader di serie di questo dispositivo non è in grado di completare in modo affidabile un aggiornamento interrotto via etere. Collegalo a un computer con un cavo USB e riprogrammalo con lo strumento DFU seriale del produttore (per esempio adafruit-nrfutil) per recuperarlo.</string>
@@ -820,6 +822,7 @@
     <string name="logs">Registri</string>
     <string name="long_name">Nome Lungo</string>
     <string name="longitude">Longitudine</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Livello batteria basso</string>
@@ -1343,8 +1346,6 @@
     <string name="share_to">Condividi con…</string>
     <string name="share_your_location_in_real_time">Condividi la tua posizione in tempo reale e mantieni il tuo gruppo coordinato con le funzionalità GPS integrate.</string>
     <string name="short_name">Nome Breve</string>
-    <string name="should_update">Per usufruire delle ultime correzioni e funzionalità, aggiorna il firmware del tuo nodo.\n\nVersione stabile più recente del firmware: %1$s</string>
-    <string name="should_update_firmware">Aggiornamento Firmware Consigliato.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Significato Chiave Di Crittografia</string>
     <string name="show_iaq_legend">Mostra legenda qualità dell'aria</string>

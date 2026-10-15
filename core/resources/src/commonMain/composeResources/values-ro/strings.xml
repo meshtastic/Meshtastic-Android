@@ -310,6 +310,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Ediţie firmware</string>
+    <string name="firmware_gate_title">Este necesară actualizarea firmware-ului</string>
     <string name="firmware_old">Firmware-ul radioului este prea vechi pentru a putea comunica cu această aplicație. Pentru mai multe informații despre acest proces, consultați <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Ghidul nostru de instalare pentru firmware</a>.</string>
     <string name="firmware_too_old">Este necesară actualizarea firmware-ului.</string>
     <string name="firmware_update_almost_there">Aproape gata...</string>
@@ -482,6 +483,7 @@
     <string name="logs">Jurnale</string>
     <string name="long_name">Nume lung</string>
     <string name="longitude">Longitudine</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Baterie descarcata </string>
@@ -853,8 +855,6 @@
     <string name="share_to">Distribuire către…</string>
     <string name="share_your_location_in_real_time">Partajați-vă locația în timp real și păstrați grupul coordonat cu funcții GPS integrate.</string>
     <string name="short_name">Nume scurt</string>
-    <string name="should_update">Pentru a beneficia de cele mai recente remedieri și caracteristici, vă rugăm să vă actualizați firmware-ul node.\n\nUltima versiune de firmware stabilă: %1$s</string>
-    <string name="should_update_firmware">Actualizare firmware recomandată.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Semnificațiile cheilor de criptare</string>
     <string name="show_layer">Arată Layer</string>

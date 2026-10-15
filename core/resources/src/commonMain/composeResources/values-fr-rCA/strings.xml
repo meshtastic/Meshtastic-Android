@@ -529,6 +529,8 @@
     <string name="firmware_edition">Version du micrologiciel</string>
     <string name="firmware_event_ended_banner">%1$s est déprécié. Utilisez un micrologiciel Meshtastic standard pour restaurer les fonctionnalités normales.</string>
     <string name="firmware_event_ended_button">Mettre à jour le micrologiciel</string>
+    <string name="firmware_gate_title">Mise à jour du micrologiciel requise</string>
+    <string name="firmware_gate_update">Mettre à jour le micrologiciel</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Mise à jour du bootloader</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Mettre à jour le chargeur de démarrage ?</string>
     <string name="firmware_old">Le micrologiciel de la radio est trop ancien pour communiquer avec cette application. Pour des informations, voir <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Guide d'installation du micrologiciel</a>.</string>
@@ -770,6 +772,7 @@
     <string name="logs">Journaux</string>
     <string name="long_name">Nom long</string>
     <string name="longitude">Longitude</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="low_battery">Batterie faible</string>
@@ -1201,8 +1204,6 @@
     <string name="share_to">Partager vers…</string>
     <string name="share_your_location_in_real_time">Partagez votre position en temps réel et gardez votre groupe coordonné avec les fonctionnalités GPS intégrées.</string>
     <string name="short_name">Nom court</string>
-    <string name="should_update">Pour bénéficier des dernières corrections et fonctionnalités, veuillez mettre à jour le micrologiciel de votre nœud.\n\nDernière version stable du micrologiciel : %1$s</string>
-    <string name="should_update_firmware">Mise à jour du micrologiciel recommandée.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Signification de la clé de chiffrement</string>
     <string name="show_iaq_legend">Afficher la légende de la qualité de l'air</string>

@@ -80,6 +80,7 @@
     <!-- FILTER -->
     <string name="filter_icon">פילטר</string>
     <!-- FIRMWARE -->
+    <string name="firmware_gate_title">נדרש עדכון קושחה</string>
     <string name="firmware_old">קושחת המכשיר ישנה מידי בכדי לתקשר עם האפליקציה. למידע נוסף בקר ב<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">מדריך התקנת קושחה</a>.</string>
     <string name="firmware_too_old">נדרש עדכון קושחה.</string>
     <string name="firmware_update_failed">העדכון נכשל</string>
@@ -103,6 +104,7 @@
     <!-- LOCKDOWN -->
     <string name="locked">נעול</string>
     <!-- LOG -->
+    <!-- LORA -->
     <!-- MAP -->
     <string name="map_cache_manager">ניהול מטמון</string>
     <string name="map_cache_size">גודל מטמון נוכחי</string>

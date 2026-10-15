@@ -139,6 +139,7 @@
     <!-- LOCKDOWN -->
     <!-- LOG -->
     <string name="logs">Журнал</string>
+    <!-- LORA -->
     <string name="lora">LoRa</string>
     <string name="lora_config">LoRa</string>
     <string name="lux">Люкс</string>
