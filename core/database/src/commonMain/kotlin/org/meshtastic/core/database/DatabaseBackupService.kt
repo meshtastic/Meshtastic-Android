@@ -45,8 +45,11 @@ sealed interface RestoreStageResult {
 
 /** What the settings screen needs from a database backup, so a test can stand in for the file-backed service. */
 interface DatabaseBackupOperations {
-    /** File name of the database active now; capture it before anything switches databases. */
-    val activeDatabaseName: String
+    /**
+     * The device database to act on: the active one, or the last device's when none is selected. Null when no device
+     * database exists. Capture it before anything switches databases.
+     */
+    suspend fun backupTargetName(): String?
 
     suspend fun export(dbName: String, sink: BufferedSink): Long
 
@@ -62,8 +65,7 @@ class DatabaseBackupService(private val manager: DatabaseManager, private val di
     DatabaseBackupOperations {
     private val fileSystem: FileSystem = getFileSystem()
 
-    override val activeDatabaseName: String
-        get() = manager.activeDatabaseName
+    override suspend fun backupTargetName(): String? = manager.backupTargetDatabaseName()
 
     /** Snapshots [dbName] with `VACUUM INTO`, then streams the snapshot into [sink]. Returns the bytes written. */
     override suspend fun export(dbName: String, sink: BufferedSink): Long = withContext(dispatchers.io) {
@@ -193,14 +195,30 @@ private fun swapInStagedRestore(staged: Path, dbFile: Path, fileSystem: FileSyst
 }
 
 /**
- * Finishes a swap a crash interrupted: with the main file missing its `.bak` set goes back, otherwise the swap
- * completed and the `.bak` set is stale.
+ * Finishes a swap a crash interrupted: with the main file missing its `.bak` set goes back. With both present the
+ * `.bak` set is deleted only when the live database holds a local node, so a live file Room just created empty after a
+ * failed put-back never costs the user the original.
  */
 private fun recoverInterruptedRestore(dbFile: Path, fileSystem: FileSystem) {
+    val asideFiles = DatabaseBackup.databaseFiles(dbFile).filter { fileSystem.exists(DatabaseBackup.backupPath(it)) }
+    if (asideFiles.isEmpty()) return
     val putBack = !fileSystem.exists(dbFile) && fileSystem.exists(DatabaseBackup.backupPath(dbFile))
-    for (file in DatabaseBackup.databaseFiles(dbFile)) {
+    if (!putBack && !hasLocalNode(dbFile)) {
+        Logger.w { "Keeping the .bak of an interrupted restore beside a database with no local node" }
+        return
+    }
+    for (file in asideFiles) {
         val aside = DatabaseBackup.backupPath(file)
-        if (!fileSystem.exists(aside)) continue
         if (putBack) fileSystem.atomicMove(aside, file) else fileSystem.delete(aside)
     }
+}
+
+/** True when the database at [dbFile] has its local node row, which a database Room just created never has. */
+internal fun hasLocalNode(dbFile: Path): Boolean = try {
+    BundledSQLiteDriver().open(dbFile.toString(), SQLITE_OPEN_READONLY).use { connection ->
+        (connection.firstColumn("SELECT count(*) FROM my_node")?.toLongOrNull() ?: 0L) > 0L
+    }
+} catch (e: SQLiteException) {
+    Logger.w(e) { "Could not read the local node from a restored database" }
+    false
 }

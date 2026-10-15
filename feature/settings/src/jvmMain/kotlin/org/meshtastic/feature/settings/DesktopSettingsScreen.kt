@@ -176,6 +176,7 @@ fun DesktopSettingsScreen(
                         }
                     navRoute?.let { onNavigate(it) }
                 },
+                databaseBackupAvailable = databaseBackup.available,
                 onBackupDatabase = databaseBackup.onBackup,
                 onRestoreDatabase = databaseBackup.onRestore,
                 onNavigate = onNavigate,

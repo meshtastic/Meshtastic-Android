@@ -263,6 +263,7 @@ fun SettingsScreen(
                     deviceProfile = null
                     showEditDeviceProfileDialog = true
                 },
+                databaseBackupAvailable = databaseBackup.available,
                 onBackupDatabase = databaseBackup.onBackup,
                 onRestoreDatabase = databaseBackup.onRestore,
                 onNavigate = onNavigate,

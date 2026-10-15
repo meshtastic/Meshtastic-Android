@@ -28,6 +28,7 @@ import okio.Path
 import okio.Path.Companion.toOkioPath
 import okio.buffer
 import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
+import org.meshtastic.core.database.entity.MyNodeEntity
 import java.io.RandomAccessFile
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -227,6 +228,43 @@ class DatabaseBackupJvmTest {
         assertEquals("keep me", fileSystem.read(live) { readUtf8() })
         assertFalse(fileSystem.exists(DatabaseBackup.backupPath(live)))
     }
+
+    @Test
+    fun `a leftover bak beside a database Room just created empty is kept`() {
+        val live = dir / "live.db"
+        createRealDatabase(live)
+        fileSystem.write(DatabaseBackup.backupPath(live)) { writeUtf8("original") }
+
+        applyStagedRestore("live", live, fileSystem)
+
+        assertEquals("original", fileSystem.read(DatabaseBackup.backupPath(live)) { readUtf8() })
+    }
+
+    @Test
+    fun `a leftover bak beside a restored database with a local node is deleted`() {
+        val live = dir / "live.db"
+        val db = openRealDatabase(live)
+        runBlocking { db.nodeInfoDao().setMyNodeInfo(myNode(num = 1)) }
+        db.close()
+        fileSystem.write(DatabaseBackup.backupPath(live)) { writeUtf8("stale") }
+
+        applyStagedRestore("live", live, fileSystem)
+
+        assertFalse(fileSystem.exists(DatabaseBackup.backupPath(live)))
+    }
+
+    private fun myNode(num: Int) = MyNodeEntity(
+        myNodeNum = num,
+        model = null,
+        firmwareVersion = null,
+        couldUpdate = false,
+        shouldUpdate = false,
+        currentPacketId = 0L,
+        messageTimeoutMsec = 0,
+        minAppVersion = 0,
+        maxChannels = 0,
+        hasWifi = false,
+    )
 
     @Test
     fun `invalid staged restore is discarded and the live database is untouched`() {

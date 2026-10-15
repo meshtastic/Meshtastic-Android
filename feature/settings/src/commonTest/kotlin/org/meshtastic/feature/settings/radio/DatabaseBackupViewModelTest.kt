@@ -19,6 +19,7 @@ package org.meshtastic.feature.settings.radio
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -41,8 +42,10 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DatabaseBackupViewModelTest {
@@ -54,13 +57,18 @@ class DatabaseBackupViewModelTest {
     private val backupService = FakeBackupOperations(radioController)
     private val fileService = FakeFileService()
 
-    /** Reports the device database until the radio is deselected, as the real switch does, and records targets. */
+    /**
+     * Reports the selected device's database, or [lastDeviceDb] once the radio is deselected, and records targets.
+     * Distinct names show which one an operation was bound to.
+     */
     private class FakeBackupOperations(private val radioController: FakeRadioController) : DatabaseBackupOperations {
         val exported = mutableListOf<String>()
         val staged = mutableListOf<String>()
+        var selectedDb: String? = DEVICE_DB
+        var lastDeviceDb: String? = LAST_DEVICE_DB
 
-        override val activeDatabaseName: String
-            get() = if (radioController.lastSetDeviceAddress == "n") DEFAULT_DB else DEVICE_DB
+        override suspend fun backupTargetName(): String? =
+            if (radioController.lastSetDeviceAddress == "n") lastDeviceDb else selectedDb
 
         override suspend fun export(dbName: String, sink: BufferedSink): Long {
             exported += dbName
@@ -186,6 +194,41 @@ class DatabaseBackupViewModelTest {
     }
 
     @Test
+    fun `already disconnected backup targets the last device database`() = runTest {
+        radioController.setConnectionState(ConnectionState.Disconnected)
+        backupService.selectedDb = LAST_DEVICE_DB
+
+        viewModel.runWhenDisconnected { readyCount++ }
+        viewModel.backup(CommonUri.parse("file:///backup.db"))
+        awaitResultAlert()
+
+        assertEquals(1, readyCount)
+        assertEquals(listOf(LAST_DEVICE_DB), backupService.exported)
+    }
+
+    @Test
+    fun `with no device database the items are unavailable and nothing proceeds`() = runTest {
+        radioController.setConnectionState(ConnectionState.Disconnected)
+        backupService.selectedDb = null
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.hasDeviceDatabase.collect {} }
+
+        viewModel.runWhenDisconnected { readyCount++ }
+        viewModel.backup(CommonUri.parse("file:///backup.db"))
+
+        assertFalse(viewModel.hasDeviceDatabase.value)
+        assertEquals(0, readyCount)
+        assertTrue(backupService.exported.isEmpty())
+    }
+
+    @Test
+    fun `a device database makes the items available`() = runTest {
+        radioController.setConnectionState(ConnectionState.Disconnected)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.hasDeviceDatabase.collect {} }
+
+        assertTrue(viewModel.hasDeviceDatabase.value)
+    }
+
+    @Test
     fun `dismissing the dialog leaves the radio connected and does not proceed`() {
         radioController.setConnectionState(ConnectionState.Connected)
         viewModel.runWhenDisconnected { readyCount++ }
@@ -198,6 +241,6 @@ class DatabaseBackupViewModelTest {
 }
 
 private const val DEVICE_DB = "meshtastic_database_device"
-private const val DEFAULT_DB = "meshtastic_database"
+private const val LAST_DEVICE_DB = "meshtastic_database_last_device"
 private const val RESULT_TIMEOUT_MS = 5_000L
 private const val POLL_MS = 10L

@@ -17,22 +17,29 @@
 package org.meshtastic.feature.settings.radio
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.database.DatabaseBackup
 import org.meshtastic.core.ui.util.rememberOpenFileLauncher
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 
-/** Picker-backed entry points for the Backup & Restore section's app database items. */
-class DatabaseBackupActions(val onBackup: () -> Unit, val onRestore: () -> Unit)
+/**
+ * Picker-backed entry points for the Backup & Restore section's app database items. [available] is false until some
+ * device has a database.
+ */
+class DatabaseBackupActions(val available: Boolean, val onBackup: () -> Unit, val onRestore: () -> Unit)
 
 @Composable
 fun rememberDatabaseBackupActions(): DatabaseBackupActions {
     val viewModel = koinViewModel<DatabaseBackupViewModel>()
+    val available by viewModel.hasDeviceDatabase.collectAsStateWithLifecycle()
     val saveFile = rememberSaveFileLauncher { uri -> viewModel.backup(uri) }
     val openFile = rememberOpenFileLauncher { uri -> if (uri != null) viewModel.restore(uri) }
-    return remember(viewModel, saveFile, openFile) {
+    return remember(viewModel, available, saveFile, openFile) {
         DatabaseBackupActions(
+            available = available,
             onBackup = {
                 viewModel.runWhenDisconnected { saveFile(viewModel.suggestedFileName(), DatabaseBackup.MIME_TYPE) }
             },

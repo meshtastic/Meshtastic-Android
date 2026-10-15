@@ -36,6 +36,7 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.advanced_title
+import org.meshtastic.core.resources.app_database_backup_no_device
 import org.meshtastic.core.resources.backup_app_database
 import org.meshtastic.core.resources.backup_restore
 import org.meshtastic.core.resources.clean_node_database_title
@@ -86,6 +87,7 @@ fun RadioConfigItemList(
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
+    databaseBackupAvailable: Boolean = true,
     onBackupDatabase: () -> Unit = {},
     onRestoreDatabase: () -> Unit = {},
     onNavigate: (Route) -> Unit,
@@ -117,6 +119,7 @@ fun RadioConfigItemList(
                 enabled = enabled,
                 onImport = onImport,
                 onExport = onExport,
+                databaseBackupAvailable = databaseBackupAvailable,
                 onBackupDatabase = onBackupDatabase,
                 onRestoreDatabase = onRestoreDatabase,
             )
@@ -176,6 +179,7 @@ private fun BackupRestoreSection(
     enabled: Boolean,
     onImport: () -> Unit,
     onExport: () -> Unit,
+    databaseBackupAvailable: Boolean,
     onBackupDatabase: () -> Unit,
     onRestoreDatabase: () -> Unit,
 ) {
@@ -196,14 +200,23 @@ private fun BackupRestoreSection(
             enabled = enabled,
             onClick = onExport,
         )
+        if (!databaseBackupAvailable) {
+            Text(
+                text = stringResource(Res.string.app_database_backup_no_device),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         ListItem(
             text = stringResource(Res.string.backup_app_database),
             leadingIcon = MeshtasticIcons.Upload,
+            enabled = databaseBackupAvailable,
             onClick = onBackupDatabase,
         )
         ListItem(
             text = stringResource(Res.string.restore_app_database),
             leadingIcon = MeshtasticIcons.Download,
+            enabled = databaseBackupAvailable,
             onClick = onRestoreDatabase,
         )
     }

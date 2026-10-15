@@ -17,10 +17,13 @@
 package org.meshtastic.feature.settings.radio
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.nowInstant
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.DatabaseBackup
 import org.meshtastic.core.database.DatabaseBackupOperations
 import org.meshtastic.core.database.RestoreStageResult
@@ -44,6 +47,7 @@ import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.resources.restore_app_database
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 
 /** Backs up the app database for the connected device, and stages a restore that applies on the next launch. */
 @KoinViewModel
@@ -61,9 +65,14 @@ class DatabaseBackupViewModel(
 
     private var target: Target? = null
 
-    private fun captureTarget() = Target(backupService.activeDatabaseName, nodeRepository.myNodeInfo.value?.deviceId)
+    /** False until some device has a database, so there is nothing to back up or restore into. */
+    val hasDeviceDatabase: StateFlow<Boolean> =
+        radioController.connectionState
+            .map { safeCatching { backupService.backupTargetName() != null }.getOrDefault(false) }
+            .stateInWhileSubscribed(initialValue = false)
 
-    private fun targetDbName(): String = target?.dbName ?: backupService.activeDatabaseName
+    private suspend fun captureTarget(): Target? =
+        backupService.backupTargetName()?.let { Target(it, nodeRepository.myNodeInfo.value?.deviceId) }
 
     /** File name offered by the save picker: device id and today's date. */
     fun suggestedFileName(): String =
@@ -71,14 +80,16 @@ class DatabaseBackupViewModel(
 
     /**
      * Runs [onReady] now when the radio is disconnected. Otherwise, including while it sleeps or connects, asks first
-     * and, once confirmed, disconnects the radio the same way the Connections screen does, then runs [onReady]. Either
-     * way the backup or restore stays bound to the database that was active when this was called.
+     * and, once confirmed, disconnects the radio the same way the Connections screen does, then runs [onReady]. The
+     * backup or restore binds to the device database active before the disconnect or, already disconnected, to the last
+     * device's; with no device database it does not proceed.
      */
     fun runWhenDisconnected(onReady: () -> Unit) {
-        val captured = captureTarget()
         if (radioController.connectionState.value is ConnectionState.Disconnected) {
-            target = captured
-            onReady()
+            safeLaunch(tag = "databaseBackupTarget") {
+                target = captureTarget() ?: return@safeLaunch
+                onReady()
+            }
             return
         }
         alertManager.showAlert(
@@ -87,9 +98,10 @@ class DatabaseBackupViewModel(
             confirmTextRes = Res.string.disconnect,
             onConfirm = {
                 safeLaunch(tag = "databaseBackupDisconnect") {
-                    target = captured
+                    val captured = captureTarget()
                     radioPrefs.setDevName(null)
                     radioController.setDeviceAddress(NO_DEVICE_SELECTED)
+                    target = captured ?: return@safeLaunch
                     onReady()
                 }
             },
@@ -97,7 +109,7 @@ class DatabaseBackupViewModel(
     }
 
     fun backup(uri: CommonUri) {
-        val dbName = targetDbName()
+        val dbName = target?.dbName ?: return
         safeLaunch(tag = "databaseBackup") {
             val written = fileService.write(uri) { sink -> backupService.export(dbName, sink) }
             val message =
@@ -119,7 +131,7 @@ class DatabaseBackupViewModel(
     }
 
     fun restore(uri: CommonUri) {
-        val dbName = targetDbName()
+        val dbName = target?.dbName ?: return
         safeLaunch(tag = "databaseRestore") {
             var result: RestoreStageResult = RestoreStageResult.Failed(IllegalStateException("file not readable"))
             fileService.read(uri) { source -> result = backupService.stageRestore(dbName, source) }

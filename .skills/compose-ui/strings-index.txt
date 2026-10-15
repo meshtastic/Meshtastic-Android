@@ -71,6 +71,7 @@ any
 ### APP ###
 app_database_backup_disconnect_confirmation
 app_database_backup_failed
+app_database_backup_no_device
 app_database_backup_saved
 app_database_restore_confirmation
 app_database_restore_corrupt

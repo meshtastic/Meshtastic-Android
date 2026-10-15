@@ -547,9 +547,18 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         return getDatabaseBuilder(dbName).build()
     }
 
-    /** File name of the database currently active, the one a backup export or staged restore targets. */
-    val activeDatabaseName: String
-        get() = currentDbName
+    /**
+     * The device database a backup or restore acts on: the active one, or with no device selected the most recently
+     * used device database. Null when no device database exists yet.
+     */
+    suspend fun backupTargetDatabaseName(): String? = withManagerOperation {
+        withContext(dispatchers.io) {
+            mutex.withLock {
+                currentDbName.takeIf { it != DatabaseConstants.DEFAULT_DB_NAME }
+                    ?: deviceDbNamesLocked().maxByOrNull { lastUsed(it) }
+            }
+        }
+    }
 
     /**
      * Resolves the DB name to use for [address], honoring a cross-transport alias when one exists. A secondary
