@@ -266,6 +266,10 @@ fun DesktopSettingsScreen(
                     onToggleNodeEvents = { settingsViewModel.setNodeEventsEnabled(it) },
                     lowBatteryEnabled = settingsViewModel.lowBatteryEnabled.collectAsStateWithLifecycle().value,
                     onToggleLowBattery = { settingsViewModel.setLowBatteryEnabled(it) },
+                    reactionsEnabled = settingsViewModel.reactionsEnabled.collectAsStateWithLifecycle().value,
+                    onToggleReactions = { settingsViewModel.setReactionsEnabled(it) },
+                    newWaypointsEnabled = settingsViewModel.newWaypointsEnabled.collectAsStateWithLifecycle().value,
+                    onToggleNewWaypoints = { settingsViewModel.setNewWaypointsEnabled(it) },
                 )
 
                 ExpressiveSection(title = stringResource(Res.string.help_and_documentation)) {

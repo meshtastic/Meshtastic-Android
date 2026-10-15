@@ -49,6 +49,17 @@ class DesktopMeshNotificationManagerTest {
     private val manager = DesktopMeshNotificationManager(notificationManager)
 
     @Test
+    fun `reactions and waypoints dispatch in their own categories`() = runTest {
+        manager.updateReactionNotification("c", "Ann", "+1", isBroadcast = false, channelName = null, isSilent = false)
+        manager.updateWaypointNotification("c", "Ann", "Camp", waypointId = 3, isSilent = false)
+
+        assertEquals(
+            listOf(Notification.Category.Reaction, Notification.Category.Waypoint),
+            notificationManager.dispatched.map { it.category },
+        )
+    }
+
+    @Test
     fun `critical alerts dispatch in the alert category`() = runTest {
         manager.showAlertNotification(contactKey = "contact-1", name = "Alert", alert = "Something happened")
 
