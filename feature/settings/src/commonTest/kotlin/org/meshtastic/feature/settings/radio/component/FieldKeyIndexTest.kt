@@ -108,6 +108,18 @@ class FieldKeyIndexTest {
     }
 
     @Test
+    fun theEthernetKeyLandsOnTheEthernetCardNotTheWifiCard() {
+        val keys = SettingsSearchCatalog.fieldKeys(ConfigRoute.NETWORK.route)
+        val (wifi, other) = splitFieldKeys(keys) { it.startsWith("schema_network_wifi_") }
+        val (ethernet, advanced) = splitFieldKeys(other) { it == ETHERNET_ENABLED_KEY }
+
+        assertEquals(setOf(ETHERNET_ENABLED_KEY), ethernet)
+        assertTrue(ETHERNET_ENABLED_KEY in keys)
+        assertTrue(ETHERNET_ENABLED_KEY !in wifi && ETHERNET_ENABLED_KEY !in advanced)
+        assertEquals(keys, wifi + ethernet + advanced)
+    }
+
+    @Test
     fun partitionFieldKeysPutsUnclaimedKeysOnTheFirstCard() {
         val keys = setOf("p_a", "p_b", "p_c", "p_new")
         val groups = partitionFieldKeys(keys, "p_", listOf("b"), listOf("c", "absent"))

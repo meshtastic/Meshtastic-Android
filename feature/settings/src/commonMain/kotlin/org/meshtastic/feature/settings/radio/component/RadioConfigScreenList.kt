@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +61,7 @@ import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.feature.settings.search.FieldFocusRequest
 import org.meshtastic.feature.settings.search.LocalSettingsFieldFocus
 
 /** The local radio's settings open read-only while disconnected; remote-admin screens never show the prompt. */
@@ -112,19 +114,23 @@ fun <T : Message<T, *>> RadioConfigScreenList(
 
             // A request for a key no item carries stays pending until the screen closes, and the screen just opens.
             LaunchedEffect(requestedField, fieldFocus) {
-                val key = requestedField ?: return@LaunchedEffect
+                val request = requestedField ?: return@LaunchedEffect
+                val key = request.key
                 val target =
                     snapshotFlow { listState.layoutInfo.totalItemsCount }
                         .map { keyIndex.indexOf(key) }
                         .first { it != null } ?: return@LaunchedEffect
                 listState.animateScrollToItem(target)
-                fieldFocus.consume(key)
+                fieldFocus.consume(request)
                 highlightKey = key
                 highlightActive = true
                 delay(HIGHLIGHT_HOLD_MILLIS)
                 highlightActive = false
             }
-            DisposableEffect(fieldFocus) { onDispose { fieldFocus?.clear() } }
+            // Leaving clears only the request this screen saw, never a newer one made for the next destination.
+            val seenRequest = remember { mutableStateOf<FieldFocusRequest?>(null) }
+            SideEffect { if (requestedField != null) seenRequest.value = requestedField }
+            DisposableEffect(fieldFocus) { onDispose { fieldFocus?.clear(seenRequest.value) } }
 
             LazyColumn(
                 state = listState,

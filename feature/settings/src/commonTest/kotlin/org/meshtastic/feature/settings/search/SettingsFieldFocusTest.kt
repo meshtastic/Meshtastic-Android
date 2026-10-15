@@ -26,6 +26,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -53,7 +54,7 @@ class SettingsFieldFocusTest {
         val route = viewModel.select(entry)
 
         assertEquals(entry.route, route)
-        assertEquals("schema_lora_hop_limit", focus.pending.value)
+        assertEquals("schema_lora_hop_limit", focus.pending.value?.key)
     }
 
     @Test
@@ -66,20 +67,55 @@ class SettingsFieldFocusTest {
     }
 
     @Test
-    fun consumingAnOlderKeyDoesNotDropANewerRequest() {
+    fun consumingAnOlderRequestDoesNotDropANewerRequest() {
         focus.request("schema_lora_hop_limit")
+        val older = focus.pending.value!!
         focus.request("schema_lora_region")
 
-        focus.consume("schema_lora_hop_limit")
+        focus.consume(older)
 
-        assertEquals("schema_lora_region", focus.pending.value)
+        assertEquals("schema_lora_region", focus.pending.value?.key)
     }
 
     @Test
-    fun consumingThePendingKeyClearsIt() {
+    fun consumingThePendingRequestClearsIt() {
         focus.request("schema_lora_hop_limit")
 
-        focus.consume("schema_lora_hop_limit")
+        focus.consume(focus.pending.value!!)
+
+        assertNull(focus.pending.value)
+    }
+
+    @Test
+    fun disposingTheScreenThatConsumedARequestKeepsTheNextRequestPending() {
+        focus.request("schema_lora_hop_limit")
+        val a = focus.pending.value!!
+        focus.consume(a)
+        focus.request("schema_lora_region")
+
+        focus.clear(a)
+
+        assertEquals("schema_lora_region", focus.pending.value?.key)
+    }
+
+    @Test
+    fun selectingTheSameKeyTwiceMakesDistinctRequests() {
+        focus.request("schema_lora_hop_limit")
+        val first = focus.pending.value!!
+        focus.request("schema_lora_hop_limit")
+        val second = focus.pending.value!!
+
+        focus.clear(first)
+
+        assertNotEquals(first, second)
+        assertEquals(second, focus.pending.value)
+    }
+
+    @Test
+    fun clearingTheStillPendingRequestDropsIt() {
+        focus.request("schema_lora_hop_limit")
+
+        focus.clear(focus.pending.value)
 
         assertNull(focus.pending.value)
     }

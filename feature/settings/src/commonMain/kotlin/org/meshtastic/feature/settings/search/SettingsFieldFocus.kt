@@ -25,28 +25,37 @@ import org.koin.core.annotation.Single
 /**
  * The control a settings search result named, handed from the search field to the config screen it opened.
  *
- * The key is the schema string key of the field (`schema_lora_hop_limit`). The screen's list host scrolls to the item
- * carrying that key and calls [consume]; a screen whose items carry no matching key leaves the request pending until
- * the host leaves composition, which [clear]s it.
+ * Each request carries the schema string key of the field (`schema_lora_hop_limit`) and an id unique to that selection.
+ * The screen's list host scrolls to the item carrying the key and calls [consume]; a screen whose items carry no
+ * matching key leaves the request pending until the host leaves composition, which [clear]s it.
  */
 @Single
 class SettingsFieldFocus {
-    private val _pending = MutableStateFlow<String?>(null)
-    val pending: StateFlow<String?> = _pending.asStateFlow()
+    private val _pending = MutableStateFlow<FieldFocusRequest?>(null)
+    val pending: StateFlow<FieldFocusRequest?> = _pending.asStateFlow()
+    private var lastId = 0L
 
     fun request(fieldKey: String?) {
-        _pending.value = fieldKey
+        _pending.value = fieldKey?.let { FieldFocusRequest(it, ++lastId) }
     }
 
-    /** Clears the request only if it is still [fieldKey], so a newer search result is not dropped by an older host. */
-    fun consume(fieldKey: String) {
-        if (_pending.value == fieldKey) _pending.value = null
+    /**
+     * Clears the pending request only if it is still [request], so a newer selection is not dropped by an older host.
+     */
+    fun consume(request: FieldFocusRequest) {
+        _pending.compareAndSet(request, null)
     }
 
-    fun clear() {
-        _pending.value = null
+    /**
+     * Clears the pending request only if it is still [request]; same guard as [consume], for a host that is leaving.
+     */
+    fun clear(request: FieldFocusRequest?) {
+        if (request != null) consume(request)
     }
 }
+
+/** One selection of a search result: two selections of the same [key] differ by [id]. */
+data class FieldFocusRequest(val key: String, val id: Long)
 
 /** Provided around each config screen; null where no search can have named a control, such as previews. */
 @Suppress("CompositionLocalAllowlist")
