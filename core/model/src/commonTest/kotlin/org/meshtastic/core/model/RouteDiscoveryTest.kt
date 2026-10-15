@@ -136,21 +136,28 @@ class RouteDiscoveryTest {
     fun hopName_usesFullNodeId_whenNodeIsNotInDatabase() {
         val placeholder = user("!a1b2c3d4", "Meshtastic c3d4", "c3d4")
 
-        assertEquals("!a1b2c3d4", tracerouteHopName(0xa1b2c3d4.toInt(), placeholder))
+        assertEquals("!a1b2c3d4", tracerouteHopName(0xa1b2c3d4.toInt(), placeholder, UNKNOWN_HOP))
+    }
+
+    @Test
+    fun hopName_usesUnknownLabel_whenNodeNumIsBroadcast() {
+        val placeholder = user("!ffffffff", "Meshtastic ffff", "ffff")
+
+        assertEquals(UNKNOWN_HOP, tracerouteHopName(NodeAddress.NODENUM_BROADCAST, placeholder, UNKNOWN_HOP))
     }
 
     @Test
     fun hopName_padsNodeIdToEightDigits() {
         val placeholder = user("!0000002a", "Meshtastic 002a", "002a")
 
-        assertEquals("!0000002a", tracerouteHopName(0x2a, placeholder))
+        assertEquals("!0000002a", tracerouteHopName(0x2a, placeholder, UNKNOWN_HOP))
     }
 
     @Test
     fun hopName_keepsNames_whenNodeIsKnown() {
         val known = user("!a1b2c3d4", "Base Station", "BASE", HardwareModel.TBEAM)
 
-        assertEquals("Base Station (BASE)", tracerouteHopName(0xa1b2c3d4.toInt(), known))
+        assertEquals("Base Station (BASE)", tracerouteHopName(0xa1b2c3d4.toInt(), known, UNKNOWN_HOP))
     }
 
     @Test
@@ -168,9 +175,36 @@ class RouteDiscoveryTest {
                 }
                 .build()
 
-        val text = route.getTracerouteResponse(getUser = { num -> tracerouteHopName(num, users.getValue(num)) })
+        val text =
+            route.getTracerouteResponse(getUser = { num -> tracerouteHopName(num, users.getValue(num), UNKNOWN_HOP) })
 
         assertEquals("Route traced toward destination:\n\n■ Alpha (ALP)\n⇊ 2.0 dB\n■ !a1b2c3d4", text)
+    }
+
+    @Test
+    fun tracerouteResponse_namesSilentRelayAsUnknownHop() {
+        val silent = NodeAddress.NODENUM_BROADCAST
+        val route =
+            RouteDiscovery.Builder()
+                .also { b ->
+                    b.route = listOf(1, silent, 2)
+                    b.snr_towards = listOf(8, -128)
+                }
+                .build()
+        val users =
+            mapOf(
+                1 to user("!00000001", "Alpha", "ALP", HardwareModel.TBEAM),
+                silent to user("!ffffffff", "Meshtastic ffff", "ffff"),
+                2 to user("!00000002", "Beta", "BET", HardwareModel.TBEAM),
+            )
+
+        val text =
+            route.getTracerouteResponse(getUser = { num -> tracerouteHopName(num, users.getValue(num), UNKNOWN_HOP) })
+
+        assertEquals(
+            "Route traced toward destination:\n\n■ Alpha (ALP)\n⇊ 2.0 dB\n■ $UNKNOWN_HOP\n⇊ ? dB\n■ Beta (BET)",
+            text,
+        )
     }
 
     @Test
@@ -191,3 +225,5 @@ class RouteDiscoveryTest {
         assertEquals(TracerouteMapAvailability.Ok, result)
     }
 }
+
+private const val UNKNOWN_HOP = "Unknown hop"
