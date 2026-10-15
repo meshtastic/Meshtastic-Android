@@ -182,10 +182,18 @@ class SendMessageUseCaseImpl(
             Logger.w { "Refusing to resend to a retired conversation" }
             return SendMessageOutcome.Refused
         }
-        sendDirectMessageSideEffects(parsedKey.channelOrNull, parsedKey.addressString, nodeRepository.ourNodeInfo.value)
 
         val packetId = Random.nextInt(1, Int.MAX_VALUE)
-        val requeued = packetRepository.resendMessage(uuid, packetId) { messageQueue.enqueue(it) }
+        // Side effects run only once the repository has found the row, so a missing message touches nothing.
+        val requeued =
+            packetRepository.resendMessage(uuid, packetId) {
+                sendDirectMessageSideEffects(
+                    parsedKey.channelOrNull,
+                    parsedKey.addressString,
+                    nodeRepository.ourNodeInfo.value,
+                )
+                messageQueue.enqueue(it)
+            }
         return if (requeued == null) SendMessageOutcome.Refused else SendMessageOutcome.Queued(packetId)
     }
 

@@ -213,6 +213,18 @@ class SendMessageUseCaseTest {
     }
 
     @Test
+    fun `resend of a missing direct message runs no side effects`() = runTest {
+        setUpDirectMessage(firmwareVersion = "2.7.12")
+        everySuspend { packetRepository.resendMessage(any(), any(), any()) } returns null
+
+        useCase.resend(77L, "!dest") shouldBe SendMessageOutcome.Refused
+
+        radioController.sentSharedContacts.size shouldBe 0
+        radioController.favoritedNodes.size shouldBe 0
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    @Test
     fun `resend into a retired conversation is refused without touching the row`() = runTest {
         useCase.resend(77L, ContactKey.retiredBroadcast("token").value) shouldBe SendMessageOutcome.Refused
 
