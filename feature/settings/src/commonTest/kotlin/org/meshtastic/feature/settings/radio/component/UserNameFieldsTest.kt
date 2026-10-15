@@ -42,7 +42,7 @@ import kotlin.test.assertEquals
 class UserNameFieldsTest {
 
     /** Renders [UserNameFields] over [user] and returns an accessor for the edited message. */
-    private fun ComposeUiTest.showNameFields(user: User, hamMode: Boolean): () -> User {
+    private fun ComposeUiTest.showNameFields(user: User, hamMode: Boolean, longNameMaxBytes: Int = 24): () -> User {
         lateinit var formState: ConfigState<User>
         setContent {
             AppTheme {
@@ -50,6 +50,7 @@ class UserNameFieldsTest {
                 UserNameFields(
                     formState = formState,
                     hamMode = hamMode,
+                    longNameMaxBytes = longNameMaxBytes,
                     enabled = true,
                     isLongNameError = false,
                     isShortNameError = false,
@@ -169,5 +170,15 @@ class UserNameFieldsTest {
         field(HAM_LONG_NAME_TEST_TAG).performTextInput("Attic Heltec 3")
 
         assertEquals("KD2ABCD//Attic Heltec 3", user().long_name)
+    }
+
+    @Test
+    fun `the long name stops at the node limit`() = runComposeUiTest {
+        val user = showNameFields(User.Builder().also { wb -> wb.short_name = "ATTC" }.build(), hamMode = false)
+
+        field(USER_LONG_NAME_TEST_TAG).performTextInput("Rooftop Solar Repeater 1")
+        field(USER_LONG_NAME_TEST_TAG).performTextInput("2")
+
+        assertEquals("Rooftop Solar Repeater 1", user().long_name)
     }
 }

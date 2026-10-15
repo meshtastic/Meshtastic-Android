@@ -71,7 +71,6 @@ import org.meshtastic.proto.ExcludedModules
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 
-private const val LONG_NAME_MAX_LENGTH = 39 // long_name max_size:40
 private const val SHORT_NAME_MAX_LENGTH = 4 // short_name max_size:5
 private const val STATUS_MESSAGE_MAX_BYTES = 80 // status_message max_size:80
 
@@ -118,7 +117,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, focusS
     // Ham onboarding repurposes the long-name field as the callsign, for the local node only (iOS parity).
     val hamMode = formState.value.is_licensed && state.isLocal
     val longNameValue = if (hamMode) HamName.split(formState.value.long_name).first else formState.value.long_name
-    val longNameMax = if (hamMode) HamName.MAX_CALL_SIGN_BYTES else LONG_NAME_MAX_LENGTH
+    val longNameMax = if (hamMode) HamName.MAX_CALL_SIGN_BYTES else capabilities.maxLongNameBytes
     val validLongName = longNameValue.isNotBlank() && longNameValue.utf8Size() <= longNameMax
     val validShortName = formState.value.short_name.isNotBlank()
     val validNames = validLongName && validShortName
@@ -146,6 +145,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, focusS
                 UserNameFields(
                     formState = formState,
                     hamMode = hamMode,
+                    longNameMaxBytes = capabilities.maxLongNameBytes,
                     enabled = state.connected,
                     isLongNameError = !validLongName,
                     isShortNameError = !validShortName,
@@ -315,6 +315,7 @@ internal fun StatusMessageField(
 internal fun UserNameFields(
     formState: ConfigState<User>,
     hamMode: Boolean,
+    longNameMaxBytes: Int,
     enabled: Boolean,
     isLongNameError: Boolean,
     isShortNameError: Boolean,
@@ -329,7 +330,7 @@ internal fun UserNameFields(
             title = stringResource(if (hamMode) Res.string.call_sign else Res.string.long_name),
             value = if (hamMode) callSign else formState.value.long_name,
             summary = if (hamMode) stringResource(Res.string.call_sign_summary) else null,
-            maxSize = if (hamMode) HamName.MAX_CALL_SIGN_BYTES else LONG_NAME_MAX_LENGTH,
+            maxSize = if (hamMode) HamName.MAX_CALL_SIGN_BYTES else longNameMaxBytes,
             enabled = enabled,
             isError = isLongNameError,
             keyboardOptions = keyboardOptions,
