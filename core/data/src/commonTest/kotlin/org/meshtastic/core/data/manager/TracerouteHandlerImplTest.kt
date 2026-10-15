@@ -43,6 +43,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TracerouteHandlerImplTest {
 
@@ -80,9 +81,9 @@ class TracerouteHandlerImplTest {
         withContext(Dispatchers.Default) { withTimeout(TIMEOUT_MS) { job.children.toList().joinAll() } }
     }
 
-    private fun response(requestId: Int) = MeshPacket.Builder()
+    private fun response(requestId: Int, from: Int = REMOTE) = MeshPacket.Builder()
         .also { wb ->
-            wb.from = REMOTE
+            wb.from = from
             wb.to = LOCAL
             wb.hop_start = 3
             wb.decoded =
@@ -139,12 +140,25 @@ class TracerouteHandlerImplTest {
     @Test
     fun `a response to a request this process sent raises the result alert`() = runTest {
         val handler = newHandler()
-        handler.recordStartTime(REQUEST_ID)
+        handler.recordStartTime(REQUEST_ID, REMOTE)
 
         handler.handleAndSettle(response(REQUEST_ID))
 
         val alert = assertNotNull(serviceRepository.tracerouteResponse.value)
         assertEquals(REQUEST_ID, alert.requestId)
+    }
+
+    @Test
+    fun `a response from a node other than the destination raises no alert and keeps the timer`() = runTest {
+        val handler = newHandler()
+        handler.recordStartTime(REQUEST_ID, REMOTE)
+
+        handler.handleAndSettle(response(REQUEST_ID, from = RELAY))
+        assertNull(serviceRepository.tracerouteResponse.value)
+
+        handler.handleAndSettle(response(REQUEST_ID))
+        val alert = assertNotNull(serviceRepository.tracerouteResponse.value)
+        assertTrue(alert.message.contains("Duration: "), "the intended request's duration was lost: ${alert.message}")
     }
 
     @Test

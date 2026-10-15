@@ -63,6 +63,27 @@ class RequestTimerTest {
     }
 
     @Test
+    fun appendDuration_fromAnotherNode_leavesTextAndStartTimeUntouched() {
+        val timer = RequestTimer()
+        timer.start(requestId = 9, destination = 100)
+
+        assertEquals("base", timer.appendDuration(requestId = 9, text = "base", logLabel = "Test", from = 200))
+        assertTrue(timer.has(requestId = 9, from = 100))
+        assertTrue(
+            timer.appendDuration(requestId = 9, text = "base", logLabel = "Test", from = 100).contains("Duration: "),
+        )
+    }
+
+    @Test
+    fun has_withMismatchedSender_isFalse() {
+        val timer = RequestTimer()
+        timer.start(requestId = 9, destination = 100)
+
+        assertFalse(timer.has(requestId = 9, from = 200))
+        assertTrue(timer.has(requestId = 9, from = 100))
+    }
+
+    @Test
     fun has_isTrueOnlyBetweenStartAndResponse() {
         val timer = RequestTimer()
         assertFalse(timer.has(requestId = 3))

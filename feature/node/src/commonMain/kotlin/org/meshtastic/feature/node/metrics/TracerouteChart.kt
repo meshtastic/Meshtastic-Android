@@ -157,10 +157,7 @@ internal fun observedTracerouteResponses(requests: List<MeshLog>, results: List<
     return results.filter { log ->
         val packet = log.fromRadio.packet ?: return@filter false
         val requestId = packet.decoded?.request_id ?: 0
-        requestId != 0 &&
-            requestId !in requestedIds &&
-            packet.to != NodeAddress.NODENUM_BROADCAST &&
-            packet.fullRouteDiscovery != null
+        requestId !in requestedIds && packet.to != NodeAddress.NODENUM_BROADCAST && packet.fullRouteDiscovery != null
     }
 }
 
@@ -381,11 +378,10 @@ private class ObservedPointProvider(private val observedX: Set<Double>, color: C
             size = OBSERVED_RING_SIZE,
         )
 
-    override fun getPoint(
-        entry: LineCartesianLayerModel.Entry,
-        seriesIndex: Int,
-        extraStore: ExtraStore,
-    ): LineCartesianLayer.Point? = ring.takeIf { entry.x in observedX }
+    override fun getPoint(entry: LineCartesianLayerModel.Entry, extraStore: ExtraStore): LineCartesianLayer.Point? =
+        ring.takeIf {
+            entry.x in observedX
+        }
 
     override fun getLargestPoint(extraStore: ExtraStore): LineCartesianLayer.Point = ring
 }

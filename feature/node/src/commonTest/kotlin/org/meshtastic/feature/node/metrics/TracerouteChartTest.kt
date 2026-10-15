@@ -264,6 +264,14 @@ class TracerouteChartTest {
     }
 
     @Test
+    fun zeroIdResponse_isObservedBecauseNoRequestCanMatchIt() {
+        val requests = listOf(makeRequest(id = 1, receivedDateMillis = 1000L * MS_PER_SEC))
+        val zeroId = makeResult(requestId = 0, receivedDateMillis = 2000L * MS_PER_SEC)
+
+        assertEquals(listOf(zeroId), observedTracerouteResponses(requests, listOf(zeroId)))
+    }
+
+    @Test
     fun responseToARequestWeSent_isNotObserved() {
         val requests = listOf(makeRequest(id = 5, receivedDateMillis = 1000L * MS_PER_SEC))
         val results = listOf(makeResult(requestId = 5, receivedDateMillis = 1002L * MS_PER_SEC))

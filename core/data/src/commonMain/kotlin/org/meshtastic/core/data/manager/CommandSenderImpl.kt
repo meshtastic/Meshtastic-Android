@@ -356,7 +356,7 @@ class CommandSenderImpl(
             ),
             "Traceroute request",
         )
-        tracerouteHandler.recordStartTime(effectiveRequestId)
+        tracerouteHandler.recordStartTime(effectiveRequestId, destNum)
     }
 
     override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {

@@ -358,7 +358,7 @@ class CommandSenderImplTest {
 
         commandSender.requestTraceroute(requestId = 42, destNum = DEST_NODE)
 
-        verify { tracerouteHandler.recordStartTime(42) }
+        verify { tracerouteHandler.recordStartTime(42, DEST_NODE) }
     }
 
     @Test
@@ -369,7 +369,7 @@ class CommandSenderImplTest {
             commandSender.requestTraceroute(requestId = 42, destNum = DEST_NODE)
         }
 
-        verify(exactly(0)) { tracerouteHandler.recordStartTime(any()) }
+        verify(exactly(0)) { tracerouteHandler.recordStartTime(any(), any()) }
     }
 
     @Test
@@ -404,7 +404,7 @@ class CommandSenderImplTest {
 
         val generatedId = packets.single().id
         assertNotEquals(0, generatedId)
-        verify { tracerouteHandler.recordStartTime(generatedId) }
+        verify { tracerouteHandler.recordStartTime(generatedId, DEST_NODE) }
     }
 
     // --- requestNeighborInfo ---

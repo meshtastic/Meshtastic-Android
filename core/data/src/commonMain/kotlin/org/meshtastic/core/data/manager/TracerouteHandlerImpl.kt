@@ -63,7 +63,7 @@ class TracerouteHandlerImpl(
         )
     }
 
-    override fun recordStartTime(requestId: Int) = requestTimer.start(requestId)
+    override fun recordStartTime(requestId: Int, destination: Int) = requestTimer.start(requestId, destination)
 
     override fun handleTraceroute(
         packet: MeshPacket,
@@ -100,7 +100,8 @@ class TracerouteHandlerImpl(
                 return@launchSessionWork
             }
 
-            val responseText = requestTimer.appendDuration(requestId, renderResponse(routeDiscovery), "Traceroute")
+            val responseText =
+                requestTimer.appendDuration(requestId, renderResponse(routeDiscovery), "Traceroute", packet.from)
             val destination = forwardRoute.firstOrNull() ?: returnRoute.lastOrNull() ?: 0
             serviceStateWriter.setTracerouteResponse(
                 TracerouteResponse(
@@ -117,11 +118,11 @@ class TracerouteHandlerImpl(
 
     /**
      * The in-memory timer covers requests sent since this process started; the request's MeshLog row covers one sent
-     * before a restart.
+     * before a restart. Either way the response must come from the node the request was sent to.
      */
     private suspend fun isOurRequest(requestId: Int, responder: Int): Boolean = requestId != 0 &&
         (
-            requestTimer.has(requestId) ||
+            requestTimer.has(requestId, responder) ||
                 meshLogRepository.value.getRequestLogs(responder, PortNum.TRACEROUTE_APP).first().any {
                     it.fromRadio.packet?.id == requestId
                 }
