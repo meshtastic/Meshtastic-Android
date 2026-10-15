@@ -300,6 +300,7 @@
     <string name="configure_notification_permissions">Configure notification permissions</string>
     <string name="connect">Connect</string>
     <string name="connect_radio_for_remote_admin">Connect to a radio to administer remote nodes.</string>
+    <string name="connect_radio_to_change_settings">Connect to a radio to change these settings.</string>
     <string name="connected">Connected</string>
     <string name="connected_device">Connected Device</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>

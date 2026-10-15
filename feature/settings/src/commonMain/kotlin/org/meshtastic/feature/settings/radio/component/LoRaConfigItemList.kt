@@ -161,6 +161,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             configState = rememberConfigState(initialValue = loraConfig),
             enabled = false,
             responseState = state.responseState,
+            showConnectPrompt = state.connectPromptVisible,
             onDismissPacketResponse = viewModel::clearPacketResponse,
             onSave = {},
         ) {}
@@ -188,6 +189,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         enabled = state.connected,
         saveEnabled = customBandwidthIsValid,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val config = Config.Builder().also { wb -> wb.lora = it.withCodingRateOverrideFor(capabilities) }.build()

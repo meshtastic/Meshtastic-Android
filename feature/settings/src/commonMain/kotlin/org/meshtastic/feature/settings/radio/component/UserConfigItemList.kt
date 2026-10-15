@@ -129,6 +129,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, focusS
         configState = formState,
         enabled = state.connected && validNames,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         additionalDirtyCheck = { statusMessageDirty },
         onDiscard = { statusMessageInput = statusMessage },

@@ -29,7 +29,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -37,13 +39,19 @@ import androidx.compose.ui.unit.dp
 import com.squareup.wire.Message
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.connect_radio_to_change_settings
 import org.meshtastic.core.resources.discard_changes
 import org.meshtastic.core.resources.save_and_restart
 import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
+import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
+
+/** The local radio's settings open read-only while disconnected; remote-admin screens never show the prompt. */
+internal val RadioConfigState.connectPromptVisible: Boolean
+    get() = !connected && isLocal
 
 @Suppress("LongMethod")
 @Composable
@@ -57,6 +65,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
     onSave: (T) -> Unit,
     modifier: Modifier = Modifier,
     saveEnabled: Boolean = enabled,
+    showConnectPrompt: Boolean = false,
     rebootBehavior: RebootBehavior = RebootBehavior.MAY_RESTART,
     actions: @Composable () -> Unit = {},
     additionalDirtyCheck: () -> Boolean = { false },
@@ -86,6 +95,15 @@ fun <T : Message<T, *>> RadioConfigScreenList(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
+                if (showConnectPrompt) {
+                    item {
+                        Text(
+                            text = stringResource(Res.string.connect_radio_to_change_settings),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
                 content()
 
                 item {

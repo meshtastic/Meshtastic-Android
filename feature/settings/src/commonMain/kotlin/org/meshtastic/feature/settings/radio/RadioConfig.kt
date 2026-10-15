@@ -39,6 +39,7 @@ import org.meshtastic.core.resources.advanced_title
 import org.meshtastic.core.resources.backup_restore
 import org.meshtastic.core.resources.clean_node_database_title
 import org.meshtastic.core.resources.configuration
+import org.meshtastic.core.resources.connect_radio_to_change_settings
 import org.meshtastic.core.resources.debug_panel
 import org.meshtastic.core.resources.device_configuration
 import org.meshtastic.core.resources.discovery_local_mesh
@@ -85,16 +86,24 @@ fun RadioConfigItemList(
     onExport: () -> Unit = {},
     onNavigate: (Route) -> Unit,
 ) {
-    val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
+    val waiting = state.responseState.isWaiting()
+    val enabled = radioActionRowsEnabled(state.connected, waiting, isManaged)
+    val readable = radioConfigRowsReadable(state.connected, state.isLocal, waiting, isManaged)
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         ExpressiveSection(title = stringResource(Res.string.configuration)) {
             if (isManaged) {
                 ManagedMessage()
+            } else if (!state.connected && state.isLocal) {
+                Text(
+                    text = stringResource(Res.string.connect_radio_to_change_settings),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-            RadioConfigContent(enabled, onRouteClick)
-            DeviceConfigContent(enabled, onNavigate)
-            ModuleSettingsContent(enabled, onNavigate)
+            RadioConfigContent(readable, onRouteClick)
+            DeviceConfigContent(readable, onNavigate)
+            ModuleSettingsContent(readable, onNavigate)
             AdministrationContent(enabled, onNavigate)
         }
 
@@ -104,6 +113,14 @@ fun RadioConfigItemList(
         }
     }
 }
+
+/** Rows that open an editor: the local radio's stored snapshot stays readable while disconnected. */
+internal fun radioConfigRowsReadable(connected: Boolean, isLocal: Boolean, isWaiting: Boolean, isManaged: Boolean) =
+    (connected || isLocal) && !isWaiting && !isManaged
+
+/** Rows that act on the radio itself and need a live connection. */
+internal fun radioActionRowsEnabled(connected: Boolean, isWaiting: Boolean, isManaged: Boolean) =
+    connected && !isWaiting && !isManaged
 
 @Composable
 private fun ColumnScope.RadioConfigContent(enabled: Boolean, onRouteClick: (Enum<*>) -> Unit) {

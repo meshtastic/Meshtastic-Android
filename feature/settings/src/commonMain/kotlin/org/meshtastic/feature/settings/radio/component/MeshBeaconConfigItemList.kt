@@ -122,6 +122,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
             configState = rememberConfigState(initialValue = meshBeaconConfig),
             enabled = false,
             responseState = state.responseState,
+            showConnectPrompt = state.connectPromptVisible,
             onDismissPacketResponse = viewModel::clearPacketResponse,
             onSave = {},
         ) {
@@ -185,6 +186,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
         meshBeaconSaveEnabled(state.connected, radioLora.use_preset, intervalValid, state.channelList.isNotEmpty()),
         rebootBehavior = RebootBehavior.NEVER,
         responseState = state.responseState,
+        showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val stamped = stampBeaconConfigForSave(it, meshBeaconConfig, radioLora, state.channelList)
