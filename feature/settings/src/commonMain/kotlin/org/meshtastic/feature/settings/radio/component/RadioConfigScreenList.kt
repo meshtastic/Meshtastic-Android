@@ -60,7 +60,6 @@ import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
-
 import org.meshtastic.feature.settings.search.LocalSettingsFieldFocus
 
 /** The local radio's settings open read-only while disconnected; remote-admin screens never show the prompt. */

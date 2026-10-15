@@ -16,11 +16,16 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.dp
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connect_radio_to_change_settings
 import org.meshtastic.core.resources.discard_changes
@@ -29,8 +34,11 @@ import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.feature.settings.search.LocalSettingsFieldFocus
+import org.meshtastic.feature.settings.search.SettingsFieldFocus
 import org.meshtastic.proto.Config
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -88,5 +96,34 @@ class RadioConfigScreenListConnectPromptTest {
         }
 
         onNodeWithText(getString(Res.string.connect_radio_to_change_settings)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `search focus lands on its item below the prompt row`() = runComposeUiTest {
+        val focus = SettingsFieldFocus()
+        focus.request("field_30")
+
+        setContent {
+            AppTheme {
+                CompositionLocalProvider(LocalSettingsFieldFocus provides focus) {
+                    RadioConfigScreenList(
+                        title = "LoRa",
+                        onBack = {},
+                        responseState = ResponseState.Empty,
+                        onDismissPacketResponse = {},
+                        configState = rememberConfigState(Config.LoRaConfig.Builder().build()),
+                        enabled = false,
+                        showConnectPrompt = true,
+                        onSave = {},
+                    ) {
+                        items(count = 40, key = { "field_$it" }) { Text("Field $it", Modifier.height(48.dp)) }
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        onNodeWithText("Field 30").assertIsDisplayed()
+        runOnIdle { assertEquals(null, focus.pending.value) }
     }
 }
