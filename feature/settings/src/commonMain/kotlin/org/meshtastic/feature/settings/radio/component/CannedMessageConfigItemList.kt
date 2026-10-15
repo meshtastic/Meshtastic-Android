@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -117,6 +118,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 }
                 SwitchPreference(
                     title = stringResource(Res.string.schema_cannedmessage_rotary1_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_cannedmessage_rotary1_enabled),
                     summary = stringResource(Res.string.schema_cannedmessage_rotary1_enabled_description),
                     checked = formState.value.rotary1_enabled,
                     enabled = state.connected,
@@ -128,6 +130,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_a),
+                    modifier = Modifier.settingsField(Res.string.schema_cannedmessage_inputbroker_pin_a),
                     summary = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_a_description),
                     value = formState.value.inputbroker_pin_a,
                     enabled = state.connected,
@@ -138,6 +141,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_b),
+                    modifier = Modifier.settingsField(Res.string.schema_cannedmessage_inputbroker_pin_b),
                     summary = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_b_description),
                     value = formState.value.inputbroker_pin_b,
                     enabled = state.connected,
@@ -148,6 +152,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_press),
+                    modifier = Modifier.settingsField(Res.string.schema_cannedmessage_inputbroker_pin_press),
                     summary = stringResource(Res.string.schema_cannedmessage_inputbroker_pin_press_description),
                     value = formState.value.inputbroker_pin_press,
                     enabled = state.connected,
@@ -159,6 +164,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 )
                 DropDownPreference(
                     title = stringResource(Res.string.schema_cannedmessage_inputbroker_event_press),
+                    modifier = Modifier.settingsField(Res.string.schema_cannedmessage_inputbroker_event_press),
                     summary = stringResource(Res.string.schema_cannedmessage_inputbroker_event_press_description),
                     enabled = state.connected,
                     selectedItem = formState.value.inputbroker_event_press,
@@ -170,6 +176,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_cannedmessage_inputbroker_event_cw),
+                    modifier = Modifier.settingsField(Res.string.schema_cannedmessage_inputbroker_event_cw),
                     summary = stringResource(Res.string.schema_cannedmessage_inputbroker_event_cw_description),
                     enabled = state.connected,
                     selectedItem = formState.value.inputbroker_event_cw,
@@ -181,6 +188,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_cannedmessage_inputbroker_event_ccw),
+                    modifier = Modifier.settingsField(Res.string.schema_cannedmessage_inputbroker_event_ccw),
                     summary = stringResource(Res.string.schema_cannedmessage_inputbroker_event_ccw_description),
                     enabled = state.connected,
                     selectedItem = formState.value.inputbroker_event_ccw,
@@ -192,6 +200,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_cannedmessage_updown1_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_cannedmessage_updown1_enabled),
                     summary = stringResource(Res.string.schema_cannedmessage_updown1_enabled_description),
                     checked = formState.value.updown1_enabled,
                     enabled = state.connected,
@@ -224,6 +233,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 }
                 SwitchPreference(
                     title = stringResource(Res.string.schema_cannedmessage_send_bell),
+                    modifier = Modifier.settingsField(Res.string.schema_cannedmessage_send_bell),
                     summary = stringResource(Res.string.schema_cannedmessage_send_bell_description),
                     checked = formState.value.send_bell,
                     enabled = state.connected,

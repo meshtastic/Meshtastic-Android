@@ -77,6 +77,7 @@ import org.meshtastic.core.resources.schema_device_button_gpio
 import org.meshtastic.core.resources.schema_device_button_gpio_description
 import org.meshtastic.core.resources.schema_device_buzzer_gpio
 import org.meshtastic.core.resources.schema_device_buzzer_gpio_description
+import org.meshtastic.core.resources.schema_device_disable_triple_click
 import org.meshtastic.core.resources.schema_device_double_tap_as_button_press
 import org.meshtastic.core.resources.schema_device_double_tap_as_button_press_description
 import org.meshtastic.core.resources.schema_device_led_heartbeat_disabled
@@ -156,6 +157,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 val currentRole = formState.value.role
                 DropDownPreference(
                     title = stringResource(Res.string.schema_device_role),
+                    modifier = Modifier.settingsField(Res.string.schema_device_role),
                     enabled = state.connected,
                     selectedItem = currentRole,
                     onItemSelected = { selectedRole = it },
@@ -168,6 +170,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 val currentRebroadcastMode = formState.value.rebroadcast_mode
                 DropDownPreference(
                     title = stringResource(Res.string.schema_device_rebroadcast_mode),
+                    modifier = Modifier.settingsField(Res.string.schema_device_rebroadcast_mode),
                     enabled = state.connected,
                     selectedItem = currentRebroadcastMode,
                     onItemSelected = {
@@ -181,6 +184,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_device_node_info_broadcast_secs),
+                    modifier = Modifier.settingsField(Res.string.schema_device_node_info_broadcast_secs),
                     summary = stringResource(Res.string.schema_device_node_info_broadcast_secs_description),
                     selectedItem = formState.value.node_info_broadcast_secs.toLong(),
                     enabled = state.connected,
@@ -197,6 +201,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             TitledCard(title = stringResource(Res.string.hardware)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_device_double_tap_as_button_press),
+                    modifier = Modifier.settingsField(Res.string.schema_device_double_tap_as_button_press),
                     summary = stringResource(Res.string.schema_device_double_tap_as_button_press_description),
                     checked = formState.value.double_tap_as_button_press,
                     enabled = state.connected,
@@ -211,6 +216,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 SwitchPreference(
                     title = stringResource(Res.string.triple_click_adhoc_ping),
+                    modifier = Modifier.settingsField(Res.string.schema_device_disable_triple_click),
                     summary = stringResource(Res.string.config_device_tripleClickAsAdHocPing_summary),
                     checked = !formState.value.disable_triple_click,
                     enabled = state.connected,
@@ -225,6 +231,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 SwitchPreference(
                     title = stringResource(Res.string.schema_device_led_heartbeat_disabled),
+                    modifier = Modifier.settingsField(Res.string.schema_device_led_heartbeat_disabled),
                     summary = stringResource(Res.string.config_device_ledHeartbeatEnabled_summary),
                     checked = !formState.value.led_heartbeat_disabled,
                     enabled = state.connected,
@@ -242,6 +249,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 EditTextPreference(
                     title = "",
+                    modifier = Modifier.settingsField(Res.string.schema_device_tzdef),
                     value = formState.value.tzdef,
                     summary = stringResource(Res.string.config_device_tzdef_summary),
                     maxSize = 64, // tzdef max_size:65
@@ -294,6 +302,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             TitledCard(title = stringResource(Res.string.gpio)) {
                 EditTextPreference(
                     title = stringResource(Res.string.schema_device_button_gpio),
+                    modifier = Modifier.settingsField(Res.string.schema_device_button_gpio),
                     summary = stringResource(Res.string.schema_device_button_gpio_description),
                     value = formState.value.button_gpio,
                     enabled = state.connected,
@@ -307,6 +316,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 EditTextPreference(
                     title = stringResource(Res.string.schema_device_buzzer_gpio),
+                    modifier = Modifier.settingsField(Res.string.schema_device_buzzer_gpio),
                     summary = stringResource(Res.string.schema_device_buzzer_gpio_description),
                     value = formState.value.buzzer_gpio,
                     enabled = state.connected,

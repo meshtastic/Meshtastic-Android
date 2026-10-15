@@ -17,10 +17,13 @@
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -44,12 +48,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.squareup.wire.Message
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connect_radio_to_change_settings
@@ -109,74 +117,99 @@ fun <T : Message<T, *>> RadioConfigScreenList(
             val fieldFocus = LocalSettingsFieldFocus.current
             val requestedField = fieldFocus?.pending?.collectAsState()?.value
             val keyIndex = remember { FieldKeyIndex() }
-            var highlightKey by remember { mutableStateOf<String?>(null) }
             var highlightActive by remember { mutableStateOf(false) }
+            val tintAlpha = if (highlightActive) HIGHLIGHT_ALPHA else 0f
+            val tint =
+                animateColorAsState(
+                    targetValue = MaterialTheme.colorScheme.primary.copy(alpha = tintAlpha),
+                    animationSpec = tween(durationMillis = HIGHLIGHT_FADE_MILLIS),
+                    label = "fieldHighlight",
+                )
+            val highlight = remember(tint) { FieldHighlight(tint) }
 
             // A request for a key no item carries stays pending until the screen closes, and the screen just opens.
-            LaunchedEffect(requestedField, fieldFocus) {
-                val request = requestedField ?: return@LaunchedEffect
-                val key = request.key
-                val target =
-                    snapshotFlow { listState.layoutInfo.totalItemsCount }
-                        .map { keyIndex.indexOf(key) }
-                        .first { it != null } ?: return@LaunchedEffect
-                listState.animateScrollToItem(target)
-                fieldFocus.consume(request)
-                highlightKey = key
-                highlightActive = true
-                delay(HIGHLIGHT_HOLD_MILLIS)
-                highlightActive = false
+            // The card scroll composes the row; a second scroll then centers the row, however deep in the card it sits.
+            // Scrolling clamps at the list ends, so a row near the top or bottom goes only as far as the list allows.
+            // Consuming must not cancel the landing, so only a newer request restarts it.
+            LaunchedEffect(fieldFocus) {
+                val focus = fieldFocus ?: return@LaunchedEffect
+                focus.pending.filterNotNull().collectLatest { request ->
+                    val key = request.key
+                    val target =
+                        snapshotFlow { listState.layoutInfo.totalItemsCount }
+                            .map { keyIndex.indexOf(key) }
+                            .first { it != null } ?: return@collectLatest
+                    listState.animateScrollToItem(target)
+                    focus.consume(request)
+                    highlight.key = key
+                    highlightActive = true
+                    val offset =
+                        withTimeoutOrNull(PLACEMENT_WAIT_MILLIS) {
+                            snapshotFlow { highlight.placements to highlight.offsetToCenter(key) }
+                                .map { it.second }
+                                .filterNotNull()
+                                .first()
+                        }
+                    offset?.let { listState.animateScrollBy(it) }
+                    delay(HIGHLIGHT_HOLD_MILLIS)
+                    highlightActive = false
+                }
             }
             // Leaving clears only the request this screen saw, never a newer one made for the next destination.
             val seenRequest = remember { mutableStateOf<FieldFocusRequest?>(null) }
             SideEffect { if (requestedField != null) seenRequest.value = requestedField }
             DisposableEffect(fieldFocus) { onDispose { fieldFocus?.clear(seenRequest.value) } }
 
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.padding(innerPadding).fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                keyIndex.reset()
-                val recording = FieldKeyRecordingScope(this, keyIndex, highlightKey, highlightActive)
-                if (showConnectPrompt) {
-                    recording.item {
-                        Text(
-                            text = stringResource(Res.string.connect_radio_to_change_settings),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+            CompositionLocalProvider(LocalFieldHighlight provides highlight) {
+                LazyColumn(
+                    state = listState,
+                    modifier =
+                    Modifier.padding(innerPadding).fillMaxSize().onGloballyPositioned {
+                        highlight.listCoordinates = it
+                    },
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    keyIndex.reset()
+                    val recording = FieldKeyRecordingScope(this, keyIndex, highlight)
+                    if (showConnectPrompt) {
+                        recording.item {
+                            Text(
+                                text = stringResource(Res.string.connect_radio_to_change_settings),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
-                }
-                recording.content()
+                    recording.content()
 
-                item {
-                    AnimatedVisibility(
-                        modifier = Modifier.fillMaxWidth(),
-                        visible = showFooterButtons,
-                        enter = fadeIn() + expandIn(),
-                        exit = fadeOut() + shrinkOut(),
-                    ) {
-                        PreferenceFooter(
-                            enabled = enabled && showFooterButtons,
-                            positiveEnabled = saveEnabled,
-                            negativeText = stringResource(Res.string.discard_changes),
-                            onNegativeClicked = {
-                                focusManager.clearFocus()
-                                configState.reset()
-                                onDiscard()
-                            },
-                            positiveText =
-                            if (rebootBehavior == RebootBehavior.ALWAYS) {
-                                stringResource(Res.string.save_and_restart)
-                            } else {
-                                stringResource(Res.string.save_changes)
-                            },
-                            onPositiveClicked = {
-                                focusManager.clearFocus()
-                                if (saveEnabled) onSave(configState.value)
-                            },
-                        )
+                    item {
+                        AnimatedVisibility(
+                            modifier = Modifier.fillMaxWidth(),
+                            visible = showFooterButtons,
+                            enter = fadeIn() + expandIn(),
+                            exit = fadeOut() + shrinkOut(),
+                        ) {
+                            PreferenceFooter(
+                                enabled = enabled && showFooterButtons,
+                                positiveEnabled = saveEnabled,
+                                negativeText = stringResource(Res.string.discard_changes),
+                                onNegativeClicked = {
+                                    focusManager.clearFocus()
+                                    configState.reset()
+                                    onDiscard()
+                                },
+                                positiveText =
+                                if (rebootBehavior == RebootBehavior.ALWAYS) {
+                                    stringResource(Res.string.save_and_restart)
+                                } else {
+                                    stringResource(Res.string.save_changes)
+                                },
+                                onPositiveClicked = {
+                                    focusManager.clearFocus()
+                                    if (saveEnabled) onSave(configState.value)
+                                },
+                            )
+                        }
                     }
                 }
             }

@@ -68,6 +68,7 @@ class FieldKeyIndexTest {
                 ConfigRoute.BLUETOOTH.route,
                 ConfigRoute.DEVICE.route,
                 ConfigRoute.DISPLAY.route,
+                ConfigRoute.LORA.route,
                 ConfigRoute.NETWORK.route,
                 ConfigRoute.POSITION.route,
                 ConfigRoute.POWER.route,
@@ -125,5 +126,16 @@ class FieldKeyIndexTest {
         val groups = partitionFieldKeys(keys, "p_", listOf("b"), listOf("c", "absent"))
 
         assertEquals(listOf(setOf("p_a", "p_new"), setOf("p_b"), setOf("p_c")), groups)
+    }
+
+    @Test
+    fun loraAdvancedFieldsLandOnTheAdvancedCard() {
+        val keys = SettingsSearchCatalog.fieldKeys(ConfigRoute.LORA.route)
+        val (options, advanced) = partitionFieldKeys(keys, "schema_lora_", LORA_ADVANCED_FIELDS)
+
+        assertTrue("schema_lora_hop_limit" in advanced && "schema_lora_tx_power" in advanced)
+        assertTrue("schema_lora_region" in options && "schema_lora_modem_preset" in options)
+        assertEquals(LORA_ADVANCED_FIELDS.size, advanced.size)
+        assertEquals(keys, options + advanced)
     }
 }

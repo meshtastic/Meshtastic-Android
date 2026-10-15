@@ -145,6 +145,7 @@ fun ExternalNotificationConfigScreenCommon(
             TitledCard(title = stringResource(Res.string.external_notification_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_enabled),
                     summary = stringResource(Res.string.schema_externalnotification_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
@@ -160,6 +161,7 @@ fun ExternalNotificationConfigScreenCommon(
             TitledCard(title = stringResource(Res.string.notifications_on_message_receipt)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_alert_message),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_alert_message),
                     summary = stringResource(Res.string.schema_externalnotification_alert_message_description),
                     checked = formState.value.alert_message,
                     enabled = state.connected,
@@ -171,6 +173,7 @@ fun ExternalNotificationConfigScreenCommon(
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_alert_message_buzzer),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_alert_message_buzzer),
                     summary = stringResource(Res.string.schema_externalnotification_alert_message_buzzer_description),
                     checked = formState.value.alert_message_buzzer,
                     enabled = state.connected,
@@ -183,6 +186,7 @@ fun ExternalNotificationConfigScreenCommon(
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_alert_message_vibra),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_alert_message_vibra),
                     summary = stringResource(Res.string.schema_externalnotification_alert_message_vibra_description),
                     checked = formState.value.alert_message_vibra,
                     enabled = state.connected,
@@ -199,6 +203,7 @@ fun ExternalNotificationConfigScreenCommon(
             TitledCard(title = stringResource(Res.string.notifications_on_alert_bell_receipt)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_alert_bell),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_alert_bell),
                     summary = stringResource(Res.string.schema_externalnotification_alert_bell_description),
                     checked = formState.value.alert_bell,
                     enabled = state.connected,
@@ -210,6 +215,7 @@ fun ExternalNotificationConfigScreenCommon(
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_alert_bell_buzzer),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_alert_bell_buzzer),
                     summary = stringResource(Res.string.schema_externalnotification_alert_bell_buzzer_description),
                     checked = formState.value.alert_bell_buzzer,
                     enabled = state.connected,
@@ -221,6 +227,7 @@ fun ExternalNotificationConfigScreenCommon(
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_alert_bell_vibra),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_alert_bell_vibra),
                     summary = stringResource(Res.string.schema_externalnotification_alert_bell_vibra_description),
                     checked = formState.value.alert_bell_vibra,
                     enabled = state.connected,
@@ -237,6 +244,7 @@ fun ExternalNotificationConfigScreenCommon(
                 val gpio = remember { org.meshtastic.feature.settings.util.gpioPins }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_externalnotification_output),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_output),
                     summary = stringResource(Res.string.schema_externalnotification_output_description),
                     items = gpio,
                     selectedItem = formState.value.output.toLong(),
@@ -249,6 +257,7 @@ fun ExternalNotificationConfigScreenCommon(
                     HorizontalDivider()
                     SwitchPreference(
                         title = stringResource(Res.string.schema_externalnotification_active),
+                        modifier = Modifier.settingsField(Res.string.schema_externalnotification_active),
                         summary = stringResource(Res.string.schema_externalnotification_active_description),
                         checked = formState.value.active,
                         enabled = state.connected,
@@ -261,6 +270,7 @@ fun ExternalNotificationConfigScreenCommon(
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_externalnotification_output_buzzer),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_output_buzzer),
                     summary = stringResource(Res.string.schema_externalnotification_output_buzzer_description),
                     items = gpio,
                     selectedItem = formState.value.output_buzzer.toLong(),
@@ -274,6 +284,7 @@ fun ExternalNotificationConfigScreenCommon(
                     HorizontalDivider()
                     SwitchPreference(
                         title = stringResource(Res.string.schema_externalnotification_use_pwm),
+                        modifier = Modifier.settingsField(Res.string.schema_externalnotification_use_pwm),
                         summary = stringResource(Res.string.schema_externalnotification_use_pwm_description),
                         checked = formState.value.use_pwm,
                         enabled = state.connected,
@@ -286,6 +297,7 @@ fun ExternalNotificationConfigScreenCommon(
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_externalnotification_output_vibra),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_output_vibra),
                     summary = stringResource(Res.string.schema_externalnotification_output_vibra_description),
                     items = gpio,
                     selectedItem = formState.value.output_vibra.toLong(),
@@ -299,6 +311,7 @@ fun ExternalNotificationConfigScreenCommon(
                 val outputItems = remember { FixedOutputDurations.allowed }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_externalnotification_output_ms),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_output_ms),
                     summary = stringResource(Res.string.schema_externalnotification_output_ms_description),
                     items = outputItems.map { it.value to it.toDisplayString() },
                     selectedItem = formState.value.output_ms.toLong(),
@@ -311,6 +324,7 @@ fun ExternalNotificationConfigScreenCommon(
                 val nagItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.schema_externalnotification_nag_timeout),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_nag_timeout),
                     summary = stringResource(Res.string.schema_externalnotification_nag_timeout_description),
                     items = nagItems.map { it.value to it.toDisplayString() },
                     selectedItem = formState.value.nag_timeout.toLong(),
@@ -342,6 +356,7 @@ fun ExternalNotificationConfigScreenCommon(
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_externalnotification_use_i2s_as_buzzer),
+                    modifier = Modifier.settingsField(Res.string.schema_externalnotification_use_i2s_as_buzzer),
                     summary = stringResource(Res.string.schema_externalnotification_use_i2s_as_buzzer_description),
                     checked = formState.value.use_i2s_as_buzzer,
                     enabled = state.connected,

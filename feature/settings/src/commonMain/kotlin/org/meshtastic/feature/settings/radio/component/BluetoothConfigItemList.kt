@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -75,6 +76,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.bluetooth_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_bluetooth_enabled),
+                    modifier = Modifier.settingsField(Res.string.schema_bluetooth_enabled),
                     summary = stringResource(Res.string.schema_bluetooth_enabled_description),
                     checked = formState.value.enabled,
                     enabled = state.connected,
@@ -86,6 +88,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.schema_bluetooth_mode),
+                    modifier = Modifier.settingsField(Res.string.schema_bluetooth_mode),
                     summary = stringResource(Res.string.schema_bluetooth_mode_description),
                     enabled = state.connected,
                     items =
@@ -124,6 +127,7 @@ private fun FixedPinPreference(
     val pinIsError = pinState.length != PIN_LENGTH || !pinState.all { it.isDigit() }
     EditTextPreference(
         title = stringResource(Res.string.schema_bluetooth_fixed_pin),
+        modifier = Modifier.settingsField(Res.string.schema_bluetooth_fixed_pin),
         value = pinState,
         enabled = enabled,
         isError = pinIsError,

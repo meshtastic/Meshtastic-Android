@@ -22,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -83,6 +84,7 @@ private fun PaxcounterSettings(formState: ConfigState<ModuleConfig.PaxcounterCon
     TitledCard(title = stringResource(Res.string.paxcounter_config)) {
         SwitchPreference(
             title = stringResource(Res.string.schema_paxcounter_enabled),
+            modifier = Modifier.settingsField(Res.string.schema_paxcounter_enabled),
             summary = stringResource(Res.string.schema_paxcounter_enabled_description),
             checked = formState.value.enabled,
             enabled = enabled,
@@ -93,6 +95,7 @@ private fun PaxcounterSettings(formState: ConfigState<ModuleConfig.PaxcounterCon
         val items = remember { IntervalConfiguration.PAX_COUNTER.allowedIntervals }
         DropDownPreference(
             title = stringResource(Res.string.schema_paxcounter_paxcounter_update_interval),
+            modifier = Modifier.settingsField(Res.string.schema_paxcounter_paxcounter_update_interval),
             summary = stringResource(Res.string.schema_paxcounter_paxcounter_update_interval_description),
             selectedItem = (formState.value.paxcounter_update_interval).toLong(),
             enabled = enabled,
@@ -106,6 +109,7 @@ private fun PaxcounterSettings(formState: ConfigState<ModuleConfig.PaxcounterCon
         SignedIntegerEditTextPreference(
             title =
             fieldTitle(Res.string.schema_paxcounter_wifi_threshold, ModuleConfig.PaxcounterConfig.wifi_threshold),
+            modifier = Modifier.settingsField(Res.string.schema_paxcounter_wifi_threshold),
             summary = stringResource(Res.string.schema_paxcounter_wifi_threshold_description),
             value = formState.value.wifi_threshold,
             enabled = enabled,
@@ -117,6 +121,7 @@ private fun PaxcounterSettings(formState: ConfigState<ModuleConfig.PaxcounterCon
         HorizontalDivider()
         SignedIntegerEditTextPreference(
             title = fieldTitle(Res.string.schema_paxcounter_ble_threshold, ModuleConfig.PaxcounterConfig.ble_threshold),
+            modifier = Modifier.settingsField(Res.string.schema_paxcounter_ble_threshold),
             summary = stringResource(Res.string.schema_paxcounter_ble_threshold_description),
             value = formState.value.ble_threshold,
             enabled = enabled,

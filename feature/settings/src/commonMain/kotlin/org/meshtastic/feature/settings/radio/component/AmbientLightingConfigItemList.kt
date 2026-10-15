@@ -87,6 +87,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
             TitledCard(title = stringResource(Res.string.ambient_lighting_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.schema_ambientlighting_led_state),
+                    modifier = Modifier.settingsField(Res.string.schema_ambientlighting_led_state),
                     summary = stringResource(Res.string.schema_ambientlighting_led_state_description),
                     checked = formState.value.led_state,
                     enabled = state.connected,
@@ -118,6 +119,7 @@ private fun LedColorFields(
     Column {
         BoundedIntEditTextPreference(
             title = stringResource(Res.string.schema_ambientlighting_current),
+            modifier = Modifier.settingsField(Res.string.schema_ambientlighting_current),
             summary = stringResource(Res.string.schema_ambientlighting_current_description),
             value = config.current,
             metadata = ModuleConfig.AmbientLightingConfig.current,
@@ -132,6 +134,12 @@ private fun LedColorFields(
             redLabel = stringResource(Res.string.schema_ambientlighting_red),
             greenLabel = stringResource(Res.string.schema_ambientlighting_green),
             blueLabel = stringResource(Res.string.schema_ambientlighting_blue),
+            modifier =
+            Modifier.settingsField(
+                Res.string.schema_ambientlighting_red,
+                Res.string.schema_ambientlighting_green,
+                Res.string.schema_ambientlighting_blue,
+            ),
             enabled = enabled,
             onColorChange = { r, g, b ->
                 onConfigChange(
