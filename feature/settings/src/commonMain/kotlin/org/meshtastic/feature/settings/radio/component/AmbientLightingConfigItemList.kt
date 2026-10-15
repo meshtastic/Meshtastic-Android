@@ -16,16 +16,26 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.ambient_lighting
 import org.meshtastic.core.resources.ambient_lighting_config
 import org.meshtastic.core.resources.schema_ambientlighting_blue
@@ -38,6 +48,7 @@ import org.meshtastic.core.resources.schema_ambientlighting_led_state
 import org.meshtastic.core.resources.schema_ambientlighting_led_state_description
 import org.meshtastic.core.resources.schema_ambientlighting_red
 import org.meshtastic.core.resources.schema_ambientlighting_red_description
+import org.meshtastic.core.ui.component.RgbColorPicker
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -103,7 +114,8 @@ private fun LedColorFields(
     focusManager: FocusManager,
     onConfigChange: (ModuleConfig.AmbientLightingConfig) -> Unit,
 ) {
-    androidx.compose.foundation.layout.Column {
+    var showAdvanced by rememberSaveable { mutableStateOf(false) }
+    Column {
         BoundedIntEditTextPreference(
             title = stringResource(Res.string.schema_ambientlighting_current),
             summary = stringResource(Res.string.schema_ambientlighting_current_description),
@@ -113,6 +125,44 @@ private fun LedColorFields(
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             onValueChange = { onConfigChange(config.newBuilder().also { wb -> wb.current = it }.build()) },
         )
+        RgbColorPicker(
+            red = config.red,
+            green = config.green,
+            blue = config.blue,
+            redLabel = stringResource(Res.string.schema_ambientlighting_red),
+            greenLabel = stringResource(Res.string.schema_ambientlighting_green),
+            blueLabel = stringResource(Res.string.schema_ambientlighting_blue),
+            enabled = enabled,
+            onColorChange = { r, g, b ->
+                onConfigChange(
+                    config
+                        .newBuilder()
+                        .also { wb ->
+                            wb.red = r
+                            wb.green = g
+                            wb.blue = b
+                        }
+                        .build(),
+                )
+            },
+        )
+        TextButton(onClick = { showAdvanced = !showAdvanced }, modifier = Modifier.padding(horizontal = 8.dp)) {
+            Text(stringResource(Res.string.advanced))
+        }
+        if (showAdvanced) {
+            LedColorNumberFields(config, enabled, focusManager, onConfigChange)
+        }
+    }
+}
+
+@Composable
+private fun LedColorNumberFields(
+    config: ModuleConfig.AmbientLightingConfig,
+    enabled: Boolean,
+    focusManager: FocusManager,
+    onConfigChange: (ModuleConfig.AmbientLightingConfig) -> Unit,
+) {
+    Column {
         BoundedIntEditTextPreference(
             title = stringResource(Res.string.schema_ambientlighting_red),
             summary = stringResource(Res.string.schema_ambientlighting_red_description),
