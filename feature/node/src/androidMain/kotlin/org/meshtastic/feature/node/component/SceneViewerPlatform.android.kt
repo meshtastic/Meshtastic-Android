@@ -24,9 +24,13 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import com.google.android.filament.Engine
 import io.github.sceneview.SceneView
 import io.github.sceneview.createDefaultCameraManipulator
 import io.github.sceneview.environment.Environment
+import io.github.sceneview.gesture.CameraGestureDetector
+import io.github.sceneview.loaders.EnvironmentLoader
+import io.github.sceneview.loaders.ModelLoader
 import io.github.sceneview.math.Position
 import io.github.sceneview.model.model
 import io.github.sceneview.rememberEngine
@@ -63,26 +67,48 @@ internal actual fun DeviceModelScene(
     // Captured, not read through the delegate: the null effect's dispose runs after the state already holds the load.
     val loadedEnvironment = environment
     DisposableEffect(loadedEnvironment) { onDispose { loadedEnvironment?.let(environmentLoader::destroyEnvironment) } }
+    val cameraManipulator =
+        remember(bounds) {
+            createDefaultCameraManipulator(eyePosition = orbitEye(bounds), targetPosition = Position(0f))
+        }
+    // Hidden, only the scene goes: the engine, its compiled materials, the probe and the camera stay for when it shows
+    // again.
+    if (visible && loadedEnvironment != null) {
+        OrbitScene(glb, engine, modelLoader, environmentLoader, loadedEnvironment, cameraManipulator, onError, modifier)
+    }
+}
+
+/**
+ * The model instance does not survive its scene's teardown, so it is rebuilt from the bytes each time, which is cheap.
+ */
+@Composable
+@Suppress("LongParameterList")
+private fun OrbitScene(
+    glb: ByteArray,
+    engine: Engine,
+    modelLoader: ModelLoader,
+    environmentLoader: EnvironmentLoader,
+    environment: Environment,
+    cameraManipulator: CameraGestureDetector.CameraManipulator,
+    onError: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val currentOnError by rememberUpdatedState(onError)
     val instance =
         remember(modelLoader, glb) {
             runCatching { modelLoader.createModelInstance(ByteBuffer.wrap(glb)) }.getOrNull()
         }
     DisposableEffect(instance) { onDispose { instance?.let { modelLoader.destroyModel(it.model) } } }
     SideEffect { if (instance == null) currentOnError() }
-    // Hidden, only the surface goes: the engine, probe and model stay loaded for when it shows again.
-    if (instance == null || !visible) return
-    val loaded = loadedEnvironment ?: return
+    if (instance == null) return
     SceneView(
         modifier = modifier,
         engine = engine,
         modelLoader = modelLoader,
         environmentLoader = environmentLoader,
-        environment = loaded,
+        environment = environment,
         isOpaque = false,
-        cameraManipulator =
-        remember(bounds) {
-            createDefaultCameraManipulator(eyePosition = orbitEye(bounds), targetPosition = Position(0f))
-        },
+        cameraManipulator = cameraManipulator,
     ) {
         ModelNode(modelInstance = instance)
     }
