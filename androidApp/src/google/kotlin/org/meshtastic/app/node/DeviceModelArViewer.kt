@@ -18,6 +18,8 @@ package org.meshtastic.app.node
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,6 +49,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -57,6 +60,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -84,10 +88,14 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberOnGestureListener
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.device_model_capture
+import org.meshtastic.core.resources.device_model_capture_failed
+import org.meshtastic.core.resources.device_model_capture_saved
 import org.meshtastic.core.resources.device_model_rest_face_down
 import org.meshtastic.core.resources.device_model_rest_face_up
 import org.meshtastic.core.resources.device_model_rest_left_side
@@ -95,6 +103,7 @@ import org.meshtastic.core.resources.device_model_rest_right_side
 import org.meshtastic.core.resources.device_model_rest_upright
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PhotoCamera
 import org.meshtastic.core.ui.util.DeviceModelArViewer
 import org.meshtastic.feature.node.component.ModelNotice
 import org.meshtastic.feature.node.model.GlbBounds
@@ -149,7 +158,7 @@ private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDism
     }
     Box(modifier = Modifier.fillMaxSize()) {
         if (cameraGranted) DeviceModelArScene(glb)
-        ArHeader(title, onDismiss)
+        ArHeader(title, onDismiss, onCapture = rememberArCapture(title).takeIf { cameraGranted })
         notice?.let {
             ModelNotice(
                 notice = it,
@@ -320,7 +329,7 @@ private val RestPose.label: StringResource
         }
 
 @Composable
-private fun ArHeader(title: String, onDismiss: () -> Unit) {
+private fun ArHeader(title: String, onDismiss: () -> Unit, onCapture: (() -> Unit)?) {
     Column(
         modifier =
         Modifier.fillMaxWidth().background(Color.Black.copy(alpha = SCRIM_ALPHA)).safeDrawingPadding().padding(4.dp),
@@ -333,8 +342,35 @@ private fun ArHeader(title: String, onDismiss: () -> Unit) {
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
-                modifier = Modifier.padding(start = 8.dp),
+                modifier = Modifier.padding(start = 8.dp).weight(1f),
             )
+            onCapture?.let {
+                IconButton(onClick = it) {
+                    Icon(
+                        MeshtasticIcons.PhotoCamera,
+                        contentDescription = stringResource(Res.string.device_model_capture),
+                        tint = Color.White,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Saves the AR view to Pictures and says so; Android 10 and later only, where that needs no storage permission. */
+@Composable
+private fun rememberArCapture(title: String): (() -> Unit)? {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
+    val view = LocalView.current
+    val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
+    val saved = stringResource(Res.string.device_model_capture_saved)
+    val failed = stringResource(Res.string.device_model_capture_failed)
+    return {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        scope.launch {
+            val uri = captureArScene(view.rootView, title)
+            Toast.makeText(view.context, if (uri != null) saved else failed, Toast.LENGTH_SHORT).show()
         }
     }
 }
