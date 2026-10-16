@@ -63,6 +63,44 @@ class GlbBoundsTest {
     }
 
     @Test
+    fun screenIsTheMeshOrMaterialNamedScreen() {
+        val glb =
+            glb(
+                """
+                {"accessors":[
+                  {"min":[-0.026,0,-0.015],"max":[0.026,0.138,0.017]},
+                  {"min":[-0.015,0.032,0.0158],"max":[0.015,0.047,0.016]},
+                  {"min":[0.02,0.1,0],"max":[0.021,0.11,0.001]}
+                ],
+                "materials":[{"name":"case"},{"name":"Screen"}],
+                "meshes":[
+                  {"name":"Body","primitives":[{"attributes":{"POSITION":0},"material":0}]},
+                  {"name":"Glass","primitives":[{"attributes":{"POSITION":1},"material":1}]},
+                  {"name":"screen","primitives":[{"attributes":{"POSITION":2},"material":0}]}
+                ]}
+                """,
+            )
+
+        val screen = assertNotNull(GlbBounds.screen(glb))
+
+        assertContentEquals(floatArrayOf(-0.015f, 0.032f, 0f), screen.min)
+        assertContentEquals(floatArrayOf(0.021f, 0.11f, 0.016f), screen.max)
+    }
+
+    @Test
+    fun noScreenWhenNothingIsNamedScreen() {
+        val glb =
+            glb(
+                """
+                {"accessors":[{"min":[0,0,0],"max":[1,1,1]}],
+                "meshes":[{"primitives":[{"attributes":{"POSITION":0}}]}]}
+                """,
+            )
+
+        assertNull(GlbBounds.screen(glb))
+    }
+
+    @Test
     fun rejectsNonGlbBytes() {
         assertNull(GlbBounds.parse("not a model".encodeToByteArray()))
         assertNull(GlbBounds.parse(ByteArray(4)))
