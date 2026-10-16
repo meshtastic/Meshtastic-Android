@@ -21,5 +21,12 @@ import androidx.compose.ui.Modifier
 import org.meshtastic.feature.node.model.GlbBounds
 
 @Composable
-internal actual fun DeviceModelScene(glb: ByteArray, bounds: GlbBounds, onError: () -> Unit, modifier: Modifier) =
-    SceneViewerModelScene(glb, bounds, onError, modifier)
+internal actual fun DeviceModelScene(
+    glb: ByteArray,
+    bounds: GlbBounds,
+    onError: () -> Unit,
+    modifier: Modifier,
+    visible: Boolean,
+) {
+    if (visible) SceneViewerModelScene(glb, bounds, onError, modifier)
+}

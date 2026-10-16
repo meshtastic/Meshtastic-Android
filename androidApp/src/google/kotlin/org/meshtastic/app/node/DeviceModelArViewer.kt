@@ -23,6 +23,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -33,12 +34,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -101,11 +105,12 @@ import org.meshtastic.core.resources.device_model_rest_face_up
 import org.meshtastic.core.resources.device_model_rest_left_side
 import org.meshtastic.core.resources.device_model_rest_right_side
 import org.meshtastic.core.resources.device_model_rest_upright
+import org.meshtastic.core.resources.info
 import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PhotoCamera
 import org.meshtastic.core.ui.util.DeviceModelArViewer
-import org.meshtastic.feature.node.component.ModelNotice
 import org.meshtastic.feature.node.model.GlbBounds
 import org.meshtastic.feature.node.model.RestPose
 import java.nio.ByteBuffer
@@ -157,16 +162,8 @@ private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDism
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {
-        if (cameraGranted) DeviceModelArScene(glb)
-        ArHeader(title, onDismiss, onCapture = rememberArCapture(title).takeIf { cameraGranted })
-        notice?.let {
-            ModelNotice(
-                notice = it,
-                modifier = Modifier.align(Alignment.BottomEnd).safeDrawingPadding().padding(16.dp),
-                contentColor = Color.White,
-                containerColor = Color.Black.copy(alpha = SCRIM_ALPHA),
-            )
-        }
+        if (cameraGranted) DeviceModelArScene(glb, onCapture = rememberArCapture(title))
+        ArHeader(title, notice, onDismiss)
     }
 }
 
@@ -176,13 +173,14 @@ private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDism
  */
 @Composable
 @Suppress("LongMethod")
-private fun DeviceModelArScene(glb: ByteArray) {
+private fun DeviceModelArScene(glb: ByteArray, onCapture: (() -> Unit)?) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
     val haptic = LocalHapticFeedback.current
     var anchor by remember { mutableStateOf<Anchor?>(null) }
-    var yawDegrees by remember { mutableFloatStateOf(0f) }
+    // Saved across a rotation; the anchor cannot be, since the activity's new ARCore session starts unplaced.
+    var yawDegrees by rememberSaveable { mutableFloatStateOf(0f) }
     var pose by rememberSaveable { mutableStateOf(RestPose.Upright) }
     val bounds = remember(glb) { GlbBounds.parse(glb) }
     var latestFrame by remember { mutableStateOf<Frame?>(null) }
@@ -279,12 +277,13 @@ private fun DeviceModelArScene(glb: ByteArray) {
                 trackingFailureReason = trackingFailure,
             )
         ARCoachingOverlay(guidance)
-        if (placed && bounds != null) {
-            RestPoseChips(
-                selected = pose,
-                onSelect = { pose = it },
-                modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(bottom = 72.dp),
-            )
+        Column(
+            modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(bottom = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            if (placed && bounds != null) RestPoseChips(selected = pose, onSelect = { pose = it })
+            onCapture?.let { ShutterButton(it) }
         }
     }
 }
@@ -328,8 +327,10 @@ private val RestPose.label: StringResource
             RestPose.RightSide -> Res.string.device_model_rest_right_side
         }
 
+/** Title bar over the camera; the model's notice opens under it, clear of the controls at the bottom. */
 @Composable
-private fun ArHeader(title: String, onDismiss: () -> Unit, onCapture: (() -> Unit)?) {
+private fun ArHeader(title: String, notice: String?, onDismiss: () -> Unit) {
+    var noticeShown by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier =
         Modifier.fillMaxWidth().background(Color.Black.copy(alpha = SCRIM_ALPHA)).safeDrawingPadding().padding(4.dp),
@@ -344,16 +345,32 @@ private fun ArHeader(title: String, onDismiss: () -> Unit, onCapture: (() -> Uni
                 color = Color.White,
                 modifier = Modifier.padding(start = 8.dp).weight(1f),
             )
-            onCapture?.let {
-                IconButton(onClick = it) {
-                    Icon(
-                        MeshtasticIcons.PhotoCamera,
-                        contentDescription = stringResource(Res.string.device_model_capture),
-                        tint = Color.White,
-                    )
+            if (notice != null) {
+                IconButton(onClick = { noticeShown = !noticeShown }) {
+                    Icon(MeshtasticIcons.Info, contentDescription = stringResource(Res.string.info), tint = Color.White)
                 }
             }
         }
+        AnimatedVisibility(visible = noticeShown && notice != null) {
+            Text(
+                text = notice.orEmpty(),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            )
+        }
+    }
+}
+
+/** A camera-app shutter: the one control you reach for with a thumb, so it sits bottom center. */
+@Composable
+private fun ShutterButton(onClick: () -> Unit) {
+    FilledIconButton(
+        onClick = onClick,
+        modifier = Modifier.size(72.dp),
+        colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.White, contentColor = Color.Black),
+    ) {
+        Icon(MeshtasticIcons.PhotoCamera, contentDescription = stringResource(Res.string.device_model_capture))
     }
 }
 

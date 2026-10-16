@@ -55,6 +55,7 @@ internal expect fun DeviceModelScene(
     bounds: GlbBounds,
     onError: () -> Unit,
     modifier: Modifier = Modifier,
+    visible: Boolean = true,
 )
 
 /**
