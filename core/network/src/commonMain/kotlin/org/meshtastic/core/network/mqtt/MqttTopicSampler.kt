@@ -22,7 +22,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -139,7 +138,9 @@ class MqttTopicSampler(
             coroutineScope {
                 val reachedCap = CompletableDeferred<Unit>()
                 val regionFilter = regionPacketFilter(regionTopic)
-                if (!attempt(Failure.CONNECT) { withTimeout(connectDeadline) { client.connect() } }) return@coroutineScope
+                if (!attempt(Failure.CONNECT) { withTimeout(connectDeadline) { client.connect() } }) {
+                    return@coroutineScope
+                }
                 _state.value = State(phase = Phase.Subscribing)
                 // Collect before subscribing so nothing that arrives with the SUBACK is lost.
                 val collector = launch {
@@ -152,9 +153,10 @@ class MqttTopicSampler(
                     }
                 }
                 var granted = emptyList<String>()
-                val subscribed = attempt(Failure.FILTERS_REFUSED) {
-                    granted = withTimeout(subscribeDeadline) { client.subscribe(filters(regionTopic)) }
-                }
+                val subscribed =
+                    attempt(Failure.FILTERS_REFUSED) {
+                        granted = withTimeout(subscribeDeadline) { client.subscribe(filters(regionTopic)) }
+                    }
                 if (!subscribed || granted.isEmpty()) {
                     if (subscribed) _state.value = State(phase = Phase.Failed(Failure.FILTERS_REFUSED))
                     collector.cancel()

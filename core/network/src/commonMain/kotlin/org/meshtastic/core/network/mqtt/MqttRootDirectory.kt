@@ -19,8 +19,8 @@ package org.meshtastic.core.network.mqtt
 import org.meshtastic.core.common.util.latLongToMeter
 
 /**
- * A community root whose name says nothing about where it is ("msh/US/DMV", "msh/US/MeshSTL"), with the area it
- * serves. Subdivisions are ISO 3166-2 ("US-VA"); a metro mesh may give a center and radius instead or as well.
+ * A community root whose name says nothing about where it is ("msh/US/DMV", "msh/US/MeshSTL"), with the area it serves.
+ * Subdivisions are ISO 3166-2 ("US-VA"); a metro mesh may give a center and radius instead or as well.
  */
 data class MqttRootEntry(
     val root: String,
@@ -53,8 +53,7 @@ data class MqttRootDirectory(
             at != null &&
                 center != null &&
                 radiusKm != null &&
-                latLongToMeter(at.latitude, at.longitude, center.latitude, center.longitude) <=
-                radiusKm * METERS_PER_KM
+                latLongToMeter(at.latitude, at.longitude, center.latitude, center.longitude) <= radiusKm * METERS_PER_KM
         bySubdivision || byRadius
     }
 
@@ -65,7 +64,8 @@ data class MqttRootDirectory(
         val SEED: MqttRootDirectory =
             MqttRootDirectory(
                 entries = emptyList(),
-                neighbors = symmetric(US_NEIGHBORS.mapKeys { "US-${it.key}" }.mapValues { (_, v) -> v.map { "US-$it" } }),
+                neighbors =
+                symmetric(US_NEIGHBORS.mapKeys { "US-${it.key}" }.mapValues { (_, v) -> v.map { "US-$it" } }),
                 subdivisionSegments = mapOf("US" to US_STATES.associate { (code, name) -> name.lowercase() to code }),
             )
 

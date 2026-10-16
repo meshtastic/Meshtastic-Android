@@ -87,8 +87,9 @@ data class TopicPlan(
                 suggestions += TopicSuggestion(TopicSuggestion.Kind.COUNTRY, base, countryCode)
             }
             val subdivisionName = place?.subdivision
-            val subdivisionSegment =
-                subdivisionName?.let { segment(directory.subdivisionSegment(countryCode, it), lowercased = false) }
+            val subdivisionSegment = subdivisionName?.let {
+                segment(directory.subdivisionSegment(countryCode, it), lowercased = false)
+            }
             val subdivisionTopic = subdivisionSegment?.let { fitted(base, it) }
             if (subdivisionName != null && subdivisionTopic != null) {
                 suggestions += TopicSuggestion(TopicSuggestion.Kind.SUBDIVISION, subdivisionTopic, subdivisionName)
@@ -98,7 +99,8 @@ data class TopicPlan(
                     suggestions += TopicSuggestion(TopicSuggestion.Kind.CITY, cityTopic, locality)
                 }
             }
-            val isoCode = if (countryCode != null && subdivisionSegment != null) "$countryCode-$subdivisionSegment" else null
+            val isoCode =
+                if (countryCode != null && subdivisionSegment != null) "$countryCode-$subdivisionSegment" else null
             directory.entriesServing(isoCode, at).forEach { entry ->
                 if (suggestions.none { MqttRootTopic.rootsMatch(it.topic, entry.root) }) {
                     suggestions += TopicSuggestion(TopicSuggestion.Kind.COMMUNITY, entry.root, entry.name)
@@ -124,11 +126,14 @@ data class TopicPlan(
 
         /**
          * Diacritics stripped, Latin letters folded to ASCII, then only `[A-Za-z0-9_-]` kept, lowercased when asked.
-         * Subdivisions keep their case ("WA"); cities follow the community's lowercase convention. Null when nothing
-         * is left: a name in a non-Latin script gets no rung rather than a romanization the local mesh would not use.
+         * Subdivisions keep their case ("WA"); cities follow the community's lowercase convention. Null when nothing is
+         * left: a name in a non-Latin script gets no rung rather than a romanization the local mesh would not use.
          */
         fun segment(place: String, lowercased: Boolean): String? {
-            val kept = foldToAscii(place).filter { it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '_' || it == '-' }
+            val kept =
+                foldToAscii(place).filter {
+                    it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '_' || it == '-'
+                }
             if (kept.isEmpty()) return null
             return if (lowercased) kept.lowercase() else kept
         }

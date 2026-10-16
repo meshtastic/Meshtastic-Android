@@ -86,7 +86,9 @@ class MqttTopicSamplerTest {
         val sampler = sampler(client)
         val job = launch { sampler.run(null, "msh/US") }
         runCurrent()
-        repeat(MqttTopicSampler.REGION_PACKET_CAP) { client.messages.emit("msh/US/2/e/LongFast/!00000001" to ByteArray(0)) }
+        repeat(MqttTopicSampler.REGION_PACKET_CAP) {
+            client.messages.emit("msh/US/2/e/LongFast/!00000001" to ByteArray(0))
+        }
         runCurrent()
         assertEquals(listOf("msh/US/2/e/+/+"), client.unsubscribed)
         job.cancel()

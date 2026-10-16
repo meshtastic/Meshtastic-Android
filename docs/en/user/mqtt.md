@@ -2,7 +2,7 @@
 title: MQTT
 parent: User Guide
 nav_order: 11
-last_updated: 2026-09-19
+last_updated: 2026-10-16
 description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
 aliases:
   - mqtt
@@ -61,6 +61,25 @@ not reported here.
 **Test connection** probes the broker before you commit the settings to the radio, and
 distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
 TLS failing, the attempt timing out, or the broker rejecting your credentials with a reason.
+
+### Find Topics Near You
+
+The region topic (`msh/US`) carries every gateway in the region. **Find topics near you**, under
+the root topic field, listens to the broker for one minute and lists the narrower roots in use
+around you, with the number of nodes heard on each.
+
+- **Near you** lists the region, then the country when the region spans several (`msh/EU_868/DE`),
+  then your state or province and city, named from the radio's position or, failing that, the
+  phone's location. The phone's geocoder turns the location into place names; the location itself
+  never reaches the broker.
+- **Active topics** lists every other root heard. Roots under your state or city come first, then
+  roots in neighboring states, then the rest.
+- **Custom topic** takes any root the radio accepts: up to 31 ASCII characters, no leading or
+  trailing slash, no `+` or `#`.
+
+The finder only subscribes and publishes nothing. Picking a topic fills in the root topic field,
+and nothing reaches the radio until you save. It needs the LoRa region to be set. Without a
+location, or on desktop, it still lists the region and every root it hears.
 
 ### MQTT Proxy in This App
 
