@@ -64,6 +64,18 @@ class MqttTopicFinderViewModel(
         viewModelScope.launch { sampler.state.collect { sample -> _state.update { it.copy(sample = sample) } } }
     }
 
+    private var openedSession: Int? = null
+
+    /**
+     * Starts a sample once per opening of the sheet: a recomposition or rotation repeats [session] and keeps the
+     * running sample, a reopened sheet passes a new one.
+     */
+    fun open(session: Int, config: ModuleConfig.MQTTConfig, regionName: String?, radioPosition: LatLon?) {
+        if (session == openedSession) return
+        openedSession = session
+        start(config, regionName, radioPosition)
+    }
+
     /**
      * Starts a fresh sample; a null region shows nothing but the custom field, as there is no default root to probe.
      */

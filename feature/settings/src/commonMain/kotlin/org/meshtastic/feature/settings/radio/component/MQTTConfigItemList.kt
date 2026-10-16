@@ -37,7 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -56,6 +56,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.mqtt.LatLon
 import org.meshtastic.core.network.mqtt.MqttRootTopic
 import org.meshtastic.core.network.repository.effectiveTlsEnabled
@@ -148,19 +149,16 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             true
         }
     val focusManager = LocalFocusManager.current
-    var showTopicFinder by rememberSaveable { mutableStateOf(false) }
-    if (showTopicFinder) {
-        val region = state.radioConfig.lora?.region?.takeIf { it != Config.LoRaConfig.RegionCode.UNSET }
-        val position = destNode?.takeIf { it.validPosition != null }?.let { LatLon(it.latitude, it.longitude) }
-        MqttTopicFinderSheet(
-            config = formState.value,
-            regionName = region?.name,
-            radioPosition = position,
-            onPick = { topic ->
-                formState.value = formState.value.newBuilder().also { wb -> wb.root = topic }.build()
-                showTopicFinder = false
-            },
-            onDismiss = { showTopicFinder = false },
+    // Zero means closed; each opening takes the next number so the sheet samples afresh.
+    var topicFinderSession by rememberSaveable { mutableIntStateOf(0) }
+    var lastTopicFinderSession by rememberSaveable { mutableIntStateOf(0) }
+    if (topicFinderSession != 0) {
+        TopicFinder(
+            session = topicFinderSession,
+            formState = formState,
+            region = state.radioConfig.lora?.region,
+            radio = destNode,
+            onClose = { topicFinderSession = 0 },
         )
     }
 
@@ -302,7 +300,10 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     },
                 )
                 TextButton(
-                    onClick = { showTopicFinder = true },
+                    onClick = {
+                        lastTopicFinderSession++
+                        topicFinderSession = lastTopicFinderSession
+                    },
                     enabled = state.connected,
                     modifier = Modifier.padding(horizontal = 8.dp),
                 ) {
@@ -360,6 +361,27 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             }
         }
     }
+}
+
+@Composable
+private fun TopicFinder(
+    session: Int,
+    formState: ConfigState<ModuleConfig.MQTTConfig>,
+    region: Config.LoRaConfig.RegionCode?,
+    radio: Node?,
+    onClose: () -> Unit,
+) {
+    MqttTopicFinderSheet(
+        session = session,
+        config = formState.value,
+        regionName = region?.takeIf { it != Config.LoRaConfig.RegionCode.UNSET }?.name,
+        radioPosition = radio?.takeIf { it.validPosition != null }?.let { LatLon(it.latitude, it.longitude) },
+        onPick = { topic ->
+            formState.value = formState.value.newBuilder().also { wb -> wb.root = topic }.build()
+            onClose()
+        },
+        onDismiss = onClose,
+    )
 }
 
 private const val MIN_INTERVAL_SECS = 3600

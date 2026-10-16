@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +33,7 @@ import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.io.IOException
 import org.meshtastic.core.network.mqtt.MqttTopicDiscovery.Activity
 import org.meshtastic.core.network.repository.KermitMqttLogger
@@ -125,7 +124,7 @@ class MqttTopicSampler(
      * Runs one sample to completion. Cancelling the caller ends it early and keeps what was heard, as does the broker
      * closing the connection once something has arrived.
      */
-    @Suppress("LongMethod", "TooGenericExceptionCaught")
+    @Suppress("LongMethod")
     suspend fun run(config: ModuleConfig.MQTTConfig?, regionTopic: String) {
         lock.withLock {
             tally = MqttTopicDiscovery.Tally()
@@ -138,7 +137,7 @@ class MqttTopicSampler(
             coroutineScope {
                 val reachedCap = CompletableDeferred<Unit>()
                 val regionFilter = regionPacketFilter(regionTopic)
-                if (!attempt(Failure.CONNECT) { withTimeout(connectDeadline) { client.connect() } }) {
+                if (!attempt(Failure.CONNECT, connectDeadline) { client.connect() }) {
                     return@coroutineScope
                 }
                 _state.value = State(phase = Phase.Subscribing)
@@ -146,16 +145,19 @@ class MqttTopicSampler(
                 val collector = launch {
                     client.messages.collect { (topic, payload) ->
                         when (record(topic, payload, regionTopic)) {
-                            RecordResult.REGION_CAP -> launch { runCatching { client.unsubscribe(regionFilter) } }
+                            RecordResult.REGION_CAP ->
+                                launch { quietly("unsubscribe") { client.unsubscribe(regionFilter) } }
+
                             RecordResult.MESSAGE_CAP -> reachedCap.complete(Unit)
+
                             RecordResult.RECORDED -> Unit
                         }
                     }
                 }
                 var granted = emptyList<String>()
                 val subscribed =
-                    attempt(Failure.FILTERS_REFUSED) {
-                        granted = withTimeout(subscribeDeadline) { client.subscribe(filters(regionTopic)) }
+                    attempt(Failure.FILTERS_REFUSED, subscribeDeadline) {
+                        granted = client.subscribe(filters(regionTopic))
                     }
                 if (!subscribed || granted.isEmpty()) {
                     if (subscribed) _state.value = State(phase = Phase.Failed(Failure.FILTERS_REFUSED))
@@ -186,29 +188,33 @@ class MqttTopicSampler(
             }
         } finally {
             if (_state.value.isRunning) publish(Phase.Finished)
-            withContext(NonCancellable) { runCatching { client.close() } }
+            withContext(NonCancellable) { quietly("close") { client.close() } }
             Logger.i { "MQTT topic sample ended: ${_state.value.phase::class.simpleName}" }
         }
     }
 
-    private suspend fun attempt(failure: Failure, block: suspend () -> Unit): Boolean = try {
+    /** Runs one broker step under its deadline; a timeout or broker error fails the sample with [failure]. */
+    private suspend fun attempt(failure: Failure, deadline: Duration, block: suspend () -> Unit): Boolean {
+        val done = quietly(failure.name.lowercase()) { withTimeoutOrNull(deadline) { block() } != null } == true
+        if (!done) _state.value = State(phase = Phase.Failed(failure))
+        return done
+    }
+
+    /** Null when the broker or socket fails; cancellation still propagates. */
+    private suspend fun <T> quietly(step: String, block: suspend () -> T): T? = try {
         block()
-        true
     } catch (e: CancellationException) {
-        if (e is TimeoutCancellationException) {
-            _state.value = State(phase = Phase.Failed(failure))
-            false
-        } else {
-            throw e
-        }
+        // An IllegalStateException too, so it must be rethrown before that catch.
+        throw e
     } catch (e: MqttException) {
-        Logger.w { "MQTT topic sample: ${failure.name.lowercase()} (${e.reasonCode})" }
-        _state.value = State(phase = Phase.Failed(failure))
-        false
+        Logger.w { "MQTT topic sample: $step (${e.reasonCode})" }
+        null
     } catch (e: IOException) {
-        Logger.w { "MQTT topic sample: ${failure.name.lowercase()} (${e::class.simpleName})" }
-        _state.value = State(phase = Phase.Failed(failure))
-        false
+        Logger.w { "MQTT topic sample: $step (${e::class.simpleName})" }
+        null
+    } catch (e: IllegalStateException) {
+        Logger.w { "MQTT topic sample: $step (${e::class.simpleName})" }
+        null
     }
 
     private enum class RecordResult {
