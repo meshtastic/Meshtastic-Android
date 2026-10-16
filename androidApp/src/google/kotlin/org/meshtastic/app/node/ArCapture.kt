@@ -30,7 +30,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.core.view.children
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -46,7 +46,7 @@ private const val JPEG_QUALITY = 92
  * drawn over it. The scene renders every camera frame, so the surface is never stale. Null when nothing was saved.
  */
 @RequiresApi(Build.VERSION_CODES.Q)
-internal suspend fun captureArScene(root: View, title: String): Uri? {
+internal suspend fun captureArScene(root: View, title: String, io: CoroutineDispatcher): Uri? {
     val surface = root.findSurfaceView()?.takeIf { it.width > 0 && it.height > 0 } ?: return null
     val bitmap = Bitmap.createBitmap(surface.width, surface.height, Bitmap.Config.ARGB_8888)
     val copied = suspendCancellableCoroutine { continuation ->
@@ -57,7 +57,7 @@ internal suspend fun captureArScene(root: View, title: String): Uri? {
             Handler(Looper.getMainLooper()),
         )
     }
-    return if (copied) withContext(Dispatchers.IO) { saveToPictures(root.context, bitmap, title) } else null
+    return if (copied) withContext(io) { saveToPictures(root.context, bitmap, title) } else null
 }
 
 private fun View.findSurfaceView(): SurfaceView? = when (this) {
