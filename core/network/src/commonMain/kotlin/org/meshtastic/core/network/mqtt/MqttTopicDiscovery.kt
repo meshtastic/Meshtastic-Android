@@ -41,8 +41,8 @@ object MqttTopicDiscovery {
 
     /**
      * Segments trimmed and empties dropped, the trailing "/" of a map topic kept. A root with a stray slash or space
-     * cannot be saved, so its traffic is credited to the spelling that can. Repeated segments stay: "msh/US/US/FL" is
-     * a real root with its own traffic.
+     * cannot be saved, so its traffic is credited to the spelling that can. Repeated segments stay: "msh/US/US/FL" is a
+     * real root with its own traffic.
      */
     fun normalizedTopic(topic: String): String {
         val trimmed = topic.trim()
@@ -117,10 +117,11 @@ object MqttTopicDiscovery {
         val messageCount: Int
             get() = packets + mapReports
 
-        fun nearestDistanceMeters(from: LatLon?): Double? =
-            from?.let { origin ->
-                positions.values.minOfOrNull { latLongToMeter(origin.latitude, origin.longitude, it.latitude, it.longitude) }
+        fun nearestDistanceMeters(from: LatLon?): Double? = from?.let { origin ->
+            positions.values.minOfOrNull {
+                latLongToMeter(origin.latitude, origin.longitude, it.latitude, it.longitude)
             }
+        }
 
         internal fun record(kind: Kind, sender: String?) {
             when (kind) {

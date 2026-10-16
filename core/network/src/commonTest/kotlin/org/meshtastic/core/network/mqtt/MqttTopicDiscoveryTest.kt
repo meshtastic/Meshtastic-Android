@@ -175,7 +175,8 @@ class MqttTopicDiscoveryTest {
             )
         val arlington = TopicPlan.build("US", GeocodedPlace("US", "Virginia", "Arlington"), null, directory)
         assertTrue(arlington.suggestions.any { it.kind == COMMUNITY && it.topic == "msh/US/DMV" })
-        val bellevilleIl = TopicPlan.build("US", GeocodedPlace("US", "Illinois", "Belleville"), LatLon(38.52, -89.98), directory)
+        val bellevilleIl =
+            TopicPlan.build("US", GeocodedPlace("US", "Illinois", "Belleville"), LatLon(38.52, -89.98), directory)
         assertTrue(bellevilleIl.suggestions.any { it.kind == COMMUNITY && it.topic == "msh/US/MeshSTL" })
     }
 
@@ -199,12 +200,14 @@ class MqttTopicDiscoveryTest {
 
     @Test
     fun activityForPrefersTheExactSpellingThenTheLowestVariant() {
-        val activity = mapOf("msh/US/KS/topeka" to activity(nodeCount = 1), "msh/US/KS/Topeka" to activity(nodeCount = 2))
+        val activity =
+            mapOf("msh/US/KS/topeka" to activity(nodeCount = 1), "msh/US/KS/Topeka" to activity(nodeCount = 2))
         assertEquals("msh/US/KS/topeka", TopicPlan.activityFor("msh/US/KS/topeka", activity)?.first)
         assertEquals("msh/US/KS/Topeka", TopicPlan.activityFor("msh/US/ks/TOPEKA", activity)?.first)
     }
 
-    private fun plan(region: String, place: GeocodedPlace?) = TopicPlan.build(region, place, null, MqttRootDirectory.SEED)
+    private fun plan(region: String, place: GeocodedPlace?) =
+        TopicPlan.build(region, place, null, MqttRootDirectory.SEED)
 
     private fun activity(nodeCount: Int): MqttTopicDiscovery.Activity = MqttTopicDiscovery.Activity().apply {
         repeat(nodeCount) { nodes += "!${it.toString(radix = 16).padStart(length = 8, padChar = '0')}" }

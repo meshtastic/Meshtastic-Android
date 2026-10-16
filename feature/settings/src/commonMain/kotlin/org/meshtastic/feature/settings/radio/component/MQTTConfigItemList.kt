@@ -34,9 +34,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +56,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
+import org.meshtastic.core.network.mqtt.LatLon
+import org.meshtastic.core.network.mqtt.MqttRootTopic
 import org.meshtastic.core.network.repository.effectiveTlsEnabled
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.json_output_enabled
@@ -78,6 +84,7 @@ import org.meshtastic.core.resources.mqtt_status_reconnecting_with_attempt
 import org.meshtastic.core.resources.mqtt_status_topics_refused_all
 import org.meshtastic.core.resources.mqtt_status_topics_refused_some
 import org.meshtastic.core.resources.mqtt_test_connection
+import org.meshtastic.core.resources.mqtt_topic_finder
 import org.meshtastic.core.resources.schema_mqtt_address
 import org.meshtastic.core.resources.schema_mqtt_address_description
 import org.meshtastic.core.resources.schema_mqtt_enabled
@@ -102,6 +109,7 @@ import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.json_enabled
 
@@ -140,6 +148,21 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             true
         }
     val focusManager = LocalFocusManager.current
+    var showTopicFinder by rememberSaveable { mutableStateOf(false) }
+    if (showTopicFinder) {
+        val region = state.radioConfig.lora?.region?.takeIf { it != Config.LoRaConfig.RegionCode.UNSET }
+        val position = destNode?.takeIf { it.validPosition != null }?.let { LatLon(it.latitude, it.longitude) }
+        MqttTopicFinderSheet(
+            config = formState.value,
+            regionName = region?.name,
+            radioPosition = position,
+            onPick = { topic ->
+                formState.value = formState.value.newBuilder().also { wb -> wb.root = topic }.build()
+                showTopicFinder = false
+            },
+            onDismiss = { showTopicFinder = false },
+        )
+    }
 
     RadioConfigScreenList(
         rebootBehavior = RebootBehavior.ALWAYS,
@@ -269,7 +292,8 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.root,
                     maxSize = 31, // root max_size:32
                     enabled = state.connected,
-                    isError = false,
+                    // Empty is the firmware's own default root, so only a typed root can be wrong.
+                    isError = formState.value.root.isNotEmpty() && MqttRootTopic.problem(formState.value.root) != null,
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -277,6 +301,13 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         formState.value = formState.value.newBuilder().also { wb -> wb.root = it }.build()
                     },
                 )
+                TextButton(
+                    onClick = { showTopicFinder = true },
+                    enabled = state.connected,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                ) {
+                    Text(stringResource(Res.string.mqtt_topic_finder))
+                }
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.schema_mqtt_proxy_to_client_enabled),
