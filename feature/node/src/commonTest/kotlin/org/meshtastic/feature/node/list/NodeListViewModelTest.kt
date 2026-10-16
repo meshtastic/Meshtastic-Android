@@ -23,8 +23,13 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.TemperatureUnit
 import org.meshtastic.core.model.ConnectionState
@@ -39,15 +44,18 @@ import org.meshtastic.core.testing.FakeLocaleUnitsProvider
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeRadioInterfaceService
+import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class NodeListViewModelTest {
 
     private lateinit var viewModel: NodeListViewModel
@@ -63,8 +71,12 @@ class NodeListViewModelTest {
     private val nodeRequestActions: NodeRequestActions = mock(MockMode.autofill)
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase = mock(MockMode.autofill)
 
+    private val reportsHeard = MutableStateFlow(true)
+    private val nodeDbReady = MutableStateFlow(true)
+
     @BeforeTest
     fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
         radioInterfaceService = FakeRadioInterfaceService()
@@ -77,8 +89,9 @@ class NodeListViewModelTest {
 
         every { nodeFilterPreferences.nodeSortOption } returns MutableStateFlow(NodeSortOption.LAST_HEARD)
         every { nodeFilterPreferences.filters } returns MutableStateFlow(NodeFilterPrefs())
-        every { nodeManager.reportsHeardOnCurrentLora } returns MutableStateFlow(true)
-        every { nodeManager.isNodeDbReady } returns MutableStateFlow(true)
+        every { nodeFilterPreferences.keptUnheardNodes } returns MutableStateFlow(emptySet())
+        every { nodeManager.reportsHeardOnCurrentLora } returns reportsHeard
+        every { nodeManager.isNodeDbReady } returns nodeDbReady
 
         every { getFilteredNodesUseCase(any(), any()) } returns MutableStateFlow(emptyList())
         every { nodeRequestActions.lastTracerouteTime } returns MutableStateFlow(null)
@@ -86,7 +99,12 @@ class NodeListViewModelTest {
         viewModel = createViewModel()
     }
 
-    private fun createViewModel() = NodeListViewModel(
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    private fun createViewModel(prefs: NodeFilterPreferences = nodeFilterPreferences) = NodeListViewModel(
         savedStateHandle = SavedStateHandle(),
         nodeRepository = nodeRepository,
         radioConfigRepository = radioConfigRepository,
@@ -97,7 +115,7 @@ class NodeListViewModelTest {
         nodeManagementActions = nodeManagementActions,
         nodeRequestActions = nodeRequestActions,
         getFilteredNodesUseCase = getFilteredNodesUseCase,
-        nodeFilterPreferences = nodeFilterPreferences,
+        nodeFilterPreferences = prefs,
         nodeManager = nodeManager,
         localeUnitsProvider = localeUnitsProvider,
     )
@@ -178,5 +196,59 @@ class NodeListViewModelTest {
             assertEquals(ConnectionState.Connected, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    private fun unheardNode(num: Int) =
+        TestDataFactory.createTestNode(num = num, userId = "!0000000$num").copy(heardOnCurrentLora = false)
+
+    private fun seedUnheardNodes(vararg nums: Int) {
+        val ourNode = TestDataFactory.createTestNode(num = 99, userId = "!00000099")
+        nodeRepository.setOurNode(ourNode)
+        nodeRepository.setNodes(listOf(ourNode) + nums.map(::unheardNode))
+    }
+
+    @Test
+    fun `a kept node is no longer offered by the unheard banner`() = runTest {
+        val uiPrefs = FakeUiPrefs()
+        seedUnheardNodes(1, 2)
+        val vm = createViewModel(NodeFilterPreferences(uiPrefs))
+
+        vm.unheardBannerNodes.test {
+            assertEquals(listOf(1, 2), expectMostRecentItem().map { it.num })
+
+            vm.keepUnheardNodes(listOf(unheardNode(1)))
+            assertEquals(listOf(2), awaitItem().map { it.num })
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertEquals(setOf(1), uiPrefs.keptUnheardNodes.value)
+    }
+
+    @Test
+    fun `a kept node heard again leaves the kept set`() = runTest {
+        val uiPrefs = FakeUiPrefs()
+        seedUnheardNodes(1, 2)
+        createViewModel(NodeFilterPreferences(uiPrefs))
+        uiPrefs.keepUnheardNodes(setOf(1, 2))
+
+        nodeRepository.upsert(unheardNode(1).copy(heardOnCurrentLora = true))
+
+        assertEquals(setOf(2), uiPrefs.keptUnheardNodes.value)
+    }
+
+    @Test
+    fun `kept nodes are not pruned before the heard flags are authoritative`() = runTest {
+        val uiPrefs = FakeUiPrefs()
+        nodeDbReady.value = false
+        seedUnheardNodes(1)
+        createViewModel(NodeFilterPreferences(uiPrefs))
+        uiPrefs.keepUnheardNodes(setOf(1))
+
+        // A row left heard by an earlier session, before this session's NodeInfo install lands.
+        nodeRepository.upsert(unheardNode(1).copy(heardOnCurrentLora = true))
+        assertEquals(setOf(1), uiPrefs.keptUnheardNodes.value)
+
+        reportsHeard.value = false
+        nodeDbReady.value = true
+        assertEquals(setOf(1), uiPrefs.keptUnheardNodes.value)
     }
 }

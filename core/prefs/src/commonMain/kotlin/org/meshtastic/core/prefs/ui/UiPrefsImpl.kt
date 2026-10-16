@@ -182,6 +182,29 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         }
     }
 
+    override val keptUnheardNodes: StateFlow<Set<Int>> =
+        dataStore.data
+            .map { preferences -> parseNodeNums(preferences[KEY_KEPT_UNHEARD_NODES]).toSet() }
+            .stateIn(scope, SharingStarted.Eagerly, emptySet())
+
+    override fun keepUnheardNodes(nodeNums: Set<Int>) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val kept = parseNodeNums(preferences[KEY_KEPT_UNHEARD_NODES]) - nodeNums + nodeNums
+                preferences[KEY_KEPT_UNHEARD_NODES] = kept.takeLast(MAX_KEPT_UNHEARD_NODES).joinToString(",")
+            }
+        }
+    }
+
+    override fun forgetKeptUnheardNodes(nodeNums: Set<Int>) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val kept = parseNodeNums(preferences[KEY_KEPT_UNHEARD_NODES]) - nodeNums
+                preferences[KEY_KEPT_UNHEARD_NODES] = kept.joinToString(",")
+            }
+        }
+    }
+
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
         cachedFlow(provideNodeLocationFlows, nodeNum) {
             val key = booleanPreferencesKey(provideLocationKey(nodeNum))
@@ -349,10 +372,17 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         val KEY_SHOW_BLE_TRANSPORT = booleanPreferencesKey("show-ble-transport")
         val KEY_SHOW_NETWORK_TRANSPORT = booleanPreferencesKey("show-network-transport")
         val KEY_SHOW_USB_TRANSPORT = booleanPreferencesKey("show-usb-transport")
+        val KEY_KEPT_UNHEARD_NODES = stringPreferencesKey("kept-unheard-nodes")
         private const val MAX_FIRMWARE_UPDATE_NOTIFICATION_KEYS = 100
+
+        // Kept nums leave only when heard again; this bounds the ones deleted from the DB while still kept.
+        private const val MAX_KEPT_UNHEARD_NODES = 1000
         private const val SHOW_QUICK_CHAT_BY_DEFAULT = false
 
         private fun parseDeviceType(name: String): DeviceType? = DeviceType.entries.firstOrNull { it.name == name }
+
+        private fun parseNodeNums(stored: String?): List<Int> =
+            stored?.split(',')?.mapNotNull(String::toIntOrNull)?.distinct().orEmpty()
 
         private fun legacySelectedConnectionTransport(preferences: Preferences): DeviceType? {
             val hasLegacyTransportPreference =

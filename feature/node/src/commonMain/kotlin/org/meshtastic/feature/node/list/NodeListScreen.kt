@@ -146,11 +146,7 @@ fun NodeListScreen(
     val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
-    // Favorites and our own node are never offered for removal: a favorite is an explicit keep, and the connected
-    // radio is not something the node list may delete. ourNode and unfilteredNodes come from independent flows, so
-    // the list can already contain the local node while ourNode is still null. Offer nothing until it is known,
-    // rather than risk removing the user's own node from the radio.
-    val unheardNodes = remember(unfilteredNodes, ourNode) { selectRemovableUnheardNodes(unfilteredNodes, ourNode?.num) }
+    val unheardNodes by viewModel.unheardBannerNodes.collectAsStateWithLifecycle()
     val deviceImageUrls by viewModel.deviceImageUrls.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
@@ -350,6 +346,7 @@ fun NodeListScreen(
                         )
                         UnheardNodesBanner(
                             unheardNodes = unheardNodes,
+                            onKeep = { viewModel.keepUnheardNodes(unheardNodes) },
                             onRemoveAll = { unheardNodes.forEach(viewModel::removeNode) },
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                         )
@@ -464,23 +461,26 @@ private fun NodeListEmptyState(
  * Shown as an offer, never an automatic removal: the app's node DB is deliberately a superset of the radio's, and a
  * node may simply be out of range rather than on another channel — it comes back on its own when next heard.
  *
- * Dismissal is per-composition rather than saved, and re-arms whenever the count rises, so a later config change offers
- * again instead of staying silent.
+ * Keep is saved per node, so the banner stays away across launches and returns only for nodes not yet kept. Remove
+ * hides it for this composition, since each removal still waits on its own confirmation.
  */
 @Composable
-private fun UnheardNodesBanner(unheardNodes: List<Node>, onRemoveAll: () -> Unit, modifier: Modifier = Modifier) {
-    var dismissed by remember { mutableStateOf(false) }
+private fun UnheardNodesBanner(
+    unheardNodes: List<Node>,
+    onKeep: () -> Unit,
+    onRemoveAll: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var removing by remember { mutableStateOf(false) }
     var previousCount by remember { mutableIntStateOf(0) }
     val count = unheardNodes.size
 
-    // Re-arm on any rise, not only above a historical maximum: dismissing at 3, dropping to 1 and rising to 2 is
-    // still a new config change worth offering for.
     LaunchedEffect(count) {
-        if (count > previousCount) dismissed = false
+        if (count > previousCount) removing = false
         previousCount = count
     }
 
-    if (count == 0 || dismissed) return
+    if (count == 0 || removing) return
 
     Card(
         modifier = modifier,
@@ -505,11 +505,11 @@ private fun UnheardNodesBanner(unheardNodes: List<Node>, onRemoveAll: () -> Unit
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.align(Alignment.End)) {
-                TextButton(onClick = { dismissed = true }) { Text(stringResource(Res.string.nodes_unheard_keep)) }
+                TextButton(onClick = onKeep) { Text(stringResource(Res.string.nodes_unheard_keep)) }
                 TextButton(
                     onClick = {
                         onRemoveAll()
-                        dismissed = true
+                        removing = true
                     },
                 ) {
                     Text(stringResource(Res.string.nodes_unheard_remove))
