@@ -85,19 +85,50 @@ data class GlbBounds(val min: FloatArray, val max: FloatArray) {
             return if (valid) glb.decodeToString(start, start + length) else null
         }
 
-        private fun boundsOf(root: JsonObject): GlbBounds? {
-            val accessors = root["accessors"]?.jsonArray.orEmpty()
-            val positions =
-                root["meshes"]?.jsonArray.orEmpty().flatMap { mesh ->
-                    mesh.jsonObject["primitives"]?.jsonArray.orEmpty().mapNotNull { primitive ->
-                        primitive.jsonObject["attributes"]
-                            ?.jsonObject
-                            ?.get("POSITION")
+        /**
+         * Bounds of the display glass: primitives of a mesh named `screen`, or using a material named `screen`. Null
+         * when the model does not mark its display.
+         */
+        fun screen(glb: ByteArray): GlbBounds? = jsonChunk(glb)?.let { chunk ->
+            runCatching {
+                val root = json.parseToJsonElement(chunk).jsonObject
+                val materials =
+                    root["materials"]?.jsonArray.orEmpty().map { it.jsonObject["name"]?.jsonPrimitive?.content }
+                boundsOf(root) { mesh, primitive ->
+                    mesh["name"]?.jsonPrimitive?.content.equals(SCREEN, ignoreCase = true) ||
+                        primitive["material"]
                             ?.jsonPrimitive
                             ?.int
-                            ?.let { accessors[it].jsonObject }
-                            ?.takeIf { "min" in it && "max" in it }
-                    }
+                            ?.let { materials.getOrNull(it) }
+                            .equals(SCREEN, ignoreCase = true)
+                }
+            }
+                .getOrNull()
+        }
+
+        private const val SCREEN = "screen"
+
+        private fun boundsOf(
+            root: JsonObject,
+            include: (mesh: JsonObject, primitive: JsonObject) -> Boolean = { _, _ -> true },
+        ): GlbBounds? {
+            val accessors = root["accessors"]?.jsonArray.orEmpty()
+            val positions =
+                root["meshes"]?.jsonArray.orEmpty().flatMap { meshElement ->
+                    val mesh = meshElement.jsonObject
+                    mesh["primitives"]
+                        ?.jsonArray
+                        .orEmpty()
+                        .filter { include(mesh, it.jsonObject) }
+                        .mapNotNull { primitive ->
+                            primitive.jsonObject["attributes"]
+                                ?.jsonObject
+                                ?.get("POSITION")
+                                ?.jsonPrimitive
+                                ?.int
+                                ?.let { accessors[it].jsonObject }
+                                ?.takeIf { "min" in it && "max" in it }
+                        }
                 }
             if (positions.isEmpty()) return null
             fun axis(key: String, axis: Int) = positions.map { it.getValue(key).jsonArray[axis].jsonPrimitive.float }
