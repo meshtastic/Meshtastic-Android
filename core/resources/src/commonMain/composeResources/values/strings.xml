@@ -1342,6 +1342,7 @@
     <string name="mqtt_topic_finder_connecting">Connecting…</string>
     <string name="mqtt_topic_finder_counts">Counts are nodes heard during the sample. Busy topics fill in within seconds; quiet ones may stay at zero.</string>
     <string name="mqtt_topic_finder_custom">Custom topic</string>
+    <string name="mqtt_topic_finder_custom_example" translatable="false">msh/US/WA/seattle</string>
     <string name="mqtt_topic_finder_custom_hint">Up to 31 ASCII characters, no leading or trailing slash, no + or #.</string>
     <string name="mqtt_topic_finder_failed_closed">The broker closed the connection.</string>
     <string name="mqtt_topic_finder_failed_connect">Could not connect to the broker.</string>

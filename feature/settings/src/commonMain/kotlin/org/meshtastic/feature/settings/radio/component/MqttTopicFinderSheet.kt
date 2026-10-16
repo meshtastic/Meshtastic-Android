@@ -100,31 +100,39 @@ fun MqttTopicFinderSheet(
             enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
         )
     ModalBottomSheet(onDismissRequest = dismiss, sheetState = sheetState) {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            item {
-                Text(
-                    text = stringResource(Res.string.mqtt_topic_finder),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                )
-            }
-            item {
-                StatusBlock(
-                    state = state,
-                    host = config.address.ifEmpty { DEFAULT_BROKER },
-                    onRestart = { viewModel.start(config, regionName, radioPosition) },
-                )
-            }
-            val plan = state.plan
-            if (state.regionName != null && plan != null) {
-                suggestionRows(plan, state, config.root, pick)
-                activeRows(plan, state, config.root, pick)
-            }
-            item { CustomTopic(pick) }
+        MqttTopicFinderContent(
+            state = state,
+            host = config.address.ifEmpty { DEFAULT_BROKER },
+            current = config.root,
+            onPick = pick,
+            onRestart = { viewModel.start(config, regionName, radioPosition) },
+        )
+    }
+}
+
+@Composable
+internal fun MqttTopicFinderContent(
+    state: MqttTopicFinderViewModel.UiState,
+    host: String,
+    current: String,
+    onPick: (String) -> Unit,
+    onRestart: () -> Unit,
+) {
+    LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        item {
+            Text(
+                text = stringResource(Res.string.mqtt_topic_finder),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
         }
+        item { StatusBlock(state = state, host = host, onRestart = onRestart) }
+        val plan = state.plan
+        if (state.regionName != null && plan != null) {
+            suggestionRows(plan, state, current, onPick)
+            activeRows(plan, state, current, onPick)
+        }
+        item { CustomTopic(onPick) }
     }
 }
 

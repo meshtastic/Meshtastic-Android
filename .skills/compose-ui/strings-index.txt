@@ -1297,6 +1297,7 @@ mqtt_topic_finder_active
 mqtt_topic_finder_connecting
 mqtt_topic_finder_counts
 mqtt_topic_finder_custom
+mqtt_topic_finder_custom_example
 mqtt_topic_finder_custom_hint
 mqtt_topic_finder_failed_closed
 mqtt_topic_finder_failed_connect
