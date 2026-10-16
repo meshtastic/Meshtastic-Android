@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.node.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +43,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -52,7 +57,9 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.device_model_load_failed
 import org.meshtastic.core.resources.device_model_view_in_space
+import org.meshtastic.core.resources.info
 import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.ViewInAr
 import org.meshtastic.core.ui.util.LocalDeviceModelArViewer
@@ -105,14 +112,16 @@ fun DeviceModelDialog(deviceHardware: DeviceHardware, onDismiss: () -> Unit, mod
                         DeviceModelState.Failed -> ModelFallback(deviceHardware)
 
                         is DeviceModelState.Ready ->
-                            Column(modifier = Modifier.fillMaxSize()) {
+                            Box(modifier = Modifier.fillMaxSize()) {
                                 DeviceModelScene(
                                     glb = current.glb,
                                     bounds = current.bounds,
                                     onError = viewModel::markFailed,
-                                    modifier = Modifier.fillMaxWidth().weight(1f),
+                                    modifier = Modifier.fillMaxSize(),
                                 )
-                                current.copyright?.let { ModelNotice(it, Modifier.padding(16.dp)) }
+                                current.copyright?.let {
+                                    ModelNotice(it, Modifier.align(Alignment.BottomEnd).padding(16.dp))
+                                }
                             }
                     }
                 }
@@ -121,15 +130,35 @@ fun DeviceModelDialog(deviceHardware: DeviceHardware, onDismiss: () -> Unit, mod
     }
 }
 
-/** The model file's own copyright notice, verbatim: it is the owner's text, so it is never translated or cut. */
+/**
+ * The model file's own copyright notice behind an info button, shut until tapped, as the maps carry their credit. The
+ * text is the owner's, so it is never translated or cut.
+ */
 @Composable
-internal fun ModelNotice(notice: String, modifier: Modifier = Modifier) {
-    Text(
-        text = notice,
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier,
-    )
+fun ModelNotice(
+    notice: String,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    // The toggle is last, so the notice opens inboard of it from the trailing corner, in RTL too.
+    Row(
+        modifier = modifier.clip(RoundedCornerShape(24.dp)).background(containerColor),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AnimatedVisibility(visible = expanded, modifier = Modifier.weight(1f, fill = false)) {
+            Text(
+                text = notice,
+                style = MaterialTheme.typography.labelSmall,
+                color = contentColor,
+                modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+            )
+        }
+        IconButton(onClick = { expanded = !expanded }) {
+            Icon(MeshtasticIcons.Info, contentDescription = stringResource(Res.string.info), tint = contentColor)
+        }
+    }
 }
 
 @Composable
