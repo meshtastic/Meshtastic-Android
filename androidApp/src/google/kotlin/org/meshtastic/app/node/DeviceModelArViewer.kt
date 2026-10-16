@@ -22,6 +22,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +31,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +51,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
@@ -70,19 +77,28 @@ import io.github.sceneview.ar.placementHit
 import io.github.sceneview.ar.rememberArGuidanceState
 import io.github.sceneview.ar.reticlePhaseFor
 import io.github.sceneview.ar.scene.SceneUnderstanding
+import io.github.sceneview.math.Position
 import io.github.sceneview.math.Rotation
 import io.github.sceneview.model.model
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberOnGestureListener
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.device_model_rest_face_down
+import org.meshtastic.core.resources.device_model_rest_face_up
+import org.meshtastic.core.resources.device_model_rest_left_side
+import org.meshtastic.core.resources.device_model_rest_right_side
+import org.meshtastic.core.resources.device_model_rest_upright
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.DeviceModelArViewer
 import org.meshtastic.feature.node.component.ModelNotice
+import org.meshtastic.feature.node.model.GlbBounds
+import org.meshtastic.feature.node.model.RestPose
 import java.nio.ByteBuffer
 
 private const val SCRIM_ALPHA = 0.4f
@@ -158,6 +174,8 @@ private fun DeviceModelArScene(glb: ByteArray) {
     val haptic = LocalHapticFeedback.current
     var anchor by remember { mutableStateOf<Anchor?>(null) }
     var yawDegrees by remember { mutableFloatStateOf(0f) }
+    var pose by rememberSaveable { mutableStateOf(RestPose.Upright) }
+    val bounds = remember(glb) { GlbBounds.parse(glb) }
     var latestFrame by remember { mutableStateOf<Frame?>(null) }
     var session by remember { mutableStateOf<Session?>(null) }
     var viewport by remember { mutableStateOf(IntSize.Zero) }
@@ -230,8 +248,16 @@ private fun DeviceModelArScene(glb: ByteArray) {
                     val instance = remember(modelLoader) { modelLoader.createModelInstance(ByteBuffer.wrap(glb)) }
                     DisposableEffect(instance) { onDispose { modelLoader.destroyModel(instance.model) } }
                     AnchorNode(anchor = placedAnchor) {
-                        // Moving is a new tap and scaling would break real size, so the drag's yaw is the only edit.
-                        ModelNode(modelInstance = instance, rotation = Rotation(y = yawDegrees))
+                        // Moving is a new tap and scaling would break real size, so the drag's yaw and the rest pose
+                        // are the only edits. The yaw wraps the pose so it always turns about the surface's up.
+                        val offset = bounds?.let(pose::offset) ?: floatArrayOf(0f, 0f, 0f)
+                        Node(rotation = Rotation(y = yawDegrees)) {
+                            ModelNode(
+                                modelInstance = instance,
+                                position = Position(offset[0], offset[1], offset[2]),
+                                rotation = Rotation(x = pose.pitchDegrees, z = pose.rollDegrees),
+                            )
+                        }
                     }
                 }
             }
@@ -244,8 +270,54 @@ private fun DeviceModelArScene(glb: ByteArray) {
                 trackingFailureReason = trackingFailure,
             )
         ARCoachingOverlay(guidance)
+        if (placed && bounds != null) {
+            RestPoseChips(
+                selected = pose,
+                onSelect = { pose = it },
+                modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(bottom = 72.dp),
+            )
+        }
     }
 }
+
+/** Which face of the device lies on the surface. */
+@Composable
+private fun RestPoseChips(selected: RestPose, onSelect: (RestPose) -> Unit, modifier: Modifier = Modifier) {
+    val colors =
+        FilterChipDefaults.filterChipColors(
+            labelColor = Color.White,
+            selectedContainerColor = Color.White.copy(alpha = SCRIM_ALPHA),
+            selectedLabelColor = Color.White,
+        )
+    Row(
+        modifier =
+        modifier
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color.Black.copy(alpha = SCRIM_ALPHA))
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        RestPose.entries.forEach { pose ->
+            FilterChip(
+                selected = pose == selected,
+                onClick = { onSelect(pose) },
+                label = { Text(stringResource(pose.label)) },
+                colors = colors,
+            )
+        }
+    }
+}
+
+private val RestPose.label: StringResource
+    get() =
+        when (this) {
+            RestPose.Upright -> Res.string.device_model_rest_upright
+            RestPose.FaceUp -> Res.string.device_model_rest_face_up
+            RestPose.FaceDown -> Res.string.device_model_rest_face_down
+            RestPose.LeftSide -> Res.string.device_model_rest_left_side
+            RestPose.RightSide -> Res.string.device_model_rest_right_side
+        }
 
 @Composable
 private fun ArHeader(title: String, onDismiss: () -> Unit) {
