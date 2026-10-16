@@ -17,11 +17,13 @@
 package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -33,7 +35,10 @@ import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MirrorFormat
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
@@ -55,17 +60,25 @@ private const val PIXELS_PER_PAGE = 8
 internal fun MirrorFrameImage(frame: MirrorFrame, palette: MirrorPalette?, modifier: Modifier = Modifier) {
     // A palette only applies when the frame references it; otherwise render monochrome.
     val activePalette = palette?.takeIf { frame.paletteSignature != 0 && it.signature == frame.paletteSignature }
-    val bitmap = remember(frame, activePalette) { renderFrame(frame, activePalette) }
-    Image(
-        bitmap = bitmap,
-        contentDescription = stringResource(Res.string.mirror_device_screen),
-        modifier =
+    // Rendered off the main thread: an 800x480 frame is tens of milliseconds. The last bitmap stays up meanwhile.
+    val dispatchers = koinInject<CoroutineDispatchers>()
+    val bitmap by
+        produceState<ImageBitmap?>(null, frame, activePalette) {
+            value = withContext(dispatchers.default) { renderFrame(frame, activePalette) }
+        }
+    val sizing =
         modifier
             .widthIn(max = MAX_CANVAS_WIDTH)
             .fillMaxWidth()
-            .aspectRatio(frame.width.toFloat() / frame.height.toFloat()),
-        filterQuality = FilterQuality.None,
-    )
+            .aspectRatio(frame.width.toFloat() / frame.height.toFloat())
+    bitmap?.let {
+        Image(
+            bitmap = it,
+            contentDescription = stringResource(Res.string.mirror_device_screen),
+            modifier = sizing,
+            filterQuality = FilterQuality.None,
+        )
+    } ?: Box(sizing)
 }
 
 /** One colorized rectangle with palette colors pre-resolved to Compose colors. */
