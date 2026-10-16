@@ -338,7 +338,7 @@
                     android:path="com.geeksville.mesh" /> -->
             </intent-filter>
         </receiver>
-        <!-- Reply, mark-as-read and thumbs-up from a conversation notification, including from Android Auto -->
+        <!-- Reply, mark-as-read and thumbs-up from a conversation notification, on the phone or a watch -->
         <service
             android:name="org.meshtastic.core.service.ConversationActionService"
             android:exported="false" />
