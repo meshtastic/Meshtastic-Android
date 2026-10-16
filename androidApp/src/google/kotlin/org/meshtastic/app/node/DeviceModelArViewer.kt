@@ -100,6 +100,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.repository.MirrorFrame
+import org.koin.compose.koinInject
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.device_model_capture
@@ -399,13 +401,14 @@ private fun rememberArCapture(title: String): (() -> Unit)? {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
     val view = LocalView.current
     val scope = rememberCoroutineScope()
+    val dispatchers = koinInject<CoroutineDispatchers>()
     val haptic = LocalHapticFeedback.current
     val saved = stringResource(Res.string.device_model_capture_saved)
     val failed = stringResource(Res.string.device_model_capture_failed)
     return {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         scope.launch {
-            val uri = captureArScene(view.rootView, title)
+            val uri = captureArScene(view.rootView, title, dispatchers.io)
             Toast.makeText(view.context, if (uri != null) saved else failed, Toast.LENGTH_SHORT).show()
         }
     }
