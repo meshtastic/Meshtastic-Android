@@ -17,6 +17,10 @@
 package org.meshtastic.app.node
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
@@ -143,6 +147,7 @@ private object GoogleDeviceModelArViewer : DeviceModelArViewer {
 @Composable
 private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDismiss: () -> Unit) {
     BackHandler(onBack = onDismiss)
+    LockOrientationWhileShown()
     // Asked here rather than left to the AR view, whose own request never appears from inside a dialog.
     val context = LocalContext.current
     var cameraGranted by remember {
@@ -390,4 +395,25 @@ private fun rememberArCapture(title: String): (() -> Unit)? {
             Toast.makeText(view.context, if (uri != null) saved else failed, Toast.LENGTH_SHORT).show()
         }
     }
+}
+
+/**
+ * Holds the activity at its current orientation while AR is up. A rotation recreates the activity, and the new ARCore
+ * session starts without the planes it found or the device placed on one; turning the phone here moves the camera.
+ */
+@Composable
+private fun LockOrientationWhileShown() {
+    val context = LocalContext.current
+    DisposableEffect(context) {
+        val activity = context.findActivity()
+        val previous = activity?.requestedOrientation
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+        onDispose { if (activity != null && previous != null) activity.requestedOrientation = previous }
+    }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
