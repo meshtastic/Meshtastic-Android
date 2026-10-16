@@ -8,7 +8,43 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.3-internal.7)
+### Internal (v2.8.3-internal.8)
+Changes since [`v2.8.3-closed.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3-closed.1):
+
+#### 🏗️ Features
+* feat(firmware): play Chirpy Hop while a firmware update runs by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7545
+* feat(settings): schema labels for presets and regions, keyword search, diy_only pins by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7544
+* feat(map): route MapLibre's log through Kermit on desktop by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7606
+* feat(settings): let radio settings be opened and read without a radio by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7621
+* feat(connections): keep an old radio connected and gate the app on the firmware update by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7623
+* feat(settings): region preset fallback and fixed-precision override frequency by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7626
+* feat(connections): show the LoRa preset and region on the connected radio card by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7625
+* feat(settings): land a search result on the control it names by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7627
+* feat(settings): color picker and swatch for ambient lighting by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7619
+* feat(desktop): reactions and new waypoints notification toggles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7624
+* feat(settings): back up and restore the app database by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7629
+* feat(node): record observed and inbound traceroutes in the node's history by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7643
+#### 🖥️ Desktop
+* fix(notifications): end low-battery episodes when the tray is cleared by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7546
+* Fix/desktop linux tray by @jp-bennett in https://github.com/meshtastic/Meshtastic-Android/pull/7569
+* fix(desktop): keep LWJGL whole through ProGuard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7605
+* fix(app): stop declaring Android Auto support by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7645
+#### 🛠️ Fixes
+* fix(map): show offline manager loading and failure in the offline sheet by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7570
+* fix: frequency slot for non-ASCII channel names, mark auto slot by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7580
+* fix: restore key backups after a factory reset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7581
+* fix(ci): link protobufs bump summary PRs to the protobufs repo by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7595
+* fix(discovery): scan public presets on the default public channel and slot by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7600
+* fix(config): refresh the node DB after a live LoRa save by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7620
+* fix(node): name unknown traceroute hops by their node id by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7628
+* fix(messaging): resend a failed message in place by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7622
+* fix(settings): land a search result on the row and highlight it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7637
+* fix(node): use the traceroute map colors in the traceroute chart by @garthvh in https://github.com/meshtastic/Meshtastic-Android/pull/7631
+* fix(settings): cap the long name at the 24 bytes firmware 2.8 keeps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7641
+* fix(node): show unknown traceroute hops as unknown and cool down long-press traceroute by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7640
+* fix(node): remember Keep on the unheard-nodes banner by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7646
+
+### Closed Beta (v2.8.3-closed.1)
 Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2):
 
 #### 🏗️ Features
