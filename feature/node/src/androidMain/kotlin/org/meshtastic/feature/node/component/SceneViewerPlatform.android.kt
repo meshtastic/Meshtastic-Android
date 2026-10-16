@@ -42,7 +42,13 @@ import java.nio.ByteBuffer
  * nothing is swapped. SceneView centers the model on the origin, so the orbit targets the origin.
  */
 @Composable
-internal actual fun DeviceModelScene(glb: ByteArray, bounds: GlbBounds, onError: () -> Unit, modifier: Modifier) {
+internal actual fun DeviceModelScene(
+    glb: ByteArray,
+    bounds: GlbBounds,
+    onError: () -> Unit,
+    modifier: Modifier,
+    visible: Boolean,
+) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     val environmentLoader = rememberEnvironmentLoader(engine)
@@ -63,7 +69,8 @@ internal actual fun DeviceModelScene(glb: ByteArray, bounds: GlbBounds, onError:
         }
     DisposableEffect(instance) { onDispose { instance?.let { modelLoader.destroyModel(it.model) } } }
     SideEffect { if (instance == null) currentOnError() }
-    if (instance == null) return
+    // Hidden, only the surface goes: the engine, probe and model stay loaded for when it shows again.
+    if (instance == null || !visible) return
     val loaded = loadedEnvironment ?: return
     SceneView(
         modifier = modifier,

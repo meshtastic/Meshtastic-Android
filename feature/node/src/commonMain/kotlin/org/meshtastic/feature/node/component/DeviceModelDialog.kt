@@ -75,55 +75,76 @@ fun DeviceModelDialog(deviceHardware: DeviceHardware, onDismiss: () -> Unit, mod
 
     val arViewer = LocalDeviceModelArViewer.current?.takeIf { it.isAvailable() }
     var inAr by rememberSaveable { mutableStateOf(false) }
-    val ready = state as? DeviceModelState.Ready
+    val arModel = (state as? DeviceModelState.Ready)?.takeIf { inAr && arViewer != null }
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        if (inAr && arViewer != null && ready != null) {
-            arViewer.Content(ready.glb, deviceHardware.displayName, ready.copyright) { inAr = false }
-            return@Dialog
+        // The orbit view stays composed under AR with its surface dropped, so coming back does not reload the model.
+        Box(modifier = modifier.fillMaxSize()) {
+            OrbitContent(
+                deviceHardware = deviceHardware,
+                state = state,
+                onError = viewModel::markFailed,
+                onDismiss = onDismiss,
+                onOpenAr = if (arViewer != null) ({ inAr = true }) else null,
+                visible = arModel == null,
+            )
+            arModel?.let { arViewer?.Content(it.glb, deviceHardware.displayName, it.copyright) { inAr = false } }
         }
-        Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(MeshtasticIcons.Close, contentDescription = stringResource(Res.string.close))
-                    }
-                    Text(
-                        text = deviceHardware.displayName,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(start = 8.dp).weight(1f),
-                    )
-                    if (arViewer != null && ready != null) {
-                        IconButton(onClick = { inAr = true }) {
-                            Icon(
-                                MeshtasticIcons.ViewInAr,
-                                contentDescription = stringResource(Res.string.device_model_view_in_space),
-                            )
-                        }
+    }
+}
+
+@Composable
+private fun OrbitContent(
+    deviceHardware: DeviceHardware,
+    state: DeviceModelState,
+    onError: () -> Unit,
+    onDismiss: () -> Unit,
+    onOpenAr: (() -> Unit)?,
+    visible: Boolean,
+) {
+    val ready = state as? DeviceModelState.Ready
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = onDismiss) {
+                    Icon(MeshtasticIcons.Close, contentDescription = stringResource(Res.string.close))
+                }
+                Text(
+                    text = deviceHardware.displayName,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(start = 8.dp).weight(1f),
+                )
+                if (onOpenAr != null && ready != null) {
+                    IconButton(onClick = onOpenAr) {
+                        Icon(
+                            MeshtasticIcons.ViewInAr,
+                            contentDescription = stringResource(Res.string.device_model_view_in_space),
+                        )
                     }
                 }
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    when (val current = state) {
-                        DeviceModelState.Loading -> CircularProgressIndicator()
+            }
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                when (val current = state) {
+                    DeviceModelState.Loading -> CircularProgressIndicator()
 
-                        DeviceModelState.Failed -> ModelFallback(deviceHardware)
+                    DeviceModelState.Failed -> ModelFallback(deviceHardware)
 
-                        is DeviceModelState.Ready ->
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                DeviceModelScene(
-                                    glb = current.glb,
-                                    bounds = current.bounds,
-                                    onError = viewModel::markFailed,
-                                    modifier = Modifier.fillMaxSize(),
-                                )
-                                current.copyright?.let {
-                                    ModelNotice(it, Modifier.align(Alignment.BottomEnd).padding(16.dp))
-                                }
+                    is DeviceModelState.Ready ->
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            DeviceModelScene(
+                                glb = current.glb,
+                                bounds = current.bounds,
+                                onError = onError,
+                                modifier = Modifier.fillMaxSize(),
+                                visible = visible,
+                            )
+                            current.copyright?.let {
+                                ModelNotice(it, Modifier.align(Alignment.BottomEnd).padding(16.dp))
                             }
-                    }
+                        }
                 }
             }
         }
