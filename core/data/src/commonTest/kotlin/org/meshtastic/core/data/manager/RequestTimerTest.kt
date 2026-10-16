@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class RequestTimerTest {
@@ -59,5 +60,38 @@ class RequestTimerTest {
         // Consuming one id must not affect the other.
         timer.appendDuration(requestId = 1, text = "a", logLabel = "Test")
         assertTrue(timer.appendDuration(requestId = 2, text = "b", logLabel = "Test").contains("Duration: "))
+    }
+
+    @Test
+    fun appendDuration_fromAnotherNode_leavesTextAndStartTimeUntouched() {
+        val timer = RequestTimer()
+        timer.start(requestId = 9, destination = 100)
+
+        assertEquals("base", timer.appendDuration(requestId = 9, text = "base", logLabel = "Test", from = 200))
+        assertTrue(timer.has(requestId = 9, from = 100))
+        assertTrue(
+            timer.appendDuration(requestId = 9, text = "base", logLabel = "Test", from = 100).contains("Duration: "),
+        )
+    }
+
+    @Test
+    fun has_withMismatchedSender_isFalse() {
+        val timer = RequestTimer()
+        timer.start(requestId = 9, destination = 100)
+
+        assertFalse(timer.has(requestId = 9, from = 200))
+        assertTrue(timer.has(requestId = 9, from = 100))
+    }
+
+    @Test
+    fun has_isTrueOnlyBetweenStartAndResponse() {
+        val timer = RequestTimer()
+        assertFalse(timer.has(requestId = 3))
+
+        timer.start(requestId = 3)
+        assertTrue(timer.has(requestId = 3))
+
+        timer.appendDuration(requestId = 3, text = "a", logLabel = "Test")
+        assertFalse(timer.has(requestId = 3))
     }
 }

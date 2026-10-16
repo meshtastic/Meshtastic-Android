@@ -33,21 +33,33 @@ import org.meshtastic.core.common.util.nowMillis
  */
 internal class RequestTimer {
 
-    private val startTimes = atomic(persistentMapOf<Int, Long>())
+    private class Entry(val startMillis: Long, val destination: Int?) {
+        fun matches(from: Int?) = destination == null || from == null || destination == from
+    }
 
-    /** Records the start time for [requestId]. */
-    fun start(requestId: Int) {
-        startTimes.update { it.putting(requestId, nowMillis) }
+    private val startTimes = atomic(persistentMapOf<Int, Entry>())
+
+    /** Records the start time for [requestId], and the [destination] node it was sent to when the caller knows it. */
+    fun start(requestId: Int, destination: Int? = null) {
+        startTimes.update { it.putting(requestId, Entry(nowMillis, destination)) }
     }
 
     /**
-     * Consumes the start time recorded for [requestId] and appends a `Duration: N s` line to [text], logging completion
-     * under [logLabel]. Returns [text] unchanged when no start time was recorded for the id.
+     * Whether this process sent [requestId] and no response has landed. When [from] is given and the request recorded a
+     * destination, the response must come from that destination.
      */
-    fun appendDuration(requestId: Int, text: String, logLabel: String): String {
-        val start = startTimes.value[requestId]
+    fun has(requestId: Int, from: Int? = null): Boolean = startTimes.value[requestId]?.matches(from) == true
+
+    /**
+     * Consumes the start time recorded for [requestId] and appends a `Duration: N s` line to [text], logging completion
+     * under [logLabel]. Returns [text] unchanged, leaving the start time in place, when no start time was recorded for
+     * the id or [from] differs from the recorded destination.
+     */
+    fun appendDuration(requestId: Int, text: String, logLabel: String, from: Int? = null): String {
+        val entry = startTimes.value[requestId]
+        if (entry == null || !entry.matches(from)) return text
         startTimes.update { it.removing(requestId) }
-        if (start == null) return text
+        val start = entry.startMillis
         val seconds = (nowMillis - start) / MILLIS_PER_SECOND
         Logger.i { "$logLabel $requestId complete in $seconds s" }
         return "$text\n\nDuration: ${NumberFormatter.format(seconds, 1)} s"
