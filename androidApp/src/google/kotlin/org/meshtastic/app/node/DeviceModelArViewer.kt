@@ -38,6 +38,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -69,6 +70,7 @@ import io.github.sceneview.ar.placementHit
 import io.github.sceneview.ar.rememberArGuidanceState
 import io.github.sceneview.ar.reticlePhaseFor
 import io.github.sceneview.ar.scene.SceneUnderstanding
+import io.github.sceneview.math.Rotation
 import io.github.sceneview.model.model
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberMaterialLoader
@@ -84,6 +86,7 @@ import org.meshtastic.feature.node.component.ModelNotice
 import java.nio.ByteBuffer
 
 private const val SCRIM_ALPHA = 0.4f
+private const val YAW_DEGREES_PER_PX = 0.4f
 
 val deviceModelArViewer: DeviceModelArViewer? = GoogleDeviceModelArViewer
 
@@ -154,6 +157,7 @@ private fun DeviceModelArScene(glb: ByteArray) {
     val materialLoader = rememberMaterialLoader(engine)
     val haptic = LocalHapticFeedback.current
     var anchor by remember { mutableStateOf<Anchor?>(null) }
+    var yawDegrees by remember { mutableFloatStateOf(0f) }
     var latestFrame by remember { mutableStateOf<Frame?>(null) }
     var session by remember { mutableStateOf<Session?>(null) }
     var viewport by remember { mutableStateOf(IntSize.Zero) }
@@ -202,6 +206,9 @@ private fun DeviceModelArScene(glb: ByteArray) {
                         }
                     }
                 },
+                // A one-finger drag anywhere turns it: a twist on the node itself needs both fingers on a few
+                // centimeters of device. GestureDetector's distance is previous minus current, so negate it.
+                onScroll = { _, _, _, distance -> yawDegrees -= distance.x * YAW_DEGREES_PER_PX },
             ),
         ) {
             if (!placed && isTracking && viewport != IntSize.Zero) {
@@ -223,16 +230,8 @@ private fun DeviceModelArScene(glb: ByteArray) {
                     val instance = remember(modelLoader) { modelLoader.createModelInstance(ByteBuffer.wrap(glb)) }
                     DisposableEffect(instance) { onDispose { modelLoader.destroyModel(instance.model) } }
                     AnchorNode(anchor = placedAnchor) {
-                        ModelNode(
-                            modelInstance = instance,
-                            isEditable = true,
-                            apply = {
-                                // Turn only: moving is a new tap, and scaling would break real size.
-                                isPositionEditable = false
-                                isScaleEditable = false
-                                isRotationEditable = true
-                            },
-                        )
+                        // Moving is a new tap and scaling would break real size, so the drag's yaw is the only edit.
+                        ModelNode(modelInstance = instance, rotation = Rotation(y = yawDegrees))
                     }
                 }
             }
