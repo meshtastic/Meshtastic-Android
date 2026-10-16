@@ -324,6 +324,53 @@ class DisplayMirrorManagerImplTest {
         assertNull(manager.frame.value)
     }
 
+    @Test
+    fun `continuation chunk cannot change the panel the rect was checked against`() {
+        manager.handleIncomingFrame(rectChunk(offset = 0, total = 200, data = bytes(100, 1)))
+        // A smaller panel on the final chunk would blit the 10x10 rect past the end of the canvas.
+        manager.handleIncomingFrame(rectChunk(offset = 100, total = 200, width = 10, height = 10, data = bytes(100, 2)))
+
+        assertNull(manager.frame.value)
+    }
+
+    @Test
+    fun `a surplus chunk after a completed palette does not extend it`() {
+        val region =
+            DisplayPalette.ColorRegion.Builder()
+                .also { wb ->
+                    wb.width = 8
+                    wb.height = 8
+                }
+                .build()
+        manager.handleIncomingPalette(
+            palette(signature = 5, regionOffset = 0, regionTotal = 1, regions = listOf(region)),
+        )
+        manager.handleIncomingPalette(
+            palette(signature = 5, regionOffset = 1, regionTotal = 1, regions = listOf(region)),
+        )
+
+        assertEquals(1, manager.palette.value?.regions?.size)
+    }
+
+    @Test
+    fun `an over-cap restart leaves the published palette intact`() {
+        val region =
+            DisplayPalette.ColorRegion.Builder()
+                .also { wb ->
+                    wb.width = 8
+                    wb.height = 8
+                }
+                .build()
+        manager.handleIncomingPalette(
+            palette(signature = 5, regionOffset = 0, regionTotal = 1, regions = listOf(region)),
+        )
+        manager.handleIncomingPalette(
+            palette(signature = 6, regionOffset = 0, regionTotal = 100_000, regions = listOf(region)),
+        )
+
+        assertEquals(5, manager.palette.value?.signature)
+    }
+
     private companion object {
         const val WIDTH = 128
         const val HEIGHT = 64

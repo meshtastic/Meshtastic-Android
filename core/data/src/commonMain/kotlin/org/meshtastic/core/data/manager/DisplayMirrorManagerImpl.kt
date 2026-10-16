@@ -105,7 +105,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
     }
 
     override fun handleIncomingPalette(chunk: DisplayPalette) {
-        if (chunk.region_offset == 0) {
+        if (chunk.region_offset == 0 && chunk.region_total <= MAX_PALETTE_REGIONS) {
             paletteRegions.clear()
             paletteSignature = chunk.signature
             paletteReceived = 0
@@ -129,6 +129,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
                     defaultOffColor = paletteDefaultOff,
                     regions = paletteRegions.toList(),
                 )
+            paletteReceived = -1 // complete: a surplus chunk must not extend it; the next palette starts at offset 0
         }
     }
 

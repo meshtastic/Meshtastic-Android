@@ -19,7 +19,14 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import org.meshtastic.proto.DisplayFrame
 
-private data class RectArea(val x: Int, val y: Int, val width: Int, val height: Int)
+private data class RectArea(
+    val x: Int,
+    val y: Int,
+    val width: Int,
+    val height: Int,
+    val panelWidth: Int,
+    val panelHeight: Int,
+)
 
 /**
  * Reassembles RGB565 dirty-rect chunks (LVGL-based device UIs) and composites them into a persistent little-endian
@@ -51,7 +58,7 @@ internal class MirrorRectCompositor {
             buffer = ByteArray(chunk.total_size)
             frameId = chunk.frame_id
             received = 0
-            area = RectArea(chunk.rect_x, chunk.rect_y, rectWidth(chunk), rectHeight(chunk))
+            area = RectArea(chunk.rect_x, chunk.rect_y, rectWidth(chunk), rectHeight(chunk), chunk.width, chunk.height)
         }
         return accumulate(chunk, data)
     }
@@ -62,7 +69,7 @@ internal class MirrorRectCompositor {
         received += data.size
         val complete = received >= buf.size
         if (complete) {
-            composite(chunk, buf)
+            composite(buf)
             buffer = null
         }
         return complete
@@ -89,10 +96,18 @@ internal class MirrorRectCompositor {
     private fun isAcceptable(chunk: DisplayFrame, dataSize: Int): Boolean {
         val expected = if (withinPanel(chunk)) rectWidth(chunk) * rectHeight(chunk) * 2 else -1
         val sized = expected == chunk.total_size && chunk.total_size in 1..MAX_RECT_BYTES
-        // Continuations must match the buffer allocated at offset 0, not merely their own claim.
+        // Continuations must match the buffer and the panel latched at offset 0, not merely their own claim.
+        val latched = area
         val inSequence =
             chunk.offset == 0 ||
-                (buffer?.size == chunk.total_size && chunk.frame_id == frameId && chunk.offset == received)
+                (
+                    buffer?.size == chunk.total_size &&
+                        chunk.frame_id == frameId &&
+                        chunk.offset == received &&
+                        latched != null &&
+                        chunk.width == latched.panelWidth &&
+                        chunk.height == latched.panelHeight
+                    )
         val acceptable = sized && inSequence && chunk.offset + dataSize <= chunk.total_size
         if (!acceptable) {
             Logger.w {
@@ -114,14 +129,15 @@ internal class MirrorRectCompositor {
             chunk.rect_y in 0..(chunk.height - h)
     }
 
-    private fun composite(chunk: DisplayFrame, rect: ByteArray) {
-        if (canvas == null || width != chunk.width || height != chunk.height) {
-            canvas = ByteArray(chunk.width * chunk.height * 2)
-            width = chunk.width
-            height = chunk.height
+    /** Uses the panel latched at offset 0, the geometry the rect was validated against. */
+    private fun composite(rect: ByteArray) {
+        val blit = area ?: return
+        if (canvas == null || width != blit.panelWidth || height != blit.panelHeight) {
+            canvas = ByteArray(blit.panelWidth * blit.panelHeight * 2)
+            width = blit.panelWidth
+            height = blit.panelHeight
         }
         val target = canvas ?: return
-        val blit = area ?: return
         val rowBytes = blit.width * 2
         for (row in 0 until blit.height) {
             val src = row * rowBytes
