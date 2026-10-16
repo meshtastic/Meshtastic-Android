@@ -117,11 +117,13 @@ data class TopicPlan(
          * one snapshot to the next.
          */
         fun activityFor(topic: String, activity: Map<String, Activity>): Pair<String, Activity>? {
-            activity[topic]?.let {
-                return topic to it
-            }
-            val key = activity.keys.filter { MqttRootTopic.rootsMatch(it, topic) }.minOrNull() ?: return null
-            return key to activity.getValue(key)
+            val key =
+                if (topic in activity) {
+                    topic
+                } else {
+                    activity.keys.filter { MqttRootTopic.rootsMatch(it, topic) }.minOrNull()
+                }
+            return key?.let { it to activity.getValue(it) }
         }
 
         /**

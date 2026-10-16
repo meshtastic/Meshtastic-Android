@@ -53,10 +53,8 @@ object MqttTopicDiscovery {
     /** Null for anything that is not a `2/e` or `2/map` topic (uppercase hex, `/1/c/`, `/2/json/`, foreign roots). */
     fun observation(topic: String): Observation? {
         val match = topicPattern.matchEntire(normalizedTopic(topic)) ?: return null
-        val root = match.groupValues[1]
-        val channel = match.groups[2]?.value
-        val gateway = match.groups[3]?.value
-        return if (channel != null && gateway != null) {
+        val (root, channel, gateway) = match.destructured
+        return if (channel.isNotEmpty() && gateway.isNotEmpty()) {
             Observation(root, Kind.Packet(channel, gateway))
         } else {
             Observation(root, Kind.MapReport)
@@ -73,9 +71,10 @@ object MqttTopicDiscovery {
 
     /** Plaintext MapReport out of an envelope; null for encrypted packets, other portnums and parse errors. */
     fun mapReport(envelope: ServiceEnvelope): MapReportSummary? {
-        val packet = envelope.packet ?: return null
-        val data = packet.decoded?.takeIf { it.portnum == PortNum.MAP_REPORT_APP } ?: return null
-        val report = MapReport.ADAPTER.decodeOrNull(data.payload) ?: return null
+        val packet = envelope.packet
+        val data = packet?.decoded?.takeIf { it.portnum == PortNum.MAP_REPORT_APP }
+        val report = data?.let { MapReport.ADAPTER.decodeOrNull(it.payload) }
+        if (packet == null || report == null) return null
         val reporter = envelope.gateway_id.ifEmpty { NodeAddress.numToDefaultId(packet.from) }
         val position =
             if (report.latitude_i == 0 && report.longitude_i == 0) {
@@ -174,11 +173,16 @@ object MqttTopicDiscovery {
          * report on map topics. Returns the observation so the sampler can apply the region cap.
          */
         fun record(topic: String, payload: ByteArray): Observation? {
-            val observation = observation(topic) ?: return null
-            if (observation.root !in activity && activity.size >= MAX_ROOTS) {
-                droppedRoots++
-                return observation
+            val observation = observation(topic)
+            when {
+                observation == null -> Unit
+                observation.root !in activity && activity.size >= MAX_ROOTS -> droppedRoots++
+                else -> credit(observation, payload)
             }
+            return observation
+        }
+
+        private fun credit(observation: Observation, payload: ByteArray) {
             val envelope =
                 if (payload.size <= MAX_ENVELOPE_BYTES) ServiceEnvelope.ADAPTER.decodeOrNull(payload) else null
             val sender = envelope?.packet?.from?.takeIf { it != 0 }?.let(NodeAddress::numToDefaultId)
@@ -187,7 +191,6 @@ object MqttTopicDiscovery {
             if (observation.kind == Kind.MapReport && envelope != null) {
                 mapReport(envelope)?.let(entry::record)
             }
-            return observation
         }
 
         fun markTruncated(root: String) {
