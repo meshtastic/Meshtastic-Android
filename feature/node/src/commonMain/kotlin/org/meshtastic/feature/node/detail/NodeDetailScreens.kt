@@ -30,13 +30,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.navigation.Route
@@ -59,8 +59,6 @@ private sealed interface NodeDetailOverlay {
     data class FirmwareReleaseInfo(val release: FirmwareRelease) : NodeDetailOverlay
 
     data class Compass(val nodeNum: Int, val displayUnits: MeasurementSystem) : NodeDetailOverlay
-
-    data class DeviceModel(val deviceHardware: DeviceHardware) : NodeDetailOverlay
 }
 
 @Composable
@@ -100,6 +98,8 @@ private fun NodeDetailScaffold(
     compassViewModel: CompassViewModel? = null,
 ) {
     var activeOverlay by remember { mutableStateOf<NodeDetailOverlay?>(null) }
+    // Saved, unlike the overlays: a rotation must not close the model, which the user may be turning the phone for.
+    var deviceModelOpen by rememberSaveable { mutableStateOf(false) }
     val actualCompassViewModel = compassViewModel
     val compassUiState by
         actualCompassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
@@ -132,8 +132,7 @@ private fun NodeDetailScaffold(
                     is NodeDetailAction.OpenCompass ->
                         activeOverlay = NodeDetailOverlay.Compass(action.node.num, action.displayUnits)
 
-                    is NodeDetailAction.OpenDeviceModel ->
-                        activeOverlay = NodeDetailOverlay.DeviceModel(action.deviceHardware)
+                    is NodeDetailAction.OpenDeviceModel -> deviceModelOpen = true
 
                     else ->
                         handleNodeAction(
@@ -163,6 +162,9 @@ private fun NodeDetailScaffold(
     ) {
         viewModel.handleNodeMenuAction(NodeMenuAction.RequestPosition(it))
     }
+    uiState.metricsState.deviceHardware
+        ?.takeIf { deviceModelOpen }
+        ?.let { DeviceModelDialog(it, onDismiss = { deviceModelOpen = false }) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -199,8 +201,6 @@ private fun NodeDetailOverlays(
 
     when (overlay) {
         is NodeDetailOverlay.SharedContact -> node?.let { ShareContactDialog(it, onDismiss, isOwnContact = isLocal) }
-
-        is NodeDetailOverlay.DeviceModel -> DeviceModelDialog(overlay.deviceHardware, onDismiss)
 
         is NodeDetailOverlay.FirmwareReleaseInfo ->
             NodeDetailBottomSheet(onDismiss) { FirmwareReleaseSheetContent(firmwareRelease = overlay.release) }
