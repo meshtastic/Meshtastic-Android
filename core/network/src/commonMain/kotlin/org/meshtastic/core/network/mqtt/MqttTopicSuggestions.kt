@@ -1,0 +1,172 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.network.mqtt
+
+import org.meshtastic.core.network.mqtt.MqttTopicDiscovery.Activity
+import org.meshtastic.core.repository.GeocodedPlace
+
+data class TopicSuggestion(val kind: Kind, val topic: String, val placeName: String) {
+    enum class Kind {
+        REGION,
+        COUNTRY,
+        SUBDIVISION,
+        CITY,
+        COMMUNITY,
+    }
+}
+
+data class RankedRoot(val root: String, val activity: Activity, val tier: Int, val distanceMeters: Double?)
+
+/** The topics worth offering for a place, and every other heard root ordered by how near it is likely to be. */
+data class TopicPlan(
+    val suggestions: List<TopicSuggestion>,
+    /** Roots of the subdivisions bordering the user's, which rank with the community roots. */
+    val neighborRoots: List<String>,
+) {
+    fun ranked(activity: Map<String, Activity>, from: LatLon?): List<RankedRoot> {
+        val shown = suggestions.mapNotNull { activityFor(it.topic, activity)?.first }.toSet()
+        val ladder = suggestions.filter { it.kind != TopicSuggestion.Kind.COMMUNITY }
+        val nearby = suggestions.filter { it.kind == TopicSuggestion.Kind.COMMUNITY }.map { it.topic } + neighborRoots
+        return activity
+            .filter { (root, _) -> root !in shown && MqttRootTopic.problem(root) == null }
+            .map { (root, entry) ->
+                val depth = ladder.count { MqttRootTopic.hasPrefix(root, it.topic) }
+                val tier =
+                    when {
+                        depth >= 2 -> TIER_OWN_AREA
+                        nearby.any { MqttRootTopic.hasPrefix(root, it) } -> TIER_NEARBY
+                        else -> TIER_ELSEWHERE
+                    }
+                Ranked(RankedRoot(root, entry, tier, entry.nearestDistanceMeters(from)), depth)
+            }
+            .sortedWith(rankOrder)
+            .map { it.root }
+    }
+
+    private class Ranked(val root: RankedRoot, val depth: Int)
+
+    companion object {
+        const val TIER_OWN_AREA = 0
+        const val TIER_NEARBY = 1
+        const val TIER_ELSEWHERE = 2
+
+        private val rankOrder =
+            compareBy<Ranked> { it.root.tier }
+                .thenByDescending { it.depth }
+                .thenBy(nullsLast()) { it.root.distanceMeters }
+                .thenByDescending { it.root.activity.nodeCount }
+                .thenByDescending { it.root.activity.messageCount }
+                .thenBy { it.root.root.lowercase() }
+
+        /**
+         * Region, then the country when the region spans several, then subdivision and city, then the community roots
+         * that serve the place. Each ladder rung is trimmed from the end of its last segment to fit the byte cap; a
+         * rung that empties is dropped with everything below it.
+         */
+        fun build(regionName: String, place: GeocodedPlace?, at: LatLon?, directory: MqttRootDirectory): TopicPlan {
+            val regionTopic = "msh/$regionName"
+            val suggestions = mutableListOf(TopicSuggestion(TopicSuggestion.Kind.REGION, regionTopic, regionName))
+            val countryCode = place?.countryCode?.uppercase()?.takeIf { it.length == 2 }
+            var base = regionTopic
+            if (countryCode != null && regionName !in SINGLE_COUNTRY_REGIONS) {
+                base = "$regionTopic/$countryCode"
+                suggestions += TopicSuggestion(TopicSuggestion.Kind.COUNTRY, base, countryCode)
+            }
+            val subdivisionName = place?.subdivision
+            val subdivisionSegment =
+                subdivisionName?.let { segment(directory.subdivisionSegment(countryCode, it), lowercased = false) }
+            val subdivisionTopic = subdivisionSegment?.let { fitted(base, it) }
+            if (subdivisionName != null && subdivisionTopic != null) {
+                suggestions += TopicSuggestion(TopicSuggestion.Kind.SUBDIVISION, subdivisionTopic, subdivisionName)
+                val locality = place.locality
+                val cityTopic = locality?.let { segment(it, lowercased = true) }?.let { fitted(subdivisionTopic, it) }
+                if (locality != null && cityTopic != null) {
+                    suggestions += TopicSuggestion(TopicSuggestion.Kind.CITY, cityTopic, locality)
+                }
+            }
+            val isoCode = if (countryCode != null && subdivisionSegment != null) "$countryCode-$subdivisionSegment" else null
+            directory.entriesServing(isoCode, at).forEach { entry ->
+                if (suggestions.none { MqttRootTopic.rootsMatch(it.topic, entry.root) }) {
+                    suggestions += TopicSuggestion(TopicSuggestion.Kind.COMMUNITY, entry.root, entry.name)
+                }
+            }
+            val neighborRoots =
+                directory.neighbors[isoCode].orEmpty().sorted().map { "$base/${it.substringAfter('-')}" }
+            return TopicPlan(suggestions, neighborRoots)
+        }
+
+        /**
+         * The activity recorded for a topic, with the spelling the broker used: the topic's own spelling when the
+         * broker carries it, otherwise the lowest case-insensitive match, so a row does not flip between variants from
+         * one snapshot to the next.
+         */
+        fun activityFor(topic: String, activity: Map<String, Activity>): Pair<String, Activity>? {
+            activity[topic]?.let {
+                return topic to it
+            }
+            val key = activity.keys.filter { MqttRootTopic.rootsMatch(it, topic) }.minOrNull() ?: return null
+            return key to activity.getValue(key)
+        }
+
+        /**
+         * Diacritics stripped, Latin letters folded to ASCII, then only `[A-Za-z0-9_-]` kept, lowercased when asked.
+         * Subdivisions keep their case ("WA"); cities follow the community's lowercase convention. Null when nothing
+         * is left: a name in a non-Latin script gets no rung rather than a romanization the local mesh would not use.
+         */
+        fun segment(place: String, lowercased: Boolean): String? {
+            val kept = foldToAscii(place).filter { it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '_' || it == '-' }
+            if (kept.isEmpty()) return null
+            return if (lowercased) kept.lowercase() else kept
+        }
+
+        private fun fitted(base: String, lastSegment: String): String? {
+            var segment = lastSegment
+            while (segment.isNotEmpty() && "$base/$segment".encodeToByteArray().size > MqttRootTopic.BYTE_CAP) {
+                segment = segment.dropLast(1)
+            }
+            return if (segment.isEmpty()) null else "$base/$segment"
+        }
+
+        /**
+         * Regions whose radios all sit in one country, where the second topic level is a subdivision. Every other
+         * region spans countries and the community puts the ISO country code there first ("msh/EU_868/DE").
+         */
+        private val SINGLE_COUNTRY_REGIONS =
+            setOf(
+                "US",
+                "CN",
+                "JP",
+                "KR",
+                "TW",
+                "RU",
+                "IN",
+                "NZ_865",
+                "TH",
+                "UA_433",
+                "MY_433",
+                "MY_919",
+                "SG_923",
+                "PH_433",
+                "PH_868",
+                "PH_915",
+                "KZ_433",
+                "KZ_863",
+                "NP_865",
+                "BR_902",
+            )
+    }
+}
