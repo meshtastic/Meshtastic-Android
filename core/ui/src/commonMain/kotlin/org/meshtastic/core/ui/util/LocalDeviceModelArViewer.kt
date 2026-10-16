@@ -18,6 +18,7 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
+import org.meshtastic.core.repository.MirrorFrame
 
 /** Null where there is no AR runtime at all: desktop and the fdroid flavor. */
 @Suppress("CompositionLocalAllowlist") // A host-provided capability, like the barcode and NFC providers.
@@ -28,6 +29,18 @@ interface DeviceModelArViewer {
     /** False on a phone the AR runtime has ruled out. Asked when a model opens, never at app start. */
     @Composable fun isAvailable(): Boolean
 
-    /** [notice] is the model's own copyright line, shown with it. */
-    @Composable fun Content(glb: ByteArray, title: String, notice: String?, onDismiss: () -> Unit)
+    /**
+     * [notice] is the model's own copyright line, shown with it. With [screenMin]/[screenMax] (the display glass, in
+     * model coordinates) and a [screenFrame], the live device screen is drawn on the model.
+     */
+    @Composable
+    fun Content(
+        glb: ByteArray,
+        title: String,
+        notice: String?,
+        onDismiss: () -> Unit,
+        screenMin: FloatArray?,
+        screenMax: FloatArray?,
+        screenFrame: MirrorFrame?,
+    )
 }

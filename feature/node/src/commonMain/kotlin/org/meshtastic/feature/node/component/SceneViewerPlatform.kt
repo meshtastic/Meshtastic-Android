@@ -24,6 +24,7 @@ import io.github.sceneview.compose.Lighting
 import io.github.sceneview.compose.ModelSource
 import io.github.sceneview.compose.SceneViewer
 import io.github.sceneview.compose.rememberCameraState
+import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.feature.node.model.GlbBounds
 import kotlin.math.PI
 import kotlin.math.cos
@@ -48,7 +49,10 @@ internal fun orbitEyeOffset(bounds: GlbBounds): FloatArray {
     return floatArrayOf(horizontal * sin(azimuth), distance * sin(elevation), horizontal * cos(azimuth))
 }
 
-/** The orbitable model, lit by the studio probe over a transparent backdrop so the theme shows behind it. */
+/**
+ * The orbitable model, lit by the studio probe over a transparent backdrop so the theme shows behind it. When both
+ * [screen] and [screenFrame] are present, the frame is drawn on the model's display glass.
+ */
 @Composable
 internal expect fun DeviceModelScene(
     glb: ByteArray,
@@ -56,6 +60,8 @@ internal expect fun DeviceModelScene(
     onError: () -> Unit,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
+    screen: GlbBounds? = null,
+    screenFrame: MirrorFrame? = null,
 )
 
 /**

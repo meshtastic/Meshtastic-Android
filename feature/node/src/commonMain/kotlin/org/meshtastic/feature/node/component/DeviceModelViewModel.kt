@@ -19,22 +19,36 @@ package org.meshtastic.feature.node.component
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.DeviceModelRepository
+import org.meshtastic.core.repository.DisplayMirrorManager
+import org.meshtastic.core.repository.MirrorFrame
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.feature.node.model.GlbBounds
+import kotlin.time.Duration.Companion.seconds
 
 sealed interface DeviceModelState {
     data object Loading : DeviceModelState
 
     data object Failed : DeviceModelState
 
-    /** [copyright] is the model's own notice, shown wherever the model is. */
-    data class Ready(val imageFile: String, val glb: ByteArray, val bounds: GlbBounds, val copyright: String?) :
-        DeviceModelState {
+    /** [copyright] is the model's own notice, shown wherever the model is; [screen] is its display glass, if marked. */
+    data class Ready(
+        val imageFile: String,
+        val glb: ByteArray,
+        val bounds: GlbBounds,
+        val copyright: String?,
+        val screen: GlbBounds? = null,
+    ) : DeviceModelState {
         override fun equals(other: Any?): Boolean =
             this === other || (other is Ready && imageFile == other.imageFile && bounds == other.bounds)
 
@@ -44,10 +58,26 @@ sealed interface DeviceModelState {
 
 /** Fetches a device's GLB and the bounds the viewer frames it with; one model at a time, the last request wins. */
 @KoinViewModel
-class DeviceModelViewModel(private val repository: DeviceModelRepository) : ViewModel() {
+class DeviceModelViewModel(
+    private val repository: DeviceModelRepository,
+    private val displayMirrorManager: DisplayMirrorManager,
+    private val adminController: AdminController,
+    radioConfigRepository: RadioConfigRepository,
+) : ViewModel() {
     private val _state = MutableStateFlow<DeviceModelState>(DeviceModelState.Loading)
     val state: StateFlow<DeviceModelState> = _state.asStateFlow()
 
+    /** The connected device's live screen while [setMirror] has it armed. */
+    val screenFrame: StateFlow<MirrorFrame?> = displayMirrorManager.frame
+
+    // Arming is an admin write, which managed mode forbids.
+    private val managed: StateFlow<Boolean> =
+        radioConfigRepository.localConfigFlow
+            .map { it.security?.is_managed == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    private var mirroring = false
+    private var pendingDisarm: Job? = null
     private var loading: Job? = null
     private var loadedImageFile: String? = null
 
@@ -61,7 +91,7 @@ class DeviceModelViewModel(private val repository: DeviceModelRepository) : View
             val bounds = glb?.let(GlbBounds::parse)
             _state.value =
                 if (glb != null && bounds != null) {
-                    DeviceModelState.Ready(imageFile, glb, bounds, GlbBounds.copyright(glb))
+                    DeviceModelState.Ready(imageFile, glb, bounds, GlbBounds.copyright(glb), GlbBounds.screen(glb))
                 } else {
                     DeviceModelState.Failed
                 }
@@ -72,4 +102,40 @@ class DeviceModelViewModel(private val repository: DeviceModelRepository) : View
     fun markFailed() {
         _state.value = DeviceModelState.Failed
     }
+
+    fun setMirror(enabled: Boolean) {
+        if (enabled) {
+            pendingDisarm?.cancel()
+            pendingDisarm = null
+            arm()
+        } else if (mirroring && pendingDisarm == null) {
+            // A rotation tears the dialog down and builds it again at once; keep the stream over that gap rather than
+            // disarming, re-arming and showing a blank screen until the device repaints.
+            pendingDisarm = viewModelScope.launch {
+                delay(MIRROR_DISARM_GRACE)
+                disarm()
+            }
+        }
+    }
+
+    private fun arm() {
+        if (mirroring || managed.value) return
+        displayMirrorManager.reset()
+        adminController.setDisplayMirror(true)
+        mirroring = true
+    }
+
+    private fun disarm() {
+        pendingDisarm = null
+        if (!mirroring) return
+        adminController.setDisplayMirror(false)
+        mirroring = false
+    }
+
+    override fun onCleared() {
+        pendingDisarm?.cancel()
+        disarm()
+    }
 }
+
+private val MIRROR_DISARM_GRACE = 3.seconds
