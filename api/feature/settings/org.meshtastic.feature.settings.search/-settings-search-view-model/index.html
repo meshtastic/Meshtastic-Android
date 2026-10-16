@@ -93,24 +93,24 @@
   <div class="breadcrumbs"><a href="../../index.html">feature-settings</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.settings.search</a><span class="delimiter">/</span><span class="current">SettingsSearchViewModel</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Settings</span><wbr><span>Search</span><wbr><span>View</span><wbr><span><span>Model</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SettingsSearchViewModel</a> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/search/SettingsSearchViewModel.kt#L38">source</a>)</span></span></div><p class="paragraph">Backs the search field on the Settings screen.</p><p class="paragraph">The catalog's text is resolved once, not per keystroke: reading a string resource suspends, and there are several hundred of them. Matching then runs over the resolved copy.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SettingsSearchViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fieldFocus<span class="token operator">: </span><a href="../-settings-field-focus/index.html">SettingsFieldFocus</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/search/SettingsSearchViewModel.kt#L39">source</a>)</span></span></div><p class="paragraph">Backs the search field on the Settings screen.</p><p class="paragraph">The catalog's text is resolved once, not per keystroke: reading a string resource suspends, and there are several hundred of them. Matching then runs over the resolved copy.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="569393501%2FConstructors%2F1086999794" anchor-label="SettingsSearchViewModel" id="569393501%2FConstructors%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+        <div class="table"><a data-name="-2076578398%2FConstructors%2F1086999794" anchor-label="SettingsSearchViewModel" id="-2076578398%2FConstructors%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-settings-search-view-model.html"><span>Settings</span><wbr><span>Search</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="569393501%2FConstructors%2F1086999794"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2076578398%2FConstructors%2F1086999794"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fieldFocus<span class="token operator">: </span><a href="../-settings-field-focus/index.html">SettingsFieldFocus</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -179,6 +179,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="index.html#1102255800%2FFunctions%2F1086999794">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a><span class="token operator">&gt; </span><a href="index.html#1102255800%2FFunctions%2F1086999794"><span class="token function">getCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html#1102255800%2FFunctions%2F1086999794">T</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1531295085%2FFunctions%2F1086999794" anchor-label="select" id="-1531295085%2FFunctions%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="select.html"><span><span>select</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1531295085%2FFunctions%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="select.html"><span class="token function">select</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">entry<span class="token operator">: </span><a href="../-resolved-settings-entry/index.html">ResolvedSettingsEntry</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/navigation/org.meshtastic.core.navigation/-route/index.html">Route</a></div><div class="brief "><p class="paragraph">Records the control the chosen result names, so the screen it opens can scroll to it. Returns the screen.</p></div></div></div>
                 </div>
               </div>
             </div>
