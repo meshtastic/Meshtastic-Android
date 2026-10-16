@@ -80,6 +80,7 @@ import org.meshtastic.core.resources.close
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.DeviceModelArViewer
+import org.meshtastic.feature.node.component.ModelNotice
 import java.nio.ByteBuffer
 
 private const val SCRIM_ALPHA = 0.4f
@@ -129,7 +130,15 @@ private fun DeviceModelAr(glb: ByteArray, title: String, notice: String?, onDism
     }
     Box(modifier = Modifier.fillMaxSize()) {
         if (cameraGranted) DeviceModelArScene(glb)
-        ArHeader(title, notice, onDismiss)
+        ArHeader(title, onDismiss)
+        notice?.let {
+            ModelNotice(
+                notice = it,
+                modifier = Modifier.align(Alignment.BottomEnd).safeDrawingPadding().padding(16.dp),
+                contentColor = Color.White,
+                containerColor = Color.Black.copy(alpha = SCRIM_ALPHA),
+            )
+        }
     }
 }
 
@@ -240,7 +249,7 @@ private fun DeviceModelArScene(glb: ByteArray) {
 }
 
 @Composable
-private fun ArHeader(title: String, notice: String?, onDismiss: () -> Unit) {
+private fun ArHeader(title: String, onDismiss: () -> Unit) {
     Column(
         modifier =
         Modifier.fillMaxWidth().background(Color.Black.copy(alpha = SCRIM_ALPHA)).safeDrawingPadding().padding(4.dp),
@@ -254,14 +263,6 @@ private fun ArHeader(title: String, notice: String?, onDismiss: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
                 modifier = Modifier.padding(start = 8.dp),
-            )
-        }
-        notice?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.8f),
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             )
         }
     }
