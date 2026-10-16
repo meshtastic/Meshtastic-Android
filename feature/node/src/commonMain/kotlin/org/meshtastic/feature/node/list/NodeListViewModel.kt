@@ -170,6 +170,15 @@ class NodeListViewModel(
             }
         }
 
+    /** The nodes the unheard banner offers for removal: see [selectRemovableUnheardNodes], less the ones kept. */
+    val unheardBannerNodes: StateFlow<List<Node>> =
+        combine(unfilteredNodeList, ourNodeInfo, nodeFilterPreferences.keptUnheardNodes) { nodes, ourNode, kept ->
+            selectRemovableUnheardNodes(nodes, ourNode?.num).filterNot { it.num in kept }
+        }
+            .stateInWhileSubscribed(initialValue = emptyList())
+
+    fun keepUnheardNodes(nodes: List<Node>) = nodeFilterPreferences.keepUnheardNodes(nodes.mapTo(HashSet()) { it.num })
+
     private val _deviceImageUrls = MutableStateFlow<Map<Int, String>>(emptyMap())
 
     /** Maps hw_model int value → device image URL from the flasher CDN. */
@@ -184,6 +193,24 @@ class NodeListViewModel(
                     resolveDeviceImageUrl(hwModel)
                 }
             }
+        }
+        // A kept node that is heard again leaves the kept set, so a later LoRa change offers it again. Reads the raw
+        // rows, and only once they are authoritative: unfilteredNodeList shows every node heard until then.
+        viewModelScope.launch {
+            combine(nodeRepository.getNodes(), unheardFilterAllowed, nodeFilterPreferences.keptUnheardNodes) {
+                    nodes,
+                    authoritative,
+                    kept,
+                ->
+                if (!authoritative || kept.isEmpty()) {
+                    emptySet()
+                } else {
+                    nodes.filter { it.num in kept && it.heardOnCurrentLora }.mapTo(HashSet()) { it.num }
+                }
+            }
+                .collect { heardAgain ->
+                    if (heardAgain.isNotEmpty()) nodeFilterPreferences.forgetKeptUnheardNodes(heardAgain)
+                }
         }
     }
 
