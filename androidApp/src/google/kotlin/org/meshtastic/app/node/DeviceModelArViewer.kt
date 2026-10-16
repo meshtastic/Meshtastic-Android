@@ -99,9 +99,9 @@ import io.github.sceneview.rememberOnGestureListener
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.repository.MirrorFrame
 import org.koin.compose.koinInject
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.device_model_capture
@@ -280,10 +280,12 @@ private fun DeviceModelArScene(glb: ByteArray, screen: ArScreen, onCapture: (() 
                                 position = Position(offset[0], offset[1], offset[2]),
                                 rotation = Rotation(x = pose.pitchDegrees, z = pose.rollDegrees),
                             ) {
-                                val min = screen.min
-                                val max = screen.max
+                                val glassMin = screen.glassMin
+                                val glassMax = screen.glassMax
                                 val frame = screen.frame
-                                if (min != null && max != null && frame != null) DeviceScreenNode(min, max, frame)
+                                if (glassMin != null && glassMax != null && frame != null) {
+                                    DeviceScreenNode(glassMin, glassMax, frame)
+                                }
                             }
                         }
                     }
@@ -436,4 +438,4 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 }
 
 /** The display glass in model coordinates and the live frame to draw on it; all null when there is nothing to show. */
-private class ArScreen(val min: FloatArray?, val max: FloatArray?, val frame: MirrorFrame?)
+private class ArScreen(val glassMin: FloatArray?, val glassMax: FloatArray?, val frame: MirrorFrame?)

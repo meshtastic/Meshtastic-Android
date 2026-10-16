@@ -19,7 +19,6 @@ package org.meshtastic.feature.node.component
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -157,9 +156,9 @@ fun SceneScope.DeviceScreenNode(screenMin: FloatArray, screenMax: FloatArray, fr
         apply = { node = this },
     )
     // A swapped texture is invisible to SceneView's on-demand loop until something asks for a frame.
-    LaunchedEffect(bitmap, node) {
+    SideEffect {
         node
-            ?.takeIf { bitmap !== first }
+            ?.takeIf { it.bitmap !== bitmap }
             ?.let {
                 it.bitmap = bitmap
                 it.requestRender()
