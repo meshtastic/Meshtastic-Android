@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -45,6 +46,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.meshtastic.core.common.util.LocaleUnitsProvider
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.network.mqtt.MqttRootTopic
 import org.meshtastic.core.network.mqtt.MqttTopicDiscovery
@@ -63,6 +65,7 @@ import org.meshtastic.core.resources.mqtt_root_problem_trailing_slash
 import org.meshtastic.core.resources.mqtt_root_problem_whitespace
 import org.meshtastic.core.resources.mqtt_root_problem_wildcard
 import org.meshtastic.core.resources.mqtt_topic_finder_custom
+import org.meshtastic.core.resources.mqtt_topic_finder_custom_example
 import org.meshtastic.core.resources.mqtt_topic_finder_custom_hint
 import org.meshtastic.core.resources.mqtt_topic_finder_failed_closed
 import org.meshtastic.core.resources.mqtt_topic_finder_failed_connect
@@ -91,7 +94,13 @@ internal fun subtitle(root: RankedRoot): String? {
             channels.take(MAX_CHANNELS_SHOWN).joinToString(", ") + if (channels.size > MAX_CHANNELS_SHOWN) "…" else ""
     }
     root.distanceMeters?.let { meters ->
-        val system = koinInject<LocaleUnitsProvider>().measurementSystem.collectAsStateWithLifecycle().value
+        val system =
+            if (LocalInspectionMode.current) {
+                // Previews and screenshot tests render with no Koin application.
+                MeasurementSystem.METRIC
+            } else {
+                koinInject<LocaleUnitsProvider>().measurementSystem.collectAsStateWithLifecycle().value
+            }
         parts += stringResource(Res.string.mqtt_topic_finder_nearest, meters.toInt().toDistanceString(system))
     }
     return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
@@ -151,7 +160,9 @@ internal fun CustomTopic(onPick: (String) -> Unit) {
             onValueChange = { custom = it },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            placeholder = { Text("msh/US/WA/seattle", fontFamily = FontFamily.Monospace) },
+            placeholder = {
+                Text(stringResource(Res.string.mqtt_topic_finder_custom_example), fontFamily = FontFamily.Monospace)
+            },
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
             isError = custom.isNotEmpty() && problem != null,
             supportingText = {

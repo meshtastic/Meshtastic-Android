@@ -187,8 +187,10 @@ class MqttTopicSampler(
                 }
             }
         } finally {
-            if (_state.value.isRunning) publish(Phase.Finished)
-            withContext(NonCancellable) { quietly("close") { client.close() } }
+            withContext(NonCancellable) {
+                if (_state.value.isRunning) publish(Phase.Finished)
+                quietly("close") { client.close() }
+            }
             Logger.i { "MQTT topic sample ended: ${_state.value.phase::class.simpleName}" }
         }
     }
