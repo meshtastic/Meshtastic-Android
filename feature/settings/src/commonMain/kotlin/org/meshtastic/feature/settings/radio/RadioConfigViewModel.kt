@@ -123,6 +123,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.User
+import org.meshtastic.proto.metadata
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -166,8 +167,8 @@ data class RadioConfigState(
     val analyticsEnabled: Boolean = true,
     val nodeDbResetPreserveFavorites: Boolean = false,
     val canRebootToDfu: Boolean = false,
-    /** Whether the hardware registry tags the board DIY; null when the registry does not know the board. */
-    val isDiyHardware: Boolean? = null,
+    /** Whether the board's `HardwareModel` says the maker wired its GPS. */
+    val isOemFixedGps: Boolean = false,
 )
 
 @KoinViewModel
@@ -345,7 +346,11 @@ open class RadioConfigViewModel(
             .onEach {
                 _destNode.value = it
                 _radioConfigState.update { state ->
-                    state.copy(metadata = it?.metadata, localIsLicensed = it?.user?.is_licensed == true)
+                    state.copy(
+                        metadata = it?.metadata,
+                        localIsLicensed = it?.user?.is_licensed == true,
+                        isOemFixedGps = it?.user?.hw_model?.metadata?.oem_fixed_gps == true,
+                    )
                 }
             }
             .launchIn(viewModelScope)
@@ -362,10 +367,7 @@ open class RadioConfigViewModel(
             }
             .onEach { hardware ->
                 _radioConfigState.update {
-                    it.copy(
-                        canRebootToDfu = hardware?.isNrf52Arc == true,
-                        isDiyHardware = hardware?.isDiy,
-                    )
+                    it.copy(canRebootToDfu = hardware?.isNrf52Arc == true)
                 }
             }
             .launchIn(viewModelScope)
