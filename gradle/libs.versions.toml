@@ -109,7 +109,7 @@ jmdns = "3.6.4"
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.9.3"
-meshtastic-protobufs = "2.8.1.11-g28f4f5f-SNAPSHOT"
+meshtastic-protobufs = "2.8.1.14-g6721490-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
