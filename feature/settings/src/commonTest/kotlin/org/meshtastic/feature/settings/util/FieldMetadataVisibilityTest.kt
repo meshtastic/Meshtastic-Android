@@ -17,7 +17,9 @@
 package org.meshtastic.feature.settings.util
 
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.hop_limit
+import org.meshtastic.proto.metadata
 import org.meshtastic.proto.rx_gpio
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -28,24 +30,25 @@ class FieldMetadataVisibilityTest {
     private val diyOnly = Config.PositionConfig.rx_gpio
 
     @Test
-    fun aDiyOnlyFieldIsHiddenOnAKnownCommercialBoard() {
+    fun aDiyOnlyFieldIsHiddenOnAnOemFixedGpsBoard() {
         assertTrue(diyOnly.diy_only == true, "the schema no longer marks rx_gpio diy_only")
-        assertFalse(diyOnly.offeredOn(isDiyHardware = false, holdsValue = false))
+        assertTrue(HardwareModel.TBEAM.metadata?.oem_fixed_gps == true, "the schema no longer flags the T-Beam")
+        assertFalse(diyOnly.offeredOn(isOemFixedGps = true, holdsValue = false))
     }
 
     @Test
-    fun aDiyOnlyFieldIsShownOnADiyBoardAndOnAnUnknownOne() {
-        assertTrue(diyOnly.offeredOn(isDiyHardware = true, holdsValue = false))
-        assertTrue(diyOnly.offeredOn(isDiyHardware = null, holdsValue = false))
+    fun aDiyOnlyFieldIsShownOnABoardWithAnAddOnGps() {
+        assertTrue(HardwareModel.HELTEC_V3.metadata?.oem_fixed_gps != true, "the schema flags the Heltec V3")
+        assertTrue(diyOnly.offeredOn(isOemFixedGps = false, holdsValue = false))
     }
 
     @Test
-    fun aDiyOnlyFieldHoldingAValueStaysVisibleOnACommercialBoard() {
-        assertTrue(diyOnly.offeredOn(isDiyHardware = false, holdsValue = true))
+    fun aDiyOnlyFieldHoldingAValueStaysVisibleOnAnOemFixedGpsBoard() {
+        assertTrue(diyOnly.offeredOn(isOemFixedGps = true, holdsValue = true))
     }
 
     @Test
     fun anOrdinaryFieldIsShownEverywhere() {
-        assertTrue(Config.LoRaConfig.hop_limit.offeredOn(isDiyHardware = false, holdsValue = false))
+        assertTrue(Config.LoRaConfig.hop_limit.offeredOn(isOemFixedGps = true, holdsValue = false))
     }
 }

@@ -19,9 +19,9 @@ package org.meshtastic.feature.settings.util
 import org.meshtastic.proto.FieldMetadata
 
 /**
- * Whether a control is offered on this board. A `diy_only` field is hidden only on a board the registry knows and does
- * not tag DIY ([isDiyHardware] false); an unknown board shows it, and so does a field already holding a value, which
- * would otherwise be saved back unseen.
+ * Whether a control is offered on this board. A `diy_only` field is hidden only on a board whose `HardwareModel` sets
+ * `oem_fixed_gps`; any other or unknown board shows it, and so does a field already holding a value, which would
+ * otherwise be saved back unseen.
  */
-fun FieldMetadata.offeredOn(isDiyHardware: Boolean?, holdsValue: Boolean): Boolean =
-    diy_only != true || isDiyHardware != false || holdsValue
+fun FieldMetadata.offeredOn(isOemFixedGps: Boolean, holdsValue: Boolean): Boolean =
+    diy_only != true || !isOemFixedGps || holdsValue
