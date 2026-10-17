@@ -115,7 +115,7 @@ internal const val MESSAGE_STATUS_LABEL_TEST_TAG = "message_status_label"
 internal fun formatMessageTimestamp(
     message: Message,
     showFullMessageTimestamp: Boolean,
-    fullDateTimeFormatter: (Long) -> String = DateFormatter::formatDateTime,
+    fullDateTimeFormatter: (Long) -> String = DateFormatter::formatDateTimeShort,
 ): String = if (showFullMessageTimestamp) {
     fullDateTimeFormatter(message.displayTime)
 } else {
