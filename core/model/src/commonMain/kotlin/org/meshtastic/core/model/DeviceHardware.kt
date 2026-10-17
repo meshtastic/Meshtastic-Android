@@ -70,3 +70,10 @@ data class DeviceHardware(
     val isDiy: Boolean
         get() = tags.orEmpty().contains("DIY")
 }
+
+/**
+ * The illustration the apps show for this hardware: the cased variant when the registry lists one (index 1), else the
+ * bare board. The flasher's 3D model, when there is one, is named after the same file.
+ */
+val DeviceHardware.heroImageFile: String?
+    get() = images?.getOrNull(1) ?: images?.getOrNull(0)

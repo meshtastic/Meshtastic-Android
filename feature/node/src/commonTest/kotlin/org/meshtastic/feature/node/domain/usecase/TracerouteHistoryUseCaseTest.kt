@@ -76,6 +76,7 @@ class TracerouteHistoryUseCaseTest {
             radioConfigRepository = FakeRadioConfigRepository(),
             deviceHardwareRepository = FakeDeviceHardwareRepository(),
             deviceLinkRepository = mock(MockMode.autofill),
+            deviceModelRepository = mock(MockMode.autofill),
             firmwareReleaseRepository = FakeFirmwareReleaseRepository(),
             nodeRequestActions = nodeRequestActions,
             localeUnitsProvider = FakeLocaleUnitsProvider(),

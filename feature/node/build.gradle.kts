@@ -36,10 +36,18 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.di)
 
+            implementation(libs.kotlinx.serialization.json)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.vico.compose)
             implementation(libs.vico.compose.m3)
+            // The desktop renderer's POM drags a mac-only Compose runtime onto every OS's classpath. The
+            // string form is the one overload that takes an exclude; the version still comes from the catalog.
+            implementation("io.github.sceneview:sceneview-compose:${libs.versions.sceneview.get()}") {
+                exclude(group = "org.jetbrains.compose.desktop", module = "desktop-jvm-macos-arm64")
+                // Fuel 2.3.1 (the Android renderer's URL loader, unused here) ships the pre-Parcelize runtime.
+                exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
+            }
 
             // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
             implementation(libs.jetbrains.compose.material3.adaptive)
@@ -48,7 +56,13 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
         }
 
-        androidMain.dependencies { implementation(libs.markdown.renderer.android) }
+        androidMain.dependencies {
+            implementation(libs.markdown.renderer.android)
+            // The Android renderer under sceneview-compose, which only ships it at runtime scope.
+            implementation("io.github.sceneview:sceneview:${libs.versions.sceneview.get()}") {
+                exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
+            }
+        }
 
         // Compose UI tests live in jvmTest, not commonTest: this module enables android host tests, and the
         // androidHostTest stubs leave Build.FINGERPRINT null, which the Compose Robolectric idling strategy NPEs on.

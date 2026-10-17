@@ -270,6 +270,10 @@ dependencies {
 
     googleImplementation(libs.location.services)
     googleImplementation(libs.play.services.maps)
+    // ARCore for the device model viewer; proprietary, so google only. Same exclusions as feature/node's sceneview.
+    googleImplementation("io.github.sceneview:arsceneview:${libs.versions.sceneview.get()}") {
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
+    }
     googleImplementation(libs.maps.compose)
     googleImplementation(libs.maps.compose.utils)
     googleImplementation(libs.maps.compose.widgets)
