@@ -69,6 +69,11 @@ private data class HudSettings(
     val filters: MapFilterPrefs,
     /** Nodes a traceroute or track names, shown whatever the filters and range say. */
     val pinned: Set<Int>,
+    /**
+     * The node the view was opened for, from its detail, compass, track or traceroute. Then only it and the nodes its
+     * track or route names are shown.
+     */
+    val solo: Int?,
 )
 
 /** A traceroute to draw: its node nums each way, link SNRs in quarter dB, and the positions it was recorded with. */
@@ -138,6 +143,7 @@ class MeshHudViewModel(
     private val rangeLimited = MutableStateFlow(true)
     private val fixAverager = FixAverager()
     private val routeRequest = MutableStateFlow<RouteRequest?>(null)
+    private val soloNodeNum = MutableStateFlow<Int?>(null)
     private val trackNodeNum = MutableStateFlow<Int?>(null)
 
     /**
@@ -220,25 +226,29 @@ class MeshHudViewModel(
                 focusKey,
                 rangeLimited,
                 mapPrefs.mapFilters,
-                pinned,
-                ::HudSettings,
-            ),
+                combine(pinned, soloNodeNum, ::Pair),
+            ) { units, focus, limited, filters, (pinnedNums, solo) ->
+                HudSettings(units, focus, limited, filters, pinnedNums, solo)
+            },
             packetRepository.getWaypoints(),
         ) { location, nodes, myNode, settings, waypointPackets ->
             val now = nowSeconds
             val filter = settings.filters.toNodeMapFilter()
+            val solo = settings.solo
             val shownNodes =
                 nodes.values.filter { node ->
                     node.num != myNode?.myNodeNum &&
                         node.validPosition != null &&
-                        (
+                        if (solo != null) {
+                            node.num == solo || node.num in settings.pinned
+                        } else {
                             HudSubject.NodeSubject(node).key == settings.focusKey ||
                                 node.num in settings.pinned ||
                                 node.passesMapFilter(filter, now)
-                            )
+                        }
                 }
             val waypoints =
-                if (settings.filters.showWaypoints) {
+                if (solo == null && settings.filters.showWaypoints) {
                     waypointPackets.activeWaypointPackets(now).values.mapNotNull { it.waypoint }
                 } else {
                     emptyList()
@@ -253,7 +263,7 @@ class MeshHudViewModel(
                 ::declinationAt,
             )
                 .limitedTo(settings.rangeLimited, settings.units, settings.pinned)
-                .copy(averagedFixes = fixAverager.count)
+                .copy(averagedFixes = fixAverager.count, scoped = solo != null)
         }
             .flowOn(dispatchers.default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), MeshHudTargets())
@@ -314,9 +324,13 @@ class MeshHudViewModel(
         trackNodeNum.value = nodeNum
     }
 
-    /** Focuses the finder on one node, as the compass sheet opens it. */
-    fun setFocusNode(nodeNum: Int?) {
+    /**
+     * Opens the view for [nodeNum], from that node's detail, compass, track or traceroute: the finder points at it, and
+     * only it and the nodes its track or route names are shown. Null opens the whole mesh, as from the map.
+     */
+    fun openFor(nodeNum: Int?) {
         focusKey.value = nodeNum?.let { "node-$it" }
+        soloNodeNum.value = nodeNum
     }
 
     /** Focuses the finder on [subject], or clears the focus when it is already the one focused. */

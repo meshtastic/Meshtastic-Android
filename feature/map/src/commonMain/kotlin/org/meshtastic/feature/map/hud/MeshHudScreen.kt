@@ -170,13 +170,13 @@ fun MeshHudScreen(
         viewModel.showTraceroute(tracerouteDestNum, tracerouteRequestId, tracerouteLogUuid)
     }
     LaunchedEffect(trackNodeNum) { viewModel.showTrack(trackNodeNum) }
+    // Opened for a purpose (a node, its track, a traceroute) the view shows only that; from the map, the whole mesh.
+    LaunchedEffect(focusNodeNum) { viewModel.openFor(focusNodeNum) }
     val route by viewModel.route.collectAsStateWithLifecycle()
     val alertOptIns by viewModel.geofenceAlertOptIns.collectAsStateWithLifecycle()
     var infoWaypoint by remember { mutableStateOf<Waypoint?>(null) }
     val track by viewModel.track.collectAsStateWithLifecycle()
     KeepScreenOn(true)
-    // Keyed, not a SideEffect: the user's own focus choices must survive recomposition.
-    LaunchedEffect(focusNodeNum) { viewModel.setFocusNode(focusNodeNum) }
     val camera = rememberCameraPermissionState()
     val location = rememberLocationPermissionState()
     // One system dialog at a time, and only ever asked once: a recreated screen must not prompt again. These stay
@@ -410,8 +410,10 @@ private fun HudTopBar(
                     } ?: stringResource(Res.string.mesh_hud_heading, headingText),
                 )
             }
-            Spacer(Modifier.width(8.dp))
-            HudRangeToggle(targets, onToggleRange)
+            if (!targets.scoped) {
+                Spacer(Modifier.width(8.dp))
+                HudRangeToggle(targets, onToggleRange)
+            }
         }
         targets.ownAccuracyM?.let { accuracy ->
             HudLabel(

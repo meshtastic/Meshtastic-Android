@@ -123,6 +123,8 @@ data class MeshHudTargets(
     val declinationDeg: Float = 0f,
     val units: MeasurementSystem = MeasurementSystem.METRIC,
     val rangeLimited: Boolean = true,
+    /** True when the view was opened for one purpose, so it shows only that and has no range to toggle. */
+    val scoped: Boolean = false,
     val nearRangeText: String = "",
     /** Positioned targets left out by the range limit. */
     val hiddenByRange: Int = 0,
