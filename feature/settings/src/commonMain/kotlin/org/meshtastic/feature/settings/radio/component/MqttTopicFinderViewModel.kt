@@ -30,6 +30,7 @@ import org.meshtastic.core.network.mqtt.LatLon
 import org.meshtastic.core.network.mqtt.MqttRootDirectory
 import org.meshtastic.core.network.mqtt.MqttTopicSampler
 import org.meshtastic.core.network.mqtt.TopicPlan
+import org.meshtastic.core.repository.GeocodedPlace
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.ReverseGeocoder
 import org.meshtastic.proto.ModuleConfig
@@ -46,12 +47,17 @@ class MqttTopicFinderViewModel(
 ) : ViewModel() {
     data class UiState(
         val regionName: String? = null,
-        val plan: TopicPlan? = null,
+        val place: GeocodedPlace? = null,
         val location: LatLon? = null,
         val locating: Boolean = false,
         val geocodeFailed: Boolean = false,
         val sample: MqttTopicSampler.State = MqttTopicSampler.State(),
-    )
+    ) {
+        /** Rebuilt from each snapshot, since whether the country level is offered depends on what has been heard. */
+        val plan: TopicPlan? by lazy {
+            regionName?.let { TopicPlan.build(it, place, location, MqttRootDirectory.SEED, sample.activity) }
+        }
+    }
 
     private val sampler = MqttTopicSampler()
     private val _state = MutableStateFlow(UiState())
@@ -83,7 +89,7 @@ class MqttTopicFinderViewModel(
         stop()
         _state.update { UiState(regionName = regionName, sample = it.sample) }
         if (regionName == null) return
-        planJob = viewModelScope.launch { plan(regionName, radioPosition) }
+        planJob = viewModelScope.launch { locate(radioPosition) }
         sampleJob = viewModelScope.launch { sampler.run(config, "msh/$regionName") }
     }
 
@@ -93,9 +99,8 @@ class MqttTopicFinderViewModel(
         planJob?.cancel()
     }
 
-    private suspend fun plan(regionName: String, radioPosition: LatLon?) {
-        val directory = MqttRootDirectory.SEED
-        _state.update { it.copy(plan = TopicPlan.build(regionName, null, null, directory), locating = true) }
+    private suspend fun locate(radioPosition: LatLon?) {
+        _state.update { it.copy(locating = true) }
         val location =
             radioPosition
                 ?: withTimeoutOrNull(LOCATION_WAIT) { locationService.getCurrentLocation() }
@@ -107,7 +112,7 @@ class MqttTopicFinderViewModel(
         val place = reverseGeocoder.place(location.latitude, location.longitude)
         _state.update {
             it.copy(
-                plan = TopicPlan.build(regionName, place, location, directory),
+                place = place,
                 location = location,
                 locating = false,
                 geocodeFailed = place == null,

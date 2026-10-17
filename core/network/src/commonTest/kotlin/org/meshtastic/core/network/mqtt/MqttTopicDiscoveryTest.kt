@@ -130,8 +130,9 @@ class MqttTopicDiscoveryTest {
     }
 
     @Test
-    fun multiCountryRegionPutsTheCountryBeforeTheSubdivision() {
-        val plan = plan("EU_868", GeocodedPlace("DE", "Bayern", "München"))
+    fun countryLevelIsOfferedWhenTheBrokerUsesIt() {
+        val heard = mapOf("msh/EU_868/DE/S-H" to activity(nodeCount = 3))
+        val plan = plan("EU_868", GeocodedPlace("DE", "Bayern", "München"), heard)
         assertEquals(
             listOf(
                 REGION to "msh/EU_868",
@@ -141,6 +142,37 @@ class MqttTopicDiscoveryTest {
             ),
             plan.suggestions.map { it.kind to it.topic },
         )
+    }
+
+    @Test
+    fun noCountryLevelUntilTheBrokerShowsOne() {
+        val plan = plan("EU_868", GeocodedPlace("DE", "Bayern", "München"))
+        assertEquals(
+            listOf(REGION to "msh/EU_868", SUBDIVISION to "msh/EU_868/Bayern", CITY to "msh/EU_868/Bayern/munchen"),
+            plan.suggestions.map { it.kind to it.topic },
+        )
+    }
+
+    @Test
+    fun aFloodedCountryRootPrefixesTheSubdivisionButIsNotOffered() {
+        val tally = MqttTopicDiscovery.Tally()
+        repeat(MqttTopicSampler.REGION_PACKET_CAP) { tally.record("msh/EU_868/DE/2/e/LongFast/!0000000a", ByteArray(0)) }
+        val plan = plan("EU_868", GeocodedPlace("DE", "Bayern", "München"), tally.snapshot())
+        assertEquals(
+            listOf(
+                REGION to "msh/EU_868",
+                SUBDIVISION to "msh/EU_868/DE/Bayern",
+                CITY to "msh/EU_868/DE/Bayern/munchen",
+            ),
+            plan.suggestions.map { it.kind to it.topic },
+        )
+    }
+
+    @Test
+    fun aRootRepeatingTheRegionIsNotACountryLevel() {
+        val heard = mapOf("msh/US/US" to activity(nodeCount = 60), "msh/US/US/NY/WNY" to activity(nodeCount = 24))
+        val plan = plan("US", GeocodedPlace("US", "Washington", "Seattle"), heard)
+        assertEquals(listOf("msh/US", "msh/US/WA", "msh/US/WA/seattle"), plan.suggestions.map { it.topic })
     }
 
     @Test
@@ -206,8 +238,11 @@ class MqttTopicDiscoveryTest {
         assertEquals("msh/US/KS/Topeka", TopicPlan.activityFor("msh/US/ks/TOPEKA", activity)?.first)
     }
 
-    private fun plan(region: String, place: GeocodedPlace?) =
-        TopicPlan.build(region, place, null, MqttRootDirectory.SEED)
+    private fun plan(
+        region: String,
+        place: GeocodedPlace?,
+        heard: Map<String, MqttTopicDiscovery.Activity> = emptyMap(),
+    ) = TopicPlan.build(region, place, null, MqttRootDirectory.SEED, heard)
 
     private fun activity(nodeCount: Int): MqttTopicDiscovery.Activity = MqttTopicDiscovery.Activity().apply {
         repeat(nodeCount) { nodes += "!${it.toString(radix = 16).padStart(length = 8, padChar = '0')}" }

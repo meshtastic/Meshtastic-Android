@@ -73,7 +73,7 @@ The region topic (`msh/US`) carries every gateway in the region. **Find topics n
 the root topic field, listens to the broker for one minute and lists the narrower roots in use
 around you, with the number of nodes heard on each.
 
-- **Near you** lists the region, then the country when the region spans several (`msh/EU_868/DE`),
+- **Near you** lists the region, then the country when the broker shows it in use (`msh/EU_868/DE`),
   then your state or province and city, named from the node's position or, failing that, the
   phone's location. The phone's geocoder turns the location into place names; the location itself
   never reaches the broker.

@@ -63,7 +63,7 @@ private fun sampleState(phase: MqttTopicSampler.Phase): MqttTopicFinderViewModel
     val activity = tally.snapshot()
     return MqttTopicFinderViewModel.UiState(
         regionName = "US",
-        plan = TopicPlan.build("US", GeocodedPlace("US", "Texas", "Texarkana"), location, MqttRootDirectory.SEED),
+        place = GeocodedPlace("US", "Texas", "Texarkana"),
         location = location,
         sample =
         MqttTopicSampler.State(
