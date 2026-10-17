@@ -33,6 +33,10 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.MagneticFieldProvider
+import org.meshtastic.core.repository.PhoneLocation
+import org.meshtastic.core.repository.PhoneLocationProvider
+import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

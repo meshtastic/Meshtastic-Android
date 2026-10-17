@@ -20,8 +20,10 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.LocationRepository
+import org.meshtastic.core.repository.MagneticFieldProvider
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshWorkerManager
+import org.meshtastic.core.repository.PhoneLocationProvider
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.desktop.stub.NoopAppWidgetUpdater
 import org.meshtastic.desktop.stub.NoopCompassHeadingProvider
@@ -32,8 +34,6 @@ import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
-import org.meshtastic.feature.node.compass.MagneticFieldProvider
-import org.meshtastic.feature.node.compass.PhoneLocationProvider
 
 /**
  * Stubs for interfaces whose only real implementation needs Android APIs — WorkManager, widgets, location, sensors and

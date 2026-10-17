@@ -51,7 +51,10 @@ import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCas
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.repository.MagneticFieldProvider
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PhoneLocationProvider
+import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -62,9 +65,6 @@ import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.compass.HeadingState
-import org.meshtastic.feature.node.compass.MagneticFieldProvider
-import org.meshtastic.feature.node.compass.PhoneLocationProvider
-import org.meshtastic.feature.node.compass.PhoneLocationState
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.proto.Position

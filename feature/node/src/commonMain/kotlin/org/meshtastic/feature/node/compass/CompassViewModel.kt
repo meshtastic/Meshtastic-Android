@@ -36,6 +36,9 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.core.repository.MagneticFieldProvider
+import org.meshtastic.core.repository.PhoneLocationProvider
+import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.proto.Position
 import kotlin.math.abs

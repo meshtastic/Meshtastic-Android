@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.compass
+package org.meshtastic.core.data.location
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -31,6 +31,9 @@ import kotlinx.coroutines.flow.flowOn
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.PhoneLocation
+import org.meshtastic.core.repository.PhoneLocationProvider
+import org.meshtastic.core.repository.PhoneLocationState
 
 @Single
 class AndroidPhoneLocationProvider(private val context: Context, private val dispatchers: CoroutineDispatchers) :
