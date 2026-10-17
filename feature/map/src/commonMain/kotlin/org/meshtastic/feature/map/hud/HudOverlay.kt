@@ -203,13 +203,17 @@ private const val FENCE_LINE_ALPHA = 0.85f
 private val FenceColor = Color(0xFFFFB300)
 private val FenceLineWidth = 2.dp
 
+/** The direction to a fence point [riseM] above the phone's height. */
+private fun groundDirection(point: FencePoint, riseM: Double) =
+    directionEnu(point.bearingDeg, elevationDeg(point.distanceM, riseM))
+
 /**
  * A geofence as a wall standing on the ground along its edge, solid at the foot and fading upward, so the boundary
  * reads in depth from inside or outside. Segments that fall behind the camera are left out.
  */
 internal fun DrawScope.drawGeofence(fence: HudFence, pose: CameraPose, focalPx: Float) {
     fun at(point: FencePoint, riseM: Double) = project(
-        directionEnu(point.bearingDeg, elevationDeg(point.distanceM, riseM)),
+        groundDirection(point, riseM),
         pose,
         focalPx,
         size.width,
@@ -220,6 +224,16 @@ internal fun DrawScope.drawGeofence(fence: HudFence, pose: CameraPose, focalPx: 
     edge.indices.forEach { i ->
         val p = edge[i]
         val q = edge[(i + 1) % edge.size]
+        // The foot line is clipped at the near plane, so the boundary runs to the view's edge from inside the fence.
+        val clippedFoot = clipToNearPlane(groundDirection(p, -EYE_HEIGHT_M), groundDirection(q, -EYE_HEIGHT_M), pose)
+        clippedFoot?.let { (a, b) ->
+            val fa = project(a, pose, focalPx, size.width, size.height)
+            val fb = project(b, pose, focalPx, size.width, size.height)
+            if (fa != null && fb != null) {
+                drawLine(FenceColor.copy(alpha = FENCE_LINE_ALPHA), Offset(fa.x, fa.y), Offset(fb.x, fb.y), FenceLineWidth.toPx())
+            }
+        }
+        // The wall is decoration: drawn only where its whole segment is in front of the camera.
         val footP = at(p, -EYE_HEIGHT_M) ?: return@forEach
         val footQ = at(q, -EYE_HEIGHT_M) ?: return@forEach
         val topP = at(p, FENCE_WALL_M - EYE_HEIGHT_M) ?: return@forEach
@@ -240,6 +254,5 @@ internal fun DrawScope.drawGeofence(fence: HudFence, pose: CameraPose, focalPx: 
                 end = (topP + topQ) / 2f,
             ),
         )
-        drawLine(FenceColor.copy(alpha = FENCE_LINE_ALPHA), footP, footQ, FenceLineWidth.toPx())
     }
 }

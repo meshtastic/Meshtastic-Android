@@ -38,6 +38,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.mesh_hud_distance_no_altitude
 import org.meshtastic.core.resources.mesh_hud_find
 import org.meshtastic.core.resources.mesh_hud_open_node
+import org.meshtastic.core.resources.mesh_hud_open_waypoint
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.proto.Waypoint
 
@@ -64,7 +65,14 @@ internal fun HudChip(target: HudTarget, onOpen: () -> Unit, onToggleFocus: () ->
             .clip(MaterialTheme.shapes.small)
             .minimumInteractiveComponentSize()
             .combinedClickable(
-                onClickLabel = stringResource(Res.string.mesh_hud_open_node),
+                onClickLabel =
+                stringResource(
+                    if (target.subject is HudSubject.WaypointSubject) {
+                        Res.string.mesh_hud_open_waypoint
+                    } else {
+                        Res.string.mesh_hud_open_node
+                    },
+                ),
                 onLongClickLabel = stringResource(Res.string.mesh_hud_find),
                 onClick = onOpen,
                 onLongClick = onToggleFocus,

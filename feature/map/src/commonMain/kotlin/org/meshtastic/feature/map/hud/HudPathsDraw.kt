@@ -107,10 +107,13 @@ internal fun DrawScope.drawRoute(
                 val quality = snr?.let { ((it - SNR_FLOOR_DB) / SNR_SPAN_DB).coerceIn(0f, 1f) } ?: UNKNOWN_SNR_QUALITY
                 val width = ArcMinWidth.toPx() + ArcExtraWidth.toPx() * quality
                 val stroke = color.copy(alpha = ARC_MIN_ALPHA + (1 - ARC_MIN_ALPHA) * quality)
-                if (start.atViewer && !point.atViewer) {
-                    val end = screen(directionEnu(point.bearingDeg, point.elevationDeg), pose, focalPx)
-                    if (end != null) drawLine(stroke, Offset(size.width / 2, size.height), end, width, StrokeCap.Round)
-                } else if (!start.atViewer && !point.atViewer) {
+                val viewer = Offset(size.width / 2, size.height)
+                if (start.atViewer != point.atViewer) {
+                    // A link to or from the phone itself: the forward leg leaves the viewer, the return leg comes home.
+                    val far = if (start.atViewer) point else start
+                    val end = screen(directionEnu(far.bearingDeg, far.elevationDeg), pose, focalPx)
+                    if (end != null) drawLine(stroke, viewer, end, width, StrokeCap.Round)
+                } else if (!start.atViewer) {
                     val arc = arcDirections(start, point, liftSign)
                     drawPolyline(arc, pose, focalPx, stroke, width, dashed = skipped > 0)
                     val apex = screen(arc[arc.size / 2], pose, focalPx)

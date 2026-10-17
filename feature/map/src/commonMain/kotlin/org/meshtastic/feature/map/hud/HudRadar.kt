@@ -85,7 +85,7 @@ internal fun radarOffset(target: NearbyTarget, headingDeg: Double, scaleM: Doubl
 /**
  * A heading-up plan view of the targets too close to point at, with the phone at the center inside its own accuracy
  * ring and each target inside its precision ring. Tilting the phone toward the ground [expanded]s it, since that is the
- * posture of someone looking for something close by. The heading is read in layout and draw, so it turns with the
+ * posture of someone looking for something close by. The open [route] and [track] are drawn under the dots. The heading is read in layout and draw, so it turns with the
  * camera without recomposing.
  */
 @Suppress("LongMethod")
@@ -100,6 +100,8 @@ internal fun NearbyRadar(
     expanded: Boolean,
     onOpen: (HudSubject) -> Unit,
     modifier: Modifier = Modifier,
+    route: HudRoute? = null,
+    track: HudTrack? = null,
 ) {
     val radarSize by animateDpAsState(if (expanded) ExpandedRadar else CompactRadar)
     val scaleM =
@@ -120,6 +122,7 @@ internal fun NearbyRadar(
             drawCircle(Color.White.copy(alpha = RING_ALPHA), radius - 1.dp.toPx(), style = Stroke(1.dp.toPx()))
             drawCircle(Color.White.copy(alpha = RING_ALPHA), radius / 2, style = Stroke(1.dp.toPx()))
             ownAccuracyM?.let { drawCircle(Color.White.copy(alpha = OWN_FILL_ALPHA), it * pxPerM) }
+            drawRadarPaths(route, track, heading, pxPerM)
             drawCircle(Color.White, 3.dp.toPx())
             nearby.forEach { target ->
                 if (target.radiusM > 0) {

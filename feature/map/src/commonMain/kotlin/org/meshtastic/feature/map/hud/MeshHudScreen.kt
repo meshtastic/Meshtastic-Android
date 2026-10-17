@@ -336,6 +336,8 @@ fun MeshHudScreen(
                     currentHeadingDeg = { poseState.value.pose?.azimuthDeg },
                     expanded = pointingDown,
                     onOpen = { subject -> (subject as? HudSubject.NodeSubject)?.let { onOpenNode(it.node.num) } },
+                    route = route,
+                    track = track,
                 )
             },
             cameraContent = {
@@ -410,7 +412,7 @@ private fun HudTopBar(
                     } ?: stringResource(Res.string.mesh_hud_heading, headingText),
                 )
             }
-            if (!targets.scoped) {
+            if (targets.ready && !targets.scoped) {
                 Spacer(Modifier.width(8.dp))
                 HudRangeToggle(targets, onToggleRange)
             }
@@ -474,7 +476,13 @@ private fun HudBottomPanel(
                     },
                 )
             }
-        if (targets.warnings.isEmpty() && targets.targets.isEmpty() && targets.directionUnknown.isEmpty()) {
+        if (
+            targets.ready &&
+            route == null &&
+            targets.warnings.isEmpty() &&
+            targets.targets.isEmpty() &&
+            targets.directionUnknown.isEmpty()
+        ) {
             HudLabel(stringResource(Res.string.mesh_hud_no_nodes))
         }
         if (targets.elevationApproximate && targets.targets.isNotEmpty()) {

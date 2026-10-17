@@ -53,4 +53,11 @@ class HudRadarTest {
         val at = radarOffset(nearby(bearing = 0.0, distance = 500.0), headingDeg = 0.0, scaleM = 20.0, radiusPx = 100f)
         assertEquals(-100f, at.y, 0.01f)
     }
+
+    @Test
+    fun `a path point beyond the scale runs past the rim the same way`() {
+        val at = radarPathOffset(bearingDeg = 180.0, distanceM = 500.0, headingDeg = 90.0, pxPerM = 1f)
+        assertEquals(500f, at.x, 0.01f)
+        assertEquals(0f, at.y, 0.01f)
+    }
 }

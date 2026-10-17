@@ -74,6 +74,8 @@ private data class HudSettings(
      * track or route names are shown.
      */
     val solo: Int?,
+    /** Positions to place nodes at when the database has none live (see `fallbackPositions`). */
+    val fallbacks: Map<Int, ProtoPosition>,
 )
 
 /** A traceroute to draw: its node nums each way, link SNRs in quarter dB, and the positions it was recorded with. */
@@ -197,6 +199,19 @@ class MeshHudViewModel(
             }
         }
 
+    /**
+     * Where to place a node the database has no live position for: the position recorded with the open route, else
+     * the newest point of its open track. A remote node, or one last heard while disconnected, often has only these,
+     * and without them its chip, and the edge arrow leading to it, would never appear.
+     */
+    private val fallbackPositions =
+        combine(routeSource, trackSource) { route, track ->
+            buildMap {
+                track?.positions?.lastOrNull()?.let { put(track.nodeNum, it) }
+                route?.snapshot?.let { putAll(it) }
+            }
+        }
+
     /** The phone's averaged fix, shared by the targets, the route and the track. */
     private val location =
         locationPermissionGranted
@@ -226,9 +241,9 @@ class MeshHudViewModel(
                 focusKey,
                 rangeLimited,
                 mapPrefs.mapFilters,
-                combine(pinned, soloNodeNum, ::Pair),
-            ) { units, focus, limited, filters, (pinnedNums, solo) ->
-                HudSettings(units, focus, limited, filters, pinnedNums, solo)
+                combine(pinned, soloNodeNum, fallbackPositions, ::Triple),
+            ) { units, focus, limited, filters, (pinnedNums, solo, fallbacks) ->
+                HudSettings(units, focus, limited, filters, pinnedNums, solo, fallbacks)
             },
             packetRepository.getWaypoints(),
         ) { location, nodes, myNode, settings, waypointPackets ->
@@ -236,9 +251,14 @@ class MeshHudViewModel(
             val filter = settings.filters.toNodeMapFilter()
             val solo = settings.solo
             val shownNodes =
-                nodes.values.filter { node ->
+                nodes.values.mapNotNull { node ->
+                    if (node.validPosition != null) {
+                        node
+                    } else {
+                        settings.fallbacks[node.num]?.let { node.copy(position = it) }?.takeIf { it.validPosition != null }
+                    }
+                }.filter { node ->
                     node.num != myNode?.myNodeNum &&
-                        node.validPosition != null &&
                         if (solo != null) {
                             node.num == solo || node.num in settings.pinned
                         } else {
@@ -262,8 +282,9 @@ class MeshHudViewModel(
                 now,
                 ::declinationAt,
             )
-                .limitedTo(settings.rangeLimited, settings.units, settings.pinned)
-                .copy(averagedFixes = fixAverager.count, scoped = solo != null)
+                // A scoped view has no range toggle, so it must not drop its own node for being far.
+                .limitedTo(settings.rangeLimited && solo == null, settings.units, settings.pinned)
+                .copy(averagedFixes = fixAverager.count, scoped = solo != null, ready = true)
         }
             .flowOn(dispatchers.default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), MeshHudTargets())

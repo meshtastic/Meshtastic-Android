@@ -1127,6 +1127,7 @@ mesh_hud_no_nodes
 mesh_hud_on_target
 mesh_hud_open
 mesh_hud_open_node
+mesh_hud_open_waypoint
 mesh_hud_own_accuracy
 mesh_hud_range_all
 mesh_hud_range_within

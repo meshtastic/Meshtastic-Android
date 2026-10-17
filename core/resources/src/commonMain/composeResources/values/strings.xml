@@ -1169,6 +1169,7 @@
     <string name="mesh_hud_on_target">On target</string>
     <string name="mesh_hud_open">Open mesh view</string>
     <string name="mesh_hud_open_node">Open node</string>
+    <string name="mesh_hud_open_waypoint">Open waypoint</string>
     <string name="mesh_hud_own_accuracy">You ± %1$s</string>
     <string name="mesh_hud_range_all">All distances</string>
     <string name="mesh_hud_range_within">Within %1$s</string>
