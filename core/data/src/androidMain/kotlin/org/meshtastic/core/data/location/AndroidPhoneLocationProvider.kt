@@ -20,14 +20,18 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager
+import android.location.altitude.AltitudeConverter
+import android.os.Build
 import android.os.Looper
 import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -124,10 +128,55 @@ class AndroidPhoneLocationProvider(private val context: Context, private val dis
 
         awaitClose { LocationManagerCompat.removeUpdates(locationManager, listener) }
     }
+        .map { it.withMslAltitude() }
         .flowOn(dispatchers.io)
 
-    private fun Location.toPhoneLocation() =
-        PhoneLocation(latitude = latitude, longitude = longitude, altitude = altitude, timeMillis = time)
+    private val altitudeConverter by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) AltitudeConverter() else null
+    }
+
+    /**
+     * Fills the sea-level height a provider left out, from the platform's geoid model (API 34+). It loads model data on
+     * first use and may block, which is why it runs here, upstream of the IO dispatcher, rather than in the callback.
+     */
+    @Suppress("ReturnCount")
+    private fun PhoneLocationState.withMslAltitude(): PhoneLocationState {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return this
+        val fix = location ?: return this
+        val ellipsoid = fix.altitude
+        val converter = altitudeConverter
+        if (fix.mslAltitude != null || ellipsoid == null || converter == null) return this
+        val probe =
+            Location("mesh-view").apply {
+                latitude = fix.latitude
+                longitude = fix.longitude
+                altitude = ellipsoid
+            }
+        @Suppress("TooGenericExceptionCaught")
+        return try {
+            converter.addMslAltitudeToLocation(context, probe)
+            copy(location = fix.copy(mslAltitude = probe.mslAltitudeMeters))
+        } catch (e: Exception) {
+            Logger.w(e) { "MSL altitude conversion failed" }
+            this
+        }
+    }
+
+    private fun Location.toPhoneLocation() = PhoneLocation(
+        latitude = latitude,
+        longitude = longitude,
+        altitude = if (hasAltitude()) altitude else null,
+        timeMillis = time,
+        mslAltitude =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && hasMslAltitude()) {
+            mslAltitudeMeters
+        } else {
+            null
+        },
+        accuracyM = if (hasAccuracy()) accuracy else null,
+        verticalAccuracyM = if (hasVerticalAccuracy()) verticalAccuracyMeters else null,
+        speedMps = if (hasSpeed()) speed else null,
+    )
 
     companion object {
         private const val MIN_UPDATE_INTERVAL_MS = 1_000L

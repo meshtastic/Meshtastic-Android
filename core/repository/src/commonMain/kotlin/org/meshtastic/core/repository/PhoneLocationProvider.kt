@@ -18,7 +18,22 @@ package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.Flow
 
-data class PhoneLocation(val latitude: Double, val longitude: Double, val altitude: Double, val timeMillis: Long)
+/**
+ * [altitude] is height above the WGS84 ellipsoid, as Android reports it, and null when the fix has none (a network
+ * fix). [mslAltitude] is height above mean sea level, null when the platform cannot convert. [accuracyM] and
+ * [verticalAccuracyM] are the fix's accuracy radii, null when the platform reports none. [speedMps] is ground speed,
+ * null when unknown.
+ */
+data class PhoneLocation(
+    val latitude: Double,
+    val longitude: Double,
+    val altitude: Double?,
+    val timeMillis: Long,
+    val mslAltitude: Double? = null,
+    val accuracyM: Float? = null,
+    val verticalAccuracyM: Float? = null,
+    val speedMps: Float? = null,
+)
 
 data class PhoneLocationState(
     val permissionGranted: Boolean,

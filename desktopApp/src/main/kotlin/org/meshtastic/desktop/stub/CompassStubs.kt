@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.core.repository.MagneticFieldProvider
 import org.meshtastic.core.repository.PhoneLocationProvider
 import org.meshtastic.core.repository.PhoneLocationState
+import org.meshtastic.feature.map.hud.CameraPoseProvider
+import org.meshtastic.feature.map.hud.CameraPoseState
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 import org.meshtastic.feature.node.compass.HeadingState
 
@@ -33,6 +35,11 @@ class NoopCompassHeadingProvider : CompassHeadingProvider {
 class NoopPhoneLocationProvider : PhoneLocationProvider {
     override fun locationUpdates(): Flow<PhoneLocationState> =
         flowOf(PhoneLocationState(permissionGranted = false, providerEnabled = false))
+}
+
+/** No-op [CameraPoseProvider] — desktop has no orientation sensor or back camera. */
+class NoopCameraPoseProvider : CameraPoseProvider {
+    override fun poseUpdates(): Flow<CameraPoseState> = flowOf(CameraPoseState(hasSensor = false))
 }
 
 /** No-op [MagneticFieldProvider] — always returns zero declination. */

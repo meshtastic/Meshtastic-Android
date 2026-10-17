@@ -16,11 +16,13 @@
  */
 package org.meshtastic.feature.map.navigation
 
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.navigation.NodesRoute
+import org.meshtastic.feature.map.hud.MeshHudScreen
 
 fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
     entry<MapRoute.Map> { args ->
@@ -30,6 +32,20 @@ fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
             { id -> backStack.add(NodesRoute.NodeDetail(id)) }, // navigateToNodeDetails
             args.waypointId,
             args.sitePlannerNodeNum,
+            { backStack.add(MapRoute.MeshHud()) }, // onOpenMeshHud
+        )
+    }
+
+    // No pane metadata: the camera view takes the whole window.
+    entry<MapRoute.MeshHud> { args ->
+        MeshHudScreen(
+            focusNodeNum = args.focusNodeNum,
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
+            onOpenNode = { num -> backStack.add(NodesRoute.NodeDetail(num)) },
+            tracerouteDestNum = args.tracerouteDestNum,
+            tracerouteRequestId = args.tracerouteRequestId,
+            tracerouteLogUuid = args.tracerouteLogUuid,
+            trackNodeNum = args.trackNodeNum,
         )
     }
 }

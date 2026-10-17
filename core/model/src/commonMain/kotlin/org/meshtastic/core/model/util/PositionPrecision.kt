@@ -16,6 +16,10 @@
  */
 package org.meshtastic.core.model.util
 
+import org.meshtastic.proto.Position
+import kotlin.math.pow
+import kotlin.math.sqrt
+
 /**
  * The bit depths firmware degrades a shared position to.
  *
@@ -53,3 +57,29 @@ private val PRECISION_RADIUS_METERS =
         18 to 91.182212,
         19 to 45.58554,
     )
+
+private const val DOP_SCALE = 100.0
+private const val MILLIMETERS_PER_METER = 1000.0
+
+/**
+ * Radius, in meters, within which a reported position lies: the receiver's accuracy scaled by its dilution of precision
+ * when both are reported, else the precision-bits circle, else null.
+ */
+fun Position.uncertaintyRadiusMetersOrNull(): Double? {
+    val dop =
+        when {
+            PDOP > 0 -> PDOP / DOP_SCALE
+            HDOP > 0 && VDOP > 0 -> sqrt((HDOP / DOP_SCALE).pow(2) + (VDOP / DOP_SCALE).pow(2))
+            HDOP > 0 -> HDOP / DOP_SCALE
+            else -> null
+        }
+    if (gps_accuracy > 0 && dop != null) return gps_accuracy / MILLIMETERS_PER_METER * dop
+    return precisionRadiusMetersOrNull(precision_bits)
+}
+
+/** Radius, in meters, of a reported altitude's uncertainty: the receiver's accuracy scaled by its vertical DOP. */
+fun Position.verticalUncertaintyMetersOrNull(): Double? =
+    if (gps_accuracy > 0 && VDOP > 0) gps_accuracy / MILLIMETERS_PER_METER * (VDOP / DOP_SCALE) else null
+
+/** When the fix was taken, in epoch seconds: the GPS timestamp when set, else the time the position was sent. */
+fun Position.fixTimeSecondsOrNull(): Long? = timestamp.takeIf { it > 0 }?.toLong() ?: time.takeIf { it > 0 }?.toLong()

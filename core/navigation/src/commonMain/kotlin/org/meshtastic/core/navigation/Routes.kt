@@ -55,6 +55,20 @@ sealed interface ContactsRoute : Route {
 @Serializable
 sealed interface MapRoute : Route {
     @Serializable data class Map(val waypointId: Int? = null, val sitePlannerNodeNum: Int? = null) : MapRoute
+
+    /**
+     * The camera mesh view. [focusNodeNum] points the finder at one node. A traceroute ([tracerouteDestNum] with
+     * [tracerouteRequestId], and [tracerouteLogUuid] when it was logged) draws that route in the air, and
+     * [trackNodeNum] draws that node's position track.
+     */
+    @Serializable
+    data class MeshHud(
+        val focusNodeNum: Int? = null,
+        val tracerouteDestNum: Int? = null,
+        val tracerouteRequestId: Int? = null,
+        val tracerouteLogUuid: String? = null,
+        val trackNodeNum: Int? = null,
+    ) : MapRoute
 }
 
 @Serializable

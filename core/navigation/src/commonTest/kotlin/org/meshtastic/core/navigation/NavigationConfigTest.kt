@@ -50,6 +50,7 @@ class NavigationConfigTest {
             ContactsRoute.QuickChat,
             // MapRoute
             MapRoute.Map(),
+            MapRoute.MeshHud(focusNodeNum = 100, tracerouteDestNum = 100, tracerouteRequestId = 7, trackNodeNum = 100),
             MapRoute.Map(waypointId = 42),
             // NodesRoute
             NodesRoute.Nodes,

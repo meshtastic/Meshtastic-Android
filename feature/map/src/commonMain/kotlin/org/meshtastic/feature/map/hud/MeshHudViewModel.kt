@@ -1,0 +1,359 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.feature.map.hud
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
+import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.LocaleUnitsProvider
+import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.model.fullRouteDiscovery
+import org.meshtastic.core.model.geofence.activeWaypointPackets
+import org.meshtastic.core.model.passesMapFilter
+import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.core.repository.MagneticFieldProvider
+import org.meshtastic.core.repository.MapFilterPrefs
+import org.meshtastic.core.repository.MapPrefs
+import org.meshtastic.core.repository.MeshLogRepository
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationPrefs
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PhoneLocation
+import org.meshtastic.core.repository.PhoneLocationProvider
+import org.meshtastic.core.repository.TracerouteResponseProvider
+import org.meshtastic.core.repository.TracerouteSnapshotRepository
+import org.meshtastic.core.repository.toNodeMapFilter
+import org.meshtastic.core.ui.util.toPosition
+import org.meshtastic.feature.map.mergeStationaryRuns
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Position as ProtoPosition
+
+private const val STOP_TIMEOUT_MS = 5_000L
+
+private data class HudSettings(
+    val units: MeasurementSystem,
+    val focusKey: String?,
+    val rangeLimited: Boolean,
+    val filters: MapFilterPrefs,
+    /** Nodes a traceroute or track names, shown whatever the filters and range say. */
+    val pinned: Set<Int>,
+)
+
+/** A traceroute to draw: its node nums each way, link SNRs in quarter dB, and the positions it was recorded with. */
+data class RouteSource(
+    val forward: List<Int>,
+    val back: List<Int>,
+    val snrTowards: List<Int>?,
+    val snrBack: List<Int>?,
+    val snapshot: Map<Int, ProtoPosition>,
+)
+
+/** A node's position history to draw as breadcrumbs. */
+data class TrackSource(val nodeNum: Int, val positions: List<ProtoPosition>)
+
+/** A traceroute the user opened, before it is matched to its logged response. */
+private data class RouteRequest(val destNum: Int, val requestId: Int, val logUuid: String?) {
+    fun resolve(logs: List<MeshLog>, snapshot: Map<Int, ProtoPosition>, response: TracerouteResponse?): RouteSource? {
+        val logged =
+            if (logUuid != null) {
+                logs.find { it.uuid == logUuid }
+            } else {
+                logs.find { it.fromRadio.packet?.decoded?.request_id == requestId }
+            }
+        val discovery = logged?.fromRadio?.packet?.fullRouteDiscovery
+        val live = response?.takeIf { it.requestId == requestId && it.hasOverlay }
+        val forward = discovery?.route ?: live?.forwardRoute
+        val back = discovery?.route_back ?: live?.returnRoute
+        return if (forward.isNullOrEmpty() && back.isNullOrEmpty()) {
+            null
+        } else {
+            RouteSource(forward.orEmpty(), back.orEmpty(), discovery?.snr_towards, discovery?.snr_back, snapshot)
+        }
+    }
+}
+
+private const val TRACK_FALLBACK_COLOR = 0xFFFFFFFF.toInt()
+
+/** Default reach of the view, a round number in each unit system; farther targets hide unless focused. */
+private const val NEAR_RANGE_METRIC_M = 50_000
+private const val NEAR_RANGE_IMPERIAL_M = 48_280 // 30 mi
+
+private fun nearRangeM(units: MeasurementSystem) =
+    if (units == MeasurementSystem.IMPERIAL) NEAR_RANGE_IMPERIAL_M else NEAR_RANGE_METRIC_M
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@Suppress("LongParameterList")
+@KoinViewModel
+class MeshHudViewModel(
+    poseProvider: CameraPoseProvider,
+    phoneLocationProvider: PhoneLocationProvider,
+    private val magneticFieldProvider: MagneticFieldProvider,
+    nodeRepository: NodeRepository,
+    packetRepository: PacketRepository,
+    meshLogRepository: MeshLogRepository,
+    tracerouteResponseProvider: TracerouteResponseProvider,
+    tracerouteSnapshotRepository: TracerouteSnapshotRepository,
+    mapPrefs: MapPrefs,
+    private val notificationPrefs: NotificationPrefs,
+    localeUnitsProvider: LocaleUnitsProvider,
+    dispatchers: CoroutineDispatchers,
+) : ViewModel() {
+
+    private val focusKey = MutableStateFlow<String?>(null)
+
+    // The provider checks the permission once per collection, so a grant made while the screen is open needs a new one.
+    private val locationPermissionGranted = MutableStateFlow(false)
+    private val rangeLimited = MutableStateFlow(true)
+    private val fixAverager = FixAverager()
+    private val routeRequest = MutableStateFlow<RouteRequest?>(null)
+    private val trackNodeNum = MutableStateFlow<Int?>(null)
+
+    /**
+     * The opened traceroute, resolved as the traceroute map resolves it: the logged response first (by its uuid, else
+     * its request id), then the service's latest response, with the hop positions recorded alongside it.
+     */
+    private val routeSource = routeRequest.flatMapLatest { request ->
+        if (request == null) {
+            flowOf(null)
+        } else {
+            combine(
+                nodeRepository
+                    .effectiveLogNodeId(request.destNum)
+                    .flatMapLatest { meshLogRepository.getLogsFrom(it, PortNum.TRACEROUTE_APP.value) }
+                    .onStart { emit(emptyList()) },
+                request.logUuid?.let(tracerouteSnapshotRepository::getSnapshotPositions) ?: flowOf(emptyMap()),
+                tracerouteResponseProvider.tracerouteResponse,
+            ) { logs, snapshot, response ->
+                request.resolve(logs, snapshot, response)
+            }
+        }
+    }
+
+    /** The opened node's position history, trimmed by the map's track filter and with stationary runs merged. */
+    private val trackSource = trackNodeNum.flatMapLatest { num ->
+        if (num == null) {
+            flowOf(null)
+        } else {
+            combine(
+                nodeRepository.effectiveLogNodeId(num).flatMapLatest {
+                    meshLogRepository.getMeshPacketsFrom(it, PortNum.POSITION_APP.value)
+                },
+                mapPrefs.mapFilters,
+            ) { packets, filters ->
+                val cutoff = filters.lastHeardTrackSeconds.takeIf { it > 0 }?.let { nowSeconds - it }
+                val positions =
+                    packets
+                        .mapNotNull { it.toPosition() }
+                        .filter { cutoff == null || it.time >= cutoff }
+                        .sortedBy { it.time }
+                TrackSource(num, mergeStationaryRuns(positions).map { it.position })
+            }
+        }
+    }
+    private val pinned =
+        combine(routeSource, trackSource) { route, track ->
+            buildSet {
+                route?.let { addAll(it.forward + it.back) }
+                track?.let { add(it.nodeNum) }
+                remove(UNKNOWN_HOP)
+            }
+        }
+
+    /** The phone's averaged fix, shared by the targets, the route and the track. */
+    private val location =
+        locationPermissionGranted
+            .flatMapLatest { phoneLocationProvider.locationUpdates() }
+            .map { state -> state.location?.let { state.copy(location = fixAverager.add(it)) } ?: state }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), replay = 1)
+
+    private val _headingOffsetDeg = MutableStateFlow(0.0)
+
+    /** The user's drag correction to the compass, added to the camera's heading. */
+    val headingOffsetDeg: StateFlow<Double> = _headingOffsetDeg
+
+    val pose: StateFlow<CameraPoseState> =
+        combine(poseProvider.poseUpdates().conflate(), _headingOffsetDeg) { state, offset ->
+            state.copy(pose = state.pose?.rotatedAboutVertical(offset))
+        }
+            .flowOn(dispatchers.default)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), CameraPoseState())
+
+    val targets: StateFlow<MeshHudTargets> =
+        combine(
+            location,
+            nodeRepository.nodeDBbyNum,
+            nodeRepository.myNodeInfo,
+            combine(
+                localeUnitsProvider.measurementSystem,
+                focusKey,
+                rangeLimited,
+                mapPrefs.mapFilters,
+                pinned,
+                ::HudSettings,
+            ),
+            packetRepository.getWaypoints(),
+        ) { location, nodes, myNode, settings, waypointPackets ->
+            val now = nowSeconds
+            val filter = settings.filters.toNodeMapFilter()
+            val shownNodes =
+                nodes.values.filter { node ->
+                    node.num != myNode?.myNodeNum &&
+                        node.validPosition != null &&
+                        (
+                            HudSubject.NodeSubject(node).key == settings.focusKey ||
+                                node.num in settings.pinned ||
+                                node.passesMapFilter(filter, now)
+                            )
+                }
+            val waypoints =
+                if (settings.filters.showWaypoints) {
+                    waypointPackets.activeWaypointPackets(now).values.mapNotNull { it.waypoint }
+                } else {
+                    emptyList()
+                }
+            buildHudTargets(
+                location,
+                shownNodes,
+                waypoints,
+                settings.units,
+                settings.focusKey,
+                now,
+                ::declinationAt,
+            )
+                .limitedTo(settings.rangeLimited, settings.units, settings.pinned)
+                .copy(averagedFixes = fixAverager.count)
+        }
+            .flowOn(dispatchers.default)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), MeshHudTargets())
+
+    /** The traceroute in view, if one was opened, as legs of points from here. */
+    val route: StateFlow<HudRoute?> =
+        combine(location, routeSource, nodeRepository.nodeDBbyNum) { state, source, nodes ->
+            val here = state.location
+            if (source == null || here == null) {
+                null
+            } else {
+                buildHudRoute(
+                    here,
+                    declinationAt(here),
+                    source.forward,
+                    source.back,
+                    source.snrTowards,
+                    source.snrBack,
+                ) { num ->
+                    source.snapshot[num] ?: nodes[num]?.validPosition
+                }
+            }
+        }
+            .flowOn(dispatchers.default)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+    /** The position track in view, if one was opened, as breadcrumbs from here. */
+    val track: StateFlow<HudTrack?> =
+        combine(location, trackSource, nodeRepository.nodeDBbyNum) { state, source, nodes ->
+            val here = state.location
+            if (source == null || here == null) {
+                null
+            } else {
+                val color = nodes[source.nodeNum]?.colors?.second ?: TRACK_FALLBACK_COLOR
+                buildHudTrack(here, declinationAt(here), source.nodeNum, color, source.positions, nowSeconds)
+            }
+        }
+            .flowOn(dispatchers.default)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+    private fun declinationAt(here: PhoneLocation): Float =
+        magneticFieldProvider.getDeclination(here.latitude, here.longitude, here.altitude ?: 0.0, nowMillis)
+
+    /** Waypoint ids of foreign geofences the user opted in to crossing alerts for, as the map's dialog shows them. */
+    val geofenceAlertOptIns: StateFlow<Set<Int>> = notificationPrefs.geofenceAlertOptIns
+
+    fun setGeofenceAlertOptIn(waypointId: Int, enabled: Boolean) =
+        notificationPrefs.setGeofenceAlertOptIn(waypointId, enabled)
+
+    /** Draws traceroute [requestId] to [destNum] in the air; [logUuid] names its logged response when known. */
+    fun showTraceroute(destNum: Int?, requestId: Int?, logUuid: String?) {
+        routeRequest.value =
+            if (destNum != null && requestId != null) RouteRequest(destNum, requestId, logUuid) else null
+    }
+
+    /** Draws [nodeNum]'s position track, or clears it when null. */
+    fun showTrack(nodeNum: Int?) {
+        trackNodeNum.value = nodeNum
+    }
+
+    /** Focuses the finder on one node, as the compass sheet opens it. */
+    fun setFocusNode(nodeNum: Int?) {
+        focusKey.value = nodeNum?.let { "node-$it" }
+    }
+
+    /** Focuses the finder on [subject], or clears the focus when it is already the one focused. */
+    fun toggleFocus(subject: HudSubject) {
+        focusKey.value = subject.key.takeIf { it != focusKey.value }
+    }
+
+    fun setLocationPermissionGranted(granted: Boolean) {
+        locationPermissionGranted.value = granted
+    }
+
+    /** Nudges the heading correction by [deltaDeg], kept within one turn either way. */
+    fun nudgeHeading(deltaDeg: Double) {
+        _headingOffsetDeg.value = signedTurnDeg(0.0, _headingOffsetDeg.value + deltaDeg)
+    }
+
+    fun resetHeadingOffset() {
+        _headingOffsetDeg.value = 0.0
+    }
+
+    fun toggleRangeLimit() {
+        rangeLimited.value = !rangeLimited.value
+    }
+
+    private fun MeshHudTargets.limitedTo(limited: Boolean, units: MeasurementSystem, pinned: Set<Int>): MeshHudTargets {
+        val range = nearRangeM(units)
+        fun HudTarget.isPinned() = (subject as? HudSubject.NodeSubject)?.node?.num in pinned
+        val kept = if (limited) targets.filter { it.distanceM <= range || it.focused || it.isPinned() } else targets
+        val keptFences =
+            if (limited) fences.filter { f -> f.inside || f.edge.any { it.distanceM <= range } } else fences
+        return copy(
+            targets = kept,
+            fences = keptFences,
+            rangeLimited = limited,
+            units = units,
+            nearRangeText = range.toDistanceString(units),
+            hiddenByRange = targets.size - kept.size,
+        )
+    }
+}

@@ -39,12 +39,14 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.details
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.ShareContactDialog
 import org.meshtastic.core.ui.util.ActiveWhileStarted
+import org.meshtastic.core.ui.util.rememberMeshHudSupported
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.component.CompassSheetContent
@@ -159,6 +161,15 @@ private fun NodeDetailScaffold(
         compassUiState,
         actualCompassViewModel,
         { activeOverlay = null },
+        onOpenMeshHud =
+        if (rememberMeshHudSupported()) {
+            { num ->
+                activeOverlay = null
+                onNavigate(MapRoute.MeshHud(num))
+            }
+        } else {
+            null
+        },
     ) {
         viewModel.handleNodeMenuAction(NodeMenuAction.RequestPosition(it))
     }
@@ -176,6 +187,7 @@ private fun NodeDetailOverlays(
     compassUiState: CompassUiState,
     compassViewModel: CompassViewModel?,
     onDismiss: () -> Unit,
+    onOpenMeshHud: ((Int) -> Unit)?,
     onRequestPosition: (Node) -> Unit,
 ) {
     val locationPermission = org.meshtastic.core.ui.util.rememberLocationPermissionState()
@@ -222,6 +234,7 @@ private fun NodeDetailOverlays(
                     onOpenLocationSettings = { openLocationSettings() },
                     onRequestPosition = { node?.let { onRequestPosition(it) } },
                     modifier = Modifier.padding(bottom = 24.dp),
+                    onOpenMeshHud = onOpenMeshHud?.let { open -> { open(overlay.nodeNum) } },
                 )
             }
         }

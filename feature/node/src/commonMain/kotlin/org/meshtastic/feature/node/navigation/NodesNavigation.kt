@@ -30,6 +30,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.core.navigation.ContactsRoute
+import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.Route
@@ -57,6 +58,7 @@ import org.meshtastic.core.resources.remote_shell
 import org.meshtastic.core.resources.signal
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
+import org.meshtastic.core.ui.util.rememberMeshHudSupported
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.detail.NodeDetailScreen
 import org.meshtastic.feature.node.detail.NodeDetailViewModel
@@ -141,6 +143,21 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) 
             requestId = args.requestId,
             logUuid = args.logUuid,
             onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
+            onOpenMeshHud =
+            if (rememberMeshHudSupported()) {
+                {
+                    backStack.add(
+                        MapRoute.MeshHud(
+                            focusNodeNum = args.destNum,
+                            tracerouteDestNum = args.destNum,
+                            tracerouteRequestId = args.requestId,
+                            tracerouteLogUuid = args.logUuid,
+                        ),
+                    )
+                }
+            } else {
+                null
+            },
         )
     }
 
@@ -154,13 +171,28 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) 
         )
     }
 
+    // No pane metadata: the camera view takes the whole window.
+    entry<NodeDetailRoute.PositionLog>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
+        val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(args.destNum) }
+        metricsViewModel.setNodeId(args.destNum)
+        PositionLogScreen(
+            viewModel = metricsViewModel,
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
+            onOpenMeshHud =
+            if (rememberMeshHudSupported()) {
+                { backStack.add(MapRoute.MeshHud(focusNodeNum = args.destNum, trackNodeNum = args.destNum)) }
+            } else {
+                null
+            },
+        )
+    }
+
     NodeDetailScreen.entries.forEach { routeInfo ->
         when (routeInfo.routeClass) {
             NodeDetailRoute.DeviceMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.DeviceMetrics>(backStack, routeInfo) { it.destNum }
 
-            NodeDetailRoute.PositionLog::class ->
-                addNodeDetailScreenComposable<NodeDetailRoute.PositionLog>(backStack, routeInfo) { it.destNum }
+            // NodeDetailRoute.PositionLog has its own entry above, for its mesh view action.
 
             NodeDetailRoute.EnvironmentMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.EnvironmentMetrics>(backStack, routeInfo) { it.destNum }

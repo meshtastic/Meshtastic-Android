@@ -105,6 +105,7 @@ import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.accentColorOrNull
 import org.meshtastic.core.ui.util.brandHighlightOrNull
 import org.meshtastic.core.ui.util.brandPalette
+import org.meshtastic.core.ui.util.rememberMeshHudSupported
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.intro.AppIntroductionScreen
@@ -299,7 +300,7 @@ class MainActivity : AppCompatActivity() {
                     org.meshtastic.app.map.discovery.DiscoveryMap(userLat, userLon, nodes, modifier)
                 },
             LocalMapMainScreenProvider provides
-                { onClickNodeChip, navigateToNodeDetails, waypointId, sitePlannerNodeNum ->
+                { onClickNodeChip, navigateToNodeDetails, waypointId, sitePlannerNodeNum, onOpenMeshHud ->
                     val viewModel = koinViewModel<SharedMapViewModel>()
                     MapScreen(
                         viewModel = viewModel,
@@ -307,6 +308,7 @@ class MainActivity : AppCompatActivity() {
                         navigateToNodeDetails = navigateToNodeDetails,
                         waypointId = waypointId,
                         sitePlannerNodeNum = sitePlannerNodeNum,
+                        onOpenMeshHud = onOpenMeshHud.takeIf { rememberMeshHudSupported() },
                     )
                 },
             content = content,
