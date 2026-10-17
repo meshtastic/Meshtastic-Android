@@ -73,18 +73,24 @@ data class TopicPlan(
                 .thenBy { it.root.root.lowercase() }
 
         /**
-         * Region, then the country when the region spans several, then subdivision and city, then the community roots
-         * that serve the place. Each ladder rung is trimmed from the end of its last segment to fit the byte cap; a
-         * rung that empties is dropped with everything below it.
+         * Region, then the country when the sample shows the broker uses it, then subdivision and city, then the
+         * community roots that serve the place. Each ladder rung is trimmed from the end of its last segment to fit the
+         * byte cap; a rung that empties is dropped with everything below it. Rebuilt as [activity] grows.
          */
-        fun build(regionName: String, place: GeocodedPlace?, at: LatLon?, directory: MqttRootDirectory): TopicPlan {
+        fun build(
+            regionName: String,
+            place: GeocodedPlace?,
+            at: LatLon?,
+            directory: MqttRootDirectory,
+            activity: Map<String, Activity> = emptyMap(),
+        ): TopicPlan {
             val regionTopic = "msh/$regionName"
             val suggestions = mutableListOf(TopicSuggestion(TopicSuggestion.Kind.REGION, regionTopic, regionName))
             val countryCode = place?.countryCode?.uppercase()?.takeIf { it.length == 2 }
-            var base = regionTopic
-            if (countryCode != null && regionName !in SINGLE_COUNTRY_REGIONS) {
-                base = "$regionTopic/$countryCode"
-                suggestions += TopicSuggestion(TopicSuggestion.Kind.COUNTRY, base, countryCode)
+            val country = countryLevel(regionTopic, regionName, countryCode, activity)
+            val base = country?.topic ?: regionTopic
+            if (country != null && !country.flooded) {
+                suggestions += TopicSuggestion(TopicSuggestion.Kind.COUNTRY, country.topic, country.code)
             }
             val subdivisionName = place?.subdivision
             val subdivisionSegment = subdivisionName?.let {
@@ -109,6 +115,27 @@ data class TopicPlan(
             val neighborRoots =
                 directory.neighbors[isoCode].orEmpty().sorted().map { "$base/${it.substringAfter('-')}" }
             return TopicPlan(suggestions, neighborRoots)
+        }
+
+        private class CountryLevel(val code: String, val topic: String, val flooded: Boolean)
+
+        /**
+         * The country level, decided from the broker being sampled rather than a list of regions: present when some
+         * heard root under the region has the country code as its next segment. A country code equal to the region
+         * name ("msh/US/US") is a republisher's doubled root, not a country level. A country root as busy as the
+         * region's own stream is no better to downlink, so it still prefixes the subdivision but is not offered.
+         */
+        private fun countryLevel(
+            regionTopic: String,
+            regionName: String,
+            countryCode: String?,
+            activity: Map<String, Activity>,
+        ): CountryLevel? {
+            if (countryCode == null || countryCode.equals(regionName, ignoreCase = true)) return null
+            val topic = "$regionTopic/$countryCode"
+            if (activity.keys.none { MqttRootTopic.hasPrefix(it, topic) }) return null
+            val packets = activityFor(topic, activity)?.second?.packets ?: 0
+            return CountryLevel(countryCode, topic, flooded = packets >= MqttTopicSampler.REGION_PACKET_CAP)
         }
 
         /**
@@ -147,33 +174,5 @@ data class TopicPlan(
             }
             return if (segment.isEmpty()) null else "$base/$segment"
         }
-
-        /**
-         * Regions whose radios all sit in one country, where the second topic level is a subdivision. Every other
-         * region spans countries and the community puts the ISO country code there first ("msh/EU_868/DE").
-         */
-        private val SINGLE_COUNTRY_REGIONS =
-            setOf(
-                "US",
-                "CN",
-                "JP",
-                "KR",
-                "TW",
-                "RU",
-                "IN",
-                "NZ_865",
-                "TH",
-                "UA_433",
-                "MY_433",
-                "MY_919",
-                "SG_923",
-                "PH_433",
-                "PH_868",
-                "PH_915",
-                "KZ_433",
-                "KZ_863",
-                "NP_865",
-                "BR_902",
-            )
     }
 }
