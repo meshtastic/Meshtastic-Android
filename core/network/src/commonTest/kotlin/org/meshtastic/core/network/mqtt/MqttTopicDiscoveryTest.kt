@@ -156,7 +156,9 @@ class MqttTopicDiscoveryTest {
     @Test
     fun aFloodedCountryRootPrefixesTheSubdivisionButIsNotOffered() {
         val tally = MqttTopicDiscovery.Tally()
-        repeat(MqttTopicSampler.REGION_PACKET_CAP) { tally.record("msh/EU_868/DE/2/e/LongFast/!0000000a", ByteArray(0)) }
+        repeat(MqttTopicSampler.REGION_PACKET_CAP) {
+            tally.record("msh/EU_868/DE/2/e/LongFast/!0000000a", ByteArray(0))
+        }
         val plan = plan("EU_868", GeocodedPlace("DE", "Bayern", "München"), tally.snapshot())
         assertEquals(
             listOf(
