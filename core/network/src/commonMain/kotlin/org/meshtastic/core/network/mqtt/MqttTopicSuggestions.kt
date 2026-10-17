@@ -121,9 +121,9 @@ data class TopicPlan(
 
         /**
          * The country level, decided from the broker being sampled rather than a list of regions: present when some
-         * heard root under the region has the country code as its next segment. A country code equal to the region
-         * name ("msh/US/US") is a republisher's doubled root, not a country level. A country root as busy as the
-         * region's own stream is no better to downlink, so it still prefixes the subdivision but is not offered.
+         * heard root under the region has the country code as its next segment. A country code equal to the region name
+         * ("msh/US/US") is a republisher's doubled root, not a country level. A country root as busy as the region's
+         * own stream is no better to downlink, so it still prefixes the subdivision but is not offered.
          */
         private fun countryLevel(
             regionTopic: String,
@@ -131,11 +131,15 @@ data class TopicPlan(
             countryCode: String?,
             activity: Map<String, Activity>,
         ): CountryLevel? {
-            if (countryCode == null || countryCode.equals(regionName, ignoreCase = true)) return null
-            val topic = "$regionTopic/$countryCode"
-            if (activity.keys.none { MqttRootTopic.hasPrefix(it, topic) }) return null
-            val packets = activityFor(topic, activity)?.second?.packets ?: 0
-            return CountryLevel(countryCode, topic, flooded = packets >= MqttTopicSampler.REGION_PACKET_CAP)
+            val code = countryCode?.takeUnless { it.equals(regionName, ignoreCase = true) }
+            val topic = code?.let { "$regionTopic/$it" }
+            val inUse = topic != null && activity.keys.any { MqttRootTopic.hasPrefix(it, topic) }
+            return if (code == null || topic == null || !inUse) {
+                null
+            } else {
+                val packets = activityFor(topic, activity)?.second?.packets ?: 0
+                CountryLevel(code, topic, flooded = packets >= MqttTopicSampler.REGION_PACKET_CAP)
+            }
         }
 
         /**

@@ -23,10 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.network.mqtt.LatLon
-import org.meshtastic.core.network.mqtt.MqttRootDirectory
 import org.meshtastic.core.network.mqtt.MqttTopicDiscovery
 import org.meshtastic.core.network.mqtt.MqttTopicSampler
-import org.meshtastic.core.network.mqtt.TopicPlan
 import org.meshtastic.core.repository.GeocodedPlace
 import org.meshtastic.core.ui.theme.AppTheme
 
