@@ -112,6 +112,6 @@
     <ID>UseOrEmpty:PowerMetrics.kt:state.node?.user?.long_name ?: ""</ID>
     <ID>UseOrEmpty:SignalMetrics.kt:state.node?.user?.long_name ?: ""</ID>
     <ID>UseOrEmpty:TracerouteLog.kt:state.node?.user?.long_name ?: ""</ID>
-    <ID>ViewModelForwarding:NodeDetailScreens.kt:NodeDetailScaffold( modifier = modifier, uiState = uiState, viewModel = viewModel, navigateToMessages = navigateToMessages, onNavigate = onNavigate, onNavigateUp = onNavigateUp, compassViewModel = compassViewModel, openCompass = openCompass, )</ID>
+    <ID>ViewModelForwarding:NodeDetailScreens.kt:NodeDetailScaffold( modifier = modifier, uiState = uiState, viewModel = viewModel, navigateToMessages = navigateToMessages, onNavigate = onNavigate, onNavigateUp = onNavigateUp, compassViewModel = compassViewModel, openCompass = openCompass, trackedInLiveUpdate = trackedInLiveUpdate, onTrackInLiveUpdate = onTrackInLiveUpdate, )</ID>
   </CurrentIssues>
 </SmellBaseline>

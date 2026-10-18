@@ -59,6 +59,7 @@ fun NodeDetailContent(
     onSaveNotes: (Int, String) -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
+    trackedInLiveUpdate: Boolean? = null,
 ) {
     Crossfade(targetState = uiState.node != null, label = "NodeDetailContent", modifier = modifier) { isNodePresent ->
         if (isNodePresent && uiState.node != null) {
@@ -70,6 +71,7 @@ fun NodeDetailContent(
                 onAction = onAction,
                 onFirmwareSelect = onFirmwareSelect,
                 onSaveNotes = onSaveNotes,
+                trackedInLiveUpdate = trackedInLiveUpdate,
             )
         } else {
             val loadingDescription = stringResource(Res.string.loading)
@@ -94,6 +96,7 @@ fun NodeDetailList(
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     onSaveNotes: (Int, String) -> Unit,
     modifier: Modifier = Modifier,
+    trackedInLiveUpdate: Boolean? = null,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -130,6 +133,7 @@ fun NodeDetailList(
                 isLocal = uiState.metricsState.isLocal,
                 hasConversation = uiState.hasConversation,
                 airQualityHistory = uiState.metricsState.airQualityMetrics,
+                trackedInLiveUpdate = trackedInLiveUpdate,
             )
         }
         item { NotesSection(node = node, onSaveNotes = onSaveNotes) }

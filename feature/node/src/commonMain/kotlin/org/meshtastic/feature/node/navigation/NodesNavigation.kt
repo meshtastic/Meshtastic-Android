@@ -110,6 +110,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) 
             viewModel = nodeDetailViewModel,
             compassViewModel = compassViewModel,
             openCompass = args.openCompass,
+            liveUpdateViewModel = koinViewModel(),
             navigateToMessages = { key -> backStack.add(ContactsRoute.Messages(key)) },
             onNavigate = { route -> backStack.navigateFromNodeDetail(route) },
             onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },

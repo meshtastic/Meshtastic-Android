@@ -144,6 +144,17 @@ Once the region is set, the tab warns you if the node is receive-only: a **Trans
 
 For more information, see [Settings — Radio & User](settings-radio-user#lora-config).
 
+## Live Update
+
+On Android 16 and newer, the **Connect** tab has a **Live Update** row while you are connected. It puts one thing you choose in the status bar and the service notification:
+
+- **Mesh status:** the connection, how many nodes are online, your unread messages and your radio's battery. The status bar shows the nodes online, such as `5/12`.
+- **Track a node:** one node's battery, signal, when it was last heard, its hops and its distance from your radio. The status bar shows its battery, or how long ago it was heard when it reports no battery. Pick the node from a list with favorites first, then the most recently heard, or search it by name.
+
+Tap the row to start one, switch to the other, or stop it. Only one runs at a time, and it is off until you start it. On a node's details, **Track in Live Update** starts tracking that node directly.
+
+A dropped link keeps it running and shows the connection state until the radio is back. Disconnecting, switching radios, or deleting or ignoring the tracked node stops it. If the row says Live Updates are turned off for Meshtastic, Android shows it as an ordinary notification until you allow them in system settings.
+
 ## Reconnection Behavior
 
 The app reconnects to the last selected node on startup. You can switch transports from the **Connect** tab at any time.

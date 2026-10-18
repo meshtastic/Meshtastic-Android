@@ -40,6 +40,9 @@ sealed interface NodeDetailAction {
     /** Open the real-size 3D model of the node's hardware. */
     data class OpenDeviceModel(val deviceHardware: DeviceHardware) : NodeDetailAction
 
+    /** Start or stop tracking this node in the Live Update. */
+    data class TrackInLiveUpdate(val nodeNum: Int, val track: Boolean) : NodeDetailAction
+
     // Opens the compass sheet scoped to a target node and the user’s preferred units.
     data class OpenCompass(val node: Node, val displayUnits: MeasurementSystem) : NodeDetailAction
 }
