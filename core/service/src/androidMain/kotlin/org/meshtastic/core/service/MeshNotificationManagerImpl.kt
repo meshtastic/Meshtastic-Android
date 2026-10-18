@@ -980,7 +980,9 @@ class MeshNotificationManagerImpl(
         }
         val chip =
             battery?.takeIf { it <= MAX_BATTERY_LEVEL }?.let { MetricFormatter.percent(it) }
-                ?: heardSecondsAgo?.let { formatDurationSuspend(it, largestUnit(it)) }
+                ?: heardSecondsAgo
+                    ?.takeIf { it >= SECONDS_PER_MINUTE }
+                    ?.let { formatDurationSuspend(it, largestUnit(it)) }
         return createLiveUpdateNotification(
             title =
             node.user.long_name.ifBlank { node.user.short_name }.ifBlank { NodeAddress.numToDefaultId(node.num) },
