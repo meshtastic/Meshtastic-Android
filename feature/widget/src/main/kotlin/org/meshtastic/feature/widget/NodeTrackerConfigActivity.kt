@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -52,6 +53,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
@@ -112,7 +114,9 @@ class NodeTrackerConfigActivity :
                     else -> isSystemInDarkTheme()
                 }
             AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
-                val nodes by nodeRepository.nodeDBbyNum.collectAsState()
+                // One snapshot: a live list re-sorts by last heard under the user's finger on a busy mesh.
+                val nodes by
+                    produceState(emptyMap<Int, Node>()) { value = nodeRepository.nodeDBbyNum.first { it.isNotEmpty() } }
                 val ourNodeNum = nodeRepository.myNodeInfo.collectAsState().value?.myNodeNum
                 NodeTrackerPicker(
                     nodes = nodes.values,

@@ -368,7 +368,8 @@
 
         <receiver
             android:name="org.meshtastic.feature.widget.NodeTrackerWidgetReceiver"
-            android:exported="false">
+            android:exported="false"
+            android:label="@string/widget_node_tracker_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
