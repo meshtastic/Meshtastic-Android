@@ -17,4 +17,6 @@
   -->
 <resources>
     <string name="widget_local_stats_label">Meshtastic</string>
+    <!-- Not in Crowdin: the picker label must be an Android resource, and crowdin.yml sources composeResources only. -->
+    <string name="widget_node_tracker_label">Node Tracker</string>
 </resources>

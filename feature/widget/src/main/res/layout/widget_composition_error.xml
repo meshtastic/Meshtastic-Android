@@ -17,7 +17,7 @@
   -->
 
 <!--
-    Last-resort UI for LocalStatsWidget, inflated by LocalStatsWidget.onCompositionError when the Glance
+    Last-resort UI for both widgets, inflated by their onCompositionError overrides when the Glance
     composition throws. It replaces Glance's default "Can't show content" layout.
 
     This is a RemoteViews layout, so it is deliberately plain: no Compose, no theming, no click targets. The text is

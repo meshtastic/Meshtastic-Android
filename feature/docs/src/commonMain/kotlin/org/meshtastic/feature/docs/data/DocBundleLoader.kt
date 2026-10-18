@@ -447,7 +447,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 CoreRes.string.doc_keywords_widget,
                 "en/user/widget.html",
                 20,
-                listOf("widget", "home-screen-widget", "local-stats-widget"),
+                listOf("widget", "home-screen-widget", "local-stats-widget", "node-tracker-widget"),
                 1700,
                 "widget",
             ),
