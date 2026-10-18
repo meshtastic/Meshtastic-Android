@@ -46,8 +46,8 @@ enum class ServiceStartTrigger {
     BootCompleted,
 
     /**
-     * The user tapped the Quick Settings tile. The platform lists no exemption for a tile click, so the start is legal
-     * only while the app is visible or exempt from battery optimizations; otherwise the tile opens the app instead.
+     * The user tapped the Quick Settings tile. SystemUI temp-allowlists the app for the click, so the start is
+     * attempted; if the platform refuses it, the tile opens the app instead.
      */
     QuickSettingsTile,
 }

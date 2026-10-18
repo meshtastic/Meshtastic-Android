@@ -161,7 +161,7 @@ On Android you can add a **Meshtastic** tile to Quick Settings: pull down the no
 - **Disconnected** or **Device sleeping** - the tile is off. Tap it to reconnect to the radio you last selected.
 - **No device selected** - tap the tile to open the **Connect** tab and pick a radio.
 
-Disconnecting forgets the selected radio, so after a disconnect the tile opens the **Connect** tab. If Android does not let the app reconnect in the background, the tile opens the app instead and the connection starts from there. With battery optimization turned off for Meshtastic, the tile can reconnect without opening the app. On a locked phone the tile asks you to unlock first.
+Disconnecting forgets the selected radio, so after a disconnect the tile opens the **Connect** tab. If Android does not let the app reconnect in the background, the tile opens the app instead and the connection starts from there. On a locked phone the tile asks you to unlock first.
 
 ## Desktop Connections
 

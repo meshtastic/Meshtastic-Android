@@ -17,8 +17,6 @@
 package org.meshtastic.core.service
 
 import android.app.ActivityManager
-import android.content.Context
-import android.os.PowerManager
 
 /**
  * Whether this process currently holds a user-visible component.
@@ -35,7 +33,3 @@ internal fun isAppInForeground(): Boolean {
     ActivityManager.getMyMemoryState(state)
     return state.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
 }
-
-/** Whether the user exempted this app from battery optimizations, a documented background-start exemption. */
-internal fun isIgnoringBatteryOptimizations(context: Context): Boolean =
-    context.getSystemService(PowerManager::class.java)?.isIgnoringBatteryOptimizations(context.packageName) == true

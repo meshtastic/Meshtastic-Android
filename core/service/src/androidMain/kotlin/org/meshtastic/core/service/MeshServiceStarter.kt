@@ -35,8 +35,7 @@ import co.touchlab.kermit.Logger
  */
 fun MeshService.Companion.startService(context: Context, trigger: ServiceStartTrigger): Boolean {
     val appInForeground = isAppInForeground()
-    val ignoringBatteryOptimizations = isIgnoringBatteryOptimizations(context)
-    if (!ForegroundStartPolicy.isForegroundStartAllowed(trigger, appInForeground, ignoringBatteryOptimizations)) {
+    if (!ForegroundStartPolicy.isForegroundStartAllowed(trigger, appInForeground)) {
         Logger.i {
             "Skipping MeshService start: trigger=$trigger is not permitted to start a foreground service while " +
                 "backgrounded. Waiting for the next user-visible start."

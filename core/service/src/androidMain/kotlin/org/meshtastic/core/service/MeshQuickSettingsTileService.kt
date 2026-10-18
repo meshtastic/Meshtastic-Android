@@ -17,6 +17,7 @@
 package org.meshtastic.core.service
 
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Build
 import android.service.quicksettings.TileService
@@ -52,6 +53,12 @@ class MeshQuickSettingsTileService :
     override fun onCreate() {
         super.onCreate()
         controller.startObserving()
+    }
+
+    // An active tile is bound only on request, so one added while the state is steady would stay blank.
+    override fun onTileAdded() {
+        super.onTileAdded()
+        requestListeningState(this, ComponentName(this, MeshQuickSettingsTileService::class.java))
     }
 
     override fun onStartListening() {

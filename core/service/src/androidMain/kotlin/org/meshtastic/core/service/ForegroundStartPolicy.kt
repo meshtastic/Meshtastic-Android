@@ -53,14 +53,11 @@ object ForegroundStartPolicy {
      * opening the app ([ServiceStartTrigger.UserInterface]).
      *
      * @param appInForeground whether this process currently holds a user-visible component.
-     * @param ignoringBatteryOptimizations whether the user has exempted this app from battery optimizations, a
-     *   documented exemption that only the Quick Settings tile relies on.
      * @param sdkInt the running platform API level.
      */
     fun isForegroundStartAllowed(
         trigger: ServiceStartTrigger,
         appInForeground: Boolean,
-        ignoringBatteryOptimizations: Boolean = false,
         sdkInt: Int = Build.VERSION.SDK_INT,
     ): Boolean = when {
         // Before Android 12 there is no background-start restriction at all.
@@ -73,7 +70,9 @@ object ForegroundStartPolicy {
 
         trigger == ServiceStartTrigger.BootCompleted -> true
 
-        trigger == ServiceStartTrigger.QuickSettingsTile -> appInForeground || ignoringBatteryOptimizations
+        // SystemUI temp-allowlists the app for a tile click (reason "tile onclick"); a refusal on a release without
+        // that falls back to opening the app.
+        trigger == ServiceStartTrigger.QuickSettingsTile -> true
 
         // No exemption of its own — legal only while the app is genuinely still in the foreground.
         else -> appInForeground
