@@ -8,6 +8,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Internal (v2.8.3-internal.9)
+Changes since [`v2.8.3-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3-open.1):
+
+#### 🛠️ Fixes
+* fix(settings): show GPS pin settings on commercial boards again by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7655
+* fix(settings): hide GPS pin settings only on boards whose maker wired the GPS by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7656
+* fix(messaging): show seconds in full message timestamps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7660
+
 ### Open Beta (v2.8.3-open.1)
 Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2):
 
