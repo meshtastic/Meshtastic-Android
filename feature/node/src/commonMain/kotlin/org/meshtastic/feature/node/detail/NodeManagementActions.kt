@@ -16,11 +16,13 @@
  */
 package org.meshtastic.feature.node.detail
 
+import androidx.compose.material3.Text
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.pluralStringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.safeCatching
@@ -43,6 +45,7 @@ import org.meshtastic.core.resources.mute_notifications
 import org.meshtastic.core.resources.mute_remove
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_node_text
+import org.meshtastic.core.resources.remove_nodes_text
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -64,6 +67,17 @@ constructor(
             onConfirm = {
                 launchRadioMutation(scope, "removeNode", onSuccess = onAfterRemove) { removeNode(node.num) }
             },
+        )
+    }
+
+    /** One alert for the batch: [AlertManager] holds a single alert, so per-node requests replace each other. */
+    open fun requestRemoveNodes(scope: CoroutineScope, nodes: List<Node>) {
+        if (nodes.isEmpty()) return
+        if (nodes.size == 1) return requestRemoveNode(scope, nodes.single())
+        alertManager.showAlert(
+            titleRes = Res.string.remove,
+            composableMessage = { Text(pluralStringResource(Res.plurals.remove_nodes_text, nodes.size, nodes.size)) },
+            onConfirm = { launchRadioMutation(scope, "removeNodes") { nodes.forEach { removeNode(it.num) } } },
         )
     }
 

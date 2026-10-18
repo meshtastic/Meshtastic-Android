@@ -1575,6 +1575,7 @@ remove_filter
 remove_ignored
 remove_layer
 remove_node_text
+remove_nodes_text
 replace
 replace_channels_and_settings_description
 reply

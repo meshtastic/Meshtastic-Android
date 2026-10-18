@@ -108,6 +108,20 @@ class NodeManagementActionsTest {
     }
 
     @Test
+    fun requestRemoveNodes_removes_every_node_after_one_confirmation() {
+        val realAlertManager = AlertManager()
+        val actionsWithRealAlert = actionsWith(radioController, realAlertManager)
+        val nodes = listOf(1, 2, 3).map { Node(num = it) }
+        nodeRepository.setNodes(nodes + Node(num = 4))
+
+        actionsWithRealAlert.requestRemoveNodes(testScope, nodes)
+        realAlertManager.currentAlert.value?.onConfirm?.invoke()
+        testScope.runCurrent()
+
+        assertEquals(setOf(4), nodeRepository.nodeDBbyNum.value.keys)
+    }
+
+    @Test
     fun requestRemoveNode_success_callback_failure_is_not_reported_as_radio_rejection() {
         val realAlertManager = AlertManager()
         val actionsWithRealAlert = actionsWith(radioController, realAlertManager)
