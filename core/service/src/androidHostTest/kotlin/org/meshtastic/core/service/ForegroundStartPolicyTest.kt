@@ -113,6 +113,50 @@ class ForegroundStartPolicyTest {
         }
     }
 
+    @Test
+    fun `a tile tap from the background is refused while battery optimized`() {
+        RESTRICTED_LEVELS.forEach { sdk ->
+            assertFalse(
+                ForegroundStartPolicy.isForegroundStartAllowed(
+                    ServiceStartTrigger.QuickSettingsTile,
+                    appInForeground = false,
+                    ignoringBatteryOptimizations = false,
+                    sdkInt = sdk,
+                ),
+                "QuickSettingsTile should be refused while backgrounded on API $sdk",
+            )
+        }
+    }
+
+    @Test
+    fun `a tile tap is allowed once battery optimizations are off`() {
+        RESTRICTED_LEVELS.forEach { sdk ->
+            assertTrue(
+                ForegroundStartPolicy.isForegroundStartAllowed(
+                    ServiceStartTrigger.QuickSettingsTile,
+                    appInForeground = false,
+                    ignoringBatteryOptimizations = true,
+                    sdkInt = sdk,
+                ),
+                "QuickSettingsTile should be allowed without battery optimizations on API $sdk",
+            )
+        }
+    }
+
+    @Test
+    fun `a tile tap while the app is visible is allowed`() {
+        RESTRICTED_LEVELS.forEach { sdk ->
+            assertTrue(
+                ForegroundStartPolicy.isForegroundStartAllowed(
+                    ServiceStartTrigger.QuickSettingsTile,
+                    appInForeground = true,
+                    sdkInt = sdk,
+                ),
+                "QuickSettingsTile should be allowed while visible on API $sdk",
+            )
+        }
+    }
+
     // endregion
 
     // region service type selection

@@ -71,6 +71,8 @@ class MeshService : Service() {
 
     private val radioOperationLock: RadioOperationLock by inject()
 
+    private val quickSettingsTileController: QuickSettingsTileController by inject()
+
     private var isServiceInitialized = false
 
     /**
@@ -128,6 +130,7 @@ class MeshService : Service() {
         // Keep conversation shortcuts published for the whole service lifetime (not only during an Android Auto
         // session) so message notifications can link to them and get Conversations-section treatment on phones.
         conversationShortcutPublisher.startObserving(serviceScope)
+        quickSettingsTileController.startObserving()
 
         // Hold a wake lock for as long as — and no longer than — some radio operation is in flight.
         serviceScope.launch {
@@ -202,31 +205,28 @@ class MeshService : Service() {
      */
     private fun scheduleDeviceAddressResolution() {
         addressWaitJob?.cancel()
-        addressWaitJob =
-            serviceScope.launch {
-                val resolved =
-                    withTimeoutOrNull(DEVICE_ADDRESS_SETTLE_MS) {
-                        radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
+        addressWaitJob = serviceScope.launch {
+            val resolved =
+                withTimeoutOrNull(DEVICE_ADDRESS_SETTLE_MS) {
+                    radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
+                }
+            when (serviceStayAliveDecision(resolved, radioOperationLock.isActive, transportFactory::isAddressValid)) {
+                ServiceStayAliveDecision.STAY_FOR_DEVICE -> {
+                    Logger.i {
+                        "MeshService: selected device resolved (${resolved.anonymize}) after address-flow wait"
                     }
-                when (
-                    serviceStayAliveDecision(resolved, radioOperationLock.isActive, transportFactory::isAddressValid)
-                ) {
-                    ServiceStayAliveDecision.STAY_FOR_DEVICE -> {
-                        Logger.i {
-                            "MeshService: selected device resolved (${resolved.anonymize}) after address-flow wait"
-                        }
-                        acquireWakeLock()
-                    }
+                    acquireWakeLock()
+                }
 
-                    ServiceStayAliveDecision.STAY_FOR_OPERATION ->
-                        Logger.i { "MeshService: no device selected, but a radio operation is in flight; staying up" }
+                ServiceStayAliveDecision.STAY_FOR_OPERATION ->
+                    Logger.i { "MeshService: no device selected, but a radio operation is in flight; staying up" }
 
-                    ServiceStayAliveDecision.STOP -> {
-                        Logger.i { "MeshService: no connectable device selected after address flow settled; stopping" }
-                        stopServiceCleanly()
-                    }
+                ServiceStayAliveDecision.STOP -> {
+                    Logger.i { "MeshService: no connectable device selected after address flow settled; stopping" }
+                    stopServiceCleanly()
                 }
             }
+        }
     }
 
     /** Releases everything this service holds and stops it. Safe to call before it ever reached the foreground. */
