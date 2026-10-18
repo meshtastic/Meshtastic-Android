@@ -142,10 +142,10 @@ private val US_STATES =
 private val US_NEIGHBORS =
     mapOf(
         "AL" to listOf("FL", "GA", "MS", "TN"),
-        "AZ" to listOf("CA", "CO", "NM", "NV", "UT"),
+        "AZ" to listOf("CA", "NM", "NV", "UT"),
         "AR" to listOf("LA", "MO", "MS", "OK", "TN", "TX"),
         "CA" to listOf("AZ", "NV", "OR"),
-        "CO" to listOf("AZ", "KS", "NE", "NM", "OK", "UT", "WY"),
+        "CO" to listOf("KS", "NE", "NM", "OK", "UT", "WY"),
         "CT" to listOf("MA", "NY", "RI"),
         "DE" to listOf("MD", "NJ", "PA"),
         "DC" to listOf("MD", "VA"),
