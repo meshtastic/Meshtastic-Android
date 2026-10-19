@@ -2,9 +2,11 @@
 """Point the Flathub manifest at a release: the source tag and commit, and the Gradle zip.
 
 Usage: bump-flathub-manifest.py <manifest.yaml> <tag> <commit> <gradle-wrapper.properties>
+       bump-flathub-manifest.py --gradle-only <manifest.yaml> <gradle-wrapper.properties>
 
 The Gradle distribution URL and sha256 come from the tag's own wrapper properties, since the
-offline build can only run the Gradle version that tag pins. Each field is rewritten in
+offline build can only run the Gradle version that tag pins. --gradle-only rewrites just the
+Gradle zip, which is how the verify-flatpak overlay gets the working tree's wrapper. Each field is rewritten in
 place, so comments and layout survive. Any field that does not match exactly once fails the
 run instead of guessing, and the manifest is then bumped by hand.
 """
@@ -49,22 +51,29 @@ def replace_once(pattern: re.Pattern, value_a: str, value_b: str, text: str, wha
 
 
 def main() -> None:
-    if len(sys.argv) != 5:
+    args = sys.argv[1:]
+    gradle_only = args[:1] == ["--gradle-only"]
+    if gradle_only and len(args) == 3:
+        manifest, wrapper = args[1:]
+    elif not gradle_only and len(args) == 4:
+        manifest, tag, commit, wrapper = args
+        if not re.fullmatch(r"v\d+\.\d+\.\d+", tag):
+            sys.exit(f"'{tag}' is not a production tag (vX.Y.Z)")
+        if not re.fullmatch(r"[0-9a-f]{40}", commit):
+            sys.exit(f"'{commit}' is not a full commit sha")
+    else:
         sys.exit(__doc__)
-    manifest, tag, commit, wrapper = sys.argv[1:]
-    if not re.fullmatch(r"v\d+\.\d+\.\d+", tag):
-        sys.exit(f"'{tag}' is not a production tag (vX.Y.Z)")
-    if not re.fullmatch(r"[0-9a-f]{40}", commit):
-        sys.exit(f"'{commit}' is not a full commit sha")
     url, sha = wrapper_distribution(wrapper)
 
     with open(manifest, encoding="utf-8") as f:
         text = f.read()
-    text = replace_once(GIT_SOURCE, tag, commit, text, "Meshtastic-Android git source (url, tag, commit)")
+    if not gradle_only:
+        text = replace_once(GIT_SOURCE, tag, commit, text, "Meshtastic-Android git source (url, tag, commit)")
     text = replace_once(GRADLE_ZIP, url, sha, text, "Gradle distribution (url, sha256)")
     with open(manifest, "w", encoding="utf-8") as f:
         f.write(text)
-    print(f"{manifest}: {tag} at {commit}, {url.rsplit('/', 1)[-1]}")
+    zip_name = url.rsplit("/", 1)[-1]
+    print(f"{manifest}: {zip_name}" if gradle_only else f"{manifest}: {tag} at {commit}, {zip_name}")
 
 
 if __name__ == "__main__":

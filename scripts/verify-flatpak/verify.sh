@@ -107,6 +107,9 @@ fi
 #   flatpak-sources.json = the artifact we're validating
 step "Wiring overlay manifest + our flatpak-sources.json"
 cp "$OVERLAY" "$WORK/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.yaml"
+python3 "$REPO_ROOT/scripts/verify-flatpak/bump-flathub-manifest.py" --gradle-only \
+    "$WORK/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.yaml" \
+    "$REPO_ROOT/gradle/wrapper/gradle-wrapper.properties"
 cp "$SOURCES_JSON" "$WORK/org.meshtastic.MeshtasticDesktop/flatpak-sources.json"
 
 if [[ $REBUILD_ONLY -eq 0 ]]; then

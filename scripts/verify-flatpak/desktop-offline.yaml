@@ -97,12 +97,10 @@ modules:
       - type: dir
         path: meshtastic-android
       - type: file
-        # Must be the EXACT distribution from gradle-wrapper.properties (version AND -bin
-        # flavor); distributionSha256Sum verifies this file. Renovate bumps the version here
-        # alongside wrapper bumps (custom manager in renovate.json) but the sha256 must be
-        # copied from distributionSha256Sum by hand; CI fails fast on any mismatch.
-        url: https://services.gradle.org/distributions/gradle-9.8.2-bin.zip
-        sha256: 21bd5da2de49b642904077f38c0efdc7778e92b3ed0889392dca61b97e389607
+        # Placeholder: verify.sh and verify-flatpak.yml stamp the url and sha256 from
+        # gradle-wrapper.properties into their copy (bump-flathub-manifest.py --gradle-only).
+        url: https://services.gradle.org/distributions/gradle-from-wrapper-bin.zip
+        sha256: 0000000000000000000000000000000000000000000000000000000000000000
         dest: "gradle/wrapper"
         dest-filename: "gradle-bin.zip"
       - flatpak-sources.json
