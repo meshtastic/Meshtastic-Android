@@ -38,6 +38,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
 import org.meshtastic.core.resources.ignore
+import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.resources.message
 import org.meshtastic.core.resources.mute_notifications
 import org.meshtastic.core.resources.remove
@@ -46,6 +47,7 @@ import org.meshtastic.core.resources.remove_ignored
 import org.meshtastic.core.resources.trace_route
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.resources.update_status
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.DeleteNode
 import org.meshtastic.core.ui.icon.DoDisturb
 import org.meshtastic.core.ui.icon.Favorite
@@ -57,9 +59,10 @@ import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.util.rememberMeshHudSupported
 
 /**
- * Shared context menu for node actions (favorite, mute, message, trace route, ignore, remove).
+ * Shared context menu for node actions (favorite, mute, message, trace route, mesh view, ignore, remove).
  *
  * Used by both Android and Desktop adaptive node list screens.
  */
@@ -75,6 +78,7 @@ fun NodeContextMenu(
     onIgnore: () -> Unit,
     onRemove: () -> Unit,
     onDismiss: () -> Unit,
+    onOpenMeshView: () -> Unit = {},
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
@@ -84,6 +88,9 @@ fun NodeContextMenu(
             }
             MessageMenuItem(node, onMessage, onDismiss)
             TraceRouteMenuItem(node, lastTracerouteTime, onTraceRoute, onDismiss)
+            if (node.validPosition != null && rememberMeshHudSupported()) {
+                MeshViewMenuItem(onOpenMeshView, onDismiss)
+            }
         }
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
             IgnoreMenuItem(node, onIgnore, onDismiss)
@@ -211,6 +218,18 @@ private fun TraceRouteMenuItem(
 }
 
 private const val COOLDOWN_TICK_MS = 500L
+
+@Composable
+private fun MeshViewMenuItem(onOpenMeshView: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            onOpenMeshView()
+            onDismiss()
+        },
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.CenterFocusStrong, contentDescription = null) },
+        text = { Text(text = stringResource(Res.string.mesh_hud_open)) },
+    )
+}
 
 @Composable
 private fun RemoveMenuItem(node: Node, onRemove: () -> Unit, onDismiss: () -> Unit) {

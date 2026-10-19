@@ -110,7 +110,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) 
             viewModel = nodeDetailViewModel,
             compassViewModel = compassViewModel,
             navigateToMessages = { key -> backStack.add(ContactsRoute.Messages(key)) },
-            onNavigate = { route -> backStack.add(route) },
+            onNavigate = { route -> backStack.navigateFromNodeDetail(route) },
             onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
@@ -146,7 +146,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) 
             onOpenMeshHud =
             if (rememberMeshHudSupported()) {
                 {
-                    backStack.add(
+                    backStack.navigateFromNodeDetail(
                         MapRoute.MeshHud(
                             focusNodeNum = args.destNum,
                             tracerouteDestNum = args.destNum,
@@ -180,7 +180,11 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) 
             onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
             onOpenMeshHud =
             if (rememberMeshHudSupported()) {
-                { backStack.add(MapRoute.MeshHud(focusNodeNum = args.destNum, trackNodeNum = args.destNum)) }
+                {
+                    backStack.navigateFromNodeDetail(
+                        MapRoute.MeshHud(focusNodeNum = args.destNum, trackNodeNum = args.destNum),
+                    )
+                }
             } else {
                 null
             },
