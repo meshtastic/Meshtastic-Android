@@ -1635,6 +1635,10 @@
     <string name="remove_ignored">Remove from ignored</string>
     <string name="remove_layer">Remove Layer</string>
     <string name="remove_node_text">This node will be removed from your list until your node receives data from it again.</string>
+    <plurals name="remove_nodes_text">
+        <item quantity="one">%1$d node will be removed from your list until your node receives data from it again.</item>
+        <item quantity="other">%1$d nodes will be removed from your list until your node receives data from them again.</item>
+    </plurals>
     <string name="replace">Replace</string>
     <string name="replace_channels_and_settings_description">This QR code contains a complete configuration. This will REPLACE your existing channels and radio settings. All existing channels will be removed.</string>
     <string name="reply">Reply</string>

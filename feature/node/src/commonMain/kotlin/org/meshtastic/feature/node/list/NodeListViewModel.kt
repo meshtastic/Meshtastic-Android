@@ -245,7 +245,7 @@ class NodeListViewModel(
 
     fun muteNode(node: Node) = nodeManagementActions.requestMuteNode(viewModelScope, node)
 
-    fun removeNode(node: Node) = nodeManagementActions.requestRemoveNode(viewModelScope, node)
+    fun removeNodes(nodes: List<Node>) = nodeManagementActions.requestRemoveNodes(viewModelScope, nodes)
 
     /** Returns the contact key for navigating to a direct message conversation with this node. */
     fun getDirectMessageRoute(node: Node): String {
