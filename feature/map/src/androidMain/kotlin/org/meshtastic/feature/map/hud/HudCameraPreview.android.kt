@@ -22,6 +22,7 @@ import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.CameraState
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -36,22 +37,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import co.touchlab.kermit.Logger
 import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-actual fun HudCameraPreview(onIntrinsics: (CameraIntrinsics?) -> Unit, modifier: Modifier) {
+actual fun HudCameraPreview(
+    onIntrinsics: (CameraIntrinsics?) -> Unit,
+    onAvailable: (Boolean) -> Unit,
+    modifier: Modifier,
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val currentOnIntrinsics by rememberUpdatedState(onIntrinsics)
+    val currentOnAvailable by rememberUpdatedState(onAvailable)
     var surfaceRequest by remember { mutableStateOf<SurfaceRequest?>(null) }
 
     DisposableEffect(lifecycleOwner) {
         var disposed = false
         var provider: ProcessCameraProvider? = null
         var sensorIntrinsics: CameraIntrinsics? = null
+        var boundCamera: Camera? = null
+        val stateObserver =
+            Observer<CameraState> { state ->
+                when {
+                    state.error != null -> currentOnAvailable(false)
+                    state.type == CameraState.Type.OPEN -> currentOnAvailable(true)
+                }
+            }
+        // Stabilization stays off: it crops up to a fifth of the field of view, which the intrinsics would not see.
         val preview = Preview.Builder().build()
 
         // The stream CameraX picked, and its crop, decide how much of the sensor the view shows.
@@ -90,9 +106,13 @@ actual fun HudCameraPreview(onIntrinsics: (CameraIntrinsics?) -> Unit, modifier:
                     val camera = bound.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview)
                     sensorIntrinsics = camera.intrinsics()
                     report()
+                    // Another app holding the camera, or a HAL fault, arrives here rather than as a bind failure.
+                    camera.cameraInfo.cameraState.observe(lifecycleOwner, stateObserver)
+                    boundCamera = camera
                 } catch (e: Exception) {
                     Logger.w(e) { "Mesh view camera bind failed" }
                     currentOnIntrinsics(null)
+                    currentOnAvailable(false)
                 }
             },
             ContextCompat.getMainExecutor(context),
@@ -100,6 +120,7 @@ actual fun HudCameraPreview(onIntrinsics: (CameraIntrinsics?) -> Unit, modifier:
 
         onDispose {
             disposed = true
+            boundCamera?.cameraInfo?.cameraState?.removeObserver(stateObserver)
             surfaceRequest?.willNotProvideSurface()
             surfaceRequest = null
             provider?.unbind(preview)
@@ -112,7 +133,10 @@ actual fun HudCameraPreview(onIntrinsics: (CameraIntrinsics?) -> Unit, modifier:
     }
 }
 
-/** Focal length and the active sensor area in millimetres, or null when the camera does not report them. */
+/**
+ * Focal length and the active sensor area in millimeters, or null when the camera does not report them. CameraX 1.7
+ * replaces Camera2CameraInfo with CameraInfo.cameraCharacteristics.
+ */
 @androidx.annotation.OptIn(ExperimentalCamera2Interop::class)
 private fun Camera.intrinsics(): CameraIntrinsics? {
     val info = Camera2CameraInfo.from(cameraInfo)
@@ -127,7 +151,7 @@ private fun Camera.intrinsics(): CameraIntrinsics? {
     // A calibrated focal length, in pre-correction active-array pixels, beats the nominal one when the camera has it:
     // on a logical multi-camera the first listed focal length need not be the lens in use.
     val calibratedFx = info.getCameraCharacteristic(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION)?.firstOrNull()
-    // Pixels to millimetres by the sensor's pixel pitch.
+    // Pixels to millimeters by the sensor's pixel pitch.
     val nominalOrCalibrated = calibratedFx?.takeIf { it > 0f }?.let { it * physical.width / pixels.width } ?: focal
     val zoom = cameraInfo.zoomState.value?.zoomRatio ?: 1f
     return CameraIntrinsics(

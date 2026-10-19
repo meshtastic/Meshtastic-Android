@@ -24,7 +24,7 @@ import kotlin.math.tan
 /** Fallback when the camera reports no intrinsics: a typical phone main camera's horizontal field of view. */
 private const val FALLBACK_HORIZONTAL_FOV_DEG = 66.0
 
-/** The back camera's focal length and the size of the sensor area the preview shows, both in millimetres. */
+/** The back camera's focal length and the size of the sensor area the preview shows, both in millimeters. */
 data class CameraIntrinsics(val focalLengthMm: Float, val sensorLongMm: Float, val sensorShortMm: Float) {
     /**
      * The sensor area a preview stream of [streamLong] by [streamShort] pixels shows after its [cropLong] by
@@ -60,5 +60,13 @@ data class CameraIntrinsics(val focalLengthMm: Float, val sensorLongMm: Float, v
 fun fallbackFocalPx(viewWidth: Float, viewHeight: Float): Float =
     (max(viewWidth, viewHeight) / 2 / tan(FALLBACK_HORIZONTAL_FOV_DEG.toRadians() / 2)).toFloat()
 
-/** The back camera's live preview, filling [modifier]; reports intrinsics once the camera is bound. */
-@Composable expect fun HudCameraPreview(onIntrinsics: (CameraIntrinsics?) -> Unit, modifier: Modifier = Modifier)
+/**
+ * The back camera's live preview, filling [modifier]; reports intrinsics once the camera is bound, and [onAvailable]
+ * false when it cannot bind or the camera fails, true once it opens.
+ */
+@Composable
+expect fun HudCameraPreview(
+    onIntrinsics: (CameraIntrinsics?) -> Unit,
+    onAvailable: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+)

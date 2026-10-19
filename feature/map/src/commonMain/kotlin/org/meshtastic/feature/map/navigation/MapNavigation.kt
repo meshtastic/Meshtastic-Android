@@ -46,6 +46,8 @@ fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
             tracerouteRequestId = args.tracerouteRequestId,
             tracerouteLogUuid = args.tracerouteLogUuid,
             trackNodeNum = args.trackNodeNum,
+            // The map opens the waypoint's own dialog, whose edit has the pickers.
+            onEditWaypoint = { id -> backStack.add(MapRoute.Map(waypointId = id)) },
         )
     }
 }

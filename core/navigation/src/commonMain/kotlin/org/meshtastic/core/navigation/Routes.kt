@@ -75,7 +75,8 @@ sealed interface MapRoute : Route {
 sealed interface NodesRoute : Route {
     @Serializable data object Nodes : NodesRoute, Graph
 
-    @Serializable data class NodeDetail(val destNum: Int? = null) : NodesRoute
+    /** [openCompass] opens the compass sheet on arrival, for entry points that offer the compass directly. */
+    @Serializable data class NodeDetail(val destNum: Int? = null, val openCompass: Boolean = false) : NodesRoute
 }
 
 @Serializable

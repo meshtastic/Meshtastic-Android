@@ -52,7 +52,7 @@ private val TapeMinorTick = 5.dp
 private val TapeMajorTick = 9.dp
 private val TapeMarker = 5.dp
 private val ReticleRadius = 36.dp
-private val TapeScrim = Color.Black.copy(alpha = 0.4f)
+private val TapeScrim = Color.Black.copy(alpha = HUD_SCRIM_ALPHA)
 
 /** The four cardinal letters, localized, for the compass tape. */
 internal data class Cardinals(val north: String, val east: String, val south: String, val west: String) {

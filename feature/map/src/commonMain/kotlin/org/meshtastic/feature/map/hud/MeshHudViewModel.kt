@@ -63,6 +63,9 @@ import org.meshtastic.proto.Position as ProtoPosition
 
 private const val STOP_TIMEOUT_MS = 5_000L
 
+/** Above this ground speed the user is walking with the phone up, which is when to remind them to look around. */
+private const val WALKING_MPS = 1.0f
+
 private data class HudSettings(
     val units: MeasurementSystem,
     val focusKey: String?,
@@ -133,7 +136,7 @@ class MeshHudViewModel(
     meshLogRepository: MeshLogRepository,
     tracerouteResponseProvider: TracerouteResponseProvider,
     tracerouteSnapshotRepository: TracerouteSnapshotRepository,
-    mapPrefs: MapPrefs,
+    private val mapPrefs: MapPrefs,
     private val notificationPrefs: NotificationPrefs,
     localeUnitsProvider: LocaleUnitsProvider,
     dispatchers: CoroutineDispatchers,
@@ -296,7 +299,16 @@ class MeshHudViewModel(
             )
                 // A scoped view has no range toggle, so it must not drop its own node for being far.
                 .limitedTo(settings.rangeLimited && solo == null, settings.units, settings.pinned)
-                .copy(averagedFixes = fixAverager.count, scoped = solo != null, ready = true)
+                .let { built ->
+                    built.copy(
+                        averagedFixes = fixAverager.count,
+                        scoped = solo != null,
+                        ready = true,
+                        moving = (location.location?.speedMps ?: 0f) > WALKING_MPS,
+                        showPrecision = settings.filters.showPrecisionCircle,
+                        finding = built.findingFor(settings.focusKey),
+                    )
+                }
         }
             .flowOn(dispatchers.default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), MeshHudTargets())
@@ -378,6 +390,17 @@ class MeshHudViewModel(
     fun toggleRangeLimit() {
         rangeLimited.value = !rangeLimited.value
     }
+
+    private fun MeshHudTargets.findingFor(focusKey: String?): HudFinding? =
+        targets.firstOrNull { it.focused }?.let { HudFinding(it.subject, it.distanceText) }
+            ?: directionUnknown
+                .firstOrNull { focusKey != null && it.subject.key == focusKey }
+                ?.let { HudFinding(it.subject, it.distanceM.toInt().toDistanceString(units)) }
+
+    /** True once the user has dismissed the first-run coaching. */
+    val coachSeen: StateFlow<Boolean> = mapPrefs.meshHudCoachSeen
+
+    fun dismissCoach() = mapPrefs.setMeshHudCoachSeen(true)
 
     private fun MeshHudTargets.limitedTo(limited: Boolean, units: MeasurementSystem, pinned: Set<Int>): MeshHudTargets {
         val range = nearRangeM(units)

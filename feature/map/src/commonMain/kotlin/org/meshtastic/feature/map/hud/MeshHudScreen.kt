@@ -18,22 +18,9 @@ package org.meshtastic.feature.map.hud
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -46,66 +33,38 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.common.util.formatString
-import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.compass_location_disabled
-import org.meshtastic.core.resources.compass_no_location_fix
-import org.meshtastic.core.resources.compass_no_location_permission
-import org.meshtastic.core.resources.compass_no_magnetometer
 import org.meshtastic.core.resources.mesh_hud_camera_rationale
 import org.meshtastic.core.resources.mesh_hud_cardinal_east
 import org.meshtastic.core.resources.mesh_hud_cardinal_north
 import org.meshtastic.core.resources.mesh_hud_cardinal_south
 import org.meshtastic.core.resources.mesh_hud_cardinal_west
-import org.meshtastic.core.resources.mesh_hud_elevation_approximate
-import org.meshtastic.core.resources.mesh_hud_heading
-import org.meshtastic.core.resources.mesh_hud_heading_accuracy
-import org.meshtastic.core.resources.mesh_hud_heading_low_accuracy
-import org.meshtastic.core.resources.mesh_hud_inside_geofence
-import org.meshtastic.core.resources.mesh_hud_inside_unnamed_geofence
-import org.meshtastic.core.resources.mesh_hud_nearby
-import org.meshtastic.core.resources.mesh_hud_no_nodes
-import org.meshtastic.core.resources.mesh_hud_on_target
-import org.meshtastic.core.resources.mesh_hud_own_accuracy
-import org.meshtastic.core.resources.mesh_hud_range_all
-import org.meshtastic.core.resources.mesh_hud_range_within
-import org.meshtastic.core.resources.mesh_hud_range_within_hidden
-import org.meshtastic.core.resources.mesh_hud_tilt_down
-import org.meshtastic.core.resources.mesh_hud_tilt_up
-import org.meshtastic.core.resources.mesh_hud_turn_left
-import org.meshtastic.core.resources.mesh_hud_turn_right
-import org.meshtastic.core.resources.mesh_hud_waiting_sensor
-import org.meshtastic.core.resources.navigate_back
-import org.meshtastic.core.resources.traceroute_outgoing_route
-import org.meshtastic.core.resources.traceroute_return_route
-import org.meshtastic.core.resources.traceroute_showing_nodes
+import org.meshtastic.core.resources.mesh_hud_more
+import org.meshtastic.core.resources.mesh_hud_snr
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
-import org.meshtastic.core.ui.icon.ArrowBack
-import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.rememberCameraPermissionState
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
+import org.meshtastic.core.ui.util.rememberOpenLocationSettings
+import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.component.MapFilterSheet
 import org.meshtastic.feature.map.component.WaypointInfoDialog
+import org.meshtastic.feature.map.component.mapFilterActions
 import org.meshtastic.proto.Waypoint
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -125,7 +84,6 @@ private const val ON_TARGET_DEG = 5.0
 
 /** Turn hints move in steps this coarse, so the label does not churn with every sensor sample. */
 private const val HINT_STEP_DEG = 5
-private val HudScrim = Color.Black.copy(alpha = 0.55f)
 private val TapeGap = 4.dp
 
 /** Pitched further down than this, the user is looking for something close by, so the radar grows. */
@@ -134,16 +92,16 @@ private const val POINTING_DOWN_DEG = -45.0
 /** The band under the top bar the compass tape takes, which chips stay out of. */
 private val TapeClearance = 52.dp
 
-/** Where the finder's target is from the center of the view, rounded to [HINT_STEP_DEG]. */
-private sealed interface FinderHint {
-    data object OnTarget : FinderHint
+/** Walking pace held this long brings up the reminder to look around, so a step or two does not. */
+private const val WALK_NOTICE_MS = 3_000L
 
-    data class Turn(val degrees: Int, val right: Boolean) : FinderHint
+/** Neither turned nor carried for this long, the phone has likely been set down, so the screen may sleep. */
+private const val IDLE_SCREEN_MS = 10 * 60_000L
 
-    data class Tilt(val degrees: Int, val up: Boolean) : FinderHint
-}
+/** Turning the view this far counts as the user still looking. */
+private const val ACTIVITY_TURN_DEG = 15
 
-@Suppress("LongMethod", "UnnecessaryLaunchedEffect")
+@Suppress("LongMethod", "UnnecessaryLaunchedEffect", "CyclomaticComplexMethod")
 @Composable
 fun MeshHudScreen(
     focusNodeNum: Int?,
@@ -154,6 +112,7 @@ fun MeshHudScreen(
     tracerouteRequestId: Int? = null,
     tracerouteLogUuid: String? = null,
     trackNodeNum: Int? = null,
+    onEditWaypoint: ((Int) -> Unit)? = null,
     viewModel: MeshHudViewModel = koinViewModel(),
 ) {
     LaunchedEffect(tracerouteDestNum, tracerouteRequestId, tracerouteLogUuid) {
@@ -164,11 +123,14 @@ fun MeshHudScreen(
     LaunchedEffect(focusNodeNum) { viewModel.openFor(focusNodeNum) }
     val route by viewModel.route.collectAsStateWithLifecycle()
     val alertOptIns by viewModel.geofenceAlertOptIns.collectAsStateWithLifecycle()
+    val coachSeen by viewModel.coachSeen.collectAsStateWithLifecycle()
     var infoWaypoint by remember { mutableStateOf<Waypoint?>(null) }
+    var showFilters by remember { mutableStateOf(false) }
+    var cameraAvailable by remember { mutableStateOf(true) }
     val track by viewModel.track.collectAsStateWithLifecycle()
-    KeepScreenOn(true)
     val camera = rememberCameraPermissionState()
     val location = rememberLocationPermissionState()
+    val openLocationSettings = rememberOpenLocationSettings()
     // One system dialog at a time, and only ever asked once: a recreated screen must not prompt again. These stay
     // keyed effects because each must fire once per key change, which SideEffect does not do.
     LaunchedEffect(Unit) { if (camera.status == PermissionStatus.NOT_REQUESTED) camera.request() }
@@ -208,17 +170,40 @@ fun MeshHudScreen(
         }
     }
     val hasSensor by remember { derivedStateOf { poseState.value.hasSensor } }
+    val thermal by remember { derivedStateOf { poseState.value.thermal } }
     val waitingForSensor by remember {
         derivedStateOf { sensorSilent && poseState.value.hasSensor && poseState.value.pose == null }
     }
     val hint by remember { derivedStateOf { focused?.let { finderHint(it, poseState.value.pose) } } }
     val pointingDown by remember { derivedStateOf { (poseState.value.pose?.pitchDeg ?: 0.0) < POINTING_DOWN_DEG } }
     val northLabel = stringResource(Res.string.mesh_hud_cardinal_north)
-    FinderHaptics(locked = hint == FinderHint.OnTarget)
+    FinderHaptics(hint)
+
+    // The screen stays on while the user is looking: turning the view or walking restarts the clock.
+    val lookBucket by remember { derivedStateOf { headingDeg?.div(ACTIVITY_TURN_DEG) } }
+    var idle by remember { mutableStateOf(false) }
+    LaunchedEffect(lookBucket, targets.moving) {
+        idle = false
+        delay(IDLE_SCREEN_MS)
+        idle = true
+    }
+    KeepScreenOn(!idle)
+    var walking by remember { mutableStateOf(false) }
+    LaunchedEffect(targets.moving) {
+        if (targets.moving) delay(WALK_NOTICE_MS)
+        walking = targets.moving
+    }
+    // A critical thermal state gives the camera back to the system; the overlay carries on as a compass.
+    val showCamera = camera.isGranted && thermal != HudThermal.CRITICAL
 
     val tapeClearancePx = with(LocalDensity.current) { TapeClearance.roundToPx() }
     val textMeasurer = rememberTextMeasurer()
     val tapeStyle = MaterialTheme.typography.labelSmall.copy(color = Color.White)
+    val routeLabels =
+        RouteLabels(
+            skippedTemplate = stringResource(Res.string.mesh_hud_more),
+            snrTemplate = stringResource(Res.string.mesh_hud_snr),
+        )
     val cardinals =
         Cardinals(
             north = stringResource(Res.string.mesh_hud_cardinal_north),
@@ -232,9 +217,16 @@ fun MeshHudScreen(
         val height = constraints.maxHeight.toFloat()
         val focalPx = intrinsics?.focalPx(width, height) ?: fallbackFocalPx(width, height)
 
-        if (camera.isGranted) HudCameraPreview(onIntrinsics = { intrinsics = it }, modifier = Modifier.fillMaxSize())
+        if (showCamera) {
+            HudCameraPreview(
+                onIntrinsics = { intrinsics = it },
+                onAvailable = { cameraAvailable = it },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
 
-        Canvas(Modifier.fillMaxSize()) {
+        // Decoration only: every target it marks is a chip or radar dot with its own semantics.
+        Canvas(Modifier.fillMaxSize().clearAndSetSemantics {}) {
             val state = poseState.value
             val pose = state.pose ?: return@Canvas
             drawHorizon(pose, focalPx)
@@ -249,9 +241,12 @@ fun MeshHudScreen(
                     TracerouteColors.ReturnRoute,
                     textMeasurer,
                     tapeStyle,
+                    routeLabels,
                 )
             }
-            targets.targets.forEach { drawPrecisionZone(it, pose, focalPx, state.headingAccuracyDeg) }
+            if (targets.showPrecision) {
+                targets.targets.forEach { drawPrecisionZone(it, pose, focalPx, state.headingAccuracyDeg) }
+            }
             focused?.let { drawReticle(Color(it.subject.color), locked = finderHint(it, pose) == FinderHint.OnTarget) }
             drawCompassTape(
                 trueHeadingDeg = (pose.azimuthDeg + targets.declinationDeg + FULL_CIRCLE_DEG) % FULL_CIRCLE_DEG,
@@ -274,6 +269,7 @@ fun MeshHudScreen(
         ) { target ->
             HudChip(
                 target = target,
+                currentPose = { poseState.value.pose },
                 // A node opens its detail and a waypoint its info, as on the map; long press focuses either.
                 onOpen = {
                     when (val subject = target.subject) {
@@ -286,14 +282,19 @@ fun MeshHudScreen(
         }
 
         HudTopBar(
-            headingDeg = headingDeg,
-            headingAccuracyDeg = headingAccuracyDeg,
-            hasSensor = hasSensor,
-            needsCalibration = needsCalibration,
-            waitingForSensor = waitingForSensor,
+            status =
+            HudSensorStatus(
+                headingDeg = headingDeg,
+                headingAccuracyDeg = headingAccuracyDeg,
+                hasSensor = hasSensor,
+                needsCalibration = needsCalibration,
+                waitingForSensor = waitingForSensor,
+                thermal = thermal,
+            ),
             targets = targets,
             onNavigateUp = onNavigateUp,
             onToggleRange = viewModel::toggleRangeLimit,
+            onOpenFilters = if (targets.ready && !targets.scoped) ({ showFilters = true }) else null,
             modifier =
             Modifier.align(Alignment.TopStart).onPlaced {
                 topBarBottomPx = (it.positionInParent().y + it.size.height).toInt()
@@ -303,6 +304,9 @@ fun MeshHudScreen(
             targets = targets,
             hint = hint,
             route = route,
+            notices = HudNotices(cameraUnavailable = showCamera && !cameraAvailable, walking = walking),
+            location = location,
+            onOpenLocationSettings = openLocationSettings,
             radar = {
                 NearbyRadar(
                     nearby = targets.directionUnknown,
@@ -325,9 +329,21 @@ fun MeshHudScreen(
             modifier =
             Modifier.align(Alignment.BottomStart).onPlaced { bottomPanelTopPx = it.positionInParent().y.toInt() },
         )
+        if (!coachSeen && camera.isGranted) HudCoach(onDismiss = viewModel::dismissCoach)
     }
 
-    // Read-only here: editing a waypoint re-broadcasts it, which belongs on the map with its pickers.
+    if (showFilters) {
+        // The map's own filters and sheet, so the two views always agree on what they show.
+        val mapViewModel: SharedMapViewModel = koinViewModel()
+        val filterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
+        MapFilterSheet(
+            onDismissRequest = { showFilters = false },
+            filterState = filterState,
+            actions = remember(mapViewModel) { mapViewModel.mapFilterActions() },
+        )
+    }
+
+    // Editing hands off to the map, which has the pickers a waypoint needs.
     infoWaypoint?.let { waypoint ->
         WaypointInfoDialog(
             waypoint = waypoint,
@@ -335,6 +351,13 @@ fun MeshHudScreen(
             alertsEnabled = waypoint.id in alertOptIns,
             onToggleAlerts = { viewModel.setGeofenceAlertOptIn(waypoint.id, it) },
             onDismissRequest = { infoWaypoint = null },
+            onEdit =
+            onEditWaypoint?.let { edit ->
+                {
+                    infoWaypoint = null
+                    edit(waypoint.id)
+                }
+            },
         )
     }
 }
@@ -353,190 +376,27 @@ private fun finderHint(target: HudTarget, pose: CameraPose?): FinderHint? {
     }
 }
 
-/** One firm pulse as the finder locks on, so the user can stop sweeping without looking at the screen. */
-@Suppress("UnnecessaryLaunchedEffect") // One pulse per lock, not one per recomposition.
+/** True when this turn hint is a step closer than [other] on the same side, so the user is closing in. */
+private fun FinderHint.Turn.closerThan(other: FinderHint?): Boolean =
+    other is FinderHint.Turn && other.right == right && degrees < other.degrees
+
+/**
+ * A tick for each hint step closer while turning toward the target, silent when sweeping away, and one firm pulse as
+ * the finder locks on, so the user can stop without looking at the screen. Tilt steps stay silent: they change with
+ * every movement of the wrist.
+ */
+@Suppress("UnnecessaryLaunchedEffect") // One haptic per hint change, not one per recomposition.
 @Composable
-private fun FinderHaptics(locked: Boolean) {
+private fun FinderHaptics(hint: FinderHint?) {
     val haptics = LocalHapticFeedback.current
-    LaunchedEffect(locked) { if (locked) haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate) }
-}
-
-@Suppress("LongParameterList")
-@Composable
-private fun HudTopBar(
-    headingDeg: Int?,
-    headingAccuracyDeg: Int?,
-    hasSensor: Boolean,
-    needsCalibration: Boolean,
-    waitingForSensor: Boolean,
-    targets: MeshHudTargets,
-    onNavigateUp: () -> Unit,
-    onToggleRange: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier.fillMaxWidth().safeDrawingPadding()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onNavigateUp) {
-                Icon(MeshtasticIcons.ArrowBack, stringResource(Res.string.navigate_back), tint = Color.White)
-            }
-            headingDeg?.let { heading ->
-                val headingText = formatString("%d°", heading)
-                HudLabel(
-                    headingAccuracyDeg?.let {
-                        stringResource(Res.string.mesh_hud_heading_accuracy, headingText, formatString("%d°", it))
-                    } ?: stringResource(Res.string.mesh_hud_heading, headingText),
-                )
-            }
-            if (targets.ready && !targets.scoped) {
-                Spacer(Modifier.width(8.dp))
-                HudRangeToggle(targets, onToggleRange)
-            }
-        }
-        targets.ownAccuracyM?.let { accuracy ->
-            HudLabel(
-                stringResource(
-                    Res.string.mesh_hud_own_accuracy,
-                    accuracy.toInt().coerceAtLeast(1).toDistanceString(targets.units),
-                ),
-            )
-        }
+    var previous by remember { mutableStateOf<FinderHint?>(null) }
+    LaunchedEffect(hint) {
+        val last = previous
+        previous = hint
         when {
-            !hasSensor -> HudLabel(stringResource(Res.string.compass_no_magnetometer))
-
-            waitingForSensor -> HudLabel(stringResource(Res.string.mesh_hud_waiting_sensor))
-
-            needsCalibration -> HudLabel(stringResource(Res.string.mesh_hud_heading_low_accuracy))
+            hint == FinderHint.OnTarget -> haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+            hint is FinderHint.Turn && hint.closerThan(last) ->
+                haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
         }
     }
-}
-
-@Composable
-private fun HudBottomPanel(
-    targets: MeshHudTargets,
-    hint: FinderHint?,
-    route: HudRoute?,
-    radar: @Composable () -> Unit,
-    cameraContent: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier.fillMaxWidth().safeDrawingPadding().padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        hint?.let { FinderHintLabel(it, Modifier.align(Alignment.CenterHorizontally)) }
-        route?.let { RouteLegend(it) }
-        cameraContent()
-        targets.warnings.forEach { HudLabel(stringResource(it.label())) }
-        targets.fences
-            .filter { it.inside }
-            .forEach { fence ->
-                HudLabel(
-                    if (fence.name.isNotBlank()) {
-                        stringResource(Res.string.mesh_hud_inside_geofence, fence.name)
-                    } else {
-                        stringResource(Res.string.mesh_hud_inside_unnamed_geofence)
-                    },
-                )
-            }
-        if (
-            targets.ready &&
-            route == null &&
-            targets.warnings.isEmpty() &&
-            targets.targets.isEmpty() &&
-            targets.directionUnknown.isEmpty()
-        ) {
-            HudLabel(stringResource(Res.string.mesh_hud_no_nodes))
-        }
-        if (targets.elevationApproximate && targets.targets.isNotEmpty()) {
-            HudLabel(stringResource(Res.string.mesh_hud_elevation_approximate))
-        }
-        if (targets.directionUnknown.isNotEmpty()) {
-            HudLabel(stringResource(Res.string.mesh_hud_nearby))
-            radar()
-        }
-    }
-}
-
-/** The traceroute's two colors, as on the map, and how many of its nodes have a position to draw. */
-@Composable
-private fun RouteLegend(route: HudRoute) {
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        HudLabel(stringResource(Res.string.traceroute_showing_nodes, route.mappable, route.total))
-        HudLabel(
-            stringResource(Res.string.traceroute_outgoing_route),
-            Modifier.border(2.dp, TracerouteColors.OutgoingRoute, MaterialTheme.shapes.small),
-        )
-        if (route.back != null) {
-            HudLabel(
-                stringResource(Res.string.traceroute_return_route),
-                Modifier.border(2.dp, TracerouteColors.ReturnRoute, MaterialTheme.shapes.small),
-            )
-        }
-    }
-}
-
-@Composable
-private fun FinderHintLabel(hint: FinderHint, modifier: Modifier = Modifier) {
-    val text =
-        when (hint) {
-            FinderHint.OnTarget -> stringResource(Res.string.mesh_hud_on_target)
-
-            is FinderHint.Turn ->
-                stringResource(
-                    if (hint.right) Res.string.mesh_hud_turn_right else Res.string.mesh_hud_turn_left,
-                    hint.degrees,
-                )
-
-            is FinderHint.Tilt ->
-                stringResource(
-                    if (hint.up) Res.string.mesh_hud_tilt_up else Res.string.mesh_hud_tilt_down,
-                    hint.degrees,
-                )
-        }
-    Text(
-        text = text,
-        color = Color.White,
-        style = MaterialTheme.typography.titleMedium,
-        modifier =
-        modifier
-            .semantics { liveRegion = LiveRegionMode.Polite }
-            .background(HudScrim, MaterialTheme.shapes.medium)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-    )
-}
-
-private fun HudWarning.label() = when (this) {
-    HudWarning.NO_LOCATION_PERMISSION -> Res.string.compass_no_location_permission
-    HudWarning.LOCATION_DISABLED -> Res.string.compass_location_disabled
-    HudWarning.NO_LOCATION_FIX -> Res.string.compass_no_location_fix
-}
-
-@Composable
-private fun HudRangeToggle(targets: MeshHudTargets, onToggle: () -> Unit) {
-    val text =
-        when {
-            !targets.rangeLimited -> stringResource(Res.string.mesh_hud_range_all)
-
-            targets.hiddenByRange > 0 ->
-                stringResource(Res.string.mesh_hud_range_within_hidden, targets.nearRangeText, targets.hiddenByRange)
-
-            else -> stringResource(Res.string.mesh_hud_range_within, targets.nearRangeText)
-        }
-    HudLabel(
-        text = text,
-        modifier =
-        Modifier.clip(MaterialTheme.shapes.small)
-            .toggleable(value = targets.rangeLimited, role = Role.Switch, onValueChange = { onToggle() }),
-    )
-}
-
-@Composable
-internal fun HudLabel(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text = text,
-        color = Color.White,
-        style = MaterialTheme.typography.labelMedium,
-        modifier =
-        modifier.background(HudScrim, MaterialTheme.shapes.small).padding(horizontal = 6.dp, vertical = 2.dp),
-    )
 }

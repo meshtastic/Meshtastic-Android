@@ -36,7 +36,13 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.mesh_hud_more
 import kotlin.math.abs
 
 private const val OFFSCREEN_ALPHA = 0.7f
@@ -56,7 +62,7 @@ private val StemWidth = 2.dp
 private val StemEdge = Color.Black.copy(alpha = 0.4f)
 private val OverflowPadding = 6.dp
 private val OverflowBand = 28.dp
-private val OverflowScrim = Color.Black.copy(alpha = 0.55f)
+private val OverflowScrim = Color.Black.copy(alpha = HUD_SCRIM_ALPHA)
 
 /** Where a chip went, so the draw pass can join it to its true point or point it toward the turn. */
 private class PlacedChip(val rect: IntRect, val anchor: Offset?, val edge: PinEdge?, val color: Color)
@@ -113,13 +119,15 @@ internal fun HudChipLayer(
     val placement = remember { ChipPlacement() }
     val textMeasurer = rememberTextMeasurer()
     val overflowStyle = MaterialTheme.typography.labelMedium.copy(color = Color.White)
+    val overflowTemplate = stringResource(Res.string.mesh_hud_more)
     Layout(
         content = { targets.forEach { key(it.subject.key) { chip(it) } } },
+        // A traversal group, so TalkBack reads the chips in the order each sets, nearest the center first.
         modifier =
-        modifier.drawBehind {
+        modifier.semantics { isTraversalGroup = true }.drawBehind {
             if (currentPose() == null) return@drawBehind
             placement.chips.forEach { drawStemOrArrow(it) }
-            placement.overflow.forEach { drawOverflow(it, topLimitPx(), textMeasurer, overflowStyle) }
+            placement.overflow.forEach { drawOverflow(it, topLimitPx(), textMeasurer, overflowStyle, overflowTemplate) }
         },
     ) { measurables, constraints ->
         val placeables = measurables.map { it.measure(Constraints()) }
@@ -273,8 +281,14 @@ private fun DrawScope.drawEdgeArrow(rect: IntRect, edge: PinEdge) {
     drawPath(arrow, Color.White)
 }
 
-private fun DrawScope.drawOverflow(overflow: Overflow, topLimit: Int, textMeasurer: TextMeasurer, style: TextStyle) {
-    val layout = textMeasurer.measure("+${overflow.count}", style)
+private fun DrawScope.drawOverflow(
+    overflow: Overflow,
+    topLimit: Int,
+    textMeasurer: TextMeasurer,
+    style: TextStyle,
+    template: String,
+) {
+    val layout = textMeasurer.measure(formatString(template, overflow.count), style)
     val pad = OverflowPadding.toPx()
     val boxSize = Size(layout.size.width + 2 * pad, layout.size.height + pad)
     val topLeft = Offset(overflow.centerX - boxSize.width / 2, topLimit.toFloat())

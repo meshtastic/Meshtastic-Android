@@ -131,7 +131,16 @@ data class MeshHudTargets(
     val warnings: List<HudWarning> = emptyList(),
     /** False until the first computation, so the screen does not report an empty mesh before it has looked. */
     val ready: Boolean = false,
+    /** True while the phone is carried at walking pace, so the screen can remind the user to look up. */
+    val moving: Boolean = false,
+    /** The map's precision circle setting, which the precision zones follow. */
+    val showPrecision: Boolean = true,
+    /** The target the finder is on, whether placed in the view or on the radar. */
+    val finding: HudFinding? = null,
 )
+
+/** What the finder is looking for and how far away it is. */
+data class HudFinding(val subject: HudSubject, val distanceText: String)
 
 /**
  * The HUD's view of [nodes] and [waypoints] from where the phone is. Pure, so the rules are testable without sensors:

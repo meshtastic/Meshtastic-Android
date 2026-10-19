@@ -19,4 +19,9 @@ package org.meshtastic.feature.map.hud
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-@Composable actual fun HudCameraPreview(onIntrinsics: (CameraIntrinsics?) -> Unit, modifier: Modifier) = Unit
+@Composable
+actual fun HudCameraPreview(
+    onIntrinsics: (CameraIntrinsics?) -> Unit,
+    onAvailable: (Boolean) -> Unit,
+    modifier: Modifier,
+) = Unit

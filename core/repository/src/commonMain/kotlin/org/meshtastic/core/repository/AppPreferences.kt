@@ -340,6 +340,11 @@ interface MapPrefs {
 
     /** Load the complete persisted camera, or null before the map has ever been positioned. */
     suspend fun awaitCameraPosition(): MapCameraPosition?
+
+    /** True once the user has dismissed the mesh view's first-run coaching. */
+    val meshHudCoachSeen: StateFlow<Boolean>
+
+    fun setMeshHudCoachSeen(seen: Boolean)
 }
 
 data class MapCameraPosition(val latitude: Double, val longitude: Double, val zoom: Double)

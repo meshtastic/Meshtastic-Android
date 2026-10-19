@@ -37,15 +37,22 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.model.util.waypointIconOrDefault
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.mesh_hud_radar_description
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.log10
@@ -64,7 +71,7 @@ private const val NODE_RING_ALPHA = 0.25f
 private val CompactRadar = 168.dp
 private val ExpandedRadar = 300.dp
 private val RadarDot = 30.dp
-private val RadarScrim = Color.Black.copy(alpha = 0.55f)
+private val RadarScrim = Color.Black.copy(alpha = HUD_SCRIM_ALPHA)
 
 /** The smallest of 1, 2 or 5 times a power of ten that is at least [meters]. */
 internal fun niceScaleM(meters: Double): Double {
@@ -113,7 +120,19 @@ internal fun NearbyRadar(
     val textMeasurer = rememberTextMeasurer()
     val labelStyle = MaterialTheme.typography.labelSmall.copy(color = Color.White, textAlign = TextAlign.Center)
     Layout(
-        content = { nearby.forEach { key(it.subject.key) { RadarDot(it.subject) { onOpen(it.subject) } } } },
+        content = {
+            nearby.forEach {
+                key(it.subject.key) {
+                    val description =
+                        stringResource(
+                            Res.string.mesh_hud_radar_description,
+                            it.subject.spokenName(),
+                            it.distanceM.toInt().toDistanceString(units),
+                        )
+                    RadarDot(it.subject, description) { onOpen(it.subject) }
+                }
+            }
+        },
         modifier =
         modifier.size(radarSize).clip(CircleShape).background(RadarScrim).drawBehind {
             val heading = currentHeadingDeg() ?: 0.0
@@ -164,7 +183,7 @@ internal fun NearbyRadar(
 
 /** A compact marker for the radar: the node's color and short name, or the waypoint's emoji. */
 @Composable
-private fun RadarDot(subject: HudSubject, onClick: () -> Unit) {
+private fun RadarDot(subject: HudSubject, description: String, onClick: () -> Unit) {
     val label =
         when (subject) {
             is HudSubject.NodeSubject -> subject.node.user.short_name.ifEmpty { "?" }
@@ -177,7 +196,11 @@ private fun RadarDot(subject: HudSubject, onClick: () -> Unit) {
         }
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.minimumInteractiveComponentSize().clickable(onClick = onClick),
+        modifier =
+        Modifier.minimumInteractiveComponentSize().clickable(onClick = onClick).clearAndSetSemantics {
+            contentDescription = description
+            role = Role.Button
+        },
     ) {
         when (subject) {
             is HudSubject.NodeSubject ->

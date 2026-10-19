@@ -41,7 +41,7 @@ private val ArcExtraWidth = 4.dp
 private val TrackWidth = 3.dp
 private val TrackRing = 4.dp
 private val LabelPadding = 4.dp
-private val LabelScrim = Color.Black.copy(alpha = 0.55f)
+private val LabelScrim = Color.Black.copy(alpha = HUD_SCRIM_ALPHA)
 private val Dashes = floatArrayOf(18f, 12f)
 
 /** Projects [direction], or null when it is behind the camera. */
@@ -65,6 +65,9 @@ private fun DrawScope.drawPolyline(
         drawLine(color, pa, pb, strokeWidth = width, cap = StrokeCap.Round, pathEffect = effect)
     }
 }
+
+/** The localized patterns for a route's apex tags, read in composition since drawing cannot reach resources. */
+internal class RouteLabels(val skippedTemplate: String, val snrTemplate: String)
 
 /** A small label on a dark plate, centered on [at]. */
 private fun DrawScope.drawTag(text: String, at: Offset, textMeasurer: TextMeasurer, style: TextStyle) {
@@ -91,6 +94,7 @@ internal fun DrawScope.drawRoute(
     backColor: Color,
     textMeasurer: TextMeasurer,
     labelStyle: TextStyle,
+    labels: RouteLabels,
 ) {
     listOfNotNull(route.forward, route.back).forEach { leg ->
         val color = if (leg.forward) forwardColor else backColor
@@ -120,8 +124,8 @@ internal fun DrawScope.drawRoute(
                     if (apex != null) {
                         val tag =
                             when {
-                                skipped > 0 -> "+$skipped"
-                                snr != null -> formatString("%.1f dB", snr)
+                                skipped > 0 -> formatString(labels.skippedTemplate, skipped)
+                                snr != null -> formatString(labels.snrTemplate, formatString("%.1f", snr))
                                 else -> null
                             }
                         tag?.let { drawTag(it, apex, textMeasurer, labelStyle) }
