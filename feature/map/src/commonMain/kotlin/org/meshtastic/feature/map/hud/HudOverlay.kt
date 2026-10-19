@@ -230,7 +230,12 @@ internal fun DrawScope.drawGeofence(fence: HudFence, pose: CameraPose, focalPx: 
             val fa = project(a, pose, focalPx, size.width, size.height)
             val fb = project(b, pose, focalPx, size.width, size.height)
             if (fa != null && fb != null) {
-                drawLine(FenceColor.copy(alpha = FENCE_LINE_ALPHA), Offset(fa.x, fa.y), Offset(fb.x, fb.y), FenceLineWidth.toPx())
+                drawLine(
+                    FenceColor.copy(alpha = FENCE_LINE_ALPHA),
+                    Offset(fa.x, fa.y),
+                    Offset(fb.x, fb.y),
+                    FenceLineWidth.toPx(),
+                )
             }
         }
         // The wall is decoration: drawn only where its whole segment is in front of the camera.

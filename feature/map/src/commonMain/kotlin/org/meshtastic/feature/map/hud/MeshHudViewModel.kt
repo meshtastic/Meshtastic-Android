@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -200,9 +201,9 @@ class MeshHudViewModel(
         }
 
     /**
-     * Where to place a node the database has no live position for: the position recorded with the open route, else
-     * the newest point of its open track. A remote node, or one last heard while disconnected, often has only these,
-     * and without them its chip, and the edge arrow leading to it, would never appear.
+     * Where to place a node the database has no live position for: the position recorded with the open route, else the
+     * newest point of its open track. A remote node, or one last heard while disconnected, often has only these, and
+     * without them its chip, and the edge arrow leading to it, would never appear.
      */
     private val fallbackPositions =
         combine(routeSource, trackSource) { route, track ->
@@ -219,14 +220,21 @@ class MeshHudViewModel(
             .map { state -> state.location?.let { state.copy(location = fixAverager.add(it)) } ?: state }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), replay = 1)
 
-    private val _headingOffsetDeg = MutableStateFlow(0.0)
+    /** The magnetic declination where the phone is, zero until it has a fix. */
+    private val declinationDeg =
+        location.map { state -> state.location?.let(::declinationAt) ?: 0f }.onStart { emit(0f) }.distinctUntilChanged()
 
-    /** The user's drag correction to the compass, added to the camera's heading. */
-    val headingOffsetDeg: StateFlow<Double> = _headingOffsetDeg
-
+    /**
+     * The camera's pose, always referenced to magnetic north like the rotation vector: a source that already gives true
+     * north is turned back by the declination, which every target, the tape and the radar then add once.
+     */
     val pose: StateFlow<CameraPoseState> =
-        combine(poseProvider.poseUpdates().conflate(), _headingOffsetDeg) { state, offset ->
-            state.copy(pose = state.pose?.rotatedAboutVertical(offset))
+        combine(poseProvider.poseUpdates().conflate(), declinationDeg) { state, declination ->
+            if (state.trueNorth) {
+                state.copy(pose = state.pose?.rotatedAboutVertical(-declination.toDouble()), trueNorth = false)
+            } else {
+                state
+            }
         }
             .flowOn(dispatchers.default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), CameraPoseState())
@@ -251,22 +259,26 @@ class MeshHudViewModel(
             val filter = settings.filters.toNodeMapFilter()
             val solo = settings.solo
             val shownNodes =
-                nodes.values.mapNotNull { node ->
-                    if (node.validPosition != null) {
-                        node
-                    } else {
-                        settings.fallbacks[node.num]?.let { node.copy(position = it) }?.takeIf { it.validPosition != null }
-                    }
-                }.filter { node ->
-                    node.num != myNode?.myNodeNum &&
-                        if (solo != null) {
-                            node.num == solo || node.num in settings.pinned
+                nodes.values
+                    .mapNotNull { node ->
+                        if (node.validPosition != null) {
+                            node
                         } else {
-                            HudSubject.NodeSubject(node).key == settings.focusKey ||
-                                node.num in settings.pinned ||
-                                node.passesMapFilter(filter, now)
+                            settings.fallbacks[node.num]
+                                ?.let { node.copy(position = it) }
+                                ?.takeIf { it.validPosition != null }
                         }
-                }
+                    }
+                    .filter { node ->
+                        node.num != myNode?.myNodeNum &&
+                            if (solo != null) {
+                                node.num == solo || node.num in settings.pinned
+                            } else {
+                                HudSubject.NodeSubject(node).key == settings.focusKey ||
+                                    node.num in settings.pinned ||
+                                    node.passesMapFilter(filter, now)
+                            }
+                    }
             val waypoints =
                 if (solo == null && settings.filters.showWaypoints) {
                     waypointPackets.activeWaypointPackets(now).values.mapNotNull { it.waypoint }
@@ -361,15 +373,6 @@ class MeshHudViewModel(
 
     fun setLocationPermissionGranted(granted: Boolean) {
         locationPermissionGranted.value = granted
-    }
-
-    /** Nudges the heading correction by [deltaDeg], kept within one turn either way. */
-    fun nudgeHeading(deltaDeg: Double) {
-        _headingOffsetDeg.value = signedTurnDeg(0.0, _headingOffsetDeg.value + deltaDeg)
-    }
-
-    fun resetHeadingOffset() {
-        _headingOffsetDeg.value = 0.0
     }
 
     fun toggleRangeLimit() {

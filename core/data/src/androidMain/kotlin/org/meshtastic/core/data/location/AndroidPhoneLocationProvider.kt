@@ -22,10 +22,10 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
 import androidx.core.location.LocationCompat
-import androidx.core.location.altitude.AltitudeConverterCompat
 import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
+import androidx.core.location.altitude.AltitudeConverterCompat
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

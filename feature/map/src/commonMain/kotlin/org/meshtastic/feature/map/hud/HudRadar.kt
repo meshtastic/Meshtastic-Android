@@ -85,8 +85,8 @@ internal fun radarOffset(target: NearbyTarget, headingDeg: Double, scaleM: Doubl
 /**
  * A heading-up plan view of the targets too close to point at, with the phone at the center inside its own accuracy
  * ring and each target inside its precision ring. Tilting the phone toward the ground [expanded]s it, since that is the
- * posture of someone looking for something close by. The open [route] and [track] are drawn under the dots. The heading is read in layout and draw, so it turns with the
- * camera without recomposing.
+ * posture of someone looking for something close by. The open [route] and [track] are drawn under the dots. The heading
+ * is read in layout and draw, so it turns with the camera without recomposing.
  */
 @Suppress("LongMethod")
 @Composable

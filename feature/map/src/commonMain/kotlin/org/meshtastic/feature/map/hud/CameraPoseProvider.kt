@@ -20,13 +20,15 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * [calibration] is the platform's sensor status, 3 high down to 0 unreliable, and -1 before the first reading.
- * [headingAccuracyDeg] is the sensor's own estimate of its heading error, null when it gives none.
+ * [headingAccuracyDeg] is the sensor's own estimate of its heading error, null when it gives none. [trueNorth] is true
+ * when the source already applied the declination, so the pose is referenced to true north rather than magnetic.
  */
 data class CameraPoseState(
     val pose: CameraPose? = null,
     val hasSensor: Boolean = true,
     val calibration: Int = CALIBRATION_UNKNOWN,
     val headingAccuracyDeg: Double? = null,
+    val trueNorth: Boolean = false,
 )
 
 const val CALIBRATION_UNKNOWN = -1

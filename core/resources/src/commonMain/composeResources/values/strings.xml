@@ -1149,14 +1149,12 @@
     <string name="mesh_beacon_target_default">Default</string>
     <string name="mesh_beacon_target_remove">Remove target</string>
     <string name="mesh_beacon_targets">Broadcast targets</string>
-    <string name="mesh_hud_aligned">Aligned %1$s · reset</string>
     <string name="mesh_hud_camera_rationale">Allow camera access to see nodes over the camera view.</string>
     <string name="mesh_hud_cardinal_east">E</string>
     <string name="mesh_hud_cardinal_north">N</string>
     <string name="mesh_hud_cardinal_south">S</string>
     <string name="mesh_hud_cardinal_west">W</string>
     <string name="mesh_hud_distance_no_altitude">%1$s · no altitude</string>
-    <string name="mesh_hud_drag_to_align">Drag sideways to line a chip up with what you see</string>
     <string name="mesh_hud_elevation_approximate">Elevation is approximate</string>
     <string name="mesh_hud_find">Find</string>
     <string name="mesh_hud_heading">Heading %1$s</string>

@@ -1107,14 +1107,12 @@ mesh_beacon_target_channel_index
 mesh_beacon_target_default
 mesh_beacon_target_remove
 mesh_beacon_targets
-mesh_hud_aligned
 mesh_hud_camera_rationale
 mesh_hud_cardinal_east
 mesh_hud_cardinal_north
 mesh_hud_cardinal_south
 mesh_hud_cardinal_west
 mesh_hud_distance_no_altitude
-mesh_hud_drag_to_align
 mesh_hud_elevation_approximate
 mesh_hud_find
 mesh_hud_heading

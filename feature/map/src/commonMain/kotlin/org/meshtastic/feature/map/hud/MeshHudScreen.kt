@@ -19,8 +19,6 @@ package org.meshtastic.feature.map.hud
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -51,7 +49,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
@@ -73,13 +70,11 @@ import org.meshtastic.core.resources.compass_location_disabled
 import org.meshtastic.core.resources.compass_no_location_fix
 import org.meshtastic.core.resources.compass_no_location_permission
 import org.meshtastic.core.resources.compass_no_magnetometer
-import org.meshtastic.core.resources.mesh_hud_aligned
 import org.meshtastic.core.resources.mesh_hud_camera_rationale
 import org.meshtastic.core.resources.mesh_hud_cardinal_east
 import org.meshtastic.core.resources.mesh_hud_cardinal_north
 import org.meshtastic.core.resources.mesh_hud_cardinal_south
 import org.meshtastic.core.resources.mesh_hud_cardinal_west
-import org.meshtastic.core.resources.mesh_hud_drag_to_align
 import org.meshtastic.core.resources.mesh_hud_elevation_approximate
 import org.meshtastic.core.resources.mesh_hud_heading
 import org.meshtastic.core.resources.mesh_hud_heading_accuracy
@@ -112,7 +107,6 @@ import org.meshtastic.core.ui.util.rememberCameraPermissionState
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.proto.Waypoint
-import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -133,10 +127,6 @@ private const val ON_TARGET_DEG = 5.0
 private const val HINT_STEP_DEG = 5
 private val HudScrim = Color.Black.copy(alpha = 0.55f)
 private val TapeGap = 4.dp
-private const val HALF_TURN_DEG = 180.0
-
-/** A heading correction smaller than this is not worth a reset control. */
-private const val MIN_SHOWN_OFFSET_DEG = 0.5
 
 /** Pitched further down than this, the user is looking for something close by, so the radar grows. */
 private const val POINTING_DOWN_DEG = -45.0
@@ -218,7 +208,6 @@ fun MeshHudScreen(
         }
     }
     val hasSensor by remember { derivedStateOf { poseState.value.hasSensor } }
-    val headingOffsetDeg by viewModel.headingOffsetDeg.collectAsStateWithLifecycle()
     val waitingForSensor by remember {
         derivedStateOf { sensorSilent && poseState.value.hasSensor && poseState.value.pose == null }
     }
@@ -245,17 +234,7 @@ fun MeshHudScreen(
 
         if (camera.isGranted) HudCameraPreview(onIntrinsics = { intrinsics = it }, modifier = Modifier.fillMaxSize())
 
-        val pxPerDeg = focalPx * (PI / HALF_TURN_DEG).toFloat()
-        // Dragging the empty view sideways lines the overlay up with a landmark, correcting a compass that metal or a
-        // fixed accuracy report leaves off. Chips sit above and take their own taps.
-        Canvas(
-            Modifier.fillMaxSize().pointerInput(pxPerDeg) {
-                detectHorizontalDragGestures { change, dragAmount ->
-                    change.consume()
-                    viewModel.nudgeHeading(-dragAmount / pxPerDeg.toDouble())
-                }
-            },
-        ) {
+        Canvas(Modifier.fillMaxSize()) {
             val state = poseState.value
             val pose = state.pose ?: return@Canvas
             drawHorizon(pose, focalPx)
@@ -310,8 +289,6 @@ fun MeshHudScreen(
             headingDeg = headingDeg,
             headingAccuracyDeg = headingAccuracyDeg,
             hasSensor = hasSensor,
-            headingOffsetDeg = headingOffsetDeg,
-            onResetHeading = viewModel::resetHeadingOffset,
             needsCalibration = needsCalibration,
             waitingForSensor = waitingForSensor,
             targets = targets,
@@ -390,8 +367,6 @@ private fun HudTopBar(
     headingDeg: Int?,
     headingAccuracyDeg: Int?,
     hasSensor: Boolean,
-    headingOffsetDeg: Double,
-    onResetHeading: () -> Unit,
     needsCalibration: Boolean,
     waitingForSensor: Boolean,
     targets: MeshHudTargets,
@@ -425,25 +400,12 @@ private fun HudTopBar(
                 ),
             )
         }
-        if (abs(headingOffsetDeg) >= MIN_SHOWN_OFFSET_DEG) {
-            HudLabel(
-                text =
-                stringResource(
-                    Res.string.mesh_hud_aligned,
-                    (if (headingOffsetDeg >= 0) "+" else "-") + formatString("%.0f°", abs(headingOffsetDeg)),
-                ),
-                modifier = Modifier.clip(MaterialTheme.shapes.small).clickable(onClick = onResetHeading),
-            )
-        }
         when {
             !hasSensor -> HudLabel(stringResource(Res.string.compass_no_magnetometer))
 
             waitingForSensor -> HudLabel(stringResource(Res.string.mesh_hud_waiting_sensor))
 
-            needsCalibration -> {
-                HudLabel(stringResource(Res.string.mesh_hud_heading_low_accuracy))
-                HudLabel(stringResource(Res.string.mesh_hud_drag_to_align))
-            }
+            needsCalibration -> HudLabel(stringResource(Res.string.mesh_hud_heading_low_accuracy))
         }
     }
 }

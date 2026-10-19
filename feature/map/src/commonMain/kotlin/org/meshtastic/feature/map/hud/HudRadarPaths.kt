@@ -89,8 +89,7 @@ private fun DrawScope.drawRadarTrack(track: HudTrack, at: (PathPoint) -> Offset)
     val points = track.points.map { at(it.point) }
     if (points.isEmpty()) return
     val base = Color(track.color)
-    fun alphaAt(index: Int) =
-        RADAR_TRACK_MIN_ALPHA + (1 - RADAR_TRACK_MIN_ALPHA) * (index + 1) / points.size.toFloat()
+    fun alphaAt(index: Int) = RADAR_TRACK_MIN_ALPHA + (1 - RADAR_TRACK_MIN_ALPHA) * (index + 1) / points.size.toFloat()
     points.zipWithNext().forEachIndexed { i, (a, b) ->
         drawLine(base.copy(alpha = alphaAt(i + 1)), a, b, RadarPathWidth.toPx(), StrokeCap.Round)
     }

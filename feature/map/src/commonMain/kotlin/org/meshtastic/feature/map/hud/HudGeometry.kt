@@ -60,7 +60,7 @@ data class CameraPose(val right: Vec3, val up: Vec3, val forward: Vec3) {
         }
 }
 
-/** This pose turned clockwise about the vertical by [deg], as a manual heading correction applies it. */
+/** This pose turned clockwise about the vertical by [deg]. */
 fun CameraPose.rotatedAboutVertical(deg: Double): CameraPose {
     if (deg == 0.0) return this
     val c = cos(deg.toRadians())
