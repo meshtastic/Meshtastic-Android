@@ -29,7 +29,10 @@ actual fun rememberMeshHudSupported(): Boolean {
     val context = LocalContext.current
     return remember(context) {
         val sensors = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
-        context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) &&
-            sensors?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) != null
+        val hasOrientation =
+            sensors?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) != null ||
+                sensors?.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR) != null
+        // The view binds the back camera, which FEATURE_CAMERA names; FEATURE_CAMERA_ANY is met by a front one alone.
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA) && hasOrientation
     }
 }

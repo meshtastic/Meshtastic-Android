@@ -22,84 +22,193 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
+import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.PowerManager
 import android.view.Display
 import android.view.Surface
+import androidx.annotation.RequiresApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import org.koin.core.annotation.Single
+import java.util.concurrent.Executor
 import kotlin.math.max
 import kotlin.math.sqrt
 
 private const val QUATERNION_SIZE = 4
-private const val ROTATION_MATRIX_SIZE = 9
 
 private const val HEADING_ACCURACY_INDEX = 4
 private const val NINETY_FIVE_PERCENT_SIGMAS = 1.96
+private const val MAX_HEADING_ERROR_DEG = 180f
 
+/**
+ * Prefers [fusedOrientation] and falls back to the platform rotation vector, or the geomagnetic one on devices without
+ * a gyroscope. Running hot, either source is slowed.
+ */
 @Single
-class AndroidCameraPoseProvider(private val context: Context) : CameraPoseProvider {
+class AndroidCameraPoseProvider(
+    private val context: Context,
+    private val fusedOrientation: FusedOrientationSource,
+) : CameraPoseProvider {
 
     override fun poseUpdates(): Flow<CameraPoseState> = callbackFlow {
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
-        val rotationSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
-        if (sensorManager == null || rotationSensor == null) {
-            trySend(CameraPoseState(hasSensor = false))
-            awaitClose {}
-            return@callbackFlow
-        }
-        val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
-
-        val smoothed = FloatArray(QUATERNION_SIZE)
-        val sample = FloatArray(QUATERNION_SIZE)
-        val matrix = FloatArray(ROTATION_MATRIX_SIZE)
-        val filter = OneEuroQuaternionFilter()
-        // Some fusions (measured on a Pixel 9 Pro) report a fixed pi/6 here rather than an estimate, so the value is
-        // trusted only once it has moved.
-        var firstAccuracy: Float? = null
-        var accuracyIsLive = false
-        // Sensor callbacks get their own thread, away from the main thread that draws the overlay.
+        // Every callback runs on this one thread, away from the main thread that draws the overlay, so the session
+        // needs no locking.
         val thread = HandlerThread("mesh-view-pose").apply { start() }
+        val handler = Handler(thread.looper)
+        val session = PoseSession(context, fusedOrientation, handler) { trySend(it) }
+        handler.post(session::start)
+        awaitClose {
+            handler.post {
+                session.stop()
+                thread.quitSafely()
+            }
+        }
+    }
+}
 
-        val listener =
-            object : SensorEventListener {
-                override fun onSensorChanged(event: SensorEvent) {
-                    event.toQuaternion(sample)
-                    filter.filter(sample, event.timestamp, smoothed)
-                    SensorManager.getRotationMatrixFromVector(matrix, smoothed)
-                    val rotation = displayManager?.getDisplay(Display.DEFAULT_DISPLAY)?.rotation ?: Surface.ROTATION_0
-                    trySend(
-                        CameraPoseState(
-                            pose = matrix.toCameraPose(rotation),
-                            calibration = event.accuracy,
-                            headingAccuracyDeg =
-                            event.headingAccuracyRad()?.let { raw ->
-                                if (firstAccuracy == null) firstAccuracy = raw
-                                if (raw != firstAccuracy) accuracyIsLive = true
-                                // The sensor's bound holds 95% of the time; scale it to the one-sigma figure
-                                // every other accuracy on screen uses.
-                                raw.takeIf { accuracyIsLive }
-                                    ?.let { Math.toDegrees(it.toDouble()) / NINETY_FIVE_PERCENT_SIGMAS }
-                            },
-                        ),
-                    )
-                }
+private class PoseSession(
+    context: Context,
+    private val fused: FusedOrientationSource,
+    private val handler: Handler,
+    private val send: (CameraPoseState) -> Unit,
+) {
+    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+    private val rotationSensor =
+        sensorManager?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+            ?: sensorManager?.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR)
+    private val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
+    private val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+    private val executor = Executor { handler.post(it) }
 
-                override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) = Unit
+    private val sample = FloatArray(QUATERNION_SIZE)
+    private val smoothed = FloatArray(QUATERNION_SIZE)
+    private val matrix = FloatArray(ROTATION_MATRIX_SIZE)
+    private var filter = OneEuroQuaternionFilter()
+    private var last = CameraPoseState()
+    private var thermal = HudThermal.NORMAL
+    private var fusedHandle: AutoCloseable? = null
+    private var sensorRegistered = false
+    private var stopThermal: (() -> Unit)? = null
+    private var stopped = false
+
+    // Some fusions (measured on a Pixel 9 Pro) report a fixed pi/6 here rather than an estimate, so the value is
+    // trusted only once it has moved.
+    private var firstAccuracy: Float? = null
+    private var accuracyIsLive = false
+
+    private val reduced
+        get() = thermal != HudThermal.NORMAL
+
+    private val sensorListener =
+        object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                event.toQuaternion(sample)
+                publish(sample, event.timestamp, event.accuracy, event.headingAccuracyDeg(), trueNorth = false)
             }
 
-        sensorManager.registerListener(
-            listener,
-            rotationSensor,
-            SensorManager.SENSOR_DELAY_GAME,
-            Handler(thread.looper),
-        )
-        awaitClose {
-            sensorManager.unregisterListener(listener)
-            thread.quitSafely()
+            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) = Unit
         }
+
+    private val fusedListener =
+        FusedOrientationSource.Listener { attitude, headingErrorDeg, trueNorth, timestampNs ->
+            if (!stopped && fusedHandle != null) {
+                val error = headingErrorDeg.toOneSigmaDeg()
+                // An invalid heading error means an uncalibrated compass, so it asks for calibration like status 0.
+                val calibration = if (error == null) SensorManager.SENSOR_STATUS_UNRELIABLE else CALIBRATION_UNKNOWN
+                publish(attitude, timestampNs, calibration, error, trueNorth)
+            }
+        }
+
+    fun start() {
+        val power = powerManager
+        if (power != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            stopThermal = power.watchThermal(executor, ::onThermal)
+        }
+        startOrientation()
+    }
+
+    fun stop() {
+        stopped = true
+        fusedHandle?.close()
+        fusedHandle = null
+        if (sensorRegistered) sensorManager?.unregisterListener(sensorListener)
+        sensorRegistered = false
+        stopThermal?.invoke()
+    }
+
+    private fun startOrientation() {
+        var handle: AutoCloseable? = null
+        handle = fused.start(reduced, executor, fusedListener) { onFusedFailure(handle) }
+        fusedHandle = handle
+        if (handle == null) startSensor()
+    }
+
+    private fun onFusedFailure(handle: AutoCloseable?) {
+        if (stopped || handle == null || handle !== fusedHandle) return
+        fusedHandle = null
+        filter = OneEuroQuaternionFilter()
+        startSensor()
+    }
+
+    private fun startSensor() {
+        val sensor = rotationSensor
+        val delay = if (reduced) SensorManager.SENSOR_DELAY_UI else SensorManager.SENSOR_DELAY_GAME
+        sensorRegistered =
+            sensor != null && sensorManager?.registerListener(sensorListener, sensor, delay, handler) == true
+        if (!sensorRegistered) emit(CameraPoseState(hasSensor = false))
+    }
+
+    private fun onThermal(next: HudThermal) {
+        if (stopped || next == thermal) return
+        val wasReduced = reduced
+        thermal = next
+        if (reduced != wasReduced) restartOrientation()
+        emit(last)
+    }
+
+    private fun restartOrientation() {
+        val handle = fusedHandle
+        if (handle != null) {
+            fusedHandle = null
+            handle.close()
+            startOrientation()
+        } else if (sensorRegistered) {
+            sensorManager?.unregisterListener(sensorListener)
+            startSensor()
+        }
+    }
+
+    private fun publish(
+        attitude: FloatArray,
+        timestampNs: Long,
+        calibration: Int,
+        headingAccuracyDeg: Double?,
+        trueNorth: Boolean,
+    ) {
+        filter.filter(attitude, timestampNs, smoothed)
+        val rotation = displayManager?.getDisplay(Display.DEFAULT_DISPLAY)?.rotation ?: Surface.ROTATION_0
+        emit(
+            CameraPoseState(
+                pose = attitudeToCameraPose(smoothed, rotation, matrix),
+                calibration = calibration,
+                headingAccuracyDeg = headingAccuracyDeg,
+                trueNorth = trueNorth,
+            ),
+        )
+    }
+
+    private fun emit(state: CameraPoseState) {
+        last = state.copy(thermal = thermal)
+        send(last)
+    }
+
+    private fun SensorEvent.headingAccuracyDeg(): Double? = headingAccuracyRad()?.let { raw ->
+        if (firstAccuracy == null) firstAccuracy = raw
+        if (raw != firstAccuracy) accuracyIsLive = true
+        raw.takeIf { accuracyIsLive }?.let { Math.toDegrees(it.toDouble()) / NINETY_FIVE_PERCENT_SIGMAS }
     }
 }
 
@@ -118,23 +227,21 @@ private fun SensorEvent.toQuaternion(out: FloatArray) {
 /** The rotation vector's heading error estimate, which it reports in radians and as -1 when it has none. */
 private fun SensorEvent.headingAccuracyRad(): Float? = values.getOrNull(HEADING_ACCURACY_INDEX)?.takeIf { it >= 0f }
 
-/**
- * The matrix maps device coordinates into east-north-up, so its columns are the device axes in that frame. The back
- * camera looks down device -Z, and which device axis is the screen's right depends on the display rotation.
- */
-@Suppress("MagicNumber")
-private fun FloatArray.toCameraPose(displayRotation: Int): CameraPose {
-    val deviceX = Vec3(this[0].toDouble(), this[3].toDouble(), this[6].toDouble())
-    val deviceY = Vec3(this[1].toDouble(), this[4].toDouble(), this[7].toDouble())
-    val forward = Vec3(-this[2].toDouble(), -this[5].toDouble(), -this[8].toDouble())
-    val (right, up) =
-        when (displayRotation) {
-            Surface.ROTATION_90 -> -deviceY to deviceX
-            Surface.ROTATION_180 -> -deviceX to -deviceY
-            Surface.ROTATION_270 -> deviceY to -deviceX
-            else -> deviceX to deviceY
-        }
-    return CameraPose(right = right, up = up, forward = forward)
+/** A 95% heading error bound in degrees, as the one-sigma figure every other accuracy on screen uses. */
+private fun Float.toOneSigmaDeg(): Double? =
+    takeIf { it >= 0f && it < MAX_HEADING_ERROR_DEG }?.let { it / NINETY_FIVE_PERCENT_SIGMAS }
+
+private fun Int.toHudThermal(): HudThermal = when {
+    this >= PowerManager.THERMAL_STATUS_CRITICAL -> HudThermal.CRITICAL
+    this >= PowerManager.THERMAL_STATUS_SEVERE -> HudThermal.HOT
+    else -> HudThermal.NORMAL
 }
 
-private operator fun Vec3.unaryMinus() = Vec3(-x, -y, -z)
+/** Reports the current thermal status, then every change, and returns the call that stops it. */
+@RequiresApi(Build.VERSION_CODES.Q)
+private fun PowerManager.watchThermal(executor: Executor, onChange: (HudThermal) -> Unit): () -> Unit {
+    onChange(currentThermalStatus.toHudThermal())
+    val listener = PowerManager.OnThermalStatusChangedListener { onChange(it.toHudThermal()) }
+    addThermalStatusListener(executor, listener)
+    return { removeThermalStatusListener(listener) }
+}
