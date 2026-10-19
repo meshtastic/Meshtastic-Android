@@ -41,7 +41,7 @@ runs:
       run: mkdir -p ~/.gradle && cp .github/ci-gradle.properties ~/.gradle/gradle.properties
 
     - name: Set up JDK 25
-      uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+      uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
       with:
         java-version: '25'
         distribution: ${{ inputs.jdk_distribution }}
@@ -51,7 +51,7 @@ runs:
     # running Gradle; toolchains.xml still lists JBR.
     - name: Set up JetBrains JDK 25
       if: inputs.install_jetbrains_jdk == 'true'
-      uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+      uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
       with:
         java-version: '25'
         distribution: 'jetbrains'
