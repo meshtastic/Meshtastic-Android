@@ -131,6 +131,7 @@ fun NodeListScreen(
     onNavigateToConnections: () -> Unit = {},
     onEditStatusMessage: () -> Unit = {},
     navigateToMeshView: (Int) -> Unit = {},
+    navigateToCompass: (Int) -> Unit = {},
 ) {
     val showToast = org.meshtastic.core.ui.util.rememberShowToastResource()
     val scope = rememberCoroutineScope()
@@ -276,6 +277,7 @@ fun NodeListScreen(
                     onRemove = { viewModel.removeNodes(listOf(node)) },
                     onDismiss = { expanded = false },
                     onOpenMeshView = { navigateToMeshView(node.num) },
+                    onOpenCompass = { navigateToCompass(node.num) },
                 )
             }
         }

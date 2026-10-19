@@ -72,6 +72,7 @@ fun NodeDetailScreen(
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
     compassViewModel: CompassViewModel? = null,
+    openCompass: Boolean = false,
 ) {
     SideEffect(nodeId) { viewModel.start(nodeId) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -85,6 +86,7 @@ fun NodeDetailScreen(
         onNavigate = onNavigate,
         onNavigateUp = onNavigateUp,
         compassViewModel = compassViewModel,
+        openCompass = openCompass,
     )
 }
 
@@ -98,10 +100,20 @@ private fun NodeDetailScaffold(
     onNavigate: (Route) -> Unit,
     onNavigateUp: () -> Unit,
     compassViewModel: CompassViewModel? = null,
+    openCompass: Boolean = false,
 ) {
     var activeOverlay by remember { mutableStateOf<NodeDetailOverlay?>(null) }
     // Saved, unlike the overlays: a rotation must not close the model, which the user may be turning the phone for.
     var deviceModelOpen by rememberSaveable { mutableStateOf(false) }
+    // Once per arrival: closing the sheet, or coming back to this screen, must not reopen it.
+    var compassOpened by rememberSaveable { mutableStateOf(false) }
+    val compassNode = uiState.node?.takeIf { openCompass && !compassOpened && it.validPosition != null }
+    LaunchedEffect(compassNode?.num) {
+        compassNode?.let {
+            activeOverlay = NodeDetailOverlay.Compass(it.num, uiState.metricsState.displayUnits)
+            compassOpened = true
+        }
+    }
     val actualCompassViewModel = compassViewModel
     val compassUiState by
         actualCompassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
