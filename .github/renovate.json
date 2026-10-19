@@ -147,19 +147,6 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Mirror gradle-wrapper.properties bumps into the vendored Gradle distribution URL in the verify-flatpak offline manifest (see PRs #6777/#6782, where a wrapper bump without this file broke both build-flatpak arches). Shares depName 'gradle' with the gradle-wrapper manager so both files update in the same Renovate branch/PR. The sha256 line below the URL cannot be auto-updated (the gradle-version datasource has no digest support and the hosted app disallows postUpgradeTasks); the fail-fast guard in verify-flatpak.yml's generate-sources job holds that PR red until the sha256 is copied from distributionSha256Sum.",
-      "managerFilePatterns": [
-        "/^scripts/verify-flatpak/desktop-offline\\.yaml$/"
-      ],
-      "matchStrings": [
-        "services\\.gradle\\.org/distributions/gradle-(?<currentValue>\\d+(?:\\.\\d+)*)-bin\\.zip"
-      ],
-      "depNameTemplate": "gradle",
-      "datasourceTemplate": "gradle-version",
-      "versioningTemplate": "gradle"
-    },
-    {
-      "customType": "regex",
       "description": "ktlint's version is a bare [versions] entry that only Spotless reads, so the gradle manager cannot tie it to an artifact.",
       "managerFilePatterns": [
         "/^gradle/libs\\.versions\\.toml$/"
