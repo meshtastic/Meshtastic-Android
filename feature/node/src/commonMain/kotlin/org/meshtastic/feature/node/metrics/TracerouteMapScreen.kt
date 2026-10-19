@@ -53,7 +53,7 @@ import org.meshtastic.core.resources.traceroute_showing_nodes
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Route
-import org.meshtastic.core.ui.icon.ViewInAr
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
@@ -122,7 +122,7 @@ private fun TracerouteMapScaffold(
                     onOpenMeshHud?.let { onClick ->
                         IconButton(onClick = onClick) {
                             Icon(
-                                MeshtasticIcons.ViewInAr,
+                                MeshtasticIcons.CenterFocusStrong,
                                 contentDescription = stringResource(Res.string.mesh_hud_open),
                             )
                         }

@@ -43,7 +43,7 @@ import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.FileDownload
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
-import org.meshtastic.core.ui.icon.ViewInAr
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 
@@ -77,7 +77,7 @@ fun PositionLogScreen(
             if (hasTrackPoint && onOpenMeshHud != null) {
                 IconButton(onClick = onOpenMeshHud) {
                     Icon(
-                        imageVector = MeshtasticIcons.ViewInAr,
+                        imageVector = MeshtasticIcons.CenterFocusStrong,
                         contentDescription = stringResource(Res.string.mesh_hud_open),
                     )
                 }

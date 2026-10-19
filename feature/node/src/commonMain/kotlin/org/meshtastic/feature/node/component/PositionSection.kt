@@ -48,7 +48,7 @@ import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.Compass
 import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.ViewInAr
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
 import org.meshtastic.core.ui.util.rememberMeshHudSupported
@@ -93,7 +93,7 @@ internal fun PositionInlineContent(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.large,
         ) {
-            Icon(MeshtasticIcons.ViewInAr, null, Modifier.size(18.dp))
+            Icon(MeshtasticIcons.CenterFocusStrong, null, Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text(
                 text = stringResource(Res.string.mesh_hud_open),

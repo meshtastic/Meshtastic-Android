@@ -25,6 +25,7 @@ import org.meshtastic.core.resources.ic_bluetooth_connected
 import org.meshtastic.core.resources.ic_bluetooth_searching
 import org.meshtastic.core.resources.ic_build
 import org.meshtastic.core.resources.ic_cached
+import org.meshtastic.core.resources.ic_center_focus_strong
 import org.meshtastic.core.resources.ic_display_settings
 import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.ic_mesh_radio
@@ -49,6 +50,11 @@ val MeshtasticIcons.ViewInAr: ImageVector
 /** Material Symbols "photo_camera": capture the AR view. */
 val MeshtasticIcons.PhotoCamera: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_photo_camera)
+
+/** Material Symbols "center_focus_strong", a viewfinder: the camera mesh view. */
+val MeshtasticIcons.CenterFocusStrong: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_center_focus_strong)
+
 val MeshtasticIcons.BluetoothConnected: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_bluetooth_connected)
 val MeshtasticIcons.BluetoothSearching: ImageVector

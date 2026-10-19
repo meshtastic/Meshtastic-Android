@@ -75,7 +75,7 @@ import org.meshtastic.core.ui.component.ElevationInfo
 import org.meshtastic.core.ui.icon.ErrorOutline
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
-import org.meshtastic.core.ui.icon.ViewInAr
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassWarning
 import kotlin.math.PI
@@ -173,7 +173,7 @@ fun CompassSheetContent(
 
         onOpenMeshHud?.let { onClick ->
             FilledTonalButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-                Icon(imageVector = MeshtasticIcons.ViewInAr, contentDescription = null)
+                Icon(imageVector = MeshtasticIcons.CenterFocusStrong, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(Res.string.mesh_hud_open))
             }
