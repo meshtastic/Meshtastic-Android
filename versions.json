@@ -12,6 +12,12 @@
       "seq": 1
     },
     {
+      "dir": "v2.8.3-closed.3",
+      "version": "2.8.3",
+      "track": "closed",
+      "seq": 3
+    },
+    {
       "dir": "v2.8.3-closed.2",
       "version": "2.8.3",
       "track": "closed",
