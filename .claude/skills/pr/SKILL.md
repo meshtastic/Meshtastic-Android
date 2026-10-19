@@ -30,5 +30,4 @@ gh pr create --draft --base <target> --title "<type>: <summary>" --body-file <(p
 ```
 - `--base` is the target branch chosen in pre-flight (`main` unless told otherwise) — always pass it explicitly; omitting it silently uses the repo default.
 - Draft by default; only `--ready` if explicitly asked.
-- End the body with: `🤖 Generated with [Claude Code](https://claude.com/claude-code)`
 - Report the PR URL as a markdown link.
