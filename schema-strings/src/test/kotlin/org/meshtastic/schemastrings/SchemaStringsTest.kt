@@ -70,7 +70,7 @@ class SchemaStringsTest {
 
     @Test
     fun `the schema declares only the unit symbols the app can name`() {
-        assertEquals(setOf("dBm", "kHz", "m", "ms", "s"), SchemaCatalog.units())
+        assertEquals(setOf("dBm", "kHz", "MHz", "m", "ms", "s"), SchemaCatalog.units())
     }
 
     @Test
