@@ -31,8 +31,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Node
@@ -41,8 +41,8 @@ import org.meshtastic.core.resources.add_favorite
 import org.meshtastic.core.resources.ignore
 import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.resources.message
-import org.meshtastic.core.resources.open_compass
 import org.meshtastic.core.resources.mute_notifications
+import org.meshtastic.core.resources.open_compass
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_favorite
 import org.meshtastic.core.resources.remove_ignored

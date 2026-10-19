@@ -77,7 +77,9 @@ internal fun clockHour(bearingDeg: Double, headingDeg: Double): Int {
 /** What TalkBack calls a subject: a node's long name, a waypoint's name, falling back to what the chip shows. */
 internal fun HudSubject.spokenName(): String = when (this) {
     is HudSubject.NodeSubject -> node.user.long_name.ifBlank { node.user.short_name }
-    is HudSubject.WaypointSubject -> waypoint.name.ifBlank { waypoint.icon.waypointIconOrDefault().toCodePointString() }
+
+    is HudSubject.WaypointSubject ->
+        waypoint.name.ifBlank { waypoint.icon.waypointIconOrDefault().toCodePointString() }
 }
 
 /**
@@ -92,12 +94,14 @@ internal fun HudChip(
     onToggleFocus: () -> Unit,
 ) {
     // Derived, so the chip recomposes when its clock hour changes rather than at the sensor rate.
-    val hour by remember(target.bearingDeg) {
-        derivedStateOf { currentPose()?.let { clockHour(target.bearingDeg, it.azimuthDeg) } }
-    }
+    val hour by
+        remember(target.bearingDeg) {
+            derivedStateOf { currentPose()?.let { clockHour(target.bearingDeg, it.azimuthDeg) } }
+        }
     val distanceText = chipDistanceText(target)
-    val description =
-        hour?.let { stringResource(Res.string.mesh_hud_chip_description, target.subject.spokenName(), distanceText, it) }
+    val description = hour?.let {
+        stringResource(Res.string.mesh_hud_chip_description, target.subject.spokenName(), distanceText, it)
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier =

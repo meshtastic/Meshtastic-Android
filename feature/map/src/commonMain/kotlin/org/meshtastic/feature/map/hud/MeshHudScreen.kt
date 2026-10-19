@@ -395,6 +395,7 @@ private fun FinderHaptics(hint: FinderHint?) {
         previous = hint
         when {
             hint == FinderHint.OnTarget -> haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+
             hint is FinderHint.Turn && hint.closerThan(last) ->
                 haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
         }

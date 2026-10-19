@@ -161,9 +161,7 @@ internal fun HudTopBar(
         }
         when {
             !status.hasSensor -> HudLabel(stringResource(Res.string.compass_no_magnetometer))
-
             status.waitingForSensor -> HudLabel(stringResource(Res.string.mesh_hud_waiting_sensor))
-
             status.needsCalibration -> HudLabel(stringResource(Res.string.mesh_hud_heading_low_accuracy))
         }
         when (status.thermal) {
@@ -214,13 +212,7 @@ internal fun HudBottomPanel(
                     },
                 )
             }
-        if (
-            targets.ready &&
-            route == null &&
-            targets.warnings.isEmpty() &&
-            targets.targets.isEmpty() &&
-            targets.directionUnknown.isEmpty()
-        ) {
+        if (targets.ready && route == null && targets.showsNothing) {
             HudLabel(stringResource(Res.string.mesh_hud_no_nodes))
         }
         if (targets.elevationApproximate && targets.targets.isNotEmpty()) {
@@ -263,7 +255,10 @@ private fun LocationWarnings(
  */
 @Composable
 internal fun HudCoach(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxSize().background(Color.Black.copy(alpha = COACH_BACKDROP_ALPHA)), contentAlignment = Alignment.Center) {
+    Box(
+        modifier.fillMaxSize().background(Color.Black.copy(alpha = COACH_BACKDROP_ALPHA)),
+        contentAlignment = Alignment.Center,
+    ) {
         Column(
             modifier =
             Modifier.widthIn(max = CoachMaxWidth)

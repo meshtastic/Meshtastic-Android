@@ -90,6 +90,21 @@ fun NodeDetailScreen(
     )
 }
 
+/** Opens the compass sheet once per arrival: closing it, or coming back to this screen, must not reopen it. */
+@Suppress("UnnecessaryLaunchedEffect") // Fires once per node, not once per recomposition.
+@Composable
+private fun OpenCompassOnArrival(uiState: NodeDetailUiState, open: (NodeDetailOverlay) -> Unit) {
+    var opened by rememberSaveable { mutableStateOf(false) }
+    val currentOpen by rememberUpdatedState(open)
+    val node = uiState.node?.takeIf { !opened && it.validPosition != null }
+    LaunchedEffect(node?.num) {
+        node?.let {
+            currentOpen(NodeDetailOverlay.Compass(it.num, uiState.metricsState.displayUnits))
+            opened = true
+        }
+    }
+}
+
 @Composable
 @Suppress("LongParameterList")
 private fun NodeDetailScaffold(
@@ -105,15 +120,7 @@ private fun NodeDetailScaffold(
     var activeOverlay by remember { mutableStateOf<NodeDetailOverlay?>(null) }
     // Saved, unlike the overlays: a rotation must not close the model, which the user may be turning the phone for.
     var deviceModelOpen by rememberSaveable { mutableStateOf(false) }
-    // Once per arrival: closing the sheet, or coming back to this screen, must not reopen it.
-    var compassOpened by rememberSaveable { mutableStateOf(false) }
-    val compassNode = uiState.node?.takeIf { openCompass && !compassOpened && it.validPosition != null }
-    LaunchedEffect(compassNode?.num) {
-        compassNode?.let {
-            activeOverlay = NodeDetailOverlay.Compass(it.num, uiState.metricsState.displayUnits)
-            compassOpened = true
-        }
-    }
+    if (openCompass) OpenCompassOnArrival(uiState) { activeOverlay = it }
     val actualCompassViewModel = compassViewModel
     val compassUiState by
         actualCompassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }

@@ -34,9 +34,10 @@ class FlavorModule {
     /** Downloadable Google Fonts for event branding — Google flavor only. */
     @Single fun eventFontResolver(): EventFontResolver = GoogleFontsEventFontResolver()
 
-    /** Play services' fused orientation for the camera mesh view, which falls back to the rotation vector without it. */
-    @Single
-    fun fusedOrientationSource(context: Context): FusedOrientationSource = GoogleFusedOrientationSource(context)
+    /**
+     * Play services' fused orientation for the camera mesh view, which falls back to the rotation vector without it.
+     */
+    @Single fun fusedOrientationSource(context: Context): FusedOrientationSource = GoogleFusedOrientationSource(context)
 
     /**
      * Datadog network instrumentation for the shared Ktor `HttpClient`. The interceptor emits RUM Resource spans with

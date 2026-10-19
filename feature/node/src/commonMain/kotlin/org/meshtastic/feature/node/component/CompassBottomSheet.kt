@@ -72,10 +72,10 @@ import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.last_position_update
 import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.ui.component.ElevationInfo
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.ErrorOutline
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
-import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassWarning
 import kotlin.math.PI

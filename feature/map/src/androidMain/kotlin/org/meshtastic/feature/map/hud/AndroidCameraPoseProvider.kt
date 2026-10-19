@@ -44,21 +44,19 @@ private const val NINETY_FIVE_PERCENT_SIGMAS = 1.96
 private const val MAX_HEADING_ERROR_DEG = 180f
 
 /**
- * Prefers [fusedOrientation] and falls back to the platform rotation vector, or the geomagnetic one on devices without
- * a gyroscope. Running hot, either source is slowed.
+ * Prefers [fused] and falls back to the platform rotation vector, or the geomagnetic one on devices without a
+ * gyroscope. Running hot, either source is slowed.
  */
 @Single
-class AndroidCameraPoseProvider(
-    private val context: Context,
-    private val fusedOrientation: FusedOrientationSource,
-) : CameraPoseProvider {
+class AndroidCameraPoseProvider(context: Context, private val fused: FusedOrientationSource) : CameraPoseProvider {
+    private val context = context.applicationContext
 
     override fun poseUpdates(): Flow<CameraPoseState> = callbackFlow {
         // Every callback runs on this one thread, away from the main thread that draws the overlay, so the session
         // needs no locking.
         val thread = HandlerThread("mesh-view-pose").apply { start() }
         val handler = Handler(thread.looper)
-        val session = PoseSession(context, fusedOrientation, handler) { trySend(it) }
+        val session = PoseSession(context, fused, handler) { trySend(it) }
         handler.post(session::start)
         awaitClose {
             handler.post {
@@ -112,15 +110,14 @@ private class PoseSession(
             override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) = Unit
         }
 
-    private val fusedListener =
-        FusedOrientationSource.Listener { attitude, headingErrorDeg, trueNorth, timestampNs ->
-            if (!stopped && fusedHandle != null) {
-                val error = headingErrorDeg.toOneSigmaDeg()
-                // An invalid heading error means an uncalibrated compass, so it asks for calibration like status 0.
-                val calibration = if (error == null) SensorManager.SENSOR_STATUS_UNRELIABLE else CALIBRATION_UNKNOWN
-                publish(attitude, timestampNs, calibration, error, trueNorth)
-            }
+    private val fusedListener = FusedOrientationSource.Listener { attitude, headingErrorDeg, trueNorth, timestampNs ->
+        if (!stopped && fusedHandle != null) {
+            val error = headingErrorDeg.toOneSigmaDeg()
+            // An invalid heading error means an uncalibrated compass, so it asks for calibration like status 0.
+            val calibration = if (error == null) SensorManager.SENSOR_STATUS_UNRELIABLE else CALIBRATION_UNKNOWN
+            publish(attitude, timestampNs, calibration, error, trueNorth)
         }
+    }
 
     fun start() {
         val power = powerManager
@@ -228,8 +225,10 @@ private fun SensorEvent.toQuaternion(out: FloatArray) {
 private fun SensorEvent.headingAccuracyRad(): Float? = values.getOrNull(HEADING_ACCURACY_INDEX)?.takeIf { it >= 0f }
 
 /** A 95% heading error bound in degrees, as the one-sigma figure every other accuracy on screen uses. */
-private fun Float.toOneSigmaDeg(): Double? =
-    takeIf { it >= 0f && it < MAX_HEADING_ERROR_DEG }?.let { it / NINETY_FIVE_PERCENT_SIGMAS }
+private fun Float.toOneSigmaDeg(): Double? = takeIf {
+    it >= 0f && it < MAX_HEADING_ERROR_DEG
+}
+    ?.let { it / NINETY_FIVE_PERCENT_SIGMAS }
 
 private fun Int.toHudThermal(): HudThermal = when {
     this >= PowerManager.THERMAL_STATUS_CRITICAL -> HudThermal.CRITICAL

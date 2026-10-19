@@ -45,10 +45,10 @@ import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.resources.open_compass
 import org.meshtastic.core.resources.site_planner_estimate
 import org.meshtastic.core.ui.icon.CellTower
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.Compass
 import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
 import org.meshtastic.core.ui.util.rememberMeshHudSupported

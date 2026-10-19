@@ -51,9 +51,9 @@ import org.meshtastic.core.resources.traceroute_outgoing_route
 import org.meshtastic.core.resources.traceroute_return_route
 import org.meshtastic.core.resources.traceroute_showing_nodes
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Route
-import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider

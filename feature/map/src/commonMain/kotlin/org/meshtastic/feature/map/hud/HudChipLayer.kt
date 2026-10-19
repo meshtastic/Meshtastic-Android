@@ -30,14 +30,14 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.semantics.isTraversalGroup
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.formatString
@@ -124,11 +124,15 @@ internal fun HudChipLayer(
         content = { targets.forEach { key(it.subject.key) { chip(it) } } },
         // A traversal group, so TalkBack reads the chips in the order each sets, nearest the center first.
         modifier =
-        modifier.semantics { isTraversalGroup = true }.drawBehind {
-            if (currentPose() == null) return@drawBehind
-            placement.chips.forEach { drawStemOrArrow(it) }
-            placement.overflow.forEach { drawOverflow(it, topLimitPx(), textMeasurer, overflowStyle, overflowTemplate) }
-        },
+        modifier
+            .semantics { isTraversalGroup = true }
+            .drawBehind {
+                if (currentPose() == null) return@drawBehind
+                placement.chips.forEach { drawStemOrArrow(it) }
+                placement.overflow.forEach {
+                    drawOverflow(it, topLimitPx(), textMeasurer, overflowStyle, overflowTemplate)
+                }
+            },
     ) { measurables, constraints ->
         val placeables = measurables.map { it.measure(Constraints()) }
         val width = constraints.maxWidth

@@ -32,7 +32,7 @@ class MeshHudBackStackTest {
 
         stack.navigateFromNodeDetail(MapRoute.MeshHud(focusNodeNum = 2))
 
-        assertEquals(listOf(NodesRoute.Nodes, MapRoute.MeshHud(focusNodeNum = 2)), stack)
+        assertEquals(listOf<NavKey>(NodesRoute.Nodes, MapRoute.MeshHud(focusNodeNum = 2)), stack)
     }
 
     @Test
@@ -48,7 +48,7 @@ class MeshHudBackStackTest {
 
         stack.navigateFromNodeDetail(track)
 
-        assertEquals(listOf(NodesRoute.Nodes, track), stack)
+        assertEquals(listOf<NavKey>(NodesRoute.Nodes, track), stack)
     }
 
     @Test
@@ -58,7 +58,7 @@ class MeshHudBackStackTest {
         stack.navigateFromNodeDetail(MapRoute.MeshHud(focusNodeNum = 2))
 
         assertEquals(
-            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(2), MapRoute.MeshHud(focusNodeNum = 2)),
+            listOf<NavKey>(NodesRoute.Nodes, NodesRoute.NodeDetail(2), MapRoute.MeshHud(focusNodeNum = 2)),
             stack,
         )
     }
@@ -70,7 +70,7 @@ class MeshHudBackStackTest {
         stack.navigateFromNodeDetail(ContactsRoute.Messages("0!00000002"))
 
         assertEquals(
-            listOf(
+            listOf<NavKey>(
                 NodesRoute.Nodes,
                 MapRoute.MeshHud(1),
                 NodesRoute.NodeDetail(2),
@@ -86,7 +86,7 @@ class MeshHudBackStackTest {
 
         stack.navigateFromNodeDetail(MapRoute.MeshHud(focusNodeNum = 2))
 
-        assertEquals(listOf(NodesRoute.Nodes, MapRoute.MeshHud(1), MapRoute.MeshHud(focusNodeNum = 2)), stack)
+        assertEquals(listOf<NavKey>(NodesRoute.Nodes, MapRoute.MeshHud(1), MapRoute.MeshHud(focusNodeNum = 2)), stack)
     }
 
     @Test

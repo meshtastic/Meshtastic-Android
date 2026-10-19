@@ -39,11 +39,11 @@ import org.meshtastic.core.resources.export_gpx
 import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.resources.position_log
 import org.meshtastic.core.ui.component.MeshtasticResourceDialog
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.FileDownload
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
-import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 

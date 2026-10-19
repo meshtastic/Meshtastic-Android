@@ -139,6 +139,10 @@ data class MeshHudTargets(
     val finding: HudFinding? = null,
 )
 
+/** True when there is nothing to show and no warning explaining why. */
+internal val MeshHudTargets.showsNothing: Boolean
+    get() = warnings.isEmpty() && targets.isEmpty() && directionUnknown.isEmpty()
+
 /** What the finder is looking for and how far away it is. */
 data class HudFinding(val subject: HudSubject, val distanceText: String)
 
