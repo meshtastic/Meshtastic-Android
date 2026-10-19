@@ -27,6 +27,9 @@ private const val MOVING_MPS = 0.7f
 /** A fix this many accuracy radii from the running mean is a real move, not noise. */
 private const val JUMP_RADII = 3.0
 
+/** No fix is trusted below this, so a reported zero neither divides by zero nor makes every wobble a jump. */
+private const val MIN_ACCURACY_M = 1f
+
 /** Weight for a fix that reports no accuracy, as if it were this many meters. */
 private const val UNKNOWN_ACCURACY_M = 20f
 
@@ -52,7 +55,7 @@ internal class FixAverager {
         val jumped =
             current != null &&
                 latLongToMeter(current.latitude, current.longitude, fix.latitude, fix.longitude) >
-                JUMP_RADII * (fix.accuracyM ?: UNKNOWN_ACCURACY_M)
+                JUMP_RADII * (fix.accuracyM ?: UNKNOWN_ACCURACY_M).coerceAtLeast(MIN_ACCURACY_M)
         if (moving || jumped) fixes.clear()
         fixes.addLast(fix)
         while (fixes.size > 1 && fix.timeMillis - fixes.first().timeMillis > WINDOW_MS) fixes.removeFirst()
@@ -65,7 +68,7 @@ internal class FixAverager {
         var lat = 0.0
         var lon = 0.0
         fixes.forEach { f ->
-            val accuracy = (f.accuracyM ?: UNKNOWN_ACCURACY_M).toDouble().coerceAtLeast(1.0)
+            val accuracy = (f.accuracyM ?: UNKNOWN_ACCURACY_M).coerceAtLeast(MIN_ACCURACY_M).toDouble()
             val w = 1 / (accuracy * accuracy)
             weightSum += w
             lat += w * f.latitude

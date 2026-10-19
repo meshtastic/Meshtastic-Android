@@ -19,11 +19,13 @@ package org.meshtastic.feature.map.hud
 import org.meshtastic.core.repository.PhoneLocation
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
 /** About 1.1 m of latitude. */
-private const val METRE_DEG = 0.00001
+private const val METER_DEG = 0.00001
 
-private fun fix(lat: Double, t: Long, accuracy: Float = 5f, speed: Float? = 0f) =
+private fun fix(lat: Double, t: Long, accuracy: Float? = 5f, speed: Float? = 0f) =
     PhoneLocation(40.0 + lat, -105.0, 100.0, t, accuracyM = accuracy, speedMps = speed)
 
 class FixAveragerTest {
@@ -31,8 +33,8 @@ class FixAveragerTest {
     @Test
     fun `a still phone averages its wander`() {
         val averager = FixAverager()
-        averager.add(fix(METRE_DEG, 1_000))
-        val mean = averager.add(fix(-METRE_DEG, 2_000))
+        averager.add(fix(METER_DEG, 1_000))
+        val mean = averager.add(fix(-METER_DEG, 2_000))
         assertEquals(40.0, mean.latitude, 1e-9)
         assertEquals(2, averager.count)
     }
@@ -41,9 +43,9 @@ class FixAveragerTest {
     fun `better fixes count for more`() {
         val averager = FixAverager()
         averager.add(fix(0.0, 1_000, accuracy = 2f))
-        val mean = averager.add(fix(4 * METRE_DEG, 2_000, accuracy = 8f))
+        val mean = averager.add(fix(4 * METER_DEG, 2_000, accuracy = 8f))
         // Weights 1/4 and 1/64: the mean sits close to the precise fix.
-        assertEquals(40.0 + 4 * METRE_DEG / 17, mean.latitude, 1e-9)
+        assertEquals(40.0 + 4 * METER_DEG / 17, mean.latitude, 1e-9)
         assertEquals(2f, mean.accuracyM)
     }
 
@@ -51,8 +53,8 @@ class FixAveragerTest {
     fun `walking restarts the average`() {
         val averager = FixAverager()
         averager.add(fix(0.0, 1_000))
-        val mean = averager.add(fix(METRE_DEG, 2_000, speed = 1.4f))
-        assertEquals(40.0 + METRE_DEG, mean.latitude, 1e-12)
+        val mean = averager.add(fix(METER_DEG, 2_000, speed = 1.4f))
+        assertEquals(40.0 + METER_DEG, mean.latitude, 1e-12)
         assertEquals(1, averager.count)
     }
 
@@ -60,8 +62,84 @@ class FixAveragerTest {
     fun `a jump far beyond the accuracy restarts the average`() {
         val averager = FixAverager()
         averager.add(fix(0.0, 1_000))
-        averager.add(fix(100 * METRE_DEG, 2_000))
+        averager.add(fix(100 * METER_DEG, 2_000))
         assertEquals(1, averager.count)
+    }
+
+    @Test
+    fun `fixes without an accuracy are averaged at an assumed one`() {
+        val averager = FixAverager()
+        averager.add(fix(METER_DEG, 1_000, accuracy = null))
+        val mean = averager.add(fix(-METER_DEG, 2_000, accuracy = null))
+        assertEquals(40.0, mean.latitude, 1e-9)
+        assertNull(mean.accuracyM)
+        assertEquals(2, averager.count)
+    }
+
+    @Test
+    fun `a fix without an accuracy weighs less than a precise one`() {
+        val averager = FixAverager()
+        averager.add(fix(0.0, 1_000, accuracy = 2f))
+        val mean = averager.add(fix(4 * METER_DEG, 2_000, accuracy = null))
+        // Weights 1/4 and 1/400.
+        assertEquals(40.0 + 4 * METER_DEG / 101, mean.latitude, 1e-9)
+        assertEquals(2f, mean.accuracyM)
+    }
+
+    @Test
+    fun `a zero accuracy fix averages as one meter without dividing by zero`() {
+        val averager = FixAverager()
+        averager.add(fix(0.0, 1_000, accuracy = 0f))
+        val mean = averager.add(fix(METER_DEG, 2_000, accuracy = 1f))
+        assertFalse(mean.latitude.isNaN())
+        assertEquals(40.0 + METER_DEG / 2, mean.latitude, 1e-9)
+        assertEquals(0f, mean.accuracyM)
+        assertEquals(2, averager.count)
+    }
+
+    @Test
+    fun `a run of zero accuracy fixes keeps averaging through meter-scale wander`() {
+        val averager = FixAverager()
+        averager.add(fix(0.0, 1_000, accuracy = 0f))
+        averager.add(fix(METER_DEG, 2_000, accuracy = 0f))
+        averager.add(fix(-METER_DEG, 3_000, accuracy = 0f))
+        assertEquals(3, averager.count)
+    }
+
+    @Test
+    fun `a still fix after walking starts a fresh window`() {
+        val averager = FixAverager()
+        averager.add(fix(0.0, 1_000))
+        averager.add(fix(0.0, 2_000))
+        averager.add(fix(2 * METER_DEG, 3_000, speed = 1.4f))
+        val mean = averager.add(fix(4 * METER_DEG, 4_000))
+        assertEquals(40.0 + 3 * METER_DEG, mean.latitude, 1e-9)
+        assertEquals(2, averager.count)
+    }
+
+    @Test
+    fun `a missing speed counts as still`() {
+        val averager = FixAverager()
+        averager.add(fix(0.0, 1_000, speed = null))
+        averager.add(fix(0.0, 2_000, speed = null))
+        assertEquals(2, averager.count)
+    }
+
+    @Test
+    fun `a move within a few accuracy radii is wander not a jump`() {
+        val averager = FixAverager()
+        averager.add(fix(0.0, 1_000))
+        averager.add(fix(8 * METER_DEG, 2_000))
+        assertEquals(2, averager.count)
+    }
+
+    @Test
+    fun `a move past three accuracy radii of the new fix restarts the average`() {
+        val averager = FixAverager()
+        averager.add(fix(0.0, 1_000))
+        val mean = averager.add(fix(20 * METER_DEG, 2_000))
+        assertEquals(1, averager.count)
+        assertEquals(40.0 + 20 * METER_DEG, mean.latitude, 1e-12)
     }
 
     @Test
