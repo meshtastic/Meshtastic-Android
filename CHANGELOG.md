@@ -13,16 +13,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 #### 🛠️ Fixes
 * fix(flatpak): vendor the Gradle 9.8.2 sha256 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7677
 
-### Closed Beta (v2.8.3-closed.3)
-Changes since [`v2.8.3-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3-open.1):
-
-#### 🛠️ Fixes
-* fix(settings): show GPS pin settings on commercial boards again by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7655
-* fix(settings): hide GPS pin settings only on boards whose maker wired the GPS by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7656
-* fix(messaging): show seconds in full message timestamps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7660
-* fix(node): remove every unheard node from the banner's Remove by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7667
-
-### Open Beta (v2.8.3-open.1)
+### Open Beta (v2.8.3-open.2)
 Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2):
 
 #### 🏗️ Features
@@ -108,6 +99,10 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(settings): cap the long name at the 24 bytes firmware 2.8 keeps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7641
 * fix(node): show unknown traceroute hops as unknown and cool down long-press traceroute by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7640
 * fix(node): remember Keep on the unheard-nodes banner by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7646
+* fix(settings): show GPS pin settings on commercial boards again by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7655
+* fix(settings): hide GPS pin settings only on boards whose maker wired the GPS by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7656
+* fix(messaging): show seconds in full message timestamps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7660
+* fix(node): remove every unheard node from the banner's Remove by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7667
 #### 📝 Other Changes
 * refactor(data): page the log export, remove dedupe leftovers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7449
 * refactor(map): share the Web Mercator projection with node clustering by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7483
