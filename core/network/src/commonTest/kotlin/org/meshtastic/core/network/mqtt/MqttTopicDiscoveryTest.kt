@@ -233,6 +233,22 @@ class MqttTopicDiscoveryTest {
     }
 
     @Test
+    fun anotherSubdivisionUnderTheCountryIsNotOwnArea() {
+        val heard = mapOf("msh/EU_868/DE/S-H" to activity(nodeCount = 3))
+        val plan = plan("EU_868", GeocodedPlace("DE", "Bayern", "München"), heard)
+        val ranked =
+            plan.ranked(
+                mapOf(
+                    "msh/EU_868/DE/S-H" to activity(nodeCount = 3),
+                    "msh/EU_868/DE/Bayern/augsburg" to activity(nodeCount = 1),
+                ),
+                from = null,
+            )
+        assertEquals(listOf("msh/EU_868/DE/Bayern/augsburg", "msh/EU_868/DE/S-H"), ranked.map { it.root })
+        assertEquals(listOf(TopicPlan.TIER_OWN_AREA, TopicPlan.TIER_ELSEWHERE), ranked.map { it.tier })
+    }
+
+    @Test
     fun activityForPrefersTheExactSpellingThenTheLowestVariant() {
         val activity =
             mapOf("msh/US/KS/topeka" to activity(nodeCount = 1), "msh/US/KS/Topeka" to activity(nodeCount = 2))

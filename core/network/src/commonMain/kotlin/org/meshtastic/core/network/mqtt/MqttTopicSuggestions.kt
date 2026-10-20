@@ -40,6 +40,12 @@ data class TopicPlan(
     fun ranked(activity: Map<String, Activity>, from: LatLon?): List<RankedRoot> {
         val shown = suggestions.mapNotNull { activityFor(it.topic, activity)?.first }.toSet()
         val ladder = suggestions.filter { it.kind != TopicSuggestion.Kind.COMMUNITY }
+        // The finest rungs above the region; a country rung counts only when nothing finer is known.
+        val ownArea =
+            ladder
+                .filter { it.kind == TopicSuggestion.Kind.SUBDIVISION || it.kind == TopicSuggestion.Kind.CITY }
+                .ifEmpty { ladder.filter { it.kind == TopicSuggestion.Kind.COUNTRY } }
+                .map { it.topic }
         val nearby = suggestions.filter { it.kind == TopicSuggestion.Kind.COMMUNITY }.map { it.topic } + neighborRoots
         return activity
             .filter { (root, _) -> root !in shown && MqttRootTopic.problem(root) == null }
@@ -47,7 +53,7 @@ data class TopicPlan(
                 val depth = ladder.count { MqttRootTopic.hasPrefix(root, it.topic) }
                 val tier =
                     when {
-                        depth >= 2 -> TIER_OWN_AREA
+                        ownArea.any { MqttRootTopic.hasPrefix(root, it) } -> TIER_OWN_AREA
                         nearby.any { MqttRootTopic.hasPrefix(root, it) } -> TIER_NEARBY
                         else -> TIER_ELSEWHERE
                     }
