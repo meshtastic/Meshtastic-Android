@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ import org.meshtastic.core.ui.util.ActiveWhileStarted
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.component.CompassSheetContent
+import org.meshtastic.feature.node.component.DeviceModelDialog
 import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -96,6 +98,8 @@ private fun NodeDetailScaffold(
     compassViewModel: CompassViewModel? = null,
 ) {
     var activeOverlay by remember { mutableStateOf<NodeDetailOverlay?>(null) }
+    // Saved, unlike the overlays: a rotation must not close the model, which the user may be turning the phone for.
+    var deviceModelOpen by rememberSaveable { mutableStateOf(false) }
     val actualCompassViewModel = compassViewModel
     val compassUiState by
         actualCompassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
@@ -128,6 +132,8 @@ private fun NodeDetailScaffold(
                     is NodeDetailAction.OpenCompass ->
                         activeOverlay = NodeDetailOverlay.Compass(action.node.num, action.displayUnits)
 
+                    is NodeDetailAction.OpenDeviceModel -> deviceModelOpen = true
+
                     else ->
                         handleNodeAction(
                             action = action,
@@ -156,6 +162,9 @@ private fun NodeDetailScaffold(
     ) {
         viewModel.handleNodeMenuAction(NodeMenuAction.RequestPosition(it))
     }
+    uiState.metricsState.deviceHardware
+        ?.takeIf { deviceModelOpen }
+        ?.let { DeviceModelDialog(it, onDismiss = { deviceModelOpen = false }) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

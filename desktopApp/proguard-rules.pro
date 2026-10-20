@@ -92,6 +92,12 @@
 -keep class org.maplibre.nativeffi.** { *; }
 -keep interface org.maplibre.nativeffi.** { *; }
 
+# ---- Filament's Panama FFI bindings - the 3D device model viewer ------------
+# Same jextract shape as MapLibre above: each `Fila*Callback$Function` upcall
+# resolves "apply" by name, so the shrinker would strip it.
+-keep class io.github.erkko68.filament.ffm.** { *; }
+-keep interface io.github.erkko68.filament.ffm.** { *; }
+
 # ---- LWJGL - the map bridge's Vulkan, OpenGL and Direct3D bindings -----------
 # LWJGL picks its memory backend at <clinit> by walking a list of class names
 # (`MemoryBackendUnsafe*`, `MemoryBackendFFM*`) through Class.forName, and the

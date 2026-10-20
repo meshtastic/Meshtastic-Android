@@ -28,6 +28,18 @@
         android:name="android.hardware.location.gps"
         android:required="false" />
 
+    <!--
+        SceneView (the 3D device model viewer) declares GLES 3.0 as required and asks for VIBRATE for its haptics.
+        The viewer is optional and falls back to the illustration, so neither may narrow where the app installs.
+    -->
+    <uses-feature
+        android:glEsVersion="0x00030000"
+        android:required="false"
+        tools:replace="android:required" />
+    <uses-permission
+        android:name="android.permission.VIBRATE"
+        tools:node="remove" />
+
     <!-- Request legacy Bluetooth permissions on older devices -->
     <uses-permission android:name="android.permission.BLUETOOTH"
         android:maxSdkVersion="30" />
