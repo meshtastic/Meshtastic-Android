@@ -209,7 +209,16 @@ internal fun HudChipLayer(
                     return@forEachIndexed
                 }
                 val level = if (point != null) levels[index] else 0
-                val side = leaderSide(level)
+                // A chip that would step off the screen steps to the other side of its point instead.
+                val side =
+                    leaderSide(level).let { preferred ->
+                        val x = point?.x?.toInt() ?: 0
+                        when {
+                            preferred > 0 && x + leaderRun + placeable.width > width - gutter -> -1
+                            preferred < 0 && x - leaderRun - placeable.width < gutter -> 1
+                            else -> preferred
+                        }
+                    }
                 // Pinned chips spread along their edge by where the target lies, rather than piling in one place.
                 val along = edge?.let { edgeOffsetPx(it, yaw, pitchDelta, focalPx) } ?: 0f
                 val alongX =
