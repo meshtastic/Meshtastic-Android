@@ -460,6 +460,9 @@ class SharedRadioInterfaceServiceLivenessTest {
     private class DeferredRadioPrefs(saved: String?) : RadioPrefs {
         override val devAddr = MutableStateFlow(saved)
         override val devName = MutableStateFlow<String?>(null)
+
+        override suspend fun awaitDevAddr(): String? = devAddr.value
+
         private val pending = ArrayDeque<String?>()
 
         override fun setDevAddr(address: String?) {

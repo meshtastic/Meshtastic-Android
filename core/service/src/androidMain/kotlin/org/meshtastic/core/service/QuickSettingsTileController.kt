@@ -23,7 +23,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -89,11 +88,10 @@ class QuickSettingsTileController(
      *   platform will not let the service start from here; opening the app then starts it the usual way.
      */
     suspend fun onClick(): Boolean {
-        // The selected address is null until DataStore's first load in a freshly started process.
+        // The live selection when there is one; otherwise the saved one, which is null until DataStore's first load.
         val address =
-            withTimeoutOrNull(ADDRESS_SETTLE_MS) {
-                radioInterfaceService.currentDeviceAddressFlow.first { it != null }
-            }
+            radioInterfaceService.currentDeviceAddressFlow.value
+                ?: withTimeoutOrNull(ADDRESS_SETTLE_MS) { radioPrefs.awaitDevAddr() }
         val tile =
             quickSettingsTileState(
                 connectionState = radioController.connectionState.value,
