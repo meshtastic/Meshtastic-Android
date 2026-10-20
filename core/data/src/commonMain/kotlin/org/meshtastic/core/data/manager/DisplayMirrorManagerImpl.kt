@@ -158,15 +158,16 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
      * otherwise reach the renderer (aspectRatio requires > 0).
      */
     private fun isAcceptableChunk(chunk: DisplayFrame, dataSize: Int): Boolean {
-        val total = chunk.total_size
-        val expectedSize = chunk.width * ((chunk.height + PIXELS_PER_PAGE - 1) / PIXELS_PER_PAGE)
+        val total = chunk.total_size.toLong()
+        val expectedSize = chunk.width.toLong() * ((chunk.height.toLong() + PIXELS_PER_PAGE - 1) / PIXELS_PER_PAGE)
         val acceptable =
             chunk.format == DisplayFrame.Format.MONO_VLSB &&
                 chunk.width > 0 &&
                 chunk.height > 0 &&
+                chunk.offset >= 0 &&
                 expectedSize == total &&
                 total <= MAX_FRAME_BYTES &&
-                chunk.offset + dataSize <= total
+                chunk.offset.toLong() + dataSize <= total
         if (!acceptable) {
             Logger.w {
                 "DisplayMirror: dropping bad chunk (format=${chunk.format} ${chunk.width}x${chunk.height} " +

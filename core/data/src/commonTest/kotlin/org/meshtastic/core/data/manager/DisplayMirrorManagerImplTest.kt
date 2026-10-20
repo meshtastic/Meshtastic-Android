@@ -130,6 +130,12 @@ class DisplayMirrorManagerImplTest {
     }
 
     @Test
+    fun `rejects geometry whose byte count overflows`() {
+        manager.handleIncomingFrame(chunk(width = 65536, height = 524288, total = 0, data = ByteArray(0)))
+        assertNull(manager.frame.value)
+    }
+
+    @Test
     fun `rejects unsupported format`() {
         manager.handleIncomingFrame(
             chunk(
