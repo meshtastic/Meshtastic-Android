@@ -8,7 +8,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-*No changes yet.*
+### Unreleased (not yet in any build)
+
+#### 🛠️ Fixes
+* fix(flatpak): vendor the Gradle 9.8.2 sha256 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7677
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
