@@ -1,3 +1,3 @@
-Radios on firmware older than 2.5.14 stay connected and lead straight to the firmware update, which is now required. Back up and restore the app database. Failed messages resend in place. Reactions get their own notification channel. Radio settings open without a radio, and search lands on the setting. Site Planner coverage runs on the phone. Many stability fixes.
+Исправления стабильности и надёжности.
 
 Полное описание обновления: https://github.com/meshtastic/Meshtastic-Android/releases
