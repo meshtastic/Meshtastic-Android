@@ -17,7 +17,8 @@
 //   static/img/android/docs/*.webp (or .png/.svg if not converting)
 //
 // Only screenshots a synced page actually references are published; any other
-// file already under those two directories is pruned at the end of the run.
+// file already under those two directories is pruned at the end of the run,
+// except screenshots a frozen versioned_docs/ snapshot still links.
 
 "use strict";
 
@@ -52,6 +53,9 @@ if (!fs.existsSync(SRC_DOCS_DIR)) {
 // Output directories (relative to CWD, which should be the meshtastic/meshtastic repo)
 const DEST_DOCS_DIR = path.join("docs", "software", "android");
 const DEST_IMAGES_DIR = path.join("static", "img", "android", "docs");
+// Docusaurus version snapshots. They link the same /img/android/docs/ files as the
+// current pages, but no sync rewrites them, so their images must outlive the app's.
+const VERSIONED_DOCS_DIR = "versioned_docs";
 
 // Derive sibling page slugs from the filesystem (no manual sync needed)
 const KNOWN_USER_SLUGS = discoverSlugs(SRC_DOCS_DIR, "user");
@@ -244,7 +248,8 @@ function collectImageReferences(content, into) {
     const re = /\/img\/android\/docs\/([^)"'\s>]+)/g;
     let match;
     while ((match = re.exec(content)) !== null) {
-        into.add(path.basename(match[1]));
+        // Drop any ?query or #fragment so the name matches the file on disk.
+        into.add(path.basename(match[1].split(/[?#]/, 1)[0]));
     }
 }
 
@@ -346,12 +351,28 @@ function collectFiles(dir) {
 }
 
 /**
+ * Collect the screenshot basenames that frozen version snapshots still link.
+ * Pruning one of these breaks the site build, since Docusaurus fails on a
+ * Markdown image it cannot resolve.
+ */
+function collectVersionedImageReferences() {
+    const names = new Set();
+    for (const file of collectFiles(VERSIONED_DOCS_DIR)) {
+        const ext = path.extname(file).toLowerCase();
+        if (ext !== ".md" && ext !== ".mdx") continue;
+        collectImageReferences(fs.readFileSync(path.join(VERSIONED_DOCS_DIR, file), "utf-8"), names);
+    }
+    return names;
+}
+
+/**
  * Remove destination files this run did not produce, so renamed or deleted
  * source pages (and the screenshots they referenced) don't linger on the site.
  * Mirrors the Apple sync's cleanup pass. Scoped to docs pages (.md/.mdx) and
- * images under the directories this script owns.
+ * images under the directories this script owns. Images in `keepImageNames`
+ * survive even when no current page references them.
  */
-function pruneStale(expectedDocPaths, expectedImageNames) {
+function pruneStale(expectedDocPaths, expectedImageNames, keepImageNames) {
     for (const file of collectFiles(DEST_DOCS_DIR)) {
         const ext = path.extname(file).toLowerCase();
         if (ext !== ".md" && ext !== ".mdx") continue;
@@ -368,6 +389,10 @@ function pruneStale(expectedDocPaths, expectedImageNames) {
         if (!IMAGE_EXTENSIONS.has(path.extname(file).toLowerCase())) continue;
         if (expectedImageNames.has(path.basename(file))) continue;
         const target = path.join(DEST_IMAGES_DIR, file);
+        if (keepImageNames.has(path.basename(file))) {
+            console.log(`Kept image a versioned snapshot still links: ${target}`);
+            continue;
+        }
         if (DRY_RUN) {
             console.log(`[dry-run] Would remove stale image: ${target}`);
         } else {
@@ -503,7 +528,7 @@ function main() {
     const expectedImageNames = processImages(referencedImages);
 
     // Remove anything left over from a previous sync or the old hand-written docs.
-    pruneStale(expectedDocPaths, expectedImageNames);
+    pruneStale(expectedDocPaths, expectedImageNames, collectVersionedImageReferences());
 
     console.log("\nSync complete.");
 }
