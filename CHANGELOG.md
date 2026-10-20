@@ -8,24 +8,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Unreleased (not yet in any build)
+*No changes yet.*
+<!-- UNRELEASED_END -->
 
-#### 🛠️ Fixes
-* fix(flatpak): vendor the Gradle 9.8.2 sha256 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7677
+<!-- RELEASED_START -->
 
-### Closed Beta (v2.8.3-closed.3)
-Changes since [`v2.8.3-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.3-open.1):
+## [2.8.3] - 2026-10-20
 
-#### 🛠️ Fixes
-* fix(settings): show GPS pin settings on commercial boards again by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7655
-* fix(settings): hide GPS pin settings only on boards whose maker wired the GPS by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7656
-* fix(messaging): show seconds in full message timestamps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7660
-* fix(node): remove every unheard node from the banner's Remove by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7667
-
-### Open Beta (v2.8.3-open.1)
-Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2):
-
-#### 🏗️ Features
+### 🏗️ Features
 * feat(network): a hidden showcase scenario for Demo Mode by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7377
 * feat(app): shell-only debug launch switches for onboarding and the trust dialog by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7375
 * feat(settings): raise the coding rate over a modem preset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7405
@@ -49,7 +39,7 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(desktop): reactions and new waypoints notification toggles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7624
 * feat(settings): back up and restore the app database by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7629
 * feat(node): record observed and inbound traceroutes in the node's history by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7643
-#### 🖥️ Desktop
+### 🖥️ Desktop
 * fix(mqtt): remove noop mqtt to allow the mqtt proxy to work on the desktop builds by @Tha14 in https://github.com/meshtastic/Meshtastic-Android/pull/7400
 * fix(notifications): put every notification on its own channel and tap target by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7415
 * fix(database): delete old mesh logs in bounded batches by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7423
@@ -62,7 +52,7 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * Fix/desktop linux tray by @jp-bennett in https://github.com/meshtastic/Meshtastic-Android/pull/7569
 * fix(desktop): keep LWJGL whole through ProGuard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7605
 * fix(app): stop declaring Android Auto support by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7645
-#### 🛠️ Fixes
+### 🛠️ Fixes
 * fix(map): keep the node track map responsive on long tracks by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7373
 * fix(konsist): anchor the scanned-source inputs at the source roots by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7382
 * fix(map): frame the mesh clear of the map's own controls by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7385
@@ -108,16 +98,18 @@ Changes since [`v2.8.2`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(settings): cap the long name at the 24 bytes firmware 2.8 keeps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7641
 * fix(node): show unknown traceroute hops as unknown and cool down long-press traceroute by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7640
 * fix(node): remember Keep on the unheard-nodes banner by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7646
-#### 📝 Other Changes
+* fix(settings): show GPS pin settings on commercial boards again by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7655
+* fix(settings): hide GPS pin settings only on boards whose maker wired the GPS by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7656
+* fix(messaging): show seconds in full message timestamps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7660
+* fix(node): remove every unheard node from the banner's Remove by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7667
+### 📝 Other Changes
 * refactor(data): page the log export, remove dedupe leftovers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7449
 * refactor(map): share the Web Mercator projection with node clustering by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7483
 * refactor(ui): share the remote shell's keyboard sink from core/ui by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7526
 
 ## New Contributors
 * @Tha14 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/7400
-<!-- UNRELEASED_END -->
 
-<!-- RELEASED_START -->
 
 ## [2.8.2] - 2026-09-26
 
