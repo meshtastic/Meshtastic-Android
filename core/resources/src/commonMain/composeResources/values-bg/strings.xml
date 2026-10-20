@@ -156,6 +156,7 @@
     <!-- CHIRPY -->
     <string name="chirpy">Чирпи</string>
     <string name="chirpy_downloading_subtitle">Това се случва само веднъж. Chirpy скоро ще е готов!</string>
+    <string name="chirpy_hop_game_over">КРАЙ НА ИГРАТА</string>
     <string name="chirpy_hop_update_complete">Актуализацията е завършена</string>
     <string name="chirpy_hop_update_interrupted">Актуализацията е прекъсната</string>
     <string name="chirpy_ready">Попитайте Chirpy</string>
@@ -341,6 +342,7 @@
     <string name="distance_measurements">Измервания на разстояния</string>
     <string name="distance_measurements_description">Показване на разстоянието между вашия телефон и други възли на Meshtastic с позиции.</string>
     <!-- DOC -->
+    <string name="doc_auto_translated">Автоматично преведено</string>
     <string name="doc_clear_search">Изчистване на търсенето</string>
     <string name="doc_loading">Зареждане на документацията…</string>
     <string name="doc_no_content">Няма налично съдържание.</string>
@@ -871,7 +873,7 @@
     <string name="node_list_help_title">Помощ за списъка с възли</string>
     <string name="node_number">Номер на възела</string>
     <string name="node_restarting">Рестартиране…</string>
-    <string name="node_sort_alpha">А-Я</string>
+    <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
     <string name="node_sort_channel">Канал</string>
     <string name="node_sort_distance">Разстояние</string>
@@ -931,6 +933,7 @@
     <string name="open_wifi_settings">Отваряне на настройките на Wi-Fi</string>
     <string name="options">Опции</string>
     <!-- PACKET -->
+    <string name="packet_authenticity_level">Ниво на защита</string>
     <string name="password">Парола</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
@@ -1029,10 +1032,14 @@
     <string name="remote_hardware_config">Конфигуриране на отдалечения хардуер</string>
     <string name="remote_hardware_enabled">Отдалечен хардуер е активиран</string>
     <string name="remote_shell_command_hint">Команда</string>
+    <string name="remote_shell_error_notice">Грешка от възела: %1$s</string>
     <string name="remote_shell_key_alt">н.в.</string>
     <string name="remote_shell_key_ctrl">Контрол</string>
+    <string name="remote_shell_menu_paste">Поставяне</string>
     <string name="remote_shell_modifier_locked">Заключен</string>
+    <string name="remote_shell_more_options">Още опции</string>
     <string name="remote_shell_send">Изпрати</string>
+    <string name="remote_shell_status_closing">Затваряне…</string>
     <string name="remote_shell_status_not_connected">Няма връзка</string>
     <string name="remotely_administrating">"[Отдалечен] %1$s"</string>
     <!-- REMOVE -->
@@ -1076,6 +1083,7 @@
     <string name="role_tak">TAK</string>
     <string name="role_tracker">Тракер</string>
     <!-- ROUTING -->
+    <string name="routing_error_bad_request">Невалидна заявка</string>
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
     <string name="routing_error_max_retransmit">Неуспешно доставяне към mesh</string>
     <string name="routing_error_no_interface">Няма радио интерфейс</string>
@@ -1123,6 +1131,7 @@
     <string name="security_signed_node">Подписан възел</string>
     <string name="security_signed_node_desc">Проверено автоматично</string>
     <string name="security_signed_verified">Подписано · проверено</string>
+    <string name="security_verified_contact">Потвърден контакт</string>
     <string name="select">Изберете</string>
     <string name="select_all">Избери всички</string>
     <string name="selected">Избрани</string>
@@ -1143,6 +1152,7 @@
     <!-- SHOW -->
     <string name="show_layer">Показване на слой</string>
     <string name="show_password">Показване на паролата</string>
+    <string name="show_translation">Показване на превода</string>
     <string name="show_waypoints">Показване на пътни точки</string>
     <string name="shutdown">Изключване</string>
     <string name="shutdown_node_name">Възел: %1$s</string>
@@ -1189,6 +1199,7 @@
     <string name="tak_server_section">Сървър</string>
     <string name="tak_server_status">Статус</string>
     <string name="tak_server_status_failed">Не може да се стартира TAK сървъра. Изключете го и го включете, за да опитате отново.</string>
+    <string name="tak_server_test_protocol_v2_label">V2 (фърмуер ≥ 2.8.0)</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="telemetry">Телеметрия</string>
@@ -1224,6 +1235,7 @@
     <!-- TRANSLATION -->
     <string name="translation_failed">Не може да се преведе съобщението</string>
     <string name="translation_model_download_failed">Изтеглянето на модела за превод не е успешно</string>
+    <string name="transmit_disabled">Предаването е деактивирано</string>
     <!-- TRANSPORT -->
     <string name="transport">Транспорт</string>
     <string name="transport_api">API</string>
@@ -1259,12 +1271,14 @@
     <string name="unmute">Включване на звука</string>
     <string name="unrecognized">Неразпознат</string>
     <string name="unset">Не е зададен - 0</string>
+    <string name="unsupported_device">Това устройство не се поддържа</string>
     <string name="updated">Актуализирано</string>
     <string name="uplink_feature_description">Съобщенията от mesh мрежата ще бъдат изпращани до публичния интернет през конфигурирания шлюз на всеки възел.</string>
     <string name="uptime">Време на работа</string>
     <!-- URL -->
     <string name="url">URL</string>
     <string name="url_cannot_be_empty">URL не може да бъде празен.</string>
+    <string name="url_must_be_http">URL трябва да започва с http:// или https://.</string>
     <string name="url_template">Шаблон за URL</string>
     <string name="usb">USB</string>
     <string name="use_homoglyph_characters_encoding">Компактно кодиране за Кирилица</string>
