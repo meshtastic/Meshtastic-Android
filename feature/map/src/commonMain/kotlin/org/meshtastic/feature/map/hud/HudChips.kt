@@ -43,12 +43,16 @@ import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.duration_ago
 import org.meshtastic.core.resources.formatDuration
-import org.meshtastic.core.resources.mesh_hud_age
 import org.meshtastic.core.resources.mesh_hud_chip_description
 import org.meshtastic.core.resources.mesh_hud_distance_no_altitude
 import org.meshtastic.core.resources.mesh_hud_find
+import org.meshtastic.core.resources.mesh_hud_joined
 import org.meshtastic.core.resources.mesh_hud_open_node
 import org.meshtastic.core.resources.mesh_hud_open_waypoint
+import org.meshtastic.core.resources.mesh_hud_rise_above
+import org.meshtastic.core.resources.mesh_hud_rise_above_spoken
+import org.meshtastic.core.resources.mesh_hud_rise_below
+import org.meshtastic.core.resources.mesh_hud_rise_below_spoken
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.proto.Waypoint
 import kotlin.math.roundToInt
@@ -106,9 +110,9 @@ internal fun HudChip(
         remember(target.bearingDeg) {
             derivedStateOf { currentPose()?.let { clockHour(target.bearingDeg, it.azimuthDeg) } }
         }
-    val distanceText = chipDistanceText(target, withAge = target.focused)
-    // TalkBack always hears the age: speech does not crowd the view, and the fade alone is visual only.
-    val spokenDistance = chipDistanceText(target, withAge = true)
+    val distanceText = chipDistanceText(target, details = target.focused)
+    // TalkBack always hears the rise and age: speech does not crowd the view, and fade and placement are visual only.
+    val spokenDistance = chipDistanceText(target, details = true, spoken = true)
     val description = hour?.let {
         stringResource(Res.string.mesh_hud_chip_description, target.subject.spokenName(), spokenDistance, it)
     }
@@ -144,12 +148,13 @@ internal fun HudChip(
 }
 
 /**
- * The distance under a chip, marked when the altitude is missing, and dated in its largest unit once the position is no
- * longer fresh. [withAge] is false for an unfocused chip on screen: there the fade marks staleness, and the date would
- * widen every label in a crowded view.
+ * The distance under a chip, marked when the altitude is missing, then, with [details], how far above or below the
+ * phone it is and how old its position is in its largest unit. [details] is false for an unfocused chip on screen:
+ * there the fade marks staleness and the point's place marks height, and more text would widen every label in a crowded
+ * view. [spoken] words the rise for TalkBack rather than with an arrow glyph.
  */
 @Composable
-private fun chipDistanceText(target: HudTarget, withAge: Boolean): String {
+private fun chipDistanceText(target: HudTarget, details: Boolean, spoken: Boolean = false): String {
     val showsMissingAltitude = target.subject is HudSubject.NodeSubject && !target.elevationKnown
     val distance =
         if (showsMissingAltitude) {
@@ -157,18 +162,34 @@ private fun chipDistanceText(target: HudTarget, withAge: Boolean): String {
         } else {
             target.distanceText
         }
-    val age = target.positionAgeSec?.takeIf { withAge && it > FRESH_POSITION_SEC } ?: return distance
+    if (!details) return distance
+    return listOfNotNull(distance, target.rise?.let { riseText(it, spoken) }, ageText(target.positionAgeSec)).reduce {
+            text,
+            part,
+        ->
+        stringResource(Res.string.mesh_hud_joined, text, part)
+    }
+}
+
+@Composable
+private fun riseText(rise: HudRise, spoken: Boolean): String = when {
+    spoken && rise.above -> stringResource(Res.string.mesh_hud_rise_above_spoken, rise.text)
+    spoken -> stringResource(Res.string.mesh_hud_rise_below_spoken, rise.text)
+    rise.above -> stringResource(Res.string.mesh_hud_rise_above, rise.text)
+    else -> stringResource(Res.string.mesh_hud_rise_below, rise.text)
+}
+
+/** A stale position's age in its largest unit, or null while it is fresh. */
+@Composable
+private fun ageText(ageSec: Long?): String? {
+    val age = ageSec?.takeIf { it > FRESH_POSITION_SEC } ?: return null
     val unit =
         when {
             age >= SECONDS_PER_DAY -> DurationUnit.DAYS
             age >= SECONDS_PER_HOUR -> DurationUnit.HOURS
             else -> DurationUnit.MINUTES
         }
-    return stringResource(
-        Res.string.mesh_hud_age,
-        distance,
-        stringResource(Res.string.duration_ago, formatDuration(age, unit)),
-    )
+    return stringResource(Res.string.duration_ago, formatDuration(age, unit))
 }
 
 @Composable

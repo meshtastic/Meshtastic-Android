@@ -1149,7 +1149,6 @@
     <string name="mesh_beacon_target_default">Default</string>
     <string name="mesh_beacon_target_remove">Remove target</string>
     <string name="mesh_beacon_targets">Broadcast targets</string>
-    <string name="mesh_hud_age">%1$s · %2$s</string>
     <string name="mesh_hud_camera_rationale">Allow camera access to see nodes over the camera view.</string>
     <string name="mesh_hud_camera_unavailable">Camera unavailable. The view still works as a compass.</string>
     <string name="mesh_hud_cardinal_east">E</string>
@@ -1171,6 +1170,7 @@
     <string name="mesh_hud_heading_low_accuracy">Low heading accuracy. Move the phone in a figure eight to calibrate.</string>
     <string name="mesh_hud_inside_geofence">Inside %1$s</string>
     <string name="mesh_hud_inside_unnamed_geofence">Inside a geofence</string>
+    <string name="mesh_hud_joined">%1$s · %2$s</string>
     <string name="mesh_hud_location_rationale">The mesh view uses your location to place nodes around you.</string>
     <string name="mesh_hud_more">+%1$d</string>
     <string name="mesh_hud_nearby">Nearby</string>
@@ -1184,6 +1184,10 @@
     <string name="mesh_hud_range_all">All distances</string>
     <string name="mesh_hud_range_within">Within %1$s</string>
     <string name="mesh_hud_range_within_hidden">Within %1$s · %2$d farther</string>
+    <string name="mesh_hud_rise_above">▲ %1$s</string>
+    <string name="mesh_hud_rise_above_spoken">%1$s above you</string>
+    <string name="mesh_hud_rise_below">▼ %1$s</string>
+    <string name="mesh_hud_rise_below_spoken">%1$s below you</string>
     <string name="mesh_hud_snr">%1$s dB</string>
     <string name="mesh_hud_thermal_critical">Phone is too hot. Camera paused.</string>
     <string name="mesh_hud_thermal_hot">Phone is hot. Updating less often.</string>

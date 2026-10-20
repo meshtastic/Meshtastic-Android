@@ -27,6 +27,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.Layout
@@ -46,26 +47,46 @@ import org.meshtastic.core.resources.mesh_hud_more
 import kotlin.math.abs
 
 private const val OFFSCREEN_ALPHA = 0.7f
-private const val STEM_ALPHA = 0.8f
+private const val LEADER_ALPHA = 0.8f
+
+/** Rows a chip may be lifted to clear nearer ones; the rest of a crowded column is counted, not drawn. */
+private const val MAX_CHIP_LEVEL = 3
 private const val NEAR_SCALE_M = 1_000.0
 private const val MID_SCALE_M = 10_000.0
 private const val MID_SCALE = 0.9f
 private const val FAR_SCALE = 0.8f
 private val ChipGap = 4.dp
 
-/** Chips scale about their foot, so the stem stays on the true point. */
+/** A chip on its point scales about its foot; a lifted one about the corner its leader meets. */
 private val BottomCenter = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 1f)
+private val BottomLeft = TransformOrigin(pivotFractionX = 0f, pivotFractionY = 1f)
+private val BottomRight = TransformOrigin(pivotFractionX = 1f, pivotFractionY = 1f)
+
+/** How far past its point a lifted chip's near corner sits, so the leader leans and never reads as a height. */
+private val LeaderRun = 16.dp
+private val LeaderWidth = 1.dp
+private val LeaderEdgeWidth = 3.dp
+private val LeaderDashes = floatArrayOf(10f, 8f)
 private val EdgeGutter = 28.dp
 private val ArrowSize = 10.dp
 private val AnchorRadius = 4.dp
-private val StemWidth = 2.dp
-private val StemEdge = Color.Black.copy(alpha = 0.4f)
+private val LeaderEdge = Color.Black.copy(alpha = 0.4f)
 private val OverflowPadding = 6.dp
 private val OverflowBand = 28.dp
 private val OverflowScrim = Color.Black.copy(alpha = HUD_SCRIM_ALPHA)
 
-/** Where a chip went, so the draw pass can join it to its true point or point it toward the turn. */
-private class PlacedChip(val rect: IntRect, val anchor: Offset?, val edge: PinEdge?, val color: Color)
+/**
+ * Where a chip went, so the draw pass can mark its true point, lead a lifted chip back to it from [port], or point an
+ * off-screen chip toward the turn. [dashed] is true when the point sits level only as a guess, with no altitude.
+ */
+private class PlacedChip(
+    val rect: IntRect,
+    val anchor: Offset?,
+    val port: Offset?,
+    val edge: PinEdge?,
+    val color: Color,
+    val dashed: Boolean,
+)
 
 /** A column of chips cut off by the top limit: its center and how many did not fit. */
 private class Overflow(val centerX: Int, var count: Int)
@@ -97,11 +118,12 @@ private fun distanceScale(distanceM: Double): Float = when {
 }
 
 /**
- * Places each chip with its bottom center on the target's projected point, nearest first, lifting a chip above any
- * earlier one it would overlap. The lift comes from [stackLevels], which works in view angles and so does not change as
- * the phone moves. A lifted chip keeps a stem down to its true point. Chips that would leave the band between
- * [topLimitPx] and [bottomLimitPx] are dropped into a "+N" count for their column. Targets out of view are pinned to
- * the edge they lie beyond (see [pinEdge]) with an arrow toward them.
+ * Places each chip with its bottom center on the target's projected point, focused then nearest first, lifting a chip
+ * above any earlier one it would overlap. The lift comes from [stackLevels], which works in view angles and so does not
+ * change as the phone moves. A lifted chip steps aside, alternating right and left, and a thin neutral leader runs from
+ * its near bottom corner to the point: a callout, not a height. Chips lifted past [MAX_CHIP_LEVEL] rows, or that would
+ * leave the band between [topLimitPx] and [bottomLimitPx] are dropped into a "+N" count for their column. Targets out
+ * of view are pinned to the edge they lie beyond (see [pinEdge]) with an arrow toward them.
  *
  * The pose is read in the placement and draw blocks, so sensor updates relayout and redraw without recomposing.
  */
@@ -128,7 +150,7 @@ internal fun HudChipLayer(
             .semantics { isTraversalGroup = true }
             .drawBehind {
                 if (currentPose() == null) return@drawBehind
-                placement.chips.forEach { drawStemOrArrow(it) }
+                placement.chips.forEach { drawLeaderOrArrow(it) }
                 placement.overflow.forEach {
                     drawOverflow(it, topLimitPx(), textMeasurer, overflowStyle, overflowTemplate)
                 }
@@ -152,7 +174,10 @@ internal fun HudChipLayer(
                     )
                 },
                 gapDeg = pxToDeg(gap, focalPx),
+                leaderRunDeg = pxToDeg(LeaderRun.roundToPx(), focalPx),
+                maxLevel = MAX_CHIP_LEVEL,
             )
+        val leaderRun = LeaderRun.roundToPx()
         layout(width, height) {
             placement.clear()
             placement.lastEdge.keys.retainAll(keys)
@@ -179,6 +204,12 @@ internal fun HudChipLayer(
                         }
                     }
                 val rowHeight = placeable.height + gap
+                if (point != null && levels[index] == OVERFLOW_LEVEL) {
+                    placement.addOverflow(point.x.toInt(), placeable.width)
+                    return@forEachIndexed
+                }
+                val level = if (point != null) levels[index] else 0
+                val side = leaderSide(level)
                 // Pinned chips spread along their edge by where the target lies, rather than piling in one place.
                 val along = edge?.let { edgeOffsetPx(it, yaw, pitchDelta, focalPx) } ?: 0f
                 val alongX =
@@ -193,6 +224,8 @@ internal fun HudChipLayer(
                     )
                 val left =
                     when {
+                        point != null && side > 0 -> point.x.toInt() + leaderRun
+                        point != null && side < 0 -> point.x.toInt() - leaderRun - placeable.width
                         point != null -> point.x.toInt() - placeable.width / 2
                         edge == PinEdge.RIGHT -> width - placeable.width - gutter
                         edge == PinEdge.LEFT -> gutter
@@ -200,7 +233,7 @@ internal fun HudChipLayer(
                     }
                 var top =
                     when {
-                        point != null -> point.y.toInt() - placeable.height - levels[index] * rowHeight
+                        point != null -> point.y.toInt() - placeable.height - level * rowHeight
                         edge == PinEdge.TOP -> topLimit + gutter
                         edge == PinEdge.BOTTOM -> bottomLimit - placeable.height - gutter
                         else -> alongY
@@ -217,26 +250,46 @@ internal fun HudChipLayer(
                     return@forEachIndexed
                 }
                 if (edge != null) edgeOccupied += rect
+                val port =
+                    when {
+                        point == null || side == 0 -> null
+                        side > 0 -> Offset(rect.left.toFloat(), rect.bottom.toFloat())
+                        else -> Offset(rect.right.toFloat(), rect.bottom.toFloat())
+                    }
                 placement.chips +=
-                    PlacedChip(rect, point?.let { Offset(it.x, it.y) }, edge, Color(target.subject.color))
+                    PlacedChip(
+                        rect = rect,
+                        anchor = point?.let { Offset(it.x, it.y) },
+                        port = port,
+                        edge = edge,
+                        color = Color(target.subject.color),
+                        dashed = !target.elevationKnown,
+                    )
                 val scale = distanceScale(target.distanceM)
                 placeable.placeWithLayer(left, top) {
                     alpha = if (edge == null) 1f else OFFSCREEN_ALPHA
                     scaleX = scale
                     scaleY = scale
-                    transformOrigin = BottomCenter
+                    transformOrigin =
+                        when {
+                            side > 0 -> BottomLeft
+                            side < 0 -> BottomRight
+                            else -> BottomCenter
+                        }
                 }
             }
         }
     }
 }
 
-private fun DrawScope.drawStemOrArrow(chip: PlacedChip) {
+private fun DrawScope.drawLeaderOrArrow(chip: PlacedChip) {
     chip.anchor?.let { anchor ->
-        val foot = Offset(chip.rect.center.x.toFloat(), chip.rect.bottom.toFloat())
-        // In the node's color, over a dark edge so it holds up against a bright sky.
-        drawLine(StemEdge, foot, anchor, strokeWidth = StemWidth.toPx() + 2.dp.toPx())
-        drawLine(chip.color.copy(alpha = STEM_ALPHA), foot, anchor, strokeWidth = StemWidth.toPx())
+        chip.port?.let { port ->
+            // Neutral white over a dark edge: the node's color stays on the chip and the point it marks.
+            val effect = if (chip.dashed) PathEffect.dashPathEffect(LeaderDashes) else null
+            drawLine(LeaderEdge, port, anchor, LeaderEdgeWidth.toPx(), pathEffect = effect)
+            drawLine(Color.White.copy(alpha = LEADER_ALPHA), port, anchor, LeaderWidth.toPx(), pathEffect = effect)
+        }
         drawCircle(Color.White, radius = AnchorRadius.toPx() + 1.dp.toPx(), center = anchor)
         drawCircle(chip.color, radius = AnchorRadius.toPx(), center = anchor)
     }

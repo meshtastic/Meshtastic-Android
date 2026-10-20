@@ -184,6 +184,25 @@ class HudGeometryTest {
     }
 
     @Test
+    fun `a stack past its cap overflows rather than rising further`() {
+        val box = AngularBox(bearingDeg = 90.0, elevationDeg = 0.0, halfWidthDeg = 2.0, heightDeg = 1.0)
+        val levels = stackLevels(List(5) { box }, gapDeg = 0.1, leaderRunDeg = 0.5, maxLevel = 3)
+        assertEquals(listOf(0, 1, 2, 3, OVERFLOW_LEVEL), levels.toList())
+    }
+
+    @Test
+    fun `lifted chips step aside right then left and a chip on its point does not`() {
+        assertEquals(listOf(0, 1, -1, 1), (0..3).map(::leaderSide))
+    }
+
+    @Test
+    fun `stepping aside still keeps lifted chips from overlapping`() {
+        val box = AngularBox(bearingDeg = 90.0, elevationDeg = 0.0, halfWidthDeg = 2.0, heightDeg = 1.0)
+        val levels = stackLevels(List(3) { box }, gapDeg = 0.1, leaderRunDeg = 0.5, maxLevel = 3)
+        assertEquals(listOf(0, 1, 2), levels.toList())
+    }
+
+    @Test
     fun `a chip fills the lowest free row`() {
         val low = AngularBox(bearingDeg = 0.0, elevationDeg = 0.0, halfWidthDeg = 2.0, heightDeg = 1.0)
         val high = low.copy(elevationDeg = 5.0)

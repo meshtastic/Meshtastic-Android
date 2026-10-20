@@ -25,14 +25,17 @@ import org.meshtastic.core.model.geofence.Geofence
 import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.util.fixTimeSecondsOrNull
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.core.model.util.toElevationString
 import org.meshtastic.core.model.util.uncertaintyRadiusMetersOrNull
 import org.meshtastic.core.model.util.verticalUncertaintyMetersOrNull
 import org.meshtastic.core.repository.PhoneLocation
 import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.proto.Waypoint
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.hypot
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import org.meshtastic.proto.Position as ProtoPosition
 
@@ -81,7 +84,15 @@ data class HudTarget(
     val elevationKnown: Boolean,
     val positionAgeSec: Long?,
     val focused: Boolean,
+    /** How far above or below the phone the target is, when that is known and beyond its own uncertainty. */
+    val rise: HudRise? = null,
 )
+
+/** A rise worth saying: [text] is the magnitude in the user's units, [above] its direction. */
+data class HudRise(val text: String, val above: Boolean)
+
+/** A rise smaller than this, or than the altitudes' own uncertainty, is not worth a label. */
+private const val MIN_SHOWN_RISE_M = 30.0
 
 /**
  * A target too close to point at: the phone sits inside its uncertainty circle. The radar plots it by offset instead,
@@ -109,7 +120,10 @@ enum class HudWarning {
 }
 
 data class MeshHudTargets(
-    /** Sorted nearest first, so the declutter pass stacks farther chips above nearer ones. */
+    /**
+     * Sorted focused first, then nearest, so the declutter pass keeps the focused chip on its point and stacks farther
+     * chips above nearer ones.
+     */
     val targets: List<HudTarget> = emptyList(),
     /** Nodes and waypoints whose uncertainty circle contains the phone, so their direction means nothing. */
     val directionUnknown: List<NearbyTarget> = emptyList(),
@@ -208,7 +222,7 @@ internal fun buildHudTargets(
         }
     }
     return MeshHudTargets(
-        targets = placed.sortedBy { it.distanceM },
+        targets = placed.sortedWith(compareByDescending<HudTarget> { it.focused }.thenBy { it.distanceM }),
         directionUnknown = unknown,
         fences = waypoints.mapNotNull { here.fenceFor(it, declination) },
         elevationApproximate = here.altitude == null && here.mslAltitude == null,
@@ -270,6 +284,10 @@ private fun PhoneLocation.targetAt(
         elevationKnown = riseM != null,
         positionAgeSec = null,
         focused = false,
+        rise =
+        riseM
+            ?.takeIf { abs(it) > maxOf(MIN_SHOWN_RISE_M, verticalM) }
+            ?.let { HudRise(abs(it).roundToInt().toElevationString(units), above = it > 0) },
     )
 }
 

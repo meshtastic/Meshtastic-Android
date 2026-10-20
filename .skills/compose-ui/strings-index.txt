@@ -1107,7 +1107,6 @@ mesh_beacon_target_channel_index
 mesh_beacon_target_default
 mesh_beacon_target_remove
 mesh_beacon_targets
-mesh_hud_age
 mesh_hud_camera_rationale
 mesh_hud_camera_unavailable
 mesh_hud_cardinal_east
@@ -1129,6 +1128,7 @@ mesh_hud_heading_accuracy
 mesh_hud_heading_low_accuracy
 mesh_hud_inside_geofence
 mesh_hud_inside_unnamed_geofence
+mesh_hud_joined
 mesh_hud_location_rationale
 mesh_hud_more
 mesh_hud_nearby
@@ -1142,6 +1142,10 @@ mesh_hud_radar_description
 mesh_hud_range_all
 mesh_hud_range_within
 mesh_hud_range_within_hidden
+mesh_hud_rise_above
+mesh_hud_rise_above_spoken
+mesh_hud_rise_below
+mesh_hud_rise_below_spoken
 mesh_hud_snr
 mesh_hud_thermal_critical
 mesh_hud_thermal_hot

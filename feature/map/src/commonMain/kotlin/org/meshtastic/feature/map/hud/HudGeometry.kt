@@ -130,26 +130,52 @@ data class AngularBox(val bearingDeg: Double, val elevationDeg: Double, val half
 
 private const val MAX_STACK_LEVEL = 64
 
+/** The level [stackLevels] gives a chip that would need more than its cap: it is counted, not drawn. */
+const val OVERFLOW_LEVEL = -1
+
+/** Which way a chip at [level] steps aside from its point: none at level 0, then right and left in turn. */
+fun leaderSide(level: Int): Int = when {
+    level <= 0 -> 0
+    level % 2 == 1 -> 1
+    else -> -1
+}
+
 /**
  * How many rows each chip is lifted so none overlaps an earlier one, in list order. Computed from view angles rather
- * than screen positions, so it holds still while the phone moves and changes only when the targets do.
+ * than screen positions, so it holds still while the phone moves and changes only when the targets do. A lifted chip
+ * also steps aside by its half width plus [leaderRunDeg], to the side [leaderSide] gives, so its leader leans rather
+ * than rising plumb; a chip that would need more than [maxLevel] rows gets [OVERFLOW_LEVEL].
  */
-fun stackLevels(boxes: List<AngularBox>, gapDeg: Double): IntArray {
+fun stackLevels(
+    boxes: List<AngularBox>,
+    gapDeg: Double,
+    leaderRunDeg: Double = 0.0,
+    maxLevel: Int = MAX_STACK_LEVEL,
+): IntArray {
     val levels = IntArray(boxes.size)
+    fun center(index: Int, level: Int): Double {
+        val box = boxes[index]
+        val side = leaderSide(level)
+        return if (side == 0 || leaderRunDeg == 0.0) {
+            box.bearingDeg
+        } else {
+            box.bearingDeg + side * (box.halfWidthDeg + leaderRunDeg)
+        }
+    }
     boxes.forEachIndexed { i, box ->
         fun bottom(index: Int, level: Int) = boxes[index].elevationDeg + level * (boxes[index].heightDeg + gapDeg)
-        fun clashes(level: Int) = (0 until i).any { j ->
+        fun overlaps(j: Int, level: Int): Boolean {
             val other = boxes[j]
-            val apart = abs(signedTurnDeg(other.bearingDeg, box.bearingDeg))
-            val myBottom = bottom(i, level)
-            val theirBottom = bottom(j, levels[j])
-            apart < box.halfWidthDeg + other.halfWidthDeg &&
-                myBottom < theirBottom + other.heightDeg &&
-                theirBottom < myBottom + box.heightDeg
+            val theirLevel = levels[j]
+            return abs(signedTurnDeg(center(j, theirLevel), center(i, level))) <
+                box.halfWidthDeg + other.halfWidthDeg &&
+                bottom(i, level) < bottom(j, theirLevel) + other.heightDeg &&
+                bottom(j, theirLevel) < bottom(i, level) + box.heightDeg
         }
+        fun clashes(level: Int) = (0 until i).any { j -> levels[j] != OVERFLOW_LEVEL && overlaps(j, level) }
         var level = 0
-        while (level < MAX_STACK_LEVEL && clashes(level)) level++
-        levels[i] = level
+        while (level <= maxLevel && clashes(level)) level++
+        levels[i] = if (level > maxLevel) OVERFLOW_LEVEL else level
     }
     return levels
 }

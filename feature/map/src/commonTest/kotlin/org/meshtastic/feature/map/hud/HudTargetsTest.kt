@@ -25,6 +25,8 @@ import org.meshtastic.proto.Waypoint
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 private const val LAT = 40.0
@@ -187,10 +189,25 @@ class HudTargetsTest {
     }
 
     @Test
-    fun `targets are sorted nearest first and the focused one is marked`() {
-        val result = build(nodes = listOf(node(1, lat = 40.02), node(2)), focus = "node-1")
-        assertEquals(listOf("node-2", "node-1"), result.targets.map { it.subject.key })
-        assertTrue(result.targets.last().focused)
+    fun `the focused target comes first and the rest nearest first`() {
+        val result = build(nodes = listOf(node(1, lat = 40.03), node(2, lat = 40.02), node(3)), focus = "node-1")
+        assertEquals(listOf("node-1", "node-3", "node-2"), result.targets.map { it.subject.key })
+        assertTrue(result.targets.first().focused)
+    }
+
+    @Test
+    fun `a rise well beyond the altitudes uncertainty is worded with its direction`() {
+        val above = build(nodes = listOf(node(1, hae = 220))).targets.single().rise
+        assertTrue(assertNotNull(above).above)
+        assertTrue(above.text.contains("120"))
+        val below = build(nodes = listOf(node(1, hae = 40))).targets.single().rise
+        assertFalse(assertNotNull(below).above)
+    }
+
+    @Test
+    fun `a small rise or an unknown altitude is not worded`() {
+        assertNull(build(nodes = listOf(node(1, hae = 120))).targets.single().rise)
+        assertNull(build(nodes = listOf(node(1))).targets.single().rise)
     }
 
     @Test
