@@ -69,6 +69,16 @@ class GlbBoundsTest {
     }
 
     @Test
+    fun rejectsJsonChunkLengthPastTheEnd() {
+        val model = glb("""{"asset":{"version":"2.0"}}""")
+        for (length in listOf(model.size, Int.MAX_VALUE - 10, Int.MAX_VALUE)) {
+            val bad = model.copyOf().apply { putIntLe(12, length) }
+            assertNull(GlbBounds.parse(bad))
+            assertNull(GlbBounds.copyright(bad))
+        }
+    }
+
+    @Test
     fun rejectsModelWithoutPositions() {
         assertNull(GlbBounds.parse(glb("""{"accessors":[],"meshes":[{"primitives":[{"attributes":{}}]}]}""")))
     }

@@ -24,16 +24,30 @@ import org.meshtastic.core.repository.DeviceModelRepository
 
 /**
  * Memoizes per image name for the process lifetime: a model is a few hundred KB to a few MB and the hero re-asks on
- * every node detail open. A failed fetch is not cached, so a later open retries.
+ * every node detail open. The flasher's answer is cached either way; a failed request is not, so a later open retries.
  */
 @Single
 class DeviceModelRepositoryImpl(private val remote: DeviceModelRemoteDataSource) : DeviceModelRepository {
     private val lock = Mutex()
     private val existing = mutableSetOf<String>()
+    private val absent = mutableSetOf<String>()
     private val models = mutableMapOf<String, ByteArray>()
 
-    override suspend fun hasModel(imageFile: String): Boolean = lock.withLock { imageFile in existing } ||
-        remote.exists(imageFile).also { exists -> if (exists) lock.withLock { existing += imageFile } }
+    override suspend fun hasModel(imageFile: String): Boolean {
+        val cached = lock.withLock {
+            when (imageFile) {
+                in existing -> true
+                in absent -> false
+                else -> null
+            }
+        }
+        val answer =
+            cached
+                ?: remote.exists(imageFile)?.also { exists ->
+                    lock.withLock { (if (exists) existing else absent) += imageFile }
+                }
+        return answer == true
+    }
 
     override suspend fun getModel(imageFile: String): ByteArray? = lock.withLock { models[imageFile] }
         ?: remote.fetch(imageFile)?.also { bytes ->

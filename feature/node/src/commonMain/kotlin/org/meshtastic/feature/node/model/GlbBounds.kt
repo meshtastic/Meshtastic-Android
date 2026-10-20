@@ -81,7 +81,7 @@ data class GlbBounds(val min: FloatArray, val max: FloatArray) {
                 glb.readIntLe(0) == GLB_MAGIC &&
                     glb.readIntLe(HEADER_BYTES + CHUNK_TYPE_OFFSET) == JSON_CHUNK &&
                     length >= 0 &&
-                    start + length <= glb.size
+                    length <= glb.size - start
             return if (valid) glb.decodeToString(start, start + length) else null
         }
 

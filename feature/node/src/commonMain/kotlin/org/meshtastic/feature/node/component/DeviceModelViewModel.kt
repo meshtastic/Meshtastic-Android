@@ -63,6 +63,8 @@ class DeviceModelViewModel(private val repository: DeviceModelRepository) : View
                 if (glb != null && bounds != null) {
                     DeviceModelState.Ready(imageFile, glb, bounds, GlbBounds.copyright(glb))
                 } else {
+                    // Lets the next open retry rather than replay the failure.
+                    loadedImageFile = null
                     DeviceModelState.Failed
                 }
         }

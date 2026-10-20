@@ -78,18 +78,17 @@ private fun saveToPictures(context: Context, bitmap: Bitmap, title: String): Uri
             put(MediaStore.Images.Media.RELATIVE_PATH, PICTURES_RELATIVE_PATH)
             put(MediaStore.Images.Media.IS_PENDING, 1)
         }
-    val uri = resolver.insert(MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), pending)
-    val written =
-        uri != null &&
-            runCatching {
-                resolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) }
-            }
-                .getOrNull() == true
-    // A row left pending would sit hidden in the gallery, so a failed write removes it.
-    if (written) {
-        resolver.update(uri, ContentValues().apply { put(MediaStore.Images.Media.IS_PENDING, 0) }, null, null)
-    } else if (uri != null) {
-        resolver.delete(uri, null, null)
+    val uri =
+        runCatching {
+            resolver.insert(MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), pending)
+        }
+            .getOrNull() ?: return null
+    val written = runCatching {
+        resolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) } == true &&
+            resolver.update(uri, ContentValues().apply { put(MediaStore.Images.Media.IS_PENDING, 0) }, null, null) > 0
     }
+        .getOrDefault(false)
+    // A row left pending would sit hidden in the gallery, so a failed write removes it.
+    if (!written) runCatching { resolver.delete(uri, null, null) }
     return uri.takeIf { written }
 }

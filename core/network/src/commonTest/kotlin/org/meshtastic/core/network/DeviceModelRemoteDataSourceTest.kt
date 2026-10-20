@@ -23,13 +23,12 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.headersOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.IOException
 import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class DeviceModelRemoteDataSourceTest {
     private val dispatchers =
@@ -47,7 +46,7 @@ class DeviceModelRemoteDataSourceTest {
     fun aServedGlbExistsAndIsFetched() = runTest {
         val glb = byteArrayOf(0x67, 0x6C, 0x54, 0x46)
         withSource(respondWith = glb, contentType = "model/gltf-binary") { source ->
-            assertTrue(source.exists("tracker-t1000-e.svg"))
+            assertEquals(true, source.exists("tracker-t1000-e.svg"))
             assertContentEquals(glb, source.fetch("tracker-t1000-e.svg"))
         }
     }
@@ -58,8 +57,20 @@ class DeviceModelRemoteDataSourceTest {
             respondWith = "<!doctype html>".encodeToByteArray(),
             contentType = "text/html;charset=utf-8",
         ) { source ->
-            assertFalse(source.exists("t-deck.svg"))
+            assertEquals(false, source.exists("t-deck.svg"))
             assertNull(source.fetch("t-deck.svg"))
+        }
+    }
+
+    @Test
+    fun aFailedRequestIsUnknownNotAbsent() = runTest {
+        val client = HttpClient(MockEngine { throw IOException("offline") })
+        try {
+            val source = DeviceModelRemoteDataSource(client, dispatchers)
+            assertNull(source.exists("t-deck.svg"))
+            assertNull(source.fetch("t-deck.svg"))
+        } finally {
+            client.close()
         }
     }
 

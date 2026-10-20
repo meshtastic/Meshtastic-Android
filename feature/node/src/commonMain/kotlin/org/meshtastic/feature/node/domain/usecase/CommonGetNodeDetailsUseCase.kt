@@ -22,8 +22,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.transformLatest
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.common.util.MeasurementSystem
@@ -136,13 +136,16 @@ constructor(
                 .distinctUntilChanged()
                 .flatMapLatest { key -> deviceHardwareRepository.observeDeviceHardware(key.hwModel, key.target) }
                 .onStart { emit(null) }
-                .mapLatest { hw ->
+                .transformLatest { hw ->
                     val links =
                         hw?.platformioTarget
                             ?.takeIf { it.isNotBlank() }
                             ?.let { deviceLinkRepository.getLinksForTarget(it) } ?: emptyList()
-                    val hasModel = hw?.heroImageFile?.let { deviceModelRepository.hasModel(it) } ?: false
-                    HardwareGroup(hw, links, hasModel)
+                    // The model check is a network round trip, so the hardware card never waits on it.
+                    emit(HardwareGroup(hw, links, hasModel = false))
+                    if (hw?.heroImageFile?.let { deviceModelRepository.hasModel(it) } == true) {
+                        emit(HardwareGroup(hw, links, hasModel = true))
+                    }
                 }
 
         // 4. Metadata & Request Timestamps

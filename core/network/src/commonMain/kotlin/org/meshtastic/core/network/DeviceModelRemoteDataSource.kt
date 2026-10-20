@@ -34,11 +34,12 @@ import org.meshtastic.core.di.CoroutineDispatchers
 class DeviceModelRemoteDataSource(private val client: HttpClient, private val dispatchers: CoroutineDispatchers) {
 
     /**
-     * True when the model is served. The flasher is a single-page app that answers a missing path with 200 and its HTML
-     * shell, so only the GLB content type counts.
+     * True when the model is served, false when the flasher answered without one, null when it could not be asked. The
+     * flasher is a single-page app that answers a missing path with 200 and its HTML shell, so only the GLB content
+     * type counts.
      */
-    suspend fun exists(imageFile: String): Boolean = withContext(dispatchers.io) {
-        safeCatching { client.head(modelUrl(imageFile)).isGlb() }.getOrDefault(false)
+    suspend fun exists(imageFile: String): Boolean? = withContext(dispatchers.io) {
+        safeCatching { client.head(modelUrl(imageFile)).isGlb() }.getOrNull()
     }
 
     /** The model bytes, or null when absent or the fetch failed. */
