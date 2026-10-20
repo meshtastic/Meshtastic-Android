@@ -19,6 +19,7 @@ package org.meshtastic.feature.map.hud
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
@@ -36,6 +37,9 @@ private const val SNR_SPAN_DB = 30f
 private const val UNKNOWN_SNR_QUALITY = 0.5f
 private const val ARC_MIN_ALPHA = 0.55f
 private const val TRACK_LEVELS = 8
+
+/** How far along a stem from the viewer its tag sits. */
+private const val STEM_TAG_AT = 0.7f
 private const val OLDEST_TRACK_ALPHA = 0.25f
 private val ArcMinWidth = 2.dp
 private val ArcExtraWidth = 4.dp
@@ -113,24 +117,26 @@ internal fun DrawScope.drawRoute(
                 val width = ArcMinWidth.toPx() + ArcExtraWidth.toPx() * quality
                 val stroke = color.copy(alpha = ARC_MIN_ALPHA + (1 - ARC_MIN_ALPHA) * quality)
                 val viewer = Offset(size.width / 2, size.height)
+                val tag =
+                    when {
+                        skipped > 0 -> formatString(labels.skippedTemplate, skipped)
+                        snr != null -> formatString(labels.snrTemplate, NumberFormatter.format(snr, 1))
+                        else -> null
+                    }
                 if (start.atViewer != point.atViewer) {
                     // A link to or from the phone itself: the forward leg leaves the viewer, the return leg comes home.
                     val far = if (start.atViewer) point else start
                     val end = screen(directionEnu(far.bearingDeg, far.elevationDeg), pose, focalPx)
-                    if (end != null) drawLine(stroke, viewer, end, width, StrokeCap.Round)
+                    if (end != null) {
+                        drawLine(stroke, viewer, end, width, StrokeCap.Round)
+                        // Toward the hop, so the tag stays clear of the bottom panel and the reticle.
+                        tag?.let { drawTag(it, lerp(viewer, end, STEM_TAG_AT), textMeasurer, labelStyle) }
+                    }
                 } else if (!start.atViewer) {
                     val arc = arcDirections(start, point, liftSign)
                     drawPolyline(arc, pose, focalPx, stroke, width, dashed = skipped > 0)
                     val apex = screen(arc[arc.size / 2], pose, focalPx)
-                    if (apex != null) {
-                        val tag =
-                            when {
-                                skipped > 0 -> formatString(labels.skippedTemplate, skipped)
-                                snr != null -> formatString(labels.snrTemplate, NumberFormatter.format(snr, 1))
-                                else -> null
-                            }
-                        tag?.let { drawTag(it, apex, textMeasurer, labelStyle) }
-                    }
+                    if (apex != null) tag?.let { drawTag(it, apex, textMeasurer, labelStyle) }
                 }
             }
             from = index
