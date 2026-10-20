@@ -36,7 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -71,7 +71,10 @@ fun DeviceModelDialog(deviceHardware: DeviceHardware, onDismiss: () -> Unit, mod
     val state by viewModel.state.collectAsStateWithLifecycle()
     val imageFile = deviceHardware.heroImageFile
     // Once per open: a failed load clears the view model's key, so a later open retries.
-    LaunchedEffect(imageFile) { if (imageFile != null) viewModel.load(imageFile) else viewModel.markFailed() }
+    DisposableEffect(imageFile) {
+        if (imageFile != null) viewModel.load(imageFile) else viewModel.markFailed()
+        onDispose {}
+    }
 
     val arViewer = LocalDeviceModelArViewer.current?.takeIf { it.isAvailable() }
     var inAr by rememberSaveable { mutableStateOf(false) }
