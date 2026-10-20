@@ -28,6 +28,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
 
 private const val SNR_FLOOR_DB = -20f
@@ -125,7 +126,7 @@ internal fun DrawScope.drawRoute(
                         val tag =
                             when {
                                 skipped > 0 -> formatString(labels.skippedTemplate, skipped)
-                                snr != null -> formatString(labels.snrTemplate, formatString("%.1f", snr))
+                                snr != null -> formatString(labels.snrTemplate, NumberFormatter.format(snr, 1))
                                 else -> null
                             }
                         tag?.let { drawTag(it, apex, textMeasurer, labelStyle) }

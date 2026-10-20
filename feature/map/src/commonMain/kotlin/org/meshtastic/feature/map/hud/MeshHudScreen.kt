@@ -316,7 +316,12 @@ fun MeshHudScreen(
                     declinationDeg = targets.declinationDeg,
                     currentHeadingDeg = { poseState.value.pose?.azimuthDeg },
                     expanded = pointingDown,
-                    onOpen = { subject -> (subject as? HudSubject.NodeSubject)?.let { onOpenNode(it.node.num) } },
+                    onOpen = { subject ->
+                        when (subject) {
+                            is HudSubject.NodeSubject -> onOpenNode(subject.node.num)
+                            is HudSubject.WaypointSubject -> infoWaypoint = subject.waypoint
+                        }
+                    },
                     route = route,
                     track = track,
                 )
