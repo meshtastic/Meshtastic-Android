@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.hud
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.toggleable
@@ -39,20 +41,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.compass_location_disabled
 import org.meshtastic.core.resources.compass_no_location_fix
 import org.meshtastic.core.resources.compass_no_magnetometer
+import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.resources.map_filter_title
 import org.meshtastic.core.resources.mesh_hud_camera_unavailable
+import org.meshtastic.core.resources.mesh_hud_chirpy_says
 import org.meshtastic.core.resources.mesh_hud_coach_dismiss
 import org.meshtastic.core.resources.mesh_hud_coach_find
 import org.meshtastic.core.resources.mesh_hud_coach_point
@@ -267,12 +275,35 @@ internal fun HudCoach(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            ChirpyWarning(Modifier.align(Alignment.CenterHorizontally))
             listOf(Res.string.mesh_hud_coach_point, Res.string.mesh_hud_coach_tap, Res.string.mesh_hud_coach_find)
                 .forEach { Text(stringResource(it), color = Color.White, style = MaterialTheme.typography.bodyLarge) }
             Button(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
                 Text(stringResource(Res.string.mesh_hud_coach_dismiss))
             }
         }
+    }
+}
+
+/** Chirpy's word on what camera, GPS and sensors running together cost, as on the firmware update's warning. */
+@Composable
+private fun ChirpyWarning(modifier: Modifier = Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(text = "🔋🔥", style = MaterialTheme.typography.headlineLarge)
+            Image(
+                painter = painterResource(Res.drawable.img_chirpy),
+                contentScale = ContentScale.Fit,
+                contentDescription = stringResource(Res.string.chirpy),
+                modifier = Modifier.size(48.dp),
+            )
+        }
+        Text(
+            text = stringResource(Res.string.mesh_hud_chirpy_says),
+            color = Color.White,
+            style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
