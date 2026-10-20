@@ -41,6 +41,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -197,6 +198,7 @@ private fun MirrorWithControls(
                 MirrorSurface(
                     frame,
                     palette,
+                    enabled,
                     hasTouch,
                     onEvent,
                     onTouch,
@@ -211,7 +213,7 @@ private fun MirrorWithControls(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                MirrorSurface(frame, palette, hasTouch, onEvent, onTouch, onChar)
+                MirrorSurface(frame, palette, enabled, hasTouch, onEvent, onTouch, onChar)
                 DpadCluster(enabled = enabled, onEvent = onEvent)
             }
         }
@@ -229,6 +231,7 @@ private fun MirrorWithControls(
 private fun MirrorSurface(
     frame: MirrorFrame,
     palette: MirrorPalette?,
+    enabled: Boolean,
     hasTouch: Boolean,
     onEvent: (Int) -> Unit,
     onTouch: (Int, Int, Int) -> Unit,
@@ -237,6 +240,11 @@ private fun MirrorSurface(
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+    LaunchedEffect(enabled) {
+        if (!enabled) {
+            focusManager.clearFocus()
+        }
+    }
     var focused by remember { mutableStateOf(false) }
     val currentFrame by rememberUpdatedState(frame)
     val focusColor = MaterialTheme.colorScheme.primary
@@ -248,37 +256,39 @@ private fun MirrorSurface(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Box(
-            modifier =
-            Modifier.pointerInput(hasTouch) {
-                detectTapGestures(
-                    onTap = { offset ->
-                        if (hasTouch) {
-                            onTouch(
-                                INPUT_USER_PRESS,
-                                offset.toDeviceX(size.width, currentFrame),
-                                offset.toDeviceY(size.height, currentFrame),
-                            )
-                        } else {
-                            // Tap toggles keyboard control so there is always a way out of capture.
-                            toggleKeyboard()
-                        }
-                    },
-                    onLongPress = { offset ->
-                        // Physical touch drivers map a long-press to SELECT with coordinates.
-                        if (hasTouch) {
-                            onTouch(
-                                INPUT_SELECT,
-                                offset.toDeviceX(size.width, currentFrame),
-                                offset.toDeviceY(size.height, currentFrame),
-                            )
-                        }
-                    },
-                )
+        val gestureModifier =
+            if (enabled) {
+                Modifier.pointerInput(hasTouch) {
+                    detectTapGestures(
+                        onTap = { offset ->
+                            if (hasTouch) {
+                                onTouch(
+                                    INPUT_USER_PRESS,
+                                    offset.toDeviceX(size.width, currentFrame),
+                                    offset.toDeviceY(size.height, currentFrame),
+                                )
+                            } else {
+                                // Tap toggles keyboard control so there is always a way out of capture.
+                                toggleKeyboard()
+                            }
+                        },
+                        onLongPress = { offset ->
+                            // Physical touch drivers map a long-press to SELECT with coordinates.
+                            if (hasTouch) {
+                                onTouch(
+                                    INPUT_SELECT,
+                                    offset.toDeviceX(size.width, currentFrame),
+                                    offset.toDeviceY(size.height, currentFrame),
+                                )
+                            }
+                        },
+                    )
+                }
+                    .swipeToDirection(onEvent)
+            } else {
+                Modifier
             }
-                .swipeToDirection(onEvent)
-                .border(width = 2.dp, color = if (focused) focusColor else Color.Transparent),
-        ) {
+        Box(modifier = gestureModifier.border(width = 2.dp, color = if (focused) focusColor else Color.Transparent)) {
             MirrorFrameImage(frame, palette)
             RemoteKeyboardSink(
                 focusRequester = focusRequester,
@@ -286,16 +296,22 @@ private fun MirrorSurface(
                 modifier = Modifier.onFocusChanged { focused = it.isFocused },
             )
         }
-        MirrorControlHints(focused = focused, hasTouch = hasTouch, onToggleKeyboard = { toggleKeyboard() })
+        MirrorControlHints(
+            focused = focused,
+            hasTouch = hasTouch,
+            enabled = enabled,
+            onToggleKeyboard = { toggleKeyboard() },
+        )
     }
 }
 
 @Composable
-private fun MirrorControlHints(focused: Boolean, hasTouch: Boolean, onToggleKeyboard: () -> Unit) {
+private fun MirrorControlHints(focused: Boolean, hasTouch: Boolean, enabled: Boolean, onToggleKeyboard: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         FilterChip(
             selected = focused,
             onClick = onToggleKeyboard,
+            enabled = enabled,
             label = { Text(stringResource(Res.string.mirror_keyboard)) },
         )
         Text(
