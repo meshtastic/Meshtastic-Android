@@ -132,7 +132,14 @@ class MqttTopicSampler(
             regionPackets = 0
         }
         _state.value = State(phase = Phase.Connecting)
-        val client = clientFactory(config)
+        val client =
+            try {
+                clientFactory(config)
+            } catch (e: IllegalArgumentException) {
+                Logger.w { "MQTT topic sample: address (${e::class.simpleName})" }
+                _state.value = State(phase = Phase.Failed(Failure.CONNECT))
+                return
+            }
         try {
             coroutineScope {
                 val reachedCap = CompletableDeferred<Unit>()

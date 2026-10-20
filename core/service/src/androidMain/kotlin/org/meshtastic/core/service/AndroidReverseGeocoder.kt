@@ -32,15 +32,16 @@ import java.util.Locale
 import kotlin.coroutines.resume
 
 /**
- * The platform geocoder in the device's locale, as Apple's `CLGeocoder` uses. Devices without a geocoder backend (no
- * Play services on the F-Droid flavor) get null and the topic finder falls back to the region and what it hears.
+ * The platform geocoder in US English whatever the device's locale, since root topic segments use English place names.
+ * Devices without a geocoder backend (no Play services on the F-Droid flavor) get null and the topic finder falls back
+ * to the region and what it hears.
  */
 @Single
 class AndroidReverseGeocoder(private val context: Application, private val dispatchers: CoroutineDispatchers) :
     ReverseGeocoder {
     override suspend fun place(latitude: Double, longitude: Double): GeocodedPlace? {
         if (!Geocoder.isPresent()) return null
-        val geocoder = Geocoder(context, Locale.getDefault())
+        val geocoder = Geocoder(context, Locale.US)
         val address =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 suspendCancellableCoroutine { continuation ->

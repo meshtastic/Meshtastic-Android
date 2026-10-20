@@ -27,6 +27,7 @@ import kotlinx.io.IOException
 import org.meshtastic.core.network.mqtt.MqttTopicSampler.Failure
 import org.meshtastic.core.network.mqtt.MqttTopicSampler.Phase
 import org.meshtastic.mqtt.ConnectionState
+import org.meshtastic.proto.ModuleConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -109,6 +110,15 @@ class MqttTopicSamplerTest {
         val sampler = sampler(FakeClient(connectError = IOException("unreachable")))
         sampler.run(null, "msh/US")
         assertEquals(Phase.Failed(Failure.CONNECT), sampler.state.value.phase)
+    }
+
+    @Test
+    fun anUnparseableAddressFailsTheSample() = runTest {
+        listOf("broker.local:", "http://broker.local").forEach { address ->
+            val sampler = MqttTopicSampler(timeSource = testScheduler.timeSource)
+            sampler.run(ModuleConfig.MQTTConfig.Builder().also { it.address = address }.build(), "msh/US")
+            assertEquals(Phase.Failed(Failure.CONNECT), sampler.state.value.phase, address)
+        }
     }
 
     @Test

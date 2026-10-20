@@ -19,11 +19,14 @@ package org.meshtastic.feature.settings.radio.component
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.network.mqtt.LatLon
@@ -90,7 +93,12 @@ class MqttTopicFinderViewModel(
         _state.update { UiState(regionName = regionName, sample = it.sample) }
         if (regionName == null) return
         planJob = viewModelScope.launch { locate(radioPosition) }
-        sampleJob = viewModelScope.launch { sampler.run(config, "msh/$regionName") }
+        val previous = sampleJob
+        sampleJob = viewModelScope.launch {
+            // A cancelled run's cleanup still writes sampler state, so it must end before the next run starts.
+            withContext(NonCancellable) { previous?.cancelAndJoin() }
+            sampler.run(config, "msh/$regionName")
+        }
     }
 
     /** Ends the sample and keeps what was heard. */
