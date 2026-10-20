@@ -75,27 +75,32 @@
   <screenshots>
     <screenshot type="default">
       <caption>Track every node on the mesh at a glance</caption>
-      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.3/meshtastic-desktop-01-nodes.png</image>
+      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.4/meshtastic-desktop-01-nodes.png</image>
     </screenshot>
     <screenshot>
       <caption>Chat with your mesh, channel by channel</caption>
-      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.3/meshtastic-desktop-02-messages.png</image>
+      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.4/meshtastic-desktop-02-messages.png</image>
     </screenshot>
     <screenshot>
       <caption>See the whole mesh on a map</caption>
-      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.3/meshtastic-desktop-03-map.png</image>
+      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.4/meshtastic-desktop-03-map.png</image>
     </screenshot>
     <screenshot>
       <caption>Connect over Bluetooth, USB, or Wi-Fi</caption>
-      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.3/meshtastic-desktop-04-connections.png</image>
+      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.4/meshtastic-desktop-04-connections.png</image>
     </screenshot>
     <screenshot>
       <caption>Full radio and module configuration</caption>
-      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.3/meshtastic-desktop-05-settings.png</image>
+      <image>https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.4/meshtastic-desktop-05-settings.png</image>
     </screenshot>
   </screenshots>
 
   <releases>
+    <release version="2.8.4" date="2026-10-20">
+      <description>
+        <p>Stability and reliability fixes.</p>
+      </description>
+    </release>
     <release version="2.8.3" date="2026-09-30">
       <description>
         <p>Radios on firmware older than 2.5.14 stay connected and lead straight to the firmware update, which is now required. Back up and restore the app database. Failed messages resend in place. Reactions get their own notification channel. Radio settings open without a radio, and search lands on the setting. Site Planner coverage runs on the phone. Many stability fixes.</p>
