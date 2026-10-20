@@ -1181,9 +1181,6 @@
     <string name="mesh_hud_open_waypoint">Open waypoint</string>
     <string name="mesh_hud_own_accuracy">You ± %1$s</string>
     <string name="mesh_hud_radar_description">%1$s, %2$s</string>
-    <string name="mesh_hud_range_all">All distances</string>
-    <string name="mesh_hud_range_within">Within %1$s</string>
-    <string name="mesh_hud_range_within_hidden">Within %1$s · %2$d farther</string>
     <string name="mesh_hud_rise_above">▲ %1$s</string>
     <string name="mesh_hud_rise_above_spoken">%1$s above you</string>
     <string name="mesh_hud_rise_below">▼ %1$s</string>

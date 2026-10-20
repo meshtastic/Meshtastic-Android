@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,11 +38,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -77,9 +74,6 @@ import org.meshtastic.core.resources.mesh_hud_nearby
 import org.meshtastic.core.resources.mesh_hud_no_nodes
 import org.meshtastic.core.resources.mesh_hud_on_target
 import org.meshtastic.core.resources.mesh_hud_own_accuracy
-import org.meshtastic.core.resources.mesh_hud_range_all
-import org.meshtastic.core.resources.mesh_hud_range_within
-import org.meshtastic.core.resources.mesh_hud_range_within_hidden
 import org.meshtastic.core.resources.mesh_hud_thermal_critical
 import org.meshtastic.core.resources.mesh_hud_thermal_hot
 import org.meshtastic.core.resources.mesh_hud_tilt_down
@@ -131,7 +125,6 @@ internal fun HudTopBar(
     status: HudSensorStatus,
     targets: MeshHudTargets,
     onNavigateUp: () -> Unit,
-    onToggleRange: () -> Unit,
     onOpenFilters: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -147,10 +140,6 @@ internal fun HudTopBar(
                         stringResource(Res.string.mesh_hud_heading_accuracy, headingText, formatString("%d°", it))
                     } ?: stringResource(Res.string.mesh_hud_heading, headingText),
                 )
-            }
-            if (targets.ready && !targets.scoped) {
-                Spacer(Modifier.width(8.dp))
-                HudRangeToggle(targets, onToggleRange)
             }
             Spacer(Modifier.weight(1f))
             onOpenFilters?.let { open ->
@@ -352,25 +341,6 @@ private fun FinderHintLabel(hint: FinderHint, modifier: Modifier = Modifier) {
             .semantics { liveRegion = LiveRegionMode.Polite }
             .background(HudScrim, MaterialTheme.shapes.medium)
             .padding(horizontal = 12.dp, vertical = 6.dp),
-    )
-}
-
-@Composable
-private fun HudRangeToggle(targets: MeshHudTargets, onToggle: () -> Unit) {
-    val text =
-        when {
-            !targets.rangeLimited -> stringResource(Res.string.mesh_hud_range_all)
-
-            targets.hiddenByRange > 0 ->
-                stringResource(Res.string.mesh_hud_range_within_hidden, targets.nearRangeText, targets.hiddenByRange)
-
-            else -> stringResource(Res.string.mesh_hud_range_within, targets.nearRangeText)
-        }
-    HudLabel(
-        text = text,
-        modifier =
-        Modifier.clip(MaterialTheme.shapes.small)
-            .toggleable(value = targets.rangeLimited, role = Role.Switch, onValueChange = { onToggle() }),
     )
 }
 

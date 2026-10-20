@@ -136,12 +136,8 @@ data class MeshHudTargets(
     /** Added to the camera's magnetic azimuth to give a true heading. */
     val declinationDeg: Float = 0f,
     val units: MeasurementSystem = MeasurementSystem.METRIC,
-    val rangeLimited: Boolean = true,
-    /** True when the view was opened for one purpose, so it shows only that and has no range to toggle. */
+    /** True when the view was opened for one purpose, so it shows only that and has no filters to change. */
     val scoped: Boolean = false,
-    val nearRangeText: String = "",
-    /** Positioned targets left out by the range limit. */
-    val hiddenByRange: Int = 0,
     val warnings: List<HudWarning> = emptyList(),
     /** False until the first computation, so the screen does not report an empty mesh before it has looked. */
     val ready: Boolean = false,

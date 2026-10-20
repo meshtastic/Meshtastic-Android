@@ -1139,9 +1139,6 @@ mesh_hud_open_node
 mesh_hud_open_waypoint
 mesh_hud_own_accuracy
 mesh_hud_radar_description
-mesh_hud_range_all
-mesh_hud_range_within
-mesh_hud_range_within_hidden
 mesh_hud_rise_above
 mesh_hud_rise_above_spoken
 mesh_hud_rise_below

@@ -293,7 +293,6 @@ fun MeshHudScreen(
             ),
             targets = targets,
             onNavigateUp = onNavigateUp,
-            onToggleRange = viewModel::toggleRangeLimit,
             onOpenFilters = if (targets.ready && !targets.scoped) ({ showFilters = true }) else null,
             modifier =
             Modifier.align(Alignment.TopStart).onPlaced {

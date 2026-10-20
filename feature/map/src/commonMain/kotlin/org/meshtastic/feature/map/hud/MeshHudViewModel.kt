@@ -70,7 +70,6 @@ private const val WALKING_MPS = 1.0f
 private data class HudSettings(
     val units: MeasurementSystem,
     val focusKey: String?,
-    val rangeLimited: Boolean,
     val filters: MapFilterPrefs,
     /** Nodes a traceroute or track names, shown whatever the filters and range say. */
     val pinned: Set<Int>,
@@ -133,13 +132,6 @@ private data class RouteRequest(val destNum: Int, val requestId: Int, val logUui
 
 private const val TRACK_FALLBACK_COLOR = 0xFFFFFFFF.toInt()
 
-/** Default reach of the view, a round number in each unit system; farther targets hide unless focused. */
-private const val NEAR_RANGE_METRIC_M = 50_000
-private const val NEAR_RANGE_IMPERIAL_M = 48_280 // 30 mi
-
-private fun nearRangeM(units: MeasurementSystem) =
-    if (units == MeasurementSystem.IMPERIAL) NEAR_RANGE_IMPERIAL_M else NEAR_RANGE_METRIC_M
-
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LongParameterList")
 @KoinViewModel
@@ -162,7 +154,6 @@ class MeshHudViewModel(
 
     // The provider checks the permission once per collection, so a grant made while the screen is open needs a new one.
     private val locationPermissionGranted = MutableStateFlow(false)
-    private val rangeLimited = MutableStateFlow(true)
     private val fixAverager = FixAverager()
     private val routeRequest = MutableStateFlow<RouteRequest?>(null)
     private val soloNodeNum = MutableStateFlow<Int?>(null)
@@ -267,11 +258,10 @@ class MeshHudViewModel(
             combine(
                 localeUnitsProvider.measurementSystem,
                 focusKey,
-                rangeLimited,
                 mapPrefs.mapFilters,
                 combine(pinned, soloNodeNum, positionHints, ::Triple),
-            ) { units, focus, limited, filters, (pinnedNums, solo, hints) ->
-                HudSettings(units, focus, limited, filters, pinnedNums, solo, hints)
+            ) { units, focus, filters, (pinnedNums, solo, hints) ->
+                HudSettings(units, focus, filters, pinnedNums, solo, hints)
             },
             packetRepository.getWaypoints(),
         ) { location, nodes, myNode, settings, waypointPackets ->
@@ -306,10 +296,9 @@ class MeshHudViewModel(
                 now,
                 ::declinationAt,
             )
-                // A scoped view has no range toggle, so it must not drop its own node for being far.
-                .limitedTo(settings.rangeLimited && solo == null, settings.units, settings.pinned)
                 .let { built ->
                     built.copy(
+                        units = settings.units,
                         averagedFixes = fixAverager.count,
                         scoped = solo != null,
                         ready = true,
@@ -405,10 +394,6 @@ class MeshHudViewModel(
         locationPermissionGranted.value = granted
     }
 
-    fun toggleRangeLimit() {
-        rangeLimited.value = !rangeLimited.value
-    }
-
     private fun MeshHudTargets.findingFor(focusKey: String?): HudFinding? =
         targets.firstOrNull { it.focused }?.let { HudFinding(it.subject, it.distanceText) }
             ?: directionUnknown
@@ -419,20 +404,4 @@ class MeshHudViewModel(
     val coachSeen: StateFlow<Boolean> = mapPrefs.meshHudCoachSeen
 
     fun dismissCoach() = mapPrefs.setMeshHudCoachSeen(true)
-
-    private fun MeshHudTargets.limitedTo(limited: Boolean, units: MeasurementSystem, pinned: Set<Int>): MeshHudTargets {
-        val range = nearRangeM(units)
-        fun HudTarget.isPinned() = (subject as? HudSubject.NodeSubject)?.node?.num in pinned
-        val kept = if (limited) targets.filter { it.distanceM <= range || it.focused || it.isPinned() } else targets
-        val keptFences =
-            if (limited) fences.filter { f -> f.inside || f.edge.any { it.distanceM <= range } } else fences
-        return copy(
-            targets = kept,
-            fences = keptFences,
-            rangeLimited = limited,
-            units = units,
-            nearRangeText = range.toDistanceString(units),
-            hiddenByRange = targets.size - kept.size,
-        )
-    }
 }

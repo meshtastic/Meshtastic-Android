@@ -62,7 +62,7 @@ private const val LON = -105.0
 /** About 1.1 km north of the phone. */
 private const val NEAR_LAT = 40.01
 
-/** About 111 km north of the phone, past the 50 km range limit. */
+/** About 111 km north of the phone. */
 private const val FAR_LAT = 41.0
 private const val FAR_ENOUGH_M = 100_000.0
 
@@ -240,16 +240,14 @@ class MeshHudViewModelTest {
     }
 
     @Test
-    fun `the whole mesh view hides nodes past the range limit`() = runTest(testDispatcher) {
+    fun `the whole mesh view leaves distance to the map filters`() = runTest(testDispatcher) {
         nodeRepository.setNodes(listOf(node(1), node(3, lat = FAR_LAT)))
         viewModel.openFor(null)
-        val targets = collectTargets()
-        assertEquals(setOf("node-1"), targets.keys)
-        assertEquals(1, targets.value.hiddenByRange)
+        assertEquals(setOf("node-1", "node-3"), collectTargets().keys)
     }
 
     @Test
-    fun `a scoped view keeps its node past the range limit even unfocused`() = runTest(testDispatcher) {
+    fun `a scoped view keeps its node when the focus is cleared`() = runTest(testDispatcher) {
         val far = node(3, lat = FAR_LAT)
         nodeRepository.setNodes(listOf(node(1), far))
         viewModel.openFor(3)
@@ -260,11 +258,10 @@ class MeshHudViewModelTest {
         runCurrent()
         assertEquals(setOf("node-3"), targets.keys)
         assertFalse(targets.value.targets.single().focused)
-        assertEquals(0, targets.value.hiddenByRange)
     }
 
     @Test
-    fun `a tracked node past the range limit stays in the whole mesh view`() = runTest(testDispatcher) {
+    fun `a tracked node stays in the whole mesh view`() = runTest(testDispatcher) {
         nodeRepository.setNodes(listOf(node(1), node(3, lat = FAR_LAT)))
         viewModel.openFor(null)
         viewModel.showTrack(3)
