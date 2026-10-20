@@ -69,6 +69,7 @@ private val LeaderEdgeWidth = 3.dp
 private val LeaderDashes = floatArrayOf(10f, 8f)
 private val EdgeGutter = 28.dp
 private val ArrowSize = 10.dp
+private val ArrowGap = 2.dp
 private val AnchorRadius = 4.dp
 private val LeaderEdge = Color.Black.copy(alpha = 0.4f)
 private val OverflowPadding = 6.dp
@@ -178,6 +179,7 @@ internal fun HudChipLayer(
                 maxLevel = MAX_CHIP_LEVEL,
             )
         val leaderRun = LeaderRun.roundToPx()
+        val arrowRoomPx = (ArrowSize + ArrowGap).roundToPx()
         layout(width, height) {
             placement.clear()
             placement.lastEdge.keys.retainAll(keys)
@@ -247,8 +249,10 @@ internal fun HudChipLayer(
                         edge == PinEdge.BOTTOM -> bottomLimit - placeable.height - gutter
                         else -> alongY
                     }
-                // Top-pinned chips stack downward, away from the edge; every other kind stacks upward.
-                val step = if (edge == PinEdge.TOP) rowHeight else -rowHeight
+                // Top-pinned chips stack downward, away from the edge; every other kind stacks upward. A top or bottom
+                // pin's arrow sits outside its chip, so those rows leave room for it.
+                val arrowRoom = if (edge == PinEdge.TOP || edge == PinEdge.BOTTOM) arrowRoomPx else 0
+                val step = if (edge == PinEdge.TOP) rowHeight + arrowRoom else -(rowHeight + arrowRoom)
                 var rect = IntRect(left, top, left + placeable.width, top + placeable.height)
                 while (edge != null && edgeOccupied.any { it.overlaps(rect) }) {
                     top += step
@@ -308,7 +312,7 @@ private fun DrawScope.drawLeaderOrArrow(chip: PlacedChip) {
 /** A triangle just outside [rect], pointing past the edge the target lies beyond. */
 private fun DrawScope.drawEdgeArrow(rect: IntRect, edge: PinEdge) {
     val size = ArrowSize.toPx()
-    val gap = 2.dp.toPx()
+    val gap = ArrowGap.toPx()
     val cx = rect.center.x.toFloat()
     val cy = rect.center.y.toFloat()
     val arrow =
