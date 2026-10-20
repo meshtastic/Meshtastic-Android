@@ -1466,6 +1466,8 @@ class MeshConnectionManagerImplTest {
                     errorMessages += call.arg<String>(0) to call.arg<Severity>(1)
                 }
             val restartTransportCalls = restartTransportCallCounter()
+            var disconnectCalls = 0
+            everySuspend { radioInterfaceService.disconnect() } calls { disconnectCalls += 1 }
 
             manager = createManager(backgroundScope)
             radioConnectionState.value = ConnectionState.Connected
@@ -1496,6 +1498,7 @@ class MeshConnectionManagerImplTest {
             advanceTimeBy(4_000L)
             advanceUntilIdle()
             assertEquals(3, restartTransportCalls())
+            assertEquals(0, disconnectCalls)
             radioConnectionState.value = ConnectionState.DeviceSleep
             radioConnectionState.value = ConnectionState.Connected
             advanceTimeBy(200)
@@ -1508,6 +1511,7 @@ class MeshConnectionManagerImplTest {
             advanceUntilIdle()
 
             assertEquals(3, restartTransportCalls())
+            assertEquals(1, disconnectCalls, "Recovery exhaustion must stop the transport's own reconnect loop")
             assertEquals(
                 ConnectionState.Disconnected,
                 serviceRepository.connectionState.value,

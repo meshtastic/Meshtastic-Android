@@ -447,6 +447,8 @@ class MeshConnectionManagerImpl(
                         "failures; surfacing sticky error"
                 }
                 consecutiveRecoveryFailures.value = 0
+                // Stop the transport too, or its own reconnect loop re-enters the handshake and starts a new streak.
+                radioInterfaceService.disconnect()
                 serviceRepository.setConnectionProgress("")
                 onConnectionChanged(ConnectionState.Disconnected, fromState = ConnectionState.Connecting)
                 // safeCatchingAll swallows Skiko ExceptionInInitializerError on headless JVM tests
