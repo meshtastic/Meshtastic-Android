@@ -324,7 +324,12 @@ class MeshHudViewModel(
 
     /** The traceroute in view, if one was opened, as legs of points from here. */
     val route: StateFlow<HudRoute?> =
-        combine(location, routeSource, nodeRepository.nodeDBbyNum) { state, source, nodes ->
+        combine(location, routeSource, nodeRepository.nodeDBbyNum, nodeRepository.myNodeInfo) {
+                state,
+                source,
+                nodes,
+                myNode,
+            ->
             val here = state.location
             if (source == null || here == null) {
                 null
@@ -336,6 +341,7 @@ class MeshHudViewModel(
                     source.back,
                     source.snrTowards,
                     source.snrBack,
+                    viewerNum = myNode?.myNodeNum,
                 ) { num ->
                     source.snapshot[num] ?: nodes[num]?.validPosition
                 }

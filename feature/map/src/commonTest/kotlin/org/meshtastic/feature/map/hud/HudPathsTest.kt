@@ -108,6 +108,18 @@ class HudPathsTest {
     }
 
     @Test
+    fun `the connected radio is at the viewer even with no position or a distant one`() {
+        val unplaced =
+            buildHudRoute(here, 0f, listOf(1, 2), listOf(2, 1), null, null, viewerNum = 1) { num ->
+                if (num == 1) null else at(40.01)
+            }
+        assertTrue(assertNotNull(unplaced.forward.points[0]).atViewer)
+        assertTrue(assertNotNull(assertNotNull(unplaced.back).points[1]).atViewer)
+        val distant = buildHudRoute(here, 0f, listOf(1, 2), emptyList(), null, null, viewerNum = 1) { at(40.01) }
+        assertTrue(assertNotNull(distant.forward.points[0]).atViewer)
+    }
+
+    @Test
     fun `a track runs oldest first and flags points with no altitude`() {
         val track =
             buildHudTrack(

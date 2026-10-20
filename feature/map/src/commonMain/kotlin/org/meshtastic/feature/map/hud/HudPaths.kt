@@ -99,9 +99,14 @@ private fun snrFor(route: List<Int>, quarterDb: List<Int>?): List<Float?> =
         List((route.size - 1).coerceAtLeast(0)) { null }
     }
 
+/** The phone itself, where a leg to or from the connected radio starts or ends. */
+private val ViewerPoint = PathPoint(bearingDeg = 0.0, elevationDeg = 0.0, distanceM = 0.0, atViewer = true)
+
 /**
  * A traceroute as legs of points from here. Each hop takes [positionOf]'s answer, which should prefer the position the
- * route was recorded with and fall back to the live one, so a hop is only blank when neither is known.
+ * route was recorded with and fall back to the live one, so a hop is only blank when neither is known. [viewerNum], the
+ * connected radio, is always at the viewer: it is within Bluetooth or cable reach of the phone, and often has no
+ * position of its own.
  */
 @Suppress("LongParameterList")
 internal fun buildHudRoute(
@@ -111,11 +116,14 @@ internal fun buildHudRoute(
     back: List<Int>,
     snrTowards: List<Int>?,
     snrBack: List<Int>?,
+    viewerNum: Int? = null,
     positionOf: (Int) -> ProtoPosition?,
 ): HudRoute {
+    fun pointOf(num: Int) =
+        if (num == viewerNum) ViewerPoint else positionOf(num)?.let { here.pathPoint(it, declination) }
     fun leg(route: List<Int>, snr: List<Int>?, isForward: Boolean) = RouteLeg(
         nodeNums = route,
-        points = route.map { num -> positionOf(num)?.let { here.pathPoint(it, declination) } },
+        points = route.map(::pointOf),
         snrDb = snrFor(route, snr),
         forward = isForward,
     )
