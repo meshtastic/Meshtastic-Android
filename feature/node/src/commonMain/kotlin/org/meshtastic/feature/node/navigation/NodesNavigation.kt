@@ -172,7 +172,6 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) 
         )
     }
 
-    // No pane metadata: the camera view takes the whole window.
     entry<NodeDetailRoute.PositionLog>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(args.destNum) }
         metricsViewModel.setNodeId(args.destNum)

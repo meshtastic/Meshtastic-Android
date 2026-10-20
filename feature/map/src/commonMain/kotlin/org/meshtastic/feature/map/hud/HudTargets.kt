@@ -197,8 +197,8 @@ internal fun buildHudTargets(
         }
     }
     waypoints.forEach { waypoint ->
-        val lat = waypoint.latitude_i?.takeIf { it != 0 }?.let { Position.degD(it) } ?: return@forEach
-        val lon = waypoint.longitude_i?.takeIf { it != 0 }?.let { Position.degD(it) } ?: return@forEach
+        val lat = waypoint.latitude_i?.let { Position.degD(it) } ?: return@forEach
+        val lon = waypoint.longitude_i?.let { Position.degD(it) } ?: return@forEach
         val subject = HudSubject.WaypointSubject(waypoint)
         val target = here.targetAt(subject, lat, lon, null, null, declination, units)
         if (target == null) {

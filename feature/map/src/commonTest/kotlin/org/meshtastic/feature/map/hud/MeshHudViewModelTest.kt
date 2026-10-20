@@ -184,6 +184,21 @@ class MeshHudViewModelTest {
     }
 
     @Test
+    fun `opening again for the same node keeps the focus the user chose`() = runTest(testDispatcher) {
+        nodeRepository.setNodes(listOf(node(1), node(2)))
+        viewModel.openFor(null)
+        val targets = collectTargets()
+        viewModel.toggleFocus(HudSubject.NodeSubject(node(2)))
+        viewModel.openFor(null)
+        runCurrent()
+        assertEquals("node-2", targets.value.targets.single { it.focused }.subject.key)
+
+        viewModel.openFor(1)
+        runCurrent()
+        assertEquals("node-1", targets.value.targets.single { it.focused }.subject.key)
+    }
+
+    @Test
     fun `a scoped view ignores the map filter for its node`() = runTest(testDispatcher) {
         nodeRepository.setNodes(listOf(node(1, favorite = true), node(2)))
         mapPrefs.mapFilters.value = MapFilterPrefs(onlyFavorites = true)

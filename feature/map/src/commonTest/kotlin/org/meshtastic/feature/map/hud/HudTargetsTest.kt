@@ -100,6 +100,20 @@ class HudTargetsTest {
     }
 
     @Test
+    fun `a node at sea level is a reading and not a missing altitude`() {
+        val target = build(phone(hae = null, msl = 100.0), listOf(node(1, msl = 0))).targets.single()
+        assertTrue(target.elevationKnown)
+        assertEquals(-5.1, target.elevationDeg, 0.1)
+    }
+
+    @Test
+    fun `a phone at zero ellipsoid height is a reading and not a missing altitude`() {
+        val target = build(phone(hae = 0.0), listOf(node(1, hae = 100))).targets.single()
+        assertTrue(target.elevationKnown)
+        assertEquals(5.1, target.elevationDeg, 0.1)
+    }
+
+    @Test
     fun `a node closer than the phone fix accuracy has no direction`() {
         val result = build(phone(accuracyM = 2_000f), listOf(node(1)))
         assertTrue(result.targets.isEmpty())
@@ -129,6 +143,25 @@ class HudTargetsTest {
     fun `a waypoint closer than the phone fix accuracy has no direction either`() {
         val result = build(phone(accuracyM = 2_000f), waypoints = listOf(waypoint(7, NORTH_LAT)))
         assertEquals("waypoint-7", result.directionUnknown.single().subject.key)
+    }
+
+    @Test
+    fun `a waypoint on the equator and prime meridian is placed`() {
+        val nullIsland =
+            Waypoint.Builder()
+                .also { b ->
+                    b.id = 3
+                    b.latitude_i = 0
+                    b.longitude_i = 0
+                }
+                .build()
+        assertEquals("waypoint-3", build(waypoints = listOf(nullIsland)).targets.single().subject.key)
+    }
+
+    @Test
+    fun `a waypoint without coordinates is left out`() {
+        val unplaced = Waypoint.Builder().also { it.id = 4 }.build()
+        assertTrue(build(waypoints = listOf(unplaced)).targets.isEmpty())
     }
 
     @Test

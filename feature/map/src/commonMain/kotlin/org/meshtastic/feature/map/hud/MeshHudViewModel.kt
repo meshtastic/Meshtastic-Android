@@ -150,6 +150,7 @@ class MeshHudViewModel(
     private val fixAverager = FixAverager()
     private val routeRequest = MutableStateFlow<RouteRequest?>(null)
     private val soloNodeNum = MutableStateFlow<Int?>(null)
+    private var opened = false
     private val trackNodeNum = MutableStateFlow<Int?>(null)
 
     /**
@@ -374,6 +375,9 @@ class MeshHudViewModel(
      * only it and the nodes its track or route names are shown. Null opens the whole mesh, as from the map.
      */
     fun openFor(nodeNum: Int?) {
+        // A recreated screen opens again for the same node, and must keep the focus the user has chosen since.
+        if (opened && soloNodeNum.value == nodeNum) return
+        opened = true
         focusKey.value = nodeNum?.let { "node-$it" }
         soloNodeNum.value = nodeNum
     }
