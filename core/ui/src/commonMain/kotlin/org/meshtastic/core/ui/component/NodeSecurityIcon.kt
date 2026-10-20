@@ -211,8 +211,12 @@ fun NodeSecurityIcon(
     if (showDialog) {
         NodeSecurityDialog(indicator = indicator, key = publicKey, onDismiss = { showDialog = false })
     }
-    // The button keeps its own minimum touch target; only the glyph inside it takes iconSize.
-    IconButton(onClick = { showDialog = true }, modifier = modifier) { indicator.Glyph(Modifier.size(iconSize)) }
+    IconButton(
+        onClick = { showDialog = true },
+        modifier = modifier.size(iconSize + 8.dp),
+    ) {
+        indicator.Glyph(Modifier.size(iconSize))
+    }
 }
 
 /**
