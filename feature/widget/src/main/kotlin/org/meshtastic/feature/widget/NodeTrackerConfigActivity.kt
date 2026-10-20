@@ -58,12 +58,16 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.doc_no_results
 import org.meshtastic.core.resources.node_filter_placeholder
+import org.meshtastic.core.resources.nodes_empty_disconnected_hint
+import org.meshtastic.core.resources.nodes_empty_disconnected_title
 import org.meshtastic.core.resources.nodes_empty_searching_hint
 import org.meshtastic.core.resources.nodes_empty_searching_title
 import org.meshtastic.core.resources.widget_node_tracker_choose
@@ -71,6 +75,7 @@ import org.meshtastic.core.ui.component.EmptyState
 import org.meshtastic.core.ui.component.MeshtasticSearchBar
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.theme.AppTheme
@@ -86,6 +91,7 @@ class NodeTrackerConfigActivity :
     KoinComponent {
 
     private val nodeRepository: NodeRepository by inject()
+    private val connectionStateProvider: ConnectionStateProvider by inject()
     private val uiPrefs: UiPrefs by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,13 +120,19 @@ class NodeTrackerConfigActivity :
                     else -> isSystemInDarkTheme()
                 }
             AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
-                // One snapshot: a live list re-sorts by last heard under the user's finger on a busy mesh.
+                // One snapshot: a live list re-sorts by last heard under the user's finger on a busy mesh. Read the DB
+                // directly, since the repository's flow opens on an empty map; an empty DB waits for its first nodes.
                 val nodes by
-                    produceState(emptyMap<Int, Node>()) { value = nodeRepository.nodeDBbyNum.first { it.isNotEmpty() } }
+                    produceState<Map<Int, Node>?>(null) {
+                        value = nodeRepository.getNodeDbSnapshot()
+                        if (value.isNullOrEmpty()) value = nodeRepository.nodeDBbyNum.first { it.isNotEmpty() }
+                    }
                 val ourNodeNum = nodeRepository.myNodeInfo.collectAsState().value?.myNodeNum
+                val connectionState by connectionStateProvider.connectionState.collectAsState()
                 NodeTrackerPicker(
-                    nodes = nodes.values,
+                    nodes = nodes?.values,
                     ourNodeNum = ourNodeNum,
+                    connected = connectionState is ConnectionState.Connected,
                     onPick = { node -> track(appWidgetId, node.num) },
                 )
             }
@@ -144,10 +156,10 @@ class NodeTrackerConfigActivity :
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun NodeTrackerPicker(nodes: Collection<Node>, ourNodeNum: Int?, onPick: (Node) -> Unit) {
+internal fun NodeTrackerPicker(nodes: Collection<Node>?, ourNodeNum: Int?, connected: Boolean, onPick: (Node) -> Unit) {
     var query by rememberSaveable { mutableStateOf("") }
-    val all = remember(nodes, ourNodeNum) { trackerCandidates(nodes, "", ourNodeNum) }
-    val matches = remember(nodes, ourNodeNum, query) { trackerCandidates(nodes, query, ourNodeNum) }
+    val all = remember(nodes, ourNodeNum) { trackerCandidates(nodes.orEmpty(), "", ourNodeNum) }
+    val matches = remember(nodes, ourNodeNum, query) { trackerCandidates(nodes.orEmpty(), query, ourNodeNum) }
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(Res.string.widget_node_tracker_choose)) }) },
     ) { padding ->
@@ -165,15 +177,27 @@ internal fun NodeTrackerPicker(nodes: Collection<Node>, ourNodeNum: Int?, onPick
                     }
                 },
             )
-            if (all.isEmpty()) {
-                EmptyState(
-                    icon = MeshtasticIcons.Nodes,
-                    title = stringResource(Res.string.nodes_empty_searching_title),
-                    supportingText = stringResource(Res.string.nodes_empty_searching_hint),
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                CandidateList(all, onPick)
+            when {
+                // Still reading the snapshot; an empty state here would flash before the list.
+                nodes == null -> Unit
+
+                all.isNotEmpty() -> CandidateList(all, onPick)
+
+                connected ->
+                    EmptyState(
+                        icon = MeshtasticIcons.Nodes,
+                        title = stringResource(Res.string.nodes_empty_searching_title),
+                        supportingText = stringResource(Res.string.nodes_empty_searching_hint),
+                        modifier = Modifier.fillMaxSize(),
+                    )
+
+                else ->
+                    EmptyState(
+                        icon = MeshtasticIcons.NoDevice,
+                        title = stringResource(Res.string.nodes_empty_disconnected_title),
+                        supportingText = stringResource(Res.string.nodes_empty_disconnected_hint),
+                        modifier = Modifier.fillMaxSize(),
+                    )
             }
         }
     }

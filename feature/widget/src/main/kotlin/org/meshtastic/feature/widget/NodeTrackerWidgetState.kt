@@ -16,10 +16,16 @@
  */
 package org.meshtastic.feature.widget
 
+import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
@@ -35,7 +41,7 @@ import org.meshtastic.core.repository.NodeRepository
 
 /** What one Node Tracker instance renders. */
 sealed interface NodeTrackerWidgetState {
-    /** No node chosen yet, or the chosen one has left the node DB. Tapping reopens the picker. */
+    /** No node chosen yet, or the chosen one is missing from a populated node DB. Tapping reopens the picker. */
     data object NodeNotFound : NodeTrackerWidgetState
 
     data class Tracking(
@@ -68,8 +74,24 @@ internal fun nodeTrackerState(
     nodeNum: Int?,
     inputs: NodeTrackerInputs,
     onlineThreshold: Int = onlineTimeThreshold(),
+    lastKnown: NodeTrackerWidgetState.Tracking? = null,
 ): NodeTrackerWidgetState {
-    val node = nodeNum?.let { inputs.nodes[it] } ?: return NodeTrackerWidgetState.NodeNotFound
+    val node = nodeNum?.let { inputs.nodes[it] }
+    return when {
+        node != null -> trackingOf(node, inputs, onlineThreshold)
+
+        // An empty node DB means no radio's DB is open (disconnected, or no device selected), not that the node left.
+        nodeNum != null && inputs.nodes.isEmpty() ->
+            lastKnown?.takeIf { it.nodeNum == nodeNum }?.asLastKnown() ?: NodeTrackerWidgetState.NodeNotFound
+
+        else -> NodeTrackerWidgetState.NodeNotFound
+    }
+}
+
+/** How [this] reading renders once no node DB backs it: dimmed, and without a distance from a radio now gone. */
+internal fun NodeTrackerWidgetState.Tracking.asLastKnown() = copy(distance = null, isStale = true)
+
+private fun trackingOf(node: Node, inputs: NodeTrackerInputs, onlineThreshold: Int): NodeTrackerWidgetState.Tracking {
     val direct = node.hopsAway == 0 && !node.viaMqtt
     // A disconnected radio's last position would read as live, so distance is shown only while connected.
     val distance =
@@ -91,6 +113,54 @@ internal fun nodeTrackerState(
         distance = distance,
         isStale = node.lastHeard <= onlineThreshold,
     )
+}
+
+private val LAST_KNOWN_NUM_KEY = intPreferencesKey("last_known_num")
+private val LAST_KNOWN_SHORT_NAME_KEY = stringPreferencesKey("last_known_short_name")
+private val LAST_KNOWN_LONG_NAME_KEY = stringPreferencesKey("last_known_long_name")
+private val LAST_KNOWN_FOREGROUND_KEY = intPreferencesKey("last_known_foreground")
+private val LAST_KNOWN_BACKGROUND_KEY = intPreferencesKey("last_known_background")
+private val LAST_KNOWN_BATTERY_KEY = intPreferencesKey("last_known_battery")
+private val LAST_KNOWN_SNR_KEY = floatPreferencesKey("last_known_snr")
+private val LAST_KNOWN_RSSI_KEY = intPreferencesKey("last_known_rssi")
+private val LAST_KNOWN_HOPS_KEY = intPreferencesKey("last_known_hops")
+private val LAST_KNOWN_LAST_HEARD_KEY = intPreferencesKey("last_known_last_heard")
+
+/**
+ * The last reading this instance rendered from a node DB, kept in its Glance state for when no DB is open.
+ * [storeLastKnown] writes every key in one atomic edit, so the node number stands for the whole set.
+ */
+internal fun Preferences.lastKnownTracking(): NodeTrackerWidgetState.Tracking? = this[LAST_KNOWN_NUM_KEY]?.let { num ->
+    NodeTrackerWidgetState.Tracking(
+        nodeNum = num,
+        shortName = this[LAST_KNOWN_SHORT_NAME_KEY].orEmpty(),
+        longName = this[LAST_KNOWN_LONG_NAME_KEY].orEmpty(),
+        colors = (this[LAST_KNOWN_FOREGROUND_KEY] ?: 0) to (this[LAST_KNOWN_BACKGROUND_KEY] ?: 0),
+        batteryLevel = this[LAST_KNOWN_BATTERY_KEY],
+        snr = this[LAST_KNOWN_SNR_KEY],
+        rssi = this[LAST_KNOWN_RSSI_KEY],
+        hopsAway = this[LAST_KNOWN_HOPS_KEY],
+        lastHeard = this[LAST_KNOWN_LAST_HEARD_KEY] ?: 0,
+        distance = null,
+        isStale = true,
+    )
+}
+
+internal fun MutablePreferences.storeLastKnown(state: NodeTrackerWidgetState.Tracking) {
+    this[LAST_KNOWN_NUM_KEY] = state.nodeNum
+    this[LAST_KNOWN_SHORT_NAME_KEY] = state.shortName
+    this[LAST_KNOWN_LONG_NAME_KEY] = state.longName
+    this[LAST_KNOWN_FOREGROUND_KEY] = state.colors.first
+    this[LAST_KNOWN_BACKGROUND_KEY] = state.colors.second
+    putOrRemove(LAST_KNOWN_BATTERY_KEY, state.batteryLevel)
+    putOrRemove(LAST_KNOWN_SNR_KEY, state.snr)
+    putOrRemove(LAST_KNOWN_RSSI_KEY, state.rssi)
+    putOrRemove(LAST_KNOWN_HOPS_KEY, state.hopsAway)
+    this[LAST_KNOWN_LAST_HEARD_KEY] = state.lastHeard
+}
+
+private fun <T> MutablePreferences.putOrRemove(key: Preferences.Key<T>, value: T?) {
+    if (value == null) remove(key) else this[key] = value
 }
 
 @Single
@@ -115,8 +185,14 @@ class NodeTrackerWidgetDataSource(
      * The current inputs, reading the database directly while the repository's flow still holds its empty initial value
      * after a cold process start; otherwise a widget rendered then would claim its node was not found.
      */
-    suspend fun currentInputs(): NodeTrackerInputs {
-        val current = inputs.value
-        return if (current.nodes.isEmpty()) current.copy(nodes = nodeRepository.getNodeDbSnapshot()) else current
-    }
+    suspend fun currentInputs(): NodeTrackerInputs = checkedAgainstDb(inputs.value)
+
+    /**
+     * [inputs], with each empty node map checked against the database the same way, so an empty map is passed on only
+     * when the open DB really is empty.
+     */
+    val checkedInputs: Flow<NodeTrackerInputs> = inputs.map { checkedAgainstDb(it) }
+
+    private suspend fun checkedAgainstDb(current: NodeTrackerInputs): NodeTrackerInputs =
+        if (current.nodes.isEmpty()) current.copy(nodes = nodeRepository.getNodeDbSnapshot()) else current
 }

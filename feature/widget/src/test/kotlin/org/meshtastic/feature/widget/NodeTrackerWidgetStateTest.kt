@@ -17,6 +17,7 @@
 package org.meshtastic.feature.widget
 
 import android.app.Application
+import androidx.datastore.preferences.core.mutablePreferencesOf
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
@@ -111,6 +112,55 @@ class NodeTrackerWidgetStateTest {
         assertNull(state.batteryLevel)
         assertNull(state.hopsAway)
         assertNull(state.distance)
+    }
+
+    @Test
+    fun `an empty node DB keeps the last reading on screen dimmed`() {
+        val live = assertIs<NodeTrackerWidgetState.Tracking>(nodeTrackerState(TRACKED_NUM, inputs(), HEARD - 1))
+        val noDb = NodeTrackerInputs(connectionState = ConnectionState.Disconnected)
+
+        val state =
+            assertIs<NodeTrackerWidgetState.Tracking>(
+                nodeTrackerState(TRACKED_NUM, noDb, HEARD - 1, lastKnown = live.asLastKnown()),
+            )
+
+        assertEquals(live.copy(distance = null, isStale = true), state)
+        assertTrue(state.isStale)
+        assertNull(state.distance)
+    }
+
+    @Test
+    fun `an empty node DB without a reading for this node is not found`() {
+        val other = assertIs<NodeTrackerWidgetState.Tracking>(nodeTrackerState(OUR_NUM, inputs())).asLastKnown()
+        val noDb = NodeTrackerInputs()
+
+        assertEquals(NodeTrackerWidgetState.NodeNotFound, nodeTrackerState(TRACKED_NUM, noDb))
+        assertEquals(NodeTrackerWidgetState.NodeNotFound, nodeTrackerState(TRACKED_NUM, noDb, lastKnown = other))
+    }
+
+    @Test
+    fun `a populated node DB without the node is not found despite a last reading`() {
+        val live = assertIs<NodeTrackerWidgetState.Tracking>(nodeTrackerState(TRACKED_NUM, inputs()))
+        val otherRadio = NodeTrackerInputs(nodes = mapOf(OUR_NUM to ourNode), ourNode = ourNode)
+
+        assertEquals(
+            NodeTrackerWidgetState.NodeNotFound,
+            nodeTrackerState(TRACKED_NUM, otherRadio, lastKnown = live.asLastKnown()),
+        )
+    }
+
+    @Test
+    fun `the last reading survives a round trip through Glance state`() {
+        val live = assertIs<NodeTrackerWidgetState.Tracking>(nodeTrackerState(TRACKED_NUM, inputs(), HEARD - 1))
+        val bareNode = testNode(0x41, hopsAway = -1)
+        val bare = assertIs<NodeTrackerWidgetState.Tracking>(nodeTrackerState(0x41, inputs(0x41 to bareNode)))
+        val prefs = mutablePreferencesOf()
+
+        assertNull(prefs.lastKnownTracking())
+        prefs.storeLastKnown(live.asLastKnown())
+        assertEquals(live.asLastKnown(), prefs.lastKnownTracking())
+        prefs.storeLastKnown(bare.asLastKnown())
+        assertEquals(bare.asLastKnown(), prefs.lastKnownTracking())
     }
 
     private companion object {

@@ -56,7 +56,9 @@ Widen the widget to add a second column:
 
 When a node has not been heard within the last two hours, the widget dims its readings so they do not read as current. Tap the widget to open that node's details in the app.
 
-If the node you picked is removed from your node list, the widget says **Node not found**. Tap it to choose another node.
+After you disconnect from your node in the app, the widget keeps the tracked node's last readings on screen, dimmed, until you reconnect.
+
+If your node list does not include the node you picked, because you removed it or connected to a different node, the widget says **Node not found**. Tap it to choose another node.
 
 ## Adding a Widget
 

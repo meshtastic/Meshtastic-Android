@@ -22,10 +22,13 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,6 +51,7 @@ import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.provideContent
+import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
@@ -68,7 +72,6 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -105,10 +108,22 @@ class NodeTrackerWidget :
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
         val initialInputs = dataSource.currentInputs()
         provideContent {
-            val nodeNum = currentState<Preferences>()[TRACKED_NODE_NUM_KEY]
-            // Skips the repository's empty initial map so a cold start does not flash "not found".
-            val inputs by remember { dataSource.inputs.filter { it.nodes.isNotEmpty() } }.collectAsState(initialInputs)
-            WidgetContent(nodeTrackerState(nodeNum, inputs), appWidgetId)
+            val prefs = currentState<Preferences>()
+            val inputs by remember { dataSource.checkedInputs }.collectAsState(initialInputs)
+            var rendered by remember { mutableStateOf<NodeTrackerWidgetState.Tracking?>(null) }
+            val fromDb = inputs.nodes.isNotEmpty()
+            val state =
+                nodeTrackerState(prefs[TRACKED_NODE_NUM_KEY], inputs, lastKnown = rendered ?: prefs.lastKnownTracking())
+            LaunchedEffect(state, fromDb) {
+                val reading = (state as? NodeTrackerWidgetState.Tracking)?.takeIf { fromDb }?.asLastKnown()
+                if (reading != null) {
+                    rendered = reading
+                    if (prefs.lastKnownTracking() != reading) {
+                        updateAppWidgetState(context, id) { it.storeLastKnown(reading) }
+                    }
+                }
+            }
+            WidgetContent(state, appWidgetId)
         }
     }
 
