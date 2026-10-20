@@ -64,6 +64,7 @@ private const val NEAR_LAT = 40.01
 
 /** About 111 km north of the phone, past the 50 km range limit. */
 private const val FAR_LAT = 41.0
+private const val FAR_ENOUGH_M = 100_000.0
 
 private fun node(num: Int, lat: Double = NEAR_LAT, favorite: Boolean = false) = Node(
     num = num,
@@ -113,6 +114,7 @@ class MeshHudViewModelTest {
     private val nodeRepository = FakeNodeRepository()
     private val mapPrefs = FakeMapPrefs()
     private val traceroutes = FakeTracerouteResponses()
+    private val snapshots = FakeTracerouteSnapshotRepository()
     private val packetRepository: PacketRepository = mock()
     private lateinit var viewModel: MeshHudViewModel
 
@@ -129,7 +131,7 @@ class MeshHudViewModelTest {
                 packetRepository = packetRepository,
                 meshLogRepository = FakeMeshLogRepository(),
                 tracerouteResponseProvider = traceroutes,
-                tracerouteSnapshotRepository = FakeTracerouteSnapshotRepository(),
+                tracerouteSnapshotRepository = snapshots,
                 mapPrefs = mapPrefs,
                 notificationPrefs = FakeNotificationPrefs(),
                 localeUnitsProvider = FakeLocaleUnitsProvider(),
@@ -222,6 +224,19 @@ class MeshHudViewModelTest {
         viewModel.openFor(2)
         viewModel.showTraceroute(destNum = 2, requestId = 7, logUuid = null)
         assertEquals(setOf("node-2", "node-3", "node-4"), collectTargets().keys)
+    }
+
+    @Test
+    fun `a hop is placed where its traceroute recorded it rather than where it is now`() = runTest(testDispatcher) {
+        nodeRepository.setNodes(listOf(node(2), node(3)))
+        val recorded = mapOf(3 to node(3, lat = FAR_LAT).position)
+        snapshots.upsertSnapshotPositions("log-1", requestId = 7, positions = recorded)
+        traceroutes.tracerouteResponse.value =
+            TracerouteResponse("", 2, requestId = 7, forwardRoute = listOf(3), returnRoute = emptyList())
+        viewModel.openFor(2)
+        viewModel.showTraceroute(destNum = 2, requestId = 7, logUuid = "log-1")
+        val hop = collectTargets().value.targets.first { it.subject.key == "node-3" }
+        assertTrue(hop.distanceM > FAR_ENOUGH_M)
     }
 
     @Test

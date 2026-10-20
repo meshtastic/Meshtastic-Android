@@ -39,6 +39,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.passesMapFilter
@@ -78,9 +79,24 @@ private data class HudSettings(
      * track or route names are shown.
      */
     val solo: Int?,
-    /** Positions to place nodes at when the database has none live (see `fallbackPositions`). */
-    val fallbacks: Map<Int, ProtoPosition>,
+    /** Where the open route and track place the nodes they name (see `positionHints`). */
+    val hints: PositionHints,
 )
+
+/**
+ * Where to place the nodes an open route or track names. A route's [recorded] positions win over live ones, as on the
+ * traceroute map, so each chip sits where its arc ends; a track's newest point is only a [fallback] for a node the
+ * database has no live position for.
+ */
+private data class PositionHints(
+    val recorded: Map<Int, ProtoPosition> = emptyMap(),
+    val fallback: Map<Int, ProtoPosition> = emptyMap(),
+)
+
+private fun Node.placedBy(hints: PositionHints): Node? {
+    val position = hints.recorded[num] ?: hints.fallback[num]?.takeIf { validPosition == null }
+    return (position?.let { copy(position = it) } ?: this).takeIf { it.validPosition != null }
+}
 
 /** A traceroute to draw: its node nums each way, link SNRs in quarter dB, and the positions it was recorded with. */
 data class RouteSource(
@@ -205,16 +221,16 @@ class MeshHudViewModel(
         }
 
     /**
-     * Where to place a node the database has no live position for: the position recorded with the open route, else the
-     * newest point of its open track. A remote node, or one last heard while disconnected, often has only these, and
-     * without them its chip, and the edge arrow leading to it, would never appear.
+     * The open route's recorded hop positions and the open track's newest point. A remote node, or one last heard while
+     * disconnected, often has only these, and without them its chip, and the edge arrow leading to it, would never
+     * appear.
      */
-    private val fallbackPositions =
+    private val positionHints =
         combine(routeSource, trackSource) { route, track ->
-            buildMap {
-                track?.positions?.lastOrNull()?.let { put(track.nodeNum, it) }
-                route?.snapshot?.let { putAll(it) }
-            }
+            PositionHints(
+                recorded = route?.snapshot.orEmpty(),
+                fallback = track?.positions?.lastOrNull()?.let { mapOf(track.nodeNum to it) }.orEmpty(),
+            )
         }
 
     /** The phone's averaged fix, shared by the targets, the route and the track. */
@@ -253,9 +269,9 @@ class MeshHudViewModel(
                 focusKey,
                 rangeLimited,
                 mapPrefs.mapFilters,
-                combine(pinned, soloNodeNum, fallbackPositions, ::Triple),
-            ) { units, focus, limited, filters, (pinnedNums, solo, fallbacks) ->
-                HudSettings(units, focus, limited, filters, pinnedNums, solo, fallbacks)
+                combine(pinned, soloNodeNum, positionHints, ::Triple),
+            ) { units, focus, limited, filters, (pinnedNums, solo, hints) ->
+                HudSettings(units, focus, limited, filters, pinnedNums, solo, hints)
             },
             packetRepository.getWaypoints(),
         ) { location, nodes, myNode, settings, waypointPackets ->
@@ -264,15 +280,7 @@ class MeshHudViewModel(
             val solo = settings.solo
             val shownNodes =
                 nodes.values
-                    .mapNotNull { node ->
-                        if (node.validPosition != null) {
-                            node
-                        } else {
-                            settings.fallbacks[node.num]
-                                ?.let { node.copy(position = it) }
-                                ?.takeIf { it.validPosition != null }
-                        }
-                    }
+                    .mapNotNull { node -> node.placedBy(settings.hints) }
                     .filter { node ->
                         node.num != myNode?.myNodeNum &&
                             if (solo != null) {
