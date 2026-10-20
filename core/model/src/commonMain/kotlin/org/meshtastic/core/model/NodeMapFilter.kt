@@ -64,7 +64,7 @@ fun Node.passesMapFilter(filter: NodeMapFilter, nowSeconds: Long): Boolean {
 fun decodeExcludedRoles(names: Set<String>): Set<Config.DeviceConfig.Role> =
     names.mapNotNullTo(mutableSetOf()) { name -> Config.DeviceConfig.Role.entries.firstOrNull { it.name == name } }
 
-/** Who the node is: favourited, ignored, its role, and whether its name has arrived yet. */
+/** Who the node is: favorited, ignored, its role, and whether its name has arrived yet. */
 private fun Node.passesIdentityFilters(filter: NodeMapFilter): Boolean = (!filter.onlyFavorites || isFavorite) &&
     (!isIgnored || filter.showIgnored) &&
     user.role !in filter.excludedRoles &&

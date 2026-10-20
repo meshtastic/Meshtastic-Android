@@ -128,9 +128,8 @@ data class MeshHudTargets(
     /** Nodes and waypoints whose uncertainty circle contains the phone, so their direction means nothing. */
     val directionUnknown: List<NearbyTarget> = emptyList(),
     val fences: List<HudFence> = emptyList(),
-    /** The phone's own fix accuracy after averaging, in meters, and how many fixes went into it. */
+    /** The phone's own fix accuracy after averaging, in meters. */
     val ownAccuracyM: Float? = null,
-    val averagedFixes: Int = 0,
     /** True when the phone's fix has no altitude, so every target sits level with it. */
     val elevationApproximate: Boolean = false,
     /** Added to the camera's magnetic azimuth to give a true heading. */

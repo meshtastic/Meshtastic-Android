@@ -61,11 +61,7 @@ data class RouteLeg(
 )
 
 /** A traceroute to draw: its legs, and how many of its known nodes have a position to draw them at. */
-data class HudRoute(val forward: RouteLeg, val back: RouteLeg?, val mappable: Int, val total: Int) {
-    /** Node nums the route passes through, the relays the user wants to see whatever the map filters say. */
-    val nodeNums: Set<Int>
-        get() = (forward.nodeNums + back?.nodeNums.orEmpty()).filterTo(mutableSetOf()) { it != UNKNOWN_HOP }
-}
+data class HudRoute(val forward: RouteLeg, val back: RouteLeg?, val mappable: Int, val total: Int)
 
 data class TrackPoint(val point: PathPoint, val ageSec: Long?, val altitudeKnown: Boolean)
 

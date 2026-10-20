@@ -88,7 +88,6 @@ class HudPathsTest {
         assertNull(route.forward.points[1])
         assertEquals(listOf(5f, null), route.forward.snrDb)
         assertNull(route.back)
-        assertEquals(setOf(1, 3), route.nodeNums)
     }
 
     @Test

@@ -49,9 +49,9 @@ object MapNodePolicy {
      * Pure so it can be tested without a renderer: the filter rules are the part users notice when they go wrong, and
      * they should not need a GPU to verify.
      *
-     * Your own node is exempt from both filters. You are always on your own map, whether or not you have favourited
+     * Your own node is exempt from both filters. You are always on your own map, whether or not you have favorited
      * yourself and whether or not you have heard from yourself lately — the Google map has always done this, and the
-     * MapLibre map's own copy of these rules did not, so filtering to favourites there hid you from yourself.
+     * MapLibre map's own copy of these rules did not, so filtering to favorites there hid you from yourself.
      *
      * Nodes without a fix are dropped up front. They cannot be drawn, and leaving them in drags a camera that fits to
      * these bounds toward (0, 0) — which is how the OSMdroid map used to open in the Atlantic.

@@ -258,7 +258,8 @@ enum class NodeDetailScreen(
         Res.string.position_log,
         NodeDetailRoute.PositionLog::class,
         Res.drawable.ic_location_on,
-        { metricsVM, onNavigateUp -> PositionLogScreen(metricsVM, onNavigateUp) },
+        // Built by its own entry in nodeDetailGraph, which wires the mesh view; never called.
+        { _, _ -> },
     ),
     ENVIRONMENT(
         Res.string.environment,

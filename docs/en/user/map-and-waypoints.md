@@ -55,7 +55,6 @@ Tap **Open mesh view** in the map's top bar to see the whole mesh, filtered by t
 
 - **Tap** a node to open its detail page, or a waypoint to open its info.
 - **Touch & hold** a node or waypoint to find it. The view says how far to turn and tilt, the phone ticks as you turn closer, and it pulses once you are on target.
-- In the whole-mesh view, nodes and waypoints farther than 50 km (30 mi) stay hidden until you tap the range label in the top bar.
 - A node whose position uncertainty covers your own spot has no meaningful direction, so it goes on the radar at the bottom instead. Point the phone down to enlarge the radar.
 - Waypoint geofences are outlined, and the view says when you are inside one.
 

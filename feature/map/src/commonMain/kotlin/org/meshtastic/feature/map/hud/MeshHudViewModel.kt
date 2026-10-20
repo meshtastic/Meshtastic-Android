@@ -71,7 +71,7 @@ private data class HudSettings(
     val units: MeasurementSystem,
     val focusKey: String?,
     val filters: MapFilterPrefs,
-    /** Nodes a traceroute or track names, shown whatever the filters and range say. */
+    /** Nodes a traceroute or track names, shown whatever the filters say. */
     val pinned: Set<Int>,
     /**
      * The node the view was opened for, from its detail, compass, track or traceroute. Then only it and the nodes its
@@ -299,7 +299,6 @@ class MeshHudViewModel(
                 .let { built ->
                     built.copy(
                         units = settings.units,
-                        averagedFixes = fixAverager.count,
                         scoped = solo != null,
                         ready = true,
                         moving = (location.location?.speedMps ?: 0f) > WALKING_MPS,

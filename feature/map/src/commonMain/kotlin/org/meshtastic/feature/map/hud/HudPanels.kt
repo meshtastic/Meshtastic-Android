@@ -286,7 +286,10 @@ internal fun HudCoach(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
 private fun ChirpyWarning(modifier: Modifier = Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(text = stringResource(Res.string.mesh_hud_chirpy_glyphs), style = MaterialTheme.typography.headlineLarge)
+            Text(
+                text = stringResource(Res.string.mesh_hud_chirpy_glyphs),
+                style = MaterialTheme.typography.headlineLarge,
+            )
             Image(
                 painter = painterResource(Res.drawable.img_chirpy),
                 contentScale = ContentScale.Fit,
