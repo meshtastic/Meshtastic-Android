@@ -1114,6 +1114,7 @@ mesh_hud_cardinal_north
 mesh_hud_cardinal_south
 mesh_hud_cardinal_west
 mesh_hud_chip_description
+mesh_hud_chirpy_glyphs
 mesh_hud_chirpy_says
 mesh_hud_coach_dismiss
 mesh_hud_coach_find

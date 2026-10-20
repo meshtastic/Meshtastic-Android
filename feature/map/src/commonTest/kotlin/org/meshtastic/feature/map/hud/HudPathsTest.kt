@@ -117,6 +117,7 @@ class HudPathsTest {
         assertTrue(assertNotNull(assertNotNull(unplaced.back).points[1]).atViewer)
         val distant = buildHudRoute(here, 0f, listOf(1, 2), emptyList(), null, null, viewerNum = 1) { at(40.01) }
         assertTrue(assertNotNull(distant.forward.points[0]).atViewer)
+        assertEquals(2, unplaced.mappable)
     }
 
     @Test

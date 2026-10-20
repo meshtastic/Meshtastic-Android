@@ -1156,6 +1156,7 @@
     <string name="mesh_hud_cardinal_south">S</string>
     <string name="mesh_hud_cardinal_west">W</string>
     <string name="mesh_hud_chip_description">%1$s, %2$s, at %3$d o'clock</string>
+    <string name="mesh_hud_chirpy_glyphs" translatable="false">🔋🔥</string>
     <string name="mesh_hud_chirpy_says">Chirpy says, "This'll use your battery and make your phone hot!"</string>
     <string name="mesh_hud_coach_dismiss">Got it</string>
     <string name="mesh_hud_coach_find">Long-press a node to find it.</string>

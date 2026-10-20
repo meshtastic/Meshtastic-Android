@@ -131,7 +131,7 @@ internal fun buildHudRoute(
     return HudRoute(
         forward = leg(forward, snrTowards, isForward = true),
         back = back.takeIf { it.isNotEmpty() }?.let { leg(it, snrBack, isForward = false) },
-        mappable = known.count { num -> positionOf(num)?.hasFix() == true },
+        mappable = known.count { num -> num == viewerNum || positionOf(num)?.hasFix() == true },
         total = known.size,
     )
 }
