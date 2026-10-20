@@ -44,6 +44,12 @@ private const val NINETY_FIVE_PERCENT_SIGMAS = 1.96
 private const val MAX_HEADING_ERROR_DEG = 180f
 
 /**
+ * Running hot, at most one pose per this long, the SENSOR_DELAY_UI period. The fused orientation provider ignores a
+ * slower requested period (measured on a Pixel 6a: 55 Hz when asked for 15), so the pose is thinned here.
+ */
+private const val REDUCED_INTERVAL_NS = 66_667_000L
+
+/**
  * Prefers [fused] and falls back to the platform rotation vector, or the geomagnetic one on devices without a
  * gyroscope. Running hot, either source is slowed.
  */
@@ -91,6 +97,7 @@ private class PoseSession(
     private var sensorRegistered = false
     private var stopThermal: (() -> Unit)? = null
     private var stopped = false
+    private var lastPublishedNs = 0L
 
     // Some fusions (measured on a Pixel 9 Pro) report a fixed pi/6 here rather than an estimate, so the value is
     // trusted only once it has moved.
@@ -185,6 +192,8 @@ private class PoseSession(
         headingAccuracyDeg: Double?,
         trueNorth: Boolean,
     ) {
+        if (reduced && timestampNs - lastPublishedNs < REDUCED_INTERVAL_NS) return
+        lastPublishedNs = timestampNs
         filter.filter(attitude, timestampNs, smoothed)
         val rotation = displayManager?.getDisplay(Display.DEFAULT_DISPLAY)?.rotation ?: Surface.ROTATION_0
         emit(
