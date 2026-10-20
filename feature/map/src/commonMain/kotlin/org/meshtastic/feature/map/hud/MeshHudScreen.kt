@@ -20,6 +20,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInParent
@@ -41,6 +43,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
@@ -84,13 +87,14 @@ private const val ON_TARGET_DEG = 5.0
 
 /** Turn hints move in steps this coarse, so the label does not churn with every sensor sample. */
 private const val HINT_STEP_DEG = 5
-private val TapeGap = 4.dp
+private const val TAPE_SHADOW_ALPHA = 0.9f
+private const val TAPE_SHADOW_BLUR = 6f
 
 /** Pitched further down than this, the user is looking for something close by, so the radar grows. */
 private const val POINTING_DOWN_DEG = -45.0
 
-/** The band under the top bar the compass tape takes, which chips stay out of. */
-private val TapeClearance = 52.dp
+/** The band under the top bar the compass tape and its caret take, which chips and notices stay out of. */
+private val TapeClearance = 48.dp
 
 /** Walking pace held this long brings up the reminder to look around, so a step or two does not. */
 private const val WALK_NOTICE_MS = 3_000L
@@ -144,6 +148,7 @@ fun MeshHudScreen(
     val poseState = viewModel.pose.collectAsStateWithLifecycle()
     var intrinsics by remember { mutableStateOf<CameraIntrinsics?>(null) }
     var topBarBottomPx by remember { mutableIntStateOf(0) }
+    var noticesHeightPx by remember { mutableIntStateOf(0) }
     var bottomPanelTopPx by remember { mutableIntStateOf(0) }
     var sensorSilent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -198,7 +203,12 @@ fun MeshHudScreen(
 
     val tapeClearancePx = with(LocalDensity.current) { TapeClearance.roundToPx() }
     val textMeasurer = rememberTextMeasurer()
-    val tapeStyle = MaterialTheme.typography.labelSmall.copy(color = Color.White)
+    // A shadow rather than a solid band keeps the tape's figures legible over a bright sky.
+    val tapeStyle =
+        MaterialTheme.typography.labelSmall.copy(
+            color = Color.White,
+            shadow = Shadow(Color.Black.copy(alpha = TAPE_SHADOW_ALPHA), blurRadius = TAPE_SHADOW_BLUR),
+        )
     val routeLabels =
         RouteLabels(
             skippedTemplate = stringResource(Res.string.mesh_hud_more),
@@ -253,7 +263,7 @@ fun MeshHudScreen(
                 declinationDeg = targets.declinationDeg,
                 targets = targets.targets,
                 focalPx = focalPx,
-                topPx = topBarBottomPx + TapeGap.toPx(),
+                topPx = topBarBottomPx.toFloat(),
                 cardinals = cardinals,
                 textMeasurer = textMeasurer,
                 labelStyle = tapeStyle,
@@ -263,7 +273,7 @@ fun MeshHudScreen(
             targets = targets.targets,
             currentPose = { poseState.value.pose },
             focalPx = focalPx,
-            topLimitPx = { topBarBottomPx + tapeClearancePx },
+            topLimitPx = { topBarBottomPx + tapeClearancePx + noticesHeightPx },
             bottomLimitPx = { bottomPanelTopPx },
             modifier = Modifier.fillMaxSize(),
         ) { target ->
@@ -281,8 +291,7 @@ fun MeshHudScreen(
             )
         }
 
-        HudTopBar(
-            status =
+        val sensorStatus =
             HudSensorStatus(
                 headingDeg = headingDeg,
                 headingAccuracyDeg = headingAccuracyDeg,
@@ -290,7 +299,16 @@ fun MeshHudScreen(
                 needsCalibration = needsCalibration,
                 waitingForSensor = waitingForSensor,
                 thermal = thermal,
-            ),
+            )
+        HudTopNotices(
+            status = sensorStatus,
+            modifier =
+            Modifier.align(Alignment.TopStart)
+                .offset { IntOffset(0, topBarBottomPx + tapeClearancePx) }
+                .onPlaced { noticesHeightPx = it.size.height },
+        )
+        HudTopBar(
+            status = sensorStatus,
             targets = targets,
             onNavigateUp = onNavigateUp,
             onOpenFilters = if (targets.ready && !targets.scoped) ({ showFilters = true }) else null,

@@ -119,7 +119,7 @@ internal data class HudSensorStatus(
     val thermal: HudThermal,
 )
 
-/** [onOpenFilters] is null where filters do not apply, in a view scoped to one purpose. */
+/** The heading and the phone's own accuracy beside it; [onOpenFilters] is null in a view scoped to one purpose. */
 @Composable
 internal fun HudTopBar(
     status: HudSensorStatus,
@@ -128,27 +128,20 @@ internal fun HudTopBar(
     onOpenFilters: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onNavigateUp) {
-                Icon(MeshtasticIcons.ArrowBack, stringResource(Res.string.navigate_back), tint = Color.White)
-            }
-            status.headingDeg?.let { heading ->
-                val headingText = formatString("%d°", heading)
-                HudLabel(
-                    status.headingAccuracyDeg?.let {
-                        stringResource(Res.string.mesh_hud_heading_accuracy, headingText, formatString("%d°", it))
-                    } ?: stringResource(Res.string.mesh_hud_heading, headingText),
-                )
-            }
-            Spacer(Modifier.weight(1f))
-            onOpenFilters?.let { open ->
-                IconButton(onClick = open) {
-                    Icon(MeshtasticIcons.Tune, stringResource(Res.string.map_filter_title), tint = Color.White)
-                }
-            }
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = onNavigateUp) {
+            Icon(MeshtasticIcons.ArrowBack, stringResource(Res.string.navigate_back), tint = Color.White)
+        }
+        status.headingDeg?.let { heading ->
+            val headingText = formatString("%d°", heading)
+            HudLabel(
+                status.headingAccuracyDeg?.let {
+                    stringResource(Res.string.mesh_hud_heading_accuracy, headingText, formatString("%d°", it))
+                } ?: stringResource(Res.string.mesh_hud_heading, headingText),
+            )
         }
         targets.ownAccuracyM?.let { accuracy ->
+            Spacer(Modifier.width(6.dp))
             HudLabel(
                 stringResource(
                     Res.string.mesh_hud_own_accuracy,
@@ -156,6 +149,19 @@ internal fun HudTopBar(
                 ),
             )
         }
+        Spacer(Modifier.weight(1f))
+        onOpenFilters?.let { open ->
+            IconButton(onClick = open) {
+                Icon(MeshtasticIcons.Tune, stringResource(Res.string.map_filter_title), tint = Color.White)
+            }
+        }
+    }
+}
+
+/** Sensor and phone notices, under the compass tape so they never push it down. */
+@Composable
+internal fun HudTopNotices(status: HudSensorStatus, modifier: Modifier = Modifier) {
+    Column(modifier.padding(horizontal = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         when {
             !status.hasSensor -> HudLabel(stringResource(Res.string.compass_no_magnetometer))
             status.waitingForSensor -> HudLabel(stringResource(Res.string.mesh_hud_waiting_sensor))
