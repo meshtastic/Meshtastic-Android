@@ -37,11 +37,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.duration_ago
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.mesh_hud_age
 import org.meshtastic.core.resources.mesh_hud_chip_description
 import org.meshtastic.core.resources.mesh_hud_distance_no_altitude
@@ -49,12 +50,14 @@ import org.meshtastic.core.resources.mesh_hud_find
 import org.meshtastic.core.resources.mesh_hud_open_node
 import org.meshtastic.core.resources.mesh_hud_open_waypoint
 import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.proto.Waypoint
 import kotlin.math.roundToInt
+import kotlin.time.DurationUnit
 
 private const val FRESH_POSITION_SEC = 15 * 60L
 private const val OLD_POSITION_SEC = 6 * 60 * 60L
+private const val SECONDS_PER_HOUR = 60 * 60L
+private const val SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR
 private const val OLDEST_ALPHA = 0.45f
 private const val WAYPOINT_SHADOW_ALPHA = 0.8f
 private const val WAYPOINT_SHADOW_BLUR = 8f
@@ -103,9 +106,11 @@ internal fun HudChip(
         remember(target.bearingDeg) {
             derivedStateOf { currentPose()?.let { clockHour(target.bearingDeg, it.azimuthDeg) } }
         }
-    val distanceText = chipDistanceText(target)
+    val distanceText = chipDistanceText(target, withAge = target.focused)
+    // TalkBack always hears the age: speech does not crowd the view, and the fade alone is visual only.
+    val spokenDistance = chipDistanceText(target, withAge = true)
     val description = hour?.let {
-        stringResource(Res.string.mesh_hud_chip_description, target.subject.spokenName(), distanceText, it)
+        stringResource(Res.string.mesh_hud_chip_description, target.subject.spokenName(), spokenDistance, it)
     }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -138,9 +143,13 @@ internal fun HudChip(
     }
 }
 
-/** The distance under a chip, marked when the altitude is missing and dated once the position is no longer fresh. */
+/**
+ * The distance under a chip, marked when the altitude is missing, and dated in its largest unit once the position is no
+ * longer fresh. [withAge] is false for an unfocused chip on screen: there the fade marks staleness, and the date would
+ * widen every label in a crowded view.
+ */
 @Composable
-private fun chipDistanceText(target: HudTarget): String {
+private fun chipDistanceText(target: HudTarget, withAge: Boolean): String {
     val showsMissingAltitude = target.subject is HudSubject.NodeSubject && !target.elevationKnown
     val distance =
         if (showsMissingAltitude) {
@@ -148,8 +157,18 @@ private fun chipDistanceText(target: HudTarget): String {
         } else {
             target.distanceText
         }
-    val age = target.positionAgeSec?.takeIf { it > FRESH_POSITION_SEC } ?: return distance
-    return stringResource(Res.string.mesh_hud_age, distance, formatAgo((nowSeconds - age).toInt()))
+    val age = target.positionAgeSec?.takeIf { withAge && it > FRESH_POSITION_SEC } ?: return distance
+    val unit =
+        when {
+            age >= SECONDS_PER_DAY -> DurationUnit.DAYS
+            age >= SECONDS_PER_HOUR -> DurationUnit.HOURS
+            else -> DurationUnit.MINUTES
+        }
+    return stringResource(
+        Res.string.mesh_hud_age,
+        distance,
+        stringResource(Res.string.duration_ago, formatDuration(age, unit)),
+    )
 }
 
 @Composable
