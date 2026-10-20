@@ -38,8 +38,12 @@ private const val UNKNOWN_SNR_QUALITY = 0.5f
 private const val ARC_MIN_ALPHA = 0.55f
 private const val TRACK_LEVELS = 8
 
-/** How far along a stem from the viewer its tag sits. */
-private const val STEM_TAG_AT = 0.7f
+/**
+ * How far along a stem from the viewer its tag sits. The two legs' stems leave the same point, so their tags sit at
+ * different heights rather than on top of each other.
+ */
+private const val FORWARD_STEM_TAG_AT = 0.7f
+private const val RETURN_STEM_TAG_AT = 0.45f
 private const val OLDEST_TRACK_ALPHA = 0.25f
 private val ArcMinWidth = 2.dp
 private val ArcExtraWidth = 4.dp
@@ -130,7 +134,8 @@ internal fun DrawScope.drawRoute(
                     if (end != null) {
                         drawLine(stroke, viewer, end, width, StrokeCap.Round)
                         // Toward the hop, so the tag stays clear of the bottom panel and the reticle.
-                        tag?.let { drawTag(it, lerp(viewer, end, STEM_TAG_AT), textMeasurer, labelStyle) }
+                        val along = if (leg.forward) FORWARD_STEM_TAG_AT else RETURN_STEM_TAG_AT
+                        tag?.let { drawTag(it, lerp(viewer, end, along), textMeasurer, labelStyle) }
                     }
                 } else if (!start.atViewer) {
                     val arc = arcDirections(start, point, liftSign)
