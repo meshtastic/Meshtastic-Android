@@ -261,8 +261,9 @@ class MeshHudViewModelTest {
     }
 
     @Test
-    fun `a tracked node stays in the whole mesh view`() = runTest(testDispatcher) {
-        nodeRepository.setNodes(listOf(node(1), node(3, lat = FAR_LAT)))
+    fun `a tracked node stays in the whole mesh view whatever the filters say`() = runTest(testDispatcher) {
+        nodeRepository.setNodes(listOf(node(1, favorite = true), node(3, lat = FAR_LAT)))
+        mapPrefs.mapFilters.value = MapFilterPrefs(onlyFavorites = true)
         viewModel.openFor(null)
         viewModel.showTrack(3)
         assertEquals(setOf("node-1", "node-3"), collectTargets().keys)

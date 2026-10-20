@@ -40,6 +40,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -183,7 +184,7 @@ internal fun NearbyRadar(
 
 /** A compact marker for the radar: the node's color and short name, or the waypoint's emoji. */
 @Composable
-private fun RadarDot(subject: HudSubject, description: String, onClick: () -> Unit) {
+private fun RadarDot(subject: HudSubject, description: String, onActivate: () -> Unit) {
     val label =
         when (subject) {
             is HudSubject.NodeSubject -> subject.node.user.short_name.ifEmpty { "?" }
@@ -197,9 +198,14 @@ private fun RadarDot(subject: HudSubject, description: String, onClick: () -> Un
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-        Modifier.minimumInteractiveComponentSize().clickable(onClick = onClick).clearAndSetSemantics {
+        // Cleared semantics drop the click action too, so TalkBack's activation is set back explicitly.
+        Modifier.minimumInteractiveComponentSize().clickable(onClick = onActivate).clearAndSetSemantics {
             contentDescription = description
             role = Role.Button
+            onClick {
+                onActivate()
+                true
+            }
         },
     ) {
         when (subject) {
