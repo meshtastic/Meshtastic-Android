@@ -21,6 +21,7 @@ import org.gradle.kotlin.dsl.dependencies
 import org.koin.compiler.plugin.KoinGradleExtension
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
+import org.meshtastic.buildlogic.version
 
 class KoinConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -33,6 +34,9 @@ class KoinConventionPlugin : Plugin<Project> {
                 // it is only enabled there. A library module validates locally, cannot see the
                 // assembled graph, and reports KOIN-D003 on definitions its consumers supply.
                 compileSafety.set(path in KOIN_ENTRY_POINTS)
+                // The plugin's version check fails CI's -Werror on a Kotlin it has not verified. Mute it
+                // only for versions that pass its tools/abi-check/check-kotlin-abi.sh, so the next bump warns.
+                if (libs.version("kotlin") in KOIN_ABI_CHECKED_KOTLIN) versionCheckSeverity.set("info")
             }
 
             val koinAnnotations = libs.findLibrary("koin-annotations").get()
@@ -80,3 +84,6 @@ class KoinConventionPlugin : Plugin<Project> {
 
 /** Modules declaring a `@KoinApplication`. A new app target must be added here or it is never validated. */
 private val KOIN_ENTRY_POINTS = setOf(":androidApp", ":desktopApp")
+
+/** Kotlin versions newer than the Koin plugin's own verified list that resolve every reference in its ABI check. */
+private val KOIN_ABI_CHECKED_KOTLIN = setOf("2.4.21")
