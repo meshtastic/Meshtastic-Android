@@ -37,6 +37,7 @@ class MqttTopicSamplerTest {
     private class FakeClient(
         private val granted: (List<String>) -> List<String> = { it },
         private val connectError: Throwable? = null,
+        private val subscribeError: Throwable? = null,
     ) : TopicSamplerClient {
         override val messages = MutableSharedFlow<Pair<String, ByteArray>>(extraBufferCapacity = 1_000)
         override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
@@ -50,6 +51,7 @@ class MqttTopicSamplerTest {
         }
 
         override suspend fun subscribe(filters: List<String>): List<String> {
+            subscribeError?.let { throw it }
             subscribed += filters
             return granted(filters)
         }
@@ -108,6 +110,14 @@ class MqttTopicSamplerTest {
     @Test
     fun aConnectErrorFailsTheSample() = runTest {
         val sampler = sampler(FakeClient(connectError = IOException("unreachable")))
+        sampler.run(null, "msh/US")
+        assertEquals(Phase.Failed(Failure.CONNECT), sampler.state.value.phase)
+    }
+
+    @Test
+    fun aSubscribeErrorFailsAsConnect() = runTest {
+        val client = FakeClient(subscribeError = IOException("reset"))
+        val sampler = sampler(client)
         sampler.run(null, "msh/US")
         assertEquals(Phase.Failed(Failure.CONNECT), sampler.state.value.phase)
     }

@@ -163,7 +163,7 @@ class MqttTopicSampler(
                 }
                 var granted = emptyList<String>()
                 val subscribed =
-                    attempt(Failure.FILTERS_REFUSED, subscribeDeadline) {
+                    attempt(Failure.CONNECT, subscribeDeadline) {
                         granted = client.subscribe(filters(regionTopic))
                     }
                 if (!subscribed || granted.isEmpty()) {
