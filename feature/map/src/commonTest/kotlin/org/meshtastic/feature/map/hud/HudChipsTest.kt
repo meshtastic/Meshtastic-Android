@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.map.hud
 
+import org.meshtastic.core.model.Node
+import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -52,5 +54,17 @@ class HudChipsTest {
         assertEquals(12, clockHour(bearingDeg = 14.0, headingDeg = 0.0))
         assertEquals(1, clockHour(bearingDeg = 16.0, headingDeg = 0.0))
         assertEquals(11, clockHour(bearingDeg = 344.0, headingDeg = 0.0))
+    }
+
+    @Test
+    fun `a node with no names is spoken by its node id`() {
+        val node = Node(num = 0x1a2b3c4d, user = User.Builder().build())
+        assertEquals("!1a2b3c4d", HudSubject.NodeSubject(node).spokenName())
+    }
+
+    @Test
+    fun `a node with only a short name is spoken by it`() {
+        val node = Node(num = 1, user = User.Builder().also { it.short_name = "ABCD" }.build())
+        assertEquals("ABCD", HudSubject.NodeSubject(node).spokenName())
     }
 }

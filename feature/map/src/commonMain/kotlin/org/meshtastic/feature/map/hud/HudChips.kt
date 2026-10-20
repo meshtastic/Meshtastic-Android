@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
@@ -74,9 +75,13 @@ internal fun clockHour(bearingDeg: Double, headingDeg: Double): Int {
     return if (hour == 0) HOURS_ON_DIAL else hour
 }
 
-/** What TalkBack calls a subject: a node's long name, a waypoint's name, falling back to what the chip shows. */
+/**
+ * What TalkBack calls a subject: a node's long name, else its short name, else its node id, since a node never heard
+ * from has neither name; a waypoint's name, else its emoji.
+ */
 internal fun HudSubject.spokenName(): String = when (this) {
-    is HudSubject.NodeSubject -> node.user.long_name.ifBlank { node.user.short_name }
+    is HudSubject.NodeSubject ->
+        node.user.long_name.ifBlank { node.user.short_name.ifBlank { NodeAddress.numToDefaultId(node.num) } }
 
     is HudSubject.WaypointSubject ->
         waypoint.name.ifBlank { waypoint.icon.waypointIconOrDefault().toCodePointString() }
