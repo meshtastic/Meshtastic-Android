@@ -16,14 +16,11 @@
  */
 package org.meshtastic.app.node
 
-import android.content.ContentValues
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore
 import android.view.PixelCopy
 import android.view.SurfaceView
 import android.view.View
@@ -33,13 +30,8 @@ import androidx.core.view.children
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import org.meshtastic.core.ui.util.saveJpegToPictures
 import kotlin.coroutines.resume
-
-private const val PICTURES_RELATIVE_PATH = "Pictures/Meshtastic"
-private const val JPEG_QUALITY = 92
 
 /**
  * Copies the AR view's GL surface into Pictures/Meshtastic: the camera feed and the model, none of the Compose controls
@@ -57,38 +49,11 @@ internal suspend fun captureArScene(root: View, title: String, io: CoroutineDisp
             Handler(Looper.getMainLooper()),
         )
     }
-    return if (copied) withContext(io) { saveToPictures(root.context, bitmap, title) } else null
+    return if (copied) withContext(io) { saveJpegToPictures(root.context, bitmap, title) } else null
 }
 
 private fun View.findSurfaceView(): SurfaceView? = when (this) {
     is SurfaceView -> this
     is ViewGroup -> children.firstNotNullOfOrNull { it.findSurfaceView() }
     else -> null
-}
-
-@RequiresApi(Build.VERSION_CODES.Q)
-private fun saveToPictures(context: Context, bitmap: Bitmap, title: String): Uri? {
-    val resolver = context.contentResolver
-    val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-    val name = "${title.replace(Regex("[^A-Za-z0-9]+"), "-").trim('-')}-$stamp.jpg"
-    val pending =
-        ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, name)
-            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            put(MediaStore.Images.Media.RELATIVE_PATH, PICTURES_RELATIVE_PATH)
-            put(MediaStore.Images.Media.IS_PENDING, 1)
-        }
-    val uri =
-        runCatching {
-            resolver.insert(MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), pending)
-        }
-            .getOrNull() ?: return null
-    val written = runCatching {
-        resolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) } == true &&
-            resolver.update(uri, ContentValues().apply { put(MediaStore.Images.Media.IS_PENDING, 0) }, null, null) > 0
-    }
-        .getOrDefault(false)
-    // A row left pending would sit hidden in the gallery, so a failed write removes it.
-    if (!written) runCatching { resolver.delete(uri, null, null) }
-    return uri.takeIf { written }
 }
