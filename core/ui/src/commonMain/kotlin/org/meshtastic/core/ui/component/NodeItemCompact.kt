@@ -20,6 +20,7 @@ package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -270,14 +271,19 @@ private fun CompactNameRow(
     Row(
         modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(0.dp),
     ) {
-        NodeSecurityIcons(
-            thatNode,
-            iconSize = 18.dp,
-            isThisNode = isThisNode,
-            modifier = Modifier.width(18.dp).height(28.dp),
-        )
+        // Wrapping with box, that limits the display size, but not touch area
+        Box(
+            modifier = Modifier.width(24.dp).height(28.dp),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            NodeSecurityIcons(
+                thatNode = thatNode,
+                iconSize = 18.dp,
+                isThisNode = isThisNode,
+            )
+        }
         Text(
             text = longName,
             style = MaterialTheme.typography.titleMediumEmphasized.copy(fontStyle = style),
