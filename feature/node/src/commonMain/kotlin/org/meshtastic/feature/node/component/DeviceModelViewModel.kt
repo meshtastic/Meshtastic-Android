@@ -18,6 +18,7 @@ package org.meshtastic.feature.node.component
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.DeviceModelRepository
+import org.meshtastic.core.resources.Res
 import org.meshtastic.feature.node.model.GlbBounds
 
 sealed interface DeviceModelState {
@@ -51,17 +53,30 @@ class DeviceModelViewModel(private val repository: DeviceModelRepository) : View
     private var loading: Job? = null
     private var loadedImageFile: String? = null
 
-    fun load(imageFile: String) {
-        if (loadedImageFile == imageFile) return
-        loadedImageFile = imageFile
+    fun load(imageFile: String) = loadModel(imageFile) { repository.getModel(imageFile) }
+
+    /** Swaps in Chirpy, the mascot, bundled with the app: the viewer's easter egg. */
+    fun showChirpy() = loadModel(CHIRPY_KEY) {
+        try {
+            Res.readBytes(CHIRPY_MODEL)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun loadModel(key: String, fetch: suspend () -> ByteArray?) {
+        if (loadedImageFile == key) return
+        loadedImageFile = key
         loading?.cancel()
         _state.value = DeviceModelState.Loading
         loading = viewModelScope.launch {
-            val glb = repository.getModel(imageFile)
+            val glb = fetch()
             val bounds = glb?.let(GlbBounds::parse)
             _state.value =
                 if (glb != null && bounds != null) {
-                    DeviceModelState.Ready(imageFile, glb, bounds, GlbBounds.copyright(glb))
+                    DeviceModelState.Ready(key, glb, bounds, GlbBounds.copyright(glb))
                 } else {
                     // Lets the next open retry rather than replay the failure.
                     loadedImageFile = null
@@ -72,6 +87,14 @@ class DeviceModelViewModel(private val repository: DeviceModelRepository) : View
 
     /** The renderer rejected a model the parser accepted: show the illustration instead. */
     fun markFailed() {
+        // Forgets the model too, so asking for it again loads it rather than replaying the failure.
+        loading?.cancel()
+        loadedImageFile = null
         _state.value = DeviceModelState.Failed
+    }
+
+    companion object {
+        internal const val CHIRPY_MODEL = "files/models/chirpy.glb"
+        private const val CHIRPY_KEY = "chirpy"
     }
 }

@@ -18,6 +18,7 @@ package org.meshtastic.feature.node.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,13 +39,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -54,6 +59,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.heroImageFile
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.device_model_load_failed
 import org.meshtastic.core.resources.device_model_view_in_space
@@ -70,11 +76,17 @@ fun DeviceModelDialog(deviceHardware: DeviceHardware, onDismiss: () -> Unit, mod
     val viewModel = koinViewModel<DeviceModelViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val imageFile = deviceHardware.heroImageFile
+    var chirpy by rememberSaveable { mutableStateOf(false) }
     // Once per open: a failed load clears the view model's key, so a later open retries.
-    DisposableEffect(imageFile) {
-        if (imageFile != null) viewModel.load(imageFile) else viewModel.markFailed()
+    DisposableEffect(imageFile, chirpy) {
+        when {
+            chirpy -> viewModel.showChirpy()
+            imageFile != null -> viewModel.load(imageFile)
+            else -> viewModel.markFailed()
+        }
         onDispose {}
     }
+    val title = if (chirpy) stringResource(Res.string.chirpy) else deviceHardware.displayName
 
     val arViewer = LocalDeviceModelArViewer.current?.takeIf { it.isAvailable() }
     var inAr by rememberSaveable { mutableStateOf(false) }
@@ -85,13 +97,15 @@ fun DeviceModelDialog(deviceHardware: DeviceHardware, onDismiss: () -> Unit, mod
         Box(modifier = modifier.fillMaxSize()) {
             OrbitContent(
                 deviceHardware = deviceHardware,
+                title = title,
                 state = state,
                 onError = viewModel::markFailed,
                 onDismiss = onDismiss,
                 onOpenAr = if (arViewer != null) ({ inAr = true }) else null,
+                onToggleChirpy = { chirpy = !chirpy },
                 visible = arModel == null,
             )
-            arModel?.let { arViewer?.Content(it.glb, deviceHardware.displayName, it.copyright) { inAr = false } }
+            arModel?.let { arViewer?.Content(it.glb, title, it.copyright) { inAr = false } }
         }
     }
 }
@@ -99,13 +113,17 @@ fun DeviceModelDialog(deviceHardware: DeviceHardware, onDismiss: () -> Unit, mod
 @Composable
 private fun OrbitContent(
     deviceHardware: DeviceHardware,
+    title: String,
     state: DeviceModelState,
     onError: () -> Unit,
     onDismiss: () -> Unit,
     onOpenAr: (() -> Unit)?,
+    onToggleChirpy: () -> Unit,
     visible: Boolean,
 ) {
     val ready = state as? DeviceModelState.Ready
+    val toggleChirpy by rememberUpdatedState(onToggleChirpy)
+    var titleTaps by remember { mutableIntStateOf(0) }
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
             Row(
@@ -116,9 +134,13 @@ private fun OrbitContent(
                     Icon(MeshtasticIcons.Close, contentDescription = stringResource(Res.string.close))
                 }
                 Text(
-                    text = deviceHardware.displayName,
+                    text = title,
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 8.dp).weight(1f),
+                    // The easter egg: no ripple and no semantics, so it stays hidden.
+                    modifier =
+                    Modifier.padding(start = 8.dp).weight(1f).pointerInput(Unit) {
+                        detectTapGestures { if (++titleTaps % CHIRPY_TAPS == 0) toggleChirpy() }
+                    },
                 )
                 if (onOpenAr != null && ready != null) {
                     IconButton(onClick = onOpenAr) {
@@ -184,6 +206,9 @@ fun ModelNotice(
         }
     }
 }
+
+/** Taps on the title that swap Chirpy in or out. */
+private const val CHIRPY_TAPS = 7
 
 @Composable
 private fun ModelFallback(deviceHardware: DeviceHardware) {
