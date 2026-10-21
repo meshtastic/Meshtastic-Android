@@ -1,8 +1,8 @@
 ---
 title: Widget na domovské obrazovce
 nav_order: 20
-last_updated: 2026-08-30
-description: Přidejte widget Meshtastic na domovskou obrazovku a mějte přehled o místních statistikách připojeného rádia bez nutnosti otevírat aplikaci.
+last_updated: 2026-10-21
+description: Add the Meshtastic home screen widget to glance at your connected node's local stats without opening the app.
 aliases:
   - widget
   - home-screen-widget
@@ -11,39 +11,39 @@ aliases:
 
 # Widget na domovské obrazovce
 
-V systému Android nabízí Meshtastic **widget** na domovskou obrazovku, který na první pohled zobrazuje aktuální místní statistiky připojeného rádia – bez nutnosti otevírat aplikaci.
+On Android, Meshtastic provides a home screen **widget** that shows live local statistics from your connected node at a glance, without opening the app.
 
 ## Co zobrazuje
 
-Widget zobrazuje aktuální místní statistiky **připojeného rádia**:
+The widget displays the **connected node's** current local stats:
 
-- Nahoře je **štítek uzlu** s krátkým názvem rádia v jeho vlastních barvách
-- **Baterie** – úroveň nabití baterie rádia, nebo _Napájeno_ při napájení z externího zdroje
+- A **node chip** across the top, carrying the node's short name in its own colors
+- **Battery** — the node's battery level, or _Powered_ when running on external power
 - **ChUtil** — využití kanálu (jak je kanál LoRa vytížený, v procentech)
-- **AirUtil** — využití vysílacího času (jakou část povoleného vysílacího cyklu rádio využívá k vysílání)
+- **AirUtil** — the percentage of airtime this node used transmitting in the last hour
 - **Provoz** – pakety odeslané / přijaté a zaznamenané duplikáty
-- **Přeposláno** – přeposlané pakety a zrušení přeposílání (zobrazuje se, když rádio přeposílá pakety)
-- **Diagnostiky** – společný řádek s údaji **Šum** (úroveň okolního šumu v dBm), **Poškozené** (přijaté poškozené pakety) a **Zahozené** (pakety, které rádio zahodilo). Poškozené a zahozené pakety se zobrazí až při hodnotě vyšší než nula, takže u rádia bez provozu se může zobrazovat pouze hodnota šumu
-- **Halda** — volná a celková paměť rádia, znázorněná pomocí pruhu
+- **Relays** — packets relayed and relay cancellations (shown when the node is relaying)
+- **Diagnostics** — a combined line carrying **Noise** (the background noise level in dBm), **Bad** (corrupt packets received), and **Dropped** (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone
+- **Heap** — free versus total memory on the node, drawn as a bar
 - **Uzly** — počet uzlů online z celkového počtu známých uzlů
-- **Doba provozu** — doba provozu rádia od posledního restartu, zobrazená vedle položky Uzly
+- **Uptime** — how long the node has been running since its last reboot, shown beside Nodes
 - **Aktualizováno** – čas poslední aktualizace statistik, zobrazený v dolní části widgetu
 
 Klepnutím na widget otevřete aplikaci nebo pomocí tlačítka obnovení vyžádejte aktuální statistiky.
 
-> ℹ️ **Poznámka:** Hodnoty se vztahují k připojenému rádiu. Pokud se rádio odpojí, widget nahradí statistiky stavovým řádkem – **Odpojeno**, **Připojování** nebo **Zařízení spí**. Nezobrazuje poslední známé hodnoty.
+> ℹ️ **Note:** The values reflect the connected node. If the node disconnects, the widget replaces the stats with a status line: **Disconnected**, **Connecting**, or **Device sleeping**. Nezobrazuje poslední známé hodnoty.
 
 ## Přidání widgetu
 
 1. Dotkněte se prázdného místa na domovské obrazovce Androidu a podržte jej.
 2. Klepněte na položku **Widgety**.
-3. Přetáhněte widget Meshtastic na domovskou obrazovku. Aplikace obsahuje jeden widget, takže v nabídce widgetů se zobrazuje pouze název aplikace.
+3. Přetáhněte widget Meshtastic na domovskou obrazovku. The app ships one widget, so the picker entry is the app name.
 4. Podle potřeby změňte jeho velikost – rozložení se přizpůsobí dostupnému prostoru.
 
-> ℹ️ **Poznámka:** Widget je k dispozici pouze pro Android. Není k dispozici ve verzích pro Desktop ani iOS.
+> ℹ️ **Poznámka:** Widget je k dispozici pouze pro Android. It is not available in the desktop app.
 
 ## Související témata
 
 - [Metriky uzlu](node-metrics) — kompletní historie kvality signálu a místních statistik přímo v aplikaci
-- [Připojení](connections) — připojte se k rádiu, aby widget mohl zobrazovat statistiky
+- [Connections](connections) — connect to a node so the widget has stats to show
 - [Local Mesh Discovery](discovery) — channel and airtime utilization across the mesh

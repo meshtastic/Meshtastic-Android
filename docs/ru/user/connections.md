@@ -1,8 +1,8 @@
 ---
 title: Соединения
 nav_order: 2
-last_updated: 2026-09-29
-description: Подключи свой телефон или компьютер к устройству Meshtastic через Bluetooth, USB или TCP/IP.
+last_updated: 2026-10-21
+description: Connect your phone or desktop to a Meshtastic node over Bluetooth, USB, or TCP/IP.
 aliases:
   - bluetooth
   - usb
@@ -12,7 +12,7 @@ aliases:
 
 # Соединения
 
-Meshtastic supports multiple transport methods to communicate between your phone or desktop and a radio.
+Meshtastic supports multiple transport methods to communicate between your phone or desktop and a node.
 
 ## Bluetooth (BLE)
 
@@ -20,21 +20,23 @@ Bluetooth Low Energy является наиболее распростране�
 
 ### Pairing a Radio
 
-1. Power on your radio. Most radios advertise over Bluetooth as soon as they boot — there is no pairing mode to enter. Radios with a color touchscreen ship with Bluetooth switched off, so turn it on from the radio's own on-screen menu first.
+1. Power on your node. Most nodes advertise over Bluetooth as soon as they boot, so there is no pairing mode to enter. Nodes with a color touchscreen ship with Bluetooth switched off, so turn it on from the node's own on-screen menu first.
 2. Откройте приложение и перейдите на вкладку **Подключение**.
-3. Нажми **Сканировать Bluetooth-устройства** — рядом появятся радиостанции Meshtastic.
-4. Select your radio from the list.
-5. Android asks you to pair. If your radio has a screen, it shows a six-digit PIN — type that into the Android dialog. If your radio has no screen, the PIN is `123456`.
+3. Tap **Scan for Bluetooth devices**. Nearby Meshtastic nodes appear in the list.
+4. Select your node from the list.
+5. Android asks you to pair. If your node has a screen, it shows a six-digit PIN. Type that into the Android dialog. If your node has no screen, the PIN is `123456`.
 
-![Сканирование устройств Bluetooth с обнаружением радиоустройств в списке](../../assets/screenshots/connections_bluetooth_scan.png)
+![Scanning for Bluetooth devices, with a discovered node in the list](../../assets/screenshots/connections_bluetooth_scan.png)
 
-You can change the pairing method, or turn Bluetooth on for a radio that ships with it off, under **Settings → Device configuration → Bluetooth** — see [Settings — Radio & User](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
+To change the pairing method, or to turn Bluetooth on for a node that ships with it off, open **Settings → Device configuration → Bluetooth**. See [Settings — Radio & User](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
 
 Используйте селектор транспорта — ряд сегментированных кнопок под карточкой подключения — для переключения между транспортами Bluetooth, Network и USB (одновременно активен только один):
 
 ![Connections screen with the transport selector showing Bluetooth, Network, and USB](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 **Tip:** If your radio doesn't appear, check that it isn't already connected to another phone, or out of range.
+On hardware with no Bluetooth LE the selector leaves out **Bluetooth**, and on hardware with no USB host it leaves out **USB**. With **Network** as the only transport left, the selector is hidden.
+
+> 💡 **Tip:** If your node doesn't appear, check that it isn't already connected to another phone, or out of range.
 
 The screen names anything on the app's side that is blocking a scan, with the fix attached:
 
@@ -43,18 +45,20 @@ The screen names anything on the app's side that is blocking a scan, with the fi
 | A card asking for **Nearby devices**                        | The permission has not been granted. **Grant permission** requests it; once Android stops prompting, the button becomes **Open settings**. |
 | **Bluetooth is off**                                        | The adapter is disabled — the card opens Bluetooth settings.                                                                                               |
 | **Bluetooth scanning also needs location services**         | Android 11 and older only: the permission is held but the system location toggle is off.                                                   |
-| No card, and **No Bluetooth devices seen** under the header | Nothing on this side is blocking the scan. The radio is out of range, off, or already connected elsewhere.                                 |
+| No card, and **No Bluetooth devices seen** under the header | Nothing on this side is blocking the scan. The node is out of range, off, or already connected elsewhere.                                  |
 
 The explanation lives in that card, not in the scan control: tapping **Scan for Bluetooth devices** after you have declined once asks Android again directly.
 
 ### Статус подключения
 
-| Иконка | Состояние       | Описание                                                                                                   |
-| ------ | --------------- | ---------------------------------------------------------------------------------------------------------- |
-| 🟢     | Подключено      | Подключение активно                                                                                        |
-| 🟡     | Подключение     | Выполняется рукопожатие                                                                                    |
-| 🔴     | Отключено       | No active connection. The app retries automatically, with a growing delay between attempts |
-| ⚪      | Устройство спит | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing                 |
+The **Connect** tab icon in the navigation bar shows the connection state by color:
+
+| Иконка | Состояние       | Описание                                                                                                                |
+| ------ | --------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 🟢     | Подключено      | Active link to the node. The badge shows the transport in use: Bluetooth, Wi-Fi, or USB |
+| 🟠     | Подключение     | Выполняется рукопожатие                                                                                                 |
+| 🔴     | Отключено       | No active connection. The app retries automatically, with a growing delay between attempts              |
+| 🟡     | Устройство спит | The node is in light sleep. The app is waiting for it to wake and reconnect, not failing                |
 
 These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
 
@@ -62,7 +66,9 @@ When connecting, a status indicator shows the current connection state — tap *
 
 ![Состояние подключения](../../assets/screenshots/connections_connecting.png)
 
-With no radio chosen yet, the connection card reads **No device selected**. A pane with nothing to list says so under its header, with a hint:
+Once connected, the connection card shows the node's name and firmware version, its signal strength over Bluetooth, and its LoRa modem preset and region, for example "Long Range - Fast · United States". A node on custom modem settings shows **Custom** in place of the preset. Tap the preset row to open the LoRa screen.
+
+With no node chosen yet, the connection card reads **No device selected**. A pane with nothing to list says so under its header, with a hint:
 
 | Pane      | What it shows                                                                                                                                                                                                                                                                |
 | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -72,12 +78,12 @@ With no radio chosen yet, the connection card reads **No device selected**. A pa
 
 ### Устранение неполадок Bluetooth
 
-- **Radio not found:** Turn Bluetooth off and back on. On Android 11 and older, also check that system location services are switched on — those releases do not return scan results without them.
+- **Node not found:** Turn Bluetooth off and back on. On Android 11 and older, also check that system location services are switched on. Those releases do not return scan results without them.
 - **Bluetooth scan couldn't start:** Try again, and toggle Bluetooth off and on if it repeats.
-- **Потеря связи:** Подойди ближе к ноде; проверь наличие помех.
+- **Connection drops:** Move closer to the node; check for interference.
 - **Pairing failed, or pairing did not complete:** Check that the **Nearby devices** permission is granted, then pair again.
 - **Сопряжение отклонено:** Забыть устройство в настройках Bluetooth на Android и повторить попытку.
-- **Could not establish a stable connection after repeated attempts:** The app stopped retrying after three failed handshakes — a radio that keeps failing here is usually crashing on reconnect. Power-cycle the radio, then tap it again on the **Connect** tab to start a fresh attempt.
+- **Could not establish a stable connection after repeated attempts:** The app stopped retrying after three failed handshakes. A node that keeps failing here is usually crashing on reconnect. Power-cycle the node, then tap it again on the **Connect** tab to start a fresh attempt.
 
 ## Последовательный USB
 
@@ -85,44 +91,44 @@ With no radio chosen yet, the connection card reads **No device selected**. A pa
 
 ### Настройка
 
-1. Connect your radio to your phone with a USB data cable. Charge-only cables carry no data lines, and a radio on one never appears in the list.
-2. The app prompts for USB permission — tap **Allow**.
+1. Connect your node to your phone with a USB data cable. Charge-only cables carry no data lines, and a node on one never appears in the list.
+2. The app prompts for USB permission. Tap **Allow**.
 3. Соединение устанавливается автоматически.
 
 > ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ### Troubleshooting USB
 
-- **USB permission denied:** Unplug the radio and plug it back in — Android asks again on reconnect.
-- **No radio in the list:** Check that the cable carries data rather than only power, and that the phone supports OTG.
+- **USB permission denied:** Unplug the node and plug it back in. Android asks again on reconnect.
+- **No node in the list:** Check that the cable carries data rather than only power, and that the phone supports OTG.
 
 ## TCP/IP (Сеть)
 
-Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first. Connect to it over Bluetooth or USB, open **Settings → Device configuration → Network**, and under **Wi-Fi Options** turn on **Wi-Fi enabled** and enter the **SSID** and **Password**. The Network screen appears only for radios whose hardware supports Wi-Fi or Ethernet. Once the radio has an address, come back and connect to it over the network.
+Some Meshtastic nodes support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the node onto your network first. Connect to it over Bluetooth or USB, open **Settings → Device configuration → Network**, and under **Wi-Fi Options** turn on **WiFi Enabled** and enter the **SSID** and **Password**. The Network screen appears only for nodes whose hardware supports Wi-Fi or Ethernet. Once the node has an address, come back and connect to it over the network.
 
 ### Подключение к сети
 
-1. Убедись, что радио подключено к той же локальной сети, что и твой телефон/компьютер.
+1. Make sure the node is on the same local network as your phone or desktop.
 2. On the **Connect** tab, select **Network** in the transport selector.
-3. Выбери радиоустройство одним из двух способов:
-   - **Сканировать сетевые устройства** — включи эту опцию чтобы автоматически обнаруживать радиоустройства, которые объявляют о себе в локальной сети (mDNS / `_meshtastic._tcp`). Обнаруженные устройства появляются в списке; нажми на одно, чтобы подключиться.
-   - **Добавить устройство вручную…** — введи IP-адрес радиостанции (или имя хоста) и порт (по умолчанию: `4403`).
-4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (touch & hold to remove one).
+3. Choose the node one of two ways:
+   - **Scan for network devices**: toggle this on to auto-discover nodes that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Обнаруженные устройства появляются в списке; нажми на одно, чтобы подключиться.
+   - **Add device manually…**: enter the node's IP address (or hostname) and port (default: `4403`).
+4. Previously used network addresses are remembered under **Recent Network Devices** for reconnection (touch & hold to remove one).
 
-Network discovery uses mDNS, which only works when both your phone and the radio are on the same subnet. If the phone is not on Wi-Fi at all, the app warns that a network scan may find nothing. On Android 17 and newer, the app needs the **Local network permission** to reach a radio on your own Wi-Fi at all — not only to discover it — so typing the address by hand does not work around a denied permission. Grant it from the card on the Network pane, or from the **Permissions** section of **Settings**. A radio on a public address, or one reached over a VPN, needs no permission.
+Network discovery uses mDNS, which only works when both your phone and the node are on the same subnet. If the phone is not on Wi-Fi at all, the app warns that a network scan may find nothing. On Android 17 and newer, the app needs the **Local network permission** to reach a node on your own Wi-Fi at all, not only to discover it, so typing the address by hand does not work around a denied permission. Grant it from the card on the Network pane, or from the **Permissions** section of **Settings**. A node on a public address, or one reached over a VPN, needs no permission.
 
 ### Когда использовать TCP
 
-- Радиостанция находится в той же локальной сети
-- Тестирование с использованием имитирования радиоприемника
+- Node is on the same local network
+- Testing with a simulated node
 - Окружающая среда, где возникают помехи Bluetooth
 
 ### Настройка Wi-Fi для mPWRD-OS
 
-**Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It sends Wi-Fi credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not configure Wi-Fi on an ordinary Meshtastic radio. It is available on both Android and desktop.
+**Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It sends Wi-Fi credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol. It does not configure Wi-Fi on an ordinary Meshtastic node. It is available on both Android and desktop.
 
 1. Open the screen and wait while the app finds the device over Bluetooth.
-2. Tap **Scan for Networks**, then pick a network from **Available Networks** — or turn on **Hidden network** and type the name into **Network Name (SSID)**.
+2. Tap **Scan for Networks**, then pick a network from **Available Networks**, or turn on **Hidden network** and type the name into **Network Name (SSID)**.
 3. Enter the **Password** and tap **Apply**.
 
 If the scan reports **No networks found** or fails outright, move the phone closer to the device and scan again. If **Failed to apply Wi-Fi configuration** comes back, check the password and try again.
@@ -131,19 +137,19 @@ If the scan reports **No networks found** or fails outright, move the phone clos
 
 Being connected is not the same as being able to transmit.
 
-A radio leaves the factory with no LoRa region set, and it does not transmit until you set one. When you connect such a radio, the **Connect** tab shows a **Set your region** card; tap it to open the LoRa screen and choose the region you are in.
+A node leaves the factory with no LoRa region set, and it does not transmit until you set one. When you connect such a node, the **Connect** tab shows a **Set your region** card; tap it to open the LoRa screen and choose the region you are in.
 
-Once the region is set, the tab warns you if the radio is receive-only: a **Transmit is disabled** card, reading "This device can receive but will not send anything over LoRa." Tap it to open the same screen and turn **Transmit Enabled** back on. Only one of the two cards appears at a time — an unset region already stops the radio transmitting, so the app names that first and holds the transmit card back until you have set a region.
+Once the region is set, the tab warns you if the node is receive-only: a **Transmit is disabled** card, reading "This device can receive but will not send anything over LoRa." Tap it to open the same screen and turn **Transmit Enabled** back on. Only one of the two cards appears at a time. An unset region already stops the node transmitting, so the app names that first and holds the transmit card back until you have set a region.
 
 For more information, see [Settings — Radio & User](settings-radio-user#lora-config).
 
 ## Поведение при повторном подключении
 
-The app reconnects to the last selected radio on startup. You can switch transports from the **Connect** tab at any time.
+The app reconnects to the last selected node on startup. You can switch transports from the **Connect** tab at any time.
 
 To disconnect, tap the disconnect button on the **Connect** tab:
 
-![Отключение от радиоприёмника](../../assets/screenshots/connections_disconnect.png)
+![Disconnect from the node](../../assets/screenshots/connections_disconnect.png)
 
 ## Подключение к компьютеру
 
@@ -151,7 +157,7 @@ To disconnect, tap the disconnect button on the **Connect** tab:
 
 - **Bluetooth (BLE)** — через библиотеку Kable; работает на macOS, Linux и Windows
 - **Последовательный USB** — основной способ проводного подключения
-- **TCP/IP** — для радиостанций, подключенных к сети
+- **TCP/IP** — for network-connected nodes
 
 См. [десктопное приложение](desktop) для информации о платформе и сочетаниях клавиш.
 
@@ -159,7 +165,7 @@ To disconnect, tap the disconnect button on the **Connect** tab:
 
 - [Начало работы](onboarding) — настройка при первом запуске и разрешения
 - [Settings — Radio & User](settings-radio-user) — Bluetooth, region, and network configuration
-- [Messages & Channels](messages-and-channels) — send your first message once the radio is connected
+- [Messages & Channels](messages-and-channels) — send your first message once the node is connected
 - [Nodes](nodes) — see who else is on your mesh
 - [Десктопное приложение](desktop) — детали подключения, специфичные для настольных компьютеров
-- [Поддерживаемые устройства](https://meshtastic.org/docs/hardware/devices) — полный список совместимых радиоустройств на meshtastic.org
+- [Supported devices](https://meshtastic.org/docs/hardware/devices) — full list of compatible nodes on meshtastic.org

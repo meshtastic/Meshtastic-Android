@@ -1,7 +1,7 @@
 ---
 title: デバッグログ
 nav_order: 22
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: アプリのデバッグログをアプリ内で表示・エクスポートし、バグの診断に役立つよう GitHub の issue にキャプチャを添付できます。adb は不要です。
 aliases:
   - debug-logs
@@ -22,10 +22,19 @@ If you're filing an issue, export your logs (see [Exporting](#exporting)) and at
 
 デバッグパネルには 2 つのタブがあります：
 
-- **パケット**：無線機が送受信した、デコード済みのメッシュトラフィック（プロトコルレベルのメッセージ）。メッシュやルーティングの動作を診断するのに役立ちます。
+- **Packets** — the decoded mesh traffic your node has sent and received (protocol-level messages). メッシュやルーティングの動作を診断するのに役立ちます。
 - **アプリログ**：アプリ自身の診断ログ（Android の _logcat_）。アプリからの警告、エラー、スタックトレースを含みます。通常、バグ報告に必要なのはこちらです。
 
 各タブには独自の**エクスポート**ボタンがあり、それぞれ別のファイルを生成するため、関連する方を、または両方を取得できます。
+
+## Viewing packets
+
+The **Packets** tab lists each logged packet; tap one to expand it, including its decoded payload where there is one.
+
+- **Search** — type in **Search in logs…** to highlight matches, and step between them with the arrows.
+- **Filters** — add your own text filters, or pick from **Preset Filters**: your own node ID, the broadcast address `!ffffffff`, `decoded`, today's date, and each port name. The match toggle switches between matching any filter and matching all of them.
+- **Settings** — the gear icon shows **Store mesh logs**, which turns writing packets to the log on or off, and **MeshLog retention period**, from one hour to a year, or **Never delete logs**.
+- **Clear Logs** — the delete icon removes every stored packet, after you confirm.
 
 ## アプリログを表示する
 
@@ -52,4 +61,4 @@ The **App logs** tab shows the most recent log lines from **this app only** — 
 ## 関連トピック
 
 - [ヘルプとアプリ内ドキュメント](help-and-docs)：このドキュメントをアプリ内でオフラインで読む
-- [コネクション](connections)：そもそも無線機に接続できないことが問題の場合
+- [Connections](connections) — if the problem is getting connected to your node in the first place

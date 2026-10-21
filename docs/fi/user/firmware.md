@@ -1,8 +1,8 @@
 ---
 title: Laiteohjelmiston päivitykset
 nav_order: 13
-last_updated: 2026-10-05
-description: Päivitä radiosi laiteohjelmisto bluetoothin tai USB:n kautta — OTA-päivitys, versiokanavat, tarkistukset ennen päivitystä ja palautus.
+last_updated: 2026-10-21
+description: Update your node's firmware over Bluetooth, Wi-Fi, or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - firmware
   - päivitä
@@ -12,58 +12,72 @@ aliases:
 
 # Laiteohjelmiston päivitykset
 
-Pidä Meshtastic-radiosi ajan tasalla uusimmalla firmwarella, jossa on uusia ominaisuuksia, virhekorjauksia ja tietoturvaparannuksia.
+Keep your Meshtastic node up to date with the latest firmware for new features, bug fixes, and security improvements.
 
 ## Päivitysten tarkistaminen
 
-1. Avaa yhdistetyn radion asetukset ja valitse **Lisäasetukset → Laiteohjelmiston päivitys**. Kohta näkyy vain OTA-päivitystä tukeville radioille.
+1. Open **Settings** for the connected node and, under **Advanced**, tap **Firmware Update**. The entry appears only for OTA-capable nodes.
 2. Sovellus tarkistaa saatavilla olevat firmware-versiot.
-3. Saatavilla olevat päivitykset näyttävät versionumeron ja muutoslokin yhteenvedon.
+3. Available updates show the version number and release notes.
+
+The app also tells you when the connected node is behind the latest stable release. The **Connect** tab shows a **Firmware update available** card naming the installed and the stable version, and a notification says the same once per node and release. Its button reads **Open Firmware Updates** when the app can update the node over the current connection, or **Open Meshtastic Flasher** when it can't.
 
 ## Päivitysmenetelmät
+
+The Firmware Update screen picks the method from how the node is connected, and its update button names it: **Update via BLE OTA**, **Update via Wi-Fi OTA**, or **Update via USB File Transfer**.
+
+| Yhteys    | nRF52            | ESP32    | RP2040           |
+| --------- | ---------------- | -------- | ---------------- |
+| Bluetooth | BLE OTA          | BLE OTA  | —                |
+| Verkko    | —                | WiFi OTA | —                |
+| USB       | USB-tiedonsiirto | —        | USB-tiedonsiirto |
+
+Where the table has no method, the screen says firmware updates are not supported over this connection. Connect another way, or use the [Web Flasher](https://flasher.meshtastic.org).
 
 ### OTA (Over-The-Air) Bluetooth-yhteyden kautta
 
 Yleisin päivitystapa Android-käyttäjille:
 
-> ⚠️ **Varoitus:** Laiteohjelmistopäivityksen keskeyttäminen voi estää radion käynnistymisen. Pidä puhelin lähellä ja molemmat laitteet käynnissä, kunnes päivitys on valmis.
+> ⚠️ **Warning:** Interrupting a firmware update can leave the node unable to boot. Pidä puhelin lähellä ja molemmat laitteet käynnissä, kunnes päivitys on valmis.
 
-1. Varmista, että radiosi on yhdistetty Bluetoothilla.
+1. Ensure your node is connected via Bluetooth.
 2. Siirry Firmware-päivitys -näkymään.
 3. Valitse haluamasi firmware-versio.
-4. Napauta **Päivitä**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
-5. Odota, että päivitys valmistuu — älä katkaise yhteyttä päivityksen aikana.
+4. Tap **Update via BLE OTA**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
+5. Wait for the update to complete. Do not disconnect during the update.
 
 While the update downloads, uploads or verifies, you can tap **Play Chirpy Hop** to play a short runner game: tap to jump, swipe down to crouch. The update's progress stays visible above the game, and back returns to the update screen. When the update finishes or fails, the game stops and offers **Back to update**. Your best score is kept on this device.
 
 ![Päivitysten tarkistaminen](../../assets/screenshots/firmware_checking.png)
 
+Some boards ship with a bootloader that cannot take a Bluetooth update. For these, the screen shows a warning card before you start, with a hint for the board where one exists. **Don't show again for this device** hides it for that node. When a stock nRF bootloader limits how fast the upload can run, the screen says so during the upload, and again on the success screen, with a link to the OTAFIX bootloader that makes Bluetooth updates much faster.
+
 #### Tyhjennä laite päivityksen aikana
 
-Jos sovellus tukee sitä, päivityspainikkeen vieressä näkyy **Tyhjennä laite päivityksen aikana** -valintaruutu. Asetus koskee vain tätä päivitystä eikä sitä muisteta myöhemmin.
+Where the app offers it, an **Erase device during update** switch appears above the update button. Asetus koskee vain tätä päivitystä eikä sitä muisteta myöhemmin.
 
 | Menetelmä      | Mitä tyhjennys tekee                                                                                                                                     |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BLE / WiFi OTA | Laite palautetaan tehdasasetuksiin, kun päivitys on vahvistettu. Kaikki asetukset ja Bluetooth-pariliitokset poistetaan. |
 | USB            | Tyhjentää laitteen flash-muistin kokonaan ja asentaa sen jälkeen valitun laiteohjelmiston alusta alkaen.                                 |
 
-It is not offered for a local firmware file, during a recovery update, on USB devices whose board does not support the erase step, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. Tämän jälkeen laite on määritettävä uudelleen ja pariliitos muodostettava uudelleen.
+It is not offered for a local firmware file, during a recovery update, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. Over USB it is offered for nRF52 and RP2040 nodes only, and when the app can't erase one safely, the switch is shown disabled with the reason. Tämän jälkeen laite on määritettävä uudelleen ja pariliitos muodostettava uudelleen.
 
 ### OTA WiFi:n kautta (verkkoon yhdistetty ESP32)
 
-Kun ESP32-radio on yhdistetty verkkoon Bluetoothin sijaan, sovellus tarjoaa **WiFi OTA** -vaihtoehdon, joka siirtää saman päivityksen TCP-yhteyden kautta.
+When an ESP32 node is connected over the network rather than Bluetooth, the app offers **Wi-Fi OTA**, which pushes the same update over TCP:
 
-1. Muodosta yhteys radioon verkon kautta (katso [Yhteydet](connections)).
+1. Connect to the node over the network (see [Connections](connections)).
 2. Avaa Laiteohjelmiston päivitys -näkymä ja valitse versio.
-3. Napauta **Päivitä**. Pidä radio ja puhelin samassa verkossa koko siirron ajan.
+3. Tap **Update via Wi-Fi OTA**. Keep the node and phone on the same network for the whole transfer.
 
-WiFi OTA käyttää ESP32:n `update.bin`-tiedostoa USB-päivityksen `.uf2`-tiedoston sijaan. Sovellus valitsee oikean tiedoston automaattisesti.
+Wi-Fi OTA installs the ESP32 app image, a `.bin` file, rather than the `.uf2` a USB update uses. The app selects the right file from the release for you.
 
 ### USB-päivitys sovelluksesta
 
-Kun radio on yhdistetty **USB:n tai sarjayhteyden** kautta (bluetoothin sijaan), **laiteohjelmiston päivitys** -näkymässä on käytettävissä **USB-tiedostonsiirto**. Sovellus käynnistää laitteen uudelleen DFU-tilaan ja pyytää sitten tallentamaan `.uf2`-tiedoston laitteen DFU-asemaan järjestelmän tiedostonvalitsimen avulla. Tämä vaihtoehto näkyy vain USB tai sarjayhteydellä — sitä ei voi käyttää bluetoothin kautta.
+When your nRF52 or RP2040 node is connected over **USB/serial** (rather than Bluetooth), the Firmware Update screen offers **USB File Transfer**. Sovellus käynnistää laitteen uudelleen DFU-tilaan ja pyytää sitten tallentamaan `.uf2`-tiedoston laitteen DFU-asemaan järjestelmän tiedostonvalitsimen avulla. This option appears only on a USB/serial connection. It is not available over Bluetooth, and ESP32 nodes have no USB update path in the app.
 
-> ℹ️ **Huomautus:** Valmistajan nRF-käynnistyslatain, joka toimitetaan `.zip`-tiedostona (esim. RAK WisBlock RAK4631), on asennettava sarjaliitäntäisen DFU-työkalun, kuten `adafruit-nrfutil`-ohjelman avulla — `.zip`-tiedoston kopioiminen asemalle ei toimi. Päivitysmuotoinen .uf2-käynnistyslatain voidaan asentaa kopioimalla se asemalle. Näin myös tämän sovelluksen käynnistyslataimen päivitystoiminto toimii. Sovellus näyttää huomautuksen, kun käytettävissä on vain sarjaliitäntäinen menetelmä.
+A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. Päivitysmuotoinen .uf2-käynnistyslatain voidaan asentaa kopioimalla se asemalle. Näin myös tämän sovelluksen käynnistyslataimen päivitystoiminto toimii. Sovellus näyttää huomautuksen, kun käytettävissä on vain sarjaliitäntäinen menetelmä.
 
 ### Tyhjennys tehdasasetuksiin ja käynnistyslataimen päivitys
 
@@ -79,11 +93,11 @@ Sovellus lukee valitsemaltasi asemalta tiedoston `INFO_UF2.TXT` varmistaakseen, 
 
 For a bootloader upgrade, the app also reads the installed bootloader version from `INFO_UF2.TXT` and shows it next to the latest release before writing anything. The running firmware doesn't report its bootloader, so the installed version appears only once the device has restarted into update mode, never on the firmware screen while connected. If the two match, the bootloader is left as it is and the app moves straight on to reinstalling the firmware. Otherwise choose **Upgrade bootloader** to write it, or **Skip** to reinstall the firmware without changing it.
 
-On nRF52 the app must already know which Bluetooth stack your device uses before it starts, because it can't read the bootloader until the device has rebooted. If it can't confirm the stack, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. Web Flasherissa väärän Bluetooth-pinon valitseminen voi johtaa siihen, että radion palauttaminen onnistuu vain laitteisto-ohjelmoijan avulla.
+On nRF52 the app must already know which Bluetooth stack your device uses before it starts, because it can't read the bootloader until the device has rebooted. If it can't confirm the stack, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the node recoverable only with a hardware programmer.
 
 Once the drive is readable, how an nRF52 device is erased depends on its bootloader:
 
-- **Newer bootloaders erase themselves.** A bootloader that advertises factory-erase support in `INFO_UF2.TXT` (newer OTAFIX bootloaders) takes a single, board-agnostic erase file. The bootloader wipes your settings, channels, keys and the stored node list itself, leaves the installed firmware in place, and comes back as an update drive a second or two later for the firmware file. There is no Bluetooth-stack choice to get wrong on this path.
+- **Newer bootloaders erase themselves.** A bootloader that advertises factory-erase support in `INFO_UF2.TXT` (OTAFIX 2.4 and later) takes a single, board-agnostic erase file. The bootloader wipes your settings, channels, keys and the stored node list itself, leaves the installed firmware in place, and comes back as an update drive a second or two later for the firmware file. There is no Bluetooth-stack choice to get wrong on this path.
 - **Older bootloaders need a Bluetooth-stack-specific erase.** On these the app writes a small erase program matched to your device's Bluetooth stack, then starts it over the serial port. If the drive reports a different stack than expected, the app refuses rather than guessing.
 
 The app picks the path from what the drive reports; you don't choose it.
@@ -97,18 +111,18 @@ Käytä näitä palautukseen tai silloin, kun OTA- tai sovelluksen USB-päivitys
 
 ## Versiokanavat
 
-| Kanava               | Kuvaus                                                                   |
-| -------------------- | ------------------------------------------------------------------------ |
-| Vakaa                | Suositeltu useimmille käyttäjille: testatut julkaisut    |
-| Alpha                | Esijulkaisut voivat sisältää virheitä                                    |
-| Paikallinen tiedosto | Asenna itse valitsemasi laiteohjelmistotiedosto ladatun julkaisun sijaan |
+| Kanava               | Kuvaus                                                                                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vakaa                | Suositeltu useimmille käyttäjille: testatut julkaisut                                                                                                                             |
+| Alpha                | Esijulkaisut voivat sisältää virheitä                                                                                                                                                             |
+| Paikallinen tiedosto | Flash a firmware file you select yourself, instead of a downloaded release. The button reads **Select Local File**, and the app asks you to confirm the file name before flashing |
 
 ## Päivitystä edeltävä tarkistuslista
 
 Ennen päivityksen aloitamista:
 
-- [ ] Akku > 50 %
-- [ ] Vakaa Bluetooth-yhteys
+- [ ] Battery above 50%, recommended. The app itself refuses to start an update only when the node reports 10% or less
+- [ ] A stable connection over the method you're updating with: Bluetooth, Wi-Fi, or USB
 - [ ] Kirjaa ylös nykyiset asetuksesi (ne voivat nollautua suurissa versiomuutoksissa)
 - [ ] Tarkista julkaisumuistiinpanot mahdollista yhteensopivuutta rikkovien muutosten varalta
 - [ ] Päivitä myös Meshtastic-sovellus joko ennen laiteohjelmiston päivitystä tai sen yhteydessä yhteensopivuuden varmistamiseksi
@@ -121,7 +135,7 @@ Kun laiteohjelmisto on kirjoitettu, sovellus varmistaa päivityksen ja odottaa l
 
 Kun päivitys onnistuu:
 
-- Radio käynnistyy uudelleen automaattisesti
+- The node reboots automatically
 - Bluetooth-yhteys muodostetaan uudelleen
 - Varmista, että asetuksesi ovat säilyneet
 - Vahvista uusi versio **Asennettu tällä hetkellä** -kohdasta **Laiteohjelmiston päivitys** -näkymässä — sama tieto näkyy myös radion tiedoissa ja **Yhteydet**-näkymässä
@@ -134,19 +148,21 @@ Kun päivitys onnistuu:
 
 Jos päivitys näyttää jumiutuneen:
 
-- Anna sille hetki aikaa. Kun tiedosto on kirjoitettu, sovellus odottaa enintään **60 sekuntia**, että radio käynnistyy uudelleen ja ilmoittaa uuden versionsa. Lyhyt odotus vahvistusvaiheessa on siis normaalia.
-- Jos radio on tämän jälkeen edelleen jumissa, käynnistä se uudelleen katkaisemalla virta.
+- Anna sille hetki aikaa. After writing the image the app waits up to **60 seconds** for the node to come back and report its new version, so a pause at the verify step is expected.
+- If it is still stuck after that, power-cycle the node.
 - Yritä päivitystä uudelleen.
 
-The message **Verification timed out. Device did not reconnect in time.** means the image was written but the radio did not come back within that window — power-cycle it and check the version under **Currently Installed** before re-running the update.
+The message **Verification timed out. Device did not reconnect in time.** means the image was written but the node did not come back within that window. Power-cycle it and check the version under **Currently Installed** before re-running the update.
 
 ![Laiteohjelmiston päivitysvirhe](../../assets/screenshots/firmware_error.png)
 
 ### Radio ei käynnisty päivityksen jälkeen
 
-If the app told you the Bluetooth update could not be finished, follow the instruction it gave: connect the radio to a computer over USB and re-flash it with the vendor's serial DFU tool, such as `adafruit-nrfutil`. A stock nRF bootloader cannot reliably complete an interrupted over-the-air update.
+A Bluetooth update that stops partway can leave the node waiting in bootloader mode. While the app is disconnected, the **Connect** tab then shows a **Finish updating** card naming the node. Tap **Resume firmware update** and keep the node nearby so the app can re-flash it, or dismiss the card if the update can't be finished from the phone.
 
-Otherwise, if your radio fails to boot:
+If the app told you the Bluetooth update could not be finished, follow the instruction it gave: connect the node to a computer over USB and re-flash it with the vendor's serial DFU tool, such as `adafruit-nrfutil`. A stock nRF bootloader cannot reliably complete an interrupted over-the-air update.
+
+Otherwise, if your node fails to boot:
 
 1. Kokeile yhdistää USB:llä tietokoneeseen
 2. Käytä web-flasheria palautus tai DFU-tilassa
@@ -155,15 +171,15 @@ Otherwise, if your radio fails to boot:
 
 ### Yhteensopivuutta koskevat varoitukset
 
-Yhteyden muodostamisen yhteydessä sovellus vertaa radion laiteohjelmistoversiota kahteen rajaan ja toimii niiden perusteella eri tavoin:
+On connecting, the app compares the node's firmware against two thresholds and reacts differently to each:
 
-| Laiteohjelmistoversio                                                                                         | Näet seuraavan                                                | Mitä tapahtuu                                                                                                                |
-| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Alle **2.3.15**                                                               | **Laiteohjelmiston päivitys vaaditaan.**      | Sovellus katkaisee yhteyden radioon. Se ei toimi näin vanhan laiteohjelmiston kanssa.        |
-| **2.3.15** tai uudempi, mutta alle **2.5.14** | **Laiteohjelmiston päivitystä suositellaan.** | Vain suositus – voit ohittaa sen ja jatkaa. Valintaikkunassa kerrotaan uusin vakaa julkaisu. |
-| **2.5.14** tai uudempi                                                        | Ei mitään                                                     | —                                                                                                                            |
+| Laiteohjelmistoversio                                                                                         | Näet seuraavan                                           | Mitä tapahtuu                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Alle **2.3.15**                                                               | **Laiteohjelmiston päivitys vaaditaan.** | The app disconnects from the node. Se ei toimi näin vanhan laiteohjelmiston kanssa.                                                                                                                                                                                  |
+| **2.3.15** tai uudempi, mutta alle **2.5.14** | **Firmware update required**                             | The node stays connected, but the dialog blocks the rest of the app until the firmware is updated. It names the installed, minimum, and latest stable versions. **Update firmware** opens the Firmware Update screen; **Disconnect** drops the node. |
+| **2.5.14** tai uudempi                                                        | Ei mitään                                                | —                                                                                                                                                                                                                                                                                                    |
 
-Jos sovellus ei pysty tulkitsemaan versionumeroa, se ohitetaan sen sijaan, että sitä pidettäisiin liian vanhana. Näin tilapäinen lukuvirhe ei katkaise yhteyttä toimivaan radioon.
+A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working node.
 
 ## Aiheeseen liittyvät aiheet
 

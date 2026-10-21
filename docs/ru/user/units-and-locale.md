@@ -1,7 +1,7 @@
 ---
 title: Единицы измерения и локаль
 nav_order: 16
-last_updated: 2026-08-30
+last_updated: 2026-10-21
 description: Как приложение отображает температуру, расстояние, скорость и другие показатели в зависимости от настроек устройства.
 aliases:
   - measurement
@@ -17,7 +17,7 @@ The Meshtastic app automatically displays temperatures, distances, speeds, and t
 
 ## Как это работает
 
-Радиостанции Meshtastic всегда передают данные в **метрических единицах** (метры, °C, м/с, гПа и т.д.). Когда приложение получает эти данные, оно преобразует их и показывает значения в той системе единиц, которую задает локаль устройства.
+Meshtastic nodes always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). Когда приложение получает эти данные, оно преобразует их и показывает значения в той системе единиц, которую задает локаль устройства.
 
 На Android твои предпочтения единиц измерений определяются настройками системы **Язык и регион**. На настольном компьютере (JVM) приложение использует стандартную `Locale` JVM.
 
@@ -25,11 +25,11 @@ Units follow your device's **region**, not the display language. Plain languages
 
 > 💡 **Tip:** By default there is nothing to configure — change your system measurement preferences and every screen in Meshtastic updates automatically. If your device offers no working region or measurement setting (some manufacturer builds don't), set **Settings → Units** in the app instead.
 
-## The Radio's Own Screen Is Separate
+## The node's own screen is separate
 
-**Settings → Device configuration → Display → Display units** configures the screen on the radio, not the app. The **Use 12h clock format** and **Always point north** settings do too — all three apply to the radio's display only. Temperature on that screen has its own setting, **Environment metrics use Fahrenheit**, on the radio's Telemetry module — see the [Telemetry module reference](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit) on meshtastic.org.
+**Settings → Device configuration → Display → Display Units** configures the screen on the node, not the app. The **12 Hour Clock** and **Always point north** settings do too, and all three apply to the node's display only. Temperature on that screen has its own setting, **Display Fahrenheit**, on the node's Telemetry module. See the [Telemetry module reference](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit) on meshtastic.org.
 
-If your node list shows miles while the radio's screen shows kilometers, this is why: the two are set in different places. Changing the radio's setting never alters what the app displays. See the [Display Config](https://meshtastic.org/docs/configuration/radio/display) guide on meshtastic.org for the device-side options.
+If your node list shows miles while the node's screen shows kilometers, this is why: the two are set in different places. Changing the node's setting never alters what the app displays. See the [Display Config](https://meshtastic.org/docs/configuration/radio/display) guide on meshtastic.org for the device-side options.
 
 ## Температура
 
@@ -108,13 +108,14 @@ Readings from a connected scale are transmitted in **kg** and converted for disp
 
 Некоторые единицы являются международными стандартами и отображаются одинаково независимо от вашего региона:
 
-| Показатель                          | Единица                        | Почему                                   |
-| ----------------------------------- | ------------------------------ | ---------------------------------------- |
-| Барометрическое давление            | гПа                            | Международный метеорологический стандарт |
-| Курс / азимут                       | ° (градусы) | Универсальная навигационная конвенция    |
-| Радиация                            | µR/h                           | Стандартная единица дозиметрии           |
-| GPS координаты                      | десятичные градусы             | Универсальный географический стандарт    |
-| Влажность, батарея, влажность почвы | %                              | Универсальный                            |
+| Показатель                          | Единица                                                                             | Почему                                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Барометрическое давление            | гПа                                                                                 | Международный метеорологический стандарт                                                      |
+| Курс / азимут                       | ° (градусы)                                                      | Универсальная навигационная конвенция                                                         |
+| Радиация                            | µR/h                                                                                | Стандартная единица дозиметрии                                                                |
+| GPS координаты                      | десятичные градусы                                                                  | Универсальный географический стандарт                                                         |
+| Влажность, батарея, влажность почвы | %                                                                                   | Универсальный                                                                                 |
+| Data sizes and transfer rates       | B, kB, MB, GB (decimal: 1 MB is 1,000,000 bytes) | Matches the storage figures Android shows; the number itself follows your locale's formatting |
 
 ## Дата и время
 
@@ -147,7 +148,7 @@ Not every device can express every preference — some manufacturer builds ship 
 offer only one English variant, and UK regions are imperial for distance even if you'd rather read altitude in
 meters. For those cases the app has its own switch:
 
-1. Open **Meshtastic Settings → Units**
+1. In Meshtastic, open **Settings → Units**
 2. Choose **System default**, **Metric**, or **Imperial**
 3. Every screen updates immediately — no restart needed
 
@@ -160,5 +161,5 @@ otherwise. The setting exists on Android and Desktop alike.
 - [Метрики ноды](node-metrics) — здесь отображаются температура, расстояние и значения датчиков
 - [Телеметрия и датчики](telemetry-and-sensors) — датчики, производящие эти измерения
 - [Измерение и форматирование](../developer/measurement) — ссылка на разработчика утилит форматирования
-- [Настройки — Радио и Пользователь](settings-radio-user) — настройка региона, управляющая выбором единиц
-- [Display Config](https://meshtastic.org/docs/configuration/radio/display) — units, clock, and compass settings for the radio's own screen, on meshtastic.org
+- [Settings — Radio & User](settings-radio-user) — the Display config that sets units on the node's own screen
+- [Display Config](https://meshtastic.org/docs/configuration/radio/display) — units, clock, and compass settings for the node's own screen, on meshtastic.org

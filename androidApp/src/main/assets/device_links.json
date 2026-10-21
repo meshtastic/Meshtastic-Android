@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-14T00:56:18.000Z",
+  "generatedAt": "2026-10-21T18:31:45.000Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -4060,7 +4060,7 @@
       "description": "Seeed Wio Tracker L2 Pro",
       "type": "vendor",
       "targets": [
-        "seeed_wio_tracker_L2-tft"
+        "seeed_wio_tracker_L2"
       ],
       "hwModels": [
         137
@@ -4101,6 +4101,48 @@
         "GB",
         "US"
       ]
+    },
+    {
+      "shortCode": "heltec-rcc6",
+      "url": "https://msh.to/heltec-rcc6",
+      "description": "Radiocore C6",
+      "type": "vendor",
+      "targets": [
+        "heltec-rcc6"
+      ],
+      "hwModels": [
+        143
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-rc32",
+      "url": "https://msh.to/heltec-rc32",
+      "description": "Radiocore S3",
+      "type": "vendor",
+      "targets": [
+        "heltec-rc32"
+      ],
+      "hwModels": [
+        141
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-rc52",
+      "url": "https://msh.to/heltec-rc52",
+      "description": "Radiocore nRF52",
+      "type": "vendor",
+      "targets": [
+        "heltec-rc52"
+      ],
+      "hwModels": [
+        142
+      ],
+      "marketplace": null,
+      "regions": null
     }
   ]
 }

@@ -1,7 +1,7 @@
 ---
 title: Virheenjäljityslokitiedot
 nav_order: 22
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: Tarkastele ja vie sovelluksen omat virheenjäljityslokitiedot suoraan sovelluksesta ja liitä lokitiedot GitHub-vikaraporttiin ongelmien selvittämisen helpottamiseksi — adb:tä ei tarvita.
 aliases:
   - debug-lokitiedot
@@ -22,10 +22,19 @@ Jos teet vikailmoituksen, vie lokit (katso [Lokien vieminen](#exporting)) ja lii
 
 Virheenjäljityspaneelissa on kaksi välilehteä:
 
-- **Paketit** — radion lähettämä ja vastaanottama purettu mesh-liikenne (protokollatason viestit). Hyödyllinen mesh-verkon ja reitityksen toiminnan diagnosointiin.
+- **Packets** — the decoded mesh traffic your node has sent and received (protocol-level messages). Hyödyllinen mesh-verkon ja reitityksen toiminnan diagnosointiin.
 - **Sovelluslokitiedot** — sovelluksen oma diagnostiikkaloki (Androidin _logcat_), joka sisältää varoitukset, virheet ja pinoseurannat itse sovelluksesta. Tätä tarvitaan yleensä vikaraportissa.
 
 Jokaisella välilehdellä on oma **Vie**-painikkeensa, ja kumpikin tuottaa oman tiedostonsa. Voit siis liittää raporttiin vain tarvittavan tiedoston tai molemmat.
+
+## Viewing packets
+
+The **Packets** tab lists each logged packet; tap one to expand it, including its decoded payload where there is one.
+
+- **Search** — type in **Search in logs…** to highlight matches, and step between them with the arrows.
+- **Filters** — add your own text filters, or pick from **Preset Filters**: your own node ID, the broadcast address `!ffffffff`, `decoded`, today's date, and each port name. The match toggle switches between matching any filter and matching all of them.
+- **Settings** — the gear icon shows **Store mesh logs**, which turns writing packets to the log on or off, and **MeshLog retention period**, from one hour to a year, or **Never delete logs**.
+- **Clear Logs** — the delete icon removes every stored packet, after you confirm.
 
 ## Sovelluslokitietojen tarkastelu
 
@@ -52,4 +61,4 @@ Työpöytäsovelluksessa ei ole järjestelmän logcat-lokitietoa, joten **Sovell
 ## Aiheeseen liittyvät aiheet
 
 - [Ohjeet ja sovelluksen sisäinen dokumentaatio](help-and-docs) — tämän dokumentaation lukeminen offline-tilassa sovelluksessa
-- [Yhteydet](connections) — jos ongelma liittyy radion yhdistämiseen
+- [Connections](connections) — if the problem is getting connected to your node in the first place

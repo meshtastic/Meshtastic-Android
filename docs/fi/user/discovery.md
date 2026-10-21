@@ -1,7 +1,7 @@
 ---
 title: Paikallisen mesh-verkon skannaus
 nav_order: 12
-last_updated: 2026-10-12
+last_updated: 2026-10-21
 description: Tutki mesh-verkkoasi — paikallinen verkon haku, reitinselvitykset, naapurikartat ja radion hakuun liittyvät työkalut.
 aliases:
   - haku
@@ -28,19 +28,19 @@ Paikallinen verkon haku on erillinen skannaustila, joka auttaa löytämään par
 
 Connect your node, then open **Settings → Advanced → Local Mesh Discovery**. On Android the **Advanced** section appears only for a locally connected node, never over remote admin, and stays grayed out until the app has finished reading the node's configuration. On a managed device its entries are disabled, except **Debug Panel**, which reads app-local logs and stays available. On desktop, Local Mesh Discovery has its own entry on the Settings screen, with no such gate.
 
-> ℹ️ **Note:** Discovery temporarily changes your node's LoRa settings while it scans, then restores your original configuration when it finishes.
+Discovery changes your node's LoRa settings while it scans, then restores your original configuration when it finishes.
 
-Each preset is scanned on the public mesh: the default frequency slot for that preset, decoded with the default public channel. If your node uses a custom frequency slot, the scan uses the default slot and puts your slot back when it finishes. If your primary channel has a custom name or key, the scan switches it to the default public channel before the first preset change and restores your channel when the scan ends, whether it completes, you stop it, or it fails. Channel changes don't reboot the node, so this happens at once at the start and end of the scan. You no longer need to put your primary channel on the default key before scanning.
+Each preset is scanned on the public mesh: the default frequency slot for that preset, decoded with the default public channel. If your node uses a custom frequency slot, the scan uses the default slot and puts your slot back when it finishes. If your primary channel has a custom name or key, the scan switches it to the default public channel before the first preset change and restores your channel when the scan ends, whether it completes, you stop it, or it fails. Channel changes don't reboot the node, so this happens at once at the start and end of the scan.
 
 ### Setting up a scan
 
 Ennen aloittamista määritä nämä asetukset:
 
-| Säädin                         | Kuvaus                                                                                                                                                                                                                                                   |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LoRa-esiasetuksen valitsin** | Valitse yksi tai useampi esiasetus skannattavaksi. Haku pysähtyy jokaisessa valitussa esiasetuksessa vuorollaan kuuntelemaan liikennettä.                                                                                |
-| **Kuunteluaika**               | Kunkin esiasetuksen kuunteluaika. Valitse 1, 5, 15, 30, 45, 60, 90, 120 tai 180 minuuttia. Pidempi kuunteluaika kerää enemmän paketteja ja antaa tarkemman kuvan, mutta kestää pidempään.                |
-| **Pidä näyttö päällä**         | Keeps the display on for the scan. The scan itself holds a CPU wake lock for its whole run and posts a **Scanning LoRa presets…** notification, so it keeps collecting with the screen off or the app in the background. |
+| Säädin                 | Kuvaus                                                                                                                                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LoRa Presets**       | Valitse yksi tai useampi esiasetus skannattavaksi. Haku pysähtyy jokaisessa valitussa esiasetuksessa vuorollaan kuuntelemaan liikennettä.                                                                                |
+| **Dwell Time**         | Kunkin esiasetuksen kuunteluaika. Valitse 1, 5, 15, 30, 45, 60, 90, 120 tai 180 minuuttia. Pidempi kuunteluaika kerää enemmän paketteja ja antaa tarkemman kuvan, mutta kestää pidempään.                |
+| **Pidä näyttö päällä** | Keeps the display on for the scan. The scan itself holds a CPU wake lock for its whole run and posts a **Scanning LoRa presets…** notification, so it keeps collecting with the screen off or the app in the background. |
 
 The **Start Scan** button stays disabled — with an explanation of why — until the scan can run. Yleisiä syitä, miksi se on pois käytöstä:
 
@@ -89,7 +89,7 @@ Tuloksista saatavilla olevat lisätoiminnot:
 - **Haun kartta** — kartta skannauksessa löydetyistä radioista.
 - **Raportin vienti** — vie raportti PDF-tiedostona Androidilla tai tekstinä muilla alustoilla.
 
-> 💡 **Vinkki:** **Google Play** -versiossa Discovery voi luoda tuloksista laitteella toimivan tekoälyyhteenvedon (Gemini Nano). F-Droid-versio käyttää aina algoritmista yhteenvetoa — suljettu ML Kit -riippuvuus on jätetty tarkoituksella pois tästä versiosta, joten saat luettavan yhteenvedon skannauksesta joka tapauksessa.
+On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary, because that flavor leaves out the proprietary ML Kit dependency, so every build gives a readable interpretation of the scan.
 
 ## Verkkokutsu
 
@@ -98,12 +98,12 @@ Mesh Beacon antaa radioille mahdollisuuden kutsua muita liittymään mesh-verkko
 Configure it under **Settings → Module configuration → Mesh Beacon**. The entry appears only on nodes running firmware 2.8.0 or newer. A read-only **Region** row at the top of the screen shows the region the beacon advertises: that region, and the preset, are always the ones the node itself uses, so a beacon can't invite anyone onto settings your node isn't running.
 
 - **Kuuntele majakoita** – vastaanota muiden radioiden lähettämiä liittymiskutsuja.
-- **Broadcast a beacon** — periodically advertise this mesh to nearby nodes, with an optional **Beacon message** of up to 100 bytes, a **Broadcast interval** picked from fixed intervals between 1 hour and 72 hours, and an **Offered channel** chosen from your node's own channels. The offered channel is required, and defaults to your primary channel. Over remote admin the picker offers the primary channel only.
+- **Broadcast a beacon** — periodically advertise this mesh to nearby nodes, with an optional **Message** of up to 60 bytes, a **Broadcast interval** picked from fixed intervals between 1 hour and 72 hours, and an **Offered channel** chosen from your node's own channels. The offered channel is required, and defaults to your primary channel. Over remote admin the picker offers the primary channel only.
 - **Broadcast targets** — where the beacon actually transmits. The list always holds at least one row: the first is the beacon's own transmission, not an extra. Each row picks a **Channel** and a **Transmit preset**. **Add target** appends a row, and **Remove target** deletes one — removing the last row replaces it with a fresh default rather than emptying the list.
 
 Two conditions block beacon setup:
 
-- **The node has no region set.** The screen shows nothing but _Set your node's region before setting up a beacon._ Set the region on **Settings → LoRa** first.
+- **The node has no region set.** The screen shows nothing but _Set your radio's region before setting up a beacon._ Set the region on **Settings → LoRa** first.
 - **The node uses custom LoRa settings.** A beacon advertises a modem preset for others to join, so a node with **Use Preset** turned off has no standard preset to offer. In that state **Broadcast a beacon** can be turned off but not on, and the broadcast settings are read-only. Listening for beacons is unaffected.
 
 Vastaanotetut kutsut näkyvät **Mesh-kutsut** -korteissa haku-näytössä. Jokainen kortti näyttää lähettäjän viestin sekä tarjotun kanavan, alueen, esiasetuksen ja signaalin laadun. Käytettävissä ovat seuraavat toiminnot:
@@ -122,7 +122,7 @@ Seuraavat työkalut ovat aina käytettävissä Radiot- ja Radion tiedot -näkymi
 
 ### Reitinselvitys
 
-Reitinselvitys näyttää tarkan polun, jota kautta viesti kulkee omalta radioltasi mihin tahansa toiseen verkon radioon. Se on yksittäisistä työkaluista hyödyllisin yhteysongelmien vianmääritykseen.
+Traceroute reveals the exact path a message takes from your node to any other node on the mesh, which makes it the first tool to reach for when debugging connectivity problems.
 
 #### Reitinselvityksen suorittaminen
 
@@ -145,14 +145,14 @@ Route traced toward destination:
 
 Each `⇊` line between two nodes is one relay hop, and the SNR on that line is the quality of that segment alone. The app colors it against the demodulation floor of the preset in use, not a fixed number: green above the floor, yellow within 5.5 dB below it, orange within 7.5 dB, and red beyond that. The floor is −7.5 dB on Short Fast and improves 2.5 dB per spreading-factor step, so it is −17.5 dB on Long Fast — the same SNR reads differently on different presets. See [Signal Meter](signal-meter). A request that also gets a reply adds a second block under **Route traced back to us:**.
 
-| Mitä kannattaa tarkkailla                                   | Mitä se tarkoittaa                                                               |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| All hops show Good SNR (green)           | Hyvä reitti — viestit kulkevat luotettavasti                                     |
-| One hop shows a poor SNR (orange or red) | Heikko yhteys — tämä välityssegmentti on haavoittuva                             |
-| Useita hyppyjä (4+)                      | Pitkä reitti — harkitse radion siirtämistä sen lyhentämiseksi                    |
-| Eri reitti uudelleenyrityksellä                             | Verkko mukautuu — useita reittejä on olemassa (tämä on hyvä!) |
+| Mitä kannattaa tarkkailla                                   | Mitä se tarkoittaa                                             |
+| ----------------------------------------------------------- | -------------------------------------------------------------- |
+| All hops show Good SNR (green)           | Hyvä reitti — viestit kulkevat luotettavasti                   |
+| One hop shows a poor SNR (orange or red) | Heikko yhteys — tämä välityssegmentti on haavoittuva           |
+| Useita hyppyjä (4+)                      | Pitkä reitti — harkitse radion siirtämistä sen lyhentämiseksi  |
+| Eri reitti uudelleenyrityksellä                             | Mesh is adapting — multiple routes exist, a sign of redundancy |
 
-> Vinkki: Aja reitinselvitys useita kertoja muutaman minuutin aikana. Jos reitti muuttuu, verkossasi on varareittejä — merkki hyvin kytketystä verkosta.
+Run traceroute several times over a few minutes, waiting out the 30-second cooldown between requests. If the path changes, your mesh has redundant routes, a sign of a well-connected network. A relay that didn't record itself in the route shows as **Unknown hop**.
 
 #### Reitinselvityksen vianmääritys
 
@@ -176,7 +176,7 @@ Once enabled and transmitting over LoRa, your node periodically broadcasts its n
 
 #### Viewing neighbor data
 
-- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The request button asks the node for its current neighbor list; once the app has received one, a second button on the same row opens the log of everything that node has reported. The row appears only on nodes that can answer a neighbor request, or that have already reported neighbors.
+- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The row appears once the app has received that node's neighbor list. Its log button opens everything that node has reported, and its request button asks the node for a fresh list.
 - Jokainen naapurimerkintä näyttää radion, joka on kuultu suoraan, sekä sen signaalilaadun.
 - Yhdistä naapuritiedot useista radioista ymmärtääksesi koko mesh-verkon topologian.
 
@@ -184,7 +184,7 @@ Once enabled and transmitting over LoRa, your node periodically broadcasts its n
 
 ### Node list as a discovery tool
 
-Radiolista on itsessään tehokas hakutyökalu, kun käytät sen suodatus- ja lajitteluominaisuuksia oikein.
+The node list's filtering and sorting make it a discovery tool of its own.
 
 #### Finding new nodes
 
@@ -207,7 +207,7 @@ Katso [Radiot](nodes) saadaksesi lisätietoa suodatus- ja lajitteluasetuksista.
 ## Tips for Mesh exploration
 
 - Aloita reitinselvityksellä — se antaa välittömän ja käytännöllisen tiedon yksittäisestä reitistä.
-- Ota naapuritieto käyttöön keskeisissä radioissa — erityisesti reitittimissä ja toistimissa, jotta saat näkyvyyden runkoverkkoon.
+- **Enable Neighbor Info on key nodes** — especially routers, to build a picture of the backbone.
 - Tarkista kartta — [Kartta](map-and-waypoints) yhdessä signaalitiedon kanssa auttaa ymmärtämään, miksi jotkin yhteydet ovat vahvoja ja toiset heikkoja.
 - Seuraa signaalin muutoksia ajan kuluessa — käytä [Signaalimittari](signal-meter) -opasta tulkitaksesi SNR- ja RSSI-arvot oikein.
 

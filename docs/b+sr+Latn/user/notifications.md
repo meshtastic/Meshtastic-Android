@@ -2,7 +2,7 @@
 title: Notifications
 parent: User Guide
 nav_order: 18
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: What each Meshtastic notification is for, how to silence one kind without the others, and what you can do from a message notification or a watch.
 aliases:
   - notifications
@@ -19,21 +19,22 @@ Meshtastic posts a notification when something on the mesh needs you while the a
 
 To see the categories, tap **App Notifications** in the **Information** section of **Settings**. It opens Android's notification settings for Meshtastic, where the categories sit in three groups.
 
-| Group  | Категорија                                                                | Posted for                                                                      | Tapping it opens                |
-| ------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
-| Поруке | Direct message notifications                                              | A message sent directly to you                                                  | The conversation                |
-| Поруке | Broadcast message notifications                                           | A message on one of your channels                                               | The channel                     |
-| Поруке | Waypoint notifications                                                    | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Поруке | Обавештења о упозорењима                                                  | A critical alert from a node                                                    | The conversation                |
-| Mesh   | Обавештење о новом чвору                                                  | A node heard for the first time                                                 | The node's details              |
-| Mesh   | Mesh invitation notifications                                             | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
-| Mesh   | Нотификације о ниском нивоу батерије (омиљени чворови) | A favorite node's battery running low                                           | The node's details              |
-| Уређај | Servisna obaveštenja                                                      | The connection to your node while the app runs in the background                | The app                         |
-| Уређај | Нотификације о ниском нивоу батерије                                      | Your node's battery running low                                                 | The node's details              |
-| Уређај | Radio notifications                                                       | Notices from your node, such as key verification requests and security warnings | The app                         |
-| Уређај | Update and connection notifications                                       | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
+| Group    | Категорија                                                                | Posted for                                                                      | Tapping it opens                |
+| -------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
+| Поруке   | Direct message notifications                                              | A message sent directly to you                                                  | The conversation                |
+| Поруке   | Broadcast message notifications                                           | A message on one of your channels                                               | The channel                     |
+| Поруке   | Reaction notifications                                                    | An emoji reaction to a message in one of your conversations                     | The conversation                |
+| Поруке   | Waypoint notifications                                                    | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
+| Messages | Обавештења о упозорењима                                                  | A critical alert from a node                                                    | The conversation                |
+| Mesh     | Обавештење о новом чвору                                                  | A node heard for the first time                                                 | The node's details              |
+| Mesh     | Mesh invitation notifications                                             | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
+| Mesh     | Нотификације о ниском нивоу батерије (омиљени чворови) | A favorite node's battery running low                                           | The node's details              |
+| Уређај   | Servisna obaveštenja                                                      | The connection to your node while the app runs in the background                | The app                         |
+| Уређај   | Нотификације о ниском нивоу батерије                                      | Your node's battery running low                                                 | The node's details              |
+| Уређај   | Radio notifications                                                       | Notices from your node, such as key verification requests and security warnings | The app                         |
+| Уређај   | Update and connection notifications                                       | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
 
-By default, direct messages, alerts and radio notices pop up on screen, mesh invitations and the service notification arrive without a sound, and the rest make a sound. Android keeps whatever you change on a category, and the app cannot change it back.
+By default, direct messages, alerts and notices from your node pop up on screen, mesh invitations and the service notification arrive without a sound, and the rest make a sound. Android keeps whatever you change on a category, and the app cannot change it back.
 
 Alert notifications play an alarm sound. To let them through Do Not Disturb as well, open the category and allow it to override Do Not Disturb, which is the step [Getting Started](onboarding#critical-alerts-permission) offers during setup.
 

@@ -1,7 +1,7 @@
 ---
 title: Notifications
 nav_order: 18
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: What each Meshtastic notification is for, how to silence one kind without the others, and what you can do from a message notification or a watch.
 aliases:
   - notifications
@@ -22,8 +22,9 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | ------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
 | Mesajlar      | Direct message notifications                                | A message sent directly to you                                                  | The conversation                |
 | Mesajlar      | Broadcast message notifications                             | A message on one of your channels                                               | The channel                     |
+| Mesajlar      | Reaction notifications                                      | An emoji reaction to a message in one of your conversations                     | The conversation                |
 | Mesajlar      | Waypoint notifications                                      | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Mesajlar      | Uyarı bildirimleri                                          | A critical alert from a node                                                    | The conversation                |
+| Messages      | Uyarı bildirimleri                                          | A critical alert from a node                                                    | The conversation                |
 | Amatör Telsiz | Yeni düğüm bildirimleri                                     | A node heard for the first time                                                 | The node's details              |
 | Amatör Telsiz | Mesh invitation notifications                               | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
 | Amatör Telsiz | Düşük pil bildirimleri (favori düğümler) | A favorite node's battery running low                                           | The node's details              |
@@ -32,7 +33,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Cihaz         | Radio notifications                                         | Notices from your node, such as key verification requests and security warnings | The app                         |
 | Cihaz         | Update and connection notifications                         | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
 
-By default, direct messages, alerts and radio notices pop up on screen, mesh invitations and the service notification arrive without a sound, and the rest make a sound. Android keeps whatever you change on a category, and the app cannot change it back.
+By default, direct messages, alerts and notices from your node pop up on screen, mesh invitations and the service notification arrive without a sound, and the rest make a sound. Android keeps whatever you change on a category, and the app cannot change it back.
 
 Alert notifications play an alarm sound. To let them through Do Not Disturb as well, open the category and allow it to override Do Not Disturb, which is the step [Getting Started](onboarding#critical-alerts-permission) offers during setup.
 

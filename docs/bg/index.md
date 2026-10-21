@@ -14,7 +14,7 @@ User and developer documentation for the Meshtastic Android and Desktop app, bui
 
 | Ръководство                                                          | Описание                                                       |
 | -------------------------------------------------------------------- | -------------------------------------------------------------- |
-| [Първи стъпки](user/onboarding)                                      | Свържете първото си радио и изпратете съобщение                |
+| [Първи стъпки](user/onboarding)                                      | Connect your first node and send a message                     |
 | [Съобщения & Канали](user/messages-and-channels) | Channel broadcasts, direct messages, reactions, and encryption |
 | [Възли](user/nodes)                                                  | Understanding the mesh network node list                       |
 | [Измервател на сигнала](user/signal-meter)                           | Как работи измервателят на качеството на LoRa сигнала          |
@@ -23,4 +23,4 @@ User and developer documentation for the Meshtastic Android and Desktop app, bui
 | [Архитектура](developer/architecture)                                | App architecture overview for contributors                     |
 | [Допринасяне](developer/contributing)                                | Branch naming, PR workflow, and verification commands          |
 
-> This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
