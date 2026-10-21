@@ -46,6 +46,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.toDistanceString
@@ -55,6 +56,7 @@ import org.meshtastic.core.resources.compass_location_disabled
 import org.meshtastic.core.resources.compass_no_location_fix
 import org.meshtastic.core.resources.compass_no_magnetometer
 import org.meshtastic.core.resources.device_model_capture
+import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.resources.map_filter_title
 import org.meshtastic.core.resources.mesh_hud_camera_unavailable
@@ -80,6 +82,10 @@ import org.meshtastic.core.resources.mesh_hud_thermal_critical
 import org.meshtastic.core.resources.mesh_hud_thermal_hot
 import org.meshtastic.core.resources.mesh_hud_tilt_down
 import org.meshtastic.core.resources.mesh_hud_tilt_up
+import org.meshtastic.core.resources.mesh_hud_track_empty
+import org.meshtastic.core.resources.mesh_hud_track_newest
+import org.meshtastic.core.resources.mesh_hud_track_points
+import org.meshtastic.core.resources.mesh_hud_track_summary
 import org.meshtastic.core.resources.mesh_hud_turn_left
 import org.meshtastic.core.resources.mesh_hud_turn_right
 import org.meshtastic.core.resources.mesh_hud_waiting_sensor
@@ -96,11 +102,14 @@ import org.meshtastic.core.ui.icon.PhotoCamera
 import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.PermissionUiState
+import org.meshtastic.core.ui.util.formatAgo
+import kotlin.time.DurationUnit
 
 /** Dark enough that white label text keeps about 4.5:1 over a white sky. */
 internal const val HUD_SCRIM_ALPHA = 0.8f
 private val HudScrim = Color.Black.copy(alpha = HUD_SCRIM_ALPHA)
 private const val COACH_BACKDROP_ALPHA = 0.5f
+private const val SECONDS_PER_MINUTE = 60L
 private val CoachMaxWidth = 360.dp
 
 /** Where the finder's target is from the center of the view, in whole hint steps. */
@@ -196,6 +205,7 @@ internal fun HudBottomPanel(
     targets: MeshHudTargets,
     hint: FinderHint?,
     route: HudRoute?,
+    track: HudTrack?,
     notices: HudNotices,
     location: PermissionUiState,
     onOpenLocationSettings: () -> Unit,
@@ -213,6 +223,7 @@ internal fun HudBottomPanel(
         }
         hint?.let { FinderHintLabel(it, Modifier.align(Alignment.CenterHorizontally)) }
         route?.let { RouteLegend(it) }
+        track?.let { TrackLegend(it) }
         cameraContent()
         if (notices.cameraUnavailable) HudLabel(stringResource(Res.string.mesh_hud_camera_unavailable))
         LocationWarnings(targets.warnings, location, onOpenLocationSettings)
@@ -227,7 +238,7 @@ internal fun HudBottomPanel(
                     },
                 )
             }
-        if (targets.ready && route == null && targets.showsNothing) {
+        if (targets.ready && route == null && track == null && targets.showsNothing) {
             HudLabel(stringResource(Res.string.mesh_hud_no_nodes))
         }
         if (targets.elevationApproximate && targets.targets.isNotEmpty()) {
@@ -333,6 +344,36 @@ private fun RouteLegend(route: HudRoute) {
             )
         }
     }
+}
+
+/**
+ * What the track covers, bordered in its color: how many points, over how long, and how old the newest is. The camera
+ * overlay is hidden from TalkBack, so this line is also what a screen reader says about the track.
+ */
+@Composable
+private fun TrackLegend(track: HudTrack) {
+    val summary = track.summary()
+    if (summary == null) {
+        HudLabel(stringResource(Res.string.mesh_hud_track_empty))
+        return
+    }
+    val count = pluralStringResource(Res.plurals.mesh_hud_track_points, summary.points, summary.points)
+    val newest = summary.newestFixTimeSec?.let { formatAgo(it.toInt()) }
+    val text =
+        when {
+            newest == null -> count
+
+            summary.spanSec < SECONDS_PER_MINUTE -> stringResource(Res.string.mesh_hud_track_newest, count, newest)
+
+            else ->
+                stringResource(
+                    Res.string.mesh_hud_track_summary,
+                    count,
+                    formatDuration(summary.spanSec, DurationUnit.MINUTES),
+                    newest,
+                )
+        }
+    HudLabel(text, Modifier.border(2.dp, Color(track.color), MaterialTheme.shapes.small))
 }
 
 @Composable

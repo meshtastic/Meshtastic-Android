@@ -128,9 +128,75 @@ class HudPathsTest {
                 nodeNum = 7,
                 color = 0,
                 positions = listOf(at(40.02, time = 300), at(40.01, time = 100, altitude = null)),
-                nowSeconds = 400,
             )
-        assertEquals(listOf(300L, 100L), track.points.map { it.ageSec })
+        assertEquals(listOf(100L, 300L), track.points.map { it.fixTimeSec })
         assertFalse(track.points.first().altitudeKnown)
     }
+
+    @Test
+    fun `a leg out of the viewer names its far end`() {
+        val near = point(atViewer = true)
+        val far = point(atViewer = false)
+        assertEquals(far, viewerLeg(near, far))
+        assertEquals(far, viewerLeg(far, near))
+    }
+
+    @Test
+    fun `a leg between two viewer points or two far points is not a viewer leg`() {
+        assertNull(viewerLeg(point(atViewer = true), point(atViewer = true)))
+        assertNull(viewerLeg(point(atViewer = false), point(atViewer = false)))
+    }
+
+    @Test
+    fun `a summary counts points and spans oldest to newest`() {
+        val summary = assertNotNull(track(100L, null, 400L).summary())
+        assertEquals(3, summary.points)
+        assertEquals(300L, summary.spanSec)
+        assertEquals(400L, summary.newestFixTimeSec)
+    }
+
+    @Test
+    fun `an empty track has no summary`() {
+        assertNull(HudTrack(nodeNum = 7, color = 0, points = emptyList()).summary())
+    }
+
+    @Test
+    fun `the oldest point is labeled and the newest is not`() {
+        assertEquals(listOf(0), trackLabelIndices(track(0L, 600L, 1_200L).points))
+    }
+
+    @Test
+    fun `a track over an hour also labels the point nearest its middle`() {
+        assertEquals(listOf(0, 2), trackLabelIndices(track(0L, 1_000L, 3_700L, 7_200L).points))
+    }
+
+    @Test
+    fun `viewer points and untimed points are never labeled`() {
+        val points =
+            listOf(
+                TrackPoint(point(atViewer = true), 0L, altitudeKnown = true),
+                TrackPoint(point(atViewer = false), null, altitudeKnown = true),
+                TrackPoint(point(atViewer = false), 500L, altitudeKnown = true),
+                TrackPoint(point(atViewer = false), 900L, altitudeKnown = true),
+            )
+        assertEquals(listOf(2), trackLabelIndices(points))
+    }
+
+    @Test
+    fun `a one point track labels nothing`() {
+        assertTrue(trackLabelIndices(track(100L).points).isEmpty())
+    }
+
+    private fun point(atViewer: Boolean) = PathPoint(
+        bearingDeg = if (atViewer) 0.0 else 90.0,
+        elevationDeg = 0.0,
+        distanceM = if (atViewer) 1.0 else 1_000.0,
+        atViewer = atViewer,
+    )
+
+    private fun track(vararg times: Long?) = HudTrack(
+        nodeNum = 7,
+        color = 0,
+        points = times.map { TrackPoint(point(atViewer = false), it, altitudeKnown = true) },
+    )
 }

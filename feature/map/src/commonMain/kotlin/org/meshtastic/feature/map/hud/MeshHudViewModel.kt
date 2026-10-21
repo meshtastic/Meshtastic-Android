@@ -346,7 +346,7 @@ class MeshHudViewModel(
                 null
             } else {
                 val color = nodes[source.nodeNum]?.colors?.second ?: TRACK_FALLBACK_COLOR
-                buildHudTrack(here, declinationAt(here), source.nodeNum, color, source.positions, nowSeconds)
+                buildHudTrack(here, declinationAt(here), source.nodeNum, color, source.positions)
             }
         }
             .flowOn(dispatchers.default)

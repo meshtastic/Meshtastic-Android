@@ -57,6 +57,8 @@ import org.meshtastic.core.resources.mesh_hud_cardinal_south
 import org.meshtastic.core.resources.mesh_hud_cardinal_west
 import org.meshtastic.core.resources.mesh_hud_more
 import org.meshtastic.core.resources.mesh_hud_snr
+import org.meshtastic.core.resources.now
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.KeepScreenOn
@@ -214,6 +216,7 @@ fun MeshHudScreen(
             skippedTemplate = stringResource(Res.string.mesh_hud_more),
             snrTemplate = stringResource(Res.string.mesh_hud_snr),
         )
+    val trackLabels = TrackLabels(unknown = stringResource(Res.string.unknown), now = stringResource(Res.string.now))
     val cardinals =
         Cardinals(
             north = stringResource(Res.string.mesh_hud_cardinal_north),
@@ -241,7 +244,7 @@ fun MeshHudScreen(
             val pose = state.pose ?: return@Canvas
             drawHorizon(pose, focalPx)
             targets.fences.forEach { drawGeofence(it, pose, focalPx) }
-            track?.let { drawTrack(it, pose, focalPx) }
+            track?.let { drawTrack(it, pose, focalPx, textMeasurer, tapeStyle, trackLabels) }
             route?.let {
                 drawRoute(
                     it,
@@ -322,6 +325,7 @@ fun MeshHudScreen(
             targets = targets,
             hint = hint,
             route = route,
+            track = track,
             notices = HudNotices(cameraUnavailable = showCamera && !cameraAvailable, walking = walking),
             location = location,
             onOpenLocationSettings = openLocationSettings,

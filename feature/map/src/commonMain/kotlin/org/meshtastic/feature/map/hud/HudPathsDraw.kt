@@ -31,6 +31,7 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.ui.util.formatAgo
 
 private const val SNR_FLOOR_DB = -20f
 private const val SNR_SPAN_DB = 30f
@@ -50,6 +51,8 @@ private val ArcExtraWidth = 4.dp
 private val TrackWidth = 3.dp
 private val TrackRing = 4.dp
 private val LabelPadding = 4.dp
+private val TagLift = 16.dp
+private val TagMinGap = 48.dp
 private val LabelScrim = Color.Black.copy(alpha = HUD_SCRIM_ALPHA)
 private val Dashes = floatArrayOf(18f, 12f)
 
@@ -75,8 +78,26 @@ private fun DrawScope.drawPolyline(
     }
 }
 
+/** A straight line from the bottom center of the view, where the viewer stands, to [far]. */
+@Suppress("LongParameterList")
+private fun DrawScope.drawFromViewer(
+    far: PathPoint,
+    pose: CameraPose,
+    focalPx: Float,
+    color: Color,
+    width: Float,
+    dashed: Boolean,
+) {
+    val end = screen(directionEnu(far.bearingDeg, far.elevationDeg), pose, focalPx) ?: return
+    val effect = if (dashed) PathEffect.dashPathEffect(Dashes) else null
+    drawLine(color, Offset(size.width / 2, size.height), end, width, StrokeCap.Round, pathEffect = effect)
+}
+
 /** The localized patterns for a route's apex tags, read in composition since drawing cannot reach resources. */
 internal class RouteLabels(val skippedTemplate: String, val snrTemplate: String)
+
+/** The words a track's time tags fall back on, read in composition like [RouteLabels]. */
+internal class TrackLabels(val unknown: String, val now: String)
 
 /** A small label on a dark plate, centered on [at]. */
 private fun DrawScope.drawTag(text: String, at: Offset, textMeasurer: TextMeasurer, style: TextStyle) {
@@ -120,21 +141,21 @@ internal fun DrawScope.drawRoute(
                 val quality = snr?.let { ((it - SNR_FLOOR_DB) / SNR_SPAN_DB).coerceIn(0f, 1f) } ?: UNKNOWN_SNR_QUALITY
                 val width = ArcMinWidth.toPx() + ArcExtraWidth.toPx() * quality
                 val stroke = color.copy(alpha = ARC_MIN_ALPHA + (1 - ARC_MIN_ALPHA) * quality)
-                val viewer = Offset(size.width / 2, size.height)
+                val far = viewerLeg(start, point)
                 val tag =
                     when {
                         skipped > 0 -> formatString(labels.skippedTemplate, skipped)
                         snr != null -> formatString(labels.snrTemplate, NumberFormatter.format(snr, 1))
                         else -> null
                     }
-                if (start.atViewer != point.atViewer) {
+                if (far != null) {
                     // A link to or from the phone itself: the forward leg leaves the viewer, the return leg comes home.
-                    val far = if (start.atViewer) point else start
+                    drawFromViewer(far, pose, focalPx, stroke, width, dashed = false)
                     val end = screen(directionEnu(far.bearingDeg, far.elevationDeg), pose, focalPx)
                     if (end != null) {
-                        drawLine(stroke, viewer, end, width, StrokeCap.Round)
                         // Toward the hop, so the tag stays clear of the bottom panel and the reticle.
                         val along = if (leg.forward) FORWARD_STEM_TAG_AT else RETURN_STEM_TAG_AT
+                        val viewer = Offset(size.width / 2, size.height)
                         tag?.let { drawTag(it, lerp(viewer, end, along), textMeasurer, labelStyle) }
                     }
                 } else if (!start.atViewer) {
@@ -151,9 +172,19 @@ internal fun DrawScope.drawRoute(
 
 /**
  * A node's track as breadcrumbs in its color, fading with age in the same eight steps as the Google track map so the
- * two views agree. A leg into a point with no altitude draws dashed, since that point only sits level as a guess.
+ * two views agree. A leg into a point with no altitude draws dashed, since that point only sits level as a guess. A leg
+ * to or from a point at the viewer rises from the bottom of the view, as a route's does. The oldest point, and one near
+ * the middle of a long track, is tagged with how long ago it was fixed.
  */
-internal fun DrawScope.drawTrack(track: HudTrack, pose: CameraPose, focalPx: Float) {
+@Suppress("LongParameterList")
+internal fun DrawScope.drawTrack(
+    track: HudTrack,
+    pose: CameraPose,
+    focalPx: Float,
+    textMeasurer: TextMeasurer,
+    labelStyle: TextStyle,
+    labels: TrackLabels,
+) {
     val points = track.points
     if (points.isEmpty()) return
     val base = Color(track.color)
@@ -163,19 +194,37 @@ internal fun DrawScope.drawTrack(track: HudTrack, pose: CameraPose, focalPx: Flo
     }
     fun TrackPoint.direction() = directionEnu(point.bearingDeg, point.elevationDeg)
     points.zipWithNext().forEachIndexed { i, (a, b) ->
-        drawPolyline(
-            listOf(a.direction(), b.direction()),
-            pose,
-            focalPx,
-            base.copy(alpha = alphaAt(i + 1)),
-            TrackWidth.toPx(),
-            dashed = !b.altitudeKnown,
-        )
+        val color = base.copy(alpha = alphaAt(i + 1))
+        val far = viewerLeg(a.point, b.point)
+        when {
+            far != null -> drawFromViewer(far, pose, focalPx, color, TrackWidth.toPx(), dashed = !b.altitudeKnown)
+
+            !a.point.atViewer ->
+                drawPolyline(
+                    listOf(a.direction(), b.direction()),
+                    pose,
+                    focalPx,
+                    color,
+                    TrackWidth.toPx(),
+                    dashed = !b.altitudeKnown,
+                )
+        }
     }
     points.forEachIndexed { i, p ->
         if (p.point.atViewer) return@forEachIndexed
         screen(p.direction(), pose, focalPx)?.let { at ->
             drawCircle(base.copy(alpha = alphaAt(i)), TrackRing.toPx(), at, style = Stroke(2.dp.toPx()))
         }
+    }
+    val placed = mutableListOf<Offset>()
+    val minGap = TagMinGap.toPx()
+    trackLabelIndices(points).forEach { i ->
+        val time = points[i].fixTimeSec ?: return@forEach
+        val at = screen(points[i].direction(), pose, focalPx) ?: return@forEach
+        // Two tags that close would overlap; the first, the oldest, wins.
+        if (placed.any { (it - at).getDistance() < minGap }) return@forEach
+        placed += at
+        val text = formatAgo(time.toInt(), labels.unknown, labels.now)
+        drawTag(text, at - Offset(0f, TagLift.toPx()), textMeasurer, labelStyle)
     }
 }
