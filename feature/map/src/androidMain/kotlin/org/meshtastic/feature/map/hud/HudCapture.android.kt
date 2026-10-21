@@ -29,10 +29,15 @@ import android.view.Window
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -58,11 +63,20 @@ actual fun rememberHudCapture(): (() -> Unit)? {
     val haptic = LocalHapticFeedback.current
     val saved = stringResource(Res.string.device_model_capture_saved)
     val failed = stringResource(Res.string.device_model_capture_failed)
+    // One capture at a time: each holds a full-window bitmap, so a burst of taps must not stack them.
+    var capturing by remember { mutableStateOf(false) }
     return {
-        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        scope.launch {
-            val uri = view.context.findActivity()?.window?.let { captureWindow(it, dispatchers.io) }
-            Toast.makeText(view.context, if (uri != null) saved else failed, Toast.LENGTH_SHORT).show()
+        if (!capturing) {
+            capturing = true
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            scope.launch {
+                try {
+                    val uri = view.context.findActivity()?.window?.let { captureWindow(it, dispatchers.io) }
+                    Toast.makeText(view.context, if (uri != null) saved else failed, Toast.LENGTH_SHORT).show()
+                } finally {
+                    capturing = false
+                }
+            }
         }
     }
 }
@@ -76,12 +90,18 @@ private suspend fun captureWindow(window: Window, io: CoroutineDispatcher): Uri?
     val decor = window.decorView.takeIf { it.width > 0 && it.height > 0 } ?: return null
     val bitmap = Bitmap.createBitmap(decor.width, decor.height, Bitmap.Config.ARGB_8888)
     val copied = suspendCancellableCoroutine { continuation ->
-        PixelCopy.request(
-            window,
-            bitmap,
-            { result -> continuation.resume(result == PixelCopy.SUCCESS) },
-            Handler(Looper.getMainLooper()),
-        )
+        try {
+            PixelCopy.request(
+                window,
+                bitmap,
+                { result -> continuation.resume(result == PixelCopy.SUCCESS) },
+                Handler(Looper.getMainLooper()),
+            )
+        } catch (e: IllegalArgumentException) {
+            // The window can lose its surface between the size check and the request.
+            Logger.w(e) { "Mesh view capture lost its window surface" }
+            continuation.resume(false)
+        }
     }
     return if (copied) withContext(io) { saveJpegToPictures(decor.context, bitmap, FILE_TITLE) } else null
 }

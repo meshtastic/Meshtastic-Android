@@ -87,6 +87,25 @@ class AltitudeFuserTest {
     }
 
     @Test
+    fun `a fix without a gps height keeps the barometer height on the last level`() {
+        val fuser = AltitudeFuser()
+        fuser.onPressure(hPaAt(300.0))
+        fuser.fuse(fix(150.0, 1_000))
+        fuser.onPressure(hPaAt(302.0))
+        val held = fuser.fuse(fix(null, 2_000, msl = null))
+        assertEquals(152.0, assertNotNull(held.altitude), 0.01)
+        assertEquals(127.0, assertNotNull(held.mslAltitude), 0.01)
+    }
+
+    @Test
+    fun `before any level is set a fix without a gps height passes through`() {
+        val fuser = AltitudeFuser()
+        fuser.onPressure(hPaAt(300.0))
+        val fix = fix(null, 1_000, msl = null)
+        assertEquals(fix, fuser.fuse(fix))
+    }
+
+    @Test
     fun `a height change under a quarter meter is the same fix`() {
         val a = PhoneLocationState(true, true, fix(150.0, 1_000))
         assertTrue(sameFix(a, a.copy(location = fix(150.2, 1_000))))

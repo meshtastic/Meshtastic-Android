@@ -57,12 +57,16 @@ internal fun pressureAltitudeM(hPa: Float): Double =
  * wanders by many meters from fix to fix. So the barometer gives the changes and GPS, averaged over a minute, keeps the
  * level: the fused height is the pressure altitude plus an offset that leans toward GPS a little with each fix.
  *
- * Without a barometer reading the fix passes through as GPS gave it.
+ * Without a barometer reading the fix passes through as GPS gave it. A fix without a GPS height, once the level is set,
+ * keeps the barometer's height on the last level rather than losing the height altogether.
  */
 internal class AltitudeFuser {
     private var baroM: Double? = null
     private var offsetM: Double? = null
     private var lastFixMillis: Long? = null
+
+    /** How far the ellipsoid height sits above the sea-level one here, from the last fix that gave both. */
+    private var geoidSeparationM: Double? = null
 
     fun onPressure(hPa: Float) {
         baroM = pressureAltitudeM(hPa)
@@ -72,7 +76,21 @@ internal class AltitudeFuser {
     fun fuse(fix: PhoneLocation): PhoneLocation {
         val baro = baroM
         val gps = fix.altitude
-        if (baro == null || gps == null) return fix
+        return when {
+            baro == null -> fix
+            gps == null -> held(fix, baro)
+            else -> calibrated(fix, baro, gps)
+        }
+    }
+
+    /** A fix with no GPS height: the barometer's height on the last level, or the fix as it is before any level. */
+    private fun held(fix: PhoneLocation, baro: Double): PhoneLocation {
+        val height = offsetM?.let { baro + it } ?: return fix
+        return fix.copy(altitude = height, mslAltitude = geoidSeparationM?.let { height - it } ?: fix.mslAltitude)
+    }
+
+    private fun calibrated(fix: PhoneLocation, baro: Double, gps: Double): PhoneLocation {
+        fix.mslAltitude?.let { geoidSeparationM = gps - it }
         val target = gps - baro
         val offset = offsetM
         val previous = lastFixMillis
