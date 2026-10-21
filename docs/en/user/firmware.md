@@ -121,7 +121,7 @@ For recovery or when neither OTA nor in-app USB is available:
 
 Before updating:
 - [ ] Battery above 50%, recommended. The app itself refuses to start an update only when the node reports 10% or less
-- [ ] Stable Bluetooth connection
+- [ ] A stable connection over the method you're updating with: Bluetooth, Wi-Fi, or USB
 - [ ] Note your current settings (they may reset on major version changes)
 - [ ] Check the release notes for breaking changes
 - [ ] Update the Meshtastic app itself, before or alongside firmware updates, to ensure compatibility
