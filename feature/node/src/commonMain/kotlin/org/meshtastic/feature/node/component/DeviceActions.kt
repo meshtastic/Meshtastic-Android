@@ -84,7 +84,7 @@ fun DeviceActions(
 
             if (!isLocal) {
                 SectionDivider(Modifier.padding(vertical = 8.dp))
-                ManagementActions(node = node, onAction = onAction)
+                ManagementActions(node = node, canMute = canMuteFrom(ourNode), onAction = onAction)
             }
         }
 
@@ -163,7 +163,7 @@ private fun PrimaryActionsRow(
 }
 
 @Composable
-private fun ManagementActions(node: Node, onAction: (NodeDetailAction) -> Unit) {
+private fun ManagementActions(node: Node, canMute: Boolean, onAction: (NodeDetailAction) -> Unit) {
     Column {
         SwitchListItem(
             text = stringResource(Res.string.ignore),
@@ -177,7 +177,7 @@ private fun ManagementActions(node: Node, onAction: (NodeDetailAction) -> Unit) 
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(node))) },
         )
 
-        if (node.capabilities.canMuteNode) {
+        if (canMute) {
             SwitchListItem(
                 text = stringResource(Res.string.mute_notifications),
                 leadingIcon =

@@ -64,6 +64,9 @@ import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.util.rememberMeshHudSupported
 
+/** Mute is `toggle_muted_node` sent to our own node, so our firmware, not the muted node's, must support it. */
+internal fun canMuteFrom(ourNode: Node?): Boolean = ourNode?.capabilities?.canMuteNode == true
+
 /**
  * Shared context menu for node actions (favorite, mute, message, trace route, compass, mesh view, ignore, remove).
  *
@@ -73,6 +76,7 @@ import org.meshtastic.core.ui.util.rememberMeshHudSupported
 fun NodeContextMenu(
     expanded: Boolean,
     node: Node,
+    ourNode: Node?,
     onFavorite: () -> Unit,
     onMute: () -> Unit,
     onMessage: () -> Unit,
@@ -87,7 +91,7 @@ fun NodeContextMenu(
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
             FavoriteMenuItem(node, onFavorite, onDismiss)
-            if (node.capabilities.canMuteNode) {
+            if (canMuteFrom(ourNode)) {
                 MuteMenuItem(node, onMute, onDismiss)
             }
             MessageMenuItem(node, onMessage, onDismiss)
