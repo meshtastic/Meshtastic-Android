@@ -115,8 +115,8 @@ class MapLibreMapViewProvider(
         DefaultWaypointEditor(request)
     },
     /**
-     * Runs a Site Planner session. Null hides the button entirely. The F-Droid app hosts the planner in a WebView;
-     * desktop hands the same form to the system browser. See [SitePlannerSession].
+     * Runs a Site Planner session. Null hides the button entirely. F-Droid and desktop compute the estimate on device
+     * and draw it on this map. See [SitePlannerSession].
      */
     private val sitePlanner: (@Composable (SitePlannerSession) -> Unit)? = null,
     /**

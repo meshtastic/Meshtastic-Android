@@ -69,8 +69,8 @@ plugins.withId("org.meshtastic.flatpak.sources") {
         outputFile.set(layout.buildDirectory.file("flatpak-sources.json"))
         mustRunAfterTasks.set(listOf(":desktopApp:assemble", ":desktopApp:packageUberJarForCurrentOS"))
         targetPlatforms.set(platforms)
-        // Force-resolve platform-specific native artifacts not resolved on the generation host (the
-        // manifest is generated on an x86_64 runner, but the offline build also needs to run on arm64).
+        // Force-resolve platform-specific native artifacts not resolved on the generation host, so a
+        // manifest generated on one architecture still builds offline on the other.
         //
         // Since plugin 0.2.0 each coordinate resolves transitively, so only direct dependencies belong
         // here: desktop-jvm-{platform} brings skiko-awt-runtime-{platform}, and the maplibre runtimes

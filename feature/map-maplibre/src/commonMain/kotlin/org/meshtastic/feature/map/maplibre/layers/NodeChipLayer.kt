@@ -72,8 +72,8 @@ import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
 
 /**
  * Node markers drawn as chips — the rounded, node-coloured badge with the short name in it that
- * [org.meshtastic.core.ui.component.NodeChip] renders everywhere else in the app, and that the Google and OSMdroid maps
- * both put on the map.
+ * [org.meshtastic.core.ui.component.NodeChip] renders everywhere else in the app, and that the Google map also puts on
+ * the map.
  *
  * A MapLibre text layer cannot draw a chip's label: a short name can be emoji, which the basemap glyphs lack, and it
  * has no strikethrough or minimum width. So a tinted SDF sprite under `iconTextFit` is no substitute.

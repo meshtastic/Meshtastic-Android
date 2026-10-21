@@ -25,7 +25,7 @@ import org.meshtastic.feature.map.maplibre.component.ImportedLayersSlot
 import org.meshtastic.feature.map.maplibre.layers.rememberRenderableLayers
 
 /**
- * The desktop map provider: the shared MapLibre surfaces, the browser-handed Site Planner, and — through the same
+ * The desktop map provider: the shared MapLibre surfaces, the on-device Site Planner, and — through the same
  * imported-layer manager the Android flavours mount — the layers sheet that lets a Site Planner GeoJSON, or any
  * KML/KMZ/GeoJSON, be imported here too.
  */

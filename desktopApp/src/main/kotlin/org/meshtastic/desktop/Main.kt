@@ -472,7 +472,7 @@ private fun ApplicationScope.MeshtasticWindow(
             CompositionLocalProvider(
                 LocalEventBranding provides eventEdition,
                 LocalMapViewProvider provides desktopMapViewProvider(),
-                // The planner runs in the browser here rather than in the app; the button is still offered.
+                // The planner computes coverage on device and imports it as a map layer.
                 LocalSitePlannerAvailable provides true,
                 // mapGraph renders the Map tab through this seam, not through LocalMapViewProvider
                 // directly; without it the tab falls back to the "Map" placeholder.

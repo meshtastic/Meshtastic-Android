@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Check the flatpak platform-dependency list still declares every per-architecture root.
 
-`flatpak-sources.json` is generated on an x86_64 runner, so it only ever contains the URLs an x86_64
-resolution needs. The arm64 Flatpak then builds *offline* against that manifest, so every artifact it
-resolves differently has to be force-resolved during generation — that is what the `platformDependencies`
-block in the root build.gradle.kts is for.
+A generation host only resolves the URLs its own architecture needs. Release generates on x86_64 and
+arm64 and merges the two, but a single-host run (verify.sh, verify-flatpak.yml) does not, and the Flatpak
+builds *offline* against the manifest, so every artifact the other architecture resolves differently has to
+be force-resolved during generation — that is what the `platformDependencies` block in the root
+build.gradle.kts is for.
 
 Since flatpak-sources 0.2.0 those coordinates resolve transitively, so a platform artifact's own natives
 come along by themselves and no longer need declaring; this used to check that they were, and that half is
