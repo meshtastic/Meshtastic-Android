@@ -1,7 +1,7 @@
 ---
 title: Телеметрия и датчики
 nav_order: 9
-last_updated: 2026-09-18
+last_updated: 2026-10-21
 description: Данные датчиков в mesh-сети — поддерживаемые датчики окружающей среды, качества воздуха и питания, а также руководства по настройке и просмотру.
 aliases:
   - sensors
@@ -58,7 +58,7 @@ aliases:
 
 Both appear as info cards on the node detail screen, next to the other environment readings.
 
-Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, dissolved oxygen, ORP, turbidity, nitrate, ammonium, oxygen demand, solar irradiance) appears as a **Soil & Water** row of info cards on the node detail screen once a node reports any of it, and is included in the node database export. There is no chart or log screen for it yet.
+Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, dissolved oxygen, ORP, turbidity, nitrate, ammonium, oxygen demand, solar irradiance) appears as a **Soil & Water** row of info cards on the node detail screen once a node reports any of it, and is included in the node database export. It has no chart or log screen, and the row has no request button.
 
 ### Освещённость и УФ
 
@@ -75,7 +75,7 @@ Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, d
 | Wind speed                                             | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card                                                                   |
 | Wind direction, gust, and lull                         | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                                                                                       |
 | Rainfall, last hour and last 24 hours                  | mm or in             | Listed with each reading on the Environment Metrics screen; not charted                                                                                                                                                       |
-| Lightning, strikes in the last hour and storm distance | count, km or mi      | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometres |
+| Lightning, strikes in the last hour and storm distance | count, km or mi      | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometers |
 | Радиация                                               | µR/h                 | Card and chart                                                                                                                                                                                                                |
 | Вес                                                    | kg or lb             | Card only — load cells, such as a beehive scale                                                                                                                                                                               |
 | Расстояние                                             | mm or in             | Card only — water level, from a distance sensor                                                                                                                                                                               |
@@ -101,13 +101,14 @@ The node detail screen shows read-only cards for channels 1 to 3. Use the chart 
 1. Navigate to **Settings → Module configuration → Telemetry**.
 2. Each metric group has its own enable toggle and its own interval:
 
-   - **Device Metrics** — battery, voltage, uptime, ChUtil, and AirUtil. Its enable toggle, **Send Device Telemetry**, appears only on firmware 2.7.12 and later; on older firmware you can change the interval but not turn the group off
+   - **Device Metrics** — battery, voltage, uptime, ChUtil, and AirUtil. Its toggle, **Broadcast Device Metrics**, appears only on firmware 2.7.13 and later. Turned off, the node stops broadcasting these metrics to the mesh but still sends them to the connected app; on older firmware you can change the interval but not stop the broadcast
    - **Environment Metrics** — temperature, humidity, pressure and the other sensor readings
    - **Air Quality Metrics** — particulate and CO₂ readings
    - **Power Metrics** — the per-channel voltage and current readings
 
-   Environment and Power each have an extra toggle to show their readings on the radio's own
-   screen, and Environment has one more to show its temperatures there in Fahrenheit.
+   Environment has an extra toggle, **Show on device screen**, to show its readings on the node's own
+   screen, and **Display Fahrenheit** to show its temperatures there in Fahrenheit. Power has
+   **Power Screen** for the same purpose.
 
 ### Choosing an Interval
 
@@ -135,8 +136,8 @@ hand-tune them for mesh size. Lengthen them deliberately only to save battery.
 ## Просмотр телеметрии
 
 1. Перейдите в **Ноды** и выберите ноду.
-2. The **Telemetry** section lists a row for every metric type — Device, Environment, Air Quality, Power, and the rest — whether or not this node has reported it. A row fills in with readings, and grows a chart button, once that node has actually sent that kind of telemetry. An empty row means nothing has arrived yet, not that the sensor is missing.
-3. Use the chart button on a row to open that metric's history, where you can pick a time frame and export the readings as CSV.
+2. The **Telemetry** section lists a row for each metric type — Device, Environment, Air Quality, Power, Host, PAX, and the rest — whether or not this node has reported it. A row fills in with readings, and grows a chart button, once that node has sent that kind of telemetry. An empty row means nothing has arrived, not that the sensor is missing. **Soil & Water** is the exception: its row appears only after the node reports soil or water readings.
+3. Use the chart button on a row to open that metric's history, where you can pick a time frame. The Device, Environment, Air Quality, Power, Signal Quality, and Position screens also export their readings as CSV.
 
 ![Node detail screen with the telemetry chart action menu open](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
@@ -144,7 +145,7 @@ hand-tune them for mesh size. Lengthen them deliberately only to save battery.
 
 - **Нет данных об окружающей среде?** К удалённой ноде должен быть физически подключён датчик (например, BME280 по I2C). Телеметрия устройства (заряд батареи, время работы) доступна всегда, но для метрик окружающей среды требуется оборудование.
 - **Показания устарели?** Проверьте интервал передачи — очень большие интервалы (7200 с и более) означают, что данные обновляются редко. Также убедитесь, что удалённая нода всё ещё в сети.
-- **Конфликт датчиков на шине I2C?** Некоторые датчики используют одинаковые адреса I2C. Если на одной шине несколько твоих датчиков, проверь последовательный отладочный вывод радио на предмет конфликтов адресов.
+- **Конфликт датчиков на шине I2C?** Некоторые датчики используют одинаковые адреса I2C. If you have multiple sensors on the same bus, check for address collisions in the node's serial debug output.
 
 ## Связанные темы
 

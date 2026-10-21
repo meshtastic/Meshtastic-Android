@@ -1,8 +1,8 @@
 ---
 title: Sovellustoiminnot
 nav_order: 19
-last_updated: 2026-08-30
-description: Tuo mesh-ominaisuudet Android-järjestelmälle ja laitteessa toimiville tekoälyavustajille (esim. Gemini), jotta ne voivat suorittaa mesh-toimintoja ilman sovelluksen avaamista.
+last_updated: 2026-10-21
+description: Expose mesh capabilities to the Android system and on-device AI assistants such as Gemini, so they can run mesh workflows without opening the app.
 aliases:
   - sovellustoiminnot
   - järjestelmä-ai
@@ -25,7 +25,7 @@ Hallitse sovellustoimintoja kohdasta **Asetukset → Järjestelmätekoäly**. N�
 
 > ⚠️ **Important:** App Functions ship switched on. On a Google-flavor build the master toggle and every individual function, **Send message** included, start enabled — so an assistant can read your mesh data and send messages to your mesh until you turn **Allow AI access** off.
 
-Toiminnot on jaettu **Kirjoita**-osioon (toiminnot, jotka muuttavat jotakin tai lähettävät dataa mesh-verkkoon) ja **Lue**-osioon (toiminnot, jotka palauttavat vain tietoa).
+The functions are grouped into a **Write functions** section (functions that change something or send data to your mesh) and a **Read functions** section (functions that only return information).
 
 ![Sovellustoimintojen näkymä, jossa on pääkytkin ja toimintokohtaiset kytkimet](../../assets/screenshots/app-functions_settings.png)
 
@@ -33,22 +33,22 @@ The screenshot has **Send message** and **Get recent messages** switched off to 
 
 ### Kirjoitustoiminnot
 
-| Toiminto         | Mitä se tekee                                                                                                                                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Send message** | Sends a text message to a contact (direct message) or to a channel. The mesh carries at most 233 bytes of text, so keep assistant-composed messages short. |
+| Toiminto         | Mitä se tekee                                                                                                                                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Send message** | Sends a text message to a contact (direct message) or to a channel. It refuses text over 228 bytes, and sends at most five messages a minute, so keep assistant-composed messages short. |
 
 ### Lukutoiminnot
 
-| Toiminto                | Mitä se palauttaa                                                                    |
-| ----------------------- | ------------------------------------------------------------------------------------ |
-| **Get mesh status**     | Onko yhteys radioon muodostettu ja kuinka monta radiota on verkossa. |
-| **Get node list**       | Mesh-verkon radiolista.                                              |
-| **Get channel info**    | Tietoa kanavistasi.                                                  |
-| **Get device status**   | Yhdistetyn radion tila.                                              |
-| **Get node details**    | Yksityiskohtaiset tiedot tietystä radiosta.                          |
-| **Get mesh metrics**    | Mesh-verkon telemetria ja metriikat.                                 |
-| **Get recent messages** | Viimeisimmät viestisi keskusteluista.                                |
-| **Get unread summary**  | Yhteenveto lukemattomista viesteistä.                                |
+| Toiminto                | Mitä se palauttaa                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| **Get mesh status**     | Whether you're connected to a node, and how many nodes are online. |
+| **Get node list**       | Mesh-verkon radiolista.                                            |
+| **Get channel info**    | Tietoa kanavistasi.                                                |
+| **Get device status**   | Status of your connected node.                                     |
+| **Get node details**    | Yksityiskohtaiset tiedot tietystä radiosta.                        |
+| **Get mesh metrics**    | Mesh-verkon telemetria ja metriikat.                               |
+| **Get recent messages** | Viimeisimmät viestisi keskusteluista.                              |
+| **Get unread summary**  | Yhteenveto lukemattomista viesteistä.                              |
 
 ## Yksityisyys
 

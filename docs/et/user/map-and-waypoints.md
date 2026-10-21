@@ -1,7 +1,7 @@
 ---
 title: Kaart ja teekonnapunktid
 nav_order: 6
-last_updated: 2026-10-20
+last_updated: 2026-10-21
 description: Vaata sõlmede asukohti kaardil, loo ja jaga teekonnapunkte ning halda asukoha jagamist ja privaatsust.
 aliases:
   - kaart
@@ -28,16 +28,16 @@ Kaardil kuvatakse:
 
 ### Node Markers
 
-Iga asukohta teavitav sõlm kuvatakse **sõlme kiibi** markerina, mis kuvab sõlme lühinime. Kiip on värvitud sõlme enda identiteedivärviga (stabiilne värv, mis on tuletatud sõlme numbrist) – sama kiip, mida kasutatakse sõlmede loendis, seega näeb sõlm kõikjal ühesugune välja. Markeri värv **ei kodeeri** võrguühenduseta/võrguühenduseta olekut. Kui sõlme asukoht reaalajas uueneb, pulseerib selle marker lühidalt. Nearby markers are clustered as you zoom out.
+Iga asukohta teavitav sõlm kuvatakse **sõlme kiibi** markerina, mis kuvab sõlme lühinime. Kiip on värvitud sõlme enda identiteedivärviga (stabiilne värv, mis on tuletatud sõlme numbrist) – sama kiip, mida kasutatakse sõlmede loendis, seega näeb sõlm kõikjal ühesugune välja. Markeri värv **ei kodeeri** võrguühenduseta/võrguühenduseta olekut. Kui sõlme asukoht reaalajas uueneb, pulseerib selle marker lühidalt. Nearby markers are clustered as you zoom out. Tapping a cluster zooms in on it, and a cluster whose nodes all share one spot lists them instead.
 
 ### Kaardi juhtnupud
 
 - **Suumi** – näpista või +/- nuppude kasutamine
 - **Pan** — drag to explore
-- **Center** — tap the location button to center on your position
+- **Center** — tap the location button to follow your position
 - **Sõlme puudutamine** – üksikasjade kuvamiseks puuduta sõlmel
 
-The floating toolbar provides quick access to the compass, the map type and layers pickers, node filters, Site Planner, and location tracking. Põhjasuuna muutmiseks puuduta kompassi või praeguse asukoha keskpunkti seadmiseks asukohanuppu. On **Google Play** builds a refresh button joins them while a network layer is showing; on **F-Droid** and **Desktop**, refresh a network layer from its own row in the layers sheet instead.
+The floating toolbar provides quick access to the compass, the map type and layers pickers, node filters, Site Planner, and location tracking. Tap the compass to reorient north-up, or tap the location button to follow your current position. While the map follows you, the compass instead turns heading lock on and off, so the map rotates with the phone. On **Google Play** builds a refresh button joins them while a network layer is showing; on **F-Droid** and **Desktop**, refresh a network layer from its own row in the layers sheet instead.
 
 ![Map floating toolbar with compass, filter, refresh, and location controls](../../assets/screenshots/map_controls_overlay.png)
 
@@ -45,13 +45,13 @@ The floating toolbar provides quick access to the compass, the map type and laye
 
 Tap the filter button in the floating toolbar to open **Filter map**. **Display** controls what is drawn: **Only Favorites**, **Show Waypoints**, **Show Precision Circles**, and a slider that hides nodes not heard from recently. **Node roles** is a chip per device role, plus **All** to show every role; a selected chip means that role is shown. **Nodes** narrows the set further with **Hide offline nodes**, **Only show direct nodes**, **Signed only**, **Encrypted only**, **Exclude MQTT**, **Show ignored nodes**, and **Include unknown** — the same rules as the node list's [filter toggles](nodes).
 
-A dot on the filter button means at least one filter is hiding something — check it before concluding the mesh is quiet. Turning **Show Waypoints** off hides every waypoint, including your own. **Show ignored nodes** adds them to the map rather than showing only them — unlike the node list's **Only show ignored Nodes**.
+A dot on the filter button means at least one filter is hiding nodes — check it before concluding the mesh is quiet. Turning **Show Waypoints** off hides every waypoint, including your own. **Show ignored nodes** adds them to the map rather than showing only them — unlike the node list's **Only show ignored Nodes**.
 
 ## AR mesh view
 
-The mesh view draws nodes and waypoints over the phone's camera, each in the direction and at the height where it stands, with its distance and the age of its position. It needs a back camera and an orientation sensor, so it appears only on Android phones that have both.
+The mesh view draws nodes and waypoints over the phone's camera, each in the direction and at the height where it stands, with its distance and the age of its position. It needs a back camera and an orientation sensor, so it appears only on Android phones that have both, on Google Play and F-Droid builds alike. It isn't available on Desktop. On opening, it asks for camera access and then location.
 
-Tap **Open mesh view** in the map's top bar to see the whole mesh, filtered by the same **Filter map** settings as the map. A node's detail page, its compass sheet, its position log, and a traceroute map open the view too. Opened from a node, it shows only that node, plus the track or route you came from.
+Tap the mesh view button (**Open mesh view**) in the map's top bar to see the whole mesh, filtered by the same **Filter map** settings as the map. The node list's touch & hold menu, a node's detail page, its compass sheet, its position log, and a traceroute map open the view too. Opened from a node, it shows only that node, plus the track or route you came from.
 
 - **Tap** a node to open its detail page, or a waypoint to open its info.
 - **Touch & hold** a node or waypoint to find it. The view says how far to turn and tilt, the phone ticks as you turn closer, and it pulses once you are on target.
@@ -66,7 +66,7 @@ Waypoints are shared points of interest, visible to everyone on your mesh.
 
 ### Loo teekonnapunkt
 
-Your radio must be connected — the map ignores a touch & hold while it is not, because saving a waypoint means broadcasting it.
+Your node must be connected — the map ignores a touch & hold while it is not, because saving a waypoint means broadcasting it.
 
 1. Touch & hold the map at the desired location.
 2. Sisestage nimi ja valikuline kirjeldus.
@@ -88,10 +88,7 @@ Waypoints always broadcast to the whole mesh on the primary channel. Unlike a me
 
 ### Waypoint Expiration
 
-Waypoints can be set to expire automatically:
-
-- **Never** (default) — waypoint remains until manually deleted
-- **Timed** — pick a specific date and time; the waypoint is automatically removed once that time passes. Kasulik ajutiste märkide, näiteks kogunemispunktide, ohtude või kohtumispaikade jaoks.
+A waypoint stays until it is deleted unless you turn on **Expires** in the waypoint editor. The switch starts the expiry eight hours out; change it with the **Date** and **Time** pickers. Once that time passes, the waypoint is removed, which suits temporary markers such as rally points, hazards, or meeting locations.
 
 Aegunud teekonnapunktid peidetakse kaardilt automaatselt, et need ekraani ei risustaks. The expiration countdown is based on the absolute time you picked, not a duration from when the waypoint was created or received.
 
@@ -109,18 +106,25 @@ Kuna teekonnapunktid (ja nende geopiirded) edastatakse kogu kärgvõrgule, teavi
 
 - Tap a waypoint to see its name, description, and geofence radius. On **Google Play** builds the first tap opens the marker's info bubble — tap the bubble to open the waypoint itself
 - **Locked waypoints** can only be changed on the mesh by the node that locked them
-- Unlocked waypoints can be edited by any mesh member while connected to a radio — saving re-broadcasts the waypoint
+- Unlocked waypoints can be edited by any mesh member while connected to a node — saving re-broadcasts the waypoint
 - Confirming a delete removes your own copy. To remove it from everyone else's map too, select **Delete for everyone** in the delete dialog; that box appears only for a waypoint you may change (unlocked, or locked by you) and only while you are connected
 
 ## Kaardikihid
 
-Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format, including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. **Add Network Layer** instead takes a name and an `https://` URL pointing at a KML or GeoJSON file (`http://` also works on Desktop, but on Android only for `localhost`); that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
+Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format, including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. A file opened or shared this way is refused if it is over 50 MB. **Add Network Layer** instead takes a name and an `https://` URL pointing at a KML or GeoJSON file (`http://` also works on Desktop, but on Android only for `localhost`); that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
 
 Imporditud kihid on loetletud koos lülitiga iga kihi kuvamiseks/peitmiseks ja valikuga selle eemaldamiseks. Each layer — imported or built-in overlay — carries its own opacity slider while it is switched on, so an overlay can be faded back rather than only switched off. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
 
 ### Saidi planeerija
 
-**Asukoha planeerija** hindab saatja raadiosageduslikku leviala ja joonistab selle kaardile värvikoodiga kihina. Ava see kaardihalduselemendist või sõlme detaillehelt valiku **Hinnatud katvus** kaudu (kuvatakse ainult teadaoleva asukohaga sõlmede puhul). Konfi saatja (asukoht, sagedus, saatja võimsus, antenni võimendus ja kõrgus), vastuvõtja (tundlikkus, kõrgus) ja simulatsioonivalikud (maksimaalne ulatus, kõrge eraldusvõimega maastik, värvipalett) ning seejärel käivita hinnang. Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On **Desktop** the same form is shown but the planner opens in your browser; to bring the estimate onto the map, click the transmitter pin in the browser, choose the planner's GeoJSON export, then add the downloaded file under **Manage Map Layers** with **Add Layer**. Use the GeoJSON export, not the KML one — the KML is a ground-overlay image this map cannot draw.
+**Asukoha planeerija** hindab saatja raadiosageduslikku leviala ja joonistab selle kaardile värvikoodiga kihina. Open it from the Site Planner button in the map toolbar, or from a node's detail page with **Estimate coverage** (shown only for nodes with a known position). The form has four sections:
+
+- **Site / Transmitter**: name, latitude and longitude, **TX power (W)**, **Frequency (MHz)**, **Antenna height (m)**, and **Antenna gain (dBi)**. Chips such as **Use current node location** and **Use map center** fill in the coordinates.
+- **Receiver**: **Receiver sensitivity (dBm)** and **Receiver height (m)**.
+- **Simulation Options**: **Max range (km)**, from 1 to 150.
+- **Display**: **Color palette**.
+
+Tap **Estimate coverage** to run it. The app computes the estimate itself, using the ITU-R P.1812 propagation model over Mapterhorn terrain, on Google Play, F-Droid, and Desktop alike. The terrain downloads the first time an area is estimated, so that step needs a network connection; if it fails, the form comes back with a note to check your connection. The finished estimate is added under **Manage Map Layers** as a coverage estimate layer, and the map moves to it.
 
 ## Position Sharing
 
@@ -129,15 +133,15 @@ Imporditud kihid on loetletud koos lülitiga iga kihi kuvamiseks/peitmiseks ja v
 Sõlm jagab oma GPS asukohta järgmise alusel:
 
 - **Broadcast Interval** — share the position on a fixed timer
-- **Smart Position** — share only once you have moved far enough; **Smart Interval** sets the shortest gap between broadcasts and **Smart Distance** how far you must move
+- **Smart Position** — share only once you have moved far enough; **Minimum Interval** sets the shortest gap between broadcasts and **Minimum Distance** how far you must move
 - **Fixed Position** — publish a latitude, longitude, and altitude you enter by hand instead of the GPS reading
-- **GPS Mode (Physical Hardware)** — GPS enabled, disabled, or not present on this hardware; offered only while **Fixed Position** is off
+- **GPS Mode** — **Enabled**, **Disabled**, or **Not Present** on this hardware; offered only while **Fixed Position** is off
 
-Configure position behavior in **Settings → Device configuration → Position**. The screen is only reachable while your radio is connected, and saving it reboots the radio. For the full field list, see [Settings — Radio & User](settings-radio-user).
+Configure position behavior in **Settings → Device configuration → Position**, and saving it reboots the node. Without a connection the screen opens read-only, with a prompt to connect before changing anything. For the full field list, see [Settings — Radio & User](settings-radio-user).
 
 ### Privacy Considerations
 
-> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile sinu kanali sõlmedele. Kui sa ei soovi, et sinu asukohta jagataks, keela GPS asukohta seadetes või kasuta fikseeritud/võltsasukohta. To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point.
+> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile sinu kanali sõlmedele. If you don't want your location shared, set **GPS Mode** to **Disabled**, or use a **Fixed Position** somewhere else. To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point.
 
 ## Kaardi allikad
 
@@ -181,30 +185,33 @@ On **Android**, the same screen also imports a local `.mbtiles` archive for full
 
 On **F-Droid**, select a vector base map first — Liberty, Positron, or Dark — since a download is defined
 against a vector style and **Start Download** stays disabled over a raster one. Frame the area you want on
-screen, then tap **Start Download** in the layers sheet: that creates a paused pack covering the current zoom
-plus two levels deeper. Press play on the pack's row to actually download it. If the offline database
-cannot be opened, the section says offline maps are unavailable and **Start Download** stays disabled.
+screen, then tap **Start Download** in the layers sheet's **Cache Manager** section: that creates a paused pack
+covering the current zoom plus two levels deeper. Press play on the pack's row to download it. While the offline
+database opens, the section shows a progress bar. If it cannot be opened, the section reads **Offline maps are
+unavailable on this device** and **Start Download** stays disabled. If the area cannot be saved, the section
+reads **Couldn't save this area for offline use**.
 
 On **Google Play**, the layers sheet's **Offline Manager** section downloads its own offline regions instead
 — water, roads and administrative boundaries extracted from the public Protomaps basemap dataset, drawn
 directly as map shapes rather than raster tiles. Frame the area you want, tap **Start Download**, and once
-it finishes flip **Show on map** to draw it (it's off by default so it never surprises you by covering up the
-live map). You can still import a pre-made `.mbtiles` archive here too, as before. **Desktop** has neither, though
-the offline terrain described next does work there.
+it finishes turn on **Show on map** to draw it. The switch is off by default, so a download never covers up the
+live map unasked. **Desktop** has no offline base map downloads, though the offline terrain described next
+does work there.
 
 ### Offline terrain
 
 Hillshade and elevation contours can be downloaded for offline use as well, so a downloaded area still
 shows why a link fails when there is no network. The terrain data comes from Mapterhorn and is credited on
 the map. On **Google Play**, each downloaded region in the **Offline Manager** list has a **Download Terrain**
-button and **Hillshade** and **Contours** switches; terrain attaches to that region and shares its storage limit, and an area
-too large for terrain asks you to zoom in or pick a smaller region. On **F-Droid** and **Desktop**, the
-layers sheet has an **Offline Terrain** section of its own: frame the area, tap **Start Download**, and the
-hillshade and contours draw from the downloaded tiles from then on.
+button. Terrain attaches to that region and shares its storage limit, and an area too large for terrain asks
+you to zoom in or pick a smaller region. Once the terrain is downloaded, the button gives way to **Hillshade**
+and **Contours** switches, both off until you turn them on. On **F-Droid** and **Desktop**, the layers sheet
+has an **Offline Terrain** section of its own: frame the area, tap **Start Download**, and the hillshade and
+contours draw automatically from then on, whenever the downloaded area is in view.
 
 ### Going offline
 
-An **Offline** pill appears over the map whenever the device has no network connection. On **Google Play**
+A pill reading **Offline — showing cached map data** appears over the map whenever the device has no network connection. On **Google Play**
 builds, if you've imported a local `.mbtiles` archive, the map switches to it automatically the moment the
 network drops — no toggle to remember — and switches back once you're reconnected, as long as you haven't
 picked a different base map yourself in between. On **F-Droid**, a downloaded offline area keeps rendering on

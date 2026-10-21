@@ -1,7 +1,7 @@
 ---
 title: Radion mittarit
 nav_order: 5
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: Telemetrianäkymät jokaiselle verkon radiolle — laitteen kunto, ympäristöanturit, ilmanlaatu, signaalin laatu, virta, reitinselvitys ja sijaintihistoria.
 aliases:
   - mittarit
@@ -91,14 +91,14 @@ CO₂-lukemat on värikoodattu vakavuuden mukaan, joten ilmanlaadun näkee yhdel
 
 ![Ilmanlaatulukemat värikoodatulla CO₂-vakavuusasteella](../../assets/screenshots/node-metrics_air_quality.png)
 
-Ilmanlaatu tai mittaripainike näkyy radion tietonäytössä **vain silloin, kun radio on raportoinut ilmanlaatutelemetriaa**. Ilmanlaatu-näkymässä voit:
+The **Air-Quality Metrics** row is always listed on the node detail screen; its chart button appears once the node has reported air-quality telemetry. Ilmanlaatu-näkymässä voit:
 
 - Valita kaavioille **aikajakson**.
 - Suodattaa **mittarisiruilla** — vain mittarit, joista on dataa, näytetään.
 - **Päivittää ja pyytää** uusimmat ilmanlaatutelemetriatiedot.
 - **Viedä CSV-tiedostoon** analysoitavaksi taulukkolaskentaohjelmassa.
 
-> 💡 **Vinkki:** Ilmanlaatumittarit edellyttävät yhteensopivaa ilmanlaatuanturia etäradiossa. Katso [Telemetria ja anturit](telemetry-and-sensors) saadaksesi lisätietoja tuetusta laitteistosta.
+See [Telemetry & Sensors](telemetry-and-sensors) for supported air-quality hardware.
 
 ## Signaalin laatu
 
@@ -109,11 +109,10 @@ Radiosignaalin laatutiedot:
 | SNR              | Signaali-kohinasuhde (suurempi SNR on parempi)                                                         |
 | RSSI             | Vastaanotetun signaalin voimakkuusindikaattori (RSSI) (lähempänä nollaa on parempi) |
 | Kohinataso       | Paikallinen taustakohina dBm-arvona (negatiivisempi on hiljaisempi)                                    |
-| Hyppylaskuri     | Verkon hyppymäärä viimeisimmälle viestille                                                                                |
 
 ### Signaalin laadun viitearvot
 
-Signaalin laatu arvioidaan **SNR**-arvon perusteella suhteessa käytössä olevan LoRa-modeemiesiasetuksen **demodulaation alarajaan**, ei kiinteiden raja-arvojen perusteella. Sama SNR-arvo voi tarkoittaa eri asioita eri esiasetuksilla (esim. `-15 dB` on hyvä LongSlow-esiasetuksella, mutta käyttökelvoton ShortFast-esiasetuksella). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. Otherwise, RSSI is display-only. Taulukossa _raja_ tarkoittaa esiasetuksen SNR-rajaa.
+Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (for example, −16 dB rates Good on Long Fast but None on Short Fast). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. Otherwise, RSSI is display-only. Taulukossa _raja_ tarkoittaa esiasetuksen SNR-rajaa.
 
 | Laatu       | Kriteerit                          |
 | ----------- | ---------------------------------- |
@@ -124,9 +123,9 @@ Signaalin laatu arvioidaan **SNR**-arvon perusteella suhteessa käytössä oleva
 
 Katso [Signaalimittarin toiminta](signal-meter), jos haluat täydellisen selityksen.
 
-Yhdistetyn radion paikalliset tilastot näytetään myös Signaalin laatu -näkymässä silloin, kun ne ovat saatavilla. Nämä kerätyt tiedot sisältävät kohinatason, liikennelaskurit, välityslaskurit, verkossa olevien radioiden määrän sekä radion käyttöajan. Kohinatason kaaviossa käytetään katkoviivalla merkittyä viiteviivaa arvossa -85 dBm, jotta kuormittunut RF-ympäristö on helpompi tunnistaa.
+Local Stats from your connected node are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and uptime. The noise floor chart uses a dashed reference line at −85 dBm to help identify a busy RF environment.
 
-- **Pyydä** — pyydä yhdistettyä radiota lähettämään uusi Local Stats -telemetriaraportti
+- **Request** — ask the connected node for a fresh Local Stats telemetry report
 - **Tyhjennä** — poista tämän radion Local Stats -lokit
 - **Tallenna** — vie näkyvä Local Stats -historia CSV-tiedostoon
 
@@ -145,7 +144,7 @@ The node detail screen shows cards for channels 1 to 3. Use the chart button on 
 
 Reitinselvitys näyttää viestin kulkeman reitin verkossa:
 
-1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node, and the button accepts one request every 30 seconds.
+1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node. The app sends at most one traceroute every 30 seconds, to any node, and **Trace Route** in the node list's touch & hold menu shares that cooldown.
 2. Sovellus lähettää reitinselvityspyynnön kohderadiolle.
 3. Results show each hop with its SNR.
 
@@ -153,20 +152,27 @@ Reitinselvitys näyttää viestin kulkeman reitin verkossa:
 
 A traceroute is a round trip, so each saved result carries a hop count in each direction, **Forward Hops** and **Return Hops**, plus the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. That view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
 
+A relay that didn't record itself in the route shows as **Unknown hop**, and a relay your node has no record of shows as its node ID, such as `!a1b2c3d4`.
+
+The history also keeps traceroutes this app didn't request:
+
+- **Observed** marks a response from this node to a request made elsewhere, such as one started from your node's own screen. It has hop counts but no round-trip time, and its points on the chart are hollow rings.
+- **Traced by** _node_ marks a traceroute that node ran to yours. It shows the inbound route with the SNR of each hop, but no return route, no round-trip time, and no map, and it stays off the chart.
+
 A result marked **No Response** means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
 
 ## Sijainnin Loki
 
-Historialliset sijaintitiedot radioille, jotka jakavat sijaintinsa:
+The chart button on the **Position** row opens the node's position history: its track on a map, and a list of every position report with latitude, longitude, satellites in view, altitude, speed, heading, and timestamp. From the app bar you can:
 
-- GPS-koordinaatit
-- Korkeus
-- Nopeus (jos radio liikkuu)
-- Aikaleima jokaiselle sijaintiraportille
+- **Export GPX** to save the track as a GPX file. Reports without a GPS fix are left out.
+- Save the list as CSV.
+- **Clear** the recorded track, after a confirmation. This can't be undone.
+- Ask a remote node for a fresh position.
 
 ## Naapuritieto
 
-Näyttää, mitkä radiot tietty radio voi kuulla suoraan, mikä auttaa ymmärtämään verkon topologiaa.
+Näyttää, mitkä radiot tietty radio voi kuulla suoraan, mikä auttaa ymmärtämään verkon topologiaa. The **Neighbor Info** row appears once that node's neighbor list has reached the app. See [Local Mesh Discovery](discovery#neighbor-info) for turning the module on.
 
 ## Isäntälaitteen mittausarvot
 

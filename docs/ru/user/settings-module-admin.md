@@ -1,7 +1,7 @@
 ---
 title: Настройки — Модули и администрирование
 nav_order: 8
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: Настрой дополнительные функциональные модули (MQTT, телеметрия, готовые сообщения, TAK и другие) и выполняй администрирование устройств.
 aliases:
   - modules
@@ -13,7 +13,7 @@ aliases:
 
 Настрой дополнительные функциональные модули и выполняй управление устройством. Модули расширяют Meshtastic с помощью специализированных возможностей — каждый из них можно включать или отключать отдельно.
 
-> 💡 **Совет:** Тебе нужно включать только те модули, которые действительно используешь. Отключение неиспользуемых модулей снижает время передачи, экономит батарею и упрощает конфигурацию. A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
+Enable only the modules you use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration. A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
 
 Настройки модулей используют макет на основе карточек с переключателями, выпадающими списками, текстовыми полями и ползунками:
 
@@ -29,35 +29,35 @@ aliases:
 
 Every module lives under **Settings → Module configuration**.
 
-> ⚠️ **Important:** Saving a module screen restarts the node: the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**. External Notification may still restart the node for some changes, while a Mesh Beacon change applies without a restart.
+Saving a module screen restarts the node: the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**. External Notification may still restart the node for some changes, while a Mesh Beacon change applies without a restart.
 
 ### MQTT module
 
 Мосты передают сообщения туда и обратно от брокера MQTT для подключения к интернету. This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
-| Настройка              | Описание                                                                                                                                                                                |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MQTT включен           | Переключить MQTT мост                                                                                                                                                                   |
-| Адрес                  | Адрес MQTT брокера                                                                                                                                                                      |
-| Имя пользователя       | Имя пользователя для аутентификации                                                                                                                                                     |
-| Пароль                 | Пароль аутентификации                                                                                                                                                                   |
-| Шифрование включено    | Зашифровать MQTT-пейлоады                                                                                                                                                               |
-| Вывод JSON включен     | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
-| TLS включен            | Использовать защищённое соединение                                                                                                                                                      |
-| Корневая тема          | Базовый путь темы MQTT                                                                                                                                                                  |
-| Прокси клиенту включен | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
-| MQTT proxy in this app | The app-side half of **Proxy to client enabled**: whether this app acts as that relay. See [MQTT](mqtt)                                                 |
-| Отчёты по карте        | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
+| Настройка              | Описание                                                                                                                                                                                                                                                                         | Default               |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| Адрес                  | Адрес MQTT брокера                                                                                                                                                                                                                                                               | `mqtt.meshtastic.org` |
+| Encryption Enabled     | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
+| Вывод JSON включен     | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Off                   |
+| Map Reporting          | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | Off                   |
+| MQTT Client Proxy      | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | Off                   |
+| MQTT Enabled           | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | Off                   |
+| MQTT proxy in this app | The app-side half of **MQTT Client Proxy**: whether this app acts as that relay. It shows whether the relay is running, and can be turned on only while **MQTT Enabled** and **MQTT Client Proxy** are both on. See [MQTT](mqtt) | —                     |
+| Пароль                 | Пароль аутентификации                                                                                                                                                                                                                                                            | The public broker's   |
+| Root Topic             | Базовый путь темы MQTT                                                                                                                                                                                                                                                           | `msh`                 |
+| TLS Enabled            | Use a secure connection                                                                                                                                                                                                                                                          | Off                   |
+| Имя пользователя       | Имя пользователя для аутентификации                                                                                                                                                                                                                                              | The public broker's   |
 
-Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
+Turning **Map Reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
 until you agree:
 
 | Настройка                   | Описание                                                                                                                                                                                 |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Я согласен. | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
-| Precision slider            | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
 | Map Publish Interval        | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
+| Precision slider            | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
 
 См. [MQTT](mqtt) для подробного руководства по использованию, включая шифрование, конфиденциальность и настройку брокера.
 
@@ -65,88 +65,88 @@ until you agree:
 
 Позволяет общаться через последовательный порт с внешними устройствами (GPS-модулями, датчиками или собственной техникой). Когда включено, последовательный порт ноды может отправлять и получать данные в формате protobuf или текст, что позволяет внешним микроконтроллерам или компьютерам взаимодействовать с сетью.
 
-| Настройка                       | Описание                                                                                                                                                                                            |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| COM-порт включен                | Включить последовательное соединение                                                                                                                                                                |
-| Echo включен                    | Echo получил обратно последовательные данные                                                                                                                                                        |
-| Режим COM-порта                 | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
-| RX / TX                         | GPIO pins for the serial connection                                                                                                                                                                 |
-| Скорость COM-порта              | Port speed                                                                                                                                                                                          |
-| Время ожидания истекло          | How long to wait before considering an incoming message complete                                                                                                                                    |
-| Переопределить COM-порт консоли | Take over the port the debug console normally uses                                                                                                                                                  |
+| Настройка                                                                                        | Описание                                                                                                                                                                                                                            | Default |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Baud                                                                                             | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | Default |
+| Echo                                                                                             | Echo packets you send back over the serial port                                                                                                                                                                                     | Off     |
+| Mode                                                                                             | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | Default |
+| Переопределить COM-порт консоли                                                                  | Take over the port the debug console normally uses                                                                                                                                                                                  | Off     |
+| Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0       |
+| Serial Enabled                                                                                   | Turn serial communication on                                                                                                                                                                                                        | Off     |
+| Время ожидания истекло                                                                           | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0       |
 
 ### External Notification module
 
 Controls buzzer, LED, or vibration alerts on your node hardware. Полезно для устройств, которым нужно физически сигнализировать о приходе сообщения — особенно удобно для неоснащенных персоналом или уличных установок.
 
 There are two independent triggers — an incoming **message**, and a received **bell** character —
-and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
+and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles. The
+firmware turns the module on, and picks the outputs, on hardware that has a buzzer, vibration motor
+or notification LED; elsewhere everything starts off.
 
-| Настройка                               | Описание                                                                                            |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Внешние уведомления включены            | Master toggle for the module                                                                        |
-| Alert message LED / buzzer / vibra      | Which outputs fire on an incoming message                                                           |
-| Alert bell LED / buzzer / vibra         | Which outputs fire on a received bell character                                                     |
-| Выход LED (GPIO)     | Pin the LED is wired to                                                                             |
-| Вывод светодиода активный высокий       | Whether the LED pin is active high or low                                                           |
-| Выход Буззера (GPIO) | Pin the buzzer is wired to                                                                          |
-| Вибросигнал (GPIO)   | Pin the vibration motor is wired to                                                                 |
-| Использовать PWM-звукоизлучатель        | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
-| Использовать I2S как буззер             | Send the alert through an I2S audio output instead                                                  |
-| GPIO Output Duration                    | How long a single alert lasts                                                                       |
-| Интервал повтора                        | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
-| Рингтон                                 | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
+| Настройка                                                                                                            | Описание                                                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Active                                                                                                               | Whether the LED pin is active high or low. Shown once **Output pin GPIO** is set                                       |
+| Alert when receiving a bell / Alert GPIO buzzer when receiving a bell / Alert GPIO vibra motor when receiving a bell | Which outputs fire on a received bell character                                                                                        |
+| Alert when receiving a message / Alert GPIO buzzer when receiving a message / Vibra Motor Alert                      | Which outputs fire on an incoming message                                                                                              |
+| External Notification Enabled                                                                                        | Master toggle for the module                                                                                                           |
+| GPIO Output Duration                                                                                                 | How long a single alert lasts                                                                                                          |
+| Интервал повтора                                                                                                     | Keep repeating the alert for this long until it is acknowledged. **Unset** disables nagging                            |
+| Output pin GPIO                                                                                                      | Pin the LED is wired to                                                                                                                |
+| Output pin buzzer GPIO                                                                                               | Pin the buzzer is wired to                                                                                                             |
+| Output pin vibra GPIO                                                                                                | Pin the vibration motor is wired to                                                                                                    |
+| Рингтон                                                                                                              | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file                                                 |
+| Use I2S As Buzzer                                                                                                    | Send the alert through an I2S audio output instead                                                                                     |
+| Use PWM Buzzer                                                                                                       | Drive the buzzer with PWM, which allows tones rather than a single pitch. Shown once **Output pin buzzer GPIO** is set |
 
 ### Store & Forward module
 
-Буферизирует сообщения для узлов, которые временно были недоступны, а затем ретранслирует их, когда эти узлы переподключаются. Важное значение для сеток, где узлы входят и выходят вне диапазона регулярно - обеспечивает отсутствие потери сообщений при коротких разъединениях.
+Буферизирует сообщения для узлов, которые временно были недоступны, а затем ретранслирует их, когда эти узлы переподключаются. Важное значение для сеток, где узлы входят и выходят вне диапазона регулярно - обеспечивает отсутствие потери сообщений при коротких разъединениях. A server needs an ESP32 with PSRAM or a Linux `meshtasticd` node. A node in the Router or Router Late role acts as a server even with the server setting off.
 
-| Настройка                                   | Описание                                                                                                                               |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Store & Forward включен | Активировать режим хранения и пересылки                                                                                                |
-| Heartbeat                                   | Периодически объявлять о наличии функции хранения и пересылки у этого узла                                                             |
-| Количество записей                          | Максимальное количество сохраненных сообщений                                                                                          |
-| Макс возврат истории                        | Максимум сообщений для повтора                                                                                                         |
-| Окно возврата истории                       | Окно времени для повтора                                                                                                               |
-| Сервер                                      | Действовать как сервер хранения и пересылки для mesh-сети (требуется большой объем памяти, например, ESP32 с PSRAM) |
-
-> 💡 **Совет:** Хранение и пересылка лучше всего работает на узлах с достаточной памятью (ESP32 с PSRAM). Узлы маршрутизатора являются идеальными кандидатами, так как они обычно всегда включены.
+| Настройка                 | Описание                                                                           | Default |
+| ------------------------- | ---------------------------------------------------------------------------------- | ------- |
+| History Return Max        | Most stored messages returned per request. 0 uses 25               | 0       |
+| History Return Window     | How far back, in minutes, stored messages are returned. 0 uses 240 | 0       |
+| Количество записей        | Most messages to store. 0 uses three quarters of the free PSRAM    | 0       |
+| Send Heartbeat            | Periodically announce that this node is a store-and-forward server                 | Off     |
+| Сервер                    | Act as a store-and-forward server for the mesh                                     | Off     |
+| Store and Forward Enabled | Turn store and forward on                                                          | Off     |
 
 ### Range Test module
 
-> ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
-> still uses the default channel key, the interval and CSV controls stay disabled — you can still
-> switch an already-enabled module off — and saving force-disables the module if the channel has
-> reverted to public.
-
 Автоматизированный инструмент для проверки дальности и оценки качества связи между нодами. Когда включено, нода периодически отправляет сообщения с увеличивающимся счетчиком. Приёмная нода записывает эти сообщения, что позволяет тебе уйти пешком или уехать на машине, а потом проанализировать, на каком расстоянии сообщения перестали приходить.
 
-| Настройка                                                                    | Описание                                                                                 |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Проверка дальности включена                                                  | Активировать проверку дальности                                                          |
-| Sender Interval                                                              | Time between test transmissions, chosen from a dropdown of fixed intervals               |
-| Сохранить .CSV в хранилище (только ESP32) | Log received test data to the node's own filesystem. ESP32 hardware only |
+Range Test only works on a secured primary channel. As long as your primary channel still uses the
+default channel key, the interval and CSV controls stay disabled — you can still switch an
+already-enabled module off — and saving force-disables the module if the channel has reverted to
+public.
+
+| Настройка          | Описание                                                                                                            | Default |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ------- |
+| Range Test Enabled | Turn range testing on                                                                                               | Off     |
+| Save               | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only                      | Off     |
+| Sender Interval    | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | Unset   |
 
 ### Telemetry module
 
 Контролирует какими телеметрическими данными ваш узел делится с сеткой. Телеметрия включает данные о состоянии устройства (заряд батареи, время работы) и данные с датчиков окружающей среды (температура, влажность, давление).
 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
-battery health often and sensors rarely.
+battery health often and sensors rarely. The intervals run from 30 minutes to 72 hours.
 
-| Настройка                                   | Описание                                                                                                                                                                         |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Отправлять телеметрию устройства            | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                        |
-| Интервал обновления метрик устройства       | How often to report battery, uptime and channel utilization                                                                                                                      |
-| Модуль метрик окружения включен             | Report the attached environment sensors                                                                                                                                          |
-| Интервал обновления метрик среды            | How often to report them                                                                                                                                                         |
-| Показатели окружения на экране включены     | Also show these readings on the device's own display                                                                                                                             |
-| Использовать метрику окружения в Fahrenheit | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
-| Модуль измерения качества воздуха включен   | Report particulate and CO₂ sensor data                                                                                                                                           |
-| Интервал обновления данных качества воздуха | How often to report them                                                                                                                                                         |
-| Модуль метрик питания включен               | Report the per-channel voltage and current readings                                                                                                                              |
-| Интервал обновления метрик электропитания   | How often to report them                                                                                                                                                         |
-| Включить метрики питания на экране          | Also show power readings on the device's display                                                                                                                                 |
+| Настройка                    | Описание                                                                                                                                                                                    | Default |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Air Quality Metrics Enabled  | Report particulate and CO₂ sensor data                                                                                                                                                      | Off     |
+| Air Quality Metrics Interval | How often to report them                                                                                                                                                                    | —       |
+| Broadcast Device Metrics     | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | Off     |
+| Device Metrics Interval      | How often to report battery, uptime and channel utilization                                                                                                                                 | —       |
+| Display Fahrenheit           | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | Off     |
+| Environment Metrics Enabled  | Report the attached environment sensors                                                                                                                                                     | Off     |
+| Environment Metrics Interval | How often to report them                                                                                                                                                                    | —       |
+| Power Measurement Enabled    | Report the per-channel voltage and current readings                                                                                                                                         | Off     |
+| Power Metrics Interval       | How often to report them                                                                                                                                                                    | —       |
+| Power Screen                 | Also show power readings on the device's display                                                                                                                                            | Off     |
+| Show on device screen        | Also show environment readings on the device's display                                                                                                                                      | Off     |
 
 Посмотрите [Телеметрия и датчики](telemetry-and-sensors) — для получения информации о поддерживаемых датчиках и рекомендациях по настройке.
 
@@ -154,32 +154,32 @@ battery health often and sensors rarely.
 
 Pre-configured messages accessible from the node's physical buttons (for nodes with rotary encoders, keypads, or similar input hardware). Определите список быстрых сообщений, которые могут быть переданы без подключённого телефона — идеально подходит для использования в поле.
 
-| Настройка                                      | Описание                                                                                                  |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| ~~Canned message enabled~~                     | ⚠️ **Deprecated** in the protobuf schema                                                                  |
-| Сообщения                                      | Список сообщений, разделённых новой строкой                                                               |
-| Отправить колокольчик                          | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
-| Поворотный энкодер #1 включен                  | Use a rotary encoder as the input device                                                                  |
-| GPIO pin for rotary encoder A / B / Press port | The three pins the encoder is wired to                                                                    |
-| Generate input event on Press / CW / CCW       | Which key event each encoder action produces                                                              |
-| Вверх/Вниз/Выбирать включён                    | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
-| ~~Allow input source~~                         | ⚠️ **Deprecated** in the protobuf schema                                                                  |
+| Настройка                                                                    | Описание                                                                                                                                           | Default |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Clockwise Rotary Event / Counterclockwise Rotary Event / Encoder Press Event | Which key event each encoder action produces: **None**, **Up**, **Down**, **Left**, **Right**, **Select**, **Back**, or **Cancel** | None    |
+| Сообщения                                                                    | Список сообщений, разделённых новой строкой                                                                                                        | Empty   |
+| Pin A / Pin B / Press Pin                                                    | The three pins the rotary encoder is wired to                                                                                                      | 0       |
+| Rotary Encoder                                                               | Use a rotary encoder as the input device                                                                                                           | Off     |
+| Send Bell                                                                    | Send a bell character alongside the message, so a receiving node's External Notification module can sound                                          | Off     |
+| Up/Down/Select Input                                                         | A separate, simpler input scheme using up/down/select buttons rather than an encoder                                                               | Off     |
+
+Some boards with built-in encoders or keys come with the input settings filled in. Two older
+fields, **Canned message enabled** and **Allow input source**, appear only for a node on firmware
+older than 2.7, or while they still hold a value.
 
 ### Audio module
 
-Поддержка аудио Codec2 для низкополосной голосовой связи через сетку. Это **экспериментальная функция**, которая кодирует голос в очень маленькие пакеты данных с помощью кодека Codec2.
+Поддержка аудио Codec2 для низкополосной голосовой связи через сетку. Это **экспериментальная функция**, которая кодирует голос в очень маленькие пакеты данных с помощью кодека Codec2. It needs specific hardware, an I2S microphone and speaker, and the voice quality is low.
 
-| Настройка                    | Описание                                               |
-| ---------------------------- | ------------------------------------------------------ |
-| CODEC 2 включен              | Активировать модуль аудио                              |
-| Частота дискретизации CODEC2 | Компромисс между качеством звука и полосой пропускания |
-| Контакт PTT                  | GPIO pin for the push-to-talk button                   |
-| I2S Word Select              | GPIO контакт для I2S WS                                |
-| I2S Data In                  | Пин GPIO для I2S DIN                                   |
-| I2S Data Out                 | Пин GPIO для I2S DOUT                                  |
-| I2S Clock                    | GPIO pin for the I2S bit clock                         |
-
-> ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Качество голоса очень низкополосное — представьте себе «разборчивую радиосвязь», а не качество телефонного звонка.
+| Настройка           | Описание                                                                                                               | Default |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------- |
+| Bitrate             | Codec2 bitrate, from **450 bps** to **3200 bps**. Lower rates use less bandwidth and give poorer audio | Default |
+| Codec2 Enabled      | Turn the audio module on                                                                                               | Off     |
+| I2S Clock Pin       | GPIO pin for the I2S bit clock                                                                                         | 0       |
+| I2S Data In Pin     | GPIO pin for I2S data in                                                                                               | 0       |
+| I2S Data Out Pin    | GPIO pin for I2S data out                                                                                              | 0       |
+| I2S Word Select Pin | GPIO pin for I2S word select                                                                                           | 0       |
+| PTT Pin             | GPIO pin for the push-to-talk button. 0 uses GPIO 39                                                   | 0       |
 
 ### Remote Hardware module
 
@@ -187,21 +187,21 @@ Pre-configured messages accessible from the node's physical buttons (for nodes w
 
 > ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the node's own hardware. Turn it on only on dedicated GPIO nodes.
 
-| Настройка                        | Описание                                                                        |
-| -------------------------------- | ------------------------------------------------------------------------------- |
-| Удаленное оборудование включено  | Активировать удаленный GPIO доступ                                              |
-| Разрешить неопределённый контакт | Разрешить доступ к любому GPIO-пину (риск для безопасности)  |
-| Доступные контакты               | До 4 пинов GPIO, которые этот узел предоставляет для удалённого чтения и записи |
+| Настройка                        | Описание                                                                        | Default |
+| -------------------------------- | ------------------------------------------------------------------------------- | ------- |
+| Разрешить неопределённый контакт | Разрешить доступ к любому GPIO-пину (риск для безопасности)  | Off     |
+| Доступные контакты               | До 4 пинов GPIO, которые этот узел предоставляет для удалённого чтения и записи | None    |
+| Удаленное оборудование включено  | Turn remote GPIO access on                                                      | Off     |
 
 ### Neighbor Info module
 
 Транслирует информацию о доступных услышанных соседей, включив ячейку сеточной топологии. Каждый включенный узел периодически делится списком других узлов которые он может слышать и их качество сигнала.
 
-| Настройка                     | Описание                                                                                                                                         |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Информация о соседях включена | Включить трансляцию соседей                                                                                                                      |
-| Интервал опроса GPS           | Как часто транслировать список соседей                                                                                                           |
-| Передать через LoRa           | Также транслировать информацию соседей по LoRa, а не только MQTT/телефон. Недоступно на канале используя ключ по умолчанию и имя |
+| Настройка             | Описание                                                                                                                                            | Default                                 |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Neighbor Info Enabled | Turn neighbor broadcasting on                                                                                                                       | Off                                     |
+| Передать через LoRa   | Also broadcast neighbor info over LoRa, not just MQTT and the connected app. Недоступно на канале используя ключ по умолчанию и имя | Off                                     |
+| Интервал опроса GPS   | How often to broadcast the neighbor list, in seconds. Minimum 4 hours                                                               | 0 (firmware default) |
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
@@ -209,39 +209,40 @@ See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topo
 
 Управляет встроенными светодиодами NeoPixel или другими адресуемыми RGB-светодиодами на поддерживаемом оборудовании. Может использоваться для визуальных статусовых индикаторов, световых уведомлений, или декоративных эффектов.
 
-| Настройка                 | Описание                                                         |
-| ------------------------- | ---------------------------------------------------------------- |
-| Состояние LED             | Включить или выключить светодиод                                 |
-| Ток                       | Текущий лимит светодиодов (0–31)              |
-| Красный / Зеленый / Синий | Индивидуальные значения цветов канала (0–255) |
+Pick the color with the swatch's **Preset colors** row or the **Red**, **Green** and **Blue** sliders.
+**Advanced** opens number fields for the same three values.
+
+| Настройка                 | Описание                                  | Default                      |
+| ------------------------- | ----------------------------------------- | ---------------------------- |
+| Ток                       | LED drive current, 0 to 31                | 10                           |
+| LED State                 | Включить или выключить светодиод          | Off                          |
+| Красный / Зеленый / Синий | Individual color channel values, 0 to 255 | Derived from the node number |
 
 ### Detection Sensor module
 
 Превращает ваш узел в систему сигнализации на основе датчика движения или открытия двери. При обнаружении изменения состояния на выводе GPIO (например, сработал датчик движения или открылась дверь) узел отправляет по меш-сети оповещение.
 
-| Настройка                                            | Описание                                                                                                                                           |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Датчик определения включен                           | Активировать датчик обнаружения                                                                                                                    |
-| GPIO контакт для мониторинга                         | Пин GPIO, подключенный к датчику                                                                                                                   |
-| Тип триггера обнаружения                             | Как состояние пина интерпретируется как событие обнаружения (например, активный высокий/низкий уровень, срабатывание по фронту) |
-| Использовать режим INPUT_PULLUP | Включить внутренний подтягивающий резистор пина                                                                                                    |
-| Minimum time between detection broadcasts            | Минимальный интервал между оповещениями                                                                                                            |
-| State Broadcast Interval                             | Интервал периодической отправки состояния                                                                                                          |
-| Отправить колокол с уведомлением                     | Включать символ колокола в оповещения                                                                                                              |
-| Понятное имя                                         | Пользовательское имя для этого датчика                                                                                                             |
+| Настройка                                 | Описание                                                                                                                                                          | Default                                                                              |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Detection Sensor Enabled                  | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log                                             | Off                                                                                  |
+| GPIO Pin to monitor                       | GPIO pin connected to the sensor. 0 disables the module                                                                                           | 0                                                                                    |
+| Minimum time between detection broadcasts | Минимальный интервал между оповещениями                                                                                                                           | 0, which the firmware treats as 1 hour (12 hours on Router roles) |
+| Name                                      | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
+| Send Bell                                 | Include a bell character in alerts                                                                                                                                | Off                                                                                  |
+| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | Unset                                                                                |
+| Trigger Type                              | How the pin's state maps to a detection event: **High**, **Low**, **Rising Edge**, **Falling Edge**, **Either Edge High**, or **Either Edge Low** | High                                                                                 |
+| Use Internal Pull-up                      | Включить внутренний подтягивающий резистор пина                                                                                                                   | Off                                                                                  |
 
 ### Paxcounter module
 
-People counter using Wi-Fi and BLE probe requests. Засчитывает ближайшие устройства, пассивно прослушивая зондирующие запросы, чтобы телефоны и ноутбуки излучали при сканировании сетей. Доступно только на устройствах ESP32.
+People counter using Wi-Fi and BLE probe requests. Засчитывает ближайшие устройства, пассивно прослушивая зондирующие запросы, чтобы телефоны и ноутбуки излучали при сканировании сетей. Доступно только на устройствах ESP32. Counts are approximate, since one person may carry several devices, so the module suits estimating foot traffic at trailheads or event venues.
 
-| Настройка                               | Описание                                                                                                         |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Paxcounter включен                      | Активировать подсчет людей                                                                                       |
-| Интервал опроса GPS                     | Как часто сообщать подсчитывания                                                                                 |
-| WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
-| BLE Threshold (dBm)  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
-
-> 💡 **Совет:** Paxcounter полезен для приблизительной оценки пешеходного потока в местах начала маршрутов, на мероприятийных площадках или в других локациях. Счетчики приблизительны — один человек может иметь несколько устройств.
+| Настройка                               | Описание                                                                                                 | Default                                 |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| BLE Threshold (dBm)  | The same cut-off for BLE advertisements                                                                  | 0, which the firmware treats as −80 dBm |
+| PAX Counter Enabled                     | Turn people counting on. Wi-Fi and Bluetooth must both be off on the node for it to work | Off                                     |
+| Интервал опроса GPS                     | Как часто сообщать подсчитывания                                                                         | —                                       |
+| WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted                                  | 0, which the firmware treats as −80 dBm |
 
 ### Status Message module
 
@@ -256,35 +257,34 @@ walkthrough.
 
 ### TAK module
 
-Интеграция Team Awareness Kit для совместимости с ATAK и WinTAK. Two things have to be
-true before the entry appears in the module list: the node runs firmware 2.8.0 or newer, and its
-**Device Role** on **Settings → Device configuration → Device** is set to `TAK` or `TAK_TRACKER`.
-См. [TAK Integration](tak) для детальной настройки и использования.
+Интеграция Team Awareness Kit для совместимости с ATAK и WinTAK. The entry is labeled
+**TAK (ATAK)**. Two things have to be true before it appears in the module list: the node runs
+firmware 2.8.0 or newer, and its **Device Role** on **Settings → Device configuration → Device** is
+set to **TAK** or **TAK Tracker**. См. [TAK Integration](tak) для детальной настройки и использования.
 
 ## Администрирование
 
 ### Удаленное администрирование
 
-Удалённо настраивай ноды, которые используют твой ключ администрирования:
+Remote administration changes another node's settings over the mesh. The target node must list your node's public key as one of its **Admin Key** entries, set on its **Settings → Security** screen.
 
-1. Выбери целевую ноду в списке нод.
-2. Перейди в **Настройки** этой ноды.
+1. Tap the target node in the node list to open its detail screen.
+2. In the **Administration** card, tap **Remote Administration**. The app first establishes a session with the node, showing _Establishing remote session…_, then opens its **Settings**.
 3. Измени конфигурацию.
-4. Нажми **Сохранить** — изменения отправляются через сеть.
-
-> ⚠️ **Important:** Requires an admin key configured on both your node and the target node.
+4. Tap **Save** or **Save & restart**. The changes are sent over the mesh.
 
 ### Device Actions
 
-**Settings → Administration** holds five one-shot actions, each behind a confirmation dialog:
+**Settings → Administration** holds one-shot actions, each behind a confirmation dialog:
 
-| Действие                    | Что она делает                                                                                 |
-| --------------------------- | ---------------------------------------------------------------------------------------------- |
-| Установить время            | Sends your phone's clock to the node                                                           |
-| Перезагрузка                | Restarts the node                                                                              |
-| Выключение                  | Powers the node down                                                                           |
-| Сброс до заводских настроек | Returns every setting to its factory default                                                   |
-| Очистка списка нод сети     | Clears the node database. This dialog carries a **Preserve Favorites?** switch |
+| Действие                    | Что она делает                                                                                                                                                   |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Установить время            | Sends your phone's clock to the node                                                                                                                             |
+| Перезагрузка                | Restarts the node                                                                                                                                                |
+| Reboot into DFU mode        | Restarts an nRF52 node into its bootloader, where it stays off the mesh until new firmware is flashed or it is reset. Shown only for nRF52 nodes |
+| Выключение                  | Powers the node down                                                                                                                                             |
+| Сброс до заводских настроек | Returns every setting to its factory default                                                                                                                     |
+| Очистка списка нод сети     | Clears the node database. This dialog carries a **Preserve Favorites?** switch                                                                   |
 
 > ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the node's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
 
@@ -295,6 +295,19 @@ true before the entry appears in the module list: the node runs firmware 2.8.0 o
 Traffic Management settings are exported but not applied on import. Export before a factory
 reset, or to copy one node's setup onto another. The section is shown for your
 own node only, not over remote admin.
+
+The same section backs up the app's own data for a node: its messages and nodes as stored in the
+app, not the node's settings.
+
+- **Back up app data** saves that data to a file named after the node and the date.
+- **Restore app data** replaces the app's messages and nodes for that node with a backup, after a
+  confirmation. It accepts only an undamaged backup made by an app with the same database version.
+  The restore takes effect after you restart the app and reconnect to that node.
+
+Both disconnect the node first, after asking, and act on the data of the node that was connected.
+With no node connected they act on the most recently connected node. They stay disabled, with
+the line _Connect to a radio first. There is no app data to back up or restore yet._, until the
+app has stored data for some node.
 
 ### Расширенные
 
@@ -324,30 +337,18 @@ say — that is why the queued list can be shorter than you expect.
 
 ### App Settings
 
-The **App Settings** block on the **Settings** screen configures the app rather than the node, and
-appears only when your own node is selected. It is grouped rather than flat:
+The **App** section of the **Settings** screen configures the app rather than the node, and
+appears only when your own node is selected. It holds, in order:
 
-**Privacy**
-
-- **Allow analytics and crash reporting** — opt in or out of diagnostics.
+- **Allow analytics and crash reporting.** — opt in or out of diagnostics. Google Play build only.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
   It needs precise location: with approximate location allowed, turning it on asks for precise.
-- **Homoglyph encoding** — how look-alike characters in names are handled.
-
-**Appearance**
-
-- **Units** — metric, imperial, or follow the system. This is the entry
-  [Units & Locale](units-and-locale) sends you to.
-- **Theme** and **Language**.
+- **Compact encoding for Cyrillic** — how look-alike characters in names are handled.
+- **Language**, **Theme**, and **Units**. **Units** is metric, imperial, or follow the system, and
+  is the entry [Units & Locale](units-and-locale) sends you to.
 - **Show full message timestamps**.
-
-**Persistence**
-
-- A cache limit for how much history is kept.
+- **Device DB cache limit**, which sets how much history is kept.
 - **Export rangetest packets**, **Export all packets** and **Export node database**.
-
-**On their own**
-
 - **Node Layout** — how much detail each row of the node list shows.
 - **Wi-Fi Provisioning for mPWRD-OS** — see [Connections](connections).
 - **Message Filter** — hides incoming messages that contain words you list. With no words
@@ -355,14 +356,14 @@ appears only when your own node is selected. It is grouped rather than flat:
 - **System AI** — appears only where app functions are available; see
   [App Functions](app-functions).
 
-A **Permissions** block sits above App Settings, so a user who skipped a permission during
-onboarding can get back to it, and **App Info** sits below.
+A **Permissions** section sits above **App**, so a user who skipped a permission during
+onboarding can get back to it. **Information** sits below it, with **Show Introduction**,
+**App Notifications**, **System Settings**, **About**, and the app version. **Help &
+Documentation** closes the screen.
 
 ### О приложении
 
-**Settings → About** carries the app's own identity rather than the node's:
-
-Three sections:
+**Settings → About** carries the app's own identity rather than the node's, in three sections:
 
 - **What is Meshtastic?** — a short description of the project.
 - **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
@@ -377,13 +378,13 @@ may redistribute under the same license.
 ### Благодарности
 
 Reached from **About**, this lists every open-source library the app ships, with its license,
-generated at build time by AboutLibraries. It was previously called the license screen.
+generated at build time by AboutLibraries.
 
 ### Troubleshooting remote admin
 
-- **"Нет ответа от целевого узла"** — цель может находиться вне диапазона, в автономном режиме или иметь несоответствующий ключ администратора. Проверьте соответствие ключа администратора на обоих узлах.
+- **"Could not reach node — try again or move closer."** The target may be out of range or offline, or it doesn't list your node's public key as an admin key. Check the **Admin Key** entries on the target node.
+- **"Connect to a radio to administer remote nodes."** Your own node isn't connected. Reconnect it from the [Connections](connections) screen.
 - **Изменения не применены** — чтобы некоторые настройки вступили в силу, нужно перезагрузить устройство. Попробуй перезагрузить после сохранения.
-- **Не видны настройки удалённой ноды** — убедись, что твоя нода имеет админ-ключ для целевой ноды. Админ-канал настраивается автоматически, когда задан ключ администратора.
 
 ## Связанные темы
 

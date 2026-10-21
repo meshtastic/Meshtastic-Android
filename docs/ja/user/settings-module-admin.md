@@ -1,7 +1,7 @@
 ---
 title: 設定：モジュールと管理
 nav_order: 8
-last_updated: 2026-09-28
+last_updated: 2026-10-21
 description: オプションの機能モジュール（MQTT、テレメトリ、定型メッセージ、TAK など）を設定し、デバイスの管理を行います。
 aliases:
   - modules
@@ -13,7 +13,7 @@ aliases:
 
 オプションの機能モジュールを設定し、デバイスの管理を行います。モジュールは、専用の機能で Meshtastic を拡張します。それぞれ個別に有効・無効を切り替えられます。
 
-> 💡 **ヒント：** 実際に使うモジュールだけを有効にすれば十分です。使わないモジュールを無効にすると、電波利用時間が減り、バッテリーを節約でき、設定もシンプルになります。 A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
+Enable only the modules you use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration. A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
 
 モジュールの設定は、トグルスイッチ、ドロップダウン、テキストフィールド、スライダーを備えたカード形式のレイアウトを使用します：
 
@@ -29,35 +29,35 @@ aliases:
 
 Every module lives under **Settings → Module configuration**.
 
-> ⚠️ **Important:** Saving a module screen restarts the node: the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**. External Notification may still restart the node for some changes, while a Mesh Beacon change applies without a restart.
+Saving a module screen restarts the node: the button reads **Save & restart**, and the node is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**. External Notification may still restart the node for some changes, while a Mesh Beacon change applies without a restart.
 
 ### MQTT module
 
 インターネット接続のために、メッシュのメッセージを MQTT サーバーとの間で橋渡しします。 This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
-| 設定項目                   | 説明                                                                                                                                                                                      |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MQTTを有効化               | MQTT ブリッジを切り替え                                                                                                                                                                          |
-| アドレス                   | MQTT サーバーのアドレス                                                                                                                                                                          |
-| ユーザー名                  | 認証用のユーザー名                                                                                                                                                                               |
-| パスワード                  | 認証用のパスワード                                                                                                                                                                               |
-| 暗号化の有効化                | MQTT ペイロードを暗号化                                                                                                                                                                          |
-| JSON出力の有効化             | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
-| TLS の有効化               | セキュアな接続を使用                                                                                                                                                                              |
-| ルート トピック               | MQTT のベーストピックパス                                                                                                                                                                         |
-| クライアントへのプロキシの有効化       | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
-| MQTT proxy in this app | The app-side half of **Proxy to client enabled**: whether this app acts as that relay. See [MQTT](mqtt)                                                 |
-| マップレポート                | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
+| 設定項目                   | 説明                                                                                                                                                                                                                                                                               | Default               |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| アドレス                   | MQTT サーバーのアドレス                                                                                                                                                                                                                                                                   | `mqtt.meshtastic.org` |
+| Encryption Enabled     | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
+| JSON出力の有効化             | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Off                   |
+| Map Reporting          | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | Off                   |
+| MQTT Client Proxy      | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | Off                   |
+| MQTT Enabled           | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | Off                   |
+| MQTT proxy in this app | The app-side half of **MQTT Client Proxy**: whether this app acts as that relay. It shows whether the relay is running, and can be turned on only while **MQTT Enabled** and **MQTT Client Proxy** are both on. See [MQTT](mqtt) | —                     |
+| パスワード                  | 認証用のパスワード                                                                                                                                                                                                                                                                        | The public broker's   |
+| Root Topic             | MQTT のベーストピックパス                                                                                                                                                                                                                                                                  | `msh`                 |
+| TLS Enabled            | Use a secure connection                                                                                                                                                                                                                                                          | Off                   |
+| ユーザー名                  | 認証用のユーザー名                                                                                                                                                                                                                                                                        | The public broker's   |
 
-Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
+Turning **Map Reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
 until you agree:
 
 | 設定項目                 | 説明                                                                                                                                                                                       |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 同意します。               | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting doesn't start without it                                      |
-| Precision slider     | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
 | Map Publish Interval | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
+| Precision slider     | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
 
 暗号化、プライバシー、サーバーの設定を含む詳しい使い方は、[MQTT](mqtt) を参照してください。
 
@@ -65,88 +65,88 @@ until you agree:
 
 外部デバイスとの連携（GPS モジュール、センサー、カスタムハードウェア）のために、シリアルポート通信を有効にします。有効にすると、ノードのシリアルポートで protobuf またはテキストデータを送受信でき、外部のマイコンやコンピューターがメッシュとやり取りできるようになります。
 
-| 設定項目              | 説明                                                                                                                                                                                                  |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| シリアル通信を有効化        | シリアル通信を有効化                                                                                                                                                                                          |
-| Echoを有効化          | 受信したシリアルデータをそのまま返す                                                                                                                                                                                  |
-| シリアルモード           | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
-| RX / TX           | GPIO pins for the serial connection                                                                                                                                                                 |
-| シリアルボーレイト         | Port speed                                                                                                                                                                                          |
-| タイムアウト            | How long to wait before considering an incoming message complete                                                                                                                                    |
-| コンソールのシリアルポートを上書き | Take over the port the debug console normally uses                                                                                                                                                  |
+| 設定項目                                                                                             | 説明                                                                                                                                                                                                                                  | Default |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Baud                                                                                             | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | Default |
+| Echo                                                                                             | Echo packets you send back over the serial port                                                                                                                                                                                     | Off     |
+| Mode                                                                                             | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | Default |
+| コンソールのシリアルポートを上書き                                                                                | Take over the port the debug console normally uses                                                                                                                                                                                  | Off     |
+| Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0       |
+| Serial Enabled                                                                                   | Turn serial communication on                                                                                                                                                                                                        | Off     |
+| タイムアウト                                                                                           | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0       |
 
 ### External Notification module
 
 Controls buzzer, LED, or vibration alerts on your node hardware. メッセージ到着時に物理的に知らせる必要があるデバイスに便利です。特に無人設置や屋外設置で役立ちます。
 
 There are two independent triggers — an incoming **message**, and a received **bell** character —
-and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
+and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles. The
+firmware turns the module on, and picks the outputs, on hardware that has a buzzer, vibration motor
+or notification LED; elsewhere everything starts off.
 
-| 設定項目                                 | 説明                                                                                                  |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| 外部通知を有効化                             | Master toggle for the module                                                                        |
-| Alert message LED / buzzer / vibra   | Which outputs fire on an incoming message                                                           |
-| Alert bell LED / buzzer / vibra      | Which outputs fire on a received bell character                                                     |
-| LED出力 (GPIO)      | Pin the LED is wired to                                                                             |
-| LED出力 アクティブハイ                        | Whether the LED pin is active high or low                                                           |
-| ブザー出力(GPIO)       | Pin the buzzer is wired to                                                                          |
-| バイブレーション出力 (GPIO) | Pin the vibration motor is wired to                                                                 |
-| PWMブザーを使用                            | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
-| I2Sをブザーとして使用                         | Send the alert through an I2S audio output instead                                                  |
-| GPIO Output Duration                 | How long a single alert lasts                                                                       |
-| Nag Timeout                          | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
-| 着信音                                  | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
+| 設定項目                                                                                                                 | 説明                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Active                                                                                                               | Whether the LED pin is active high or low. Shown once **Output pin GPIO** is set                                       |
+| Alert when receiving a bell / Alert GPIO buzzer when receiving a bell / Alert GPIO vibra motor when receiving a bell | Which outputs fire on a received bell character                                                                                        |
+| Alert when receiving a message / Alert GPIO buzzer when receiving a message / Vibra Motor Alert                      | Which outputs fire on an incoming message                                                                                              |
+| External Notification Enabled                                                                                        | Master toggle for the module                                                                                                           |
+| GPIO Output Duration                                                                                                 | How long a single alert lasts                                                                                                          |
+| Nag Timeout                                                                                                          | Keep repeating the alert for this long until it is acknowledged. **Unset** disables nagging                            |
+| Output pin GPIO                                                                                                      | Pin the LED is wired to                                                                                                                |
+| Output pin buzzer GPIO                                                                                               | Pin the buzzer is wired to                                                                                                             |
+| Output pin vibra GPIO                                                                                                | Pin the vibration motor is wired to                                                                                                    |
+| 着信音                                                                                                                  | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file                                                 |
+| Use I2S As Buzzer                                                                                                    | Send the alert through an I2S audio output instead                                                                                     |
+| Use PWM Buzzer                                                                                                       | Drive the buzzer with PWM, which allows tones rather than a single pitch. Shown once **Output pin buzzer GPIO** is set |
 
 ### Store & Forward module
 
-一時的にオフラインだったノードのためにメッセージをバッファリングし、それらのノードが再接続したときに再送します。ノードが頻繁に圏内・圏外を行き来するメッシュに不可欠です。短時間の切断中にメッセージが失われないようにします。
+一時的にオフラインだったノードのためにメッセージをバッファリングし、それらのノードが再接続したときに再送します。ノードが頻繁に圏内・圏外を行き来するメッシュに不可欠です。短時間の切断中にメッセージが失われないようにします。 A server needs an ESP32 with PSRAM or a Linux `meshtasticd` node. A node in the Router or Router Late role acts as a server even with the server setting off.
 
-| 設定項目                                                   | 説明                                                     |
-| ------------------------------------------------------ | ------------------------------------------------------ |
-| 一時保管と転送の有効化                                            | ストア＆フォワードを有効化                                          |
-| ハートビート                                                 | このノードのストア＆フォワード機能を定期的に告知する                             |
-| サーバーの最大保管レコード数  (デフォルト 約11,000レコード) | 保存するメッセージの最大数                                          |
-| リクエスト可能な最大の履歴件数                                        | 再送するメッセージの最大数                                          |
-| リクエスト可能な履歴の期間  (分)                  | 再送する時間の範囲                                              |
-| サーバー                                                   | メッシュのストア＆フォワードサーバーとして動作する（十分なメモリが必要、例：PSRAM 搭載の ESP32） |
-
-> 💡 **ヒント：** ストア＆フォワードは、十分なメモリを持つノード（PSRAM 搭載の ESP32）で最も良く機能します。ルーターノードは通常は常時起動しているため、理想的な候補です。
+| 設定項目                                                   | 説明                                                                                 | Default |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------- | ------- |
+| History Return Max                                     | Most stored messages returned per request. 0 uses 25               | 0       |
+| History Return Window                                  | How far back, in minutes, stored messages are returned. 0 uses 240 | 0       |
+| サーバーの最大保管レコード数  (デフォルト 約11,000レコード) | Most messages to store. 0 uses three quarters of the free PSRAM    | 0       |
+| Send Heartbeat                                         | Periodically announce that this node is a store-and-forward server                 | Off     |
+| サーバー                                                   | Act as a store-and-forward server for the mesh                                     | Off     |
+| Store and Forward Enabled                              | Turn store and forward on                                                          | Off     |
 
 ### Range Test module
 
-> ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
-> still uses the default channel key, the interval and CSV controls stay disabled — you can still
-> switch an already-enabled module off — and saving force-disables the module if the channel has
-> reverted to public.
-
 ノード間のリンク品質を評価するための、自動レンジテストツールです。有効にすると、ノードはカウンターを増やしながらテストメッセージを定期的に送信します。受信側のノードがこれらのメッセージを記録するため、歩いたり車で移動したりして、後からどの距離でメッセージが届かなくなったかを分析できます。
 
-| 設定項目                                         | 説明                                                                                       |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| レンジテストを有効化                                   | レンジテストを有効化                                                                               |
-| Sender Interval                              | Time between test transmissions, chosen from a dropdown of fixed intervals               |
-| ストレージにCSVファイルを保存(ESP32のみ) | Log received test data to the node's own filesystem. ESP32 hardware only |
+Range Test only works on a secured primary channel. As long as your primary channel still uses the
+default channel key, the interval and CSV controls stay disabled — you can still switch an
+already-enabled module off — and saving force-disables the module if the channel has reverted to
+public.
+
+| 設定項目               | 説明                                                                                                                  | Default |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ------- |
+| Range Test Enabled | Turn range testing on                                                                                               | Off     |
+| Save               | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only                      | Off     |
+| Sender Interval    | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | Unset   |
 
 ### Telemetry module
 
 ノードがメッシュと共有するテレメトリデータを制御します。テレメトリには、デバイスの状態（バッテリー、連続稼働時間）と環境センサーのデータ（温度、湿度、気圧）が含まれます。
 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
-battery health often and sensors rarely.
+battery health often and sensors rarely. The intervals run from 30 minutes to 72 hours.
 
-| 設定項目             | 説明                                                                                                                                                                               |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| デバイステレメトリを送信     | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                        |
-| デバイスメトリクスの更新間隔   | How often to report battery, uptime and channel utilization                                                                                                                      |
-| 環境メトリクスモジュールを有効化 | Report the attached environment sensors                                                                                                                                          |
-| 環境メトリクスの更新間隔     | How often to report them                                                                                                                                                         |
-| 環境メトリクスを画面上で有効化  | Also show these readings on the device's own display                                                                                                                             |
-| 環境メトリクスは華氏を使用    | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
-| 空気品質測定モジュールを有効化  | Report particulate and CO₂ sensor data                                                                                                                                           |
-| 空気品質メトリクスの更新間隔   | How often to report them                                                                                                                                                         |
-| 電源メトリクスモジュール有効   | Report the per-channel voltage and current readings                                                                                                                              |
-| 電源メトリクスの更新間隔     | How often to report them                                                                                                                                                         |
-| 電源メトリクスを画面上で有効化  | Also show power readings on the device's display                                                                                                                                 |
+| 設定項目                         | 説明                                                                                                                                                                                          | Default |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Air Quality Metrics Enabled  | Report particulate and CO₂ sensor data                                                                                                                                                      | Off     |
+| Air Quality Metrics Interval | How often to report them                                                                                                                                                                    | —       |
+| Broadcast Device Metrics     | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | Off     |
+| Device Metrics Interval      | How often to report battery, uptime and channel utilization                                                                                                                                 | —       |
+| Display Fahrenheit           | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | Off     |
+| Environment Metrics Enabled  | Report the attached environment sensors                                                                                                                                                     | Off     |
+| Environment Metrics Interval | How often to report them                                                                                                                                                                    | —       |
+| Power Measurement Enabled    | Report the per-channel voltage and current readings                                                                                                                                         | Off     |
+| Power Metrics Interval       | How often to report them                                                                                                                                                                    | —       |
+| Power Screen                 | Also show power readings on the device's display                                                                                                                                            | Off     |
+| Show on device screen        | Also show environment readings on the device's display                                                                                                                                      | Off     |
 
 対応センサーと設定の推奨事項については、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
 
@@ -154,32 +154,32 @@ battery health often and sensors rarely.
 
 Pre-configured messages accessible from the node's physical buttons (for nodes with rotary encoders, keypads, or similar input hardware). スマートフォンを接続していなくても送信できる、クイック送信メッセージのリストを定義します。フィールドでの使用に最適です。
 
-| 設定項目                                           | 説明                                                                                                        |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| ~~Canned message enabled~~                     | ⚠️ **Deprecated** in the protobuf schema                                                                  |
-| メッセージ                                          | 改行で区切ったメッセージのリスト                                                                                          |
-| ベルを送信                                          | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
-| ロータリーエンコーダ #1 を有効化                             | Use a rotary encoder as the input device                                                                  |
-| GPIO pin for rotary encoder A / B / Press port | The three pins the encoder is wired to                                                                    |
-| Generate input event on Press / CW / CCW       | Which key event each encoder action produces                                                              |
-| 上下/選択入力を有効化                                    | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
-| ~~Allow input source~~                         | ⚠️ **Deprecated** in the protobuf schema                                                                  |
+| 設定項目                                                                         | 説明                                                                                                                                                 | Default |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Clockwise Rotary Event / Counterclockwise Rotary Event / Encoder Press Event | Which key event each encoder action produces: **None**, **Up**, **Down**, **Left**, **Right**, **Select**, **Back**, or **Cancel** | None    |
+| メッセージ                                                                        | 改行で区切ったメッセージのリスト                                                                                                                                   | Empty   |
+| Pin A / Pin B / Press Pin                                                    | The three pins the rotary encoder is wired to                                                                                                      | 0       |
+| Rotary Encoder                                                               | Use a rotary encoder as the input device                                                                                                           | Off     |
+| Send Bell                                                                    | Send a bell character alongside the message, so a receiving node's External Notification module can sound                                          | Off     |
+| Up/Down/Select Input                                                         | A separate, simpler input scheme using up/down/select buttons rather than an encoder                                                               | Off     |
+
+Some boards with built-in encoders or keys come with the input settings filled in. Two older
+fields, **Canned message enabled** and **Allow input source**, appear only for a node on firmware
+older than 2.7, or while they still hold a value.
 
 ### Audio module
 
-メッシュ上での低帯域幅の音声通信のための、Codec2 音声サポートです。これは、Codec2 コーデックを使って音声を非常に小さなデータパケットにエンコードする、**実験的**な機能です。
+メッシュ上での低帯域幅の音声通信のための、Codec2 音声サポートです。これは、Codec2 コーデックを使って音声を非常に小さなデータパケットにエンコードする、**実験的**な機能です。 It needs specific hardware, an I2S microphone and speaker, and the voice quality is low.
 
-| 設定項目           | 説明                                   |
-| -------------- | ------------------------------------ |
-| CODEC 2 を有効化   | オーディオモジュールを有効化                       |
-| CODEC2 サンプルレート | 音質と帯域幅のトレードオフ                        |
-| PTT端子          | GPIO pin for the push-to-talk button |
-| I2S ワードセレクト    | I2S WS 用の GPIO ピン                    |
-| I2S データ IN     | I2S DIN 用の GPIO ピン                   |
-| I2S データ OUT    | I2S DOUT 用の GPIO ピン                  |
-| I2S クロック       | GPIO pin for the I2S bit clock       |
-
-> ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). 音質は非常に低帯域です。「聞き取れる無線の声」程度で、電話並みの品質ではないと考えてください。
+| 設定項目                | 説明                                                                                                                     | Default |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------- |
+| Bitrate             | Codec2 bitrate, from **450 bps** to **3200 bps**. Lower rates use less bandwidth and give poorer audio | Default |
+| Codec2 Enabled      | Turn the audio module on                                                                                               | Off     |
+| I2S Clock Pin       | GPIO pin for the I2S bit clock                                                                                         | 0       |
+| I2S Data In Pin     | GPIO pin for I2S data in                                                                                               | 0       |
+| I2S Data Out Pin    | GPIO pin for I2S data out                                                                                              | 0       |
+| I2S Word Select Pin | GPIO pin for I2S word select                                                                                           | 0       |
+| PTT Pin             | GPIO pin for the push-to-talk button. 0 uses GPIO 39                                                   | 0       |
 
 ### Remote Hardware module
 
@@ -187,21 +187,21 @@ Pre-configured messages accessible from the node's physical buttons (for nodes w
 
 > ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the node's own hardware. Turn it on only on dedicated GPIO nodes.
 
-| 設定項目            | 説明                                    |
-| --------------- | ------------------------------------- |
-| リモートハードウェアを有効化  | リモート GPIO アクセスを有効化                    |
-| 未定義のピンへのアクセスを許可 | 任意の GPIO ピンへのアクセスを許可（セキュリティリスク）       |
-| 使用可能な端子         | このノードがリモートの読み書き用に公開する GPIO ピン（最大 4 個） |
+| 設定項目            | 説明                                    | Default |
+| --------------- | ------------------------------------- | ------- |
+| 未定義のピンへのアクセスを許可 | 任意の GPIO ピンへのアクセスを許可（セキュリティリスク）       | Off     |
+| 使用可能な端子         | このノードがリモートの読み書き用に公開する GPIO ピン（最大 4 個） | None    |
+| リモートハードウェアを有効化  | Turn remote GPIO access on            | Off     |
 
 ### Neighbor Info module
 
 直接受信した隣接ノードの情報をブロードキャストし、メッシュのトポロジーマッピングを可能にします。有効にした各ノードは、受信できる他のノードとその信号品質のリストを定期的に共有します。
 
-| 設定項目        | 説明                                                                             |
-| ----------- | ------------------------------------------------------------------------------ |
-| 近隣ノード情報を有効化 | 隣接ノードのブロードキャストを有効化                                                             |
-| GPS ポーリング間隔 | 隣接ノードのリストをブロードキャストする頻度                                                         |
-| LoRaで送信     | MQTT／スマートフォンだけでなく、LoRa 経由でも隣接ノード情報をブロードキャストします。デフォルトの鍵と名前を使用しているチャンネルでは利用できません |
+| 設定項目                  | 説明                                                                                                                           | Default                                 |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Neighbor Info Enabled | Turn neighbor broadcasting on                                                                                                | Off                                     |
+| LoRaで送信               | Also broadcast neighbor info over LoRa, not just MQTT and the connected app. デフォルトの鍵と名前を使用しているチャンネルでは利用できません | Off                                     |
+| GPS ポーリング間隔           | How often to broadcast the neighbor list, in seconds. Minimum 4 hours                                        | 0 (firmware default) |
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
@@ -209,39 +209,40 @@ See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topo
 
 対応ハードウェア上の、オンボードの NeoPixel やその他のアドレサブル RGB LED を制御します。視覚的なステータス表示、通知ライト、装飾的な演出に使用できます。
 
-| 設定項目   | 説明               |
-| ------ | ---------------- |
-| LEDの状態 | LED のオン／オフを切り替え  |
-| 電流     | LED の電流制限（0〜31）  |
-| 赤／緑／青  | 各色チャンネルの値（0〜255） |
+Pick the color with the swatch's **Preset colors** row or the **Red**, **Green** and **Blue** sliders.
+**Advanced** opens number fields for the same three values.
+
+| 設定項目      | 説明                                        | Default                      |
+| --------- | ----------------------------------------- | ---------------------------- |
+| 電流        | LED drive current, 0 to 31                | 10                           |
+| LED State | LED のオン／オフを切り替え                           | Off                          |
+| 赤／緑／青     | Individual color channel values, 0 to 255 | Derived from the node number |
 
 ### Detection Sensor module
 
 ノードを、動きやドアを検知するセンサーアラートシステムに変えます。 GPIO ピンが状態の変化（動きの検知、ドアの開放）を検出すると、ノードはメッシュ経由でアラートメッセージをブロードキャストします。
 
-| 設定項目                                      | 説明                                          |
-| ----------------------------------------- | ------------------------------------------- |
-| 検出センサーを有効化                                | 検知センサーを有効化                                  |
-| モニターのGPIOピン                               | センサーに接続された GPIO ピン                          |
-| 検出トリガーの種類                                 | ピンの状態を検知イベントにどう対応させるか（例：アクティブハイ／ロー、エッジトリガー） |
-| INPUT_PULLUP モードを使用  | ピンの内蔵プルアップ抵抗を有効にする                          |
-| Minimum time between detection broadcasts | アラートのブロードキャスト間の最小時間                         |
-| State Broadcast Interval                  | 定期的な状態ブロードキャストの間隔                           |
-| アラートメッセージ付きのベルを送信                         | アラートにベル文字を含める                               |
-| 名前                                        | このセンサーのカスタム名                                |
+| 設定項目                                      | 説明                                                                                                                                                                | Default                                                                              |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Detection Sensor Enabled                  | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log                                             | Off                                                                                  |
+| GPIO Pin to monitor                       | GPIO pin connected to the sensor. 0 disables the module                                                                                           | 0                                                                                    |
+| Minimum time between detection broadcasts | アラートのブロードキャスト間の最小時間                                                                                                                                               | 0, which the firmware treats as 1 hour (12 hours on Router roles) |
+| Name                                      | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
+| Send Bell                                 | Include a bell character in alerts                                                                                                                                | Off                                                                                  |
+| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | Unset                                                                                |
+| Trigger Type                              | How the pin's state maps to a detection event: **High**, **Low**, **Rising Edge**, **Falling Edge**, **Either Edge High**, or **Either Edge Low** | High                                                                                 |
+| Use Internal Pull-up                      | ピンの内蔵プルアップ抵抗を有効にする                                                                                                                                                | Off                                                                                  |
 
 ### Paxcounter module
 
-People counter using Wi-Fi and BLE probe requests. スマートフォンやノートパソコンがネットワークを探すときに発するプローブ要求を受動的に受信して、近くのデバイスを数えます。 ESP32 デバイスでのみ利用できます。
+People counter using Wi-Fi and BLE probe requests. スマートフォンやノートパソコンがネットワークを探すときに発するプローブ要求を受動的に受信して、近くのデバイスを数えます。 ESP32 デバイスでのみ利用できます。 Counts are approximate, since one person may carry several devices, so the module suits estimating foot traffic at trailheads or event venues.
 
-| 設定                                      | 説明                                                                                                               |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Paxcounter を有効化                         | 人数カウントを有効化                                                                                                       |
-| GPS ポーリング間隔                             | カウントを報告する頻度                                                                                                      |
-| WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted (defaults to −80 dBm) |
-| BLE Threshold (dBm)  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
-
-> 💡 **ヒント：** Paxcounter は、登山口やイベント会場などの人出を推定するのに便利です。カウントはおおよその値です。1 人が複数のデバイスを持っていることがあります。
+| 設定                                      | 説明                                                                                                       | Default                                 |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| BLE Threshold (dBm)  | The same cut-off for BLE advertisements                                                                  | 0, which the firmware treats as −80 dBm |
+| PAX Counter Enabled                     | Turn people counting on. Wi-Fi and Bluetooth must both be off on the node for it to work | Off                                     |
+| GPS ポーリング間隔                             | カウントを報告する頻度                                                                                              | —                                       |
+| WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted                                  | 0, which the firmware treats as −80 dBm |
 
 ### Status Message module
 
@@ -256,35 +257,34 @@ walkthrough.
 
 ### TAK module
 
-ATAK および WinTAK と相互運用するための、Team Awareness Kit 連携です。 Two things have to be
-true before the entry appears in the module list: the node runs firmware 2.8.0 or newer, and its
-**Device Role** on **Settings → Device configuration → Device** is set to `TAK` or `TAK_TRACKER`.
-詳しい設定と使い方は、[TAK 連携](tak) を参照してください。
+ATAK および WinTAK と相互運用するための、Team Awareness Kit 連携です。 The entry is labeled
+**TAK (ATAK)**. Two things have to be true before it appears in the module list: the node runs
+firmware 2.8.0 or newer, and its **Device Role** on **Settings → Device configuration → Device** is
+set to **TAK** or **TAK Tracker**. 詳しい設定と使い方は、[TAK 連携](tak) を参照してください。
 
 ## 管理
 
 ### リモート管理
 
-管理者鍵を共有しているノードをリモートで設定します：
+Remote administration changes another node's settings over the mesh. The target node must list your node's public key as one of its **Admin Key** entries, set on its **Settings → Security** screen.
 
-1. ノードリストで対象のノードを選択します。
-2. そのノードの「**設定**」に移動します。
+1. Tap the target node in the node list to open its detail screen.
+2. In the **Administration** card, tap **Remote Administration**. The app first establishes a session with the node, showing _Establishing remote session…_, then opens its **Settings**.
 3. 設定を変更します。
-4. 「**保存**」をタップします。変更がメッシュ経由で送信されます。
-
-> ⚠️ **Important:** Requires an admin key configured on both your node and the target node.
+4. Tap **Save** or **Save & restart**. The changes are sent over the mesh.
 
 ### Device Actions
 
-**Settings → Administration** holds five one-shot actions, each behind a confirmation dialog:
+**Settings → Administration** holds one-shot actions, each behind a confirmation dialog:
 
-| 操作          | 内容                                                                                             |
-| ----------- | ---------------------------------------------------------------------------------------------- |
-| 時刻を設定       | Sends your phone's clock to the node                                                           |
-| 再起動         | Restarts the node                                                                              |
-| シャットダウン     | Powers the node down                                                                           |
-| 出荷時にリセット    | Returns every setting to its factory default                                                   |
-| NodeDBをリセット | Clears the node database. This dialog carries a **Preserve Favorites?** switch |
+| 操作                   | 内容                                                                                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 時刻を設定                | Sends your phone's clock to the node                                                                                                                             |
+| 再起動                  | Restarts the node                                                                                                                                                |
+| Reboot into DFU mode | Restarts an nRF52 node into its bootloader, where it stays off the mesh until new firmware is flashed or it is reset. Shown only for nRF52 nodes |
+| シャットダウン              | Powers the node down                                                                                                                                             |
+| 出荷時にリセット             | Returns every setting to its factory default                                                                                                                     |
+| NodeDBをリセット          | Clears the node database. This dialog carries a **Preserve Favorites?** switch                                                                   |
 
 > ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the node's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
 
@@ -295,6 +295,19 @@ true before the entry appears in the module list: the node runs firmware 2.8.0 o
 Traffic Management settings are exported but not applied on import. Export before a factory
 reset, or to copy one node's setup onto another. The section is shown for your
 own node only, not over remote admin.
+
+The same section backs up the app's own data for a node: its messages and nodes as stored in the
+app, not the node's settings.
+
+- **Back up app data** saves that data to a file named after the node and the date.
+- **Restore app data** replaces the app's messages and nodes for that node with a backup, after a
+  confirmation. It accepts only an undamaged backup made by an app with the same database version.
+  The restore takes effect after you restart the app and reconnect to that node.
+
+Both disconnect the node first, after asking, and act on the data of the node that was connected.
+With no node connected they act on the most recently connected node. They stay disabled, with
+the line _Connect to a radio first. There is no app data to back up or restore yet._, until the
+app has stored data for some node.
 
 ### 詳細設定
 
@@ -324,30 +337,18 @@ say — that is why the queued list can be shorter than you expect.
 
 ### App Settings
 
-The **App Settings** block on the **Settings** screen configures the app rather than the node, and
-appears only when your own node is selected. It is grouped rather than flat:
+The **App** section of the **Settings** screen configures the app rather than the node, and
+appears only when your own node is selected. It holds, in order:
 
-**Privacy**
-
-- **Allow analytics and crash reporting** — opt in or out of diagnostics.
+- **Allow analytics and crash reporting.** — opt in or out of diagnostics. Google Play build only.
 - **Provide phone location to mesh** — share this phone's position when the node has no GPS fix.
   It needs precise location: with approximate location allowed, turning it on asks for precise.
-- **Homoglyph encoding** — how look-alike characters in names are handled.
-
-**Appearance**
-
-- **Units** — metric, imperial, or follow the system. This is the entry
-  [Units & Locale](units-and-locale) sends you to.
-- **Theme** and **Language**.
+- **Compact encoding for Cyrillic** — how look-alike characters in names are handled.
+- **Language**, **Theme**, and **Units**. **Units** is metric, imperial, or follow the system, and
+  is the entry [Units & Locale](units-and-locale) sends you to.
 - **Show full message timestamps**.
-
-**Persistence**
-
-- A cache limit for how much history is kept.
+- **Device DB cache limit**, which sets how much history is kept.
 - **Export rangetest packets**, **Export all packets** and **Export node database**.
-
-**On their own**
-
 - **Node Layout** — how much detail each row of the node list shows.
 - **Wi-Fi Provisioning for mPWRD-OS** — see [Connections](connections).
 - **Message Filter** — hides incoming messages that contain words you list. With no words
@@ -355,14 +356,14 @@ appears only when your own node is selected. It is grouped rather than flat:
 - **System AI** — appears only where app functions are available; see
   [App Functions](app-functions).
 
-A **Permissions** block sits above App Settings, so a user who skipped a permission during
-onboarding can get back to it, and **App Info** sits below.
+A **Permissions** section sits above **App**, so a user who skipped a permission during
+onboarding can get back to it. **Information** sits below it, with **Show Introduction**,
+**App Notifications**, **System Settings**, **About**, and the app version. **Help &
+Documentation** closes the screen.
 
 ### 概要
 
-**Settings → About** carries the app's own identity rather than the node's:
-
-Three sections:
+**Settings → About** carries the app's own identity rather than the node's, in three sections:
 
 - **What is Meshtastic?** — a short description of the project.
 - **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
@@ -377,13 +378,13 @@ may redistribute under the same license.
 ### 謝辞
 
 Reached from **About**, this lists every open-source library the app ships, with its license,
-generated at build time by AboutLibraries. It was previously called the license screen.
+generated at build time by AboutLibraries.
 
 ### Troubleshooting remote admin
 
-- **「対象ノードから応答がありません」**：対象が圏外、オフライン、または管理者鍵が一致していない可能性があります。両方のノードで管理者鍵が一致しているか確認してください。
+- **"Could not reach node — try again or move closer."** The target may be out of range or offline, or it doesn't list your node's public key as an admin key. Check the **Admin Key** entries on the target node.
+- **"Connect to a radio to administer remote nodes."** Your own node isn't connected. Reconnect it from the [Connections](connections) screen.
 - **変更が適用されない**：一部の設定は、反映に再起動が必要です。保存後に「再起動」を実行してみてください。
-- **リモートの設定が表示されない**：自分のノードに、対象ノードの管理者鍵があることを確認してください。管理チャンネルは、管理者鍵を設定すると自動的に構成されます。
 
 ## 関連トピック
 

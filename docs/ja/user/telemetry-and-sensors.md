@@ -1,7 +1,7 @@
 ---
 title: テレメトリとセンサー
 nav_order: 9
-last_updated: 2026-09-18
+last_updated: 2026-10-21
 description: メッシュ上のセンサーデータ。対応する環境・大気質・電力センサーと、設定・表示のガイドを説明します。
 aliases:
   - sensors
@@ -58,7 +58,7 @@ Meshtastic のノードは、メッシュネットワーク全体でセンサー
 
 Both appear as info cards on the node detail screen, next to the other environment readings.
 
-Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, dissolved oxygen, ORP, turbidity, nitrate, ammonium, oxygen demand, solar irradiance) appears as a **Soil & Water** row of info cards on the node detail screen once a node reports any of it, and is included in the node database export. There is no chart or log screen for it yet.
+Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, dissolved oxygen, ORP, turbidity, nitrate, ammonium, oxygen demand, solar irradiance) appears as a **Soil & Water** row of info cards on the node detail screen once a node reports any of it, and is included in the node database export. It has no chart or log screen, and the row has no request button.
 
 ### 光と UV
 
@@ -75,7 +75,7 @@ Soil probe and water-quality sonde chemistry (pH, conductivity, salinity, NPK, d
 | Wind speed                                             | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card                                                                   |
 | Wind direction, gust, and lull                         | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                                                                                       |
 | Rainfall, last hour and last 24 hours                  | mm or in             | Listed with each reading on the Environment Metrics screen; not charted                                                                                                                                                       |
-| Lightning, strikes in the last hour and storm distance | count, km or mi      | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometres |
+| Lightning, strikes in the last hour and storm distance | count, km or mi      | Card and listed with each reading on the Environment Metrics screen; not charted. From an AS3935 detector. Storm distance is always in km or mi, since the detector resolves whole kilometers |
 | 放射線                                                    | µR/h                 | Card and chart                                                                                                                                                                                                                |
 | 重さ                                                     | kg or lb             | Card only — load cells, such as a beehive scale                                                                                                                                                                               |
 | 距離                                                     | mm or in             | Card only — water level, from a distance sensor                                                                                                                                                                               |
@@ -101,13 +101,14 @@ The node detail screen shows read-only cards for channels 1 to 3. Use the chart 
 1. Navigate to **Settings → Module configuration → Telemetry**.
 2. Each metric group has its own enable toggle and its own interval:
 
-   - **Device Metrics** — battery, voltage, uptime, ChUtil, and AirUtil. Its enable toggle, **Send Device Telemetry**, appears only on firmware 2.7.12 and later; on older firmware you can change the interval but not turn the group off
+   - **Device Metrics** — battery, voltage, uptime, ChUtil, and AirUtil. Its toggle, **Broadcast Device Metrics**, appears only on firmware 2.7.13 and later. Turned off, the node stops broadcasting these metrics to the mesh but still sends them to the connected app; on older firmware you can change the interval but not stop the broadcast
    - **Environment Metrics** — temperature, humidity, pressure and the other sensor readings
    - **Air Quality Metrics** — particulate and CO₂ readings
    - **Power Metrics** — the per-channel voltage and current readings
 
-   Environment and Power each have an extra toggle to show their readings on the radio's own
-   screen, and Environment has one more to show its temperatures there in Fahrenheit.
+   Environment has an extra toggle, **Show on device screen**, to show its readings on the node's own
+   screen, and **Display Fahrenheit** to show its temperatures there in Fahrenheit. Power has
+   **Power Screen** for the same purpose.
 
 ### Choosing an Interval
 
@@ -135,8 +136,8 @@ CO₂ の測定値は、深刻度に応じて色分けされます（良好 → 
 ## テレメトリを表示する
 
 1. 「**ノード**」に移動して、ノードを選択します。
-2. The **Telemetry** section lists a row for every metric type — Device, Environment, Air Quality, Power, and the rest — whether or not this node has reported it. A row fills in with readings, and grows a chart button, once that node has actually sent that kind of telemetry. An empty row means nothing has arrived yet, not that the sensor is missing.
-3. Use the chart button on a row to open that metric's history, where you can pick a time frame and export the readings as CSV.
+2. The **Telemetry** section lists a row for each metric type — Device, Environment, Air Quality, Power, Host, PAX, and the rest — whether or not this node has reported it. A row fills in with readings, and grows a chart button, once that node has sent that kind of telemetry. An empty row means nothing has arrived, not that the sensor is missing. **Soil & Water** is the exception: its row appears only after the node reports soil or water readings.
+3. Use the chart button on a row to open that metric's history, where you can pick a time frame. The Device, Environment, Air Quality, Power, Signal Quality, and Position screens also export their readings as CSV.
 
 ![Node detail screen with the telemetry chart action menu open](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
@@ -144,7 +145,7 @@ CO₂ の測定値は、深刻度に応じて色分けされます（良好 → 
 
 - **環境データが表示されない？** リモートノードに物理センサーが接続されている必要があります（例：I2C の BME280）。デバイステレメトリ（バッテリー、連続稼働時間）は常に利用できますが、環境メトリクスにはハードウェアが必要です。
 - **測定値が古い？** 報告間隔を確認してください。非常に長い間隔（7200 秒以上）では、データの更新頻度が低くなります。リモートノードがまだオンラインであるかも確認してください。
-- **I2C バスでセンサーが競合している？** 一部のセンサーは I2C アドレスを共有しています。同じバスに複数のセンサーがある場合は、無線機のシリアルデバッグ出力でアドレスの衝突がないか確認してください。
+- **I2C バスでセンサーが競合している？** 一部のセンサーは I2C アドレスを共有しています。 If you have multiple sensors on the same bus, check for address collisions in the node's serial debug output.
 
 ## 関連トピック
 

@@ -1,8 +1,8 @@
 ---
 title: アプリ機能
 nav_order: 19
-last_updated: 2026-08-30
-description: メッシュの機能を Android システムやオンデバイスの AI アシスタント（例：Gemini）に公開し、アプリを開かずにメッシュのワークフローを実行できるようにします。
+last_updated: 2026-10-21
+description: Expose mesh capabilities to the Android system and on-device AI assistants such as Gemini, so they can run mesh workflows without opening the app.
 aliases:
   - app-functions
   - system-ai
@@ -25,7 +25,7 @@ Control App Functions from **Settings → System AI**. この画面には次が�
 
 > ⚠️ **Important:** App Functions ship switched on. On a Google-flavor build the master toggle and every individual function, **Send message** included, start enabled — so an assistant can read your mesh data and send messages to your mesh until you turn **Allow AI access** off.
 
-機能は、**書き込み**セクション（何かを変更したり、メッシュにデータを送信したりする機能）と、**読み取り**セクション（情報を返すだけの機能）に分かれています。
+The functions are grouped into a **Write functions** section (functions that change something or send data to your mesh) and a **Read functions** section (functions that only return information).
 
 ![マスタートグルと機能ごとのトグルを備えたアプリ機能の画面](../../assets/screenshots/app-functions_settings.png)
 
@@ -33,22 +33,22 @@ The screenshot has **Send message** and **Get recent messages** switched off to 
 
 ### 書き込み機能
 
-| 機能               | 内容                                                                                                                                                                                                            |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Send message** | Sends a text message to a contact (direct message) or to a channel. The mesh carries at most 233 bytes of text, so keep assistant-composed messages short. |
+| 機能               | 内容                                                                                                                                                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Send message** | Sends a text message to a contact (direct message) or to a channel. It refuses text over 228 bytes, and sends at most five messages a minute, so keep assistant-composed messages short. |
 
 ### 読み取り機能
 
-| 機能                      | 返す内容                                                                                |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| **Get mesh status**     | Whether you're connected to a radio, and how many nodes are online. |
-| **Get node list**       | メッシュ上のノードのリスト。                                                                      |
-| **Get channel info**    | チャンネルに関する情報。                                                                        |
-| **Get device status**   | 接続中の無線機の状態。                                                                         |
-| **Get node details**    | 特定のノードに関する詳細情報。                                                                     |
-| **Get mesh metrics**    | メッシュからのテレメトリとメトリクス。                                                                 |
-| **Get recent messages** | 会話からの最近のメッセージ。                                                                      |
-| **Get unread summary**  | 未読メッセージの概要。                                                                         |
+| 機能                      | 返す内容                                                                               |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| **Get mesh status**     | Whether you're connected to a node, and how many nodes are online. |
+| **Get node list**       | メッシュ上のノードのリスト。                                                                     |
+| **Get channel info**    | チャンネルに関する情報。                                                                       |
+| **Get device status**   | Status of your connected node.                                     |
+| **Get node details**    | 特定のノードに関する詳細情報。                                                                    |
+| **Get mesh metrics**    | メッシュからのテレメトリとメトリクス。                                                                |
+| **Get recent messages** | 会話からの最近のメッセージ。                                                                     |
+| **Get unread summary**  | 未読メッセージの概要。                                                                        |
 
 ## プライバシー
 
