@@ -57,10 +57,10 @@ private const val CASING_LUMINANCE_SPLIT = 0.5f
 private val SparkCore = 2.5.dp
 private val SparkGlow = 5.dp
 private val SparkTail = 14.dp
-private val SparkSpacing = 120.dp
 
-/** How far a spark travels in a second, on screen. */
-private val SparkSpeed = 90.dp
+/** Sparks ride a path this many degrees apart, and travel this many degrees a second, so they hold to the world. */
+private const val SPARK_SPACING_DEG = 30.0
+private const val SPARK_DEG_PER_SECOND = 4.0
 private const val SPARK_GLOW_ALPHA = 0.6f
 private val LabelPadding = 4.dp
 private val TagLift = 16.dp
@@ -72,10 +72,7 @@ private val Dashes = floatArrayOf(18f, 12f)
 private fun DrawScope.screen(direction: Vec3, pose: CameraPose, focalPx: Float): Offset? =
     project(direction, pose, focalPx, size.width, size.height)?.let { Offset(it.x, it.y) }
 
-/**
- * Draws the polyline through [directions], clipping each piece at the near plane so nothing wraps around the view.
- * Returns the pieces as drawn on screen, in order, null where a piece was behind the camera.
- */
+/** Draws the polyline through [directions], clipping each piece at the near plane so nothing wraps around the view. */
 private fun DrawScope.drawPolyline(
     directions: List<Vec3>,
     pose: CameraPose,
@@ -83,21 +80,17 @@ private fun DrawScope.drawPolyline(
     color: Color,
     width: Float,
     dashed: Boolean,
-): List<Pair<Offset, Offset>?> {
+) {
     val effect = if (dashed) PathEffect.dashPathEffect(Dashes) else null
-    return directions.zipWithNext { a, b ->
-        val (ca, cb) = clipToNearPlane(a, b, pose) ?: return@zipWithNext null
-        val pa = screen(ca, pose, focalPx) ?: return@zipWithNext null
-        val pb = screen(cb, pose, focalPx) ?: return@zipWithNext null
+    directions.zipWithNext { a, b ->
+        val (ca, cb) = clipToNearPlane(a, b, pose) ?: return@zipWithNext
+        val pa = screen(ca, pose, focalPx) ?: return@zipWithNext
+        val pb = screen(cb, pose, focalPx) ?: return@zipWithNext
         drawLine(color, pa, pb, strokeWidth = width, cap = StrokeCap.Round, pathEffect = effect)
-        pa to pb
     }
 }
 
-/**
- * A straight line from the bottom center of the view, where the viewer stands, to [far]. Returns it as drawn, oriented
- * away from the viewer when [leaving] and toward it otherwise, or null when [far] is behind the camera.
- */
+/** A straight line from the bottom center of the view, where the viewer stands, to [far]. */
 @Suppress("LongParameterList")
 private fun DrawScope.drawFromViewer(
     far: PathPoint,
@@ -106,56 +99,50 @@ private fun DrawScope.drawFromViewer(
     color: Color,
     width: Float,
     dashed: Boolean,
-    leaving: Boolean,
-): Pair<Offset, Offset>? {
-    val end = screen(directionEnu(far.bearingDeg, far.elevationDeg), pose, focalPx) ?: return null
-    val viewer = Offset(size.width / 2, size.height)
+) {
+    val end = screen(directionEnu(far.bearingDeg, far.elevationDeg), pose, focalPx) ?: return
     val effect = if (dashed) PathEffect.dashPathEffect(Dashes) else null
-    drawLine(color, viewer, end, width, StrokeCap.Round, pathEffect = effect)
-    return if (leaving) viewer to end else end to viewer
+    drawLine(color, Offset(size.width / 2, size.height), end, width, StrokeCap.Round, pathEffect = effect)
+}
+
+/** A leg to or from the viewer as directions, from its feet out to [far] when [leaving], and back otherwise. */
+private fun viewerPath(far: PathPoint, leaving: Boolean): List<Vec3> {
+    val out = listOf(VIEWER_DOWN, directionEnu(far.bearingDeg, far.elevationDeg))
+    return if (leaving) out else out.reversed()
 }
 
 /** Black on a light color and white on a dark one, for whatever is drawn over or around it. */
 private fun contrastOn(color: Color): Color =
     if (color.luminance() > CASING_LUMINANCE_SPLIT) Color.Black else Color.White
 
-/** A spark on a path: where it is, and the unit direction it travels. */
-internal data class Spark(val at: Offset, val heading: Offset)
-
 /**
- * Sparks spaced [spacingPx] apart along the pieces of a path drawn on screen, in path order, all shifted [phasePx]
- * forward so that a growing phase moves them along it. Spacing is by length on screen, so a dense track carries no more
- * sparks than a sparse one of the same size. A gap between pieces is skipped, not crossed.
- */
-internal fun sparksAlong(pieces: List<Pair<Offset, Offset>>, phasePx: Float, spacingPx: Float): List<Spark> {
-    if (spacingPx <= 0f) return emptyList()
-    val sparks = mutableListOf<Spark>()
-    var next = phasePx.mod(spacingPx)
-    var walked = 0f
-    pieces.forEach { (from, to) ->
-        val length = (to - from).getDistance()
-        if (length == 0f) return@forEach
-        val heading = (to - from) / length
-        while (next <= walked + length) {
-            sparks += Spark(from + heading * (next - walked), heading)
-            next += spacingPx
-        }
-        walked += length
-    }
-    return sparks
-}
-
-/**
- * Packets in flight along a path, after the Chirpy Hop backdrop's hops: each spark a bright core over a halo in the
+ * Packets in flight along [path], after the Chirpy Hop backdrop's hops: each spark a bright core over a halo in the
  * path's color, with a short tail behind it, moving with [seconds].
  */
-private fun DrawScope.drawSparks(pieces: List<Pair<Offset, Offset>>, seconds: Double, core: Color, glow: Color) {
+@Suppress("LongParameterList")
+private fun DrawScope.drawSparks(
+    path: List<Vec3>,
+    seconds: Double,
+    pose: CameraPose,
+    focalPx: Float,
+    core: Color,
+    glow: Color,
+) {
     val tail = SparkTail.toPx()
-    sparksAlong(pieces, (seconds * SparkSpeed.toPx()).toFloat(), SparkSpacing.toPx()).forEach { (at, heading) ->
-        drawLine(glow, at - heading * tail, at, SparkGlow.toPx(), StrokeCap.Round)
+    sparksAlong(path, seconds * SPARK_DEG_PER_SECOND, SPARK_SPACING_DEG).forEach { spark ->
+        val at = screen(spark.at, pose, focalPx) ?: return@forEach
+        val behind = screen(spark.behind, pose, focalPx) ?: return@forEach
+        val ahead = screen(spark.ahead, pose, focalPx) ?: return@forEach
+        val heading = (ahead - behind).let { d -> d.getDistance().takeIf { it > 0f }?.let { d / it } }
+        heading?.let { drawLine(glow, at - it * tail, at, SparkGlow.toPx(), StrokeCap.Round) }
         drawCircle(glow, SparkGlow.toPx(), at)
         drawCircle(core, SparkCore.toPx(), at)
     }
+}
+
+/** Appends [leg] to [path], dropping its first direction where it repeats the path's last. */
+private fun MutableList<Vec3>.extend(leg: List<Vec3>) {
+    addAll(if (leg.firstOrNull() == lastOrNull()) leg.drop(1) else leg)
 }
 
 /** The localized patterns for a route's apex tags, read in composition since drawing cannot reach resources. */
@@ -196,8 +183,8 @@ internal fun DrawScope.drawRoute(
     listOfNotNull(route.forward, route.back).forEach { leg ->
         val color = if (leg.forward) forwardColor else backColor
         val liftSign = if (leg.forward) 1 else -1
-        // The leg as drawn, hop by hop, for its sparks to run along once every link is down.
-        val pieces = mutableListOf<Pair<Offset, Offset>>()
+        // The leg hop by hop as directions, for its sparks to run along once every link is down.
+        val path = mutableListOf<Vec3>()
         var from: Int? = null
         leg.points.forEachIndexed { index, point ->
             if (point == null) return@forEachIndexed
@@ -219,23 +206,24 @@ internal fun DrawScope.drawRoute(
                     }
                 if (far != null) {
                     // A link to or from the phone itself: the forward leg leaves the viewer, the return leg comes home.
-                    drawFromViewer(far, pose, focalPx, stroke, width, dashed = false, leaving = start.atViewer)?.let {
-                        pieces += it
+                    drawFromViewer(far, pose, focalPx, stroke, width, dashed = false)
+                    path.extend(viewerPath(far, leaving = start.atViewer))
+                    screen(directionEnu(far.bearingDeg, far.elevationDeg), pose, focalPx)?.let { end ->
                         // Toward the hop, so the tag stays clear of the bottom panel and the reticle.
-                        val end = if (start.atViewer) it.second else it.first
                         val along = if (leg.forward) FORWARD_STEM_TAG_AT else RETURN_STEM_TAG_AT
-                        tag?.let { text -> tags += text to lerp(Offset(size.width / 2, size.height), end, along) }
+                        tag?.let { tags += it to lerp(Offset(size.width / 2, size.height), end, along) }
                     }
                 } else if (!start.atViewer) {
                     val arc = arcDirections(start, point, liftSign)
-                    pieces += drawPolyline(arc, pose, focalPx, stroke, width, dashed = skipped > 0).filterNotNull()
+                    drawPolyline(arc, pose, focalPx, stroke, width, dashed = skipped > 0)
+                    path.extend(arc)
                     val apex = screen(arc[arc.size / 2], pose, focalPx)
                     if (apex != null && tag != null) tags += tag to apex
                 }
             }
             from = index
         }
-        drawSparks(pieces, sparkSeconds, core = contrastOn(color), glow = color.copy(alpha = SPARK_GLOW_ALPHA))
+        drawSparks(path, sparkSeconds, pose, focalPx, contrastOn(color), color.copy(alpha = SPARK_GLOW_ALPHA))
     }
     tags.forEach { (text, at) -> drawTag(text, at, textMeasurer, labelStyle) }
 }
@@ -266,33 +254,29 @@ internal fun DrawScope.drawTrack(
     fun alphaAt(index: Int): Float = trackFadeAlpha(recency[index])
     fun TrackPoint.direction() = directionEnu(point.bearingDeg, point.elevationDeg)
 
-    // The leg from older a to newer b as drawn on screen, oriented that way, or null where none of it shows.
-    fun leg(a: TrackPoint, b: TrackPoint, color: Color, width: Float): Pair<Offset, Offset>? {
+    // Each leg from older a to newer b as directions along the ground; one with an end at the viewer runs to its feet.
+    val legs = points.zipWithNext { a, b ->
         val far = viewerLeg(a.point, b.point)
-        return when {
-            far != null ->
-                drawFromViewer(far, pose, focalPx, color, width, dashed = !b.altitudeKnown, leaving = a.point.atViewer)
-
-            !a.point.atViewer ->
-                drawPolyline(
-                    listOf(a.direction(), b.direction()),
-                    pose,
-                    focalPx,
-                    color,
-                    width,
-                    dashed = !b.altitudeKnown,
-                )
-                    .singleOrNull()
-
-            else -> null
+        when {
+            far != null -> viewerPath(far, leaving = a.point.atViewer)
+            a.point.atViewer -> emptyList()
+            else -> groundDirections(a.point, b.point)
         }
     }
-    val casingWidth = TrackWidth.toPx() + 2 * TrackCasing.toPx()
-    points.zipWithNext().forEachIndexed { i, (a, b) -> leg(a, b, casing.copy(alpha = alphaAt(i + 1)), casingWidth) }
-    val drawn =
-        points.zipWithNext().mapIndexed { i, (a, b) -> leg(a, b, base.copy(alpha = alphaAt(i + 1)), TrackWidth.toPx()) }
+    fun drawLegs(width: Float, color: (Int) -> Color) = points.zipWithNext().forEachIndexed { i, (a, b) ->
+        val far = viewerLeg(a.point, b.point)
+        when {
+            far != null -> drawFromViewer(far, pose, focalPx, color(i + 1), width, dashed = !b.altitudeKnown)
+
+            legs[i].isNotEmpty() ->
+                drawPolyline(legs[i], pose, focalPx, color(i + 1), width, dashed = !b.altitudeKnown)
+        }
+    }
+    drawLegs(TrackWidth.toPx() + 2 * TrackCasing.toPx()) { casing.copy(alpha = alphaAt(it)) }
+    drawLegs(TrackWidth.toPx()) { base.copy(alpha = alphaAt(it)) }
     // Older to newer, the core in the outline's shade so it stands off the line it runs along.
-    drawSparks(drawn.filterNotNull(), sparkSeconds, core = casing, glow = base.copy(alpha = SPARK_GLOW_ALPHA))
+    val path = mutableListOf<Vec3>().apply { legs.forEach { extend(it) } }
+    drawSparks(path, sparkSeconds, pose, focalPx, casing, base.copy(alpha = SPARK_GLOW_ALPHA))
     points.forEachIndexed { i, p ->
         if (p.point.atViewer) return@forEachIndexed
         screen(p.direction(), pose, focalPx)?.let { at ->

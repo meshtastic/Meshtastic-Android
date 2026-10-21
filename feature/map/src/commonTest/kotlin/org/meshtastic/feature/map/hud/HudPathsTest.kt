@@ -16,9 +16,12 @@
  */
 package org.meshtastic.feature.map.hud
 
-import androidx.compose.ui.geometry.Offset
 import org.meshtastic.core.repository.PhoneLocation
 import org.meshtastic.proto.Position
+import kotlin.math.PI
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.hypot
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -189,30 +192,74 @@ class HudPathsTest {
     }
 
     @Test
-    fun `sparks sit a spacing apart from the phase and head along the path`() {
-        val pieces = listOf(Offset(0f, 0f) to Offset(100f, 0f), Offset(100f, 0f) to Offset(100f, 100f))
-        val sparks = sparksAlong(pieces, phasePx = 10f, spacingPx = 50f)
-        assertEquals(
-            listOf(Offset(10f, 0f), Offset(60f, 0f), Offset(100f, 10f), Offset(100f, 60f)),
-            sparks.map { it.at },
-        )
-        assertEquals(listOf(Offset(1f, 0f), Offset(1f, 0f), Offset(0f, 1f), Offset(0f, 1f)), sparks.map { it.heading })
+    fun `sparks sit a spacing apart in angle from the phase across every leg`() {
+        val path = listOf(directionEnu(0.0, 0.0), directionEnu(45.0, 0.0), directionEnu(90.0, 0.0))
+        val sparks = sparksAlong(path, phaseDeg = 10.0, spacingDeg = 30.0)
+        assertEquals(listOf(10.0, 40.0, 70.0), sparks.map { bearingOf(it.at) }, absoluteTolerance = 1e-6)
     }
 
     @Test
-    fun `a growing phase moves every spark forward and wraps at the spacing`() {
-        val pieces = listOf(Offset(0f, 0f) to Offset(100f, 0f))
+    fun `a spark looks ahead the way the path runs`() {
+        val spark = sparksAlong(listOf(directionEnu(0.0, 0.0), directionEnu(90.0, 0.0)), 20.0, 30.0).first()
+        assertTrue(bearingOf(spark.behind) < bearingOf(spark.at))
+        assertTrue(bearingOf(spark.at) < bearingOf(spark.ahead))
+    }
+
+    @Test
+    fun `a phase one spacing on puts every spark back where it was`() {
+        val path = listOf(directionEnu(0.0, 0.0), directionEnu(90.0, 0.0))
         assertEquals(
-            sparksAlong(pieces, phasePx = 5f, spacingPx = 50f),
-            sparksAlong(pieces, phasePx = 55f, spacingPx = 50f),
+            sparksAlong(path, 5.0, 30.0).map { bearingOf(it.at) },
+            sparksAlong(path, 35.0, 30.0).map { bearingOf(it.at) },
+            absoluteTolerance = 1e-9,
         )
-        assertEquals(Offset(25f, 0f), sparksAlong(pieces, phasePx = 25f, spacingPx = 50f).first().at)
     }
 
     @Test
     fun `a path with no length carries no sparks`() {
-        assertTrue(sparksAlong(listOf(Offset(3f, 3f) to Offset(3f, 3f)), phasePx = 0f, spacingPx = 50f).isEmpty())
-        assertTrue(sparksAlong(emptyList(), phasePx = 0f, spacingPx = 50f).isEmpty())
+        assertTrue(sparksAlong(listOf(directionEnu(10.0, 0.0), directionEnu(10.0, 0.0)), 0.0, 30.0).isEmpty())
+        assertTrue(sparksAlong(emptyList(), 0.0, 30.0).isEmpty())
+    }
+
+    @Test
+    fun `a short leg stays a straight chord between its ends`() {
+        val a = ground(east = 100.0, north = 1_000.0, rise = 0.0)
+        val b = ground(east = 120.0, north = 1_000.0, rise = 0.0)
+        assertEquals(2, groundDirections(a, b).size)
+    }
+
+    @Test
+    fun `a leg passing close by follows the ground and dips toward the viewer`() {
+        val a = ground(east = -100.0, north = 20.0, rise = -2.0)
+        val b = ground(east = 100.0, north = 20.0, rise = -2.0)
+        val steps = groundDirections(a, b)
+        assertTrue(steps.size > 2)
+        val middle = steps[steps.size / 2]
+        assertEquals(0.0, bearingOf(middle), absoluteTolerance = 1e-6)
+        assertEquals(elevationDeg(20.0, -2.0), elevationOf(middle), absoluteTolerance = 1e-6)
+        assertEquals(a.bearingDeg, bearingOf(steps.first()), absoluteTolerance = 1e-6)
+        assertEquals(b.elevationDeg, elevationOf(steps.last()), absoluteTolerance = 1e-6)
+    }
+
+    private fun ground(east: Double, north: Double, rise: Double): PathPoint {
+        val distance = hypot(east, north)
+        return PathPoint(
+            bearingDeg = (degrees(atan2(east, north)) + 360.0) % 360.0,
+            elevationDeg = elevationDeg(distance, rise),
+            distanceM = distance,
+            atViewer = false,
+        )
+    }
+
+    private fun degrees(radians: Double) = radians * 180.0 / PI
+
+    private fun bearingOf(v: Vec3) = (degrees(atan2(v.x, v.y)) + 360.0) % 360.0
+
+    private fun elevationOf(v: Vec3) = degrees(asin(v.z))
+
+    private fun assertEquals(expected: List<Double>, actual: List<Double>, absoluteTolerance: Double) {
+        assertEquals(expected.size, actual.size)
+        expected.zip(actual).forEach { (e, a) -> assertEquals(e, a, absoluteTolerance) }
     }
 
     private fun point(atViewer: Boolean) = PathPoint(
