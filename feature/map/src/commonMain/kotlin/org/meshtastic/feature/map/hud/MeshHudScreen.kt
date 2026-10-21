@@ -87,6 +87,9 @@ private const val FULL_CIRCLE_DEG = 360.0
 private const val SENSOR_WAIT_MS = 2_000L
 private const val MILLIS_PER_SECOND = 1_000.0
 
+/** How often a hot phone moves the sparks along, rather than every frame. */
+private const val HOT_SPARK_TICK_MS = 100L
+
 /** The finder counts as on target within this many degrees, or the target's own spread when that is wider. */
 private const val ON_TARGET_DEG = 5.0
 
@@ -181,14 +184,18 @@ fun MeshHudScreen(
     }
     val hasSensor by remember { derivedStateOf { poseState.value.hasSensor } }
     val thermal by remember { derivedStateOf { poseState.value.thermal } }
-    // The sparks' clock, read only while drawing, so a frame redraws the canvas and recomposes nothing. It runs only
-    // with a path open and a cool phone; a hot phone keeps its sparks where they stopped.
+    // The sparks' clock, read only while drawing, so a tick redraws the canvas and recomposes nothing. It runs only
+    // with
+    // a path open: every frame on a cool phone, a few times a second on a hot one, which still shows the direction.
     val sparkMillis = remember { mutableLongStateOf(0L) }
-    val animateSparks = (route != null || track != null) && thermal == HudThermal.NORMAL
-    LaunchedEffect(animateSparks) {
-        if (animateSparks) {
-            val start = withFrameMillis { it } - sparkMillis.longValue
-            while (true) withFrameMillis { sparkMillis.longValue = it - start }
+    val sparksOpen = route != null || track != null
+    val hotTickMs = if (thermal == HudThermal.NORMAL) 0L else HOT_SPARK_TICK_MS
+    LaunchedEffect(sparksOpen, hotTickMs) {
+        if (!sparksOpen) return@LaunchedEffect
+        val start = withFrameMillis { it } - sparkMillis.longValue
+        while (true) {
+            if (hotTickMs > 0) delay(hotTickMs)
+            withFrameMillis { sparkMillis.longValue = it - start }
         }
     }
     val waitingForSensor by remember {
