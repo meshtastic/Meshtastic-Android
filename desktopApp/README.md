@@ -1,116 +1,85 @@
 # `:desktopApp` — Meshtastic Desktop
 
-A Compose Desktop application target — the first full non-Android target for the shared KMP module graph. This module serves as:
-
-1. **First multi-target milestone** — Proves the KMP architecture supports real application targets beyond Android.
-2. **Build smoke-test** — Validates that all `core:*` KMP modules compile and link on a JVM Desktop target.
-3. **Shared navigation proof** — Uses the same Navigation 3 routes from `core:navigation` and the same `NavDisplay` + `entryProvider` pattern as the Android app, proving the shared backstack architecture works cross-target.
-4. **Desktop app scaffold** — A working Compose Desktop application with a `NavigationRail` for top-level destinations and placeholder screens for each feature.
+The Compose Desktop host for the shared KMP module graph. It runs the same `core:*` modules and the same `feature:*` screens and Navigation 3 graphs as the Android app, and adds only what a JVM desktop needs: the window and tray, TCP, serial/USB and BLE transports, native notifications, and packaging.
 
 ## Quick Start
 
-```bash
+```shell
 # Run the desktop app
 ./gradlew :desktopApp:run
+
+# Run it with live recomposition on source edits (needs the JetBrains Runtime the toolchain pins)
+./gradlew :desktopApp:hotRun
 
 # Run tests
 ./gradlew :desktopApp:test
 
-# Package native distribution (DMG/MSI/DEB) — debug (no ProGuard)
+# Package native distribution for this OS, debug (no ProGuard)
 ./gradlew :desktopApp:packageDistributionForCurrentOS
 
-# Package native distribution (DMG/MSI/DEB) — release (ProGuard minified)
+# Package native distribution for this OS, release (ProGuard)
 ./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
 ```
 
-## Install via Homebrew (macOS, Apple Silicon)
+Packaging builds the formats of the host it runs on: DMG on macOS, MSI and EXE on Windows, DEB, RPM and a jpackage app-image on Linux. CI wraps that app-image into a real `.AppImage` with `scripts/build-appimage.sh`. A release build (`-Pdesktop.release=true`) sets `IS_DEBUG=false`, which turns off debug HTTP logging and turns on the update check.
 
-```bash
-brew install --cask meshtastic/tap/meshtastic-desktop
-```
+## Distribution
 
-The cask lives in the [meshtastic/homebrew-tap](https://github.com/meshtastic/homebrew-tap) tap (alongside the `meshtasticd` formula) and is regenerated from the template at `.github/homebrew/meshtastic-desktop.rb` by the `update-homebrew-cask` job in `promote.yml`, which opens a PR against the tap for production releases when `HOMEBREW_TAP_TOKEN` is configured.
+Releases ship the installers on [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases) and a Flatpak on [Flathub](https://flathub.org/apps/org.meshtastic.MeshtasticDesktop). `RELEASE_PROCESS.md` covers signing and the store workflows.
+
+A Homebrew cask is rendered from `.github/homebrew/meshtastic-desktop.rb` by the `update-homebrew-cask` job in `promote.yml`, which opens a PR against [meshtastic/homebrew-tap](https://github.com/meshtastic/homebrew-tap) on each production release when `HOMEBREW_TAP_TOKEN` is set. `brew install --cask meshtastic/tap/meshtastic-desktop` works once one of those PRs has merged. The cask is Apple silicon only.
 
 ## ProGuard / Minification
 
-Release builds use ProGuard for tree-shaking (unused code removal), significantly reducing distribution size. Obfuscation is disabled since the project is open-source. Rules are aligned with the Android R8 rules in `androidApp/proguard-rules.pro` — both targets share the same anti-class-merging philosophy.
+Release builds run ProGuard 7.9.1 to shrink the app. Obfuscation is off (`obfuscate.set(false)`), and `-dontoptimize` in `proguard-rules.pro` turns the optimizer off as well, overriding `optimize.set(true)` in `build.gradle.kts`, because the Compose Multiplatform consumer rules carry `-assumenosideeffects` directives the optimizer would act on.
 
 **Configuration:**
-- `build.gradle.kts` — `buildTypes.release.proguard` block enables ProGuard with `optimize.set(true)` and `obfuscate.set(false)`.
-- `proguard-rules.pro` — Keep-rules for reflection/JNI-sensitive dependencies (Koin, kotlinx-serialization, Wire protobuf, Room KMP `androidx.room3`, Ktor, Kable BLE, Coil, SQLite JNI, Compose Multiplatform resources) and an anti-merge rule for Compose animation classes.
-
-**Key rules:**
-- **Compose animation anti-merge** (`-keep class androidx.compose.animation.** { *; }`) — Prevents ProGuard's optimizer from incorrectly tree-shaking or merging animation class hierarchies (e.g. `EnterTransition`/`ExitTransition` into `*Impl`), which causes animations to silently snap. Same rule as Android.
-- **Room KMP** — Uses `androidx.room3` package path (Room KMP 3.x).
+- `config/proguard/shared-rules.pro`: keep rules shared with the Android R8 build, for Compose Multiplatform resources, Koin Annotations, kotlinx coroutines, serialization and datetime, Ktor, DataStore, Wire, the bundled SQLite driver and Room KMP (`androidx.room3`). Compose Desktop's ProGuard task does not read the `META-INF/proguard/*.pro` consumer rules inside dependency jars, so they are inlined here.
+- `proguard-rules.pro`: desktop-only rules, for JNA (libnotify and Kable's btleplug bindings), dbus-java for the Linux tray, the MapLibre and Filament FFI bindings, LWJGL, jSerialComm and Vico.
 
 **Troubleshooting ProGuard issues:**
-- If the release build crashes at runtime with `ClassNotFoundException` or `NoSuchMethodError`, a library is loading classes via reflection that ProGuard stripped. Add a `-keep` rule in `proguard-rules.pro` **and** the corresponding rule in `androidApp/proguard-rules.pro` to keep both targets aligned.
-- To debug which classes ProGuard removes, temporarily add `-printusage proguard-usage.txt` to the rules file and inspect the output in `desktopApp/proguard-usage.txt`.
-- To see the full mapping of optimizations applied, add `-printseeds proguard-seeds.txt`.
+- If the release build crashes at runtime with `ClassNotFoundException` or `NoSuchMethodError`, a library is loading classes via reflection that ProGuard stripped. Add a `-keep` rule to `config/proguard/shared-rules.pro` when the library is on both targets, or to `proguard-rules.pro` when it is desktop-only.
+- To debug which classes ProGuard removes, temporarily add `-printusage <file>` to the rules file; `-printseeds <file>` lists what the keep rules matched.
 - Run `./gradlew :desktopApp:runRelease` for a quick smoke-test of the minified app before packaging.
 
 ## Architecture
 
-The module depends on the JVM variants of KMP modules:
+The module depends on the JVM variants of the KMP modules: every `core:*` module except `core:nfc`, `core:barcode`, `core:konsist` and `core:testing`, and every `feature:*` module except `feature:widget` (`feature:map-terrain` arrives through `feature:map-maplibre`). The map is `feature:map-maplibre`, shared with the `fdroid` Android flavor, with exactly one MapLibre native runtime chosen for the build host's architecture.
 
-- `core:common`, `core:model`, `core:di`, `core:navigation`, `core:repository`
-- `core:domain`, `core:data`, `core:database`, `core:datastore`, `core:prefs`
-- `core:network`, `core:resources`, `core:ui`
+**Navigation:** Uses the JetBrains multiplatform forks of Navigation 3 (`org.jetbrains.androidx.navigation3:navigation3-ui`) and Lifecycle. `DesktopMainScreen` assembles the shared `MeshtasticAppShell`, `MeshtasticNavigationSuite` and `MeshtasticNavDisplay`, and `desktopNavGraph` registers the graphs each feature module exports from `commonMain` (`nodesGraph`, `contactsGraph`, `channelsGraph`, `mapGraph`, `settingsGraph`, `connectionsGraph`, `discoveryGraph`, `firmwareGraph`, `wifiProvisionGraph`).
 
-**Navigation:** Uses JetBrains multiplatform forks of Navigation 3 (`org.jetbrains.androidx.navigation3:navigation3-ui`) and Lifecycle (`org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose`, `lifecycle-runtime-compose`). A unified `SavedStateConfiguration` with polymorphic `SerializersModule` is provided centrally by `core:navigation` for non-Android NavKey serialization. Desktop utilizes the exact same navigation graph wiring (`settingsGraph`, `nodesGraph`, `contactsGraph`, `connectionsGraph`) directly from the `commonMain` of their respective feature modules, maintaining full UI parity.
+**Coroutines:** Requires `kotlinx-coroutines-swing` for `Dispatchers.Main` on JVM/Desktop. Without it, any code using `lifecycle.coroutineScope` or `Dispatchers.Main` crashes at runtime.
 
-**Coroutines:** Requires `kotlinx-coroutines-swing` for `Dispatchers.Main` on JVM/Desktop. Without it, any code using `lifecycle.coroutineScope` or `Dispatchers.Main` (e.g., `NodeRepositoryImpl`, `RadioConfigRepositoryImpl`) will crash at runtime.
+**DI:** `Main.kt` starts Koin with `startKoin<DesktopKoinApp>`. `DesktopKoinModule` includes the `commonMain` modules of the core libraries, then the desktop modules, so a desktop binding wins over any `commonMain` default it replaces.
 
-**DI:** A Koin DI graph is bootstrapped in `Main.kt` with platform-specific implementations injected.
+**UI:** JetBrains Compose for Desktop with Material 3 theming. Desktop is a thin host shell that delegates almost entirely to the shared KMP UI modules. The tray uses Compose's `Tray` on macOS and Windows, and a StatusNotifierItem over D-Bus on Linux (`tray/SniTray.kt`), since AWT's XEmbed tray loses clicks on GNOME and Plasma.
 
-**UI:** JetBrains Compose for Desktop with Material 3 theming. Desktop acts as a thin host shell, delegating almost entirely to fully shared KMP UI modules. Includes native OS notifications (macOS `UNUserNotificationCenter`, Linux libnotify, Windows toast) and a monochrome SVG tray icon for a native look and feel.
+**Notifications:** `DesktopNotificationManager` implements the common `NotificationManager` interface and forwards to a native sender: `UNUserNotificationCenter` on macOS, libnotify on Linux, a PowerShell toast on Windows. It falls back to Compose `TrayState` notifications when native delivery fails. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) for proper app attribution.
 
-**Notifications:** Implements the common `NotificationManager` interface via `DesktopNotificationManager`. Repository-level notifications (messages, node events, alerts) are collected in `Main.kt` and forwarded to platform-native senders; the app falls back to Compose `TrayState` notifications only if native delivery fails. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) for proper app attribution.
+**Localization:** Desktop exposes a language picker that persists the selected BCP-47 tag in `UiPrefs.locale`. `Main.kt` resolves it against the system locale (`resolveLocale`) and applies it as the JVM default `Locale`.
 
-**Localization:** Desktop exposes a language picker, persisting the selected BCP-47 tag in `UiPrefs.locale` (`Main.kt` injects `org.meshtastic.core.repository.UiPrefs`). `Main.kt` applies the override to the JVM default `Locale` and uses a `staticCompositionLocalOf`-backed recomposition trigger so Compose Multiplatform `stringResource()` calls update immediately without recreating the Navigation 3 backstack.
+**Updates:** Release builds outside Flatpak check GitHub's `releases/latest` at startup (`UpdateChecker`) and post a notification when a newer production release exists. Flatpak installs update through Flathub.
 
 ## Key Files
 
 | File | Purpose |
 |---|---|
-| `Main.kt` | App entry point — Koin bootstrap, Compose Desktop window, theme + locale application |
-| `ui/DesktopMainScreen.kt` | Navigation 3 shell — `NavigationRail` + `NavDisplay` |
+| `Main.kt` | App entry point: Koin bootstrap, Compose Desktop window and tray, theme and locale application, update check |
+| `ui/DesktopMainScreen.kt` | Navigation 3 shell: shared app shell, navigation suite and `MeshtasticNavDisplay` |
 | `navigation/DesktopNavigation.kt` | Nav graph entry registrations for all top-level destinations (delegates to shared feature graphs) |
-| `radio/DesktopRadioTransportFactory.kt` | Provides TCP, Serial/USB, and BLE transports |
-| `notification/DesktopMeshNotificationManager.kt` | Desktop `MeshNotificationManager` — converts mesh events into `Notification`s and dispatches them |
+| `radio/DesktopRadioTransportFactory.kt` | Provides TCP, Serial/USB (jSerialComm) and BLE (Kable) transports |
+| `radio/DesktopMessageQueue.kt` | Sends queued outbound messages straight through the active radio controller (no WorkManager) |
+| `notification/DesktopMeshNotificationManager.kt` | Desktop `MeshNotificationManager`; converts mesh events into `Notification`s and dispatches them |
 | `notification/NativeNotificationSender.kt` | Native-sender contract, implemented by `MacOSNotificationSender` / `WindowsNotificationSender` / `LinuxNotificationSender` |
-| `DesktopNotificationManager.kt` | Bridge between repository notifications and Compose `TrayState` |
-| `radio/DesktopMessageQueue.kt` | Message queue for outbound mesh packets |
-| `di/DesktopKoinModule.kt` | Koin module with stub implementations |
-| `di/DesktopPlatformModule.kt` | Platform-specific Koin bindings |
-| `stub/NoopStubs.kt` | No-op implementations for all repository interfaces |
+| `DesktopNotificationManager.kt` | Bridge between repository notifications, the native senders and the Compose `TrayState` fallback |
+| `UpdateChecker.kt` | Compares the running version with GitHub's latest production release |
+| `tray/` | Linux StatusNotifierItem tray and its D-Bus menu |
+| `map/DesktopMapViewProvider.kt` | MapLibre map surfaces, imported map layers and the Site Planner slot |
+| `di/DesktopKoinModule.kt` | Aggregate Koin module that `DesktopKoinApp` points at |
+| `di/DesktopRuntimeModule.kt` | Radio stack, notifications and networking the JVM host owns |
+| `di/DesktopStubsModule.kt` | Bindings for interfaces whose only real implementation needs Android APIs |
+| `stub/NoopStubs.kt`, `stub/CompassStubs.kt` | The no-op implementations those bindings use |
 
-## What This Validates
+## Tests
 
-| Module | What's Tested |
-|---|---|
-| `core:common` | `NumberFormatter`, `UrlUtils`, `DateFormatter`, `CommonUri` |
-| `core:model` | `DeviceVersion`, `Capabilities`, `SfppHasher`, `platformRandomBytes`, `getShortDateTime`, `Channel.getRandomKey` |
-| `core:ui` | Shared Compose components compile and render on Desktop |
-| Build graph | All core modules compile and link without Android SDK |
-
-## Roadmap
-
-- [x] Implement real navigation with shared `core:navigation` routes (Navigation 3 shell)
-- [x] Adopt JetBrains multiplatform forks for lifecycle and navigation3
-- [x] Implement native macOS/Desktop notification support with `TrayState` and system tray
-- [x] Wire `feature:settings` composables into the nav graph (first real feature — ~30 screens)
-- [x] Wire `feature:node` composables into the nav graph (node list with shared ViewModel + NodeItem)
-- [x] Wire `feature:messaging` composables into the nav graph (contacts list with shared ViewModel)
-- [x] Add JetBrains Material 3 Adaptive `ListDetailPaneScaffold` to node and messaging screens
-- [x] Implement TCP transport (`DesktopRadioTransportFactory`) with auto-reconnect and backoff retry
-- [x] Implement mesh service lifecycle with full `want_config` handshake (lives in shared `:core:service` — `SharedRadioInterfaceService` / `MeshServiceOrchestrator`)
-- [x] Create connections screen using shared `feature:connections` with dynamic transport detection
-- [x] Replace 5 placeholder config screens with real desktop implementations (Device, Position, Network, Security, ExtNotification)
-- [x] Add desktop language picker backed by shared `UiPrefs.locale` with live translation updates
-- [x] Wire remaining `feature:*` composables (map) into the nav graph
-- [x] Move remaining node detail and message composables from `androidMain` to `commonMain`
-- [x] Add serial/USB transport for direct radio connection on Desktop
-- [x] Add BLE transport (via Kable) for direct radio connection on Desktop
-- [x] Add MQTT transport for cloud-connected operation
-- [x] Package as native distributions (DMG, MSI, DEB) via CI release pipeline
+`src/test/` covers the desktop host itself: Koin graph resolution (`DesktopKoinTest`), top-level destination parity with Android (`DesktopTopLevelDestinationParityTest`), the native notification senders and the notification managers, the message queue, the Linux tray, locale resolution, the update checker, the HTTP cache and logging. The shared modules' own tests run under `allTests`.

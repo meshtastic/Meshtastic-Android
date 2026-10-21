@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `:feature:docs` module is an **in-app documentation browser** with Compose Multiplatform UI. It bundles the Meshtastic user guide and developer guide as Compose resources at build time, provides full-text keyword search, Crowdin-backed multilingual content, optional ML Kit runtime translation (Google Play flavor), and a "Chirpy" AI Q&A assistant (Gemini Nano on Google Play; keyword fallback on F-Droid / Desktop / iOS).
+The `:feature:docs` module is an **in-app documentation browser** with Compose Multiplatform UI. It bundles the Meshtastic user guide and developer guide as Compose resources at build time, provides full-text keyword search, Crowdin-backed multilingual content, optional ML Kit runtime translation (Google Play flavor), and a "Chirpy" AI Q&A assistant (Gemini Nano on Google Play; keyword fallback on F-Droid and Desktop).
 
 **Targets:** Android · JVM (Desktop) · iOS (via `meshtastic.kmp.feature` convention plugin)
 
@@ -10,22 +10,22 @@ The `:feature:docs` module is an **in-app documentation browser** with Compose M
 
 - Bundle `docs/en/user/**/*.md` and `docs/en/developer/**/*.md` as Compose resources at build time
 - Sync Crowdin-translated locales into `composeResources/files/{locale}/docs/`
-- Keyword search (TF-IDF style) across the full doc bundle
+- Weighted keyword search across the full doc bundle (title, then keyword, alias and page-id matches)
 - Locale-aware content loading with Crowdin → ML Kit fallback chain
 - Adaptive list/detail layout (single pane on phones, split pane on tablets/desktop)
-- Chirpy AI assistant: streaming Q&A against in-app docs via Gemini Nano or keyword fallback
+- Chirpy AI assistant: streaming Q&A against in-app docs via Gemini Nano; the keyword fallback suggests matching pages instead
 
 ## Source Structure
 
-```
+```text
 src/commonMain/kotlin/org/meshtastic/feature/docs/
 ├── ai/
 │   ├── AIDocAssistant.kt            ← interface (Gemini Nano / keyword fallback)
 │   ├── ChirpySessionHolder.kt
 │   └── KeywordFallbackAssistant.kt
 ├── data/
-│   ├── DocBundleLoader.kt           ← interface + DefaultDocBundleLoader
-│   └── KeywordSearchEngine.kt       ← TF-IDF keyword search
+│   ├── DocBundleLoader.kt           ← interface + DefaultDocBundleLoader (the in-app page index)
+│   └── KeywordSearchEngine.kt       ← weighted keyword search
 ├── di/
 │   └── FeatureDocsModule.kt         ← Koin module
 ├── model/
@@ -33,7 +33,7 @@ src/commonMain/kotlin/org/meshtastic/feature/docs/
 ├── navigation/
 │   └── DocsNavigation.kt            ← docsEntries(), ChirpyUiState, rememberChirpyState()
 ├── translation/
-│   ├── DocTranslationService.kt     ← ML Kit (Google) or no-op (fdroid/desktop/iOS)
+│   ├── DocTranslationService.kt     ← ML Kit (Google) or no-op (fdroid/desktop)
 │   ├── DocTranslationCache.kt
 │   ├── MarkdownTranslationSegmenter.kt
 │   └── NoOpDocTranslator.kt
@@ -69,9 +69,15 @@ data class DocPage(
     val navOrder: Int,
     val resourcePath: String,
     val keywords: List<String>,
+    val aliases: List<String> = emptyList(),
     val charCount: Int,
+    val iconId: String? = null,   // maps to a MeshtasticIcons entry in the table of contents
 )
 ```
+
+### `DocBundleLoader`
+
+`DefaultDocBundleLoader` is the in-app index. It holds a hardcoded entry per page (id, nav order, aliases, icon) and reads each page's Markdown from `files/docs/<section>/<id>.md`, or from `files/<locale>/docs/...` when a Crowdin translation exists. User guide titles and keywords come from `doc_title_*` / `doc_keywords_*` string resources so they translate; developer guide entries stay in English. A new page under `docs/en/` needs an entry here, and `scripts/check-doc-aliases.js` fails CI when a page's frontmatter `aliases` are missing from its entry.
 
 ### `AIDocAssistant` (interface)
 
@@ -88,8 +94,8 @@ interface AIDocAssistant {
 `AIDocAssistantResult` is a sealed interface: `Partial`, `Success`, `Fallback`, `Error`.
 
 Platform bindings:
-- **Google flavor**: Gemini Nano via on-device ML
-- **F-Droid / Desktop / iOS**: `KeywordFallbackAssistant` (keyword search + summarisation, no network)
+- **Google flavor**: `GeminiNanoDocAssistant` (`GoogleAiModule` in `:androidApp`), Gemini Nano on device
+- **F-Droid / Desktop**: `KeywordFallbackAssistant`, which returns the best-matching pages as suggestions with no generated answer and no network
 
 ### `ChirpyMessage`
 
@@ -105,18 +111,28 @@ data class ChirpyMessage(
 
 ## Gradle Tasks
 
-Two custom tasks keep bundled docs in sync:
+This module registers two tasks that copy the docs into its Compose resources:
 
 | Task | Description |
 |---|---|
-| `syncDocsToComposeResources` | Copies `docs/en/user/**/*.md` and `docs/en/developer/**/*.md` into `src/commonMain/composeResources/files/docs/`, plus `docs/assets/screenshots/**/*.png` into `.../files/docs/assets/screenshots/`. Runs automatically before resource generation. |
-| `syncTranslatedDocsToComposeResources` | Copies Crowdin-translated locales from `docs/{locale}/user/**/*.md` into `src/commonMain/composeResources/files/{locale}/docs/` using CMP qualifier format (e.g. `pt-rBR`). |
+| `syncDocsToComposeResources` | Copies `docs/en/user/**/*.md` and `docs/en/developer/**/*.md` into `src/commonMain/composeResources/files/docs/`, plus `docs/assets/screenshots/**/*.png` into `.../files/docs/assets/screenshots/`. |
+| `syncTranslatedDocsToComposeResources` | Copies Crowdin-translated user pages from `docs/{locale}/user/**/*.md` into `src/commonMain/composeResources/files/{locale}/docs/user/`. The `{locale}` directory keeps Crowdin's name, which already matches the `values-*` qualifiers (for example `pt-rBR`, `b+sr+Latn`). |
 
-These tasks run automatically — no manual invocation is required during normal development.
+Both run before every Compose resource generation task, so a normal build needs no manual invocation. The copied files are git-ignored.
+
+The root project's `meshtastic.docs` convention plugin (`DocsTasks.kt` in `build-logic`) adds three tasks for the published site. They don't feed the in-app bundle:
+
+| Task | Description |
+|---|---|
+| `generateDocsBundle` | Renders `docs/en/{user,developer}/*.md` and `docs/{locale}/user/*.md` to HTML under `build/generated/docs/common/`, with an `index.json` keyword index, `locales.json`, and a stylesheet. `-Pdocs.channel` and `-Pdocs.version` default to `beta`. |
+| `validateDocsBundle` | Runs `generateDocsBundle`, then fails if `index.json` is missing or not a JSON array, if a `resourcePath` it lists has no file, or if the bundle exceeds 20 MB (warning above 16 MB). |
+| `publishDocsSite` | Assembles the Jekyll source tree for one GitHub Pages channel into `build/_site/`. |
+
+`docs-deploy.yml` and `docs-release.yml` run all three. Before a docs pull request, run `./gradlew generateDocsBundle validateDocsBundle`.
 
 ## Navigation
 
-Routes (registered under the Settings nav graph):
+Routes are `SettingsRoute` keys, registered by `docsEntries()` from the Android (`Main.kt`) and Desktop (`DesktopNavigation.kt`) nav hosts:
 
 | Route | Description |
 |---|---|
@@ -129,11 +145,11 @@ The `docsEntries()` extension uses Material3 adaptive `ListDetailSceneStrategy` 
 
 ### Key Dependencies
 
-```
+```text
 feature:docs
   ├── core:common, core:navigation, core:resources, core:ui, core:di
   ├── coil                      (image loading in Markdown)
-  ├── markdown-renderer-m3      (Compose Markdown rendering)
+  ├── markdown-renderer, markdown-renderer-m3   (Compose Markdown rendering)
   └── compose.material3.adaptive, compose.material3.adaptive.navigation3
 ```
 

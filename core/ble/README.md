@@ -2,34 +2,37 @@
 
 ## Overview
 
-The `:core:ble` module contains the foundation for Bluetooth Low Energy (BLE) communication in the Meshtastic Android app. It uses the **Kable** multiplatform BLE library to provide a unified, Coroutine-based architecture across all supported targets (Android, Desktop, and future iOS).
+The `:core:ble` module contains the foundation for Bluetooth Low Energy (BLE) communication in the Meshtastic Android app. It uses the **Kable** multiplatform BLE library to provide one Coroutine-based implementation for Android and Desktop. The iOS target compiles against no-op stubs; `createPeripheral` throws there.
 
-This module abstracts platform-specific BLE operations behind common Kotlin interfaces (`BleDevice`, `BleScanner`, `BleConnection`, `BleConnectionFactory`), ensuring that business logic in `commonMain` remains platform-agnostic and testable.
+This module abstracts platform-specific BLE operations behind common Kotlin interfaces (`BleDevice`, `BleScanner`, `BleConnection`, `BleConnectionFactory`, `BluetoothRepository`, `MeshtasticRadioProfile`), so business logic in `commonMain` stays platform-agnostic and testable.
 
 ## Key Components
 
 ### 1. `BleConnection`
-A robust wrapper around Kable's `Peripheral` that simplifies the connection lifecycle and service discovery using modern Coroutine APIs.
+The connection contract, implemented over Kable's `Peripheral` by `KableBleConnection` and created through `KableBleConnectionFactory`.
 
 - **Features:**
-    - **Connection & Await:** Provides suspend functions to connect and wait for a terminal state (Connected or Disconnected).
-    - **Unified Profile Helper:** A `profile` function that manages service discovery, characteristic setup, and lifecycle in a single block, with automatic timeout and error handling.
-    - **Observability:** Exposes `connectionState` as a Flow for reactive UI and service updates.
-    - **Platform Setup:** Seamlessly handles platform-specific configuration (like MTU negotiation on Android or direct connections on Desktop) via `platformConfig()` extensions.
+    - **Connection & Await:** `connect` and `connectAndAwait` connect and wait for a terminal `BleConnectionState`.
+    - **Unified Profile Helper:** `profile` runs service discovery and characteristic setup for one service in a single block, with a timeout (30 s by default).
+    - **Observability:** Exposes `connectionState` and `deviceFlow` as `StateFlow`s for reactive UI and service updates.
+    - **Platform Setup:** The `expect`/`actual` functions in `KablePlatformSetup.kt` (`platformConfig`, `negotiatedMaxWriteLength`, connection priority, GATT cache refresh) carry the platform differences: on Android, `autoConnect` for bonded devices without a fresh advertisement and a 512-byte MTU request; on Desktop, direct connections.
 
 ### 2. `BluetoothRepository`
-A Singleton repository responsible for the global state of Bluetooth on the device.
+A singleton repository for the global state of Bluetooth on the device, implemented by `AndroidBluetoothRepository` and, on Desktop, `KableBluetoothRepository`.
 
 - **Features:**
-    - **State Management:** Exposes a `StateFlow<BluetoothState>` reflecting whether Bluetooth is enabled, permissions are granted, and which devices are bonded.
-    - **Permission Handling:** Centralizes logic for checking Bluetooth and Location permissions across different platforms.
-    - **Bonding:** Simplifies the process of creating and validating bonds with peripherals.
+    - **State Management:** Exposes a `StateFlow<BluetoothState>` reflecting whether Bluetooth is enabled, permissions are granted, and which devices are bonded. `isSupported` is false on hardware with no Bluetooth LE.
+    - **Permission Handling:** On Android 12 and later, checks `BLUETOOTH_SCAN` and `BLUETOOTH_CONNECT`. Earlier versions grant the Bluetooth permissions at install, so the check passes.
+    - **Bonding:** `bond` creates a bond with a peripheral and waits for the result, with a 30 s timeout on Android.
 
 ### 3. `BleScanner`
-A wrapper around Kable's `Scanner` to provide a consistent and easy-to-use API for BLE scanning with built-in peripheral mapping.
+`scan(timeout, serviceUuid, address)` returns a `Flow<BleDevice>`, implemented over Kable's `Scanner` by `KableBleScanner`. A scan that cannot start fails with `BleScanStartException`, whose `BleScanStartFailureReason` names the cause.
 
-### 4. `BleRetry`
-A utility for executing BLE operations with retry logic, essential for handling the inherent unreliability of wireless communication.
+### 4. `MeshtasticRadioProfile`
+The Meshtastic GATT service as flows: `fromRadio`, `logRadio` and `sendToRadio`, implemented by `KableMeshtasticRadioProfile` (`BleService.toMeshtasticRadioProfile()`). UUIDs live in `MeshtasticBleConstants`.
+
+### 5. `retryBleOperation` and `classifyBleException`
+`retryBleOperation` (`BleRetry.kt`) runs a BLE operation with capped exponential backoff. `classifyBleException` and `isSessionFatalBleException` (`BleExceptionClassifier.kt`) sort failures into transient ones worth a retry and session-fatal ones that force a reconnect.
 
 ## Integration
 
@@ -37,15 +40,7 @@ The `:core:ble` module is used by `BleRadioTransport` in [`:core:network`](../ne
 
 ## Usage
 
-Dependencies are managed via the version catalog (`libs.versions.toml`).
-
-```toml
-[versions]
-kable = "0.44.2"
-
-[libraries]
-kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
-```
+Kable comes from the version catalog as `libs.kable.core`; `gradle/libs.versions.toml` pins its version.
 
 ## Architecture
 
@@ -53,11 +48,15 @@ The module follows a clean multiplatform architecture approach:
 
 - **Repository Pattern:** `BluetoothRepository` mediates data access.
 - **Coroutines & Flow:** All asynchronous operations use Kotlin Coroutines and Flows.
-- **Dependency Injection:** Koin is used for dependency injection.
+- **Dependency Injection:** Koin, through `CoreBleModule` (common, provides `BleLoggingConfig`) and `CoreBleAndroidModule` (Android).
 
 ## Testing
 
-The module includes unit tests for key components, utilizing Kable's architecture and standard coroutine testing tools to ensure logic correctness.
+Platform-neutral tests live in `commonTest` and run on the JVM and Android host targets; bonding and scan-limiter tests live in `androidHostTest`.
+
+```shell
+./gradlew :core:ble:allTests
+```
 
 ## Dependency Graph
 

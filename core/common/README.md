@@ -10,17 +10,21 @@ The `:core:common` module contains low-level utility functions, extensions, and 
 
 ### 1. `util` package
 Contains general-purpose extensions and helpers:
-- **Coroutines**: Helpers for structured concurrency and Flow transformations.
-- **Time**: Utilities for handling timestamps and durations, plus `DateFormatter` for display dates.
-- **Exceptions**: Standardized exception types for common error scenarios.
+- **Coroutines**: `handledLaunch`, which launches with a central exception handler that reports through `Exceptions`.
+- **Time**: `nowMillis`, `nowInstant` and friends (`TimeUtils.kt`), `formatDuration` (`DurationFormatter.kt`), and `DateFormatter` for display dates.
+- **Exceptions**: `Exceptions.report`, `ignoreException` and `exceptionReporter`, the shared error-reporting helpers.
 - **`NumberFormatter`**: Locale-aware number formatting (pre-format floats before Compose display).
-- **`UrlUtils` / `CommonUri`**: URL helpers and a multiplatform URI abstraction.
+- **Units**: `MeasurementSystem`, `TemperatureUnit`, `LocaleUnitsProvider` (the system locale's units with the in-app override folded in) and the `format*Localized` functions.
+- **`UrlUtils` / `CommonUri`**: URL helpers, and a typealias for uri-kmp's `Uri`.
 
-### 2. `MetricFormatter.kt`
-Centralized utility for display strings — temperature, voltage, current, percent, humidity, pressure, SNR, RSSI. Ensures consistent unit spacing and formatting across all UI surfaces.
+### 2. `util/MetricFormatter.kt`
+Centralized utility for display strings: temperature, voltage, current, percent, humidity, pressure, SNR, RSSI, wind speed, rainfall and weight. Ensures consistent unit spacing and formatting across all UI surfaces.
 
-### 3. `BuildConfigProvider.kt`
-An interface for accessing build-time configuration in a multiplatform-friendly way.
+### 3. `log` and `state` packages
+`ExpectedCondition` and `shouldReportAsException` decide which failures reach crash reporting, and `ErrorReportThrottle` rate-limits them. `RadioOperationLock` lets a long-running operation (such as a firmware update) claim the connected node; `HiddenFeaturesUnlock` and `LaunchOptions` hold process-scoped flags.
+
+### 4. `BuildConfigProvider`, `ApplicationCoroutineScope`, `ServiceScope`
+Interfaces for build-time configuration and the two process-lifetime coroutine scopes, bound by the app hosts.
 
 
 ## Dependency Graph

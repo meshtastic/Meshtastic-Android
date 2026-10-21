@@ -7,12 +7,19 @@ The `:core:data` module holds the concrete implementations of the `:core:reposit
 
 ### 1. Repository implementations (`repository/`)
 - **`NodeRepositoryImpl`**: High-level access to node information and mesh state (Room KMP backed).
-- **`MeshLogRepositoryImpl`**: Access to historical logs and diagnostics.
-- **`FirmwareReleaseRepositoryImpl`**: Manages the discovery and retrieval of firmware updates.
+- **`PacketRepositoryImpl`** / **`MeshLogRepositoryImpl`**: Stored messages and packets, and historical logs and diagnostics.
+- **`RadioConfigRepositoryImpl`**: The connected device's config, module config and channel set.
+- **`FirmwareReleaseRepositoryImpl`** / **`DeviceHardwareRepositoryImpl`**: Firmware releases and the hardware list, served by `staleWhileRevalidateFlow` from the local data sources and bundled assets in `datasource/`, refreshed from the `:core:network` remote data sources.
 
 ### 2. Manager implementations (`manager/`)
+- **`MeshConnectionManagerImpl`** / **`MeshConfigFlowManagerImpl`**: Connection lifecycle and the config handshake.
+- **`CommandSenderImpl`**: Sends data and admin packets through the outbound queue; `:core:service`'s `RadioControllerImpl` issues commands through it.
 - **`SessionManagerImpl`**: Per-node remote-admin passkey store.
-- **`PacketHandlerImpl`** / **`MeshMessageProcessorImpl`**: Inbound mesh packet handling and message processing.
+- **`PacketHandlerImpl`** / **`FromRadioPacketHandlerImpl`** / **`MeshMessageProcessorImpl`**: Inbound mesh packet handling and message processing, with per-port handlers (`AdminPacketHandlerImpl`, `TelemetryPacketHandlerImpl`, `TracerouteHandlerImpl`, and others).
+- **`NodeManagerImpl`**, **`MqttManagerImpl`**, **`XModemManagerImpl`**: The in-memory node database, the MQTT proxy, and XModem file transfer.
+
+### 3. `ai/`
+`AiFunctionProvider` is the contract for operations a system assistant can invoke (on Android, through AppFunctions), with `FuzzyNameResolver` resolving node and channel names.
 
 
 ## Dependency Graph

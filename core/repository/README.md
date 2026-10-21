@@ -12,13 +12,14 @@ The `:core:repository` module defines the **data and infrastructure contracts** 
 - Declare the raw hardware I/O interface (`RadioTransport`)
 - Provide the mesh node database interface (`NodeRepository`)
 - Expose per-node remote-admin passkey management (`SessionManager`)
-- Host all packet handlers (admin, telemetry, traceroute, store-and-forward, neighbour info)
-- Manage the outbound message queue, MQTT bridge, and XModem firmware transfer
+- Declare the packet handler contracts (admin, telemetry, traceroute, store-and-forward, neighbor info, remote shell)
+- Declare the outbound message queue, MQTT proxy, and XModem file transfer contracts
+- Declare the app preference interfaces (`AppPreferences.kt`) that `:core:prefs` implements
 - Provide the `AppWidgetUpdater` contract so the mesh service can trigger widget refreshes without depending on Android widget APIs directly
 
 ## Source Structure
 
-```
+```text
 src/
 ├── commonMain/kotlin/org/meshtastic/core/repository/
 │   ├── RadioTransport.kt              ← interface: raw hardware I/O
@@ -36,7 +37,9 @@ src/
 │   ├── AdminController.kt             ← config, channels, owner, device lifecycle, editSettings
 │   ├── MessagingController.kt         ← send packets, reactions, contacts
 │   ├── NodeController.kt              ← favorite, ignore, mute, remove nodes
-│   ├── QueryController.kt           ← telemetry, traceroute, position queries
+│   ├── QueryController.kt             ← telemetry, traceroute, position, neighbor info queries
+│   ├── AppPreferences.kt              ← UiPrefs, MapPrefs, RadioPrefs, TakPrefs and the other prefs interfaces
+│   ├── *Repository.kt                 ← firmware, hardware, device links, discovery, mesh beacon, …
 │   ├── CommandSender.kt
 │   ├── AdminPacketHandler.kt
 │   ├── FromRadioPacketHandler.kt
@@ -65,10 +68,10 @@ src/
 │   │   └── SendMessageUseCase.kt
 │   └── di/
 │       └── CoreRepositoryModule.kt
-├── androidMain/kotlin/    ← Android LocationRepository actual
-├── iosMain/kotlin/        ← iOS LocationRepository actual
-└── jvmMain/kotlin/        ← Desktop LocationRepository actual
+└── commonTest/kotlin/
 ```
+
+The module has no platform source sets. Platform implementations such as the Android `LocationRepositoryImpl` live in `:core:data` and the app hosts.
 
 ## Core Interfaces
 
@@ -89,7 +92,7 @@ interface RadioTransport {
 handoff, not that the device received them. `false` means the transport is unavailable, closed, or unable to schedule
 the handoff; delivery confirmation is a separate protocol concern.
 
-`RadioTransportWriter` is the service-facing half of the same admission contract. `trySendToRadio` must likewise return
+`RadioTransportWriter` (`RadioInterfaceService.kt`) is the service-facing half of the same admission contract. `trySendToRadio` must likewise return
 promptly and reports only whether the active transport accepted the bytes for asynchronous delivery.
 
 ```kotlin
@@ -122,7 +125,7 @@ interface NeighborInfoResponseProvider {
 }
 
 interface ServiceStateWriter {
-    fun setConnectionState(state: ConnectionState)
+    fun setConnectionState(connectionState: ConnectionState)
     suspend fun emitMeshPacket(packet: MeshPacket)
     fun setTracerouteResponse(value: TracerouteResponse?)
     fun setNeighborInfoResponse(value: String?)
@@ -138,12 +141,13 @@ interface ServiceRepository :
     val errorMessage: StateFlow<String?>
     val connectionProgress: StateFlow<String?>
     val meshPacketFlow: Flow<MeshPacket>
+    // …plus lockdown state, lockdown token info and sessionAuthorized, with their setters
 }
 ```
 
 VMs inject the narrowest interface they need (e.g., `ConnectionStateProvider` for read-only
 connection state). Handlers inject `ServiceStateWriter` for mutations. The full
-`ServiceRepository` union is still available for backward compatibility.
+`ServiceRepository` union serves code that needs both sides.
 
 Radio commands are issued through `RadioController` (a composite of `AdminController`,
 `MessagingController`, `NodeController`, `QueryController`) rather than an action/intent bus.
@@ -167,7 +171,7 @@ interface NodeRepository {
     suspend fun clearNodeDB(preserveFavorites: Boolean = false)
     suspend fun deleteNode(num: Int)
     suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
-    suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>)
+    suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int>
 }
 ```
 
@@ -187,13 +191,13 @@ interface SessionManager {
 
 ## Dependency Graph
 
-```
+```text
 core:repository
   ├── api → core:model                   (exported to consumers)
   ├── api → org.meshtastic:protobufs     (Maven, exported to consumers)
   ├── core:common
   ├── core:database
-  └── kotlinx.coroutines, kermit, androidx.paging.common
+  └── kotlinx.coroutines, atomicfu, kermit, androidx.paging.common
 ```
 
 ## Dependency Graph

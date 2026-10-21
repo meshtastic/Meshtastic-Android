@@ -14,7 +14,8 @@ Some machines run many Claude sessions against one shared `~/.gradle`, where unq
 ```bash
 GQ="$HOME/.claude/bin/gradle-queue"
 if [ -x "$GQ" ]; then BUILD=("$GQ" --); else BUILD=(./gradlew); fi
-cd "$(git rev-parse --show-toplevel)" && pwd && export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}" && "${BUILD[@]}" <tasks>
+[ -n "$ANDROID_HOME" ] || for d in "$HOME/Library/Android/sdk" "$HOME/Android/Sdk" /opt/android-sdk; do [ -d "$d" ] && export ANDROID_HOME="$d" && break; done
+cd "$(git rev-parse --show-toplevel)" && pwd && "${BUILD[@]}" <tasks>
 ```
 Keep `BUILD` an array and invoke it as `"${BUILD[@]}"` — a plain string would word-split on a `$HOME` containing spaces or glob characters. Do not `cd` elsewhere mid-command.
 
@@ -31,11 +32,11 @@ An edit, revert or commit made to get a green build hides the real failure from 
 - NEVER run git write commands: no `commit`, `add`, `checkout --`, `restore`, `stash`, `clean`, `reset`. Read-only git (`status`, `diff`, `log`) is fine.
 - The ONLY permitted write is bootstrap: `export ANDROID_HOME=...`.
 - If the build fails, REPORT it — do not attempt any fix, however trivial.
-- If a Gradle task itself dirties tracked files (e.g. `allTests` regenerates `docs/assets/screenshots/*.png` on this machine), leave them dirty and say so in NOTES — do not revert.
+- If a Gradle task itself dirties tracked files (e.g. screenshot PNGs under `docs/assets/screenshots/` or a module's `src/screenshotTestDebug/reference/`), leave them dirty and say so in NOTES — do not revert.
 
 ## How to run
 - Run exactly the task(s) the caller specified. Do not add `clean` unless asked.
-- KMP test gotcha: KMP modules use `:module:allTests`; pure-Android/JVM modules (`androidApp`, `core:barcode`) use `:module:testFdroidDebugUnitTest`; `:desktopApp` uses plain `test`. If the caller's task name looks wrong for the module type, run what they asked, then note the likely correct name in your report.
+- KMP test gotcha: KMP modules use `:module:allTests`; flavored Android modules (`androidApp`, `core:barcode`) use `:module:testFdroidDebugUnitTest`; `feature:widget` uses `:module:testDebugUnitTest` (`core:nfc` has no tests); `:desktopApp` and `:schema-strings` use plain `test`. If the caller's task name looks wrong for the module type, run what they asked, then note the likely correct name in your report.
 - If the build fails to *configure* (vs. a test failure), say so explicitly — that's a different problem.
 - Prefer `--console=plain`. It's fine to pipe through filters to find failures, but you must still inspect enough to report accurately.
 

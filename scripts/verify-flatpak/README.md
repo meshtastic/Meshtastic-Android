@@ -3,11 +3,11 @@
 Replicates the official `flathub/org.meshtastic.MeshtasticDesktop` flatpak build on your machine
 so you can validate `flatpak-sources.json` end-to-end without round-tripping through that repo's CI.
 
-## What it tests that our CI doesn't
+## What it tests
 
-Our CI (`:desktopApp:packageUberJarForCurrentOS :captureFlatpakSources`) only proves the manifest can be *generated*.
-Flathub's CI is where the manifest actually gets *consumed* by `flatpak-builder`. This script
-runs that step locally:
+The release build (`:desktopApp:packageUberJarForCurrentOS :captureFlatpakSources`) only proves the manifest can be
+*generated*. `flatpak-builder` *consumes* it, offline, in Flathub's CI and in `verify-flatpak.yml`, which runs nightly,
+on pull requests that change this directory or the workflow, and on merges to `main` that change either one or the Gradle wrapper. This script runs the same step locally:
 
 1. Clones `flathub/org.meshtastic.MeshtasticDesktop` (the official Flathub packaging repo).
 2. Overlays a patched manifest that:
@@ -16,8 +16,8 @@ runs that step locally:
    - Uncomments `- flatpak-sources.json`.
    - Drops `--share=network` from the build-args (true offline — what Flathub requires).
    - Adds `--offline` to the Gradle invocation (belt + suspenders).
-3. Runs `flatpak-builder` in a Docker container with the same Freedesktop 25.08 SDK
-   the upstream flatpak CI image uses.
+3. Runs `flatpak-builder` in the `bilelmoussaoui/flatpak-github-actions` Docker image that Flathub's CI
+   uses, which installs the Freedesktop 25.08 runtime and SDK the manifest declares from Flathub.
 
 If your `flatpak-sources.json` has the wrong URL, wrong sha256, or a missing entry,
 the build fails with the same error Flathub CI would see. You can iterate in ~5–15 min loops
@@ -27,13 +27,13 @@ instead of waiting on cross-repo CI.
 
 - Docker (Docker Desktop on macOS works — the container needs `--privileged` to use
   bubblewrap; that's enabled by default).
-- ~10 GB free disk for the SDK + Gradle cache.
-- A populated Gradle cache (`./gradlew :desktopApp:packageUberJarForCurrentOS` must have
-  run; the script does this implicitly via `:captureFlatpakSources`).
+- ~15 GB free disk for the SDK, the Gradle cache and the build directory.
+- Network access: unless `--skip-regen` is passed, the script regenerates `flatpak-sources.json` in a fresh,
+  isolated Gradle home (`build/flatpak-gradle-home`), so every dependency is downloaded and captured.
 
 ## Usage
 
-```bash
+```shell
 # Full offline build — Linux host required (~15–30 min first time)
 scripts/verify-flatpak/verify.sh
 
@@ -80,6 +80,9 @@ executing the Gradle build, or run the full script on a Linux host.
   diff against `https://raw.githubusercontent.com/flathub/org.meshtastic.MeshtasticDesktop/master/org.meshtastic.MeshtasticDesktop.yaml`
   if upstream changes something material. Its Gradle zip is a placeholder; `verify.sh` and
   `verify-flatpak.yml` fill it from `gradle/wrapper/gradle-wrapper.properties`.
+- `check-platform-deps.py` - checks that the root `build.gradle.kts` platform-dependency list still declares
+  every per-architecture runtime `desktopApp` resolves, so the arm64 offline build cannot miss one. `pull-request.yml`
+  runs it on pull requests.
 - `bump-flathub-manifest.py` - points the upstream manifest at a release: the source tag and
   commit, and the Gradle zip the tag's wrapper pins. `promote.yml`'s `update-flathub` job runs it
   on every production promotion, then commits the release's `flatpak-sources.json` beside it.

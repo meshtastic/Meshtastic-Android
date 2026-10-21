@@ -14,13 +14,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - **Broad searches** ("where is X used", "find all implementers of Y") → dispatch the `Explore` subagent so file dumps stay out of the main context; you get back the conclusion.
   - **Gradle builds/tests/lint** → dispatch the `gradle-runner` subagent. A full `assembleDebug`/`allTests` log is thousands of lines; the subagent returns only pass/fail + failing tests. Don't run heavy `./gradlew` tasks inline.
   - **Symbol navigation** ("where is this defined", "who calls this", "find implementers") → `rg` for the symbol, then read only the matching range. There is no Kotlin LSP server: none available today handles KMP reliably, so the `LSP` tool answering "No LSP server available for file type: .kt" is expected.
-- **Big files are guarded, not free:** `.claude/settings.json` denies the Crowdin locale `strings.xml` files and prompts before reading the base `strings.xml`, `firmware_releases.json`, `emoji-data.json`, and `flatpak-sources.json`. For strings, consult `.skills/compose-ui/strings-index.txt` instead of the raw file.
+- **Big files are guarded, not free:** `.claude/settings.json` denies the Crowdin locale `strings.xml` files and prompts before reading the base `strings.xml`, `firmware_releases.json`, `emoji-data.json`, `flatpak-sources*.json` and any `*.keystore`/`*.jks`. For strings, consult `.skills/compose-ui/strings-index.txt` instead of the raw file.
+- **Hooks (`.claude/hooks/`):** `git commit` runs `spotlessApply` on staged Kotlin and re-stages it; `git push` runs `detekt` and blocks on a violation; force-push and `reset --hard` ask first. Editing the base `strings.xml` runs `sort-strings.py`, and a `java.*`/`android.*` import in `commonMain`/`commonTest` or a store-metadata violation blocks the edit. When a subagent finishes with a dirty tree or a commit under 15 minutes old, its HEAD and dirty files are reported back.
+- **Claude-only skills and subagents:** `.claude/skills/` also holds `baseline`, `pr`, `proto-bump`, `crashlytics-triage` and `run-meshtastic-android`; `.claude/agents/` holds `gradle-runner`, `crash-investigator` and `datadog-rum-investigator`.
 
 ## Quick Reference
 
 JDK 25 is required. **Bootstrap before any Gradle task** (don't wait to be told) — full details in `.skills/project-overview/SKILL.md`:
 ```bash
-[ -z "$ANDROID_HOME" ] && export ANDROID_HOME="$HOME/Library/Android/sdk"  # often unset in agent workspaces
+# often unset in agent workspaces; macOS, Linux and /opt defaults in that order
+[ -n "$ANDROID_HOME" ] || for d in "$HOME/Library/Android/sdk" "$HOME/Android/Sdk" /opt/android-sdk; do [ -d "$d" ] && export ANDROID_HOME="$d" && break; done
 ```
 No secrets step is needed: `androidApp/build.gradle.kts` points the secrets plugin at
 `secrets.properties` and falls back to the tracked `secrets.defaults.properties`, so the

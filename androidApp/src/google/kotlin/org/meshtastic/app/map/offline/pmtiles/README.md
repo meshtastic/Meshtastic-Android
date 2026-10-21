@@ -34,7 +34,7 @@ markers with no compositing seam.
   the format this codebase already speaks (`MBTilesProvider`) and any generic MBTiles tool can open what this writes.
 - **No geometry simplification/road-stitching pass** (iOS's `PMTilesMapView.swift:247-321`). MVT tiles are already
   simplified per zoom level by the source, and Google's classic renderer tolerates more overlays than SwiftUI `Map`
-  does — legible without it for a first pass, but the win (fewer, longer polylines) is real and worth doing later.
+  does, so the layer is legible without it; fewer, longer polylines would still be a win.
 - **One HTTP request per tile**, not iOS's coalesced-byte-range batching. This is why `MAX_TILES_PER_REGION` is
   2,000 here against iOS's 600,000 — at one round trip per tile, anything near that scale would be impractically
   slow on a phone connection. Coalescing adjacent tiles' byte ranges into batched requests is the natural way to
@@ -47,12 +47,12 @@ markers with no compositing seam.
 - **Polygon holes**: every ring MVT returns — hole or exterior — is drawn as its own independent `Polygon`. A real
   lake-with-island therefore double-draws over the island rather than cutting it out. Grouping rings by winding
   direction (spec section 4.3.3.3) into proper polygon/hole sets would fix this.
-- **Auto-activation on connectivity loss**: `offlineOverlayEnabled` is a manual toggle today. Wiring it to
-  `mapNetworkAvailable` (from the sibling offline-fallback PR) so a downloaded region draws itself the instant the
-  network drops — matching what that PR already does on MapLibre and what iOS does for its whole offline layer — is
-  a small follow-up once both land; kept manual here so this PR doesn't depend on that one merging first.
-- **Terrain/hillshade**: iOS also offers an offline terrain layer via the same bbox-extraction technique against a
-  different PMTiles source (Mapterhorn). Not attempted here.
+- **Auto-activation on connectivity loss**: `offlineOverlayEnabled` is a manual toggle. `MapViewModel` already
+  exposes `mapNetworkAvailable`; driving the toggle from it would draw a downloaded region the moment the network
+  drops, as the MapLibre flavor and iOS do.
+
+Offline terrain (hillshade and contours from Mapterhorn) is the sibling `../terrain/` package, built on the shared
+math in `:feature:map-terrain`.
 
 ## Legal
 
@@ -66,7 +66,8 @@ markers with no compositing seam.
 
 ## Testing
 
-`androidApp:testGoogle` — `MvtDecoderTest` (hand-encoded protobuf bytes, not a vendored fixture or a round-trip
-through the same encoder under test — see its own doc comment), `WebMercatorTileMathTest`, `OfflineRegionTileSetTest`.
+`androidApp/src/testGoogle`, run by `:androidApp:testGoogleDebugUnitTest` — `MvtDecoderTest` (hand-encoded protobuf
+bytes, not a vendored fixture or a round-trip through the same encoder under test — see its own doc comment),
+`WebMercatorTileMathTest`, `OfflineRegionTileSetTest`, `OfflineRegionStoreTest`.
 No test drives the network extractor itself; it's a thin loop over already-tested pieces (`Reader`, `MvtDecoder`,
 `OfflineVectorArchive`).

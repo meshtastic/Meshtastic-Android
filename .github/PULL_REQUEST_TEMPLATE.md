@@ -1,14 +1,15 @@
-## Thank you for sending in a pull request, here's some tips to get started!
+## Thank you for sending in a pull request. Some tips to get started
 
-(Please delete all these tips and replace with your text)
+(Delete all these tips and replace them with your description. The full guide is [CONTRIBUTING.md → Pull Requests](https://github.com/meshtastic/Meshtastic-Android/blob/main/CONTRIBUTING.md#pull-requests).)
 
-- Before starting on some new big chunk of code, it it is optional but highly recommended to open an issue first to say "Hey, I think this idea X should be implemented and I'm starting work on it. My general plan is Y, any feedback is appreciated." This will allow other devs to potentially save you time by not accidentally duplicating work etc...
-- Mention "#(issue)" in the description, when applicable
-- Please do not check in files that don't have real changes
-- Please do not reformat lines that you didn't have to change the code on
-- If your other co-developers have comments on your PR please tweak as needed
-- Do not use any external image service, just paste or drag and drop the image here and it will be uploaded automatically
-- Please also enable "Allow edits by maintainers".
+- Before starting on a big chunk of code, consider opening an issue first: "I think X should be implemented and I'm starting on it. My general plan is Y." Other devs can then save you time by pointing out duplicated work.
+- Lead with why: one or two sentences on the problem the change solves, before any list of what changed. If it fixes an issue, add `Fixes #123`.
+- Group what changed under whichever of these apply: 🌟 New Features · 🛠️ Refactoring & Architecture · 🐛 Bug Fixes · 🧹 Chores.
+- Add a "Testing Performed" section when tests were added or changed.
+- Don't check in files that have no real changes, and don't reformat lines you didn't otherwise change.
+- If your co-developers comment on your PR, tweak it as needed.
+- Don't use an external image service: paste or drag images into the PR so GitHub hosts them.
+- Enable "Allow edits by maintainers".
 
 <!--
 If you have screenshots or recordings to display your change, please include them!

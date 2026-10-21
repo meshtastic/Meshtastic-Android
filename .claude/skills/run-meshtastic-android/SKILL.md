@@ -23,11 +23,13 @@ step on stderr.
 
 ## Prerequisites
 
-- Gradle runs go through the machine-wide queue: `~/.claude/bin/gradle-queue`.
-  Everything after its `--` is **Gradle arguments** — it runs `./gradlew` itself
+- The desktop driver is macOS-only: it raises the window through `osascript`, and it
+  finds the JetBrains 25 JDK Gradle provisioned at the macOS layout
+  `~/.gradle/jdks/jetbrains_s_r_o_-25-*/…/Contents/Home`. The emulator driver needs only `adb`.
+- Where `~/.claude/bin/gradle-queue` exists, Gradle runs go through it, and the
+  commands below use it; elsewhere replace `~/.claude/bin/gradle-queue --` in them with `./gradlew`. Everything after its `--`
+  is **Gradle arguments**: it runs `./gradlew` itself
   (`gradle-queue -- ./gradlew tasks` fails with `Task './gradlew' not found`).
-- The JetBrains 25 JDK Gradle provisioned at
-  `~/.gradle/jdks/jetbrains_s_r_o_-25-*/…/Contents/Home` (the drivers find it themselves).
 - Emulator leg: a running AVD (`adb devices`) with the fdroid debug build installed
   (`./gradlew :androidApp:installFdroidDebug` via the queue if missing).
 - A simulated radio, e.g. `replay_start(source="meshcon", sim_nodes=30, port=4403,
@@ -43,7 +45,7 @@ reports `connected:false` forever:
 pgrep -fl "MainKt|devtools.Main"   # kill any hits before launching
 ```
 
-Launch (the Nix dev shell's Darwin stdenv breaks the MapLibre FFI — strip it):
+Launch. A Nix dev shell's Darwin stdenv breaks the MapLibre FFI, so the line strips it; outside Nix the `env -u` list is harmless:
 
 ```bash
 env -u DEVELOPER_DIR -u SDKROOT -u CC -u CXX -u LD -u AR -u NM -u RANLIB -u STRIP -u NIX_CC \
@@ -128,8 +130,8 @@ with the `skip_onboarding` and `skip_connect_confirm` extras and the
 `/connections?address=` deeplink (`t` = TCP, `x` = BLE, `s` = serial, `n` = disconnect —
 full path list in `docs/en/developer/navigation-and-deep-links.md`). That alias exists
 only in debug builds and only the shell may start it, and the extras do nothing on any
-other launch. With `skip_connect_confirm` the address is applied with no trust dialog; a
-build that predates the alias still pops it, and the driver taps its **Connect** button. Desktop
+other launch. With `skip_connect_confirm` the address is applied with no trust dialog; if the
+dialog appears anyway, the driver taps its **Connect** button. Desktop
 takes the same switch as a `--skip-connect-confirm` argument in a non-release build. Success looks like the Connection
 screen showing `RPLY Replay Observer` with a **Disconnect** button, and
 `replay_status` reporting `connected:true`.
@@ -198,8 +200,8 @@ faster even for humans.
 - Screenshot is your terminal → `raise` before `ss` (window wasn't frontmost).
 - `connected:false` forever from `status` → stray `MainKt` from another checkout
   or worktree; `pgrep -fl MainKt`, kill, relaunch.
-- Trust dialog never tapped, app stuck on dialog → older driver matched
-  "Reconnecting…"; re-run `tap_text=Connect` (exact match wins now).
+- Trust dialog never tapped, app stuck on dialog → re-run `tap_text=Connect`;
+  the driver prefers an exact text match over a substring.
 - UI card stuck "Reconnecting…" but sim says `connected:true` → not stuck; config
   download in progress. Check the Nodes tab for the sim's nodes.
 - Connection flapping → `desktopApp/build/run/main/hotRun.stderr.txt` carries the
