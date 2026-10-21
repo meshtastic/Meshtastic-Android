@@ -111,6 +111,7 @@
     <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="i_know_what_i_m_doing">Ξέρω τι κάνω.</string>
+    <!-- IAQ -->
     <string name="ignore">Παράβλεψη</string>
     <!-- IMPORT -->
     <string name="info">Πληροφορίες</string>

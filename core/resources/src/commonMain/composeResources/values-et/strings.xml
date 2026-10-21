@@ -761,8 +761,11 @@
     <string name="i_agree">Nõustun.</string>
     <string name="i_agree_to_share_my_location">Olen ülaltoodu läbi lugenud ja sellest aru saanud. Annan vabatahtlikult nõusoleku oma sõlmeandmete krüpteerimata edastamiseks MQTT kaudu</string>
     <string name="i_know_what_i_m_doing">Ma tean mida teen.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Siseõhu kvaliteet (IAQ) on suhtelise skaala väärtus, näiteks mõõtes Bosch BME680 abil. Väärtuste vahemik 0–500.</string>
+    <string name="iaq_level_excellent">Suurepärane</string>
+    <string name="iaq_level_good">Hea</string>
     <string name="icon_meanings">Ikooni tähendused</string>
     <string name="ignore">Eira</string>
     <string name="ignore_add">Lisa '%1$s' eiramis loendisse?</string>

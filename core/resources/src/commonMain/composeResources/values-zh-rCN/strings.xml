@@ -708,8 +708,10 @@
     <string name="i_agree">我同意。</string>
     <string name="i_agree_to_share_my_location">我已阅读并理解以上内容。我自愿同意通过MQTT未加密地传输我的节点数据。</string>
     <string name="i_know_what_i_m_doing">我知道自己在做什么</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">室内空气质量（Indoor Air Quality, IAQ）：由 Bosch BME680 传感器测量的相对标尺 IAQ 值，取值范围为 0–500。</string>
+    <string name="iaq_level_good">良好</string>
     <string name="icon_meanings">图标含义</string>
     <string name="ignore">忽略</string>
     <string name="ignore_add">添加 '%1$s' 到忽略列表？</string>

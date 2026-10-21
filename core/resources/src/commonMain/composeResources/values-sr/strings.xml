@@ -188,8 +188,10 @@
     <string name="hops_away">Скокова удаљено</string>
     <string name="humidity">Влажност</string>
     <string name="i_know_what_i_m_doing">Знам шта радим.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Индекс квалитета ваздуха (IAQ) као мера за одређивање квалитета ваздуха унутрашњости, мерен са Bosch BME680. Вредности се крећу у распону од 0 до 500.</string>
+    <string name="iaq_level_good">Добро</string>
     <string name="ignore">Игнориши</string>
     <string name="ignore_add">Додати '%1$s' на листу игнорисаних?</string>
     <string name="ignore_remove">Уклнити '%1$s' на листу игнорисаних?</string>

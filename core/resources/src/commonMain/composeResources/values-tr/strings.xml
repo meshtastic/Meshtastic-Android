@@ -201,8 +201,10 @@
     <string name="host_metrics_log">Sunucu Ölçümleri</string>
     <string name="i_agree">Katılıyorum.</string>
     <string name="i_know_what_i_m_doing">Ne yaptığımı biliyorum.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(İç Hava Kalitesi) Bosch BME680 tarafından ölçülen bağıl ölçekli IAQ değeri. Değer Aralığı 0–500.</string>
+    <string name="iaq_level_good">İyi</string>
     <string name="ignore">Yok say</string>
     <string name="ignore_add">Yoksay listesine '%1$s' eklensin mi? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <string name="ignore_incoming">Gelenleri Yoksay</string>

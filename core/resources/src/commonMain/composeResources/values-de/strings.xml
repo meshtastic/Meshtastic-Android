@@ -628,8 +628,10 @@
     <string name="i_agree">Ich stimme zu.</string>
     <string name="i_agree_to_share_my_location">Ich habe das oben stehende gelesen und verstanden. Ich willige ein in die unverschlüsselte Übertragung der Daten meines Nodes.</string>
     <string name="i_know_what_i_m_doing">Ich weiß was ich tue.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Innenluftqualität) relativer IAQ-Wert gemessen von Bosch BME680.</string>
+    <string name="iaq_level_good">Gut</string>
     <string name="icon_meanings">Symbolbedeutung</string>
     <string name="ignore">Ignorieren</string>
     <string name="ignore_add">'%1$s' zur Ignorieren-Liste hinzufügen?</string>

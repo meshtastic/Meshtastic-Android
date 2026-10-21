@@ -104,8 +104,10 @@
     <!-- GEOFENCE -->
     <string name="good">Godt</string>
     <string name="hops_away">Hopp Unna</string>
+    <!-- IAQ -->
     <string name="iaq">Luftkvalitet</string>
     <string name="iaq_definition">(Innendørs luftkvalitet) relativ skala IAQ-verdi målt ved Bosch BME680. Verdi 0–500.</string>
+    <string name="iaq_level_good">Godt</string>
     <string name="ignore">Ignorer</string>
     <string name="ignore_add">Legg til '%1$s' i ignorereringslisten?</string>
     <string name="ignore_remove">Fjern '%1$s fra ignoreringslisten?</string>

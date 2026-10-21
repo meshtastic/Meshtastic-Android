@@ -184,8 +184,10 @@
     <string name="i_agree">동의합니다.</string>
     <string name="i_agree_to_share_my_location">위 내용을 읽고 이해했습니다. 저는 MQTT를 통해 제 노드 데이터를 암호화되지 않은 상태로 전송하는 것에 자발적으로 동의합니다.</string>
     <string name="i_know_what_i_m_doing">뭘하는지 알고 있습니다</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(실내공기질) Bosch BME680으로 측정한 상대적 척도 IAQ 값. 범위 0–500.</string>
+    <string name="iaq_level_good">좋음</string>
     <string name="ignore">무시하기</string>
     <string name="ignore_add">%1$s를 무시 목록에 추가하시겠습니까?</string>
     <string name="ignore_incoming">수신 무시</string>

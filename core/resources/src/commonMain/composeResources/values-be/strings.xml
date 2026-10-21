@@ -121,6 +121,7 @@
     <string name="hardware">Устройства</string>
     <string name="hide_password">Схаваць пароль</string>
     <string name="i_know_what_i_m_doing">Я ведаю, што я раблю.</string>
+    <!-- IAQ -->
     <string name="iaq">Якасць паветра</string>
     <string name="ignore">Ігнараваць</string>
     <!-- IMPORT -->

@@ -716,8 +716,10 @@
     <string name="i_agree">Souhlasím.</string>
     <string name="i_agree_to_share_my_location">Četl jsem a rozumím výše uvedenému. Dobrovolně souhlasím s nešifrovaným přenosem dat svého uzlu přes MQTT</string>
     <string name="i_know_what_i_m_doing">Vím co dělám.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Vnitřní kvalita ovzduší) relativní hodnota IAQ měřená Bosch BME680. Hodnota rozsahu 0–500.</string>
+    <string name="iaq_level_good">Silný</string>
     <string name="icon_meanings">Význam ikon</string>
     <string name="ignore">Ignorovat</string>
     <string name="ignore_add">Přidat '%1$s' do seznamu ignorovaných?</string>

@@ -658,8 +658,10 @@
     <string name="i_agree">J'accepte.</string>
     <string name="i_agree_to_share_my_location">J’ai lu et compris ce qui précède. Je consens volontairement à la transmission non chiffrée des données de mon nœud via MQTT.</string>
     <string name="i_know_what_i_m_doing">Je sais ce que je fais.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Qualité de l'air intérieur) valeur de l'échelle relative IAQ mesurée par Bosch BME680. Plage de valeur 0–500.</string>
+    <string name="iaq_level_good">Bon</string>
     <string name="icon_meanings">Signification des icônes</string>
     <string name="ignore">Ignorer</string>
     <string name="ignore_add">Ajouter '%1$s' à la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>

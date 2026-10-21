@@ -106,7 +106,9 @@
     <!-- GEOFENCE -->
     <string name="good">Mirë</string>
     <string name="hops_away">Hops larg</string>
+    <!-- IAQ -->
     <string name="iaq_definition">(Cilësia e Ajrit të Brendshëm) shkalla relative e vlerës IAQ siç matet nga Bosch BME680. Intervali i Vlerave 0–500.</string>
+    <string name="iaq_level_good">Mirë</string>
     <string name="ignore">Injoro</string>
     <string name="ignore_add">Të shtohet ‘%1$s’ në listën e injoruar?</string>
     <string name="ignore_remove">Të hiqet ‘%1$s’ nga lista e injoruar?</string>

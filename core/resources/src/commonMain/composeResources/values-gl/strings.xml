@@ -89,6 +89,7 @@
     <string name="firmware_update_failed">Actualización fallou</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
+    <!-- IAQ -->
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Engadir '%1$s' á lista de ignorar?</string>
     <string name="ignore_remove">Quitar '%1$s' da lista de ignorar?</string>
