@@ -11,7 +11,7 @@ The `:core:common` module contains low-level utility functions, extensions, and 
 ### 1. `util` package
 Contains general-purpose extensions and helpers:
 - **Coroutines**: `handledLaunch`, which launches with a central exception handler that reports through `Exceptions`.
-- **Time**: `nowMillis`, `nowInstant` and friends (`TimeUtils.kt`), `DurationFormatter`, and `DateFormatter` for display dates.
+- **Time**: `nowMillis`, `nowInstant` and friends (`TimeUtils.kt`), `formatDuration` (`DurationFormatter.kt`), and `DateFormatter` for display dates.
 - **Exceptions**: `Exceptions.report`, `ignoreException` and `exceptionReporter`, the shared error-reporting helpers.
 - **`NumberFormatter`**: Locale-aware number formatting (pre-format floats before Compose display).
 - **Units**: `MeasurementSystem`, `TemperatureUnit`, `LocaleUnitsProvider` (the system locale's units with the in-app override folded in) and the `format*Localized` functions.

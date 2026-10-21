@@ -29,7 +29,7 @@ The Firmware Update screen picks the method from how the node is connected, and 
 
 | Connection | nRF52 | ESP32 | RP2040 |
 |---|---|---|---|
-| Bluetooth | BLE OTA | BLE OTA | — |
+| Bluetooth | BLE OTA | BLE OTA | BLE OTA |
 | Network | — | Wi-Fi OTA | — |
 | USB | USB File Transfer | — | USB File Transfer |
 
@@ -62,7 +62,7 @@ Where the app offers it, an **Erase device during update** switch appears above 
 | BLE / Wi-Fi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
 | USB | Wipes the device's flash completely, then installs the selected firmware from scratch. |
 
-It is not offered for a local firmware file, during a recovery update, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. On a USB device the app can't erase safely, the switch is shown disabled with the reason. Afterwards the device needs setting up — and pairing — again.
+It is not offered for a local firmware file, during a recovery update, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. Over USB it is offered for nRF52 and RP2040 nodes only, and when the app can't erase one safely, the switch is shown disabled with the reason. Afterwards the device needs setting up — and pairing — again.
 
 ### OTA via Wi-Fi (network-connected ESP32)
 

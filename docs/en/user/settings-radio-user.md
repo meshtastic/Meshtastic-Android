@@ -138,7 +138,7 @@ The **SNR Limit** values are negative on purpose. LoRa can decode signals *below
 | Tiny Fast | ~10 km | 0.68 kbps | −7.5 dB | Amateur bands that cap occupied bandwidth; these presets use 15.6 kHz. Needs firmware 2.8 or newer, an SX126x or SX127x radio, and a TCXO of ±5 ppm or better |
 | Tiny Slow | ~20 km | 0.33 kbps | −10 dB | Same band restrictions as Tiny Fast, longer range. Same firmware, node, and TCXO requirements |
 | Long Slow | ~30 km | 0.18 kbps | −20 dB | Deprecated. Still selectable, but may be removed in a future firmware release |
-| Very Long Slow | ~40+ km | 0.09 kbps | −20 dB | Deprecated. Firmware 2.6 and newer no longer support it |
+| Very Long Slow | ~40+ km | 0.09 kbps | −20 dB | Deprecated. Firmware 2.6.5 and newer no longer support it |
 
 #### Choosing a modem preset
 

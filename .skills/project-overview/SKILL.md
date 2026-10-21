@@ -44,7 +44,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `feature/coverage` | Site Planner coverage computed on the device with `kp1812` over Mapterhorn terrain, returned as GeoJSON for the map. |
 | `screenshot-tests/`, `docs-screenshots/` | Compose preview screenshot modules: the CI visual-regression gate, and the generate-only docs images (see `testing-ci` §3b). |
 | `store-screenshots/` | Instrumented capture of the store-listing screenshots from the debug app on a device or emulator. |
-| `schema-strings/` | JVM generator for `values/schema_strings.xml` from the protobufs field metadata (`:schema-strings:sync`); its `test` fails when the file is stale. |
+| `schema-strings/` | JVM generator for `values/schema_strings.xml` from the protobufs field metadata (`:schema-strings:sync`); its `test` fails when the file is stale against the pin it recorded, and skips the check when that pin no longer matches the catalog. |
 | `baselineprofile/` | Macrobenchmark Baseline Profile generation for `:androidApp` (AOT-compiled cold-start journey). Android-only. |
 | `feature/wifi-provision` | KMP WiFi provisioning via BLE (Nymea protocol). Uses `core:ble` Kable abstractions. |
 | `feature/firmware` | Fully KMP firmware update system: Unified OTA (BLE + WiFi), native Nordic Secure DFU protocol (pure KMP), USB/UF2 updates, and `FirmwareRetriever` with manifest-based resolution. Desktop is a first-class target. |

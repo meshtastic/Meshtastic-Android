@@ -85,7 +85,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **Root Assembly:** Confirm that the root Koin DI graph is only assembled in host shells (`androidApp` and `desktopApp`).
 
 ### 5. Networking, DB & I/O
-- [ ] **Ktor Strictly:** Check that Ktor's `HttpClient` is the only HTTP API. OkHttp appears only as the Ktor engine `androidApp`'s `NetworkModule` configures (with Datadog's interceptor on google); flag any direct OkHttp use elsewhere.
+- [ ] **Ktor Strictly:** Check that Ktor's `HttpClient` is the only HTTP API. OkHttp appears as the Ktor engine `androidApp`'s `NetworkModule` configures (with Datadog's interceptor on google) and in the google flavor's map-tile client (`MapTileHttpClient`); flag any other direct OkHttp use.
 - [ ] **HTTP Configuration:** Verify timeouts and base URLs use `HttpClientDefaults` from `core:network`. Never hardcode timeouts in feature modules. `DefaultRequest` sets the base URL; feature API services use relative paths.
 - [ ] **Image Loading (Coil):** Coil must use `coil-network-ktor3` in host modules. Feature modules should ONLY depend on `libs.coil` (coil-compose) and never configure fetchers.
 - [ ] **Room KMP:** Ensure `factory = { MeshtasticDatabaseConstructor.initialize() }` is used in `Room.databaseBuilder`. DAOs and Entities must reside in `commonMain`.
@@ -94,7 +94,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 
 ### 6. Dependency Catalog Aliases
 - [ ] **JetBrains vs. AndroidX:**
-  - In `commonMain`: Must use `jetbrains-*` aliases (e.g., `jetbrains-lifecycle-*`, `jetbrains-navigation3-ui`). `androidx-navigation3-runtime` is the exception: AndroidX publishes it as KMP itself.
+  - In `commonMain`: Must use `jetbrains-*` aliases (e.g., `jetbrains-lifecycle-*`, `jetbrains-navigation3-ui`). An `androidx-*` alias is allowed only where AndroidX publishes the artifact as KMP itself (`androidx-navigation3-runtime`, DataStore, Room, SQLite bundled, Paging).
   - In `androidMain`: Can use `androidx-*` or `jetbrains-*` as appropriate, but do not mix them up in `commonMain`.
 - [ ] **Compose Multiplatform:** Ensure `compose-multiplatform-*` aliases are used instead of plain `androidx.compose` in all KMP modules.
 

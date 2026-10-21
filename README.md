@@ -147,7 +147,7 @@ Most modules have their own README with details on their responsibilities, API s
 | [feature/messaging](feature/messaging/README.md) | Messaging UI feature |
 | [feature/map](feature/map/README.md) | Map UI feature — shared state, policy, tile sources and the waypoint editor |
 | [feature/map-maplibre](feature/map-maplibre/README.md) | MapLibre map surfaces shared by the `fdroid` flavor and Desktop |
-| [feature/map-terrain](feature/map-terrain/) | Offline terrain math (Terrarium decode, hillshade, contours) shared by both map stacks; no README |
+| [feature/map-terrain](feature/map-terrain/README.md) | Offline terrain math (Terrarium decode, hillshade, contours) shared by both map stacks |
 | [feature/coverage](feature/coverage/README.md) | Site Planner coverage computed in-process with ITU-R P.1812 (`kp1812`) |
 | [feature/node](feature/node/README.md) | Node detail UI feature |
 | [feature/settings](feature/settings/README.md) | Settings UI feature |

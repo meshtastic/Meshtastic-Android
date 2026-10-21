@@ -126,8 +126,9 @@ Platform-specific implementations:
 5. **Disconnection** — Clean teardown or error recovery
 
 The app-level state is `ConnectionState` (`Disconnected`, `Connecting`, `Connected`, `DeviceSleep`), read
-through `ConnectionStateProvider`. `MeshConnectionManager` is its only writer: it reconciles transport events
-with handshake progress and the node's sleep policy. UI code observes this state, never
+through `ConnectionStateProvider`. `MeshConnectionManager` writes `Connecting`, `DeviceSleep` and
+`Disconnected` as it reconciles transport events with the node's sleep policy, and `MeshConfigFlowManager`
+writes `Connected` once the handshake completes. UI code observes this state, never
 `RadioInterfaceService.connectionState`.
 
 ## Adding a New Transport

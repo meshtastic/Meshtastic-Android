@@ -102,7 +102,7 @@ or notification LED; elsewhere everything starts off.
 
 ### Store & Forward module
 
-Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections. A server needs an ESP32 with PSRAM, and an always-on Router node is a good candidate.
+Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections. A server needs an ESP32 with PSRAM or a Linux `meshtasticd` node. A node in the Router or Router Late role acts as a server even with the server setting off.
 
 | Setting | Description | Default |
 |---------|-------------|---------|
@@ -125,7 +125,7 @@ public.
 | Setting | Description | Default |
 |---------|-------------|---------|
 | Range Test Enabled | Turn range testing on | Off |
-| Save | Log received test data as a CSV on the node's own filesystem. ESP32 nodes with a web server only | Off |
+| Save | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only | Off |
 | Sender Interval | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | Unset |
 
 ### Telemetry module
@@ -336,7 +336,7 @@ say — that is why the queued list can be shorter than you expect.
 
 Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
 
-### App settings
+### App Settings
 
 The **App** section of the **Settings** screen configures the app rather than the node, and
 appears only when your own node is selected. It holds, in order:

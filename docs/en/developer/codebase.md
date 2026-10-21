@@ -129,7 +129,7 @@ block rather than assuming a plugin does or does not exist.
 ### Key Gradle Tasks
 
 ```shell
-# Compile every KMP module's commonMain metadata, JVM and iosSimulatorArm64 main and test sources, and assemble the device-test APKs
+# Compile every KMP module's commonMain metadata, JVM main, and iosSimulatorArm64 main and test sources (excludes :desktopApp), and assemble the device-test APKs
 ./gradlew kmpSmokeCompile
 
 # Run all tests: allTests covers KMP modules, test covers Android/JVM-only modules; run both

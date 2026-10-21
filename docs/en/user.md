@@ -19,7 +19,7 @@ Keep the last 5–8 entries and archive older ones by removing them.
 
 **October 2026** — [Settings — Radio & User](user/settings-radio-user) — Each configuration screen has its own section, settings use the app's exact labels, and every table lists the default value.
 
-**October 2026** — [Firmware Updates](user/firmware) — A node on firmware older than 2.5.14 stays connected behind a required-update screen, and the Connect tab flags a newer stable release.
+**October 2026** — [Firmware Updates](user/firmware) — A node on firmware from 2.3.15 up to 2.5.14 stays connected behind a required-update screen, and the Connect tab flags a newer stable release.
 
 **October 2026** — [Messages & Channels](user/messages-and-channels) — A failed message can be resent in place, and on firmware 2.8.1 or newer a direct message can show **Delivered to recipient · proven**.
 

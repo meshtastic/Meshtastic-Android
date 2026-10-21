@@ -50,7 +50,7 @@ Meshtastic-Android uses [Detekt](https://detekt.dev/) for static code analysis a
 Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented tests to ensure code quality and reliability.
 
 - **KMP module tests** live in `src/commonTest/`, with platform-specific ones in `src/jvmTest/` and `src/androidHostTest/`. `commonTest` runs on the JVM and, in modules that declare `withHostTest`, as Android host tests.
-- **Pure Android/JVM module tests** (`androidApp`, `desktopApp`, `core:barcode`, `feature:widget`) live in `src/test/`, using **Robolectric** where they need Android.
+- **Pure Android/JVM module tests** (`androidApp`, `desktopApp`, `core:barcode`, `feature:widget`, `schema-strings`) live in `src/test/`, using **Robolectric** where they need Android.
 - **Compose UI tests** use the Compose Multiplatform `runComposeUiTest` API in `commonTest` or `jvmTest`, and are preferred over instrumented tests for component testing.
 - **Instrumented tests** live in `src/androidDeviceTest/` (`core:database`, `core:model`).
 

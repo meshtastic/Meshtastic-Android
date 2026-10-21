@@ -6,8 +6,8 @@ so you can validate `flatpak-sources.json` end-to-end without round-tripping thr
 ## What it tests
 
 The release build (`:desktopApp:packageUberJarForCurrentOS :captureFlatpakSources`) only proves the manifest can be
-*generated*. `flatpak-builder` *consumes* it, offline, in Flathub's CI and in `verify-flatpak.yml`, which runs nightly
-and on changes to this directory, the workflow or the Gradle wrapper. This script runs the same step locally:
+*generated*. `flatpak-builder` *consumes* it, offline, in Flathub's CI and in `verify-flatpak.yml`, which runs nightly,
+on pull requests that change this directory or the workflow, and on merges to `main` that change either one or the Gradle wrapper. This script runs the same step locally:
 
 1. Clones `flathub/org.meshtastic.MeshtasticDesktop` (the official Flathub packaging repo).
 2. Overlays a patched manifest that:
