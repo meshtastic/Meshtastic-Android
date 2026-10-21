@@ -62,4 +62,16 @@ class DeviceModelChirpyTest {
         assertEquals("chirpy", ready.imageFile)
         assertTrue(ready.copyright.orEmpty().contains("Chirpy"), "notice was ${ready.copyright}")
     }
+
+    @Test
+    fun `Chirpy comes back after the viewer fell back to the illustration`() = runTest {
+        val viewModel = DeviceModelViewModel(noNetwork)
+        viewModel.showChirpy()
+        viewModel.state.first { it is DeviceModelState.Ready }
+
+        viewModel.markFailed()
+        viewModel.showChirpy()
+
+        assertIs<DeviceModelState.Ready>(viewModel.state.first { it != DeviceModelState.Loading })
+    }
 }

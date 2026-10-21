@@ -87,6 +87,9 @@ class DeviceModelViewModel(private val repository: DeviceModelRepository) : View
 
     /** The renderer rejected a model the parser accepted: show the illustration instead. */
     fun markFailed() {
+        // Forgets the model too, so asking for it again loads it rather than replaying the failure.
+        loading?.cancel()
+        loadedImageFile = null
         _state.value = DeviceModelState.Failed
     }
 
