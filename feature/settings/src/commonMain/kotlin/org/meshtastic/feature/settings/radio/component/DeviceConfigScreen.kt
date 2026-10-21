@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.input.ImeAction
@@ -229,17 +230,13 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 InsetDivider()
 
-                SwitchPreference(
-                    title = stringResource(Res.string.schema_device_led_heartbeat_disabled),
-                    modifier = Modifier.settingsField(Res.string.schema_device_led_heartbeat_disabled),
-                    summary = stringResource(Res.string.config_device_ledHeartbeatEnabled_summary),
-                    checked = !formState.value.led_heartbeat_disabled,
+                LedHeartbeatPreference(
                     enabled = state.connected,
+                    heartbeatDisabled = formState.value.led_heartbeat_disabled,
                     onCheckedChange = {
                         formState.value =
-                            formState.value.newBuilder().also { wb -> wb.led_heartbeat_disabled = !it }.build()
+                            formState.value.newBuilder().also { wb -> wb.led_heartbeat_disabled = it }.build()
                     },
-                    containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
         }
@@ -364,6 +361,23 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             }
         }
     }
+}
+
+internal const val LED_HEARTBEAT_SWITCH_TEST_TAG = "led_heartbeat_switch"
+
+@Composable
+internal fun LedHeartbeatPreference(enabled: Boolean, heartbeatDisabled: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    SwitchPreference(
+        title = stringResource(Res.string.schema_device_led_heartbeat_disabled),
+        modifier =
+        Modifier.settingsField(Res.string.schema_device_led_heartbeat_disabled)
+            .testTag(LED_HEARTBEAT_SWITCH_TEST_TAG),
+        summary = stringResource(Res.string.config_device_ledHeartbeatEnabled_summary),
+        checked = heartbeatDisabled,
+        enabled = enabled,
+        onCheckedChange = onCheckedChange,
+        containerColor = CardDefaults.cardColors().containerColor,
+    )
 }
 
 @Composable
