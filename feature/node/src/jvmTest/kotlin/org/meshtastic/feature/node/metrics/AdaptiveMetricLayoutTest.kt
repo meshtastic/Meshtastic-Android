@@ -31,6 +31,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
@@ -40,6 +42,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,8 +57,10 @@ class AdaptiveMetricLayoutTest {
         val expanded = mutableStateOf(false)
         val selected = mutableStateOf(-1)
         val listState = LazyListState()
+        // Density 0.5 keeps the dp sizes inside the pixel window. The split reads this window, not the parent width.
+        val windowInfo = ResizableWindowInfo(IntSize(180, 400))
         setContent {
-            CompositionLocalProvider(LocalDensity provides Density(0.5f)) {
+            CompositionLocalProvider(LocalDensity provides Density(0.5f), LocalWindowInfo provides windowInfo) {
                 MaterialTheme {
                     AdaptiveMetricLayout(
                         modifier = Modifier.size(width.value.dp, 800.dp).testTag("parent"),
@@ -81,7 +86,10 @@ class AdaptiveMetricLayoutTest {
         }
 
         for (size in listOf(600, 360, 720, 800, 840, 1200, 720)) {
-            runOnIdle { width.value = size }
+            runOnIdle {
+                width.value = size
+                windowInfo.resize(IntSize(size / 2, 400))
+            }
             val parent = onNodeWithTag("parent").fetchSemanticsNode().boundsInRoot
             val chart = onNodeWithTag("chart").fetchSemanticsNode().boundsInRoot
             val list = onNodeWithTag("list").fetchSemanticsNode().boundsInRoot
@@ -112,5 +120,27 @@ class AdaptiveMetricLayoutTest {
             onNodeWithText("Metric 39 selected true").assertIsDisplayed()
             runOnIdle { assertEquals(firstVisible, listState.firstVisibleItemIndex) }
         }
+
+        // An expanded window splits even when the composable itself is still below 840dp.
+        runOnIdle { windowInfo.resize(IntSize(600, 400)) }
+        val parent = onNodeWithTag("parent").fetchSemanticsNode().boundsInRoot
+        val chart = onNodeWithTag("chart").fetchSemanticsNode().boundsInRoot
+        val list = onNodeWithTag("list").fetchSemanticsNode().boundsInRoot
+        assertEquals(chart.right, list.left)
+        assertEquals(parent.width / 2, chart.width)
+        assertEquals(parent.width / 2, list.width)
+    }
+}
+
+private class ResizableWindowInfo(initial: IntSize) : WindowInfo {
+    private val sizePx = mutableStateOf(initial)
+
+    override val isWindowFocused: Boolean = true
+
+    override val containerSize: IntSize
+        get() = sizePx.value
+
+    fun resize(size: IntSize) {
+        sizePx.value = size
     }
 }
