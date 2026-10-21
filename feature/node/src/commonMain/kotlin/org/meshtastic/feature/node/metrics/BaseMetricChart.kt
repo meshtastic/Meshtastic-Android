@@ -193,9 +193,9 @@ fun MetricChartScaffold(
 }
 
 /**
- * An adaptive layout for metric screens. Uses a split Row for wide screens (tablets/landscape) and a stacked Column for
- * narrow screens (phones). When [isChartExpanded] is true, the card list is hidden and the chart fills the available
- * space.
+ * An adaptive layout for metric screens. Uses a split Row at expanded content widths (840dp and above) and a stacked
+ * Column at compact and medium widths. When [isChartExpanded] is true, the card list is hidden and the chart fills the
+ * available space.
  */
 @Composable
 fun AdaptiveMetricLayout(
@@ -205,12 +205,17 @@ fun AdaptiveMetricLayout(
     isChartExpanded: Boolean = false,
 ) {
     BoxWithConstraints(modifier = modifier) {
-        val isExpanded = maxWidth >= 600.dp
+        val isExpanded = maxWidth >= 840.dp
         if (isExpanded) {
             Row(modifier = Modifier.fillMaxSize()) {
                 chartPart(Modifier.weight(1f).fillMaxHeight())
-                AnimatedVisibility(visible = !isChartExpanded, enter = expandVertically(), exit = shrinkVertically()) {
-                    listPart(Modifier.weight(1f).fillMaxHeight())
+                AnimatedVisibility(
+                    visible = !isChartExpanded,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    enter = expandVertically(),
+                    exit = shrinkVertically(),
+                ) {
+                    listPart(Modifier.fillMaxSize())
                 }
             }
         } else {
@@ -222,8 +227,13 @@ fun AdaptiveMetricLayout(
                         Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.45f)
                     },
                 )
-                AnimatedVisibility(visible = !isChartExpanded, enter = expandVertically(), exit = shrinkVertically()) {
-                    listPart(Modifier.fillMaxWidth().weight(1f))
+                AnimatedVisibility(
+                    visible = !isChartExpanded,
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    enter = expandVertically(),
+                    exit = shrinkVertically(),
+                ) {
+                    listPart(Modifier.fillMaxSize())
                 }
             }
         }
