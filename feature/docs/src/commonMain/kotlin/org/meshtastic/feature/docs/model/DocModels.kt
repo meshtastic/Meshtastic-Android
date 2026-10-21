@@ -176,9 +176,16 @@ enum class ChirpyRole {
 
 /** Indicates the source of displayed page content for translation attribution. */
 enum class TranslationSource {
-    /** English source or Crowdin community translation. */
+    /** The English original, shown as-is. */
+    UNTRANSLATED,
+
+    /** Crowdin community translation bundled with the app. */
     BUNDLED,
 
     /** ML Kit on-device auto-translation (Google flavor only). */
     ML_KIT,
 }
+
+/** The source of a page as loaded, before any runtime translation: a Crowdin file, or else the English original. */
+internal fun loadedTranslationSource(wasCrowdinLocalized: Boolean): TranslationSource =
+    if (wasCrowdinLocalized) TranslationSource.BUNDLED else TranslationSource.UNTRANSLATED

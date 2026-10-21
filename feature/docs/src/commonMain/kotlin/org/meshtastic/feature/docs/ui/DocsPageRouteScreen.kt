@@ -69,7 +69,7 @@ fun DocsPageRouteScreen(
     pageId: String,
     content: DocPageContent?,
     isLoading: Boolean,
-    translationSource: TranslationSource = TranslationSource.BUNDLED,
+    translationSource: TranslationSource = TranslationSource.UNTRANSLATED,
     isNonEnglish: Boolean = false,
     isAiSupported: Boolean = false,
     modelReadiness: ModelReadiness = ModelReadiness.Checking,
@@ -94,13 +94,15 @@ fun DocsPageRouteScreen(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        if (isNonEnglish && !isLoading && content != null) {
+                        val translationLabel =
+                            when (translationSource) {
+                                TranslationSource.ML_KIT -> Res.string.doc_auto_translated
+                                TranslationSource.BUNDLED -> Res.string.doc_community_translated
+                                TranslationSource.UNTRANSLATED -> null
+                            }
+                        if (isNonEnglish && !isLoading && content != null && translationLabel != null) {
                             Text(
-                                text =
-                                when (translationSource) {
-                                    TranslationSource.ML_KIT -> stringResource(Res.string.doc_auto_translated)
-                                    TranslationSource.BUNDLED -> stringResource(Res.string.doc_community_translated)
-                                },
+                                text = stringResource(translationLabel),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
