@@ -1,0 +1,310 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>HudTarget</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map/commonMain" data-filter=":feature:map/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-map::org.meshtastic.feature.map.hud/HudTarget///PointingToDeclaration//-1707802287">
+  <div class="breadcrumbs"><a href="../../index.html">feature-map</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.map.hud</a><span class="delimiter">/</span><span class="current">HudTarget</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Hud</span><wbr><span><span>Target</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">HudTarget</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>subject<span class="token operator">: </span><a href="../-hud-subject/index.html">HudSubject</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>bearingDeg<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>elevationDeg<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>distanceM<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>distanceText<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>precisionHalfAngleDeg<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>elevationSpreadDeg<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>elevationKnown<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>positionAgeSec<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>focused<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>rise<span class="token operator">: </span><a href="../-hud-rise/index.html">HudRise</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map/src/commonMain/kotlin/org/meshtastic/feature/map/hud/HudTargets.kt#L75">source</a>)</span></span></div><p class="paragraph">A positioned node or waypoint as the HUD draws it. <a href="../../../../feature/map/org.meshtastic.feature.map.hud/-hud-target/--root--.html">bearingDeg</a> is magnetic, to match the camera pose, and <a href="../../../../feature/map/org.meshtastic.feature.map.hud/-hud-target/--root--.html">precisionHalfAngleDeg</a> spans the target's uncertainty circle widened by the phone's own fix accuracy, or is null when neither is known. <a href="../../../../feature/map/org.meshtastic.feature.map.hud/-hud-target/--root--.html">elevationKnown</a> is false when the target and the phone share no altitude frame, so the target sits level with the phone.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="1045881908%2FConstructors%2F-1707802287" anchor-label="HudTarget" id="1045881908%2FConstructors%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-hud-target.html"><span>Hud</span><wbr><span><span>Target</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1045881908%2FConstructors%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">subject<span class="token operator">: </span><a href="../-hud-subject/index.html">HudSubject</a><span class="token punctuation">, </span></span><span class="parameter ">bearingDeg<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">elevationDeg<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">distanceM<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">distanceText<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">precisionHalfAngleDeg<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">elevationSpreadDeg<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">elevationKnown<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">positionAgeSec<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">focused<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">rise<span class="token operator">: </span><a href="../-hud-rise/index.html">HudRise</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-548600115%2FProperties%2F-1707802287" anchor-label="bearingDeg" id="-548600115%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="bearing-deg.html"><span>bearing</span><wbr><span><span>Deg</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-548600115%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="bearing-deg.html">bearingDeg</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-881783491%2FProperties%2F-1707802287" anchor-label="distanceM" id="-881783491%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="distance-m.html"><span>distance</span><wbr><span><span>M</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-881783491%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="distance-m.html">distanceM</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-306940221%2FProperties%2F-1707802287" anchor-label="distanceText" id="-306940221%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="distance-text.html"><span>distance</span><wbr><span><span>Text</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-306940221%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="distance-text.html">distanceText</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1141788932%2FProperties%2F-1707802287" anchor-label="elevationDeg" id="-1141788932%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="elevation-deg.html"><span>elevation</span><wbr><span><span>Deg</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1141788932%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="elevation-deg.html">elevationDeg</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="213668127%2FProperties%2F-1707802287" anchor-label="elevationKnown" id="213668127%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="elevation-known.html"><span>elevation</span><wbr><span><span>Known</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="213668127%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="elevation-known.html">elevationKnown</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-129654193%2FProperties%2F-1707802287" anchor-label="elevationSpreadDeg" id="-129654193%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="elevation-spread-deg.html"><span>elevation</span><wbr><span>Spread</span><wbr><span><span>Deg</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-129654193%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="elevation-spread-deg.html">elevationSpreadDeg</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Half the vertical angle the target could lie within, from both altitudes' accuracy.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-750538850%2FProperties%2F-1707802287" anchor-label="focused" id="-750538850%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="focused.html"><span><span>focused</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-750538850%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="focused.html">focused</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-342922166%2FProperties%2F-1707802287" anchor-label="positionAgeSec" id="-342922166%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="position-age-sec.html"><span>position</span><wbr><span>Age</span><wbr><span><span>Sec</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-342922166%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="position-age-sec.html">positionAgeSec</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-226272623%2FProperties%2F-1707802287" anchor-label="precisionHalfAngleDeg" id="-226272623%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="precision-half-angle-deg.html"><span>precision</span><wbr><span>Half</span><wbr><span>Angle</span><wbr><span><span>Deg</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-226272623%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="precision-half-angle-deg.html">precisionHalfAngleDeg</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-149316452%2FProperties%2F-1707802287" anchor-label="rise" id="-149316452%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="rise.html"><span><span>rise</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-149316452%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="rise.html">rise</a><span class="token operator">: </span><a href="../-hud-rise/index.html">HudRise</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">How far above or below the phone the target is, when that is known and beyond its own uncertainty.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-208352375%2FProperties%2F-1707802287" anchor-label="subject" id="-208352375%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="subject.html"><span><span>subject</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-208352375%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="subject.html">subject</a><span class="token operator">: </span><a href="../-hud-subject/index.html">HudSubject</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

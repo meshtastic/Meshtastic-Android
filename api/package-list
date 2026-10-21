@@ -27,6 +27,7 @@ module:core-data
 org.meshtastic.core.data.ai
 org.meshtastic.core.data.datasource
 org.meshtastic.core.data.di
+org.meshtastic.core.data.location
 org.meshtastic.core.data.manager
 org.meshtastic.core.data.repository
 module:core-database
@@ -146,6 +147,7 @@ org.meshtastic.feature.map
 org.meshtastic.feature.map.component
 org.meshtastic.feature.map.di
 org.meshtastic.feature.map.geojson
+org.meshtastic.feature.map.hud
 org.meshtastic.feature.map.kml
 org.meshtastic.feature.map.layers
 org.meshtastic.feature.map.navigation
