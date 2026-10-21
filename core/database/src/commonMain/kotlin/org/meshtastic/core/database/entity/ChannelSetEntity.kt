@@ -18,6 +18,7 @@ package org.meshtastic.core.database.entity
 
 import androidx.room3.ColumnInfo
 import androidx.room3.Entity
+import androidx.room3.Ignore
 import androidx.room3.PrimaryKey
 import co.touchlab.kermit.Logger
 import okio.ByteString
@@ -53,6 +54,7 @@ data class ChannelSetEntity(
     @ColumnInfo(name = "last_reconciled") val lastReconciled: ByteString? = null,
 ) {
     /** The baseline decoded, or null when no reconcile has run for this device yet. */
+    @Ignore
     val lastReconciledChannelSet: ChannelSet?
         get() = lastReconciled?.let { ChannelSet.ADAPTER.decodeOrNull(it.toByteArray(), Logger) }
 
