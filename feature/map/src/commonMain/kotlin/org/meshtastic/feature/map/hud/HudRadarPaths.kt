@@ -24,10 +24,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.TracerouteColors
+import org.meshtastic.feature.map.trackFadeAlpha
+import org.meshtastic.feature.map.trackRecency
 import kotlin.math.cos
 import kotlin.math.sin
 
-private const val RADAR_TRACK_MIN_ALPHA = 0.3f
 private val RadarPathWidth = 2.dp
 private val RadarReturnShift = 3.dp
 private val RadarTrackRing = 3.dp
@@ -89,7 +90,8 @@ private fun DrawScope.drawRadarTrack(track: HudTrack, at: (PathPoint) -> Offset)
     val points = track.points.map { at(it.point) }
     if (points.isEmpty()) return
     val base = Color(track.color)
-    fun alphaAt(index: Int) = RADAR_TRACK_MIN_ALPHA + (1 - RADAR_TRACK_MIN_ALPHA) * (index + 1) / points.size.toFloat()
+    val recency = trackRecency(track.points.map { it.fixTimeSec })
+    fun alphaAt(index: Int) = trackFadeAlpha(recency[index])
     points.zipWithNext().forEachIndexed { i, (a, b) ->
         drawLine(base.copy(alpha = alphaAt(i + 1)), a, b, RadarPathWidth.toPx(), StrokeCap.Round)
     }

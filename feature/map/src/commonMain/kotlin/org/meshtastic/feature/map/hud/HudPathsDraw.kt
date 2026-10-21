@@ -32,12 +32,13 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.ui.util.formatAgo
+import org.meshtastic.feature.map.trackFadeAlpha
+import org.meshtastic.feature.map.trackRecency
 
 private const val SNR_FLOOR_DB = -20f
 private const val SNR_SPAN_DB = 30f
 private const val UNKNOWN_SNR_QUALITY = 0.5f
 private const val ARC_MIN_ALPHA = 0.55f
-private const val TRACK_LEVELS = 8
 
 /**
  * How far along a stem from the viewer its tag sits. The two legs' stems leave the same point, so their tags sit at
@@ -45,7 +46,6 @@ private const val TRACK_LEVELS = 8
  */
 private const val FORWARD_STEM_TAG_AT = 0.7f
 private const val RETURN_STEM_TAG_AT = 0.45f
-private const val OLDEST_TRACK_ALPHA = 0.25f
 private val ArcMinWidth = 2.dp
 private val ArcExtraWidth = 4.dp
 private val TrackWidth = 3.dp
@@ -171,10 +171,10 @@ internal fun DrawScope.drawRoute(
 }
 
 /**
- * A node's track as breadcrumbs in its color, fading with age in the same eight steps as the Google track map so the
- * two views agree. A leg into a point with no altitude draws dashed, since that point only sits level as a guess. A leg
- * to or from a point at the viewer rises from the bottom of the view, as a route's does. The oldest point, and one near
- * the middle of a long track, is tagged with how long ago it was fixed.
+ * A node's track as breadcrumbs in its color, fading with the time of each fix as both track maps do. A leg into a
+ * point with no altitude draws dashed, since that point only sits level as a guess. A leg to or from a point at the
+ * viewer rises from the bottom of the view, as a route's does. The oldest point, and one near the middle of a long
+ * track, is tagged with how long ago it was fixed.
  */
 @Suppress("LongParameterList")
 internal fun DrawScope.drawTrack(
@@ -188,10 +188,8 @@ internal fun DrawScope.drawTrack(
     val points = track.points
     if (points.isEmpty()) return
     val base = Color(track.color)
-    fun alphaAt(index: Int): Float {
-        val level = (index * TRACK_LEVELS / points.size).coerceAtMost(TRACK_LEVELS - 1)
-        return OLDEST_TRACK_ALPHA + (1 - OLDEST_TRACK_ALPHA) * level / (TRACK_LEVELS - 1)
-    }
+    val recency = trackRecency(points.map { it.fixTimeSec })
+    fun alphaAt(index: Int): Float = trackFadeAlpha(recency[index])
     fun TrackPoint.direction() = directionEnu(point.bearingDeg, point.elevationDeg)
     points.zipWithNext().forEachIndexed { i, (a, b) ->
         val color = base.copy(alpha = alphaAt(i + 1))
