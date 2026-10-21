@@ -82,7 +82,7 @@ if [[ $SKIP_REGEN -eq 0 ]]; then
     (cd "$REPO_ROOT" && ./gradlew --no-build-cache \
         -Dgradle.user.home="$GRADLE_HOME_ISOLATED" \
         :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources)
-    cp "$REPO_ROOT/build/flatpak-ops-sources.json" "$SOURCES_JSON"
+    cp "$REPO_ROOT/build/flatpak-sources.json" "$SOURCES_JSON"
 elif [[ ! -f "$SOURCES_JSON" ]]; then
     fail "--skip-regen specified but $SOURCES_JSON does not exist."
 fi
