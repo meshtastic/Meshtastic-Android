@@ -33,6 +33,9 @@ private const val MIN_ACCURACY_M = 1f
 /** Weight for a fix that reports no accuracy, as if it were this many meters. */
 private const val UNKNOWN_ACCURACY_M = 20f
 
+/** Weight for a height that reports no vertical accuracy, as if it were this many meters: GPS height is the weaker. */
+private const val UNKNOWN_VERTICAL_ACCURACY_M = 30f
+
 /**
  * Steadies the phone's own position while it is held still: a mean of the last [WINDOW_MS] of fixes, each weighted by
  * the inverse square of its accuracy, restarted whenever the phone moves. Bearings to nodes a few tens of meters away
@@ -79,6 +82,26 @@ internal class FixAverager {
             latitude = lat / weightSum,
             longitude = lon / weightSum,
             accuracyM = fixes.mapNotNull { it.accuracyM }.minOrNull(),
+            altitude = meanHeight { it.altitude },
+            mslAltitude = meanHeight { it.mslAltitude },
+            verticalAccuracyM = fixes.mapNotNull { it.verticalAccuracyM }.minOrNull(),
         )
+    }
+
+    /**
+     * A height averaged like the position, each fix weighted by the inverse square of its vertical accuracy, over the
+     * fixes that report it. GPS height wanders further than position, which is why it most needs the average.
+     */
+    private fun meanHeight(height: (PhoneLocation) -> Double?): Double? {
+        var weightSum = 0.0
+        var sum = 0.0
+        fixes.forEach { f ->
+            val h = height(f) ?: return@forEach
+            val accuracy = (f.verticalAccuracyM ?: UNKNOWN_VERTICAL_ACCURACY_M).coerceAtLeast(MIN_ACCURACY_M).toDouble()
+            val w = 1 / (accuracy * accuracy)
+            weightSum += w
+            sum += w * h
+        }
+        return if (weightSum > 0) sum / weightSum else null
     }
 }

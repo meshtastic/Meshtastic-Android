@@ -47,6 +47,7 @@ import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
+import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.LastHeardFilter
@@ -63,13 +64,15 @@ import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
 import org.meshtastic.feature.map.maplibre.layers.NodeChipLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapColors
+import org.meshtastic.feature.map.trackFadeAlpha
+import org.meshtastic.feature.map.trackRecency
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 import org.meshtastic.proto.Position as ProtoPosition
 
 private const val TRACK_POINT_KEY = "positionTime"
 
-/** How far along the track a point sits: 0 for the oldest, 1 for the newest. Drives the age fade. */
-private const val TRACK_AGE_KEY = "age"
+/** A point's opacity along the track's time fade, from the shared [trackFadeAlpha]. */
+private const val TRACK_ALPHA_KEY = "alpha"
 
 /** A timestamped point on a node's position track. */
 private typealias TrackPoint = Pair<GeoPosition, Int>
@@ -201,18 +204,44 @@ private fun List<TrackPoint>.olderThanCutoffRemoved(filter: LastHeardFilter): Li
     filter.includes(time, nowSeconds)
 }
 
-private fun pointFeatures(points: List<TrackPoint>) = FeatureCollection(
-    points.mapIndexed { index, (position, time) ->
-        Feature<Point, JsonObject?>(
-            geometry = Point(position),
-            properties =
-            buildJsonObject {
-                put(TRACK_POINT_KEY, time)
-                put(TRACK_AGE_KEY, if (points.size > 1) index.toDouble() / (points.size - 1) else 1.0)
-            },
-        )
-    },
-)
+private fun List<TrackPoint>.recency(): List<Float> = trackRecency(map { it.second.toLong() })
+
+private fun pointFeatures(points: List<TrackPoint>): FeatureCollection<Point, JsonObject?> {
+    val recency = points.recency()
+    return FeatureCollection(
+        points.mapIndexed { index, (position, time) ->
+            Feature<Point, JsonObject?>(
+                geometry = Point(position),
+                properties =
+                buildJsonObject {
+                    put(TRACK_POINT_KEY, time)
+                    put(TRACK_ALPHA_KEY, trackFadeAlpha(recency[index]))
+                },
+            )
+        },
+    )
+}
+
+/**
+ * The line's fade as `line-progress` stops. Line progress runs by distance, so each vertex sits at its share of the
+ * track's length and carries its fix's alpha. The inputs must strictly ascend, so a vertex that adds no length replaces
+ * the stop before it, the newer fix winning.
+ */
+internal fun trackLineStops(points: List<GeoPosition>, recency: List<Float>): List<Pair<Double, Float>> {
+    val along = DoubleArray(points.size)
+    for (i in 1 until points.size) {
+        val (a, b) = points[i - 1] to points[i]
+        along[i] = along[i - 1] + latLongToMeter(a.latitude, a.longitude, b.latitude, b.longitude)
+    }
+    val total = along.lastOrNull() ?: 0.0
+    val stops = mutableListOf<Pair<Double, Float>>()
+    points.indices.forEach { i ->
+        val progress = if (total > 0) along[i] / total else 0.0
+        val stop = progress to trackFadeAlpha(recency[i])
+        if (stops.isNotEmpty() && progress <= stops.last().first) stops[stops.lastIndex] = stop else stops += stop
+    }
+    return stops
+}
 
 /**
  * The track itself, fading from faint at the oldest end to solid at the newest.
@@ -220,6 +249,7 @@ private fun pointFeatures(points: List<TrackPoint>) = FeatureCollection(
  * `line-gradient` needs the source to compute line-distance metrics, which is what `lineMetrics` turns on; without it
  * the gradient is silently ignored and the line draws in its base colour.
  */
+@Suppress("SpreadOperator") // interpolate() only takes its stops as varargs
 @Composable
 private fun TrackLineLayer(points: List<TrackPoint>, color: Color) {
     val source =
@@ -230,6 +260,7 @@ private fun TrackLineLayer(points: List<TrackPoint>, color: Color) {
                 ),
             )
         }
+    val stops = remember(points) { trackLineStops(points.map { it.first }, points.recency()) }
     LineLayer(
         id = "track-line",
         source = source,
@@ -240,8 +271,7 @@ private fun TrackLineLayer(points: List<TrackPoint>, color: Color) {
         interpolate(
             linear(),
             feature.lineProgress(),
-            0 to const(color.copy(alpha = OLDEST_ALPHA)),
-            1 to const(color),
+            *stops.map { (progress, alpha) -> progress to const(color.copy(alpha = alpha)) }.toTypedArray(),
         ),
     )
 }
@@ -257,9 +287,7 @@ private fun TrackPointLayer(points: List<TrackPoint>, color: Color, onPositionSe
         radius = const(5.dp),
         strokeColor = const(Color.White),
         strokeWidth = const(2.dp),
-        // Faded rather than fully transparent at the oldest end. The Google flavor takes its alpha straight to zero,
-        // which makes the first point of a track invisible and untappable.
-        opacity = interpolate(linear(), feature[TRACK_AGE_KEY].asNumber(), 0 to const(OLDEST_ALPHA), 1 to const(1f)),
+        opacity = feature[TRACK_ALPHA_KEY].asNumber(),
         // Where points overlap the newest one wins, rather than whichever the query happened to return first —
         // the same reason the node chips resolve a stacked tap by rank instead of by query order.
         onClick = { features ->
@@ -308,6 +336,3 @@ private fun NewestPositionChip(node: Node, newest: TrackPoint) {
         }
     NodeChipLayer(id = "track-head", source = source, nodes = listOf(node))
 }
-
-/** Alpha the oldest end of a track fades to. */
-private const val OLDEST_ALPHA = 0.25f

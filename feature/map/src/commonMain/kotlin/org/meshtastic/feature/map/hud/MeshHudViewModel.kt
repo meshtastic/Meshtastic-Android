@@ -138,6 +138,7 @@ private const val TRACK_FALLBACK_COLOR = 0xFFFFFFFF.toInt()
 class MeshHudViewModel(
     poseProvider: CameraPoseProvider,
     phoneLocationProvider: PhoneLocationProvider,
+    pressureProvider: PhonePressureProvider,
     private val magneticFieldProvider: MagneticFieldProvider,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
@@ -155,6 +156,7 @@ class MeshHudViewModel(
     // The provider checks the permission once per collection, so a grant made while the screen is open needs a new one.
     private val locationPermissionGranted = MutableStateFlow(false)
     private val fixAverager = FixAverager()
+    private val altitudeFuser = AltitudeFuser()
     private val routeRequest = MutableStateFlow<RouteRequest?>(null)
     private val soloNodeNum = MutableStateFlow<Int?>(null)
     private var opened = false
@@ -224,11 +226,24 @@ class MeshHudViewModel(
             )
         }
 
-    /** The phone's averaged fix, shared by the targets, the route and the track. */
+    /**
+     * The phone's averaged fix, its height fused with the barometer, shared by the targets, the route and the track. A
+     * pressure reading moves only the height, so it passes on only once the height has moved a little, and the targets
+     * are not rebuilt several times a second for a phone held still.
+     */
     private val location =
-        locationPermissionGranted
-            .flatMapLatest { phoneLocationProvider.locationUpdates() }
-            .map { state -> state.location?.let { state.copy(location = fixAverager.add(it)) } ?: state }
+        combine(
+            locationPermissionGranted
+                .flatMapLatest { phoneLocationProvider.locationUpdates() }
+                .map { state -> state.location?.let { state.copy(location = fixAverager.add(it)) } ?: state },
+            pressureProvider.pressureUpdates().map<Float, Float?> { it }.onStart { emit(null) },
+        ) { state, hPa ->
+            hPa?.let(altitudeFuser::onPressure)
+            state.location?.let { state.copy(location = altitudeFuser.fuse(it)) } ?: state
+        }
+            .distinctUntilChanged { old, new ->
+                old.copy(location = null) == new.copy(location = null) && sameFix(old, new)
+            }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), replay = 1)
 
     /** The magnetic declination where the phone is, zero until it has a fix. */
@@ -346,7 +361,7 @@ class MeshHudViewModel(
                 null
             } else {
                 val color = nodes[source.nodeNum]?.colors?.second ?: TRACK_FALLBACK_COLOR
-                buildHudTrack(here, declinationAt(here), source.nodeNum, color, source.positions, nowSeconds)
+                buildHudTrack(here, declinationAt(here), source.nodeNum, color, source.positions)
             }
         }
             .flowOn(dispatchers.default)

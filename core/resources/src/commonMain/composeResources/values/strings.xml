@@ -1202,6 +1202,13 @@
     <string name="mesh_hud_thermal_hot">Phone is hot. Updating less often.</string>
     <string name="mesh_hud_tilt_down">Tilt down %1$d°</string>
     <string name="mesh_hud_tilt_up">Tilt up %1$d°</string>
+    <string name="mesh_hud_track_empty">No positions in the track window</string>
+    <string name="mesh_hud_track_newest">%1$s · newest %2$s</string>
+    <plurals name="mesh_hud_track_points">
+        <item quantity="one">%1$d point</item>
+        <item quantity="other">%1$d points</item>
+    </plurals>
+    <string name="mesh_hud_track_summary">%1$s over %2$s · newest %3$s</string>
     <string name="mesh_hud_turn_left">Turn left %1$d°</string>
     <string name="mesh_hud_turn_right">Turn right %1$d°</string>
     <string name="mesh_hud_waiting_sensor">Waiting for the orientation sensor</string>

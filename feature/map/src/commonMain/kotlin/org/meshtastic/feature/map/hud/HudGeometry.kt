@@ -28,7 +28,7 @@ import kotlin.math.sin
 private const val DEGREES_PER_RADIAN = 180.0 / PI
 
 /** Earth radius scaled by 4/3, the standard allowance for atmospheric refraction near the horizon. */
-private const val EFFECTIVE_EARTH_RADIUS_M = 6_371_000.0 * 4.0 / 3.0
+internal const val EFFECTIVE_EARTH_RADIUS_M = 6_371_000.0 * 4.0 / 3.0
 
 /** Points nearer than this to the camera plane are treated as behind it, so a projection never divides by ~0. */
 private const val MIN_FORWARD_COMPONENT = 0.05

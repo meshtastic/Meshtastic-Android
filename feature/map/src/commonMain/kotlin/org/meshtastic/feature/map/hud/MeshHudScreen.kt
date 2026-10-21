@@ -28,10 +28,12 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,6 +59,8 @@ import org.meshtastic.core.resources.mesh_hud_cardinal_south
 import org.meshtastic.core.resources.mesh_hud_cardinal_west
 import org.meshtastic.core.resources.mesh_hud_more
 import org.meshtastic.core.resources.mesh_hud_snr
+import org.meshtastic.core.resources.now
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.KeepScreenOn
@@ -81,6 +85,10 @@ private const val FULL_CIRCLE_DEG = 360.0
 
 /** How long the sensor may stay silent before the screen says it is waiting for it. */
 private const val SENSOR_WAIT_MS = 2_000L
+private const val MILLIS_PER_SECOND = 1_000.0
+
+/** How often a hot phone moves the sparks along, rather than every frame. */
+private const val HOT_SPARK_TICK_MS = 100L
 
 /** The finder counts as on target within this many degrees, or the target's own spread when that is wider. */
 private const val ON_TARGET_DEG = 5.0
@@ -176,6 +184,20 @@ fun MeshHudScreen(
     }
     val hasSensor by remember { derivedStateOf { poseState.value.hasSensor } }
     val thermal by remember { derivedStateOf { poseState.value.thermal } }
+    // The sparks' clock, read only while drawing, so a tick redraws the canvas and recomposes nothing. It runs only
+    // with
+    // a path open: every frame on a cool phone, a few times a second on a hot one, which still shows the direction.
+    val sparkMillis = remember { mutableLongStateOf(0L) }
+    val sparksOpen = route != null || track != null
+    val hotTickMs = if (thermal == HudThermal.NORMAL) 0L else HOT_SPARK_TICK_MS
+    LaunchedEffect(sparksOpen, hotTickMs) {
+        if (!sparksOpen) return@LaunchedEffect
+        val start = withFrameMillis { it } - sparkMillis.longValue
+        while (true) {
+            if (hotTickMs > 0) delay(hotTickMs)
+            withFrameMillis { sparkMillis.longValue = it - start }
+        }
+    }
     val waitingForSensor by remember {
         derivedStateOf { sensorSilent && poseState.value.hasSensor && poseState.value.pose == null }
     }
@@ -214,6 +236,7 @@ fun MeshHudScreen(
             skippedTemplate = stringResource(Res.string.mesh_hud_more),
             snrTemplate = stringResource(Res.string.mesh_hud_snr),
         )
+    val trackLabels = TrackLabels(unknown = stringResource(Res.string.unknown), now = stringResource(Res.string.now))
     val cardinals =
         Cardinals(
             north = stringResource(Res.string.mesh_hud_cardinal_north),
@@ -241,7 +264,8 @@ fun MeshHudScreen(
             val pose = state.pose ?: return@Canvas
             drawHorizon(pose, focalPx)
             targets.fences.forEach { drawGeofence(it, pose, focalPx) }
-            track?.let { drawTrack(it, pose, focalPx) }
+            val sparkSeconds = sparkMillis.longValue / MILLIS_PER_SECOND
+            track?.let { drawTrack(it, pose, focalPx, textMeasurer, tapeStyle, trackLabels, sparkSeconds) }
             route?.let {
                 drawRoute(
                     it,
@@ -252,6 +276,7 @@ fun MeshHudScreen(
                     textMeasurer,
                     tapeStyle,
                     routeLabels,
+                    sparkSeconds,
                 )
             }
             if (targets.showPrecision) {
@@ -312,6 +337,7 @@ fun MeshHudScreen(
             targets = targets,
             onNavigateUp = onNavigateUp,
             onOpenFilters = if (targets.ready && !targets.scoped) ({ showFilters = true }) else null,
+            onCapture = rememberHudCapture().takeIf { showCamera && cameraAvailable },
             modifier =
             Modifier.align(Alignment.TopStart).onPlaced {
                 topBarBottomPx = (it.positionInParent().y + it.size.height).toInt()
@@ -321,6 +347,7 @@ fun MeshHudScreen(
             targets = targets,
             hint = hint,
             route = route,
+            track = track,
             notices = HudNotices(cameraUnavailable = showCamera && !cameraAvailable, walking = walking),
             location = location,
             onOpenLocationSettings = openLocationSettings,

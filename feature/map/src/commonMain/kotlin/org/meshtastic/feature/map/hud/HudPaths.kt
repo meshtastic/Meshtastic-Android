@@ -25,6 +25,7 @@ import org.meshtastic.core.model.util.fixTimeSecondsOrNull
 import org.meshtastic.core.model.util.uncertaintyRadiusMetersOrNull
 import org.meshtastic.core.repository.PhoneLocation
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.sin
 import org.meshtastic.proto.Position as ProtoPosition
@@ -63,10 +64,59 @@ data class RouteLeg(
 /** A traceroute to draw: its legs, and how many of its known nodes have a position to draw them at. */
 data class HudRoute(val forward: RouteLeg, val back: RouteLeg?, val mappable: Int, val total: Int)
 
-data class TrackPoint(val point: PathPoint, val ageSec: Long?, val altitudeKnown: Boolean)
+/** [fixTimeSec] is absolute, so ages read from it stay current while the track itself is unchanged. */
+data class TrackPoint(val point: PathPoint, val fixTimeSec: Long?, val altitudeKnown: Boolean)
 
 /** A node's position history as breadcrumbs, oldest first, in the node's [color]. */
 data class HudTrack(val nodeNum: Int, val color: Int, val points: List<TrackPoint>)
+
+/** What a track covers: how many points, from its oldest timed fix to its newest. */
+data class TrackSummary(val points: Int, val spanSec: Long, val newestFixTimeSec: Long?)
+
+/** Null for an empty track. Points with no fix time count but do not stretch the span. */
+internal fun HudTrack.summary(): TrackSummary? {
+    if (points.isEmpty()) return null
+    val times = points.mapNotNull { it.fixTimeSec }
+    return TrackSummary(
+        points = points.size,
+        spanSec = if (times.isEmpty()) 0 else times.max() - times.min(),
+        newestFixTimeSec = times.maxOrNull(),
+    )
+}
+
+/** A track spanning longer than this also labels a point near its middle. */
+private const val MIDPOINT_LABEL_SPAN_SEC = 3_600L
+
+/**
+ * The points whose fix time is tagged in the air: the oldest, and on a track over an hour one near the middle. Never
+ * the newest, where the node's chip already gives its age, and never a point at the viewer, which has no direction.
+ */
+internal fun trackLabelIndices(points: List<TrackPoint>): List<Int> {
+    val timed =
+        points.indices.filter {
+            it != points.lastIndex && !points[it].point.atViewer && points[it].fixTimeSec != null
+        }
+    val oldest = timed.firstOrNull() ?: return emptyList()
+    val oldestTime = points[oldest].fixTimeSec ?: 0L
+    val newestTime = points.mapNotNull { it.fixTimeSec }.max()
+    val middleTime = (oldestTime + newestTime) / 2
+    val middle =
+        timed
+            .filter { it != oldest }
+            .minByOrNull { abs((points[it].fixTimeSec ?: 0L) - middleTime) }
+            .takeIf { newestTime - oldestTime > MIDPOINT_LABEL_SPAN_SEC }
+    return listOfNotNull(oldest, middle)
+}
+
+/**
+ * The far end of a leg with exactly one end at the viewer, which is drawn from the bottom of the view: the near end's
+ * bearing comes from an offset smaller than the phone's own fix, so it points nowhere. Null when neither or both are.
+ */
+internal fun viewerLeg(a: PathPoint, b: PathPoint): PathPoint? = when {
+    a.atViewer == b.atViewer -> null
+    a.atViewer -> b
+    else -> a
+}
 
 /** The node num a traceroute uses for a relay it could not identify. */
 internal const val UNKNOWN_HOP = NodeAddress.NODENUM_BROADCAST
@@ -139,7 +189,6 @@ internal fun buildHudTrack(
     nodeNum: Int,
     color: Int,
     positions: List<ProtoPosition>,
-    nowSeconds: Long,
 ): HudTrack {
     val points =
         positions
@@ -150,7 +199,7 @@ internal fun buildHudTrack(
                 here.pathPoint(position, declination)?.let { point ->
                     TrackPoint(
                         point = point,
-                        ageSec = position.fixTimeSecondsOrNull()?.let { maxOf(0, nowSeconds - it) },
+                        fixTimeSec = position.fixTimeSecondsOrNull(),
                         altitudeKnown = position.altitude != null || position.altitude_hae != null,
                     )
                 }

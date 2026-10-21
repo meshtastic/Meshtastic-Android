@@ -165,6 +165,11 @@ class DeepLinkRouterTest {
         assertEquals(listOf(MapRoute.Map(waypointId = null)), route("/map/not-a-number"))
     }
 
+    @Test
+    fun `map mesh-view opens the mesh view over the map`() {
+        assertEquals(listOf(MapRoute.Map(waypointId = null), MapRoute.MeshHud()), route("/map/mesh-view"))
+    }
+
     // endregion
 
     // region nodes
@@ -209,6 +214,32 @@ class DeepLinkRouterTest {
             listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 100), NodeDetailRoute.PositionLog(destNum = 100)),
             route("/nodes/100/position"),
         )
+    }
+
+    @Test
+    fun `nodes mesh-view finds the node over its detail`() {
+        assertEquals(
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 100), MapRoute.MeshHud(focusNodeNum = 100)),
+            route("/nodes/100/mesh-view"),
+        )
+    }
+
+    @Test
+    fun `nodes position mesh-view shows the track over its position log`() {
+        assertEquals(
+            listOf(
+                NodesRoute.Nodes,
+                NodesRoute.NodeDetail(destNum = 100),
+                NodeDetailRoute.PositionLog(destNum = 100),
+                MapRoute.MeshHud(focusNodeNum = 100, trackNodeNum = 100),
+            ),
+            route("/nodes/100/position/mesh-view"),
+        )
+    }
+
+    @Test
+    fun `nodes position mesh-view with a bad destNum opens the node list`() {
+        assertEquals(listOf(NodesRoute.Nodes), route("/nodes/abc/position/mesh-view"))
     }
 
     @Test

@@ -45,6 +45,9 @@ private typealias DeepLinkArgs = Map<String, List<String>>
  * - `/nodes` -> List of all nodes
  * - `/nodes/{destNum}` -> Node details
  * - `/nodes/{destNum}/{metric}` -> Specific node metric (e.g., `/nodes/1234/device-metrics`)
+ * - `/nodes/{destNum}/mesh-view` -> Camera mesh view finding that node
+ * - `/nodes/{destNum}/position/mesh-view` -> Camera mesh view of that node's position track
+ * - `/map/mesh-view` -> Camera mesh view of the whole mesh
  * - `/messages` -> Conversation list
  * - `/messages/{contactKey}` -> Specific conversation
  * - `/settings` -> Settings root
@@ -144,10 +147,18 @@ object DeepLinkRouter {
                 listOf(key)
             },
             pattern("discovery", DiscoveryRoute.DiscoveryGraph.serializer()) { key, _ -> listOf(key) },
+            pattern("map/mesh-view", MapRoute.Map.serializer()) { key, _ -> listOf(key, MapRoute.MeshHud()) },
             pattern("map/{waypointId}", MapRoute.Map.serializer()) { key, _ -> listOf(key) },
             pattern("map?waypointId={waypointId}", MapRoute.Map.serializer()) { key, _ -> listOf(key) },
             // A non-numeric waypointId fails to decode above and opens the plain map.
             pattern("map/.*", MapRoute.Map.serializer()) { key, _ -> listOf(key) },
+            pattern("nodes/{destNum}/position/mesh-view", NodesRoute.NodeDetail.serializer()) { key, _ ->
+                listOf(NodesRoute.Nodes, key) +
+                    listOfNotNull(
+                        key.destNum?.let { NodeDetailRoute.PositionLog(it) },
+                        key.destNum?.let { MapRoute.MeshHud(focusNodeNum = it, trackNodeNum = it) },
+                    )
+            },
             pattern("nodes/{destNum}/{metric}", NodesRoute.NodeDetail.serializer()) { key, args ->
                 val metric = key.destNum?.let { nodeDetailSubRoutes[args.value("metric").lowercase()]?.invoke(it) }
                 listOf(NodesRoute.Nodes, key) + listOfNotNull(metric)
@@ -269,5 +280,6 @@ object DeepLinkRouter {
             "host-metrics" to { destNum -> NodeDetailRoute.HostMetricsLog(destNum) },
             "pax" to { destNum -> NodeDetailRoute.PaxMetrics(destNum) },
             "neighbors" to { destNum -> NodeDetailRoute.NeighborInfoLog(destNum) },
+            "mesh-view" to { destNum -> MapRoute.MeshHud(focusNodeNum = destNum) },
         )
 }

@@ -1160,6 +1160,10 @@ mesh_hud_thermal_critical
 mesh_hud_thermal_hot
 mesh_hud_tilt_down
 mesh_hud_tilt_up
+mesh_hud_track_empty
+mesh_hud_track_newest
+mesh_hud_track_points
+mesh_hud_track_summary
 mesh_hud_turn_left
 mesh_hud_turn_right
 mesh_hud_waiting_sensor
