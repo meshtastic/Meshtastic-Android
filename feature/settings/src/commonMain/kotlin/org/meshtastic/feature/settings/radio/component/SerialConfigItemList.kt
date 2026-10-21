@@ -152,6 +152,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     modifier = Modifier.settingsField(Res.string.schema_serial_mode),
                     summary = stringResource(Res.string.schema_serial_mode_description),
                     enabled = state.connected,
+                    items = schemaLabelledItems(serialModeOptions(formState.value.mode)),
                     selectedItem = formState.value.mode,
                     onItemSelected = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build()
@@ -172,3 +173,9 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         }
     }
 }
+
+/** MODBUS is in the schema but no firmware release implements it, so it is offered only while the node holds it. */
+internal fun serialModeOptions(selected: ModuleConfig.SerialConfig.Serial_Mode) =
+    ModuleConfig.SerialConfig.Serial_Mode.entries.filter {
+        it != ModuleConfig.SerialConfig.Serial_Mode.MODBUS || it == selected
+    }

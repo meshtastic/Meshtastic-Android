@@ -86,6 +86,15 @@ class LoRaPresetItemsTest {
     }
 
     @Test
+    fun veryLongSlow_isNotOfferedToFirmwareThatNoLongerRunsIt() {
+        assertFalse(ModemPreset.VERY_LONG_SLOW in presets(null))
+
+        // A node still holding it keeps it visible, greyed out, so the field never goes blank.
+        val items = buildPresetItems(null, false, ModemPreset.VERY_LONG_SLOW, caps, emptyMap())
+        assertFalse(items.single { it.value == ModemPreset.VERY_LONG_SLOW }.enabled)
+    }
+
+    @Test
     fun frequencyField_showsThreeDecimalsWithADotSeparator() {
         assertEquals("906.875", formatFrequencyMhz(906.875f))
         assertEquals("869.400", formatFrequencyMhz(869.4f))

@@ -221,6 +221,21 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun supportsPreset_hides_VeryLongSlow_from_2_6_5_where_firmware_dropped_it() {
+        // firmware#6486 removed its modemPresetToParams case; 2.6.5 and later run LONG_FAST when sent it.
+        assertTrue(caps("2.6.4").supportsPreset(ChannelOption.VERY_LONG_SLOW))
+        assertFalse(caps("2.6.5").supportsPreset(ChannelOption.VERY_LONG_SLOW))
+        assertFalse(caps("2.8.0").supportsPreset(ChannelOption.VERY_LONG_SLOW))
+        assertEquals(
+            setOf(ChannelOption.VERY_LONG_SLOW),
+            ChannelOption.entries.filter { it.removedInFirmware != null }.toSet(),
+        )
+        assertTrue(
+            Capabilities(firmwareVersion = "2.8.0", forceEnableAll = true).supportsPreset(ChannelOption.VERY_LONG_SLOW),
+        )
+    }
+
+    @Test
     fun nullFirmware_returns_all_false() {
         val c = caps(null)
         assertFalse(c.canMuteNode)

@@ -86,19 +86,10 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                DropDownPreference(
-                    title = stringResource(Res.string.schema_bluetooth_mode),
-                    modifier = Modifier.settingsField(Res.string.schema_bluetooth_mode),
-                    summary = stringResource(Res.string.schema_bluetooth_mode_description),
+                BluetoothPairingModePreference(
                     enabled = state.connected,
-                    items =
-                    Config.BluetoothConfig.PairingMode.entries
-                        .filter { it.name != "UNRECOGNIZED" }
-                        .map { it to it.name },
-                    selectedItem =
-                    formState.value.mode.takeUnless { it.name == "UNRECOGNIZED" }
-                        ?: Config.BluetoothConfig.PairingMode.RANDOM_PIN,
-                    onItemSelected = {
+                    mode = formState.value.mode,
+                    onModeChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build()
                     },
                 )
@@ -114,6 +105,23 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             }
         }
     }
+}
+
+@Composable
+internal fun BluetoothPairingModePreference(
+    enabled: Boolean,
+    mode: Config.BluetoothConfig.PairingMode,
+    onModeChange: (Config.BluetoothConfig.PairingMode) -> Unit,
+) {
+    DropDownPreference(
+        title = stringResource(Res.string.schema_bluetooth_mode),
+        modifier = Modifier.settingsField(Res.string.schema_bluetooth_mode),
+        summary = stringResource(Res.string.schema_bluetooth_mode_description),
+        enabled = enabled,
+        items = schemaLabelledItems(Config.BluetoothConfig.PairingMode.entries.filter { it.name != "UNRECOGNIZED" }),
+        selectedItem = mode.takeUnless { it.name == "UNRECOGNIZED" } ?: Config.BluetoothConfig.PairingMode.RANDOM_PIN,
+        onItemSelected = onModeChange,
+    )
 }
 
 @Composable

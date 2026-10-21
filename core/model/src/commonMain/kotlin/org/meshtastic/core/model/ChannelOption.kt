@@ -136,6 +136,9 @@ private val FIRMWARE_2_8 = DeviceVersion("2.8.0")
 /** The firmware release that introduced the LONG_TURBO preset (firmware#8985). */
 private val FIRMWARE_2_7_17 = DeviceVersion("2.7.17")
 
+/** The first firmware release without VERY_LONG_SLOW in its preset table (firmware#6486). */
+private val FIRMWARE_2_6_5 = DeviceVersion("2.6.5")
+
 /**
  * Regulatory regions for radio usage
  *
@@ -485,14 +488,22 @@ enum class ChannelOption(
     /** The coding-rate denominator the preset uses, 5 through 8 for 4/5 through 4/8. */
     val codingRate: Int,
     val minFirmware: DeviceVersion? = null,
+    val removedInFirmware: DeviceVersion? = null,
 ) {
     // Grouped by range and speed for better readability.
     // Preset parameters mirror firmware's modemPresetToParams (src/mesh/MeshRadio.h).
-    // minFirmware = first firmware release whose preset table has the entry ([Capabilities.supportsPreset]);
-    // older firmware silently falls back to LONG_FAST when sent an unknown preset.
+    // minFirmware = first firmware release whose preset table has the entry, removedInFirmware = first release
+    // without it ([Capabilities.supportsPreset]); firmware silently falls back to LONG_FAST when sent a preset its
+    // table lacks.
 
     // Historical parameters for firmware predating the removal of VERY_LONG_SLOW.
-    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, 0.0625f, spreadingFactor = 12, codingRate = 8),
+    VERY_LONG_SLOW(
+        ModemPreset.VERY_LONG_SLOW,
+        0.0625f,
+        spreadingFactor = 12,
+        codingRate = 8,
+        removedInFirmware = FIRMWARE_2_6_5,
+    ),
     LONG_TURBO(ModemPreset.LONG_TURBO, 0.500f, spreadingFactor = 11, codingRate = 8, minFirmware = FIRMWARE_2_7_17),
     LONG_FAST(ModemPreset.LONG_FAST, 0.250f, spreadingFactor = 11, codingRate = 5),
     LONG_MODERATE(ModemPreset.LONG_MODERATE, 0.125f, spreadingFactor = 11, codingRate = 8),
