@@ -77,7 +77,7 @@ data class LocalStatsWidgetUiState(
 )
 ```
 
-Every field has a default. Until the node has sent `LocalStats` (`hasStats` false), utilization and uptime fall back to the node's own device metrics.
+Every field has a default in the source; the listing leaves them out. Until the node has sent `LocalStats` (`hasStats` false), utilization and uptime fall back to the node's own device metrics.
 
 ### `LocalStatsWidgetStateProvider`
 

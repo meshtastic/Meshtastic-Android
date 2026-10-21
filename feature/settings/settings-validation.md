@@ -179,7 +179,7 @@ The screen edits the node's `User` record. Save is disabled while the long name 
 | Field | Type | Validation | Notes |
 |-------|------|------------|-------|
 | `public_key` | Base64 | 32 bytes; read-only | Auto-derived from private key |
-| `private_key` | Base64 | 32 bytes | Key generation applies bit masking: `f[0] &= 0xF8`, `f[31] = (f[31] & 0x7F) ǀ 0x40`. A remote node reports no private key, so the field shows as redacted there |
+| `private_key` | Base64 | 32 bytes | Key generation applies bit masking: `f[0] &= 0xF8`, `f[31] = (f[31] & 0x7F) \| 0x40`. A remote node reports no private key, so the field shows as redacted there |
 | `admin_key` | Base64 list | maxCount: 3 | Each entry must decode as Base64; proto max_size is 32 bytes, which the UI does not enforce |
 | `serial_enabled` | Boolean | Toggle | — |
 | `debug_log_api_enabled` | Boolean | Toggle | — |

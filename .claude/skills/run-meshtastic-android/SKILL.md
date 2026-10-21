@@ -27,7 +27,7 @@ step on stderr.
   finds the JetBrains 25 JDK Gradle provisioned at the macOS layout
   `~/.gradle/jdks/jetbrains_s_r_o_-25-*/…/Contents/Home`. The emulator driver needs only `adb`.
 - Where `~/.claude/bin/gradle-queue` exists, Gradle runs go through it, and the
-  commands below use it; elsewhere run `./gradlew` directly. Everything after its `--`
+  commands below use it; elsewhere replace `~/.claude/bin/gradle-queue --` in them with `./gradlew`. Everything after its `--`
   is **Gradle arguments**: it runs `./gradlew` itself
   (`gradle-queue -- ./gradlew tasks` fails with `Task './gradlew' not found`).
 - Emulator leg: a running AVD (`adb devices`) with the fdroid debug build installed

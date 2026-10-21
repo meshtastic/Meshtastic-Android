@@ -120,7 +120,7 @@ For recovery or when neither OTA nor in-app USB is available:
 ## Pre-Update Checklist
 
 Before updating:
-- [ ] Battery > 50%. The app refuses to start an update when the node reports 10% or less
+- [ ] Battery above 50%, recommended. The app itself refuses to start an update only when the node reports 10% or less
 - [ ] Stable Bluetooth connection
 - [ ] Note your current settings (they may reset on major version changes)
 - [ ] Check the release notes for breaking changes

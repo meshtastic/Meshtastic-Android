@@ -100,7 +100,7 @@ null for them, and the caller hands them to its import fallback.
 | `/wifi-provision?address={mac}` | `WifiProvisionRoute.WifiProvision(mac)` | Provisioning targeting a specific node MAC |
 | `/settings` | `SettingsRoute.Settings(null)` | Settings root |
 | `/settings/{page}` | e.g. `SettingsRoute.LoRa` | A settings screen by slug (`lora`, `mqtt`, `security`, `about`, ...); the full list is `settingsSubRoutes` |
-| `/settings/{destNum}` | `SettingsRoute.Settings(destNum)` | Settings for a remote node; every `/settings/...` path also takes a leading `{destNum}`, as in `/settings/{destNum}/{page}` |
+| `/settings/{destNum}` | `SettingsRoute.Settings(destNum)` | Settings for a remote node. A settings path can take a leading `{destNum}` to target a remote node, as in `/settings/{destNum}/{page}`; without it the path opens the connected node's settings |
 | `/settings/helpDocs` | `SettingsRoute.HelpDocs` | Docs browser |
 | `/settings/helpDocs/{pageId}` | `SettingsRoute.HelpDocPage(pageId)` | Specific doc page |
 | `/settings/help-docs` | `SettingsRoute.HelpDocs` | Compatibility alias |

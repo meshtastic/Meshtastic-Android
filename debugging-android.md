@@ -20,6 +20,7 @@ Set up your phone and PC for debugging:
 Then capture the log:
 
 * Long-press the Meshtastic app icon, open **App info**, and choose **Force stop**, so the log starts from scratch and is easier to read.
+* Start the app again. The command that follows finds the app by its process, so it must be running first.
 * On macOS or Linux, run:
 
 ```shell
@@ -32,6 +33,6 @@ adb shell 'logcat --pid=$(pidof -s com.geeksville.mesh)' | tee newlogfile.txt
 adb shell 'logcat --pid=$(pidof -s com.geeksville.mesh)' | Tee-Object newlogfile.txt
 ```
 
-The package name above is for release builds. For a debug or snapshot build, use `com.geeksville.mesh.google.debug` or `com.geeksville.mesh.fdroid.debug` instead. `pidof` finds the app only while it runs, so start the app first.
+The package name above is for release builds. For a debug or snapshot build, use `com.geeksville.mesh.google.debug` or `com.geeksville.mesh.fdroid.debug` instead. For a problem that happens while the app starts, clear the log with `adb logcat -c`, run `adb logcat | tee newlogfile.txt` without the process filter, then start the app.
 
 Go through the app to the part that misbehaves, then press Ctrl+C in the terminal to stop logging. Open a GitHub [issue](https://github.com/meshtastic/Meshtastic-Android/issues) describing the problem and attach `newlogfile.txt`. We'll reply with what we find, possibly with some extra questions.

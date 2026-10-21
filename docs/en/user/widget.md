@@ -21,7 +21,7 @@ The widget displays the **connected node's** current local stats:
 - A **node chip** across the top, carrying the node's short name in its own colors
 - **Battery** — the node's battery level, or *Powered* when running on external power
 - **ChUtil** — channel utilization (how busy the LoRa channel is, as a percentage)
-- **AirUtil** — airtime utilization (how much of the duty cycle your node is transmitting)
+- **AirUtil** — the percentage of airtime this node used transmitting in the last hour
 - **Traffic** — packets transmitted / received, and duplicates seen
 - **Relays** — packets relayed and relay cancellations (shown when the node is relaying)
 - **Diagnostics** — a combined line carrying **Noise** (the background noise level in dBm), **Bad** (corrupt packets received), and **Dropped** (packets the node discarded). Bad and Dropped appear only once they are above zero, so a quiet node may show the noise reading alone

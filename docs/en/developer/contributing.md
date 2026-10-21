@@ -103,6 +103,7 @@ For docs-specific changes, also run the Gradle bundle checks and the scripts the
 node scripts/validate-doc-links.js docs/en
 node scripts/check-doc-coverage.js .
 node scripts/check-doc-aliases.js .
+node scripts/check-doc-freshness.js docs/en --max-age-days=180
 python3 scripts/docs/sync-locale-front-matter.py --check
 ```
 

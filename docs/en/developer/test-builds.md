@@ -134,7 +134,7 @@ install. `INSTALL_FAILED_UPDATE_INCOMPATIBLE` means the installed build predates
 
 Two more things about release selection apply to every channel described earlier, not just snapshot:
 
-> ⚠️ **Important:** Leave **Fallback to older releases** on. It is not a channel-strictness setting, and turning it off breaks every channel config here. Obtainium's release loop breaks out after the first candidate when fallback is off, so a title filter never gets to skip past non-matching releases. A config pinned to `-open` or `^Snapshot` then fails with "Could not find a suitable release" when a newer production release sits at the head of the list. The title filter is what pins the channel; fallback is what lets Obtainium walk down to the newest release that matches it.
+> ⚠️ **Important:** Leave **Fallback to older releases** on. It is not a channel-strictness setting, and turning it off breaks the beta and snapshot configs. Obtainium's release loop breaks out after the first candidate when fallback is off, so a title filter never gets to skip past non-matching releases. A config pinned to `-open` or `^Snapshot` then fails with "Could not find a suitable release" when a newer production release sits at the head of the list. The title filter is what pins the channel; fallback is what lets Obtainium walk down to the newest release that matches it.
 
 If your channel filter still finds nothing, that channel has no published release, which is common early in a version cycle and between a production release and the next promotion. Check the [project README](https://github.com/meshtastic/Meshtastic-Android#get-meshtastic) for what is live, or use the *Bleeding edge* form to follow whichever of open/closed is newest.
 

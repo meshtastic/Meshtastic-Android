@@ -178,7 +178,7 @@ reviews:
     - path: core/database/
       instructions: >-
         Review focus: schema compatibility. A `@Database` version bump must ship a new
-        `core/database/schemas/<n>.json` AND an (n-1)→n test under `androidHostTest` that inserts rows at
+        `core/database/schemas/<n>.json` AND an (n-1)→n case in `jvmTest`'s `MeshtasticDatabaseMigrationTest` that inserts rows at
         the old version, migrates, and asserts row count and column values survive — not merely that the
         migration executes. A column going nullable must assert both that pre-existing values are retained
         and that the new NULL state is reachable. Flag `@Insert`+`@Update` pairs that should be `@Upsert`,

@@ -37,7 +37,7 @@ git status --short
 - If gradle-runner touched files you didn't, treat its PASS as suspect and re-run the failing task inline.
 - If `docs/assets/screenshots/` shows changes and the work is not a UI change (you did not run `copyDocsScreenshots` on purpose), restore that directory so host-render noise does not ride into the PR:
 ```bash
-git restore -- docs/assets/screenshots/
+git restore --source=HEAD --staged --worktree -- docs/assets/screenshots/
 ```
 
 ## 5. Report

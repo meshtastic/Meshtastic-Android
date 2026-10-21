@@ -12,7 +12,7 @@ Opens a PR the way this repo expects. The SOP lives in `CONTRIBUTING.md` → **P
 - Target branch is `main` unless told otherwise.
 - On the default branch? Create a feature branch first.
 - Baseline must be green **this session** (`spotlessApply spotlessCheck detekt detektTypeResolved assembleDebug test allTests`). If it hasn't run since the last code change, run `/baseline` first. The push hook in `.claude/hooks/pre-bash-guard.sh` runs only `detekt`.
-- `git status`: nothing unintended staged. Never commit `.agent_memory/`. If `docs/assets/screenshots/*.png` are dirty and the change is not an intentional UI change, restore them: `git restore -- docs/assets/screenshots`.
+- `git status`: nothing unintended staged. Never commit `.agent_memory/`. If `docs/assets/screenshots/*.png` are dirty and the change is not an intentional UI change, restore them: `git restore --source=HEAD --staged --worktree -- docs/assets/screenshots`.
 
 ## 2. Body
 Draft per `CONTRIBUTING.md` → Pull Requests → **Writing the description** (WHY-first summary, then changes under the 🌟 New Features / 🛠️ Refactoring & Architecture / 🐛 Bug Fixes / 🧹 Chores categories that apply, **Testing Performed** section when tests were added/changed).
