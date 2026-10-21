@@ -75,7 +75,7 @@ A public-key conversation carries an encryption icon in its top bar. A green clo
 ### 傳送私訊
 
 1. Open the **Messages** tab and select a conversation, or touch & hold a node in the node list and choose **Message**.
-2. Type your message and tap **Send**.
+2. 輸入訊息後點選「傳送」。
 
 On a hardware keyboard, Enter sends the message and Shift+Enter starts a new line. The on-screen keyboard's Enter key always starts a new line.
 

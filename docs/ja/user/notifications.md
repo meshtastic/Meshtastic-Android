@@ -18,20 +18,20 @@ Meshtastic posts a notification when something on the mesh needs you while the a
 
 To see the categories, tap **App Notifications** in the **Information** section of **Settings**. It opens Android's notification settings for Meshtastic, where the categories sit in three groups.
 
-| Group    | Category                                  | Posted for                                                                      | Tapping it opens                |
-| -------- | ----------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
-| メッセージ    | ダイレクトメッセージの通知                             | A message sent directly to you                                                  | The conversation                |
-| メッセージ    | ブロードキャストメッセージの通知                          | A message on one of your channels                                               | The channel                     |
-| メッセージ    | Reaction notifications                    | An emoji reaction to a message in one of your conversations                     | The conversation                |
-| メッセージ    | ウェイポイントの通知                                | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages | アラート通知                                    | A critical alert from a node                                                    | The conversation                |
-| メッシュ     | 新しいノードの通知                                 | A node heard for the first time                                                 | The node's details              |
-| メッシュ     | メッシュ招待の通知                                 | An invitation to join a nearby mesh                                             | ローカルメッシュ探索                      |
-| メッシュ     | バッテリー残量低下通知 (お気に入りノード) | A favorite node's battery running low                                           | The node's details              |
-| デバイス     | サービス通知                                    | The connection to your node while the app runs in the background                | The app                         |
-| デバイス     | バッテリー残量低下通知                               | Your node's battery running low                                                 | The node's details              |
-| デバイス     | Radio notifications                       | Notices from your node, such as key verification requests and security warnings | The app                         |
-| デバイス     | Update and connection notifications       | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
+| Group | Category                                  | Posted for                                                                      | Tapping it opens                |
+| ----- | ----------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------- |
+| メッセージ | ダイレクトメッセージの通知                             | A message sent directly to you                                                  | The conversation                |
+| メッセージ | ブロードキャストメッセージの通知                          | A message on one of your channels                                               | The channel                     |
+| メッセージ | Reaction notifications                    | An emoji reaction to a message in one of your conversations                     | The conversation                |
+| メッセージ | ウェイポイントの通知                                | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
+| メッセージ | アラート通知                                    | A critical alert from a node                                                    | The conversation                |
+| メッシュ  | 新しいノードの通知                                 | A node heard for the first time                                                 | The node's details              |
+| メッシュ  | メッシュ招待の通知                                 | An invitation to join a nearby mesh                                             | ローカルメッシュ探索                      |
+| メッシュ  | バッテリー残量低下通知 (お気に入りノード) | A favorite node's battery running low                                           | The node's details              |
+| デバイス  | サービス通知                                    | The connection to your node while the app runs in the background                | The app                         |
+| デバイス  | バッテリー残量低下通知                               | Your node's battery running low                                                 | The node's details              |
+| デバイス  | Radio notifications                       | Notices from your node, such as key verification requests and security warnings | The app                         |
+| デバイス  | Update and connection notifications       | A firmware update for your node, or a problem reconnecting to it                | Firmware update, or Connections |
 
 By default, direct messages, alerts and notices from your node pop up on screen, mesh invitations and the service notification arrive without a sound, and the rest make a sound. Android keeps whatever you change on a category, and the app cannot change it back.
 

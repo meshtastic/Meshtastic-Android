@@ -24,7 +24,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Meddelanden | Meddelandeaviseringar                                         | A message on one of your channels                                               | The channel                     |
 | Meddelanden | Reaction notifications                                        | An emoji reaction to a message in one of your conversations                     | The conversation                |
 | Meddelanden | Waypoint-aviseringar                                          | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages    | Larmmeddelanden                                               | A critical alert from a node                                                    | The conversation                |
+| Meddelanden | Larmmeddelanden                                               | A critical alert from a node                                                    | The conversation                |
 | Meshnätverk | Ny nod avisering                                              | A node heard for the first time                                                 | The node's details              |
 | Meshnätverk | Mesh invitation notifications                                 | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
 | Meshnätverk | Meddelanden om lågt batteri (favoritnoder) | A favorite node's battery running low                                           | The node's details              |

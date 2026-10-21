@@ -23,4 +23,4 @@ User and developer documentation for the Meshtastic Android and Desktop app, bui
 | [アーキテクチャ](developer/architecture)         | コントリビューター向けのアプリアーキテクチャ概要                   |
 | [コントリビューション](developer/contributing)      | ブランチ命名、PR ワークフロー、検証コマンド                    |
 
-This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+このドキュメントは、アプリ内の**ヘルプとドキュメント**ブラウザと同じ Markdown ソースから提供されています。

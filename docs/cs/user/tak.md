@@ -43,7 +43,7 @@ Navigate to **Settings → Module configuration → TAK (ATAK)**. The module's o
 there is no separate enable switch here, because the **Device Role** setting in Device configuration is what
 turns TAK on. Your node broadcasts this identity, which appears on TAK maps.
 
-| Nastavení | Popis                                                                                                                          | Default                                  |
+| Nastavení | Popis                                                                                                                          | Výchozí                                  |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
 | Role      | Your operational role within the team: Team Member, Team Lead, HQ, Sniper, Medic, Forward Observer, RTO, or K9 | Default (Team Member) |
 | Team      | Your team color on the TAK map, one of the 14 standard TAK team colors such as Blue, Red, Cyan, or Green                       | Default (Cyan)        |

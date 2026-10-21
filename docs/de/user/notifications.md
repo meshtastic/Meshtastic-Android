@@ -24,7 +24,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Nachrichten | Benachrichtigung allgemeine Nachrichten               | A message on one of your channels                                               | The channel                     |
 | Nachrichten | Reaction notifications                                | An emoji reaction to a message in one of your conversations                     | The conversation                |
 | Nachrichten | Wegpunkt Benachrichtigungen                           | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages    | Warnmeldungen                                         | A critical alert from a node                                                    | The conversation                |
+| Nachrichten | Warnmeldungen                                         | A critical alert from a node                                                    | The conversation                |
 | Netz        | Benachrichtigung neue Knoten                          | A node heard for the first time                                                 | The node's details              |
 | Netz        | Mesh invitation notifications                         | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
 | Netz        | Akkustands Warnung (für Favoriten) | A favorite node's battery running low                                           | The node's details              |

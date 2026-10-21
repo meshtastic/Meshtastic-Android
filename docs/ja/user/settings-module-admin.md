@@ -13,7 +13,7 @@ aliases:
 
 オプションの機能モジュールを設定し、デバイスの管理を行います。モジュールは、専用の機能で Meshtastic を拡張します。それぞれ個別に有効・無効を切り替えられます。
 
-Enable only the modules you use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration. A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
+Enable only the modules you use. 使わないモジュールを無効にすると、電波利用時間が減り、バッテリーを節約でき、設定もシンプルになります。 A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
 
 モジュールの設定は、トグルスイッチ、ドロップダウン、テキストフィールド、スライダーを備えたカード形式のレイアウトを使用します：
 
@@ -35,18 +35,18 @@ Saving a module screen restarts the node: the button reads **Save & restart**, a
 
 インターネット接続のために、メッシュのメッセージを MQTT サーバーとの間で橋渡しします。 This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
-| 設定項目                   | 説明                                                                                                                                                                                                                                                                               | Default               |
+| 設定項目                   | 説明                                                                                                                                                                                                                                                                               | デフォルト                 |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | アドレス                   | MQTT サーバーのアドレス                                                                                                                                                                                                                                                                   | `mqtt.meshtastic.org` |
-| Encryption Enabled     | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
-| JSON出力の有効化             | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Off                   |
-| Map Reporting          | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | Off                   |
-| MQTT Client Proxy      | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | Off                   |
-| MQTT Enabled           | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | Off                   |
+| 暗号化の有効化                | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
+| JSON出力の有効化             | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | オフ                    |
+| マップ報告                  | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | オフ                    |
+| クライアントへのプロキシの有効化       | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | オフ                    |
+| MQTTを有効化               | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | オフ                    |
 | MQTT proxy in this app | The app-side half of **MQTT Client Proxy**: whether this app acts as that relay. It shows whether the relay is running, and can be turned on only while **MQTT Enabled** and **MQTT Client Proxy** are both on. See [MQTT](mqtt) | —                     |
 | パスワード                  | 認証用のパスワード                                                                                                                                                                                                                                                                        | The public broker's   |
-| Root Topic             | MQTT のベーストピックパス                                                                                                                                                                                                                                                                  | `msh`                 |
-| TLS Enabled            | Use a secure connection                                                                                                                                                                                                                                                          | Off                   |
+| ルート トピック               | MQTT のベーストピックパス                                                                                                                                                                                                                                                                  | `msh`                 |
+| TLS Enabled            | Use a secure connection                                                                                                                                                                                                                                                          | オフ                    |
 | ユーザー名                  | 認証用のユーザー名                                                                                                                                                                                                                                                                        | The public broker's   |
 
 Turning **Map Reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
@@ -65,15 +65,15 @@ until you agree:
 
 外部デバイスとの連携（GPS モジュール、センサー、カスタムハードウェア）のために、シリアルポート通信を有効にします。有効にすると、ノードのシリアルポートで protobuf またはテキストデータを送受信でき、外部のマイコンやコンピューターがメッシュとやり取りできるようになります。
 
-| 設定項目                                                                                             | 説明                                                                                                                                                                                                                                  | Default |
-| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Baud                                                                                             | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | Default |
-| Echo                                                                                             | Echo packets you send back over the serial port                                                                                                                                                                                     | Off     |
-| Mode                                                                                             | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | Default |
-| コンソールのシリアルポートを上書き                                                                                | Take over the port the debug console normally uses                                                                                                                                                                                  | Off     |
-| Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0       |
-| Serial Enabled                                                                                   | Turn serial communication on                                                                                                                                                                                                        | Off     |
-| タイムアウト                                                                                           | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0       |
+| 設定項目                                                                                             | 説明                                                                                                                                                                                                                                  | デフォルト |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| シリアルボーレイト                                                                                        | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | デフォルト |
+| Echoを有効化                                                                                         | Echo packets you send back over the serial port                                                                                                                                                                                     | オフ    |
+| シリアルモード                                                                                          | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | デフォルト |
+| コンソールのシリアルポートを上書き                                                                                | Take over the port the debug console normally uses                                                                                                                                                                                  | オフ    |
+| Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0     |
+| シリアル通信を有効化                                                                                       | Turn serial communication on                                                                                                                                                                                                        | オフ    |
+| タイムアウト                                                                                           | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0     |
 
 ### External Notification module
 
@@ -86,31 +86,31 @@ or notification LED; elsewhere everything starts off.
 
 | 設定項目                                                                                                                 | 説明                                                                                                                                     |
 | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Active                                                                                                               | Whether the LED pin is active high or low. Shown once **Output pin GPIO** is set                                       |
+| LED出力 アクティブハイ                                                                                                        | Whether the LED pin is active high or low. Shown once **Output pin GPIO** is set                                       |
 | Alert when receiving a bell / Alert GPIO buzzer when receiving a bell / Alert GPIO vibra motor when receiving a bell | Which outputs fire on a received bell character                                                                                        |
 | Alert when receiving a message / Alert GPIO buzzer when receiving a message / Vibra Motor Alert                      | Which outputs fire on an incoming message                                                                                              |
-| External Notification Enabled                                                                                        | Master toggle for the module                                                                                                           |
+| 外部通知を有効化                                                                                                             | Master toggle for the module                                                                                                           |
 | GPIO Output Duration                                                                                                 | How long a single alert lasts                                                                                                          |
 | Nag Timeout                                                                                                          | Keep repeating the alert for this long until it is acknowledged. **Unset** disables nagging                            |
-| Output pin GPIO                                                                                                      | Pin the LED is wired to                                                                                                                |
-| Output pin buzzer GPIO                                                                                               | Pin the buzzer is wired to                                                                                                             |
-| Output pin vibra GPIO                                                                                                | Pin the vibration motor is wired to                                                                                                    |
+| LED出力 (GPIO)                                                                                      | Pin the LED is wired to                                                                                                                |
+| ブザー出力(GPIO)                                                                                       | Pin the buzzer is wired to                                                                                                             |
+| バイブレーション出力 (GPIO)                                                                                 | Pin the vibration motor is wired to                                                                                                    |
 | 着信音                                                                                                                  | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file                                                 |
-| Use I2S As Buzzer                                                                                                    | Send the alert through an I2S audio output instead                                                                                     |
-| Use PWM Buzzer                                                                                                       | Drive the buzzer with PWM, which allows tones rather than a single pitch. Shown once **Output pin buzzer GPIO** is set |
+| I2Sをブザーとして使用                                                                                                         | Send the alert through an I2S audio output instead                                                                                     |
+| PWMブザーを使用                                                                                                            | Drive the buzzer with PWM, which allows tones rather than a single pitch. Shown once **Output pin buzzer GPIO** is set |
 
 ### Store & Forward module
 
 一時的にオフラインだったノードのためにメッセージをバッファリングし、それらのノードが再接続したときに再送します。ノードが頻繁に圏内・圏外を行き来するメッシュに不可欠です。短時間の切断中にメッセージが失われないようにします。 A server needs an ESP32 with PSRAM or a Linux `meshtasticd` node. A node in the Router or Router Late role acts as a server even with the server setting off.
 
-| 設定項目                                                   | 説明                                                                                 | Default |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------- | ------- |
-| History Return Max                                     | Most stored messages returned per request. 0 uses 25               | 0       |
-| History Return Window                                  | How far back, in minutes, stored messages are returned. 0 uses 240 | 0       |
-| サーバーの最大保管レコード数  (デフォルト 約11,000レコード) | Most messages to store. 0 uses three quarters of the free PSRAM    | 0       |
-| Send Heartbeat                                         | Periodically announce that this node is a store-and-forward server                 | Off     |
-| サーバー                                                   | Act as a store-and-forward server for the mesh                                     | Off     |
-| Store and Forward Enabled                              | Turn store and forward on                                                          | Off     |
+| 設定項目                                                   | 説明                                                                                 | デフォルト |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------- | ----- |
+| リクエスト可能な最大の履歴件数                                        | Most stored messages returned per request. 0 uses 25               | 0     |
+| リクエスト可能な履歴の期間  (分)                  | How far back, in minutes, stored messages are returned. 0 uses 240 | 0     |
+| サーバーの最大保管レコード数  (デフォルト 約11,000レコード) | Most messages to store. 0 uses three quarters of the free PSRAM    | 0     |
+| ハートビート                                                 | Periodically announce that this node is a store-and-forward server                 | オフ    |
+| サーバー                                                   | Act as a store-and-forward server for the mesh                                     | オフ    |
+| ストアアンドフォワード有効                                          | Turn store and forward on                                                          | オフ    |
 
 ### Range Test module
 
@@ -121,11 +121,11 @@ default channel key, the interval and CSV controls stay disabled — you can sti
 already-enabled module off — and saving force-disables the module if the channel has reverted to
 public.
 
-| 設定項目               | 説明                                                                                                                  | Default |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ------- |
-| Range Test Enabled | Turn range testing on                                                                                               | Off     |
-| Save               | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only                      | Off     |
-| Sender Interval    | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | Unset   |
+| 設定項目                                         | 説明                                                                                                                  | デフォルト |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----- |
+| レンジテストを有効化                                   | Turn range testing on                                                                                               | オフ    |
+| ストレージにCSVファイルを保存(ESP32のみ) | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only                      | オフ    |
+| Sender Interval                              | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | 未設定   |
 
 ### Telemetry module
 
@@ -134,19 +134,19 @@ public.
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely. The intervals run from 30 minutes to 72 hours.
 
-| 設定項目                         | 説明                                                                                                                                                                                          | Default |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Air Quality Metrics Enabled  | Report particulate and CO₂ sensor data                                                                                                                                                      | Off     |
-| Air Quality Metrics Interval | How often to report them                                                                                                                                                                    | —       |
-| Broadcast Device Metrics     | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | Off     |
-| Device Metrics Interval      | How often to report battery, uptime and channel utilization                                                                                                                                 | —       |
-| Display Fahrenheit           | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | Off     |
-| Environment Metrics Enabled  | Report the attached environment sensors                                                                                                                                                     | Off     |
-| Environment Metrics Interval | How often to report them                                                                                                                                                                    | —       |
-| Power Measurement Enabled    | Report the per-channel voltage and current readings                                                                                                                                         | Off     |
-| Power Metrics Interval       | How often to report them                                                                                                                                                                    | —       |
-| Power Screen                 | Also show power readings on the device's display                                                                                                                                            | Off     |
-| Show on device screen        | Also show environment readings on the device's display                                                                                                                                      | Off     |
+| 設定項目             | 説明                                                                                                                                                                                          | デフォルト |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| 空気品質測定モジュールを有効化  | Report particulate and CO₂ sensor data                                                                                                                                                      | オフ    |
+| 空気品質メトリクスの更新間隔   | How often to report them                                                                                                                                                                    | —     |
+| デバイステレメトリを送信     | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | オフ    |
+| デバイスメトリクスの更新間隔   | How often to report battery, uptime and channel utilization                                                                                                                                 | —     |
+| 環境メトリクスは華氏を使用    | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | オフ    |
+| 環境メトリクスモジュールを有効化 | Report the attached environment sensors                                                                                                                                                     | オフ    |
+| 環境メトリクスの更新間隔     | How often to report them                                                                                                                                                                    | —     |
+| 電源メトリクスモジュール有効   | Report the per-channel voltage and current readings                                                                                                                                         | オフ    |
+| 電源メトリクスの更新間隔     | How often to report them                                                                                                                                                                    | —     |
+| 電源メトリクスを画面上で有効化  | Also show power readings on the device's display                                                                                                                                            | オフ    |
+| 環境メトリクスを画面上で有効化  | Also show environment readings on the device's display                                                                                                                                      | オフ    |
 
 対応センサーと設定の推奨事項については、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
 
@@ -154,14 +154,14 @@ battery health often and sensors rarely. The intervals run from 30 minutes to 72
 
 Pre-configured messages accessible from the node's physical buttons (for nodes with rotary encoders, keypads, or similar input hardware). スマートフォンを接続していなくても送信できる、クイック送信メッセージのリストを定義します。フィールドでの使用に最適です。
 
-| 設定項目                                                                         | 説明                                                                                                                                                 | Default |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Clockwise Rotary Event / Counterclockwise Rotary Event / Encoder Press Event | Which key event each encoder action produces: **None**, **Up**, **Down**, **Left**, **Right**, **Select**, **Back**, or **Cancel** | None    |
-| メッセージ                                                                        | 改行で区切ったメッセージのリスト                                                                                                                                   | Empty   |
-| Pin A / Pin B / Press Pin                                                    | The three pins the rotary encoder is wired to                                                                                                      | 0       |
-| Rotary Encoder                                                               | Use a rotary encoder as the input device                                                                                                           | Off     |
-| Send Bell                                                                    | Send a bell character alongside the message, so a receiving node's External Notification module can sound                                          | Off     |
-| Up/Down/Select Input                                                         | A separate, simpler input scheme using up/down/select buttons rather than an encoder                                                               | Off     |
+| 設定項目                                                                         | 説明                                                                                                                                                 | デフォルト |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| Clockwise Rotary Event / Counterclockwise Rotary Event / Encoder Press Event | Which key event each encoder action produces: **None**, **Up**, **Down**, **Left**, **Right**, **Select**, **Back**, or **Cancel** | なし    |
+| メッセージ                                                                        | 改行で区切ったメッセージのリスト                                                                                                                                   | Empty |
+| Pin A / Pin B / Press Pin                                                    | The three pins the rotary encoder is wired to                                                                                                      | 0     |
+| ロータリーエンコーダー                                                                  | Use a rotary encoder as the input device                                                                                                           | オフ    |
+| アラートメッセージ付きのベルを送信                                                            | Send a bell character alongside the message, so a receiving node's External Notification module can sound                                          | オフ    |
+| Up/Down/Select Input                                                         | A separate, simpler input scheme using up/down/select buttons rather than an encoder                                                               | オフ    |
 
 Some boards with built-in encoders or keys come with the input settings filled in. Two older
 fields, **Canned message enabled** and **Allow input source**, appear only for a node on firmware
@@ -171,15 +171,15 @@ older than 2.7, or while they still hold a value.
 
 メッシュ上での低帯域幅の音声通信のための、Codec2 音声サポートです。これは、Codec2 コーデックを使って音声を非常に小さなデータパケットにエンコードする、**実験的**な機能です。 It needs specific hardware, an I2S microphone and speaker, and the voice quality is low.
 
-| 設定項目                | 説明                                                                                                                     | Default |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------- |
-| Bitrate             | Codec2 bitrate, from **450 bps** to **3200 bps**. Lower rates use less bandwidth and give poorer audio | Default |
-| Codec2 Enabled      | Turn the audio module on                                                                                               | Off     |
-| I2S Clock Pin       | GPIO pin for the I2S bit clock                                                                                         | 0       |
-| I2S Data In Pin     | GPIO pin for I2S data in                                                                                               | 0       |
-| I2S Data Out Pin    | GPIO pin for I2S data out                                                                                              | 0       |
-| I2S Word Select Pin | GPIO pin for I2S word select                                                                                           | 0       |
-| PTT Pin             | GPIO pin for the push-to-talk button. 0 uses GPIO 39                                                   | 0       |
+| 設定項目                | 説明                                                                                                                     | デフォルト |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----- |
+| CODEC2 サンプルレート      | Codec2 bitrate, from **450 bps** to **3200 bps**. Lower rates use less bandwidth and give poorer audio | デフォルト |
+| CODEC 2 を有効化        | Turn the audio module on                                                                                               | オフ    |
+| I2S Clock Pin       | GPIO pin for the I2S bit clock                                                                                         | 0     |
+| I2S Data In Pin     | GPIO pin for I2S data in                                                                                               | 0     |
+| I2S Data Out Pin    | GPIO pin for I2S data out                                                                                              | 0     |
+| I2S Word Select Pin | GPIO pin for I2S word select                                                                                           | 0     |
+| PTT端子               | GPIO pin for the push-to-talk button. 0 uses GPIO 39                                                   | 0     |
 
 ### Remote Hardware module
 
@@ -187,21 +187,21 @@ older than 2.7, or while they still hold a value.
 
 > ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the node's own hardware. Turn it on only on dedicated GPIO nodes.
 
-| 設定項目            | 説明                                    | Default |
-| --------------- | ------------------------------------- | ------- |
-| 未定義のピンへのアクセスを許可 | 任意の GPIO ピンへのアクセスを許可（セキュリティリスク）       | Off     |
-| 使用可能な端子         | このノードがリモートの読み書き用に公開する GPIO ピン（最大 4 個） | None    |
-| リモートハードウェアを有効化  | Turn remote GPIO access on            | Off     |
+| 設定項目            | 説明                                    | デフォルト |
+| --------------- | ------------------------------------- | ----- |
+| 未定義のピンへのアクセスを許可 | 任意の GPIO ピンへのアクセスを許可（セキュリティリスク）       | オフ    |
+| 使用可能な端子         | このノードがリモートの読み書き用に公開する GPIO ピン（最大 4 個） | なし    |
+| リモートハードウェアを有効化  | Turn remote GPIO access on            | オフ    |
 
 ### Neighbor Info module
 
 直接受信した隣接ノードの情報をブロードキャストし、メッシュのトポロジーマッピングを可能にします。有効にした各ノードは、受信できる他のノードとその信号品質のリストを定期的に共有します。
 
-| 設定項目                  | 説明                                                                                                                           | Default                                 |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Neighbor Info Enabled | Turn neighbor broadcasting on                                                                                                | Off                                     |
-| LoRaで送信               | Also broadcast neighbor info over LoRa, not just MQTT and the connected app. デフォルトの鍵と名前を使用しているチャンネルでは利用できません | Off                                     |
-| GPS ポーリング間隔           | How often to broadcast the neighbor list, in seconds. Minimum 4 hours                                        | 0 (firmware default) |
+| 設定項目        | 説明                                                                                                                           | デフォルト                                   |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| 近隣ノード情報を有効化 | Turn neighbor broadcasting on                                                                                                | オフ                                      |
+| LoRaで送信     | Also broadcast neighbor info over LoRa, not just MQTT and the connected app. デフォルトの鍵と名前を使用しているチャンネルでは利用できません | オフ                                      |
+| GPS ポーリング間隔 | How often to broadcast the neighbor list, in seconds. Minimum 4 hours                                        | 0 (firmware default) |
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
@@ -212,35 +212,35 @@ See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topo
 Pick the color with the swatch's **Preset colors** row or the **Red**, **Green** and **Blue** sliders.
 **Advanced** opens number fields for the same three values.
 
-| 設定項目      | 説明                                        | Default                      |
-| --------- | ----------------------------------------- | ---------------------------- |
-| 電流        | LED drive current, 0 to 31                | 10                           |
-| LED State | LED のオン／オフを切り替え                           | Off                          |
-| 赤／緑／青     | Individual color channel values, 0 to 255 | Derived from the node number |
+| 設定項目   | 説明                                        | デフォルト                        |
+| ------ | ----------------------------------------- | ---------------------------- |
+| 電流     | LED drive current, 0 to 31                | 10                           |
+| LEDの状態 | LED のオン／オフを切り替え                           | オフ                           |
+| 赤／緑／青  | Individual color channel values, 0 to 255 | Derived from the node number |
 
 ### Detection Sensor module
 
 ノードを、動きやドアを検知するセンサーアラートシステムに変えます。 GPIO ピンが状態の変化（動きの検知、ドアの開放）を検出すると、ノードはメッシュ経由でアラートメッセージをブロードキャストします。
 
-| 設定項目                                      | 説明                                                                                                                                                                | Default                                                                              |
+| 設定項目                                      | 説明                                                                                                                                                                | デフォルト                                                                                |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Detection Sensor Enabled                  | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log                                             | Off                                                                                  |
-| GPIO Pin to monitor                       | GPIO pin connected to the sensor. 0 disables the module                                                                                           | 0                                                                                    |
+| 検出センサーを有効化                                | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log                                             | オフ                                                                                   |
+| モニターのGPIOピン                               | GPIO pin connected to the sensor. 0 disables the module                                                                                           | 0                                                                                    |
 | Minimum time between detection broadcasts | アラートのブロードキャスト間の最小時間                                                                                                                                               | 0, which the firmware treats as 1 hour (12 hours on Router roles) |
-| Name                                      | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
-| Send Bell                                 | Include a bell character in alerts                                                                                                                                | Off                                                                                  |
-| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | Unset                                                                                |
-| Trigger Type                              | How the pin's state maps to a detection event: **High**, **Low**, **Rising Edge**, **Falling Edge**, **Either Edge High**, or **Either Edge Low** | High                                                                                 |
-| Use Internal Pull-up                      | ピンの内蔵プルアップ抵抗を有効にする                                                                                                                                                | Off                                                                                  |
+| 名前                                        | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
+| アラートメッセージ付きのベルを送信                         | Include a bell character in alerts                                                                                                                                | オフ                                                                                   |
+| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | 未設定                                                                                  |
+| Trigger Type                              | How the pin's state maps to a detection event: **High**, **Low**, **Rising Edge**, **Falling Edge**, **Either Edge High**, or **Either Edge Low** | 高                                                                                    |
+| Use Internal Pull-up                      | ピンの内蔵プルアップ抵抗を有効にする                                                                                                                                                | オフ                                                                                   |
 
 ### Paxcounter module
 
 People counter using Wi-Fi and BLE probe requests. スマートフォンやノートパソコンがネットワークを探すときに発するプローブ要求を受動的に受信して、近くのデバイスを数えます。 ESP32 デバイスでのみ利用できます。 Counts are approximate, since one person may carry several devices, so the module suits estimating foot traffic at trailheads or event venues.
 
-| 設定                                      | 説明                                                                                                       | Default                                 |
+| 設定                                      | 説明                                                                                                       | デフォルト                                   |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------- |
 | BLE Threshold (dBm)  | The same cut-off for BLE advertisements                                                                  | 0, which the firmware treats as −80 dBm |
-| PAX Counter Enabled                     | Turn people counting on. Wi-Fi and Bluetooth must both be off on the node for it to work | Off                                     |
+| Paxcounter を有効化                         | Turn people counting on. Wi-Fi and Bluetooth must both be off on the node for it to work | オフ                                      |
 | GPS ポーリング間隔                             | カウントを報告する頻度                                                                                              | —                                       |
 | WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted                                  | 0, which the firmware treats as −80 dBm |
 

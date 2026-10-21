@@ -23,4 +23,4 @@ Rakenduse funktsioonide vaatamiseks kasuta külgriba navigeerimisriba, et sirvid
 | [Arhitektuur](developer/architecture)            | Rakenduse arhitektuuri ülevaade kaastöölistele                    |
 | [Panustamine](developer/contributing)            | Haarade nimetamine, PR töövoog ja kinnituskäsklused               |
 
-This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+See dokumentatsioon pärineb samast Markdowni allikast, mis toetab rakendusesisest **Abi ja dokumentatsioon** brauserit.

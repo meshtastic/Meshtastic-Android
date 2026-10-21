@@ -23,4 +23,4 @@ nav_order: 0
 | [Архитектура](developer/architecture)                                          | Обзор архитектуры приложения для участников                       |
 | [Вклад](developer/contributing)                                                | Именование веток, рабочий процесс PR и команды проверки           |
 
-This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+Эта документация предоставляется из того же источника Markdown, который обеспечивает работу встроенного браузера **Справка и документация**.

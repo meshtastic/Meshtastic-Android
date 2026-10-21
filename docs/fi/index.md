@@ -23,4 +23,4 @@ Käytä sivupalkkia selataksesi **käyttöopasta** ja **Kehittäjäopasta**. Kä
 | [Arkkitehtuuri](developer/architecture)                             | Yleiskatsaus sovelluksen arkkitehtuuriin kehittäjille                       |
 | [Osallistuminen kehitystyöhön](developer/contributing)              | Haarojen nimeäminen, PR-työnkulku ja tarkistuskomennot                      |
 
-This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+Tämä dokumentaatio perustuu samoihin Markdown-lähdetiedostoihin kuin sovelluksen sisäinen **Ohje ja dokumentaatio** -osio.

@@ -24,7 +24,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | 訊息                             | 廣播訊息通知                              | A message on one of your channels                                               | The channel                     |
 | 訊息                             | Reaction notifications              | An emoji reaction to a message in one of your conversations                     | The conversation                |
 | 訊息                             | 航點通知                                | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages                       | 警告信息                                | A critical alert from a node                                                    | The conversation                |
+| 訊息                             | 警告信息                                | A critical alert from a node                                                    | The conversation                |
 | 網狀網路 (Mesh) | 新節點通知                               | A node heard for the first time                                                 | The node's details              |
 | 網狀網路 (Mesh) | Mesh invitation notifications       | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
 | 網狀網路 (Mesh) | 低電量通知(收藏節點)      | A favorite node's battery running low                                           | The node's details              |

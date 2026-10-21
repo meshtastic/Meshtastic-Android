@@ -24,7 +24,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Üzenetek | Sugárzott üzenet értesítések                                              | A message on one of your channels                                               | The channel                     |
 | Üzenetek | Reaction notifications                                                    | An emoji reaction to a message in one of your conversations                     | The conversation                |
 | Üzenetek | Útpont-értesítések                                                        | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages | Riasztási értesítések                                                     | A critical alert from a node                                                    | The conversation                |
+| Üzenetek | Riasztási értesítések                                                     | A critical alert from a node                                                    | The conversation                |
 | Mesh     | Új állomás értesítések                                                    | A node heard for the first time                                                 | The node's details              |
 | Mesh     | Mesh invitation notifications                                             | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
 | Mesh     | Alacsony töltöttségű értesítések (kedvenc csomópontok) | A favorite node's battery running low                                           | The node's details              |

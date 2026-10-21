@@ -23,4 +23,4 @@ Use the sidebar navigation to browse the **User Guide** for app features and the
 | 〔架構〕(developer/architecture)        | 供貢獻者參考的應用程式架構概覽                            |
 | 〔貢獻指南〕(developer/contributing)      | 分支命名規範、PR 工作流程與驗證指令                        |
 
-This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+本說明文件與應用程式內建的說明與文件瀏覽器使用相同的 Markdown 原始檔。

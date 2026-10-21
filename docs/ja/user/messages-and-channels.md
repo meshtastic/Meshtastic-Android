@@ -75,7 +75,7 @@ A public-key conversation carries an encryption icon in its top bar. A green clo
 ### ダイレクトメッセージを送信する
 
 1. Open the **Messages** tab and select a conversation, or touch & hold a node in the node list and choose **Message**.
-2. Type your message and tap **Send**.
+2. メッセージを入力し、「**送信**」をタップします。
 
 On a hardware keyboard, Enter sends the message and Shift+Enter starts a new line. The on-screen keyboard's Enter key always starts a new line.
 
@@ -109,17 +109,17 @@ control whether they are offered at all.
 
 ステータスラベルは、**自分が**送信したメッセージの下にのみ表示されます（他のユーザーからの受信メッセージにはステータスラベルは表示されません）：
 
-| 状態                                                         | 意味                                                                                                                                                                                                                                       |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sending... | Queued or already handed to your node, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once your node has it |
-| 受信者に配信済み                                                   | An acknowledgment came back for a direct message                                                                                                                                                                                         |
-| Delivered to recipient · proven                            | The strongest confirmation. The acknowledgment carried a proof that only the recipient could have produced. Needs firmware 2.8.1 or newer                                |
-| Delivery proof failed                                      | Something acknowledged the message without the key only the recipient holds, so the acknowledgment doesn't show that the recipient received it                                                                                           |
-| メッシュに配信済み                                                  | チャンネルブロードキャストでは、メッセージがメッシュに届いたことを示します（ブロードキャストには受信者ごとの確認応答はありません）                                                                                                                                                                        |
-| 中継済み、受信者による確認なし                                            | ダイレクトメッセージでは警告色で表示されます。メッセージは中継されましたが、まだ受信確認が返ってきていません                                                                                                                                                                                   |
-| SF++ チェーン経由でルーティング中…                                       | Store & Forward Plus Plus チェーンによってルーティング／バッファリングされています                                                                                                                                                               |
-| SF++ チェーンで確認済み                                             | SF++ チェーン経由で配信が確認されました                                                                                                                                                                                                                   |
-| エラー                                                        | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
+| 状態                              | 意味                                                                                                                                                                                                                                       |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 送信中…                            | Queued or already handed to your node, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once your node has it |
+| 受信者に配信済み                        | An acknowledgment came back for a direct message                                                                                                                                                                                         |
+| Delivered to recipient · proven | The strongest confirmation. The acknowledgment carried a proof that only the recipient could have produced. Needs firmware 2.8.1 or newer                                |
+| Delivery proof failed           | Something acknowledged the message without the key only the recipient holds, so the acknowledgment doesn't show that the recipient received it                                                                                           |
+| メッシュに配信済み                       | チャンネルブロードキャストでは、メッセージがメッシュに届いたことを示します（ブロードキャストには受信者ごとの確認応答はありません）                                                                                                                                                                        |
+| 中継済み、受信者による確認なし                 | ダイレクトメッセージでは警告色で表示されます。メッセージは中継されましたが、まだ受信確認が返ってきていません                                                                                                                                                                                   |
+| SF++ チェーン経由でルーティング中…            | Store & Forward Plus Plus チェーンによってルーティング／バッファリングされています                                                                                                                                                               |
+| SF++ チェーンで確認済み                  | SF++ チェーン経由で配信が確認されました                                                                                                                                                                                                                   |
+| エラー                             | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
 
 Tap the status under a failed message, or under a direct message marked **Relayed, not confirmed by recipient**, and choose **Resend** to send it again. The message keeps its place in the conversation and its status starts over. **Resend** isn't offered for **Channel/key mismatch** or **Message is too large to send**, which a second attempt can't fix, or in an archived conversation.
 
