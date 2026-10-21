@@ -67,7 +67,7 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented test
 
 ## Pull Requests
 
-- Branches use conventional-commit style prefixes, for example `feat/<topic>`. The branch prefix and a conventional-commit PR title set the PR's changelog label automatically:
+- Branches use conventional-commit style prefixes, for example `feat/<topic>`:
     - `feat/` — new user-visible behavior
     - `fix/` — bug fixes
     - `chore/` — tooling, deps, CI, cleanup
@@ -77,6 +77,7 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented test
     - `refactor/` — code structure changes
     - `test/` — test additions or fixes
     - `deps/` — dependency updates
+- The branch prefix and a conventional-commit PR title set the PR's changelog label automatically.
 - Spec-driven work takes no prefix from that list: a numeric spec prefix (`005-tak-v2-protocol`) or the timestamp form `YYYYMMDD-HHMMSS-feature-name` created by `/speckit.git.feature`. Both are valid.
 - `release/*` and `automation/*` are reserved for maintainers and automated workflows.
 - Ensure your branch is up to date with the latest `main` branch before submitting a PR.

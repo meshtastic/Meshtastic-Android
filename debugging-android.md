@@ -1,6 +1,6 @@
 # Found a problem with our Android app?
 
-The `google` build sends crash reports when analytics and crash reporting are allowed in the app's settings, but that covers crashes only, and the `fdroid` build sends none. For anything else, a log of the app while it does the wrong thing is the most useful thing to attach to a GitHub [issue](https://github.com/meshtastic/Meshtastic-Android/issues).
+The `google` build sends crash reports when analytics and crash reporting are allowed in the app's settings, but that covers only crashes and the errors the app logs, and the `fdroid` build sends none. For anything else, a log of the app while it does the wrong thing is the most useful thing to attach to a GitHub [issue](https://github.com/meshtastic/Meshtastic-Android/issues).
 
 ## From inside the app
 

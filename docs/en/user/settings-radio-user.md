@@ -101,7 +101,7 @@ On **Settings → LoRa**. These settings decide where and how the node transmits
 | RX Boosted Gain | Extra receive gain on SX126x radios; costs a little current | On |
 | Spread Factor | Manual mode only: 5 to 12. Higher spreads further but slower. On SX127x (RF95) radios the firmware doesn't accept 5 or 6 and uses 11 instead | From preset |
 | Transmit Enabled | Turning this off makes the node receive-only | On |
-| Transmit Power (dBm) | 0 uses the highest power legal for the region, which suits most nodes | 0 (region max) |
+| Transmit Power | In dBm. 0 uses the highest power legal for the region, which suits most nodes | 0 (region max) |
 | Use Preset | Turn it off to set **Spread Factor**, **Coding Rate** and **Bandwidth** by hand instead of taking them from the modem preset | On |
 
 The preset list is also filtered to what your region legally permits, so a preset allowed in one
@@ -187,7 +187,7 @@ On **Settings → Device configuration → Position**. These settings decide whe
 | Fixed Position | Broadcast a manually entered **Latitude**, **Longitude** and **Altitude** instead of a live GPS fix. **Set from current phone location** fills them in | Off |
 | GPS Enable GPIO / GPS Receive GPIO / GPS Transmit GPIO | Advanced: the pins an add-on GPS module is wired to. Hidden on boards whose maker wired the GPS, unless a pin already holds a value | 0 |
 | GPS Mode | **Enabled**, **Disabled**, or **Not Present**. Hidden while **Fixed Position** is on | Depends on the hardware |
-| Minimum Distance (m) | With **Smart Position** on, how far you must move before a broadcast is considered | 100 m |
+| Minimum Distance | In meters. With **Smart Position** on, how far you must move before a broadcast is considered | 100 m |
 | Minimum Interval | With **Smart Position** on, the shortest gap between broadcasts once the distance is met | 5 minutes |
 | Position Flags | A group of checkboxes choosing which fields ride along with a position, such as altitude, its reference and precision, satellites in view, and timestamp | **Altitude**, **Altitude is Mean Sea Level**, **Vehicle speed**, **Vehicle heading**, **DOP**, **Number of satellites** |
 | Smart Position | Broadcast based on movement rather than purely on the clock | On |

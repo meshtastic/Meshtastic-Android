@@ -29,7 +29,7 @@ The Firmware Update screen picks the method from how the node is connected, and 
 
 | Connection | nRF52 | ESP32 | RP2040 |
 |---|---|---|---|
-| Bluetooth | BLE OTA | BLE OTA | BLE OTA |
+| Bluetooth | BLE OTA | BLE OTA | — |
 | Network | — | Wi-Fi OTA | — |
 | USB | USB File Transfer | — | USB File Transfer |
 

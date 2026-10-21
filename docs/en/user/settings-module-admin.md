@@ -227,7 +227,7 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 |---------|-------------|---------|
 | Detection Sensor Enabled | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log | Off |
 | GPIO Pin to monitor | GPIO pin connected to the sensor. 0 disables the module | 0 |
-| Minimum time between detection broadcasts | Minimum time between alert broadcasts | 45 seconds |
+| Minimum time between detection broadcasts | Minimum time between alert broadcasts | 0, which the firmware treats as 1 hour (12 hours on Router roles) |
 | Name | Custom name for this sensor, used in its messages | Empty |
 | Send Bell | Include a bell character in alerts | Off |
 | State Broadcast Interval | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection | Unset |

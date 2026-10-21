@@ -1,6 +1,6 @@
 ---
 name: proto-bump
-description: Change the org.meshtastic:protobufs pin for Meshtastic-Android — to a tagged release or to a commit snapshot (X.Y.Z.N-g<sha>-SNAPSHOT) from protobufs master. Verifies with test/allTests (not just compile) via the gradle-runner subagent, audits the new field surface, and opens a PR. Use to consume new proto changes, or to finish a Renovate protobufs bump that needs call-site work.
+description: Change the org.meshtastic:protobufs pin for Meshtastic-Android — to a tagged release or to a commit snapshot (X.Y.Z.N-g<sha>-SNAPSHOT) from protobufs master. Verifies with test/allTests (not compile alone) via the gradle-runner subagent, audits the new field surface, and opens a PR. Use to consume new proto changes, or to finish a Renovate protobufs bump that needs call-site work.
 disable-model-invocation: true
 ---
 

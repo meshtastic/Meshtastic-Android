@@ -69,7 +69,7 @@ TLS failing, the attempt timing out, or the broker rejecting your credentials wi
 
 ### MQTT Proxy in This App
 
-If your node has no internet access of its own, it can use the app as its MQTT gateway: turn on **MQTT Enabled** and **MQTT Client Proxy** in the module config, and the app relays MQTT traffic between the node and the broker over your phone's or computer's internet connection.
+If your node has no internet access of its own, it can use the app as its MQTT gateway. Turn on **MQTT Enabled** and **MQTT Client Proxy** in the module config. The app then relays MQTT traffic between the node and the broker over your phone's or computer's internet connection.
 
 The **MQTT proxy in this app** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately, without editing and re-saving the node's MQTT configuration.
 

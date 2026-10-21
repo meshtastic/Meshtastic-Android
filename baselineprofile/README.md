@@ -13,7 +13,7 @@ JIT cost on first launch. Targets the **google** flavor (the variant most users 
 Output is merged into `androidApp/src/main/generated/baselineProfiles/` (`mergeIntoMain` in
 `androidApp/build.gradle.kts`): `baseline-prof.txt`, plus `startup-prof.txt` because the generator sets
 `includeInStartupProfile`. **Commit both files**: release builds of both flavors package them, and
-`androidx.profileinstaller` installs the profile on API levels below 31.
+`androidx.profileinstaller` writes the bundled profile to the device when the app first starts.
 
 ## Quantify the win
 

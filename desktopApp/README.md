@@ -27,7 +27,7 @@ Packaging builds the formats of the host it runs on: DMG on macOS, MSI and EXE o
 
 Releases ship the installers on [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases) and a Flatpak on [Flathub](https://flathub.org/apps/org.meshtastic.MeshtasticDesktop). `RELEASE_PROCESS.md` covers signing and the store workflows.
 
-A Homebrew cask is rendered from `.github/homebrew/meshtastic-desktop.rb` by the `update-homebrew-cask` job in `promote.yml`, which opens a PR against [meshtastic/homebrew-tap](https://github.com/meshtastic/homebrew-tap) on each production release when `HOMEBREW_TAP_TOKEN` is set. The tap carries no cask until that job's first PR merges, so `brew install --cask meshtastic/tap/meshtastic-desktop` finds nothing before then. The cask is Apple silicon only.
+A Homebrew cask is rendered from `.github/homebrew/meshtastic-desktop.rb` by the `update-homebrew-cask` job in `promote.yml`, which opens a PR against [meshtastic/homebrew-tap](https://github.com/meshtastic/homebrew-tap) on each production release when `HOMEBREW_TAP_TOKEN` is set. `brew install --cask meshtastic/tap/meshtastic-desktop` works once one of those PRs has merged. The cask is Apple silicon only.
 
 ## ProGuard / Minification
 

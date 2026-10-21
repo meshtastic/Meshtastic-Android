@@ -36,7 +36,7 @@ An edit, revert or commit made to get a green build hides the real failure from 
 
 ## How to run
 - Run exactly the task(s) the caller specified. Do not add `clean` unless asked.
-- KMP test gotcha: KMP modules use `:module:allTests`; flavored Android modules (`androidApp`, `core:barcode`) use `:module:testFdroidDebugUnitTest`; `core:nfc` and `feature:widget` use `:module:testDebugUnitTest`; `:desktopApp` and `:schema-strings` use plain `test`. If the caller's task name looks wrong for the module type, run what they asked, then note the likely correct name in your report.
+- KMP test gotcha: KMP modules use `:module:allTests`; flavored Android modules (`androidApp`, `core:barcode`) use `:module:testFdroidDebugUnitTest`; `feature:widget` uses `:module:testDebugUnitTest` (`core:nfc` has no tests); `:desktopApp` and `:schema-strings` use plain `test`. If the caller's task name looks wrong for the module type, run what they asked, then note the likely correct name in your report.
 - If the build fails to *configure* (vs. a test failure), say so explicitly — that's a different problem.
 - Prefer `--console=plain`. It's fine to pipe through filters to find failures, but you must still inspect enough to report accurately.
 

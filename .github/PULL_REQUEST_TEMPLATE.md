@@ -1,4 +1,4 @@
-## Thank you for sending in a pull request! Some tips to get started
+## Thank you for sending in a pull request. Some tips to get started
 
 (Delete all these tips and replace them with your description. The full guide is [CONTRIBUTING.md → Pull Requests](https://github.com/meshtastic/Meshtastic-Android/blob/main/CONTRIBUTING.md#pull-requests).)
 

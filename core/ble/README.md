@@ -22,7 +22,7 @@ A singleton repository for the global state of Bluetooth on the device, implemen
 
 - **Features:**
     - **State Management:** Exposes a `StateFlow<BluetoothState>` reflecting whether Bluetooth is enabled, permissions are granted, and which devices are bonded. `isSupported` is false on hardware with no Bluetooth LE.
-    - **Permission Handling:** On Android 12 and later, checks `BLUETOOTH_SCAN` and `BLUETOOTH_CONNECT`.
+    - **Permission Handling:** On Android 12 and later, checks `BLUETOOTH_SCAN` and `BLUETOOTH_CONNECT`. Earlier versions grant the Bluetooth permissions at install, so the check passes.
     - **Bonding:** `bond` creates a bond with a peripheral and waits for the result, with a 30 s timeout on Android.
 
 ### 3. `BleScanner`
@@ -40,15 +40,7 @@ The `:core:ble` module is used by `BleRadioTransport` in [`:core:network`](../ne
 
 ## Usage
 
-Dependencies are managed via the version catalog (`libs.versions.toml`).
-
-```toml
-[versions]
-kable = "0.45.0"
-
-[libraries]
-kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
-```
+Kable comes from the version catalog as `libs.kable.core`; `gradle/libs.versions.toml` pins its version.
 
 ## Architecture
 
