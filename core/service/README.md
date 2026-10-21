@@ -4,21 +4,24 @@
 
 **Targets:** Android · JVM (Desktop) · iOS
 
-The `:core:service` module contains the abstractions and client-side logic for interacting with the main Meshtastic Android Service.
+The `:core:service` module runs the mesh service: the shared orchestrator that wires the mesh service graph, the controllers that send commands to the node, and the Android foreground service and its notifications, workers and receivers.
 
 ## Key Components
 
-### 1. `MeshService`
-Android foreground service entry point that hosts the orchestrator lifecycle.
+### 1. `MeshServiceOrchestrator` and `MeshService`
+`MeshServiceOrchestrator` (commonMain) starts and stops the mesh service graph. Android's foreground `MeshService` hosts it; the Desktop app starts it from `Main.kt` while its window is composed.
 
-### 2. `ServiceRepository`
-A high-level repository that wraps the service connection and exposes reactive `Flow`s for connection status and data arrival.
+### 2. `ServiceRepositoryImpl`
+The shared implementation of `:core:repository`'s `ServiceRepository`, exposing reactive `Flow`s for connection status, errors and arriving packets. `AndroidServiceRepository` is its Android Koin binding.
 
-### 3. `ConnectionState`
-Represents the current state of the radio connection (`Connected`, `Disconnected`, `DeviceSleep`, etc.).
+### 3. `SharedRadioInterfaceService`
+The multiplatform connection orchestrator: connect, reconnect loop, device-address state and Bluetooth/network toggles, delegating the byte transport to a platform `RadioTransportFactory`. It publishes the `ConnectionState` from `:core:model` (`Connected`, `Connecting`, `Disconnected`, `DeviceSleep`).
 
 ### 4. `RadioControllerImpl`
 The in-process `RadioController` composition root (Desktop, iOS, and single-process Android). It assembles four focused sub-controllers — `AdminControllerImpl`, `MessagingControllerImpl`, `NodeControllerImpl`, `QueryControllerImpl` — via Kotlin interface delegation, and owns the cross-cutting concerns (connection state, packet-id, location, device-address switching). Commands are direct suspend calls to `CommandSender`; admin sends are fire-and-forget (the device is the source of truth). Config writes use the `editSettings { }` transaction.
+
+### 5. Platform pieces
+`androidMain` holds the notifications (`MeshNotificationManagerImpl`, `NotificationChannels`), WorkManager workers (`SendMessageWorker`, `MeshLogCleanupWorker`), `BootCompleteReceiver`, conversation shortcuts, and the encrypted stores for security-key backups and the lockdown passphrase. `jvmMain` holds the Desktop equivalents of the file, location and key stores.
 
 
 ## Dependency Graph

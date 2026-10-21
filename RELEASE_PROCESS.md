@@ -18,17 +18,17 @@ The entire release process is managed by a single GitHub Action: **`Create or Pr
         already in flight. Internal releases and dry runs are exempt (Play internal testing
         skips full review).
 -   **Automation:** The workflow handles everything automatically:
-    -   **Generates Changelog:** Categorizes merged PRs by their labels (per `.github/release.yml`) into GitHub's auto-generated release notes. The internal draft's notes cover the PRs since the previous published pre-release; a production promotion rewrites them over the whole range since the previous production tag, with the metainfo `<description>` for the version as a Highlights section on top, and opens a PR folding the same notes into `CHANGELOG.md`. Every internal, closed and open run ends by dispatching the `Update Changelog` workflow, which refreshes that file's `[Unreleased]` section through its own PR. Every PR the release automation opens (these two, the screenshot refresh and the version bump) goes through `.github/actions/bot-pr` with `CROWDIN_GITHUB_TOKEN`, so it runs the normal PR checks and merges itself through the queue once they pass.
+    -   **Generates Changelog:** Categorizes merged PRs by their labels (per `.github/release.yml`) into GitHub's auto-generated release notes. The internal draft's notes cover the PRs since the newest published release, pre-release or production; a production promotion rewrites them over the whole range since the previous production tag, with the metainfo `<description>` for the version as a Highlights section on top, and opens a PR folding the same notes into `CHANGELOG.md`. Every internal, closed and open run ends by dispatching the `Update Changelog` workflow, which refreshes that file's `[Unreleased]` section through its own PR. Every PR the release automation opens (these two, the screenshot refresh and the version bump) goes through `.github/actions/bot-pr` with `CROWDIN_GITHUB_TOKEN`, so it runs the normal PR checks and merges itself through the queue once they pass.
     -   **Tags & Builds** *(internal releases)*: Pushes the incremental tag first — there is no lint/test gate in this workflow, that's the separate PR/CI pipeline — then builds the Android bundle/APK and Desktop installers from that tag; if the build fails, an automatic cleanup job deletes the tag so a retry starts clean. Once `publish-play` has uploaded the bundle the tag stays, since Play keeps that versionCode; re-run the failed jobs instead. Promotions skip this entirely and retag the already-built artifact (see below).
     -   **Deploys Android:** Uploads the build to the correct Google Play track and attaches artifacts (`.aab`/`.apk`) to a GitHub Release. An internal cut sends the bundle to Play only after every Android, desktop and Flatpak leg has built, so a failed leg and its deleted tag leave nothing on Play. Each promotion also uploads the Play "What's new" text for every locale from `fastlane/metadata/android/<locale>/changelogs/default.txt`, which `scripts/sync-play-changelog.py` renders from the metainfo `<description>` and Crowdin translates.
     -   **Captures the store screenshots** *(internal releases)*: `store-screenshots.yml` runs the real debug apps from the tag, connected to Demo Mode's showcase mesh, on one emulator per flavor and on a virtual display for desktop, and attaches `store-listing-screenshots-google-<versionCode>.zip`, `store-listing-screenshots-fdroid-<versionCode>.zip` and the five desktop PNGs to the draft once it exists, so the draft does not wait on the capture. A set with a shot missing is replaced whole by the committed one, so the metainfo's screenshot URLs still resolve, and the job summary says which set went up. A failed capture never fails the release.
-    -   **Publishes the Play listing:** every promotion runs the `play_listing` lane with the tag's text for every locale and the google-flavor screenshots, as a dry run on closed and open and for real on production, held as "changes not sent for review". Production also opens a self-merging PR that writes the fdroid-flavor screenshots back into `fastlane/`, which F-Droid and IzzyOnDroid read from git, and the desktop set into `desktopApp/packaging/linux/screenshots/`.
+    -   **Publishes the Play listing:** every promotion runs the `play_listing` lane with the tag's text for every locale and the google-flavor screenshots attached to the release (the committed set when none are attached), as a dry run on closed and open and for real on production, held as "changes not sent for review". Production also opens a self-merging PR that writes the fdroid-flavor screenshots back into `fastlane/`, which F-Droid and IzzyOnDroid read from git, and the desktop set into `desktopApp/packaging/linux/screenshots/`.
     -   **Publishes docs:** Every promotion dispatches `docs-release.yml` on the new tag (the tag is created with `GITHUB_TOKEN`, so its tag trigger never fires on its own).
     -   **Refreshes the Obtainium table:** Every promotion dispatches `scheduled-updates.yml` once the release is published, so the Obtainium table in `README.md` follows it without waiting for the scheduled run.
     -   **Writes a checklist:** The promotion run's summary lists what it did, what it dispatched, and what is still done by hand. winget, the Microsoft Store, Homebrew and Flathub each read "will skip: `<SECRET>` unset" when their secret is missing, since those workflows and jobs then submit nothing.
     -   **Reruns:** Re-running a failed `update-github-release` job finds the release under its final tag when the first attempt already moved it, and updates the bot PRs in place; its workflow dispatches run again. The Discord announcement goes out whenever the release step succeeded, whatever failed after it.
     -   **Deploys Desktop** *(internal releases)*: Builds native installers (DMG, MSI, EXE, DEB, RPM, AppImage) and Flatpak sources on a matrix of runners and attaches them to the GitHub Release.
--   **Changelog:** Both the GitHub Release notes and `CHANGELOG.md` are generated from merged PR labels, not raw commit messages — label PRs correctly (`enhancement`, `bugfix`, etc.) to keep them accurate.
+-   **Changelog:** Both the GitHub Release notes and `CHANGELOG.md` are generated from merged PR labels, not raw commit messages — label PRs correctly (`enhancement`, `bugfix`, etc.) to keep them accurate. `pull-request-target.yml` sets the label from the PR's branch prefix and conventional-commit title, so a wrong label usually means a wrong prefix.
 -   **Not part of this workflow:** Firmware/hardware/device-links lists and Crowdin translations are kept current by a separate scheduled workflow, `scheduled-updates.yml` ("Scheduled Updates (Firmware, Hardware, Translations)"), which opens its own PR rather than committing directly and enables auto-merge on it, so it lands through the merge queue once its checks pass. A promotion dispatches it (above) without waiting on it. `VERSION_NAME_BASE` in `config.properties` moves to the next patch version after each production release: `promote.yml` dispatches `version-bump.yml`, which runs `scripts/bump-version-name.py` and opens a self-merging PR carrying the new `<release>` entry in `desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml`, its five `<image>` URLs moved to `releases/download/v<version>/`, and `fastlane/metadata/android/en-US/changelogs/default.txt` rendered from that entry. `pull-request.yml` fails a bump PR missing any of them; the bot PR is opened with `CROWDIN_GITHUB_TOKEN`, so those checks run on it and the merge queue takes it. The entry's paragraph is a placeholder; replace it and re-run `scripts/sync-play-changelog.py` before the next internal cut, because it becomes the release Highlights and Play's "What's new". A minor or major line is a hand PR running the same script, and the workflow skips when `main` is already past the shipped version. `Create or Promote Release` only *reads* `config.properties` at the commit being released: `VERSION_NAME_BASE` must match `base_version`, and `VERSION_CODE_OFFSET` plus that commit's count gives the build's version code.
 
 ## Release Steps
@@ -112,7 +112,7 @@ Publishing a **production** release also fires two workflows, both keyed on the 
 
 | Workflow | Target | Credentials |
 |---|---|---|
-| `msstore-publish.yml` | Microsoft Store, via the Partner Center API using the MSStore CLI (#6864 replaced the deprecated `microsoft/store-submission` action) | `MSSTORE_*` secrets |
+| `msstore-publish.yml` | Microsoft Store, via the Partner Center API using the MSStore CLI | `MSSTORE_*` secrets |
 | `winget-publish.yml` | A PR against `microsoft/winget-pkgs` | `WINGET_TOKEN` PAT |
 
 Neither fires for drafts or pre-releases, so internal/closed/open promotions are ignored.
@@ -145,11 +145,26 @@ macOS builds are signed and notarized when the following CI secrets are configur
 | `APPLE_APP_SPECIFIC_PASSWORD` | App-specific password from [appleid.apple.com](https://appleid.apple.com) |
 | `APPLE_TEAM_ID` | 10-character Apple Developer Team ID |
 
-Without these secrets, macOS builds are produced unsigned. Unsigned DMGs will trigger Gatekeeper warnings on end-user machines.
+Without these secrets, macOS builds are produced unsigned. Unsigned DMGs will trigger Gatekeeper warnings on end-user machines. The DMG is built on an Apple silicon runner only, so there is no Intel macOS build.
+
+### Windows Code Signing
+
+The Windows `.msi` and `.exe` installers are Authenticode-signed through Azure Trusted Signing (Artifact Signing) when these CI secrets are configured:
+
+| Secret | Source |
+|---|---|
+| `AZURE_TENANT_ID` | Entra tenant ID |
+| `AZURE_CLIENT_ID` | Client ID of the app registration (service principal) |
+| `AZURE_CLIENT_SECRET` | Client secret for that app registration |
+| `AZURE_TRUSTED_SIGNING_ENDPOINT` | Account endpoint, for example `https://eus.codesigning.azure.net` |
+| `AZURE_TRUSTED_SIGNING_ACCOUNT` | Trusted Signing account name |
+| `AZURE_TRUSTED_SIGNING_CERT_PROFILE` | Public-trust certificate profile name |
+
+The service principal needs the "Trusted Signing Certificate Profile Signer" role on the account. Without the endpoint secret the installers ship unsigned; with it set and another secret missing, the signing step fails the build. Only the installers are signed, not the launcher `.exe` inside them.
 
 ### Version Alignment
 
-Desktop uses the same version resolution chain as Android — both read `VERSION_CODE_OFFSET` and `VERSION_NAME_BASE` from `config.properties`, with CI passing the resolved values as environment variables. Version names are sanitized to strict `X.Y.Z` format for native installer compatibility.
+Desktop uses the same version resolution chain as Android (`resolveVersionInfo` in `build-logic`): both fall back to `VERSION_NAME_BASE` and the commit count plus `VERSION_CODE_OFFSET` from `config.properties`, and CI passes in the resolved name and code, as `-Pandroid.injected.version.*` for Android and as `appVersionName` and `VERSION_CODE` for desktop. Desktop version names are sanitized to strict `X.Y.Z` format for native installer compatibility.
 
 ### Flatpak
 

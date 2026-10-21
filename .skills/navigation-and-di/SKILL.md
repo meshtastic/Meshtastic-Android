@@ -36,7 +36,7 @@ startKoin<AndroidKoinApp> {
 - `@KoinApplication` goes on a **dedicated bootstrap object**, not on a `@Module` class.
 - `startKoin<T>()` (from `org.koin.plugin.module.dsl`) is a compiler plugin stub — if the plugin isn't applied, it throws `NotImplementedError`.
 - `stopKoin()` uses the standard runtime API (`org.koin.core.context.stopKoin`).
-- `compileSafety` is **on at the entry points only** (`:androidApp`, `:desktopApp`). Plugin 1.1.0 replaced per-module validation with whole-graph validation, so the flag is only meaningful where the graph is assembled. A new app target must be added to `KOIN_ENTRY_POINTS` or it is never validated.
+- `compileSafety` is **on at the entry points only** (`:androidApp`, `:desktopApp`). Validation is whole-graph, so the flag is only meaningful where the graph is assembled. A new app target must be added to `KOIN_ENTRY_POINTS` or it is never validated.
 - A definition two `@Module(includes = ...)` levels below the entry point is invisible to the index. The flavor modules carry `@Configuration` as well as their `includes` for this reason; dropping the `includes` removes them from the **runtime** graph, which `KoinVerificationTest` catches.
 - Hand-written DSL `module { }` definitions are not reachable by the assembled graph, which is why `:desktopApp` uses `@Module` classes.
 
@@ -48,7 +48,7 @@ startKoin<AndroidKoinApp> {
 3. **Graph Assembly:** Define feature navigation graphs as extension functions on `EntryProviderScope<NavKey>` in `commonMain` (e.g., `fun EntryProviderScope<NavKey>.settingsGraph(backStack)`).
 4. **Host Integration:** Use `MeshtasticNavDisplay` (from `core:ui/commonMain`) as the Navigation 3 host. It owns the entry decorators; do not create them in app hosts or feature modules.
 5. **Scenes:** `MeshtasticNavDisplay` renders `ListDetailSceneStrategy` scenes (`listPane()`, `detailPane()`, `extraPane()` entry metadata) and falls back to a single pane. It registers no dialog or supporting-pane strategy, so that metadata has no effect.
-6. **Back Handlers:** Use `NavigationBackHandler` from `androidx.navigationevent:navigationevent-compose` for back gestures in multiplatform code. Do not use Android's `BackHandler`.
+6. **Back Handlers:** Use `NavigationBackHandler` (`androidx.navigationevent.compose`, catalog alias `jetbrains-navigationevent-compose`) for back gestures in multiplatform code. Do not use Android's `BackHandler`.
 7. **Deep Links:** Use `DeepLinkRouter.route()` in `core:navigation` to synthesize typed backstacks from RESTful paths.
 8. **Tab Lifetime:** A hidden tab's entry ViewModels and saved state live until that entry is popped from its own stack; switching tabs does not clear them.
 

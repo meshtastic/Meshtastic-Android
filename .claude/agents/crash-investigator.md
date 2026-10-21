@@ -17,7 +17,7 @@ A Crashlytics issue id or console URL, a crash signature / exception class, an a
 2. **Map versionCode → tag / commit / Play track.** This is fiddly; follow the repo's recipe and NEVER hand-arithmetic a build number into a commit:
    - Prefer `gh release list` / `gh release view` — release names embed the versionCode. Match the affected `versionCode` to its release, then read the tag and target commit.
    - Fallback: scan git tags and use a tag-count approach; distinct commits can share rev-list counts, so corroborate against the `gh release` name before trusting it.
-   - Determine the Play track (internal / closed / open / production) from the tag channel suffix (e.g. `-internal.N`, `-closed.N`, production).
+   - Determine the Play track (internal / closed / open / production) from the tag channel suffix (`-internal.N`, `-closed.N`, `-open.N`; a bare `vX.Y.Z` is production).
    - Establish whether the **latest shipped production build** is affected, vs. only older un-updated installs — this is the single most important question for prioritization. "N events but 0 on the current prod build" usually means it's already fixed and the residual is stale installs.
 
 3. **Locate the suspect code.** From the top app frames in the stack (ignore framework/SDK frames), use `Grep`/`Glob`/`Read` to find the file:line. Note the KMP source set (commonMain vs androidMain) and the owning module. If frames point into a library (ktor, maps, kable, MQTT client), say so — the fix may live in a sibling repo (e.g. MQTTastic-Client-KMP) rather than this one.

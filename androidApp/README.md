@@ -19,6 +19,16 @@ The module primarily serves as a "glue" layer, connecting:
 - `core:*` modules for shared logic.
 - `feature:*` modules for specific user-facing screens.
 
+## Flavors
+The `marketplace` dimension has two flavors, which share the application ID `com.geeksville.mesh`:
+
+| Flavor | Map | Flavor-only dependencies |
+|---|---|---|
+| `google` | Google Maps, with offline vector regions (`src/google/.../map/offline/pmtiles/`) and terrain (`.../offline/terrain/`) | Play services location, Firebase Analytics and Crashlytics, Datadog, Firebase AI and ML Kit, AndroidX App Functions, ARCore for the device model viewer |
+| `fdroid` | MapLibre, from `:feature:map-maplibre` | only `:feature:map-maplibre` |
+
+Debug builds take the application ID `com.geeksville.mesh.<flavor>.debug`, so they install beside a release build. A release build is signed only when `keystore.properties` names a keystore; without one it is unsigned. ABI splits produce per-ABI APKs plus a universal one, and `-Pmeshtastic.disableAbiSplits=true` turns them off, as the Play bundle build does.
+
 ## Module dependency graph
 
 <!--region graph-->

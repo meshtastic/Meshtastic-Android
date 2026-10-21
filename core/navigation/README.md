@@ -9,10 +9,13 @@ The `:core:navigation` module defines the type-safe Navigation 3 route model for
 Contains serializable `NavKey` route classes/objects used by shared feature graphs.
 
 ### 2. `DeepLinkRouter.kt`
-Parses Meshtastic deep-link URIs and synthesizes a typed backstack (for example `/nodes/1234/device-metrics`).
+Matches Meshtastic deep-link URIs against Navigation 3 `UriDeepLinkMatcher` patterns and synthesizes a typed backstack (for example `/nodes/1234/device-metrics`).
 
 ### 3. `NavigationConfig.kt`
-Defines `MeshtasticNavSavedStateConfig` using sealed interface hierarchies so Navigation 3 backstacks can be persisted/restored safely — new routes are auto-registered at compile time.
+Defines `MeshtasticNavSavedStateConfig`, which registers each sealed route hierarchy with `subclassesOfSealed` so Navigation 3 backstacks can be persisted and restored. A new route inside an existing hierarchy is registered at compile time; a new hierarchy needs its own line.
+
+### 4. Shell helpers
+`TopLevelDestination` lists the five top-level tabs shared by the Android and Desktop shells, `MultiBackstack` (`rememberMultiBackstack`) keeps one backstack per tab, `NavBackStackExt.kt` adds `replaceLast`, `popUnlessRoot` and `replaceAll`, and `rumViewName` derives the analytics view name for a route.
 
 ## Features
 - **Type-Safety**: Uses serializable `NavKey` routes instead of ad-hoc string routes.

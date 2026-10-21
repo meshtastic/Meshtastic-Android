@@ -15,12 +15,16 @@ directory holds the machine-readable artifacts.
 | the deep-link table in [README.md](../README.md) | same links, narrowed to latest release + open beta × both flavors | ✅ |
 | `com.geeksville.mesh.json` | Submission file for [apps.obtainium.imranr.dev](https://github.com/ImranR98/apps.obtainium.imranr.dev) | hand-maintained |
 
-`generate-links.py` writes the three generated targets from one `CHANNELS` ×
-`FLAVORS` definition, so the links and the import files cannot disagree:
+`generate-links.py` writes the generated targets above from one `CHANNELS` ×
+`FLAVORS` definition, so the links and the import files cannot disagree. With
+`--refresh` it also queries the GitHub releases API, checks every
+`apkFilterRegEx` against the published assets, and rewrites the "what those
+channels point at" status table in `README.md`; `scheduled-updates.yml` runs that:
 
-```bash
-python3 obtainium/generate-links.py          # regenerate
-python3 obtainium/generate-links.py --check  # verify, exits 1 on drift
+```shell
+python3 obtainium/generate-links.py            # regenerate
+python3 obtainium/generate-links.py --check    # verify, exits 1 on drift
+python3 obtainium/generate-links.py --refresh  # regenerate plus the status table (network)
 ```
 
 Run `--check` after editing anything in this directory. Editing a generated file
@@ -47,9 +51,9 @@ because only those can coexist and need telling apart. Labels are set via
 and without `appName` Obtainium falls back to the installed app's own label — a
 debug build shows up as "Google Debug".
 
-> `com.geeksville.mesh.json` is a **byte-identical mirror** of what we submitted
-> upstream as [apps.obtainium.imranr.dev#1566](https://github.com/ImranR98/apps.obtainium.imranr.dev/pull/1566)
-> (`public/data/apps/complex/com.geeksville.mesh.json`). Change it here and
+> `com.geeksville.mesh.json` is a **byte-identical mirror** of the config site's
+> `public/data/apps/complex/com.geeksville.mesh.json`, added upstream in
+> [apps.obtainium.imranr.dev#1566](https://github.com/ImranR98/apps.obtainium.imranr.dev/pull/1566). Change it here and
 > upstream together, or the config site and this repo will disagree. Their
 > formatting conventions are load-bearing for review: 4-space indent, trailing
 > newline, top-level key order `configs, icon, categories, description`, config
@@ -126,16 +130,16 @@ Three distribution shapes, all carrying the same object:
   `if (!fallbackToOlderReleases && i > prereleaseSkipped) break;`, and
   `prereleaseSkipped` stays `0` when `includePrereleases` is on — so with
   fallback off, only the release at index 0 is ever considered and a title
-  filter can never skip past it. Setting it to `false` made the snapshot and
-  beta configs fail outright with `NoReleasesError`. The title filter alone
-  pins the channel.
+  filter can never skip past it, and the snapshot and beta configs fail with
+  `NoReleasesError`. The title filter alone pins the channel.
 
-## Submitting to the config site
+## Updating the config site entry
 
 [apps.obtainium.imranr.dev](https://apps.obtainium.imranr.dev) is a
-crowdsourced repo that takes pull requests. Meshtastic is not listed there yet.
+crowdsourced repo that takes pull requests, and lists Meshtastic from
+`com.geeksville.mesh.json`.
 
-1. Read [`APP_CRITERIA.md`](https://github.com/ImranR98/apps.obtainium.imranr.dev/blob/main/APP_CRITERIA.md).
+1. Check the change against [`APP_CRITERIA.md`](https://github.com/ImranR98/apps.obtainium.imranr.dev/blob/main/APP_CRITERIA.md).
    We qualify: official upstream source, no fork, no reupload mirror.
 2. Copy `com.geeksville.mesh.json` to
    `public/data/apps/complex/com.geeksville.mesh.json` in a fork of that repo.

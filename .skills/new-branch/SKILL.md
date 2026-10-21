@@ -10,8 +10,6 @@ Canonical recipe for spinning up a fresh working branch off the latest upstream 
 whenever the user says things like *"make a new branch off fetched origin/main"*, *"peel off a fresh
 branch"*, *"dust off #NNNN"*, or otherwise signals the start of a new unit of work.
 
-This replaces the ad-hoc prose that used to be retyped at the start of every session.
-
 ## When to Use
 - Starting any new feature, fix, chore, or refactor.
 - Rebasing a stale PR onto current `main` (see [Rebase variant](#rebase-variant)).
@@ -19,8 +17,9 @@ This replaces the ad-hoc prose that used to be retyped at the start of every ses
 
 ## Preconditions (verify before branching)
 1. **Clean worktree.** If `git status --porcelain` is non-empty, ask the user before proceeding.
-2. **Upstream remote present.** `git remote -v` must list `upstream` pointing at
-   `meshtastic/Meshtastic-Android`. If only `origin` exists on a fork, treat `origin` as upstream.
+2. **Upstream remote known.** Find the remote in `git remote -v` that points at
+   `meshtastic/Meshtastic-Android`: `upstream` in a fork clone, `origin` in a direct clone. The
+   recipes below call it `upstream`; substitute its real name.
 3. **Secrets:** nothing to bootstrap — `secrets.defaults.properties` is tracked and is the
    secrets plugin's fallback, so every flavor builds without a local secrets file.
 
@@ -86,7 +85,7 @@ case here. The lease is intact and the wrong branch gets rewritten.
 
 ## Post-Branch Checklist
 - [ ] Branch name carries a conventional prefix, or is a spec-driven name (numeric or `YYYYMMDD-HHMMSS-`) per Branch Naming above.
-- [ ] `ANDROID_HOME` exported (see AGENTS.md workspace bootstrap).
+- [ ] `ANDROID_HOME` exported (see the bootstrap in `.skills/project-overview/SKILL.md`).
 - [ ] Optional: run `./gradlew assembleDebug` once to catch environment regressions before editing.
 
 ## Tip: Delegate Long Audits to a Subagent

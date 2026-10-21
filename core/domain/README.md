@@ -2,22 +2,22 @@
 
 ## Overview
 
-The `:core:domain` module is the **business-logic layer** of the KMP architecture. It contains exclusively use-case classes — no UI, no platform code, no mutable state. Each use case is a thin orchestrator that coordinates one or more repository/model dependencies to fulfil a single application action.
+The `:core:domain` module is the **business-logic layer** of the KMP architecture. It contains exclusively use-case classes, with no UI and no platform code. Each use case is a thin orchestrator that coordinates one or more repository/model dependencies to fulfill a single application action.
 
 **Targets:** Android · JVM · iOS (via `meshtastic.kmp.library` convention plugin)
 
 ## Key Responsibilities
 
-- Orchestrate radio configuration reads/writes (config, module config, channels, owner, position)
+- Orchestrate node configuration reads/writes (config, module config, channels, owner, position)
 - Manage remote-admin session lifecycle (per-node passkey negotiation)
-- Process radio admin responses and manage mesh log settings
-- Data export (CSV mesh log, profile `.zip`)
+- Process admin responses from the node and manage mesh log settings
+- Data export (CSV mesh log, JSON node database, `DeviceProfile` protobuf)
 - Profile and security-config import/install
 - Node database maintenance (clean, reset, selective purge) and OTA capability checks
 
 ## Source Structure
 
-```
+```text
 src/commonMain/kotlin/org/meshtastic/core/domain/
 ├── di/
 │   └── CoreDomainModule.kt          ← Koin @Module + component scan
@@ -30,6 +30,7 @@ src/commonMain/kotlin/org/meshtastic/core/domain/
         ├── AdminActionsUseCase.kt
         ├── CleanNodeDatabaseUseCase.kt
         ├── ExportDataUseCase.kt
+        ├── ExportNodeDatabaseUseCase.kt  ← plus NodeDatabaseExport.kt, its JSON model
         ├── ExportProfileUseCase.kt
         ├── ImportProfileUseCase.kt
         ├── ImportSecurityConfigUseCase.kt
@@ -57,43 +58,53 @@ sealed interface EnsureSessionResult {
 
 ### `RadioConfigUseCase`
 
-Radio configuration read/write operations, all returning the `packetId` for async tracking:
+Node configuration read/write operations. Each admin request returns its `packetId` for async tracking, except `setFixedPosition`, `removeFixedPosition`, `setRingtone` and `setCannedMessages`, which return nothing:
 
 | Method | Description |
 |---|---|
 | `setOwner` / `getOwner` | Node owner info |
+| `setHamMode` | Licensed (ham) mode parameters |
 | `setConfig` / `getConfig` | `Config` proto (device, position, power, …) |
 | `setModuleConfig` / `getModuleConfig` | `ModuleConfig` proto |
 | `getChannel` / `setRemoteChannel` | Channel configuration |
 | `setFixedPosition` / `removeFixedPosition` | Fixed GPS position |
 | `setRingtone` / `getRingtone` | External notification ringtone |
 | `setCannedMessages` / `getCannedMessages` | Canned message slots |
+| `getDeviceConnectionStatus` | The node's `DeviceConnectionStatus` |
 
 ### `AdminActionsUseCase`
 
+Each call also takes an optional `onRequestId` callback and returns the request's packet id.
+
 ```kotlin
 reboot(destNum)
+rebootToDfu(destNum)
 shutdown(destNum)
+setTime(destNum)                 // sync the node's clock to the phone's
 factoryReset(destNum, isLocal)   // also clears local NodeDB when isLocal = true
 nodedbReset(destNum, preserveFavorites, isLocal)
 ```
 
 ### `ExportDataUseCase`
 
-Streams all mesh log packets to a CSV `BufferedSink`. Columns: date, time, from, sender name/location, received location/elevation, SNR, distance, hop limit, payload.
+Streams the mesh log's received packets that carry an SNR reading to a CSV `BufferedSink`, optionally filtered to one port. Columns: date, time, from, sender name/location, received location/elevation, SNR, distance, hop limit, hop start, relay node, payload.
+
+### `ExportNodeDatabaseUseCase`
+
+Writes the node database as JSON (`NodeDatabaseExport`), omitting absent fields rather than writing zero.
 
 ## Dependency Graph
 
 ```text
 core:domain
-  ├── core:repository              (use-case interfaces & contracts)
+  ├── core:repository              (repository and controller contracts)
   ├── core:model                   (domain models)
   ├── org.meshtastic:protobufs     (Meshtastic protobuf types, Maven)
   ├── core:common
   └── core:resources
 ```
 
-The generated Mermaid graph below renders project-module edges only — external Maven artifacts such as `org.meshtastic:protobufs` are not shown, and dashed edges are test-only (e.g. `:core:testing`).
+The generated Mermaid graph below renders project-module edges only, so external Maven artifacts such as `org.meshtastic:protobufs` are not shown. Solid edges are `api` dependencies and dashed edges are `implementation` ones, test source sets included (`:core:testing` comes from `commonTest`).
 
 ## DI
 

@@ -18,7 +18,7 @@ A Composable function (in `main/`) that provides camera permission handling, a f
 
 ## Source Layout
 
-```
+```text
 src/
 ├── main/        BarcodeScannerProvider.kt (shared UI), SingleScanResultGate.kt
 ├── google/      BarcodeAnalyzerFactory.kt (ML Kit decoder)

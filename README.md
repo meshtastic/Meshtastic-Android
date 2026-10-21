@@ -32,7 +32,7 @@ Highlights of the 2.8 line:
 
 The fastest way to get releases is [GitHub releases](https://github.com/meshtastic/Meshtastic-Android/releases); pair them with [Obtainium](https://github.com/ImranR98/Obtainium) for automatic updates.
 
-With Obtainium installed, tap a link below on your phone to set it up with everything pre-configured. The `google` flavor adds Google Crashlytics and Google Maps; `fdroid` has no Google dependencies.
+With Obtainium installed, tap a link below on your phone to set it up with everything pre-configured. The `google` flavor adds Google Maps, Firebase Crashlytics, Datadog and the Google AI features; `fdroid` has none of them.
 
 <!-- BEGIN GENERATED LINKS: obtainium/generate-links.py -->
 
@@ -71,7 +71,7 @@ width="24%">](https://github.com/meshtastic/Meshtastic-Android/releases)
 alt="Get it on Google Play"
 width="24%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
 
-The play store is the last to update of these options. To [join the Play Store testing program](https://play.google.com/apps/testing/com.geeksville.mesh), opt in to become a tester.
+Google Play is the last of these to update. To [join the Play Store testing program](https://play.google.com/apps/testing/com.geeksville.mesh), opt in to become a tester.
 If you encounter any problems or have questions, [ask us on the discord](https://discord.gg/meshtastic), [create an issue](https://github.com/meshtastic/Meshtastic-Android/issues), or [post in the forum](https://github.com/orgs/meshtastic/discussions) and we'll help as we can.
 
 ### Desktop
@@ -80,7 +80,7 @@ If you encounter any problems or have questions, [ask us on the discord](https:/
 
 ## Documentation
 
-The two documentation sites below are deployed to GitHub Pages automatically on every push to `main`.
+Both sites are published to GitHub Pages. The site root carries the docs of the latest production release, `/main/` is rebuilt from `main` whenever a push changes the docs, and `/api/` is rebuilt from `main` daily and on each production release.
 
 | Site | URL | Contents |
 |---|---|---|
@@ -90,14 +90,14 @@ The two documentation sites below are deployed to GitHub Pages automatically on 
 ### Generating Locally
 
 **User & Developer Docs (Jekyll):**
-```bash
-./gradlew generateDocsBundle publishDocsSite
+```shell
+./gradlew publishDocsSite -Pdocs.channel=root
 BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll serve \
   --source build/_site --baseurl ""
 ```
 
 **API Reference (Dokka):**
-```bash
+```shell
 ./gradlew :dokkaGeneratePublicationHtml
 # Output: build/dokka/html/index.html
 ```
@@ -118,7 +118,7 @@ The BLE stack uses a multiplatform interface-driven architecture. Platform-agnos
 
 ### Module Documentation
 
-Each module has its own README with details on its responsibilities, API surface, and internal design.
+Most modules have their own README with details on their responsibilities, API surface, and internal design.
 
 | Module | Description |
 |---|---|
@@ -134,7 +134,7 @@ Each module has its own README with details on its responsibilities, API surface
 | [core/datastore](core/datastore/README.md) | DataStore preferences |
 | [core/service](core/service/README.md) | Meshtastic Android service abstractions |
 | [core/navigation](core/navigation/README.md) | Type-safe Navigation 3 route model |
-| [core/resources](core/resources/README.md) | Centralised CMP string & drawable resources |
+| [core/resources](core/resources/README.md) | Centralized CMP string & drawable resources |
 | [core/model](core/model/README.md) | Shared domain models |
 | [core/ui](core/ui/README.md) | Shared UI components |
 | [core/common](core/common/README.md) | Common utilities |
@@ -147,6 +147,8 @@ Each module has its own README with details on its responsibilities, API surface
 | [feature/messaging](feature/messaging/README.md) | Messaging UI feature |
 | [feature/map](feature/map/README.md) | Map UI feature — shared state, policy, tile sources and the waypoint editor |
 | [feature/map-maplibre](feature/map-maplibre/README.md) | MapLibre map surfaces shared by the `fdroid` flavor and Desktop |
+| [feature/map-terrain](feature/map-terrain/) | Offline terrain math (Terrarium decode, hillshade, contours) shared by both map stacks; no README |
+| [feature/coverage](feature/coverage/README.md) | Site Planner coverage computed in-process with ITU-R P.1812 (`kp1812`) |
 | [feature/node](feature/node/README.md) | Node detail UI feature |
 | [feature/settings](feature/settings/README.md) | Settings UI feature |
 | [feature/firmware](feature/firmware/README.md) | Firmware update UI feature |
@@ -164,7 +166,7 @@ You can help translate the app into your native language using [Crowdin](https:/
 
 ## Integration
 
-The app includes a built-in **Local TAK Server** feature that can be enabled in settings. This runs a loopback-only TLS (mTLS) server on port 8089 so ATAK on the same device can connect directly and route its traffic over the mesh.
+The app includes a built-in local TAK server, turned on with **Enable Local TAK Server** under **Settings → Advanced → TAK Server**. It runs a loopback-only TLS (mTLS) server on port 8089 so ATAK on the same device can connect directly and route its traffic over the mesh. See [TAK Integration](docs/en/user/tak.md).
 
 ## Building the Android App
 > [!WARNING]
@@ -172,8 +174,7 @@ The app includes a built-in **Local TAK Server** feature that can be enabled in 
 
 Follow the [Android development guide](https://meshtastic.org/docs/development/android/) to set up your environment.
 
-Note: when building the `google` flavor locally you will need a [Google Maps Android SDK api key](https://developers.google.com/maps/documentation/android-sdk/get-api-key) to use Google Maps. Create `secrets.properties` at the repo root and set `MAPS_API_KEY=…`. Without it the build still succeeds with a placeholder key, but map tiles will not load.
-e.g.
+Note: when building the `google` flavor locally you will need a [Google Maps Android SDK API key](https://developers.google.com/maps/documentation/android-sdk/get-api-key) to use Google Maps. Create `secrets.properties` at the repo root and set `MAPS_API_KEY=…`. Without it the build still succeeds with the placeholder key from `secrets.defaults.properties`, but map tiles will not load. For example:
 ```properties
 # secrets.properties
 MAPS_API_KEY=your_google_maps_api_key_here

@@ -9,7 +9,7 @@ applyTo: "**/commonMain/**/*.kt"
 - Use Okio (`BufferedSource`/`BufferedSink`) instead of `java.io.*`.
 - Use `kotlinx.coroutines.sync.Mutex` instead of `java.util.concurrent.locks.*`.
 - Use `atomicfu` or Mutex-guarded `mutableMapOf()` instead of `ConcurrentHashMap`.
-- Use `jetbrains-*` catalog aliases for lifecycle/navigation dependencies.
+- Use `jetbrains-*` catalog aliases for lifecycle/navigation dependencies. The one `androidx-*` exception is `androidx-navigation3-runtime`, AndroidX's own KMP artifact.
 - Use `compose-multiplatform-*` catalog aliases for CMP dependencies.
 - Never use plain `androidx.compose` dependencies in `commonMain`.
 - Strings: use `stringResource(Res.string.key)` from `core:resources`. No hardcoded strings.
