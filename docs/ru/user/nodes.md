@@ -1,7 +1,7 @@
 ---
 title: Ноды
 nav_order: 4
-last_updated: 2026-10-02
+last_updated: 2026-10-20
 description: Просматривайте, фильтруйте и сортируйте ноды сети — просматривайте подробности, качество сигнала, роли и быстрые действия.
 aliases:
   - node-list
@@ -107,6 +107,8 @@ A mismatch never replaces the key you already hold. The app keeps the first key 
   - Отключить/включить уведомления
   - Отправить личное сообщение
   - Трассировка
+  - Open Compass, for a node with a position
+  - Open mesh view, for a node with a position on a phone that supports the [AR mesh view](map-and-waypoints#ar-mesh-view)
   - Игнорировать/разблокировать
   - Удалить
 
