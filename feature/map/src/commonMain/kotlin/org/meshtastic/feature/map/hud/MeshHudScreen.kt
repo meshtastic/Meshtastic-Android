@@ -28,10 +28,12 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -83,6 +85,7 @@ private const val FULL_CIRCLE_DEG = 360.0
 
 /** How long the sensor may stay silent before the screen says it is waiting for it. */
 private const val SENSOR_WAIT_MS = 2_000L
+private const val MILLIS_PER_SECOND = 1_000.0
 
 /** The finder counts as on target within this many degrees, or the target's own spread when that is wider. */
 private const val ON_TARGET_DEG = 5.0
@@ -178,6 +181,16 @@ fun MeshHudScreen(
     }
     val hasSensor by remember { derivedStateOf { poseState.value.hasSensor } }
     val thermal by remember { derivedStateOf { poseState.value.thermal } }
+    // The sparks' clock, read only while drawing, so a frame redraws the canvas and recomposes nothing. It runs only
+    // with a path open and a cool phone; a hot phone keeps its sparks where they stopped.
+    val sparkMillis = remember { mutableLongStateOf(0L) }
+    val animateSparks = (route != null || track != null) && thermal == HudThermal.NORMAL
+    LaunchedEffect(animateSparks) {
+        if (animateSparks) {
+            val start = withFrameMillis { it } - sparkMillis.longValue
+            while (true) withFrameMillis { sparkMillis.longValue = it - start }
+        }
+    }
     val waitingForSensor by remember {
         derivedStateOf { sensorSilent && poseState.value.hasSensor && poseState.value.pose == null }
     }
@@ -244,7 +257,8 @@ fun MeshHudScreen(
             val pose = state.pose ?: return@Canvas
             drawHorizon(pose, focalPx)
             targets.fences.forEach { drawGeofence(it, pose, focalPx) }
-            track?.let { drawTrack(it, pose, focalPx, textMeasurer, tapeStyle, trackLabels) }
+            val sparkSeconds = sparkMillis.longValue / MILLIS_PER_SECOND
+            track?.let { drawTrack(it, pose, focalPx, textMeasurer, tapeStyle, trackLabels, sparkSeconds) }
             route?.let {
                 drawRoute(
                     it,
@@ -255,6 +269,7 @@ fun MeshHudScreen(
                     textMeasurer,
                     tapeStyle,
                     routeLabels,
+                    sparkSeconds,
                 )
             }
             if (targets.showPrecision) {

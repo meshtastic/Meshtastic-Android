@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.hud
 
+import androidx.compose.ui.geometry.Offset
 import org.meshtastic.core.repository.PhoneLocation
 import org.meshtastic.proto.Position
 import kotlin.test.Test
@@ -185,6 +186,33 @@ class HudPathsTest {
     @Test
     fun `a one point track labels nothing`() {
         assertTrue(trackLabelIndices(track(100L).points).isEmpty())
+    }
+
+    @Test
+    fun `sparks sit a spacing apart from the phase and head along the path`() {
+        val pieces = listOf(Offset(0f, 0f) to Offset(100f, 0f), Offset(100f, 0f) to Offset(100f, 100f))
+        val sparks = sparksAlong(pieces, phasePx = 10f, spacingPx = 50f)
+        assertEquals(
+            listOf(Offset(10f, 0f), Offset(60f, 0f), Offset(100f, 10f), Offset(100f, 60f)),
+            sparks.map { it.at },
+        )
+        assertEquals(listOf(Offset(1f, 0f), Offset(1f, 0f), Offset(0f, 1f), Offset(0f, 1f)), sparks.map { it.heading })
+    }
+
+    @Test
+    fun `a growing phase moves every spark forward and wraps at the spacing`() {
+        val pieces = listOf(Offset(0f, 0f) to Offset(100f, 0f))
+        assertEquals(
+            sparksAlong(pieces, phasePx = 5f, spacingPx = 50f),
+            sparksAlong(pieces, phasePx = 55f, spacingPx = 50f),
+        )
+        assertEquals(Offset(25f, 0f), sparksAlong(pieces, phasePx = 25f, spacingPx = 50f).first().at)
+    }
+
+    @Test
+    fun `a path with no length carries no sparks`() {
+        assertTrue(sparksAlong(listOf(Offset(3f, 3f) to Offset(3f, 3f)), phasePx = 0f, spacingPx = 50f).isEmpty())
+        assertTrue(sparksAlong(emptyList(), phasePx = 0f, spacingPx = 50f).isEmpty())
     }
 
     private fun point(atViewer: Boolean) = PathPoint(
