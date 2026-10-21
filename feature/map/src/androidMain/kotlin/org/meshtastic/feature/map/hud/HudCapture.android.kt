@@ -86,7 +86,6 @@ private suspend fun captureWindow(window: Window, io: CoroutineDispatcher): Uri?
     return if (copied) withContext(io) { saveJpegToPictures(decor.context, bitmap, FILE_TITLE) } else null
 }
 
-
 private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()

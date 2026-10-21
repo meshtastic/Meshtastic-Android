@@ -24,6 +24,7 @@ import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.math.tan
 
 private const val FULL_CIRCLE = 360.0
 
@@ -50,6 +51,10 @@ internal fun groundDirections(a: PathPoint, b: PathPoint): List<Vec3> {
         directionEnu(bearing, elevationDeg(hypot(e, n), riseA + (riseB - riseA) * t))
     }
 }
+
+/** The rise that [elevationDeg] turns into [elevationDeg] at [distanceM]: its inverse. */
+internal fun riseM(distanceM: Double, elevationDeg: Double): Double =
+    distanceM * tan(elevationDeg.toRadians()) + distanceM * distanceM / (2 * EFFECTIVE_EARTH_RADIUS_M)
 
 /** A track leg is stepped along the ground once it spans more than this much of the view. */
 private const val GROUND_STEP_DEG = 5.0

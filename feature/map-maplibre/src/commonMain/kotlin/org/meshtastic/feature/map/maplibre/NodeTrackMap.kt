@@ -249,6 +249,7 @@ internal fun trackLineStops(points: List<GeoPosition>, recency: List<Float>): Li
  * `line-gradient` needs the source to compute line-distance metrics, which is what `lineMetrics` turns on; without it
  * the gradient is silently ignored and the line draws in its base colour.
  */
+@Suppress("SpreadOperator") // interpolate() only takes its stops as varargs
 @Composable
 private fun TrackLineLayer(points: List<TrackPoint>, color: Color) {
     val source =

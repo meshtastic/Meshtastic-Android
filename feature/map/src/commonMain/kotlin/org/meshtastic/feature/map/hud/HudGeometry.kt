@@ -24,12 +24,11 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
-import kotlin.math.tan
 
 private const val DEGREES_PER_RADIAN = 180.0 / PI
 
 /** Earth radius scaled by 4/3, the standard allowance for atmospheric refraction near the horizon. */
-private const val EFFECTIVE_EARTH_RADIUS_M = 6_371_000.0 * 4.0 / 3.0
+internal const val EFFECTIVE_EARTH_RADIUS_M = 6_371_000.0 * 4.0 / 3.0
 
 /** Points nearer than this to the camera plane are treated as behind it, so a projection never divides by ~0. */
 private const val MIN_FORWARD_COMPONENT = 0.05
@@ -96,10 +95,6 @@ fun elevationDeg(distanceM: Double, riseM: Double?): Double {
     val drop = distanceM * distanceM / (2 * EFFECTIVE_EARTH_RADIUS_M)
     return atan2((riseM ?: 0.0) - drop, distanceM) * DEGREES_PER_RADIAN
 }
-
-/** The rise that [elevationDeg] turns into [elevationDeg] at [distanceM]: its inverse. */
-fun riseM(distanceM: Double, elevationDeg: Double): Double =
-    distanceM * tan(elevationDeg.toRadians()) + distanceM * distanceM / (2 * EFFECTIVE_EARTH_RADIUS_M)
 
 /** A target with no shared altitude frame could sit anywhere in a band this tall either side of level. */
 private const val UNKNOWN_ELEVATION_SPREAD_DEG = 4.0

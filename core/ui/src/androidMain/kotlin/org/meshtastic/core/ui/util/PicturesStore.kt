@@ -32,8 +32,8 @@ private const val JPEG_QUALITY = 92
 
 /**
  * Saves [bitmap] as a JPEG in Pictures/Meshtastic, named after [title] and the time, and returns it, or null when
- * nothing was saved. Android 10 and later only, where writing there needs no storage permission. Blocks on disk, so call
- * it off the main thread.
+ * nothing was saved. Android 10 and later only, where writing there needs no storage permission. Blocks on disk, so
+ * call it off the main thread.
  */
 @RequiresApi(Build.VERSION_CODES.Q)
 fun saveJpegToPictures(context: Context, bitmap: Bitmap, title: String): Uri? {
