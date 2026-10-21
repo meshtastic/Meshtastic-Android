@@ -18,15 +18,17 @@ const DOCS_DIR = path.join(REPO_ROOT, "docs", "en");
 // Modules not listed here are considered internal (no user-facing docs required).
 const MODULE_TO_DOCS = {
     "feature/connections":    { pages: ["connections"], section: "user" },
+    // Site Planner's on-device coverage estimate, documented in map-and-waypoints.md.
+    "feature/coverage":       { pages: ["map-and-waypoints"], section: "user" },
     "feature/discovery":      { pages: ["discovery"], section: "user" },
     "feature/docs":           { pages: [], section: "user", internal: true },
     "feature/firmware":       { pages: ["firmware"], section: "user" },
     "feature/intro":          { pages: ["onboarding"], section: "user" },
     "feature/map":            { pages: ["map-and-waypoints"], section: "user" },
     "feature/messaging":      { pages: ["messages-and-channels"], section: "user" },
-    "feature/node":           { pages: ["nodes", "node-metrics"], section: "user" },
+    "feature/node":           { pages: ["nodes", "node-metrics", "telemetry-and-sensors"], section: "user" },
     "feature/settings":       { pages: ["settings-radio-user", "settings-module-admin"], section: "user" },
-    "feature/telemetry":      { pages: ["telemetry-and-sensors"], section: "user" },
+    "feature/widget":         { pages: ["widget"], section: "user" },
     // Wi-Fi Provisioning for mPWRD-OS is a Settings entry point, documented in the
     // "Wi-Fi provisioning" note of the TCP/IP section of connections.md.
     "feature/wifi-provision": { pages: ["connections"], section: "user" },

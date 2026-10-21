@@ -173,8 +173,6 @@ reviews:
       instructions: Treat the Compose resources under `src/commonMain/composeResources/files/` as generated output from `/docs/en/**` and translated docs sync tasks; do not hand-edit those copied files.
     - path: feature/map/
       instructions: Route map access through the injected `CompositionLocal` provider contracts; do not depend directly on Google Maps or osmdroid from feature code.
-    - path: feature/car/
-      instructions: Run unit tests with `./gradlew :feature:car:testGoogleDebugUnitTest`, and keep Robolectric pinned to SDK 36 for this module.
     - path: core/database/
       instructions: >-
         Review focus: schema compatibility. A `@Database` version bump must ship a new
