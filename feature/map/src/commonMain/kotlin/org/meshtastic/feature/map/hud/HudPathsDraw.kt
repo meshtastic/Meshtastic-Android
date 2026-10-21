@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -50,6 +51,9 @@ private val ArcMinWidth = 2.dp
 private val ArcExtraWidth = 4.dp
 private val TrackWidth = 3.dp
 private val TrackRing = 4.dp
+private val TrackRingStroke = 2.dp
+private val TrackCasing = 1.5.dp
+private const val CASING_LUMINANCE_SPLIT = 0.5f
 private val LabelPadding = 4.dp
 private val TagLift = 16.dp
 private val TagMinGap = 48.dp
@@ -188,14 +192,16 @@ internal fun DrawScope.drawTrack(
     val points = track.points
     if (points.isEmpty()) return
     val base = Color(track.color)
+    // A node's color can be as dark or as light as the scene behind it, so the track rides on an outline of the
+    // opposite shade, as a chip's text does on its fill.
+    val casing = if (base.luminance() > CASING_LUMINANCE_SPLIT) Color.Black else Color.White
     val recency = trackRecency(points.map { it.fixTimeSec })
     fun alphaAt(index: Int): Float = trackFadeAlpha(recency[index])
     fun TrackPoint.direction() = directionEnu(point.bearingDeg, point.elevationDeg)
-    points.zipWithNext().forEachIndexed { i, (a, b) ->
-        val color = base.copy(alpha = alphaAt(i + 1))
+    fun leg(a: TrackPoint, b: TrackPoint, color: Color, width: Float) {
         val far = viewerLeg(a.point, b.point)
         when {
-            far != null -> drawFromViewer(far, pose, focalPx, color, TrackWidth.toPx(), dashed = !b.altitudeKnown)
+            far != null -> drawFromViewer(far, pose, focalPx, color, width, dashed = !b.altitudeKnown)
 
             !a.point.atViewer ->
                 drawPolyline(
@@ -203,15 +209,25 @@ internal fun DrawScope.drawTrack(
                     pose,
                     focalPx,
                     color,
-                    TrackWidth.toPx(),
+                    width,
                     dashed = !b.altitudeKnown,
                 )
         }
     }
+    val casingWidth = TrackWidth.toPx() + 2 * TrackCasing.toPx()
+    points.zipWithNext().forEachIndexed { i, (a, b) -> leg(a, b, casing.copy(alpha = alphaAt(i + 1)), casingWidth) }
+    points.zipWithNext().forEachIndexed { i, (a, b) -> leg(a, b, base.copy(alpha = alphaAt(i + 1)), TrackWidth.toPx()) }
     points.forEachIndexed { i, p ->
         if (p.point.atViewer) return@forEachIndexed
         screen(p.direction(), pose, focalPx)?.let { at ->
-            drawCircle(base.copy(alpha = alphaAt(i)), TrackRing.toPx(), at, style = Stroke(2.dp.toPx()))
+            val ring = TrackRingStroke.toPx()
+            drawCircle(
+                casing.copy(alpha = alphaAt(i)),
+                TrackRing.toPx(),
+                at,
+                style = Stroke(ring + 2 * TrackCasing.toPx()),
+            )
+            drawCircle(base.copy(alpha = alphaAt(i)), TrackRing.toPx(), at, style = Stroke(ring))
         }
     }
     val placed = mutableListOf<Offset>()
