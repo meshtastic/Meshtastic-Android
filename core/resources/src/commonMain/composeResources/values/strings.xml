@@ -869,8 +869,19 @@
     <string name="i_agree">I agree.</string>
     <string name="i_agree_to_share_my_location">I have read and understand the above. I voluntarily consent to the unencrypted transmission of my node data via MQTT</string>
     <string name="i_know_what_i_m_doing">I know what I'm doing.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
+    <string name="iaq_level_dangerously_polluted">Dangerously Polluted</string>
+    <string name="iaq_level_excellent">Excellent</string>
+    <string name="iaq_level_extremely_polluted">Extremely Polluted</string>
+    <string name="iaq_level_good">Good</string>
+    <string name="iaq_level_heavily_polluted">Heavily Polluted</string>
+    <string name="iaq_level_lightly_polluted">Lightly Polluted</string>
+    <string name="iaq_level_moderately_polluted">Moderately Polluted</string>
+    <string name="iaq_level_range">%1$s (%2$d-%3$d)</string>
+    <string name="iaq_level_range_open">%1$s (%2$d+)</string>
+    <string name="iaq_level_severely_polluted">Severely Polluted</string>
     <string name="iaq_value">IAQ %1$d</string>
     <string name="icon_meanings">Icon Meanings</string>
     <string name="ignore">Ignore</string>
@@ -1142,7 +1153,7 @@
     <string name="mesh_beacon_preset_indicator">Advertised by a nearby beacon</string>
     <string name="mesh_beacon_preset_none">None</string>
     <string name="mesh_beacon_region_label">Region</string>
-    <string name="mesh_beacon_region_required">Set your radio's region before setting up a beacon.</string>
+    <string name="mesh_beacon_region_required">Set your node's region before setting up a beacon.</string>
     <string name="mesh_beacon_target">Target %1$d</string>
     <string name="mesh_beacon_target_add">Add target</string>
     <string name="mesh_beacon_target_channel_index">Channel</string>
