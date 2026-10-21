@@ -51,6 +51,23 @@ class StringFieldByteLimitTest {
     }
 
     @Test
+    fun `MQTT password counts UTF-8 bytes rather than characters`() = runComposeUiTest {
+        var stored by mutableStateOf("")
+        setContent {
+            AppTheme { MqttPasswordPreference(enabled = true, password = stored, onValueChange = { stored = it }) }
+        }
+
+        onNode(hasSetTextAction()).performTextInput("é".repeat(15) + "a")
+        waitForIdle()
+        assertEquals(31, stored.encodeToByteArray().size)
+
+        onNode(hasSetTextAction()).performTextInput("é")
+        waitForIdle()
+        assertEquals(31, stored.encodeToByteArray().size)
+        assertEquals(16, stored.length)
+    }
+
+    @Test
     fun `canned message input source stops at 15 bytes because allow_input_source max_size is 16`() = runComposeUiTest {
         var stored by mutableStateOf("")
         setContent {
