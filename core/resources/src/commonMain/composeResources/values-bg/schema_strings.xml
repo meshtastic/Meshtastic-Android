@@ -30,6 +30,7 @@
     <string name="schema_audio_audio_baud_codec2_2400">2400 bps</string>
     <string name="schema_audio_audio_baud_codec2_3200">3200 bps</string>
     <string name="schema_audio_audio_baud_codec2_450">450 bps</string>
+    <string name="schema_audio_audio_baud_codec2_700c">700 bps (700C)</string>
     <string name="schema_audio_audio_baud_codec2_default">По подразбиране</string>
     <string name="schema_audio_codec2_enabled">CODEC 2 е активиран</string>
     <string name="schema_audio_ptt_pin">Пин за РТТ</string>
@@ -38,8 +39,10 @@
     <string name="schema_bluetooth_fixed_pin">Фиксиран ПИН</string>
     <string name="schema_bluetooth_fixed_pin_description">Фиксиран ПИН код за Bluetooth сдвояване. Използва се, когато режимът на сдвояване е настроен на фиксиран ПИН.</string>
     <string name="schema_bluetooth_mode">Режим на сдвояване</string>
+    <string name="schema_bluetooth_mode_description">Стратегия за сдвояване с Bluetooth</string>
     <string name="schema_bluetooth_pairingmode_fixed_pin">Фиксиран ПИН</string>
     <string name="schema_bluetooth_pairingmode_no_pin">Без ПИН (просто работи)</string>
+    <string name="schema_bluetooth_pairingmode_random_pin">Случаен ПИН</string>
     <string name="schema_cannedmessage_inputbroker_pin_a">GPIO пин за ротационен енкодер A порт</string>
     <string name="schema_cannedmessage_inputbroker_pin_b">GPIO пин за ротационен енкодер Б порт</string>
     <string name="schema_cannedmessage_inputbroker_pin_press">GPIO пин за ротационен енкодер Press порт</string>
@@ -47,6 +50,8 @@
     <string name="schema_cannedmessage_inputeventchar_cancel">Отказ</string>
     <string name="schema_cannedmessage_inputeventchar_none">Няма</string>
     <string name="schema_cannedmessage_inputeventchar_select">Изберете</string>
+    <string name="schema_detectionsensor_detection_trigger_type">Тип на тригера</string>
+    <string name="schema_detectionsensor_detection_trigger_type_description">Тип на задействащото събитие</string>
     <string name="schema_detectionsensor_name">Име</string>
     <string name="schema_detectionsensor_triggertype_logic_high">Високо</string>
     <string name="schema_detectionsensor_triggertype_logic_low">Ниско</string>
@@ -88,6 +93,7 @@
     <string name="schema_display_compassorientation_degrees_90_inverted">90° обърнат</string>
     <string name="schema_display_displaymode">Режим на дисплея</string>
     <string name="schema_display_displaymode_description">Замяна на оформлението на екрана по подразбиране.</string>
+    <string name="schema_display_displaymode_twocolor">Оптимизирано за 2 цветни дисплеи</string>
     <string name="schema_display_displayunits_imperial">Имперски</string>
     <string name="schema_display_displayunits_metric">Метрични</string>
     <string name="schema_display_flip_screen">Обръщане на екрана</string>
@@ -97,6 +103,11 @@
     <string name="schema_display_oled">Тип на OLED</string>
     <string name="schema_display_oled_description">Замяна на автоматичното разпознаване на OLED екрана.</string>
     <string name="schema_display_oledtype_oled_auto">Автоматично откриване</string>
+    <string name="schema_display_oledtype_oled_sh1106">SH1106</string>
+    <string name="schema_display_oledtype_oled_sh1107">SH1107</string>
+    <string name="schema_display_oledtype_oled_sh1107_128_128">SH1107 128x128</string>
+    <string name="schema_display_oledtype_oled_sh1107_rotated">SH1107 завъртян</string>
+    <string name="schema_display_oledtype_oled_ssd1306">SSD1306</string>
     <string name="schema_display_screen_on_secs">Екранът е включен за</string>
     <string name="schema_display_screen_on_secs_description">Колко дълго екранът остава включен след натискане на потребителския бутон или получаване на съобщения.</string>
     <string name="schema_display_units">Показвани единици</string>
@@ -127,10 +138,18 @@
     <string name="schema_lora_regioncode_eu_917">Европейски съюз 917MHz</string>
     <string name="schema_lora_regioncode_eu_n_868">Европейски съюз 868MHz (теснолентов)</string>
     <string name="schema_lora_regioncode_in">Индия</string>
+    <string name="schema_lora_regioncode_itu1_2m">ITU Регион 1 / Любителски 2m</string>
+    <string name="schema_lora_regioncode_itu1_70cm">ITU Регион 1 / Любителски 70cm</string>
+    <string name="schema_lora_regioncode_itu2_125cm">ITU Регион 2 / Любителски 1.25m</string>
+    <string name="schema_lora_regioncode_itu2_2m">ITU Регион 2 / Любителски 2m</string>
+    <string name="schema_lora_regioncode_itu2_70cm">ITU Регион 2 / Любителски 70cm</string>
+    <string name="schema_lora_regioncode_itu3_2m">ITU Регион 3 / Любителски 2m</string>
+    <string name="schema_lora_regioncode_itu3_70cm">ITU Регион 3 / Любителски 70cm</string>
     <string name="schema_lora_regioncode_jp">Япония</string>
     <string name="schema_lora_regioncode_kr">Корея</string>
     <string name="schema_lora_regioncode_kz_433">Казахстан 433MHz</string>
     <string name="schema_lora_regioncode_kz_863">Казахстан 863MHz</string>
+    <string name="schema_lora_regioncode_lora_24">2.4 GHz</string>
     <string name="schema_lora_regioncode_my_433">Малайзия 433 MHz</string>
     <string name="schema_lora_regioncode_my_919">Малайзия 919 MHz</string>
     <string name="schema_lora_regioncode_np_865">Непал 865 MHz</string>
@@ -177,6 +196,7 @@
     <string name="schema_network_addressmode_static">Статичен</string>
     <string name="schema_network_enabled_protocols">Активирани протоколи</string>
     <string name="schema_network_eth_enabled">Ethernet е активиран</string>
+    <string name="schema_network_eth_enabled_description">При платките ESP32 активирането на Ethernet ще деактивира Bluetooth връзката с приложението.</string>
     <string name="schema_network_ipv4_dns">DNS</string>
     <string name="schema_network_ipv4_gateway">Шлюз</string>
     <string name="schema_network_ipv4_ip">IP</string>
@@ -185,7 +205,9 @@
     <string name="schema_network_ntp_server_description">Адрес на NTP сървър. По подразбиране е meshtastic.pool.ntp.org</string>
     <string name="schema_network_protocolflags_no_broadcast">Няма</string>
     <string name="schema_network_rsyslog_server">rsyslog сървър</string>
+    <string name="schema_network_wifi_enabled_description">Активирането на WiFi ще деактивира Bluetooth връзката с приложението.</string>
     <string name="schema_network_wifi_psk">Парола</string>
+    <string name="schema_network_wifi_psk_description">WiFi парола за автентикация</string>
     <string name="schema_network_wifi_ssid">SSID</string>
     <string name="schema_paxcounter_ble_threshold">Праг на BLE RSSI (по подразбиране -80)</string>
     <string name="schema_paxcounter_enabled">Paxcounter е активиран</string>
@@ -226,7 +248,7 @@
     <string name="schema_serial_baud_description">Серийна скорост на предаване</string>
     <string name="schema_serial_echo">Echo е активирано</string>
     <string name="schema_serial_enabled">Серийната връзка е активирана</string>
-    <string name="schema_serial_mode">Сериен режим</string>
+    <string name="schema_serial_mode">Режим</string>
     <string name="schema_serial_rxd">RX</string>
     <string name="schema_serial_serial_baud_baud_default">По подразбиране</string>
     <string name="schema_serial_serial_mode_default">По подразбиране</string>
@@ -234,6 +256,8 @@
     <string name="schema_storeforward_is_server">Сървър</string>
     <string name="schema_storeforward_records">Брой записи</string>
     <string name="schema_tak_role">Роля</string>
+    <string name="schema_tak_team">Екип</string>
+    <string name="schema_tak_team_description">Цвят на TAK екипа</string>
     <string name="schema_team_blue">Син</string>
     <string name="schema_team_brown">Кафяв</string>
     <string name="schema_team_cyan">Циан</string>

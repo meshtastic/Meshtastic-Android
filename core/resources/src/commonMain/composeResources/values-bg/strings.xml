@@ -1297,12 +1297,17 @@
     <string name="view_release">Преглед на изданието</string>
     <string name="voltage">Напрежение</string>
     <string name="warning">Предупреждение</string>
+    <string name="water_ph">pH на водата</string>
     <string name="waypoint_delete">Изтриване на пътна точка?</string>
     <string name="waypoint_edit">Редактиране на пътна точка</string>
     <string name="waypoint_new">Нова пътна точка</string>
     <string name="waypoint_received">Получена пътна точка: %1$s</string>
+    <string name="website">Уебсайт</string>
     <string name="weight">Тегло</string>
+    <string name="what_is_meshtastic">Какво е Meshtastic?</string>
+    <string name="what_is_meshtastic_description">Мрежа с отворен код, работеща независимо от централизирана инфраструктура (off-grid), децентрализирана и изградена на принципа на мрежовата топология (mesh), която функционира чрез достъпни радиоустройства с ниска консумация на енергия.</string>
     <!-- WIFI -->
+    <string name="wifi_config">Опции за Wi-Fi</string>
     <string name="wifi_devices">Осигуряване на Wi-Fi за mPWRD-OS</string>
     <string name="wifi_provision_available_networks">Налични мрежи</string>
     <string name="wifi_provision_connect_failed">Не можа да се свърже: %1$s</string>
@@ -1310,12 +1315,16 @@
     <string name="wifi_provision_hidden_network">Скрита мрежа</string>
     <string name="wifi_provision_mpwrd_disclaimer">Научете повече за проекта mPWRD-OS \nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Няма намерени мрежи</string>
+    <string name="wifi_provision_scan_failed">Неуспешно сканиране за Wi-Fi мрежи: %1$s</string>
     <string name="wifi_provision_scan_networks">Сканиране за мрежи</string>
     <string name="wifi_provision_scanning_ble">Търси се устройство…</string>
     <string name="wifi_provision_scanning_wifi">Сканиране…</string>
+    <string name="wifi_provision_sending_credentials">Applying Wi-Fi configuration…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Име на мрежата (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Въведете или изберете мрежа</string>
+    <string name="wifi_provision_status_applied">Wi-Fi е конфигуриран успешно!</string>
+    <string name="wifi_provision_status_failed">Неуспешно прилагане на Wi-Fi конфигурацията</string>
     <string name="wifi_provision_success_description">Вашето mPWRD-OS устройство се е присъединило към Wi-Fi мрежата.</string>
     <string name="wifi_provision_success_device_connected">Устройството е свързано</string>
     <string name="wifi_provision_success_done">Готово</string>
