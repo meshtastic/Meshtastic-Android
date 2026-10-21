@@ -86,6 +86,7 @@
     <string name="firmware_update_failed">העדכון נכשל</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
+    <!-- IAQ -->
     <string name="ignore">התעלם</string>
     <string name="ignore_add">הוסף '%1$s' לרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
     <string name="ignore_remove">הורד '%1$s' מרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>

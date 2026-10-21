@@ -105,6 +105,8 @@
     <!-- GEOFENCE -->
     <string name="good">Geras</string>
     <string name="hops_away">Persiuntimų kiekis</string>
+    <!-- IAQ -->
+    <string name="iaq_level_good">Geras</string>
     <string name="ignore">Ignoruoti</string>
     <string name="ignore_add">Ar pridėti „%1$s“ į ignoruojamų sąrašą? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
     <string name="ignore_remove">Ar pašalinti „%1$s“ iš ignoruojamų sąrašo? Po šio pakeitimo jūsų radijas bus perkrautas.</string>

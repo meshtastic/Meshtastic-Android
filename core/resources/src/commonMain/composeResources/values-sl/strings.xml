@@ -106,8 +106,10 @@
     <!-- GEOFENCE -->
     <string name="good">Dober</string>
     <string name="hops_away">Skokov stran</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Kakovost zraka v zaprtih prostorih) relativna vrednost IAQ na lestvici, izmerjena z Bosch BME680. Razpon vrednosti 0–500.</string>
+    <string name="iaq_level_good">Dober</string>
     <string name="ignore">Prezri</string>
     <string name="ignore_add">Dodaj '%1$s' na prezrto listo?</string>
     <string name="ignore_remove">Odstrani '%1$s' iz prezrte liste?</string>

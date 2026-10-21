@@ -79,6 +79,7 @@
     <string name="firmware_update_failed">Uppfærsla misfórst</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
+    <!-- IAQ -->
     <string name="ignore">Hunsa</string>
     <string name="ignore_add">Bæta '%1$s' við Ignore lista?</string>
     <string name="ignore_remove">Fjarlægja '%1$s' frá hunsa lista?</string>

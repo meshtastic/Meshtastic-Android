@@ -294,8 +294,10 @@
     <string name="i_agree">Zgadzam się.</string>
     <string name="i_agree_to_share_my_location">Przeczytałem powyższe informacje i rozumiem je. Wyrażam dobrowolną zgodę na niezaszyfrowaną transmisję danych mojego węzła za pośrednictwem protokołu MQTT</string>
     <string name="i_know_what_i_m_doing">Wiem, co robię.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Jakość powietrza w pomieszczeniach (Indoor Air Quality) - wartość względna w skali IAQ mierzona czujnikiem BME680. Zakres wartości: 0–500.</string>
+    <string name="iaq_level_good">dobry</string>
     <string name="icon_meanings">Znaczenia ikon</string>
     <string name="ignore">Zignoruj</string>
     <string name="ignore_add">Dodać '%1$s' do listy ignorowanych?</string>

@@ -775,8 +775,11 @@
     <string name="i_agree">Hyväksyn.</string>
     <string name="i_agree_to_share_my_location">Olen lukenut ja ymmärtänyt yllä olevan. Annan suostumuksen laitetietojeni salaamattomaan lähettämiseen MQTT:n kautta</string>
     <string name="i_know_what_i_m_doing">Tiedän mitä olen tekemässä.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">Sisäilman laatu (IAQ) on suhteellinen asteikko, jota voidaan mitata mm. Bosch BME680 anturilla ja sen arvoväli on 0–500.</string>
+    <string name="iaq_level_excellent">Erinomainen</string>
+    <string name="iaq_level_good">Hyvä</string>
     <string name="icon_meanings">Kuvakkeiden merkitykset</string>
     <string name="ignore">Jätä huomiotta</string>
     <string name="ignore_add">Lisää '%1$s' jätä huomiotta listalle? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
@@ -1008,7 +1011,6 @@
     <string name="mesh_beacon_preset_indicator">Lähellä olevan verkkokutsun ilmoittama</string>
     <string name="mesh_beacon_preset_none">ei mitään</string>
     <string name="mesh_beacon_region_label">Alue</string>
-    <string name="mesh_beacon_region_required">Määritä radion alue ennen majakan määrittämistä.</string>
     <string name="mesh_beacon_target">Kohde %1$d</string>
     <string name="mesh_beacon_target_add">Lisää kohde</string>
     <string name="mesh_beacon_target_channel_index">Kanava</string>

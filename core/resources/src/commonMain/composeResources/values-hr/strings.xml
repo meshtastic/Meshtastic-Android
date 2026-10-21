@@ -93,6 +93,7 @@
     <string name="firmware_update_failed">Ažuriranje neuspjelo</string>
     <!-- FORMAT -->
     <!-- GEOFENCE -->
+    <!-- IAQ -->
     <string name="ignore">Ignoriraj</string>
     <string name="ignore_add">Dodati '%1$s' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
     <string name="ignore_remove">Ukloniti '%1$s' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>

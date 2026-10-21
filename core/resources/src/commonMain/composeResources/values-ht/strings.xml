@@ -101,7 +101,9 @@
     <!-- GEOFENCE -->
     <string name="good">Bon</string>
     <string name="hops_away">Hops Lwen</string>
+    <!-- IAQ -->
     <string name="iaq_definition">(Kalite Lèy Entèryè) echèl relatif valè IAQ jan li mezire pa Bosch BME680. Ranje valè 0–500.</string>
+    <string name="iaq_level_good">Bon</string>
     <string name="ignore">Ignoré</string>
     <string name="ignore_add">Ajoute '%1$s' nan lis ignòre?</string>
     <string name="ignore_remove">Retire '%1$s' nan lis ignòre?</string>

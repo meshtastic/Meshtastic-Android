@@ -695,8 +695,10 @@
     <string name="i_agree">Sono d’accordo.</string>
     <string name="i_agree_to_share_my_location">Ho letto e accetto quanto sopra. Acconsento volontariamente alla trasmissione non crittografata dei dati del mio nodo tramite MQTT</string>
     <string name="i_know_what_i_m_doing">So cosa sto facendo.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Qualità dell'aria interna) scala relativa del valore della qualità dell'aria indoor, misurato da Bosch BME680. Valore Intervallo 0–500.</string>
+    <string name="iaq_level_good">Buono</string>
     <string name="icon_meanings">Significato delle icone</string>
     <string name="ignore">Ignora</string>
     <string name="ignore_add">Aggiungere '%1$s' alla lista degli ignorati?</string>

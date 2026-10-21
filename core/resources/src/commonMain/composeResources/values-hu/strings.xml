@@ -277,8 +277,10 @@
     <string name="i_agree">Elfogadom.</string>
     <string name="i_agree_to_share_my_location">Elolvastam és megértettem a fentieket. Önkéntesen hozzájárulok, hogy a csomópontom adatai titkosítatlanul kerüljenek továbbításra MQTT-n keresztül</string>
     <string name="i_know_what_i_m_doing">Tudom, mit csinálok.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Beltéri levegőminőség) relatív IAQ érték a Bosch BME680 szenzor alapján. Értéktartomány: 0–500.</string>
+    <string name="iaq_level_good">Jó</string>
     <string name="icon_meanings">Ikonmagyarázatok</string>
     <string name="ignore">Mellőzés</string>
     <string name="ignore_add">Hozzáadod „%1$s”-t a figyelmen kívül hagyási listához?</string>

@@ -834,8 +834,11 @@
     <string name="i_agree">Я согласен.</string>
     <string name="i_agree_to_share_my_location">Я прочитал и понял вышеописанное. Я добровольно даю согласие на незашифрованную передачу данных моей ноды через MQTT</string>
     <string name="i_know_what_i_m_doing">Я знаю, что делаю.</string>
+    <!-- IAQ -->
     <string name="iaq">Относительное качество воздуха в помещении</string>
     <string name="iaq_definition">(Качество воздуха в помещении) Относительная шкала IAQ, измеренная Bosch BME680. Диапазон значений 0–500.</string>
+    <string name="iaq_level_excellent">Отлично</string>
+    <string name="iaq_level_good">Хороший</string>
     <string name="iaq_value">IAQ %1$d</string>
     <string name="icon_meanings">Обозначение значков</string>
     <string name="ignore">Игнорировать</string>
@@ -1106,7 +1109,6 @@
     <string name="mesh_beacon_preset_indicator">Рекламируется ближайшим маяком</string>
     <string name="mesh_beacon_preset_none">Отсутствует</string>
     <string name="mesh_beacon_region_label">Регион / Страна</string>
-    <string name="mesh_beacon_region_required">Укажите регион твоего радио перед настройкой маяка.</string>
     <string name="mesh_beacon_target">Цель %1$d</string>
     <string name="mesh_beacon_target_add">Добавить цель</string>
     <string name="mesh_beacon_target_channel_index">Канал</string>

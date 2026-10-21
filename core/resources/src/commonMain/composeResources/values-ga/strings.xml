@@ -104,8 +104,10 @@
     <!-- GEOFENCE -->
     <string name="good">Maith</string>
     <string name="hops_away">Céimeanna uaidh</string>
+    <!-- IAQ -->
     <string name="iaq">QAÍ (Cáilíocht Aeir Inmheánach)</string>
     <string name="iaq_definition">(Cáilíocht Aeir Inmheánach) scála ábhartha den luach QAÍ a thomhas ag Bosch BME680. Scála Luach 0–500.</string>
+    <string name="iaq_level_good">Maith</string>
     <string name="ignore">Ignóra</string>
     <string name="ignore_add">Cuir ‘%1$s’ leis an liosta ignorálacha?</string>
     <string name="ignore_remove">Bain ‘%1$s’ ón liosta ignorálacha?</string>

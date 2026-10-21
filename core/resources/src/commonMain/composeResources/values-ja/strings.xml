@@ -696,8 +696,10 @@
     <string name="i_agree">同意します。</string>
     <string name="i_agree_to_share_my_location">上記を読んで理解しています。MQTTを通じて自分のノードデータの暗号化されていない送信に自発的に同意します</string>
     <string name="i_know_what_i_m_doing">はい、了承します。</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(屋内空気品質) 相対スケールIAQ値は、ボッシュBME680によって測定されます。 値の範囲は 0-500。</string>
+    <string name="iaq_level_good">良</string>
     <string name="icon_meanings">アイコンの意味</string>
     <string name="ignore">無視</string>
     <string name="ignore_add">'%1$s'を無視リストに追加しますか？</string>

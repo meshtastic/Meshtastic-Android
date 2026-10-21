@@ -171,8 +171,10 @@
     <string name="hide_password">Skryť heslo</string>
     <string name="hops_away">Počet skokov</string>
     <string name="i_know_what_i_m_doing">Viem čo robím.</string>
+    <!-- IAQ -->
     <string name="iaq">IAQ</string>
     <string name="iaq_definition">(Kvalita vzduchu v interiéri) relatívna hodnota IAQ meraná prístrojom Bosch BME680. Rozsah hodnôt 0–500.</string>
+    <string name="iaq_level_good">Dobrý</string>
     <string name="ignore">Ignorovať</string>
     <string name="ignore_add">Pridať '%1$s' do zoznamu ignorovaných?</string>
     <string name="ignore_remove">Odstrániť '%1$s' zo zoznamu ignorovaných?</string>
