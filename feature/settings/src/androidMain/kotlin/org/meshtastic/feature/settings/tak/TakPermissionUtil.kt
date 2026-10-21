@@ -40,7 +40,7 @@ import org.meshtastic.core.ui.util.rememberLocalNetworkPermissionState
 @Composable
 actual fun TakPermissionHandler(isTakServerEnabled: Boolean, onPermissionResult: (Boolean) -> Unit) {
     // ACCESS_LOCAL_NETWORK (Android 17 / API 37+) is required for the TAK Server's localhost socket binding
-    // (127.0.0.1:8087). It is also required for NSD/mDNS device discovery when targetSdk >= 37 and is requested from
+    // (127.0.0.1:8089). It is also required for NSD/mDNS device discovery when targetSdk >= 37 and is requested from
     // the Connections screen, so it will usually already be granted by the time the user enables TAK. This composable
     // handles the standalone case — a user who opens TAK settings before ever tapping the network-scan toggle.
     val permission = rememberLocalNetworkPermissionState()

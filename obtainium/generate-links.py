@@ -5,7 +5,7 @@ This script owns:
 
   1. the one-tap deep-link tables in the project README and the developer guide,
   2. the per-flavor Obtainium import files in this directory, and
-  3. with --refresh, the "currently published" channel table in the guide.
+  3. with --refresh, the "currently published" channel table in the project README.
 
 Two kinds of staleness, two modes:
 
