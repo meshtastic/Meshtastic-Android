@@ -60,7 +60,12 @@ def clean_env():
     env["PATH"] = "/usr/bin:/bin:/usr/sbin:/sbin"
     import glob
 
-    jdks = sorted(p for g in JDK_GLOBS for p in glob.glob(g) if os.path.isfile(os.path.join(p, "bin", "java")))
+    jdks = sorted(
+        p
+        for g in JDK_GLOBS
+        for p in glob.glob(g)
+        if os.path.isfile(os.path.join(p, "bin", "java")) and os.access(os.path.join(p, "bin", "java"), os.X_OK)
+    )
     if jdks:
         env["JAVA_HOME"] = jdks[-1]
     return env
