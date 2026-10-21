@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -267,7 +268,7 @@ private fun CompactNameRow(
     unmessageable: Boolean,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(28.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -275,7 +276,7 @@ private fun CompactNameRow(
             thatNode,
             iconSize = 18.dp,
             isThisNode = isThisNode,
-            modifier = Modifier.width(18.dp)
+            modifier = Modifier.width(18.dp).height(28.dp),
         )
         Text(
             text = longName,
