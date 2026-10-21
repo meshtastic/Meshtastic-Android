@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -69,7 +70,9 @@ import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.exchange_position
 import org.meshtastic.core.resources.formatDuration
 import org.meshtastic.core.resources.last_position_update
+import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.ui.component.ElevationInfo
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.ErrorOutline
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
@@ -89,6 +92,8 @@ fun CompassSheetContent(
     onOpenLocationSettings: () -> Unit,
     onRequestPosition: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Null hides the mesh view button, for platforms with no camera. */
+    onOpenMeshHud: (() -> Unit)? = null,
 ) {
     val haptics = LocalHapticFeedback.current
 
@@ -163,6 +168,14 @@ fun CompassSheetContent(
                 Icon(imageVector = MeshtasticIcons.MyLocation, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(Res.string.exchange_position))
+            }
+        }
+
+        onOpenMeshHud?.let { onClick ->
+            FilledTonalButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+                Icon(imageVector = MeshtasticIcons.CenterFocusStrong, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = stringResource(Res.string.mesh_hud_open))
             }
         }
 

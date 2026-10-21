@@ -45,6 +45,14 @@ kotlin {
             implementation(libs.ktor.client.core)
         }
 
+        // The camera mesh view's preview and lens intrinsics.
+        androidMain.dependencies {
+            implementation(libs.androidx.camera.camera2)
+            implementation(libs.androidx.camera.compose)
+            implementation(libs.androidx.camera.core)
+            implementation(libs.androidx.camera.lifecycle)
+        }
+
         // Compose UI tests live in jvmTest, not commonTest: this module enables Android host tests, and
         // `runComposeUiTest` has no Robolectric host there — the same tests NPE the moment they run under it.
         jvmTest.dependencies {

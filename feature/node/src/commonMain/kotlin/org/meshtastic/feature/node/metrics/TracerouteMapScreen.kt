@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -44,11 +45,13 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.mesh_hud_open
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.traceroute_outgoing_route
 import org.meshtastic.core.resources.traceroute_return_route
 import org.meshtastic.core.resources.traceroute_showing_nodes
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.CenterFocusStrong
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.theme.TracerouteColors
@@ -61,6 +64,8 @@ fun TracerouteMapScreen(
     metricsViewModel: MetricsViewModel,
     requestId: Int,
     logUuid: String? = null,
+    /** Null hides the mesh view button, for platforms with no camera. */
+    onOpenMeshHud: (() -> Unit)? = null,
     onNavigateUp: () -> Unit,
 ) {
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
@@ -89,6 +94,7 @@ fun TracerouteMapScreen(
         overlay = overlay,
         snapshotPositions = snapshotPositions,
         onNavigateUp = onNavigateUp,
+        onOpenMeshHud = onOpenMeshHud,
     )
 }
 
@@ -98,6 +104,7 @@ private fun TracerouteMapScaffold(
     overlay: TracerouteOverlay?,
     snapshotPositions: Map<Int, Position>,
     onNavigateUp: () -> Unit,
+    onOpenMeshHud: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     var tracerouteNodesShown by remember { mutableStateOf(0) }
@@ -111,7 +118,16 @@ private fun TracerouteMapScaffold(
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
-                actions = {},
+                actions = {
+                    onOpenMeshHud?.let { onClick ->
+                        IconButton(onClick = onClick) {
+                            Icon(
+                                MeshtasticIcons.CenterFocusStrong,
+                                contentDescription = stringResource(Res.string.mesh_hud_open),
+                            )
+                        }
+                    }
+                },
                 onClickChip = {},
             )
         },

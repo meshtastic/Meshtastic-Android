@@ -301,6 +301,12 @@ class FakeMapPrefs : MapPrefs {
     }
 
     override suspend fun awaitCameraPosition(): MapCameraPosition? = cameraPosition
+
+    override val meshHudCoachSeen = MutableStateFlow(false)
+
+    override fun setMeshHudCoachSeen(seen: Boolean) {
+        meshHudCoachSeen.value = seen
+    }
 }
 
 class FakeMapConsentPrefs : MapConsentPrefs {

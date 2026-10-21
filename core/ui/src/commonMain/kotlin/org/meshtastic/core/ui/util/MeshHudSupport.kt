@@ -14,21 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.compass
+package org.meshtastic.core.ui.util
 
-import kotlinx.coroutines.flow.Flow
+import androidx.compose.runtime.Composable
 
-data class PhoneLocation(val latitude: Double, val longitude: Double, val altitude: Double, val timeMillis: Long)
-
-data class PhoneLocationState(
-    val permissionGranted: Boolean,
-    val providerEnabled: Boolean,
-    val location: PhoneLocation? = null,
-) {
-    val hasFix: Boolean
-        get() = location != null
-}
-
-interface PhoneLocationProvider {
-    fun locationUpdates(): Flow<PhoneLocationState>
-}
+/** Whether this device can show the camera mesh view: it needs a back camera and an orientation sensor. */
+@Composable expect fun rememberMeshHudSupported(): Boolean

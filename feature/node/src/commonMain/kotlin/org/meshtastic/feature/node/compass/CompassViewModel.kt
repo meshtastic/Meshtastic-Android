@@ -34,21 +34,20 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.core.model.util.uncertaintyRadiusMetersOrNull
+import org.meshtastic.core.repository.MagneticFieldProvider
+import org.meshtastic.core.repository.PhoneLocationProvider
+import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.proto.Position
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.min
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 private const val ALIGNMENT_TOLERANCE_DEGREES = 5f
 private const val FULL_CIRCLE_DEGREES = 360f
 private const val BEARING_FORMAT = "%.0f°"
-private const val HUNDRED = 100f
-private const val MILLIMETERS_PER_METER = 1000f
 
 @Suppress("TooManyFunctions")
 @KoinViewModel
@@ -125,8 +124,8 @@ class CompassViewModel(
         val isAligned = isAligned(trueHeading, bearingDegrees)
         val lastUpdateAgeSeconds = targetPositionTimeSec?.let { maxOf(0, nowSeconds - it) }
         val angularErrorDeg = calculateAngularError(positionalAccuracyMeters, distanceMeters)
-        val errorRadiusText =
-            positionalAccuracyMeters?.toInt()?.let { "± ${it.toDistanceString(current.displayUnits)}" }
+        // The string resource carries the ±.
+        val errorRadiusText = positionalAccuracyMeters?.toInt()?.toDistanceString(current.displayUnits)
 
         return current.copy(
             heading = trueHeading,
@@ -191,7 +190,8 @@ class CompassViewModel(
     private fun applyTrueNorthCorrection(heading: Float?, locationState: PhoneLocationState): Float? {
         val loc = locationState.location ?: return heading
         val baseHeading = heading ?: return null
-        val declination = magneticFieldProvider.getDeclination(loc.latitude, loc.longitude, loc.altitude, nowMillis)
+        val declination =
+            magneticFieldProvider.getDeclination(loc.latitude, loc.longitude, loc.altitude ?: 0.0, nowMillis)
         return (baseHeading + declination + FULL_CIRCLE_DEGREES) % FULL_CIRCLE_DEGREES
     }
 
@@ -201,34 +201,7 @@ class CompassViewModel(
         val positionTime = targetPositionTimeSec
         if (positionTime == null || positionTime <= 0) return null
 
-        val gpsAccuracyMm = position.gps_accuracy.toFloat()
-        val pdop = position.PDOP
-        val hdop = position.HDOP
-        val vdop = position.VDOP
-        val dop: Float? =
-            when {
-                pdop > 0 -> pdop / HUNDRED
-
-                hdop > 0 && vdop > 0 ->
-                    sqrt((hdop / HUNDRED).toDouble().pow(2.0) + (vdop / HUNDRED).toDouble().pow(2.0)).toFloat()
-
-                hdop > 0 -> hdop / HUNDRED
-
-                else -> null
-            }
-
-        if (gpsAccuracyMm > 0f && dop != null) {
-            return (gpsAccuracyMm / MILLIMETERS_PER_METER) * dop
-        }
-
-        // Fallback: infer radius from precision bits if provided
-        // Only a degraded position implies a radius; `0` and `32` both mean "not degraded", and the old formula
-        // answered 23,905 km and 5 mm for them respectively.
-        precisionRadiusMetersOrNull(position.precision_bits)?.let {
-            return it.toFloat()
-        }
-
-        return null
+        return position.uncertaintyRadiusMetersOrNull()?.toFloat()
     }
 
     @Suppress("ReturnCount")

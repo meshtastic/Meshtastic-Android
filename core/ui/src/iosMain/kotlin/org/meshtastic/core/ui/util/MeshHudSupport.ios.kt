@@ -14,15 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.compass
+package org.meshtastic.core.ui.util
 
-import android.hardware.GeomagneticField
-import org.koin.core.annotation.Single
+import androidx.compose.runtime.Composable
 
-@Single
-class AndroidMagneticFieldProvider : MagneticFieldProvider {
-    override fun getDeclination(latitude: Double, longitude: Double, altitude: Double, timeMillis: Long): Float {
-        val geomagneticField = GeomagneticField(latitude.toFloat(), longitude.toFloat(), altitude.toFloat(), timeMillis)
-        return geomagneticField.declination
-    }
-}
+@Composable actual fun rememberMeshHudSupported(): Boolean = false

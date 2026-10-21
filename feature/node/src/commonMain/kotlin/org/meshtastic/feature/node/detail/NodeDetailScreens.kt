@@ -39,12 +39,14 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.details
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.ShareContactDialog
 import org.meshtastic.core.ui.util.ActiveWhileStarted
+import org.meshtastic.core.ui.util.rememberMeshHudSupported
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.component.CompassSheetContent
@@ -70,6 +72,7 @@ fun NodeDetailScreen(
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
     compassViewModel: CompassViewModel? = null,
+    openCompass: Boolean = false,
 ) {
     SideEffect(nodeId) { viewModel.start(nodeId) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -83,11 +86,27 @@ fun NodeDetailScreen(
         onNavigate = onNavigate,
         onNavigateUp = onNavigateUp,
         compassViewModel = compassViewModel,
+        openCompass = openCompass,
     )
 }
 
+/** Opens the compass sheet once per arrival: closing it, or coming back to this screen, must not reopen it. */
+@Suppress("UnnecessaryLaunchedEffect") // Fires once per node, not once per recomposition.
 @Composable
-@Suppress("LongParameterList")
+private fun OpenCompassOnArrival(uiState: NodeDetailUiState, open: (NodeDetailOverlay) -> Unit) {
+    var opened by rememberSaveable { mutableStateOf(false) }
+    val currentOpen by rememberUpdatedState(open)
+    val node = uiState.node?.takeIf { !opened && it.validPosition != null }
+    LaunchedEffect(node?.num) {
+        node?.let {
+            currentOpen(NodeDetailOverlay.Compass(it.num, uiState.metricsState.displayUnits))
+            opened = true
+        }
+    }
+}
+
+@Composable
+@Suppress("LongParameterList", "LongMethod")
 private fun NodeDetailScaffold(
     modifier: Modifier,
     uiState: NodeDetailUiState,
@@ -96,10 +115,12 @@ private fun NodeDetailScaffold(
     onNavigate: (Route) -> Unit,
     onNavigateUp: () -> Unit,
     compassViewModel: CompassViewModel? = null,
+    openCompass: Boolean = false,
 ) {
     var activeOverlay by remember { mutableStateOf<NodeDetailOverlay?>(null) }
     // Saved, unlike the overlays: a rotation must not close the model, which the user may be turning the phone for.
     var deviceModelOpen by rememberSaveable { mutableStateOf(false) }
+    if (openCompass) OpenCompassOnArrival(uiState) { activeOverlay = it }
     val actualCompassViewModel = compassViewModel
     val compassUiState by
         actualCompassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
@@ -159,6 +180,15 @@ private fun NodeDetailScaffold(
         compassUiState,
         actualCompassViewModel,
         { activeOverlay = null },
+        onOpenMeshHud =
+        if (rememberMeshHudSupported()) {
+            { num ->
+                activeOverlay = null
+                onNavigate(MapRoute.MeshHud(num))
+            }
+        } else {
+            null
+        },
     ) {
         viewModel.handleNodeMenuAction(NodeMenuAction.RequestPosition(it))
     }
@@ -176,6 +206,7 @@ private fun NodeDetailOverlays(
     compassUiState: CompassUiState,
     compassViewModel: CompassViewModel?,
     onDismiss: () -> Unit,
+    onOpenMeshHud: ((Int) -> Unit)?,
     onRequestPosition: (Node) -> Unit,
 ) {
     val locationPermission = org.meshtastic.core.ui.util.rememberLocationPermissionState()
@@ -222,6 +253,7 @@ private fun NodeDetailOverlays(
                     onOpenLocationSettings = { openLocationSettings() },
                     onRequestPosition = { node?.let { onRequestPosition(it) } },
                     modifier = Modifier.padding(bottom = 24.dp),
+                    onOpenMeshHud = onOpenMeshHud?.let { open -> { open(overlay.nodeNum) } },
                 )
             }
         }

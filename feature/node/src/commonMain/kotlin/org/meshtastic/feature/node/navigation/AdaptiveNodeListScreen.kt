@@ -22,6 +22,7 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.navigation.ContactsRoute
+import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -47,5 +48,7 @@ fun AdaptiveNodeListScreen(
         onNavigateToConnections = onNavigateToConnections,
         // A bare radio-config route on this tab's stack resolves to the local session, the same as Connections -> LoRa.
         onEditStatusMessage = { backStack.add(SettingsRoute.UserStatusMessage) },
+        navigateToMeshView = { num -> backStack.add(MapRoute.MeshHud(focusNodeNum = num)) },
+        navigateToCompass = { num -> backStack.add(NodesRoute.NodeDetail(num, openCompass = true)) },
     )
 }
