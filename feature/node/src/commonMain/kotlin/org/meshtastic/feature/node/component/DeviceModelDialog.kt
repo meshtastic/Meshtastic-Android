@@ -138,9 +138,9 @@ private fun OrbitContent(
                     style = MaterialTheme.typography.titleLarge,
                     // The easter egg: no ripple and no semantics, so it stays hidden.
                     modifier =
-                        Modifier.padding(start = 8.dp).weight(1f).pointerInput(Unit) {
-                            detectTapGestures { if (++titleTaps % CHIRPY_TAPS == 0) toggleChirpy() }
-                        },
+                    Modifier.padding(start = 8.dp).weight(1f).pointerInput(Unit) {
+                        detectTapGestures { if (++titleTaps % CHIRPY_TAPS == 0) toggleChirpy() }
+                    },
                 )
                 if (onOpenAr != null && ready != null) {
                     IconButton(onClick = onOpenAr) {
