@@ -121,11 +121,11 @@ default channel key, the interval and CSV controls stay disabled — you can sti
 already-enabled module off — and saving force-disables the module if the channel has reverted to
 public.
 
-| Setting            | Cur síos                                                                                                            | Default |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ------- |
-| Range Test Enabled | Turn range testing on                                                                                               | Off     |
-| Save               | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only                      | Off     |
-| Sender Interval    | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | Unset   |
+| Setting            | Cur síos                                                                                                            | Default     |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ----------- |
+| Range Test Enabled | Turn range testing on                                                                                               | Off         |
+| Sábháil            | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only                      | Off         |
+| Sender Interval    | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | Díshocraigh |
 
 ### Telemetry module
 
@@ -154,14 +154,14 @@ See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and confi
 
 Pre-configured messages accessible from the node's physical buttons (for nodes with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
-| Setting                                                                      | Cur síos                                                                                                                                           | Default |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Clockwise Rotary Event / Counterclockwise Rotary Event / Encoder Press Event | Which key event each encoder action produces: **None**, **Up**, **Down**, **Left**, **Right**, **Select**, **Back**, or **Cancel** | None    |
-| Messages                                                                     | Newline-separated list of messages                                                                                                                 | Empty   |
-| Pin A / Pin B / Press Pin                                                    | The three pins the rotary encoder is wired to                                                                                                      | 0       |
-| Rotary Encoder                                                               | Use a rotary encoder as the input device                                                                                                           | Off     |
-| Send Bell                                                                    | Send a bell character alongside the message, so a receiving node's External Notification module can sound                                          | Off     |
-| Up/Down/Select Input                                                         | A separate, simpler input scheme using up/down/select buttons rather than an encoder                                                               | Off     |
+| Setting                                                                      | Cur síos                                                                                                                                           | Default          |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| Clockwise Rotary Event / Counterclockwise Rotary Event / Encoder Press Event | Which key event each encoder action produces: **None**, **Up**, **Down**, **Left**, **Right**, **Select**, **Back**, or **Cancel** | Ní dhéanfaidh sé |
+| Messages                                                                     | Newline-separated list of messages                                                                                                                 | Empty            |
+| Pin A / Pin B / Press Pin                                                    | The three pins the rotary encoder is wired to                                                                                                      | 0                |
+| Rotary Encoder                                                               | Use a rotary encoder as the input device                                                                                                           | Off              |
+| Send Bell                                                                    | Send a bell character alongside the message, so a receiving node's External Notification module can sound                                          | Off              |
+| Up/Down/Select Input                                                         | A separate, simpler input scheme using up/down/select buttons rather than an encoder                                                               | Off              |
 
 Some boards with built-in encoders or keys come with the input settings filled in. Two older
 fields, **Canned message enabled** and **Allow input source**, appear only for a node on firmware
@@ -187,11 +187,11 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 
 > ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the node's own hardware. Turn it on only on dedicated GPIO nodes.
 
-| Setting                    | Cur síos                                                        | Default |
-| -------------------------- | --------------------------------------------------------------- | ------- |
-| Allow undefined pin access | Allow access to any GPIO pin (security risk) | Off     |
-| Available pins             | Up to 4 GPIO pins this node exposes for remote read/write       | None    |
-| Remote Hardware enabled    | Turn remote GPIO access on                                      | Off     |
+| Setting                    | Cur síos                                                        | Default          |
+| -------------------------- | --------------------------------------------------------------- | ---------------- |
+| Allow undefined pin access | Allow access to any GPIO pin (security risk) | Off              |
+| Available pins             | Up to 4 GPIO pins this node exposes for remote read/write       | Ní dhéanfaidh sé |
+| Remote Hardware enabled    | Turn remote GPIO access on                                      | Off              |
 
 ### Neighbor Info module
 
@@ -227,9 +227,9 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 | Detection Sensor Enabled                  | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log                                             | Off                                                                                  |
 | GPIO Pin to monitor                       | GPIO pin connected to the sensor. 0 disables the module                                                                                           | 0                                                                                    |
 | Minimum time between detection broadcasts | Minimum time between alert broadcasts                                                                                                                             | 0, which the firmware treats as 1 hour (12 hours on Router roles) |
-| Name                                      | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
+| Ainm                                      | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
 | Send Bell                                 | Include a bell character in alerts                                                                                                                                | Off                                                                                  |
-| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | Unset                                                                                |
+| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | Díshocraigh                                                                          |
 | Trigger Type                              | How the pin's state maps to a detection event: **High**, **Low**, **Rising Edge**, **Falling Edge**, **Either Edge High**, or **Either Edge Low** | High                                                                                 |
 | Use Internal Pull-up                      | Enable the pin's internal pull-up resistor                                                                                                                        | Off                                                                                  |
 

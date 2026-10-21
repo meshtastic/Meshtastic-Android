@@ -24,7 +24,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Mesajlar      | Broadcast message notifications                             | A message on one of your channels                                               | The channel                     |
 | Mesajlar      | Reaction notifications                                      | An emoji reaction to a message in one of your conversations                     | The conversation                |
 | Mesajlar      | Waypoint notifications                                      | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages      | Uyarı bildirimleri                                          | A critical alert from a node                                                    | The conversation                |
+| Mesajlar      | Uyarı bildirimleri                                          | A critical alert from a node                                                    | The conversation                |
 | Amatör Telsiz | Yeni düğüm bildirimleri                                     | A node heard for the first time                                                 | The node's details              |
 | Amatör Telsiz | Mesh invitation notifications                               | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
 | Amatör Telsiz | Düşük pil bildirimleri (favori düğümler) | A favorite node's battery running low                                           | The node's details              |

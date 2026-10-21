@@ -32,7 +32,7 @@ This page covers installing the Meshtastic desktop app, connecting a node, and h
 ### Windows
 
 - Download the `.msi` or `.exe` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases). Both are x64 builds.
-- Or build from source
+- Tai rakenna lähdekoodista
 
 ## Radioon yhdistäminen
 

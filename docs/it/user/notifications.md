@@ -24,7 +24,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Messaggi    | Notifiche di messaggi broadcast                                | A message on one of your channels                                               | The channel                     |
 | Messaggi    | Reaction notifications                                         | An emoji reaction to a message in one of your conversations                     | The conversation                |
 | Messaggi    | Notifiche Waypoint                                             | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages    | Notifiche di allarme                                           | A critical alert from a node                                                    | The conversation                |
+| Messaggi    | Notifiche di allarme                                           | A critical alert from a node                                                    | The conversation                |
 | Mesh        | Notifiche di nuovi nodi                                        | A node heard for the first time                                                 | The node's details              |
 | Mesh        | Notifiche di invito mesh                                       | An invitation to join a nearby mesh                                             | Discovery della mesh locale     |
 | Mesh        | Notifiche batteria scarica (nodi preferiti) | A favorite node's battery running low                                           | The node's details              |

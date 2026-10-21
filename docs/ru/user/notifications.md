@@ -24,7 +24,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Сообщения  | Уведомления о сообщениях в общем чате                                   | A message on one of your channels                                               | The channel                     |
 | Сообщения  | Reaction notifications                                                  | An emoji reaction to a message in one of your conversations                     | The conversation                |
 | Сообщения  | Уведомления о путевых точках                                            | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages   | Служебные уведомления                                                   | A critical alert from a node                                                    | The conversation                |
+| Сообщения  | Служебные уведомления                                                   | A critical alert from a node                                                    | The conversation                |
 | Меш        | Уведомления о новых нодах                                               | A node heard for the first time                                                 | The node's details              |
 | Меш        | Уведомления о приглашениях в сеть                                       | An invitation to join a nearby mesh                                             | Локальное обнаружение сети      |
 | Меш        | Уведомления о низком заряде батареи (избранные ноды) | A favorite node's battery running low                                           | The node's details              |

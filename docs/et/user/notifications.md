@@ -24,7 +24,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Sõnumid  | Ringhäälingusõnumi teated                                 | A message on one of your channels                                               | The channel                     |
 | Sõnumid  | Reaction notifications                                    | An emoji reaction to a message in one of your conversations                     | The conversation                |
 | Sõnumid  | Teekonnapunktide teavitused                               | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages | Märguteated                                               | A critical alert from a node                                                    | The conversation                |
+| Sõnumid  | Märguteated                                               | A critical alert from a node                                                    | The conversation                |
 | Kärgvõrk | Uue sõlme teade                                           | A node heard for the first time                                                 | The node's details              |
 | Kärgvõrk | Kärgvõrgu kutse märguanne                                 | An invitation to join a nearby mesh                                             | Kohalik kärgvõrgu avastaja      |
 | Kärgvõrk | Madala akupinge teated (lemmik sõlmed) | A favorite node's battery running low                                           | The node's details              |

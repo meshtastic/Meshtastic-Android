@@ -75,7 +75,7 @@ A public-key conversation carries an encryption icon in its top bar. A green clo
 ### Sending a Direct Message
 
 1. Open the **Messages** tab and select a conversation, or touch & hold a node in the node list and choose **Message**.
-2. Type your message and tap **Send**.
+2. Tippi oma sõnum ja puuduta nuppu **Saada**.
 
 On a hardware keyboard, Enter sends the message and Shift+Enter starts a new line. The on-screen keyboard's Enter key always starts a new line.
 
@@ -109,17 +109,17 @@ control whether they are offered at all.
 
 Olekumärgis kuvatakse ainult **sinu enda** väljaminevate sõnumite all (teiste sissetulevate sõnumite puhul olekumärgist ei kuvata):
 
-| Olek                                                       | Tähendus                                                                                                                                                                                                                                 |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sending... | Queued or already handed to your node, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once your node has it |
-| Saajale kätte toimetatud                                   | An acknowledgment came back for a direct message                                                                                                                                                                                         |
-| Delivered to recipient · proven                            | The strongest confirmation. The acknowledgment carried a proof that only the recipient could have produced. Needs firmware 2.8.1 or newer                                |
-| Delivery proof failed                                      | Something acknowledged the message without the key only the recipient holds, so the acknowledgment doesn't show that the recipient received it                                                                                           |
-| Kärgvõrku kohale jõudnud                                   | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                                                                                                          |
-| Vahendatud, saaja pole kinnitanud                          | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                                                                                                              |
-| Marsruutimine SF++ ahela kaudu…                            | Being routed/buffered by the Store & Forward Plus Plus chain                                                                                                                                                         |
-| Kinnitatud SF++ ahel                                       | Kinnitatud kohaletoimetamine SF++ keti kaudu                                                                                                                                                                                             |
-| Tõrge                                                      | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
+| Olek                                                      | Tähendus                                                                                                                                                                                                                                 |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Saadan... | Queued or already handed to your node, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once your node has it |
+| Saajale kätte toimetatud                                  | An acknowledgment came back for a direct message                                                                                                                                                                                         |
+| Delivered to recipient · proven                           | The strongest confirmation. The acknowledgment carried a proof that only the recipient could have produced. Needs firmware 2.8.1 or newer                                |
+| Delivery proof failed                                     | Something acknowledged the message without the key only the recipient holds, so the acknowledgment doesn't show that the recipient received it                                                                                           |
+| Kärgvõrku kohale jõudnud                                  | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                                                                                                          |
+| Vahendatud, saaja pole kinnitanud                         | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                                                                                                              |
+| Marsruutimine SF++ ahela kaudu…                           | Being routed/buffered by the Store & Forward Plus Plus chain                                                                                                                                                         |
+| Kinnitatud SF++ ahel                                      | Kinnitatud kohaletoimetamine SF++ keti kaudu                                                                                                                                                                                             |
+| Tõrge                                                     | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
 
 Tap the status under a failed message, or under a direct message marked **Relayed, not confirmed by recipient**, and choose **Resend** to send it again. The message keeps its place in the conversation and its status starts over. **Resend** isn't offered for **Channel/key mismatch** or **Message is too large to send**, which a second attempt can't fix, or in an archived conversation.
 

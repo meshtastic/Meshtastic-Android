@@ -23,4 +23,4 @@ Pomocí navigace v postranním panelu si můžete procházet **Uživatelskou př
 | [Architektura](developer/architecture)           | Přehled architektury aplikace pro přispěvatele                 |
 | [Přispívání do projektu](developer/contributing) | Pojmenování větví, postup práce s PR a příkazy pro ověření     |
 
-This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+Tato dokumentace je generována ze stejného zdroje Markdownu, který používá prohlížeč **Nápovědy a dokumentace** přímo v aplikaci.

@@ -75,7 +75,7 @@ A public-key conversation carries an encryption icon in its top bar. A green clo
 ### Yksityisviestin lähettäminen
 
 1. Open the **Messages** tab and select a conversation, or touch & hold a node in the node list and choose **Message**.
-2. Type your message and tap **Send**.
+2. Kirjoita viesti ja napauta **Lähetä**.
 
 On a hardware keyboard, Enter sends the message and Shift+Enter starts a new line. The on-screen keyboard's Enter key always starts a new line.
 
@@ -101,7 +101,7 @@ Tilateksti näkyy vain **omissa** lähtevissä viesteissäsi (muiden lähettämi
 
 | Tila                                                           | Merkitys                                                                                                                                                                                                                                 |
 | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sending...     | Queued or already handed to your node, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once your node has it |
+| Lähetetään...  | Queued or already handed to your node, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once your node has it |
 | Toimitettu vastaanottajalle                                    | An acknowledgment came back for a direct message                                                                                                                                                                                         |
 | Delivered to recipient · proven                                | The strongest confirmation. The acknowledgment carried a proof that only the recipient could have produced. Needs firmware 2.8.1 or newer                                |
 | Delivery proof failed                                          | Something acknowledged the message without the key only the recipient holds, so the acknowledgment doesn't show that the recipient received it                                                                                           |

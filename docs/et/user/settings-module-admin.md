@@ -13,7 +13,7 @@ aliases:
 
 Konfi valikulisi funktsioonimooduleid ja teosta seadme haldamist. Moodulid laiendavad Meshtasticut spetsiaalsete võimalustega – igaüht saab eraldi lubada või keelata.
 
-Enable only the modules you use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration. A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
+Enable only the modules you use. Kasutamata moodulite keelamine vähendab eetriaega, säästab akut ja lihtsustab seadistamist. A module you expect can be missing for three reasons: your node's role doesn't enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
 
 Mooduli seaded kasutavad kaardipõhist paigutust koos lülitite, rippmenüüde, tekstiväljade ja liuguritega:
 
@@ -35,19 +35,19 @@ Saving a module screen restarts the node: the button reads **Save & restart**, a
 
 Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. This is how you extend your mesh beyond LoRa range or integrate with home automation systems.
 
-| Sätted                 | Kirjeldus                                                                                                                                                                                                                                                                        | Default               |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| Aadress                | MQTT vahendaja aadress                                                                                                                                                                                                                                                           | `mqtt.meshtastic.org` |
-| Encryption Enabled     | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
-| JSON väljund lubatud   | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Off                   |
-| Map Reporting          | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | Off                   |
-| MQTT Client Proxy      | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | Off                   |
-| MQTT Enabled           | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | Off                   |
-| MQTT proxy in this app | The app-side half of **MQTT Client Proxy**: whether this app acts as that relay. It shows whether the relay is running, and can be turned on only while **MQTT Enabled** and **MQTT Client Proxy** are both on. See [MQTT](mqtt) | —                     |
-| Parool                 | Authentication password                                                                                                                                                                                                                                                          | The public broker's   |
-| Root Topic             | Baas MQTT teema teekond                                                                                                                                                                                                                                                          | `msh`                 |
-| TLS Enabled            | Use a secure connection                                                                                                                                                                                                                                                          | Off                   |
-| Kasutajatunnus         | Authentication username                                                                                                                                                                                                                                                          | The public broker's   |
+| Sätted                     | Kirjeldus                                                                                                                                                                                                                                                                        | Vaikimisi             |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| Aadress                    | MQTT vahendaja aadress                                                                                                                                                                                                                                                           | `mqtt.meshtastic.org` |
+| Krüpteerimine lubatud      | Publish packets still encrypted with the channel key                                                                                                                                                                                                                             | On                    |
+| JSON väljund lubatud       | Publish and consume MQTT messages as JSON. Shown only for a node on firmware older than 2.8, which removed JSON support, or while the setting is still on                                                                                        | Väljas                |
+| Kaardiaruannete koostamine | Publish position to the public map — see the map reporting card that follows                                                                                                                                                                                                     | Väljas                |
+| Kliendi proksi lubatud     | Let the connected app carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                                                                                                              | Väljas                |
+| MQTT lubatud               | Turn the MQTT bridge on                                                                                                                                                                                                                                                          | Väljas                |
+| MQTT proxy in this app     | The app-side half of **MQTT Client Proxy**: whether this app acts as that relay. It shows whether the relay is running, and can be turned on only while **MQTT Enabled** and **MQTT Client Proxy** are both on. See [MQTT](mqtt) | —                     |
+| Parool                     | Authentication password                                                                                                                                                                                                                                                          | The public broker's   |
+| Juurteema                  | Baas MQTT teema teekond                                                                                                                                                                                                                                                          | `msh`                 |
+| TLS Enabled                | Use a secure connection                                                                                                                                                                                                                                                          | Väljas                |
+| Kasutajatunnus             | Authentication username                                                                                                                                                                                                                                                          | The public broker's   |
 
 Turning **Map Reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
 via MQTT_, with an **I agree.** switch under it. The rest of the card doesn't exist on screen
@@ -65,15 +65,15 @@ Vaata [MQTT](mqtt) üksikasjalikumat kasutusjuhendit, mis sisaldab teavet krüpt
 
 Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, andurid või kohandatud riistvara). Kui lubatud, saab sõlme jadaühendus saata ja vastu võtta protobuf- või tekstiandmeid, võimaldades välistel mikrokontrolleritel või arvutitel võrguga suhelda.
 
-| Sätted                                                                                           | Kirjeldus                                                                                                                                                                                                                           | Default |
-| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Baud                                                                                             | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | Default |
-| Echo                                                                                             | Echo packets you send back over the serial port                                                                                                                                                                                     | Off     |
-| Mode                                                                                             | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | Default |
-| Konsooli jadapordi alistamine                                                                    | Take over the port the debug console normally uses                                                                                                                                                                                  | Off     |
-| Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0       |
-| Serial Enabled                                                                                   | Turn serial communication on                                                                                                                                                                                                        | Off     |
-| Aegunud                                                                                          | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0       |
+| Sätted                                                                                           | Kirjeldus                                                                                                                                                                                                                           | Vaikimisi |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Jadapordi kiirus                                                                                 | Port speed, from **110 Baud** to **921600 Baud**                                                                                                                                                                                    | Vaikimisi |
+| Kaja lubatud                                                                                     | Echo packets you send back over the serial port                                                                                                                                                                                     | Väljas    |
+| Jadapordi režiim                                                                                 | Which protocol the port speaks: **Default**, **Simple**, **Protobufs**, **Text Message**, **NMEA Positions**, or **CalTopo**, plus `WS85`, `VE_DIRECT`, `MS_CONFIG`, `LOG` and `LOGTEXT` under their firmware names | Vaikimisi |
+| Konsooli jadapordi alistamine                                                                    | Take over the port the debug console normally uses                                                                                                                                                                                  | Väljas    |
+| Receive data (rxd) GPIO pin / Transmit data (txd) GPIO pin | GPIO pins for the serial connection                                                                                                                                                                                                 | 0         |
+| Jadaport lubatud                                                                                 | Turn serial communication on                                                                                                                                                                                                        | Väljas    |
+| Aegunud                                                                                          | How long to wait before treating received data as a complete packet. 0 uses 250 ms                                                                                                                                  | 0         |
 
 ### External Notification module
 
@@ -86,31 +86,31 @@ or notification LED; elsewhere everything starts off.
 
 | Sätted                                                                                                               | Kirjeldus                                                                                                                              |
 | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Active                                                                                                               | Whether the LED pin is active high or low. Shown once **Output pin GPIO** is set                                       |
+| Väljund LED aktiivne                                                                                                 | Whether the LED pin is active high or low. Shown once **Output pin GPIO** is set                                       |
 | Alert when receiving a bell / Alert GPIO buzzer when receiving a bell / Alert GPIO vibra motor when receiving a bell | Which outputs fire on a received bell character                                                                                        |
 | Alert when receiving a message / Alert GPIO buzzer when receiving a message / Vibra Motor Alert                      | Which outputs fire on an incoming message                                                                                              |
-| External Notification Enabled                                                                                        | Master toggle for the module                                                                                                           |
+| Luba Välised teated                                                                                                  | Master toggle for the module                                                                                                           |
 | GPIO Output Duration                                                                                                 | How long a single alert lasts                                                                                                          |
 | Nag Timeout                                                                                                          | Keep repeating the alert for this long until it is acknowledged. **Unset** disables nagging                            |
-| Output pin GPIO                                                                                                      | Pin the LED is wired to                                                                                                                |
-| Output pin buzzer GPIO                                                                                               | Pin the buzzer is wired to                                                                                                             |
-| Output pin vibra GPIO                                                                                                | Pin the vibration motor is wired to                                                                                                    |
+| Väljund LED (GPIO)                                                                                | Pin the LED is wired to                                                                                                                |
+| Väljund summer (GPIO)                                                                             | Pin the buzzer is wired to                                                                                                             |
+| Väljund värin (GPIO)                                                                              | Pin the vibration motor is wired to                                                                                                    |
 | Helin                                                                                                                | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file                                                 |
-| Use I2S As Buzzer                                                                                                    | Send the alert through an I2S audio output instead                                                                                     |
-| Use PWM Buzzer                                                                                                       | Drive the buzzer with PWM, which allows tones rather than a single pitch. Shown once **Output pin buzzer GPIO** is set |
+| Kasuta I2S summerina                                                                                                 | Send the alert through an I2S audio output instead                                                                                     |
+| Kasuta PWM summerit                                                                                                  | Drive the buzzer with PWM, which allows tones rather than a single pitch. Shown once **Output pin buzzer GPIO** is set |
 
 ### Store & Forward module
 
 Puhverdab ajutiselt võrguühenduseta olnud sõlmede sõnumeid ja esitab need uuesti, kui need sõlmed taasühenduvad. Hädavajalik kärgvõrgu jaoks, kus sõlmed regulaarselt levialasse lähevad ja levialast välja lähevad — tagab, et lühikeste katkestuste ajal sõnumid kaotsi ei lähe. A server needs an ESP32 with PSRAM or a Linux `meshtasticd` node. A node in the Router or Router Late role acts as a server even with the server setting off.
 
-| Sätted                    | Kirjeldus                                                                          | Default |
-| ------------------------- | ---------------------------------------------------------------------------------- | ------- |
-| History Return Max        | Most stored messages returned per request. 0 uses 25               | 0       |
-| History Return Window     | How far back, in minutes, stored messages are returned. 0 uses 240 | 0       |
-| Kirjete arv               | Most messages to store. 0 uses three quarters of the free PSRAM    | 0       |
-| Send Heartbeat            | Periodically announce that this node is a store-and-forward server                 | Off     |
-| Server                    | Act as a store-and-forward server for the mesh                                     | Off     |
-| Store and Forward Enabled | Turn store and forward on                                                          | Off     |
+| Sätted                                                | Kirjeldus                                                                          | Vaikimisi |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------- | --------- |
+| Ajalookirjete maksimaalne arv                         | Most stored messages returned per request. 0 uses 25               | 0         |
+| Ajalookirjete aken                                    | How far back, in minutes, stored messages are returned. 0 uses 240 | 0         |
+| Kirjete arv                                           | Most messages to store. 0 uses three quarters of the free PSRAM    | 0         |
+| Südamelöögid                                          | Periodically announce that this node is a store-and-forward server                 | Väljas    |
+| Server                                                | Act as a store-and-forward server for the mesh                                     | Väljas    |
+| Salvesta &amp; edastamine lubatud | Turn store and forward on                                                          | Väljas    |
 
 ### Range Test module
 
@@ -121,11 +121,11 @@ default channel key, the interval and CSV controls stay disabled — you can sti
 already-enabled module off — and saving force-disables the module if the channel has reverted to
 public.
 
-| Sätted             | Kirjeldus                                                                                                           | Default |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ------- |
-| Range Test Enabled | Turn range testing on                                                                                               | Off     |
-| Save               | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only                      | Off     |
-| Sender Interval    | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | Unset   |
+| Sätted                                                                | Kirjeldus                                                                                                           | Vaikimisi  |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Ulatustest lubatud                                                    | Turn range testing on                                                                                               | Väljas     |
+| Salvesta .CSV faili (ainult ESP32) | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only                      | Väljas     |
+| Sender Interval                                                       | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | Määramatta |
 
 ### Telemetry module
 
@@ -134,19 +134,19 @@ Juhib, milliseid telemeetriaandmeid sõlm võrguga jagab. Telemeetria sisaldab s
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely. The intervals run from 30 minutes to 72 hours.
 
-| Sätted                       | Kirjeldus                                                                                                                                                                                   | Default |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Air Quality Metrics Enabled  | Report particulate and CO₂ sensor data                                                                                                                                                      | Off     |
-| Air Quality Metrics Interval | How often to report them                                                                                                                                                                    | —       |
-| Broadcast Device Metrics     | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | Off     |
-| Device Metrics Interval      | How often to report battery, uptime and channel utilization                                                                                                                                 | —       |
-| Display Fahrenheit           | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | Off     |
-| Environment Metrics Enabled  | Report the attached environment sensors                                                                                                                                                     | Off     |
-| Environment Metrics Interval | How often to report them                                                                                                                                                                    | —       |
-| Power Measurement Enabled    | Report the per-channel voltage and current readings                                                                                                                                         | Off     |
-| Power Metrics Interval       | How often to report them                                                                                                                                                                    | —       |
-| Power Screen                 | Also show power readings on the device's display                                                                                                                                            | Off     |
-| Show on device screen        | Also show environment readings on the device's display                                                                                                                                      | Off     |
+| Sätted                                          | Kirjeldus                                                                                                                                                                                   | Vaikimisi |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Õhukvaliteedi moodul on lubatud                 | Report particulate and CO₂ sensor data                                                                                                                                                      | Väljas    |
+| Õhukvaliteedi näidikute värskendamise intervall | How often to report them                                                                                                                                                                    | —         |
+| Saada seadme telemeetria                        | Send device metrics to the mesh. When it is off, they go only to connected clients. Only shown on firmware 2.7.13 and newer | Väljas    |
+| Seadme mõõdikute värskendamise intervall        | How often to report battery, uptime and channel utilization                                                                                                                                 | —         |
+| Keskkonnamõõdikud kasutavad Fahrenheiti         | Use °F on the device's display. This is the node's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale)            | Väljas    |
+| Keskkonnamõõdikute lubamine                     | Report the attached environment sensors                                                                                                                                                     | Väljas    |
+| Keskkonnamõõdikute värskendamise intervall      | How often to report them                                                                                                                                                                    | —         |
+| Toitemõõdiku moodul on lubatud                  | Report the per-channel voltage and current readings                                                                                                                                         | Väljas    |
+| Toitemõõdikute värskendamise intervall          | How often to report them                                                                                                                                                                    | —         |
+| Toitemõõdiku ekraanil kuvamine lubatud          | Also show power readings on the device's display                                                                                                                                            | Väljas    |
+| Keskkonnamõõdikute ekraanil kuvamine lubatud    | Also show environment readings on the device's display                                                                                                                                      | Väljas    |
 
 Vaata [Telemeetria & Sensorid](telemetry-and-sensors) toetatud andurite ja sätete soovituste kohta.
 
@@ -154,14 +154,14 @@ Vaata [Telemeetria & Sensorid](telemetry-and-sensors) toetatud andurite ja säte
 
 Pre-configured messages accessible from the node's physical buttons (for nodes with rotary encoders, keypads, or similar input hardware). Määra nimekiri kiirsõnumitest, mida saab edastada ilma telefoni ühendamata – ideaalne välitöödeks.
 
-| Sätted                                                                       | Kirjeldus                                                                                                                                          | Default |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Clockwise Rotary Event / Counterclockwise Rotary Event / Encoder Press Event | Which key event each encoder action produces: **None**, **Up**, **Down**, **Left**, **Right**, **Select**, **Back**, or **Cancel** | None    |
-| Sõnumid                                                                      | Reavahetusega eraldatud sõnumite loend                                                                                                             | Empty   |
-| Pin A / Pin B / Press Pin                                                    | The three pins the rotary encoder is wired to                                                                                                      | 0       |
-| Rotary Encoder                                                               | Use a rotary encoder as the input device                                                                                                           | Off     |
-| Send Bell                                                                    | Send a bell character alongside the message, so a receiving node's External Notification module can sound                                          | Off     |
-| Up/Down/Select Input                                                         | A separate, simpler input scheme using up/down/select buttons rather than an encoder                                                               | Off     |
+| Sätted                                                                       | Kirjeldus                                                                                                                                          | Vaikimisi |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Clockwise Rotary Event / Counterclockwise Rotary Event / Encoder Press Event | Which key event each encoder action produces: **None**, **Up**, **Down**, **Left**, **Right**, **Select**, **Back**, or **Cancel** | Puudub    |
+| Sõnumid                                                                      | Reavahetusega eraldatud sõnumite loend                                                                                                             | Empty     |
+| Pin A / Pin B / Press Pin                                                    | The three pins the rotary encoder is wired to                                                                                                      | 0         |
+| Pöördkooder                                                                  | Use a rotary encoder as the input device                                                                                                           | Väljas    |
+| Saada Kõll                                                                   | Send a bell character alongside the message, so a receiving node's External Notification module can sound                                          | Väljas    |
+| Up/Down/Select Input                                                         | A separate, simpler input scheme using up/down/select buttons rather than an encoder                                                               | Väljas    |
 
 Some boards with built-in encoders or keys come with the input settings filled in. Two older
 fields, **Canned message enabled** and **Allow input source**, appear only for a node on firmware
@@ -171,15 +171,15 @@ older than 2.7, or while they still hold a value.
 
 Codec2 audio support for low-bandwidth voice communication over the mesh. See on **eksperimentaalne** funktsioon, mis kodeerib hääle Codec2 koodeki abil väga väikesteks andmepakettideks. It needs specific hardware, an I2S microphone and speaker, and the voice quality is low.
 
-| Sätted              | Kirjeldus                                                                                                              | Default |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------- |
-| Bitrate             | Codec2 bitrate, from **450 bps** to **3200 bps**. Lower rates use less bandwidth and give poorer audio | Default |
-| Codec2 Enabled      | Turn the audio module on                                                                                               | Off     |
-| I2S Clock Pin       | GPIO pin for the I2S bit clock                                                                                         | 0       |
-| I2S Data In Pin     | GPIO pin for I2S data in                                                                                               | 0       |
-| I2S Data Out Pin    | GPIO pin for I2S data out                                                                                              | 0       |
-| I2S Word Select Pin | GPIO pin for I2S word select                                                                                           | 0       |
-| PTT Pin             | GPIO pin for the push-to-talk button. 0 uses GPIO 39                                                   | 0       |
+| Sätted              | Kirjeldus                                                                                                              | Vaikimisi |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------- |
+| CODEC2 test sagedus | Codec2 bitrate, from **450 bps** to **3200 bps**. Lower rates use less bandwidth and give poorer audio | Vaikimisi |
+| CODEC 2 lubatud     | Turn the audio module on                                                                                               | Väljas    |
+| I2S Clock Pin       | GPIO pin for the I2S bit clock                                                                                         | 0         |
+| I2S Data In Pin     | GPIO pin for I2S data in                                                                                               | 0         |
+| I2S Data Out Pin    | GPIO pin for I2S data out                                                                                              | 0         |
+| I2S Word Select Pin | GPIO pin for I2S word select                                                                                           | 0         |
+| PTT klemm           | GPIO pin for the push-to-talk button. 0 uses GPIO 39                                                   | 0         |
 
 ### Remote Hardware module
 
@@ -187,21 +187,21 @@ GPIO juhtimine kärgvõrgu kaudu. Võimaldab kaugsõlmel lugeda või kirjutada G
 
 > ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the node's own hardware. Turn it on only on dedicated GPIO nodes.
 
-| Sätted                              | Kirjeldus                                                               | Default |
-| ----------------------------------- | ----------------------------------------------------------------------- | ------- |
-| Luba määratlemata klemmi juurdepääs | Luba juurdepääs mis tahes GPIO sisendile (turvarisk) | Off     |
-| Saadaval klemmid                    | Kuni 4 GPIO sisendit, mida see sõlm kauglugemiseks/-kirjutamiseks avab  | None    |
-| Kaug riistvara lubatud              | Turn remote GPIO access on                                              | Off     |
+| Sätted                              | Kirjeldus                                                               | Vaikimisi |
+| ----------------------------------- | ----------------------------------------------------------------------- | --------- |
+| Luba määratlemata klemmi juurdepääs | Luba juurdepääs mis tahes GPIO sisendile (turvarisk) | Väljas    |
+| Saadaval klemmid                    | Kuni 4 GPIO sisendit, mida see sõlm kauglugemiseks/-kirjutamiseks avab  | Puudub    |
+| Kaug riistvara lubatud              | Turn remote GPIO access on                                              | Väljas    |
 
 ### Neighbor Info module
 
 Levitab teavet otse kuuldud naabrite kohta, võimaldades kärgvõrgu topoloogia kaardistamist. Iga lubatud sõlm jagab perioodiliselt nimekirja teistest sõlmedest, mida ta kuuleb ja nende signaali kvaliteedist.
 
-| Sätted                   | Kirjeldus                                                                                                                                            | Default                                 |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Neighbor Info Enabled    | Turn neighbor broadcasting on                                                                                                                        | Off                                     |
-| Saada LoRa kaudu         | Also broadcast neighbor info over LoRa, not just MQTT and the connected app. Vaikimisi võtit ja nime kasutavat kanalit pole saadaval | Off                                     |
-| GPS-i küsimise intervall | How often to broadcast the neighbor list, in seconds. Minimum 4 hours                                                                | 0 (firmware default) |
+| Sätted                     | Kirjeldus                                                                                                                                            | Vaikimisi                               |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Naabruskonna teave lubatud | Turn neighbor broadcasting on                                                                                                                        | Väljas                                  |
+| Saada LoRa kaudu           | Also broadcast neighbor info over LoRa, not just MQTT and the connected app. Vaikimisi võtit ja nime kasutavat kanalit pole saadaval | Väljas                                  |
+| GPS-i küsimise intervall   | How often to broadcast the neighbor list, in seconds. Minimum 4 hours                                                                | 0 (firmware default) |
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
@@ -212,35 +212,35 @@ Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Saab ka
 Pick the color with the swatch's **Preset colors** row or the **Red**, **Green** and **Blue** sliders.
 **Advanced** opens number fields for the same three values.
 
-| Sätted                     | Kirjeldus                                 | Default                      |
+| Sätted                     | Kirjeldus                                 | Vaikimisi                    |
 | -------------------------- | ----------------------------------------- | ---------------------------- |
 | Pinge                      | LED drive current, 0 to 31                | 10                           |
-| LED State                  | Turn the LED on or off                    | Off                          |
+| LED olek                   | Turn the LED on or off                    | Väljas                       |
 | Punane / Roheline / Sinine | Individual color channel values, 0 to 255 | Derived from the node number |
 
 ### Detection Sensor module
 
 Muudab sõlme liikumis- või ukseanduri hoiatussüsteemiks. Kui GPIO sisend tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
 
-| Sätted                                    | Kirjeldus                                                                                                                                                         | Default                                                                              |
+| Sätted                                    | Kirjeldus                                                                                                                                                         | Vaikimisi                                                                            |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Detection Sensor Enabled                  | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log                                             | Off                                                                                  |
-| GPIO Pin to monitor                       | GPIO pin connected to the sensor. 0 disables the module                                                                                           | 0                                                                                    |
+| Tuvastusandur lubatud                     | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log                                             | Väljas                                                                               |
+| GPIO klemmi jälgimine                     | GPIO pin connected to the sensor. 0 disables the module                                                                                           | 0                                                                                    |
 | Minimum time between detection broadcasts | Minimaalne aeg hoiatusteadete levitamisel                                                                                                                         | 0, which the firmware treats as 1 hour (12 hours on Router roles) |
-| Name                                      | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
-| Send Bell                                 | Include a bell character in alerts                                                                                                                                | Off                                                                                  |
-| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | Unset                                                                                |
-| Trigger Type                              | How the pin's state maps to a detection event: **High**, **Low**, **Rising Edge**, **Falling Edge**, **Either Edge High**, or **Either Edge Low** | High                                                                                 |
-| Use Internal Pull-up                      | Enable the pin's internal pull-up resistor                                                                                                                        | Off                                                                                  |
+| Kasutajasõbralik nimi                     | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
+| Saada Kõll                                | Include a bell character in alerts                                                                                                                                | Väljas                                                                               |
+| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | Määramatta                                                                           |
+| Trigger Type                              | How the pin's state maps to a detection event: **High**, **Low**, **Rising Edge**, **Falling Edge**, **Either Edge High**, or **Either Edge Low** | Kõrge                                                                                |
+| Use Internal Pull-up                      | Enable the pin's internal pull-up resistor                                                                                                                        | Väljas                                                                               |
 
 ### Paxcounter module
 
 People counter using Wi-Fi and BLE probe requests. Loendab lähedalasuvaid seadmeid, kuulates passiivselt sondimistaotlusi, mida telefonid ja sülearvutid võrkude skannimisel edastavad. Available only on ESP32 devices. Counts are approximate, since one person may carry several devices, so the module suits estimating foot traffic at trailheads or event venues.
 
-| Sätted                                  | Kirjeldus                                                                                                | Default                                 |
+| Sätted                                  | Kirjeldus                                                                                                | Vaikimisi                               |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------- |
 | BLE Threshold (dBm)  | The same cut-off for BLE advertisements                                                                  | 0, which the firmware treats as −80 dBm |
-| PAX Counter Enabled                     | Turn people counting on. Wi-Fi and Bluetooth must both be off on the node for it to work | Off                                     |
+| Paxcounter lubatud                      | Turn people counting on. Wi-Fi and Bluetooth must both be off on the node for it to work | Väljas                                  |
 | GPS-i küsimise intervall                | Kui tihti loendeid esitada                                                                               | —                                       |
 | WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted                                  | 0, which the firmware treats as −80 dBm |
 

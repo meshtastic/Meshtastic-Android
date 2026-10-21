@@ -121,11 +121,11 @@ default channel key, the interval and CSV controls stay disabled — you can sti
 already-enabled module off — and saving force-disables the module if the channel has reverted to
 public.
 
-| Setting            | الوصف                                                                                                               | Default |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ------- |
-| Range Test Enabled | Turn range testing on                                                                                               | Off     |
-| Save               | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only                      | Off     |
-| Sender Interval    | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | Unset   |
+| Setting            | الوصف                                                                                                               | Default     |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ----------- |
+| Range Test Enabled | Turn range testing on                                                                                               | Off         |
+| حفظ                | Log received test data as a CSV on the node's own filesystem. ESP32 nodes only                      | Off         |
+| Sender Interval    | Time between test transmissions, chosen from a dropdown of fixed intervals. **Unset** stops sending | إلغاء تعيين |
 
 ### Telemetry module
 
@@ -156,7 +156,7 @@ Pre-configured messages accessible from the node's physical buttons (for nodes w
 
 | Setting                                                                      | الوصف                                                                                                                                              | Default |
 | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Clockwise Rotary Event / Counterclockwise Rotary Event / Encoder Press Event | Which key event each encoder action produces: **None**, **Up**, **Down**, **Left**, **Right**, **Select**, **Back**, or **Cancel** | None    |
+| Clockwise Rotary Event / Counterclockwise Rotary Event / Encoder Press Event | Which key event each encoder action produces: **None**, **Up**, **Down**, **Left**, **Right**, **Select**, **Back**, or **Cancel** | لا يوجد |
 | الرسائل                                                                      | Newline-separated list of messages                                                                                                                 | Empty   |
 | Pin A / Pin B / Press Pin                                                    | The three pins the rotary encoder is wired to                                                                                                      | 0       |
 | Rotary Encoder                                                               | Use a rotary encoder as the input device                                                                                                           | Off     |
@@ -190,7 +190,7 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 | Setting                    | الوصف                                                           | Default |
 | -------------------------- | --------------------------------------------------------------- | ------- |
 | Allow undefined pin access | Allow access to any GPIO pin (security risk) | Off     |
-| Available pins             | Up to 4 GPIO pins this node exposes for remote read/write       | None    |
+| Available pins             | Up to 4 GPIO pins this node exposes for remote read/write       | لا يوجد |
 | Remote Hardware enabled    | Turn remote GPIO access on                                      | Off     |
 
 ### Neighbor Info module
@@ -227,9 +227,9 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 | Detection Sensor Enabled                  | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log                                             | Off                                                                                  |
 | GPIO Pin to monitor                       | GPIO pin connected to the sensor. 0 disables the module                                                                                           | 0                                                                                    |
 | Minimum time between detection broadcasts | Minimum time between alert broadcasts                                                                                                                             | 0, which the firmware treats as 1 hour (12 hours on Router roles) |
-| Name                                      | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
+| الاسم                                     | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
 | Send Bell                                 | Include a bell character in alerts                                                                                                                                | Off                                                                                  |
-| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | Unset                                                                                |
+| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | إلغاء تعيين                                                                          |
 | Trigger Type                              | How the pin's state maps to a detection event: **High**, **Low**, **Rising Edge**, **Falling Edge**, **Either Edge High**, or **Either Edge Low** | High                                                                                 |
 | Use Internal Pull-up                      | Enable the pin's internal pull-up resistor                                                                                                                        | Off                                                                                  |
 

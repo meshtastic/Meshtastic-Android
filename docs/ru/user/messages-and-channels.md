@@ -75,7 +75,7 @@ A public-key conversation carries an encryption icon in its top bar. A green clo
 ### Отправка личного сообщения
 
 1. Open the **Messages** tab and select a conversation, or touch & hold a node in the node list and choose **Message**.
-2. Type your message and tap **Send**.
+2. Введите сообщение и нажмите **"Отправить"**.
 
 On a hardware keyboard, Enter sends the message and Shift+Enter starts a new line. The on-screen keyboard's Enter key always starts a new line.
 
@@ -109,17 +109,17 @@ control whether they are offered at all.
 
 Метка статуса отображается только **под твоими** исходящими сообщениями (входящие сообщения от других не имеют метки статуса):
 
-| Состояние                                                  | Значение                                                                                                                                                                                                                                 |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sending... | Queued or already handed to your node, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once your node has it |
-| Доставлено получателю                                      | An acknowledgment came back for a direct message                                                                                                                                                                                         |
-| Delivered to recipient · proven                            | The strongest confirmation. The acknowledgment carried a proof that only the recipient could have produced. Needs firmware 2.8.1 or newer                                |
-| Delivery proof failed                                      | Something acknowledged the message without the key only the recipient holds, so the acknowledgment doesn't show that the recipient received it                                                                                           |
-| Отправлено в сеть                                          | Для широковещательного сообщения в канале — сообщение достигло mesh-сети (у широковещательных сообщений нет подтверждений для каждого получателя)                                                                     |
-| Передано, не подтверждено получателем                      | Для личного сообщения, отображается предупреждающим цветом — сообщение было ретранслировано, но подтверждение ещё не получено                                                                                                            |
-| Маршрутизация по SF++ цепочке…                             | Находится в процессе маршрутизации/буферизации в цепочке Store & Forward Plus Plus                                                                                                                                   |
-| Подтверждено в цепочке SF++                                | Подтверждена доставка через цепочку SF++                                                                                                                                                                                                 |
-| Ошибки                                                     | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
+| Состояние                                                   | Значение                                                                                                                                                                                                                                 |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Отправка... | Queued or already handed to your node, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once your node has it |
+| Доставлено получателю                                       | An acknowledgment came back for a direct message                                                                                                                                                                                         |
+| Доставлено получателю - доказано                            | The strongest confirmation. The acknowledgment carried a proof that only the recipient could have produced. Needs firmware 2.8.1 or newer                                |
+| Сбой проверки доставки                                      | Something acknowledged the message without the key only the recipient holds, so the acknowledgment doesn't show that the recipient received it                                                                                           |
+| Отправлено в сеть                                           | Для широковещательного сообщения в канале — сообщение достигло mesh-сети (у широковещательных сообщений нет подтверждений для каждого получателя)                                                                     |
+| Передано, не подтверждено получателем                       | Для личного сообщения, отображается предупреждающим цветом — сообщение было ретранслировано, но подтверждение ещё не получено                                                                                                            |
+| Маршрутизация по SF++ цепочке…                              | Находится в процессе маршрутизации/буферизации в цепочке Store & Forward Plus Plus                                                                                                                                   |
+| Подтверждено в цепочке SF++                                 | Подтверждена доставка через цепочку SF++                                                                                                                                                                                                 |
+| Ошибки                                                      | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
 
 Tap the status under a failed message, or under a direct message marked **Relayed, not confirmed by recipient**, and choose **Resend** to send it again. The message keeps its place in the conversation and its status starts over. **Resend** isn't offered for **Channel/key mismatch** or **Message is too large to send**, which a second attempt can't fix, or in an archived conversation.
 

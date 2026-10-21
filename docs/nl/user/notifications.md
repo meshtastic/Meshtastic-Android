@@ -24,7 +24,7 @@ To see the categories, tap **App Notifications** in the **Information** section 
 | Berichten | Broadcast message notifications                               | A message on one of your channels                                               | The channel                     |
 | Berichten | Reaction notifications                                        | An emoji reaction to a message in one of your conversations                     | The conversation                |
 | Berichten | Waypoint notifications                                        | A waypoint shared on the mesh, or a geofence crossing                           | The waypoint on the map         |
-| Messages  | Waarschuwingsmeldingen                                        | A critical alert from a node                                                    | The conversation                |
+| Berichten | Waarschuwingsmeldingen                                        | A critical alert from a node                                                    | The conversation                |
 | Mesh      | Nieuwe node meldingen                                         | A node heard for the first time                                                 | The node's details              |
 | Mesh      | Mesh invitation notifications                                 | An invitation to join a nearby mesh                                             | Local Mesh Discovery            |
 | Mesh      | Low battery notifications (favorite nodes) | A favorite node's battery running low                                           | The node's details              |

@@ -173,13 +173,13 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 
 | Setting                    | Descriere                                                                                                              | Prestabilit |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------- |
-| Rată de eșantionare CODEC2 | Codec2 bitrate, from **450 bps** to **3200 bps**. Lower rates use less bandwidth and give poorer audio | Default     |
-| Codec2 Enabled             | Turn the audio module on                                                                                               | Off         |
+| Rată de eșantionare CODEC2 | Codec2 bitrate, from **450 bps** to **3200 bps**. Lower rates use less bandwidth and give poorer audio | Prestabilit |
+| CODEC 2 activat            | Turn the audio module on                                                                                               | Off         |
 | I2S Clock Pin              | GPIO pin for the I2S bit clock                                                                                         | 0           |
 | I2S Data In Pin            | GPIO pin for I2S data in                                                                                               | 0           |
 | I2S Data Out Pin           | GPIO pin for I2S data out                                                                                              | 0           |
 | I2S Word Select Pin        | GPIO pin for I2S word select                                                                                           | 0           |
-| PTT Pin                    | GPIO pin for the push-to-talk button. 0 uses GPIO 39                                                   | 0           |
+| Pin PTT                    | GPIO pin for the push-to-talk button. 0 uses GPIO 39                                                   | 0           |
 
 ### Remote Hardware module
 
@@ -187,19 +187,19 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 
 > ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the node's own hardware. Turn it on only on dedicated GPIO nodes.
 
-| Setting                     | Descriere                                                       | Default |
-| --------------------------- | --------------------------------------------------------------- | ------- |
-| Permite acces Pin nedefinit | Allow access to any GPIO pin (security risk) | Off     |
-| Pin-uri disponibile         | Up to 4 GPIO pins this node exposes for remote read/write       | None    |
-| Hardware extern activat     | Turn remote GPIO access on                                      | Off     |
+| Setting                     | Descriere                                                       | Prestabilit |
+| --------------------------- | --------------------------------------------------------------- | ----------- |
+| Permite acces Pin nedefinit | Allow access to any GPIO pin (security risk) | Off         |
+| Pin-uri disponibile         | Up to 4 GPIO pins this node exposes for remote read/write       | Niciunul    |
+| Hardware extern activat     | Turn remote GPIO access on                                      | Off         |
 
 ### Neighbor Info module
 
 Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
 
-| Setting                     | Descriere                                                                                                                                            | Default                                 |
+| Setting                     | Descriere                                                                                                                                            | Prestabilit                             |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Neighbor Info Enabled       | Turn neighbor broadcasting on                                                                                                                        | Off                                     |
+| Info vecin activat          | Turn neighbor broadcasting on                                                                                                                        | Off                                     |
 | Transmite peste LoRA        | Also broadcast neighbor info over LoRa, not just MQTT and the connected app. Unavailable on a channel using the default key and name | Off                                     |
 | Interval de actualizare GPS | How often to broadcast the neighbor list, in seconds. Minimum 4 hours                                                                | 0 (firmware default) |
 
@@ -212,24 +212,24 @@ Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. C
 Pick the color with the swatch's **Preset colors** row or the **Red**, **Green** and **Blue** sliders.
 **Advanced** opens number fields for the same three values.
 
-| Setting            | Descriere                                 | Default                      |
+| Setting            | Descriere                                 | Prestabilit                  |
 | ------------------ | ----------------------------------------- | ---------------------------- |
 | Actual             | LED drive current, 0 to 31                | 10                           |
-| LED State          | Turn the LED on or off                    | Off                          |
+| Stare LED          | Turn the LED on or off                    | Off                          |
 | Red / Green / Blue | Individual color channel values, 0 to 255 | Derived from the node number |
 
 ### Detection Sensor module
 
 Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
 
-| Setting                                   | Descriere                                                                                                                                                         | Default                                                                              |
+| Setting                                   | Descriere                                                                                                                                                         | Prestabilit                                                                          |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Detection Sensor Enabled                  | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log                                             | Off                                                                                  |
-| GPIO Pin to monitor                       | GPIO pin connected to the sensor. 0 disables the module                                                                                           | 0                                                                                    |
+| Senzor detectare activat                  | Turn the detection sensor on. It also has to be on for nodes that receive its alerts or chart its log                                             | Off                                                                                  |
+| Pin GPIO de monitorizat                   | GPIO pin connected to the sensor. 0 disables the module                                                                                           | 0                                                                                    |
 | Minimum time between detection broadcasts | Minimum time between alert broadcasts                                                                                                                             | 0, which the firmware treats as 1 hour (12 hours on Router roles) |
-| Name                                      | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
-| Send Bell                                 | Include a bell character in alerts                                                                                                                                | Off                                                                                  |
-| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | Unset                                                                                |
+| Nume comun                                | Custom name for this sensor, used in its messages                                                                                                                 | Empty                                                                                |
+| Trimite clopoțel                          | Include a bell character in alerts                                                                                                                                | Off                                                                                  |
+| State Broadcast Interval                  | How often to send the sensor's state whether or not anything was detected. **Unset** sends only on detection                                      | Nesetat                                                                              |
 | Trigger Type                              | How the pin's state maps to a detection event: **High**, **Low**, **Rising Edge**, **Falling Edge**, **Either Edge High**, or **Either Edge Low** | High                                                                                 |
 | Use Internal Pull-up                      | Enable the pin's internal pull-up resistor                                                                                                                        | Off                                                                                  |
 
@@ -237,10 +237,10 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 
 People counter using Wi-Fi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices. Counts are approximate, since one person may carry several devices, so the module suits estimating foot traffic at trailheads or event venues.
 
-| Setting                                 | Descriere                                                                                                | Default                                 |
+| Setting                                 | Descriere                                                                                                | Prestabilit                             |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------- |
 | BLE Threshold (dBm)  | The same cut-off for BLE advertisements                                                                  | 0, which the firmware treats as −80 dBm |
-| PAX Counter Enabled                     | Turn people counting on. Wi-Fi and Bluetooth must both be off on the node for it to work | Off                                     |
+| Paxcounter activat                      | Turn people counting on. Wi-Fi and Bluetooth must both be off on the node for it to work | Off                                     |
 | Interval de actualizare GPS             | How often to report counts                                                                               | —                                       |
 | WiFi Threshold (dBm) | Ignore Wi-Fi probes weaker than this, so distant devices aren't counted                                  | 0, which the firmware treats as −80 dBm |
 

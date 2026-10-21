@@ -42,10 +42,10 @@ Navigate to **Settings → Module configuration → TAK (ATAK)**. The module's o
 there is no separate enable switch here, because the **Device Role** setting in Device configuration is what
 turns TAK on. Radiosi lähettää tämän tunnuksen, joka näkyy TAK-kartoilla.
 
-| Asetus | Kuvaus                                                                                                                         | Default                                  |
+| Asetus | Kuvaus                                                                                                                         | Oletus                                   |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
 | Rooli  | Your operational role within the team: Team Member, Team Lead, HQ, Sniper, Medic, Forward Observer, RTO, or K9 | Default (Team Member) |
-| Team   | Your team color on the TAK map, one of the 14 standard TAK team colors such as Blue, Red, Cyan, or Green                       | Default (Cyan)        |
+| Tiimi  | Your team color on the TAK map, one of the 14 standard TAK team colors such as Blue, Red, Cyan, or Green                       | Default (Cyan)        |
 
 Your TAK callsign isn't a separate setting. The firmware uses your node's long name.
 
@@ -71,7 +71,7 @@ Open **Settings → Advanced → TAK Server**. These are app settings stored on 
 
 TAK-rooleilla määritetyt radiot käyttäytyvät eri tavalla kuin tavalliset client-laitteet:
 
-| Role            | Kuvaus                                                                                                                                                                                                                            |
+| Rooli           | Kuvaus                                                                                                                                                                                                                            |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **TAK**         | For a node paired with an ATAK device. Turns off many routine broadcasts to favor the CoT packet stream.                                                                                          |
 | **TAK Tracker** | Broadcasts TAK PLI automatically, at the interval set by the position configuration, and turns off many routine broadcasts. Suited to unattended position beacons such as vehicles and equipment. |
