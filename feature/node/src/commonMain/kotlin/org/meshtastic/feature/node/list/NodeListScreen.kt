@@ -265,6 +265,7 @@ fun NodeListScreen(
                 NodeContextMenu(
                     expanded = expanded,
                     node = node,
+                    ourNode = ourNode,
                     onFavorite = { viewModel.favoriteNode(node) },
                     onMute = { viewModel.muteNode(node) },
                     onMessage = {
