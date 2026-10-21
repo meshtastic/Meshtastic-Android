@@ -312,6 +312,7 @@ fun MeshHudScreen(
             targets = targets,
             onNavigateUp = onNavigateUp,
             onOpenFilters = if (targets.ready && !targets.scoped) ({ showFilters = true }) else null,
+            onCapture = rememberHudCapture().takeIf { showCamera && cameraAvailable },
             modifier =
             Modifier.align(Alignment.TopStart).onPlaced {
                 topBarBottomPx = (it.positionInParent().y + it.size.height).toInt()

@@ -26,6 +26,7 @@ import androidx.camera.core.CameraState
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.viewfinder.core.ImplementationMode
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -128,8 +129,14 @@ actual fun HudCameraPreview(
     }
 
     // Crop, not fit: CameraIntrinsics.focalPx assumes the preview fills the view and overflows the long side.
+    // Embedded, so the feed draws into the window and a capture of the window holds it.
     surfaceRequest?.let {
-        CameraXViewfinder(surfaceRequest = it, modifier = modifier, contentScale = ContentScale.Crop)
+        CameraXViewfinder(
+            surfaceRequest = it,
+            modifier = modifier,
+            implementationMode = ImplementationMode.EMBEDDED,
+            contentScale = ContentScale.Crop,
+        )
     }
 }
 

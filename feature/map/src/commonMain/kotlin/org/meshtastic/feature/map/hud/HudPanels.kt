@@ -54,6 +54,7 @@ import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.compass_location_disabled
 import org.meshtastic.core.resources.compass_no_location_fix
 import org.meshtastic.core.resources.compass_no_magnetometer
+import org.meshtastic.core.resources.device_model_capture
 import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.resources.map_filter_title
 import org.meshtastic.core.resources.mesh_hud_camera_unavailable
@@ -91,6 +92,7 @@ import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
+import org.meshtastic.core.ui.icon.PhotoCamera
 import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.PermissionUiState
@@ -120,13 +122,17 @@ internal data class HudSensorStatus(
     val thermal: HudThermal,
 )
 
-/** The heading and the phone's own accuracy beside it; [onOpenFilters] is null in a view scoped to one purpose. */
+/**
+ * The heading and the phone's own accuracy beside it; [onOpenFilters] is null in a view scoped to one purpose, and
+ * [onCapture] is null without a live camera feed or where the platform cannot save a picture.
+ */
 @Composable
 internal fun HudTopBar(
     status: HudSensorStatus,
     targets: MeshHudTargets,
     onNavigateUp: () -> Unit,
     onOpenFilters: (() -> Unit)?,
+    onCapture: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -154,6 +160,11 @@ internal fun HudTopBar(
         onOpenFilters?.let { open ->
             IconButton(onClick = open) {
                 Icon(MeshtasticIcons.Tune, stringResource(Res.string.map_filter_title), tint = Color.White)
+            }
+        }
+        onCapture?.let {
+            IconButton(onClick = it) {
+                Icon(MeshtasticIcons.PhotoCamera, stringResource(Res.string.device_model_capture), tint = Color.White)
             }
         }
     }
