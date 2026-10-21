@@ -220,14 +220,11 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     },
                 )
                 HorizontalDivider()
-                EditPasswordPreference(
-                    title = stringResource(Res.string.schema_mqtt_password),
-                    modifier = Modifier.settingsField(Res.string.schema_mqtt_password),
-                    value = formState.value.password,
-                    maxSize = 63, // password max_size:64
+                MqttPasswordPreference(
                     enabled = state.connected,
+                    password = formState.value.password,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = {
+                    onValueChange = {
                         formState.value = formState.value.newBuilder().also { wb -> wb.password = it }.build()
                     },
                 )
@@ -363,6 +360,24 @@ internal fun MqttTlsPreference(
         modifier = Modifier.settingsField(Res.string.schema_mqtt_tls_enabled).testTag(MQTT_TLS_SWITCH_TEST_TAG),
         onCheckedChange = onCheckedChange,
         containerColor = CardDefaults.cardColors().containerColor,
+    )
+}
+
+@Composable
+internal fun MqttPasswordPreference(
+    enabled: Boolean,
+    password: String,
+    onValueChange: (String) -> Unit,
+    keyboardActions: KeyboardActions = KeyboardActions(),
+) {
+    EditPasswordPreference(
+        title = stringResource(Res.string.schema_mqtt_password),
+        modifier = Modifier.settingsField(Res.string.schema_mqtt_password),
+        value = password,
+        maxSize = 31, // password max_size:32
+        enabled = enabled,
+        keyboardActions = keyboardActions,
+        onValueChanged = onValueChange,
     )
 }
 

@@ -216,16 +216,11 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                         isSet = formState.value.allow_input_source.isNotEmpty(),
                     )
                 ) {
-                    EditTextPreference(
-                        title = stringResource(Res.string.allow_input_source),
-                        value = formState.value.allow_input_source,
-                        maxSize = 63, // allow_input_source max_size:16
+                    AllowInputSourcePreference(
                         enabled = state.connected,
-                        isError = false,
-                        keyboardOptions =
-                        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                        value = formState.value.allow_input_source,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = {
+                        onValueChange = {
                             formState.value =
                                 formState.value.newBuilder().also { wb -> wb.allow_input_source = it }.build()
                         },
@@ -258,4 +253,23 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
             }
         }
     }
+}
+
+@Composable
+internal fun AllowInputSourcePreference(
+    enabled: Boolean,
+    value: String,
+    onValueChange: (String) -> Unit,
+    keyboardActions: KeyboardActions = KeyboardActions(),
+) {
+    EditTextPreference(
+        title = stringResource(Res.string.allow_input_source),
+        value = value,
+        maxSize = 15, // allow_input_source max_size:16
+        enabled = enabled,
+        isError = false,
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+        keyboardActions = keyboardActions,
+        onValueChanged = onValueChange,
+    )
 }
