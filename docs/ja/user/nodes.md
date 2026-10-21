@@ -1,7 +1,7 @@
 ---
 title: ノード
 nav_order: 4
-last_updated: 2026-10-02
+last_updated: 2026-10-20
 description: メッシュノードの閲覧・絞り込み・並べ替え。詳細、信号品質、役割、クイック操作を確認できます。
 aliases:
   - node-list
@@ -107,6 +107,8 @@ A mismatch never replaces the key you already hold. The app keeps the first key 
   - 通知のミュート／解除
   - ダイレクトメッセージを送信
   - 経路をトレース
+  - Open Compass, for a node with a position
+  - Open mesh view, for a node with a position on a phone that supports the [AR mesh view](map-and-waypoints#ar-mesh-view)
   - 無視／無視の解除
   - 削除
 

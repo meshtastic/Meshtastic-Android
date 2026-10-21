@@ -806,6 +806,9 @@
     <string name="mesh_beacon_target_channel_index">Kanal</string>
     <string name="mesh_beacon_target_default">Standardwert</string>
     <string name="mesh_beacon_target_remove">Ziel entfernen</string>
+    <string name="mesh_hud_cardinal_east">E</string>
+    <string name="mesh_hud_cardinal_north">N</string>
+    <string name="mesh_hud_cardinal_south">S</string>
     <string name="mesh_map_location">Netzwerk Kartenstandort</string>
     <string name="mesh_map_location_description">Aktiviert den blauen Punkt für Ihr Telefon in der Netzwerkkarte.</string>
     <!-- MESHTASTIC -->

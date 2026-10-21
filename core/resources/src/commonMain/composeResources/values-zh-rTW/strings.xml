@@ -638,6 +638,73 @@
     <string name="mesh_beacon_region_label">地區</string>
     <string name="mesh_beacon_target_channel_index">頻道</string>
     <string name="mesh_beacon_target_default">默認</string>
+    <string name="mesh_hud_cardinal_north">Meshtastic is a remarkable open-source project that leverages the power of low-power, long-range radio communication. It allows you to create a decentralized, encrypted, and resilient mesh network for text messaging and data transfer, even without cellular or WiFi connectivity.
+
+**Key Features of Meshtastic:**
+
+*   **Long-Range Communication:** Utilizing LoRa radio technology, Meshtastic devices can communicate over distances of several kilometers, depending on environmental conditions and antenna configurations.
+
+*   **Mesh Networking:** Devices automatically forward messages to each other, extending the network's reach and creating redundancy.
+
+*   **Encryption:** All messages are encrypted end-to-end, ensuring privacy and security.
+
+*   **Open Source:** The entire project is open source, allowing for community contributions, customization, and auditing.
+
+*   **Hardware Flexibility:** Meshtastic supports a variety of inexpensive, readily available hardware platforms, such as ESP32, nRF52, and RP2040 based boards.
+
+**Hardware Options:**
+
+Several popular hardware options are available for running Meshtastic, including:
+
+*   **RAK Wireless WisBlock:** A modular and versatile platform with a wide range of available modules.
+
+*   **T-Beam:** A popular, integrated solution with a built-in GPS module.
+
+*   **Heltec WiFi LoRa:** A compact and widely used board with WiFi and LoRa capabilities.
+
+*   **LilyGo T-Echo:** A ruggedized device designed for outdoor use.
+
+**Software and Configuration:**
+
+Meshtastic devices are typically configured using a companion app (available for Android and iOS) or via a CLI interface. The firmware can be updated over the air (OTA) via BLE or USB.
+
+**Technical Details:**
+
+*   **Radio Technology:** LoRa
+
+*   **Microcontrollers:** ESP32, nRF52, RP2040
+
+*   **Connectivity:** LoRa, BLE, WiFi (depending on the hardware)
+
+*   **Power:** Typically powered by USB or battery
+
+*   **Interfaces:** GPIO, USB, UART, SPI, I2C
+
+**Use Cases:**
+
+Meshtastic can be used in a variety of scenarios, including:
+
+*   **Emergency Communication:** Providing communication during natural disasters or other emergencies when cellular networks are down.
+
+*   **Outdoor Adventures:** Maintaining communication while hiking, camping, or engaging in other outdoor activities in areas with limited or no cellular coverage.
+
+*   **Off-Grid Communication:** Creating a local communication network in areas without internet access.
+
+*   **IoT Applications:** Connecting sensors and devices in remote locations.
+
+**Integration with Other Systems:**
+
+Meshtastic can be integrated with other systems via MQTT or a custom API. This allows for data to be exchanged between Meshtastic devices and other applications.
+
+**Getting Started:**
+
+To get started with Meshtastic, you will need:
+
+1.  A compatible hardware device (e.g., RAK, T-Beam, Heltec, LilyGo).
+2.  The Meshtastic firmware.
+3.  The Meshtastic companion app (Android or iOS) or CLI.
+
+You can find detailed instructions and documentation on the official Meshtastic website.</string>
     <string name="mesh_map_location">Mesh Map 地圖位置</string>
     <string name="mesh_map_location_description">在 Mesh 地圖上，為您的手機啟用藍色的定位點。</string>
     <!-- MESHTASTIC -->

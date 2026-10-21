@@ -1,7 +1,7 @@
 ---
 title: Laitteet
 nav_order: 4
-last_updated: 2026-10-02
+last_updated: 2026-10-20
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
@@ -107,6 +107,8 @@ Radioluettelosta voit:
   - Mykistä tai poista mykistys ilmoituksista
   - Lähetä yksityisviesti
   - Reitinselvitys
+  - Open Compass, for a node with a position
+  - Open mesh view, for a node with a position on a phone that supports the [AR mesh view](map-and-waypoints#ar-mesh-view)
   - Ohita tai poista ohitus
   - Poista
 

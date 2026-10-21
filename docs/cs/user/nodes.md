@@ -1,7 +1,7 @@
 ---
 title: Uzly
 nav_order: 4
-last_updated: 2026-10-02
+last_updated: 2026-10-20
 description: Procházet, filtrovat a třídit uzly sítě – zobrazit podrobnosti, kvalitu signálu, role a rychlé akce.
 aliases:
   - node-list
@@ -107,6 +107,8 @@ From the node list, you can:
   - Mute/unmute notifications
   - Send a direct message
   - Trace route
+  - Open Compass, for a node with a position
+  - Open mesh view, for a node with a position on a phone that supports the [AR mesh view](map-and-waypoints#ar-mesh-view)
   - Ignore/unignore
   - Odstranit
 
