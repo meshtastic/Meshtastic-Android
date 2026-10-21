@@ -33,8 +33,10 @@ import org.meshtastic.desktop.stub.NoopMagneticFieldProvider
 import org.meshtastic.desktop.stub.NoopMeshLocationManager
 import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
+import org.meshtastic.desktop.stub.NoopPhonePressureProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
 import org.meshtastic.feature.map.hud.CameraPoseProvider
+import org.meshtastic.feature.map.hud.PhonePressureProvider
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 
 /**
@@ -61,4 +63,6 @@ class DesktopStubsModule {
     @Single fun magneticFieldProvider(): MagneticFieldProvider = NoopMagneticFieldProvider()
 
     @Single fun cameraPoseProvider(): CameraPoseProvider = NoopCameraPoseProvider()
+
+    @Single fun phonePressureProvider(): PhonePressureProvider = NoopPhonePressureProvider()
 }

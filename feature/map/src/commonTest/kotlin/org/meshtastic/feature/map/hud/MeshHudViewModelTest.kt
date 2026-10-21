@@ -24,6 +24,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -82,6 +83,10 @@ private class FakePoseProvider : CameraPoseProvider {
     override fun poseUpdates(): Flow<CameraPoseState> = MutableStateFlow(CameraPoseState())
 }
 
+private class NoBarometer : PhonePressureProvider {
+    override fun pressureUpdates(): Flow<Float> = emptyFlow()
+}
+
 private class FakePhoneLocationProvider : PhoneLocationProvider {
     val state =
         MutableStateFlow(
@@ -126,6 +131,7 @@ class MeshHudViewModelTest {
             MeshHudViewModel(
                 poseProvider = FakePoseProvider(),
                 phoneLocationProvider = FakePhoneLocationProvider(),
+                pressureProvider = NoBarometer(),
                 magneticFieldProvider = ZeroDeclination(),
                 nodeRepository = nodeRepository,
                 packetRepository = packetRepository,

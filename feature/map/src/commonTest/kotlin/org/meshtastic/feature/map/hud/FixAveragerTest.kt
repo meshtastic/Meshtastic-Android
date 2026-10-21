@@ -20,6 +20,7 @@ import org.meshtastic.core.repository.PhoneLocation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 /** About 1.1 m of latitude. */
@@ -47,6 +48,26 @@ class FixAveragerTest {
         // Weights 1/4 and 1/64: the mean sits close to the precise fix.
         assertEquals(40.0 + 4 * METER_DEG / 17, mean.latitude, 1e-9)
         assertEquals(2f, mean.accuracyM)
+    }
+
+    @Test
+    fun `heights average weighted by their vertical accuracy`() {
+        val averager = FixAverager()
+        averager.add(fix(0.0, 1_000).copy(altitude = 100.0, mslAltitude = 120.0, verticalAccuracyM = 2f))
+        val mean = averager.add(fix(0.0, 2_000).copy(altitude = 117.0, mslAltitude = 137.0, verticalAccuracyM = 8f))
+        // Weights 1/4 and 1/64, as for position.
+        assertEquals(101.0, assertNotNull(mean.altitude), 1e-9)
+        assertEquals(121.0, assertNotNull(mean.mslAltitude), 1e-9)
+        assertEquals(2f, mean.verticalAccuracyM)
+    }
+
+    @Test
+    fun `a fix without a height leaves the height average to the fixes that have one`() {
+        val averager = FixAverager()
+        averager.add(fix(0.0, 1_000).copy(altitude = 150.0))
+        val mean = averager.add(fix(0.0, 2_000).copy(altitude = null))
+        assertEquals(150.0, assertNotNull(mean.altitude), 1e-9)
+        assertNull(mean.mslAltitude)
     }
 
     @Test
