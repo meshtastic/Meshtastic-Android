@@ -23,11 +23,14 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.doc_auto_translated
+import org.meshtastic.core.resources.doc_community_translated
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
 import org.meshtastic.feature.docs.model.DocSection
+import org.meshtastic.feature.docs.model.TranslationSource
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -115,5 +118,36 @@ class DocsPageRouteScreenTest {
         }
         // Content renders without crash; page not found should NOT appear since content object exists
         onNodeWithText("Page not found: connections").assertDoesNotExist()
+    }
+
+    @Test
+    fun untranslatedPage_inNonEnglishLocale_carriesNoTranslationLabel() = runComposeUiTest {
+        setContent {
+            DocsPageRouteScreen(
+                pageId = "connections",
+                content = sampleContent(),
+                isLoading = false,
+                translationSource = TranslationSource.UNTRANSLATED,
+                isNonEnglish = true,
+                onBack = {},
+            )
+        }
+        onNodeWithText(getString(Res.string.doc_community_translated)).assertDoesNotExist()
+        onNodeWithText(getString(Res.string.doc_auto_translated)).assertDoesNotExist()
+    }
+
+    @Test
+    fun crowdinPage_inNonEnglishLocale_isLabeledCommunityTranslated() = runComposeUiTest {
+        setContent {
+            DocsPageRouteScreen(
+                pageId = "connections",
+                content = sampleContent(),
+                isLoading = false,
+                translationSource = TranslationSource.BUNDLED,
+                isNonEnglish = true,
+                onBack = {},
+            )
+        }
+        onNodeWithText(getString(Res.string.doc_community_translated)).assertIsDisplayed()
     }
 }
