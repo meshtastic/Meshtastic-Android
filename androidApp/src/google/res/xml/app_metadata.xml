@@ -9,7 +9,7 @@
   -->
 
 <AppFunctionAppMetadata xmlns:appfn="http://schemas.android.com/apk/androidx.appfunctions"
-    appfn:description="Meshtastic is a mesh radio networking app for off-grid communications using LoRa devices.
+    appfn:instructions="Meshtastic is a mesh radio networking app for off-grid communications using LoRa devices.
 
 Operational Patterns:
 - Use 'getMeshStatus' to verify the radio is connected before calling functions that require a live connection.
