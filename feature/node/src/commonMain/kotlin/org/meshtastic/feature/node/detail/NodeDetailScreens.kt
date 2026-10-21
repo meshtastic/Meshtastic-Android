@@ -106,7 +106,7 @@ private fun OpenCompassOnArrival(uiState: NodeDetailUiState, open: (NodeDetailOv
 }
 
 @Composable
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LongMethod")
 private fun NodeDetailScaffold(
     modifier: Modifier,
     uiState: NodeDetailUiState,

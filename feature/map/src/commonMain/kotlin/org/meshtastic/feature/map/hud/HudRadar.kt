@@ -195,10 +195,10 @@ private fun RadarDot(subject: HudSubject, description: String, onActivate: () ->
             is HudSubject.NodeSubject -> Color(subject.node.colors.first)
             is HudSubject.WaypointSubject -> Color.Black
         }
+    // Cleared semantics drop the click action too, so TalkBack's activation is set back explicitly.
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-        // Cleared semantics drop the click action too, so TalkBack's activation is set back explicitly.
         Modifier.minimumInteractiveComponentSize().clickable(onClick = onActivate).clearAndSetSemantics {
             contentDescription = description
             role = Role.Button
