@@ -34,6 +34,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
+import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -91,7 +92,14 @@ class QuickSettingsTileController(
         // The live selection when there is one; otherwise the saved one, which is null until DataStore's first load.
         val address =
             radioInterfaceService.currentDeviceAddressFlow.value
-                ?: withTimeoutOrNull(ADDRESS_SETTLE_MS) { radioPrefs.awaitDevAddr() }
+                ?: withTimeoutOrNull(ADDRESS_SETTLE_MS) {
+                    try {
+                        radioPrefs.awaitDevAddr()
+                    } catch (e: IOException) {
+                        Logger.w(e) { "Quick Settings tile could not read the saved radio" }
+                        null
+                    }
+                }
         val tile =
             quickSettingsTileState(
                 connectionState = radioController.connectionState.value,
