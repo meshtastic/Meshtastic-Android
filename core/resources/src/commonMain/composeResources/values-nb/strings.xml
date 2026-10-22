@@ -119,6 +119,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Direkte</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -160,6 +162,7 @@
     <string name="module_settings">Modul konfigurasjon</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Frakoblet</string>
+    <string name="mqtt_topic_finder_level_region">Region</string>
     <string name="must_set_region">Du må angi en region!</string>
     <string name="must_update">Du må oppdatere denne applikasjonen på Google Play store (eller Github). Den er for gammel til å snakke med denne radioen.</string>
     <!-- MUTE -->

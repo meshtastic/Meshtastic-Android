@@ -116,6 +116,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">مباشره</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -150,6 +152,7 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_status_disconnected">انقطع الاتصال</string>
+    <string name="mqtt_topic_finder_level_region">الجهة</string>
     <string name="must_set_region">واجب إدخال المنطقة!</string>
     <!-- MUTE -->
     <string name="mute_1_week">أسبوع 1</string>

@@ -124,6 +124,7 @@
     <string name="latitude">Γεωγραφικό Πλάτος</string>
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -161,6 +162,7 @@
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_status_disconnected">Αποσυνδεδεμένο</string>
+    <string name="mqtt_topic_finder_level_region">Περιφέρεια</string>
     <string name="must_set_region">Πρέπει να ορίσετε μια περιοχή!</string>
     <string name="must_update">Πρέπει να ενημερώσετε την εφαρμογή μέσω Google Play store (ή Github). Είναι πολύ παλαιά ώστε να συνδεθεί με το radio.</string>
     <!-- MUTE -->

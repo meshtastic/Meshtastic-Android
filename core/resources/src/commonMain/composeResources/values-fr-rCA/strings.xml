@@ -706,6 +706,10 @@
     <string name="licensed_amateur_radio_text">L'activation de cette option désactive le chiffrement et n'est pas compatible avec le réseau Meshtastic par défaut.</string>
     <string name="licensed_mode_enable_confirm">Activer le mode licence</string>
     <string name="licensed_mode_enable_title">Activer le mode licence (Ham) ?</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Direct</string>
+    <string name="live_update_distance">À %1$s</string>
+    <string name="live_update_start">Démarrer</string>
     <!-- LOAD -->
     <string name="load">Charge</string>
     <string name="load_15_min">Charge 15 m</string>
@@ -876,6 +880,8 @@
     <string name="mqtt_status_reconnecting">Reconnexion…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Reconnexion (tentative %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Test de la connexion</string>
+    <string name="mqtt_topic_finder_connecting">Connexion…</string>
+    <string name="mqtt_topic_finder_level_region">Région</string>
     <string name="must_set_region">Vous devez définir une région !</string>
     <string name="must_update">Vous devez mettre à jour cette application sur l'app store (ou Github). Il est trop vieux pour dialoguer avec le micrologiciel de la radio. Veuillez lire nos  <a href="https://meshtastic.org/docs/software/android/installation"> docs</a> sur ce sujet.</string>
     <!-- MUTE -->

@@ -543,6 +543,9 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">領有執照的業餘無線電台 (HAM)</string>
     <string name="licensed_amateur_radio_text">啟用此選項將停用訊息加密，並與預設的 Meshtastic 網路不相容。</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">直線</string>
+    <string name="live_update_distance">距離 %1$s</string>
     <!-- LOAD -->
     <string name="load">負載</string>
     <string name="load_15_min">15分鐘負載</string>
@@ -758,6 +761,9 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="mqtt_status_reconnecting">重新連接中…</string>
     <string name="mqtt_status_reconnecting_with_attempt">重新連接中（第 %1$d 次嘗試） — %2$s</string>
     <string name="mqtt_test_connection">測試連線</string>
+    <string name="mqtt_topic_finder_connecting">正在連接…</string>
+    <string name="mqtt_topic_finder_level_country">國家/地區</string>
+    <string name="mqtt_topic_finder_level_region">地區</string>
     <string name="must_set_region">您必須設定一個區域！</string>
     <string name="must_update">您必須在應用商店(或 Github)更新此應用程式。它太舊無法與此無線電韌體通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
     <!-- MUTE -->

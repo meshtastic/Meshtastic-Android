@@ -115,6 +115,8 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Direk</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -155,6 +157,7 @@
     <string name="module_settings">Konfigirasyon modil</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Dekonekte</string>
+    <string name="mqtt_topic_finder_level_region">Rejyon</string>
     <string name="must_set_region">Ou dwe mete yon rejyon!</string>
     <string name="must_update">Ou dwe mete aplikasyon sa ajou nan magazen Google Jwèt. Li twò ansyen pou li kominike ak radyo sa a.</string>
     <!-- MUTE -->

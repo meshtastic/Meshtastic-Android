@@ -90,6 +90,7 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -125,6 +126,7 @@
     <string name="module_settings">Stillingar aukaeininga</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Aftengd</string>
+    <string name="mqtt_topic_finder_level_region">Svæði</string>
     <string name="must_set_region">Þú verður að velja svæði!</string>
     <string name="must_update">Þú verður að uppfæra þetta smáforrit í app store (eða Github). Það er of gamalt til að geta talað við fastbúnað þessa radíó. Vinsamlegast lestu <a href="https://meshtastic.org/docs/software/android/installation">leiðbeiningar </a> okkar um þetta mál.</string>
     <!-- MUTE -->

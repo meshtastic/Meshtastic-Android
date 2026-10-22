@@ -497,7 +497,6 @@
     <string name="doc_keywords_telemetry">telemetria, anturi, lämpötila, kosteus, ilmanpaine, virta</string>
     <string name="doc_keywords_translate">käännös, crowdin, lokalisointi, kieli, i18n, osallistu</string>
     <string name="doc_keywords_units">yksiköt, alueasetus, metriikka, imperiaalinen, lämpötila, etäisyys</string>
-    <string name="doc_keywords_widget">widget, aloitusnäyttö, paikalliset tilastot, yhdellä silmäyksellä, akku, käyttöaste</string>
     <string name="doc_search_placeholder">Hae documentaatiosta…</string>
     <string name="doc_section_developer">Kehittäjän opas</string>
     <string name="doc_section_user">Käyttöopas</string>
@@ -842,6 +841,10 @@
     <string name="licensed_mode_enable_title">Otetaanko lisensoitu (HAM) tila käyttöön?</string>
     <string name="licensed_mode_enable_warning">Lisensoitu tila poistaa kanavien salausavaimet ja poistaa ylläpitokanavan käytöstä, jolloin kaikki liikenne lähetetään selväkielisenä ja on kaikkien luettavissa. Koska laiteohjelmisto ei voi allekirjoittaa liikennettä, muut radiot eivät voi varmistaa sen olevan peräisin sinulta. Tämä tila ei ole yhteensopiva oletusarvoisen Meshtastic-verkon kanssa, ja vastaat itse radioamatöörilupasi vaatimusten sekä paikallisten määräysten noudattamisesta.</string>
     <string name="licensed_mode_enable_warning_signed">Lisensoitu tila poistaa kanavien salausavaimet ja poistaa ylläpitokanavan käytöstä, jolloin kaikki liikenne lähetetään selväkielisenä kaikkien luettavaksi. Liikenne kuitenkin allekirjoitetaan digitaalisesti, joten muut radiot voivat varmistaa sen olevan peräisin sinulta. Radion tunnistenumero voi muuttua vastaamaan tunnistusavaintasi, jolloin suosikit, viestihistoria, etähallinta ja muut radiot saattavat käsitellä sitä uutena radiona. Vastaat itse radioamatöörilupasi vaatimusten ja paikallisten määräysten noudattamisesta.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Suora</string>
+    <string name="live_update_distance">%1$s pois</string>
+    <string name="live_update_unread">%1$d lukematonta</string>
     <!-- LOAD -->
     <string name="load">Lataa</string>
     <string name="load_15_min">Kuormitus (15 min)</string>
@@ -1110,6 +1113,8 @@
     <string name="mqtt_status_reconnecting">Yhdistetään uudelleen…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Yhdistetään uudelleen (yritys %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Testaa yhteys</string>
+    <string name="mqtt_topic_finder_connecting">Yhdistetään…</string>
+    <string name="mqtt_topic_finder_level_region">Alue</string>
     <string name="must_set_region">Sinun täytyy määrittää alue!</string>
     <string name="must_update">Sinun täytyy päivittää tämä sovellus sovelluskaupassa (tai Githubissa). Sovelluksen versio on liian vanha toimimaan tämän radion ohjelmiston kanssa. Ole hyvä ja lue lisää aiheesta <a href="https://meshtastic.org/docs/software/android/installation">dokumenteistamme</a>.</string>
     <!-- MUTE -->

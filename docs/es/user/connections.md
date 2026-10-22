@@ -1,7 +1,7 @@
 ---
 title: Conexiones
 nav_order: 2
-last_updated: 2026-10-21
+last_updated: 2026-10-22
 description: Connect your phone or desktop to a Meshtastic node over Bluetooth, USB, or TCP/IP.
 aliases:
   - bluetooth
@@ -143,6 +143,17 @@ Once the region is set, the tab warns you if the node is receive-only: a **Trans
 
 For more information, see [Settings — Radio & User](settings-radio-user#lora-config).
 
+## Live Update
+
+On Android 16 and newer, the **Connect** tab has a **Live Update** row while you are connected. It puts one thing you choose in the status bar and the service notification:
+
+- **Mesh status:** the connection, how many nodes are online, your unread messages and your node's battery. The status bar shows the nodes online, such as `5/12`.
+- **Track a node:** one node's battery, signal, when it was last heard, its hops and its distance from your node. The status bar shows its battery, or how long ago it was heard when it reports no battery. Pick the node from a list with favorites first, then the most recently heard, or search it by name.
+
+Tap the row to start one, switch to the other, or stop it. Only one runs at a time, and it is off until you start it. On a node's details, **Track in Live Update** starts tracking that node directly.
+
+A dropped link keeps it running and shows the connection state until the node is back. Disconnecting, switching nodes, or deleting or ignoring the tracked node stops it. If the row says Live Updates are turned off for Meshtastic, Android shows it as an ordinary notification until you allow them in system settings.
+
 ## Reconnection Behavior
 
 The app reconnects to the last selected node on startup. You can switch transports from the **Connect** tab at any time.
@@ -150,6 +161,17 @@ The app reconnects to the last selected node on startup. You can switch transpor
 To disconnect, tap the disconnect button on the **Connect** tab:
 
 ![Disconnect from the node](../../assets/screenshots/connections_disconnect.png)
+
+## Quick Settings Tile
+
+On Android you can add a **Meshtastic** tile to Quick Settings: pull down the notification shade, tap the edit (pencil) button, and drag the tile into place.
+
+- **Connected** - the tile is on and shows your node's short name. Tap it to disconnect, the same as the disconnect button on the **Connect** tab.
+- **Connecting** - the tile is on and reads "Connecting". Tap it to cancel.
+- **Disconnected** or **Device sleeping** - the tile is off. Tap it to reconnect to the node you last selected.
+- **No device selected** - tap the tile to open the **Connect** tab and pick a node.
+
+Disconnecting forgets the selected node, so after a disconnect the tile opens the **Connect** tab. If Android does not let the app reconnect in the background, the tile opens the app instead and the connection starts from there. On a locked phone the tile asks you to unlock first.
 
 ## Desktop Connections
 

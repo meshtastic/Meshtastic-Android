@@ -206,6 +206,9 @@
     <string name="latitude">Ширина</string>
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
+    <string name="live_update_direct">Direktno</string>
+    <string name="live_update_start">Почетак</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -269,6 +272,7 @@
     <string name="mqtt_config">MQTT подешавања</string>
     <string name="mqtt_status_connected">Блутут повезан</string>
     <string name="mqtt_status_disconnected">Raskačeno</string>
+    <string name="mqtt_topic_finder_level_region">Регион</string>
     <string name="must_set_region">Мораш одабрати регион!</string>
     <string name="must_update">Morate da ažurirate ovu aplikaciju na prodavnici aplikacija (ili Github-u). Previše je stara da bi razgovarala sa ovim radio firmverom. Molimo vas da pročitate naše <a href="https://meshtastic.org/docs/software/android/installation">dokumente</a> o ovoj temi.</string>
     <!-- MUTE -->

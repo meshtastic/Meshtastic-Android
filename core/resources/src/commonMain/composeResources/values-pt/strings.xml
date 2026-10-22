@@ -206,6 +206,8 @@
     <string name="legacy_admin_channel">Canal de administração antigo</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ativar esta opção desativa a encriptação e não é compatível com a rede Meshtastic normal.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Direto</string>
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -269,6 +271,7 @@
     <string name="mqtt_config">Configuração MQTT</string>
     <string name="mqtt_status_connected">Ligado</string>
     <string name="mqtt_status_disconnected">Desconectado</string>
+    <string name="mqtt_topic_finder_level_region">Região</string>
     <string name="must_set_region">Você deve informar uma região!</string>
     <string name="must_update">Tem de atualizar esta aplicação no Google Play (ou Github). A versão é muito antiga para ser possível falar com este rádio.</string>
     <!-- MUTE -->

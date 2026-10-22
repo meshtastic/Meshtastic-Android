@@ -104,6 +104,7 @@
     <!-- KEY -->
     <!-- LAYER -->
     <!-- LICENSED -->
+    <!-- LIVE -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCATION -->
@@ -143,6 +144,7 @@
     <string name="module_settings">Konfiguracija modula</string>
     <!-- MQTT -->
     <string name="mqtt_status_disconnected">Odspojeno</string>
+    <string name="mqtt_topic_finder_level_region">Regija</string>
     <string name="must_set_region">Potrebno je postaviti regiju!</string>
     <string name="must_update">Potrebno je ažurirati ovu aplikaciju putem Play Storea (ili Githuba). Aplikacija je prestara za komunikaciju s ovim firmwerom radija. Pročitajte našu <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciju</a> o ovoj temi.</string>
     <!-- MUTE -->

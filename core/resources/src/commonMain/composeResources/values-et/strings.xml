@@ -486,7 +486,6 @@
     <string name="doc_keywords_telemetry">telemeetria,andur,temperatuur,niiskus,rõhk,võimsus</string>
     <string name="doc_keywords_translate">tõlkimine,rahvahulk,lokaliseerimine,keel,i18n,panusta</string>
     <string name="doc_keywords_units">ühikud,lokaat,meetriline,imperial,temperatuur,vahemaa</string>
-    <string name="doc_keywords_widget">vidin,avakuva,kohalik statistika,vaade,aku,kasutus</string>
     <string name="doc_search_placeholder">Otsi dokumentatsiooni…</string>
     <string name="doc_section_developer">Arendaja juhis</string>
     <string name="doc_section_user">Kasutusjuhend</string>
@@ -828,6 +827,10 @@
     <string name="licensed_mode_enable_title">Litsentsitud (ERAU) režiimi lubamine?</string>
     <string name="licensed_mode_enable_warning">Litsentsitud režiim eemaldab kanali krüpteerimisvõtmed ja keelab administraatori kanali, seega saadetakse kogu liiklus tavalise tekstina, mida igaüks saab lugeda – ja see püsivara ei saa seda allkirjastada, seega ei saa teised sõlmed kontrollida, kas see pärineb sinult. See ei ühildu Meshtasticu vaikevõrguga ja vastutad endiselt oma amatöörraadio litsentsi nõuete ja kohalike eeskirjade täitmise eest.</string>
     <string name="licensed_mode_enable_warning_signed">Litsentsitud režiim eemaldab kanali krüpteerimisvõtmed ja keelab administraatori kanali, seega saadetakse kogu liiklus tavalise tekstina, mida igaüks saab lugeda – kuid see on digitaalselt allkirjastatud, võimaldades teistel sõlmedel kontrollida, kas see pärineb sinult. Sõlme number võib üks kord muutuda, et see vastaks identiteedivõtmele, seega võivad lemmikud, sõnumiajalugu, kaughaldus ja teised sõlmed seda esialgu uuena käsitleda; sina vastutad endiselt oma amatöörraadio litsentsi nõuete ja kohalike eeskirjade täitmise eest.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Otsene</string>
+    <string name="live_update_distance">%1$s kaugusel</string>
+    <string name="live_update_unread">%1$d lugemata</string>
     <!-- LOAD -->
     <string name="load">Lae</string>
     <string name="load_15_min">Lae 15 min</string>
@@ -1080,6 +1083,8 @@
     <string name="mqtt_status_reconnecting">Taas ühendan…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Ühendan uuesti (katse %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Test ühendus</string>
+    <string name="mqtt_topic_finder_connecting">Ühendan…</string>
+    <string name="mqtt_topic_finder_level_region">Regioon</string>
     <string name="must_set_region">Pead valima regiooni!</string>
     <string name="must_update">Pead seda rakendust rakenduste poes (või Github) värskendama. See on liiga vana selle raadio püsivara jaoks. Loe selle kohta lisateavet meie <a href="https://meshtastic.org/docs/software/android/installation"> dokumentatsioonist </a>.</string>
     <!-- MUTE -->

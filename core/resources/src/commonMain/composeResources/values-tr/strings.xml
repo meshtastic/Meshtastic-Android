@@ -228,6 +228,8 @@
     <string name="legacy_admin_channel">Eski Yönetici kanalı</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Bu seçeneği aktif etmek şifrelemeyi devre dışı bırakır ve bu varsayılan Meshtastic ağı ile uyumsuzdur.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Doğrudan</string>
     <!-- LOAD -->
     <string name="load">Yükle</string>
     <!-- LOCAL -->
@@ -297,6 +299,7 @@
     <string name="mqtt_config">MQTT Yapılandırması</string>
     <string name="mqtt_status_connected">Bağlandı</string>
     <string name="mqtt_status_disconnected">Bağlantı kesildi</string>
+    <string name="mqtt_topic_finder_level_region">Bölge</string>
     <string name="must_set_region">Bölge seçmelisin!</string>
     <string name="must_update">Uygulamayı Google Play store (ya da GitHub)'dan güncelleyin. Bu cihaz ile haberleşmek için uygulama çok eski. İlgili <a href="https://meshtastic.org/docs/software/android/installation"> Dokümantasyon</a>.</string>
     <!-- MUTE -->

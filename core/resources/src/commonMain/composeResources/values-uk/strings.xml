@@ -497,6 +497,9 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Ліцензований радіоаматор (Ham)</string>
     <string name="licensed_amateur_radio_text">Включення цієї опції вимикає шифрування і не сумісне зі стандартною мережею Meshtastic.</string>
+    <!-- LIVE -->
+    <string name="live_update_direct">Прямий</string>
+    <string name="live_update_distance">%1$s від вас</string>
     <!-- LOAD -->
     <string name="load">Завантажити</string>
     <string name="load_15_min">Навантаження 15 хвилин</string>
@@ -644,6 +647,8 @@
     <string name="mqtt_status_reconnecting">Роз'єднання…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Роз'єднання (спроба %1$d) - %2$s</string>
     <string name="mqtt_test_connection">Перевірка зʼєднання</string>
+    <string name="mqtt_topic_finder_connecting">З'єднання…</string>
+    <string name="mqtt_topic_finder_level_region">Регіон</string>
     <string name="must_set_region">Ви повинні встановити регіон!</string>
     <string name="must_update">Ви повинні оновити цю програму в App Store (або Github). Він занадто старий, щоб спілкуватися з цією прошивкою радіо. Будь ласка, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацію</a> у вказаній темі.</string>
     <!-- MUTE -->
