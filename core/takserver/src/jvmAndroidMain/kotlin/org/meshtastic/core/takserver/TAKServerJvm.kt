@@ -187,7 +187,7 @@ internal class TAKServerJvm(
 
         val connectionId = Random.nextInt().toString(TAK_HEX_RADIX)
         val clientInfo = TAKClientInfo(id = connectionId, endpoint = endpoint)
-        Logger.i { "TAK client connected: id=$connectionId endpoint=$endpoint" }
+        Logger.i { "TAK client connecting: id=$connectionId endpoint=$endpoint" }
 
         val connection =
             TAKClientConnection(
@@ -209,7 +209,9 @@ internal class TAKServerJvm(
             connectionsLock.withLock {
                 connections[connectionId] = connection
                 _connectionCount.value = connections.size
-                Logger.i { "TAK connection count now ${connections.size}" }
+                // An issued client getting in means the current package is in use, so the re-import notice is stale.
+                _rejectedConnectionCount.value = 0
+                Logger.i { "TAK client accepted: id=$connectionId, connection count now ${connections.size}" }
             }
             connection.start()
         }

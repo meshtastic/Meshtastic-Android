@@ -126,6 +126,7 @@ class TAKServerJvmTlsTest {
             socket.startHandshake()
             awaitCount { server.connectionCount.value == 1 }
         }
+        assertEquals(0, server.rejectedConnectionCount.value, "accepting the issued client clears the notice")
     }
 
     @Test
